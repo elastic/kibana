@@ -1714,7 +1714,19 @@ module.exports = {
         'x-pack/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
         'x-pack/solutions/**/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
       ],
-      excludedFiles: ['src/platform/packages/shared/kbn-scout/src/playwright/**/*.test.ts'],
+      excludedFiles: [
+        // kbn-scout's own Playwright source has Jest unit tests that should not
+        // be linted with @playwright/test rules.
+        'src/platform/packages/shared/kbn-scout/src/playwright/**/*.test.ts',
+        // Scout test directories may contain Jest unit tests for shared helpers
+        // (e.g. data loaders). They run via `node scripts/jest` and use `it()`
+        // + `describe()` from Jest, not Playwright's `test()`. Linting them
+        // with @playwright/test rules raises false positives (e.g.
+        // `no-standalone-expect`, `max-nested-describe`).
+        'src/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.test.ts',
+        'x-pack/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.test.ts',
+        'x-pack/solutions/**/{packages,plugins}/**/test/{scout,scout_*}/**/*.test.ts',
+      ],
       extends: ['plugin:playwright/recommended'],
       plugins: ['playwright'],
       settings: {

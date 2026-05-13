@@ -28,12 +28,27 @@ export interface SubmitLiveQueryOptions {
 export interface SubmitLiveQueryResult {
   response: Response;
   /**
-   * The `action_id` returned by `POST /api/osquery/live_queries`. Callers can
-   * feed this to `helpers/poll_live_query_history.ts::waitForLiveQueryComplete`
-   * to gate subsequent UI assertions on agent-side completion rather than
-   * racing the aggregator.
+   * The TOP-LEVEL `action_id` returned by `POST /api/osquery/live_queries`. Use
+   * this with `helpers/poll_live_query_history.ts::waitForLiveQueryComplete`,
+   * which gates on completion of the umbrella action, or with the cases
+   * history drill-down which keys off the live-query id.
+   *
+   * Do NOT use this id when seeding `indexActionResponses` /
+   * `indexResultRows` — the results UI polls per-query buckets, so seeded
+   * docs MUST carry the matching `queryActionIds[i]` (see below).
    */
   actionId?: string;
+  /**
+   * The per-query `action_id`s extracted from `data.queries[].action_id` of the
+   * POST response. The aggregator that powers the live-query results table /
+   * alert flyout / inventory drill-down filters by these ids, NOT by the
+   * umbrella `actionId`. Tier-A specs that stub the results path with
+   * `indexActionResponses` + `indexResultRows` MUST seed under these ids.
+   *
+   * Single-query submissions emit exactly one entry; pack submissions emit one
+   * per pack query.
+   */
+  queryActionIds: string[];
 }
 
 /**
@@ -78,12 +93,19 @@ export async function submitLiveQuery(
   }
 
   let actionId: string | undefined;
+  let queryActionIds: string[] = [];
   try {
-    const parsed = (await response.json()) as { data?: { action_id?: string } };
+    const parsed = (await response.json()) as {
+      data?: { action_id?: string; queries?: Array<{ action_id?: string }> };
+    };
     actionId = parsed?.data?.action_id;
+    queryActionIds = (parsed?.data?.queries ?? [])
+      .map((q) => q?.action_id)
+      .filter((id): id is string => !!id);
   } catch {
     actionId = undefined;
+    queryActionIds = [];
   }
 
-  return { response, actionId };
+  return { response, actionId, queryActionIds };
 }

@@ -8,8 +8,7 @@
 import { expect } from '@kbn/scout/ui';
 import { uiTest as test } from '../fixtures';
 import { OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS } from '../../common/scout_parallel_ui_tags';
-import { waitForAtLeastOneAgentOnline } from '../helpers/fleet_agents';
-import { waitForLiveQueryComplete } from '../helpers/poll_live_query_history';
+import { mockFleetAgents, indexActionResponses, indexResultRows } from '../helpers/data_loaders';
 
 const MEMORY_QUERY_KEY = 'system_memory_linux_elastic';
 const SYSTEM_INFO_QUERY_KEY = 'system_info_elastic';
@@ -18,9 +17,7 @@ test.describe('Live query pack submission', { tag: OSQUERY_SCOUT_PARALLEL_UI_TAR
   let packId: string;
   let packName: string;
 
-  test.beforeAll(async ({ kbnClient, apiServices }) => {
-    await waitForAtLeastOneAgentOnline(kbnClient);
-
+  test.beforeAll(async ({ apiServices }) => {
     // API two-query pack — this spec targets live-query pack mode UI only.
     const created = await apiServices.osquery.packs.create({
       name: `scout-live-pack-${Date.now()}`,
@@ -53,15 +50,19 @@ test.describe('Live query pack submission', { tag: OSQUERY_SCOUT_PARALLEL_UI_TAR
     }
   });
 
-  // One submit covers pack mode + expansion + status tab (same response — avoids extra agent cold-starts).
+  // One submit covers pack mode + expansion + status tab (same response — avoids extra cold-starts).
   test('submits a live pack, expands per-query results, and renders status-tab headers', async ({
     browserAuth,
-    kbnClient,
+    esClient,
     page,
     pageObjects,
   }) => {
-    // 6 min: pack submit + per-query grid on cold CI.
-    test.setTimeout(360_000);
+    // 4 min: pack submit + per-query grid + result seeding.
+    test.setTimeout(240_000);
+
+    // Pack submit fans out one action per query; we need agents in the picker
+    // so the "All agents" submission populates the action targets correctly.
+    const { agents } = await mockFleetAgents(page, { count: 1 });
 
     await browserAuth.loginAsOsqueryPowerUser();
     await pageObjects.osqueryNavigation.gotoNewLiveQuery();
@@ -78,11 +79,27 @@ test.describe('Live query pack submission', { tag: OSQUERY_SCOUT_PARALLEL_UI_TAR
       await expect(page.getByText(SYSTEM_INFO_QUERY_KEY)).toBeVisible({ timeout: 30_000 });
     });
 
-    await test.step('submits against all agents', async () => {
-      await pageObjects.osqueryLiveQueryForm.selectAllAgents();
-      const actionId = await pageObjects.osqueryLiveQueryForm.submitQuery();
-      if (actionId) {
-        await waitForLiveQueryComplete(kbnClient, actionId);
+    await test.step('submits against the mocked agent and seeds per-query results', async () => {
+      // Tier-A: pick the mocked agent by hostname (NOT "All agents") so the
+      // POST avoids Fleet's server-side `.fleet-agents` lookup. See `selectMockedAgents` JSDoc.
+      await pageObjects.osqueryLiveQueryForm.selectMockedAgents(agents[0].hostName);
+      const { queryActionIds } = await pageObjects.osqueryLiveQueryForm.submitQuery();
+
+      // Pack submissions emit one `queryActionIds` entry per pack query (one for
+      // MEMORY_QUERY_KEY, one for SYSTEM_INFO_QUERY_KEY). Seed responses + rows
+      // under EACH per-query id so both the per-query data grid and the
+      // status-tab aggregate render without a real agent.
+      for (const queryActionId of queryActionIds) {
+        await indexActionResponses(esClient, {
+          actionId: queryActionId,
+          agents,
+          rowCountPerAgent: 1,
+        });
+        await indexResultRows(esClient, {
+          actionId: queryActionId,
+          agents,
+          rows: [{ memory_total: '8192' }],
+        });
       }
     });
 
@@ -92,7 +109,7 @@ test.describe('Live query pack submission', { tag: OSQUERY_SCOUT_PARALLEL_UI_TAR
       const gridCells =
         pageObjects.osqueryLiveQueryForm.resultsPanel.getByTestId('dataGridRowCell');
       // eslint-disable-next-line playwright/no-nth-methods -- first result cell in panel
-      await expect(gridCells.first()).toBeVisible({ timeout: 180_000 });
+      await expect(gridCells.first()).toBeVisible({ timeout: 120_000 });
     });
 
     await test.step('renders status-tab data-grid headers', async () => {

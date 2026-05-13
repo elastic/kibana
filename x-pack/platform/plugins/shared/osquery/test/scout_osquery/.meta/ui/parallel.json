@@ -2,117 +2,6 @@
   "sha1": "",
   "tests": [
     {
-      "id": "9e9fb514eb46e1f-e5eca0a10d94e78",
-      "title": "stop osquery fleet containers",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/global.teardown.ts",
-        "line": 38,
-        "column": 1
-      }
-    },
-    {
-      "id": "4567b23343b38fd-c815631c126bff9",
-      "title": "Set up Fleet Server and Elastic Agents for Osquery tests",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/global.setup.ts",
-        "line": 323,
-        "column": 16
-      }
-    },
-    {
-      "id": "1c132af0b1a53e2-ef18389f41ba1b1",
-      "title": "Alert flyout Osquery case creation runs osquery from an alert and attaches results to an existing + a new case",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@local-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/alert_case_creation.spec.ts",
-        "line": 55,
-        "column": 7
-      }
-    },
-    {
-      "id": "4ca43fa35cf0f01-f1a254566ad288e",
-      "title": "Alert flyout take action and investigation guide adds investigation guide queries to response actions from the rule editor",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@local-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/alert_flyout_take_action.spec.ts",
-        "line": 33,
-        "column": 7
-      }
-    },
-    {
-      "id": "4ca43fa35cf0f01-dd148ea00e0a045",
-      "title": "Alert flyout take action and investigation guide runs a live query from the alert flyout and adds the action to Timeline",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@local-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/alert_flyout_take_action.spec.ts",
-        "line": 57,
-        "column": 7
-      }
-    },
-    {
-      "id": "4ca43fa35cf0f01-9b53a63538bbb83",
-      "title": "Alert flyout take action and investigation guide persists investigation guide suggestions after saving the rule twice",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@local-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/alert_flyout_take_action.spec.ts",
-        "line": 95,
-        "column": 7
-      }
-    },
-    {
-      "id": "c90b8f776f6f2c1-7f7a86a1796e46c",
-      "title": "Osquery parameter substitution from alerts runs a take-action query against all enrolled agents with substituted parameters",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@local-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/alert_parameter_substitution.spec.ts",
-        "line": 42,
-        "column": 7
-      }
-    },
-    {
-      "id": "c90b8f776f6f2c1-a0a63b833d73d04",
-      "title": "Osquery parameter substitution from alerts substitutes parameters in osquery launched from timeline-linked alerts",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@local-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/alert_parameter_substitution.spec.ts",
-        "line": 65,
-        "column": 7
-      }
-    },
-    {
       "id": "a43bba141bc59db-493b97db0359c20",
       "title": "Pack-based Osquery response actions in the rule editor persists pack response actions and expands queries on save",
       "expectedStatus": "passed",
@@ -203,19 +92,6 @@
       }
     },
     {
-      "id": "0d2bd692340aa69-176ea677360f64b",
-      "title": "Inventory host Osquery tab submits a simple query from the embedded Osquery form",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/inventory_osquery_tab.spec.ts",
-        "line": 20,
-        "column": 7
-      }
-    },
-    {
       "id": "d605f1580fc0166-8a416d2a6d73139",
       "title": "Live query ECS mapping submits a query with dynamic + static ECS mappings and surfaces both columns in results",
       "expectedStatus": "passed",
@@ -225,7 +101,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/live_query_ecs_mapping.spec.ts",
-        "line": 27,
+        "line": 21,
         "column": 7
       }
     },
@@ -239,7 +115,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/live_query_ecs_mapping.spec.ts",
-        "line": 70,
+        "line": 88,
         "column": 7
       }
     },
@@ -253,7 +129,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/live_query_history.spec.ts",
-        "line": 33,
+        "line": 38,
         "column": 7
       }
     },
@@ -267,7 +143,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/live_query_history.spec.ts",
-        "line": 68,
+        "line": 67,
         "column": 7
       }
     },
@@ -281,7 +157,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/live_query_history.spec.ts",
-        "line": 97,
+        "line": 98,
         "column": 7
       }
     },
@@ -359,7 +235,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/live_query_submission_with_agent.spec.ts",
-        "line": 21,
+        "line": 18,
         "column": 7
       }
     },
@@ -391,20 +267,6 @@
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/osquery_case_security.spec.ts",
         "line": 16,
         "column": 7
-      }
-    },
-    {
-      "id": "56a02db77db0f10-70f2aa944bff8c1",
-      "title": "Pack agent-triggered results shows pack query results after scheduled agent execution",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@local-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/packs_agent_triggered.spec.ts",
-        "line": 37,
-        "column": 8
       }
     },
     {
@@ -538,6 +400,20 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/saved_queries_crud.spec.ts",
         "line": 153,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8b1c2d3e4f5a6b7-rewritten-saved-dropdown",
+      "title": "Live query saved-query dropdown populates the editor from the saved-query dropdown and submits against agents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/live_query_saved_query_dropdown.spec.ts",
+        "line": 57,
         "column": 7
       }
     }

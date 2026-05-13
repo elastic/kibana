@@ -15,10 +15,10 @@ const statefulOnlyTags = tags.stateful.classic;
 test.describe('Osquery results attached to Observability cases', { tag: statefulOnlyTags }, () => {
   test('adds a live query result to an Observability case from history', async ({
     browserAuth,
+    esClient,
     page,
     pageObjects,
     apiServices,
-    kbnClient,
   }) => {
     // 4 min: live query + case attach.
     test.setTimeout(240_000);
@@ -26,7 +26,7 @@ test.describe('Osquery results attached to Observability cases', { tag: stateful
     const caseId = await runAddLiveQueryResultToCase({
       apiServices,
       browserAuth,
-      kbnClient,
+      esClient,
       page,
       pageObjects,
       caseOwner: 'observability',

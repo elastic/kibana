@@ -11,12 +11,12 @@ import { expect } from '@kbn/scout/ui';
 import { uiTest as test } from '../fixtures';
 import { OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS } from '../../common/scout_parallel_ui_tags';
 import { buildOsqueryAlertTestRule } from '../helpers/detection_rule_lifecycle';
-import { getFirstOnlineAgent } from '../helpers/fleet_agents';
 import {
   bootstrapSecurityAlertsIndex,
   deleteSeededAlerts,
   seedAlertForRule,
 } from '../helpers/seed_alert';
+import { mockFleetAgents, indexActionResponses, indexResultRows } from '../helpers/data_loaders';
 
 test.describe(
   'Alert flyout Osquery case creation',
@@ -51,21 +51,22 @@ test.describe(
       );
     });
 
-    // One single-query submit, two Add to Case clicks: existing case (select) then new case (create).
     // TODO: re-enable Scout osquery alert flyout + cases flow when stable.
     // eslint-disable-next-line playwright/no-skipped-test
     test.skip('runs osquery from an alert and attaches results to an existing + a new case', async ({
       browserAuth,
       esClient,
-      kbnClient,
       page,
       pageObjects,
       apiServices,
     }) => {
-      // Cold stacks: agent results + two case attachments.
-      test.setTimeout(420_000);
+      // 4 min: seed + flyout submit + two case attachments.
+      test.setTimeout(240_000);
 
-      // API-seeded case drives "Select case"; same results later drive "Create case".
+      // Mock fleet agents first so the picker renders without real enrollment.
+      const { agents } = await mockFleetAgents(page, { count: 1 });
+      const mockedAgent = agents[0];
+
       const existingCaseTitle = `scout-existing-case-${Date.now()}`;
       const existingCase = await apiServices.cases.create({
         title: existingCaseTitle,
@@ -80,12 +81,11 @@ test.describe(
       const existingCaseId = existingCase.data.id;
       transientCaseIds.push(existingCaseId);
 
-      const { agentId, hostName } = await getFirstOnlineAgent(kbnClient);
       const seed = await seedAlertForRule(esClient, {
         ruleId,
         ruleName,
-        agentId,
-        hostName,
+        agentId: mockedAgent.agentId,
+        hostName: mockedAgent.hostName,
         embeddedDetectionRuleBody: embeddedRuleBody as Record<string, unknown>,
       });
 
@@ -97,7 +97,21 @@ test.describe(
         await pageObjects.osqueryAlertFlyout.chooseOsqueryAction();
         await pageObjects.osqueryAlertFlyout.waitForFlyoutEditorReady();
         await pageObjects.osqueryAlertFlyout.inputFlyoutQuery('select * from uptime;');
-        await pageObjects.osqueryAlertFlyout.clickSubmitInFlyout();
+        const { queryActionIds } = await pageObjects.osqueryAlertFlyout.clickSubmitInFlyout();
+        // Single-query flyout mode → results UI filters on per-query id.
+        const queryActionId = queryActionIds[0] ?? 'unknown';
+
+        await indexActionResponses(esClient, {
+          actionId: queryActionId,
+          agents,
+          rowCountPerAgent: 1,
+        });
+        await indexResultRows(esClient, {
+          actionId: queryActionId,
+          agents,
+          rows: [{ days: 1 }],
+        });
+
         await pageObjects.osqueryLiveQueryForm.waitForSingleQueryResults(
           pageObjects.osqueryAlertFlyout.flyoutBody
         );

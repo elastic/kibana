@@ -8,8 +8,7 @@
 import { expect } from '@kbn/scout/ui';
 import { uiTest as test } from '../fixtures';
 import { OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS } from '../../common/scout_parallel_ui_tags';
-import { waitForAtLeastOneAgentOnline } from '../helpers/fleet_agents';
-import { waitForLiveQueryComplete } from '../helpers/poll_live_query_history';
+import { mockFleetAgents, indexActionResponses, indexResultRows } from '../helpers/data_loaders';
 
 const SAVED_QUERY_BODY = 'select * from uptime;';
 
@@ -20,9 +19,7 @@ test.describe(
     let savedQueryId: string;
     let savedObjectId: string;
 
-    test.beforeAll(async ({ kbnClient, apiServices }) => {
-      await waitForAtLeastOneAgentOnline(kbnClient);
-
+    test.beforeAll(async ({ apiServices }) => {
       const body = {
         id: `scout-dropdown-${Date.now()}`,
         description: 'Scout dropdown test',
@@ -44,13 +41,16 @@ test.describe(
     });
 
     // One flow: dropdown → Monaco → submit (does not assert Monaco overwrite edge case).
-    test('populates the editor from the saved-query dropdown and submits against agents', async ({
+    test('populates the editor from the saved-query dropdown and submits against the mocked agent', async ({
       browserAuth,
-      kbnClient,
+      esClient,
+      page,
       pageObjects,
     }) => {
-      // 5 min: dropdown + submit + results.
-      test.setTimeout(300_000);
+      // 3 min: dropdown + seed + submit + results.
+      test.setTimeout(180_000);
+
+      const { agents } = await mockFleetAgents(page, { count: 1 });
 
       await browserAuth.loginAsOsqueryPowerUser();
       await pageObjects.osqueryNavigation.gotoNewLiveQuery();
@@ -61,18 +61,29 @@ test.describe(
         expect(editorText).toContain(SAVED_QUERY_BODY);
       });
 
-      await test.step('submits against all agents', async () => {
-        await pageObjects.osqueryLiveQueryForm.selectAllAgents();
-        const actionId = await pageObjects.osqueryLiveQueryForm.submitQuery();
-        if (actionId) {
-          await waitForLiveQueryComplete(kbnClient, actionId);
-        }
+      await test.step('submits against the mocked agent', async () => {
+        // Tier-A: specific-agent selection (NOT "All agents") avoids the
+        // server-side `.fleet-agents` lookup. See `selectMockedAgents` JSDoc.
+        await pageObjects.osqueryLiveQueryForm.selectMockedAgents(agents[0].hostName);
+        const { queryActionIds } = await pageObjects.osqueryLiveQueryForm.submitQuery();
+        const queryActionId = queryActionIds[0] ?? 'unknown';
+
+        await indexActionResponses(esClient, {
+          actionId: queryActionId,
+          agents,
+          rowCountPerAgent: 1,
+        });
+        await indexResultRows(esClient, {
+          actionId: queryActionId,
+          agents,
+          rows: [{ total_seconds: '1000' }],
+        });
       });
 
       await test.step('renders results', async () => {
         await pageObjects.osqueryLiveQueryForm.waitForSingleQueryResults();
         await expect(pageObjects.osqueryLiveQueryForm.resultsTable).toBeVisible({
-          timeout: 180_000,
+          timeout: 60_000,
         });
       });
     });

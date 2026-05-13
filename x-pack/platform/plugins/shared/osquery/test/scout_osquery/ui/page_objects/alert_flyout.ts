@@ -181,10 +181,57 @@ export class AlertFlyoutPage {
       .catch(() => {});
   }
 
-  async clickSubmitInFlyout(): Promise<void> {
-    await submitLiveQuery(this.page, this.submitButton, {
+  /**
+   * Replace any existing agent selection with one or more named mocked agents.
+   *
+   * Tier-A specs MUST use this instead of `clearAgentsAndSelectAllAgents` —
+   * the "All agents" path sends `agent_all: true` to `POST /api/osquery/live_queries`,
+   * which triggers Fleet's `agentService.listAgents()` query against the
+   * `.fleet-agents` index server-side. That index does not exist in Tier-A
+   * (no Fleet Server), so the POST 500s with `index_not_found_exception`.
+   * Selecting specific agent(s) fills `agent_ids: [...]` instead and bypasses
+   * the Fleet listAgents call entirely.
+   *
+   * Multi-agent selection is supported — the picker accumulates picks.
+   */
+  async clearAgentsAndSelectMockedAgents(hostnames: string | string[]): Promise<void> {
+    const names = Array.isArray(hostnames) ? hostnames : [hostnames];
+
+    // Clear may be missing if no chip is currently selected — tolerate.
+    await this.agentSelection
+      .getByTestId('comboBoxClearButton')
+      .click({ timeout: 5_000 })
+      .catch(() => {});
+
+    const input = this.agentSelection.getByTestId('comboBoxSearchInput');
+    for (const hostname of names) {
+      await input.click();
+      await input.fill(hostname);
+      const option = this.page.getByRole('option', { name: new RegExp(hostname) });
+      await option.waitFor({ state: 'visible', timeout: 30_000 });
+      await option.click();
+      // Selected pill renders the hostname inside the flyout's agentSelection subtree.
+      await this.agentSelection.getByText(hostname).waitFor({
+        state: 'visible',
+        timeout: 15_000,
+      });
+    }
+  }
+
+  /**
+   * Submit and return the captured action ids:
+   * - `actionId`: top-level umbrella id (use for `waitForLiveQueryComplete` / cases drill-down).
+   * - `queryActionIds`: per-query ids for seeding `indexActionResponses` / `indexResultRows` (results UI filters by these).
+   *
+   * Single-query alert flyout submissions emit exactly one `queryActionIds` entry.
+   * See `common/submit_live_query.ts` for the rationale.
+   */
+  async clickSubmitInFlyout(): Promise<{ actionId?: string; queryActionIds: string[] }> {
+    const { actionId, queryActionIds } = await submitLiveQuery(this.page, this.submitButton, {
       responseTimeoutMs: 120_000,
     });
+
+    return { actionId, queryActionIds };
   }
 
   async clickAddToTimeline(): Promise<void> {

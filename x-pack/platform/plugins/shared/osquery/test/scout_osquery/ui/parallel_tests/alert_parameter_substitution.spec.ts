@@ -11,12 +11,16 @@ import { expect } from '@kbn/scout/ui';
 import { uiTest as test } from '../fixtures';
 import { OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS } from '../../common/scout_parallel_ui_tags';
 import { buildOsqueryAlertTestRule } from '../helpers/detection_rule_lifecycle';
-import { getFirstOnlineAgent, waitForAtLeastOneAgentOnline } from '../helpers/fleet_agents';
 import {
   bootstrapSecurityAlertsIndex,
   deleteSeededAlerts,
   seedAlertForRule,
 } from '../helpers/seed_alert';
+import { mockFleetAgents, indexActionResponses, indexResultRows } from '../helpers/data_loaders';
+
+// The host.os.name the seeded alert advertises — must match what we synthesize
+// in the mocked result rows so the parameter-substituted query "succeeds".
+const SEEDED_HOST_OS_NAME = 'Linux';
 
 test.describe(
   'Osquery parameter substitution from alerts',
@@ -42,40 +46,55 @@ test.describe(
       );
     });
 
-    // IG query text is read-only; substitution is covered via Take action + `{{host.os.name}}`.
-
     test('runs a take-action query against all enrolled agents with substituted parameters', async ({
       browserAuth,
       esClient,
-      kbnClient,
       page,
       pageObjects,
     }) => {
-      test.setTimeout(300_000);
+      test.setTimeout(240_000);
 
-      const { agentId, hostName, hostOsName } = await getFirstOnlineAgent(kbnClient);
+      // Two mocked agents so "All agents" selection has multiple targets.
+      const { agents } = await mockFleetAgents(page, { count: 2 });
+      const [primary] = agents;
+
       const seed = await seedAlertForRule(esClient, {
         ruleId,
         ruleName,
-        agentId,
-        hostName,
-        hostOsName,
+        agentId: primary.agentId,
+        hostName: primary.hostName,
+        hostOsName: SEEDED_HOST_OS_NAME,
         embeddedDetectionRuleBody: embeddedRuleBody as Record<string, unknown>,
       });
-
-      // Need both Docker agents online before "All agents" (second can lag on serverless).
-      await waitForAtLeastOneAgentOnline(kbnClient, { expectedCount: 2, timeoutMs: 180_000 });
 
       await browserAuth.loginAsOsqueryPowerUser();
 
       await pageObjects.osqueryRuleEditor.openSeededAlertFlyout(seed);
       await pageObjects.osqueryAlertFlyout.openTakeActionMenu();
       await pageObjects.osqueryAlertFlyout.chooseOsqueryAction();
-      await pageObjects.osqueryAlertFlyout.clearAgentsAndSelectAllAgents();
+      // Tier-A: clear pre-selected primary host and pick both mocked agents by
+      // hostname (NOT "All agents") so the POST avoids Fleet's server-side
+      // `.fleet-agents` lookup. Selecting both preserves the ">= 2 result rows"
+      // assertion below.
+      await pageObjects.osqueryAlertFlyout.clearAgentsAndSelectMockedAgents(
+        agents.map((a) => a.hostName)
+      );
       await pageObjects.osqueryAlertFlyout.inputFlyoutQuery(
         "SELECT * FROM os_version where name='{{host.os.name}}';"
       );
-      await pageObjects.osqueryAlertFlyout.clickSubmitInFlyout();
+      const { queryActionIds } = await pageObjects.osqueryAlertFlyout.clickSubmitInFlyout();
+      const queryActionId = queryActionIds[0] ?? 'unknown';
+
+      await indexActionResponses(esClient, {
+        actionId: queryActionId,
+        agents,
+        rowCountPerAgent: 1,
+      });
+      await indexResultRows(esClient, {
+        actionId: queryActionId,
+        agents,
+        rows: [{ name: SEEDED_HOST_OS_NAME, version: '5.15' }],
+      });
 
       const flyoutOsquery = page
         .getByTestId('flyout-body-osquery')
@@ -84,7 +103,7 @@ test.describe(
         .last();
       await expect
         .poll(async () => flyoutOsquery.locator('[data-grid-row-index]').count(), {
-          timeout: 180_000,
+          timeout: 120_000,
         })
         .toBeGreaterThanOrEqual(2);
       await expect(flyoutOsquery).toContainText(/version/i, {
@@ -95,23 +114,22 @@ test.describe(
     test('substitutes parameters in osquery launched from timeline-linked alerts', async ({
       browserAuth,
       esClient,
-      kbnClient,
       page,
       pageObjects,
     }) => {
-      test.setTimeout(300_000);
+      test.setTimeout(240_000);
 
-      const { agentId, hostName, hostOsName } = await getFirstOnlineAgent(kbnClient);
+      const { agents } = await mockFleetAgents(page, { count: 2 });
+      const [primary] = agents;
+
       const seed = await seedAlertForRule(esClient, {
         ruleId,
         ruleName,
-        agentId,
-        hostName,
-        hostOsName,
+        agentId: primary.agentId,
+        hostName: primary.hostName,
+        hostOsName: SEEDED_HOST_OS_NAME,
         embeddedDetectionRuleBody: embeddedRuleBody as Record<string, unknown>,
       });
-
-      await waitForAtLeastOneAgentOnline(kbnClient, { expectedCount: 2, timeoutMs: 180_000 });
 
       await browserAuth.loginAsOsqueryPowerUser();
 
@@ -120,11 +138,28 @@ test.describe(
       await pageObjects.osqueryAlertFlyout.openFirstAlertInTimelineAndExpand();
       await pageObjects.osqueryAlertFlyout.openTakeActionMenu();
       await pageObjects.osqueryAlertFlyout.chooseOsqueryAction();
-      await pageObjects.osqueryAlertFlyout.clearAgentsAndSelectAllAgents();
+      // Tier-A: pick both mocked agents by hostname (NOT "All agents") so the
+      // POST avoids Fleet's server-side `.fleet-agents` lookup. Picking both
+      // preserves the ">= 2 result rows" assertion below.
+      await pageObjects.osqueryAlertFlyout.clearAgentsAndSelectMockedAgents(
+        agents.map((a) => a.hostName)
+      );
       await pageObjects.osqueryAlertFlyout.inputFlyoutQuery(
         "SELECT * FROM os_version where name='{{host.os.name}}';"
       );
-      await pageObjects.osqueryAlertFlyout.clickSubmitInFlyout();
+      const { queryActionIds } = await pageObjects.osqueryAlertFlyout.clickSubmitInFlyout();
+      const queryActionId = queryActionIds[0] ?? 'unknown';
+
+      await indexActionResponses(esClient, {
+        actionId: queryActionId,
+        agents,
+        rowCountPerAgent: 1,
+      });
+      await indexResultRows(esClient, {
+        actionId: queryActionId,
+        agents,
+        rows: [{ name: SEEDED_HOST_OS_NAME, version: '5.15' }],
+      });
 
       const flyoutOsqueryTimeline = page
         .getByTestId('flyout-body-osquery')
@@ -133,7 +168,7 @@ test.describe(
         .last();
       await expect
         .poll(async () => flyoutOsqueryTimeline.locator('[data-grid-row-index]').count(), {
-          timeout: 300_000,
+          timeout: 240_000,
         })
         .toBeGreaterThanOrEqual(2);
       await expect(flyoutOsqueryTimeline).toContainText(/version/i, {

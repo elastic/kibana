@@ -74,6 +74,42 @@ export class LiveQueryFormPage {
     });
   }
 
+  /**
+   * Pick one or more specific agents in the picker by hostname.
+   *
+   * Tier-A specs MUST use this instead of `selectAllAgents` — the "All agents"
+   * path sends `agent_all: true` to `POST /api/osquery/live_queries`, which
+   * triggers Fleet's `agentService.listAgents()` query against the `.fleet-agents`
+   * index server-side. That index does not exist in Tier-A (no Fleet Server),
+   * so the POST 500s with `index_not_found_exception`. Selecting specific
+   * agent(s) fills `agent_ids: [...]` instead and bypasses the Fleet listAgents
+   * call entirely (see `server/lib/parse_agent_groups.ts`).
+   *
+   * Multi-agent selection is supported — the picker is an EuiComboBox that
+   * accumulates picks. Use this to preserve per-agent UI assertions
+   * (e.g. "renders per-agent rows via the agent.name column").
+   */
+  async selectMockedAgents(hostnames: string | string[]): Promise<void> {
+    const names = Array.isArray(hostnames) ? hostnames : [hostnames];
+
+    const agentInput = this.agentSelection.getByTestId('comboBoxSearchInput');
+    await agentInput.waitFor({ state: 'visible', timeout: 15_000 });
+
+    for (const hostname of names) {
+      await agentInput.click();
+      const agentOption = this.page.getByRole('option', { name: new RegExp(hostname) });
+      await agentOption.waitFor({ state: 'visible', timeout: 30_000 });
+      await agentOption.click();
+      // Selected pill renders the hostname inside the agentSelection subtree.
+      await this.agentSelection.getByText(hostname).waitFor({
+        state: 'visible',
+        timeout: 30_000,
+      });
+    }
+
+    await this.page.keyboard.press('Escape');
+  }
+
   async inputQuery(query: string): Promise<void> {
     await this.queryEditor.click();
     await this.queryEditor.pressSequentially(query);
@@ -91,11 +127,18 @@ export class LiveQueryFormPage {
     await this.submitButton.click();
   }
 
-  /** Submit; returns `action_id` when parseable (else undefined). Pair with poll/history waiters. */
-  async submitQuery(): Promise<string | undefined> {
-    const { actionId } = await submitLiveQuery(this.page, this.submitButton);
+  /**
+   * Submit and return the captured action ids:
+   * - `actionId`: top-level umbrella id (use for `waitForLiveQueryComplete` / live-query history drill-downs).
+   * - `queryActionIds`: per-query ids for seeding `indexActionResponses` / `indexResultRows` (results UI filters by these).
+   *
+   * Specs typically need `queryActionIds[0]` for single-query submissions.
+   * See `common/submit_live_query.ts` for the rationale.
+   */
+  async submitQuery(): Promise<{ actionId?: string; queryActionIds: string[] }> {
+    const { actionId, queryActionIds } = await submitLiveQuery(this.page, this.submitButton);
 
-    return actionId;
+    return { actionId, queryActionIds };
   }
 
   /**

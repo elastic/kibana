@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { KbnClient, ScoutPage } from '@kbn/scout';
+import type { Client } from '@elastic/elasticsearch';
+import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type {
   OsqueryBrowserAuthFixture,
   OsqueryUiApiServicesFixture,
   OsqueryUiTestFixtures,
 } from '../fixtures';
-import { waitForAtLeastOneAgentOnline } from './fleet_agents';
-import { waitForLiveQueryComplete } from './poll_live_query_history';
 import { getMinimalLiveQuery } from '../../api/fixtures/constants';
+import { mockFleetAgents, indexActionResponses, indexResultRows } from './data_loaders';
 
 /** Case API owner for attach flow (`securitySolution` vs `observability`). */
 export type CaseOwner = 'securitySolution' | 'observability';
@@ -22,7 +22,7 @@ export type CaseOwner = 'securitySolution' | 'observability';
 export interface RunAddLiveQueryResultToCaseParams {
   apiServices: OsqueryUiApiServicesFixture;
   browserAuth: OsqueryBrowserAuthFixture;
-  kbnClient: KbnClient;
+  esClient: Client;
   page: ScoutPage;
   pageObjects: OsqueryUiTestFixtures['pageObjects'];
   caseOwner: CaseOwner;
@@ -31,29 +31,56 @@ export interface RunAddLiveQueryResultToCaseParams {
 }
 
 /**
- * API live query → wait complete → create case → UI attach from history → assert body.
- * Returns case id for caller cleanup.
+ * Mock the agent picker → API live query → seed result docs → create case →
+ * UI attach from history → assert body. Returns case id for caller cleanup.
+ *
+ * Tier-A: no real agent enrollment required. The Kibana route still writes the
+ * action SO; the per-agent responses + result rows are seeded so the history
+ * polling completes immediately. The agent picker is populated via
+ * `mockFleetAgents` rather than writing to `.fleet-agents` directly.
  */
 export async function runAddLiveQueryResultToCase({
   apiServices,
   browserAuth,
-  kbnClient,
+  esClient,
   page,
   pageObjects,
   caseOwner,
   caseTitlePrefix,
 }: RunAddLiveQueryResultToCaseParams): Promise<string> {
-  await waitForAtLeastOneAgentOnline(kbnClient);
+  const { agents } = await mockFleetAgents(page, { count: 1 });
 
+  // Tier-A: pass explicit `agent_ids` (NOT `agent_all: true`) so the server's
+  // `parseAgentSelection` skips Fleet's `agentService.listAgents()` call
+  // against `.fleet-agents`. That index does not exist without Fleet Server,
+  // and `agent_all: true` would otherwise 500 with `index_not_found_exception`.
   const live = await apiServices.osquery.liveQueries.create(
     getMinimalLiveQuery({
       query: 'SELECT * FROM os_version;',
-      agent_all: true,
+      agent_all: false,
+      agent_ids: agents.map((a) => a.agentId),
     })
   );
-  const actionId = (live.data as { data: { action_id: string } }).data.action_id;
-  // Wait for completion so history row has results before UI steps.
-  await waitForLiveQueryComplete(kbnClient, actionId);
+  // Top-level umbrella id (used by the cases history row drill-down).
+  const liveData = (
+    live.data as {
+      data: { action_id: string; queries?: Array<{ action_id: string }> };
+    }
+  ).data;
+  const actionId = liveData.action_id;
+  // Per-query id (used by the results grid filter — see submit_live_query.ts notes).
+  const queryActionId = liveData.queries?.[0]?.action_id ?? actionId;
+
+  await indexActionResponses(esClient, {
+    actionId: queryActionId,
+    agents,
+    rowCountPerAgent: 1,
+  });
+  await indexResultRows(esClient, {
+    actionId: queryActionId,
+    agents,
+    rows: [{ name: 'Linux', version: '5.15' }],
+  });
 
   const caseTitle = `${caseTitlePrefix}-${Date.now()}`;
   const createdCase = await apiServices.cases.create({

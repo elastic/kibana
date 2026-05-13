@@ -8,55 +8,69 @@
 import { expect } from '@kbn/scout/ui';
 import { uiTest as test } from '../fixtures';
 import { OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS } from '../../common/scout_parallel_ui_tags';
-import { waitForAtLeastOneAgentOnline } from '../helpers/fleet_agents';
-import { waitForLiveQueryComplete } from '../helpers/poll_live_query_history';
+import { mockFleetAgents, indexActionResponses, indexResultRows } from '../helpers/data_loaders';
 
 test.describe(
   'Live query submission with enrolled agents',
   { tag: OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS },
   () => {
     // One submit + steps: avoids tripling agent cold-start for the same response.
-    test('submits a live query against all agents and validates results, per-agent rendering, and the Discover link', async ({
+    test('submits a live query against multiple mocked agents and validates results, per-agent rendering, and the Discover link', async ({
       browserAuth,
       context,
-      kbnClient,
+      esClient,
       page,
       pageObjects,
     }) => {
-      // 6 min: all-agents submit + 120s timeout + results + Discover tab.
-      test.setTimeout(360_000);
+      // 3 min: seed + submit + results + Discover tab.
+      test.setTimeout(180_000);
 
-      await waitForAtLeastOneAgentOnline(kbnClient);
+      const { agents } = await mockFleetAgents(page, { count: 2 });
+
       await browserAuth.loginAsOsqueryPowerUser();
       await pageObjects.osqueryNavigation.gotoNewLiveQuery();
 
-      await test.step('submit against all agents with a custom 120s timeout', async () => {
-        await pageObjects.osqueryLiveQueryForm.selectAllAgents();
+      await test.step('submit against both mocked agents with a custom 120s timeout', async () => {
+        // Tier-A note: specific-agent selection (NOT "All agents") — sends
+        // `agent_ids: [...]` to POST /live_queries, which bypasses Fleet's
+        // server-side `.fleet-agents` listAgents call (that index doesn't
+        // exist without Fleet Server). See `selectMockedAgents` JSDoc.
+        await pageObjects.osqueryLiveQueryForm.selectMockedAgents(agents.map((a) => a.hostName));
         await pageObjects.osqueryLiveQueryForm.clearAndInputQuery('select * from os_version;');
         await pageObjects.osqueryLiveQueryForm.clickAdvanced();
         await pageObjects.osqueryLiveQueryForm.fillInQueryTimeout('120');
-        const actionId = await pageObjects.osqueryLiveQueryForm.submitQuery();
-        if (actionId) {
-          await waitForLiveQueryComplete(kbnClient, actionId);
-        }
+        const { queryActionIds } = await pageObjects.osqueryLiveQueryForm.submitQuery();
+        // Single-query mode → exactly one per-query id; the results UI filters by THIS, not the umbrella id.
+        const queryActionId = queryActionIds[0] ?? 'unknown';
+
+        await indexActionResponses(esClient, {
+          actionId: queryActionId,
+          agents,
+          rowCountPerAgent: 1,
+        });
+        await indexResultRows(esClient, {
+          actionId: queryActionId,
+          agents,
+          rows: [{ name: 'Linux', version: '5.15' }],
+        });
 
         await pageObjects.osqueryLiveQueryForm.waitForSingleQueryResults();
         await expect(pageObjects.osqueryLiveQueryForm.resultsTable).toBeVisible({
-          timeout: 180_000,
+          timeout: 60_000,
         });
       });
 
       await test.step('renders at least one populated result row', async () => {
         // eslint-disable-next-line playwright/no-nth-methods -- any result cell
         await expect(page.testSubj.locator('dataGridRowCell').first()).toBeVisible({
-          timeout: 180_000,
+          timeout: 60_000,
         });
       });
 
       await test.step('renders per-agent rows via the agent.name column', async () => {
         // agent.name header appears only when per-agent rows exist.
         await expect(page.testSubj.locator('dataGridHeaderCell-agent.name')).toBeVisible({
-          timeout: 180_000,
+          timeout: 60_000,
         });
       });
 

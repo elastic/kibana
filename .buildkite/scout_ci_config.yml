@@ -76,3 +76,7 @@ excluded_configs:
   - x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/playwright.config.ts
   - src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/playwright.config.ts
   - x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/playwright.config.ts
+  # Tier-B osquery agent-dependent suite — Docker + Fleet Server + Elastic Agent.
+  # Owned by security-defend-workflows. Runs only via `kibana-scout-osquery-agents`
+  # pipeline (nightly cron + path-filter + `/ci-osquery-agents` PR comment).
+  - x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/real_agent.playwright.config.ts

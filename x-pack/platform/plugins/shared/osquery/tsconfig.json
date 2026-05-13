@@ -99,8 +99,7 @@
     "@kbn/core-http-browser",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-http-request-handler-context-server",
-    "@kbn/core-security-server"
-    "@kbn/core-http-browser",
+    "@kbn/core-security-server",
     "@kbn/es",
     "@kbn/dev-utils"
   ]

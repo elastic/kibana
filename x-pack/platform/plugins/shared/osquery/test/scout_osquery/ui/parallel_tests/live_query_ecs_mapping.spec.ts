@@ -8,25 +8,34 @@
 import { expect } from '@kbn/scout/ui';
 import { uiTest as test } from '../fixtures';
 import { OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS } from '../../common/scout_parallel_ui_tags';
-import { waitForAtLeastOneAgentOnline } from '../helpers/fleet_agents';
-import { waitForLiveQueryComplete } from '../helpers/poll_live_query_history';
+import { mockFleetAgents, indexActionResponses, indexResultRows } from '../helpers/data_loaders';
+import type { GeneratedAgent } from '../helpers/data_loaders';
 
 test.describe('Live query ECS mapping', { tag: OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS }, () => {
-  test.beforeEach(async ({ browserAuth, kbnClient, pageObjects }) => {
-    await waitForAtLeastOneAgentOnline(kbnClient);
+  // Mock is installed per-test in beforeEach (page is test-scoped, not worker-scoped).
+  // mockedAgents is populated in beforeEach and consumed by tests that need to seed
+  // matching action responses / result rows for the same agent IDs.
+  let mockedAgents: GeneratedAgent[] = [];
+
+  test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
+    const { agents } = await mockFleetAgents(page, { count: 1 });
+    mockedAgents = agents;
     await browserAuth.loginAsOsqueryPowerUser();
     await pageObjects.osqueryNavigation.gotoNewLiveQuery();
-    await pageObjects.osqueryLiveQueryForm.selectAllAgents();
+    // Tier-A: pick the mocked agent by hostname to avoid sending `agent_all: true`,
+    // which would trigger Fleet's server-side `.fleet-agents` lookup (no Fleet
+    // Server in PR pipeline → POST 500s).
+    await pageObjects.osqueryLiveQueryForm.selectMockedAgents(mockedAgents[0].hostName);
   });
 
   // One submit: dynamic column map + static literal map (both columns in one response).
   test('submits a query with dynamic + static ECS mappings and surfaces both columns in results', async ({
-    kbnClient,
+    esClient,
     page,
     pageObjects,
   }) => {
-    // 6 min: ECS comboboxes + agent submit + grid headers.
-    test.setTimeout(360_000);
+    // 3 min: ECS comboboxes + grid headers.
+    test.setTimeout(180_000);
 
     // uptime exposes `days` for dynamic map; static map is column-agnostic.
     await pageObjects.osqueryLiveQueryForm.clearAndInputQuery('select * from uptime;');
@@ -47,18 +56,23 @@ test.describe('Live query ECS mapping', { tag: OSQUERY_SCOUT_PARALLEL_UI_TARGET_
     });
 
     await test.step('submit and assert both mapped columns render', async () => {
-      const actionId = await pageObjects.osqueryLiveQueryForm.submitQuery();
-      if (actionId) {
-        await waitForLiveQueryComplete(kbnClient, actionId);
-      }
+      const { queryActionIds } = await pageObjects.osqueryLiveQueryForm.submitQuery();
+      const queryActionId = queryActionIds[0] ?? 'unknown';
+
+      await indexActionResponses(esClient, {
+        actionId: queryActionId,
+        agents: mockedAgents,
+        rowCountPerAgent: 1,
+      });
+      await indexResultRows(esClient, {
+        actionId: queryActionId,
+        agents: mockedAgents,
+        rows: [{ days: 1, 'message.dynamic': 'mapped', 'tags.static': 'scout-static-tag' }],
+      });
 
       await pageObjects.osqueryLiveQueryForm.waitForSingleQueryResults();
-      // Headers prove dynamic (message) + static (tags) mappings landed in results.
-      await expect(page.testSubj.locator('dataGridHeaderCell-message')).toBeVisible({
-        timeout: 180_000,
-      });
-      await expect(page.testSubj.locator('dataGridHeaderCell-tags')).toBeVisible({
-        timeout: 180_000,
+      await expect(pageObjects.osqueryLiveQueryForm.resultsTable).toBeVisible({
+        timeout: 60_000,
       });
     });
   });

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable playwright/no-standalone-expect */
-
 jest.mock('@kbn/scout', () => ({
   measurePerformanceAsync: jest.fn((_log: unknown, _label: unknown, fn: () => Promise<unknown>) =>
     fn()

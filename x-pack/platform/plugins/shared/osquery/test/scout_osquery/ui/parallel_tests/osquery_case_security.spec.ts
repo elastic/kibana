@@ -15,10 +15,10 @@ test.describe(
   () => {
     test('adds a live query result to a Security case from history', async ({
       browserAuth,
+      esClient,
       page,
       pageObjects,
       apiServices,
-      kbnClient,
     }) => {
       // 4 min: live query + case attach.
       test.setTimeout(240_000);
@@ -26,7 +26,7 @@ test.describe(
       const caseId = await runAddLiveQueryResultToCase({
         apiServices,
         browserAuth,
-        kbnClient,
+        esClient,
         page,
         pageObjects,
         caseOwner: 'securitySolution',

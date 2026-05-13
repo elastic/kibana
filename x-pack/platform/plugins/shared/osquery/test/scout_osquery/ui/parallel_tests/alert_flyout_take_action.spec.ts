@@ -15,12 +15,12 @@ import {
   createDetectionRule,
   deleteDetectionRule,
 } from '../helpers/detection_rule_lifecycle';
-import { getFirstOnlineAgent } from '../helpers/fleet_agents';
 import {
   bootstrapSecurityAlertsIndex,
   deleteSeededAlerts,
   seedAlertForRule,
 } from '../helpers/seed_alert';
+import { mockFleetAgents, indexActionResponses, indexResultRows } from '../helpers/data_loaders';
 
 test.describe(
   'Osquery rule editor and alert flyout (investigation guide + timeline)',
@@ -68,7 +68,7 @@ test.describe(
       page,
       pageObjects,
     }) => {
-      test.setTimeout(300_000);
+      test.setTimeout(180_000);
       await browserAuth.loginAsOsqueryPowerUser();
 
       await pageObjects.osqueryRuleEditor.navigateToRuleEdit(editorRuleId);
@@ -93,7 +93,7 @@ test.describe(
       page,
       pageObjects,
     }) => {
-      test.setTimeout(300_000);
+      test.setTimeout(180_000);
 
       const seededRule = buildOsqueryAlertTestRule({
         includeResponseActions: true,
@@ -139,18 +139,21 @@ test.describe(
     test('runs a live query from the alert flyout and adds the action to Timeline', async ({
       browserAuth,
       esClient,
-      kbnClient,
       page,
       pageObjects,
     }) => {
-      test.setTimeout(300_000);
+      test.setTimeout(240_000);
 
-      const { agentId, hostName } = await getFirstOnlineAgent(kbnClient);
+      // Mock the agent picker before seeding the alert so the alert's host details
+      // match an agent the picker will show.
+      const { agents } = await mockFleetAgents(page, { count: 1 });
+      const [mockedAgent] = agents;
+
       const seed = await seedAlertForRule(esClient, {
         ruleId: flyoutRuleId,
         ruleName: flyoutRuleName,
-        agentId,
-        hostName,
+        agentId: mockedAgent.agentId,
+        hostName: mockedAgent.hostName,
         embeddedDetectionRuleBody: flyoutEmbeddedBody as Record<string, unknown>,
       });
 
@@ -160,7 +163,21 @@ test.describe(
       await pageObjects.osqueryAlertFlyout.openTakeActionMenu();
       await pageObjects.osqueryAlertFlyout.chooseOsqueryAction();
       await pageObjects.osqueryAlertFlyout.inputFlyoutQuery('select * from uptime;');
-      await pageObjects.osqueryAlertFlyout.clickSubmitInFlyout();
+      const { queryActionIds } = await pageObjects.osqueryAlertFlyout.clickSubmitInFlyout();
+      // Single-query flyout mode → exactly one per-query id (results table filters by THIS).
+      const queryActionId = queryActionIds[0] ?? 'unknown';
+
+      await indexActionResponses(esClient, {
+        actionId: queryActionId,
+        agents,
+        rowCountPerAgent: 1,
+      });
+      await indexResultRows(esClient, {
+        actionId: queryActionId,
+        agents,
+        rows: [{ days: 1 }],
+      });
+
       await pageObjects.osqueryLiveQueryForm.waitForSingleQueryResults(
         pageObjects.osqueryAlertFlyout.flyoutBody
       );

@@ -8,21 +8,21 @@
 /**
  * This is the ONLY file in Phases 5.1 / 5.2 / 5.3a that exercises `/s/{spaceId}/...` routing.
  * It was previously covered by `custom_space.cy.ts` (tagged `@brokenInServerless`).
- * Local-only because it requires a live Fleet stack and agent enrollment via `global.setup.ts`.
  *
  * Phase 5.4 will extend `uiTest` to use `spaceTest` broadly; for now this spec is the sole
  * non-default-space test, using `customSpaceUiTest` which extends Scout's `spaceTest`.
+ *
+ * Tier-A: agents and results are seeded via `helpers/data_loaders/` — no Docker / Fleet
+ * Server required. The space routing + UI rendering is what this spec covers; the
+ * agent execution path is covered by Tier-B (`real_agent_tests/`).
  */
 
 import { expect } from '@kbn/scout/ui';
 import type { KbnClient } from '@kbn/scout';
 import { OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS } from '../../common/scout_parallel_ui_tags';
 import { customSpaceUiTest as test } from '../fixtures';
-import {
-  shareOsqueryPoliciesWithSpace,
-  waitForAtLeastOneAgentOnline,
-} from '../helpers/fleet_agents';
-import { waitForLiveQueryComplete } from '../helpers/poll_live_query_history';
+import { shareOsqueryPoliciesWithSpace } from '../helpers/fleet_agents';
+import { mockFleetAgents, indexActionResponses, indexResultRows } from '../helpers/data_loaders';
 
 /**
  * Read-after-write verification for `shareOsqueryPoliciesWithSpace`.
@@ -101,32 +101,45 @@ test.describe('Osquery in a custom space', { tag: OSQUERY_SCOUT_PARALLEL_UI_TARG
 
   test('runs a live query in the custom space and asserts the Discover link routes to that space', async ({
     browserAuth,
-    page,
     context,
-    kbnClient,
+    esClient,
+    page,
     scoutSpace,
     pageObjects,
   }) => {
-    // 6 min: policy share + space UI + submit + Discover.
-    test.setTimeout(360_000);
+    // 3 min: seed + space UI + submit + Discover.
+    test.setTimeout(180_000);
 
-    await waitForAtLeastOneAgentOnline(kbnClient);
+    const { agents } = await mockFleetAgents(page, { count: 2 });
+
     await browserAuth.loginAsOsqueryPowerUser();
 
     await test.step('navigate to new live query in custom space', async () => {
       await pageObjects.osqueryCustomSpace.gotoNewLiveQueryInSpace(scoutSpace.id);
     });
 
-    await test.step('submit query against all agents', async () => {
-      await pageObjects.osqueryLiveQueryForm.selectAllAgents();
+    await test.step('submit query against the mocked agents', async () => {
+      // Tier-A: specific-agent selection (NOT "All agents") avoids `.fleet-agents` lookup.
+      await pageObjects.osqueryLiveQueryForm.selectMockedAgents(agents.map((a) => a.hostName));
       await pageObjects.osqueryLiveQueryForm.clearAndInputQuery('select * from uptime;');
-      const actionId = await pageObjects.osqueryLiveQueryForm.submitQuery();
-      if (actionId) {
-        await waitForLiveQueryComplete(kbnClient, actionId, { spaceId: scoutSpace.id });
-      }
+      const { queryActionIds } = await pageObjects.osqueryLiveQueryForm.submitQuery();
+      const queryActionId = queryActionIds[0] ?? 'unknown';
+
+      await indexActionResponses(esClient, {
+        actionId: queryActionId,
+        agents,
+        rowCountPerAgent: 1,
+      });
+      await indexResultRows(esClient, {
+        actionId: queryActionId,
+        agents,
+        rows: [{ days: 1 }],
+      });
 
       await pageObjects.osqueryLiveQueryForm.waitForSingleQueryResults();
-      await expect(pageObjects.osqueryLiveQueryForm.resultsTable).toBeVisible({ timeout: 180_000 });
+      await expect(pageObjects.osqueryLiveQueryForm.resultsTable).toBeVisible({
+        timeout: 60_000,
+      });
     });
 
     await test.step('Discover link routes to the custom space', async () => {
@@ -146,15 +159,17 @@ test.describe('Osquery in a custom space', { tag: OSQUERY_SCOUT_PARALLEL_UI_TARG
 
   test('runs a pack in the custom space and verifies results render', async ({
     browserAuth,
-    kbnClient,
+    esClient,
+    page,
     scoutSpace,
     apiServices,
     pageObjects,
   }) => {
-    // 6 min: pack in custom space + run + results.
-    test.setTimeout(360_000);
+    // 3 min: pack in custom space + run + seeded results.
+    test.setTimeout(180_000);
 
-    await waitForAtLeastOneAgentOnline(kbnClient);
+    const { agents } = await mockFleetAgents(page, { count: 1 });
+
     await browserAuth.loginAsOsqueryPowerUser();
 
     const packName = `scout-custom-space-pack-${Date.now()}`;
@@ -170,11 +185,22 @@ test.describe('Osquery in a custom space', { tag: OSQUERY_SCOUT_PARALLEL_UI_TARG
 
     await pageObjects.osqueryCustomSpace.gotoPacksInSpace(scoutSpace.id);
     await pageObjects.osqueryCustomSpace.runPackBySavedObjectId(packId);
-    await pageObjects.osqueryLiveQueryForm.selectAllAgents();
-    const actionId = await pageObjects.osqueryLiveQueryForm.submitQuery();
-    if (actionId) {
-      await waitForLiveQueryComplete(kbnClient, actionId, { spaceId: scoutSpace.id });
-    }
+    // Tier-A: specific-agent selection (NOT "All agents") avoids `.fleet-agents` lookup.
+    await pageObjects.osqueryLiveQueryForm.selectMockedAgents(agents[0].hostName);
+    const { queryActionIds } = await pageObjects.osqueryLiveQueryForm.submitQuery();
+    // Pack with a single query → one per-query id; pack results UI filters by this.
+    const queryActionId = queryActionIds[0] ?? 'unknown';
+
+    await indexActionResponses(esClient, {
+      actionId: queryActionId,
+      agents,
+      rowCountPerAgent: 1,
+    });
+    await indexResultRows(esClient, {
+      actionId: queryActionId,
+      agents,
+      rows: [{ days: 1 }],
+    });
 
     await pageObjects.osqueryLiveQueryForm.waitForPackResults();
   });

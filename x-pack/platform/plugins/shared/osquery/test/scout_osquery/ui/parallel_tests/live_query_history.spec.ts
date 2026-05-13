@@ -9,55 +9,53 @@ import { expect } from '@kbn/scout/ui';
 import { uiTest as test } from '../fixtures';
 import { getMinimalLiveQuery } from '../../api/fixtures/constants';
 import { OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS } from '../../common/scout_parallel_ui_tags';
-import { waitForAtLeastOneAgentOnline } from '../helpers/fleet_agents';
-import { waitForLiveQueryComplete } from '../helpers/poll_live_query_history';
+import { mockFleetAgents } from '../helpers/data_loaders';
+
+// Stable synthesized agent id used by all Tier-A API-driven live-query seeds in
+// this spec. The osquery route's `parseAgentSelection` skips Fleet's
+// `.fleet-agents` lookup whenever `agent_all: false` and explicit `agent_ids`
+// are provided (`server/lib/parse_agent_groups.ts`); the id itself is never
+// dereferenced because we never wait on real agent responses in these history
+// flows.
+const TIER_A_SEED_AGENT_ID = 'scout-history-seed-00000000-0000-0000-0000-000000000001';
 
 test.describe('Live query history', { tag: OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS }, () => {
-  test.beforeAll(async ({ kbnClient, apiServices }) => {
-    await waitForAtLeastOneAgentOnline(kbnClient);
-
+  test.beforeAll(async ({ apiServices }) => {
     // Two completed live queries seed history list (ephemeral — no SO cleanup).
-    let lastSeedActionId: string | undefined;
+    // Live-query creation via the osquery API does not require any agent picker
+    // population; the mocked Fleet helper is only needed for browser-level UI tests below.
     for (let i = 0; i < 2; i++) {
-      const seed = await apiServices.osquery.liveQueries.create(
+      await apiServices.osquery.liveQueries.create(
         getMinimalLiveQuery({
           query: `select * from uptime; -- history-seed-${Date.now()}-${i}`,
-          agent_all: true,
+          agent_all: false,
+          agent_ids: [TIER_A_SEED_AGENT_ID],
         })
       );
-      lastSeedActionId = (seed.data as { data?: { action_id?: string } }).data?.action_id;
-    }
-
-    // Waiting on latest action implies prior seed finished too (same agent pool).
-    if (lastSeedActionId) {
-      await waitForLiveQueryComplete(kbnClient, lastSeedActionId);
     }
   });
 
   test('re-runs the most recent query from history and restores its editor state', async ({
     browserAuth,
-    kbnClient,
     page,
     pageObjects,
   }) => {
-    // 5 min: submit + history + re-run.
-    test.setTimeout(300_000);
+    // 3 min: submit + history + re-run.
+    test.setTimeout(180_000);
+
+    const { agents } = await mockFleetAgents(page, { count: 2 });
 
     await browserAuth.loginAsOsqueryPowerUser();
     await pageObjects.osqueryNavigation.gotoNewLiveQuery();
-    await pageObjects.osqueryLiveQueryForm.selectAllAgents();
+    // Tier-A: specific-agent selection (NOT "All agents") avoids `.fleet-agents` lookup.
+    await pageObjects.osqueryLiveQueryForm.selectMockedAgents(agents.map((a) => a.hostName));
 
     // Unique marker in typed query (avoid saved-query dropdown — it can overwrite Monaco after clear).
     const uniqueMarker = `scout-history-${Date.now()}`;
     await pageObjects.osqueryLiveQueryForm.clearAndInputQuery(`select '${uniqueMarker}';`);
     await pageObjects.osqueryLiveQueryForm.clickAdvanced();
     await pageObjects.osqueryLiveQueryForm.fillInQueryTimeout('601');
-    const actionId = await pageObjects.osqueryLiveQueryForm.submitQuery();
-    if (actionId) {
-      await waitForLiveQueryComplete(kbnClient, actionId);
-    }
-
-    await pageObjects.osqueryLiveQueryForm.waitForSingleQueryResults();
+    await pageObjects.osqueryLiveQueryForm.submitQuery();
 
     await pageObjects.osqueryNavigation.gotoHistory();
     // eslint-disable-next-line playwright/no-nth-methods -- re-run top row (just submitted)
@@ -73,7 +71,6 @@ test.describe('Live query history', { tag: OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS
   test('opens query details from history and surfaces the submitted query body', async ({
     apiServices,
     browserAuth,
-    kbnClient,
     page,
     pageObjects,
   }) => {
@@ -82,16 +79,13 @@ test.describe('Live query history', { tag: OSQUERY_SCOUT_PARALLEL_UI_TARGET_TAGS
 
     // Per-test seed with marker (ordering vs beforeAll seeds is unreliable).
     const detailsMarker = `scout-details-${Date.now()}`;
-    const seed = await apiServices.osquery.liveQueries.create(
+    await apiServices.osquery.liveQueries.create(
       getMinimalLiveQuery({
         query: `select '${detailsMarker}';`,
-        agent_all: true,
+        agent_all: false,
+        agent_ids: [TIER_A_SEED_AGENT_ID],
       })
     );
-    const seedActionId = (seed.data as { data?: { action_id?: string } }).data?.action_id;
-    if (seedActionId) {
-      await waitForLiveQueryComplete(kbnClient, seedActionId);
-    }
 
     await browserAuth.loginAsOsqueryPowerUser();
     await pageObjects.osqueryNavigation.gotoHistory();

@@ -37,7 +37,19 @@ export class InventoryHostOsqueryPage {
     await this.liveQueryForm.waitFor({ state: 'visible', timeout: 60_000 });
   }
 
-  async submitSimpleEmbeddedQuery(query: string): Promise<void> {
+  /**
+   * Types `query` into the embedded osquery editor and submits it.
+   *
+   * Returns:
+   * - `actionId`: top-level umbrella id from `POST /api/osquery/live_queries`.
+   * - `queryActionIds`: per-query ids — seed `indexActionResponses` /
+   *   `indexResultRows` with `queryActionIds[0]` for the inventory tab's
+   *   single-query flow. The results UI filters on per-query ids, so seeding
+   *   under `actionId` would leave the results panel pending.
+   */
+  async submitSimpleEmbeddedQuery(
+    query: string
+  ): Promise<{ actionId?: string; queryActionIds: string[] }> {
     // Use osqueryEditor test-subj (other CodeEditors share kibanaCodeEditor).
     const editor = this.liveQueryForm.getByTestId('osqueryEditor');
     await editor.waitFor({ state: 'visible', timeout: 60_000 });
@@ -45,9 +57,11 @@ export class InventoryHostOsqueryPage {
     await editor.pressSequentially(query, { delay: 5 });
 
     // submitLiveQuery beats Monaco debounce / empty RHF query on first click.
-    await submitLiveQuery(
+    const { actionId, queryActionIds } = await submitLiveQuery(
       this.page,
       this.liveQueryForm.locator('[data-test-subj="liveQuerySubmitButton"]')
     );
+
+    return { actionId, queryActionIds };
   }
 }
