@@ -73,7 +73,14 @@ function formatTime(timestamp: number, uiSettings: IUiSettingsClient): string {
       values: { minutes },
     });
   }
-  return moment(timestamp).format(uiSettings.get('dateFormat:scaled'));
+
+  const dateFormatDefault = 'YYYY-MM-DD HH:mm';
+  const dateFormat: Array<[string, string]> = uiSettings.get('dateFormat:scaled') ?? [
+    ['PT1H', dateFormatDefault],
+  ];
+  const [, PT1H] = dateFormat.find(([key]) => key === 'PT1H') ?? ['', dateFormatDefault];
+
+  return moment(timestamp).format(PT1H);
 }
 
 function NotificationTime({
