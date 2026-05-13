@@ -7,9 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  asCodePaginationParamsSchema,
-  asCodePaginationResponseMetaSchema,
-  PAGINATION_DEFAULT_PER_PAGE,
-  PAGINATION_MAX_SIZE,
-} from './pagination';
+export { asCodePaginationParamsSchema, asCodePaginationResponseMetaSchema } from './pagination';

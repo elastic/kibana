@@ -8,9 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-
-export const PAGINATION_DEFAULT_PER_PAGE = 20;
-export const PAGINATION_MAX_SIZE = 1000;
+import { PAGINATION_DEFAULT_PER_PAGE, PAGINATION_MAX_SIZE } from '../../constants';
 
 export const asCodePaginationParamsSchema = schema.object({
   page: schema.number({
