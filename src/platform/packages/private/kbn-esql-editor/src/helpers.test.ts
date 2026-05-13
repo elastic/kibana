@@ -79,6 +79,34 @@ describe('helpers', function () {
       ]);
     });
 
+    it('should return one marker per problem when ES reports multiple problems with colon-containing index names', function () {
+      const error = new Error(
+        '[esql] > Unexpected error from Elasticsearch: verification_exception - Found 2 problems\nline 3:19: Cannot use field [fields.varnish_cache_hit_rate] due to ambiguities being mapped as [2] incompatible types: [float] in [smops_tv_bmbg10:tv-poc_metrics_cdn-2026.04.03-000716] and [102] other indices, [long] in [smops_tv_bmbg10:tv-poc_metrics_cdn-2026.04.04-000720] and [25] other indices\nline 3:64: Cannot use field [fields.varnish_cache_miss_rate] due to ambiguities being mapped as [2] incompatible types: [float] in [smops_tv_bmbg10:tv-poc_metrics_cdn-2026.04.03-000716] and [106] other indices, [long] in [smops_tv_bmbg10:tv-poc_metrics_cdn-2026.04.06-000730] and [21] other indices'
+      );
+      expect(parseErrors([error], 'FROM smops_tv_bmbg10:tv-poc_metrics_cdn-*')).toEqual([
+        {
+          message:
+            ' Cannot use field [fields.varnish_cache_hit_rate] due to ambiguities being mapped as [2] incompatible types: [float] in [smops_tv_bmbg10:tv-poc_metrics_cdn-2026.04.03-000716] and [102] other indices, [long] in [smops_tv_bmbg10:tv-poc_metrics_cdn-2026.04.04-000720] and [25] other indices',
+          startColumn: 19,
+          startLineNumber: 3,
+          endColumn: 19 + 'fields.varnish_cache_hit_rate'.length + 1,
+          endLineNumber: 3,
+          severity: 8,
+          code: 'errorFromES',
+        },
+        {
+          message:
+            ' Cannot use field [fields.varnish_cache_miss_rate] due to ambiguities being mapped as [2] incompatible types: [float] in [smops_tv_bmbg10:tv-poc_metrics_cdn-2026.04.03-000716] and [106] other indices, [long] in [smops_tv_bmbg10:tv-poc_metrics_cdn-2026.04.06-000730] and [21] other indices',
+          startColumn: 64,
+          startLineNumber: 3,
+          endColumn: 64 + 'fields.varnish_cache_miss_rate'.length + 1,
+          endLineNumber: 3,
+          severity: 8,
+          code: 'errorFromES',
+        },
+      ]);
+    });
+
     it('should return the generic error object for an error with unexpected format', function () {
       const error = new Error(
         '[esql] > Unexpected error from Elasticsearch: verification_exception - Found ambiguous reference to [user_id]; matches any of [line 3:15 [user_id], line 4:15 [user_id]]'
