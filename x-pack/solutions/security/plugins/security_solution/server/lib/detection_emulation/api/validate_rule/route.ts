@@ -37,6 +37,10 @@ import {
 import { EmulationRunner } from '../../execution/runner';
 import { EmulationAllowlist, createAllowlistFromConfig } from '../../execution/allowlist';
 import { EmulationRateLimiter, createDefaultRateLimiterConfig } from '../../execution/rate_limiter';
+import {
+  EmulationConcurrencyGate,
+  createDefaultConcurrencyGateConfig,
+} from '../../execution/concurrency_gate';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -72,6 +76,10 @@ const MESSAGES = {
   }),
   rateLimitExceeded: i18n.translate(`${I18N_PREFIX}.rateLimitExceeded`, {
     defaultMessage: 'Rate limit exceeded.',
+  }),
+  concurrencyExceeded: i18n.translate(`${I18N_PREFIX}.concurrencyExceeded`, {
+    defaultMessage:
+      'Another real-execution emulation scenario is already in flight in this space. Wait for it to complete or retry after the suggested interval.',
   }),
   internalError: i18n.translate(`${I18N_PREFIX}.internalError`, {
     defaultMessage: 'Failed to validate the rule via detection emulation.',
@@ -123,9 +131,11 @@ export const validateRuleRoute = (
   {
     allowlist: allowlistOverride,
     rateLimiter: rateLimiterOverride,
+    concurrencyGate: concurrencyGateOverride,
   }: {
     allowlist?: EmulationAllowlist;
     rateLimiter?: EmulationRateLimiter;
+    concurrencyGate?: EmulationConcurrencyGate;
   } = {}
 ): void => {
   // Constructed once per route registration so the per-space rate window
@@ -154,6 +164,14 @@ export const validateRuleRoute = (
       emulationConfig?.rateLimiter ?? createDefaultRateLimiterConfig(),
       logger
     );
+
+  // PROD-5: per-space concurrency gate. Limits real_execution validateRule
+  // scenarios to one in-flight per space so a second multi-payload run
+  // can't pile on top of the first and N-multiply host-side queue
+  // pressure. Stale-entry sweeper auto-recovers from process crashes.
+  const concurrencyGate =
+    concurrencyGateOverride ??
+    new EmulationConcurrencyGate(createDefaultConcurrencyGateConfig(), logger);
 
   router.versioned
     .post({
@@ -186,6 +204,11 @@ export const validateRuleRoute = (
         // I1: token from rate-limit acquire (real_execution only). Released
         // in the unified catch when any downstream step throws after acquire.
         let rateLimitToken: ReturnType<typeof rateLimiter.acquire>['token'];
+        // PROD-5: token from concurrency-gate acquire (real_execution only,
+        // after scenario fingerprint is known). Released on every exit
+        // path — success, scenario-failure, or thrown error — so the gate
+        // never wedges.
+        let concurrencyToken: ReturnType<typeof concurrencyGate.acquire>['token'];
         try {
           const {
             ruleId,
@@ -321,6 +344,39 @@ export const validateRuleRoute = (
             scenarioResult.selectedPayloads.map((p) => p.techniqueId),
             agentType
           );
+
+          // Step 4b (real_execution only, PROD-5): concurrency gate.
+          // Reserve the per-space slot now that we know the scenario
+          // fingerprint, so a parallel call's rejection can name the
+          // scenario it's contending with. Released on every exit path
+          // below (success, telemetry-fail, thrown error) — try/finally
+          // semantics via `concurrencyToken` + the unified catch.
+          if (mode === 'real_execution') {
+            const concurrencyResult = concurrencyGate.acquire(spaceId, scenarioFingerprint);
+            if (!concurrencyResult.allowed) {
+              // Release the rate-limit slot we reserved a few lines back —
+              // a concurrency rejection should not penalise the per-space
+              // window since no payload was dispatched.
+              rateLimiter.release(rateLimitToken);
+              rateLimitToken = undefined;
+              logger.warn(
+                `[validate_rule] blocked by concurrency gate for rule [${ruleId}]: ${concurrencyResult.error}`
+              );
+              return siemResponse.error({
+                statusCode: 429,
+                headers: concurrencyResult.retryAfterSeconds
+                  ? { 'Retry-After': String(concurrencyResult.retryAfterSeconds) }
+                  : undefined,
+                body: {
+                  message: MESSAGES.concurrencyExceeded,
+                  reason: concurrencyResult.reason,
+                  inflight_scenario_fingerprint: concurrencyResult.inflightScenarioFingerprint,
+                  retry_after_seconds: concurrencyResult.retryAfterSeconds,
+                },
+              });
+            }
+            concurrencyToken = concurrencyResult.token;
+          }
 
           // Step 5: Dispatch.
           const dispatchedActions: EmulationReportAttributes['dispatchedActions'] = [];
@@ -486,6 +542,12 @@ export const validateRuleRoute = (
             { soClient: internalSoClient }
           );
 
+          // PROD-5: release the concurrency slot on the success path.
+          // The catch block below covers every thrown failure path; this
+          // explicit release covers the final, healthy return.
+          concurrencyGate.release(concurrencyToken);
+          concurrencyToken = undefined;
+
           return response.ok({
             body: {
               report_id: historyResult.id,
@@ -511,6 +573,11 @@ export const validateRuleRoute = (
           // failed attempt. Safe to call with `undefined` — release is a
           // no-op when the token is missing.
           rateLimiter.release(rateLimitToken);
+          // PROD-5: release the concurrency slot on every error path so
+          // a thrown scenario doesn't wedge the gate. The stale sweeper
+          // is a fallback for process crashes that bypass this catch
+          // (the in-process catch will always fire for thrown errors).
+          concurrencyGate.release(concurrencyToken);
           const error = transformError(err);
           logger.error(`[validate_rule] ${error.message}`);
           return siemResponse.error({

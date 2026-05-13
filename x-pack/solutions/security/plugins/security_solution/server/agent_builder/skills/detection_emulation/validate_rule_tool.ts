@@ -45,6 +45,10 @@ import {
   EmulationRateLimiter,
   createDefaultRateLimiterConfig,
 } from '../../../lib/detection_emulation/execution/rate_limiter';
+import {
+  EmulationConcurrencyGate,
+  createDefaultConcurrencyGateConfig,
+} from '../../../lib/detection_emulation/execution/concurrency_gate';
 import { buildAgentBuilderActor } from '../../../lib/detection_emulation/execution/audit_context';
 import { validateRuleSchema } from './validate_rule_input';
 
@@ -146,6 +150,13 @@ export const createValidateRuleTool = (
   }
   const allowlist = new EmulationAllowlist(createAllowlistFromConfig(operatorAllowlist), logger);
   const rateLimiter = new EmulationRateLimiter(createDefaultRateLimiterConfig(), logger);
+  // PROD-5: per-space concurrency gate, shared across all invocations of
+  // the tool — same singleton lifetime as the rate limiter so the limit
+  // is enforced across requests, not within a single one.
+  const concurrencyGate = new EmulationConcurrencyGate(
+    createDefaultConcurrencyGateConfig(),
+    logger
+  );
 
   return {
     id: 'security.detection-emulation.validate-rule',
@@ -202,6 +213,12 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
       // caller-side retry isn't penalised by the rate-limit slot the failed
       // attempt consumed.
       let rateLimitToken: ReturnType<typeof rateLimiter.acquire>['token'];
+      // PROD-5: token from concurrency-gate acquire (real_execution only,
+      // after scenario fingerprint is known). Released on every exit path
+      // — success, scenario-failure, or thrown error — so the gate never
+      // wedges. Stale-entry sweeper backstops process crashes that
+      // bypass the catch.
+      let concurrencyToken: ReturnType<typeof concurrencyGate.acquire>['token'];
       try {
         // Step 1: Feature flag gate — each mode is independently gated.
         const featureFlags = getDetectionEmulationFeatureFlags(config.experimentalFeatures);
@@ -474,6 +491,39 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
           agentType
         );
 
+        // PROD-5 concurrency gate (real_execution only). Sits AFTER the
+        // allowlist + rate limiter (cheap rejects already drained) and
+        // AFTER the scenario is generated (we need a fingerprint to
+        // attribute the in-flight slot), but BEFORE dispatch so we never
+        // saturate host-side queues with parallel scenarios. If the gate
+        // rejects, release the rate-limit slot so a re-try after the
+        // in-flight scenario completes isn't double-charged.
+        if (mode === 'real_execution') {
+          const concurrencyResult = concurrencyGate.acquire(spaceId, scenarioFingerprint);
+          if (!concurrencyResult.allowed) {
+            rateLimiter.release(rateLimitToken);
+            rateLimitToken = undefined;
+            return {
+              results: [
+                {
+                  type: ToolResultType.error,
+                  data: {
+                    error:
+                      'Another real_execution scenario is already in flight for this Kibana space. Concurrent real_execution scenarios are not allowed.',
+                    reason: 'concurrency_exceeded',
+                    rule_id: ruleId,
+                    inflight_scenario_fingerprint: concurrencyResult.inflightFingerprint,
+                    retry_after_seconds: concurrencyResult.retryAfterSeconds,
+                    likely_cause:
+                      'Another real_execution scenario is currently in flight for this space. Wait for it to complete or retry after the suggested interval.',
+                  },
+                },
+              ],
+            };
+          }
+          concurrencyToken = concurrencyResult.token;
+        }
+
         // Step 5: Dispatch.
         const dispatchedActions: EmulationReportAttributes['dispatchedActions'] = [];
 
@@ -635,6 +685,13 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
           { soClient: internalSoClient }
         );
 
+        // PROD-5: release the concurrency slot on the success path so the
+        // next real_execution scenario can proceed immediately. The
+        // rate-limit slot intentionally stays consumed for the full
+        // window — that gate counts attempts, not in-flight scenarios.
+        concurrencyGate.release(concurrencyToken);
+        concurrencyToken = undefined;
+
         return {
           results: [
             {
@@ -666,6 +723,9 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
         // failed attempt. Safe to call with `undefined` — release is a
         // no-op when the token is missing.
         rateLimiter.release(rateLimitToken);
+        // PROD-5: same for the concurrency slot — the in-flight scenario
+        // is over (failed); the next caller should be able to proceed.
+        concurrencyGate.release(concurrencyToken);
         const error = err as Error;
         logger.error(`[validate_rule tool] Failed for rule [${ruleId}]: ${error.message}`, {
           tags: ['detection-emulation'],

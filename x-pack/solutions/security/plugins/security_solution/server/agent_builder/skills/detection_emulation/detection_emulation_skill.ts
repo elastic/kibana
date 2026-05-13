@@ -195,6 +195,7 @@ Guards applied by each tool (in order; first failure short-circuits). The four
 | **HITL prompt** | ✓ (real_execution; on-demand, skipped in standalone mode) | — | ✓ (declarative, once per conversation) |
 | Rate limit (per-space) | ✓ (real_execution, 1 slot/scenario; 100/space/hour) | — | ✓ (1 slot/command; 100/space/hour) |
 | **Rate limit (per-host, PROD-4)** | ✓ (real_execution; 3/host/hour) | — | ✓ (3/host/hour) |
+| **Concurrency gate (PROD-5)** | ✓ (real_execution; ≤ 1 in flight per Kibana space) | — | — |
 
 Feature flags: \`detectionEmulationLogInjection\` gates log_injection;
 \`detectionEmulationRealExecution\` gates real_execution and all four
@@ -255,6 +256,26 @@ a 429 names \`blocked_endpoints\`, suggest the user either (a) wait
 for the per-host window to roll, (b) target different hosts, or (c)
 switch to \`mode: 'log_injection'\` which is exempt from per-host
 limiting (it does not touch the host).
+
+**Concurrency gate (PROD-5).** \`validateRule\` in \`real_execution\` mode
+allows **at most one in-flight scenario per Kibana space**. The gate
+sits AFTER the allowlist + rate limiters (cheap rejects already drained)
+and AFTER scenario generation (we need a fingerprint to attribute the
+slot) but BEFORE dispatch, so concurrent scenarios cannot N-multiply
+host-side response-action queues even when per-space and per-host
+budgets would otherwise allow it. A second concurrent call returns HTTP
+429 with \`reason: concurrency_exceeded\`, the
+\`inflight_scenario_fingerprint\` of the in-flight scenario, and a
+\`retry_after_seconds\` hint. The slot is released on every exit path
+(success, scenario-failure, thrown error); a stale-entry sweeper
+(default 10 min) backstops process crashes that bypass the catch.
+\`log_injection\` and the four \`run*Command\` tools are intentionally
+not gated — log injection does not touch the host, and per-family
+commands are already bounded by per-host rate limit (PROD-4). When a
+429 names \`concurrency_exceeded\`, suggest waiting until the in-flight
+scenario completes (the fingerprint is included so the operator can
+correlate the run in audit logs) or retrying after the
+\`retry_after_seconds\` hint.
 
 ## Response Format
 

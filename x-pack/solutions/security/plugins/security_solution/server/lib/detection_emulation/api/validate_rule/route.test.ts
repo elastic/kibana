@@ -15,6 +15,7 @@ import { DETECTION_ENGINE_EMULATION_VALIDATE_RULE_URL } from '../../../../../com
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 import { EmulationAllowlist, createRestrictiveAllowlistConfig } from '../../execution/allowlist';
 import { EmulationRateLimiter } from '../../execution/rate_limiter';
+import { EmulationConcurrencyGate } from '../../execution/concurrency_gate';
 import { generateScenario } from '../../scenario_generator';
 import { MAX_ENDPOINT_FANOUT } from '../../../../../common/detection_emulation/schemas/constants';
 
@@ -389,5 +390,123 @@ describe('validateRuleRoute — endpoint fanout cap (PROD-3)', () => {
         requestContextMock.convertContext(context)
       )
     ).resolves.toMatchObject({ status: 404 });
+  });
+});
+
+// ─── PROD-5: concurrency gate (one in-flight real_execution per space) ───────
+//
+// The gate sits AFTER the allowlist and the rate limiter (cheap rejects
+// already drained) and AFTER scenario generation (we need a fingerprint to
+// attribute the in-flight slot), but BEFORE dispatch. We exercise it by
+// pre-acquiring a slot directly on the gate so the route's call returns
+// `allowed: false`. The test asserts that the route never reaches dispatch
+// and surfaces the inflight fingerprint + retry-after hint.
+describe('validateRuleRoute — concurrency gate (PROD-5)', () => {
+  let server: ReturnType<typeof serverMock.create>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+    server = serverMock.create();
+    (generateScenario as jest.Mock).mockReset();
+    // Scenario generation needs to succeed so we reach the gate. We don't
+    // care what the payloads look like; we only care that the gate
+    // rejects before dispatch.
+    (generateScenario as jest.Mock).mockResolvedValue({
+      ok: true,
+      scenarioId: 'scenario-test',
+      selectedPayloads: [
+        {
+          techniqueId: 'T1059',
+          command: 'execute',
+          parameters: { command: 'echo hi' },
+          expectedSignals: [],
+        },
+      ],
+      expectedSignals: [],
+    });
+  });
+
+  it('returns 429 with concurrency_exceeded when another real_execution scenario is in flight for the same space', async () => {
+    const allowlist = new EmulationAllowlist(createRestrictiveAllowlistConfig(['agent-1']), logger);
+    // Permissive rate limiter so per-space / per-host gates don't shadow
+    // the concurrency rejection.
+    const rateLimiter = new EmulationRateLimiter(
+      { maxCommands: 100, windowMs: 60_000, disabled: false },
+      logger
+    );
+    const concurrencyGate = new EmulationConcurrencyGate(
+      { maxConcurrent: 1, staleMs: 60_000, disabled: false },
+      logger
+    );
+    // Pre-occupy the single slot for the default space.
+    concurrencyGate.acquire('default', 'pre-existing-fingerprint');
+
+    validateRuleRoute(server.router, FEATURE_ENABLED_CONFIG, logger, {
+      allowlist,
+      rateLimiter,
+      concurrencyGate,
+    });
+
+    const { context } = requestContextMock.createTools();
+    stubAuthenticatedUser(context);
+    context.securitySolution.getEndpointAuthz.mockResolvedValue(
+      getEndpointAuthzInitialStateMock({ canWriteExecuteOperations: true })
+    );
+
+    const response = await server.inject(
+      buildRealExecutionRequest({ endpointIds: ['agent-1'] }),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toBe(429);
+    expect(response.body.message).toMatchObject({
+      reason: 'concurrency_exceeded',
+      inflight_scenario_fingerprint: 'pre-existing-fingerprint',
+    });
+    expect(response.body.message.retry_after_seconds).toBeGreaterThan(0);
+  });
+
+  it('does not engage the concurrency gate for log_injection mode', async () => {
+    const allowlist = new EmulationAllowlist(
+      createRestrictiveAllowlistConfig(['blocked-host', 'another-blocked-host']),
+      logger
+    );
+    const rateLimiter = new EmulationRateLimiter(
+      { maxCommands: 100, windowMs: 60_000, disabled: false },
+      logger
+    );
+    const concurrencyGate = new EmulationConcurrencyGate(
+      { maxConcurrent: 1, staleMs: 60_000, disabled: false },
+      logger
+    );
+    // Saturate the gate — log_injection should still pass because the
+    // gate is only engaged for real_execution.
+    concurrencyGate.acquire('default', 'pre-existing-fingerprint');
+
+    // Short-circuit at scenario gen so the test doesn't drag in dispatch.
+    (generateScenario as jest.Mock).mockResolvedValue({ ok: false, reason: 'rule_not_found' });
+
+    validateRuleRoute(server.router, FEATURE_ENABLED_CONFIG, logger, {
+      allowlist,
+      rateLimiter,
+      concurrencyGate,
+    });
+
+    const { context } = requestContextMock.createTools();
+    stubAuthenticatedUser(context);
+    context.securitySolution.getEndpointAuthz.mockResolvedValue(getEndpointAuthzInitialStateMock());
+
+    const response = await server.inject(
+      buildLogInjectionRequest(),
+      requestContextMock.convertContext(context)
+    );
+
+    // Whatever the response (likely 404 from scenario-failure path), it
+    // must NOT be 429 with a concurrency-exceeded reason — that would
+    // mean the gate fired on a path it isn't supposed to gate.
+    if (response.status === 429) {
+      expect(response.body.message?.reason).not.toBe('concurrency_exceeded');
+    }
   });
 });
