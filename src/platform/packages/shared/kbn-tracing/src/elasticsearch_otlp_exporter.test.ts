@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Readable } from 'node:stream';
 import { core } from '@elastic/opentelemetry-node/sdk';
 import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import { ProtobufTraceSerializer } from '@opentelemetry/otlp-transformer';
@@ -16,25 +17,34 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 jest.mock('@opentelemetry/otlp-transformer', () => ({
   ProtobufTraceSerializer: {
     serializeRequest: jest.fn(),
+    deserializeResponse: jest.fn(),
   },
 }));
 
 const mockedSerializeRequest = ProtobufTraceSerializer.serializeRequest as jest.MockedFunction<
   typeof ProtobufTraceSerializer.serializeRequest
 >;
+const mockedDeserializeResponse =
+  ProtobufTraceSerializer.deserializeResponse as jest.MockedFunction<
+    typeof ProtobufTraceSerializer.deserializeResponse
+  >;
+
+const emptyStream = (): Readable => Readable.from([]);
+const streamFrom = (buf: Buffer): Readable => Readable.from([buf]);
 
 describe('ElasticsearchOtlpExporter', () => {
   const spans = [] as tracing.ReadableSpan[];
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedDeserializeResponse.mockReturnValue({});
   });
 
-  it('calls transport.request with correct path, method, and headers on success', (done) => {
+  it('calls transport.request with correct path, method, headers, and asStream on success', (done) => {
     const serialized = new Uint8Array([1, 2, 3]);
     mockedSerializeRequest.mockReturnValue(serialized);
 
-    const request = jest.fn().mockResolvedValue({});
+    const request = jest.fn().mockResolvedValue(emptyStream());
     const client = {
       transport: { request },
     } as unknown as ElasticsearchClient;
@@ -53,6 +63,7 @@ describe('ElasticsearchOtlpExporter', () => {
           {
             headers: { 'Content-Type': 'application/x-protobuf' },
             maxRetries: 3,
+            asStream: true,
           }
         );
         done();
@@ -107,11 +118,87 @@ describe('ElasticsearchOtlpExporter', () => {
     });
   });
 
+  it('returns FAILED when OTLP response contains a partial failure', (done) => {
+    const serialized = new Uint8Array([1, 2, 3]);
+    mockedSerializeRequest.mockReturnValue(serialized);
+
+    const protobufBytes = Buffer.from([0x0a, 0x05]);
+    const request = jest.fn().mockResolvedValue(streamFrom(protobufBytes));
+    const client = {
+      transport: { request },
+    } as unknown as ElasticsearchClient;
+
+    const errorMessage =
+      'action [indices:data/write/bulk[s]] is unauthorized for user [kibana_system]';
+    mockedDeserializeResponse.mockReturnValue({
+      partialSuccess: { rejectedSpans: 3, errorMessage },
+    });
+
+    const exporter = new ElasticsearchOtlpExporter(client);
+
+    exporter.export(spans, (result) => {
+      try {
+        expect(result.code).toBe(core.ExportResultCode.FAILED);
+        expect(result.error?.message).toBe(errorMessage);
+        expect(mockedDeserializeResponse).toHaveBeenCalledWith(protobufBytes);
+        done();
+      } catch (err) {
+        done(err);
+      }
+    });
+  });
+
+  it('returns SUCCESS when OTLP response has no partial failure', (done) => {
+    const serialized = new Uint8Array([1, 2, 3]);
+    mockedSerializeRequest.mockReturnValue(serialized);
+
+    const protobufBytes = Buffer.from([0x0a, 0x00]);
+    const request = jest.fn().mockResolvedValue(streamFrom(protobufBytes));
+    const client = {
+      transport: { request },
+    } as unknown as ElasticsearchClient;
+
+    mockedDeserializeResponse.mockReturnValue({});
+
+    const exporter = new ElasticsearchOtlpExporter(client);
+
+    exporter.export(spans, (result) => {
+      try {
+        expect(result.code).toBe(core.ExportResultCode.SUCCESS);
+        done();
+      } catch (err) {
+        done(err);
+      }
+    });
+  });
+
+  it('treats empty response body as success', (done) => {
+    const serialized = new Uint8Array([1, 2, 3]);
+    mockedSerializeRequest.mockReturnValue(serialized);
+
+    const request = jest.fn().mockResolvedValue(emptyStream());
+    const client = {
+      transport: { request },
+    } as unknown as ElasticsearchClient;
+
+    const exporter = new ElasticsearchOtlpExporter(client);
+
+    exporter.export(spans, (result) => {
+      try {
+        expect(result.code).toBe(core.ExportResultCode.SUCCESS);
+        expect(mockedDeserializeResponse).not.toHaveBeenCalled();
+        done();
+      } catch (err) {
+        done(err);
+      }
+    });
+  });
+
   it('shutdown waits for in-flight exports to complete before returning', async () => {
     const serialized = new Uint8Array([1, 2, 3]);
     mockedSerializeRequest.mockReturnValue(serialized);
 
-    const request = jest.fn().mockResolvedValue({});
+    const request = jest.fn().mockResolvedValue(emptyStream());
     const client = {
       transport: { request },
     } as unknown as ElasticsearchClient;
@@ -150,10 +237,10 @@ describe('ElasticsearchOtlpExporter', () => {
     const serialized = new Uint8Array([4, 5]);
     mockedSerializeRequest.mockReturnValue(serialized);
 
-    let resolveRequest: () => void;
+    let resolveRequest: (value: unknown) => void;
     const request = jest.fn().mockImplementation(
       () =>
-        new Promise<void>((resolve) => {
+        new Promise((resolve) => {
           resolveRequest = resolve;
         })
     );
@@ -168,7 +255,7 @@ describe('ElasticsearchOtlpExporter', () => {
     const flushPromise = exporter.forceFlush();
 
     expect(results).toHaveLength(0);
-    resolveRequest!();
+    resolveRequest!(emptyStream());
     await flushPromise;
 
     expect(results).toHaveLength(1);
