@@ -4,4 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { getIndexMappingNode } from './get_index_mapping';
+
+export { getSampleIndexRecordsNode } from './sample_index_records';
