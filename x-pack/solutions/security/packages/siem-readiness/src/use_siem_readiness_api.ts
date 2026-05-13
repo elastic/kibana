@@ -9,37 +9,38 @@ import { useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type {
-  CategoriesResponse,
   SiemReadinessPackageInfo,
   RelatedIntegrationRuleResponse,
-  DataQualityResultDocument,
-  PipelineStats,
-  RetentionResponse,
+  CompiledContinuityData,
+  CompiledRetentionData,
+  CompiledQualityData,
+  CompiledCoverageData,
 } from './types';
 import {
-  GET_SIEM_READINESS_CATEGORIES_API_PATH,
   GET_SIEM_READINESS_PIPELINES_API_PATH,
   GET_SIEM_READINESS_RETENTION_API_PATH,
-  GET_INDEX_RESULTS_LATEST_API_PATH,
+  GET_SIEM_READINESS_QUALITY_API_PATH,
+  GET_SIEM_READINESS_COVERAGE_API_PATH,
 } from './constants';
 
 const REFETCH_INTERVAL = 30000;
 
-const GET_READINESS_CATEGORIES_QUERY_KEY = ['readiness-categories'] as const;
+const GET_READINESS_COVERAGE_QUERY_KEY = ['readiness-coverage'] as const;
 const GET_READINESS_RETENTION_QUERY_KEY = ['readiness-retention'] as const;
 const GET_READINESS_PIPELINES_QUERY_KEY = ['readiness-pipelines'] as const;
+const GET_READINESS_QUALITY_QUERY_KEY = ['readiness-quality'] as const;
 const GET_DETECTION_RULES_QUERY_KEY = ['detection-rules'] as const;
 const GET_INTEGRATIONS_QUERY_KEY = ['fleet-integrations-packages'] as const;
-const GET_INDEX_RESULTS_LATEST_QUERY_KEY = ['index-results-latest'] as const;
 
 export const useSiemReadinessApi = () => {
   const { http } = useKibana<CoreStart>().services;
 
-  const getReadinessCategories = useQuery({
-    queryKey: GET_READINESS_CATEGORIES_QUERY_KEY,
+  const getReadinessCoverage = useQuery({
+    queryKey: GET_READINESS_COVERAGE_QUERY_KEY,
     queryFn: () => {
-      return http.get<CategoriesResponse>(GET_SIEM_READINESS_CATEGORIES_API_PATH);
+      return http.get<CompiledCoverageData>(GET_SIEM_READINESS_COVERAGE_API_PATH);
     },
+    refetchInterval: REFETCH_INTERVAL,
   });
 
   const getIntegrations = useQuery({
@@ -65,19 +66,10 @@ export const useSiemReadinessApi = () => {
     },
   });
 
-  const getIndexQualityResultsLatest = useQuery({
-    queryKey: GET_INDEX_RESULTS_LATEST_QUERY_KEY,
-    queryFn: () => {
-      return http.get<DataQualityResultDocument[]>(`${GET_INDEX_RESULTS_LATEST_API_PATH}/*`, {
-        version: '1',
-      });
-    },
-  });
-
   const getReadinessPipelines = useQuery({
     queryKey: GET_READINESS_PIPELINES_QUERY_KEY,
     queryFn: () => {
-      return http.get<PipelineStats[]>(GET_SIEM_READINESS_PIPELINES_API_PATH);
+      return http.get<CompiledContinuityData>(GET_SIEM_READINESS_PIPELINES_API_PATH);
     },
     refetchInterval: REFETCH_INTERVAL,
   });
@@ -85,16 +77,25 @@ export const useSiemReadinessApi = () => {
   const getReadinessRetention = useQuery({
     queryKey: GET_READINESS_RETENTION_QUERY_KEY,
     queryFn: () => {
-      return http.get<RetentionResponse>(GET_SIEM_READINESS_RETENTION_API_PATH);
+      return http.get<CompiledRetentionData>(GET_SIEM_READINESS_RETENTION_API_PATH);
     },
     refetchInterval: REFETCH_INTERVAL,
   });
+
+  const getReadinessQuality = useQuery({
+    queryKey: GET_READINESS_QUALITY_QUERY_KEY,
+    queryFn: () => {
+      return http.get<CompiledQualityData>(GET_SIEM_READINESS_QUALITY_API_PATH);
+    },
+    refetchInterval: REFETCH_INTERVAL,
+  });
+
   return {
-    getReadinessCategories,
+    getReadinessCoverage,
     getIntegrations,
     getDetectionRules,
-    getIndexQualityResultsLatest,
     getReadinessRetention,
     getReadinessPipelines,
+    getReadinessQuality,
   };
 };

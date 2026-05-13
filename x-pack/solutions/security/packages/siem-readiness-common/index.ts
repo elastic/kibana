@@ -14,3 +14,4 @@ export * from './src/quality_status';
 export * from './src/retention_status';
 export * from './src/coverage_status';
 export * from './src/mitre_coverage';
+export * from './src/data_stream_health_status';

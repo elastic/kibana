@@ -8,3 +8,5 @@
 export const GET_SIEM_READINESS_CATEGORIES_API_PATH = '/api/siem_readiness/get_categories';
 export const GET_SIEM_READINESS_RETENTION_API_PATH = '/api/siem_readiness/get_retention';
 export const GET_SIEM_READINESS_PIPELINES_API_PATH = '/api/siem_readiness/get_pipelines';
+export const GET_SIEM_READINESS_QUALITY_API_PATH = '/api/siem_readiness/get_quality';
+export const GET_SIEM_READINESS_COVERAGE_API_PATH = '/api/siem_readiness/get_coverage';

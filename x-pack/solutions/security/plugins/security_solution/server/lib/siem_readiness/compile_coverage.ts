@@ -12,8 +12,14 @@ import {
   getRuleIntegrationCoverage,
   hasMitreTacticMapping,
 } from '@kbn/siem-readiness-common';
-import type { MitreThreatEntry } from '@kbn/siem-readiness-common';
+import type {
+  MitreThreatEntry,
+  CompiledCategoryData,
+  CompiledCoverageData,
+} from '@kbn/siem-readiness-common';
 import type { CategoriesData } from './fetch_categories';
+
+export type { CompiledCategoryData, CompiledCoverageData };
 
 /** Minimal rule shape needed for coverage compilation. */
 export interface CoverageRuleInput {
@@ -23,29 +29,6 @@ export interface CoverageRuleInput {
 
 export interface CompiledCoverageOptions {
   category?: string;
-}
-
-export interface CompiledCategoryData {
-  category: string;
-  hasActiveData: boolean;
-  indexCount: number;
-  totalDocs: number;
-  coveredRules: number;
-  uncoveredRules: number;
-  totalRulesWithIntegrations: number;
-  mitreMappedRules: number;
-  missingIntegrations: string[];
-  activeEcsCategories: string[];
-  expectedEcsCategories: string[];
-}
-
-export interface CompiledCoverageData {
-  summary: {
-    activeCategories: string[];
-    inactiveCategories: string[];
-    totalInstalledIntegrations: number;
-  };
-  categories: CompiledCategoryData[];
 }
 
 /**

@@ -5,40 +5,19 @@
  * 2.0.
  */
 
-import type { RetentionInfo } from '@kbn/siem-readiness-common';
+import type {
+  RetentionInfo,
+  CompiledRetentionIndex,
+  CompiledRetentionData,
+} from '@kbn/siem-readiness-common';
 import { SIEM_READINESS_CATEGORIES, RETENTION_THRESHOLD_DAYS } from '@kbn/siem-readiness-common';
 import type { CategoriesData } from './fetch_categories';
+
+export type { CompiledRetentionIndex, CompiledRetentionData };
 
 export interface CompiledRetentionOptions {
   category?: string;
   statusFilter?: 'all' | 'non-compliant' | 'healthy';
-}
-
-export interface CompiledRetentionIndex {
-  indexName: string;
-  isDataStream: boolean;
-  managedBy: 'ILM' | 'DSL' | 'None';
-  retentionPeriod: string;
-  retentionDays: number | null;
-  policyName: string | null;
-  status: RetentionInfo['status'];
-}
-
-export interface CompiledRetentionData {
-  summary: {
-    totalIndices: number;
-    healthyCount: number;
-    nonCompliantCount: number;
-    complianceThreshold: string;
-    serverlessMode: boolean;
-  };
-  byCategory: Array<{
-    category: string;
-    totalIndices: number;
-    healthyCount: number;
-    nonCompliantCount: number;
-    indices: CompiledRetentionIndex[];
-  }>;
 }
 
 /**

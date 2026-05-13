@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { CompiledPipeline } from '@kbn/siem-readiness';
 import type { CategoryData } from '../../components/category_accordion_table';
-import type { PipelineInfoWithStatus } from './continuity_tab';
 import { isCriticalFailureRateFromString } from '../../../hooks/visibility_status_utils';
 
 export const buildContinuityCaseDescription = (
-  categories: Array<CategoryData<PipelineInfoWithStatus>>,
+  categories: Array<CategoryData<CompiledPipeline>>,
   basePath: string
 ): string => {
   const ingestPipelinesUrl = `${window.location.origin}${basePath}/app/management/ingest/ingest_pipelines`;

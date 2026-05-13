@@ -11,6 +11,8 @@ import { GET_SIEM_READINESS_PIPELINES_API_PATH } from '../../../../common/api/si
 import { API_VERSIONS } from '../../../../common/constants';
 import type { SiemReadinessRoutesDeps } from '../types';
 import { fetchPipelines } from '../fetch_pipelines';
+import { fetchCategories } from '../fetch_categories';
+import { compileContinuityData } from '../compile_continuity';
 
 export const getReadinessPipelinesRoute = (
   router: SiemReadinessRoutesDeps['router'],
@@ -27,14 +29,21 @@ export const getReadinessPipelinesRoute = (
       const siemResponse = buildSiemResponse(response);
       try {
         const { elasticsearch } = await context.core;
-        const pipelines = await fetchPipelines(elasticsearch.client.asCurrentUser, isServerless);
+        const esClient = elasticsearch.client.asCurrentUser;
+
+        const [pipelines, categoriesData] = await Promise.all([
+          fetchPipelines(esClient, isServerless),
+          fetchCategories(esClient),
+        ]);
+
+        const compiledData = compileContinuityData(pipelines, categoriesData, isServerless);
 
         logger.info(
-          `Retrieved ${pipelines.length} ingest pipelines${
-            isServerless ? ' (serverless mode)' : ''
-          }`
+          `Retrieved ${compiledData.summary.totalPipelines} ingest pipelines (${
+            compiledData.summary.criticalPipelines
+          } critical)${isServerless ? ' (serverless mode)' : ''}`
         );
-        return response.ok({ body: pipelines });
+        return response.ok({ body: compiledData });
       } catch (e) {
         const error = transformError(e);
         logger.error(`Error retrieving SIEM readiness pipelines: ${error.message}`);

@@ -11,6 +11,8 @@ import { GET_SIEM_READINESS_RETENTION_API_PATH } from '../../../../common/api/si
 import { API_VERSIONS } from '../../../../common/constants';
 import type { SiemReadinessRoutesDeps } from '../types';
 import { fetchRetention } from '../fetch_retention';
+import { fetchCategories } from '../fetch_categories';
+import { compileRetentionData } from '../compile_retention';
 
 export const getReadinessRetentionRoute = (
   router: SiemReadinessRoutesDeps['router'],
@@ -27,16 +29,21 @@ export const getReadinessRetentionRoute = (
       const siemResponse = buildSiemResponse(response);
       try {
         const { elasticsearch } = await context.core;
-        const items = await fetchRetention(elasticsearch.client.asCurrentUser, isServerless);
+        const esClient = elasticsearch.client.asCurrentUser;
+
+        const [items, categoriesData] = await Promise.all([
+          fetchRetention(esClient, isServerless),
+          fetchCategories(esClient),
+        ]);
+
+        const compiledData = compileRetentionData(items, categoriesData, isServerless);
 
         logger.info(
-          `Retrieved retention data for ${items.filter((i) => i.isDataStream).length} data streams${
-            isServerless
-              ? ' (serverless mode)'
-              : ` and ${items.filter((i) => !i.isDataStream).length} standalone indices`
-          }`
+          `Retrieved retention data for ${compiledData.summary.totalIndices} indices (${
+            compiledData.summary.nonCompliantCount
+          } non-compliant)${isServerless ? ' (serverless mode)' : ''}`
         );
-        return response.ok({ body: { items } });
+        return response.ok({ body: compiledData });
       } catch (e) {
         const error = transformError(e);
         logger.error(`Error retrieving SIEM readiness retention data: ${error.message}`);

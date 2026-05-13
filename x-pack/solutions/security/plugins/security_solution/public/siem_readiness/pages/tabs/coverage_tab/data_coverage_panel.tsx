@@ -74,7 +74,7 @@ const buildMissingCategoriesDescription = (
 // Component
 export const DataCoveragePanel: React.FC = () => {
   const basePath = useBasePath();
-  const { getReadinessCategories, getIntegrations } = useSiemReadinessApi();
+  const { getReadinessCoverage, getIntegrations } = useSiemReadinessApi();
   const { openNewCaseFlyout } = useSiemReadinessCases();
 
   const getCategoryIntegrationUrl = useCallback(
@@ -128,25 +128,18 @@ export const DataCoveragePanel: React.FC = () => {
     [getIntegrations.data?.items]
   );
 
-  // Transform raw data into table rows
+  // Transform compiled coverage data into table rows
   const coverageData = useMemo<CategoryCoverageData[]>(() => {
-    if (!getReadinessCategories.data?.mainCategoriesMap) {
+    if (!getReadinessCoverage.data?.categories) {
       return [];
     }
 
-    const mainCategoriesMap = getReadinessCategories.data.mainCategoriesMap;
-
-    return CATEGORY_ORDER.map((category) => {
-      const categoryData = mainCategoriesMap.find((item) => item.category === category);
-      const totalDocs = categoryData?.indices.reduce((sum, index) => sum + index.docs, 0) || 0;
-
-      return {
-        category,
-        hasCoverage: totalDocs > 0,
-        totalDocs,
-      };
-    });
-  }, [getReadinessCategories.data?.mainCategoriesMap]);
+    return getReadinessCoverage.data.categories.map((c) => ({
+      category: c.category,
+      hasCoverage: c.hasActiveData,
+      totalDocs: c.totalDocs,
+    }));
+  }, [getReadinessCoverage.data?.categories]);
 
   const missingCategories = useMemo(
     () => coverageData.filter((row) => !row.hasCoverage),

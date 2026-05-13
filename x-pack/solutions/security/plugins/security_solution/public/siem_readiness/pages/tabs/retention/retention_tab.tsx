@@ -19,12 +19,7 @@ import {
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSiemReadinessApi, CATEGORY_ORDER } from '@kbn/siem-readiness';
-import type {
-  RetentionInfo,
-  RetentionStatus,
-  RetentionType,
-  MainCategories,
-} from '@kbn/siem-readiness';
+import type { RetentionStatus, CompiledRetentionIndex } from '@kbn/siem-readiness';
 import {
   CategoryAccordionTable,
   type CategoryData,
@@ -55,86 +50,51 @@ const getIndexDetailsUrl = (basePath: string, indexName: string): string => {
     indexName
   )}`;
 };
-// Extended RetentionInfo for table compatibility
-interface RetentionInfoWithStatus extends RetentionInfo, Record<string, unknown> {}
+
+// Extended CompiledRetentionIndex for table compatibility
+interface RetentionIndexWithRecord extends CompiledRetentionIndex, Record<string, unknown> {}
 
 export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
   activeCategories,
 }) => {
   const basePath = useBasePath();
   const { openNewCaseFlyout } = useSiemReadinessCases();
-  const { getReadinessCategories, getReadinessRetention } = useSiemReadinessApi();
-  const {
-    data: categoriesData,
-    isLoading: categoriesLoading,
-    error: categoriesError,
-  } = getReadinessCategories;
+  const { getReadinessRetention } = useSiemReadinessApi();
   const {
     data: retentionData,
     isLoading: retentionLoading,
     error: retentionError,
   } = getReadinessRetention;
 
-  const isLoading = categoriesLoading || retentionLoading;
-  const error = categoriesError || retentionError;
+  const isLoading = retentionLoading;
+  const error = retentionError;
 
-  // Match data streams to categories by checking if backing index contains data stream name
-  const categories: Array<CategoryData<RetentionInfoWithStatus>> = useMemo(() => {
-    const result: Array<CategoryData<RetentionInfoWithStatus>> = [];
+  // Build categories from pre-compiled byCategory data, filtered by activeCategories
+  const categories: Array<CategoryData<RetentionIndexWithRecord>> = useMemo(() => {
+    if (!retentionData?.byCategory) return [];
 
-    for (const category of categoriesData?.mainCategoriesMap ?? []) {
-      const isActive = activeCategories.includes(category.category as MainCategories);
-      if (isActive) {
-        const matchingRetention: RetentionInfoWithStatus[] = [];
-        for (const retention of retentionData?.items ?? []) {
-          const hasMatch = category.indices.some((idx) =>
-            idx.indexName.includes(retention.indexName)
-          );
-          if (hasMatch) {
-            matchingRetention.push(retention as RetentionInfoWithStatus);
-          }
-        }
+    return retentionData.byCategory
+      .filter(
+        (c) =>
+          activeCategories.includes(c.category as (typeof activeCategories)[number]) &&
+          c.indices.length > 0
+      )
+      .map((c) => ({
+        category: c.category,
+        items: c.indices as RetentionIndexWithRecord[],
+      }));
+  }, [retentionData?.byCategory, activeCategories]);
 
-        if (matchingRetention.length > 0) {
-          result.push({ category: category.category, items: matchingRetention });
-        }
-      }
-    }
-
-    return result;
-  }, [categoriesData?.mainCategoriesMap, retentionData?.items, activeCategories]);
-
-  // Check if any matched items exist ignoring activeCategories filter (for hasUnfilteredData prop)
+  // Check if any category has indices (ignoring active filter)
   const hasUnfilteredData = useMemo(() => {
-    for (const category of categoriesData?.mainCategoriesMap ?? []) {
-      for (const retention of retentionData?.items ?? []) {
-        const hasMatch = category.indices.some((idx) =>
-          idx.indexName.includes(retention.indexName)
-        );
-        if (hasMatch) return true;
-      }
-    }
-    return false;
-  }, [categoriesData?.mainCategoriesMap, retentionData?.items]);
+    return retentionData?.byCategory.some((c) => c.indices.length > 0) ?? false;
+  }, [retentionData?.byCategory]);
 
-  // Count non-compliant items (deduplicated by indexName)
+  // Non-compliant stats from compiled summary
   const nonCompliantStats = useMemo(() => {
-    const seen = new Set<string>();
-    let nonCompliantCount = 0;
-
-    for (const category of categories) {
-      for (const item of category.items) {
-        if (!seen.has(item.indexName)) {
-          seen.add(item.indexName);
-          if (isRetentionNonCompliant(item.status)) {
-            nonCompliantCount++;
-          }
-        }
-      }
-    }
-
+    const nonCompliantCount = retentionData?.summary.nonCompliantCount ?? 0;
     return { totalNonCompliant: nonCompliantCount, hasIssues: nonCompliantCount > 0 };
-  }, [categories]);
+  }, [retentionData?.summary.nonCompliantCount]);
 
   // Case description
   const caseDescription = useMemo(
@@ -151,7 +111,7 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
   }, [openNewCaseFlyout, caseDescription]);
 
   // Render function for accordion extra action (right side badges/stats)
-  const renderExtraAction = (category: CategoryData<RetentionInfoWithStatus>) => {
+  const renderExtraAction = (category: CategoryData<RetentionIndexWithRecord>) => {
     const nonCompliantCount = category.items.filter((item) =>
       isRetentionNonCompliant(item.status)
     ).length;
@@ -222,7 +182,7 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
   ];
 
   // Define columns for the data stream table
-  const columns: Array<EuiBasicTableColumn<RetentionInfoWithStatus>> = useMemo(
+  const columns: Array<EuiBasicTableColumn<RetentionIndexWithRecord>> = useMemo(
     () => [
       {
         field: 'indexName',
@@ -237,7 +197,7 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         width: '30%',
       },
       {
-        field: 'retentionType',
+        field: 'managedBy',
         name: i18n.translate(
           'xpack.securitySolution.siemReadiness.retention.table.column.retentionType',
           {
@@ -245,20 +205,17 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
           }
         ),
         width: '10%',
-        render: (retentionType: RetentionType) => {
-          if (retentionType === 'dsl') {
-            return <EuiText size="xs">{'DSL'}</EuiText>;
+        render: (managedBy: CompiledRetentionIndex['managedBy']) => {
+          if (managedBy === 'None') {
+            return (
+              <EuiText size="xs" color="subdued">
+                {i18n.translate('xpack.securitySolution.siemReadiness.retention.managedBy.none', {
+                  defaultMessage: 'None',
+                })}
+              </EuiText>
+            );
           }
-          if (retentionType === 'ilm') {
-            return <EuiText size="xs">{'ILM'}</EuiText>;
-          }
-          return (
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('xpack.securitySolution.siemReadiness.retention.managedBy.none', {
-                defaultMessage: 'None',
-              })}
-            </EuiText>
-          );
+          return <EuiText size="xs">{managedBy}</EuiText>;
         },
       },
       {
@@ -269,10 +226,10 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
             defaultMessage: 'Current retention',
           }
         ),
-        sortable: (item: RetentionInfoWithStatus) => item?.retentionDays ?? 0,
+        sortable: (item: RetentionIndexWithRecord) => item?.retentionDays ?? 0,
         width: '15%',
-        render: (retentionPeriod: string | null, item: RetentionInfoWithStatus) => {
-          if (!retentionPeriod) {
+        render: (retentionPeriod: string, item: RetentionIndexWithRecord) => {
+          if (retentionPeriod === 'Not configured') {
             return (
               <EuiText size="xs" color="subdued">
                 {i18n.translate(
@@ -355,13 +312,13 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         ),
         actions: [
           {
-            render: (item: RetentionInfoWithStatus) => {
+            render: (item: RetentionIndexWithRecord) => {
               let href: string;
               let label: string;
 
-              const isDsl = item.retentionType === 'dsl';
-              const isUnmanagedDataStream = item.isDataStream && item.retentionType === null;
-              const isUnmanagedIndex = !item.isDataStream && item.retentionType === null;
+              const isDsl = item.managedBy === 'DSL';
+              const isUnmanagedDataStream = item.isDataStream && item.managedBy === 'None';
+              const isUnmanagedIndex = !item.isDataStream && item.managedBy === 'None';
 
               if (isDsl || isUnmanagedDataStream) {
                 href = getDataStreamUrl(basePath, item.indexName);
@@ -369,7 +326,7 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
                   'xpack.securitySolution.siemReadiness.retention.action.viewDataStream',
                   { defaultMessage: 'View Data Stream' }
                 );
-              } else if (item.retentionType === 'ilm' && item.policyName) {
+              } else if (item.managedBy === 'ILM' && item.policyName) {
                 href = getIlmPoliciesUrl(basePath, item.policyName);
                 label = i18n.translate(
                   'xpack.securitySolution.siemReadiness.retention.action.viewIlm',
@@ -472,7 +429,7 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <CategoryAccordionTable<RetentionInfoWithStatus>
+      <CategoryAccordionTable<RetentionIndexWithRecord>
         categories={categories}
         columns={columns}
         filterOptions={filterOptions}

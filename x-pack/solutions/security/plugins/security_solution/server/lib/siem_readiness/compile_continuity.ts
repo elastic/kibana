@@ -5,40 +5,27 @@
  * 2.0.
  */
 
-import type { PipelineStats } from '@kbn/siem-readiness-common';
+import type {
+  PipelineStats,
+  LatencyStatus,
+  CompiledPipeline,
+  CompiledContinuityData,
+} from '@kbn/siem-readiness-common';
 import {
   SIEM_READINESS_CATEGORIES,
   CRITICAL_FAILURE_RATE_THRESHOLD,
+  LATENCY_SLA_MS,
+  LATENCY_SLA_DEFAULT_MS,
   getPipelineStatus,
   getFailureRateString,
 } from '@kbn/siem-readiness-common';
 import type { CategoriesData } from './fetch_categories';
 
+export type { CompiledPipeline, CompiledContinuityData };
+
 export interface CompiledContinuityOptions {
   category?: string;
   criticalOnly?: boolean;
-}
-
-export interface CompiledPipeline extends PipelineStats {
-  failureRate: string;
-  status: 'critical' | 'healthy';
-  statsAvailable: boolean;
-}
-
-export interface CompiledContinuityData {
-  summary: {
-    totalPipelines: number;
-    criticalPipelines: number;
-    healthyPipelines: number;
-    statsAvailable: boolean;
-    criticalThreshold: string;
-  };
-  byCategory: Array<{
-    category: string;
-    pipelineCount: number;
-    criticalCount: number;
-    pipelines: CompiledPipeline[];
-  }>;
 }
 
 /**
@@ -56,19 +43,30 @@ export const compileContinuityData = (
 
   const statsAvailable = !isServerless;
 
-  const compiledPipelines: CompiledPipeline[] = pipelines.map((p) => ({
-    ...p,
-    failureRate: getFailureRateString(p.failedDocsCount, p.docsCount),
-    status: getPipelineStatus(p.failedDocsCount, p.docsCount),
-    statsAvailable,
-  }));
-
   const targetCategories = category ? [category] : [...SIEM_READINESS_CATEGORIES];
 
   const byCategory = targetCategories.map((cat) => {
-    const pipelinesInCategory = compiledPipelines.filter((p) =>
-      p.indices.some((idx) => indexToCategoryMap.get(idx) === cat)
-    );
+    const slaMs = LATENCY_SLA_MS[cat] ?? LATENCY_SLA_DEFAULT_MS;
+
+    const pipelinesInCategory: CompiledPipeline[] = pipelines
+      .filter((p) => p.indices.some((idx) => indexToCategoryMap.get(idx) === cat))
+      .map((p) => {
+        const latencyP95Ms = p.volume?.latencyP95Ms ?? null;
+        let latencyStatus: LatencyStatus = 'unknown';
+        if (latencyP95Ms !== null) {
+          latencyStatus =
+            latencyP95Ms <= slaMs ? 'ok' : latencyP95Ms <= slaMs * 2 ? 'warning' : 'critical';
+        }
+        return {
+          ...p,
+          failureRate: getFailureRateString(p.failedDocsCount, p.docsCount),
+          status: getPipelineStatus(p.failedDocsCount, p.docsCount),
+          statsAvailable,
+          latencySlaMs: slaMs,
+          latencyStatus,
+        };
+      });
+
     const filtered = criticalOnly
       ? pipelinesInCategory.filter((p) => p.status === 'critical')
       : pipelinesInCategory;
@@ -81,8 +79,14 @@ export const compileContinuityData = (
     };
   });
 
+  const allPipelines = byCategory.flatMap((c) => c.pipelines);
   const totalCritical = byCategory.reduce((sum, c) => sum + c.criticalCount, 0);
   const totalPipelines = byCategory.reduce((sum, c) => sum + c.pipelineCount, 0);
+  const silentPipelines = allPipelines.filter((p) => p.volume?.silenceDetected).length;
+  const criticalSilencePipelines = allPipelines.filter((p) => p.volume?.criticalSilence).length;
+  const latencyBreachPipelines = allPipelines.filter(
+    (p) => p.latencyStatus === 'warning' || p.latencyStatus === 'critical'
+  ).length;
 
   return {
     summary: {
@@ -91,6 +95,9 @@ export const compileContinuityData = (
       healthyPipelines: totalPipelines - totalCritical,
       statsAvailable,
       criticalThreshold: `${CRITICAL_FAILURE_RATE_THRESHOLD}%`,
+      silentPipelines,
+      criticalSilencePipelines,
+      latencyBreachPipelines,
     },
     byCategory,
   };

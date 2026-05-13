@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { SecuritySolutionPluginRouter } from '../../types';
+import type { StartPlugins } from '../../plugin';
 
 export interface SiemReadinessRoutesDeps {
   router: SecuritySolutionPluginRouter;
   logger: Logger;
   isServerless: boolean;
+  getStartServices: StartServicesAccessor<StartPlugins>;
 }

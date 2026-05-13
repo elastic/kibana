@@ -50,10 +50,28 @@ interface QualityData {
   indices?: QualityIndexRow[];
 }
 
+type DropSeverity = 'none' | 'warning' | 'critical';
+type LatencyStatus = 'ok' | 'warning' | 'critical' | 'unknown';
+
+interface PipelineVolumeStats {
+  current24h: number;
+  baseline: number | null;
+  lastEventMs?: number | null;
+  hoursSilent?: number | null;
+  silenceDetected: boolean;
+  criticalSilence?: boolean;
+  dropPercent?: number | null;
+  dropSeverity?: DropSeverity;
+  latencyP95Ms?: number | null;
+}
+
 interface PipelineRow {
   pipeline_name: string;
   status: 'healthy' | 'critical';
   failure_rate: string;
+  latency_status?: LatencyStatus;
+  latency_sla_ms?: number;
+  volume?: PipelineVolumeStats | null;
 }
 
 interface ContinuityData {
@@ -257,6 +275,114 @@ const ContinuityInlineContent: React.FC<{ attachment: ContinuityAttachment }> = 
         ),
         width: '120px',
       },
+      {
+        field: 'latency_status',
+        name: i18n.translate(
+          'xpack.securitySolution.agentBuilder.siemReadiness.continuity.table.latency',
+          { defaultMessage: 'Latency p95' }
+        ),
+        width: '110px',
+        render: (latencyStatus: LatencyStatus | undefined, row: PipelineRow) => {
+          if (latencyStatus == null || latencyStatus === 'unknown') return null;
+          const color =
+            latencyStatus === 'critical'
+              ? 'danger'
+              : latencyStatus === 'warning'
+              ? 'warning'
+              : 'success';
+          const slaLabel =
+            row.latency_sla_ms != null
+              ? ` / ${
+                  row.latency_sla_ms >= 3_600_000
+                    ? `${row.latency_sla_ms / 3_600_000}h`
+                    : `${row.latency_sla_ms / 60_000}m`
+                }`
+              : '';
+          const p95Label =
+            row.volume?.latencyP95Ms != null
+              ? row.volume.latencyP95Ms >= 60_000
+                ? `${(row.volume.latencyP95Ms / 60_000).toFixed(1)}m`
+                : `${Math.round(row.volume.latencyP95Ms / 1_000)}s`
+              : latencyStatus;
+          return (
+            <EuiHealth color={color}>
+              <EuiText size="xs">{`${p95Label}${slaLabel}`}</EuiText>
+            </EuiHealth>
+          );
+        },
+      },
+      {
+        field: 'volume',
+        name: i18n.translate(
+          'xpack.securitySolution.agentBuilder.siemReadiness.continuity.table.volume',
+          { defaultMessage: 'Volume (24h / baseline)' }
+        ),
+        width: '170px',
+        render: (volume: PipelineVolumeStats | null | undefined) => {
+          if (volume == null) return null;
+
+          const isCritical = volume.criticalSilence;
+          const isSilent = volume.silenceDetected;
+          const isDropCritical = volume.dropSeverity === 'critical';
+          const isDropWarning = volume.dropSeverity === 'warning';
+
+          const color =
+            isCritical || isDropCritical
+              ? 'danger'
+              : isSilent || isDropWarning
+              ? 'warning'
+              : 'success';
+
+          if (isCritical) {
+            const hrs = volume.hoursSilent != null ? ` (${volume.hoursSilent.toFixed(1)}h)` : '';
+            return (
+              <EuiHealth color="danger">
+                <EuiText size="xs">
+                  {i18n.translate(
+                    'xpack.securitySolution.agentBuilder.siemReadiness.continuity.volume.criticalSilence',
+                    { defaultMessage: 'Critical silence{hrs}', values: { hrs } }
+                  )}
+                </EuiText>
+              </EuiHealth>
+            );
+          }
+
+          if (isSilent) {
+            return (
+              <EuiHealth color="warning">
+                {i18n.translate(
+                  'xpack.securitySolution.agentBuilder.siemReadiness.continuity.volume.silent',
+                  { defaultMessage: 'Silent' }
+                )}
+              </EuiHealth>
+            );
+          }
+
+          if (isDropCritical || isDropWarning) {
+            const pct = volume.dropPercent != null ? ` −${volume.dropPercent}%` : '';
+            return (
+              <EuiHealth color={color}>
+                <EuiText size="xs">
+                  {i18n.translate(
+                    'xpack.securitySolution.agentBuilder.siemReadiness.continuity.volume.drop',
+                    { defaultMessage: 'Drop{pct}', values: { pct } }
+                  )}
+                </EuiText>
+              </EuiHealth>
+            );
+          }
+
+          return (
+            <EuiHealth color="success">
+              <EuiText size="xs">
+                {`${volume.current24h.toLocaleString()} / ${
+                  volume.baseline != null ? volume.baseline.toLocaleString() : '—'
+                }`}
+              </EuiText>
+            </EuiHealth>
+          );
+        },
+      },
     ],
     [basePath]
   );
@@ -422,8 +548,7 @@ export const registerSiemReadinessAttachments = (
       getLabel: (attachment) =>
         attachment.data.attachmentLabel ??
         i18n.translate('xpack.securitySolution.agentBuilder.siemReadiness.continuity.label', {
-          defaultMessage: 'Pipeline: {name}',
-          values: { name: attachment.data.pipeline_name },
+          defaultMessage: 'Ingest Pipelines',
         }),
       getIcon: () => 'pipelineApp',
       renderInlineContent: (props) => <ContinuityInlineContent attachment={props.attachment} />,
@@ -436,8 +561,7 @@ export const registerSiemReadinessAttachments = (
       getLabel: (attachment) =>
         attachment.data.attachmentLabel ??
         i18n.translate('xpack.securitySolution.agentBuilder.siemReadiness.retention.label', {
-          defaultMessage: 'Retention: {name}',
-          values: { name: attachment.data.index_name },
+          defaultMessage: 'Data Retention',
         }),
       getIcon: () => 'indexManagementApp',
       renderInlineContent: (props) => <RetentionInlineContent attachment={props.attachment} />,

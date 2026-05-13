@@ -6,18 +6,21 @@
  */
 
 import type { SiemReadinessRoutesDeps } from './types';
-import { getReadinessCategoriesRoute } from './routes/get_readiness_categories';
 import { getMitreDataIndicesDocsCountRoute } from './routes/get_mitre_data_indices_docs_count';
 import { getReadinessRetentionRoute } from './routes/get_readiness_retention';
 import { getReadinessPipelinesRoute } from './routes/get_readiness_pipelines';
+import { getReadinessQualityRoute } from './routes/get_readiness_quality';
+import { getReadinessCoverageRoute } from './routes/get_readiness_coverage';
 
 export const registerSiemReadinessRoutes = ({
   router,
   logger,
   isServerless,
+  getStartServices,
 }: SiemReadinessRoutesDeps) => {
-  getReadinessCategoriesRoute(router, logger);
   getMitreDataIndicesDocsCountRoute(router, logger);
   getReadinessRetentionRoute(router, logger, isServerless);
   getReadinessPipelinesRoute(router, logger, isServerless);
+  getReadinessQualityRoute(router, logger);
+  getReadinessCoverageRoute(router, logger, getStartServices);
 };

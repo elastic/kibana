@@ -22,7 +22,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { useSiemReadinessApi, CATEGORY_ORDER } from '@kbn/siem-readiness';
-import type { IndexInfo, DataQualityResultDocument, MainCategories } from '@kbn/siem-readiness';
+import type { CompiledQualityIndex, MainCategories } from '@kbn/siem-readiness';
 import {
   CategoryAccordionTable,
   type CategoryData,
@@ -34,18 +34,27 @@ import { QualityWarningPrompt } from './quality_warning_prompt';
 import { buildQualityCaseDescription, getQualityCaseTitle } from './quality_add_case_details';
 import { ViewCasesButton } from '../../components/view_cases_button';
 import type { SiemReadinessTabActiveCategoriesProps } from '../../components/configuration_panel';
-import { isQualityIncompatible } from '../../../hooks/visibility_status_utils';
 import { useAutoCheckIndices } from './use_auto_check_indices';
 import { SIEM_READINESS_ACCORDIONS_STORAGE_KEY } from '../../../constants';
 
 const DATA_QUALITY_CASE_TAGS = ['siem-readiness', 'data-quality', 'ecs-compatibility'];
 
-// Extended IndexInfo with computed fields
-interface IndexInfoWithStatus extends IndexInfo, Record<string, unknown> {
-  status: 'incompatible' | 'healthy';
-  incompatibleFieldCount: number;
-  checkedAt: number | undefined;
-}
+/** EuiBasicTable requires rows to satisfy Record<string, unknown>; this intersection provides it. */
+type QualityIndexRow = CompiledQualityIndex & Record<string, unknown>;
+
+const makeUncheckedRow = (indexName: string): QualityIndexRow => ({
+  indexName,
+  status: 'healthy',
+  incompatibleFieldCount: 0,
+  sameFamilyFieldCount: 0,
+  ecsFieldCount: 0,
+  customFieldCount: 0,
+  totalFieldCount: 0,
+  docsCount: 0,
+  lastChecked: null,
+  ecsVersion: null,
+  error: null,
+});
 
 export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
   activeCategories,
@@ -53,76 +62,49 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
   const { euiTheme } = useEuiTheme();
   const basePath = useBasePath();
   const { openNewCaseFlyout } = useSiemReadinessCases();
-  const { getReadinessCategories, getIndexQualityResultsLatest } = useSiemReadinessApi();
-  const { data: getReadinessCategoriesData } = getReadinessCategories;
-  const { data: getIndexQualityData } = getIndexQualityResultsLatest;
+  const { getReadinessQuality } = useSiemReadinessApi();
+  const { data: qualityData, isLoading, error } = getReadinessQuality;
 
-  // Create a lookup map for index results by indexName
-  const indexDataQualityMap = useMemo(() => {
-    if (!getIndexQualityData) return new Map<string, DataQualityResultDocument>();
-
-    return new Map(getIndexQualityData.map((result) => [result.indexName, result]));
-  }, [getIndexQualityData]);
-
-  // Extract flat list of all index names for auto-checking
+  // Full index list (checked + unchecked) for active categories — drives auto-check
   const allIndexNames = useMemo(() => {
-    if (!getReadinessCategoriesData?.mainCategoriesMap) return [];
+    if (!qualityData?.byCategory) return [];
 
-    const activeOnly = getReadinessCategoriesData.mainCategoriesMap.filter((category) =>
-      activeCategories.includes(category.category as MainCategories)
-    );
-
-    return activeOnly.flatMap((category) => category.indices.map((index) => index.indexName));
-  }, [getReadinessCategoriesData?.mainCategoriesMap, activeCategories]);
+    return qualityData.byCategory
+      .filter((c) => activeCategories.includes(c.category as MainCategories))
+      .flatMap((c) => [...c.indices.map((i) => i.indexName), ...c.uncheckedIndices]);
+  }, [qualityData?.byCategory, activeCategories]);
 
   // Auto-check all indices when tab is visited
   const { isChecking, isComplete, progress, currentIndexName } = useAutoCheckIndices({
     indexNames: allIndexNames,
-    enabled: !getReadinessCategories.isLoading && allIndexNames.length > 0,
+    enabled: !isLoading && allIndexNames.length > 0,
   });
 
-  // Prepare categories data with computed status field, filtered by active categories
-  const categories: Array<CategoryData<IndexInfoWithStatus>> = useMemo(() => {
-    if (!getReadinessCategoriesData?.mainCategoriesMap) return [];
+  // Build category rows: checked indices from compiled data + placeholder rows for unchecked
+  const categories: Array<CategoryData<QualityIndexRow>> = useMemo(() => {
+    if (!qualityData?.byCategory) return [];
 
-    const activeOnly = getReadinessCategoriesData.mainCategoriesMap.filter((category) =>
-      activeCategories.includes(category.category as MainCategories)
-    );
+    return qualityData.byCategory
+      .filter(
+        (c) => activeCategories.includes(c.category as MainCategories) && c.totalActiveIndices > 0
+      )
+      .map((c) => ({
+        category: c.category,
+        items: [...(c.indices as QualityIndexRow[]), ...c.uncheckedIndices.map(makeUncheckedRow)],
+      }));
+  }, [qualityData?.byCategory, activeCategories]);
 
-    const withStatus = activeOnly.map((category) => ({
-      category: category.category,
-      items: category.indices.map((index) => {
-        const result = indexDataQualityMap.get(index.indexName);
-        const incompatibleCount = result?.incompatibleFieldCount ?? 0;
-
-        return {
-          ...index,
-          status: isQualityIncompatible(incompatibleCount)
-            ? ('incompatible' as const)
-            : ('healthy' as const),
-          incompatibleFieldCount: incompatibleCount,
-          checkedAt: result?.checkedAt,
-        };
-      }),
-    }));
-
-    return withStatus.filter((category) => category.items.length > 0);
-  }, [getReadinessCategoriesData?.mainCategoriesMap, indexDataQualityMap, activeCategories]);
-
-  // Calculate total incompatible indices - count unique indices only
+  // Total incompatible across active categories
   const totalIncompatibleIndices = useMemo(() => {
-    const uniqueIncompatibleIndices = new Set<string>();
-    categories.forEach((category) => {
-      category.items
-        .filter((item) => item.status === 'incompatible')
-        .forEach((item) => {
-          uniqueIncompatibleIndices.add(item.indexName);
-        });
-    });
-    return uniqueIncompatibleIndices.size;
-  }, [categories]);
+    if (!qualityData?.byCategory) return 0;
+    return qualityData.byCategory
+      .filter((c) => activeCategories.includes(c.category as MainCategories))
+      .reduce((sum, c) => sum + c.incompatibleCount, 0);
+  }, [qualityData?.byCategory, activeCategories]);
 
   const hasIncompatibleIndices = totalIncompatibleIndices > 0;
+
+  const hasUnfilteredData = Boolean(qualityData?.byCategory?.length);
 
   // Case description
   const caseDescription = useMemo(
@@ -139,11 +121,8 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
   }, [openNewCaseFlyout, caseDescription]);
 
   // Render function for accordion extra action (right side badges/stats)
-  const renderExtraAction = (category: CategoryData<IndexInfoWithStatus>) => {
-    const hasIncompatibleFields = category.items.some((item) =>
-      isQualityIncompatible(item.incompatibleFieldCount)
-    );
-    const status = hasIncompatibleFields ? 'Actions required' : 'Healthy';
+  const renderExtraAction = (category: CategoryData<QualityIndexRow>) => {
+    const hasIncompatibleFields = category.items.some((item) => item.status === 'incompatible');
     const statusColor = hasIncompatibleFields ? 'warning' : 'success';
 
     const totalIncompatibleFields = category.items.reduce(
@@ -151,12 +130,7 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
       0
     );
 
-    const affectedIndices = new Set(
-      category.items
-        .filter((item) => isQualityIncompatible(item.incompatibleFieldCount))
-        .map((item) => item.indexName)
-    ).size;
-
+    const affectedIndices = category.items.filter((item) => item.status === 'incompatible').length;
     const totalDataSources = category.items.length;
 
     return (
@@ -169,7 +143,16 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiBadge color={statusColor}>{status}</EuiBadge>
+          <EuiBadge color={statusColor}>
+            {hasIncompatibleFields
+              ? i18n.translate(
+                  'xpack.securitySolution.siemReadiness.quality.status.actionsRequired',
+                  { defaultMessage: 'Actions required' }
+                )
+              : i18n.translate('xpack.securitySolution.siemReadiness.quality.status.healthy', {
+                  defaultMessage: 'Healthy',
+                })}
+          </EuiBadge>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
@@ -208,7 +191,6 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     );
   };
 
-  // Filter options for the component
   const filterOptions: FilterOption[] = [
     {
       value: 'all',
@@ -230,8 +212,7 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     },
   ];
 
-  // Define columns for the data source table
-  const columns: Array<EuiBasicTableColumn<IndexInfoWithStatus>> = useMemo(
+  const columns: Array<EuiBasicTableColumn<QualityIndexRow>> = useMemo(
     () => [
       {
         field: 'indexName',
@@ -252,37 +233,34 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         ),
         sortable: true,
         width: '15%',
-        render: (incompatibleFieldCount: number) => {
-          return <strong>{incompatibleFieldCount}</strong>;
-        },
+        render: (incompatibleFieldCount: number) => <strong>{incompatibleFieldCount}</strong>,
       },
       {
-        field: 'checkedAt',
+        field: 'lastChecked',
         name: i18n.translate(
           'xpack.securitySolution.siemReadiness.quality.table.column.lastChecked',
           {
             defaultMessage: 'Last checked',
           }
         ),
-        sortable: (item: IndexInfoWithStatus) => item?.checkedAt ?? 0,
+        sortable: (item: QualityIndexRow) =>
+          item.lastChecked ? new Date(item.lastChecked as string).getTime() : 0,
         width: '15%',
-        render: (checkedAt: number | undefined) => {
-          if (!checkedAt) {
+        render: (lastChecked: string | null) => {
+          if (!lastChecked) {
             return i18n.translate(
               'xpack.securitySolution.siemReadiness.quality.lastChecked.never',
-              {
-                defaultMessage: 'Never',
-              }
+              { defaultMessage: 'Never' }
             );
           }
-          return moment(checkedAt).fromNow();
+          return moment(lastChecked).fromNow();
         },
       },
       {
+        field: 'status',
         name: i18n.translate('xpack.securitySolution.siemReadiness.quality.table.column.status', {
           defaultMessage: 'Status',
         }),
-        field: 'status',
         sortable: true,
         width: '15%',
         render: (status: 'incompatible' | 'healthy') => {
@@ -292,9 +270,7 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
               {isIncompatible
                 ? i18n.translate(
                     'xpack.securitySolution.siemReadiness.quality.status.incompatible',
-                    {
-                      defaultMessage: 'Incompatible',
-                    }
+                    { defaultMessage: 'Incompatible' }
                   )
                 : i18n.translate('xpack.securitySolution.siemReadiness.quality.status.healthy', {
                     defaultMessage: 'Healthy',
@@ -310,16 +286,17 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         }),
         actions: [
           {
-            render: () => {
-              const dataQualityUrl = `${basePath}/app/security/data_quality`;
-              return (
-                <EuiButtonEmpty size="s" href={dataQualityUrl} target="_blank">
-                  {i18n.translate('xpack.securitySolution.siemReadiness.quality.action.view', {
-                    defaultMessage: 'View Data quality',
-                  })}
-                </EuiButtonEmpty>
-              );
-            },
+            render: () => (
+              <EuiButtonEmpty
+                size="s"
+                href={`${basePath}/app/security/data_quality`}
+                target="_blank"
+              >
+                {i18n.translate('xpack.securitySolution.siemReadiness.quality.action.view', {
+                  defaultMessage: 'View Data quality',
+                })}
+              </EuiButtonEmpty>
+            ),
           },
         ],
       },
@@ -327,7 +304,7 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     [basePath]
   );
 
-  if (getReadinessCategories.isLoading) {
+  if (isLoading) {
     return (
       <>
         <EuiSpacer size="m" />
@@ -340,7 +317,7 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     );
   }
 
-  if (getReadinessCategories.error) {
+  if (error) {
     return (
       <>
         <EuiSpacer size="m" />
@@ -352,7 +329,7 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
           iconType="error"
           announceOnMount
         >
-          <p>{(getReadinessCategories.error as Error).message}</p>
+          <p>{(error as Error).message}</p>
         </EuiCallOut>
       </>
     );
@@ -426,9 +403,7 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         filterField="status"
         searchPlaceholder={i18n.translate(
           'xpack.securitySolution.siemReadiness.quality.searchPlaceholder',
-          {
-            defaultMessage: 'Search indices...',
-          }
+          { defaultMessage: 'Search indices...' }
         )}
         filterOptions={filterOptions}
         itemName={i18n.translate('xpack.securitySolution.siemReadiness.quality.itemName', {
@@ -436,11 +411,8 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         })}
         defaultSortField="indexName"
         storageKey={SIEM_READINESS_ACCORDIONS_STORAGE_KEY}
-        isFilterActive={
-          activeCategories.length < CATEGORY_ORDER.length &&
-          (getReadinessCategoriesData?.mainCategoriesMap?.length ?? 0) > 0
-        }
-        hasUnfilteredData={(getReadinessCategoriesData?.mainCategoriesMap?.length ?? 0) > 0}
+        isFilterActive={activeCategories.length < CATEGORY_ORDER.length && hasUnfilteredData}
+        hasUnfilteredData={hasUnfilteredData}
       />
     </>
   );

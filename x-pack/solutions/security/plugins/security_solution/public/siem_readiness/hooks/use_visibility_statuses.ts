@@ -6,24 +6,14 @@
  */
 
 import { useMemo } from 'react';
-import {
-  useSiemReadinessApi,
-  useDetectionRulesByIntegration,
-  CATEGORY_ORDER,
-} from '@kbn/siem-readiness';
+import { useSiemReadinessApi } from '@kbn/siem-readiness';
 import type {
   MainCategories,
-  CategoriesResponse,
-  DataQualityResultDocument,
-  PipelineStats,
-  RetentionResponse,
+  CompiledCoverageData,
+  CompiledContinuityData,
+  CompiledRetentionData,
+  CompiledQualityData,
 } from '@kbn/siem-readiness';
-import {
-  isCriticalFailureRate,
-  isQualityIncompatible,
-  isRetentionNonCompliant,
-  hasMissingIntegrations,
-} from './visibility_status_utils';
 
 export type VisibilityStatus = 'healthy' | 'actionsRequired' | 'noData';
 
@@ -34,153 +24,79 @@ interface VisibilityStatuses {
   retentionStatus: VisibilityStatus;
 }
 
-interface RuleIntegrationCoverage {
-  missingIntegrations?: string[];
-}
-
 /**
- * Build a map of index name to category for quick lookup
- */
-const buildIndexToCategoryMap = (
-  categoriesData: CategoriesResponse | undefined
-): Map<string, string> => {
-  const map = new Map<string, string>();
-  if (!categoriesData?.mainCategoriesMap) return map;
-
-  categoriesData.mainCategoriesMap.forEach(({ category, indices }) => {
-    indices.forEach(({ indexName }) => map.set(indexName, category));
-  });
-
-  return map;
-};
-
-/**
- * Compute Coverage status based on rule coverage and data coverage
+ * Compute Coverage status based on compiled coverage data.
  */
 const computeCoverageStatus = (
-  categoriesData: CategoriesResponse | undefined,
-  hasDetectionRules: boolean,
-  ruleIntegrationCoverage: RuleIntegrationCoverage | undefined
+  coverageData: CompiledCoverageData | undefined
 ): VisibilityStatus => {
-  const hasCategories = Boolean(categoriesData?.mainCategoriesMap?.length);
+  if (!coverageData?.categories?.length) return 'noData';
 
-  if (!hasCategories && !hasDetectionRules) return 'noData';
-  if (hasCategories && !hasDetectionRules) return 'actionsRequired';
+  const hasMissingData = coverageData.summary.inactiveCategories.length > 0;
+  const hasMissingIntegrations = coverageData.categories.some(
+    (c) => c.missingIntegrations.length > 0
+  );
 
-  const hasMissing =
-    hasDetectionRules && hasMissingIntegrations(ruleIntegrationCoverage?.missingIntegrations);
-
-  const hasMissingData =
-    hasCategories &&
-    CATEGORY_ORDER.some((category) => {
-      const categoryData = categoriesData?.mainCategoriesMap?.find(
-        (item) => item.category === category
-      );
-      const totalDocs = categoryData?.indices.reduce((sum, idx) => sum + idx.docs, 0) || 0;
-      return totalDocs === 0;
-    });
-
-  return hasMissing || hasMissingData ? 'actionsRequired' : 'healthy';
+  if (hasMissingData || hasMissingIntegrations) return 'actionsRequired';
+  return coverageData.summary.activeCategories.length > 0 ? 'healthy' : 'noData';
 };
 
 /**
- * Compute Quality status based on ECS compatibility
+ * Compute Quality status based on compiled quality data.
+ * Uses the pre-computed byCategory grouping to check active categories only.
  */
 const computeQualityStatus = (
-  categoriesData: CategoriesResponse | undefined,
-  qualityData: DataQualityResultDocument[] | undefined,
+  qualityData: CompiledQualityData | undefined,
   activeCategories: MainCategories[]
 ): VisibilityStatus => {
-  if (!categoriesData?.mainCategoriesMap || !qualityData) return 'noData';
+  if (!qualityData?.byCategory?.length) return 'noData';
 
-  const qualityMap = new Map(qualityData.map((result) => [result.indexName, result]));
+  const relevantCategories = qualityData.byCategory.filter(
+    (cat) => activeCategories.includes(cat.category as MainCategories) && cat.totalActiveIndices > 0
+  );
 
-  let hasIncompatible = false;
-  let hasData = false;
-
-  categoriesData.mainCategoriesMap
-    .filter((cat) => activeCategories.includes(cat.category as MainCategories))
-    .forEach((category) => {
-      category.indices.forEach((index) => {
-        hasData = true;
-        const result = qualityMap.get(index.indexName);
-        if (result && isQualityIncompatible(result.incompatibleFieldCount)) {
-          hasIncompatible = true;
-        }
-      });
-    });
-
-  if (!hasData) return 'noData';
-  return hasIncompatible ? 'actionsRequired' : 'healthy';
+  if (!relevantCategories.length) return 'noData';
+  return relevantCategories.some((cat) => cat.incompatibleCount > 0)
+    ? 'actionsRequired'
+    : 'healthy';
 };
 
 /**
- * Compute Continuity status based on pipeline failure rates
+ * Compute Continuity status based on compiled pipeline data.
+ * Uses the pre-computed byCategory grouping to check active categories only.
  */
 const computeContinuityStatus = (
-  pipelinesData: PipelineStats[] | undefined,
-  indexToCategoryMap: Map<string, string>,
+  pipelinesData: CompiledContinuityData | undefined,
   activeCategories: MainCategories[]
 ): VisibilityStatus => {
-  if (!pipelinesData?.length) return 'noData';
+  if (!pipelinesData?.byCategory?.length) return 'noData';
 
-  let hasCritical = false;
-  let hasRelevantPipelines = false;
+  const relevantCategories = pipelinesData.byCategory.filter(
+    (cat) => activeCategories.includes(cat.category as MainCategories) && cat.pipelineCount > 0
+  );
 
-  pipelinesData.forEach((pipeline) => {
-    const pipelineCategories = new Set<string>();
-    pipeline.indices.forEach((indexName) => {
-      const category = indexToCategoryMap.get(indexName);
-      if (category) pipelineCategories.add(category);
-    });
-
-    const isInActiveCategory = Array.from(pipelineCategories).some((cat) =>
-      activeCategories.includes(cat as MainCategories)
-    );
-
-    if (isInActiveCategory) {
-      hasRelevantPipelines = true;
-      if (isCriticalFailureRate(pipeline.failedDocsCount, pipeline.docsCount)) {
-        hasCritical = true;
-      }
-    }
-  });
-
-  if (!hasRelevantPipelines) return 'noData';
-  return hasCritical ? 'actionsRequired' : 'healthy';
+  if (!relevantCategories.length) return 'noData';
+  return relevantCategories.some((cat) => cat.criticalCount > 0) ? 'actionsRequired' : 'healthy';
 };
 
 /**
- * Compute Retention status based on compliance with retention requirements
+ * Compute Retention status based on compiled retention data.
+ * Uses the pre-computed byCategory grouping to check active categories only.
  */
 const computeRetentionStatus = (
-  categoriesData: CategoriesResponse | undefined,
-  retentionData: RetentionResponse | undefined,
+  retentionData: CompiledRetentionData | undefined,
   activeCategories: MainCategories[]
 ): VisibilityStatus => {
-  if (!categoriesData?.mainCategoriesMap || !retentionData?.items?.length) return 'noData';
+  if (!retentionData?.byCategory?.length) return 'noData';
 
-  let hasNonCompliant = false;
-  let hasRelevantData = false;
+  const relevantCategories = retentionData.byCategory.filter(
+    (cat) => activeCategories.includes(cat.category as MainCategories) && cat.totalIndices > 0
+  );
 
-  categoriesData.mainCategoriesMap
-    .filter((cat) => activeCategories.includes(cat.category as MainCategories))
-    .forEach((category) => {
-      category.indices.forEach((index) => {
-        const matchingRetention = retentionData.items.find((retention) =>
-          index.indexName.includes(retention.indexName)
-        );
-        if (matchingRetention) {
-          hasRelevantData = true;
-          if (isRetentionNonCompliant(matchingRetention.status)) {
-            hasNonCompliant = true;
-          }
-        }
-      });
-    });
-
-  if (!hasRelevantData) return 'noData';
-  return hasNonCompliant ? 'actionsRequired' : 'healthy';
+  if (!relevantCategories.length) return 'noData';
+  return relevantCategories.some((cat) => cat.nonCompliantCount > 0)
+    ? 'actionsRequired'
+    : 'healthy';
 };
 
 /**
@@ -189,49 +105,32 @@ const computeRetentionStatus = (
  */
 export const useVisibilityStatuses = (activeCategories: MainCategories[]): VisibilityStatuses => {
   const {
-    getReadinessCategories,
-    getIndexQualityResultsLatest,
+    getReadinessCoverage,
+    getReadinessQuality,
     getReadinessPipelines,
     getReadinessRetention,
-    getDetectionRules,
   } = useSiemReadinessApi();
 
-  const { data: categoriesData } = getReadinessCategories;
-  const { data: qualityData } = getIndexQualityResultsLatest;
+  const { data: coverageData } = getReadinessCoverage;
+  const { data: qualityData } = getReadinessQuality;
   const { data: pipelinesData } = getReadinessPipelines;
   const { data: retentionData } = getReadinessRetention;
 
-  const { ruleIntegrationCoverage } = useDetectionRulesByIntegration();
-
-  // Build index → category mapping for continuity status
-  const indexToCategoryMap = useMemo(
-    () => buildIndexToCategoryMap(categoriesData),
-    [categoriesData]
-  );
-
-  const coverageStatus = useMemo(
-    () =>
-      computeCoverageStatus(
-        categoriesData,
-        Boolean(getDetectionRules.data?.data?.length),
-        ruleIntegrationCoverage ?? undefined
-      ),
-    [categoriesData, getDetectionRules.data?.data?.length, ruleIntegrationCoverage]
-  );
+  const coverageStatus = useMemo(() => computeCoverageStatus(coverageData), [coverageData]);
 
   const qualityStatus = useMemo(
-    () => computeQualityStatus(categoriesData, qualityData, activeCategories),
-    [categoriesData, qualityData, activeCategories]
+    () => computeQualityStatus(qualityData, activeCategories),
+    [qualityData, activeCategories]
   );
 
   const continuityStatus = useMemo(
-    () => computeContinuityStatus(pipelinesData, indexToCategoryMap, activeCategories),
-    [pipelinesData, indexToCategoryMap, activeCategories]
+    () => computeContinuityStatus(pipelinesData, activeCategories),
+    [pipelinesData, activeCategories]
   );
 
   const retentionStatus = useMemo(
-    () => computeRetentionStatus(categoriesData, retentionData, activeCategories),
-    [categoriesData, retentionData, activeCategories]
+    () => computeRetentionStatus(retentionData, activeCategories),
+    [retentionData, activeCategories]
   );
 
   return {

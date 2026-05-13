@@ -19,11 +19,14 @@ import {
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSiemReadinessApi, CATEGORY_ORDER } from '@kbn/siem-readiness';
-import type { PipelineStats } from '@kbn/siem-readiness';
+import type { CompiledPipeline } from '@kbn/siem-readiness';
 import {
   CategoryAccordionTable,
   type CategoryData,
 } from '../../components/category_accordion_table';
+
+/** EuiBasicTable requires rows to satisfy Record<string, unknown>; this intersection provides it. */
+type CompiledPipelineRow = CompiledPipeline & Record<string, unknown>;
 import type { SiemReadinessTabActiveCategoriesProps } from '../../components/configuration_panel';
 import { useSiemReadinessCases } from '../../../hooks/use_siem_readiness_cases';
 import { useBasePath } from '../../../../common/lib/kibana';
@@ -42,15 +45,6 @@ import { SIEM_READINESS_ACCORDIONS_STORAGE_KEY } from '../../../constants';
 
 const DATA_CONTINUITY_CASE_TAGS = ['siem-readiness', 'data-continuity', 'ingest-pipelines'];
 
-export interface PipelineInfoWithStatus extends PipelineStats, Record<string, unknown> {
-  failureRate: string;
-  status: 'healthy' | 'critical';
-}
-
-const getDocInjectionStatus = (failureRate: string): 'healthy' | 'critical' => {
-  return isCriticalFailureRateFromString(failureRate) ? 'critical' : 'healthy';
-};
-
 export const getIngestPipelineUrl = (basePath: string, pipelineName: string): string => {
   return `${basePath}/app/management/ingest/ingest_pipelines?pipeline=${encodeURIComponent(
     pipelineName
@@ -62,89 +56,33 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
 }) => {
   const basePath = useBasePath();
   const { openNewCaseFlyout } = useSiemReadinessCases();
-  const { getReadinessCategories, getReadinessPipelines } = useSiemReadinessApi();
+  const { getReadinessPipelines } = useSiemReadinessApi();
 
-  const { data: categoriesData, isLoading: categoriesLoading } = getReadinessCategories;
   const { data: pipelinesData, isLoading: pipelinesLoading } = getReadinessPipelines;
 
-  // If any pipeline has statsAvailable: false, stats are not available for this environment
-  const statsAvailable = pipelinesData ? pipelinesData.every((p) => p.statsAvailable) : true;
+  // Stats availability comes directly from compiled summary
+  const statsAvailable = pipelinesData?.summary.statsAvailable ?? true;
 
-  // Build index → category mapping from getReadinessCategories
-  const indexToCategoryMap = useMemo(() => {
-    const map = new Map<string, string>();
+  // Build categorized pipelines from pre-compiled byCategory data, filtered by activeCategories
+  const categorizedPipelines: Array<CategoryData<CompiledPipelineRow>> = useMemo(() => {
+    if (!pipelinesData?.byCategory) return [];
 
-    if (!categoriesData?.mainCategoriesMap) return map;
+    return pipelinesData.byCategory
+      .filter(
+        (c) =>
+          activeCategories.includes(c.category as (typeof activeCategories)[number]) &&
+          c.pipelines.length > 0
+      )
+      .map((c) => ({ category: c.category, items: c.pipelines as CompiledPipelineRow[] }));
+  }, [pipelinesData?.byCategory, activeCategories]);
 
-    categoriesData.mainCategoriesMap.forEach(({ category, indices }) => {
-      indices.forEach(({ indexName }) => {
-        map.set(indexName, category);
-      });
-    });
-
-    return map;
-  }, [categoriesData?.mainCategoriesMap]);
-
-  // Group pipelines by category based on their associated indices
-  const categorizedPipelines: Array<CategoryData<PipelineInfoWithStatus>> = useMemo(() => {
-    if (!pipelinesData?.length) return [];
-
-    const categoryPipelinesMap = new Map<string, PipelineInfoWithStatus[]>();
-
-    pipelinesData.forEach((pipeline) => {
-      const failureRate = getFailureRateString(pipeline.failedDocsCount, pipeline.docsCount);
-
-      const pipelineWithStats: PipelineInfoWithStatus = {
-        ...pipeline,
-        failureRate,
-        status: getDocInjectionStatus(failureRate),
-      };
-
-      // Get unique categories for this pipeline
-      const uniqueCategories = new Set<string>();
-      pipeline.indices.forEach((indexName) => {
-        const category = indexToCategoryMap.get(indexName);
-        if (category) uniqueCategories.add(category);
-      });
-
-      // Add pipeline to each category (once per category)
-      uniqueCategories.forEach((category) => {
-        const pipelinesInCategory = categoryPipelinesMap.get(category) || [];
-        pipelinesInCategory.push(pipelineWithStats);
-        categoryPipelinesMap.set(category, pipelinesInCategory);
-      });
-    });
-
-    // Build result in category order, filtered by active categories
-    const result: Array<CategoryData<PipelineInfoWithStatus>> = [];
-    activeCategories.forEach((category) => {
-      const items = categoryPipelinesMap.get(category);
-      if (!items) return;
-
-      result.push({
-        category,
-        items,
-      });
-    });
-
-    return result;
-  }, [pipelinesData, indexToCategoryMap, activeCategories]);
-
-  // Check if any matched pipelines exist ignoring activeCategories filter (for hasUnfilteredData prop)
+  // Check if any category has pipelines (ignoring active filter)
   const hasUnfilteredData = useMemo(() => {
-    if (!pipelinesData?.length) return false;
+    return pipelinesData?.byCategory.some((c) => c.pipelines.length > 0) ?? false;
+  }, [pipelinesData?.byCategory]);
 
-    return pipelinesData.some((pipeline) =>
-      pipeline.indices.some((indexName) => indexToCategoryMap.has(indexName))
-    );
-  }, [pipelinesData, indexToCategoryMap]);
-
-  // Check if any pipeline has failures
-  const hasDocCriticalFailures = useMemo(() => {
-    return categorizedPipelines.some((category) =>
-      category.items.some((pipeline) => pipeline.status === 'critical')
-    );
-  }, [categorizedPipelines]);
+  // Check if any pipeline is in critical status
+  const hasDocCriticalFailures = (pipelinesData?.summary.criticalPipelines ?? 0) > 0;
 
   // Case description
   const caseDescription = useMemo(
@@ -161,7 +99,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
   }, [openNewCaseFlyout, caseDescription]);
 
   // Table columns
-  const columns: Array<EuiBasicTableColumn<PipelineInfoWithStatus>> = useMemo(
+  const columns: Array<EuiBasicTableColumn<CompiledPipelineRow>> = useMemo(
     () => [
       {
         field: 'name',
@@ -183,7 +121,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
               sortable: true,
               render: (docsCount: number) => docsCount.toLocaleString(),
               width: '20%',
-            } as EuiBasicTableColumn<PipelineInfoWithStatus>,
+            } as EuiBasicTableColumn<CompiledPipelineRow>,
             {
               field: 'failedDocsCount',
               name: i18n.translate(
@@ -193,7 +131,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
               sortable: true,
               render: (failedDocsCount: number) => failedDocsCount.toLocaleString(),
               width: '15%',
-            } as EuiBasicTableColumn<PipelineInfoWithStatus>,
+            } as EuiBasicTableColumn<CompiledPipelineRow>,
             {
               field: 'failureRate',
               name: i18n.translate(
@@ -203,7 +141,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
               sortable: true,
               render: (failureRate: string) => `${failureRate}%`,
               width: '15%',
-            } as EuiBasicTableColumn<PipelineInfoWithStatus>,
+            } as EuiBasicTableColumn<CompiledPipelineRow>,
             {
               field: 'failureRate',
               name: i18n.translate(
@@ -227,7 +165,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
                 );
               },
               width: '20%',
-            } as EuiBasicTableColumn<PipelineInfoWithStatus>,
+            } as EuiBasicTableColumn<CompiledPipelineRow>,
           ]
         : []),
       {
@@ -237,7 +175,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         }),
         actions: [
           {
-            render: (item: PipelineInfoWithStatus) => (
+            render: (item: CompiledPipelineRow) => (
               <EuiButtonEmpty
                 size="s"
                 href={getIngestPipelineUrl(basePath, item.name)}
@@ -266,7 +204,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
   );
 
   // Render function for accordion extra action (right side badges/stats)
-  const renderExtraAction = (category: CategoryData<PipelineInfoWithStatus>) => {
+  const renderExtraAction = (category: CategoryData<CompiledPipelineRow>) => {
     const totalPipelines = category.items.length;
     const totalDocs = category.items.reduce((sum, p) => sum + p.docsCount, 0);
     const totalFailed = category.items.reduce((sum, p) => sum + p.failedDocsCount, 0);
@@ -358,7 +296,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     );
   };
 
-  const isLoading = categoriesLoading || pipelinesLoading;
+  const isLoading = pipelinesLoading;
 
   if (isLoading) {
     return (

@@ -5,47 +5,16 @@
  * 2.0.
  */
 
+import type { CompiledQualityIndex, CompiledQualityData } from '@kbn/siem-readiness-common';
 import { SIEM_READINESS_CATEGORIES } from '@kbn/siem-readiness-common';
 import type { CategoriesData } from './fetch_categories';
 import type { QualityResultWithStatus } from './fetch_quality_results';
 
+export type { CompiledQualityIndex, CompiledQualityData };
+
 export interface CompiledQualityOptions {
   category?: string;
   statusFilter?: 'all' | 'incompatible' | 'healthy';
-}
-
-export interface CompiledQualityIndex {
-  indexName: string;
-  status: 'healthy' | 'incompatible';
-  incompatibleFieldCount: number;
-  sameFamilyFieldCount: number;
-  ecsFieldCount: number;
-  customFieldCount: number;
-  totalFieldCount: number;
-  docsCount: number;
-  lastChecked: string | null;
-  ecsVersion: string | null;
-  error: string | null;
-}
-
-export interface CompiledQualityData {
-  summary: {
-    totalChecked: number;
-    totalIncompatible: number;
-    totalHealthy: number;
-    totalUnchecked: number;
-    note?: string;
-  };
-  byCategory: Array<{
-    category: string;
-    totalActiveIndices: number;
-    checkedCount: number;
-    uncheckedCount: number;
-    healthyCount: number;
-    incompatibleCount: number;
-    uncheckedIndices: string[];
-    indices: CompiledQualityIndex[];
-  }>;
 }
 
 /**
