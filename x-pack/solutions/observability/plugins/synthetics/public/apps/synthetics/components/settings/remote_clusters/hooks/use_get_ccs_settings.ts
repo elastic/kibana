@@ -19,13 +19,13 @@ export const DEFAULT_CCS_SETTINGS: SyntheticsCCSSettings = {
 
 const fetchCCSSettings = async (): Promise<SyntheticsCCSSettings> => {
   try {
-    const dynamicSettings = await apiService.get<{
+    const settings = await apiService.get<{
       useAllRemoteClusters?: boolean;
       selectedRemoteClusters?: string[];
-    }>(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS);
+    }>(SYNTHETICS_API_URLS.MULTI_SPACE_SETTINGS);
     return {
-      useAllRemoteClusters: dynamicSettings.useAllRemoteClusters ?? false,
-      selectedRemoteClusters: dynamicSettings.selectedRemoteClusters ?? [],
+      useAllRemoteClusters: settings.useAllRemoteClusters ?? false,
+      selectedRemoteClusters: settings.selectedRemoteClusters ?? [],
     };
   } catch (e) {
     return DEFAULT_CCS_SETTINGS;

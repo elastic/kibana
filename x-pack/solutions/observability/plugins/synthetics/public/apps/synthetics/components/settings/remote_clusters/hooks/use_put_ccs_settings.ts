@@ -22,7 +22,7 @@ export const usePutCCSSettings = () => {
     async (settings: SyntheticsCCSSettings) => {
       setIsSaving(true);
       try {
-        const result = await apiService.put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS, settings);
+        const result = await apiService.put(SYNTHETICS_API_URLS.MULTI_SPACE_SETTINGS, settings);
         notifications?.toasts.addSuccess({
           title: i18n.translate('xpack.synthetics.settings.ccs.saveSuccess', {
             defaultMessage: 'CCS settings saved successfully',
