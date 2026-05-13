@@ -11,7 +11,8 @@ import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { apiTest } from '../../common/fixtures';
 import { esResourcesEndpoint } from '../../common/fixtures/constants';
 
-apiTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/253221
+apiTest.describe.skip(
   'APM integration not installed but setup completed',
   { tag: tags.stateful.classic },
   () => {
