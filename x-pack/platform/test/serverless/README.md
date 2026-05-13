@@ -371,7 +371,7 @@ For tests using package registry we have enabled a configuration that uses a doc
 To be able to run this version locally you must have a Docker daemon running in your system and set `FLEET_PACKAGE_REGISTRY_PORT` env var. In order to set this variable execute
 
 ```bash
-export set FLEET_PACKAGE_REGISTRY_PORT=12345
+export FLEET_PACKAGE_REGISTRY_PORT=12345
 ```
 
 To unset the variable, and run the tests against the real endpoint again, execute
