@@ -98,8 +98,6 @@
     "@kbn/share-plugin",
     "@kbn/deeplinks-analytics",
     "@kbn/unified-doc-viewer-plugin",
-    "@kbn/core-user-profile-browser",
-    "@kbn/user-profile-components",
     "@kbn/maintenance-windows-plugin",
     "@kbn/esql-types",
     "@kbn/agent-builder-plugin",
