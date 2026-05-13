@@ -60,13 +60,16 @@ const throttleSchema = z.object({
   interval: durationSchema.optional().describe('The throttle interval duration (e.g. 5m, 1h).'),
 });
 
-const PER_EPISODE_STRATEGIES = new Set<string>([
+export const PER_EPISODE_STRATEGIES = new Set<string>([
   'on_status_change',
   'per_status_interval',
   'every_time',
 ]);
-const AGGREGATE_STRATEGIES = new Set<string>(['time_interval', 'every_time']);
-const STRATEGIES_REQUIRING_INTERVAL = new Set<string>(['per_status_interval', 'time_interval']);
+export const AGGREGATE_STRATEGIES = new Set<string>(['time_interval', 'every_time']);
+export const STRATEGIES_REQUIRING_INTERVAL = new Set<string>([
+  'per_status_interval',
+  'time_interval',
+]);
 
 interface ValidationPayload {
   value: {

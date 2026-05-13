@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import {
+  createRuleDataSchema,
   metadataSchema,
   ruleKindSchema,
   scheduleSchema,
@@ -57,6 +58,10 @@ export const setRecoveryPolicyOperationSchema = recoveryPolicySchema.extend({
   operation: z.literal('set_recovery_policy'),
 });
 
+export const validateOperationSchema = z.object({
+  operation: z.literal('validate'),
+});
+
 // ─── Discriminated union ──────────────────────────────────────────────────────
 
 export const ruleOperationSchema = z.discriminatedUnion('operation', [
@@ -67,6 +72,7 @@ export const ruleOperationSchema = z.discriminatedUnion('operation', [
   setGroupingOperationSchema,
   setStateTransitionOperationSchema,
   setRecoveryPolicyOperationSchema,
+  validateOperationSchema,
 ]);
 
 export type RuleOperation = z.infer<typeof ruleOperationSchema>;
@@ -87,9 +93,14 @@ export class RuleOperationValidationError extends Error {
 
 // ─── ES|QL query validation ───────────────────────────────────────────────────
 
-interface EsqlColumn {
+export interface EsqlColumn {
   name: string;
   type: string;
+}
+
+export interface RuleOperationsResult {
+  data: Partial<RuleAttachmentData>;
+  queryColumns?: EsqlColumn[];
 }
 
 /**
@@ -121,7 +132,7 @@ export const executeRuleOperations = async (
   operations: RuleOperation[],
   esClient?: IScopedClusterClient,
   { isNew = false }: { isNew?: boolean } = {}
-): Promise<Partial<RuleAttachmentData>> => {
+): Promise<RuleOperationsResult> => {
   let next = { ...data };
   let lastQueryColumns: EsqlColumn[] | undefined;
 
@@ -215,6 +226,20 @@ export const executeRuleOperations = async (
           },
         };
         break;
+
+      case 'validate': {
+        const payload = buildRuleValidationPayload(next);
+        const result = createRuleDataSchema.safeParse(payload);
+        if (!result.success) {
+          const issues = result.error.issues
+            .map((i) => `${i.path.join('.')}: ${i.message}`)
+            .join('\n');
+          throw new RuleOperationValidationError(
+            `Rule is not ready to save:\n${issues}`
+          );
+        }
+        break;
+      }
     }
   }
 
@@ -236,5 +261,23 @@ export const executeRuleOperations = async (
     );
   }
 
-  return next;
+  return {
+    data: next,
+    ...(lastQueryColumns ? { queryColumns: lastQueryColumns } : {}),
+  };
 };
+
+// ─── Validation payload ────────────────────────────────────────────────────────
+
+const buildRuleValidationPayload = (data: Partial<RuleAttachmentData>) => ({
+  kind: data.kind,
+  metadata: data.metadata,
+  schedule: data.schedule,
+  evaluation: data.evaluation,
+  time_field: data.time_field ?? '@timestamp',
+  state_transition: data.state_transition ?? null,
+  ...(data.recovery_policy !== undefined ? { recovery_policy: data.recovery_policy } : {}),
+  ...(data.grouping !== undefined ? { grouping: data.grouping } : {}),
+  ...(data.no_data !== undefined ? { no_data: data.no_data } : {}),
+  ...(data.artifacts !== undefined ? { artifacts: data.artifacts } : {}),
+});

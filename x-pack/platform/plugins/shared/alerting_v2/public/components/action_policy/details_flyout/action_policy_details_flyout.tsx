@@ -10,7 +10,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCode,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,7 +19,6 @@ import {
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
-  EuiText,
   EuiTitle,
   type EuiDescriptionListProps,
 } from '@elastic/eui';
@@ -33,9 +31,7 @@ import React from 'react';
 import { ActionPolicyActionsMenu } from '../action_policy_actions_menu';
 import { ActionPolicyStateBadge } from '../action_policy_state_badge';
 import { isSnoozed } from '../is_snoozed';
-import { getGroupingModeLabel, getThrottleStrategyLabel } from '../labels';
-import { BadgeList } from './badge_list';
-import { DestinationRow } from './destination_row';
+import { ActionPolicyDefinitionList } from './action_policy_definition_list';
 
 const FLYOUT_TITLE_ID = 'actionPolicyDetailsFlyoutTitle';
 const EMPTY_VALUE = '-';
@@ -92,90 +88,6 @@ export const ActionPolicyDetailsFlyout = ({
     onClose();
     onUpdateApiKey(id);
   };
-
-  const actionPolicyItems: EuiDescriptionListProps['listItems'] = [
-    {
-      title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.description', {
-        defaultMessage: 'Description',
-      }),
-      description: policy.description ? policy.description : EMPTY_VALUE,
-    },
-    {
-      title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.tags', {
-        defaultMessage: 'Tags',
-      }),
-      description:
-        policy.tags && policy.tags.length > 0 ? <BadgeList items={policy.tags} /> : EMPTY_VALUE,
-    },
-    {
-      title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.matcher', {
-        defaultMessage: 'Matcher',
-      }),
-      description: policy.matcher ? (
-        <EuiCode>{policy.matcher}</EuiCode>
-      ) : (
-        <EuiText size="s" color="subdued">
-          <FormattedMessage
-            id="xpack.alertingV2.actionPolicy.detailsFlyout.matchesAll"
-            defaultMessage="Matches all alerts."
-          />
-        </EuiText>
-      ),
-    },
-    {
-      title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.dispatchMode', {
-        defaultMessage: 'Dispatch per',
-      }),
-      description: getGroupingModeLabel(policy.groupingMode),
-    },
-  ];
-  if (policy.groupingMode === 'per_field' && policy.groupBy && policy.groupBy.length > 0) {
-    actionPolicyItems.push({
-      title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.groupBy', {
-        defaultMessage: 'Group by',
-      }),
-      description: <BadgeList items={policy.groupBy} />,
-    });
-  }
-  actionPolicyItems.push({
-    title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.frequency', {
-      defaultMessage: 'Frequency',
-    }),
-    description: (
-      <>
-        {getThrottleStrategyLabel(policy.throttle?.strategy, policy.groupingMode)}
-        {policy.throttle?.interval && (
-          <>
-            {' '}
-            <EuiText size="xs" color="subdued">
-              <FormattedMessage
-                id="xpack.alertingV2.actionPolicy.detailsFlyout.interval"
-                defaultMessage="Every {interval}"
-                values={{ interval: policy.throttle.interval }}
-              />
-            </EuiText>
-          </>
-        )}
-      </>
-    ),
-  });
-  actionPolicyItems.push({
-    title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.destinations', {
-      defaultMessage: 'Destinations',
-    }),
-    description:
-      policy.destinations.length === 0 ? (
-        EMPTY_VALUE
-      ) : (
-        <EuiFlexGroup direction="column" gutterSize="xs">
-          {policy.destinations.map((destination) => (
-            <EuiFlexItem key={`${destination.type}-${destination.id}`}>
-              <DestinationRow destination={destination} />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      ),
-  });
 
   const metadataItems: EuiDescriptionListProps['listItems'] = [
     {
@@ -303,7 +215,15 @@ export const ActionPolicyDetailsFlyout = ({
             </h3>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <EuiDescriptionList compressed type="column" listItems={actionPolicyItems} />
+          <ActionPolicyDefinitionList
+            description={policy.description ?? undefined}
+            tags={policy.tags ?? undefined}
+            matcher={policy.matcher}
+            groupingMode={policy.groupingMode ?? undefined}
+            groupBy={policy.groupBy ?? undefined}
+            throttle={policy.throttle ?? undefined}
+            destinations={policy.destinations}
+          />
           <EuiHorizontalRule />
           <EuiTitle size="xs">
             <h3>

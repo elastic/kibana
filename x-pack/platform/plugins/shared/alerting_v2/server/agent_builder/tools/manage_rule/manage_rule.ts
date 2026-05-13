@@ -47,25 +47,36 @@ Use operations[] to:
 4. set_query — set the base ES|QL detection query
 5. set_grouping — set fields to group alerts by
 6. set_state_transition — set consecutive breaches threshold
-7. set_recovery_policy — set recovery detection type and optional query`,
+7. set_recovery_policy — set recovery detection type and optional query
+8. validate — validate the accumulated rule against the API request schema; throws if not ready to save`,
   schema: manageRuleSchema,
   handler: async (
     { ruleAttachmentId: previousAttachmentId, operations },
     { logger, attachments, esClient }
   ) => {
     try {
-      const persistedRecord = previousAttachmentId
+      const currentAttachment = previousAttachmentId
         ? attachments.getAttachmentRecord(previousAttachmentId)
         : undefined;
 
-      const isNew = !persistedRecord;
+      const isNew = !currentAttachment;
       const attachmentId = previousAttachmentId ?? uuidv4();
 
-      const currentData: Partial<RuleAttachmentData> = persistedRecord?.versions.at(-1)?.data ?? {};
+      const currentData: Partial<RuleAttachmentData> = currentAttachment?.versions.at(-1)?.data ?? {};
 
-      const updatedData = (await executeRuleOperations(currentData, operations, esClient, {
-        isNew,
-      })) as RuleAttachmentData;
+      const { data: updatedData, queryColumns } = await executeRuleOperations(
+        currentData,
+        operations,
+        esClient,
+        { isNew }
+      );
+
+      // Pre-assign a stable rule ID so that action policies can reference it
+      // via `rule.id` before the rule is persisted. The UI will use this ID
+      // when calling PUT /api/alerting/v2/rules/{id} (upsert).
+      if (isNew && !updatedData.id) {
+        updatedData.id = uuidv4();
+      }
 
       const attachmentInput = {
         id: attachmentId,
@@ -98,11 +109,13 @@ Use operations[] to:
               version: attachment.current_version ?? 1,
               ruleAttachment: {
                 id: attachment.id,
+                ruleId: updatedData.id,
                 name: updatedData.metadata?.name,
                 kind: updatedData.kind,
                 schedule: updatedData.schedule,
                 query: updatedData.evaluation?.query?.base,
               },
+              ...(queryColumns ? { queryColumns } : {}),
             },
           },
         ],
@@ -110,9 +123,9 @@ Use operations[] to:
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       if (error instanceof RuleOperationValidationError) {
-        logger.warn(`manage_rule tool: invalid input — ${message}`);
+        logger.debug(`manage_rule tool: invalid input — ${message}`);
       } else {
-        logger.error(`Error in manage_rule tool: ${message}`);
+        logger.warn(`Error in manage_rule tool: ${message}`);
       }
       return {
         results: [

@@ -12,15 +12,21 @@ import { WorkflowDestinationLink } from '../workflow_destination_link';
 
 interface Props {
   destination: ActionPolicyDestination;
+  name?: string;
+  isDraft?: boolean;
 }
 
-export const DestinationRow = ({ destination }: Props) => {
+export const DestinationRow = ({ destination, name, isDraft }: Props) => {
   if (destination.type === 'workflow') {
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiBadge color="hollow" iconType="workflow">
-            <WorkflowDestinationLink id={destination.id} />
+            <WorkflowDestinationLink
+              id={destination.id}
+              name={name}
+              isDraft={isDraft}
+            />
           </EuiBadge>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -12,43 +12,32 @@ import {
   type AttachmentRenderProps,
   type CanvasRenderCallbacks,
 } from '@kbn/agent-builder-browser/attachments';
-import type { ApplicationStart, IBasePath, NotificationsStart } from '@kbn/core/public';
-import { Context } from '@kbn/core-di-browser';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
-import type { Container } from 'inversify';
 import { RuleProvider } from '../../components/rule_details/rule_context';
 import { RuleHeaderDescription } from '../../components/rule_details/rule_header_description';
 import { RuleSidebar } from '../../components/rule_details/sidebar/rule_sidebar';
 import { paths } from '../../constants';
-import type { RuleApiResponse, RulesApi } from '../../services/rules_api';
+import { RulesApi, type RuleApiResponse } from '../../services/rules_api';
 import type { RuleAttachment } from './rule_attachment_definition';
 
 export interface RuleCanvasContentProps
   extends AttachmentRenderProps<RuleAttachment>,
-    CanvasRenderCallbacks {
-  rulesApi: RulesApi;
-  application: ApplicationStart;
-  basePath: IBasePath;
-  notifications: NotificationsStart;
-  container: Container;
-}
+    CanvasRenderCallbacks {}
 
 export const RuleCanvasContent = ({
   attachment,
   registerActionButtons,
   updateOrigin,
-  rulesApi,
-  application,
-  basePath,
-  notifications,
-  container,
 }: RuleCanvasContentProps) => {
-  const { data, origin } = attachment;
-  const isPersisted = hasOrigin(origin);
+  const rulesApi = useService(RulesApi);
+  const application = useService(CoreStart('application'));
+  const basePath = useService(CoreStart('http')).basePath;
+  const notifications = useService(CoreStart('notifications'));
 
-  // Start false so the first effect registers [],
-  // matching the canvas_flyout clear effect. The second cycle (mounted=true)
-  // registers the real buttons after the parent clear has already fired.
+  const { data, origin: savedObjectId } = attachment;
+  const isPersisted = isPersistedSavedObject(savedObjectId);
+
   const [mounted, setMounted] = React.useState(false);
 
   useEffect(() => {
@@ -70,11 +59,11 @@ export const RuleCanvasContent = ({
           icon: 'save',
           type: ActionButtonType.PRIMARY,
           handler: async () => {
-            const created = await rulesApi.createRule({
+            await rulesApi.upsertRule(data.id!, {
               kind: data.kind,
               ...buildRuleCommonPayload(data),
             });
-            await updateOrigin(created.id);
+            await updateOrigin(data.id!);
             notifications.toasts.addSuccess(
               i18n.translate('xpack.alertingV2.ruleAttachment.createdSuccess', {
                 defaultMessage: 'Rule "{name}" created',
@@ -87,7 +76,7 @@ export const RuleCanvasContent = ({
       return;
     }
 
-    const ruleId = origin;
+    const ruleId = savedObjectId;
 
     registerActionButtons([
       {
@@ -97,7 +86,8 @@ export const RuleCanvasContent = ({
         icon: 'save',
         type: ActionButtonType.PRIMARY,
         handler: async () => {
-          await rulesApi.updateRule(ruleId, {
+          await rulesApi.upsertRule(ruleId, {
+            kind: data.kind,
             ...buildRuleCommonPayload(data),
           });
           notifications.toasts.addSuccess(
@@ -122,7 +112,7 @@ export const RuleCanvasContent = ({
   }, [
     mounted,
     isPersisted,
-    origin,
+    savedObjectId,
     registerActionButtons,
     updateOrigin,
     rulesApi,
@@ -133,20 +123,18 @@ export const RuleCanvasContent = ({
   ]);
 
   return (
-    <Context.Provider value={container}>
-      <RuleProvider rule={data as unknown as RuleApiResponse}>
-        <EuiPanel paddingSize="l" hasShadow={false}>
-          <RuleHeaderDescription />
-          <EuiSpacer size="m" />
-          <RuleSidebar />
-        </EuiPanel>
-      </RuleProvider>
-    </Context.Provider>
+    <RuleProvider rule={data as unknown as RuleApiResponse}>
+      <EuiPanel paddingSize="l" hasShadow={false}>
+        <RuleHeaderDescription />
+        <EuiSpacer size="m" />
+        <RuleSidebar />
+      </EuiPanel>
+    </RuleProvider>
   );
 };
 
-const hasOrigin = (origin: string | undefined): origin is string => {
-  return typeof origin === 'string';
+const isPersistedSavedObject = (savedObjectId: string | undefined): savedObjectId is string => {
+  return Boolean(savedObjectId);
 };
 
 const buildRuleCommonPayload = (data: RuleAttachment['data']) => ({

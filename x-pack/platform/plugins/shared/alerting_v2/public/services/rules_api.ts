@@ -60,6 +60,12 @@ export class RulesApi {
     });
   }
 
+  public async upsertRule(id: string, payload: CreateRuleData) {
+    return this.http.put<RuleResponse>(`${ALERTING_V2_RULE_API_PATH}/${id}`, {
+      body: JSON.stringify(payload),
+    });
+  }
+
   public async getRule(id: string) {
     return this.http.get<RuleResponse>(`${ALERTING_V2_RULE_API_PATH}/${id}`);
   }

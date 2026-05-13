@@ -72,7 +72,6 @@ export const module = new ContainerModule(({ bind }) => {
       const agentBuilderToken = PluginStart('agentBuilder');
       if (experimentalEnabled && diContainer.isBound(agentBuilderToken)) {
         const agentBuilder = diContainer.get(agentBuilderToken) as AgentBuilderPluginStart;
-        const rulesApi = diContainer.get(RulesApi);
         import(
           /* webpackChunkName: "alerting_v2_rule_attachment" */
           './agent_builder/attachments/rule_attachment_definition'
@@ -80,14 +79,26 @@ export const module = new ContainerModule(({ bind }) => {
           agentBuilder.attachments.addAttachmentType(
             ruleAttachmentType,
             createRuleAttachmentDefinition({
-              rulesApi,
-              application: coreStart.application,
-              basePath: coreStart.http.basePath,
-              notifications: coreStart.notifications,
               container: diContainer,
             })
           );
         });
+        import(
+          /* webpackChunkName: "alerting_v2_action_policy_attachment" */
+          './agent_builder/attachments/action_policy_attachment_definition'
+        ).then(
+          ({
+            createActionPolicyAttachmentDefinition,
+            ACTION_POLICY_ATTACHMENT_TYPE: actionPolicyAttachmentType,
+          }) => {
+            agentBuilder.attachments.addAttachmentType(
+              actionPolicyAttachmentType,
+              createActionPolicyAttachmentDefinition({
+                container: diContainer,
+              })
+            );
+          }
+        );
       }
     });
 

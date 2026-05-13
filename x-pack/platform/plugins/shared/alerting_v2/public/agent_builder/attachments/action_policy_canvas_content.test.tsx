@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { RuleCanvasContent } from './rule_canvas_content';
+import { ActionPolicyCanvasContent } from './action_policy_canvas_content';
 
-const mockUpsertRule = jest.fn().mockResolvedValue({});
+const mockUpsertActionPolicy = jest.fn().mockResolvedValue({});
 const mockNavigateToUrl = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockPrepend = (path: string) => `/base${path}`;
@@ -26,48 +26,44 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'notifications') {
       return { toasts: { addSuccess: mockAddSuccess } };
     }
-    return { upsertRule: mockUpsertRule };
+    return { upsertActionPolicy: mockUpsertActionPolicy };
   },
 }));
 
-jest.mock('../../components/rule_details/rule_context', () => ({
-  RuleProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+jest.mock('../../components/action_policy/details_flyout/action_policy_definition_list', () => ({
+  ActionPolicyDefinitionList: (props: Record<string, unknown>) => (
+    <div data-test-subj="mockDefinitionList">{JSON.stringify(Object.keys(props))}</div>
+  ),
 }));
 
-jest.mock('../../components/rule_details/rule_header_description', () => ({
-  RuleHeaderDescription: () => <div data-test-subj="mockRuleHeaderDescription" />,
-}));
-
-jest.mock('../../components/rule_details/sidebar/rule_sidebar', () => ({
-  RuleSidebar: () => <div data-test-subj="mockRuleSidebar" />,
-}));
-
-jest.mock('../../services/rules_api', () => ({
-  RulesApi: Symbol('RulesApi'),
+jest.mock('../../services/action_policies_api', () => ({
+  ActionPoliciesApi: Symbol('ActionPoliciesApi'),
 }));
 
 const createAttachment = (
-  overrides: { origin?: string; enabled?: boolean; dataId?: string } = {}
+  overrides: { origin?: string; enabled?: boolean; dataId?: string; version?: string } = {}
 ) => ({
   id: 'att-1',
-  type: 'rule' as const,
+  type: 'action_policy' as const,
   versions: [],
   current_version: 1,
   origin: overrides.origin,
   data: {
-    kind: 'signal' as const,
-    metadata: { name: 'My Rule', tags: ['tag1'], description: 'A test rule' },
-    schedule: { every: '5m' },
-    time_field: '@timestamp',
-    evaluation: { query: { kql: 'host.name: *' } },
-    state_transition: null,
+    name: 'My Policy',
+    description: 'A test policy',
+    destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
+    matcher: 'rule.id: "abc"',
+    groupingMode: 'per_episode' as const,
+    throttle: { strategy: 'on_status_change' as const },
+    tags: ['tag1'],
     enabled: overrides.enabled,
     ...(overrides.dataId ? { id: overrides.dataId } : {}),
+    ...(overrides.version ? { version: overrides.version } : {}),
   } as any,
 });
 
 const renderCanvas = (
-  overrides: { origin?: string; enabled?: boolean; dataId?: string } = {},
+  overrides: { origin?: string; enabled?: boolean; dataId?: string; version?: string } = {},
   callbackOverrides: Record<string, jest.Mock> = {}
 ) => {
   const attachment = createAttachment(overrides);
@@ -76,7 +72,7 @@ const renderCanvas = (
   const closeCanvas = jest.fn();
 
   const result = render(
-    <RuleCanvasContent
+    <ActionPolicyCanvasContent
       attachment={attachment}
       isSidebar={false}
       registerActionButtons={callbackOverrides.registerActionButtons ?? registerActionButtons}
@@ -98,37 +94,37 @@ const getLastRegisteredButtons = (registerActionButtons: jest.Mock) => {
   return calls[calls.length - 1][0] as Array<{ label: string; handler: () => unknown }>;
 };
 
-describe('RuleCanvasContent', () => {
+describe('ActionPolicyCanvasContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('rendering', () => {
-    it('renders the RuleSidebar', () => {
-      const { getByTestId } = renderCanvas();
-      expect(getByTestId('mockRuleSidebar')).toBeDefined();
+    it('renders the policy name', () => {
+      const { getByText } = renderCanvas();
+      expect(getByText('My Policy')).toBeDefined();
     });
 
-    it('renders the RuleHeaderDescription', () => {
+    it('renders the ActionPolicyDefinitionList', () => {
       const { getByTestId } = renderCanvas();
-      expect(getByTestId('mockRuleHeaderDescription')).toBeDefined();
+      expect(getByTestId('mockDefinitionList')).toBeDefined();
     });
   });
 
-  describe('action buttons for proposed (unsaved) rules', () => {
-    it('registers Create rule button', () => {
+  describe('action buttons for proposed (unsaved) policies', () => {
+    it('registers Create policy button', () => {
       const { registerActionButtons } = renderCanvas();
       const buttons = getLastRegisteredButtons(registerActionButtons);
-      expect(buttons.find((b) => b.label === 'Create rule')).toBeDefined();
+      expect(buttons.find((b) => b.label === 'Create policy')).toBeDefined();
     });
 
-    it('does not register Update Rule button', () => {
+    it('does not register Update Policy button', () => {
       const { registerActionButtons } = renderCanvas();
       const buttons = getLastRegisteredButtons(registerActionButtons);
-      expect(buttons.find((b) => b.label === 'Update Rule')).toBeUndefined();
+      expect(buttons.find((b) => b.label === 'Update Policy')).toBeUndefined();
     });
 
-    it('Create rule handler calls upsertRule and updateOrigin', async () => {
+    it('Create policy handler calls upsertActionPolicy and updateOrigin', async () => {
       const updateOrigin = jest.fn().mockResolvedValue(undefined);
       const { registerActionButtons } = renderCanvas(
         { dataId: 'pre-assigned-id' },
@@ -136,60 +132,66 @@ describe('RuleCanvasContent', () => {
       );
 
       const buttons = getLastRegisteredButtons(registerActionButtons);
-      const createButton = buttons.find((b) => b.label === 'Create rule')!;
+      const createButton = buttons.find((b) => b.label === 'Create policy')!;
       await createButton.handler();
 
-      expect(mockUpsertRule).toHaveBeenCalledWith(
+      expect(mockUpsertActionPolicy).toHaveBeenCalledWith(
         'pre-assigned-id',
-        expect.objectContaining({ kind: 'signal' })
+        expect.objectContaining({ name: 'My Policy' })
       );
       expect(updateOrigin).toHaveBeenCalledWith('pre-assigned-id');
       expect(mockAddSuccess).toHaveBeenCalled();
     });
   });
 
-  describe('action buttons for persisted (saved) rules', () => {
-    it('registers Update Rule button', () => {
-      const { registerActionButtons } = renderCanvas({ origin: 'rule-123' });
+  describe('action buttons for persisted (saved) policies', () => {
+    it('registers Update Policy button', () => {
+      const { registerActionButtons } = renderCanvas({ origin: 'policy-123', version: 'v1' });
       const buttons = getLastRegisteredButtons(registerActionButtons);
-      expect(buttons.find((b) => b.label === 'Update Rule')).toBeDefined();
+      expect(buttons.find((b) => b.label === 'Update Policy')).toBeDefined();
     });
 
-    it('registers View in Rules button', () => {
-      const { registerActionButtons } = renderCanvas({ origin: 'rule-123' });
+    it('registers View in Policies button', () => {
+      const { registerActionButtons } = renderCanvas({ origin: 'policy-123', version: 'v1' });
       const buttons = getLastRegisteredButtons(registerActionButtons);
-      expect(buttons.find((b) => b.label === 'View in Rules')).toBeDefined();
+      expect(buttons.find((b) => b.label === 'View in Policies')).toBeDefined();
     });
 
-    it('does not register Create rule button', () => {
-      const { registerActionButtons } = renderCanvas({ origin: 'rule-123' });
+    it('does not register Create policy button', () => {
+      const { registerActionButtons } = renderCanvas({ origin: 'policy-123', version: 'v1' });
       const buttons = getLastRegisteredButtons(registerActionButtons);
-      expect(buttons.find((b) => b.label === 'Create rule')).toBeUndefined();
+      expect(buttons.find((b) => b.label === 'Create policy')).toBeUndefined();
     });
 
-    it('Update Rule handler calls upsertRule with the origin id', async () => {
-      const { registerActionButtons, attachment } = renderCanvas({ origin: 'rule-123' });
+    it('Update Policy handler calls upsertActionPolicy with the origin id', async () => {
+      const { registerActionButtons } = renderCanvas({
+        origin: 'policy-123',
+        version: 'v1',
+      });
 
       const buttons = getLastRegisteredButtons(registerActionButtons);
-      const updateButton = buttons.find((b) => b.label === 'Update Rule')!;
+      const updateButton = buttons.find((b) => b.label === 'Update Policy')!;
       await updateButton.handler();
 
-      expect(mockUpsertRule).toHaveBeenCalledWith(
-        'rule-123',
-        expect.objectContaining({ metadata: attachment.data.metadata })
+      expect(mockUpsertActionPolicy).toHaveBeenCalledWith(
+        'policy-123',
+        expect.objectContaining({ name: 'My Policy' })
       );
       expect(mockAddSuccess).toHaveBeenCalled();
     });
 
-    it('View in Rules handler navigates to the rule detail page', () => {
-      const { registerActionButtons } = renderCanvas({ origin: 'rule-123' });
+    it('View in Policies handler navigates to the policy edit page', () => {
+      const { registerActionButtons } = renderCanvas({
+        origin: 'policy-123',
+        version: 'v1',
+      });
 
       const buttons = getLastRegisteredButtons(registerActionButtons);
-      const viewButton = buttons.find((b) => b.label === 'View in Rules')!;
+      const viewButton = buttons.find((b) => b.label === 'View in Policies')!;
       viewButton.handler();
 
       expect(mockNavigateToUrl).toHaveBeenCalledWith(
-        expect.stringContaining('rule-123')
+        expect.stringContaining('policy-123')
       );
     });
   });

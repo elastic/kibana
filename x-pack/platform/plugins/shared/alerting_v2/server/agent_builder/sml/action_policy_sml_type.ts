@@ -1,0 +1,105 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import type { SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
+import {
+  ACTION_POLICY_ATTACHMENT_TYPE,
+  ACTION_POLICY_SML_TYPE,
+  actionPolicyAttachmentDataSchema,
+} from '@kbn/alerting-v2-schemas';
+import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
+import { ACTION_POLICY_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import type { ActionPolicySavedObjectAttributes } from '../../saved_objects';
+import type { GetScopedActionPolicyClient } from '../scoped_action_policy_client_factory';
+
+interface CreateActionPolicySmlTypeOptions {
+  getScopedActionPolicyClient: GetScopedActionPolicyClient;
+  getInternalRepository: () => ISavedObjectsRepository;
+}
+
+export const createActionPolicySmlType = ({
+  getScopedActionPolicyClient,
+  getInternalRepository,
+}: CreateActionPolicySmlTypeOptions): SmlTypeDefinition => ({
+  id: ACTION_POLICY_SML_TYPE,
+  fetchFrequency: () => '1m',
+
+  async *list() {
+    const repository = getInternalRepository();
+    const finder = repository.createPointInTimeFinder<ActionPolicySavedObjectAttributes>({
+      type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+      perPage: 1000,
+      namespaces: ['*'],
+      fields: [],
+    });
+
+    try {
+      for await (const response of finder.find()) {
+        yield response.saved_objects.map((so) => ({
+          id: so.id,
+          updatedAt: so.updated_at ?? new Date().toISOString(),
+          spaces: so.namespaces ?? ['default'],
+        }));
+      }
+    } finally {
+      await finder.close();
+    }
+  },
+
+  getSmlData: async (originId, context) => {
+    try {
+      const repository = getInternalRepository();
+      const so = await repository.get<ActionPolicySavedObjectAttributes>(
+        ACTION_POLICY_SAVED_OBJECT_TYPE,
+        originId
+      );
+      const attrs = so.attributes;
+      const name = attrs?.name ?? originId;
+      const description = attrs?.description ?? '';
+      const tags = attrs?.tags?.join(', ') ?? '';
+      const matcher = attrs?.matcher ?? '';
+      const groupingMode = attrs?.groupingMode ?? '';
+      const destinations = attrs?.destinations
+        ?.map((d) => `${d.type}:${d.id}`)
+        .join(', ') ?? '';
+
+      const contentParts = [name, description, matcher, groupingMode, destinations, tags].filter(
+        Boolean
+      );
+
+      return {
+        chunks: [
+          {
+            type: ACTION_POLICY_SML_TYPE,
+            title: name,
+            content: contentParts.join('\n'),
+            permissions: [`api:${ALERTING_V2_API_PRIVILEGES.actionPolicies.read}`],
+          },
+        ],
+      };
+    } catch (error) {
+      context.logger.warn(
+        `SML action policy: failed to get data for '${originId}': ${(error as Error).message}`
+      );
+      return undefined;
+    }
+  },
+
+  toAttachment: async (item, context) => {
+    try {
+      const client = getScopedActionPolicyClient(context.request);
+      const policy = await client.getActionPolicy({ id: item.origin_id });
+      return {
+        type: ACTION_POLICY_ATTACHMENT_TYPE,
+        data: actionPolicyAttachmentDataSchema.parse(policy),
+      };
+    } catch {
+      return undefined;
+    }
+  },
+});

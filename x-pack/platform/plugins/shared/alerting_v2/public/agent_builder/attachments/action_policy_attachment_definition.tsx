@@ -11,34 +11,40 @@ import {
   type AttachmentUIDefinition,
 } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import { RULE_ATTACHMENT_TYPE, type RuleAttachmentData } from '@kbn/alerting-v2-schemas';
+import {
+  ACTION_POLICY_ATTACHMENT_TYPE,
+  type ActionPolicyAttachmentData,
+} from '@kbn/alerting-v2-schemas';
 
-export { RULE_ATTACHMENT_TYPE };
+export { ACTION_POLICY_ATTACHMENT_TYPE };
 import { Context } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import type { Container } from 'inversify';
-import { RuleInlineContent } from './rule_inline_content';
-import { RuleCanvasContent } from './rule_canvas_content';
+import { ActionPolicyInlineContent } from './action_policy_inline_content';
+import { ActionPolicyCanvasContent } from './action_policy_canvas_content';
 
-export type RuleAttachment = Attachment<typeof RULE_ATTACHMENT_TYPE, RuleAttachmentData>;
+export type ActionPolicyAttachment = Attachment<
+  typeof ACTION_POLICY_ATTACHMENT_TYPE,
+  ActionPolicyAttachmentData
+>;
 
-interface RuleAttachmentDefinitionServices {
+interface ActionPolicyAttachmentDefinitionServices {
   container: Container;
 }
 
-export const createRuleAttachmentDefinition = ({
+export const createActionPolicyAttachmentDefinition = ({
   container,
-}: RuleAttachmentDefinitionServices): AttachmentUIDefinition<RuleAttachment> => ({
-  getLabel: (attachment) => attachment.data.metadata.name,
-  getIcon: () => 'bell',
+}: ActionPolicyAttachmentDefinitionServices): AttachmentUIDefinition<ActionPolicyAttachment> => ({
+  getLabel: (attachment) => attachment.data.name ?? 'Action Policy',
+  getIcon: () => 'pagesSelect',
 
   canvasWidth: '40vw',
 
-  renderInlineContent: (props) => <RuleInlineContent {...props} />,
+  renderInlineContent: (props) => <ActionPolicyInlineContent {...props} />,
 
   renderCanvasContent: (props, callbacks) => (
     <Context.Provider value={container}>
-      <RuleCanvasContent {...props} {...callbacks} />
+      <ActionPolicyCanvasContent {...props} {...callbacks} />
     </Context.Provider>
   ),
 
@@ -46,7 +52,7 @@ export const createRuleAttachmentDefinition = ({
     if (isCanvas) return [];
     return [
       {
-        label: i18n.translate('xpack.alertingV2.ruleAttachment.preview', {
+        label: i18n.translate('xpack.alertingV2.actionPolicyAttachment.preview', {
           defaultMessage: 'Preview',
         }),
         icon: 'eye',
