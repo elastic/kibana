@@ -261,7 +261,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       {
         perPage: SO_SEARCH_LIMIT,
         page: 1,
-        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageInfo.name} and ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.namespace:"${currentNamespace}"`,
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:"${packageInfo.name}" and ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.namespace:"${currentNamespace}"`,
       },
       {
         enabled:

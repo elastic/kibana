@@ -13,7 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIcon,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -79,6 +79,12 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
         return;
       }
       if (draftNamespaces.includes(newNamespace)) {
+        setValidationError(
+          i18n.translate(
+            'xpack.fleet.integrations.settings.namespaceCustomization.duplicateError',
+            { defaultMessage: 'Namespace is already in the list.' }
+          )
+        );
         return;
       }
 
@@ -104,6 +110,25 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
       setDraftNamespaces([...draftNamespaces, newNamespace]);
     },
     [draftNamespaces, prefixesForCheck, allowedNamespacePrefixes]
+  );
+
+  // EUI silently ignores Enter when the typed value matches a selected option, so
+  // onCreateOption never fires for duplicates. Detect them in real-time via onSearchChange.
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      const trimmed = value.trim();
+      if (trimmed && draftNamespaces.includes(trimmed)) {
+        setValidationError(
+          i18n.translate(
+            'xpack.fleet.integrations.settings.namespaceCustomization.duplicateError',
+            { defaultMessage: 'Namespace is already in the list.' }
+          )
+        );
+      } else {
+        setValidationError(undefined);
+      }
+    },
+    [draftNamespaces]
   );
 
   const handleChange = useCallback((next: Array<EuiComboBoxOptionOption<string>>) => {
@@ -166,6 +191,7 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
           selectedOptions={selectedOptions}
           onCreateOption={handleCreate}
           onChange={handleChange}
+          onSearchChange={handleSearchChange}
         />
       </EuiFormRow>
       {(isDirty || isSubmitting) && (
@@ -179,7 +205,7 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
             >
               <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="clock" aria-hidden={true} />
+                  <EuiLoadingSpinner size="s" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <FormattedMessage
