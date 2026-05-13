@@ -50,9 +50,9 @@ function sortByColumnType(a: DatatableColumn, b: DatatableColumn): number {
 
 /**
  * Remove duplicate visualization columns by columnId.
- * Stale duplicates can appear from drag-and-drop or copy operations that didn't clean up.
+ * There is one datatable panel with 2 columns with the same columnId.
  */
-function deduplicateColumns(columns: DatatableColumn[]): DatatableColumn[] {
+function dedupColumnsByColumnId(columns: DatatableColumn[]): DatatableColumn[] {
   const seen = new Set<string>();
   return columns.filter((col) => {
     if (seen.has(col.columnId)) return false;
@@ -316,9 +316,15 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
     },
   };
 
+  const deduplicateColumns: NormalizerConfig<DatatableAttributes> = {
+    original: (attrs) => {
+      attrs.state.visualization.columns = dedupColumnsByColumnId(attrs.state.visualization.columns);
+      return attrs;
+    },
+  };
+
   const sortColumns: NormalizerConfig<DatatableAttributes> = {
     original: (attrs) => {
-      attrs.state.visualization.columns = deduplicateColumns(attrs.state.visualization.columns);
       attrs.state.visualization.columns.sort(sortByColumnType);
       return attrs;
     },
@@ -330,9 +336,10 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
       columnRemapping,
     })),
     alignColumnTypes,
-    alignLegacyTypes,
     alignId,
+    deduplicateColumns,
     sortColumns,
+    alignLegacyTypes,
     getPaletteNormalizer<DatatableAttributes>('state.visualization.columns.*.palette'),
   ])(attributes);
 };
