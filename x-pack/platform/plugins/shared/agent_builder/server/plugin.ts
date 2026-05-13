@@ -6,9 +6,11 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { AgentBuilderConfig } from './config';
 import { registerTracingExporter } from './tracing/register_tracing';
 import { ServiceManager } from './services';
@@ -36,6 +38,7 @@ import { createModelProviderFactory } from './services/execution/runner/model_pr
 import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
+import { installAgentBuilderDashboard } from './dashboard';
 import { registerInferenceFeatures } from './inference_features';
 
 export class AgentBuilderPlugin
@@ -248,6 +251,22 @@ export class AgentBuilderPlugin
     if (this.home) {
       registerSampleData(this.home, this.logger);
     }
+
+    const installTokenUsageDashboardIfExperimentalEnabled = async () => {
+      const internalRepository = coreStart.savedObjects.createInternalRepository();
+      const internalClient = new SavedObjectsClient(internalRepository);
+      const uiSettingsClient = coreStart.uiSettings.asScopedToClient(internalClient);
+      const isEnabled = await uiSettingsClient.get<boolean>(
+        AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+      );
+      if (!isEnabled) {
+        return;
+      }
+      await installAgentBuilderDashboard(internalClient, this.logger);
+    };
+    void installTokenUsageDashboardIfExperimentalEnabled().catch((e) => {
+      this.logger.error(`Failed to install Agent Builder token usage dashboard: ${e.message}`);
+    });
 
     const modelProviderFactory = createModelProviderFactory({
       inference,

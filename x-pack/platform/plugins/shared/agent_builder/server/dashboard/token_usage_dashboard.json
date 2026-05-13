@@ -1,0 +1,20 @@
+[
+  {
+    "type": "dashboard",
+    "id": "agent-builder-token-usage",
+    "managed": true,
+    "coreMigrationVersion": "8.8.0",
+    "typeMigrationVersion": "10.3.0",
+    "attributes": {
+      "description": "",
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
+      },
+      "optionsJSON": "{\"hidePanelTitles\":false,\"hidePanelBorders\":false,\"useMargins\":true,\"autoApplyFilters\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false}",
+      "panelsJSON": "[{\"type\":\"vis\",\"embeddableConfig\":{\"attributes\":{\"visualizationType\":\"lnsXY\",\"title\":\"Total Token Usage Over Time by Model and Provider\",\"state\":{\"datasourceStates\":{\"textBased\":{\"layers\":{\"line_0\":{\"index\":\"traces-agent_builder.otel-default-@timestamp\",\"query\":{\"esql\":\"FROM traces-agent_builder.otel-default\\n| WHERE name == \\\"ChatComplete\\\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend\\n| EVAL `Input Tokens` = TO_LONG(attributes.gen_ai.usage.input_tokens)\\n| EVAL `Output Tokens` = TO_LONG(attributes.gen_ai.usage.output_tokens)\\n| EVAL `Total Tokens` = COALESCE(`Input Tokens`, 0::LONG) + COALESCE(`Output Tokens`, 0::LONG)\\n| STATS `Total Token Usage` = SUM(`Total Tokens`) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend), `Model` = attributes.gen_ai.request.model, `Provider` = attributes.gen_ai.system\\n| SORT `Time`\"},\"timeField\":\"@timestamp\",\"columns\":[{\"columnId\":\"line_x\",\"fieldName\":\"Time\",\"params\":{\"format\":{\"id\":\"custom\",\"params\":{\"decimals\":2,\"pattern\":\"YYYY-MM-DD HH:mm\"}}},\"meta\":{\"type\":\"date\"}},{\"columnId\":\"line_y_0\",\"fieldName\":\"Total Token Usage\",\"params\":{\"format\":{\"id\":\"number\",\"params\":{\"decimals\":0,\"compact\":true}}},\"meta\":{\"type\":\"number\"}},{\"columnId\":\"line_breakdown\",\"fieldName\":\"Model\",\"meta\":{\"type\":\"string\"}}],\"ignoreGlobalFilters\":false}}}},\"internalReferences\":[{\"type\":\"index-pattern\",\"id\":\"traces-agent_builder.otel-default-@timestamp\",\"name\":\"indexpattern-datasource-layer-line_0\"}],\"visualization\":{\"preferredSeriesType\":\"line\",\"legend\":{\"isVisible\":true,\"position\":\"right\"},\"axisTitlesVisibilitySettings\":{\"x\":false,\"yLeft\":false,\"yRight\":true},\"layers\":[{\"layerId\":\"line_0\",\"accessors\":[\"line_y_0\"],\"layerType\":\"data\",\"seriesType\":\"line\",\"xAccessor\":\"line_x\",\"yConfig\":[{\"axisMode\":\"left\",\"forAccessor\":\"line_y_0\"}],\"splitAccessors\":[\"line_breakdown\"]}]},\"adHocDataViews\":{\"traces-agent_builder.otel-default-@timestamp\":{\"id\":\"traces-agent_builder.otel-default-@timestamp\",\"title\":\"traces-agent_builder.otel-default\",\"name\":\"traces-agent_builder.otel-default\",\"timeFieldName\":\"@timestamp\",\"sourceFilters\":[],\"fieldFormats\":{},\"runtimeFieldMap\":{},\"fieldAttrs\":{},\"allowNoIndex\":false,\"allowHidden\":false,\"type\":\"esql\"}},\"query\":{\"esql\":\"FROM traces-agent_builder.otel-default\\n| WHERE name == \\\"ChatComplete\\\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend\\n| EVAL `Input Tokens` = TO_LONG(attributes.gen_ai.usage.input_tokens)\\n| EVAL `Output Tokens` = TO_LONG(attributes.gen_ai.usage.output_tokens)\\n| EVAL `Total Tokens` = COALESCE(`Input Tokens`, 0::LONG) + COALESCE(`Output Tokens`, 0::LONG)\\n| STATS `Total Token Usage` = SUM(`Total Tokens`) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend), `Model` = attributes.gen_ai.request.model, `Provider` = attributes.gen_ai.system\\n| SORT `Time`\"},\"filters\":[]},\"references\":[],\"description\":\"\"},\"drilldowns\":[]},\"panelIndex\":\"61ef7f80-ef06-464b-8bcb-2cd055ce2e6a\",\"gridData\":{\"y\":0,\"x\":0,\"w\":24,\"h\":15,\"i\":\"61ef7f80-ef06-464b-8bcb-2cd055ce2e6a\"}}]",
+      "timeRestore": false,
+      "title": "[Elastic] Agent Builder Overview"
+    },
+    "references": []
+  }
+]
