@@ -21,7 +21,11 @@ import type { LensCellValueAction, RowHeightMode } from '@kbn/lens-common';
 import type { FormatFactory } from '../../../../common/types';
 import type { DatatableColumnConfig } from '../../../../common/expressions';
 import { nonNullable } from '../../../utils';
-import { buildColumnsMetaLookup } from './helpers';
+import {
+  buildColumnsMetaLookup,
+  getQueryTimeComputedColumnFilterMessage,
+  isEsqlQueryTimeComputedColumn,
+} from './helpers';
 
 const hasFilterCellAction = (actions: LensCellValueAction[]) => {
   return actions.some(({ type }) => type === FILTER_CELL_ACTION_TYPE);
@@ -88,12 +92,19 @@ export const createGridColumns = (
       // compatible cell actions from actions registry
       const compatibleCellActions = columnCellValueActions?.[colIndex] ?? [];
 
-      if (
-        !hasFilterCellAction(compatibleCellActions) &&
-        filterable &&
+      const queryTimeInteractionReason = isEsqlQueryTimeComputedColumn(table, field)
+        ? getQueryTimeComputedColumnFilterMessage()
+        : undefined;
+
+      const shouldIncludeBuiltInFilters =
+        (!hasFilterCellAction(compatibleCellActions) || Boolean(queryTimeInteractionReason)) &&
         handleFilterClick &&
-        !columnArgs?.oneClickFilter
-      ) {
+        !columnArgs?.oneClickFilter;
+
+      const showBuiltInFilterActions =
+        shouldIncludeBuiltInFilters && (filterable || Boolean(queryTimeInteractionReason));
+
+      if (showBuiltInFilterActions) {
         cellActions.push(
           ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
             const { rowValue, contentsIsDefined, cellContent } = getContentData({
@@ -125,11 +136,16 @@ export const createGridColumns = (
               <Component
                 aria-label={filterForAriaLabel}
                 data-test-subj="lensDatatableFilterFor"
+                disabled={Boolean(queryTimeInteractionReason)}
                 onClick={() => {
+                  if (queryTimeInteractionReason) {
+                    return;
+                  }
                   handleFilterClick(field, rowValue, colIndex, rowIndex);
                   closeCellPopover?.();
                 }}
                 iconType="plusCircle"
+                title={queryTimeInteractionReason}
               >
                 {filterForText}
               </Component>
@@ -165,11 +181,16 @@ export const createGridColumns = (
               <Component
                 data-test-subj="lensDatatableFilterOut"
                 aria-label={filterOutAriaLabel}
+                disabled={Boolean(queryTimeInteractionReason)}
                 onClick={() => {
+                  if (queryTimeInteractionReason) {
+                    return;
+                  }
                   handleFilterClick(field, rowValue, colIndex, rowIndex, true);
                   closeCellPopover?.();
                 }}
                 iconType="minusCircle"
+                title={queryTimeInteractionReason}
               >
                 {filterOutText}
               </Component>

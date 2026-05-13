@@ -24,6 +24,7 @@ import type {
   EuiDataGridColumn,
   EuiDataGridSorting,
   EuiDataGridStyle,
+  EuiDataGridCellPopoverElementProps,
 } from '@elastic/eui';
 import { EuiButtonIcon, EuiDataGrid, useEuiTheme } from '@elastic/eui';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
@@ -74,6 +75,7 @@ import {
 import type { CellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 import { getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 import { getColumnAlignment, hasIncompatibleColorConfig, getColorByValuePalette } from '../utils';
+import { DatatableCellPopover } from './datatable_cell_popover';
 
 export const DataContext = React.createContext<DataContextType>({});
 
@@ -602,6 +604,12 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     ];
   }, [euiTheme.colors.backgroundFilledText, euiTheme.size.m, props.args.showRowNumbers]);
 
+  const renderCellPopover = useMemo(() => {
+    return (popoverProps: EuiDataGridCellPopoverElementProps) => (
+      <DatatableCellPopover {...popoverProps} table={sortedTable} />
+    );
+  }, [sortedTable]);
+
   if (isEmpty) {
     return (
       <div
@@ -668,6 +676,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           toolbarVisibility={false}
           renderFooterCellValue={renderSummaryRow}
           ref={dataGridRef}
+          renderCellPopover={renderCellPopover}
         />
       </DataContext.Provider>
     </div>
