@@ -30,10 +30,7 @@ export class GetCompositeSLO {
     private esClient: ElasticsearchClient
   ) {}
 
-  public async executeBatch(
-    ids: string[],
-    spaceId: string
-  ): Promise<BatchGetCompositeSLOResponse> {
+  public async executeBatch(ids: string[], spaceId: string): Promise<BatchGetCompositeSLOResponse> {
     const persistedSummaryById = await this.loadPersistedSummaries(ids, spaceId);
     const results = await Promise.all(ids.map((id) => this.executeOne(id, persistedSummaryById)));
     return batchGetCompositeSLOResponseSchema.encode(results);

@@ -6,11 +6,7 @@
  */
 
 import { getCompositeSLOParamsSchema } from '@kbn/slo-schema';
-import {
-  DefaultBurnRatesClient,
-  DefaultSummaryClient,
-  GetCompositeSLO,
-} from '../../../services';
+import { DefaultBurnRatesClient, DefaultSummaryClient, GetCompositeSLO } from '../../../services';
 import { createSloServerRoute } from '../../create_slo_server_route';
 import { assertPlatinumLicense } from '../utils/assert_platinum_license';
 
