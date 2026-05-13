@@ -7,11 +7,9 @@
 
 import type { DashboardAttachmentData } from '@kbn/dashboard-agent-common';
 import { z } from '@kbn/zod/v4';
-import { addMarkdownOperation } from './add_markdown';
-import { addPanelsFromAttachmentsOperation } from './add_panels_from_attachments';
+import { addPanelsOperation } from './add_panels';
 import { addSectionOperation } from './add_section';
-import { createVisualizationPanelsOperation } from './create_visualization_panels';
-import { editVisualizationPanelsOperation } from './edit_visualization_panels';
+import { editPanelsOperation } from './edit_panels';
 import { removePanelsOperation } from './remove_panels';
 import { removeSectionOperation } from './remove_section';
 import { setMetadataOperation } from './set_metadata';
@@ -21,10 +19,8 @@ import { resolveVisualizationCreationRequests } from './visualization_creation';
 
 const operationDefinitions = [
   setMetadataOperation,
-  addMarkdownOperation,
-  addPanelsFromAttachmentsOperation,
-  createVisualizationPanelsOperation,
-  editVisualizationPanelsOperation,
+  addPanelsOperation,
+  editPanelsOperation,
   updatePanelLayoutsOperation,
   addSectionOperation,
   removeSectionOperation,
