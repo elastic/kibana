@@ -29,7 +29,7 @@ const compositeRollingTimeWindowSchema = z.object({
 
 const compositeSloMemberSchema = z.object({
   sloId: compositeSloIdSchema,
-  weight: z.number(),
+  weight: z.number().int().positive(),
   instanceId: z.string().optional(),
 });
 

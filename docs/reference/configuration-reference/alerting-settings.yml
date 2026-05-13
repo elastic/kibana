@@ -191,7 +191,7 @@ groups:
         default: "25000000 (25MB)"
         applies_to:
           stack: ga 9.3
-          ech: ga
+          ech: unavailable
           self: ga
 
       - setting: xpack.actions.email.services.ses.host
@@ -372,7 +372,7 @@ groups:
       - setting: xpack.actions.ssl.verificationMode
         id: action-config-verification-mode
         description: |
-          Controls the verification for the server certificate that Elastic Maps Server receives when making an outbound SSL/TLS connection for actions. Valid values are `full`, `certificate`, and `none`. Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification.
+          Controls the verification for the server certificate that Kibana receives when making an outbound SSL/TLS connection for actions. Valid values are `full`, `certificate`, and `none`. Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification.
 
           [Equivalent Kibana setting](/reference/configuration-reference/general-settings.md#elasticsearch-ssl-verificationmode)
 
@@ -1327,3 +1327,33 @@ groups:
                       - id: '.server-log'
                         max: 5
           ```
+
+      - setting: xpack.alerting.maxEphemeralActionsPerAlert
+        description: |
+          The maximum number of actions that a single alert instance could run using ephemeral tasks (in-memory, non-persisted).
+        datatype: int
+        applies_to:
+          - "stack: ga 7.15, removed 9.0"
+          - "ech: ga"
+          - "self: ga"
+        deprecation_details: "Ignored since 9.0. Ephemeral tasks were removed. If you are upgrading your cluster or using the current version, you must remove this setting from your `kibana.yml` file to avoid configuration errors."
+
+      - setting: xpack.alerting.defaultRuleTaskTimeout
+        description: |
+          The default timeout for rule tasks. Accepts a duration string such as `5m` or `1h`.
+        datatype: string
+        applies_to:
+          - "stack: ga 7.16, removed 8.2"
+          - "ech: ga"
+          - "self: ga"
+        deprecation_details: "Removed in 8.2. Use `xpack.alerting.rules.run.timeout` instead."
+
+      - setting: xpack.eventLog.logEntries
+        description: |
+          Set to `true` to log event log document entries in the Kibana server log. Useful for debugging but can be verbose in production.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga 7.7
+          ech: ga
+          self: ga
