@@ -32,7 +32,6 @@ import type { CreateAlertsIndexResponse } from './detection_engine/index_managem
 import type { DeleteAlertsIndexResponse } from './detection_engine/index_management/delete_index/delete_index.gen';
 import type { ReadAlertsIndexResponse } from './detection_engine/index_management/read_index/read_index.gen';
 import type { ReadPrivilegesResponse } from './detection_engine/index_management/read_privileges/read_privileges.gen';
-import type { BootstrapPrebuiltRulesResponse } from './detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import type { InstallPrebuiltRulesAndTimelinesResponse } from './detection_engine/prebuilt_rules/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route.gen';
 import type { ReadPrebuiltRulesAndTimelinesStatusResponse } from './detection_engine/prebuilt_rules/read_prebuilt_rules_and_timelines_status/read_prebuilt_rules_and_timelines_status_route.gen';
 import type {
@@ -657,21 +656,6 @@ is added to its existing source labels instead.
         },
         method: 'POST',
         body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Ensures that the packages needed for prebuilt detection rules to work are installed and up to date
-   */
-  async bootstrapPrebuiltRules() {
-    this.log.info(`${new Date().toISOString()} Calling API BootstrapPrebuiltRules`);
-    return this.kbnClient
-      .request<BootstrapPrebuiltRulesResponse>({
-        path: '/internal/detection_engine/prebuilt_rules/_bootstrap',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }

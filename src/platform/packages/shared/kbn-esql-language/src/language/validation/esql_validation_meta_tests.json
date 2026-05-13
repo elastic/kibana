@@ -134,6 +134,11 @@
       "userDefined": false
     },
     {
+      "name": "flattenedField",
+      "type": "flattened",
+      "userDefined": false
+    },
+    {
       "name": "any#Char$Field",
       "type": "double",
       "userDefined": false
