@@ -72,7 +72,7 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
               defaultMessage: 'Pause {total, plural, one {replication} other {replications}}',
               values: { total: patterns.length },
             }),
-            icon: <EuiIcon type="pause" />,
+            icon: <EuiIcon type="pause" aria-hidden={true} />,
             onClick: () => {
               pauseAutoFollowPattern(patterns.map(({ name }) => name));
               closePopoverViaAction();
@@ -83,7 +83,7 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
               defaultMessage: 'Resume {total, plural, one {replication} other {replications}}',
               values: { total: patterns.length },
             }),
-            icon: <EuiIcon type="play" />,
+            icon: <EuiIcon type="play" aria-hidden={true} />,
             onClick: () => {
               resumeAutoFollowPattern(patterns.map(({ name }) => name));
               closePopoverViaAction();
@@ -98,7 +98,7 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
           name: i18n.translate('xpack.crossClusterReplication.editAutoFollowPatternButtonLabel', {
             defaultMessage: 'Edit pattern',
           }),
-          icon: <EuiIcon type="pencil" />,
+          icon: <EuiIcon type="pencil" aria-hidden={true} />,
           onClick: () => {
             routing.navigate(routing.getAutoFollowPatternPath(patterns[0].name));
           },
@@ -114,7 +114,7 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
           total: patterns.length,
         },
       }),
-      icon: <EuiIcon type="trash" />,
+      icon: <EuiIcon type="trash" aria-hidden={true} />,
       onClick: () => {
         deleteAutoFollowPattern(patterns.map(({ name }) => name));
         closePopoverViaAction();

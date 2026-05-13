@@ -84,18 +84,6 @@ to the relevant index, causing it to be deleted after 30 days, and removes other
       .send(props.body as object);
   },
   /**
-   * Ensures that the packages needed for prebuilt detection rules to work are installed and up to date
-   */
-  bootstrapPrebuiltRules(kibanaSpace: string = 'default') {
-    return supertest
-      .post(
-        getRouteUrlForSpace('/internal/detection_engine/prebuilt_rules/_bootstrap', kibanaSpace)
-      )
-      .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-  },
-  /**
       * Creates an index for Elastic Security alerts. Calling this API is not
 required for the detection engine to function properly. You can create
 rules and alerts without calling this API.
