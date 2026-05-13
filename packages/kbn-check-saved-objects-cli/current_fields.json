@@ -109,10 +109,12 @@
     "groupBy",
     "groupingMode",
     "name",
+    "ruleId",
     "snoozedUntil",
     "tags",
     "throttle",
     "throttle.strategy",
+    "type",
     "updatedAt",
     "updatedBy",
     "updatedByUsername"
