@@ -5,7 +5,7 @@ Query metrics data in Elasticsearch using the `TS` source command and time serie
 ## TS Source Command
 
 `TS` replaces `FROM` when querying time series data streams and indices.
-It groups samples by time series before aggregating, which enables functions which enables functions like `RATE`, `AVG_OVER_TIME`, and `LAST_OVER_TIME`.
+It groups samples by time series before aggregating, which enables functions like `RATE`, `AVG_OVER_TIME`, and `LAST_OVER_TIME`.
 
 ```esql
 TS index_pattern [METADATA fields]
@@ -13,8 +13,11 @@ TS index_pattern [METADATA fields]
 
 **Key differences from `FROM`:**
 
-- `FROM` treats every document as an independent row. `TS` adds that time series context: it groups and aggregates data points by time series before any other aggregation run
-- A `TS | STATS` query normally has two aggregation phases. The inner phase reduces samples inside each time series; the outer phase groups and combines those per-series results.
+- `FROM` treats every document as an independent row. That is right for events, but metric aggregations often need the time series that each row belongs to.
+- `TS` adds that time series context: it groups and aggregates data points by time series before any other aggregation runs, and enables functions like `RATE`, `AVG_OVER_TIME`, and LAST_OVER_TIME.
+- A `TS | STATS` query normally has two aggregation phases - The inner phase reduces samples inside each time series; the outer phase groups and combines those per-series results.
+- The default inner aggregation is `LAST_OVER_TIME`, which is why `TS metrics | STATS AVG(cpu_usage)` and `FROM metrics | STATS AVG(cpu_usage)` can return different numbers.
+- Use `TS` to query a time series data stream. Use `FROM` for events and raw document inspection.
 
 ## Inner/Outer aggregation phases
 
@@ -29,7 +32,7 @@ In `SUM(RATE(request_count)) BY datacenter, TBUCKET(5m)`:
 - `SUM(...)` is the **outer** aggregation - It combines time series within the same `datacenter` and bucket.
 - `TBUCKET(5m)` defines the bucket boundaries (equivalent to `BUCKET(@timestamp, 5m)`).
 
-
+Notes:
 - The default inner aggregation is `LAST_OVER_TIME` (which is why `TS metrics | STATS AVG(cpu_usage)` and `FROM metrics | STATS AVG(cpu_usage)` can return different numbers)
 - The outer aggregation is optional.
 
