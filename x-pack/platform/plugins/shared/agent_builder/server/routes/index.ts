@@ -7,6 +7,7 @@
 
 import type { RouteDependencies } from './types';
 import { registerToolsRoutes } from './tools';
+import { registerNlToESQLRoute } from './generate_esql';
 import { registerInternalToolsRoutes } from './internal/tools';
 import { registerInternalSkillsRoutes } from './internal/skills';
 import { registerInternalConversationRoutes } from './internal/conversations';
@@ -26,6 +27,7 @@ import { registerInternalExecutionRoutes } from './internal/executions';
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
   registerToolsRoutes(dependencies);
+  registerNlToESQLRoute(dependencies);
   registerInternalToolsRoutes(dependencies);
   registerInternalSkillsRoutes(dependencies);
   registerInternalConversationRoutes(dependencies);
