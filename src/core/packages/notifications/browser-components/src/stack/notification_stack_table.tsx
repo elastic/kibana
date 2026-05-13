@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { ContentListTable } from '@kbn/content-list-table';
 import type { ContentListItem } from '@kbn/content-list-provider';
+import { ContentListTable } from '@kbn/content-list-table';
 import { i18n } from '@kbn/i18n';
-import { UnreadIndicatorCell } from './columns/unread_indicator_cell';
-import { TypeCell } from './columns/type_cell';
-import { SpaceCell } from './columns/space_cell';
-import { ReceivedCell } from './columns/received_cell';
-import type { NotificationStackItem } from './types';
+import React from 'react';
 import { PinnedIndicatorCell } from './columns/pinned_indicator_cell';
+import { ReceivedCell } from './columns/received_cell';
+import { SpaceCell } from './columns/space_cell';
+import { TypeCell } from './columns/type_cell';
+import { UnreadIndicatorCell } from './columns/unread_indicator_cell';
+import type { NotificationStackItem } from './types';
 
 const { Column, Action } = ContentListTable;
 
@@ -91,7 +91,7 @@ export const NotificationStackTable = ({
         minWidth="36px"
         maxWidth="36px"
         render={(item: ContentListItem) => (
-          <PinnedIndicatorCell item={item as NotificationStackItem} onTogglePin={onTogglePin} />
+          <PinnedIndicatorCell item={item} onTogglePin={onTogglePin} />
         )}
       />
       <Column.Name showDescription />
