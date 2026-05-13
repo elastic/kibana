@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { UseFormReturn } from 'react-hook-form';
@@ -85,9 +85,12 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     (newValue) => form.setValue('definition', newValue),
     templateId
   );
-  const hasChanges =
-    computeChangedLines(normalizeYamlString(initialValue), normalizeYamlString(yamlValue)).length >
-    0;
+  const hasChanges = useMemo(
+    () =>
+      computeChangedLines(normalizeYamlString(initialValue), normalizeYamlString(yamlValue))
+        .length > 0,
+    [initialValue, yamlValue]
+  );
 
   const yamlValueRef = useRef(yamlValue);
   yamlValueRef.current = yamlValue;
