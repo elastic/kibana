@@ -514,6 +514,7 @@ export const createNavigationTree = ({
                 { link: 'management:rules', breadcrumbStatus: 'hidden' },
                 { link: 'management:episodes', breadcrumbStatus: 'hidden' },
                 { link: 'management:action_policies', breadcrumbStatus: 'hidden' },
+                { link: 'management:execution_history', breadcrumbStatus: 'hidden' },
               ],
             },
             showAlertingV2
