@@ -11,7 +11,6 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsWorkflow, WorkflowDetailDto } from '../..';
 import { WORKFLOW_INDEX_NAME } from '../constants';
-
 export interface WorkflowRepositoryOptions {
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -57,22 +56,22 @@ export class WorkflowRepository {
         return null;
       }
 
-      // Transform the stored document to EsWorkflow format
-      const source = document._source as EsWorkflow;
+      // Map index _source → EsWorkflow (read created_at / updated_at; EsWorkflow uses createdAt / lastUpdatedAt).
+      const source = document._source as Record<string, unknown>;
       return {
         id: workflowId,
-        name: source.name,
-        description: source.description,
-        enabled: source.enabled,
-        tags: source.tags || [],
-        valid: source.valid,
-        createdAt: new Date(source.createdAt),
-        createdBy: source.createdBy,
-        lastUpdatedAt: new Date(source.lastUpdatedAt),
-        lastUpdatedBy: source.lastUpdatedBy,
-        definition: source.definition,
-        deleted_at: source.deleted_at ? new Date(source.deleted_at) : null,
-        yaml: source.yaml,
+        name: source.name as string,
+        description: source.description as string | undefined,
+        enabled: source.enabled as boolean,
+        tags: (source.tags as string[] | undefined) || [],
+        valid: source.valid as boolean,
+        createdAt: new Date(source.created_at as string),
+        createdBy: source.createdBy as string,
+        lastUpdatedAt: new Date(source.updated_at as string),
+        lastUpdatedBy: source.lastUpdatedBy as string,
+        definition: source.definition as EsWorkflow['definition'],
+        deleted_at: source.deleted_at ? new Date(source.deleted_at as string) : null,
+        yaml: source.yaml as string,
       };
     } catch (error) {
       if (error.statusCode === 404) {
@@ -198,8 +197,8 @@ export class WorkflowRepository {
       'createdBy',
       'lastUpdatedBy',
       'valid',
-      'createdAt',
-      'lastUpdatedAt',
+      'created_at',
+      'updated_at',
     ];
 
     const pitResponse = await this.options.esClient.openPointInTime({
@@ -265,8 +264,8 @@ export class WorkflowRepository {
         createdBy: source.createdBy as string,
         lastUpdatedBy: source.lastUpdatedBy as string,
         valid: source.valid as boolean,
-        createdAt: source.createdAt as string,
-        lastUpdatedAt: source.lastUpdatedAt as string,
+        createdAt: source.created_at as string,
+        lastUpdatedAt: source.updated_at as string,
       }));
     } finally {
       try {

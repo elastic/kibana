@@ -8,6 +8,7 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -20,20 +21,23 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiSwitch,
+  EuiTab,
+  EuiTabs,
+  EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
-  useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
+import { createRemoteMonitorDetailUrl } from '../../../../utils/remote/remote_monitor_urls';
 import type { ClientPluginsStart } from '../../../../../../plugin';
 import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
 import { useEditMonitorLocator } from '../../../../hooks/use_edit_monitor_locator';
-import type { LocationsStatus } from '../../../../hooks/use_status_by_location';
 import { useMonitorHealthColor } from '../../hooks/use_monitor_health_color';
 import {
   getMonitorAction,
@@ -47,16 +51,17 @@ import {
 } from '../../../../state';
 import { MonitorDetailsPanel } from '../../../common/components/monitor_details_panel';
 import { ErrorCallout } from '../../../common/components/error_callout';
+import { useOverviewStatusState } from '../../hooks/use_overview_status';
 import { useMonitorAttachmentConfigWithMonitor } from '../../../monitor_details/hooks/use_monitor_attachment_config';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../../common/constants';
 import type { OverviewStatusMetaData } from '../types';
 import { ConfigKey } from '../types';
 import { ActionsPopover } from './actions_popover';
 import type { FlyoutParamProps } from './types';
-import {
-  quietFetchOverviewStatusAction,
-  selectOverviewStatus,
-} from '../../../../state/overview_status';
+import { quietFetchOverviewStatusAction } from '../../../../state/overview_status';
 import { MonitorStatusPanel } from '../../../monitor_details/monitor_status/monitor_status_panel';
+import { FlyoutLastTestRun, FlyoutSummaryKPIs } from './flyout_panels';
+import { RemoteMonitorDetailsPanel } from './remote_monitor_details_panel';
 
 interface Props {
   configId: string;
@@ -91,10 +96,12 @@ function DetailFlyoutDurationChart({
   id,
   location,
   allLocations,
+  remoteName,
 }: {
   id: string;
   location: string;
   allLocations: Array<{ id: string; label: string }>;
+  remoteName?: string;
 }) {
   const { euiTheme } = useEuiTheme();
   const [showAllLocations, setShowAllLocations] = useState(false);
@@ -161,6 +168,11 @@ function DetailFlyoutDurationChart({
     ];
   }, [showAllLocations, allLocations, id, location, euiTheme.colors.vis]);
 
+  const dataTypesIndexPatterns = useMemo(
+    () => (remoteName ? { synthetics: `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` } : undefined),
+    [remoteName]
+  );
+
   return (
     <EuiPageSection bottomBorder="extended">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -188,48 +200,8 @@ function DetailFlyoutDurationChart({
         legendIsVisible={true}
         legendPosition="bottom"
         attributes={attributes}
+        dataTypesIndexPatterns={dataTypesIndexPatterns}
       />
-    </EuiPageSection>
-  );
-}
-
-function LocationScopeBadges({
-  locations,
-  currentLocation,
-  setCurrentLocation,
-}: {
-  locations: LocationsStatus;
-  currentLocation: string;
-  setCurrentLocation: (location: string, locationId: string) => void;
-}) {
-  return (
-    <EuiPageSection bottomBorder="extended" paddingSize="s">
-      <EuiTitle size="xxxs">
-        <h4>{LOCATION_LABEL_TEXT}</h4>
-      </EuiTitle>
-      <EuiSpacer size="xs" />
-      <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-        {locations.map((loc) => {
-          const isSelected = loc.label === currentLocation;
-          return (
-            <EuiFlexItem grow={false} key={loc.id}>
-              <EuiButton
-                size="s"
-                color={isSelected ? 'primary' : 'text'}
-                fill={isSelected}
-                onClick={() => {
-                  if (!isSelected) setCurrentLocation(loc.label, loc.id);
-                }}
-                data-test-subj={`syntheticsLocationButton-${loc.id}`}
-              >
-                <EuiHealth color={loc.color}>
-                  {loc.label} · {loc.status}
-                </EuiHealth>
-              </EuiButton>
-            </EuiFlexItem>
-          );
-        })}
-      </EuiFlexGroup>
     </EuiPageSection>
   );
 }
@@ -244,9 +216,21 @@ export function LoadingState() {
   );
 }
 
-function DetailFlyoutStatusHistory({ configId, location }: { configId: string; location: string }) {
+function DetailFlyoutStatusHistory({
+  configId,
+  location,
+  remoteName,
+}: {
+  configId: string;
+  location: string;
+  remoteName?: string;
+}) {
   return (
     <EuiPageSection bottomBorder="extended">
+      <EuiTitle size="xs">
+        <h3>{DOWNTIME_HISTORY_LABEL}</h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
       <MonitorStatusPanel
         from="now-24h"
         to="now"
@@ -254,6 +238,7 @@ function DetailFlyoutStatusHistory({ configId, location }: { configId: string; l
         periodCaption={LAST_24H_TEXT}
         monitorId={configId}
         locationLabel={location}
+        remoteName={remoteName}
       />
     </EuiPageSection>
   );
@@ -262,7 +247,7 @@ function DetailFlyoutStatusHistory({ configId, location }: { configId: string; l
 export function MonitorDetailFlyout(props: Props) {
   const { id, configId, onLocationChange, locationId, spaces } = props;
 
-  const { status: overviewStatus } = useSelector(selectOverviewStatus);
+  const { status: overviewStatus } = useOverviewStatusState();
 
   const monitor: OverviewStatusMetaData | undefined = useMemo(() => {
     if (!overviewStatus) return undefined;
@@ -275,9 +260,11 @@ export function MonitorDetailFlyout(props: Props) {
     return allConfigs.find((ov) => ov.configId === configId);
   }, [overviewStatus, configId]);
 
+  const isRemote = Boolean(monitor?.remote);
+
   const setLocation = useCallback(
-    (location: string, locationIdT: string) =>
-      onLocationChange({ id, configId, location, locationId: locationIdT, spaces }),
+    (locId: string, locLabel: string) =>
+      onLocationChange({ id, configId, location: locLabel, locationId: locId, spaces }),
     [onLocationChange, id, configId, spaces]
   );
 
@@ -288,6 +275,20 @@ export function MonitorDetailFlyout(props: Props) {
   });
 
   const editLink = useEditMonitorLocator({ configId, spaces });
+
+  const { space } = useKibanaSpace();
+
+  const remoteMonitorUrl = useMemo(
+    () =>
+      monitor
+        ? createRemoteMonitorDetailUrl({
+            monitor,
+            locationId,
+            spaceId: space?.id,
+          })
+        : undefined,
+    [monitor, locationId, space?.id]
+  );
 
   const dispatch = useDispatch();
 
@@ -304,34 +305,26 @@ export function MonitorDetailFlyout(props: Props) {
 
   const upsertSuccess = upsertStatus?.status === 'success';
 
-  const { space } = useKibanaSpace();
-
+  // Skip fetching the local saved object for remote monitors — they have no
+  // local SO and the request would 404.
   useEffect(() => {
+    if (isRemote) return;
     dispatch(
       getMonitorAction.get({
         monitorId: configId,
         ...(space && spaces?.length && !spaces?.includes(space?.id) ? { spaceId: spaces[0] } : {}),
       })
     );
-  }, [configId, dispatch, space, space?.id, spaces, upsertSuccess]);
+  }, [configId, dispatch, isRemote, space, space?.id, spaces, upsertSuccess]);
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
-  const monitorDetail = useMonitorDetail(configId, props.location);
+  const monitorDetail = useMonitorDetail(configId, props.location, monitor?.remote?.remoteName);
+
   const getColor = useMonitorHealthColor();
-  const locations: LocationsStatus = useMemo(
-    () =>
-      (monitor?.locations ?? []).map((loc) => ({
-        id: loc.id,
-        label: loc.label,
-        status: loc.status,
-        color: getColor(loc.status),
-      })),
-    [monitor?.locations, getColor]
-  );
 
   useMonitorAttachmentConfigWithMonitor(
-    monitorObject
+    !isRemote && monitorObject
       ? {
           ...monitorObject,
           [ConfigKey.CONFIG_ID]: monitorObject[ConfigKey.CONFIG_ID] ?? configId,
@@ -340,20 +333,30 @@ export function MonitorDetailFlyout(props: Props) {
     isLoading
   );
 
-  const isOverlay = useIsWithinMaxBreakpoint('xl');
+  const [isPush, setIsPush] = useState(() => localStorage.getItem(FLYOUT_MODE_KEY) === 'push');
 
-  const displayName = monitorObject?.[ConfigKey.NAME] ?? monitor?.name ?? configId;
+  const toggleFlyoutMode = useCallback(() => {
+    setIsPush((prev) => {
+      const next = !prev;
+      localStorage.setItem(FLYOUT_MODE_KEY, next ? 'push' : 'overlay');
+      return next;
+    });
+  }, []);
+
+  const displayName = monitor?.name ?? monitorObject?.[ConfigKey.NAME] ?? configId;
+
+  const [selectedTab, setSelectedTab] = useState<FlyoutTabId>('overview');
 
   return (
     <EuiFlyout
       size="m"
       maxWidth={1000}
-      type={isOverlay ? 'overlay' : 'push'}
+      type={isPush ? 'push' : 'overlay'}
       onClose={props.onClose}
       paddingSize="none"
       resizable
     >
-      {error && !isLoading && <ErrorCallout {...error} />}
+      {error && !isLoading && !isRemote && <ErrorCallout {...error} />}
       <EuiFlyoutHeader hasBorder>
         <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
           <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
@@ -363,6 +366,20 @@ export function MonitorDetailFlyout(props: Props) {
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={isPush ? UNDOCK_LABEL : DOCK_LABEL}
+                display="block"
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="syntheticsFlyoutToggleMode"
+                  iconType={isPush ? 'menuLeft' : 'menuRight'}
+                  aria-label={isPush ? UNDOCK_LABEL : DOCK_LABEL}
+                  onClick={toggleFlyoutMode}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
               {monitor && (
                 <ActionsPopover
                   isPopoverOpen={isActionsPopoverOpen}
@@ -370,45 +387,121 @@ export function MonitorDetailFlyout(props: Props) {
                   monitor={monitor}
                   setIsPopoverOpen={setIsActionsPopoverOpen}
                   position="default"
-                  iconHasPanel={false}
-                  iconSize="xs"
                   locationId={locationId}
+                  renderButton={(onClick) => (
+                    <EuiButtonEmpty
+                      data-test-subj="syntheticsFlyoutActionsButton"
+                      size="s"
+                      iconType="arrowDown"
+                      iconSide="right"
+                      onClick={onClick}
+                    >
+                      {ACTIONS_LABEL}
+                    </EuiButtonEmpty>
+                  )}
                 />
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
+          {monitor && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiText size="xs" color="subdued">
+                {SELECT_LOCATION_LABEL}
+              </EuiText>
+              <EuiSpacer size="xs" />
+              <EuiFlexGroup gutterSize="m" wrap responsive={false}>
+                {monitor.locations.map((loc) => {
+                  const isSelected = loc.label === props.location;
+                  return (
+                    <EuiFlexItem grow={false} key={loc.id}>
+                      <EuiHealth
+                        color={getColor(loc.status)}
+                        css={{
+                          fontSize: 13,
+                          fontWeight: isSelected ? 600 : 400,
+                          cursor: isSelected ? 'default' : 'pointer',
+                          textDecoration: isSelected ? 'underline' : 'none',
+                        }}
+                        onClick={!isSelected ? () => setLocation(loc.id, loc.label) : undefined}
+                        data-test-subj={`syntheticsFlyoutLocationHealth-${loc.id}`}
+                      >
+                        {loc.label}
+                      </EuiHealth>
+                    </EuiFlexItem>
+                  );
+                })}
+              </EuiFlexGroup>
+            </>
+          )}
         </EuiPanel>
+        <EuiTabs css={{ paddingLeft: 24, paddingRight: 24 }}>
+          {FLYOUT_TABS.map(({ id: tabId, label }) => (
+            <EuiTab
+              key={tabId}
+              isSelected={tabId === selectedTab}
+              onClick={() => setSelectedTab(tabId)}
+              data-test-subj={`syntheticsFlyoutTab-${tabId}`}
+            >
+              {label}
+            </EuiTab>
+          ))}
+        </EuiTabs>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <LocationScopeBadges
-          locations={locations}
-          currentLocation={props.location}
-          setCurrentLocation={setLocation}
-        />
-        <DetailFlyoutDurationChart
-          id={id}
-          location={props.location}
-          allLocations={monitor?.locations ?? []}
-        />
-        <DetailFlyoutStatusHistory configId={configId} location={props.location} />
-        {monitorObject ? (
-          <MonitorDetailsPanel
-            hasBorder={false}
-            latestPing={monitorDetail.data}
-            configId={configId}
-            monitor={{
-              ...monitorObject,
-              id,
-            }}
-            loading={Boolean(isLoading)}
-          />
-        ) : (
-          <EuiFlexGroup justifyContent="center" css={{ padding: 24 }}>
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="l" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+      <EuiFlyoutBody css={{ '.euiFlyoutBody__overflowContent': { padding: 16 } }}>
+        {selectedTab === 'overview' && (
+          <>
+            <FlyoutLastTestRun
+              latestPing={monitorDetail.data}
+              loading={Boolean(monitorDetail.loading)}
+              configId={configId}
+              locationId={locationId}
+              remoteName={monitor?.remote?.remoteName}
+            />
+            <FlyoutSummaryKPIs
+              monitorId={id}
+              locationLabel={props.location}
+              from="now-30d"
+              to="now"
+              dateLabel={LAST_30_DAYS_LABEL}
+              remoteName={monitor?.remote?.remoteName}
+            />
+            <DetailFlyoutStatusHistory
+              configId={configId}
+              location={props.location}
+              remoteName={monitor?.remote?.remoteName}
+            />
+          </>
         )}
+        {selectedTab === 'performance' && (
+          <DetailFlyoutDurationChart
+            id={id}
+            location={props.location}
+            allLocations={monitor?.locations ?? []}
+            remoteName={monitor?.remote?.remoteName}
+          />
+        )}
+        {selectedTab === 'details' &&
+          (isRemote && monitor ? (
+            <RemoteMonitorDetailsPanel monitor={monitor} latestPing={monitorDetail.data} />
+          ) : monitorObject ? (
+            <MonitorDetailsPanel
+              hasBorder={false}
+              latestPing={monitorDetail.data}
+              configId={configId}
+              monitor={{
+                ...monitorObject,
+                id,
+              }}
+              loading={Boolean(isLoading)}
+            />
+          ) : (
+            <EuiFlexGroup justifyContent="center" css={{ padding: 24 }}>
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="l" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ))}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l" color="transparent">
@@ -422,30 +515,46 @@ export function MonitorDetailFlyout(props: Props) {
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem grow={false}>
+              {isRemote ? (
+                <EuiToolTip content={!remoteMonitorUrl ? REMOTE_URL_UNAVAILABLE_TEXT : undefined}>
                   <EuiButton
-                    data-test-subj="syntheticsMonitorDetailFlyoutEditButton"
-                    isDisabled={!editLink}
-                    href={editLink}
-                    iconType="pencil"
-                  >
-                    {EDIT_MONITOR_LINK_TEXT}
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    data-test-subj="syntheticsMonitorDetailFlyoutButton"
-                    isDisabled={!detailLink}
-                    href={detailLink}
-                    iconType="sortRight"
+                    data-test-subj="syntheticsMonitorDetailFlyoutViewRemoteButton"
+                    isDisabled={!remoteMonitorUrl}
+                    href={remoteMonitorUrl}
+                    target="_blank"
+                    iconType="popout"
                     iconSide="right"
                     fill
                   >
-                    {GO_TO_MONITOR_LINK_TEXT}
+                    {VIEW_ON_REMOTE_CLUSTER_TEXT}
                   </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                </EuiToolTip>
+              ) : (
+                <EuiFlexGroup gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="syntheticsMonitorDetailFlyoutEditButton"
+                      isDisabled={!editLink}
+                      href={editLink}
+                      iconType="pencil"
+                    >
+                      {EDIT_MONITOR_LINK_TEXT}
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="syntheticsMonitorDetailFlyoutButton"
+                      isDisabled={!detailLink}
+                      href={detailLink}
+                      iconType="sortRight"
+                      iconSide="right"
+                      fill
+                    >
+                      {GO_TO_MONITOR_LINK_TEXT}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
@@ -505,16 +614,20 @@ const PREVIOUS_PERIOD_SERIES_NAME = i18n.translate(
   }
 );
 
+const DOWNTIME_HISTORY_LABEL = i18n.translate('xpack.synthetics.flyout.downtimeHistoryLabel', {
+  defaultMessage: 'Downtime history',
+});
+
 const LAST_24H_TEXT = i18n.translate('xpack.synthetics.flyout.last24hCaption', {
   defaultMessage: 'Last 24 hours',
 });
 
-const CLOSE_FLYOUT_TEXT = i18n.translate('xpack.synthetics.monitorList.closeFlyoutText', {
-  defaultMessage: 'Close',
+const LAST_30_DAYS_LABEL = i18n.translate('xpack.synthetics.flyout.last30daysLabel', {
+  defaultMessage: 'Last 30 days',
 });
 
-const LOCATION_LABEL_TEXT = i18n.translate('xpack.synthetics.flyout.locationLabel', {
-  defaultMessage: 'Location',
+const CLOSE_FLYOUT_TEXT = i18n.translate('xpack.synthetics.monitorList.closeFlyoutText', {
+  defaultMessage: 'Close',
 });
 
 const EDIT_MONITOR_LINK_TEXT = i18n.translate('xpack.synthetics.monitorList.editMonitorLinkText', {
@@ -524,3 +637,59 @@ const EDIT_MONITOR_LINK_TEXT = i18n.translate('xpack.synthetics.monitorList.edit
 const GO_TO_MONITOR_LINK_TEXT = i18n.translate('xpack.synthetics.monitorList.goToMonitorLinkText', {
   defaultMessage: 'Go to monitor',
 });
+
+const ACTIONS_LABEL = i18n.translate('xpack.synthetics.flyout.actionsLabel', {
+  defaultMessage: 'Actions',
+});
+
+const SELECT_LOCATION_LABEL = i18n.translate('xpack.synthetics.flyout.selectLocationLabel', {
+  defaultMessage: 'Select location',
+});
+
+const DOCK_LABEL = i18n.translate('xpack.synthetics.flyout.dock', {
+  defaultMessage: 'Dock flyout',
+});
+
+const UNDOCK_LABEL = i18n.translate('xpack.synthetics.flyout.undock', {
+  defaultMessage: 'Undock flyout',
+});
+
+const FLYOUT_MODE_KEY = 'synthetics.flyout.mode';
+
+type FlyoutTabId = 'overview' | 'performance' | 'details';
+
+const FLYOUT_TABS: Array<{ id: FlyoutTabId; label: string }> = [
+  {
+    id: 'overview',
+    label: i18n.translate('xpack.synthetics.flyout.tab.overview', {
+      defaultMessage: 'Overview',
+    }),
+  },
+  {
+    id: 'performance',
+    label: i18n.translate('xpack.synthetics.flyout.tab.performance', {
+      defaultMessage: 'Performance',
+    }),
+  },
+  {
+    id: 'details',
+    label: i18n.translate('xpack.synthetics.flyout.tab.details', {
+      defaultMessage: 'Details',
+    }),
+  },
+];
+
+const VIEW_ON_REMOTE_CLUSTER_TEXT = i18n.translate(
+  'xpack.synthetics.monitorList.viewOnRemoteClusterText',
+  {
+    defaultMessage: 'View on remote cluster',
+  }
+);
+
+const REMOTE_URL_UNAVAILABLE_TEXT = i18n.translate(
+  'xpack.synthetics.monitorList.remoteUrlUnavailableText',
+  {
+    defaultMessage:
+      'The remote Kibana URL is not available. Ensure the remote cluster has server.publicBaseUrl configured.',
+  }
+);

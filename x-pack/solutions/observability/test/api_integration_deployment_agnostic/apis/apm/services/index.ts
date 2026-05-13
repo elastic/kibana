@@ -19,6 +19,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./get_service_node_metadata.spec.ts'));
     loadTestFile(require.resolve('./service_alerts.spec.ts'));
     loadTestFile(require.resolve('./service_slos.spec.ts'));
+    loadTestFile(require.resolve('./service_anomalies.spec.ts'));
     loadTestFile(require.resolve('./services_detailed_statistics.spec.ts'));
     loadTestFile(require.resolve('./top_services.spec.ts'));
     loadTestFile(require.resolve('./transaction_types.spec.ts'));

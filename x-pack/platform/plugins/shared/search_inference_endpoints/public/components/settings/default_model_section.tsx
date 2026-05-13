@@ -9,233 +9,200 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiComboBox,
   EuiDescribedFormGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFormRow,
-  EuiSplitPanel,
+  EuiHorizontalRule,
+  EuiPanel,
   EuiSwitch,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { InferenceConnector } from '@kbn/inference-common';
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
 import { useConnectors } from '../../hooks/use_connectors';
-import { useConnectorExists } from '../../hooks/use_connector_exists';
 import type { UseDefaultModelSettingsReturn } from '../../hooks/use_default_model_settings';
+import type { DefaultModelValidationResult } from '../../hooks/use_default_model_validation';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { EventType } from '../../analytics/constants';
+import {
+  getGlobalModelComboOptions,
+  getGlobalModelSelectedOptions,
+} from './default_model_section_combo';
 
 interface Props {
   defaultModelSettings: UseDefaultModelSettingsReturn;
+  validation: DefaultModelValidationResult;
 }
 
-const NoDefaultOption: EuiComboBoxOptionOption<string> = {
-  label: i18n.translate('xpack.searchInferenceEndpoints.settings.defaultModel.noDefault', {
-    defaultMessage: 'No default model',
-  }),
-  value: NO_DEFAULT_MODEL,
-};
+const ENABLED_LABEL = i18n.translate('xpack.searchInferenceEndpoints.settings.toggle.enabled', {
+  defaultMessage: 'Enabled',
+});
+const DISABLED_LABEL = i18n.translate('xpack.searchInferenceEndpoints.settings.toggle.disabled', {
+  defaultMessage: 'Disabled',
+});
 
-const getOptions = (connectors?: InferenceConnector[]): EuiComboBoxOptionOption<string>[] => {
-  const preconfigured =
-    connectors
-      ?.filter((c) => c.isPreconfigured)
-      .map((c) => ({ label: c.name, value: c.connectorId })) ?? [];
-
-  const custom =
-    connectors
-      ?.filter((c) => !c.isPreconfigured)
-      .map((c) => ({ label: c.name, value: c.connectorId })) ?? [];
-
-  return [
-    NoDefaultOption,
-    {
-      label: i18n.translate(
-        'xpack.searchInferenceEndpoints.settings.defaultModel.preconfiguredGroup',
-        {
-          defaultMessage: 'Pre-configured',
-        }
-      ),
-      value: 'preconfigured',
-      options: preconfigured,
-    },
-    {
-      label: i18n.translate('xpack.searchInferenceEndpoints.settings.defaultModel.customGroup', {
-        defaultMessage: 'Custom connectors',
-      }),
-      value: 'custom',
-      options: custom,
-    },
-  ];
-};
-
-const getSelectedOptions = (
-  value: string,
-  options: EuiComboBoxOptionOption<string>[]
-): EuiComboBoxOptionOption<string>[] => {
-  const findInOptions = (
-    option: EuiComboBoxOptionOption<string>
-  ): EuiComboBoxOptionOption<string>[] => {
-    if (!option.options && option.value === value) return [option];
-    if (option.options) return option.options.flatMap(findInOptions);
-    return [];
-  };
-  return options.flatMap(findInOptions);
-};
-
-export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) => {
-  const { state, setDefaultModelId, setDisallowOtherModels } = defaultModelSettings;
+export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings, validation }) => {
+  const { state, setEnableAi, setDefaultModelId, setFeatureSpecificModels } = defaultModelSettings;
   const { data: connectors, isLoading: connectorsLoading } = useConnectors();
-  const { exists: connectorExists, loading: connectorExistsLoading } = useConnectorExists(
-    state.defaultModelId
-  );
   const usageTracker = useUsageTracker();
 
-  const options = useMemo(() => getOptions(connectors), [connectors]);
+  const options = useMemo(
+    () => getGlobalModelComboOptions(connectors, state.featureSpecificModels),
+    [connectors, state.featureSpecificModels]
+  );
   const selectedOptions = useMemo(
-    () => getSelectedOptions(state.defaultModelId, options),
-    [state.defaultModelId, options]
+    () => getGlobalModelSelectedOptions(state.defaultModelId, options, state.featureSpecificModels),
+    [state.defaultModelId, options, state.featureSpecificModels]
   );
 
-  const validationErrors = useMemo(() => {
-    const errors: string[] = [];
-    if (!connectorExists && !connectorExistsLoading && state.defaultModelId !== NO_DEFAULT_MODEL) {
-      errors.push(
-        i18n.translate(
-          'xpack.searchInferenceEndpoints.settings.defaultModel.error.connectorNotExist',
-          {
-            defaultMessage:
-              'The model previously selected is not available. Please select a different option.',
-          }
-        )
-      );
-    }
-    if (state.disallowOtherModels && state.defaultModelId === NO_DEFAULT_MODEL) {
-      errors.push(
-        i18n.translate(
-          'xpack.searchInferenceEndpoints.settings.defaultModel.error.disallowNoDefault',
-          {
-            defaultMessage: 'When disallowing all other models, a default model must be selected.',
-          }
-        )
-      );
-    }
-    return errors;
-  }, [connectorExists, connectorExistsLoading, state.defaultModelId, state.disallowOtherModels]);
-
   const onChangeDefaultModel = (selected: EuiComboBoxOptionOption<string>[]) => {
-    const value = selected[0]?.value ?? NO_DEFAULT_MODEL;
     usageTracker.count(EventType.DEFAULT_MODEL_CHANGED);
-    setDefaultModelId(value);
-  };
-
-  const onChangeDisallow = (checked: boolean) => {
-    setDisallowOtherModels(checked);
+    setDefaultModelId(selected[0]?.value ?? NO_DEFAULT_MODEL);
   };
 
   return (
-    <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>
-      <EuiSplitPanel.Inner paddingSize="l">
-        <EuiDescribedFormGroup
-          data-test-subj="defaultModelSection"
-          fullWidth
-          gutterSize="xl"
-          title={
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem>
-                <EuiTitle size="xs">
-                  <h3 data-test-subj="defaultModelTitle">
-                    {i18n.translate('xpack.searchInferenceEndpoints.settings.defaultModel.title', {
-                      defaultMessage: 'Default model',
-                    })}
-                  </h3>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-          description={
-            <p>
-              {i18n.translate('xpack.searchInferenceEndpoints.settings.defaultModel.description', {
-                defaultMessage:
-                  'Choose a default model for all AI features. Individual features can override this with their own model.',
+    <EuiPanel hasBorder hasShadow={false} paddingSize="l" data-test-subj="defaultModelSection">
+      <EuiDescribedFormGroup
+        data-test-subj="aiCapabilitiesRow"
+        fullWidth
+        gutterSize="xl"
+        title={
+          <EuiTitle size="xs">
+            <h3 data-test-subj="aiCapabilitiesTitle">
+              {i18n.translate('xpack.searchInferenceEndpoints.settings.aiCapabilities.title', {
+                defaultMessage: 'AI capabilities',
               })}
-            </p>
-          }
-        >
-          <EuiFormRow
-            fullWidth
-            label={i18n.translate('xpack.searchInferenceEndpoints.settings.defaultModel.label', {
-              defaultMessage: 'Default model',
+            </h3>
+          </EuiTitle>
+        }
+        description={
+          <p>
+            {i18n.translate('xpack.searchInferenceEndpoints.settings.aiCapabilities.description', {
+              defaultMessage: 'Enables AI capabilities in various features.',
             })}
-            isInvalid={validationErrors.length > 0}
-            error={validationErrors}
-          >
-            <EuiComboBox
-              data-test-subj="defaultModelComboBox"
-              placeholder={i18n.translate(
-                'xpack.searchInferenceEndpoints.settings.defaultModel.placeholder',
-                {
-                  defaultMessage: 'Select a default model',
-                }
-              )}
-              singleSelection={{ asPlainText: true }}
-              options={options}
-              selectedOptions={selectedOptions}
-              onChange={onChangeDefaultModel}
-              isLoading={connectorsLoading}
-              isInvalid={validationErrors.length > 0}
-            />
-          </EuiFormRow>
-        </EuiDescribedFormGroup>
-      </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner
-        grow={false}
-        color={state.disallowOtherModels ? 'danger' : 'subdued'}
-        paddingSize="l"
+          </p>
+        }
       >
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="s"
-          responsive={false}
-          justifyContent="spaceBetween"
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate(
+            'xpack.searchInferenceEndpoints.settings.aiCapabilities.fieldLabel',
+            {
+              defaultMessage: 'Use AI features',
+            }
+          )}
         >
-          <EuiFlexItem grow={false}>
-            <EuiSwitch
-              id="disallowOtherModelsCheckbox"
-              data-test-subj="disallowOtherModelsCheckbox"
+          <EuiSwitch
+            data-test-subj="enableAiSwitch"
+            label={state.enableAi ? ENABLED_LABEL : DISABLED_LABEL}
+            checked={state.enableAi}
+            onChange={(e) => setEnableAi(e.target.checked)}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+
+      {state.enableAi && (
+        <>
+          <EuiHorizontalRule margin="l" />
+          <EuiDescribedFormGroup
+            data-test-subj="globalModelRow"
+            fullWidth
+            gutterSize="xl"
+            title={
+              <EuiTitle size="xs">
+                <h3 data-test-subj="globalModelTitle">
+                  {i18n.translate('xpack.searchInferenceEndpoints.settings.globalModel.title', {
+                    defaultMessage: 'Global model',
+                  })}
+                </h3>
+              </EuiTitle>
+            }
+            description={
+              <p>
+                {i18n.translate('xpack.searchInferenceEndpoints.settings.globalModel.description', {
+                  defaultMessage:
+                    'Choose a default model to use for AI features. Individual features can override this with their own model selection.',
+                })}
+              </p>
+            }
+          >
+            <EuiFormRow
+              fullWidth
               label={i18n.translate(
-                'xpack.searchInferenceEndpoints.settings.defaultModel.disallowOtherModels',
+                'xpack.searchInferenceEndpoints.settings.globalModel.fieldLabel',
                 {
-                  defaultMessage: 'Only allow the default model to be used.',
+                  defaultMessage: 'Global model',
                 }
               )}
-              checked={state.disallowOtherModels}
-              onChange={(e) => onChangeDisallow(e.target.checked)}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
-              {state.disallowOtherModels
-                ? i18n.translate(
-                    'xpack.searchInferenceEndpoints.settings.defaultModel.disallowOtherModels.description',
+              isInvalid={validation.errors.length > 0}
+              error={validation.errors as string[]}
+            >
+              <EuiComboBox
+                data-test-subj="globalModelComboBox"
+                placeholder={i18n.translate(
+                  'xpack.searchInferenceEndpoints.settings.globalModel.placeholder',
+                  {
+                    defaultMessage: 'Select a default model',
+                  }
+                )}
+                singleSelection={{ asPlainText: true }}
+                options={options}
+                selectedOptions={selectedOptions}
+                onChange={onChangeDefaultModel}
+                isLoading={connectorsLoading}
+                isInvalid={validation.errors.length > 0}
+                isClearable={false}
+              />
+            </EuiFormRow>
+          </EuiDescribedFormGroup>
+
+          <EuiHorizontalRule margin="l" />
+          <EuiDescribedFormGroup
+            data-test-subj="featureSpecificModelsRow"
+            fullWidth
+            gutterSize="xl"
+            title={
+              <EuiTitle size="xs">
+                <h3 data-test-subj="featureSpecificModelsTitle">
+                  {i18n.translate(
+                    'xpack.searchInferenceEndpoints.settings.featureSpecificModels.title',
                     {
-                      defaultMessage:
-                        'Model selection is hidden and only the default model will be used.',
-                    }
-                  )
-                : i18n.translate(
-                    'xpack.searchInferenceEndpoints.settings.defaultModel.allowOtherModels.description',
-                    {
-                      defaultMessage:
-                        'Features can allow users to select other models than the default.',
+                      defaultMessage: 'Feature specific models',
                     }
                   )}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiSplitPanel.Inner>
-    </EuiSplitPanel.Outer>
+                </h3>
+              </EuiTitle>
+            }
+            description={
+              <p>
+                {i18n.translate(
+                  'xpack.searchInferenceEndpoints.settings.featureSpecificModels.description',
+                  {
+                    defaultMessage:
+                      'Use the recommended models for features or customize per feature and choose your own set of models.',
+                  }
+                )}
+              </p>
+            }
+          >
+            <EuiFormRow
+              fullWidth
+              label={i18n.translate(
+                'xpack.searchInferenceEndpoints.settings.featureSpecificModels.fieldLabel',
+                {
+                  defaultMessage: 'Feature specific models',
+                }
+              )}
+            >
+              <EuiSwitch
+                data-test-subj="featureSpecificModelsSwitch"
+                label={state.featureSpecificModels ? ENABLED_LABEL : DISABLED_LABEL}
+                checked={state.featureSpecificModels}
+                onChange={(e) => setFeatureSpecificModels(e.target.checked)}
+              />
+            </EuiFormRow>
+          </EuiDescribedFormGroup>
+        </>
+      )}
+    </EuiPanel>
   );
 };

@@ -20,12 +20,6 @@ describe('embeddable registry', () => {
       buildEmbeddable: jest.fn(),
     } as EmbeddableFactory);
 
-  it('throws an error if requested embeddable factory type is not registered', () => {
-    expect(() => getReactEmbeddableFactory('notRegistered')).rejects.toThrow(
-      'No embeddable factory found for type: notRegistered'
-    );
-  });
-
   it('throws an error if type is not lower case', () => {
     expect(() => registerEmbeddablePublicDefinition('FOO_BAR', getTestEmbeddableFactory)).toThrow();
   });
