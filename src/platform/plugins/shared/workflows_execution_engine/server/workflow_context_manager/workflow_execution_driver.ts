@@ -27,19 +27,19 @@ export class WorkflowExecutionDriver {
   private currentNodeId: string | undefined;
   private nextNodeId: string | undefined;
   private executing = true;
-  private _currentStackFrames: StackFrame[] = [];
+  private stackFrames: StackFrame[];
 
   constructor(init: WorkflowExecutionDriverInit) {
     this.workflowGraph = init.workflowExecutionGraph;
     this.currentNodeId = init.nodeId || this.workflowGraph.topologicalOrder[0];
-    this._currentStackFrames = init.stackFrames ?? [];
+    this.stackFrames = init.stackFrames ?? [];
   }
 
   public get isExecuting(): boolean {
     return this.executing;
   }
 
-  public errorVar: Error | undefined;
+  public error: Error | undefined;
 
   /**
    * Starts the execution driver: execution and persistence loops run while `isExecuting` is true.
@@ -63,7 +63,11 @@ export class WorkflowExecutionDriver {
     // this.syncScopeStack();
   }
 
-  handleEndOfCycle(): void {
+  /**
+   * Promotes `nextNodeId` to `currentNodeId` and rebuilds the scope stack from the graph.
+   * Used after a normal `runNode` cycle and after each error-bubbling step once `navigateToNode` has set `nextNodeId`.
+   */
+  commitPendingNavigation(): void {
     this.currentNodeId = this.nextNodeId;
     this.syncScopeStack();
   }
@@ -101,7 +105,7 @@ export class WorkflowExecutionDriver {
   }
 
   public get currentStackFrames(): StackFrame[] {
-    return WorkflowScopeStack.fromStackFrames(this._currentStackFrames).stackFrames;
+    return this.stackFrames;
   }
 
   public setCurrentScopeId(scopeId?: string): void {
@@ -109,9 +113,7 @@ export class WorkflowExecutionDriver {
       return;
     }
 
-    this._currentStackFrames = WorkflowScopeStack.fromStackFrames(
-      this._currentStackFrames
-    ).enterScope({
+    this.stackFrames = WorkflowScopeStack.fromStackFrames(this.stackFrames).enterScope({
       nodeId: this.currentNode.id,
       nodeType: this.currentNode.type,
       stepId: this.currentNode.stepId,
@@ -135,7 +137,7 @@ export class WorkflowExecutionDriver {
 
     const scopesMap = new Map<string, string | undefined>();
 
-    for (const scope of this._currentStackFrames) {
+    for (const scope of this.stackFrames) {
       for (const nestedScope of scope.nestedScopes) {
         scopesMap.set(nestedScope.nodeId, nestedScope.scopeId);
       }
@@ -156,6 +158,6 @@ export class WorkflowExecutionDriver {
       });
     }
 
-    this._currentStackFrames = currentNodeScope.stackFrames;
+    this.stackFrames = currentNodeScope.stackFrames;
   }
 }

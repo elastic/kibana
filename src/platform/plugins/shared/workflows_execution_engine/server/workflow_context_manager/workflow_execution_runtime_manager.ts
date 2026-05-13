@@ -135,7 +135,7 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public getCurrentNodeScope(): StackFrame[] {
-    return [...this.executionDriver.currentStackFrames];
+    return this.executionDriver.currentStackFrames;
   }
 
   /**
@@ -236,11 +236,7 @@ export class WorkflowExecutionRuntimeManager {
 
   public setWorkflowError(error: Error | undefined): void {
     const executionError = error ? ExecutionError.fromError(error) : undefined;
-    const serializedError = executionError ? executionError.toSerializableObject() : undefined;
-
-    this.workflowExecutionState.updateWorkflowExecution({
-      error: serializedError,
-    });
+    this.workflowExecutionDriver.error = executionError;
   }
 
   public markWorkflowTimeouted(): void {
@@ -460,9 +456,11 @@ export class WorkflowExecutionRuntimeManager {
 
     if (isTerminalStatus(workflowExecution.status)) {
       workflowExecutionUpdate.status = workflowExecution.status;
-    } else if (workflowExecution.error) {
+    } else if (this.workflowExecutionDriver.error) {
       workflowExecutionUpdate.status = ExecutionStatus.FAILED;
-      workflowExecutionUpdate.error = workflowExecution.error;
+      workflowExecutionUpdate.error = ExecutionError.fromError(
+        this.workflowExecutionDriver.error
+      ).toSerializableObject();
     } else if (!this.workflowExecutionDriver.currentNode) {
       workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
     }

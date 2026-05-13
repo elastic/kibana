@@ -25,9 +25,8 @@ import type { WorkflowExecutionLoopParams } from './types';
  */
 export async function executionFlowLoop(params: WorkflowExecutionLoopParams) {
   while (params.workflowExecutionDriver.isExecuting) {
-    params.workflowExecutionDriver.handleStartOfCycle();
     await runNode(params);
-    params.workflowExecutionDriver.handleEndOfCycle();
+    params.workflowExecutionDriver.commitPendingNavigation();
     await params.workflowRuntime.saveState();
     if (!params.workflowExecutionDriver.currentNode) {
       params.workflowExecutionDriver.stop();

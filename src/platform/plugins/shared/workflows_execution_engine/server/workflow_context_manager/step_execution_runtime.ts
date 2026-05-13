@@ -104,6 +104,11 @@ export class StepExecutionRuntime {
     this.stackFrames = stepExecutionRuntimeInit.stackFrames;
   }
 
+  public get error(): ExecutionError | undefined {
+    const errorInStep = this.workflowExecutionState.getStepExecution(this.stepExecutionId)?.error;
+    return errorInStep ? new ExecutionError(errorInStep) : undefined;
+  }
+
   public stepExecutionExists(): boolean {
     return !!this.workflowExecutionState.getStepExecution(this.stepExecutionId);
   }
@@ -207,9 +212,7 @@ export class StepExecutionRuntime {
         new Date(stepExecutionUpdate.finishedAt as string).getTime() -
         new Date(startedStepExecution.startedAt).getTime();
     }
-    this.workflowExecutionState.updateWorkflowExecution({
-      error: serializedError,
-    });
+
     this.workflowExecutionState.upsertStep(stepExecutionUpdate);
     this.logStepFail(executionError);
   }

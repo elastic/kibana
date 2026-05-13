@@ -46,7 +46,14 @@ import type { StepExecutionRuntime } from '../workflow_context_manager/step_exec
  * @throws Will catch and handle errors through the workflow runtime's error handling mechanism
  */
 export async function runNode(params: WorkflowExecutionLoopParams): Promise<void> {
-  const node = params.workflowExecutionDriver.currentNode;
+  const {
+    workflowExecutionDriver,
+    stepExecutionRuntimeFactory,
+    nodesFactory,
+    workflowLogger,
+    workflowRuntime,
+  } = params;
+  const node = workflowExecutionDriver.currentNode;
   let monitorAbortController: AbortController | undefined;
   let stepExecutionRuntime: StepExecutionRuntime | undefined;
 
@@ -54,7 +61,7 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     return;
   }
 
-  if (!params.workflowExecutionDriver.isExecuting) {
+  if (!workflowExecutionDriver.isExecuting) {
     return;
   }
 
@@ -69,9 +76,9 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
   }
 
   try {
-    stepExecutionRuntime = params.stepExecutionRuntimeFactory.createStepExecutionRuntime({
+    stepExecutionRuntime = stepExecutionRuntimeFactory.createStepExecutionRuntime({
       nodeId: node.id,
-      stackFrames: params.workflowExecutionDriver.currentStackFrames,
+      stackFrames: workflowExecutionDriver.currentStackFrames,
     });
 
     /**
@@ -81,15 +88,15 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
      * covers both cancellation and other terminal states (COMPLETED, FAILED, etc.).
      */
     if (
-      params.workflowRuntime.getWorkflowExecution().status !== ExecutionStatus.RUNNING ||
-      !params.workflowExecutionDriver.isExecuting
+      workflowRuntime.getWorkflowExecution().status !== ExecutionStatus.RUNNING ||
+      !workflowExecutionDriver.isExecuting
     ) {
       nodeSpan?.setOutcome('unknown');
       nodeSpan?.end();
       return;
     }
 
-    const nodeImplementation = params.nodesFactory.create(stepExecutionRuntime);
+    const nodeImplementation = nodesFactory.create(stepExecutionRuntime);
     monitorAbortController = new AbortController();
 
     /**
@@ -118,7 +125,7 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
       try {
         await nodeImplementation.onCancel();
       } catch (onCancelError) {
-        params.workflowLogger.logError(
+        workflowLogger.logError(
           'Failed to execute onCancel hook - continuing execution',
           onCancelError instanceof Error ? onCancelError : new Error(String(onCancelError))
         );
@@ -127,7 +134,7 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
 
     nodeSpan?.setOutcome('success');
   } catch (error) {
-    params.workflowRuntime.setWorkflowError(error);
+    workflowExecutionDriver.error = error;
     nodeSpan?.setOutcome('failure');
   } finally {
     monitorAbortController?.abort();
