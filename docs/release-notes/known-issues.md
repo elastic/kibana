@@ -10,7 +10,7 @@ For Elastic Security known issues, refer to [Elastic Security known issues](docs
 
 ::::{dropdown} Fleet bulk agent actions can affect agents in other spaces
 
-Applies to: {{stack}} 8.19.0–8.19.13, 9.0.x, 9.1.x, 9.2.0–9.2.7, 9.3.0–9.3.2
+Applies to: {{stack}} 9.0.x, 9.1.x, 9.2.0–9.2.7, 9.3.0–9.3.2
 
 **Details**
 
@@ -22,7 +22,7 @@ When performing bulk agent actions across all pages, select agents individually 
 
 **Resolved**
 
-This issue is resolved in {{stack}} 8.19.14, 9.2.8, 9.3.3, 9.4.0. Versions 9.0 and 9.1 are end of life — upgrade to {{stack}} 9.2.8+ or 9.3.3+.
+This issue is resolved in {{stack}} 9.2.8, 9.3.3, 9.4.0. Versions 9.0 and 9.1 are end of life — upgrade to {{stack}} 9.2.8+ or 9.3.3+.
 
 ::::
 
