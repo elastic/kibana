@@ -19,6 +19,7 @@ import type {
 import { getTranslatePanelGraph } from '../../sub_graphs/translate_panel';
 import type { TranslatePanelGraphParams } from '../../sub_graphs/translate_panel/types';
 import { createMarkdownPanel } from '../../helpers/markdown_panel/create_markdown_panel';
+import { savedDashboardRowToDashboardPanel } from '../../sub_graphs/translate_panel/nodes/translation_result/panel_builders';
 
 export type TranslatePanelNode = ((
   params: TranslatePanelNodeParams
@@ -81,7 +82,9 @@ export const getTranslatePanelNode = (params: MigrateDashboardGraphParams): Tran
         translatedPanel = {
           index,
           title: nodeParams.parsed_panel.title,
-          data: createMarkdownPanel(message, nodeParams.parsed_panel),
+          data: savedDashboardRowToDashboardPanel(
+            createMarkdownPanel(message, nodeParams.parsed_panel)
+          ),
           comments: [generateAssistantComment(message)],
           error: err,
         };

@@ -6,6 +6,7 @@
  */
 
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
+import type { DashboardPanel } from '@kbn/dashboard-plugin/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -62,8 +63,8 @@ export interface TranslatedPanel {
   index: number;
   /* The panel title */
   title: string;
-  /* The visualization json */
-  data: object;
+  /* The translated dashboard panel */
+  data: DashboardPanel;
   /* The individual panel translation result */
   translation_result?: MigrationTranslationResult;
   /* Any comments generated during the panel translation */

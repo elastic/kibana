@@ -5,46 +5,18 @@
  * 2.0.
  */
 
-import type { ParsedPanel } from '../../../../../../../../common/siem_migrations/parsers/types';
+import type { DashboardState } from '@kbn/dashboard-plugin/server';
+import { DEFAULT_DASHBOARD_OPTIONS } from '@kbn/dashboard-plugin/common/constants';
 import { generateAssistantComment } from '../../../../../common/task/util/comments';
 import { MigrationTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
-import type { GraphNode } from '../../types';
-import dashboardTemplate from './dashboard.json';
+import type { GraphNode, TranslatedPanels } from '../../types';
 
-interface DashboardSection {
-  collapsed: boolean;
-  title: string;
-  gridData: {
-    y: number;
-    i: string;
-  };
+function buildDashboardPanels(translatedPanels: TranslatedPanels): DashboardState['panels'] {
+  return [...translatedPanels]
+    .sort((a, b) => a.index - b.index)
+    .filter((tp) => !tp.error)
+    .map((tp) => tp.data);
 }
-
-interface DashboardData {
-  attributes: {
-    title: string;
-    description: string;
-    panelsJSON: string;
-    sections?: Array<DashboardSection>;
-  };
-}
-
-const processSections = (panels: ParsedPanel[]) => {
-  const sections: Record<string, DashboardSection> = {};
-  panels.forEach((panel) => {
-    if (panel.section && !sections[panel.section.id]) {
-      sections[panel.section.id] = {
-        collapsed: true,
-        title: panel.section.title,
-        gridData: {
-          y: 16,
-          i: panel.section.id,
-        },
-      };
-    }
-  });
-  return Object.values(sections);
-};
 
 export const getAggregateDashboardNode = (): GraphNode => {
   return async (state) => {
@@ -62,23 +34,22 @@ export const getAggregateDashboardNode = (): GraphNode => {
       };
     }
 
-    // Recover original order (the translated_panels is built asynchronously so the panels are in the order they complete the translation, not the original order)
     const panels = state.translated_panels.sort((a, b) => a.index - b.index);
 
     const allErrors = panels.every((panel) => panel.error);
     if (allErrors) {
-      // The dashboard migration status will be set to 'failed' and the error stored in the document.
       throw new Error(
-        `All panels failed to translate. Aborting dashboard generation. First error: ${panels[0].error}` // Only show the first error to avoid overly long error messages
+        `All panels failed to translate. Aborting dashboard generation. First error: ${panels[0].error}`
       );
     }
 
-    // Create the dashboard object
-    const dashboardData: DashboardData = structuredClone(dashboardTemplate);
-    dashboardData.attributes.title = title;
-    dashboardData.attributes.description = description;
-    dashboardData.attributes.panelsJSON = JSON.stringify(panels.map(({ data }) => data));
-    dashboardData.attributes.sections = processSections(state.parsed_original_dashboard.panels);
+    const dashboardState: DashboardState = {
+      title,
+      description,
+      options: { ...DEFAULT_DASHBOARD_OPTIONS },
+      panels: buildDashboardPanels(panels),
+      pinned_panels: [],
+    };
 
     let translationResult: MigrationTranslationResult;
 
@@ -98,7 +69,6 @@ export const getAggregateDashboardNode = (): GraphNode => {
       }
     }
 
-    // Aggregate all comments from the individual panel translations, with a header for each panel
     const comments = panels.flatMap((panel) => {
       if (panel.comments?.length) {
         return [generateAssistantComment(`# Panel "${panel.title}"`), ...panel.comments];
@@ -110,7 +80,7 @@ export const getAggregateDashboardNode = (): GraphNode => {
       elastic_dashboard: {
         title,
         description,
-        data: JSON.stringify(dashboardData),
+        data: JSON.stringify(dashboardState),
       },
       translation_result: translationResult,
       comments,

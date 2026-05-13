@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { RequestHandlerContext, SavedObjectsClientContract } from '@kbn/core/server';
+import { create } from '@kbn/dashboard-plugin/server/api/create/create';
+import { getDashboardStateSchema } from '@kbn/dashboard-plugin/server/api/dashboard_state_schemas';
+import type { DashboardCreateRequestBody } from '@kbn/dashboard-plugin/server';
 import type {
   DashboardMigrationDashboard,
   UpdateMigrationDashboard,
@@ -44,6 +47,11 @@ interface InstallTranslatedProps {
    * The space id
    */
   spaceId: string;
+
+  /**
+   * Request handler context (used by Dashboard create API for transforms and saved objects)
+   */
+  requestContext: RequestHandlerContext;
 }
 
 export const installTranslated = async ({
@@ -52,6 +60,7 @@ export const installTranslated = async ({
   savedObjectsClient,
   securitySolutionContext,
   spaceId,
+  requestContext,
 }: InstallTranslatedProps): Promise<number> => {
   const dashboardMigrationsClient = securitySolutionContext.siemMigrations.getDashboardsClient();
 
@@ -68,7 +77,8 @@ export const installTranslated = async ({
     const { dashboardsToUpdate, errors } = await installDashboards(
       dashboardsToInstall,
       savedObjectsClient,
-      spaceId
+      spaceId,
+      requestContext
     );
     installedCount += dashboardsToUpdate.length;
     installationErrors.push(...errors);
@@ -87,7 +97,8 @@ export const installTranslated = async ({
 const installDashboards = async (
   dashboardsToInstall: DashboardMigrationDashboard[],
   savedObjectsClient: SavedObjectsClientContract,
-  spaceId: string
+  _spaceId: string,
+  requestContext: RequestHandlerContext
 ): Promise<{
   dashboardsToUpdate: Array<UpdateMigrationDashboard>;
   errors: Error[];
@@ -105,32 +116,33 @@ const installDashboards = async (
           throw new Error('Invalid Dashboard: No data to install');
         }
 
-        // Parse the dashboard data (assuming it's JSON)
-        const dashboardData = JSON.parse(dashboard.elastic_dashboard.data);
+        const dashboardState = JSON.parse(dashboard.elastic_dashboard.data);
         const tagNames = [getVendorTag(dashboard.original_dashboard.vendor)];
 
-        // Find or create tag references
         const tagReferences = await findOrCreateTagReferences(savedObjectsClient, tagNames);
+        const tagIds = tagReferences.map((t) => t.id);
+        const mergedTags = Array.from(
+          new Set([...(dashboardState.tags ?? []), ...tagIds])
+        ) as string[];
 
-        const result = await savedObjectsClient.create(
-          'dashboard',
-          {
-            title: dashboard.original_dashboard.title,
-            description: dashboard.original_dashboard.description,
-            // Add other dashboard attributes as needed
-            ...dashboardData.attributes,
-          },
-          {
-            id: dashboard.id,
-            references: tagReferences,
-            initialNamespaces: [spaceId],
-          }
+        const createBody = {
+          ...dashboardState,
+          title: dashboardState.title || dashboard.original_dashboard.title,
+          tags: mergedTags,
+        } as DashboardCreateRequestBody;
+
+        const created = await create(
+          requestContext,
+          getDashboardStateSchema(false),
+          createBody,
+          undefined,
+          false
         );
 
         dashboardsToUpdate.push({
           id: dashboard.id,
           elastic_dashboard: {
-            id: result.id,
+            id: created.id,
           },
         });
       } catch (error) {

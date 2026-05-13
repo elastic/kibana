@@ -6,6 +6,7 @@
  */
 
 import { Annotation } from '@langchain/langgraph';
+import type { DashboardPanel } from '@kbn/dashboard-plugin/server';
 import type { MigrationComments } from '../../../../../../../../common/siem_migrations/model/common.gen';
 import type { ParsedPanel } from '../../../../../../../../common/siem_migrations/parsers/types';
 import { MigrationTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
@@ -17,7 +18,7 @@ export const translateDashboardPanelState = Annotation.Root({
   description: Annotation<string>(),
   dashboard_description: Annotation<string>(),
   resources: Annotation<MigrationResources>(),
-  elastic_panel: Annotation<object | undefined>(), // The visualization panel object
+  elastic_panel: Annotation<DashboardPanel | undefined>(), // The visualization panel object
   index_pattern: Annotation<string | undefined>(),
   index_mapping: Annotation<Record<string, object> | undefined>(),
   includes_ecs_mapping: Annotation<boolean>({
