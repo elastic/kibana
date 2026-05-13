@@ -44,27 +44,21 @@ describe('validateDestinations', () => {
     ]);
 
     await expect(
-      validateDestinations(
-        [{ type: 'workflow', id: 'att-workflow-1' }],
-        {
-          attachments,
-          workflowLookup: createMockWorkflowLookup(),
-          connectorLookup: createMockConnectorLookup(),
-          spaceId: 'default',
-        }
-      )
+      validateDestinations([{ type: 'workflow', id: 'att-workflow-1' }], {
+        attachments,
+        workflowLookup: createMockWorkflowLookup(),
+        connectorLookup: createMockConnectorLookup(),
+        spaceId: 'default',
+      })
     ).rejects.toThrow(ActionPolicyOperationValidationError);
 
     await expect(
-      validateDestinations(
-        [{ type: 'workflow', id: 'att-workflow-1' }],
-        {
-          attachments,
-          workflowLookup: createMockWorkflowLookup(),
-          connectorLookup: createMockConnectorLookup(),
-          spaceId: 'default',
-        }
-      )
+      validateDestinations([{ type: 'workflow', id: 'att-workflow-1' }], {
+        attachments,
+        workflowLookup: createMockWorkflowLookup(),
+        connectorLookup: createMockConnectorLookup(),
+        spaceId: 'default',
+      })
     ).rejects.toThrow(/is a workflow attachment ID, not a workflow ID/);
   });
 
@@ -152,16 +146,20 @@ describe('validateDestinations', () => {
       {
         id: 'att-wf',
         type: WORKFLOW_YAML_ATTACHMENT_TYPE,
-        versions: [{ data: { yaml: 'version: 1', workflowId: 'notify-high-cpu', name: 'High CPU' } }],
+        versions: [
+          { data: { yaml: 'version: 1', workflowId: 'notify-high-cpu', name: 'High CPU' } },
+        ],
       },
     ]);
     const workflowLookup = createMockWorkflowLookup();
     const connectorLookup = createMockConnectorLookup();
 
-    await validateDestinations(
-      [{ type: 'workflow', id: 'notify-high-cpu' }],
-      { attachments, workflowLookup, connectorLookup, spaceId: 'default' }
-    );
+    await validateDestinations([{ type: 'workflow', id: 'notify-high-cpu' }], {
+      attachments,
+      workflowLookup,
+      connectorLookup,
+      spaceId: 'default',
+    });
 
     expect(workflowLookup.getWorkflow).not.toHaveBeenCalled();
     expect(connectorLookup.findConnectorById).not.toHaveBeenCalled();
@@ -232,20 +230,19 @@ describe('validateDestinations', () => {
           id: 'att-wf-1',
           type: WORKFLOW_YAML_ATTACHMENT_TYPE,
           versions: [
-            { data: { yaml: 'version: 1', workflowId: 'notify-high-cpu', name: 'Notify: High CPU' } },
+            {
+              data: { yaml: 'version: 1', workflowId: 'notify-high-cpu', name: 'Notify: High CPU' },
+            },
           ],
         },
       ]);
 
-      const result = await validateDestinations(
-        [{ type: 'workflow', id: 'notify-high-cpu' }],
-        {
-          attachments,
-          workflowLookup: createMockWorkflowLookup(),
-          connectorLookup: createMockConnectorLookup(),
-          spaceId: 'default',
-        }
-      );
+      const result = await validateDestinations([{ type: 'workflow', id: 'notify-high-cpu' }], {
+        attachments,
+        workflowLookup: createMockWorkflowLookup(),
+        connectorLookup: createMockConnectorLookup(),
+        spaceId: 'default',
+      });
 
       expect(result.get('notify-high-cpu')).toEqual({ name: 'Notify: High CPU', isDraft: true });
     });
@@ -295,15 +292,12 @@ describe('validateDestinations', () => {
         },
       ]);
 
-      const result = await validateDestinations(
-        [{ type: 'workflow', id: 'notify-unnamed' }],
-        {
-          attachments,
-          workflowLookup: createMockWorkflowLookup(),
-          connectorLookup: createMockConnectorLookup(),
-          spaceId: 'default',
-        }
-      );
+      const result = await validateDestinations([{ type: 'workflow', id: 'notify-unnamed' }], {
+        attachments,
+        workflowLookup: createMockWorkflowLookup(),
+        connectorLookup: createMockConnectorLookup(),
+        spaceId: 'default',
+      });
 
       expect(result.get('notify-unnamed')).toEqual({ name: 'notify-unnamed', isDraft: true });
     });
