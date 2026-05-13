@@ -50,7 +50,7 @@ groups:
         description: |
           Maximum number of unique transaction combinations sampled for generating the global service map.
         datatype: int
-        default: 100
+        default: 1000
         applies_to:
           stack: ga
           ech: ga
@@ -138,9 +138,9 @@ groups:
 
       - setting: xpack.apm.agent.migrations.enabled
         description: |
-          Set to `false` to disable cloud APM migrations.
+          Set to `true` to enable cloud APM migrations.
         datatype: bool
-        default: true
+        default: false
         applies_to:
           stack: ga
           ech: ga
@@ -150,7 +150,7 @@ groups:
         description: |
           Matcher for all error indices.
         datatype: string
-        default: 'logs-apm*,apm-*,traces-*.otel-*'
+        default: 'logs-apm*,apm-*,logs-*.otel-*'
         applies_to:
           stack: ga
           ech: ga
@@ -223,5 +223,5 @@ groups:
         default: 'https://apm-agent-versions.elastic.co/versions.json'
         applies_to:
           stack: ga
-          ech: ga
+          ech: unavailable
           self: ga

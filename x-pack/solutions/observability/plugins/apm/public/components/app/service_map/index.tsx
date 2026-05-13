@@ -8,7 +8,7 @@
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
-import React, { useLayoutEffect, useRef, useState, useCallback } from 'react';
+import React, { useLayoutEffect, useMemo, useRef, useState, useCallback } from 'react';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import { cx } from '@emotion/css';
 import {
@@ -34,6 +34,7 @@ import { DisabledPrompt } from './disabled_prompt';
 import { SloOverviewFlyout, useSloOverviewFlyout } from '../../shared/slo_overview_flyout';
 import { useServiceMap } from './use_service_map';
 import { useServiceMapBadges } from './use_service_map_badges';
+import { getServiceMapBadgesEnd } from './get_service_map_badges_end';
 import { ServiceMapGraph } from './graph';
 import { ServiceMapSloFlyoutProvider } from './service_map_slo_flyout_context';
 
@@ -175,11 +176,13 @@ export function ServiceMap({
     }
   }, [isFullscreen, bodyClassesToToggle]);
 
+  const badgesEnd = useMemo(() => getServiceMapBadgesEnd(end), [end]);
+
   const { nodes: nodesForGraph, status: badgesStatus } = useServiceMapBadges({
     environment,
     start,
-    end,
-    kuery,
+    end: badgesEnd,
+    kuery: '',
     nodes: data.nodes,
     nodesStatus: status,
   });
