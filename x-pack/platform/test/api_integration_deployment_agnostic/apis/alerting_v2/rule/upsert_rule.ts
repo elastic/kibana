@@ -43,7 +43,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           metadata: { name: 'created-via-put' },
           time_field: '@timestamp',
           schedule: { every: '5m' },
-          evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+          query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 10' },
         });
 
       expect(response.status).to.be(201);
@@ -67,7 +67,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           metadata: { name: 'first-version', owner: 'team-a', tags: ['v1'] },
           time_field: '@timestamp',
           schedule: { every: '5m', lookback: '10m' },
-          evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+          query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 10' },
           grouping: { fields: ['host.name'] },
         });
 
@@ -84,7 +84,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           metadata: { name: 'second-version', owner: 'team-b' },
           time_field: '@timestamp',
           schedule: { every: '10m' },
-          evaluation: { query: { base: 'FROM metrics-* | LIMIT 5' } },
+          query: { format: 'standalone', breach: 'FROM metrics-* | LIMIT 5' },
         });
 
       expect(replaceResponse.status).to.be(200);
@@ -93,8 +93,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       // Replaced fields take the new values.
       expect(replaceResponse.body.metadata).to.eql({ name: 'second-version', owner: 'team-b' });
       expect(replaceResponse.body.schedule).to.eql({ every: '10m' });
-      expect(replaceResponse.body.evaluation).to.eql({
-        query: { base: 'FROM metrics-* | LIMIT 5' },
+      expect(replaceResponse.body.query).to.eql({
+        format: 'standalone',
+        breach: 'FROM metrics-* | LIMIT 5',
       });
 
       // Fields not in the new body are dropped (PUT replaces the whole resource).
@@ -121,7 +122,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           metadata: { name: 'to-be-disabled' },
           time_field: '@timestamp',
           schedule: { every: '5m' },
-          evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+          query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 10' },
         });
       expect(createResponse.status).to.be(201);
 
@@ -141,7 +142,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           metadata: { name: 'replaced-while-disabled' },
           time_field: '@timestamp',
           schedule: { every: '5m' },
-          evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+          query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 10' },
         });
 
       expect(replaceResponse.status).to.be(200);
@@ -157,7 +158,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           metadata: { name: 'no-kind' },
           time_field: '@timestamp',
           schedule: { every: '5m' },
-          evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+          query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 10' },
         });
 
       expect(response.status).to.be(400);

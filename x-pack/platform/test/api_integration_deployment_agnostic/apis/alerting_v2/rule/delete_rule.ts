@@ -42,7 +42,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           metadata: { name: 'rule-to-delete' },
           time_field: '@timestamp',
           schedule: { every: '5m' },
-          evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+          query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 10' },
         });
 
       expect(createResponse.status).to.be(201);

@@ -11,7 +11,7 @@ import { LOOKBACK_WINDOW, SCHEDULE_INTERVAL } from './constants';
 /**
  * Defaults used by `buildCreateRuleData` so the integration specs only have to
  * spell out what makes each rule unique (typically `metadata.name`, the
- * `evaluation.query.base`, and the `state_transition` policy under test).
+ * `query.breach`, and the `state_transition` policy under test).
  *
  * Notes:
  * - `schedule` uses the fast test-harness interval (5s every / 1m lookback)

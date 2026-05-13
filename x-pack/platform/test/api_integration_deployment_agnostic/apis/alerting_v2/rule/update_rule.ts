@@ -27,9 +27,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         metadata: { name: 'original-rule', owner: 'team-a', tags: ['prod'] },
         time_field: '@timestamp',
         schedule: { every: '5m', lookback: '10m' },
-        evaluation: {
-          query: { base: 'FROM logs-* | LIMIT 10 | WHERE status == "error"' },
-        },
+        query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 10 | WHERE status == "error"' },
         grouping: { fields: ['host.name'] },
       });
   }
@@ -49,7 +47,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
-    it('should update metadata and evaluation together', async () => {
+    it('should update metadata and query together', async () => {
       const createResponse = await createRule(roleAuthc);
       expect(createResponse.status).to.be(201);
 
@@ -61,7 +59,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(samlAuth.getInternalRequestHeader())
         .send({
           metadata: { name: 'updated-rule', owner: 'team-b' },
-          evaluation: { query: { base: 'FROM metrics-* | LIMIT 5' } },
+          query: { format: 'standalone', breach: 'FROM metrics-* | LIMIT 5' },
         });
 
       expect(response.status).to.be(200);
@@ -69,7 +67,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.kind).to.be('alert');
       expect(response.body.metadata.name).to.be('updated-rule');
       expect(response.body.metadata.owner).to.be('team-b');
-      expect(response.body.evaluation.query.base).to.be('FROM metrics-* | LIMIT 5');
+      expect(response.body.query.breach).to.be('FROM metrics-* | LIMIT 5');
       // Original schedule should be preserved
       expect(response.body.schedule).to.eql({ every: '5m', lookback: '10m' });
       expect(response.body.updatedAt).to.be.a('string');
@@ -91,8 +89,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.metadata.name).to.be('only-name-updated');
       // Original fields should be preserved
       expect(response.body.schedule).to.eql({ every: '5m', lookback: '10m' });
-      expect(response.body.evaluation).to.eql({
-        query: { base: 'FROM logs-* | LIMIT 10 | WHERE status == "error"' },
+      expect(response.body.query).to.eql({
+        format: 'standalone',
+        breach: 'FROM logs-* | LIMIT 10 | WHERE status == "error"',
       });
       expect(response.body.grouping).to.eql({ fields: ['host.name'] });
     });
@@ -118,7 +117,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.metadata.owner).to.be('team-a');
     });
 
-    it('should update only evaluation query', async () => {
+    it('should update only query', async () => {
       const createResponse = await createRule(roleAuthc);
       expect(createResponse.status).to.be(201);
 
@@ -128,10 +127,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .patch(`${RULE_API_PATH}/${ruleId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ evaluation: { query: { base: 'FROM new-index-* | LIMIT 100' } } });
+        .send({ query: { format: 'standalone', breach: 'FROM new-index-* | LIMIT 100' } });
 
       expect(response.status).to.be(200);
-      expect(response.body.evaluation.query.base).to.be('FROM new-index-* | LIMIT 100');
+      expect(response.body.query.breach).to.be('FROM new-index-* | LIMIT 100');
       // Original metadata and schedule should be preserved
       expect(response.body.metadata.name).to.be('original-rule');
       expect(response.body.schedule).to.eql({ every: '5m', lookback: '10m' });

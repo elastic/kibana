@@ -19,6 +19,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
 import type { FormValues } from '../../form/types';
@@ -60,9 +61,8 @@ const EMPTY_FORM_VALUES: FormValues = {
   metadata: { name: '', enabled: true, description: '', tags: [] },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  evaluation: { query: { base: '' } },
+  query: { format: 'standalone', breach: '' },
   grouping: undefined,
-  recoveryPolicy: { type: 'no_breach' },
   stateTransition: undefined,
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
@@ -83,12 +83,11 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   // ── UI state (step navigation, sandbox open/close, tab selection, etc.) ──
   // In edit mode, seed the sandbox draft with the rule's existing query so the
   // Alert Condition step shows the current query summary instead of "No query defined".
-  const initialSandboxQuery =
-    mode === 'edit'
-      ? rule
-        ? mapRuleResponseToFormValues(rule).evaluation?.query?.base ?? ''
-        : ''
-      : '';
+  const initialSandboxQuery = useMemo(() => {
+    if (mode !== 'edit' || !rule) return '';
+    const mapped = mapRuleResponseToFormValues(rule);
+    return mapped.query ? getBreachEsqlQuery(mapped.query) : '';
+  }, [mode, rule]);
   const [uiState, dispatch] = useComposeDiscoverState(mode, initialSandboxQuery);
 
   // Registered once here so providers persist across Sandbox open/close cycles.
@@ -112,9 +111,8 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
           every: mapped.schedule?.every ?? '1m',
           lookback: mapped.schedule?.lookback ?? '5m',
         },
-        evaluation: { query: { base: mapped.evaluation?.query?.base ?? '' } },
+        query: mapped.query ?? { format: 'standalone', breach: '' },
         grouping: mapped.grouping,
-        recoveryPolicy: mapped.recoveryPolicy ?? { type: 'no_breach' },
         stateTransition: mapped.stateTransition,
         stateTransitionAlertDelayMode: mapped.stateTransitionAlertDelayMode ?? 'immediate',
         stateTransitionRecoveryDelayMode: mapped.stateTransitionRecoveryDelayMode ?? 'immediate',
@@ -136,7 +134,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   // timeField and grouping are written directly to RHF by the form components via useFormContext.
   useEffect(() => {
     if (uiState.queryCommitted && uiState.sandbox.query) {
-      methods.setValue('evaluation', { query: { base: uiState.sandbox.query } });
+      methods.setValue('query', { format: 'standalone', breach: uiState.sandbox.query });
     }
   }, [uiState.sandbox.query, uiState.queryCommitted, methods]);
 

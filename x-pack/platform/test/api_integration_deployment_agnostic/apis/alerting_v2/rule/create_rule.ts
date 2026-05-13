@@ -42,7 +42,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           metadata: { name: 'test-alert-rule' },
           time_field: '@timestamp',
           schedule: { every: '5m' },
-          evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+          query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 10' },
         });
 
       expect(response.status).to.be(201);
@@ -51,7 +51,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.metadata.name).to.be('test-alert-rule');
       expect(response.body.time_field).to.be('@timestamp');
       expect(response.body.schedule).to.eql({ every: '5m' });
-      expect(response.body.evaluation).to.eql({ query: { base: 'FROM logs-* | LIMIT 10' } });
+      expect(response.body.query).to.eql({
+        format: 'standalone',
+        breach: 'FROM logs-* | LIMIT 10',
+      });
       expect(response.body.enabled).to.be(true);
       expect(response.body.createdBy).to.be.a('string');
       expect(response.body.createdAt).to.be.a('string');
@@ -69,7 +72,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           metadata: { name: 'test-signal-rule' },
           time_field: '@timestamp',
           schedule: { every: '10m' },
-          evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+          query: { fromat: 'standalone', breach: 'FROM logs-* | LIMIT 1' },
         });
 
       expect(response.status).to.be(201);
@@ -87,13 +90,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           metadata: { name: 'full-rule', owner: 'team-a', tags: ['critical', 'prod'] },
           time_field: '@timestamp',
           schedule: { every: '5m', lookback: '10m' },
-          evaluation: {
-            query: { base: 'FROM logs-* | LIMIT 10 | WHERE status == "error"' },
+          query: {
+            format: 'standalone',
+            breach: 'FROM logs-* | LIMIT 10 | WHERE status == "error"',
           },
-          recovery_policy: { type: 'no_breach' },
           state_transition: { pending_count: 3 },
           grouping: { fields: ['host.name'] },
-          no_data: { behavior: 'recover', timeframe: '15m' },
         });
 
       expect(response.status).to.be(201);
@@ -103,13 +105,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         tags: ['critical', 'prod'],
       });
       expect(response.body.schedule).to.eql({ every: '5m', lookback: '10m' });
-      expect(response.body.evaluation).to.eql({
-        query: { base: 'FROM logs-* | LIMIT 10 | WHERE status == "error"' },
+      expect(response.body.query).to.eql({
+        format: 'standalone',
+        breach: 'FROM logs-* | LIMIT 10 | WHERE status == "error"',
       });
-      expect(response.body.recovery_policy).to.eql({ type: 'no_breach' });
       expect(response.body.state_transition).to.eql({ pending_count: 3 });
       expect(response.body.grouping).to.eql({ fields: ['host.name'] });
-      expect(response.body.no_data).to.eql({ behavior: 'recover', timeframe: '15m' });
     });
 
     it('should return 400 when kind is missing', async () => {
@@ -121,7 +122,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           metadata: { name: 'no-kind-rule' },
           time_field: '@timestamp',
           schedule: { every: '5m' },
-          evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+          query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 10' },
         });
 
       expect(response.status).to.be(400);
@@ -136,7 +137,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           kind: 'alert',
           time_field: '@timestamp',
           schedule: { every: '5m' },
-          evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+          query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 10' },
         });
 
       expect(response.status).to.be(400);
@@ -151,13 +152,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           kind: 'alert',
           metadata: { name: 'no-schedule-rule' },
           time_field: '@timestamp',
-          evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+          query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 10' },
         });
 
       expect(response.status).to.be(400);
     });
 
-    it('should return 400 when evaluation is missing', async () => {
+    it('should return 400 when query is missing', async () => {
       const response = await supertestWithoutAuth
         .post(RULE_API_PATH)
         .set(roleAuthc.apiKeyHeader)
@@ -182,7 +183,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           metadata: { name: 'signal-with-transition' },
           time_field: '@timestamp',
           schedule: { every: '5m' },
-          evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+          query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 10' },
           state_transition: { pending_count: 3 },
         });
 

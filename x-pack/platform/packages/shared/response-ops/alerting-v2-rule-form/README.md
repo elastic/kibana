@@ -151,10 +151,9 @@ interface FormValues {
     every: string;    // Duration string like '5m', '1h'
     lookback: string; // Duration string
   };
-  evaluation: {
-    query: {
-      base: string;   // The ES|QL query
-    };
+  query: {
+    format: 'standalone',
+    breach: string;   // The ES|QL query
   };
   grouping?: {
     fields: string[]; // Columns to group alerts by
