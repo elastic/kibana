@@ -97,7 +97,7 @@ export class WorkflowsExtensionsExamplePlugin
 
       await client.install(EXAMPLE_MANAGED_WORKFLOW_ID, {
         spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-        values: { recipient: 'Worlsd' },
+        values: { recipient: 'World' },
       });
 
       await client.ready();
