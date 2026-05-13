@@ -74,6 +74,15 @@ export const isFilterFacetConfig = (
  * Feature configuration for enabling/customizing content list capabilities.
  */
 export interface ContentListFeatures {
+  /**
+   * Synchronize query text and sort state with the current route's URL.
+   *
+   * Enabled by default when the provider is rendered inside a router. Set to
+   * `false` for embedded lists, modals, sidebars, or secondary lists that share
+   * a route with another URL-synced list.
+   */
+  urlSync?: boolean;
+
   /** Sorting configuration. */
   sorting?: SortingConfig | boolean;
   /** Pagination configuration. Set to `false` to disable pagination entirely. */
