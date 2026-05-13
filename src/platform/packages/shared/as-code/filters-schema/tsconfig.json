@@ -7,7 +7,6 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/zod",
-    "@kbn/utility-types",
     "@kbn/as-code-filters-constants",
   ]
 }

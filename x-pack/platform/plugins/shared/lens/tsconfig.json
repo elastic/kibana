@@ -148,7 +148,8 @@
     "@kbn/as-code-shared-schemas",
     "@kbn/as-code-shared-telemetry",
     "@kbn/core-http-browser",
-    "@kbn/use-observable"
+    "@kbn/use-observable",
+    "@kbn/zod"
   ],
   "exclude": ["target/**/*"]
 }

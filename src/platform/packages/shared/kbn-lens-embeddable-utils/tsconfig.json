@@ -29,5 +29,6 @@
     "@kbn/transpose-utils",
     "@kbn/palettes",
     "@kbn/crypto-browser",
+    "@kbn/zod-helpers",
   ]
 }

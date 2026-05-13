@@ -17,7 +17,6 @@
     "@kbn/embeddable-plugin",
     "@kbn/presentation-util-plugin",
     "@kbn/object-versioning",
-    "@kbn/config-schema",
     "@kbn/content-management-utils",
     "@kbn/content-management-plugin",
     "@kbn/core-saved-objects-api-server",
@@ -40,7 +39,8 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/dashboard-navigation-options-common",
     "@kbn/dashboard-navigation-options-components",
-    "@kbn/dashboard-navigation-options-schema"
+    "@kbn/dashboard-navigation-options-schema",
+    "@kbn/zod"
   ],
   "exclude": ["target/**/*"]
 }
