@@ -10,17 +10,25 @@ import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definitio
 import { platformCoreTools } from '@kbn/agent-builder-common';
 
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { getPackageConfigurationsTool, generateInsightTool } from './tools';
+import {
+  getPackageConfigurationsTool,
+  generateInsightTool,
+  checkEndpointPackageFreshnessTool,
+} from './tools';
 import { AVAILABLE_INDICES } from './data_sources';
+import { STALE_ENDPOINT_PACKAGE_MESSAGE } from '../../../../common/endpoint/utils/is_endpoint_package_stale';
 
 const ID = 'automatic_troubleshooting';
-const NAME = 'elastic_defend_configuration_troubleshooting';
+const NAME = 'elastic-defend-configuration-troubleshooting';
 const BASE_PATH = 'skills/security/endpoint';
 function toolName(name: string) {
   return `${ID}.${name}`;
 }
 export const GET_PACKAGE_CONFIGURATIONS_TOOL_ID = toolName('get_package_configurations');
 export const GENERATE_INSIGHT_TOOL_ID = toolName('generate_insight');
+export const CHECK_ENDPOINT_PACKAGE_FRESHNESS_TOOL_ID = toolName(
+  'check_endpoint_package_freshness'
+);
 
 export const createAutomaticTroubleshootingSkill = (
   endpointAppContextService: EndpointAppContextService
@@ -49,6 +57,7 @@ Reference './available_indices' for the list of indices available for troublesho
 
 ## Troubleshooting Tools
 
+- **${CHECK_ENDPOINT_PACKAGE_FRESHNESS_TOOL_ID}** - Check if the Elastic Defend integration package is up to date (call this FIRST)
 - **${platformCoreTools.integrationKnowledge}** - Retrieve Elastic Defend knowledge base context to inform the analysis
 - **${platformCoreTools.search}** - Query raw data from available indices for troubleshooting evidence
 - **${platformCoreTools.getDocumentById}** - Retrieve full document content by ID from query results
@@ -57,10 +66,11 @@ Reference './available_indices' for the list of indices available for troublesho
 
 ## Troubleshooting Approach
 
-1. **Gather context** - Use ${platformCoreTools.integrationKnowledge} to retrieve relevant Elastic Defend knowledge that informs the analysis approach.
-2. **Investigate data** - Use ${platformCoreTools.search} to query relevant indices for evidence of errors, warnings, misconfigurations, or incompatibilities. Use ${platformCoreTools.getDocumentById} to retrieve full documents when needed. Use ${GET_PACKAGE_CONFIGURATIONS_TOOL_ID} to inspect Elastic Defend package configuration if relevant.
-3. **Iterate** - Continue querying and gathering context until the root cause or relevant findings are understood.
-4. **Persist findings** - Call ${GENERATE_INSIGHT_TOOL_ID} with a clear problem description, actionable remediation steps, affected endpoint IDs, and relevant raw documents.
+1. **Check package freshness** - Call ${CHECK_ENDPOINT_PACKAGE_FRESHNESS_TOOL_ID} first. If \`stale: true\`, output this exact line before anything else, substituting the version values: "⚠️ ${STALE_ENDPOINT_PACKAGE_MESSAGE}" Do not add to or rephrase this line. Then continue the investigation. If the check fails or the package is fresh, proceed without comment.
+2. **Gather context** - Use ${platformCoreTools.integrationKnowledge} to retrieve relevant Elastic Defend knowledge that informs the analysis approach.
+3. **Investigate data** - Use ${platformCoreTools.search} to query relevant indices for evidence of errors, warnings, misconfigurations, or incompatibilities. Use ${platformCoreTools.getDocumentById} to retrieve full documents when needed. Use ${GET_PACKAGE_CONFIGURATIONS_TOOL_ID} to inspect Elastic Defend package configuration if relevant.
+4. **Iterate** - Continue querying and gathering context until the root cause or relevant findings are understood.
+5. **Persist findings** - Call ${GENERATE_INSIGHT_TOOL_ID} with a clear problem description, actionable remediation steps, affected endpoint IDs, and relevant raw documents.
 
 ## Response format (CRITICAL)
 
@@ -106,7 +116,11 @@ Reference './available_indices' for the list of indices available for troublesho
       platformCoreTools.integrationKnowledge,
     ],
     getInlineTools: () => {
-      return [getPackageConfigurationsTool(endpointAppContextService), generateInsightTool()];
+      return [
+        checkEndpointPackageFreshnessTool(endpointAppContextService),
+        getPackageConfigurationsTool(endpointAppContextService),
+        generateInsightTool(),
+      ];
     },
   });
 };
