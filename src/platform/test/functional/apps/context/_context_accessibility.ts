@@ -25,11 +25,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.update({
         defaultIndex: 'logstash-*',
       });
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.navigateToApp('classic');
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async function () {
+      await PageObjects.discover.resetQueryMode();
       await kibanaServer.uiSettings.replace({});
     });
 

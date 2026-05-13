@@ -32,6 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover saved search embeddable', () => {
     before(async () => {
+      await discover.setQueryMode('classic');
       await esArchiver.loadIfNeeded(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
@@ -55,6 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       await common.unsetTime();
       await kibanaServer.uiSettings.unset('defaultIndex');
+      await discover.resetQueryMode();
     });
 
     beforeEach(async () => {

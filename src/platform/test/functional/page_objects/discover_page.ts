@@ -1288,7 +1288,7 @@ export class DiscoverPageObject extends FtrService {
     return this.browser.getLocalStorageItem(DISCOVER_QUERY_MODE_KEY);
   }
 
-  public setQueryMode(mode: string) {
+  public setQueryMode(mode: 'classic' | 'esql') {
     return this.browser.setLocalStorageItem(DISCOVER_QUERY_MODE_KEY, JSON.stringify(mode));
   }
 

@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.update({
         defaultIndex: 'logstash-*',
       });
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await header.waitUntilLoadingHasFinished();
 
       for (const columnName of TEST_COLUMN_NAMES) {
@@ -55,6 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
+      await discover.resetQueryMode();
       await kibanaServer.uiSettings.replace({});
     });
 
@@ -133,7 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('navigates to doc view from embeddable', async () => {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await discover.saveSearch('my search');
       await header.waitUntilLoadingHasFinished();
 

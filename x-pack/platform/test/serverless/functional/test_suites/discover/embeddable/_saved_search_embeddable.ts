@@ -61,6 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await kibanaServer.savedObjects.cleanStandardList();
       await common.unsetTime();
+      await discover.resetQueryMode();
     });
 
     beforeEach(async () => {
@@ -71,9 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     const createNonLogsSavedSearch = async () => {
-      await common.navigateToActualUrl('discover', undefined, {
-        ensureCurrentUrl: false,
-      });
+      await discover.navigateToApp('classic');
       await dataViews.createFromSearchBar({
         name: 'lo', // Must be anything but log/logs, since pagination is disabled for log sources
         adHoc: true,

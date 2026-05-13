@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.update({
         defaultIndex: 'logstash-*',
       });
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.navigateToApp('classic');
       await PageObjects.header.waitUntilLoadingHasFinished();
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
         await filterBar.addFilter({ field: columnName, operation: 'is', value });
@@ -51,6 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async function () {
+      await PageObjects.discover.resetQueryMode();
       await kibanaServer.uiSettings.replace({});
     });
 

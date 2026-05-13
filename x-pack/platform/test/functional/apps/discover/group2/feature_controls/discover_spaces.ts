@@ -12,8 +12,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const config = getService('config');
   const spacesService = getService('spaces');
-  const { common, error, timePicker, unifiedFieldList } = getPageObjects([
+  const { common, discover, error, timePicker, unifiedFieldList } = getPageObjects([
     'common',
+    'discover',
     'error',
     'timePicker',
     'unifiedFieldList',
@@ -49,9 +50,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           name: 'custom_space',
           disabledFeatures: [],
         });
+        await discover.setQueryMode('classic');
       });
 
       after(async () => {
+        await discover.resetQueryMode();
         await spacesService.delete('custom_space');
         await kibanaServer.importExport.unload(
           'x-pack/platform/test/functional/fixtures/kbn_archives/discover/feature_controls/custom_space',
@@ -139,6 +142,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           name: customSpace,
           disabledFeatures: ['visualize'],
         });
+        await discover.setQueryMode('classic');
         await kibanaServer.importExport.load(
           'x-pack/platform/test/functional/fixtures/kbn_archives/discover/feature_controls/custom_space',
           { space: customSpace }
@@ -146,6 +150,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await discover.resetQueryMode();
         await spacesService.delete(customSpace);
       });
 

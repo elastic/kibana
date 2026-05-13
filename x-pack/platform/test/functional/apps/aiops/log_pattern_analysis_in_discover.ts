@@ -42,8 +42,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await ml.securityUI.loginAsMlPowerUser();
     });
 
+    beforeEach(async () => {
+      await PageObjects.discover.setQueryMode('classic');
+    });
+
     after(async () => {
       await ml.testResources.deleteDataViewByTitle('logstash-*');
+      await PageObjects.discover.resetQueryMode();
     });
 
     it(`loads the log pattern analysis flyout and shows patterns in discover`, async () => {

@@ -25,6 +25,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await svlCommonPage.loginAsAdmin();
     });
 
+    after(async () => {
+      await discover.resetQueryMode();
+    });
+
     describe('ES|QL mode', () => {
       describe('custom context', () => {
         it('should render formatted record in doc viewer using formatter from custom context', async () => {
@@ -65,9 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('data view mode', () => {
       describe('custom context', () => {
         it('should render formatted record in doc viewer using formatter from custom context', async () => {
-          await common.navigateToActualUrl('discover', undefined, {
-            ensureCurrentUrl: false,
-          });
+          await discover.navigateToApp('classic');
           await discover.waitUntilSearchingHasFinished();
           await dataViews.switchToAndValidate('my-example-logs');
           await discover.waitUntilSearchingHasFinished();

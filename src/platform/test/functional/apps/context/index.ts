@@ -12,7 +12,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['discover']);
   const kibanaServer = getService('kibanaServer');
 
   describe('context app', function () {
@@ -25,10 +25,11 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
         'src/platform/test/functional/fixtures/kbn_archiver/visualize.json'
       );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.navigateToApp('classic');
     });
 
     after(async () => {
+      await PageObjects.discover.resetQueryMode();
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/visualize.json'
       );

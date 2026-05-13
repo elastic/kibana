@@ -18,9 +18,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const retry = getService('retry');
-  const { reporting, common, discover, timePicker, exports } = getPageObjects([
+  const { reporting, discover, timePicker, exports } = getPageObjects([
     'reporting',
-    'common',
     'discover',
     'timePicker',
     'share',
@@ -140,11 +139,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('Discover CSV Export', () => {
+    before(async () => {
+      await discover.setQueryMode('classic');
+    });
+
+    after(async () => {
+      await discover.resetQueryMode();
+    });
+
     describe('Check Available', () => {
       before(async () => {
         await esArchiver.emptyKibanaIndex();
         await reportingAPI.initEcommerce();
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.waitUntilTabIsLoaded();
         await discover.selectIndexPattern('ecommerce');
         await discover.waitUntilTabIsLoaded();
@@ -185,7 +192,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       beforeEach(async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.waitUntilTabIsLoaded();
         await discover.selectIndexPattern('ecommerce');
         await discover.waitUntilTabIsLoaded();
@@ -344,7 +351,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           dateSubstractUnit: 'days',
         });
         await reportingAPI.initLogs();
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.waitUntilTabIsLoaded();
         await discover.loadSavedSearch('Sparse Columns');
         await discover.waitUntilTabIsLoaded();
@@ -385,7 +392,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       before(async () => {
         await reportingAPI.initEcommerce();
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.waitUntilTabIsLoaded();
         await discover.selectIndexPattern('ecommerce');
         await discover.waitUntilTabIsLoaded();

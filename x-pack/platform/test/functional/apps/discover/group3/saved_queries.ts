@@ -39,6 +39,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    beforeEach(async () => {
+      await discover.setQueryMode('classic');
+    });
+
     after('clean up archives', async () => {
       await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
       await kibanaServer.importExport.unload(

@@ -67,6 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     this.tags(['failsOnMKI']);
     before(async () => {
       await PageObjects.svlCommonPage.loginAsAdmin();
+      await PageObjects.discover.setQueryMode('classic');
       // TODO: emptyKibanaIndex fails in Serverless with
       // "index_not_found_exception: no such index [.kibana_ingest]",
       // so it was switched to `savedObjects.cleanStandardList()`
@@ -75,11 +76,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         batchSize: 5000,
         concurrency: 4,
       });
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.navigateToApp('classic');
       await PageObjects.discover.waitUntilTabIsLoaded();
     });
 
     after(async () => {
+      await PageObjects.discover.resetQueryMode();
       await reportingAPI.teardownEcommerce();
       // TODO: emptyKibanaIndex fails in Serverless with
       // "index_not_found_exception: no such index [.kibana_ingest]",
@@ -241,7 +243,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.importExport.load(
           'x-pack/platform/test/serverless/fixtures/kbn_archives/reporting/logs'
         );
-        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.navigateToApp('classic');
         await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.discover.loadSavedSearch('Sparse Columns');
         await PageObjects.discover.waitUntilTabIsLoaded();

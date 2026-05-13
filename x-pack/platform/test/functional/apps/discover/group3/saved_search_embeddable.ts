@@ -32,6 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover saved search embeddable', () => {
     before(async () => {
+      await discover.setQueryMode('classic');
       await esArchiver.loadIfNeeded(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
@@ -57,6 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await common.unsetTime();
+      await discover.resetQueryMode();
     });
 
     beforeEach(async () => {
@@ -88,7 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     const removeFilteredTabFromSavedSearch = async (savedSearchTitle: string) => {
-      await discover.navigateToApp();
+      await discover.navigateToApp('classic');
       await discover.loadSavedSearch(savedSearchTitle);
       await discover.waitUntilTabIsLoaded();
 

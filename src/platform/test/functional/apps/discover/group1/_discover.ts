@@ -231,7 +231,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('time zone switch', () => {
       it('should show bars in the correct time zone after switching', async function () {
         await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'America/Phoenix' });
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await header.awaitKibanaChrome();
         await discover.waitUntilTabIsLoaded();
         await timePicker.setDefaultAbsoluteRange();
@@ -267,7 +267,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('managing fields', function () {
       it('should add a field, sort by it, remove it and also sorting by it', async function () {
         await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.clickFieldListItemAdd('_score');
         await discover.waitUntilTabIsLoaded();
@@ -282,7 +282,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       it('should add a field with customLabel, sort by it, display it correctly', async function () {
         await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.clickFieldListItemAdd('referer');
         await discover.waitUntilTabIsLoaded();
