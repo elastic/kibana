@@ -55,7 +55,7 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({ cloud }) => {
       .catch(() => {});
   }, [cloud]);
 
-  const trialDaysLeft = 11; // cloud?.trialDaysLeft() ?? 0;
+  const trialDaysLeft = cloud.trialDaysLeft() ?? 0;
   const daysUsed = Math.min(Math.max(0, TRIAL_TOTAL_DAYS - trialDaysLeft), TRIAL_TOTAL_DAYS);
   const hasPopoverContent = trialDaysLeft > 0 || billingUrl;
 
