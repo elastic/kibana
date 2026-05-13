@@ -139,7 +139,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
       hasWrongOperatorWithWildcard([exception])
     );
     const [hasUnnecessaryEscaping, setHasUnnecessaryEscaping] = useState<boolean>(
-      hasEscaping([exception])
+      hasEscaping([exception], exception.os_types)
     );
 
     const [hasPartialCodeSignatureWarning, setHasPartialCodeSignatureWarning] =
@@ -302,6 +302,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     const handleOnOsChange = useCallback(
       (os: OperatingSystem) => {
         if (!exception) return;
+        setHasUnnecessaryEscaping(hasEscaping([exception], [os]));
         processChanged({
           os_types: [os],
           entries: exception.entries,
@@ -516,7 +517,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         }
 
         setHasWildcardWithWrongOperator(hasWrongOperatorWithWildcard(arg.exceptionItems));
-        setHasUnnecessaryEscaping(hasEscaping(arg.exceptionItems));
+        setHasUnnecessaryEscaping(hasEscaping(arg.exceptionItems, exception.os_types));
         setHasPartialCodeSignatureWarning(hasPartialCodeSignatureEntry(arg.exceptionItems));
 
         const updatedItem: Partial<ArtifactFormComponentProps['item']> =

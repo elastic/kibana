@@ -349,7 +349,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       areValid: !!item.entries.length,
       hasDuplicateFields: false,
       hasWildcardWithWrongOperator: hasWrongOperatorWithWildcard([item]),
-      hasUnnecessaryEscaping: hasEscaping([item]),
+      hasUnnecessaryEscaping: hasEscaping([item], item.os_types),
       hasPartialCodeSignatureWarning: hasPartialCodeSignatureEntry([item]),
     });
 
@@ -586,6 +586,10 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         }
 
         processChanged(nextItem);
+        setConditionsState((prev) => ({
+          ...prev,
+          hasUnnecessaryEscaping: hasEscaping([nextItem], nextItem.os_types),
+        }));
         setHasFormChanged(true);
       },
       [item, processChanged]
@@ -701,7 +705,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         setConditionsState((prev) => ({
           ...prev,
           hasWildcardWithWrongOperator: hasWrongOperatorWithWildcard(arg.exceptionItems),
-          hasUnnecessaryEscaping: hasEscaping(arg.exceptionItems),
+          hasUnnecessaryEscaping: hasEscaping(arg.exceptionItems, item.os_types),
           hasPartialCodeSignatureWarning: hasPartialCodeSignatureEntry(arg.exceptionItems),
         }));
 

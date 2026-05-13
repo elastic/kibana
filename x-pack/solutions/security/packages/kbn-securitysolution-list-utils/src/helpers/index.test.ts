@@ -455,9 +455,6 @@ describe('Helpers', () => {
       expect(
         hasEscaping([
           {
-            description: '',
-            name: '',
-            type: 'simple',
             entries: [{ type: 'match', value: 'normal*?', field: '', operator: 'included' }],
           },
         ])
@@ -468,9 +465,6 @@ describe('Helpers', () => {
       expect(
         hasEscaping([
           {
-            description: '',
-            name: '',
-            type: 'simple',
             entries: [{ type: 'match', value: 'a\\\\b', field: '', operator: 'included' }],
           },
         ])
@@ -481,9 +475,6 @@ describe('Helpers', () => {
       expect(
         hasEscaping([
           {
-            description: '',
-            name: '',
-            type: 'simple',
             entries: [{ type: 'match', value: 'prefix\\*suffix', field: '', operator: 'included' }],
           },
         ])
@@ -494,9 +485,6 @@ describe('Helpers', () => {
       expect(
         hasEscaping([
           {
-            description: '',
-            name: '',
-            type: 'simple',
             entries: [{ type: 'match', value: 'prefix\\?suffix', field: '', operator: 'included' }],
           },
         ])
@@ -507,9 +495,6 @@ describe('Helpers', () => {
       expect(
         hasEscaping([
           {
-            description: '',
-            name: '',
-            type: 'simple',
             entries: [
               {
                 type: 'list',
@@ -527,9 +512,6 @@ describe('Helpers', () => {
       expect(
         hasEscaping([
           {
-            description: '',
-            name: '',
-            type: 'simple',
             entries: [
               {
                 field: 'parent',
@@ -546,9 +528,6 @@ describe('Helpers', () => {
       expect(
         hasEscaping([
           {
-            description: '',
-            name: '',
-            type: 'simple',
             entries: [{ type: 'match_any', value: ['\\*'], field: '', operator: 'included' }],
           },
         ])

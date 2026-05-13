@@ -1054,7 +1054,10 @@ export const hasWrongOperatorWithWildcard = (
   });
 };
 
-export const hasEscaping = (items: Array<ExceptionsBuilderReturnExceptionItem>): boolean => {
+export const hasEscaping = (
+  items: Array<Pick<ExceptionsBuilderReturnExceptionItem, 'entries'>>,
+  osTypes: ExceptionsBuilderReturnExceptionItem['os_types'] = ['linux']
+): boolean => {
   // flattens array of multiple entries added with OR
   const multipleEntries = items.flatMap((item) => item.entries);
   // flattens nested entries
@@ -1065,7 +1068,7 @@ export const hasEscaping = (items: Array<ExceptionsBuilderReturnExceptionItem>):
     return item;
   });
 
-  return allEntries.some((builderEntry) => hasEntryEscaping(builderEntry, items[0]?.os_types));
+  return allEntries.some((builderEntry) => hasEntryEscaping(builderEntry, osTypes));
 };
 
 export const hasEntryEscaping = (

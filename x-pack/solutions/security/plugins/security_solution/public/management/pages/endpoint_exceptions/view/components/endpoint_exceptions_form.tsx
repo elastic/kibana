@@ -154,7 +154,7 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
       hasWrongOperatorWithWildcard([exception])
     );
     const [hasUnnecessaryEscaping, setHasUnnecessaryEscaping] = useState<boolean>(
-      hasEscaping([exception])
+      hasEscaping([exception], exception.os_types)
     );
     const [hasPartialCodeSignatureWarning, setHasPartialCodeSignatureWarning] = useState<boolean>(
       hasPartialCodeSignatureEntry([exception])
@@ -322,13 +322,22 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
     const handleOnOsChange = useCallback(
       (os: OsTypeArray) => {
         if (!exception) return;
+        setHasUnnecessaryEscaping(
+          hasEscaping(
+            [
+              exception,
+              ...(additionalEntries ? additionalEntries.map((e) => ({ entries: e })) : []),
+            ],
+            os
+          )
+        );
         processChanged({
           os_types: os,
           entries: exception.entries,
         });
         if (!hasFormChanged) setHasFormChanged(true);
       },
-      [exception, hasFormChanged, processChanged]
+      [additionalEntries, exception, hasFormChanged, processChanged]
     );
 
     const osInputMemo = useMemo(
@@ -448,7 +457,7 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
         }
 
         setHasWildcardWithWrongOperator(hasWrongOperatorWithWildcard(arg.exceptionItems));
-        setHasUnnecessaryEscaping(hasEscaping(arg.exceptionItems));
+        setHasUnnecessaryEscaping(hasEscaping(arg.exceptionItems, exception.os_types));
         setHasPartialCodeSignatureWarning(hasPartialCodeSignatureEntry(arg.exceptionItems));
 
         const updatedItem: Partial<ArtifactFormComponentProps['item']> =
