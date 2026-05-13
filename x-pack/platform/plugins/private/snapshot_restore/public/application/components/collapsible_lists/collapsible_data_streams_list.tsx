@@ -57,7 +57,7 @@ export const CollapsibleDataStreamsList: React.FunctionComponent<Props> = ({ dat
                 values={{ count: hiddenItemsCount }}
               />
             )}{' '}
-            <EuiIcon type={isShowingFullList ? 'arrowUp' : 'arrowDown'} />
+            <EuiIcon type={isShowingFullList ? 'arrowUp' : 'arrowDown'} aria-hidden={true} />
           </EuiLink>
         </>
       ) : null}
