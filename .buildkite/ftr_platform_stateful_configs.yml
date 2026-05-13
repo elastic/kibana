@@ -120,7 +120,6 @@ enabled:
   - src/platform/test/functional/apps/discover/cascade_layout/config.ts
   - src/platform/test/functional/apps/getting_started/config.ts
   - src/platform/test/functional/apps/home/config.ts
-  - src/platform/test/functional/apps/kibana_overview/config.ts
   - src/platform/test/functional/apps/management/group1/config.ts
   - src/platform/test/functional/apps/management/group2/config.ts
   - src/platform/test/functional/apps/management/group3/config.ts
@@ -269,7 +268,6 @@ enabled:
   - x-pack/platform/test/functional/apps/home/config.ts
   - x-pack/platform/test/functional/apps/index_lifecycle_management/config.ts
   - x-pack/platform/test/functional/apps/index_management/config.ts
-  - x-pack/platform/test/functional/apps/ingest_pipelines/config.ts
   - x-pack/platform/test/functional/apps/lens/group1/config.ts
   - x-pack/platform/test/functional/apps/lens/group2/config.ts
   - x-pack/platform/test/functional/apps/lens/group3/config.ts
@@ -368,7 +366,6 @@ enabled:
   - x-pack/platform/test/rule_registry/spaces_only/config_basic.ts
   - x-pack/platform/test/rule_registry/spaces_only/config_trial.ts
   - x-pack/platform/test/saved_object_tagging/api_integration/security_and_spaces/config.ts
-  - x-pack/platform/test/saved_object_tagging/api_integration/tagging_api/config.ts
   - x-pack/platform/test/saved_object_tagging/api_integration/tagging_usage_collection/config.ts
   - x-pack/platform/test/saved_object_tagging/functional/config.ts
   - x-pack/platform/test/saved_objects_field_count/config.ts
@@ -483,6 +480,7 @@ enabled:
   - x-pack/platform/test/api_integration_basic/apis/security/config.ts
   - x-pack/platform/test/automatic_import_api_integration/configs/config.stateful.ts
   - x-pack/platform/test/encrypted_saved_objects_api_integration/config.ts
+  - x-pack/platform/test/inbox_api_integration/config.ts
   - x-pack/platform/test/fleet_multi_cluster/config.ts
   - x-pack/platform/test/monitoring_api_integration/config.ts
   - x-pack/platform/test/plugin_api_integration/config.ts
