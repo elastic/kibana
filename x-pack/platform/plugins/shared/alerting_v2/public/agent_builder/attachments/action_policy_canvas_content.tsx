@@ -6,11 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import {
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import {
   ActionButtonType,
   type AttachmentRenderProps,
@@ -53,9 +49,7 @@ export const ActionPolicyCanvasContent = ({
     const checks: Array<Promise<{ workflow?: boolean; rule?: boolean }>> = [];
     const abortController = new AbortController();
 
-    const workflowDestinations = (data.destinations ?? []).filter(
-      (d) => d.type === 'workflow'
-    );
+    const workflowDestinations = (data.destinations ?? []).filter((d) => d.type === 'workflow');
     for (const dest of workflowDestinations) {
       checks.push(
         workflowsApi
@@ -70,7 +64,7 @@ export const ActionPolicyCanvasContent = ({
       checks.push(
         rulesApi
           .getRule(matcherRuleId, abortController.signal)
-          .then(() => ({ rule: true}))
+          .then(() => ({ rule: true }))
           .catch(() => ({ rule: false }))
       );
     }
@@ -115,10 +109,9 @@ export const ActionPolicyCanvasContent = ({
           type: ActionButtonType.PRIMARY,
           disabled: hasDraftDependencies,
           disabledReason: hasDraftDependencies
-            ? i18n.translate(
-                'xpack.alertingV2.actionPolicyAttachment.saveRuleAndWorkflowFirst',
-                { defaultMessage: 'Save rule and workflow before saving policy.' }
-              )
+            ? i18n.translate('xpack.alertingV2.actionPolicyAttachment.saveRuleAndWorkflowFirst', {
+                defaultMessage: 'Save rule and workflow before saving policy.',
+              })
             : undefined,
           handler: async () => {
             await actionPoliciesApi.upsertActionPolicy(data.id!, buildActionPolicyPayload(data));
@@ -146,20 +139,19 @@ export const ActionPolicyCanvasContent = ({
         type: ActionButtonType.PRIMARY,
         disabled: hasDraftDependencies,
         disabledReason: hasDraftDependencies
-          ? i18n.translate(
-              'xpack.alertingV2.actionPolicyAttachment.saveWorkflowFirst',
-              { defaultMessage: 'Save workflow before saving policy.' }
-            )
+          ? i18n.translate('xpack.alertingV2.actionPolicyAttachment.saveWorkflowFirst', {
+              defaultMessage: 'Save workflow before saving policy.',
+            })
           : undefined,
         handler: async () => {
-            await actionPoliciesApi.upsertActionPolicy(policyId, buildActionPolicyPayload(data));
-            notifications.toasts.addSuccess(
-              i18n.translate('xpack.alertingV2.actionPolicyAttachment.updatedSuccess', {
-                defaultMessage: 'Policy "{name}" updated',
-                values: { name: data.name },
-              })
-            );
-          },
+          await actionPoliciesApi.upsertActionPolicy(policyId, buildActionPolicyPayload(data));
+          notifications.toasts.addSuccess(
+            i18n.translate('xpack.alertingV2.actionPolicyAttachment.updatedSuccess', {
+              defaultMessage: 'Policy "{name}" updated',
+              values: { name: data.name },
+            })
+          );
+        },
       },
       {
         label: i18n.translate('xpack.alertingV2.actionPolicyAttachment.viewInPolicies', {
@@ -228,8 +220,6 @@ const buildActionPolicyPayload = (data: ActionPolicyAttachment['data']) => ({
   ...(data.matcher !== undefined ? { matcher: data.matcher ?? undefined } : {}),
   ...(data.groupBy !== undefined ? { groupBy: data.groupBy ?? undefined } : {}),
   ...(data.tags !== undefined ? { tags: data.tags ?? undefined } : {}),
-  ...(data.groupingMode !== undefined
-    ? { groupingMode: data.groupingMode ?? undefined }
-    : {}),
+  ...(data.groupingMode !== undefined ? { groupingMode: data.groupingMode ?? undefined } : {}),
   ...(data.throttle !== undefined ? { throttle: data.throttle ?? undefined } : {}),
 });

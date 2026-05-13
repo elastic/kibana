@@ -36,10 +36,14 @@ jest.mock('../../services/workflows_api', () => ({
 
 const mockApplicationService = { navigateToUrl: (...a: unknown[]) => mockNavigateToUrl(...a) };
 const mockHttpService = { basePath: { prepend: mockPrepend } };
-const mockNotificationsService = { toasts: { addSuccess: (...a: unknown[]) => mockAddSuccess(...a) } };
+const mockNotificationsService = {
+  toasts: { addSuccess: (...a: unknown[]) => mockAddSuccess(...a) },
+};
 const mockWorkflowsApiService = { getWorkflow: (...a: unknown[]) => mockGetWorkflow(...a) };
 const mockRulesApiService = { getRule: (...a: unknown[]) => mockGetRule(...a) };
-const mockActionPoliciesApiService = { upsertActionPolicy: (...a: unknown[]) => mockUpsertActionPolicy(...a) };
+const mockActionPoliciesApiService = {
+  upsertActionPolicy: (...a: unknown[]) => mockUpsertActionPolicy(...a),
+};
 
 jest.mock('@kbn/core-di-browser', () => ({
   CoreStart: (key: string) => key,
@@ -122,7 +126,12 @@ const renderCanvas = async (
 
 const getLastRegisteredButtons = (
   registerActionButtons: jest.Mock
-): Array<{ label: string; disabled?: boolean; disabledReason?: string; handler: () => unknown }> => {
+): Array<{
+  label: string;
+  disabled?: boolean;
+  disabledReason?: string;
+  handler: () => unknown;
+}> => {
   const { calls } = registerActionButtons.mock;
   return calls[calls.length - 1][0];
 };
@@ -234,9 +243,7 @@ describe('ActionPolicyCanvasContent', () => {
       const viewButton = buttons.find((b) => b.label === 'View in Policies')!;
       viewButton.handler();
 
-      expect(mockNavigateToUrl).toHaveBeenCalledWith(
-        expect.stringContaining('policy-123')
-      );
+      expect(mockNavigateToUrl).toHaveBeenCalledWith(expect.stringContaining('policy-123'));
     });
   });
 

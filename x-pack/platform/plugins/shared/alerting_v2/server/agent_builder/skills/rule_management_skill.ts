@@ -11,17 +11,18 @@ import { manageActionPolicyTool } from '../tools/manage_action_policy';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
 import { alertingTools } from '../common/constants';
 
-export const createRuleManagementSkill = (deps: ManageActionPolicyToolDeps) => defineSkillType({
-  id: 'rule-management',
-  name: 'rule-management',
-  basePath: 'skills/platform/alerting',
-  description:
-    'Compose, discover, and modify alerting V2 rules and action policies (notification policies) within a conversation.',
-  referencedContent: [
-    {
-      name: 'concepts',
-      relativePath: './references',
-      content: `# Alerting V2 Concepts
+export const createRuleManagementSkill = (deps: ManageActionPolicyToolDeps) =>
+  defineSkillType({
+    id: 'rule-management',
+    name: 'rule-management',
+    basePath: 'skills/platform/alerting',
+    description:
+      'Compose, discover, and modify alerting V2 rules and action policies (notification policies) within a conversation.',
+    referencedContent: [
+      {
+        name: 'concepts',
+        relativePath: './references',
+        content: `# Alerting V2 Concepts
 
 ## Rule Kind: Alert vs Signal
 
@@ -133,9 +134,9 @@ The end-to-end notification path:
 8. **Workflow execution**: workflow steps run, using connectors to deliver notifications (email, Slack, etc.).
 
 Signal rules (\`kind: signal\`) are excluded at step 2 — the dispatcher query only selects \`type == 'alert'\` events.`,
-    },
-  ],
-  content: `## Domain Knowledge
+      },
+    ],
+    content: `## Domain Knowledge
 
 For questions about alerting concepts — rule kinds (alert vs signal), action policies, workflows, connectors, episode lifecycle, or the dispatch flow — consult the [concepts reference](./references/concepts.md).
 
@@ -406,5 +407,5 @@ After creating the defaults, briefly mention:
 - They can use a different connector type (Slack, PagerDuty, etc.) — offer to use \`platform.workflows.get_connectors\` to explore.
 - They can change the throttle strategy — \`on_status_change\` (default) only notifies on transitions, \`every_time\` notifies on every evaluation cycle.
 - They can broaden the matcher to cover multiple rules by removing the \`rule.id\` filter.`,
-  getInlineTools: () => [manageRuleTool(), manageActionPolicyTool(deps)],
-});
+    getInlineTools: () => [manageRuleTool(), manageActionPolicyTool(deps)],
+  });

@@ -184,7 +184,19 @@ export const ActionPolicyDefinitionList = ({
     });
 
     return list;
-  }, [description, policyType, ruleId, ruleDetailsHref, tags, matcher, groupingMode, groupBy, throttle, destinations, resolvedDestinations]);
+  }, [
+    description,
+    policyType,
+    ruleId,
+    ruleDetailsHref,
+    tags,
+    matcher,
+    groupingMode,
+    groupBy,
+    throttle,
+    destinations,
+    resolvedDestinations,
+  ]);
 
   return <EuiDescriptionList compressed type="column" listItems={items} />;
 };

@@ -64,9 +64,7 @@ export const createActionPolicySmlType = ({
       const tags = attrs?.tags?.join(', ') ?? '';
       const matcher = attrs?.matcher ?? '';
       const groupingMode = attrs?.groupingMode ?? '';
-      const destinations = attrs?.destinations
-        ?.map((d) => `${d.type}:${d.id}`)
-        .join(', ') ?? '';
+      const destinations = attrs?.destinations?.map((d) => `${d.type}:${d.id}`).join(', ') ?? '';
 
       const contentParts = [name, description, matcher, groupingMode, destinations, tags].filter(
         Boolean

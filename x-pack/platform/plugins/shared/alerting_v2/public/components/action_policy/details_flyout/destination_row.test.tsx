@@ -28,12 +28,7 @@ jest.mock('../workflow_destination_link', () => ({
 
 describe('DestinationRow', () => {
   it('renders a workflow destination with WorkflowDestinationLink', () => {
-    render(
-      <DestinationRow
-        destination={{ type: 'workflow', id: 'wf-1' }}
-        name="My Workflow"
-      />
-    );
+    render(<DestinationRow destination={{ type: 'workflow', id: 'wf-1' }} name="My Workflow" />);
 
     expect(screen.getByText('My Workflow')).toBeDefined();
     expect(screen.getByTestId('mockWorkflowLink')).toBeDefined();
@@ -52,20 +47,14 @@ describe('DestinationRow', () => {
   });
 
   it('renders without name (falls back to id)', () => {
-    render(
-      <DestinationRow
-        destination={{ type: 'workflow', id: 'wf-1' }}
-      />
-    );
+    render(<DestinationRow destination={{ type: 'workflow', id: 'wf-1' }} />);
 
     expect(screen.getByText('wf-1')).toBeDefined();
   });
 
   it('returns null for unknown destination types', () => {
     const { container } = render(
-      <DestinationRow
-        destination={{ type: 'unknown' as any, id: 'x' }}
-      />
+      <DestinationRow destination={{ type: 'unknown' as any, id: 'x' }} />
     );
 
     expect(container.innerHTML).toBe('');

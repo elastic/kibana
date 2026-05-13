@@ -62,7 +62,8 @@ Use operations[] to:
       const isNew = !currentAttachment;
       const attachmentId = previousAttachmentId ?? uuidv4();
 
-      const currentData: Partial<RuleAttachmentData> = currentAttachment?.versions.at(-1)?.data ?? {};
+      const currentData: Partial<RuleAttachmentData> =
+        currentAttachment?.versions.at(-1)?.data ?? {};
 
       const { data: updatedData, queryColumns } = await executeRuleOperations(
         currentData,

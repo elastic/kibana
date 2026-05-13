@@ -234,9 +234,7 @@ export const executeRuleOperations = async (
           const issues = result.error.issues
             .map((i) => `${i.path.join('.')}: ${i.message}`)
             .join('\n');
-          throw new RuleOperationValidationError(
-            `Rule is not ready to save:\n${issues}`
-          );
+          throw new RuleOperationValidationError(`Rule is not ready to save:\n${issues}`);
         }
         break;
       }

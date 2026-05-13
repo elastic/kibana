@@ -7,10 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { durationSchema } from './common';
-import {
-  groupingModeSchema,
-  throttleStrategySchema,
-} from './action_policy_data_schema';
+import { groupingModeSchema, throttleStrategySchema } from './action_policy_data_schema';
 import { actionPolicyResponseSchema } from './action_policy_response_schema';
 
 export const ACTION_POLICY_ATTACHMENT_TYPE = 'action_policy' as const;
