@@ -9,7 +9,6 @@ import React, { useMemo, memo } from 'react';
 import { Handle, Position, type Node, type NodeProps } from '@xyflow/react';
 import { useEuiTheme, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { getAgentIcon } from '@kbn/custom-icons';
-import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { getSeverity, getSeverityColor } from '../../../../common/anomaly_detection';
@@ -39,30 +38,19 @@ export const ServiceNode = memo(
     const navigateToAlertsTab = useServiceMapAlertsTabNavigate(data.label);
     const isDarkMode = colorMode === 'DARK';
 
-    const { borderColor, borderWidth, borderStyle } = useMemo(() => {
+    const { borderColor, borderWidth } = useMemo(() => {
       const score = data.serviceAnomalyStats?.anomalyScore;
-
-      if (score !== undefined) {
-        const severity = getSeverity(score);
-        const isHighSeverity =
-          severity === ML_ANOMALY_SEVERITY.CRITICAL || severity === ML_ANOMALY_SEVERITY.MAJOR;
-
-        return {
-          borderColor: getSeverityColor(score),
-          borderWidth:
-            isHighSeverity || selected
-              ? `${NODE_BORDER_WIDTH_SELECTED}px`
-              : `${NODE_BORDER_WIDTH_DEFAULT}px`,
-          borderStyle: isHighSeverity ? ('double' as const) : ('solid' as const),
-        };
-      }
+      const hasScore = score !== undefined;
 
       return {
-        borderColor: selected ? euiTheme.colors.primary : euiTheme.colors.mediumShade,
+        borderColor: hasScore
+          ? getSeverityColor(score)
+          : selected
+          ? euiTheme.colors.primary
+          : euiTheme.colors.mediumShade,
         borderWidth: selected
           ? `${NODE_BORDER_WIDTH_SELECTED}px`
           : `${NODE_BORDER_WIDTH_DEFAULT}px`,
-        borderStyle: 'solid' as const,
       };
     }, [data.serviceAnomalyStats, selected, euiTheme]);
 
@@ -117,7 +105,7 @@ export const ServiceNode = memo(
       width: ${SERVICE_NODE_CIRCLE_SIZE}px;
       height: ${SERVICE_NODE_CIRCLE_SIZE}px;
       border-radius: 50%;
-      border: ${borderWidth} ${borderStyle} ${borderColor};
+      border: ${borderWidth} solid ${borderColor};
       background: ${euiTheme.colors.backgroundBasePlain};
       display: flex;
       align-items: center;
