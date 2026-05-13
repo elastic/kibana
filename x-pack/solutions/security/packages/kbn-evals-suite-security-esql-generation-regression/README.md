@@ -59,7 +59,19 @@ In CI the trace-based evaluators query the `tracingEs` cluster declared in `kbn-
 
 ## LangSmith parity
 
-This suite replaces the legacy LangSmith-based `DefaultAssistantGraph` evaluation. The four ES|QL evaluators above are the parity baseline (LangSmith covered the same dimensions: query validity, execution success, result equivalence, functional equivalence). End-to-end verification with the live Agent Builder `converse` loop against `pmeClaudeV45SonnetUsEast1` / `pmeClaudeV46OpusUsEast1` reproduces the perfect-score behaviour the legacy suite delivered for well-formed examples (all four metrics report `1`), confirming the agent loop, ES|QL extractor, and fixture indices all pull their weight end-to-end. The five trace-based observability evaluators are additive — LangSmith did not expose those metrics as scored evaluators and they require no parity-equivalent in the prior suite.
+This suite replaces the legacy LangSmith-based `DefaultAssistantGraph` evaluation. The four ES|QL evaluators above are the parity baseline (LangSmith covered the same dimensions: query validity, execution success, result equivalence, functional equivalence). End-to-end verification with the live Agent Builder `converse` loop confirms the agent loop, ES|QL extractor, and fixture indices all pull their weight end-to-end. The five trace-based observability evaluators are additive — LangSmith did not expose those metrics as scored evaluators and they require no parity-equivalent in the prior suite.
+
+### Verified runs
+
+End-to-end runs against EIS (Elastic Inference Service) connectors after the agent-builder + fixtures fixes landed:
+
+| Run | Examples | Judge | Model | Execution Validity | Functional Equivalence | Result Equivalence | Validity |
+|---|---|---|---|---|---|---|---|
+| Smoke (LIMIT=1) | 1 | `pmeClaudeV45SonnetUsEast1` | `pmeClaudeV45SonnetUsEast1` | 1.00 | 1.00 | 1.00 | 1.00 |
+| Smoke (LIMIT=1) | 1 | `eis-google-gemini-3-1-pro` | `eis-anthropic-claude-4-7-opus` | 1.00 | 0.00 | 0.00 | 1.00 |
+| Full (EIS) | 31 | `eis-google-gemini-3-1-pro` | `eis-anthropic-claude-4-5-sonnet` | 0.69 | 0.10 | 0.35 | 0.90 |
+
+The full EIS baseline is what CI will compare against; the per-example scores are stored in `.kibana-evaluations` and the trace evaluators provide the cost/latency baseline when the run targets a cluster that holds the OTel spans (`TRACING_ES_URL` set).
 
 ---
 
@@ -105,13 +117,26 @@ node scripts/evals init config
 
 This writes `config/evals.json` with the Elasticsearch URL, API key, and default connector.
 
-### 2) Start the local eval stack
+### 2) Run the suite with EIS connectors (recommended — matches CI)
 
 ```bash
-nvm use && node scripts/evals scout
+# Discover EIS chat-completion endpoints and emit the connectors payload
+export KIBANA_EIS_CCM_API_KEY="$(vault read -field=key secret/kibana-issues/dev/inference/kibana-eis-ccm)"
+node scripts/discover_eis_models.js
+export KIBANA_TESTING_AI_CONNECTORS="$(node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_eis_connectors.js)"
+
+# Start the full stack (EDOT + Scout + EIS CCM) and run the suite
+EVALUATION_CONNECTOR_ID=eis-google-gemini-3-1-pro \
+TRACING_ES_URL="http://elastic:changeme@localhost:9200" \
+node scripts/evals start \
+  --suite security-esql-generation-regression \
+  --judge eis-google-gemini-3-1-pro \
+  --model eis-anthropic-claude-4-5-sonnet
 ```
 
-### 3) Run the full suite
+`evals start` detects the `eis-` prefix and enables EIS CCM on Scout automatically. If Scout is already running with a different `KIBANA_TESTING_AI_CONNECTORS` payload it is detected as stale and restarted with the new one.
+
+### 3) Run with a non-EIS connector (LiteLLM / kibana.dev.yml entries)
 
 ```bash
 nvm use && EVALUATION_CONNECTOR_ID=<connector-id> \
