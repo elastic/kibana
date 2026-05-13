@@ -103,12 +103,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/zod'
   - '@kbn/securitysolution-es-utils'
-  - '@kbn/openapi-generator'
-  - '@kbn/workflows-extensions'
-  - '@kbn/workflows'
   - '@kbn/lens-embeddable-utils'
-  - '@kbn/resizable-layout'
-  - '@kbn/css-utils'
 tags:
   - plugin
   - prod
