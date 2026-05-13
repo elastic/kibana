@@ -20,11 +20,9 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { TraceSpan } from '@kbn/evals-common';
-import { useTrace } from '../../hooks/use_evals_api';
 import { WaterfallItem, LABEL_WIDTH, SPAN_COLORS, type SpanCategory } from './waterfall_item';
 import { SpanDetail } from './span_detail';
-import type { SpanNode } from './types';
+import type { SpanNode, TraceSpan } from './types';
 import * as i18n from './translations';
 
 export { SpanDetail } from './span_detail';
@@ -130,22 +128,34 @@ const LEGEND_ITEMS: Array<{ category: SpanCategory; label: string }> = [
   { category: 'other', label: i18n.LEGEND_OTHER },
 ];
 
-interface TraceWaterfallProps {
-  traceId: string;
+export interface TraceWaterfallProps {
+  spans: TraceSpan[];
+  traceId?: string;
+  durationMs?: number;
+  isLoading?: boolean;
+  error?: Error | null;
   layout?: 'vertical' | 'horizontal';
+  hideNoiseDefault?: boolean;
 }
 
-export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ traceId, layout = 'vertical' }) => {
-  const { data, isLoading, error } = useTrace(traceId);
+export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({
+  spans,
+  traceId,
+  durationMs,
+  isLoading = false,
+  error = null,
+  layout = 'vertical',
+  hideNoiseDefault = true,
+}) => {
   const [selectedSpanId, setSelectedSpanId] = useState<string | null>(null);
-  const [hideNoise, setHideNoise] = useState(true);
+  const [hideNoise, setHideNoise] = useState(hideNoiseDefault);
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
 
   const { flatSpans, traceStartMs, traceDurationMs, noiseCount, tickPercents, tickLabels } =
     useMemo(() => {
-      if (!data?.spans.length) {
+      if (!spans.length) {
         return {
           flatSpans: [],
           traceStartMs: 0,
@@ -156,32 +166,35 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ traceId, layout 
         };
       }
 
-      const tree = buildSpanTree(data.spans);
+      const tree = buildSpanTree(spans);
       const flat = flattenTree(tree, hideNoise);
 
-      const startTimes = data.spans.map((s) => new Date(s.start_time).getTime());
+      const startTimes = spans.map((s) => new Date(s.start_time).getTime());
       const minStart = Math.min(...startTimes);
       const maxEnd = Math.max(
-        ...data.spans.map((s) => new Date(s.start_time).getTime() + s.duration_ms)
+        ...spans.map((s) => new Date(s.start_time).getTime() + s.duration_ms)
       );
-      const dur = maxEnd - minStart;
-      const noise = data.spans.filter((s) => isNoiseSpan(s)).length;
+      const calculatedDurationMs = maxEnd - minStart;
+      const resolvedDurationMs = durationMs ?? calculatedDurationMs;
+      const noise = spans.filter((s) => isNoiseSpan(s)).length;
 
-      const ticks = computeTickValues(dur);
-      const percents = ticks.map((t) => (dur > 0 ? (t / dur) * 100 : 0));
+      const ticks = computeTickValues(resolvedDurationMs);
+      const percents = ticks.map((t) =>
+        resolvedDurationMs > 0 ? (t / resolvedDurationMs) * 100 : 0
+      );
       const labels = ticks.map((t) => formatDuration(t));
 
       return {
         flatSpans: flat,
         traceStartMs: minStart,
-        traceDurationMs: dur,
+        traceDurationMs: resolvedDurationMs,
         noiseCount: noise,
         tickPercents: percents,
         tickLabels: labels,
       };
-    }, [data, hideNoise]);
+    }, [durationMs, hideNoise, spans]);
 
-  const autoSelectedTraceRef = useRef<string | null>(null);
+  const autoSelectedTraceRef = useRef<string | null | undefined>(null);
   useEffect(() => {
     if (flatSpans.length > 0 && autoSelectedTraceRef.current !== traceId) {
       autoSelectedTraceRef.current = traceId;
@@ -234,24 +247,24 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ traceId, layout 
         color="danger"
         iconType="error"
       >
-        <p>{error instanceof Error ? error.message : String(error)}</p>
+        <p>{error.message}</p>
       </EuiCallOut>
     );
   }
 
-  if (!data || data.spans.length === 0) {
+  if (!spans.length) {
     return (
       <EuiCallOut announceOnMount title={i18n.NO_SPANS_FOUND_TITLE} color="warning" iconType="help">
         <p>
           <FormattedMessage
-            id="xpack.evals.traceWaterfall.noSpansFoundMessage"
+            id="llmTraceWaterfall.noSpansFoundMessage"
             defaultMessage="No spans were found for trace ID: {traceId}"
-            values={{ traceId }}
+            values={{ traceId: traceId ?? '-' }}
           />
         </p>
         <p>
           <FormattedMessage
-            id="xpack.evals.traceWaterfall.noSpansFoundHelp"
+            id="llmTraceWaterfall.noSpansFoundHelp"
             defaultMessage="This usually means the trace was created before OTEL tracing was enabled, or the spans have not been exported yet. Ensure {configKey} is set in {configFile} and the EDOT collector is running."
             values={{
               configKey: <strong>telemetry.tracing.enabled: true</strong>,
@@ -349,7 +362,7 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ traceId, layout 
                   <EuiBadge color="hollow">{i18n.getHiddenCount(noiseCount)}</EuiBadge>
                 </>
               )}{' '}
-              &middot; {i18n.getTotalDuration((data.duration_ms ?? 0).toFixed(1))}
+              &middot; {i18n.getTotalDuration(traceDurationMs.toFixed(1))}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

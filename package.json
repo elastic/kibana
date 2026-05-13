@@ -801,6 +801,7 @@
     "@kbn/links-plugin": "link:src/platform/plugins/private/links",
     "@kbn/lists-plugin": "link:x-pack/solutions/security/plugins/lists",
     "@kbn/llm-tasks-plugin": "link:x-pack/platform/plugins/shared/ai_infra/llm_tasks",
+    "@kbn/llm-trace-waterfall": "link:x-pack/platform/packages/shared/llm-trace-waterfall",
     "@kbn/locator-examples-plugin": "link:examples/locator_examples",
     "@kbn/locator-explorer-plugin": "link:examples/locator_explorer",
     "@kbn/lock-manager": "link:src/platform/packages/shared/kbn-lock-manager",
