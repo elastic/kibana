@@ -89,7 +89,7 @@ const discoveriesLatestPerSlugRoute = createServerRoute({
 });
 
 const discoveriesBulkCreateRoute = createServerRoute({
-  endpoint: 'POST /internal/sig_events/discoveries',
+  endpoint: 'POST /internal/sig_events/discoveries/_bulk',
   options: {
     access: 'internal',
     summary: 'Bulk create discoveries',

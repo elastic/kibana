@@ -63,7 +63,7 @@ const detectionsSearchRoute = createServerRoute({
 });
 
 const detectionsBulkCreateRoute = createServerRoute({
-  endpoint: 'POST /internal/sig_events/detections',
+  endpoint: 'POST /internal/sig_events/detections/_bulk',
   options: {
     access: 'internal',
     summary: 'Bulk create detections',

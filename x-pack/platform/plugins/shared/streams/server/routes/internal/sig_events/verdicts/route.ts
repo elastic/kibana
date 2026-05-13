@@ -106,7 +106,7 @@ const verdictsReviewedSummaryRoute = createServerRoute({
 });
 
 const verdictsBulkCreateRoute = createServerRoute({
-  endpoint: 'POST /internal/sig_events/verdicts',
+  endpoint: 'POST /internal/sig_events/verdicts/_bulk',
   options: {
     access: 'internal',
     summary: 'Bulk create verdicts',

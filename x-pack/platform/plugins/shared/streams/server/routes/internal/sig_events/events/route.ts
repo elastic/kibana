@@ -57,7 +57,7 @@ const eventsSearchRoute = createServerRoute({
 });
 
 const eventsBulkCreateRoute = createServerRoute({
-  endpoint: 'POST /internal/sig_events/events',
+  endpoint: 'POST /internal/sig_events/events/_bulk',
   options: {
     access: 'internal',
     summary: 'Bulk create events',
