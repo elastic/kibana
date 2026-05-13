@@ -16,6 +16,7 @@ import type { StartServices } from '../../types';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { useInitDataViewManager } from '../../data_view_manager/hooks/use_init_data_view_manager';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 
 const DataViewManagerBootstrap = () => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
@@ -94,17 +95,39 @@ export const AlertFlyoutOverviewTab = ({
   return flyoutProviders({
     services,
     store,
-    children: (
-      <>
-        <DataViewManagerBootstrap />
-        {/* TODO: implement Discover cell actions - see https://github.com/elastic/kibana/issues/258858*/}
-        <EuiSpacer size="m" />
-        <OverviewTab
-          hit={hit}
-          renderCellActions={noopCellActionRenderer}
-          onAlertUpdated={onAlertUpdated}
-        />
-      </>
-    ),
+    children: <AlertFlyoutOverviewTabContent hit={hit} onAlertUpdated={onAlertUpdated} />,
   });
+};
+
+interface AlertFlyoutOverviewTabContentProps {
+  /**
+   * The document record that will be used to render the content of the overview tab in the alert details flyout.
+   */
+  hit: DataTableRecord;
+  /**
+   * Callback invoked after alert mutations to refresh the Discover table.
+   */
+  onAlertUpdated: () => void;
+}
+
+/**
+ * The content of the overview tab in the alert details flyout. This is rendered inside the flyout providers to have access to the services and store.
+ */
+const AlertFlyoutOverviewTabContent = ({
+  hit,
+  onAlertUpdated,
+}: AlertFlyoutOverviewTabContentProps) => {
+  const isInSecurityApp = useIsInSecurityApp();
+
+  return (
+    <>
+      {!isInSecurityApp && <DataViewManagerBootstrap />}
+      <EuiSpacer size="m" />
+      <OverviewTab
+        hit={hit}
+        renderCellActions={noopCellActionRenderer}
+        onAlertUpdated={onAlertUpdated}
+      />
+    </>
+  );
 };
