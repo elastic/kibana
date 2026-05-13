@@ -10,6 +10,9 @@
 export {
   NotificationEventsProvider,
   useNotificationEventsService,
+  useNotificationSpaces,
+  type NotificationEventsProviderProps,
+  type SpacesDependency,
 } from './notification_events_provider';
 export { useNotifications } from './use_notifications';
 export { useUnreadNotifications } from './use_unread_notifications';

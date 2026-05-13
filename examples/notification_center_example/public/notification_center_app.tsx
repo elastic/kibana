@@ -20,7 +20,6 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import { type Observable, of as rxOf } from 'rxjs';
 import { useObservable } from '@kbn/use-observable';
 import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
 import { SidebarHeader, SidebarBody } from '@kbn/core-chrome-sidebar-components';
@@ -33,6 +32,7 @@ import {
 } from '@kbn/core-notifications-browser-components';
 import {
   useNotificationEventsService,
+  useNotificationSpaces,
   useNotifications,
   useUnreadNotifications,
 } from '@kbn/core-notifications-browser-hooks';
@@ -41,14 +41,7 @@ import { alertTypeId, cloudTypeId, reportTypeId } from './event_types';
 
 export const notificationCenterAppId = 'sidebarExampleNotificationCenter';
 
-interface NotificationCenterAppProps extends SidebarComponentProps {
-  /** Active spaceId observable. Emits `undefined` when the spaces plugin is unavailable. */
-  activeSpaceId$?: Observable<string | undefined>;
-  /** Whether the spaces plugin is enabled at runtime. */
-  spacesEnabled?: boolean;
-}
-
-const EMPTY_SPACE$ = rxOf<string | undefined>(undefined);
+type NotificationCenterAppProps = SidebarComponentProps;
 
 const TYPE_LABELS: Readonly<Record<string, string>> = {
   [reportTypeId]: 'Report',
@@ -87,15 +80,12 @@ function deriveTypeIdMeta(events: readonly NotificationEventType[]) {
   return { typeIds, labels };
 }
 
-export function NotificationCenterApp({
-  onClose,
-  activeSpaceId$,
-  spacesEnabled = false,
-}: NotificationCenterAppProps) {
+export function NotificationCenterApp({ onClose }: NotificationCenterAppProps) {
   const events = useNotificationEventsService();
+  const { activeSpaceId$, spacesEnabled } = useNotificationSpaces();
   const all = useNotifications();
   const unread = useUnreadNotifications();
-  const activeSpaceId = useObservable(activeSpaceId$ ?? EMPTY_SPACE$, undefined);
+  const activeSpaceId = useObservable(activeSpaceId$, undefined);
 
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [selectedTypes, setSelectedTypes] = useState<ReadonlySet<string>>(new Set());
@@ -122,10 +112,7 @@ export function NotificationCenterApp({
   // selected type chip counts as one filter; a non-default state filter or
   // an active "current space only" toggle each adds one.
   const activeFilterCount = useMemo(
-    () =>
-      selectedTypes.size +
-      (stateFilter !== 'all' ? 1 : 0) +
-      (currentSpaceOnly ? 1 : 0),
+    () => selectedTypes.size + (stateFilter !== 'all' ? 1 : 0) + (currentSpaceOnly ? 1 : 0),
     [selectedTypes, stateFilter, currentSpaceOnly]
   );
 
@@ -134,22 +121,19 @@ export function NotificationCenterApp({
   };
 
   const buildContextMenu = useCallback(
-    (event: NotificationEventType) => (_id: string) => [
-      <EuiContextMenuItem
-        key="read"
-        icon={event.isRead ? 'minus' : 'check'}
-        onClick={() => events.markAsRead(event.id, !event.isRead)}
-      >
-        {event.isRead ? 'Mark as Unread' : 'Mark as Read'}
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        key="delete"
-        icon="trash"
-        onClick={() => events.delete(event.id)}
-      >
-        Delete
-      </EuiContextMenuItem>,
-    ],
+    (event: NotificationEventType) => (_id: string) =>
+      [
+        <EuiContextMenuItem
+          key="read"
+          icon={event.isRead ? 'minus' : 'check'}
+          onClick={() => events.markAsRead(event.id, !event.isRead)}
+        >
+          {event.isRead ? 'Mark as Unread' : 'Mark as Read'}
+        </EuiContextMenuItem>,
+        <EuiContextMenuItem key="delete" icon="trash" onClick={() => events.delete(event.id)}>
+          Delete
+        </EuiContextMenuItem>,
+      ],
     [events]
   );
 
