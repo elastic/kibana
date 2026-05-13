@@ -10,7 +10,7 @@
 import { BehaviorSubject, Subject } from 'rxjs';
 import { anyChildrenChanges$ } from './any_children_changes';
 
-describe('childrenUnsavedChanges$', () => {
+describe('anyChildrenChanges$', () => {
   const getChildApi = () => ({
     anyStateChange$: new Subject(),
     serializeState: jest.fn(),
