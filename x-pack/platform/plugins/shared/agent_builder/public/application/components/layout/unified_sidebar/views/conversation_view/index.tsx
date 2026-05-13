@@ -28,13 +28,13 @@ import {
   getAgentSettingsNavItems,
   getConversationIdFromPath,
 } from '../../../../../route_config';
-import { useFeatureFlags } from '../../../../../hooks/use_feature_flags';
+import { useRouteAccessConfig } from '../../../../../hooks/use_route_access_config';
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { useValidateAgentId } from '../../../../../hooks/agents/use_validate_agent_id';
 import { useAgentBuilderAgents } from '../../../../../hooks/agents/use_agents';
 import { useLastAgentId } from '../../../../../hooks/use_last_agent_id';
 import { useConversationList } from '../../../../../hooks/use_conversation_list';
-import { useSendMessageContext } from '../../../../../context/send_message/send_message_context';
+import { useStreamingContext } from '../../../../../context/streaming/streaming_context';
 import { SidebarNavList } from '../../shared/sidebar_nav_list';
 
 import { ConversationFooter } from './conversation_footer';
@@ -77,18 +77,18 @@ export const ConversationSidebarView: React.FC = () => {
   const validateAgentId = useValidateAgentId();
   const { isFetched: isAgentsFetched } = useAgentBuilderAgents();
   const lastAgentId = useLastAgentId();
-  const featureFlags = useFeatureFlags();
+  const routeAccessConfig = useRouteAccessConfig();
 
   const { conversations = [] } = useConversationList({ agentId });
   const hasConversations = conversations.length > 0;
-  const { removeAllErrors } = useSendMessageContext();
+  const { removeAllErrors } = useStreamingContext();
 
   const isNewConversationRoute =
     conversationId === 'new' || pathname === appPaths.agent.root({ agentId });
 
   const navItems = useMemo(
-    () => getAgentSettingsNavItems(agentId, featureFlags),
-    [agentId, featureFlags]
+    () => getAgentSettingsNavItems(agentId, routeAccessConfig),
+    [agentId, routeAccessConfig]
   );
 
   const isActive = (path: string) => pathname === path;

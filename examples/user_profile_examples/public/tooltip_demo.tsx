@@ -41,12 +41,7 @@ export const ToolTipDemo: FunctionComponent = () => {
             <UserAvatarTip user={userProfile.user} avatar={userProfile.data.avatar} />
           }
           username={
-            <UserToolTip
-              position="top"
-              delay="regular"
-              user={userProfile.user}
-              avatar={userProfile.data.avatar}
-            >
+            <UserToolTip position="top" user={userProfile.user} avatar={userProfile.data.avatar}>
               <strong>{userProfile.user.full_name}</strong>
             </UserToolTip>
           }

@@ -56,6 +56,8 @@ export class AuthenticationService {
     resetSessionApp.create({ application, getStartServices, http });
     unauthenticatedApp.create({ application, getStartServices, http });
 
-    return { getCurrentUser, areAPIKeysEnabled };
+    const isUIAMEnabled = () => config.uiam?.enabled === true;
+
+    return { getCurrentUser, areAPIKeysEnabled, isUIAMEnabled };
   }
 }

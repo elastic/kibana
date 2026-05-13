@@ -17,7 +17,7 @@ import {
 import type { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
-import React from 'react';
+import React, { useState } from 'react';
 import type { Streams } from '@kbn/streams-schema';
 import { StreamDeleteModal } from '../../../stream_delete_modal';
 import { RequestPreviewFlyout } from '../request_preview_flyout';
@@ -33,6 +33,8 @@ import {
   buildRoutingSaveRequestPayload,
   routingConverter,
 } from './utils';
+import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
+import { ExecutionModeModal } from './execution_mode_modal';
 
 interface AddRoutingRuleControlsProps {
   isStreamNameValid: boolean;
@@ -42,6 +44,10 @@ export const AddRoutingRuleControls = ({ isStreamNameValid }: AddRoutingRuleCont
   const { cancelChanges, forkStream } = useStreamRoutingEvents();
   const [isRequestPreviewFlyoutOpen, setIsRequestPreviewFlyoutOpen] = React.useState(false);
   const [requestPreviewCodeContent, setRequestPreviewCodeContent] = React.useState<string>('');
+  const [isExecutionModeModalVisible, setIsExecutionModeModalVisible] = useState(false);
+  const {
+    features: { draftStreams },
+  } = useStreamsPrivileges();
 
   const streamName = useStreamsRoutingSelector(
     (snapshot) => snapshot.context.definition.stream.name
@@ -84,6 +90,19 @@ export const AddRoutingRuleControls = ({ isStreamNameValid }: AddRoutingRuleCont
     setRequestPreviewCodeContent('');
   };
 
+  const handleCreateStream = () => {
+    if (draftStreams.enabled) {
+      setIsExecutionModeModalVisible(true);
+    } else {
+      forkStream(undefined, false);
+    }
+  };
+
+  const handleExecutionModeConfirm = (isDraft: boolean) => {
+    setIsExecutionModeModalVisible(false);
+    forkStream(undefined, isDraft);
+  };
+
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -101,15 +120,24 @@ export const AddRoutingRuleControls = ({ isStreamNameValid }: AddRoutingRuleCont
           <EuiFlexGroup justifyContent="flexEnd" alignItems="center" wrap responsive={false}>
             <CancelButton isDisabled={isForking} onClick={cancelChanges} />
             <PrivilegesTooltip hasPrivileges={hasPrivileges}>
-              <SaveButton
+              <CreateStreamButton
                 isLoading={isForking}
                 isDisabled={!canForkRouting || !isStreamNameValid}
-                onClick={() => forkStream()}
+                onClick={handleCreateStream}
               />
             </PrivilegesTooltip>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      {isExecutionModeModalVisible && (
+        <ExecutionModeModal
+          streamName={currentRoutingRule.destination}
+          condition={currentRoutingRule.where}
+          onCancel={() => setIsExecutionModeModalVisible(false)}
+          onConfirm={handleExecutionModeConfirm}
+        />
+      )}
 
       {isRequestPreviewFlyoutOpen && (
         <RequestPreviewFlyout
@@ -305,10 +333,10 @@ const RemoveButton = ({
   );
 };
 
-const SaveButton = (props: EuiButtonPropsForButton) => (
+const CreateStreamButton = (props: EuiButtonPropsForButton) => (
   <EuiButton data-test-subj="streamsAppStreamDetailRoutingSaveButton" size="s" fill {...props}>
-    {i18n.translate('xpack.streams.streamDetailRouting.add', {
-      defaultMessage: 'Save',
+    {i18n.translate('xpack.streams.streamDetailRouting.createStream', {
+      defaultMessage: 'Create stream',
     })}
   </EuiButton>
 );

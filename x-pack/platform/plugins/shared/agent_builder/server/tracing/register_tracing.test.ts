@@ -22,23 +22,6 @@ jest.mock('@kbn/core/server', () => {
   };
 });
 
-jest.mock('lru-cache', () => ({
-  LRUCache: jest.fn().mockImplementation((options: { fetchMethod: () => Promise<boolean> }) => {
-    let stored: boolean | undefined;
-
-    const refresh = () =>
-      options.fetchMethod().then((v) => {
-        stored = v;
-        return v;
-      });
-
-    return {
-      fetch: jest.fn(() => refresh()),
-      get: jest.fn(() => stored),
-    };
-  }),
-}));
-
 jest.mock('@kbn/tracing', () => ({
   LateBindingSpanProcessor: {
     register: jest.fn(() => jest.fn().mockResolvedValue(undefined)),
@@ -64,14 +47,8 @@ const MockedAgentBuilderProcessor = AgentBuilderSpanProcessor as jest.MockedClas
   typeof AgentBuilderSpanProcessor
 >;
 
-const flushPromises = () => new Promise<void>((resolve) => setImmediate(resolve));
-
 describe('registerTracingExporter', () => {
   const logger = loggerMock.create();
-
-  afterEach(async () => {
-    await flushPromises();
-  });
 
   function createCore() {
     const core = coreMock.createStart();
@@ -81,7 +58,12 @@ describe('registerTracingExporter', () => {
   }
 
   beforeEach(() => {
+    jest.useFakeTimers();
     jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it('returns undefined when no exporters are configured', async () => {
@@ -90,6 +72,7 @@ describe('registerTracingExporter', () => {
       send_to_self: false,
       exporters: [],
       scheduledDelay: 1000,
+      opik_distributed_tracing: false,
     };
 
     const result = await registerTracingExporter({
@@ -113,6 +96,7 @@ describe('registerTracingExporter', () => {
         },
       ],
       scheduledDelay: 750,
+      opik_distributed_tracing: false,
     };
 
     await registerTracingExporter({
@@ -134,6 +118,7 @@ describe('registerTracingExporter', () => {
       send_to_self: true,
       exporters: [],
       scheduledDelay: 500,
+      opik_distributed_tracing: false,
     };
 
     await registerTracingExporter({
@@ -154,6 +139,7 @@ describe('registerTracingExporter', () => {
       send_to_self: true,
       exporters: [],
       scheduledDelay: 250,
+      opik_distributed_tracing: false,
     };
 
     await registerTracingExporter({
@@ -174,6 +160,7 @@ describe('registerTracingExporter', () => {
       send_to_self: true,
       exporters: [],
       scheduledDelay: 100,
+      opik_distributed_tracing: false,
     };
 
     await registerTracingExporter({
@@ -187,7 +174,7 @@ describe('registerTracingExporter', () => {
     expect(isEnabled!()).toBe(true);
   });
 
-  it('refreshes the cache value when setting changes', async () => {
+  it('refreshes the cached value when the polling interval fires', async () => {
     const coreStart = createCore();
     const scopedUiSettings = jest.mocked(coreStart.uiSettings.asScopedToClient(jest.fn() as never));
     scopedUiSettings.get.mockResolvedValue(true);
@@ -196,6 +183,7 @@ describe('registerTracingExporter', () => {
       send_to_self: true,
       exporters: [],
       scheduledDelay: 100,
+      opik_distributed_tracing: false,
     };
 
     await registerTracingExporter({ core: coreStart, tracingConfig, logger });
@@ -204,13 +192,13 @@ describe('registerTracingExporter', () => {
     expect(isEnabled!()).toBe(true);
 
     scopedUiSettings.get.mockResolvedValue(false);
-    isEnabled!();
-    await flushPromises();
+    jest.advanceTimersByTime(30_000);
+    await Promise.resolve();
 
     expect(isEnabled!()).toBe(false);
   });
 
-  it('logs error when fetch rejects', async () => {
+  it('logs error when polling refresh rejects', async () => {
     const coreStart = createCore();
     const scopedUiSettings = jest.mocked(coreStart.uiSettings.asScopedToClient(jest.fn() as never));
     scopedUiSettings.get.mockResolvedValue(true);
@@ -219,18 +207,42 @@ describe('registerTracingExporter', () => {
       send_to_self: true,
       exporters: [],
       scheduledDelay: 100,
+      opik_distributed_tracing: false,
     };
 
     await registerTracingExporter({ core: coreStart, tracingConfig, logger });
 
     scopedUiSettings.get.mockRejectedValue(new Error('SO unavailable'));
-
-    const { isEnabled } = MockedAgentBuilderProcessor.mock.calls[0][0];
-    isEnabled!();
-    await flushPromises();
+    jest.advanceTimersByTime(30_000);
+    await Promise.resolve();
 
     expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to refresh tracing settings')
+      expect.stringContaining('Failed to fetch tracing settings')
     );
+  });
+
+  it('teardown stops polling and shuts down processors', async () => {
+    const coreStart = createCore();
+    const scopedUiSettings = jest.mocked(coreStart.uiSettings.asScopedToClient(jest.fn() as never));
+    scopedUiSettings.get.mockResolvedValue(true);
+
+    const tracingConfig: TracingConfig = {
+      send_to_self: true,
+      exporters: [],
+      scheduledDelay: 100,
+      opik_distributed_tracing: false,
+    };
+
+    const teardown = await registerTracingExporter({ core: coreStart, tracingConfig, logger });
+    expect(teardown).toBeDefined();
+
+    await teardown!();
+
+    scopedUiSettings.get.mockResolvedValue(false);
+    jest.advanceTimersByTime(30_000);
+    await Promise.resolve();
+
+    const { isEnabled } = MockedAgentBuilderProcessor.mock.calls[0][0];
+    expect(isEnabled!()).toBe(true);
   });
 });
