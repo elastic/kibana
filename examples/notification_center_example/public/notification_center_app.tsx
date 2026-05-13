@@ -293,7 +293,6 @@ export function NotificationCenterApp({
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="s"
-                iconType="popout"
                 iconSide="right"
                 onClick={() => {
                   onClose();
