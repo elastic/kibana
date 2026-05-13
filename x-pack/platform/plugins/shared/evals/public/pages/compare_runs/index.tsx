@@ -32,9 +32,14 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { useHistory, useLocation } from 'react-router-dom';
+import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import type { PairedTTestResult } from '@kbn/evals-common';
-import { useCompareRuns, useEvaluationRun, useRunDatasetExamples } from '../../hooks/use_evals_api';
-import { TraceWaterfall } from '../../components/trace_waterfall';
+import {
+  useCompareRuns,
+  useEvalsTraceFetcher,
+  useEvaluationRun,
+  useRunDatasetExamples,
+} from '../../hooks/use_evals_api';
 import * as i18n from './translations';
 
 const SIGNIFICANCE_THRESHOLD = 0.05;
@@ -236,6 +241,13 @@ const ExampleDrilldownFlyout: React.FC<{
 }> = ({ runIdA, runIdB, datasetId, datasetName, evaluatorName, onClose }) => {
   const { euiTheme } = useEuiTheme();
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
+  const fetchTrace = useEvalsTraceFetcher();
+  const {
+    spans,
+    durationMs,
+    isLoading: traceLoading,
+    error: traceError,
+  } = useTraceSpans(selectedTraceId, { fetchTrace });
   const { data: examplesA, isLoading: loadingA } = useRunDatasetExamples(runIdA, datasetId);
   const { data: examplesB, isLoading: loadingB } = useRunDatasetExamples(runIdB, datasetId);
 
@@ -482,7 +494,13 @@ const ExampleDrilldownFlyout: React.FC<{
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <TraceWaterfall traceId={selectedTraceId} />
+            <TraceWaterfall
+              spans={spans}
+              traceId={selectedTraceId}
+              durationMs={durationMs}
+              isLoading={traceLoading}
+              error={traceError}
+            />
           </EuiFlyoutBody>
         </EuiFlyout>
       )}
