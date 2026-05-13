@@ -70,9 +70,7 @@ function isFieldNameInvalidatedAfterRenameDefinition(
 }
 
 /**
- * Maps an ES|QL output column name toward a field name suitable for filters by walking
- * `RENAME` / `STATS` / `INLINE STATS` commands from last to first (the most recent rename
- * wins for each step). Pairs come from `getSummaryPerCommand` so pipeline order is preserved.
+ * Maps an ES|QL output column name toward a field name suitable for filters.
  *
  * If unwinding would cross a computed column that is not itself a rename output
  * (for example `EVAL message = …` then `RENAME message AS context`), returns the

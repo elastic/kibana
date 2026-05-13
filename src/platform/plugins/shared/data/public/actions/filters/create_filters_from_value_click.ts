@@ -160,6 +160,15 @@ const createFilterFromRawColumnsESQL = async (
   const sourceFieldName = column.meta?.sourceParams?.sourceField;
   const fieldName = typeof sourceFieldName === 'string' ? sourceFieldName : column.name;
 
+  // Avoid index phrase filter when output column name collides with an index field
+  if (
+    column.isComputedColumn === true &&
+    column.name === fieldName &&
+    dataView.getFieldByName(column.name)
+  ) {
+    return [];
+  }
+
   const field = dataView.getFieldByName(fieldName);
 
   // Field should be present in the data view and filterable
