@@ -132,7 +132,7 @@ export const ElasticInferenceServiceModelsPage = () => {
               <EuiFieldSearch
                 placeholder={i18n.translate(
                   'xpack.searchInferenceEndpoints.eisModelspage.searchPlaceholder',
-                  { defaultMessage: 'Search models...' }
+                  { defaultMessage: 'Search Elastic Inference Service models...' }
                 )}
                 value={searchQuery}
                 fullWidth={true}
@@ -140,7 +140,7 @@ export const ElasticInferenceServiceModelsPage = () => {
                 aria-label={i18n.translate(
                   'xpack.searchInferenceEndpoints.eisModelspage.searchbar',
                   {
-                    defaultMessage: 'Find Elastic Inference Service models',
+                    defaultMessage: 'Search Elastic Inference Service models',
                   }
                 )}
                 data-test-subj="eisModelsSearchBar"

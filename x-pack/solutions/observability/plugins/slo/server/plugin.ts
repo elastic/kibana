@@ -165,6 +165,7 @@ export class SLOPlugin
     core.savedObjects.registerType(slo);
     core.savedObjects.registerType(sloSettings);
     if (isCompositeSloEnabled) {
+      // eslint-disable-next-line @kbn/eslint/no_conditional_saved_object_type_registration -- TODO: remove conditional registration; tracked for follow-up PR
       core.savedObjects.registerType(sloComposite);
     }
 
@@ -193,6 +194,7 @@ export class SLOPlugin
         plugins: mappedPlugins,
         config: {
           isServerless: this.isServerless,
+          compositeSloSummaryTaskEnabled: this.config.compositeSloSummaryTaskEnabled,
         },
         getScopedClients: async ({ request, logger }) => {
           const [coreStart, pluginsStart] = await core.getStartServices();

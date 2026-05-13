@@ -55,7 +55,7 @@ import { saveToLibrary } from './save_to_library';
 import { deserializeState, serializeState } from './state';
 import type { VisualizeApi } from './types';
 import { initializeEditApi } from './initialize_edit_api';
-import { checkForDuplicateTitle } from '../utils/saved_objects_utils';
+import { hasLibraryItemWithTitle } from '../utils/saved_objects_utils';
 
 export const visualizeEmbeddableFactory: EmbeddableFactory<VisualizeEmbeddableState, VisualizeApi> =
   {
@@ -73,7 +73,7 @@ export const visualizeEmbeddableFactory: EmbeddableFactory<VisualizeEmbeddableSt
       const titleManager = initializeTitleManager(initialState);
 
       // Initialize dynamic actions
-      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
+      const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
 
       const runtimeState = await deserializeState(initialState);
 
@@ -326,18 +326,7 @@ export const visualizeEmbeddableFactory: EmbeddableFactory<VisualizeEmbeddableSt
         },
         canLinkToLibrary: () => Promise.resolve(!linkedToLibrary),
         canUnlinkFromLibrary: () => Promise.resolve(linkedToLibrary),
-        checkForDuplicateTitle: async (
-          newTitle: string,
-          isTitleDuplicateConfirmed: boolean,
-          onTitleDuplicate: () => void
-        ) => {
-          await checkForDuplicateTitle(
-            { title: newTitle, lastSavedTitle: '' },
-            false,
-            isTitleDuplicateConfirmed,
-            onTitleDuplicate
-          );
-        },
+        hasLibraryItemWithTitle,
         getSerializedStateByValue: () => serializeVisualizeEmbeddable(undefined, false),
         getSerializedStateByReference: (libraryId) => serializeVisualizeEmbeddable(libraryId, true),
       });

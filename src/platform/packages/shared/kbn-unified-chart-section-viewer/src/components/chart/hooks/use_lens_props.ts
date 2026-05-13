@@ -18,7 +18,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
-import { useStableCallback } from '@kbn/unified-histogram';
+import { useStableCallback } from '@kbn/react-hooks';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import {
   filter,

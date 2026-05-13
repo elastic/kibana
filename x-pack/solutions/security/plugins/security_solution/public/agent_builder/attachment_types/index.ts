@@ -5,10 +5,12 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
+import type {
+  AttachmentServiceStartContract,
+  AgentBuilderPluginStart,
+} from '@kbn/agent-builder-browser';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { ISessionService } from '@kbn/data-plugin/public';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';

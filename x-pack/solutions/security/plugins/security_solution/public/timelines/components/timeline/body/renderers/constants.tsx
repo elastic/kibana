@@ -20,6 +20,7 @@ export const RULE_REFERENCE_FIELD_NAME = 'rule.reference';
 export const REFERENCE_URL_FIELD_NAME = 'reference.url';
 export const EVENT_URL_FIELD_NAME = 'event.url';
 export const SIGNAL_RULE_NAME_FIELD_NAME = 'kibana.alert.rule.name';
+export const LEGACY_SIGNAL_RULE_NAME_FIELD_NAME = 'signal.rule.name';
 export const SIGNAL_STATUS_FIELD_NAME = 'kibana.alert.workflow_status';
 export const AGENT_STATUS_FIELD_NAME = 'agent.status';
 export const QUARANTINED_PATH_FIELD_NAME = 'quarantined.path';

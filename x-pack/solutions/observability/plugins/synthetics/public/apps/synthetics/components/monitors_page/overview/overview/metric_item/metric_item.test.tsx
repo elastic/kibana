@@ -52,7 +52,7 @@ describe('getMetricValueProps', () => {
   it('returns metric value props when trendData is available', () => {
     const trendData: OverviewTrend = {
       configId: 'test-config',
-      locationId: 'test-location',
+      locationIds: ['test-location'],
       data: [],
       count: 50,
       median: 1500,

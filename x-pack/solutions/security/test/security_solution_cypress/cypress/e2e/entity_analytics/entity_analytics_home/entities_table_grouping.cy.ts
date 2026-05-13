@@ -10,6 +10,7 @@ import { visit } from '../../../tasks/navigation';
 import {
   setGrouping,
   waitForGroupingTable,
+  waitForEntityAnalyticsPageReady,
   interceptEntityStoreSearch,
   selectGroupingOption,
   interceptEntityStoreStatus,
@@ -63,9 +64,7 @@ describe(
         visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
         cy.get(PAGE_TITLE).should('exist');
         // Resolution is the default grouping
-        cy.wait('@entityStoreStatus', { timeout: 20000 });
-        cy.wait('@entityStoreSearch');
-        waitForGroupingTable();
+        waitForEntityAnalyticsPageReady();
       });
 
       it('displays resolution groups', () => {
@@ -116,9 +115,7 @@ describe(
         interceptEntityStoreSearch();
         visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
         cy.get(PAGE_TITLE).should('exist');
-        cy.wait('@entityStoreStatus', { timeout: 20000 });
-        cy.wait('@entityStoreSearch');
-        waitForGroupingTable();
+        waitForEntityAnalyticsPageReady();
       });
 
       it('shows group selector with Entity type selected', () => {
@@ -152,9 +149,7 @@ describe(
         interceptEntityStoreSearch();
         visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
         cy.get(PAGE_TITLE).should('exist');
-        cy.wait('@entityStoreStatus', { timeout: 20000 });
-        cy.wait('@entityStoreSearch');
-        waitForGroupingTable();
+        waitForEntityAnalyticsPageReady();
       });
 
       it('selecting "None" shows flat data table', () => {

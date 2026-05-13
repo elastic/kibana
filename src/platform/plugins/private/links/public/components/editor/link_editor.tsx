@@ -38,8 +38,8 @@ import { LinkInfo } from './constants';
 import { LinkDestination } from './link_destination';
 import type { ExternalLinkOptions } from '../../../server';
 import type { ResolvedLink } from '../../types';
-import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../external_link/constants';
-import { ExternalLinkOptionsEditor } from '../external_link/external_link_options_edtior';
+import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../../../common/constants';
+import { ExternalLinkOptionsEditor } from '../external_link/external_link_options_editor';
 
 export const LinkEditor = ({
   link,

@@ -11,6 +11,7 @@ import type { IBasePath } from '@kbn/core-http-browser';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { v4 } from 'uuid';
+import type { SavedObject } from '@kbn/core/server';
 import type {
   ActionConnector,
   AttachmentV2,
@@ -26,6 +27,7 @@ import type {
   Observable,
   User,
 } from '../../../common/types/domain';
+import type { Template } from '../../../common/types/domain/template/latest';
 import { AttachmentType, CaseStatuses, UserActionTypes } from '../../../common/types/domain';
 import type {
   CasePostRequest,
@@ -679,4 +681,58 @@ export const processObservables = (
       updatedAt: new Date().toISOString(),
     });
   }
+};
+
+/**
+ *
+ * For cases that have a template and extended fields, fetches the template definitions
+ * and populates `extended_fields_labels` with a mapping from storage keys (e.g.,
+ * `priority_as_keyword`) to user-facing labels (e.g., "Priority"). Cases without templates
+ * or extended fields, or whose templates cannot be retrieved, are returned unchanged.
+ *
+ * @param cases - Array of cases to enrich
+ * @param templateSOs - Pre-fetched template saved objects
+ * @returns The enriched cases array, preserving original order
+ */
+export const enrichCasesWithFieldLabels = (
+  cases: Case[],
+  templateSOs: Array<SavedObject<Template>>
+): Case[] => {
+  type EligibleCase = Case & {
+    template: NonNullable<Case['template']>;
+    extended_fields: NonNullable<Case['extended_fields']>;
+  };
+  const isEligible = (c: Case): c is EligibleCase =>
+    c.template?.id != null && c.extended_fields != null;
+
+  const eligibleCases = cases.filter(isEligible);
+
+  if (eligibleCases.length === 0) {
+    return cases;
+  }
+
+  const labelsByTemplateKey = new Map<string, Record<string, string>>();
+  for (const so of templateSOs) {
+    const fieldKeyToLabel = Object.fromEntries(
+      (so.attributes.fieldNames ?? []).map((field) => [
+        `${field.name}_as_${field.type}`,
+        field.label,
+      ])
+    );
+    labelsByTemplateKey.set(
+      `${so.attributes.templateId}:${so.attributes.templateVersion}`,
+      fieldKeyToLabel
+    );
+  }
+
+  const enrichedCasesById = new Map(
+    eligibleCases.flatMap((c) => {
+      const fieldKeyToLabel = labelsByTemplateKey.get(`${c.template.id}:${c.template.version}`);
+      return fieldKeyToLabel != null
+        ? [[c.id, { ...c, extended_fields_labels: fieldKeyToLabel }]]
+        : [];
+    })
+  );
+
+  return cases.map((c) => enrichedCasesById.get(c.id) ?? c);
 };

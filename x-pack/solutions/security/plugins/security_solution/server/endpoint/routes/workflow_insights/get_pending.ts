@@ -7,8 +7,7 @@
 
 import pMap from 'p-map';
 import type { IKibanaResponse, RequestHandler } from '@kbn/core/server';
-import { ExecutionStatus } from '@kbn/agent-builder-plugin/server';
-import { AgentExecutionMode } from '@kbn/agent-builder-common';
+import { AgentExecutionMode, ExecutionStatus } from '@kbn/agent-builder-common';
 import type { GetPendingInsightsRequestQueryParams } from '../../../../common/api/endpoint/workflow_insights/workflow_insights';
 import { GetPendingInsightsRequestSchema } from '../../../../common/api/endpoint/workflow_insights/workflow_insights';
 import { errorHandler } from '../error_handler';

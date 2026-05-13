@@ -59,7 +59,6 @@ disabled:
   # Gen AI suites, running with their own pipeline
   - x-pack/platform/test/functional_gen_ai/inference/config.ts
   - x-pack/platform/test/functional_gen_ai/inference/generate_artifacts.config.ts
-  - x-pack/platform/test/agent_builder/smoke_tests/config.stateful.ts
 
 defaultQueue: 'n2-4-spot'
 enabled:
@@ -121,7 +120,6 @@ enabled:
   - src/platform/test/functional/apps/discover/cascade_layout/config.ts
   - src/platform/test/functional/apps/getting_started/config.ts
   - src/platform/test/functional/apps/home/config.ts
-  - src/platform/test/functional/apps/kibana_overview/config.ts
   - src/platform/test/functional/apps/management/group1/config.ts
   - src/platform/test/functional/apps/management/group2/config.ts
   - src/platform/test/functional/apps/management/group3/config.ts
@@ -206,6 +204,7 @@ enabled:
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group4/config_with_schedule_circuit_breaker.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group5/config.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group6/config.ts
+  - x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group6/config_with_change_tracking_enabled.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/actions/config.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/action_task_params/config.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/actions/connector_types/stack/email_recipient_allowlist/config.ts
@@ -269,7 +268,6 @@ enabled:
   - x-pack/platform/test/functional/apps/home/config.ts
   - x-pack/platform/test/functional/apps/index_lifecycle_management/config.ts
   - x-pack/platform/test/functional/apps/index_management/config.ts
-  - x-pack/platform/test/functional/apps/ingest_pipelines/config.ts
   - x-pack/platform/test/functional/apps/lens/group1/config.ts
   - x-pack/platform/test/functional/apps/lens/group2/config.ts
   - x-pack/platform/test/functional/apps/lens/group3/config.ts
@@ -467,12 +465,10 @@ enabled:
   - x-pack/platform/test/api_integration/apis/kibana/config.ts
   - x-pack/platform/test/api_integration/apis/management/config.ts
   - x-pack/platform/test/api_integration/apis/management/index_management/disabled_data_enrichers/config.ts
-  - x-pack/platform/test/api_integration/apis/lens/config.ts
   - x-pack/platform/test/api_integration/apis/ml/config.ts
   - x-pack/platform/test/api_integration/apis/monitoring/config.ts
   - x-pack/platform/test/api_integration/apis/monitoring_collection/config.ts
   - x-pack/platform/test/api_integration/apis/osquery/config.ts
-  - x-pack/platform/test/api_integration/apis/search_inference_endpoints/config.ts
   - x-pack/platform/test/api_integration/apis/searchprofiler/config.ts
   - x-pack/platform/test/api_integration/apis/security/config_security_trial.ts
   - x-pack/platform/test/api_integration/apis/spaces/config.ts
@@ -485,9 +481,9 @@ enabled:
   - x-pack/platform/test/api_integration_basic/apis/security/config.ts
   - x-pack/platform/test/automatic_import_api_integration/configs/config.stateful.ts
   - x-pack/platform/test/encrypted_saved_objects_api_integration/config.ts
+  - x-pack/platform/test/inbox_api_integration/config.ts
   - x-pack/platform/test/fleet_multi_cluster/config.ts
   - x-pack/platform/test/monitoring_api_integration/config.ts
-  - x-pack/platform/test/agent_builder_functional/config.ts
   - x-pack/platform/test/plugin_api_integration/config.ts
   - x-pack/platform/test/saved_object_api_integration/security_and_spaces/config_basic.ts
   - x-pack/platform/test/saved_object_api_integration/security_and_spaces/config_trial.ts

@@ -38,7 +38,7 @@ export const getImageEmbeddableFactory = () => {
     }) => {
       const titleManager = initializeTitleManager(initialState);
 
-      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
+      const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
 
       const filesClient = filesService.filesClientFactory.asUnscoped<FileImageMetadata>();
       const imageConfig$ = new BehaviorSubject<ImageConfig>(initialState.image_config);

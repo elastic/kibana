@@ -81,7 +81,7 @@ export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) =>
         <EuiFlexGroup gutterSize="s" data-test-subj="mlLensLayerCompatible">
           <EuiFlexItem grow={false}>
             <EuiText size="s">
-              <EuiIcon type="checkInCircleFilled" color="success" aria-hidden={true} />
+              <EuiIcon aria-hidden={true} type="checkCircleFill" color="success" />
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>

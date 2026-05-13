@@ -16,6 +16,7 @@ import type { Runner } from '@kbn/agent-builder-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { isAllowedBuiltinTool } from '@kbn/agent-builder-server/allow_lists';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import {
   createBuiltinToolRegistry,
@@ -116,6 +117,10 @@ export class ToolsService {
         logger,
         esClient: elasticsearch.client.asInternalUser,
       });
+      const soClient = savedObjects.getScopedClient(request);
+      const experimentalFeaturesEnabled = await uiSettings
+        .asScopedToClient(soClient)
+        .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
 
       return createToolRegistry({
         getRunner,
@@ -128,6 +133,7 @@ export class ToolsService {
         healthClient,
         logger,
         healthTrackedToolTypes,
+        experimentalFeaturesEnabled,
       });
     };
 

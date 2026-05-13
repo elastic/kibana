@@ -6,8 +6,14 @@
  */
 
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { createEventLogService } from '../../services/event_log_service/event_log_service.mock';
+import {
+  MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+  type MaintenanceWindowAttributes,
+} from '@kbn/maintenance-windows-plugin/common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import {
   ALERT_ACTIONS_DATA_STREAM,
@@ -26,6 +32,7 @@ import type { LoggerServiceContract } from '../../services/logger_service/logger
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { ActionPolicySavedObjectService } from '../../services/action_policy_saved_object_service/action_policy_saved_object_service';
 import type { ActionPolicySavedObjectServiceContract } from '../../services/action_policy_saved_object_service/action_policy_saved_object_service';
+import { MaintenanceWindowService } from '../../services/maintenance_window_service/maintenance_window_service';
 import {
   QueryService,
   type QueryServiceContract,
@@ -44,12 +51,14 @@ import {
   FetchSuppressionsStep,
   ApplySuppressionStep,
   FetchRulesStep,
+  ApplyMaintenanceWindowStep,
   FetchPoliciesStep,
   EvaluateMatchersStep,
   BuildGroupsStep,
   ApplyThrottlingStep,
   DispatchStep,
   StoreActionsStep,
+  StoreExecutionHistoryStep,
 } from '../steps';
 import { waitForDataStreamsReady } from './helpers/wait';
 import { setupTestServers } from './setup_test_servers';
@@ -472,6 +481,8 @@ describe('DispatcherService integration tests', () => {
   let rulesSoService: RulesSavedObjectServiceContract;
   let npSoService: ActionPolicySavedObjectServiceContract;
   let mockWfm: WorkflowsServerPluginSetup['management'];
+  let eventLogService: ReturnType<typeof createEventLogService>['eventLogService'];
+  let eventLogger: ReturnType<typeof createEventLogService>['mockEventLogger'];
 
   beforeAll(async () => {
     const servers = await setupTestServers();
@@ -509,12 +520,16 @@ describe('DispatcherService integration tests', () => {
 
   beforeEach(async () => {
     await cleanupDataStreams(esClient);
+    await cleanupMaintenanceWindows(esClient);
 
     mockLoggerService = createLoggerService().loggerService;
 
     queryService = new QueryService(esClient, mockLoggerService);
     storageService = new StorageService(esClient, mockLoggerService);
     mockWfm = createMockWorkflowsManagement();
+    const services = createEventLogService();
+    eventLogService = services.eventLogService;
+    eventLogger = services.mockEventLogger;
 
     jest.spyOn(npSoService, 'findAllDecrypted').mockImplementation(async () => {
       const { saved_objects: allPolicies } = await npSoService.find({
@@ -526,17 +541,27 @@ describe('DispatcherService integration tests', () => {
         .map((doc) => ({ id: doc.id, attributes: doc.attributes }));
     });
 
+    const mwService = new MaintenanceWindowService(
+      kibanaServer.coreStart.savedObjects.getUnsafeInternalClient({
+        includedHiddenTypes: [MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE],
+      }),
+      mockLoggerService,
+      { cacheIntervalMs: 0 }
+    );
+
     const pipeline = new DispatcherPipeline(mockLoggerService, [
       new FetchEpisodesStep(queryService),
       new FetchSuppressionsStep(queryService),
       new ApplySuppressionStep(),
       new FetchRulesStep(rulesSoService),
+      new ApplyMaintenanceWindowStep(mwService),
       new FetchPoliciesStep(npSoService),
-      new EvaluateMatchersStep(),
+      new EvaluateMatchersStep(mockLoggerService),
       new BuildGroupsStep(),
       new ApplyThrottlingStep(queryService, mockLoggerService),
       new DispatchStep(mockLoggerService, mockWfm),
       new StoreActionsStep(storageService),
+      new StoreExecutionHistoryStep(eventLogService),
     ]);
     dispatcherService = new DispatcherService(pipeline);
 
@@ -560,6 +585,7 @@ describe('DispatcherService integration tests', () => {
       });
 
       expect(actionsResponse.hits.hits).toHaveLength(0);
+      expect(eventLogger.logEvent).not.toHaveBeenCalled();
     });
   });
 
@@ -608,6 +634,17 @@ describe('DispatcherService integration tests', () => {
       });
 
       expect(notifiedActionsResponse.hits.hits).toHaveLength(3);
+
+      const loggedActions = eventLogger.logEvent.mock.calls.map(([event]) => event?.event?.action);
+      expect(loggedActions).toEqual(['dispatched']);
+      const [[summaryEvent]] = eventLogger.logEvent.mock.calls;
+      const refTypes = summaryEvent?.kibana?.saved_objects?.map((ref) => ref?.type);
+      expect(refTypes).toEqual([ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE]);
+      expect(summaryEvent?.kibana?.alerting_v2?.dispatcher?.episode_count).toBe(3);
+      expect(summaryEvent?.kibana?.alerting_v2?.dispatcher?.episode_ids).toHaveLength(3);
+      expect(summaryEvent?.kibana?.alerting_v2?.dispatcher?.rule_count).toBe(1);
+      expect(summaryEvent?.kibana?.alerting_v2?.dispatcher?.action_group_count).toBe(3);
+      expect(summaryEvent?.kibana?.alerting_v2?.dispatcher?.workflow_execution_ids).toEqual([]);
     });
   });
 
@@ -941,6 +978,52 @@ describe('DispatcherService integration tests', () => {
           rule_id: 'rule-groupby',
           actor: 'system',
           source: 'internal',
+        });
+      });
+    });
+  });
+
+  describe('when an enabled maintenance window covers the episode timestamps', () => {
+    it('should suppress dispatch for matching episodes and record the MW as the suppression reason', async () => {
+      const mwId = await seedMaintenanceWindow(kibanaServer, {
+        title: 'covers-rule-1-events',
+        events: [{ gte: '2026-01-22T07:00:00.000Z', lte: '2026-01-22T08:00:00.000Z' }],
+      });
+      await seedAlertEvents(esClient, ALERT_EVENTS_TEST_DATA);
+
+      const result = await dispatcherService.run({
+        previousStartedAt: new Date('2026-01-22T07:00:00.000Z'),
+      });
+
+      expect(result.startedAt).toBeDefined();
+
+      await esClient.indices.refresh({ index: ALERT_ACTIONS_DATA_STREAM });
+
+      const fireResponse = await esClient.search({
+        index: ALERT_ACTIONS_DATA_STREAM,
+        query: { term: { action_type: 'fire' } },
+        size: 100,
+      });
+      expect(fireResponse.hits.hits).toHaveLength(0);
+
+      const suppressResponse = await esClient.search({
+        index: ALERT_ACTIONS_DATA_STREAM,
+        query: { term: { action_type: 'suppress' } },
+        size: 100,
+      });
+      const suppressActions = suppressResponse.hits.hits.map(
+        (hit) => hit._source as Record<string, unknown>
+      );
+
+      expect(suppressActions).toHaveLength(3);
+      suppressActions.forEach((action) => {
+        expect(action).toMatchObject({
+          rule_id: 'rule-1',
+          group_hash: 'rule-1-series-1',
+          action_type: 'suppress',
+          actor: 'system',
+          source: 'internal',
+          reason: `maintenance_window:${mwId}`,
         });
       });
     });
@@ -1329,4 +1412,51 @@ async function seedAlertActions(
     operations,
     refresh: true,
   });
+}
+
+async function seedMaintenanceWindow(
+  kibanaServer: TestKibanaUtils,
+  overrides: Partial<MaintenanceWindowAttributes> = {}
+): Promise<string> {
+  const client = kibanaServer.coreStart.savedObjects.getUnsafeInternalClient({
+    includedHiddenTypes: [MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE],
+  });
+  const attrs: MaintenanceWindowAttributes = {
+    title: 'Test MW',
+    enabled: true,
+    duration: 60 * 60 * 1000,
+    expirationDate: '2099-01-01T00:00:00.000Z',
+    events: [{ gte: '2026-01-22T07:00:00.000Z', lte: '2026-01-22T08:00:00.000Z' }],
+    rRule: { dtstart: '2026-01-22T07:00:00.000Z', tzid: 'UTC' },
+    createdBy: null,
+    updatedBy: null,
+    createdAt: '2026-01-22T06:00:00.000Z',
+    updatedAt: '2026-01-22T06:00:00.000Z',
+    schedule: {
+      custom: {
+        start: '2026-01-22T07:00:00.000Z',
+        duration: '1h',
+      },
+    },
+    ...overrides,
+  };
+  const created = await client.create<MaintenanceWindowAttributes>(
+    MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+    attrs
+  );
+  return created.id;
+}
+
+async function cleanupMaintenanceWindows(esClient: ElasticsearchClient): Promise<void> {
+  await esClient
+    .deleteByQuery({
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+      query: { term: { type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } },
+      refresh: true,
+      wait_for_completion: true,
+      conflicts: 'proceed',
+    })
+    .catch(() => {
+      // noop
+    });
 }

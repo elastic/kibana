@@ -9,7 +9,6 @@ import { useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
 import { DISCOVERY_QUERIES_QUERY_KEY } from './use_fetch_discovery_queries';
 import { DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY } from './use_fetch_discovery_queries_occurrences';
-import { UNBACKED_QUERIES_COUNT_QUERY_KEY } from './use_unbacked_queries_count';
 
 export const useInvalidatePromoteRelatedQueries = () => {
   const queryClient = useQueryClient();
@@ -18,7 +17,6 @@ export const useInvalidatePromoteRelatedQueries = () => {
       Promise.all([
         queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
         queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY }),
-        queryClient.invalidateQueries({ queryKey: UNBACKED_QUERIES_COUNT_QUERY_KEY }),
       ]),
     [queryClient]
   );

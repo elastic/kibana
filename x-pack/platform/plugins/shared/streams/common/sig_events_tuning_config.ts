@@ -25,6 +25,6 @@ export const DEFAULT_SIG_EVENTS_TUNING_CONFIG: SigEventsTuningConfig = {
   diverse_ratio: 0.4,
   max_excluded_features_in_prompt: 10,
   max_entity_filters: 10,
-  semantic_min_score: 10,
+  semantic_min_score: 0.15,
   rrf_rank_constant: 20,
 };
