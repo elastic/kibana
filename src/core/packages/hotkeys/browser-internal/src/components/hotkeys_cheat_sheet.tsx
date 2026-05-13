@@ -9,25 +9,28 @@
 
 import React, { useMemo, useState } from 'react';
 import {
-  EuiBadge,
   EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiModal,
-  EuiModalBody,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useGeneratedHtmlId,
+  EuiPageHeader,
+  EuiPageBody,
+  EuiPanel,
+  EuiPageHeaderSection,
+  EuiButtonIcon,
+  EuiHorizontalRule,
+  EuiNotificationBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
 import type { HotkeyDefinition } from '@kbn/core-hotkeys-browser';
+
 import { useObservable } from '@kbn/use-observable';
-import { useCurrentAppId, useHotkeys } from './chrome_hooks';
-import { formatChord } from './format_chord';
+import type { Observable } from 'rxjs';
+import { formatChord } from '../utils';
 
 type Section = 'global' | 'app' | 'context';
 
@@ -77,34 +80,50 @@ const group = (
   return grouped;
 };
 
-const HotkeyRow = ({ def }: { def: HotkeyDefinition }) => (
-  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m" responsive={false}>
-    <EuiFlexItem>
-      <EuiText size="s">
-        <strong>{def.label}</strong>
-      </EuiText>
-      {def.description ? (
-        <EuiText size="xs" color="subdued">
-          {def.description}
+const HotkeyRow = ({ def }: { def: HotkeyDefinition }) => {
+  const separatorToken = '+' as const;
+  // force a separator token so we can consistently split the chord into keys, across platforms
+  const formattedChord = formatChord(def.keys, { separatorToken });
+
+  return (
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="spaceBetween"
+      gutterSize="m"
+      responsive={false}
+      data-test-subj={`hotkeysCheatSheet-chord-${def.id}`}
+    >
+      <EuiFlexItem>
+        <EuiText size="s">
+          <strong>{def.label}</strong>
         </EuiText>
-      ) : null}
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiBadge color="hollow" data-test-subj={`hotkeysCheatSheet-chord-${def.id}`}>
-        {formatChord(def.keys)}
-      </EuiBadge>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+        {def.description ? (
+          <EuiText size="xs" color="subdued">
+            {def.description}
+          </EuiText>
+        ) : null}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="xs">
+          {formattedChord.split(separatorToken).map((key) => (
+            <EuiFlexItem key={key} grow={false}>
+              <EuiNotificationBadge color="subdued">{key}</EuiNotificationBadge>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 const Section = ({ title, entries }: { title: string; entries: HotkeyDefinition[] }) => {
   if (entries.length === 0) return null;
   return (
     <>
-      <EuiTitle size="xxs">
-        <h3>{title}</h3>
+      <EuiTitle size="xs">
+        <p>{title}</p>
       </EuiTitle>
-      <EuiSpacer size="s" />
+      <EuiHorizontalRule margin="xs" />
       {entries.map((def) => (
         <React.Fragment key={def.id}>
           <HotkeyRow def={def} />
@@ -124,13 +143,17 @@ export interface HotkeysCheatSheetModalProps {
  * Modal that lists every currently-registered Kibana hotkey, grouped by scope
  * and filterable by label/description/chord.
  */
-export const HotkeysCheatSheetModal = ({ onClose }: HotkeysCheatSheetModalProps) => {
-  const hotkeys = useHotkeys();
-  const currentAppId = useCurrentAppId();
-  const registrations$ = useMemo(() => hotkeys.getRegistrations$(), [hotkeys]);
-  const registrations = useObservable(registrations$, EMPTY_REGISTRATIONS);
+export const HotkeysCheatSheet = ({
+  onClose,
+  getRegistrations$,
+  getCurrentAppId$,
+}: SidebarComponentProps & {
+  getRegistrations$: () => Observable<ReadonlyArray<HotkeyDefinition>>;
+  getCurrentAppId$: () => Observable<string | undefined>;
+}) => {
+  const currentAppId = useObservable(getCurrentAppId$());
+  const registrations = useObservable(getRegistrations$(), EMPTY_REGISTRATIONS);
   const [query, setQuery] = useState('');
-  const modalTitleId = useGeneratedHtmlId();
 
   const grouped = useMemo(
     () => group(registrations, currentAppId, query),
@@ -140,20 +163,29 @@ export const HotkeysCheatSheetModal = ({ onClose }: HotkeysCheatSheetModalProps)
     grouped.global.length === 0 && grouped.app.length === 0 && grouped.context.length === 0;
 
   return (
-    <EuiModal
-      onClose={onClose}
-      maxWidth={560}
-      aria-labelledby={modalTitleId}
-      data-test-subj="hotkeysCheatSheetModal"
-    >
-      <EuiModalHeader>
-        <EuiModalHeaderTitle id={modalTitleId}>
-          {i18n.translate('core.ui.chrome.hotkeysCheatSheet.title', {
-            defaultMessage: 'Keyboard shortcuts',
-          })}
-        </EuiModalHeaderTitle>
-      </EuiModalHeader>
-      <EuiModalBody>
+    <EuiPanel hasShadow={false}>
+      <EuiPageHeader responsive={false} bottomBorder>
+        <EuiPageHeaderSection>
+          <EuiTitle size="s">
+            <h3>
+              {i18n.translate('core.ui.chrome.hotkeysCheatSheet.title', {
+                defaultMessage: 'Keyboard shortcuts',
+              })}
+            </h3>
+          </EuiTitle>
+        </EuiPageHeaderSection>
+        <EuiPageHeaderSection>
+          <EuiButtonIcon
+            iconType="cross"
+            onClick={onClose}
+            aria-label={i18n.translate('core.ui.chrome.hotkeysCheatSheet.closeButtonAriaLabel', {
+              defaultMessage: 'Close',
+            })}
+          />
+        </EuiPageHeaderSection>
+      </EuiPageHeader>
+      <EuiSpacer size="m" />
+      <EuiPageBody>
         <EuiFieldSearch
           fullWidth
           autoFocus
@@ -184,7 +216,7 @@ export const HotkeysCheatSheetModal = ({ onClose }: HotkeysCheatSheetModalProps)
             <Section title={SECTION_TITLES.context} entries={grouped.context} />
           </>
         )}
-      </EuiModalBody>
-    </EuiModal>
+      </EuiPageBody>
+    </EuiPanel>
   );
 };

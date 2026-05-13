@@ -7,9 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { HotkeysService } from './src/service/hotkeys_service';
-export type {
-  HotkeysServiceContract,
-  SetupDeps as HotkeysServiceSetupDeps,
-  StartDeps as HotkeysServiceStartDeps,
-} from './src/service/hotkeys_service';
+export { formatChord } from './format_chord';

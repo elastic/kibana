@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/core-hotkeys-browser-internal'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-core'
+  defaultOwner: '@elastic/appex-sharedux'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/core-hotkeys-browser-internal'
   description: Moon project for @kbn/core-hotkeys-browser-internal
   channel: ''
-  owner: '@elastic/kibana-core'
+  owner: '@elastic/appex-sharedux'
   sourceRoot: src/core/packages/hotkeys/browser-internal
 dependsOn:
   - '@kbn/utility-types'

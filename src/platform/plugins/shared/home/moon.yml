@@ -45,6 +45,7 @@ dependsOn:
   - '@kbn/react-kibana-context-theme'
   - '@kbn/css-utils'
   - '@kbn/shared-ux-utility'
+  - '@kbn/core-hotkeys-browser'
 tags:
   - plugin
   - prod

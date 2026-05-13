@@ -7,15 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { formatForDisplay, type RegisterableHotkey } from '@tanstack/hotkeys';
+import {
+  formatForDisplay,
+  type RegisterableHotkey,
+  type FormatDisplayOptions,
+} from '@tanstack/hotkeys';
 
-export interface FormatChordOptions {
-  /**
-   * Override the detected platform. Primarily for tests and storybook where
-   * auto-detection would otherwise depend on the host machine.
-   */
-  platform?: 'mac' | 'windows' | 'linux';
-}
+type FormatChordOptions = Pick<FormatDisplayOptions, 'platform' | 'separatorToken'>;
 
 /**
  * Formats a `@tanstack/hotkeys` chord for display in the cheat sheet.
@@ -26,5 +24,5 @@ export interface FormatChordOptions {
  */
 export const formatChord = (
   keys: RegisterableHotkey | (string & {}),
-  { platform }: FormatChordOptions = {}
-): string => formatForDisplay(keys, platform ? { platform } : {});
+  options: FormatChordOptions = {}
+): string => formatForDisplay(keys, options);

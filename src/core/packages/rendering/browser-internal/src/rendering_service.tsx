@@ -26,7 +26,6 @@ import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import type { HotkeysStart } from '@kbn/core-hotkeys-browser';
 import type { RenderingService as IRenderingService } from '@kbn/core-rendering-browser';
 import type { LayoutService } from '@kbn/core-chrome-layout';
 import { GridLayout } from '@kbn/core-chrome-layout/layouts/grid';
@@ -53,7 +52,6 @@ export interface RenderingServiceRenderCoreDeps {
   http: InternalHttpStart;
   docLinks: DocLinksStart;
   customBranding: CustomBrandingStart;
-  hotkeys: HotkeysStart;
 }
 
 export interface RenderingServiceInternalStart extends IRenderingService {

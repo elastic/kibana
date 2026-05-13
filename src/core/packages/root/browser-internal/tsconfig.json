@@ -33,8 +33,6 @@
     "@kbn/core-deprecations-browser-internal",
     "@kbn/core-integrations-browser-internal",
     "@kbn/core-overlays-browser-internal",
-    "@kbn/core-hotkeys-browser-internal",
-    "@kbn/core-hotkeys-browser-mocks",
     "@kbn/core-notifications-browser-internal",
     "@kbn/core-chrome-browser-internal",
     "@kbn/core-rendering-browser-internal",

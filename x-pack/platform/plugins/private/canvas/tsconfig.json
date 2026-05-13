@@ -82,7 +82,6 @@
     "@kbn/saved-search-plugin",
     "@kbn/lens-common",
     "@kbn/core-http-browser",
-    "@kbn/core-hotkeys-browser"
   ],
   "exclude": ["target/**/*"]
 }

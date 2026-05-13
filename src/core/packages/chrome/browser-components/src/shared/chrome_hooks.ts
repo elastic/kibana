@@ -24,7 +24,6 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
-import type { HotkeysStart } from '@kbn/core-hotkeys-browser';
 import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useChromeComponentsDeps } from '../context';
@@ -96,11 +95,6 @@ export function useNavigateToUrl(): ApplicationStart['navigateToUrl'] {
 /** Returns the `docLinks` service. */
 export function useDocLinks(): DocLinksStart {
   return useChromeComponentsDeps().docLinks;
-}
-
-/** Returns the `hotkeys` service. */
-export function useHotkeys(): HotkeysStart {
-  return useChromeComponentsDeps().hotkeys;
 }
 
 /** Returns the resolved custom branding state. */

@@ -35,7 +35,6 @@
     "@kbn/user-profile-components",
     "@kbn/core-chrome-browser-mocks",
     "@kbn/core-hotkeys-browser",
-    "@kbn/core-hotkeys-browser-mocks",
     "@kbn/ai-assistant-icon",
     "@kbn/product-doc-base-plugin",
     "@kbn/spaces-plugin",

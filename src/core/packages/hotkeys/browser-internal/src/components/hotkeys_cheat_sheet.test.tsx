@@ -10,11 +10,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import type { HotkeyDefinition } from '@kbn/core-hotkeys-browser';
-import { hotkeysServiceMock } from '@kbn/core-hotkeys-browser-mocks';
-import { createMockChromeComponentsDeps, TestChromeProviders } from '../test_helpers';
-import { HotkeysCheatSheetModal } from './hotkeys_cheat_sheet_modal';
+import { HotkeysCheatSheet } from './hotkeys_cheat_sheet';
 
 const globalRegistration: HotkeyDefinition = {
   id: 'platform:chrome.openHotkeysCheatSheet',
@@ -46,20 +44,16 @@ const renderModal = ({
   registrations: HotkeyDefinition[];
   currentAppId?: string;
 }) => {
-  const deps = createMockChromeComponentsDeps();
-  const hotkeys = hotkeysServiceMock.createStartContract();
-  const registrations$ = new BehaviorSubject<ReadonlyArray<HotkeyDefinition>>(registrations);
-  hotkeys.getRegistrations$.mockReturnValue(registrations$);
-  deps.hotkeys = hotkeys;
-  if (currentAppId !== undefined) {
-    deps.application.currentAppId$ = new BehaviorSubject<string | undefined>(currentAppId);
-  }
+  const getRegistrations$ = () =>
+    new BehaviorSubject<ReadonlyArray<HotkeyDefinition>>(registrations);
 
   const onClose = jest.fn();
   render(
-    <TestChromeProviders deps={deps}>
-      <HotkeysCheatSheetModal onClose={onClose} />
-    </TestChromeProviders>
+    <HotkeysCheatSheet
+      onClose={onClose}
+      getRegistrations$={getRegistrations$}
+      getCurrentAppId$={() => of(currentAppId)}
+    />
   );
 
   return { onClose };

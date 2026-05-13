@@ -118,7 +118,6 @@
     "@kbn/palettes",
     "@kbn/core-application-browser",
     "@kbn/core-chrome-browser",
-    "@kbn/core-hotkeys-browser",
     "@kbn/core-capabilities-common",
     "@kbn/esql-types",
     "@kbn/react-kibana-context-theme",

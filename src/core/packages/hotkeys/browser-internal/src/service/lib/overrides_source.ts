@@ -29,7 +29,7 @@ export interface HotkeyOverride {
  * responsible for deriving the effective set of overrides from whichever
  * storage it owns (user settings, space settings, in-memory registry,
  * etc.) and emitting a fresh map whenever any of those change. The
- * service keyes into the map by {@link HotkeyDefinition.id}.
+ * service keys into the map by {@link HotkeyDefinition.id}.
  *
  * Emitting a map with a given id absent is equivalent to clearing the
  * override for that hotkey.

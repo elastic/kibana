@@ -24,7 +24,6 @@ import { HeaderLogo } from './header_logo';
 import { HeaderMenuButton } from './header_menu_button';
 import { HeaderAppMenu } from '../shared/header_app_menu';
 import { HeaderHelpMenu } from '../shared/header_help_menu';
-import { HeaderHotkeysMenu } from '../shared/header_hotkeys_menu';
 import { HeaderNavControls } from '../shared/header_nav_controls';
 import { HeaderActionMenu } from '../shared/header_action_menu';
 import { BreadcrumbsWithExtensionsWrapper } from '../shared/breadcrumbs_with_extensions';
@@ -66,7 +65,6 @@ export const ClassicHeader = React.memo(() => {
                   <EuiHideFor sizes={['m', 'l', 'xl']}>
                     <HeaderNavControls position="center" />
                   </EuiHideFor>,
-                  <HeaderHotkeysMenu />,
                   <HeaderHelpMenu />,
                   <HeaderNavControls position="right" />,
                 ],
