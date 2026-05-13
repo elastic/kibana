@@ -111,7 +111,14 @@ export const PluginDetailPanel: React.FC<PluginDetailPanelProps> = ({
           <EuiSpacer size="s" />
           <EuiFlexItem>
             {plugin?.source_url ? (
-              <EuiLink href={plugin.source_url} target="_blank" external>
+              <EuiLink
+                href={plugin.source_url}
+                target="_blank"
+                external
+                data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_PLUGINS}
+                data-ebt-action={AGENT_BUILDER_UI_EBT.action.managePlugins.DETAIL_SOURCE_LINK}
+                data-ebt-detail={plugin?.id ?? pluginId}
+              >
                 {plugin.source_url}
               </EuiLink>
             ) : (
@@ -130,7 +137,14 @@ export const PluginDetailPanel: React.FC<PluginDetailPanelProps> = ({
               <EuiFlexGroup direction="column" gutterSize="xs">
                 {plugin.skill_ids.map((skillId) => (
                   <EuiFlexItem key={skillId} grow={false}>
-                    <EuiLink onClick={() => setSelectedSkillId(skillId)}>{skillId}</EuiLink>
+                    <EuiLink
+                      onClick={() => setSelectedSkillId(skillId)}
+                      data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_PLUGINS}
+                      data-ebt-action={AGENT_BUILDER_UI_EBT.action.layer2Crud.ENTITY_DETAIL_VIEW}
+                      data-ebt-detail={skillId}
+                    >
+                      {skillId}
+                    </EuiLink>
                   </EuiFlexItem>
                 ))}
               </EuiFlexGroup>
@@ -185,6 +199,9 @@ const PluginIdFooter: React.FC<{ pluginId: string }> = ({ pluginId }) => {
               onClick={copy}
               aria-label={labels.agentPlugins.pluginDetailIdCopyLabel}
               size="xs"
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_PLUGINS}
+              data-ebt-action={AGENT_BUILDER_UI_EBT.action.layer2Crud.ENTITY_COPY_ID}
+              data-ebt-detail={pluginId}
               css={css`
                 color: ${euiTheme.colors.textSubdued};
               `}

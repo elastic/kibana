@@ -138,6 +138,7 @@ export const AGENT_BUILDER_UI_EBT = {
       ENTITY_REMOVE: 'entity_remove',
       ENTITY_DETAIL_VIEW: 'entity_detail_view',
       ENTITY_EDIT_FROM_AGENT: 'entity_edit_from_agent',
+      ENTITY_COPY_ID: 'entity_copy_id',
     },
     manageGlobal: {
       MANAGE_ENTITY_LIST_VIEW: 'manage_entity_list_view',

@@ -14,6 +14,7 @@ import {
   EuiLink,
   useEuiTheme,
 } from '@elastic/eui';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { css } from '@emotion/react';
 import React from 'react';
 import { labels } from '../../../utils/i18n';
@@ -44,7 +45,14 @@ export const SkillTools = ({ skillToolIds, onToolClick }: SkillToolsProps) => {
       >
         {skillToolIds.map((toolId) => (
           <EuiFlexItem key={toolId} grow={false}>
-            <EuiLink onClick={() => onToolClick(toolId)}>{toolId}</EuiLink>
+            <EuiLink
+              onClick={() => onToolClick(toolId)}
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_SKILLS}
+              data-ebt-action={AGENT_BUILDER_UI_EBT.action.layer2Crud.ENTITY_DETAIL_VIEW}
+              data-ebt-detail={toolId}
+            >
+              {toolId}
+            </EuiLink>
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
