@@ -107,7 +107,7 @@ const getCopyToDashboardAction = (onExecute: () => void): Action => {
       });
     },
     getIconType() {
-      return 'dashboardApp';
+      return 'addToDashboard';
     },
     async isCompatible() {
       return true;
