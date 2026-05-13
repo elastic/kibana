@@ -321,10 +321,7 @@ export class AlertsClient<
   /**
    * Returns the built alert document for a given alert instance ID as it was
    * constructed and indexed during `persistAlerts()` for this execution.
-   * Used to evaluate field-change-based unsnooze conditions against current
-   * alert state without an additional ES round-trip.
-   * Returns undefined when the alert was not indexed this execution (e.g. rule
-   * types without AAD write, or alert not currently active).
+   * Returns undefined when the alert was not indexed this execution.
    */
   public getBuiltActiveAlertDataByInstanceId(
     instanceId: string
@@ -435,7 +432,6 @@ export class AlertsClient<
       const instanceId = get(alert, ALERT_INSTANCE_ID) as string | undefined;
       if (instanceId) {
         this.builtAlertDataCache.set(instanceId, alert as Record<string, unknown>);
-
       }
     }
 

@@ -161,6 +161,80 @@ describe('getAlertSnoozeSnapshot', () => {
     );
   });
 
+  test('reads field values stored as flat dot-notation keys in the alert document', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    clusterClient.search.mockResponseOnce({
+      hits: {
+        total: 1,
+        hits: [
+          {
+            _index: 'test-index',
+            _id: 'test-alert-id',
+            _source: {
+              // fields stored with flat dot-notation keys (no nested objects)
+              'kibana.alert.consecutive_matches': 8,
+              'kibana.alert.severity': 'critical',
+            },
+          },
+        ],
+      },
+      took: 0,
+      timed_out: false,
+      _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
+    });
+
+    const result = await getAlertSnoozeSnapshot({
+      logger,
+      esClient: clusterClient,
+      indices: ['test-index'],
+      alertId: 'test-alert-id',
+      ruleId: 'test-rule-id',
+      fields: ['kibana.alert.consecutive_matches', 'kibana.alert.severity'],
+    });
+
+    expect(result).toEqual({
+      'kibana.alert.consecutive_matches': 8,
+      'kibana.alert.severity': 'critical',
+    });
+  });
+
+  test('prefers flat dot-notation key over nested path traversal when both exist in the source', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    clusterClient.search.mockResponseOnce({
+      hits: {
+        total: 1,
+        hits: [
+          {
+            _index: 'test-index',
+            _id: 'test-alert-id',
+            _source: {
+              'kibana.alert.severity': 'high',
+              kibana: { alert: { severity: 'low' } },
+            },
+          },
+        ],
+      },
+      took: 0,
+      timed_out: false,
+      _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
+    });
+
+    const result = await getAlertSnoozeSnapshot({
+      logger,
+      esClient: clusterClient,
+      indices: ['test-index'],
+      alertId: 'test-alert-id',
+      ruleId: 'test-rule-id',
+      fields: ['kibana.alert.severity'],
+    });
+
+    expect(result).toEqual({ 'kibana.alert.severity': 'high' });
+  });
+
   test('logs an error when search fails with a non-Error thrown value', async () => {
     const logger = loggingSystemMock.createLogger();
     const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;

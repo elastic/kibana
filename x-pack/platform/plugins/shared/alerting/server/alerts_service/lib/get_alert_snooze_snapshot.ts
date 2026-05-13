@@ -57,9 +57,8 @@ export async function getAlertSnoozeSnapshot({
       return null;
     }
     return fields.reduce<Record<string, unknown>>((snapshot, field) => {
-      // ES documents may store alert fields as flat dot-notation keys
-      // (e.g. { 'kibana.alert.consecutive_matches': 1 }) or as nested objects.
-      // Try the flat key first, fall back to nested path traversal.
+      // ES documents may store alert fields as flat dot-notation keys or as nested objects.
+
       if (Object.prototype.hasOwnProperty.call(source, field)) {
         snapshot[field] = source[field];
       } else {
