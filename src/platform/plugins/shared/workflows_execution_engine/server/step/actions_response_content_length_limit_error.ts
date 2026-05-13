@@ -66,9 +66,10 @@ export class ActionsResponseContentLengthLimitError extends ExecutionError {
     const suggestedLimitBytes = canOverrideWithMaxStepSize
       ? maxStepSizeSuggestedLimitBytes
       : actionConfigSuggestedLimitBytes;
-    const contentLengthMessage = contentLengthBytes
-      ? ` The response advertised a content length of ${formatBytes(contentLengthBytes)}.`
-      : '';
+    const contentLengthMessage =
+      contentLengthBytes !== undefined && (!limitBytes || contentLengthBytes >= limitBytes)
+        ? ` The response advertised a content length of ${formatBytes(contentLengthBytes)}.`
+        : '';
     const estimatedOutputMessage = estimatedOutputBytes
       ? ` Estimated stored step output size is ${formatBytes(estimatedOutputBytes)}.`
       : '';

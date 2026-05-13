@@ -113,9 +113,10 @@ export class ResponseSizeLimitError extends ExecutionError {
     const actualSizeMessage = actualBytes
       ? `Actual serialized output size was ${formatBytes(actualBytes)}. `
       : '';
-    const contentLengthMessage = contentLengthBytes
-      ? `The response advertised a content length of ${formatBytes(contentLengthBytes)}. `
-      : '';
+    const contentLengthMessage =
+      contentLengthBytes !== undefined && contentLengthBytes >= limitBytes
+        ? `The response advertised a content length of ${formatBytes(contentLengthBytes)}. `
+        : '';
     const estimatedOutputMessage = estimatedOutputBytes
       ? `Estimated step output size is ${formatBytes(estimatedOutputBytes)}. `
       : '';
