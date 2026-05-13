@@ -58,7 +58,8 @@ export function createRuleExecutionLogClientForExecutors(
   const baseCorrelationIds = getCorrelationIds(context);
   const baseLogSuffix = baseCorrelationIds.getLogSuffix();
   const baseLogMeta = baseCorrelationIds.getLogMeta();
-  const { executionId, ruleId, ruleUuid, ruleName, ruleRevision, ruleType, spaceId } = context;
+  const { executionId, ruleId, ruleUuid, ruleName, ruleRevision, ruleType, spaceId, cpsData } =
+    context;
 
   // Buffers the execution related data
   const executionResultBuffer: ExecutionResultBuffer = {
@@ -271,6 +272,7 @@ export function createRuleExecutionLogClientForExecutors(
         ruleType,
         spaceId,
         executionId,
+        cpsData,
       },
     });
   };
@@ -297,6 +299,7 @@ export function createRuleExecutionLogClientForExecutors(
         ruleType,
         spaceId,
         executionId,
+        cpsData,
       },
     });
   };
@@ -320,6 +323,7 @@ export function createRuleExecutionLogClientForExecutors(
         ruleType,
         spaceId,
         executionId,
+        cpsData,
       },
       message,
       logLevel,
