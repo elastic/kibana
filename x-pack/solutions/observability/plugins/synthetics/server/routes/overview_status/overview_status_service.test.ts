@@ -1335,8 +1335,10 @@ describe('current status route', () => {
 
       const result = await overviewStatusService.getOverviewStatus();
 
-      // Remote-only monitor should appear in downConfigs with metadata from ping fields
-      const remoteDown = result.downConfigs['remote-config-1-us-east-1'];
+      // Remote-only monitor should appear in downConfigs with metadata from ping fields.
+      // The bucket key is `${remoteName}-${configId}-${locationId}` to prevent
+      // cross-cluster collisions for the same monitor.
+      const remoteDown = result.downConfigs['cluster-east-remote-config-1-us-east-1'];
       expect(remoteDown).toBeDefined();
       expect(remoteDown.name).toBe('Remote API Check');
       expect(remoteDown.type).toBe('http');
@@ -1351,6 +1353,98 @@ describe('current status route', () => {
       });
 
       // Counts should include the remote monitor
+      expect(result.down).toBe(1);
+      expect(result.up).toBe(1);
+    });
+
+    it('keeps two remote monitors with the same configId+locationId from different clusters', async () => {
+      // Regression: two remote clusters can host the same imported monitor in
+      // the same locationId. Before keying the bucket by remoteName the second
+      // ping silently overwrote the first because the in-memory key collided.
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: {
+                monitorId: 'shared-remote-monitor',
+                locationId: 'us-east-1',
+              },
+              status: {
+                key: 'us-east-1',
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'down',
+                      kibanaUrl: 'https://east.kibana.example.com',
+                      'monitor.name': 'Shared Remote Check',
+                      'monitor.type': 'http',
+                      config_id: 'shared-config',
+                    },
+                    sort: ['2022-09-15T16:20:00.000Z'],
+                  },
+                ],
+              },
+              index_name: {
+                buckets: [{ key: 'cluster-east:synthetics-http-default', doc_count: 1 }],
+              },
+            },
+            {
+              key: {
+                monitorId: 'shared-remote-monitor',
+                locationId: 'us-east-1',
+              },
+              status: {
+                key: 'us-east-1',
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'up',
+                      kibanaUrl: 'https://west.kibana.example.com',
+                      'monitor.name': 'Shared Remote Check',
+                      'monitor.type': 'http',
+                      config_id: 'shared-config',
+                    },
+                    sort: ['2022-09-15T16:21:00.000Z'],
+                  },
+                ],
+              },
+              index_name: {
+                buckets: [{ key: 'cluster-west:synthetics-http-default', doc_count: 1 }],
+              },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: {} },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: true } } },
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+
+      const result = await overviewStatusService.getOverviewStatus();
+
+      const fromEast = result.downConfigs['cluster-east-shared-config-us-east-1'];
+      const fromWest = result.upConfigs['cluster-west-shared-config-us-east-1'];
+
+      expect(fromEast).toBeDefined();
+      expect(fromEast.remote).toEqual({
+        remoteName: 'cluster-east',
+        kibanaUrl: 'https://east.kibana.example.com',
+      });
+      expect(fromWest).toBeDefined();
+      expect(fromWest.remote).toEqual({
+        remoteName: 'cluster-west',
+        kibanaUrl: 'https://west.kibana.example.com',
+      });
       expect(result.down).toBe(1);
       expect(result.up).toBe(1);
     });
