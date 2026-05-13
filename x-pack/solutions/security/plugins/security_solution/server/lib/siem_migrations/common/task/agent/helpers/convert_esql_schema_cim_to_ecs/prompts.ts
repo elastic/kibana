@@ -38,6 +38,7 @@ Go through the current esql query above and translate the current field names th
 - Only translate the field names, do not modify the structure of the query.
 - Only translate when you are certain about the field mapping, if uncertain, leave the field as is and mention it in the summary.
 - Only use and modify the current ESQL query, do not create a new one or modify any other part of the rule.
+- Never change the index pattern. you only need to change the field names in the query.
 </guidelines>
 
 <output_format>

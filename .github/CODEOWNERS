@@ -749,6 +749,7 @@ src/platform/packages/shared/shared-ux/code_editor/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/code_editor/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/column-presets @elastic/eui @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker @elastic/appex-sharedux @elastic/eui-team
+src/platform/packages/shared/shared-ux/display/kbn-announcement-banner @elastic/appex-sharedux @elastic/eui-team
 src/platform/packages/shared/shared-ux/document_data_cascade/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/error_boundary @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/context @elastic/appex-sharedux
@@ -1389,6 +1390,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /src/platform/test/functional/fixtures/kbn_archiver/unmapped_fields.json @elastic/kibana-data-discovery # Assigned per only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/discover/group7/_indexpattern_with_unmapped_fields.ts#L28
 /src/platform/test/functional/fixtures/kbn_archiver/testlargestring.json @elastic/kibana-data-discovery # Assigned per only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/discover/group5/_large_string.ts#L28
 /src/platform/test/functional/fixtures/kbn_archiver/message_with_newline.json @elastic/kibana-data-discovery # Assigned per only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/discover/classic/_doc_table_newline.ts#L26
+/src/platform/test/functional/fixtures/kbn_archiver/simple_slow_dash.json @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/kbn_archiver/invalid_scripted_field.json @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/kbn_archiver/index_pattern_without_timefield.json @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/kbn_archiver/discover @elastic/kibana-data-discovery
@@ -2492,6 +2494,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/jina/** @elastic/jina
 src/platform/packages/shared/kbn-connector-specs/src/specs/microsoft_teams/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/notion/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/one_password/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/outlook/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/pagerduty/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/salesforce/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/servicenow_search/** @elastic/workchat-eng
@@ -2503,6 +2506,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/tavily/** @elastic/wo
 src/platform/packages/shared/kbn-connector-specs/src/specs/urlvoid/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/virustotal/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/zendesk/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/hubspot/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/zoom/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/sharepoint_server/** @elastic/workchat-eng
 
