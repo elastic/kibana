@@ -101,6 +101,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
           rulesSavedObjectService: get(RulesSavedObjectServiceScopedToken),
           taskManager: get(PluginStart<TaskManagerStartContract>('taskManager')),
           userService: get(UserService),
+          actionPolicyClient: get(ActionPolicyClient),
         },
         options: {
           spaceId: get(RulesClientSpaceIdToken),
@@ -127,6 +128,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .toDynamicValue(({ get }) => {
       return new ActionPolicyClient(
         get(ActionPolicySavedObjectServiceScopedToken),
+        get(RulesSavedObjectServiceScopedToken),
         get(UserService),
         get(ApiKeyService),
         get(EncryptedSavedObjectsClientToken),
