@@ -2857,13 +2857,17 @@ describe('EPM template', () => {
       it('returns base priority + NAMESPACE_TEMPLATE_PRIORITY_BOOST for non-prefix data stream', () => {
         // 200 (DEFAULT_TEMPLATE_PRIORITY) + 50 = 250
         expect(getNamespaceTemplatePriority(baseDataStream)).toBe(250);
-        expect(getNamespaceTemplatePriority(baseDataStream)).toBe(200 + NAMESPACE_TEMPLATE_PRIORITY_BOOST);
+        expect(getNamespaceTemplatePriority(baseDataStream)).toBe(
+          200 + NAMESPACE_TEMPLATE_PRIORITY_BOOST
+        );
       });
 
       it('returns 200 for dataset_is_prefix data stream (150 + 50), same as regular base priority — tie broken by index pattern specificity', () => {
         // 150 (DATASET_IS_PREFIX_TEMPLATE_PRIORITY) + 50 = 200
         expect(getNamespaceTemplatePriority(prefixDataStream)).toBe(200);
-        expect(getNamespaceTemplatePriority(prefixDataStream)).toBe(150 + NAMESPACE_TEMPLATE_PRIORITY_BOOST);
+        expect(getNamespaceTemplatePriority(prefixDataStream)).toBe(
+          150 + NAMESPACE_TEMPLATE_PRIORITY_BOOST
+        );
       });
     });
 
@@ -3104,40 +3108,38 @@ describe('EPM template', () => {
       };
 
       it('keyword multi-field on a text field', () => {
-        expect(
-          multiFieldResult('text', { name: 'raw', type: 'keyword' })
-        ).toEqual({ raw: { type: 'keyword', ignore_above: 1024 } });
+        expect(multiFieldResult('text', { name: 'raw', type: 'keyword' })).toEqual({
+          raw: { type: 'keyword', ignore_above: 1024 },
+        });
       });
 
       it('text multi-field on a keyword field', () => {
-        expect(
-          multiFieldResult('keyword', { name: 'analyzed', type: 'text' })
-        ).toEqual({ analyzed: { type: 'text' } });
+        expect(multiFieldResult('keyword', { name: 'analyzed', type: 'text' })).toEqual({
+          analyzed: { type: 'text' },
+        });
       });
 
       it('long multi-field', () => {
-        expect(
-          multiFieldResult('keyword', { name: 'num', type: 'long' })
-        ).toEqual({ num: { type: 'long' } });
+        expect(multiFieldResult('keyword', { name: 'num', type: 'long' })).toEqual({
+          num: { type: 'long' },
+        });
       });
 
       it('double multi-field', () => {
-        expect(
-          multiFieldResult('keyword', { name: 'num', type: 'double' })
-        ).toEqual({ num: { type: 'double' } });
+        expect(multiFieldResult('keyword', { name: 'num', type: 'double' })).toEqual({
+          num: { type: 'double' },
+        });
       });
 
       it('match_only_text multi-field', () => {
-        expect(
-          multiFieldResult('keyword', { name: 'txt', type: 'match_only_text' })
-        ).toEqual({ txt: { type: 'match_only_text' } });
+        expect(multiFieldResult('keyword', { name: 'txt', type: 'match_only_text' })).toEqual({
+          txt: { type: 'match_only_text' },
+        });
       });
 
       it('unsupported multi-field type produces no entry (current silent-skip behavior)', () => {
         // Types not in the multiFields switch today produce no output — lock this in.
-        expect(
-          multiFieldResult('keyword', { name: 'b', type: 'boolean' })
-        ).toEqual({});
+        expect(multiFieldResult('keyword', { name: 'b', type: 'boolean' })).toEqual({});
       });
     });
 

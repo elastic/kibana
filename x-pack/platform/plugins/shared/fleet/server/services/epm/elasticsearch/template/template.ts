@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+// The field-type class hierarchy (FieldType and its subclasses) lives in this file for now.
+// Moving each type to its own module is a follow-up task.
+/* eslint-disable max-classes-per-file */
 import deepEqual from 'fast-deep-equal';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
@@ -34,7 +37,6 @@ import type {
 } from '../../../../types';
 import { appContextService } from '../../..';
 import { getRegistryDataStreamAssetBaseName } from '../../../../../common/services';
-import type { FleetConfigType } from '../../../../../common/types';
 import {
   STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
   FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
@@ -84,6 +86,458 @@ export const NAMESPACE_TEMPLATE_PRIORITY_BOOST = 50;
 
 const META_PROP_KEYS = ['metric_type', 'unit'];
 
+// ---------------------------------------------------------------------------
+// Field-type class hierarchy
+// ---------------------------------------------------------------------------
+
+interface WalkerCtx {
+  addDynamicMapping: any;
+  addRuntimeField: any;
+  groupFieldName?: string;
+  isIndexModeTimeSeries: boolean;
+}
+
+interface DynamicMappingResult {
+  properties: Properties;
+  matchingType: string;
+}
+
+/**
+ * Base class for all ES field types. Default implementations are no-ops so
+ * subclasses only override the contexts that apply to them, preserving
+ * current silent-skip behavior for unsupported combinations.
+ */
+abstract class FieldType {
+  staticMapping(_field: Field, _ctx: WalkerCtx): Properties | undefined {
+    return undefined;
+  }
+
+  dynamicMapping(_field: Field, _ctx: WalkerCtx): DynamicMappingResult | undefined {
+    return undefined;
+  }
+
+  multiFieldMapping(_field: Field): Properties | undefined {
+    return undefined;
+  }
+
+  runtimeMapping(_field: Field): Properties | undefined {
+    return undefined;
+  }
+
+  protected applyTimeSeriesMetric(props: Properties, field: Field, ctx: WalkerCtx) {
+    if (ctx.isIndexModeTimeSeries && field.metric_type) {
+      props.time_series_metric = field.metric_type;
+    }
+  }
+
+  protected applyTimeSeriesDimension(props: Properties, field: Field, ctx: WalkerCtx) {
+    if (ctx.isIndexModeTimeSeries && field.dimension) {
+      props.time_series_dimension = field.dimension;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Shared helpers used by multiple type classes
+// ---------------------------------------------------------------------------
+
+const fieldPath = (groupFieldName: string | undefined, name: string) =>
+  groupFieldName ? `${groupFieldName}.${name}` : name;
+
+const dynamicPathMatch = (path: string) => (path.includes('*') ? path : `${path}.*`);
+
+/**
+ * Builds text-like field mapping extras (analyzer, search_analyzer, null_value, ignore_above).
+ * For dynamic templates the default ignore_above is intentionally omitted for
+ * backwards compatibility; static mappings include it for wildcard fields via generateWildcardMapping.
+ */
+const buildTextExtras = (field: Field, { isDynamic }: { isDynamic: boolean }): Properties => {
+  const mapping: Properties = {};
+  if (!isDynamic) {
+    if (field.analyzer) mapping.analyzer = field.analyzer;
+    if (field.search_analyzer) mapping.search_analyzer = field.search_analyzer;
+  }
+  if (field.null_value) mapping.null_value = field.null_value;
+  if (field.ignore_above) mapping.ignore_above = field.ignore_above;
+  return mapping;
+};
+
+const buildDateMapping = (field: Field): Properties => {
+  const mapping: Properties = {};
+  if (field.date_format) mapping.format = field.date_format;
+  if (field.name === '@timestamp') mapping.ignore_malformed = false;
+  return mapping;
+};
+
+const generateDynamicAndEnabled = (field: Field): Properties => {
+  const props: Properties = {};
+  if (Object.hasOwn(field, 'enabled')) props.enabled = field.enabled;
+  if (Object.hasOwn(field, 'dynamic')) props.dynamic = field.dynamic;
+  return props;
+};
+
+const generateNestedProps = (field: Field): Properties => {
+  const props = generateDynamicAndEnabled(field);
+  if (Object.hasOwn(field, 'include_in_parent')) props.include_in_parent = field.include_in_parent;
+  if (Object.hasOwn(field, 'include_in_root')) props.include_in_root = field.include_in_root;
+  return props;
+};
+
+// ---------------------------------------------------------------------------
+// Per-type subclasses
+// ---------------------------------------------------------------------------
+
+class KeywordType extends FieldType {
+  staticMapping(field: Field): Properties {
+    const props = keyword(field);
+    if (field.multi_fields) props.fields = generateMultiFields(field.multi_fields);
+    return props;
+  }
+
+  dynamicMapping(field: Field, ctx: WalkerCtx): DynamicMappingResult {
+    const props = keyword(field, true);
+    if (field.multi_fields) props.fields = generateMultiFields(field.multi_fields);
+    this.applyTimeSeriesDimension(props, field, ctx);
+    return {
+      properties: props,
+      matchingType: field.object_type_mapping_type ?? 'string',
+    };
+  }
+
+  multiFieldMapping(field: Field): Properties {
+    return keyword(field);
+  }
+
+  runtimeMapping(field: Field): Properties {
+    return { type: 'keyword' };
+  }
+}
+
+class TextLikeType extends FieldType {
+  constructor(protected readonly esType: string) {
+    super();
+  }
+
+  staticMapping(field: Field, _ctx: WalkerCtx): Properties {
+    const props = {
+      ...getDefaultProperties(field),
+      ...buildTextExtras(field, { isDynamic: false }),
+      type: this.esType,
+    };
+    if (field.multi_fields) props.fields = generateMultiFields(field.multi_fields);
+    return props;
+  }
+
+  dynamicMapping(field: Field, _ctx: WalkerCtx): DynamicMappingResult {
+    const props = {
+      ...getDefaultProperties(field),
+      ...buildTextExtras(field, { isDynamic: true }),
+      type: this.esType,
+    };
+    if (field.multi_fields) props.fields = generateMultiFields(field.multi_fields);
+    return {
+      properties: props,
+      matchingType: field.object_type_mapping_type ?? 'string',
+    };
+  }
+
+  multiFieldMapping(field: Field): Properties {
+    return { ...buildTextExtras(field, { isDynamic: false }), type: this.esType };
+  }
+}
+
+class WildcardType extends FieldType {
+  staticMapping(field: Field, _ctx: WalkerCtx): Properties {
+    const props: Properties = {
+      ...getDefaultProperties(field),
+      ignore_above: DEFAULT_IGNORE_ABOVE,
+    };
+    if (field.null_value) props.null_value = field.null_value;
+    if (field.ignore_above) props.ignore_above = field.ignore_above;
+    props.type = 'wildcard';
+    if (field.multi_fields) props.fields = generateMultiFields(field.multi_fields);
+    return props;
+  }
+
+  dynamicMapping(field: Field, _ctx: WalkerCtx): DynamicMappingResult {
+    const props = {
+      ...getDefaultProperties(field),
+      ...buildTextExtras(field, { isDynamic: true }),
+      type: 'wildcard',
+    };
+    if (field.multi_fields) props.fields = generateMultiFields(field.multi_fields);
+    return {
+      properties: props,
+      matchingType: field.object_type_mapping_type ?? 'string',
+    };
+  }
+}
+
+/**
+ * Handles all numeric types. The esType is what gets written to the mapping;
+ * the defaultMatchingType is the ES match_mapping_type for dynamic templates.
+ * 'integer' is handled by passing esType='long' since ES maps integers as long.
+ */
+class NumericType extends FieldType {
+  constructor(private readonly esType: string, private readonly defaultMatchingType: string) {
+    super();
+  }
+
+  staticMapping(field: Field, ctx: WalkerCtx): Properties {
+    const props = { ...getDefaultProperties(field), type: this.esType };
+    this.applyTimeSeriesMetric(props, field, ctx);
+    return props;
+  }
+
+  dynamicMapping(field: Field, ctx: WalkerCtx): DynamicMappingResult {
+    const props = { ...getDefaultProperties(field), type: this.esType };
+    this.applyTimeSeriesMetric(props, field, ctx);
+    this.applyTimeSeriesDimension(props, field, ctx);
+    return {
+      properties: props,
+      matchingType: field.object_type_mapping_type ?? this.defaultMatchingType,
+    };
+  }
+
+  multiFieldMapping(field: Field): Properties {
+    return { type: this.esType };
+  }
+
+  runtimeMapping(field: Field): Properties {
+    return { type: this.esType };
+  }
+}
+
+class BooleanType extends FieldType {
+  staticMapping(field: Field, ctx: WalkerCtx): Properties {
+    const props = { ...getDefaultProperties(field), type: 'boolean' };
+    this.applyTimeSeriesMetric(props, field, ctx);
+    return props;
+  }
+
+  dynamicMapping(field: Field, ctx: WalkerCtx): DynamicMappingResult {
+    const props = { ...getDefaultProperties(field), type: 'boolean' };
+    this.applyTimeSeriesMetric(props, field, ctx);
+    this.applyTimeSeriesDimension(props, field, ctx);
+    return {
+      properties: props,
+      matchingType: field.object_type_mapping_type ?? 'boolean',
+    };
+  }
+
+  runtimeMapping(_field: Field): Properties {
+    return { type: 'boolean' };
+  }
+}
+
+class DateType extends FieldType {
+  staticMapping(field: Field, _ctx: WalkerCtx): Properties {
+    return { ...getDefaultProperties(field), ...buildDateMapping(field), type: 'date' };
+  }
+
+  runtimeMapping(field: Field): Properties {
+    return { ...buildDateMapping(field), type: 'date' };
+  }
+}
+
+class IpType extends FieldType {
+  staticMapping(field: Field, _ctx: WalkerCtx): Properties {
+    return { ...getDefaultProperties(field), type: 'ip' };
+  }
+
+  dynamicMapping(field: Field, _ctx: WalkerCtx): DynamicMappingResult {
+    const props = { ...getDefaultProperties(field), type: 'ip' };
+    return {
+      properties: props,
+      matchingType: field.object_type_mapping_type ?? 'string',
+    };
+  }
+}
+
+class HistogramType extends FieldType {
+  staticMapping(field: Field, _ctx: WalkerCtx): Properties {
+    return histogram(field);
+  }
+
+  dynamicMapping(field: Field, _ctx: WalkerCtx): DynamicMappingResult {
+    return {
+      properties: histogram(field),
+      matchingType: field.object_type_mapping_type ?? '*',
+    };
+  }
+}
+
+class ScaledFloatType extends FieldType {
+  staticMapping(field: Field, _ctx: WalkerCtx): Properties {
+    return scaledFloat(field);
+  }
+
+  dynamicMapping(field: Field, _ctx: WalkerCtx): DynamicMappingResult {
+    return {
+      properties: scaledFloat(field),
+      matchingType: field.object_type_mapping_type ?? '*',
+    };
+  }
+}
+
+class AggregateMetricDoubleType extends FieldType {
+  staticMapping(field: Field, _ctx: WalkerCtx): Properties {
+    return {
+      ...getDefaultProperties(field),
+      metrics: field.metrics,
+      default_metric: field.default_metric,
+      type: 'aggregate_metric_double',
+    };
+  }
+
+  dynamicMapping(field: Field, _ctx: WalkerCtx): DynamicMappingResult {
+    const props = {
+      ...getDefaultProperties(field),
+      type: 'aggregate_metric_double',
+      metrics: field.metrics,
+      default_metric: field.default_metric,
+    };
+    return {
+      properties: props,
+      matchingType: field.object_type_mapping_type ?? '*',
+    };
+  }
+}
+
+class FlattenedType extends FieldType {
+  staticMapping(field: Field, _ctx: WalkerCtx): Properties {
+    const props = { ...getDefaultProperties(field), type: 'flattened' };
+    if (field.ignore_above) props.ignore_above = field.ignore_above;
+    return props;
+  }
+
+  dynamicMapping(field: Field, _ctx: WalkerCtx): DynamicMappingResult {
+    return {
+      properties: { ...getDefaultProperties(field), type: 'flattened' },
+      matchingType: field.object_type_mapping_type ?? 'object',
+    };
+  }
+}
+
+class ConstantKeywordType extends FieldType {
+  staticMapping(field: Field, _ctx: WalkerCtx): Properties {
+    const props: Properties = { ...getDefaultProperties(field), type: 'constant_keyword' };
+    if (field.value) props.value = field.value;
+    return props;
+  }
+}
+
+class AliasType extends FieldType {
+  staticMapping(field: Field, _ctx: WalkerCtx): Properties {
+    // Assumes alias fields were validated in an earlier step.
+    // Adding a path to a field that doesn't exist would result in an error when the template is added to ES.
+    return { ...getDefaultProperties(field), type: 'alias', path: field.path };
+  }
+}
+
+class ArrayType extends FieldType {
+  staticMapping(field: Field, _ctx: WalkerCtx): Properties {
+    // Assumes array fields were validated in an earlier step.
+    // Adding an array field with no object_type would result in an error when the template is added to ES.
+    const props = getDefaultProperties(field);
+    if (field.object_type) props.type = field.object_type;
+    return props;
+  }
+}
+
+class ObjectType extends FieldType {
+  staticMapping(field: Field, _ctx: WalkerCtx): Properties {
+    return { ...getDefaultProperties(field), ...generateDynamicAndEnabled(field), type: 'object' };
+  }
+}
+
+class NestedType extends FieldType {
+  staticMapping(field: Field, ctx: WalkerCtx): Properties {
+    const props: Properties = { ...generateNestedProps(field), type: 'nested' };
+    if (field.fields) {
+      props.properties = _generateMappings(
+        field.fields,
+        { ...ctx, groupFieldName: fieldPath(ctx.groupFieldName, field.name) },
+        ctx.isIndexModeTimeSeries
+      ).properties;
+    }
+    return props;
+  }
+}
+
+interface GroupMappingResult {
+  fieldProps: Properties;
+  /** True when this group's result only comes from dynamic template children, no static props. */
+  onlyDynamicTemplateMappings: boolean;
+}
+
+class GroupType extends FieldType {
+  /**
+   * Returns a GroupMappingResult so the walker can propagate the outer
+   * hasDynamicTemplateMappings flag correctly (only when the group itself
+   * has no static children, i.e. only dynamic template mappings).
+   * Returns undefined when the group has no mappings to emit.
+   */
+  mapGroup(field: Field, ctx: WalkerCtx): GroupMappingResult | undefined {
+    const childCtx = { ...ctx, groupFieldName: fieldPath(ctx.groupFieldName, field.name) };
+    const mappings = _generateMappings(field.fields!, childCtx, ctx.isIndexModeTimeSeries);
+
+    let fieldProps: Properties;
+
+    if (mappings.hasNonDynamicTemplateMappings) {
+      fieldProps = {
+        properties: Object.keys(mappings.properties).length > 0 ? mappings.properties : undefined,
+        ...generateDynamicAndEnabled(field),
+      };
+      if (mappings.hasDynamicTemplateMappings) {
+        fieldProps.type = 'object';
+        fieldProps.dynamic = true;
+      }
+      if (mappings.subobjects !== undefined) fieldProps.subobjects = mappings.subobjects;
+      return { fieldProps, onlyDynamicTemplateMappings: false };
+    } else if (mappings.hasDynamicTemplateMappings) {
+      fieldProps = { type: 'object', dynamic: true };
+      if (mappings.subobjects !== undefined) fieldProps.subobjects = mappings.subobjects;
+      return { fieldProps, onlyDynamicTemplateMappings: true };
+    }
+
+    return undefined;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Registry: maps every supported field type string to its handler instance
+// ---------------------------------------------------------------------------
+
+const fieldTypeRegistry: Readonly<Record<string, FieldType>> = {
+  keyword: new KeywordType(),
+  text: new TextLikeType('text'),
+  match_only_text: new TextLikeType('match_only_text'),
+  wildcard: new WildcardType(),
+  long: new NumericType('long', 'long'),
+  integer: new NumericType('long', 'long'), // integer maps to long
+  short: new NumericType('short', 'long'),
+  byte: new NumericType('byte', 'long'),
+  unsigned_long: new NumericType('unsigned_long', 'long'),
+  double: new NumericType('double', 'double'),
+  float: new NumericType('float', 'double'),
+  half_float: new NumericType('half_float', 'double'),
+  boolean: new BooleanType(),
+  date: new DateType(),
+  ip: new IpType(),
+  histogram: new HistogramType(),
+  scaled_float: new ScaledFloatType(),
+  aggregate_metric_double: new AggregateMetricDoubleType(),
+  flattened: new FlattenedType(),
+  constant_keyword: new ConstantKeywordType(),
+  alias: new AliasType(),
+  array: new ArrayType(),
+  object: new ObjectType(),
+  nested: new NestedType(),
+  'group-nested': new NestedType(), // treated identically to nested
+  group: new GroupType(),
+};
+
 /**
  * getTemplate retrieves the default template but overwrites the index pattern with the given value.
  *
@@ -126,19 +580,15 @@ export function getTemplate({
   }
 
   const esBaseComponents = getBaseEsComponents(type, !!isIndexModeTimeSeries, isOtelInputType);
-
-  const isEventIngestedEnabled = (config?: FleetConfigType): boolean =>
-    Boolean(!config?.agentIdVerificationEnabled && config?.eventIngestedEnabled);
+  const config = appContextService.getConfig();
 
   template.composed_of = [
     ...esBaseComponents,
     ...(template.composed_of || []),
     ...(isOtelInputType ? [] : [STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS]),
     FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
-    ...(appContextService.getConfig()?.agentIdVerificationEnabled
-      ? [FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME]
-      : []),
-    ...(isEventIngestedEnabled(appContextService.getConfig())
+    ...(config?.agentIdVerificationEnabled ? [FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME] : []),
+    ...(!config?.agentIdVerificationEnabled && config?.eventIngestedEnabled
       ? [FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME]
       : []),
   ];
@@ -185,8 +635,6 @@ const getOtelBaseComponents = (type: string): string[] => {
  * mapping properties out of it.
  *
  * This assumes that all fields with dotted.names have been expanded in a previous step.
- *
- * @param fields
  */
 export function generateMappings(
   fields: Field[],
@@ -240,6 +688,7 @@ export function generateMappings(
       addRuntimeField: (runtimeField: { path: string; properties: Properties }) => {
         runtimeFields[`${runtimeField.path}`] = runtimeField.properties;
       },
+      isIndexModeTimeSeries,
     },
     isIndexModeTimeSeries
   );
@@ -254,21 +703,9 @@ export function generateMappings(
   return indexTemplateMappings;
 }
 
-/**
- * Generate mapping takes the given nested fields array and creates the Elasticsearch
- * mapping properties out of it.
- *
- * This assumes that all fields with dotted.names have been expanded in a previous step.
- *
- * @param fields
- */
 function _generateMappings(
   fields: Field[],
-  ctx: {
-    addDynamicMapping: any;
-    addRuntimeField: any;
-    groupFieldName?: string;
-  },
+  ctx: WalkerCtx,
   isIndexModeTimeSeries: boolean
 ): {
   properties: IndexTemplateMappings['properties'];
@@ -287,14 +724,11 @@ function _generateMappings(
     if (field.name.includes('*')) {
       return;
     }
-
-    const fieldProps = {
+    props[field.name] = {
       type: 'object',
       dynamic: true,
       ...(field.subobjects !== undefined && { subobjects: field.subobjects }),
     };
-
-    props[field.name] = fieldProps;
     hasNonDynamicTemplateMappings = true;
   }
 
@@ -303,14 +737,14 @@ function _generateMappings(
     pathMatch: string,
     matchingType: string,
     dynProperties: Properties,
-    fieldProps?: Properties
+    runtimeProperties?: Properties
   ) {
     ctx.addDynamicMapping({
       path,
       pathMatch,
       matchingType,
       properties: dynProperties,
-      runtimeProperties: fieldProps,
+      runtimeProperties,
     });
     hasDynamicTemplateMappings = true;
 
@@ -318,387 +752,174 @@ function _generateMappings(
     const parts = pathMatch.split('.');
     for (let i = parts.length - 1; i > 0; i--) {
       const name = parts.slice(0, i).join('.');
-      if (!name.includes('*')) {
-        continue;
-      }
-      const dynProps: Properties = {
-        type: 'object',
-        dynamic: true,
-      };
+      if (!name.includes('*')) continue;
       ctx.addDynamicMapping({
         path: name,
         pathMatch: name,
         matchingType: 'object',
-        properties: dynProps,
+        properties: { type: 'object', dynamic: true },
       });
     }
   }
 
   function addObjectAsDynamicMapping(field: Field) {
-    const path = ctx.groupFieldName ? `${ctx.groupFieldName}.${field.name}` : field.name;
-    const pathMatch = path.includes('*') ? path : `${path}.*`;
+    const path = fieldPath(ctx.groupFieldName, field.name);
+    const pMatch = dynamicPathMatch(path);
+    const objectType = field.object_type!;
 
-    let dynProperties: Properties = getDefaultProperties(field);
-    let matchingType: string | undefined;
-    switch (field.object_type) {
-      case 'histogram':
-        dynProperties = histogram(field);
-        matchingType = field.object_type_mapping_type ?? '*';
-        break;
-      case 'ip':
-        dynProperties.type = field.object_type;
-        matchingType = field.object_type_mapping_type ?? 'string';
-        break;
-      case 'keyword':
-        dynProperties = keyword(field, true);
-        matchingType = field.object_type_mapping_type ?? 'string';
-        if (field.multi_fields) {
-          dynProperties.fields = generateMultiFields(field.multi_fields);
-        }
-        break;
-      case 'match_only_text':
-      case 'text':
-      case 'wildcard':
-        matchingType = field.object_type_mapping_type ?? 'string';
-        const textMapping = generateTextMappingForDynamic(field);
-        dynProperties = { ...dynProperties, ...textMapping, type: field.object_type };
-        if (field.multi_fields) {
-          dynProperties.fields = generateMultiFields(field.multi_fields);
-        }
-        break;
-      case 'scaled_float':
-        dynProperties = scaledFloat(field);
-        matchingType = field.object_type_mapping_type ?? '*';
-        break;
-      case 'aggregate_metric_double':
-        dynProperties.type = field.object_type;
-        dynProperties.metrics = field.metrics;
-        dynProperties.default_metric = field.default_metric;
-        matchingType = field.object_type_mapping_type ?? '*';
-        break;
-      case 'double':
-      case 'float':
-      case 'half_float':
-        dynProperties.type = field.object_type;
-        if (isIndexModeTimeSeries) {
-          dynProperties.time_series_metric = field.metric_type;
-        }
-        matchingType = field.object_type_mapping_type ?? 'double';
-        break;
-      case 'byte':
-      case 'long':
-      case 'short':
-      case 'unsigned_long':
-        dynProperties.type = field.object_type;
-        if (isIndexModeTimeSeries) {
-          dynProperties.time_series_metric = field.metric_type;
-        }
-        matchingType = field.object_type_mapping_type ?? 'long';
-        break;
-      case 'integer':
-        // Map integers as long, as in other cases.
-        dynProperties.type = 'long';
-        if (isIndexModeTimeSeries) {
-          dynProperties.time_series_metric = field.metric_type;
-        }
-        matchingType = field.object_type_mapping_type ?? 'long';
-        break;
-      case 'boolean':
-        dynProperties.type = field.object_type;
-        if (isIndexModeTimeSeries) {
-          dynProperties.time_series_metric = field.metric_type;
-        }
-        matchingType = field.object_type_mapping_type ?? field.object_type;
-        break;
-      case 'group':
-        if (!field?.fields) {
-          break;
-        }
-        const subFields = field.fields.map((subField) => ({
-          ...subField,
-          type: 'object',
-          object_type: subField.object_type ?? subField.type,
-        }));
-        const mappings = _generateMappings(
-          subFields,
-          {
-            ...ctx,
-            groupFieldName: ctx.groupFieldName ? `${ctx.groupFieldName}.${field.name}` : field.name,
-          },
-          isIndexModeTimeSeries
-        );
-        if (mappings.hasDynamicTemplateMappings) {
-          hasDynamicTemplateMappings = true;
-        }
-        break;
-      case 'flattened':
-        dynProperties.type = field.object_type;
-        matchingType = field.object_type_mapping_type ?? 'object';
-        break;
-      default:
-        throw new PackageInvalidArchiveError(
-          `No dynamic mapping generated for field ${path} of type ${field.object_type}`
-        );
+    if (objectType === 'group') {
+      if (!field.fields) return;
+      const subFields = field.fields.map((subField) => ({
+        ...subField,
+        type: 'object',
+        object_type: subField.object_type ?? subField.type,
+      }));
+      const mappings = _generateMappings(
+        subFields,
+        { ...ctx, groupFieldName: fieldPath(ctx.groupFieldName, field.name) },
+        isIndexModeTimeSeries
+      );
+      if (mappings.hasDynamicTemplateMappings) hasDynamicTemplateMappings = true;
+      return;
     }
 
-    if (field.dimension && isIndexModeTimeSeries) {
-      dynProperties.time_series_dimension = field.dimension;
+    const handler = fieldTypeRegistry[objectType];
+    const result = handler?.dynamicMapping({ ...field, type: objectType }, ctx);
+
+    if (!result) {
+      // Preserve original behavior: unsupported or unknown object_type always throws.
+      throw new PackageInvalidArchiveError(
+        `No dynamic mapping generated for field ${path} of type ${objectType}`
+      );
     }
 
     // When a wildcard field specifies the subobjects setting,
-    // the parent intermediate object should set the subobjects
-    // setting.
-    //
+    // the parent intermediate object should set the subobjects setting.
     // For example, if a wildcard field `foo.*` has subobjects,
     // we should set subobjects on the intermediate object `foo`.
-    //
     if (field.subobjects !== undefined && path.includes('*')) {
       subobjects = field.subobjects;
     }
 
-    if (dynProperties && matchingType) {
-      addDynamicMappingWithIntermediateObjects(path, pathMatch, matchingType, dynProperties);
+    addDynamicMappingWithIntermediateObjects(path, pMatch, result.matchingType, result.properties);
 
-      // Add the parent object as static property, this is needed for
-      // index templates not using `"dynamic": true`.
-      addParentObjectAsStaticProperty(field);
-    }
+    // Add the parent object as static property, needed for index templates not using `"dynamic": true`.
+    addParentObjectAsStaticProperty(field);
   }
 
-  // TODO: this can happen when the fields property in fields.yml is present but empty
-  // Maybe validation should be moved to fields/field.ts
+  // TODO: this can happen when the fields property in fields.yml is present but empty.
+  // Maybe validation should be moved to fields/field.ts.
   if (fields) {
     fields.forEach((field) => {
       // If type is not defined, assume keyword
       const type = field.type || 'keyword';
 
       if (field.runtime !== undefined) {
-        const path = ctx.groupFieldName ? `${ctx.groupFieldName}.${field.name}` : field.name;
-        let runtimeFieldProps: Properties = getDefaultProperties(field);
+        const path = fieldPath(ctx.groupFieldName, field.name);
 
-        // Is it a dynamic template?
         if (type === 'object' && field.object_type) {
-          const pathMatch = path.includes('*') ? path : `${path}.*`;
+          // Runtime field that is also a dynamic template (e.g. labels.* with runtime: true).
+          const pMatch = dynamicPathMatch(path);
+          const objectType = field.object_type;
 
-          const dynProperties: Properties = getDefaultProperties(field);
-          let matchingType: string | undefined;
-          switch (field.object_type) {
-            case 'keyword':
-              dynProperties.type = field.object_type;
-              matchingType = field.object_type_mapping_type ?? 'string';
-              break;
-            case 'double':
-            case 'long':
-            case 'boolean':
-              dynProperties.type = field.object_type;
-              if (isIndexModeTimeSeries) {
-                dynProperties.time_series_metric = field.metric_type;
-              }
-              matchingType = field.object_type_mapping_type ?? field.object_type;
-            default:
-              break;
-          }
+          const handler = fieldTypeRegistry[objectType];
+          const dynResult = handler?.dynamicMapping({ ...field, type: objectType }, ctx);
+          const runtimeProps = handler?.runtimeMapping({ ...field, type: objectType });
 
-          // get the runtime properies of this field assuming type equals to object_type
-          const _field = { ...field, type: field.object_type };
-          const fieldProps = generateRuntimeFieldProps(_field);
-
-          if (dynProperties && matchingType) {
+          if (dynResult && runtimeProps) {
             addDynamicMappingWithIntermediateObjects(
               path,
-              pathMatch,
-              matchingType,
-              dynProperties,
-              fieldProps
+              pMatch,
+              dynResult.matchingType,
+              dynResult.properties,
+              runtimeProps
             );
-
-            // Add the parent object as static property, this is needed for
-            // index templates not using `"dynamic": true`.
             addParentObjectAsStaticProperty(field);
           }
           return;
         }
-        const fieldProps = generateRuntimeFieldProps(field);
-        runtimeFieldProps = { ...runtimeFieldProps, ...fieldProps };
 
+        const handler = fieldTypeRegistry[type];
+        const runtimeProps = handler?.runtimeMapping(field) ?? { type };
+        const runtimeFieldProps = {
+          ...getDefaultProperties(field),
+          ...runtimeProps,
+        };
+        if (typeof field.runtime === 'string') {
+          runtimeFieldProps.script = { source: field.runtime.trim() };
+        }
         ctx.addRuntimeField({ path, properties: runtimeFieldProps });
-        return; // runtime fields should not be added as a property
+        return;
       }
 
       if (type === 'object' && field.object_type) {
         addObjectAsDynamicMapping(field);
-      } else {
-        let fieldProps = getDefaultProperties(field);
-
-        switch (type) {
-          case 'group':
-            const mappings = _generateMappings(
-              field.fields!,
-              {
-                ...ctx,
-                groupFieldName: ctx.groupFieldName
-                  ? `${ctx.groupFieldName}.${field.name}`
-                  : field.name,
-              },
-              isIndexModeTimeSeries
-            );
-            if (field.object_type) {
-              // A group can have an object_type if it has been merged with an object during deduplication,
-              // generate also the dynamic mapping for the object.
-              addObjectAsDynamicMapping(field);
-              mappings.hasDynamicTemplateMappings = true;
-            }
-            if (mappings.hasNonDynamicTemplateMappings) {
-              fieldProps = {
-                properties:
-                  Object.keys(mappings.properties).length > 0 ? mappings.properties : undefined,
-                ...generateDynamicAndEnabled(field),
-              };
-              if (mappings.hasDynamicTemplateMappings) {
-                fieldProps.type = 'object';
-                fieldProps.dynamic = true;
-              }
-            } else if (mappings.hasDynamicTemplateMappings) {
-              fieldProps = {
-                type: 'object',
-                dynamic: true,
-              };
-              hasDynamicTemplateMappings = true;
-            } else {
-              return;
-            }
-            if (mappings.subobjects !== undefined) {
-              fieldProps.subobjects = mappings.subobjects;
-            }
-            break;
-          case 'nested':
-          case 'group-nested':
-            fieldProps = { ...generateNestedProps(field), type: 'nested' };
-            if (field.fields) {
-              fieldProps.properties = _generateMappings(
-                field.fields!,
-                {
-                  ...ctx,
-                  groupFieldName: ctx.groupFieldName
-                    ? `${ctx.groupFieldName}.${field.name}`
-                    : field.name,
-                },
-                isIndexModeTimeSeries
-              ).properties;
-            }
-            break;
-          case 'integer':
-            fieldProps.type = 'long';
-            break;
-          case 'scaled_float':
-            fieldProps = scaledFloat(field);
-            break;
-          case 'text':
-            const textMapping = generateTextMapping(field);
-            fieldProps = { ...fieldProps, ...textMapping, type: 'text' };
-            if (field.multi_fields) {
-              fieldProps.fields = generateMultiFields(field.multi_fields);
-            }
-            break;
-          case 'object':
-            fieldProps = { ...fieldProps, ...generateDynamicAndEnabled(field), type: 'object' };
-            break;
-          case 'keyword':
-            fieldProps = keyword(field);
-            if (field.multi_fields) {
-              fieldProps.fields = generateMultiFields(field.multi_fields);
-            }
-            break;
-          case 'wildcard':
-            const wildcardMapping = generateWildcardMapping(field);
-            fieldProps = { ...fieldProps, ...wildcardMapping, type: 'wildcard' };
-            if (field.multi_fields) {
-              fieldProps.fields = generateMultiFields(field.multi_fields);
-            }
-            break;
-          case 'constant_keyword':
-            fieldProps.type = field.type;
-            if (field.value) {
-              fieldProps.value = field.value;
-            }
-            break;
-          case 'array':
-            // this assumes array fields were validated in an earlier step
-            // adding an array field with no object_type would result in an error
-            // when the template is added to ES
-            if (field.object_type) {
-              fieldProps.type = field.object_type;
-            }
-            break;
-          case 'alias':
-            // this assumes alias fields were validated in an earlier step
-            // adding a path to a field that doesn't exist would result in an error
-            // when the template is added to ES.
-            fieldProps.type = 'alias';
-            fieldProps.path = field.path;
-            break;
-          case 'date':
-            const dateMappings = generateDateMapping(field);
-            fieldProps = { ...fieldProps, ...dateMappings, type: 'date' };
-            break;
-          case 'aggregate_metric_double':
-            fieldProps = {
-              ...fieldProps,
-              metrics: field.metrics,
-              default_metric: field.default_metric,
-              type: 'aggregate_metric_double',
-            };
-            break;
-          case 'flattened':
-            fieldProps.type = type;
-            if (field.ignore_above) {
-              fieldProps.ignore_above = field.ignore_above;
-            }
-            break;
-          default:
-            fieldProps.type = type;
-        }
-
-        const fieldHasMetaProps = META_PROP_KEYS.some((key) => key in field);
-        if (fieldHasMetaProps) {
-          switch (type) {
-            case 'group':
-            case 'group-nested':
-              break;
-            default: {
-              const meta = {};
-              if ('unit' in field) Reflect.set(meta, 'unit', field.unit);
-              fieldProps.meta = meta;
-            }
-          }
-        }
-
-        if ('metric_type' in field && isIndexModeTimeSeries) {
-          fieldProps.time_series_metric = field.metric_type;
-        }
-        if (field.dimension && isIndexModeTimeSeries) {
-          fieldProps.time_series_dimension = field.dimension;
-        }
-
-        if (field.subobjects !== undefined) {
-          fieldProps.subobjects = field.subobjects;
-        }
-
-        // Even if we don't add the property because it has a wildcard, notify
-        // the parent that there is some kind of property, so the intermediate object
-        // is still created.
-        // This is done for legacy packages that include ambiguous mappings with objects
-        // without object type. This is not allowed starting on Package Spec v3.
-        hasNonDynamicTemplateMappings = true;
-
-        // Avoid including maps with wildcards, they have generated dynamic mappings.
-        if (field.name.includes('*')) {
-          hasDynamicTemplateMappings = true;
-          return;
-        }
-
-        props[field.name] = fieldProps;
+        return;
       }
+
+      const handler = fieldTypeRegistry[type];
+      let fieldProps: Properties;
+
+      if (type === 'group') {
+        const groupHandler = handler as GroupType;
+        const groupResult = groupHandler.mapGroup(field, ctx);
+        if (groupResult === undefined) return;
+
+        fieldProps = groupResult.fieldProps;
+
+        // Only propagate hasDynamicTemplateMappings upward when the group produced
+        // no static properties — matching original behavior.
+        if (groupResult.onlyDynamicTemplateMappings) hasDynamicTemplateMappings = true;
+
+        // A group that also has an object_type was merged with an object during deduplication.
+        // Generate the dynamic mapping for the object side too, and mark the group as dynamic.
+        if (field.object_type) {
+          addObjectAsDynamicMapping(field);
+          hasDynamicTemplateMappings = true;
+          fieldProps.type = 'object';
+          fieldProps.dynamic = true;
+        }
+      } else if (handler) {
+        const mapped = handler.staticMapping(field, ctx);
+        if (mapped === undefined) return;
+        fieldProps = mapped;
+      } else {
+        // Unknown type: pass through as-is (legacy behaviour).
+        fieldProps = { ...getDefaultProperties(field), type };
+      }
+
+      const fieldHasMetaProps = META_PROP_KEYS.some((key) => key in field);
+      if (fieldHasMetaProps && type !== 'group' && type !== 'group-nested') {
+        const meta: Properties = {};
+        if ('unit' in field) Reflect.set(meta, 'unit', field.unit);
+        fieldProps.meta = meta;
+      }
+
+      if ('metric_type' in field && isIndexModeTimeSeries) {
+        fieldProps.time_series_metric = field.metric_type;
+      }
+      if (field.dimension && isIndexModeTimeSeries) {
+        fieldProps.time_series_dimension = field.dimension;
+      }
+
+      if (field.subobjects !== undefined) {
+        fieldProps.subobjects = field.subobjects;
+      }
+
+      // Even if we don't add the property because it has a wildcard, notify
+      // the parent that there is some kind of property, so the intermediate object
+      // is still created.
+      // This is done for legacy packages that include ambiguous mappings with objects
+      // without object type. This is not allowed starting on Package Spec v3.
+      hasNonDynamicTemplateMappings = true;
+
+      // Avoid including maps with wildcards, they have generated dynamic mappings.
+      if (field.name.includes('*')) {
+        hasDynamicTemplateMappings = true;
+        return;
+      }
+
+      props[field.name] = fieldProps;
     });
   }
 
@@ -710,122 +931,16 @@ function _generateMappings(
   };
 }
 
-function generateDynamicAndEnabled(field: Field) {
-  const props: Properties = {};
-  if (Object.hasOwn(field, 'enabled')) {
-    props.enabled = field.enabled;
-  }
-  if (Object.hasOwn(field, 'dynamic')) {
-    props.dynamic = field.dynamic;
-  }
-  return props;
-}
-
-function generateNestedProps(field: Field) {
-  const props = generateDynamicAndEnabled(field);
-
-  if (Object.hasOwn(field, 'include_in_parent')) {
-    props.include_in_parent = field.include_in_parent;
-  }
-  if (Object.hasOwn(field, 'include_in_root')) {
-    props.include_in_root = field.include_in_root;
-  }
-  return props;
-}
-
 function generateMultiFields(fields: Fields): MultiFields {
   const multiFields: MultiFields = {};
   if (fields) {
     fields.forEach((f: Field) => {
-      const type = f.type;
-      switch (type) {
-        case 'text':
-          multiFields[f.name] = { ...generateTextMapping(f), type: f.type };
-          break;
-        case 'keyword':
-          multiFields[f.name] = keyword(f);
-          break;
-        case 'long':
-        case 'double':
-        case 'match_only_text':
-          multiFields[f.name] = { type: f.type };
-          break;
-      }
+      const handler = f.type ? fieldTypeRegistry[f.type] : undefined;
+      const mapped = handler?.multiFieldMapping(f);
+      if (mapped) multiFields[f.name] = mapped;
     });
   }
   return multiFields;
-}
-
-function generateTextMapping(field: Field): IndexTemplateMapping {
-  const mapping: IndexTemplateMapping = {};
-  if (field.analyzer) {
-    mapping.analyzer = field.analyzer;
-  }
-  if (field.search_analyzer) {
-    mapping.search_analyzer = field.search_analyzer;
-  }
-  return mapping;
-}
-
-function generateWildcardMapping(field: Field): IndexTemplateMapping {
-  const mapping: IndexTemplateMapping = {
-    ignore_above: DEFAULT_IGNORE_ABOVE,
-  };
-  if (field.null_value) {
-    mapping.null_value = field.null_value;
-  }
-  if (field.ignore_above) {
-    mapping.ignore_above = field.ignore_above;
-  }
-  return mapping;
-}
-//  This is a duplicate of the above function, but without the default 'ignore_above' value for dynamic mappings. We dont want to enforce due to backwards compatibility
-function generateTextMappingForDynamic(field: Field): IndexTemplateMapping {
-  const mapping: IndexTemplateMapping = {};
-  if (field.null_value) {
-    mapping.null_value = field.null_value;
-  }
-  if (field.ignore_above) {
-    mapping.ignore_above = field.ignore_above;
-  }
-  return mapping;
-}
-
-function generateDateMapping(field: Field): IndexTemplateMapping {
-  const mapping: IndexTemplateMapping = {};
-  if (field.date_format) {
-    mapping.format = field.date_format;
-  }
-
-  if (field.name === '@timestamp') {
-    mapping.ignore_malformed = false;
-  }
-
-  return mapping;
-}
-
-function generateRuntimeFieldProps(field: Field): IndexTemplateMapping {
-  let mapping: IndexTemplateMapping = {};
-  const type = field.type || keyword;
-  switch (type) {
-    case 'integer':
-      mapping.type = 'long';
-      break;
-    case 'date':
-      const dateMappings = generateDateMapping(field);
-      mapping = { ...mapping, ...dateMappings, type: 'date' };
-      break;
-    default:
-      mapping.type = type;
-  }
-
-  if (typeof field.runtime === 'string') {
-    const scriptObject = {
-      source: field.runtime.trim(),
-    };
-    mapping.script = scriptObject;
-  }
-  return mapping;
 }
 
 /**
@@ -849,17 +964,19 @@ async function getIndexTemplate(
   return dataStream.data_streams[0].template;
 }
 
+const buildIndexPattern = (baseName: string, isPrefix: boolean, tail: string): string =>
+  isPrefix ? `${baseName}.*-${tail}` : `${baseName}-${tail}`;
+
 export function generateTemplateIndexPattern(
   dataStream: RegistryDataStream,
   isOtelInputType?: boolean
 ): string {
-  // undefined or explicitly set to false
   // See also https://github.com/elastic/package-spec/pull/102
-  if (!dataStream.dataset_is_prefix) {
-    return getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType) + '-*';
-  } else {
-    return getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType) + '.*-*';
-  }
+  return buildIndexPattern(
+    getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType),
+    !!dataStream.dataset_is_prefix,
+    '*'
+  );
 }
 
 // Template priorities are discussed in https://github.com/elastic/kibana/issues/88307
@@ -910,12 +1027,11 @@ export function generateNamespaceTemplateIndexPattern(
   namespace: string,
   isOtelInputType?: boolean
 ): string {
-  const baseName = getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType);
-  if (!dataStream.dataset_is_prefix) {
-    return `${baseName}-${namespace}`;
-  } else {
-    return `${baseName}.*-${namespace}`;
-  }
+  return buildIndexPattern(
+    getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType),
+    !!dataStream.dataset_is_prefix,
+    namespace
+  );
 }
 
 /**
@@ -971,24 +1087,6 @@ export function generateESIndexPatterns(
   }
   return patterns;
 }
-
-const flattenFieldsToNameAndType = (
-  fields: Fields,
-  path: string = ''
-): Array<Pick<Field, 'name' | 'type'>> => {
-  let newFields: Array<Pick<Field, 'name' | 'type'>> = [];
-  fields.forEach((field) => {
-    const fieldName = path ? `${path}.${field.name}` : field.name;
-    newFields.push({
-      name: fieldName,
-      type: field.type,
-    });
-    if (field.fields && field.fields.length) {
-      newFields = newFields.concat(flattenFieldsToNameAndType(field.fields, fieldName));
-    }
-  });
-  return newFields;
-};
 
 function getBaseTemplate({
   templateIndexPattern,
@@ -1106,7 +1204,7 @@ const MAPPER_EXCEPTION_REASONS_REQUIRING_ROLLOVER = [
   "[enabled] parameter can't be updated for the object mapping",
 ];
 
-function errorNeedRollover(err: any) {
+function errorNeedRollover(err: any): boolean {
   if (
     isResponseError(err) &&
     err.statusCode === 400 &&
@@ -1123,6 +1221,7 @@ function errorNeedRollover(err: any) {
   ) {
     return true;
   }
+  return false;
 }
 
 const rolloverDataStream = (dataStreamName: string, esClient: ElasticsearchClient) => {
@@ -1230,7 +1329,7 @@ const updateExistingDataStream = async ({
       subobjectsFieldChanged = true;
     }
 
-    logger.info(`Attempt to update the mappings for the ${dataStreamName} (write_index_only)`);
+    logger.debug(`Attempt to update the mappings for the ${dataStreamName} (write_index_only)`);
     await retryTransientEsErrors(
       () =>
         esClient.indices.putMapping({
