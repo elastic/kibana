@@ -10,7 +10,7 @@
 import type { EuiDataGridProps } from '@elastic/eui';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { generateEsHits } from '@kbn/discover-utils/src/__mocks__';
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { omit } from 'lodash';
 import React from 'react';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
@@ -154,7 +154,9 @@ describe('CompareDocuments', () => {
   it('should set selected docs when columns change', () => {
     const { replaceSelectedDocs } = renderCompareDocuments();
     const visibleColumns = ['fields_generated-id', '0', '1', '2'];
-    mockDataGridProps?.columnVisibility.setVisibleColumns(visibleColumns);
+    act(() => {
+      mockDataGridProps?.columnVisibility.setVisibleColumns(visibleColumns);
+    });
     expect(replaceSelectedDocs).toHaveBeenCalledWith(visibleColumns.slice(1));
   });
 
@@ -169,11 +171,11 @@ describe('CompareDocuments', () => {
     );
   });
 
-  it('should retain comparison docs when docMap loses access to them', () => {
+  it('should retain comparison docs when docMap and selectedDocIds lose access to them', () => {
     const { rerender } = renderCompareDocuments();
     const visibleColumns = ['fields_generated-id', '0', '1', '2'];
     expect(mockDataGridProps?.columnVisibility.visibleColumns).toEqual(visibleColumns);
-    rerender({ docMap: new Map() });
+    rerender({ docMap: new Map(), selectedDocIds: [] });
     expect(mockDataGridProps?.columnVisibility.visibleColumns).toEqual(visibleColumns);
   });
 });

@@ -19,7 +19,7 @@ import type {
 import { EuiDataGrid, useGeneratedHtmlId } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { DATA_GRID_STYLE_DEFAULT } from '../../constants';
 import { ComparisonControls } from './comparison_controls';
 import { renderComparisonToolbar } from './comparison_toolbar';
@@ -68,18 +68,26 @@ const CompareDocuments = ({
   dataView,
   isPlainRecord,
   selectedFieldNames,
-  selectedDocIds,
+  selectedDocIds: originalSelectedDocIds,
   schemaDetectors,
   forceShowAllFields,
   showFullScreenButton,
   fieldFormats,
-  docMap,
-  replaceSelectedDocs,
+  docMap: originalDocMap,
+  replaceSelectedDocs: originalReplaceSelectedDocs,
   setIsCompareActive,
 }: CompareDocumentsProps) => {
-  // Snapshot docMap to ensure we don't lose access to the comparison docs if, for example,
-  // a time range change or auto refresh causes the previous docs to no longer be available
-  const [comparisonDocMap] = useState<DocMap>(() => new Map(docMap));
+  // Snapshot docMap and selectedDocIds to ensure we don't lose access to the comparison docs
+  // or their selection state if, for example, a time range change or auto refresh changes them.
+  const [docMap] = useState<DocMap>(originalDocMap);
+  const [selectedDocIds, setSelectedDocIds] = useState(originalSelectedDocIds);
+  const replaceSelectedDocs = useCallback(
+    (docIds: string[]) => {
+      setSelectedDocIds(docIds);
+      originalReplaceSelectedDocs(docIds);
+    },
+    [originalReplaceSelectedDocs]
+  );
   const [showDiff, setShowDiff] = useRestorableLocalStorage(
     'comparisonSettingShowDiff',
     getStorageKey(consumer, 'ShowDiff'),
@@ -113,14 +121,14 @@ const CompareDocuments = ({
     selectedDocIds,
     showAllFields: Boolean(forceShowAllFields || showAllFields),
     showMatchingValues: Boolean(showMatchingValues),
-    docMap: comparisonDocMap,
+    docMap,
   });
   const comparisonColumns = useComparisonColumns({
     wrapper,
     isPlainRecord,
     fieldColumnId,
     selectedDocIds,
-    docMap: comparisonDocMap,
+    docMap,
     replaceSelectedDocs,
   });
   const comparisonColumnVisibility = useMemo<EuiDataGridColumnVisibility>(
@@ -193,7 +201,7 @@ const CompareDocuments = ({
     selectedDocIds,
     diffMode: showDiff ? diffMode : undefined,
     fieldFormats,
-    docMap: comparisonDocMap,
+    docMap,
   });
   const comparisonCss = useComparisonCss({
     diffMode: showDiff ? diffMode : undefined,
