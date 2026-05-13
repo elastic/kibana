@@ -145,3 +145,4 @@ export {
   packagePolicyHasOtelInputs,
   OTEL_INPUTS_MINIMUM_VERSION,
 } from './otelcol_helpers';
+export { isOtelCollector, agentToOtelCollector } from './agent_to_otel_collector';

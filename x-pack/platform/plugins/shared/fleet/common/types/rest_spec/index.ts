@@ -25,3 +25,4 @@ export type * from './standalone_agent_api_key';
 export type * from './remote_synced_integrations';
 export type * from './custom_integrations';
 export type * from './agentless_policy';
+export * from './otel_collector';

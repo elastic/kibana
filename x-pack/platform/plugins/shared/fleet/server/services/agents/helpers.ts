@@ -23,7 +23,7 @@ type FleetServerAgentESResponse =
 export function searchHitToAgent(
   hit: FleetServerAgentESResponse & {
     sort?: SortResults;
-    fields?: { status?: AgentStatus[] };
+    fields?: { status?: AgentStatus[]; signals?: string[] };
   }
 ): Agent {
   const outputs: OutputMap | undefined = hit._source?.outputs
@@ -118,6 +118,9 @@ export function searchHitToAgent(
       );
   } else {
     agent.status = hit.fields.status[0];
+  }
+  if (hit.fields?.signals?.length) {
+    agent.signals = hit.fields.signals;
   }
   return agent;
 }

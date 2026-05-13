@@ -32,6 +32,7 @@ import { registerRoutes as registerDebugRoutes } from './debug';
 import { registerRoutes as registerRemoteSyncedIntegrations } from './remote_synced_integrations';
 import { registerRoutes as registerCloudConnectorRoutes } from './cloud_connector';
 import { registerRoutes as registerAgentlessPoliciesRoutes } from './agentless_policy'; //
+import { registerOtelCollectorRoutes } from './otel_collector';
 
 export function registerRoutes(
   fleetAuthzRouter: FleetAuthzRouter,
@@ -72,5 +73,6 @@ export function registerRoutes(
   if (config.agents.enabled) {
     registerAgentAPIRoutes(fleetAuthzRouter, config);
     registerEnrollmentApiKeyRoutes(fleetAuthzRouter);
+    registerOtelCollectorRoutes(fleetAuthzRouter, config);
   }
 }

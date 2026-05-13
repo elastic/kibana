@@ -27,6 +27,7 @@ import {
   FLEET_DEBUG_ROUTES,
   REMOTE_SYNCED_INTEGRATIONS_API_ROUTES,
   AGENTLESS_POLICIES_ROUTES,
+  OTEL_COLLECTOR_API_ROUTES,
 } from '../constants';
 
 export const epmRouteService = {
@@ -367,6 +368,10 @@ export const agentRouteService = {
   postGenerateAgentsReport: () => AGENT_API_ROUTES.GENERATE_REPORT_PATTERN,
   getAgentEffectiveConfig: (agentId: string) =>
     AGENT_API_ROUTES.EFFECTIVE_CONFIG_PATTERN.replace('{agentId}', agentId),
+};
+
+export const otelCollectorRouteService = {
+  getListPath: () => OTEL_COLLECTOR_API_ROUTES.LIST_PATTERN,
 };
 
 export const outputRoutesService = {

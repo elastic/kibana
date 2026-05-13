@@ -218,6 +218,7 @@ export async function getAgentsByKuery(
     pitId?: string;
     pitKeepAlive?: string;
     aggregations?: Record<string, AggregationsAggregationContainer>;
+    runtimeFields?: estypes.SearchRequest['runtime_mappings'];
   }
 ): Promise<{
   agents: Agent[];
@@ -277,7 +278,10 @@ export async function getAgentsByKuery(
 
   const kueryNode = _joinFilters(filters);
 
-  const runtimeFields = await buildAgentStatusRuntimeField(soClient);
+  const runtimeFields = {
+    ...(await buildAgentStatusRuntimeField(soClient)),
+    ...options.runtimeFields,
+  };
 
   const sort = getSortConfig(sortField, sortOrder);
 

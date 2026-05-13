@@ -203,6 +203,10 @@ export const AGENT_API_ROUTES = {
   GENERATE_REPORT_PATTERN: `${INTERNAL_ROOT}/agents/reporting/generate`,
 };
 
+export const OTEL_COLLECTOR_API_ROUTES = {
+  LIST_PATTERN: `${API_ROOT}/otel_collectors`,
+};
+
 export const AGENTLESS_POLICIES_ROUTES = {
   CREATE_PATTERN: `${API_ROOT}/agentless_policies`,
   DELETE_PATTERN: `${API_ROOT}/agentless_policies/{policyId}`,

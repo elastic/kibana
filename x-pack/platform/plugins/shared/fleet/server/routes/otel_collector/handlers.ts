@@ -1,0 +1,23 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { TypeOf } from '@kbn/config-schema';
+
+import type { GetOtelCollectorsRequestSchema } from '../../../common/types/rest_spec/otel_collector';
+import type { FleetRequestHandler } from '../../types';
+import { listOtelCollectors } from '../../services/otel_collectors';
+
+export const getOtelCollectorsHandler: FleetRequestHandler<
+  undefined,
+  TypeOf<typeof GetOtelCollectorsRequestSchema.query>
+> = async (context, request, response) => {
+  const fleetContext = await context.fleet;
+
+  const body = await listOtelCollectors(fleetContext.agentClient.asCurrentUser, request.query);
+
+  return response.ok({ body });
+};
