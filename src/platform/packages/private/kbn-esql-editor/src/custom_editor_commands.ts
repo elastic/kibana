@@ -314,7 +314,8 @@ export const addEditorKeyBindings = (
   editor: monaco.editor.IStandaloneCodeEditor,
   onQuerySubmit: (source: QuerySource) => void,
   toggleVisor: () => void,
-  onPrettifyQuery: () => void
+  onPrettifyQuery: () => void,
+  onGenerateFromComment?: () => void
 ) => {
   // Add editor key bindings
   editor.addCommand(
@@ -336,6 +337,14 @@ export const addEditorKeyBindings = (
       onPrettifyQuery();
     }
   );
+
+  if (onGenerateFromComment) {
+    editor.addCommand(
+      // eslint-disable-next-line no-bitwise
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyJ,
+      () => onGenerateFromComment()
+    );
+  }
 };
 
 export const addTabKeybindingRules = () => {
