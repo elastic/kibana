@@ -102,9 +102,10 @@ export type InferenceEndpointWithDisplayCreatorMetadata = InferenceEndpointWithM
 export enum EisModelStatus {
   Preview = 'preview',
   GA = 'ga',
+  // metadata status is 'deprecated' OR the end_of_life_date is within the next 30 days
   Deprecated = 'deprecated',
   // The following status are purely for the UI and not directly received from EIS metadata
-  // DeprecatedEOL is status: deprecated and end_of_life_date in the past
+  // DeprecatedEOL is status: end_of_life_date in the past regardless of status value
   DeprecatedEOL = 'deprecated_eol',
   // Unknown is used when we either don't have a status value in the metadata
   // or we haven't updated our parsing for a new value

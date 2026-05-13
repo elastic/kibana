@@ -10,12 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { NO_DEFAULT_MODEL } from '../../common/constants';
 import { useConnectors } from './use_connectors';
 import type { DefaultModelSettingsState } from './use_default_model_settings';
-import {
-  getModelEOLDate,
-  getModelEOLMessage,
-  getModelDeprecatedMessage,
-  getModelStatus,
-} from '../utils/eis_utils';
+import { getModelEOLDate, getModelEOLMessage, getModelStatus } from '../utils/eis_utils';
 import { EisModelStatus } from '../types';
 
 export interface DefaultModelValidationResult {

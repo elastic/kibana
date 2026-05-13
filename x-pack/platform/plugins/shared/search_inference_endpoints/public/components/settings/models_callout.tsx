@@ -37,7 +37,7 @@ export const ModelsCallout = ({
         <p>{message}</p>
         <ul>
           {modelList.map((model, i) => (
-            <li key={`endpoint.${i}`}>{model}</li>
+            <li key={`modelList.${i}`}>{model}</li>
           ))}
         </ul>
       </EuiCallOut>

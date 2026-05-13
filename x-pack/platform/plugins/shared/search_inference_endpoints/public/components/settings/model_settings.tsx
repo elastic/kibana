@@ -269,7 +269,7 @@ export const ModelSettings: React.FC = () => {
                   'xpack.searchInferenceEndpoints.settings.invalidEndpoints.description',
                   {
                     defaultMessage:
-                      'The following endpoints could not be found:\n{endpointList}.\nFeatures using these endpoints may not work as expected.',
+                      'The following endpoints could not be found: {endpointList}. Features using these endpoints may not work as expected.',
                     values: {
                       endpointList: [...invalidEndpointIds].join(', '),
                     },
@@ -292,7 +292,7 @@ export const ModelSettings: React.FC = () => {
               'xpack.searchInferenceEndpoints.settings.eolModelsCallout.description',
               {
                 defaultMessage:
-                  'Features using these models may not work as expected. The following models are have reached end of life and are no longer available:',
+                  'Features using these models may not work as expected. The following models have reached end of life and are no longer available:',
               }
             )}
             modelList={eolAssignedModels}

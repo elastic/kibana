@@ -7,7 +7,12 @@
 
 import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 import { EisModelStatus } from '../../common/types';
-import { getModelEOLDate, getModelStatus, isModelEndOfLifeReached } from './eis_utils';
+import {
+  getModelEOLDate,
+  getModelStatus,
+  isModelDeprecated,
+  isModelEndOfLifeReached,
+} from './eis_utils';
 
 const makeMetadata = (
   overrides: NonNullable<EisInferenceEndpointMetadata['heuristics']>
@@ -50,6 +55,37 @@ describe('eis utility functions', function () {
     });
   });
 
+  describe('isModelDeprecated', function () {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date('2026-05-13'));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('returns false when metadata is undefined', () => {
+      expect(isModelDeprecated(undefined)).toBe(false);
+    });
+
+    it('returns false when no EOL date and status is ga', () => {
+      expect(isModelDeprecated(makeMetadata({ status: 'ga' }))).toBe(false);
+    });
+
+    it('returns true when status is deprecated and no EOL date', () => {
+      expect(isModelDeprecated(makeMetadata({ status: 'deprecated' }))).toBe(true);
+    });
+
+    it('returns true when EOL date is within the next 30 days', () => {
+      expect(isModelDeprecated(makeMetadata({ end_of_life_date: '2026-06-01' }))).toBe(true);
+    });
+
+    it('returns false when EOL date is more than 30 days in the future', () => {
+      expect(isModelDeprecated(makeMetadata({ end_of_life_date: '2026-07-01' }))).toBe(false);
+    });
+  });
+
   describe('getModelStatus', function () {
     it('returns Unknown when metadata is undefined', () => {
       expect(getModelStatus(undefined)).toBe(EisModelStatus.Unknown);
@@ -75,6 +111,18 @@ describe('eis utility functions', function () {
       expect(
         getModelStatus(makeMetadata({ status: 'deprecated', end_of_life_date: '2099-01-01' }))
       ).toBe(EisModelStatus.Deprecated);
+    });
+
+    it('returns Deprecated when EOL date is within the next 30 days regardless of status', () => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date('2026-05-13'));
+      try {
+        expect(getModelStatus(makeMetadata({ status: 'ga', end_of_life_date: '2026-06-01' }))).toBe(
+          EisModelStatus.Deprecated
+        );
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it('returns DeprecatedEOL when EOL date is in the past regardless of status', () => {

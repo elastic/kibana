@@ -97,13 +97,13 @@ export const getModelStatus = (
 ): EisModelStatus => {
   if (!metadata) return EisModelStatus.Unknown;
   if (isModelEndOfLifeReached(metadata)) return EisModelStatus.DeprecatedEOL;
+  // use helper function to catch eol dates within the next month regardless of status value
+  if (isModelDeprecated(metadata)) return EisModelStatus.Deprecated;
   switch (metadata.heuristics?.status?.toLowerCase()) {
     case EisModelStatus.GA:
       return EisModelStatus.GA;
     case EisModelStatus.Preview:
       return EisModelStatus.Preview;
-    case EisModelStatus.Deprecated:
-      return EisModelStatus.Deprecated;
     default:
       return EisModelStatus.Unknown;
   }
@@ -232,8 +232,14 @@ export const filterGroupedModels = (
     .sort((a, b) => a.modelName.localeCompare(b.modelName));
 };
 
+const MODEL_DEPRECATED_EOL_TIME_DURATION = 'now+30d';
 export function isModelDeprecated(metadata: EisInferenceEndpointMetadata | undefined) {
   if (!metadata) return false;
+  const eolDate = getModelEOLDate(metadata);
+  if (eolDate && dateMath.parse(MODEL_DEPRECATED_EOL_TIME_DURATION)?.isSameOrAfter(eolDate)) {
+    // if the EOL date is withing the next 30 days, treat is as deprecated.
+    return true;
+  }
   if (metadata.heuristics?.status?.toLowerCase() === EisModelStatus.Deprecated) return true;
   return false;
 }
@@ -247,13 +253,21 @@ export function isModelEndOfLifeReached(metadata: EisInferenceEndpointMetadata |
 export function getModelReleaseDate(metadata: EisInferenceEndpointMetadata | undefined) {
   if (!metadata) return undefined;
   if (!metadata.heuristics?.release_date) return undefined;
-  return dateMath.parse(metadata.heuristics.release_date);
+  const releaseMoment = dateMath.parse(metadata.heuristics.release_date);
+  if (releaseMoment?.isValid()) {
+    return releaseMoment;
+  }
+  return undefined;
 }
 
 export function getModelEOLDate(metadata: EisInferenceEndpointMetadata | undefined) {
   if (!metadata) return undefined;
   if (!metadata.heuristics?.end_of_life_date) return undefined;
-  return dateMath.parse(metadata.heuristics.end_of_life_date);
+  const eolMoment = dateMath.parse(metadata.heuristics.end_of_life_date);
+  if (eolMoment?.isValid()) {
+    return eolMoment;
+  }
+  return undefined;
 }
 
 export function getModelEOLMessage(eolFormattedDate: string | null) {

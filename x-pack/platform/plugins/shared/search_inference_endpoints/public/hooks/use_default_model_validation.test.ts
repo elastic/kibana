@@ -107,7 +107,7 @@ describe('useDefaultModelValidation', () => {
     expect(result.current.errors).toEqual([]);
   });
 
-  it('reports an error when the selected model is deprecated with a future EOL date', () => {
+  it('does not report an error when the selected model is deprecated with a future EOL date', () => {
     mockUseConnectors.mockReturnValue({
       data: [
         {
@@ -126,11 +126,10 @@ describe('useDefaultModelValidation', () => {
       })
     );
 
-    expect(result.current.isValid).toBe(false);
-    expect(result.current.errors[0]).toMatch(/will be deprecated on/);
+    expect(result.current.isValid).toBe(true);
   });
 
-  it('reports an error when the selected model has no EOL date but is deprecated', () => {
+  it('does not report an error when the selected model has no EOL date but is deprecated', () => {
     mockUseConnectors.mockReturnValue({
       data: [
         {
@@ -149,8 +148,7 @@ describe('useDefaultModelValidation', () => {
       })
     );
 
-    expect(result.current.isValid).toBe(false);
-    expect(result.current.errors[0]).toMatch(/This model is deprecated/);
+    expect(result.current.isValid).toBe(true);
   });
 
   it('reports an error when the selected model has passed its end-of-life date', () => {
