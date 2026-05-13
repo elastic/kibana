@@ -8,6 +8,7 @@ This file defines the required sections of a test plan, their order, and the con
 
 - [Template](#template)
 - [Notes](#notes)
+- [Pending work pattern](#pending-work-pattern)
 - [Test Coverage Summary — filling in the table](#test-coverage-summary--filling-in-the-table)
 
 ---
@@ -124,6 +125,17 @@ This file defines the required sections of a test plan, their order, and the con
 - **Terminology** is optional — omit the section entirely if the issue uses no domain-specific terms.
 - **RBAC / Permission Testing Matrix** — only include if the issue explicitly mentions roles, permissions, or access control. Do not add speculatively.
 - If a section cannot be filled in due to missing information, apply the Core rule: stop and ask the user rather than leaving placeholder text in the draft.
+
+## Pending work pattern
+
+When the issue passed to the skill is an epic and one or more sub-issues are not yet implemented, document the not-yet-implemented work as forward-looking scenarios using this pattern:
+
+1. **Acceptance Criteria**: prefix each unimplemented AC with `(Pending #N)` where N is the sub-issue number — e.g. `25. (Pending #16937) Inline UDF definitions are translated correctly...`.
+2. **Test Scenarios**: group the corresponding scenarios in a single collapsible section titled `Pending work — forward-looking gaps from open sub-issues`. Each scenario title ends with `— pending #N`.
+3. **Test Coverage Summary**: add a single `Pending work` row whose `Automated` column reads `0` and `Manual only` equals the total — these scenarios are not testable today.
+4. **Known Limitations**: add one ⚠️ entry noting that forward-looking scenarios are written against sub-issue ACs and should be reviewed when each sub-issue ships.
+
+Apply this pattern only to **unimplemented** sub-issues. Implemented-but-unreleased sub-issues count as in scope — write regular scenarios for them. If the issue is not an epic at all, omit the pattern entirely.
 
 ## Test Coverage Summary — filling in the table
 
