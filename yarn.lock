@@ -4590,6 +4590,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/agent-condition-language@link:x-pack/platform/packages/shared/kbn_agent_condition_language":
+  version "0.0.0"
+  uid ""
+
 "@kbn/agent-context-layer-plugin@link:x-pack/platform/plugins/shared/agent_context_layer":
   version "0.0.0"
   uid ""
