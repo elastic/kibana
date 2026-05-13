@@ -22,6 +22,7 @@ import { getFormattedError } from '../../../../../util/errors';
 import { KI_ROW_ACTION_MUTATION_KEY } from '../../../stream_detail_significant_events_view/knowledge_indicator_actions_cell';
 import { getKnowledgeIndicatorItemId } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_item_id';
 import { getKnowledgeIndicatorStreamName } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_stream_name';
+import { getKnowledgeIndicatorSubtype } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_subtype';
 import { matchesKnowledgeIndicatorFilters } from '../../../stream_detail_significant_events_view/utils/matches_knowledge_indicator_filters';
 import { getKnowledgeIndicatorType } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_type';
 import {
@@ -60,6 +61,7 @@ export function useKnowledgeIndicatorsTable() {
     .toLowerCase();
   const [statusFilter, setStatusFilter] = useState<'active' | 'excluded'>('active');
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [selectedSubtypes, setSelectedSubtypes] = useState<string[]>([]);
   const [selectedStreams, setSelectedStreams] = useState<string[]>([]);
   const [hideComputedTypes, setHideComputedTypes] = useState(true);
 
@@ -113,6 +115,7 @@ export function useKnowledgeIndicatorsTable() {
   // but *with* the other filters applied.
   useEffect(() => {
     const availableTypes = new Set<string>();
+    const availableSubtypes = new Set<string>();
     const availableStreams = new Set<string>();
 
     for (const ki of knowledgeIndicators) {
@@ -129,6 +132,17 @@ export function useKnowledgeIndicatorsTable() {
         matchesKnowledgeIndicatorFilters(ki, {
           statusFilter,
           selectedTypes,
+          selectedStreams,
+          hideComputedTypes,
+        })
+      ) {
+        const subtype = getKnowledgeIndicatorSubtype(ki);
+        if (subtype) availableSubtypes.add(subtype);
+      }
+      if (
+        matchesKnowledgeIndicatorFilters(ki, {
+          statusFilter,
+          selectedTypes,
           hideComputedTypes,
         })
       ) {
@@ -138,6 +152,10 @@ export function useKnowledgeIndicatorsTable() {
 
     setSelectedTypes((current) => {
       const pruned = current.filter((t) => availableTypes.has(t));
+      return pruned.length === current.length ? current : pruned;
+    });
+    setSelectedSubtypes((current) => {
+      const pruned = current.filter((s) => availableSubtypes.has(s));
       return pruned.length === current.length ? current : pruned;
     });
     setSelectedStreams((current) => {
@@ -151,6 +169,7 @@ export function useKnowledgeIndicatorsTable() {
       matchesKnowledgeIndicatorFilters(ki, {
         statusFilter,
         selectedTypes,
+        selectedSubtypes,
         selectedStreams,
         hideComputedTypes,
         searchTerm: debouncedSearchTerm,
@@ -167,6 +186,7 @@ export function useKnowledgeIndicatorsTable() {
     debouncedSearchTerm,
     statusFilter,
     selectedTypes,
+    selectedSubtypes,
     selectedStreams,
     hideComputedTypes,
   ]);
@@ -190,6 +210,15 @@ export function useKnowledgeIndicatorsTable() {
   const handleSelectedTypesChange = useCallback(
     (types: string[]) => {
       setSelectedTypes(types);
+      setSelectedSubtypes([]);
+      resetPagination();
+    },
+    [resetPagination]
+  );
+
+  const handleSelectedSubtypesChange = useCallback(
+    (subtypes: string[]) => {
+      setSelectedSubtypes(subtypes);
       resetPagination();
     },
     [resetPagination]
@@ -324,6 +353,7 @@ export function useKnowledgeIndicatorsTable() {
         matchesKnowledgeIndicatorFilters(ki, {
           statusFilter,
           selectedTypes,
+          selectedSubtypes,
           selectedStreams,
           hideComputedTypes: false,
           searchTerm: debouncedSearchTerm,
@@ -336,6 +366,7 @@ export function useKnowledgeIndicatorsTable() {
     filteredKnowledgeIndicators,
     statusFilter,
     selectedTypes,
+    selectedSubtypes,
     selectedStreams,
     debouncedSearchTerm,
   ]);
@@ -396,10 +427,12 @@ export function useKnowledgeIndicatorsTable() {
     debouncedSearchTerm,
     statusFilter,
     selectedTypes,
+    selectedSubtypes,
     selectedStreams,
     hideComputedTypes,
     handleStatusFilterChange,
     handleSelectedTypesChange,
+    handleSelectedSubtypesChange,
     handleSelectedStreamsChange,
     handleComputedToggleChange,
     handleSearchChange,

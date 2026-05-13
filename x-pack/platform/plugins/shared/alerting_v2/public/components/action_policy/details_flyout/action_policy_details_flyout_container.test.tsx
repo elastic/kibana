@@ -187,6 +187,8 @@ const buildPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolic
     groupingMode: 'per_episode',
     enabled: true,
     tags: ['t1'],
+    type: 'global',
+    ruleId: undefined,
     matcher: undefined,
     groupBy: undefined,
     throttle: undefined,
@@ -259,6 +261,24 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
         name: 'My Policy [clone]',
         description: 'desc',
         groupingMode: 'per_episode',
+      })
+    );
+    expect(mockOnClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('clones a single_rule policy carrying over the ruleId', async () => {
+    mockUseFetchActionPolicy.mockReturnValue({
+      data: buildPolicy({ type: 'single_rule', ruleId: 'rule-1' }),
+    });
+    renderContainer();
+
+    await userEvent.click(screen.getByTestId('flyout-clone'));
+
+    expect(mockCreateActionPolicy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'My Policy [clone]',
+        type: 'single_rule',
+        ruleId: 'rule-1',
       })
     );
     expect(mockOnClose).toHaveBeenCalledTimes(1);
