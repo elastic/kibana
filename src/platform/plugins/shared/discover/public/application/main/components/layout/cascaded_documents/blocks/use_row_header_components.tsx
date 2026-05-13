@@ -455,6 +455,9 @@ export function useEsqlDataCascadeRowHeaderComponents(
           if (aggregation && /sparkline/i.test(aggregation) && isArrayType) {
             return (
               <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false} css={rowHeaderTitleStyles.textWrapper}>
+                  <span css={rowHeaderTitleStyles.textInner}>{selectedColumn}</span>
+                </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <div css={css({ width: '100px' })}>
                     {getSparklineCellRenderer(services.charts, aggregatedValue, false, undefined)}
