@@ -19,7 +19,6 @@ export const getSavedObjectsTaggingReadRole = (): KibanaRole => ({
   ],
   elasticsearch: {
     cluster: [],
-    indices: undefined,
   },
 });
 
@@ -35,7 +34,6 @@ export const getSavedObjectsTaggingWriteRole = (): KibanaRole => ({
   ],
   elasticsearch: {
     cluster: [],
-    indices: undefined,
   },
 });
 
@@ -52,7 +50,6 @@ export const getSavedObjectsTaggingReadWithSavedObjectsManagementReadRole = (): 
   ],
   elasticsearch: {
     cluster: [],
-    indices: undefined,
   },
 });
 
@@ -66,7 +63,6 @@ export const getDefaultSpaceWriteRole = (): KibanaRole => ({
   ],
   elasticsearch: {
     cluster: [],
-    indices: undefined,
   },
 });
 
@@ -82,6 +78,5 @@ export const getNoSavedObjectsTaggingAccessRole = (): KibanaRole => ({
   ],
   elasticsearch: {
     cluster: [],
-    indices: undefined,
   },
 });

@@ -155,7 +155,7 @@ export class TagsTable {
     }
 
     const collapsedActionsButton = row.locator('[data-test-subj="euiCollapsedItemActionsButton"]');
-    if ((await collapsedActionsButton.count()) > 0) {
+    if (await collapsedActionsButton.isVisible()) {
       await collapsedActionsButton.click();
       const actionInPortal = this.page
         .locator('[data-euiportal="true"]')
