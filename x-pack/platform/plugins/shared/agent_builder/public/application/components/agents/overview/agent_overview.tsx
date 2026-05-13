@@ -34,7 +34,11 @@ import { CapabilitiesSection } from './capabilities_section';
 import { EditDetailsFlyout } from './edit_details_flyout';
 import { SettingsSection } from './settings_section';
 import { PageWrapper } from '../common/page_wrapper';
-import { getActiveTools } from '../../../utils/tool_selection_utils';
+import {
+  getActivePlugins,
+  getActiveSkills,
+  getActiveTools,
+} from '../../../utils/tool_selection_utils';
 
 export const AgentOverview: React.FC = () => {
   const { agentId } = useParams<{ agentId: string }>();
@@ -71,38 +75,18 @@ export const AgentOverview: React.FC = () => {
 
   const enableElasticCapabilities = agent?.configuration?.enable_elastic_capabilities ?? false;
 
-  const agentSkillIdSet = useMemo(
-    () => new Set(agent?.configuration?.skill_ids ?? []),
-    [agent?.configuration?.skill_ids]
+  const skillsCount = useMemo(
+    () =>
+      getActiveSkills(allSkills, agent?.configuration?.skill_ids, enableElasticCapabilities).length,
+    [allSkills, agent?.configuration?.skill_ids, enableElasticCapabilities]
   );
 
-  const builtinSkills = useMemo(() => allSkills.filter((s) => s.readonly), [allSkills]);
-
-  const skillsCount = useMemo(() => {
-    const explicitCount = agent?.configuration?.skill_ids?.length ?? 0;
-    if (!enableElasticCapabilities) return explicitCount;
-    const builtinNotExplicit = builtinSkills.filter((s) => !agentSkillIdSet.has(s.id)).length;
-    return explicitCount + builtinNotExplicit;
-  }, [agent?.configuration?.skill_ids, enableElasticCapabilities, builtinSkills, agentSkillIdSet]);
-
-  const agentPluginIdSet = useMemo(
-    () => new Set(agent?.configuration?.plugin_ids ?? []),
-    [agent?.configuration?.plugin_ids]
+  const pluginsCount = useMemo(
+    () =>
+      getActivePlugins(allPlugins, agent?.configuration?.plugin_ids, enableElasticCapabilities)
+        .length,
+    [allPlugins, agent?.configuration?.plugin_ids, enableElasticCapabilities]
   );
-
-  const builtinPlugins = useMemo(() => allPlugins.filter((p) => p.readonly), [allPlugins]);
-
-  const pluginsCount = useMemo(() => {
-    const explicitCount = agent?.configuration?.plugin_ids?.length ?? 0;
-    if (!enableElasticCapabilities) return explicitCount;
-    const builtinNotExplicit = builtinPlugins.filter((p) => !agentPluginIdSet.has(p.id)).length;
-    return explicitCount + builtinNotExplicit;
-  }, [
-    agent?.configuration?.plugin_ids,
-    enableElasticCapabilities,
-    builtinPlugins,
-    agentPluginIdSet,
-  ]);
 
   const defaultToolIdSet = useMemo(() => new Set<string>(defaultAgentToolIds), []);
 

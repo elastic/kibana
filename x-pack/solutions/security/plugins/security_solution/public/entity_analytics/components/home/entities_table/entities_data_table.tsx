@@ -25,7 +25,7 @@ import { CellActionsProvider } from '@kbn/cell-actions';
 import {
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
-  formatFieldValue,
+  formatFieldValueText,
 } from '@kbn/discover-utils';
 import { type DataTableRecord } from '@kbn/discover-utils/types';
 import {
@@ -154,7 +154,7 @@ const COLUMN_HEADERS: Record<string, string> = {
 const DEFAULT_COLUMNS: DefaultColumn[] = [
   { id: ENTITY_FIELDS.ENTITY_NAME, width: 200 },
   { id: ENTITY_FIELDS.ENTITY_ID, width: 300 },
-  { id: ENTITY_FIELDS.ENTITY_SOURCE, width: 200 },
+  { id: ENTITY_FIELDS.ENTITY_SOURCE, width: 216 },
   { id: ENTITY_FIELDS.RESOLVED_TO, width: 300 },
   { id: ENTITY_FIELDS.ENTITY_TYPE, width: 200 },
   { id: ENTITY_FIELDS.ENTITY_RISK, width: 200 },
@@ -405,7 +405,7 @@ export const EntitiesDataTable = ({
             return getEmptyTagValue();
           }
           const field = dv.fields.getByName(columnId);
-          return <>{formatFieldValue(value, row.raw, ff, dv, field, 'text')}</>;
+          return <>{formatFieldValueText({ value, fieldFormats: ff, dataView: dv, field })}</>;
         },
       ])
     );
@@ -427,7 +427,12 @@ export const EntitiesDataTable = ({
               const resolvedTo = row.flattened[ENTITY_FIELDS.RESOLVED_TO];
               const isTarget = resolvedTo === null || resolvedTo === undefined;
               const field = dv.fields.getByName(ENTITY_FIELDS.ENTITY_NAME);
-              const formattedValue = formatFieldValue(value, row.raw, ff, dv, field, 'text');
+              const formattedValue = formatFieldValueText({
+                value,
+                fieldFormats: ff,
+                dataView: dv,
+                field,
+              });
 
               if (isTarget) {
                 return (
@@ -457,7 +462,7 @@ export const EntitiesDataTable = ({
       [ENTITY_FIELDS.ENTITY_SOURCE]: ({ row }: DataGridCellValueElementProps) => {
         const values = toEntitySourceArray(row.flattened[ENTITY_FIELDS.ENTITY_SOURCE]);
         if (values.length === 0) return getEmptyTagValue();
-        return <EntitySourceValue values={values} />;
+        return <EntitySourceValue values={values} textSize="xs" />;
       },
       [ENTITY_FIELDS.ASSET_CRITICALITY]: ({ row }: DataGridCellValueElementProps) => {
         const value = row.flattened[ENTITY_FIELDS.ASSET_CRITICALITY] as

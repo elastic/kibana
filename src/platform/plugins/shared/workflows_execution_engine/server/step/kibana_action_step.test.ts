@@ -94,10 +94,8 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
 
   beforeEach(() => {
     mockContextManager = {
-      getContext: jest.fn().mockReturnValue({
-        workflow: { spaceId: 'default' },
-      }),
       renderValueAccordingToContext: jest.fn((value) => value),
+      getWorkflowSpaceId: jest.fn().mockReturnValue('default'),
       getCoreStart: jest.fn().mockReturnValue({
         http: {
           basePath: { publicBaseUrl: 'https://localhost:5601' },

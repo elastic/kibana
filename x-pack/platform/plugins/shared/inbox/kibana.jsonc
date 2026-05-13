@@ -1,25 +1,16 @@
 {
   "type": "plugin",
   "id": "@kbn/inbox-plugin",
-  "owner": [
-    "@elastic/security-pds-deployment"
-  ],
+  "owner": ["@elastic/security-pds-deployment"],
   "group": "platform",
   "visibility": "shared",
   "plugin": {
     "id": "inbox",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "inbox"
-    ],
-    "requiredPlugins": [
-      "features"
-    ],
-    "optionalPlugins": [],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "configPath": ["xpack", "inbox"],
+    "requiredPlugins": ["features"],
+    "optionalPlugins": ["spaces"],
+    "requiredBundles": ["kibanaReact"]
   }
 }

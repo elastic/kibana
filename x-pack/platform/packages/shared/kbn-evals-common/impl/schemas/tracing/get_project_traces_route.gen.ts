@@ -14,59 +14,67 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const TraceSummary = lazySchema(() =>
+  z.object({
+    trace_id: z.string(),
+    name: z.string(),
+    start_time: z.string(),
+    duration_ms: z.number(),
+    status: z.string().optional(),
+    total_spans: z.number().int().optional(),
+    input_preview: z.string().optional(),
+    output_preview: z.string().optional(),
+    error: z.string().optional(),
+    tokens: z
+      .object({
+        input: z.number().int().optional(),
+        output: z.number().int().optional(),
+        total: z.number().int().optional(),
+      })
+      .optional(),
+    prompt_id: z.string().optional(),
+    model: z.string().optional(),
+  })
+);
 export type TraceSummary = z.infer<typeof TraceSummary>;
-export const TraceSummary = z.object({
-  trace_id: z.string(),
-  name: z.string(),
-  start_time: z.string(),
-  duration_ms: z.number(),
-  status: z.string().optional(),
-  total_spans: z.number().int().optional(),
-  input_preview: z.string().optional(),
-  output_preview: z.string().optional(),
-  error: z.string().optional(),
-  tokens: z
-    .object({
-      input: z.number().int().optional(),
-      output: z.number().int().optional(),
-      total: z.number().int().optional(),
-    })
-    .optional(),
-  prompt_id: z.string().optional(),
-  model: z.string().optional(),
-});
 
+export const GetProjectTracesRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Start of time range (ISO 8601)
+     */
+    from: z.string().optional(),
+    /**
+     * End of time range (ISO 8601)
+     */
+    to: z.string().optional(),
+    /**
+     * Filter traces by input, output, or prompt ID content
+     */
+    name: z.string().optional(),
+    sort_field: z.enum(['start_time', 'duration', 'name']).optional().default('start_time'),
+    sort_order: z.enum(['asc', 'desc']).optional().default('desc'),
+    page: z.coerce.number().int().min(1).optional().default(1),
+    per_page: z.coerce.number().int().min(1).max(100).optional().default(25),
+  })
+);
 export type GetProjectTracesRequestQuery = z.infer<typeof GetProjectTracesRequestQuery>;
-export const GetProjectTracesRequestQuery = z.object({
-  /**
-   * Start of time range (ISO 8601)
-   */
-  from: z.string().optional(),
-  /**
-   * End of time range (ISO 8601)
-   */
-  to: z.string().optional(),
-  /**
-   * Filter traces by input, output, or prompt ID content
-   */
-  name: z.string().optional(),
-  sort_field: z.enum(['start_time', 'duration', 'name']).optional().default('start_time'),
-  sort_order: z.enum(['asc', 'desc']).optional().default('desc'),
-  page: z.coerce.number().int().min(1).optional().default(1),
-  per_page: z.coerce.number().int().min(1).max(100).optional().default(25),
-});
 export type GetProjectTracesRequestQueryInput = z.input<typeof GetProjectTracesRequestQuery>;
 
+export const GetProjectTracesRequestParams = lazySchema(() =>
+  z.object({
+    projectName: z.string(),
+  })
+);
 export type GetProjectTracesRequestParams = z.infer<typeof GetProjectTracesRequestParams>;
-export const GetProjectTracesRequestParams = z.object({
-  projectName: z.string(),
-});
 export type GetProjectTracesRequestParamsInput = z.input<typeof GetProjectTracesRequestParams>;
 
+export const GetProjectTracesResponse = lazySchema(() =>
+  z.object({
+    traces: z.array(TraceSummary),
+    total: z.number().int(),
+  })
+);
 export type GetProjectTracesResponse = z.infer<typeof GetProjectTracesResponse>;
-export const GetProjectTracesResponse = z.object({
-  traces: z.array(TraceSummary),
-  total: z.number().int(),
-});

@@ -50,3 +50,10 @@ export const actionPolicyKeys = {
   allTags: () => [...actionPolicyKeys.all, 'tags'] as const,
   tags: (search?: string) => [...actionPolicyKeys.allTags(), { search }] as const,
 };
+
+export const executionHistoryKeys = {
+  all: ['executionHistory'] as const,
+  list: (filters: { page: number; perPage: number }) =>
+    [...executionHistoryKeys.all, 'list', filters] as const,
+  countSince: (since: string) => [...executionHistoryKeys.all, 'countSince', since] as const,
+};

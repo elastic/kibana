@@ -1,9 +1,7 @@
 {
   "type": "shared-common",
   "id": "@kbn/inbox-common",
-  "owner": [
-    "@elastic/security-pds-deployment"
-  ],
+  "owner": ["@elastic/security-pds-deployment"],
   "group": "platform",
   "visibility": "shared"
 }

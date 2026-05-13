@@ -36,7 +36,7 @@ export const TagsInput = ({ value, onChange }: TagsInputProps) => {
       isLoading={isLoading}
       data-test-subj="tagsInput"
       placeholder={i18n.translate('xpack.alertingV2.actionPolicy.form.tags.placeholder', {
-        defaultMessage: 'Add tags to organize and filter policies.',
+        defaultMessage: 'Add tags to organize and filter policies',
       })}
       selectedOptions={value.map((t) => ({ label: t }))}
       options={tagOptions}

@@ -7,19 +7,27 @@
 
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
 
+import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { HostItem } from '../../../../../common/search_strategy/security_solution/hosts';
 import type { CriteriaFields } from '../types';
 
-export const hostToCriteria = (hostItem: HostItem, euid?: EntityStoreEuid): CriteriaFields[] => {
+interface HostToCriteriaOptions {
+  hostItem: HostItem;
+  entityRecord?: EntityStoreRecord | null;
+  euid?: EntityStoreEuid;
+}
+export const hostToCriteria = (opts: HostToCriteriaOptions): CriteriaFields[] => {
+  const { hostItem, entityRecord, euid } = opts;
   if (hostItem == null) {
     return [];
   }
   if (euid) {
-    const scopedDsl = euid.dsl.getEuidFilterBasedOnDocument('host', hostItem);
+    const inputDoc = entityRecord ? entityRecord : hostItem;
+    const scopedDsl = euid.dsl.getEuidFilterBasedOnDocument('host', inputDoc);
     if (scopedDsl != null) {
       return [];
     }
-    const identifiers = euid.getEntityIdentifiersFromDocument('host', hostItem);
+    const identifiers = euid.getEntityIdentifiersFromDocument('host', inputDoc);
     if (identifiers != null && Object.keys(identifiers).length > 0) {
       return Object.entries(identifiers).map(([fieldName, fieldValue]) => ({
         fieldName,

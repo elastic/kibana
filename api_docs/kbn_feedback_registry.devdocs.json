@@ -38,7 +38,7 @@
           "[]>"
         ],
         "path": "x-pack/platform/packages/private/feedback-registry/src/registry.ts",
-        "lineNumber": 16,
+        "lineNumber": 32,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -54,7 +54,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/private/feedback-registry/src/registry.ts",
-            "lineNumber": 17,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

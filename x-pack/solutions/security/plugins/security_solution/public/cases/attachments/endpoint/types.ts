@@ -7,18 +7,20 @@
 
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 
-export interface IExternalReferenceMetaDataProps {
-  externalReferenceMetadata: {
-    comment: ExternalReferenceCommentType;
-    command: ExternalReferenceCommandType;
-    targets: ExternalReferenceTargetsType;
-  };
-}
-
-type ExternalReferenceTargetsType = Array<{
+/**
+ * Shape of the metadata stored on a `security.endpoint` unified attachment.
+ * Server-side `validateEndpointAttachmentMetadata` guarantees this shape on
+ * the write path, so renderers can safely cast the unified view's `metadata`
+ * (typed as `Record<string, JsonValue>`) to `EndpointMetadata`.
+ */
+export interface EndpointTarget {
   endpointId: string;
   hostname: string;
   agentType: ResponseActionAgentType;
-}>;
-type ExternalReferenceCommentType = string;
-type ExternalReferenceCommandType = string;
+}
+
+export interface EndpointMetadata {
+  comment: string;
+  command: string;
+  targets: EndpointTarget[];
+}

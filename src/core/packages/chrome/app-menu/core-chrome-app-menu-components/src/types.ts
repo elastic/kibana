@@ -8,7 +8,7 @@
  */
 
 import type { EuiHideForProps, IconType } from '@elastic/eui';
-import type { SplitButtonWithNotificationProps } from '@kbn/split-button';
+import type { SplitButtonWithNotificationProps } from './components/split_button_with_notification';
 
 /**
  * Parameters passed to AppMenuRunAction
@@ -43,15 +43,11 @@ export type AppMenuRunAction = (params?: AppMenuRunActionParams) => void;
 type BaseSplitProps = Pick<
   SplitButtonWithNotificationProps,
   | 'isMainButtonLoading'
-  | 'isMainButtonDisabled'
-  | 'isSecondaryButtonLoading'
   | 'isSecondaryButtonDisabled'
   | 'secondaryButtonAriaLabel'
-  | 'secondaryButtonTitle'
-  | 'secondaryButtonIcon'
   | 'iconType'
   | 'showNotificationIndicator'
-  | 'notifcationIndicatorTooltipContent'
+  | 'notificationIndicatorTooltipContent'
 >;
 
 type AppMenuSecondarySplitButton = BaseSplitProps & {
@@ -134,7 +130,7 @@ type AppMenuLinkItem = AppMenuItemBase & {
   /**
    * The HTML target attribute for the item. Only used if `items` is not provided.
    */
-  target: string;
+  target?: string;
   /**
    * Function to run when the item is clicked. Only used if `items` is not provided.
    */
@@ -231,6 +227,14 @@ export type AppMenuItemType = AppMenuItemCommon & {
    * Ignored for top-level, non-popover items.
    */
   separator?: 'above' | 'below';
+};
+
+export type AppMenuStaticItem = AppMenuItemType & {
+  /**
+   * Global static items are singleton items that are registered once
+   * and are shared across all app menus.
+   */
+  global?: boolean;
 };
 
 /**

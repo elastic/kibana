@@ -48,19 +48,19 @@ export const allowedExperimentalValues = Object.freeze({
    * `runscript` response action for Elastic Defend Endpoint
    * Release: 9.4
    */
-  responseActionsEndpointRunScript: false,
+  responseActionsEndpointRunScript: true,
 
   /**
    * Support for Automated Endpoint `runscript` (from rules)
    * Release: 9.4
    */
-  responseActionsEndpointAutomatedRunScript: false,
+  responseActionsEndpointAutomatedRunScript: true,
 
   /**
    * Scripts library in support of `runscript`/upload-execute` new command for elastic defend
    * Release: 9.4
    */
-  responseActionsScriptLibraryManagement: false,
+  responseActionsScriptLibraryManagement: true,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -101,7 +101,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables gap reason display in the gaps table and reason-based filtering.
    */
-  gapReasonDetectionEnabled: false,
+  gapReasonDetectionEnabled: true,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
@@ -131,8 +131,9 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Removes Endpoint Exceptions from Rules/Alerts pages, and shows it instead in Manage/Assets.
+   * Additionally: enables import/export for all Endpoint artifacts.
    */
-  endpointExceptionsMovedUnderManagement: false,
+  endpointExceptionsMovedUnderManagement: true,
 
   /**
    * Enables CrowdStrike's RunScript RTR command
@@ -179,6 +180,10 @@ export const allowedExperimentalValues = Object.freeze({
    */
   qradarRulesMigration: true,
   /**
+   *  Enables the Microsoft Sentinel rules import feature
+   */
+  sentinelRulesMigration: false,
+  /**
    * Enables the Kubernetes Dashboard in Security Solution
    */
   kubernetesEnabled: true,
@@ -218,6 +223,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Automatic Troubleshooting Agent Builder skill
    */
   automaticTroubleshootingSkill: false,
+
+  /**
+   * Enables the PCI DSS v4.0.1 Compliance Agent Builder skill and its backing tools.
+   * Gates skill + tool registration so the feature can ship dark and be enabled per environment.
+   */
+  pciComplianceAgentBuilder: true,
 
   /**
    * Enables the new flyout using the EUI flyout system

@@ -11,12 +11,8 @@ import { useEuiTheme, EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getAgentIcon } from '@kbn/custom-icons';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { getSeverity, getSeverityColor } from '../../../../common/anomaly_detection';
 import type { ServiceNodeData } from '../../../../common/service_map';
-import {
-  ServiceHealthStatus,
-  getServiceHealthStatusColor,
-  getServiceHealthStatusLabel,
-} from '../../../../common/service_health_status';
 import {
   NODE_BORDER_WIDTH_DEFAULT,
   NODE_BORDER_WIDTH_SELECTED,
@@ -31,27 +27,21 @@ export const ServiceNode = memo(
     const { euiTheme, colorMode } = useEuiTheme();
     const isDarkMode = colorMode === 'DARK';
 
-    const borderColor = useMemo(() => {
-      if (data.serviceAnomalyStats?.healthStatus) {
-        return getServiceHealthStatusColor(euiTheme, data.serviceAnomalyStats.healthStatus);
-      }
-      if (selected) {
-        return euiTheme.colors.primary;
-      }
-      return euiTheme.colors.mediumShade;
-    }, [data.serviceAnomalyStats?.healthStatus, selected, euiTheme]);
+    const { borderColor, borderWidth } = useMemo(() => {
+      const score = data.serviceAnomalyStats?.anomalyScore;
+      const hasScore = score !== undefined;
 
-    const borderWidth = useMemo(() => {
-      const status = data.serviceAnomalyStats?.healthStatus;
-      if (status === ServiceHealthStatus.critical) return `${NODE_BORDER_WIDTH_SELECTED}px`;
-      return selected ? `${NODE_BORDER_WIDTH_SELECTED}px` : `${NODE_BORDER_WIDTH_DEFAULT}px`;
-    }, [data.serviceAnomalyStats?.healthStatus, selected]);
-
-    const borderStyle = useMemo(() => {
-      const status = data.serviceAnomalyStats?.healthStatus;
-      if (status === ServiceHealthStatus.critical) return 'double';
-      return 'solid';
-    }, [data.serviceAnomalyStats?.healthStatus]);
+      return {
+        borderColor: hasScore
+          ? getSeverityColor(score)
+          : selected
+          ? euiTheme.colors.primary
+          : euiTheme.colors.mediumShade,
+        borderWidth: selected
+          ? `${NODE_BORDER_WIDTH_SELECTED}px`
+          : `${NODE_BORDER_WIDTH_DEFAULT}px`,
+      };
+    }, [data.serviceAnomalyStats, selected, euiTheme]);
 
     const iconUrl = useMemo(() => {
       if (data.agentName) {
@@ -77,21 +67,17 @@ export const ServiceNode = memo(
         );
       }
 
-      if (data.serviceAnomalyStats?.healthStatus) {
+      if (data.serviceAnomalyStats?.anomalyScore !== undefined) {
         parts.push(
-          i18n.translate('xpack.apm.serviceMap.serviceNode.healthInfo', {
-            defaultMessage: 'Health status: {status}',
-            values: {
-              status: getServiceHealthStatusLabel(
-                data.serviceAnomalyStats.healthStatus
-              ).toLowerCase(),
-            },
+          i18n.translate('xpack.apm.serviceMap.serviceNode.anomalySeverityInfo', {
+            defaultMessage: 'Machine learning anomaly severity: {severity}',
+            values: { severity: getSeverity(data.serviceAnomalyStats.anomalyScore) },
           })
         );
       }
 
       return parts.join('. ');
-    }, [data.label, data.agentName, data.serviceAnomalyStats?.healthStatus]);
+    }, [data.label, data.agentName, data.serviceAnomalyStats?.anomalyScore]);
 
     const showAlertsBadge = data.alertsCount !== undefined && data.alertsCount > 0;
 
@@ -114,7 +100,7 @@ export const ServiceNode = memo(
       width: ${SERVICE_NODE_CIRCLE_SIZE}px;
       height: ${SERVICE_NODE_CIRCLE_SIZE}px;
       border-radius: 50%;
-      border: ${borderWidth} ${borderStyle} ${borderColor};
+      border: ${borderWidth} solid ${borderColor};
       background: ${euiTheme.colors.backgroundBasePlain};
       display: flex;
       align-items: center;

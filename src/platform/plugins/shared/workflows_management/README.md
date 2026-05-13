@@ -303,6 +303,15 @@ workflows_management/
 3. Start Kibana: `yarn start`
 4. Navigate to `/app/workflows`
 
+### Event-driven custom trigger `on` options
+
+Registered (non-built-in) triggers may set optional flags under `triggers[].on` in YAML:
+
+- **`workflowEvents`**: One of **`ignore`**, **`avoid-loop`**, or **`allow-all`** (string). Controls how the workflow is scheduled when the trigger event was emitted from a workflow-attributed chain:
+  - **`ignore`**: Do not schedule when the emit is workflow-attributed; user or domain-originated emits (no chain context) still run the workflow.
+  - **`avoid-loop`**: Schedule on workflow-attributed emits, but skip if this workflow id is already on the event chain (cycle guard). **Omitted defaults to `avoid-loop`** at runtime.
+  - **`allow-all`**: Schedule without the cycle guard; **`maxEventChainDepth`** from the execution engine config still applies.
+
 ### Testing
 
 ```bash

@@ -2342,6 +2342,266 @@ export default function (providerContext: FtrProviderContext) {
               expect(labelNode.color).to.equal('primary');
             });
           });
+
+          it('should return doc data when host ip is singular', async () => {
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [],
+                    entityIds: [{ id: 'host:host-with-single-ip', isOrigin: false }],
+                    start: '2024-09-01T00:00:00Z',
+                    end: '2024-09-02T00:00:00Z',
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200));
+
+              expect(response.body).to.have.property('nodes').length(1);
+              expect(response.body).to.have.property('edges').length(0);
+              expect(response.body).not.to.have.property('messages');
+              // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
+              const entityNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.id === 'host:host-with-single-ip'
+              ) as EntityNodeDataModel;
+
+              // Verify entity enrichment
+              expect(entityNode).not.to.be(undefined);
+              // For single enriched entities, label should be entity.name
+              expect(entityNode.label).to.equal('Host with single ip');
+              expect(entityNode.icon).to.equal('storage');
+              expect(entityNode.shape).to.equal('hexagon');
+              expect(entityNode.tag).to.equal('Host');
+              expect(entityNode.documentsData).to.have.length(1);
+              expect(entityNode.documentsData![0].entity?.host?.ip).to.have.length(1);
+            });
+          });
+
+          it('should return doc data when host ip is missing', async () => {
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [],
+                    entityIds: [{ id: 'host:host-with-no-ip', isOrigin: false }],
+                    start: '2024-09-01T00:00:00Z',
+                    end: '2024-09-02T00:00:00Z',
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200));
+
+              expect(response.body).to.have.property('nodes').length(1);
+              expect(response.body).to.have.property('edges').length(0);
+              expect(response.body).not.to.have.property('messages');
+              // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
+              const entityNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.id === 'host:host-with-no-ip'
+              ) as EntityNodeDataModel;
+
+              // Verify entity enrichment
+              expect(entityNode).not.to.be(undefined);
+              // For single enriched entities, label should be entity.name
+              expect(entityNode.label).to.equal('Host with no ip');
+              expect(entityNode.icon).to.equal('storage');
+              expect(entityNode.shape).to.equal('hexagon');
+              expect(entityNode.tag).to.equal('Host');
+              expect(entityNode.documentsData).to.have.length(1);
+              expect(entityNode.documentsData![0].entity).not.to.have.property('host');
+            });
+          });
+
+          it('should return doc data when host ip is multiple', async () => {
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [],
+                    entityIds: [{ id: 'host:host-with-multiple-ips', isOrigin: false }],
+                    start: '2024-09-01T00:00:00Z',
+                    end: '2024-09-02T00:00:00Z',
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200));
+
+              expect(response.body).to.have.property('nodes').length(1);
+              expect(response.body).to.have.property('edges').length(0);
+              expect(response.body).not.to.have.property('messages');
+              // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
+              const entityNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.id === 'host:host-with-multiple-ips'
+              ) as EntityNodeDataModel;
+
+              // Verify entity enrichment
+              expect(entityNode).not.to.be(undefined);
+              // For single enriched entities, label should be entity.name
+              expect(entityNode.label).to.equal('Host with multiple ips');
+              expect(entityNode.icon).to.equal('storage');
+              expect(entityNode.shape).to.equal('hexagon');
+              expect(entityNode.tag).to.equal('Host');
+              expect(entityNode.documentsData).to.have.length(1);
+              expect(entityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
+            });
+          });
+
+          it('should return doc data when relationship actor host ip is multiple', async () => {
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [],
+                    entityIds: [{ id: 'host:host-with-multiple-ips-actor', isOrigin: false }],
+                    start: '2024-09-01T00:00:00Z',
+                    end: '2024-09-02T00:00:00Z',
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200));
+
+              expect(response.body).to.have.property('nodes').length(3);
+              expect(response.body).to.have.property('edges').length(2);
+              expect(response.body).not.to.have.property('messages');
+              // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
+              const actorEntityNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.id === 'host:host-with-multiple-ips-actor'
+              ) as EntityNodeDataModel;
+
+              // Verify entity enrichment
+              expect(actorEntityNode).not.to.be(undefined);
+              // For single enriched entities, label should be entity.name
+              expect(actorEntityNode.label).to.equal('Actor Host with multiple ips');
+              expect(actorEntityNode.icon).to.equal('storage');
+              expect(actorEntityNode.shape).to.equal('hexagon');
+              expect(actorEntityNode.tag).to.equal('Host');
+              expect(actorEntityNode.documentsData).to.have.length(1);
+              expect(actorEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
+
+              // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
+              const targetEntityNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.id === 'host:host-with-multiple-ips-target'
+              ) as EntityNodeDataModel;
+
+              // Verify entity enrichment
+              expect(targetEntityNode).not.to.be(undefined);
+              // For single enriched entities, label should be entity.name
+              expect(targetEntityNode.label).to.equal('Target Host with multiple ips');
+              expect(targetEntityNode.icon).to.equal('storage');
+              expect(targetEntityNode.shape).to.equal('hexagon');
+              expect(targetEntityNode.tag).to.equal('Host');
+              expect(targetEntityNode.documentsData).to.have.length(1);
+              expect(targetEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
+            });
+          });
+
+          it('should return doc data when relationship target host ip is multiple', async () => {
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [],
+                    entityIds: [{ id: 'host:host-with-multiple-ips-target', isOrigin: false }],
+                    start: '2024-09-01T00:00:00Z',
+                    end: '2024-09-02T00:00:00Z',
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200));
+
+              expect(response.body).to.have.property('nodes').length(3);
+              expect(response.body).to.have.property('edges').length(2);
+              expect(response.body).not.to.have.property('messages');
+              // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
+              const actorEntityNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.id === 'host:host-with-multiple-ips-actor'
+              ) as EntityNodeDataModel;
+
+              // Verify entity enrichment
+              expect(actorEntityNode).not.to.be(undefined);
+              // For single enriched entities, label should be entity.name
+              expect(actorEntityNode.label).to.equal('Actor Host with multiple ips');
+              expect(actorEntityNode.icon).to.equal('storage');
+              expect(actorEntityNode.shape).to.equal('hexagon');
+              expect(actorEntityNode.tag).to.equal('Host');
+              expect(actorEntityNode.documentsData).to.have.length(1);
+              expect(actorEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
+
+              // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
+              const targetEntityNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.id === 'host:host-with-multiple-ips-target'
+              ) as EntityNodeDataModel;
+
+              // Verify entity enrichment
+              expect(targetEntityNode).not.to.be(undefined);
+              // For single enriched entities, label should be entity.name
+              expect(targetEntityNode.label).to.equal('Target Host with multiple ips');
+              expect(targetEntityNode.icon).to.equal('storage');
+              expect(targetEntityNode.shape).to.equal('hexagon');
+              expect(targetEntityNode.tag).to.equal('Host');
+              expect(targetEntityNode.documentsData).to.have.length(1);
+              expect(targetEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
+            });
+          });
+
+          it('should return doc data for event nodes when both actor and target host have multiple IPs', async () => {
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [{ id: 'entities-host-multiple-ips-event-id', isAlert: false }],
+                    start: '2024-09-01T00:00:00Z',
+                    end: '2024-09-02T00:00:00Z',
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200));
+
+              expect(response.body).to.have.property('nodes').length(3);
+              expect(response.body).to.have.property('edges').length(2);
+              expect(response.body).not.to.have.property('messages');
+              // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
+              const actorEntityNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.id === 'host:host-with-multiple-ips-actor'
+              ) as EntityNodeDataModel;
+
+              // Verify entity enrichment
+              expect(actorEntityNode).not.to.be(undefined);
+              // For single enriched entities, label should be entity.name
+              expect(actorEntityNode.label).to.equal('Actor Host with multiple ips');
+              expect(actorEntityNode.icon).to.equal('storage');
+              expect(actorEntityNode.shape).to.equal('hexagon');
+              expect(actorEntityNode.tag).to.equal('Host');
+              expect(actorEntityNode.documentsData).to.have.length(1);
+              expect(actorEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
+
+              // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
+              const targetEntityNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.id === 'host:host-with-multiple-ips-target'
+              ) as EntityNodeDataModel;
+
+              // Verify entity enrichment
+              expect(targetEntityNode).not.to.be(undefined);
+              // For single enriched entities, label should be entity.name
+              expect(targetEntityNode.label).to.equal('Target Host with multiple ips');
+              expect(targetEntityNode.icon).to.equal('storage');
+              expect(targetEntityNode.shape).to.equal('hexagon');
+              expect(targetEntityNode.tag).to.equal('Host');
+              expect(targetEntityNode.documentsData).to.have.length(1);
+              expect(targetEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
+            });
+          });
         };
 
         before(async () => {
@@ -2409,7 +2669,7 @@ export default function (providerContext: FtrProviderContext) {
               logger,
               retry,
               entitiesIndex: getEntitiesLatestIndexName(entitiesSpaceId),
-              expectedCount: 35,
+              expectedCount: 40,
             });
           });
 
