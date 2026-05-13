@@ -35,7 +35,11 @@ export const getEffectiveSuppressionGroupByFields = (
   }
 
   const legacy =
-    'groupBy' in alertSuppression ? alertSuppression.groupBy : alertSuppression.group_by;
+    'groupBy' in alertSuppression && alertSuppression.groupBy != null
+      ? alertSuppression.groupBy
+      : 'group_by' in alertSuppression
+      ? alertSuppression.group_by
+      : undefined;
 
   return legacy ?? [];
 };

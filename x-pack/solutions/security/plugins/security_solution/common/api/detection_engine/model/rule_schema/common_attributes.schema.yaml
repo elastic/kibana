@@ -789,7 +789,10 @@ components:
 
     AlertSuppression:
       type: object
-      description: Defines alert suppression configuration.
+      description: |
+        Defines alert suppression configuration. At least one of `group_by` or `group_by_v2`
+        must be provided with at least one field when suppression is enabled (enforced by
+        request validation, not by this object schema alone).
       properties:
         group_by:
           $ref: '#/components/schemas/AlertSuppressionGroupBy'
@@ -799,12 +802,13 @@ components:
           $ref: '#/components/schemas/AlertSuppressionDuration'
         missing_fields_strategy:
           $ref: '#/components/schemas/AlertSuppressionMissingFieldsStrategy'
-        anyOf:
-          - group_by
-          - group_by_v2
 
     AlertSuppressionCamel:
       type: object
+      description: |
+        CamelCase variant of AlertSuppression. At least one of `groupBy` or `groupByV2`
+        must be provided with at least one field when suppression is enabled (enforced by
+        request validation, not by this object schema alone).
       properties:
         groupBy:
           $ref: '#/components/schemas/AlertSuppressionGroupBy'
@@ -814,9 +818,6 @@ components:
           $ref: '#/components/schemas/AlertSuppressionDuration'
         missingFieldsStrategy:
           $ref: '#/components/schemas/AlertSuppressionMissingFieldsStrategy'
-        anyOf:
-          - group_by
-          - group_by_v2
 
     # Gap fill status used in aggregated rule gap summaries
     GapFillStatus:

@@ -807,26 +807,33 @@ export const AlertSuppressionGroupByV2 = lazySchema(() =>
 export type AlertSuppressionGroupByV2 = z.infer<typeof AlertSuppressionGroupByV2>;
 
 /**
- * Defines alert suppression configuration.
- */
+  * Defines alert suppression configuration. At least one of `group_by` or `group_by_v2`
+must be provided with at least one field when suppression is enabled (enforced by
+request validation, not by this object schema alone).
+
+  */
 export const AlertSuppression = lazySchema(() =>
   z.object({
     group_by: AlertSuppressionGroupBy.optional(),
     group_by_v2: AlertSuppressionGroupByV2.optional(),
     duration: AlertSuppressionDuration.optional(),
     missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.optional(),
-    anyOf: z.unknown(),
   })
 );
 export type AlertSuppression = z.infer<typeof AlertSuppression>;
 
+/**
+  * CamelCase variant of AlertSuppression. At least one of `groupBy` or `groupByV2`
+must be provided with at least one field when suppression is enabled (enforced by
+request validation, not by this object schema alone).
+
+  */
 export const AlertSuppressionCamel = lazySchema(() =>
   z.object({
     groupBy: AlertSuppressionGroupBy.optional(),
     groupByV2: AlertSuppressionGroupByV2.optional(),
     duration: AlertSuppressionDuration.optional(),
     missingFieldsStrategy: AlertSuppressionMissingFieldsStrategy.optional(),
-    anyOf: z.unknown(),
   })
 );
 export type AlertSuppressionCamel = z.infer<typeof AlertSuppressionCamel>;
