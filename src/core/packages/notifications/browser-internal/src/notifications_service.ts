@@ -84,8 +84,6 @@ export class NotificationsService {
     const toastsContainer = document.createElement('div');
     targetDomElement.appendChild(toastsContainer);
 
-    // events.start() awaits the state store's preload so subsequent
-    // notify() calls can hydrate read/pinned flags synchronously.
     const events = await this.events.start();
 
     return {

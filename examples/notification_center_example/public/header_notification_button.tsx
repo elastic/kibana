@@ -23,7 +23,7 @@ export function HeaderNotificationButton() {
       notification={unreadCount > 0}
       onClick={() => center.open()}
     >
-      <EuiIcon type="bell" size="m" />
+      <EuiIcon type="bell" size="m" aria-hidden={true} />
     </EuiHeaderSectionItemButton>
   );
 }
