@@ -1,6 +1,6 @@
 ---
 # This file is used to generate the "General settings in Kibana" page in the product docs.
-# For the schema and an example refer to the automated settings reference: 
+# For the schema and an example refer to the automated settings reference:
 # https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
 
 product: Kibana
@@ -269,6 +269,15 @@ groups:
           - "ech: unavailable"
           - "self: ga"
         deprecation_details: "This setting is deprecated in favor of `csp.object_src`."
+
+      - setting: csp.report_only.connect_src
+        description: |
+          Add sources for the [Content Security Policy `connect-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/connect-src) in reporting mode.
+        datatype: string
+        applies_to:
+          - "stack: ga 9.5"
+          - "ech: ga"
+          - "self: ga"
 
       - setting: csp.report_uri
         description: |
