@@ -60,6 +60,10 @@ import type { BulkEditRuleParamsOptions } from '../application/rule/methods/bulk
 import { bulkEditRuleParamsWithReadAuth } from '../application/rule/methods/bulk_edit_params/bulk_edit_rule_params';
 import type { BulkEnableRulesParams } from '../application/rule/methods/bulk_enable';
 import { bulkEnableRules } from '../application/rule/methods/bulk_enable';
+import type { BulkCreateRulesParams } from '../application/rule/methods/bulk_create';
+import { bulkCreateRules } from '../application/rule/methods/bulk_create';
+import type { BulkEnableTasksParams } from '../application/rule/methods/bulk_enable_tasks';
+import { bulkEnableTasks } from '../application/rule/methods/bulk_enable_tasks';
 import { enableRule } from '../application/rule/methods/enable_rule/enable_rule';
 import { updateRuleApiKey } from '../application/rule/methods/update_api_key/update_rule_api_key';
 import { disableRule } from '../application/rule/methods/disable/disable_rule';
@@ -200,6 +204,9 @@ export class RulesClient {
 
   public bulkGetRules = <Params extends RuleTypeParams = never>(params: BulkGetRulesParams) =>
     bulkGetRules<Params>(this.context, params);
+  public bulkCreateRules = <Params extends RuleTypeParams = never>(
+    params: BulkCreateRulesParams<Params>
+  ) => bulkCreateRules<Params>(this.context, params);
   public bulkDeleteRules = (options: BulkDeleteRulesRequestBody) =>
     bulkDeleteRules(this.context, options);
   public bulkEdit = <Params extends RuleTypeParams>(options: BulkEditOptions<Params>) =>
@@ -209,6 +216,7 @@ export class RulesClient {
     options: BulkEditRuleParamsOptions<Params>
   ) => bulkEditRuleParamsWithReadAuth<Params>(this.context, options);
   public bulkEnableRules = (params: BulkEnableRulesParams) => bulkEnableRules(this.context, params);
+  public bulkEnableTasks = (params: BulkEnableTasksParams) => bulkEnableTasks(this.context, params);
   public bulkDisableRules = (options: BulkDisableRulesRequestBody) =>
     bulkDisableRules(this.context, options);
 
