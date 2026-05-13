@@ -100,7 +100,12 @@ export const findRulesRequestQuerySchema = schema.object({
         meta: {
           description: 'List of consumers to filter.',
         },
-      })
+      }),
+      {
+        meta: {
+          description: 'A list of consumers to use for filtering rules.',
+        },
+      }
     )
   ),
 });
