@@ -8,7 +8,7 @@
  */
 import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
-import { environmentRt } from '@kbn/apm-types-shared';
+import { environmentRt } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kueryRt, rangeRt, offsetRt } from '../../default_api_types';
 

@@ -8,7 +8,7 @@
  */
 import * as t from 'io-ts';
 import type { ServiceAnomalyTimeseries } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types-shared';
+import { environmentRt } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeRt } from '../../default_api_types';
 

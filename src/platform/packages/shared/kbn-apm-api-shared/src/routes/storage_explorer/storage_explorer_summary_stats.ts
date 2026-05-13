@@ -8,7 +8,7 @@
  */
 import * as t from 'io-ts';
 import { indexLifecyclePhaseRt } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types-shared';
+import { environmentRt } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kueryRt, rangeRt, probabilityRt } from '../../default_api_types';
 
