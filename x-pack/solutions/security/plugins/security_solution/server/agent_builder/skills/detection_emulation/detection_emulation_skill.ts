@@ -188,22 +188,22 @@ Guards applied by each tool (in order; first failure short-circuits). The four
 | Guard | \`validateRule\` | \`getEmulationHistory\` | \`run*Command\` (all four) |
 |---|---|---|---|
 | Feature flag (static) | ✓ (per-mode) | — | ✓ (realExecution) |
-| **Runtime kill switch (PROD-6)** | ✓ (real_execution) | — | ✓ |
+| **Runtime kill switch** | ✓ (real_execution) | — | ✓ |
 | Auth required | ✓ | — | ✓ |
 | RBAC | ✓ (real_execution) | — | ✓ (per-command) |
 | Allowlist | ✓ (real_execution) | — | ✓ |
 | **Endpoint fanout cap (5/call)** | ✓ (schema-enforced, both modes) | — | ✓ (schema-enforced) |
 | **HITL prompt** | ✓ (real_execution; on-demand, skipped in standalone mode) | — | ✓ (declarative, once per conversation) |
 | Rate limit (per-space) | ✓ (real_execution, 1 slot/scenario; 100/space/hour) | — | ✓ (1 slot/command; 100/space/hour) |
-| **Rate limit (per-host, PROD-4)** | ✓ (real_execution; 3/host/hour) | — | ✓ (3/host/hour) |
-| **Concurrency gate (PROD-5)** | ✓ (real_execution; ≤ 1 in flight per Kibana space) | — | — |
+| **Rate limit (per-host)** | ✓ (real_execution; 3/host/hour) | — | ✓ (3/host/hour) |
+| **Concurrency gate** | ✓ (real_execution; ≤ 1 in flight per Kibana space) | — | — |
 
 Feature flags: \`detectionEmulationLogInjection\` gates log_injection;
 \`detectionEmulationRealExecution\` gates real_execution and all four
 \`run*Command\` tools. Both ship dark by default and require a Kibana
 restart to flip.
 
-**Runtime kill switch (PROD-6):**
+**Runtime kill switch.**
 \`xpack.securitySolution.detectionEmulation.realExecutionEnabled\` defaults
 to \`true\`. Operators flip it to \`false\` via \`kibana.yml\` reload (no
 restart) to halt new \`real_execution\` dispatches in response to anomalous
@@ -228,7 +228,7 @@ endpoints into the allowlist explicitly. The previous experimental default
 \`createTestAllowlistConfig()\` but is intentionally absent from production
 construction paths.
 
-**Audit attribution (PROD-2).** Every dispatched response action carries an
+**Audit attribution.** Every dispatched response action carries an
 \`actor\` block describing who triggered it. Tool invocations are tagged
 \`actor.kind: 'agent-builder'\` plus \`conversationId\` / \`executionId\` /
 \`runId\` / \`toolCallId\` IDs from the agent runtime; direct REST calls are
@@ -239,7 +239,7 @@ suffix, so an auditor can pivot from a single response action back to the
 exact conversation and tool call that produced it. Legacy v1 reports are
 backfilled to \`actor: { kind: 'user' }\` on first read.
 
-**Endpoint fanout cap (PROD-3).** A single \`validateRule\` or
+**Endpoint fanout cap.** A single \`validateRule\` or
 \`run*Command\` call may target at most **5** endpoints
 (\`MAX_ENDPOINT_FANOUT\`). The cap is enforced by the central Zod schema
 shared between the tool boundary and the REST routes, so an oversized
@@ -253,7 +253,7 @@ request, or use \`mode: 'log_injection'\` (which writes synthetic ECS
 docs and doesn't dispatch real response actions — but is still subject
 to the same cap to keep behaviour predictable across modes).
 
-**Per-host rate limit (PROD-4).** In addition to the per-space window
+**Per-host rate limit.** In addition to the per-space window
 (100/hour), each enrolled endpoint has its own bucket of **3
 real-execution dispatches per hour**. A call targeting endpoints whose
 buckets are saturated is rejected atomically (per-space slot rolled back
@@ -261,14 +261,15 @@ before responding) with HTTP 429 + \`blocked_endpoints\` listing every
 host at capacity. The bound matches the lower end of major EDR vendors'
 documented response-action queue depth before host-side backpressure
 kicks in; raising it requires confirming the target vendor can absorb
-the load AND raising \`MAX_ENDPOINT_FANOUT\` (PROD-3) in lockstep, since
-the realistic ceiling on a single emulation is fanout × per-host. When
+the load AND raising \`MAX_ENDPOINT_FANOUT\` (the endpoint fanout cap) in
+lockstep, since the realistic ceiling on a single emulation is fanout
+× per-host. When
 a 429 names \`blocked_endpoints\`, suggest the user either (a) wait
 for the per-host window to roll, (b) target different hosts, or (c)
 switch to \`mode: 'log_injection'\` which is exempt from per-host
 limiting (it does not touch the host).
 
-**Concurrency gate (PROD-5).** \`validateRule\` in \`real_execution\` mode
+**Concurrency gate.** \`validateRule\` in \`real_execution\` mode
 allows **at most one in-flight scenario per Kibana space**. The gate
 sits AFTER the allowlist + rate limiters (cheap rejects already drained)
 and AFTER scenario generation (we need a fingerprint to attribute the
@@ -282,7 +283,7 @@ budgets would otherwise allow it. A second concurrent call returns HTTP
 (default 10 min) backstops process crashes that bypass the catch.
 \`log_injection\` and the four \`run*Command\` tools are intentionally
 not gated — log injection does not touch the host, and per-family
-commands are already bounded by per-host rate limit (PROD-4). When a
+commands are already bounded by the per-host rate limit. When a
 429 names \`concurrency_exceeded\`, suggest waiting until the in-flight
 scenario completes (the fingerprint is included so the operator can
 correlate the run in audit logs) or retrying after the
