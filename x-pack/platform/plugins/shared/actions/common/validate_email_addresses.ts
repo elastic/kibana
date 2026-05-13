@@ -86,9 +86,7 @@ function validateEmailAddress(
 }
 
 function hasValidDomainLabels(domain: string): boolean {
-  const labels = domain.split('.');
-  if (labels.length < 1) return false;
-  return labels.every(
+  return domain.split('.').every(
     (label) => label.length > 0 && !label.startsWith('-') && !label.endsWith('-')
   );
 }
