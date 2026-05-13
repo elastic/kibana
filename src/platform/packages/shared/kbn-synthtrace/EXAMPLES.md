@@ -717,6 +717,37 @@ Generates simple OpenTelemetry traces.
 node scripts/synthtrace otel_simple_trace --live
 ```
 
+#### `apm_service_legacy_to_otel_metrics`
+
+Simulates a service migrating from classic Elastic APM to OTel instrumentation. The first half of the time range produces classic APM Java data (metrics + transactions), the second half produces OTel data with stable semconv `jvm.*` metrics in a dedicated OTel index. Both halves share the same `service.name`, so the APM Metrics tab must select the correct dashboard based on the latest agent data.
+
+**Options:**
+
+- `serviceName` (string, default: `migration-svc`): The shared service name across both phases
+- `rpm` (number, default: 2): Transactions per minute per phase
+
+**Usage:**
+
+```sh
+node scripts/synthtrace apm_service_legacy_to_otel_metrics --from now-1w --to now --clean
+```
+
+#### `apm_jvm_metrics_type_conflict`
+
+Reproduces `verification_exception` errors on the APM Metrics tab when both classic (Elastic APM) and OTel Java agents ingest data for the same service. The OTel metrics index is configured as TSDB with gauge annotations, causing type conflicts with classic APM fields when queried via ES|QL.
+
+**Options:**
+
+- `serviceName` (string, default: `kms-gps-synth`): OTel service name
+- `classicServiceName` (string, default: `kms-gps-classic`): Classic APM service name
+- `rpm` (number, default: 2): OTel traces per minute
+
+**Usage:**
+
+```sh
+node scripts/synthtrace apm_jvm_metrics_type_conflict --from now-1w --to now --clean
+```
+
 #### `degraded_synthetics_monitors`
 
 Generates degraded synthetic monitor data.

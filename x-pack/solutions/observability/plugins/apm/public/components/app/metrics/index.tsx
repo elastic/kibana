@@ -11,6 +11,7 @@ import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isAWSLambdaAgentName } from '../../../../common/agent_name';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { ServerlessMetrics } from './serverless_metrics';
 import { ServiceMetrics } from './service_metrics';
 import { JsonMetricsDashboard } from './static_dashboard';
@@ -26,6 +27,7 @@ export function Metrics() {
     serverlessType,
     telemetrySdkName,
     telemetrySdkLanguage,
+    serviceAgentStatus,
   } = useApmServiceContext();
   const isAWSLambda = isAWSLambdaAgentName(serverlessType);
   const { dataView, apmIndices } = useAdHocApmDataView();
@@ -39,6 +41,21 @@ export function Metrics() {
 
   if (isAWSLambda) {
     return <ServerlessMetrics />;
+  }
+
+  if (serviceAgentStatus === FETCH_STATUS.SUCCESS && !agentName) {
+    return (
+      <EuiCallOut
+        announceOnMount
+        title={i18n.translate('xpack.apm.metrics.noDataForRange.title', {
+          defaultMessage:
+            'No metrics data found for the selected time range. Try adjusting the time range.',
+        })}
+        iconType="eyeSlash"
+        color="warning"
+        data-test-subj="apmMetricsNoDataForRange"
+      />
+    );
   }
 
   if (!hasDashboardFile && !isElasticAgentName(agentName ?? '')) {
