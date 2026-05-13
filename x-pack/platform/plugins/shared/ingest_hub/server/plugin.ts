@@ -12,6 +12,7 @@ import type {
   Plugin,
   Logger,
 } from '@kbn/core/server';
+import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 
 import type {
   IngestHubServerPluginSetup,
@@ -19,6 +20,7 @@ import type {
   IngestHubServerPluginSetupDependencies,
   IngestHubServerPluginStartDependencies,
 } from './types';
+import { registerRoutes } from './routes/register_routes';
 
 export class IngestHubServerPlugin
   implements
@@ -30,6 +32,7 @@ export class IngestHubServerPlugin
     >
 {
   private readonly logger: Logger;
+  private fleetStart?: FleetStartContract;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -40,11 +43,26 @@ export class IngestHubServerPlugin
     plugins: IngestHubServerPluginSetupDependencies
   ): IngestHubServerPluginSetup {
     this.logger.debug('ingestHub server: Setup');
+
+    const router = core.http.createRouter();
+    const getFleetStart = (): FleetStartContract => {
+      if (!this.fleetStart) {
+        throw new Error('Fleet plugin not started yet');
+      }
+      return this.fleetStart;
+    };
+
+    registerRoutes(router, this.logger, getFleetStart);
+
     return {};
   }
 
-  public start(core: CoreStart): IngestHubServerPluginStart {
+  public start(
+    core: CoreStart,
+    plugins: IngestHubServerPluginStartDependencies
+  ): IngestHubServerPluginStart {
     this.logger.debug('ingestHub server: Started');
+    this.fleetStart = plugins.fleet;
     return {};
   }
 
