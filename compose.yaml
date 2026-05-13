@@ -1,0 +1,28 @@
+services:
+  epipe:
+    command:
+      - epipe.yaml
+    configs:
+      - source: epipe.yaml
+        target: /bzt-configs/epipe.yaml
+    image: blazemeter/taurus
+    network_mode: host
+
+configs:
+  epipe.yaml:
+    content: |
+      ---
+      execution:
+        - concurrency: 1000
+          ramp-up: 15m
+          hold-for: 15m
+          throughput: 500
+          scenario: epipe
+
+      scenarios:
+        epipe:
+          requests:
+            - label: slow
+              method: GET
+              url: http://host.docker.internal:5601/api/slow
+              timeout: 5000ms
