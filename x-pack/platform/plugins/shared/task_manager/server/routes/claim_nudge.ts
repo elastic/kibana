@@ -30,6 +30,7 @@ export function claimNudgeRoute({ router, logger, shouldRunTasks, onClaimNudge }
         },
       },
       validate: false,
+      xsrfRequired: false,
       options: {
         access: 'public',
       },

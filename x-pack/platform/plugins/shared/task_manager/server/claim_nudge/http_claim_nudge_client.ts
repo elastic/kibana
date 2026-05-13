@@ -146,6 +146,7 @@ export class HttpClaimNudgeClient {
             headers: {
               'content-type': 'application/json',
               'x-elastic-internal-origin': 'task-manager',
+              'kbn-xsrf': 'task-manager-claim-nudge',
               'content-length': '2',
             },
           },
