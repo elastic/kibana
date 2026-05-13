@@ -19,6 +19,11 @@ export interface YamlParseResult {
   error: string | null;
 }
 
+export interface YamlParseOptions {
+  /** When false, skip required-field and ES|QL syntax validation. Default: true. */
+  strict?: boolean;
+}
+
 const parseArtifacts = (artifacts: unknown): FormValues['artifacts'] => {
   if (!Array.isArray(artifacts)) return undefined;
 
@@ -120,9 +125,17 @@ export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
 };
 
 /**
- * Parse and validate YAML string to FormValues
+ * Parse and validate YAML string to FormValues.
+ *
+ * With `strict: true` (default), all required fields must be present and
+ * the ES|QL query must be syntactically valid. Use `strict: false` for
+ * best-effort parsing (e.g. flushing partial edits when toggling out of
+ * YAML mode) — missing required fields get safe defaults instead of errors.
  */
-export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
+export const parseYamlToFormValues = (
+  yamlString: string,
+  { strict = true }: YamlParseOptions = {}
+): YamlParseResult => {
   let parsed: unknown;
   try {
     parsed = load(yamlString);
@@ -208,7 +221,7 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
 
   // Validate required fields
   const name = metadata?.name;
-  if (typeof name !== 'string' || !name.trim()) {
+  if (strict && (typeof name !== 'string' || !name.trim())) {
     return {
       values: null,
       error: i18n.translate('xpack.alertingV2.yamlRuleForm.nameRequiredError', {
@@ -218,7 +231,7 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
   }
 
   const queryBase = evalQuery?.base;
-  if (typeof queryBase !== 'string' || !queryBase.trim()) {
+  if (strict && (typeof queryBase !== 'string' || !queryBase.trim())) {
     return {
       values: null,
       error: i18n.translate('xpack.alertingV2.yamlRuleForm.queryRequiredError', {
@@ -228,19 +241,21 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
   }
 
   // Validate ES|QL query syntax
-  const queryValidationError = validateEsqlQuery(queryBase);
-  if (queryValidationError) {
-    return {
-      values: null,
-      error: queryValidationError,
-    };
+  if (strict && typeof queryBase === 'string' && queryBase.trim()) {
+    const queryValidationError = validateEsqlQuery(queryBase);
+    if (queryValidationError) {
+      return {
+        values: null,
+        error: queryValidationError,
+      };
+    }
   }
 
   return {
     values: {
       kind: (kind as 'alert' | 'signal') ?? 'alert',
       metadata: {
-        name: name.trim(),
+        name: typeof name === 'string' ? name.trim() : '',
         enabled: metadata?.enabled !== false,
         description: typeof metadata?.description === 'string' ? metadata.description : undefined,
         owner: typeof metadata?.owner === 'string' ? metadata.owner : undefined,
@@ -253,7 +268,7 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
       },
       evaluation: {
         query: {
-          base: queryBase,
+          base: typeof queryBase === 'string' ? queryBase : '',
         },
       },
       grouping: Array.isArray(grouping?.fields)

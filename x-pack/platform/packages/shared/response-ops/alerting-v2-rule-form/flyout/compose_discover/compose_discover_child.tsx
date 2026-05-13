@@ -145,8 +145,10 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
 
   const handleDone = useCallback(() => {
     dispatch({ type: 'COMMIT_SANDBOX_QUERY', query: localQuery });
-    onClose();
-  }, [localQuery, dispatch, onClose]);
+    if (!state.yamlMode) {
+      onClose();
+    }
+  }, [localQuery, dispatch, onClose, state.yamlMode]);
 
   const gridColumns: EuiDataGridColumn[] = useMemo(
     () =>
@@ -304,7 +306,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
           )}
 
           {hasRun && isError && (
-            <EuiCallOut color="danger" iconType="error" title="Query error">
+            <EuiCallOut announceOnMount color="danger" iconType="error" title="Query error">
               <p>{error}</p>
             </EuiCallOut>
           )}

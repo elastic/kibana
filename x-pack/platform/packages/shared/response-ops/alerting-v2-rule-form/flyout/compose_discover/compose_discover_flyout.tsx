@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -19,9 +21,12 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
 import type { FormValues } from '../../form/types';
+import { serializeFormToYaml, parseYamlToFormValues } from '../../form/utils/yaml_form_utils';
+import { RULE_FORM_ID } from '../../form/constants';
 import {
   mapRuleResponseToFormValues,
   mapFormValuesToCreateRequest,
@@ -33,9 +38,27 @@ import { ComposeDiscoverForm } from './compose_discover_form';
 import { ComposeDiscoverChild } from './compose_discover_child';
 import { useEsqlAutocomplete } from './use_esql_providers';
 
-// These hooks live in the plugin, not the package — imported via the plugin's hook layer
-// when this flyout is rendered in the rules list page.
-// For now they are passed as props to keep the package boundary clean.
+const LazyYamlRuleForm = React.lazy(() =>
+  import('../../form/yaml_rule_form').then((m) => ({ default: m.YamlRuleForm }))
+);
+
+const EDIT_MODE_OPTIONS = [
+  {
+    id: 'form',
+    label: i18n.translate('xpack.alertingV2.composeDiscover.editMode.form', {
+      defaultMessage: 'Form view',
+    }),
+    iconType: 'tableDensityNormal',
+  },
+  {
+    id: 'yaml',
+    label: i18n.translate('xpack.alertingV2.composeDiscover.editMode.yaml', {
+      defaultMessage: 'YAML view',
+    }),
+    iconType: 'editorCodeBlock',
+  },
+];
+
 export interface ComposeDiscoverFlyoutProps {
   historyKey: symbol;
   mode?: ComposeDiscoverMode;
@@ -132,6 +155,51 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   const stepTitles = getStepTitles();
   const isLastStep = uiState.step === stepTitles.length - 1;
 
+  // ── YAML mode state ──────────────────────────────────────────────────────
+  // Lifted to the parent so yamlText survives the YAML editor unmounting
+  // when toggling back to Form mode.
+  const [yamlText, setYamlText] = useState('');
+
+  const handleToggleYamlMode = useCallback(
+    (enabled: boolean) => {
+      if (enabled) {
+        setYamlText(serializeFormToYaml(methods.getValues()));
+      } else {
+        // Lenient parse so partially-filled YAML (e.g. name set but no
+        // query yet) still flushes back into form state.
+        const result = parseYamlToFormValues(yamlText, { strict: false });
+        if (result.values) {
+          methods.reset(result.values);
+        }
+      }
+      dispatch({ type: 'SET_YAML_MODE', enabled });
+    },
+    [methods, yamlText, dispatch]
+  );
+
+  // Form → YAML: regenerate YAML when form values change from external
+  // sources (e.g. Sandbox "Apply changes"). Uses the callback variant of
+  // watch() so the parent does not re-render on every form keystroke.
+  useEffect(() => {
+    if (!uiState.yamlMode) return;
+    const { unsubscribe } = methods.watch(() => {
+      setYamlText(serializeFormToYaml(methods.getValues()));
+    });
+    return unsubscribe;
+  }, [uiState.yamlMode, methods]);
+
+  // YAML submit handler — parses YAML and submits directly.
+  const handleYamlSubmit = useCallback(
+    (values: FormValues) => {
+      if (isCreate) {
+        onCreateRule(mapFormValuesToCreateRequest(values));
+      } else if (ruleId && onUpdateRule) {
+        onUpdateRule(ruleId, mapFormValuesToUpdateRequest(values));
+      }
+    },
+    [isCreate, onCreateRule, ruleId, onUpdateRule]
+  );
+
   // Sync the committed query into RHF whenever the user applies changes from the Sandbox.
   // timeField and grouping are written directly to RHF by the form components via useFormContext.
   useEffect(() => {
@@ -175,67 +243,131 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
               <h2>{title}</h2>
             </EuiTitle>
 
-            {/* Step indicator coming in PR A — HorizontalMinimalStepper */}
+            <EuiFlexGroup
+              justifyContent="spaceBetween"
+              alignItems="center"
+              responsive={false}
+              style={{ marginTop: 8 }}
+            >
+              <EuiFlexItem grow={false}>
+                {uiState.yamlMode ? (
+                  <EuiBadge color="hollow" data-test-subj="composeDiscoverYamlBadge">
+                    YAML MODE
+                  </EuiBadge>
+                ) : (
+                  <>{/* Step indicator coming in PR A — HorizontalMinimalStepper */}</>
+                )}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonGroup
+                  legend={i18n.translate('xpack.alertingV2.composeDiscover.editMode.legend', {
+                    defaultMessage: 'Edit mode selection',
+                  })}
+                  options={EDIT_MODE_OPTIONS}
+                  idSelected={uiState.yamlMode ? 'yaml' : 'form'}
+                  onChange={(id) => handleToggleYamlMode(id === 'yaml')}
+                  isIconOnly
+                  buttonSize="compressed"
+                  data-test-subj="composeDiscoverEditModeToggle"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlyoutHeader>
 
           <EuiFlyoutBody>
-            <ComposeDiscoverForm state={uiState} dispatch={dispatch} services={services} />
+            {uiState.yamlMode ? (
+              <React.Suspense fallback={null}>
+                <LazyYamlRuleForm
+                  services={services}
+                  onSubmit={handleYamlSubmit}
+                  yamlText={yamlText}
+                  setYamlText={setYamlText}
+                  isSubmitting={isSaving}
+                />
+              </React.Suspense>
+            ) : (
+              <ComposeDiscoverForm state={uiState} dispatch={dispatch} services={services} />
+            )}
           </EuiFlyoutBody>
 
           <EuiFlyoutFooter>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={onClose}>Cancel</EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup gutterSize="s" responsive={false}>
-                  {uiState.step > 0 && (
+            {uiState.yamlMode ? (
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    onClick={() => handleToggleYamlMode(false)}
+                    data-test-subj="composeDiscoverYamlCancel"
+                  >
+                    Cancel YAML
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    type="submit"
+                    form={RULE_FORM_ID}
+                    isLoading={isSaving}
+                    data-test-subj="composeDiscoverYamlSubmit"
+                  >
+                    {isCreate ? 'Create rule' : 'Save rule'}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : (
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty onClick={onClose}>Cancel</EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="s" responsive={false}>
+                    {uiState.step > 0 && (
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                          iconType="arrowLeft"
+                          onClick={() => dispatch({ type: 'GO_BACK' })}
+                          data-test-subj="composeDiscoverBack"
+                        >
+                          Back
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                    )}
                     <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty
-                        iconType="arrowLeft"
-                        onClick={() => dispatch({ type: 'GO_BACK' })}
-                        data-test-subj="composeDiscoverBack"
-                      >
-                        Back
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
-                  )}
-                  <EuiFlexItem grow={false}>
-                    {isLastStep ? (
-                      <EuiButton
-                        fill
-                        isLoading={isSaving}
-                        onClick={handleSubmit}
-                        data-test-subj="composeDiscoverSubmit"
-                      >
-                        {isCreate ? 'Create rule' : 'Save rule'}
-                      </EuiButton>
-                    ) : (
-                      <EuiToolTip
-                        content={
-                          uiState.step === 0 && !uiState.queryCommitted
-                            ? 'Define a query in the editor before continuing'
-                            : undefined
-                        }
-                      >
+                      {isLastStep ? (
                         <EuiButton
                           fill
-                          iconType="arrowRight"
-                          iconSide="right"
-                          isDisabled={
-                            uiState.childOpen || (uiState.step === 0 && !uiState.queryCommitted)
-                          }
-                          onClick={handleNext}
-                          data-test-subj="composeDiscoverNext"
+                          isLoading={isSaving}
+                          onClick={handleSubmit}
+                          data-test-subj="composeDiscoverSubmit"
                         >
-                          Next
+                          {isCreate ? 'Create rule' : 'Save rule'}
                         </EuiButton>
-                      </EuiToolTip>
-                    )}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+                      ) : (
+                        <EuiToolTip
+                          content={
+                            uiState.step === 0 && !uiState.queryCommitted
+                              ? 'Define a query in the editor before continuing'
+                              : undefined
+                          }
+                        >
+                          <EuiButton
+                            fill
+                            iconType="arrowRight"
+                            iconSide="right"
+                            isDisabled={
+                              uiState.childOpen || (uiState.step === 0 && !uiState.queryCommitted)
+                            }
+                            onClick={handleNext}
+                            data-test-subj="composeDiscoverNext"
+                          >
+                            Next
+                          </EuiButton>
+                        </EuiToolTip>
+                      )}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
           </EuiFlyoutFooter>
 
           {uiState.childOpen && (
