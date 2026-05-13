@@ -355,7 +355,7 @@ describe('createEsqlExecutionEvaluator', () => {
         'FROM logs-* | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | LIMIT 10';
       const executableQuery = `FROM logs-* | WHERE @timestamp >= "${DEFAULT_TSTART}" AND @timestamp < "${DEFAULT_TEND}" | LIMIT 10`;
 
-      const queryFn = jest.fn(async () => ({ values: [[1]] }));
+      const queryFn = jest.fn(async ({ query: _q }: { query: string }) => ({ values: [[1]] }));
       const esClient = {
         esql: { query: queryFn },
       } as unknown as ElasticsearchClient;
@@ -378,7 +378,9 @@ describe('createEsqlExecutionEvaluator', () => {
     it('preserves the original query in details/metadata after substitution', async () => {
       const originalQuery = 'FROM logs-* | WHERE @timestamp >= ?_tstart';
       const esClient = {
-        esql: { query: jest.fn(async () => ({ values: [[1]] })) },
+        esql: {
+          query: jest.fn(async ({ query: _q }: { query: string }) => ({ values: [[1]] })),
+        },
       } as unknown as ElasticsearchClient;
 
       const evaluator = createEsqlExecutionEvaluator({
@@ -397,7 +399,7 @@ describe('createEsqlExecutionEvaluator', () => {
 
     it('passes through queries without bind tokens unchanged', async () => {
       const originalQuery = 'FROM logs-* | LIMIT 10';
-      const queryFn = jest.fn(async () => ({ values: [[1]] }));
+      const queryFn = jest.fn(async ({ query: _q }: { query: string }) => ({ values: [[1]] }));
       const esClient = {
         esql: { query: queryFn },
       } as unknown as ElasticsearchClient;

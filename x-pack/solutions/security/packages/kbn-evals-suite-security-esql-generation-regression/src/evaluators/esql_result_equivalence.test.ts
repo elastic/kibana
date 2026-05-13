@@ -648,7 +648,7 @@ describe('createEsqlResultEquivalenceEvaluator', () => {
       const executableGold = `FROM logs-* | WHERE @timestamp >= "${DEFAULT_TSTART}" AND @timestamp < "${DEFAULT_TEND}" | STATS c = COUNT(*)`;
       const executableCandidate = `FROM logs-* | WHERE @timestamp >= "${DEFAULT_TSTART}" AND @timestamp < "${DEFAULT_TEND}" | STATS total = COUNT(*)`;
 
-      const queryFn = jest.fn(async () => ({
+      const queryFn = jest.fn(async ({ query: _q }: { query: string }) => ({
         columns: [{ name: 'c', type: 'long' }],
         values: [[42]],
       }));
@@ -676,7 +676,10 @@ describe('createEsqlResultEquivalenceEvaluator', () => {
       const candidateWithBinds = 'FROM logs-* | WHERE @timestamp < ?_tend';
       const esClient = {
         esql: {
-          query: jest.fn(async () => ({ columns: twoColumns, values: [] })),
+          query: jest.fn(async ({ query: _q }: { query: string }) => ({
+            columns: twoColumns,
+            values: [],
+          })),
         },
       } as unknown as ElasticsearchClient;
 
