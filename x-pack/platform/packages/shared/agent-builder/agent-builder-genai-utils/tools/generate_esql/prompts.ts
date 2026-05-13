@@ -9,7 +9,7 @@ import type { BaseMessageLike } from '@langchain/core/messages';
 import type { ResolvedResourceWithSampling } from '../utils/resources';
 import { formatResourceWithSampledValues } from '../utils/resources';
 import type { Action } from './actions';
-import { formatAction } from './actions';
+import { formatAction, isRequestDocumentationAction } from './actions';
 import { getEsqlInstructions } from './prompts/instructions_template';
 import type { EsqlLoadedDocumentation } from './documentation';
 import { EsqlDocEntry } from './documentation';
@@ -68,6 +68,11 @@ export const createGenerateEsqlPrompt = ({
   rowLimit?: number;
   disableNamedParams?: boolean;
 }): BaseMessageLike[] => {
+  // always add the TS extended documentation if the agent requested doc about the command
+  const tsDocRequested = previousActions.some(
+    (a) => isRequestDocumentationAction(a) && a.requestedKeywords.includes('TS')
+  );
+
   return [
     [
       'system',
@@ -80,7 +85,11 @@ Your current task is to respond to the user's question by providing a valid ES|Q
 
 Please use the information accessible from your past actions when relevant.
 
-${getDocumentationSection({ resource, documentation })}
+${getDocumentationSection({
+  resource,
+  documentation,
+  tsDocRequested,
+})}
 
 ## Instructions
 
@@ -125,11 +134,13 @@ Now, based on that information, please generate the ES|QL query.`,
 const getDocumentationSection = ({
   resource,
   documentation,
+  tsDocRequested = false,
 }: {
   resource: ResolvedResourceWithSampling;
   documentation: EsqlLoadedDocumentation;
+  tsDocRequested?: boolean;
 }): string => {
-  const isTsdb = resource.isTsdb;
+  const isTsdb = resource.isTsdb || tsDocRequested;
 
   return `## Documentation
 
