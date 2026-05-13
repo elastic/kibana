@@ -12,6 +12,8 @@
     "@kbn/esql-language",
     "@kbn/evals",
     "@kbn/inference-common",
-    "@kbn/tooling-log"
+    "@kbn/inference-prompt-utils",
+    "@kbn/tooling-log",
+    "@kbn/zod"
   ]
 }

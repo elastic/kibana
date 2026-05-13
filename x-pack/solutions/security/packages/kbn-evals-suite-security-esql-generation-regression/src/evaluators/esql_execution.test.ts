@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Example } from '@kbn/evals';
 import { createEsqlExecutionEvaluator, ESQL_EXECUTION_EVALUATOR_NAME } from './esql_execution';
+import { DEFAULT_TEND, DEFAULT_TSTART } from './esql_bind_params';
 
 const params = <T>(output: T) => ({
   input: {},
@@ -345,6 +346,70 @@ describe('createEsqlExecutionEvaluator', () => {
       const result = await evaluator.evaluate(params([a, b]));
 
       expect(result.explanation).toContain('2 queries have valid syntax');
+    });
+  });
+
+  describe('bind-parameter substitution', () => {
+    it('substitutes ?_tstart / ?_tend in the query passed to esClient.esql.query', async () => {
+      const originalQuery =
+        'FROM logs-* | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | LIMIT 10';
+      const executableQuery = `FROM logs-* | WHERE @timestamp >= "${DEFAULT_TSTART}" AND @timestamp < "${DEFAULT_TEND}" | LIMIT 10`;
+
+      const queryFn = jest.fn(async () => ({ values: [[1]] }));
+      const esClient = {
+        esql: { query: queryFn },
+      } as unknown as ElasticsearchClient;
+
+      const evaluator = createEsqlExecutionEvaluator({
+        esClient,
+        queryExtractor: identityExtractor,
+      });
+
+      const result = await evaluator.evaluate(params([originalQuery]));
+
+      expect(queryFn).toHaveBeenCalledTimes(1);
+      expect(queryFn).toHaveBeenCalledWith({ query: executableQuery });
+      // AST + execution both succeed because the substituted form parses
+      // and runs cleanly against ES.
+      expect(result.score).toBe(1);
+      expect(result.label).toBe('valid');
+    });
+
+    it('preserves the original query in details/metadata after substitution', async () => {
+      const originalQuery = 'FROM logs-* | WHERE @timestamp >= ?_tstart';
+      const esClient = {
+        esql: { query: jest.fn(async () => ({ values: [[1]] })) },
+      } as unknown as ElasticsearchClient;
+
+      const evaluator = createEsqlExecutionEvaluator({
+        esClient,
+        queryExtractor: identityExtractor,
+      });
+
+      const result = await evaluator.evaluate(params([originalQuery]));
+
+      const metadata = result.metadata as Record<string, unknown>;
+      const queries = metadata.queries as Array<{ query: string }>;
+      // Per-query details capture the original — debuggers see the agent's
+      // actual emission, not the executor's rewrite.
+      expect(queries[0].query).toBe(originalQuery);
+    });
+
+    it('passes through queries without bind tokens unchanged', async () => {
+      const originalQuery = 'FROM logs-* | LIMIT 10';
+      const queryFn = jest.fn(async () => ({ values: [[1]] }));
+      const esClient = {
+        esql: { query: queryFn },
+      } as unknown as ElasticsearchClient;
+
+      const evaluator = createEsqlExecutionEvaluator({
+        esClient,
+        queryExtractor: identityExtractor,
+      });
+
+      await evaluator.evaluate(params([originalQuery]));
+
+      expect(queryFn).toHaveBeenCalledWith({ query: originalQuery });
     });
   });
 

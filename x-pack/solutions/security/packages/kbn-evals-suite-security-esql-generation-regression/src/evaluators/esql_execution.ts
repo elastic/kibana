@@ -8,6 +8,7 @@
 import { validateQuery } from '@kbn/esql-language';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Evaluator, EvaluationResult, Example, TaskOutput } from '@kbn/evals';
+import { substituteEsqlBindParams } from './esql_bind_params';
 
 export const ESQL_EXECUTION_EVALUATOR_NAME = 'ES|QL Execution Validity';
 
@@ -68,9 +69,18 @@ async function evaluateSingleQuery(
     return detail;
   }
 
+  // AST validation runs against the original query so the validator sees
+  // exactly what the agent emitted (including bind-param placeholders,
+  // which `@kbn/esql-language` accepts as syntactically valid). ES
+  // execution, on the other hand, rejects `?_tstart` / `?_tend` with
+  // `parsing_exception: Unknown query parameter` unless the placeholder
+  // is substituted at the API layer — which production code does and
+  // this evaluator must mirror, or 50%+ of agent-emitted queries that
+  // are otherwise correct will spuriously fail execution validity.
+  const executableQuery = substituteEsqlBindParams(query);
   const [astResult, execResult] = await Promise.allSettled([
     validateQuery(query),
-    esClient.esql.query({ query }),
+    esClient.esql.query({ query: executableQuery }),
   ]);
 
   if (astResult.status === 'fulfilled') {

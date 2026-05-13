@@ -7,7 +7,7 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { DefaultEvaluators, Evaluator, EvalsExecutorClient } from '@kbn/evals';
-import { createEsqlEquivalenceEvaluator, withEvaluatorSpan } from '@kbn/evals';
+import { withEvaluatorSpan } from '@kbn/evals';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { EsqlRegressionAgentBuilderChatClient } from './chat_client';
@@ -15,6 +15,7 @@ import { esqlGenerationDataset } from './dataset';
 import { createEsqlValidityEvaluator } from './evaluators/esql_validity';
 import { createEsqlExecutionEvaluator } from './evaluators/esql_execution';
 import { createEsqlResultEquivalenceEvaluator } from './evaluators/esql_result_equivalence';
+import { createCalibratedEsqlEquivalenceEvaluator } from './evaluators/esql_functional_equivalence';
 import { extractEsqlFromConverseResponse } from './extract_esql';
 
 /**
@@ -91,7 +92,15 @@ export function createEvaluateEsqlGenerationDataset({
   const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
     evaluators.traceBasedEvaluators;
 
-  const baseEquivalenceEvaluator = createEsqlEquivalenceEvaluator({
+  // Suite-local calibrated FuncEq judge replaces the framework default
+  // (`@kbn/evals` `createEsqlEquivalenceEvaluator`). Same evaluator name +
+  // `kind: 'LLM'` so the golden-cluster history is continuous, but the
+  // rubric is calibrated (three-point scale, explicit allow/deny lists
+  // for common ES|QL transformations, conservative tie-breaker). See
+  // `evaluators/esql_functional_equivalence.ts` for the full rubric and
+  // the `judgeVersion=v2` stamp that lets dashboards partition out the
+  // v1 framework history.
+  const baseEquivalenceEvaluator = createCalibratedEsqlEquivalenceEvaluator({
     inferenceClient,
     log,
     predictionExtractor,

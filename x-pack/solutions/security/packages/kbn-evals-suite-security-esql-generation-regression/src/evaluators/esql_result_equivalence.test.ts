@@ -10,6 +10,7 @@ import {
   createEsqlResultEquivalenceEvaluator,
   ESQL_RESULT_EQUIVALENCE_EVALUATOR_NAME,
 } from './esql_result_equivalence';
+import { DEFAULT_TEND, DEFAULT_TSTART } from './esql_bind_params';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -634,6 +635,100 @@ describe('createEsqlResultEquivalenceEvaluator', () => {
       const meta = result.metadata as Record<string, unknown>;
       expect(meta.goldQuery).toBe(GOLD_QUERY);
       expect(meta.candidateQuery).toBe(CANDIDATE_QUERY);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  describe('bind-parameter substitution', () => {
+    it('substitutes ?_tstart / ?_tend in queries sent to ES for both gold and candidate', async () => {
+      const goldWithBinds =
+        'FROM logs-* | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS c = COUNT(*)';
+      const candidateWithBinds =
+        'FROM logs-* | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS total = COUNT(*)';
+      const executableGold = `FROM logs-* | WHERE @timestamp >= "${DEFAULT_TSTART}" AND @timestamp < "${DEFAULT_TEND}" | STATS c = COUNT(*)`;
+      const executableCandidate = `FROM logs-* | WHERE @timestamp >= "${DEFAULT_TSTART}" AND @timestamp < "${DEFAULT_TEND}" | STATS total = COUNT(*)`;
+
+      const queryFn = jest.fn(async () => ({
+        columns: [{ name: 'c', type: 'long' }],
+        values: [[42]],
+      }));
+      const esClient = {
+        esql: { query: queryFn },
+      } as unknown as ElasticsearchClient;
+
+      const evaluator = createEsqlResultEquivalenceEvaluator({
+        esClient,
+        ...defaultExtractors,
+      });
+
+      const result = await evaluator.evaluate(params(candidateWithBinds, goldWithBinds));
+
+      expect(queryFn).toHaveBeenCalledTimes(2);
+      const sentQueries = queryFn.mock.calls.map((c) => c[0].query);
+      expect(sentQueries).toContain(executableGold);
+      expect(sentQueries).toContain(executableCandidate);
+      // Score still computes normally on the substituted result sets.
+      expect(result.score).toBe(1);
+    });
+
+    it('preserves the original query strings in metadata after substitution', async () => {
+      const goldWithBinds = 'FROM logs-* | WHERE @timestamp >= ?_tstart';
+      const candidateWithBinds = 'FROM logs-* | WHERE @timestamp < ?_tend';
+      const esClient = {
+        esql: {
+          query: jest.fn(async () => ({ columns: twoColumns, values: [] })),
+        },
+      } as unknown as ElasticsearchClient;
+
+      const evaluator = createEsqlResultEquivalenceEvaluator({
+        esClient,
+        ...defaultExtractors,
+      });
+
+      const result = await evaluator.evaluate(params(candidateWithBinds, goldWithBinds));
+
+      const meta = result.metadata as Record<string, unknown>;
+      // Debuggers see what the agent actually emitted, not the executor's
+      // rewrite — same contract as esql_execution.
+      expect(meta.goldQuery).toBe(goldWithBinds);
+      expect(meta.candidateQuery).toBe(candidateWithBinds);
+    });
+
+    it('preserves originals in metadata when ES execution fails on bind params', async () => {
+      // Simulates the legacy bug shape: a real cluster rejecting the
+      // un-substituted form. The evaluator should NEVER see this any
+      // more, but the test guards against regression of the boundary.
+      const goldWithBinds = 'FROM logs-* | WHERE @timestamp >= ?_tstart';
+      const candidate = 'FROM logs-* | LIMIT 1';
+      const esClient = {
+        esql: {
+          query: jest.fn(async ({ query }: { query: string }) => {
+            if (query.includes('?_tstart')) {
+              throw new Error(
+                'parsing_exception: Unknown query parameter [_tstart], did you forget to provide a params argument?'
+              );
+            }
+            return { columns: twoColumns, values: [] };
+          }),
+        },
+      } as unknown as ElasticsearchClient;
+
+      const evaluator = createEsqlResultEquivalenceEvaluator({
+        esClient,
+        ...defaultExtractors,
+      });
+
+      const result = await evaluator.evaluate(params(candidate, goldWithBinds));
+
+      // No call should have included the un-substituted form.
+      const queryFn = (esClient.esql as unknown as { query: jest.Mock }).query;
+      const queryStringsCalled = queryFn.mock.calls.map((c) => c[0].query);
+      for (const sent of queryStringsCalled) {
+        expect(sent).not.toMatch(/\?_tstart/);
+      }
+      // With substitution the gold no longer fails; both queries succeed
+      // and the score reflects an actual result-set comparison.
+      expect(result.label).not.toBe('execution-failure');
     });
   });
 

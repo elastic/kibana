@@ -36,10 +36,17 @@ Spec `beforeAll` materialises **six index mappings** (`postgres-logs-*`, `packet
 
 | Evaluator | Kind | Score | Source | Description |
 |---|---|---|---|---|
-| **ES\|QL Functional Equivalence** | `LLM` | 0 or 1 | `@kbn/evals` (`createEsqlEquivalenceEvaluator`) | Judges whether the generated query is *functionally equivalent* to the reference query — same results, not necessarily same syntax. |
+| **ES\|QL Functional Equivalence** | `LLM` | 0 / 0.5 / 1 | suite-local (`src/evaluators/esql_functional_equivalence.ts`) | Calibrated three-point judge — same evaluator name as the framework default, but the rubric (allow-list of common transformations, deny-list of substantive differences, conservative tie-breaker on `equivalent_with_caveats`) is suite-local. Stamps `metadata.judgeVersion=v2` so dashboards can partition out the framework's v1 history if needed. See [Calibrated FuncEq + bind-param substitution](#calibrated-funceq--bind-param-substitution) below. |
 | **ES\|QL Validity** | `CODE` | 0–1 | suite-local (`src/evaluators/esql_validity.ts`) | Parses each generated query via `@kbn/esql-language` `validateQuery`; score is the fraction of queries with no AST errors. No LLM call, no network. |
-| **ES\|QL Execution Validity** | `CODE` | 0–1 | suite-local (`src/evaluators/esql_execution.ts`) | Runs each generated query against the live Elasticsearch cluster; three-tier composite of AST validity, execution success, and optional hit detection. |
-| **ES\|QL Result Equivalence** | `CODE` | 0–1 | suite-local (`src/evaluators/esql_result_equivalence.ts`) | Executes both gold and candidate queries and computes Jaccard similarity over their normalised row sets. Score 1 = identical rows, 0 = no overlap. |
+| **ES\|QL Execution Validity** | `CODE` | 0–1 | suite-local (`src/evaluators/esql_execution.ts`) | Runs each generated query against the live Elasticsearch cluster; three-tier composite of AST validity, execution success, and optional hit detection. Substitutes `?_tstart` / `?_tend` at the ES boundary so the agent's bind-parameter form executes cleanly. |
+| **ES\|QL Result Equivalence** | `CODE` | 0–1 | suite-local (`src/evaluators/esql_result_equivalence.ts`) | Executes both gold and candidate queries and computes Jaccard similarity over their normalised row sets. Score 1 = identical rows, 0 = no overlap. Same bind-parameter substitution as the execution evaluator. |
+
+#### Calibrated FuncEq + bind-param substitution
+
+Two suite-local divergences from the framework defaults, both motivated by failure cases observed against the EIS baseline:
+
+- **`?_tstart` / `?_tend` substitution** (`src/evaluators/esql_bind_params.ts`) — the agent emits ES|QL with these placeholders for the user's time window; in production they're substituted at the `esClient.esql.query({ query, params })` boundary. Running the agent's output directly without substitution caused ~50% of otherwise-correct candidate queries to fail with `parsing_exception: Unknown query parameter [_tstart]`. The substitution happens only at the ES boundary; AST validation and `metadata.queries[].query` continue to see the agent's original emission so debuggers see exactly what the model produced.
+- **Calibrated FuncEq rubric** (`src/evaluators/esql_functional_equivalence.ts`) — replaces the framework's vague binary "Yes / No" rubric with a three-point scale (`equivalent`, `equivalent_with_caveats`, `not_equivalent`) and explicit allow/deny lists drawn from real failure cases (column renames, equivalent date functions, `?_tstart`/`?_tend` ↔ literal time range, wrong aggregations, missing critical filters). When uncertain, the judge is instructed to return `equivalent_with_caveats` rather than `equivalent`, biasing the suite against false-positive equivalence claims that would mask regressions. Evaluator name stays `ES|QL Functional Equivalence` for golden-cluster history continuity.
 
 ### Observability (trace-based, zero per-example LLM cost)
 
