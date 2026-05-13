@@ -9,7 +9,7 @@
 
 import type { ExitNormalPathNode } from '@kbn/workflows/graph';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
-import { ExitNormalPathNodeImpl } from '../exit_normal_path_node_impl';
+import { ExitNormalPathNodeImpl } from '@kbn/workflows-execution-engine-core';
 
 describe('ExitNormalPathNodeImpl', () => {
   let underTest: ExitNormalPathNodeImpl;

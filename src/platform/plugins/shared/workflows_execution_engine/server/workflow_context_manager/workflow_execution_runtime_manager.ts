@@ -21,12 +21,14 @@ import {
 } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
-import type { IWorkflowExecutionRuntimeManager } from '@kbn/workflows-execution-engine-core';
+import type {
+  IWorkflowExecutionRuntimeManager,
+  IStepExecutionRuntimeFactory,
+  ScopeData,
+} from '@kbn/workflows-execution-engine-core';
 import { buildWorkflowContext } from './build_workflow_context';
-import type { StepExecutionRuntimeFactory } from './step_execution_runtime_factory';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
-import type { ScopeData } from './workflow_scope_stack';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
@@ -270,7 +272,7 @@ export class WorkflowExecutionRuntimeManager implements IWorkflowExecutionRuntim
    * - workflow.output / workflow.fail — unwind the entire stack (no predicate)
    */
   public unwindScopes(
-    stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
+    stepExecutionRuntimeFactory: IStepExecutionRuntimeFactory,
     shouldStop?: (scope: ScopeData) => boolean,
     { inclusive = false }: { inclusive?: boolean } = {}
   ): void {

@@ -14,7 +14,7 @@ import type { BaseStep, CancellableNode, RunStepResult } from './node_implementa
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { ConnectorExecutor } from '../connector_executor';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
-import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowExecutionRuntimeManager } from '@kbn/workflows-execution-engine-core';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 /**
@@ -34,7 +34,7 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
     private stepDefinition: ServerStepDefinition,
     stepExecutionRuntime: StepExecutionRuntime,
     connectorExecutor: ConnectorExecutor,
-    workflowExecutionRuntime: WorkflowExecutionRuntimeManager,
+    workflowExecutionRuntime: IWorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
   ) {
     const baseStep: BaseStep = {

@@ -9,7 +9,7 @@
 
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
-import { ExitIfNodeImpl } from '../exit_if_node_impl';
+import { ExitIfNodeImpl } from '@kbn/workflows-execution-engine-core';
 
 describe('ExitIfNodeImpl', () => {
   let mockStepExecutionRuntime: jest.Mocked<StepExecutionRuntime>;

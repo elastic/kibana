@@ -10,7 +10,7 @@
 import type { DataSetGraphNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
-import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowExecutionRuntimeManager } from '@kbn/workflows-execution-engine-core';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { BaseStep, RunStepResult } from '../node_implementation';
 import { BaseAtomicNodeImplementation } from '../node_implementation';
@@ -23,7 +23,7 @@ export class DataSetStepImpl extends BaseAtomicNodeImplementation<DataSetStep> {
   constructor(
     private node: DataSetGraphNode,
     stepExecutionRuntime: StepExecutionRuntime,
-    workflowRuntime: WorkflowExecutionRuntimeManager,
+    workflowRuntime: IWorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
   ) {
     const dataSetStep: DataSetStep = {

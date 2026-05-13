@@ -13,7 +13,7 @@ import type { StepExecutionRuntimeFactory } from '../../../workflow_context_mana
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { WorkflowExecutionState } from '../../../workflow_context_manager/workflow_execution_state';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
-import { LoopContinueNodeImpl } from '../loop_continue_node_impl';
+import { LoopContinueNodeImpl } from '@kbn/workflows-execution-engine-core';
 
 describe('LoopContinueNodeImpl', () => {
   let node: LoopContinueNode;

@@ -10,7 +10,7 @@
 import { ExecutionError } from '@kbn/workflows/server';
 import type { StepExecutionRuntime } from '../../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
-import { ExitTryBlockNodeImpl } from '../exit_try_block_node_impl';
+import { ExitTryBlockNodeImpl } from '@kbn/workflows-execution-engine-core';
 
 describe('ExitTryBlockNodeImpl', () => {
   let underTest: ExitTryBlockNodeImpl;

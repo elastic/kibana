@@ -10,8 +10,11 @@
 export type { WorkflowLogEvent } from './workflow_log_event';
 export type { IWorkflowEventLogger } from './workflow_event_logger';
 export type { IWorkflowContextManager } from './workflow_context_manager';
-export type { IStepExecutionRuntime } from './step_execution_runtime';
+export type { IStepExecutionRuntime, IScopeStack } from './step_execution_runtime';
 export type { IWorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
+export type { IWorkflowExecutionState } from './workflow_execution_state';
+export type { IStepExecutionRuntimeFactory } from './step_execution_runtime_factory';
+export type { ScopeData } from './scope_data';
 export type {
   INodeImplementation,
   INodeWithErrorCatching,

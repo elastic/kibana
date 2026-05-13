@@ -12,7 +12,7 @@ import type { EnterForeachNode } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
-import { EnterForeachNodeImpl } from '../enter_foreach_node_impl';
+import { EnterForeachNodeImpl } from '@kbn/workflows-execution-engine-core';
 
 describe('EnterForeachNodeImpl', () => {
   let node: EnterForeachNode;

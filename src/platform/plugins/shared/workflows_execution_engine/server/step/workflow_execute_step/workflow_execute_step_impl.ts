@@ -23,14 +23,14 @@ import type { StepExecutionRepository } from '../../repositories/step_execution_
 import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../types';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
-import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowExecutionRuntimeManager } from '@kbn/workflows-execution-engine-core';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { CancellableNode, NodeImplementation } from '../node_implementation';
 
 export interface WorkflowExecuteStepImplInit {
   node: WorkflowExecuteGraphNode | WorkflowExecuteAsyncGraphNode;
   stepExecutionRuntime: StepExecutionRuntime;
-  workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
+  workflowExecutionRuntime: IWorkflowExecutionRuntimeManager;
   workflowRepository: WorkflowRepository;
   spaceId: string;
   request: KibanaRequest;

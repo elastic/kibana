@@ -14,18 +14,18 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import { buildElasticsearchRequest } from '@kbn/workflows';
 import type { ElasticsearchGraphNode } from '@kbn/workflows/graph/types';
-import { formatBytes, ResponseSizeLimitError } from './errors';
+import { formatBytes, ResponseSizeLimitError } from '@kbn/workflows-execution-engine-core';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
-import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowExecutionRuntimeManager } from '@kbn/workflows-execution-engine-core';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
   constructor(
     private node: ElasticsearchGraphNode,
     contextManager: StepExecutionRuntime,
-    workflowRuntime: WorkflowExecutionRuntimeManager,
+    workflowRuntime: IWorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
   ) {
     const step = {

@@ -9,7 +9,7 @@
 
 import type { ExitConditionBranchNode, ExitIfNode, WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
-import { ExitConditionBranchNodeImpl } from '../exit_condition_branch_node_impl';
+import { ExitConditionBranchNodeImpl } from '@kbn/workflows-execution-engine-core';
 
 describe('ExitConditionBranchNodeImpl', () => {
   let node: ExitConditionBranchNode;

@@ -17,7 +17,7 @@ import type { StepExecutionRuntime } from '../../../workflow_context_manager/ste
 import type { WorkflowContextManager } from '../../../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
-import { EnterSwitchNodeImpl } from '../enter_switch_node_impl';
+import { EnterSwitchNodeImpl } from '@kbn/workflows-execution-engine-core';
 
 describe('EnterSwitchNodeImpl', () => {
   let node: EnterSwitchNode;

@@ -12,7 +12,7 @@ import type { EnterWhileNode } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
-import { EnterWhileNodeImpl } from '../enter_while_node_impl';
+import { EnterWhileNodeImpl } from '@kbn/workflows-execution-engine-core';
 
 describe('EnterWhileNodeImpl', () => {
   let node: EnterWhileNode;

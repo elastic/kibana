@@ -8,7 +8,7 @@
  */
 
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
-import { ExitContinueNodeImpl } from '../exit_continue_node_impl';
+import { ExitContinueNodeImpl } from '@kbn/workflows-execution-engine-core';
 
 describe('ExitContinueNodeImpl', () => {
   let underTest: ExitContinueNodeImpl;

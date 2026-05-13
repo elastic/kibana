@@ -8,7 +8,7 @@
  */
 
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
-import { ExitWorkflowTimeoutZoneNodeImpl } from '../exit_workflow_timeout_zone_node_impl';
+import { ExitWorkflowTimeoutZoneNodeImpl } from '@kbn/workflows-execution-engine-core';
 
 describe('ExitWorkflowTimeoutZoneNodeImpl', () => {
   let wfExecutionRuntimeManagerMock: WorkflowExecutionRuntimeManager;

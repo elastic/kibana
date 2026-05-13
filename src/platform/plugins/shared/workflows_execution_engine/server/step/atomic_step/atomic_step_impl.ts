@@ -9,7 +9,7 @@
 import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import type { ConnectorExecutor } from '../../connector_executor';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
-import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowExecutionRuntimeManager } from '@kbn/workflows-execution-engine-core';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import { ConnectorStepImpl } from '../connector_step';
 import type { NodeImplementation } from '../node_implementation';
@@ -35,7 +35,7 @@ export class AtomicStepImpl implements NodeImplementation {
     private node: AtomicGraphNode,
     private stepExecutionRuntime: StepExecutionRuntime,
     private connectorExecutor: ConnectorExecutor,
-    private workflowState: WorkflowExecutionRuntimeManager,
+    private workflowState: IWorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
   ) {}
 

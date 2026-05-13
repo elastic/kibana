@@ -7,10 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import type { EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
+import type { ScopeData } from './scope_data';
 import type { IWorkflowContextManager } from './workflow_context_manager';
 import type { IWorkflowEventLogger } from './workflow_event_logger';
+
+/**
+ * Minimal scope-stack surface needed by flow-control nodes that walk the
+ * ancestor scope chain (timeout nodes, workflow.output).
+ *
+ * The concrete plugin implementation is `WorkflowScopeStack`; nodes in
+ * `@kbn/workflows-execution-engine-core` only ever see this interface.
+ */
+export interface IScopeStack {
+  isEmpty(): boolean;
+  getCurrentScope(): ScopeData;
+  /** Returns a new scope-stack with the top frame removed. */
+  exitScope(): IScopeStack;
+  readonly stackFrames: StackFrame[];
+}
 
 /**
  * Per-step runtime collaborator used by flow-control nodes.
@@ -66,4 +82,32 @@ export interface IStepExecutionRuntime {
    * already waiting and is now exiting.
    */
   tryEnterWaitUntil(resumeDate?: Date, waitingStatus?: ExecutionStatus): boolean;
+
+  /**
+   * Returns `true` when a persisted `EsWorkflowStepExecution` record already
+   * exists for this runtime (i.e. the step was previously started and its
+   * record is loaded). Used by `unwindScopes` to skip finish-calls for steps
+   * that were never started.
+   */
+  stepExecutionExists(): boolean;
+
+  /**
+   * Returns the last recorded input/output/error triple for this step, or
+   * `undefined` when the step has not run yet. Used by retry nodes to inspect
+   * the error from the most recent failed attempt.
+   */
+  getCurrentStepResult(): { input: unknown; output: unknown; error: unknown } | undefined;
+
+  /**
+   * AbortController whose `signal` is passed to abortable operations so they
+   * can be interrupted by timeout nodes.
+   */
+  readonly abortController: { readonly signal: AbortSignal; abort(): void };
+
+  /**
+   * Scope stack derived from the current stack frames. Timeout and
+   * workflow.output nodes walk this to finish ancestor steps when the
+   * workflow terminates early.
+   */
+  readonly scopeStack: IScopeStack;
 }

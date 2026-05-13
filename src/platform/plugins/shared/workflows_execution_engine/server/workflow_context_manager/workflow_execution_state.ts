@@ -8,6 +8,7 @@
  */
 
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
+import type { IWorkflowExecutionState } from '@kbn/workflows-execution-engine-core';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
@@ -28,7 +29,7 @@ export interface FailedStepContext {
   stepExecutionId: string;
 }
 
-export class WorkflowExecutionState {
+export class WorkflowExecutionState implements IWorkflowExecutionState {
   private stepExecutions: Map<string, EsWorkflowStepExecution> = new Map();
   private workflowExecution: EsWorkflowExecution;
   private workflowDocumentChanges: Partial<EsWorkflowExecution> | undefined = undefined;

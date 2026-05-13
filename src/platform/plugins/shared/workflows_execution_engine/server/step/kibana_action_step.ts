@@ -14,7 +14,7 @@ import type { FetcherConfigSchema } from '@kbn/workflows';
 import { buildKibanaRequest } from '@kbn/workflows';
 import type { KibanaGraphNode } from '@kbn/workflows/graph/types';
 import type { z } from '@kbn/zod/v4';
-import { ResponseSizeLimitError } from './errors';
+import { ResponseSizeLimitError } from '@kbn/workflows-execution-engine-core';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import {
@@ -23,7 +23,7 @@ import {
 } from '../trigger_events/event_context/event_chain_context';
 import { getKibanaUrl, isTextContentType, readResponseStream } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
-import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowExecutionRuntimeManager } from '@kbn/workflows-execution-engine-core';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 /**
@@ -52,7 +52,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
   constructor(
     private node: KibanaGraphNode,
     stepExecutionRuntime: StepExecutionRuntime,
-    workflowRuntime: WorkflowExecutionRuntimeManager,
+    workflowRuntime: IWorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
   ) {
     const step = {

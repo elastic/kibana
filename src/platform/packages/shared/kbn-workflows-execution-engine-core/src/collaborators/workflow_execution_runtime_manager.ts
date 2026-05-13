@@ -10,6 +10,9 @@
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 
+import type { IStepExecutionRuntimeFactory } from './step_execution_runtime_factory';
+import type { ScopeData } from './scope_data';
+
 /**
  * Workflow-level runtime collaborator used by flow-control nodes.
  *
@@ -57,4 +60,22 @@ export interface IWorkflowExecutionRuntimeManager {
    * from the current clock and the workflow's `startedAt`.
    */
   markWorkflowTimeouted(): void;
+
+  /**
+   * Unwinds scope frames from the current scope stack, calling `finishStep()`
+   * on each scope's runtime as it is popped.
+   *
+   * @param stepExecutionRuntimeFactory - Factory used to build a runtime for
+   *   each scope being exited.
+   * @param shouldStop - Optional predicate; unwinding stops at (but does not
+   *   include) the first scope for which it returns `true`. When omitted the
+   *   entire stack is unwound.
+   * @param options.inclusive - When `true`, the scope that matched
+   *   `shouldStop` is also unwound.
+   */
+  unwindScopes(
+    stepExecutionRuntimeFactory: IStepExecutionRuntimeFactory,
+    shouldStop?: (scope: ScopeData) => boolean,
+    options?: { inclusive?: boolean }
+  ): void;
 }

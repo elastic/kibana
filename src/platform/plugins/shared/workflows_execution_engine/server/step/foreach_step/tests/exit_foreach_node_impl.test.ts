@@ -12,7 +12,7 @@ import type { StepExecutionRuntime } from '../../../workflow_context_manager/ste
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { WorkflowExecutionState } from '../../../workflow_context_manager/workflow_execution_state';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
-import { ExitForeachNodeImpl } from '../exit_foreach_node_impl';
+import { ExitForeachNodeImpl } from '@kbn/workflows-execution-engine-core';
 
 describe('ExitForeachNodeImpl', () => {
   let node: ExitForeachNode;

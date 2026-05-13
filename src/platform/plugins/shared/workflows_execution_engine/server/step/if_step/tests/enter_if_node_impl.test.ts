@@ -12,7 +12,7 @@ import type { StepExecutionRuntime } from '../../../workflow_context_manager/ste
 import type { WorkflowContextManager } from '../../../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
-import { EnterIfNodeImpl } from '../enter_if_node_impl';
+import { EnterIfNodeImpl } from '@kbn/workflows-execution-engine-core';
 
 describe('EnterIfNodeImpl', () => {
   let node: EnterIfNode;
@@ -236,7 +236,7 @@ describe('EnterIfNodeImpl', () => {
       } as EnterConditionBranchNode,
     ]);
     await expect(impl.run()).rejects.toThrow(
-      `Syntax error in condition "invalid""condition" for step ${node.stepId}:`
+      `Syntax error in condition for step ${node.stepId}:`
     );
   });
 

@@ -11,6 +11,7 @@ import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { StackFrame } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
+import type { IStepExecutionRuntimeFactory } from '@kbn/workflows-execution-engine-core';
 import { StepExecutionRuntime } from './step_execution_runtime';
 import type { ContextDependencies } from './types';
 import { WorkflowContextManager } from './workflow_context_manager';
@@ -82,7 +83,7 @@ function removeCurrentNodeFromStackFrames(nodeId: string, stackFrames: StackFram
  * });
  * ```
  */
-export class StepExecutionRuntimeFactory {
+export class StepExecutionRuntimeFactory implements IStepExecutionRuntimeFactory {
   constructor(
     private params: {
       workflowExecutionState: WorkflowExecutionState;

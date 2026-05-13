@@ -17,6 +17,9 @@ export type {
   IWorkflowContextManager,
   IStepExecutionRuntime,
   IWorkflowExecutionRuntimeManager,
+  IWorkflowExecutionState,
+  IStepExecutionRuntimeFactory,
+  ScopeData,
   INodeImplementation,
   INodeWithErrorCatching,
   IMonitorableNode,
@@ -28,3 +31,24 @@ export { WorkflowTemplatingEngine } from './src/templating_engine';
 export { evaluateCondition } from './src/evaluate_condition';
 export { safeEvaluateKql } from './src/safe_evaluate_kql';
 export type { SafeEvaluateKqlResult } from './src/safe_evaluate_kql';
+
+// Step-level error types and byte-size helpers used by flow-control nodes.
+export {
+  DEFAULT_MAX_STEP_SIZE,
+  formatBytes,
+  parseByteSize,
+  safeOutputSize,
+  ResponseSizeLimitError,
+} from './src/step/errors';
+
+// Flow-control node implementations.
+export * from './src/step/flow_control_step';
+export * from './src/step/foreach_step';
+export * from './src/step/if_step';
+export * from './src/step/while_step';
+export * from './src/step/switch_step';
+export * from './src/step/on_failure/continue_step';
+export * from './src/step/on_failure/fallback_step';
+export * from './src/step/on_failure/retry_step';
+export * from './src/step/timeout_zone_step';
+export * from './src/step/workflow_output_step';

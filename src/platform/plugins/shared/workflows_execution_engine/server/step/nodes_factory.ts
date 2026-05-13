@@ -48,63 +48,62 @@ import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
 import { CustomStepImpl } from './custom_step_impl';
 import { DataSetStepImpl } from './data_set_step';
 import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
-import { LoopBreakNodeImpl, LoopContinueNodeImpl } from './flow_control_step';
-import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
-import {
-  EnterConditionBranchNodeImpl,
-  EnterIfNodeImpl,
-  ExitConditionBranchNodeImpl,
-  ExitIfNodeImpl,
-} from './if_step';
-import { KibanaActionStepImpl } from './kibana_action_step';
-import type { NodeImplementation } from './node_implementation';
-import { EnterContinueNodeImpl, ExitContinueNodeImpl } from './on_failure/continue_step';
-import {
-  EnterFallbackPathNodeImpl,
-  EnterNormalPathNodeImpl,
-  EnterTryBlockNodeImpl,
-  ExitFallbackPathNodeImpl,
-  ExitNormalPathNodeImpl,
-  ExitTryBlockNodeImpl,
-} from './on_failure/fallback_step';
-import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './on_failure/retry_step';
 import {
   EnterBranchNodeImpl,
-  EnterSwitchNodeImpl,
-  ExitBranchNodeImpl,
-  ExitSwitchNodeImpl,
-} from './switch_step';
-import {
+  EnterContinueNodeImpl,
+  EnterConditionBranchNodeImpl,
+  EnterFallbackPathNodeImpl,
+  EnterForeachNodeImpl,
+  EnterIfNodeImpl,
+  EnterNormalPathNodeImpl,
+  EnterRetryNodeImpl,
   EnterStepTimeoutZoneNodeImpl,
+  EnterSwitchNodeImpl,
+  EnterTryBlockNodeImpl,
+  EnterWhileNodeImpl,
   EnterWorkflowTimeoutZoneNodeImpl,
+  ExitBranchNodeImpl,
+  ExitContinueNodeImpl,
+  ExitConditionBranchNodeImpl,
+  ExitFallbackPathNodeImpl,
+  ExitForeachNodeImpl,
+  ExitIfNodeImpl,
+  ExitNormalPathNodeImpl,
+  ExitRetryNodeImpl,
   ExitStepTimeoutZoneNodeImpl,
+  ExitSwitchNodeImpl,
+  ExitTryBlockNodeImpl,
+  ExitWhileNodeImpl,
   ExitWorkflowTimeoutZoneNodeImpl,
-} from './timeout_zone_step';
+  LoopBreakNodeImpl,
+  LoopContinueNodeImpl,
+  WorkflowOutputStepImpl,
+} from '@kbn/workflows-execution-engine-core';
+import { KibanaActionStepImpl } from './kibana_action_step';
+import type { INodeImplementation } from '@kbn/workflows-execution-engine-core';
 import { WaitForInputStepImpl } from './wait_for_input_step/wait_for_input_step';
 import { WaitStepImpl } from './wait_step/wait_step';
-import { EnterWhileNodeImpl, ExitWhileNodeImpl } from './while_step';
 import { WorkflowExecuteStepImpl } from './workflow_execute_step/workflow_execute_step_impl';
-import { WorkflowOutputStepImpl } from './workflow_output_step/workflow_output_step_impl';
 import type { ConnectorExecutor } from '../connector_executor';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
-import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
+import type { IStepExecutionRuntimeFactory } from '@kbn/workflows-execution-engine-core';
 import type { ContextDependencies } from '../workflow_context_manager/types';
-import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
-import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
-import type { IWorkflowEventLogger } from '../workflow_event_logger';
+import type { IWorkflowExecutionRuntimeManager } from '@kbn/workflows-execution-engine-core';
+import type { IWorkflowExecutionState } from '@kbn/workflows-execution-engine-core';
+import type { IWorkflowEventLogger } from '../workflow_event_logger/types';
 
 export class NodesFactory {
   constructor(
     private connectorExecutor: ConnectorExecutor, // this is temporary, we will remove it when we have a proper connector executor
-    private workflowRuntime: WorkflowExecutionRuntimeManager,
-    private workflowLogger: IWorkflowEventLogger, // Assuming you have a logger interface
+    private workflowRuntime: IWorkflowExecutionRuntimeManager,
+    private workflowLogger: IWorkflowEventLogger,
     private workflowGraph: WorkflowGraph,
-    private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
+    private stepExecutionRuntimeFactory: IStepExecutionRuntimeFactory,
     private dependencies: ContextDependencies,
-    private workflowExecutionState: WorkflowExecutionState
+    private workflowExecutionState: IWorkflowExecutionState
   ) {}
 
-  public create(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
+  public create(stepExecutionRuntime: StepExecutionRuntime): INodeImplementation {
     const { node } = stepExecutionRuntime;
 
     // Built-in steps - checked first before workflows_extensions
@@ -178,7 +177,7 @@ export class NodesFactory {
   }
 
   // eslint-disable-next-line complexity
-  private createGenericStepNode(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
+  private createGenericStepNode(stepExecutionRuntime: StepExecutionRuntime): INodeImplementation {
     const node = stepExecutionRuntime.node;
     const stepLogger = stepExecutionRuntime.stepLogger;
     switch (node.type) {

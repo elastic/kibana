@@ -8,7 +8,7 @@
  */
 
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
-import { EnterNormalPathNodeImpl } from '../enter_normal_path_node_impl';
+import { EnterNormalPathNodeImpl } from '@kbn/workflows-execution-engine-core';
 
 describe('EnterNormalPathNodeImpl', () => {
   let underTest: EnterNormalPathNodeImpl;

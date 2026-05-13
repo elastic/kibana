@@ -50,4 +50,18 @@ export interface IWorkflowContextManager {
    * Throws on invalid templates — callers must catch where appropriate.
    */
   evaluateExpressionInContext(template: string): unknown;
+
+  /**
+   * Renders `condition` against the current context (resolving template
+   * expressions), then evaluates the result as a boolean:
+   * - `boolean` — returned as-is
+   * - `undefined` — returns `false`
+   * - `string` — evaluated as KQL against the current context
+   *
+   * Used by continue/retry nodes to decide whether to act on caught errors.
+   */
+  evaluateBooleanExpressionInContext(
+    condition: string | boolean | undefined,
+    additionalContext?: Record<string, unknown>
+  ): boolean;
 }

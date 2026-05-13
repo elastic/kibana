@@ -16,10 +16,10 @@ import {
   parseByteSize,
   ResponseSizeLimitError,
   safeOutputSize,
-} from './errors';
+} from '@kbn/workflows-execution-engine-core';
 import type { ConnectorExecutor } from '../connector_executor';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
-import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowExecutionRuntimeManager } from '@kbn/workflows-execution-engine-core';
 
 export interface RunStepResult {
   input: unknown;
@@ -101,13 +101,13 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   protected step: TStep;
   protected stepExecutionRuntime: StepExecutionRuntime;
   protected connectorExecutor: ConnectorExecutor | undefined;
-  protected workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
+  protected workflowExecutionRuntime: IWorkflowExecutionRuntimeManager;
 
   constructor(
     step: TStep,
     stepExecutionRuntime: StepExecutionRuntime,
     connectorExecutor: ConnectorExecutor | undefined,
-    workflowExecutionRuntime: WorkflowExecutionRuntimeManager
+    workflowExecutionRuntime: IWorkflowExecutionRuntimeManager
   ) {
     this.step = step;
     this.stepExecutionRuntime = stepExecutionRuntime;
