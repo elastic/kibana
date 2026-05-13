@@ -13,7 +13,7 @@ import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
 import type { Conversation, ConversationRound, ConverseInput } from '@kbn/agent-builder-common';
 import { createUserMessage } from '@kbn/agent-builder-genai-utils/langchain';
-import { trace } from '@opentelemetry/api';
+import { ROOT_CONTEXT, trace } from '@opentelemetry/api';
 import type { Context, Span } from '@opentelemetry/api';
 
 /**
@@ -55,35 +55,33 @@ const generateConversationTitle = async ({
   chatModel: InferenceChatModel;
   getOtelContext?: () => Context | undefined;
 }) => {
-  const parentCtx = getOtelContext?.();
-  const spanArgs = [
+  const parentCtx = getOtelContext?.() ?? ROOT_CONTEXT;
+
+  return withActiveInferenceSpan(
     'GenerateTitle',
     { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
-  ] as const;
+    parentCtx,
+    async (span?: Span) => {
+      let titleCtx: Context | undefined;
+      if (span) {
+        titleCtx = trace.setSpan(parentCtx, span);
+      }
 
-  const spanCb = async (span?: Span) => {
-    // Build a context that includes the GenerateTitle span so the
-    // chatModel's ChatComplete span becomes a child of GenerateTitle.
-    let titleCtx: Context | undefined;
-    if (span && parentCtx) {
-      titleCtx = trace.setSpan(parentCtx, span);
-    }
+      const scopedModel = titleCtx ? chatModel.withParentContext(() => titleCtx) : chatModel;
 
-    const scopedModel = titleCtx ? chatModel.withParentContext(() => titleCtx) : chatModel;
+      const structuredModel = scopedModel.withStructuredOutput(
+        z
+          .object({
+            title: z.string().describe('The title for the conversation'),
+          })
+          .describe('Tool to use to provide the title for the conversation'),
+        { name: 'set_title' }
+      );
 
-    const structuredModel = scopedModel.withStructuredOutput(
-      z
-        .object({
-          title: z.string().describe('The title for the conversation'),
-        })
-        .describe('Tool to use to provide the title for the conversation'),
-      { name: 'set_title' }
-    );
-
-    const prompt: BaseMessageLike[] = [
-      [
-        'system',
-        `You are a title-generation utility. Your ONLY purpose is to create a short, relevant title for the provided conversation.
+      const prompt: BaseMessageLike[] = [
+        [
+          'system',
+          `You are a title-generation utility. Your ONLY purpose is to create a short, relevant title for the provided conversation.
 
 You MUST call the 'set_title' tool to provide the title. Do NOT respond with plain text or any other conversational language.
 
@@ -94,18 +92,15 @@ Conversation:
 => Your response MUST be a call to the 'set_title' tool like this: {"title": "Kibana Read-Only Role Configuration"}
 
 Now, generate a title for the following conversation.`,
-      ],
-      createUserMessage(nextInput.message ?? '[no message]'),
-    ];
+        ],
+        createUserMessage(nextInput.message ?? '[no message]'),
+      ];
 
-    const { title } = await structuredModel.invoke(prompt);
+      const { title } = await structuredModel.invoke(prompt);
 
-    span?.setAttribute('output.value', title);
+      span?.setAttribute('output.value', title);
 
-    return title;
-  };
-
-  return parentCtx
-    ? withActiveInferenceSpan(spanArgs[0], spanArgs[1], parentCtx, spanCb)
-    : withActiveInferenceSpan(spanArgs[0], spanArgs[1], spanCb);
+      return title;
+    }
+  );
 };

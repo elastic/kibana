@@ -229,10 +229,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     const promptManager = createPromptManager({ state: promptState });
     const toolManager = createToolManager();
 
-    const allDeps: CreateScopedRunnerDeps = {
+    const baseDeps = {
       ...runnerDeps,
-      // modelProvider is set below after allDeps is created
-      modelProvider: undefined!,
       request,
       defaultConnectorId,
       abortSignal,
@@ -249,11 +247,14 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       otelContext,
     };
 
-    allDeps.modelProvider = modelProviderFactory({
-      request,
-      defaultConnectorId,
-      getParentContext: () => allDeps.otelContext,
-    });
+    const allDeps: CreateScopedRunnerDeps = {
+      ...baseDeps,
+      modelProvider: modelProviderFactory({
+        request,
+        defaultConnectorId,
+        getParentContext: () => allDeps.otelContext,
+      }),
+    };
 
     return createScopedRunner(allDeps);
   };

@@ -72,23 +72,29 @@ function handlePromise<T>(span: Span, promise: Promise<T>): Promise<T> {
 
 function handleObservable<T>(span: Span, source$: Observable<T>): Observable<T> {
   return new Observable<T>((subscriber) => {
+    let ended = false;
+    const endSpan = (status: SpanStatusCode, message?: string) => {
+      if (ended) return;
+      ended = true;
+      span.setStatus({ code: status, ...(message ? { message } : {}) });
+      span.end();
+    };
+
     const subscription = source$.subscribe({
       next: (value) => subscriber.next(value),
       error: (error) => {
         span.recordException(error);
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: error instanceof Error ? error.message : String(error),
-        });
-        span.end();
+        endSpan(SpanStatusCode.ERROR, error instanceof Error ? error.message : String(error));
         subscriber.error(error);
       },
       complete: () => {
-        span.setStatus({ code: SpanStatusCode.OK });
-        span.end();
+        endSpan(SpanStatusCode.OK);
         subscriber.complete();
       },
     });
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      endSpan(SpanStatusCode.ERROR, 'cancelled');
+    };
   });
 }
