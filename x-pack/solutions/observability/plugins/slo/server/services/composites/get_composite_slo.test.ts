@@ -47,7 +47,8 @@ const DEFAULT_BURN_RATE_WINDOWS = buildBurnRateWindows({
   '1d': 0.995,
 });
 
-const readContext = { spaceId: 'default', esClient: {} as ElasticsearchClient };
+const DEFAULT_SPACE_ID = 'default';
+const DEFAULT_ES_CLIENT = {} as ElasticsearchClient;
 
 function mockPersistedCompositeSummary(compositeId: string, summary: CompositeSLOSummary) {
   return jest
@@ -65,7 +66,12 @@ describe('GetCompositeSLO', () => {
     mockCompositeRepo = createCompositeSLORepositoryMock();
     mockSloRepo = createSLORepositoryMock();
     mockSummaryClient = createSummaryClientMock();
-    getCompositeSLO = new GetCompositeSLO(mockCompositeRepo, mockSloRepo, mockSummaryClient);
+    getCompositeSLO = new GetCompositeSLO(
+      mockCompositeRepo,
+      mockSloRepo,
+      mockSummaryClient,
+      DEFAULT_ES_CLIENT
+    );
   });
 
   it('derives composite burn rates from composite per-window SLIs and composite target', async () => {
@@ -139,7 +145,7 @@ describe('GetCompositeSLO', () => {
     };
     const fetchSpy = mockPersistedCompositeSummary(composite.id, persistedSummary);
 
-    const result = await getCompositeSLO.execute(composite.id, readContext);
+    const result = await getCompositeSLO.execute(composite.id, DEFAULT_SPACE_ID);
     fetchSpy.mockRestore();
 
     expect(result.summary).toEqual(persistedSummary);
@@ -217,7 +223,7 @@ describe('GetCompositeSLO', () => {
     };
     const fetchSpy = mockPersistedCompositeSummary(composite.id, persistedSummary);
 
-    const result = await getCompositeSLO.execute(composite.id, readContext);
+    const result = await getCompositeSLO.execute(composite.id, DEFAULT_SPACE_ID);
     fetchSpy.mockRestore();
 
     expect(result.summary).toEqual(persistedSummary);
@@ -261,7 +267,7 @@ describe('GetCompositeSLO', () => {
     };
     const fetchSpy = mockPersistedCompositeSummary(composite.id, persistedSummary);
 
-    const result = await getCompositeSLO.execute(composite.id, readContext);
+    const result = await getCompositeSLO.execute(composite.id, DEFAULT_SPACE_ID);
     fetchSpy.mockRestore();
 
     expect(result.summary).toEqual(persistedSummary);
@@ -320,7 +326,7 @@ describe('GetCompositeSLO', () => {
     };
     const fetchSpy = mockPersistedCompositeSummary(composite.id, persistedSummary);
 
-    const result = await getCompositeSLO.execute(composite.id, readContext);
+    const result = await getCompositeSLO.execute(composite.id, DEFAULT_SPACE_ID);
     fetchSpy.mockRestore();
 
     // sloB has no data (-1), so only sloA participates with normalisedWeight = 1.0
@@ -371,7 +377,7 @@ describe('GetCompositeSLO', () => {
     const fetchSpy = jest
       .spyOn(compositeSloSummaryIndex, 'fetchCompositeSloSummariesFromIndex')
       .mockResolvedValue(new Map());
-    const result = await getCompositeSLO.execute(composite.id, readContext);
+    const result = await getCompositeSLO.execute(composite.id, DEFAULT_SPACE_ID);
     fetchSpy.mockRestore();
 
     expect(result.summary.sliValue).toBe(-1);
@@ -421,7 +427,7 @@ describe('GetCompositeSLO', () => {
     };
     const fetchSpy = mockPersistedCompositeSummary(composite.id, persistedSummary);
 
-    const result = await getCompositeSLO.execute(composite.id, readContext);
+    const result = await getCompositeSLO.execute(composite.id, DEFAULT_SPACE_ID);
     fetchSpy.mockRestore();
 
     // Only sloA participates
@@ -453,7 +459,12 @@ describe('GetCompositeSLO', () => {
       },
     ]);
 
-    const result = await getCompositeSLO.execute(composite.id);
+    const fetchSpy = jest
+      .spyOn(compositeSloSummaryIndex, 'fetchCompositeSloSummariesFromIndex')
+      .mockResolvedValue(new Map());
+
+    const result = await getCompositeSLO.execute(composite.id, DEFAULT_SPACE_ID);
+    fetchSpy.mockRestore();
 
     expect(mockSummaryClient.computeSummaries).toHaveBeenCalledWith([
       {
@@ -509,10 +520,7 @@ describe('GetCompositeSLO', () => {
       .spyOn(compositeSloSummaryIndex, 'fetchCompositeSloSummariesFromIndex')
       .mockResolvedValue(new Map([[composite.id, { summary: indexSummary }]]));
 
-    const result = await getCompositeSLO.execute(composite.id, {
-      spaceId: 'default',
-      esClient: {} as ElasticsearchClient,
-    });
+    const result = await getCompositeSLO.execute(composite.id, DEFAULT_SPACE_ID);
 
     expect(fetchSpy).toHaveBeenCalled();
     expect(result.summary).toEqual(indexSummary);
@@ -559,7 +567,7 @@ describe('GetCompositeSLO', () => {
     };
     const fetchSpy = mockPersistedCompositeSummary(composite.id, persistedSummary);
 
-    const result = await getCompositeSLO.execute(composite.id, readContext);
+    const result = await getCompositeSLO.execute(composite.id, DEFAULT_SPACE_ID);
     fetchSpy.mockRestore();
 
     expect(result.summary).toEqual(persistedSummary);
