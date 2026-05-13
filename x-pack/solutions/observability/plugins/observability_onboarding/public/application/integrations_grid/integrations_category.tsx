@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
 
 interface Props {
   id: string;
@@ -15,7 +15,7 @@ interface Props {
 }
 
 export const IntegrationsCategory = ({ id, label, children }: Props) => {
-  const labelId = `integrationsCategory-${id}`;
+  const labelId = useGeneratedHtmlId({ prefix: 'integrationsCategory', suffix: id });
 
   return (
     <section aria-labelledby={labelId}>

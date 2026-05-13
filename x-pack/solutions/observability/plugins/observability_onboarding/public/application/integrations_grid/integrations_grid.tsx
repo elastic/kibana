@@ -21,9 +21,9 @@ import { i18n } from '@kbn/i18n';
 import { IntegrationsCategory } from './integrations_category';
 import { IntegrationTile } from './integration_tile';
 import { INTEGRATION_CATEGORIES } from './tiles_config';
-import { MoreIntegrationTile } from './more_integrations/more_integration_tile';
-import { BrowseAllTile } from './more_integrations/browse_all_tile';
-import { MORE_INTEGRATION_TILES } from './more_integrations/tiles_config';
+import { MiniIntegrationTile } from './more_integrations_section/mini_integration_tile';
+import { BrowseAllIntegrationsTile } from './more_integrations_section/browse_all_integrations_tile';
+import { MINI_INTEGRATION_TILES } from './more_integrations_section/mini_tiles_config';
 
 export const IntegrationsGrid = () => {
   const titleId = useGeneratedHtmlId({ prefix: 'integrationsGridTitle' });
@@ -67,22 +67,22 @@ export const IntegrationsGrid = () => {
             <IntegrationsCategory
               id="more-integrations"
               label={i18n.translate(
-                'xpack.observability_onboarding.integrationsGrid.moreIntegrations.title',
+                'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.title',
                 { defaultMessage: 'More integrations' }
               )}
             >
               <EuiFlexGroup direction={shouldStackVertically ? 'column' : 'row'} gutterSize="m">
                 <EuiFlexItem grow={shouldStackVertically ? false : 5}>
                   <EuiFlexGroup gutterSize="m">
-                    {MORE_INTEGRATION_TILES.map((tile) => (
+                    {MINI_INTEGRATION_TILES.map((tile) => (
                       <EuiFlexItem key={tile.id} grow={1}>
-                        <MoreIntegrationTile tile={tile} />
+                        <MiniIntegrationTile tile={tile} />
                       </EuiFlexItem>
                     ))}
                   </EuiFlexGroup>
                 </EuiFlexItem>
                 <EuiFlexItem grow={shouldStackVertically ? false : 2}>
-                  <BrowseAllTile />
+                  <BrowseAllIntegrationsTile />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </IntegrationsCategory>

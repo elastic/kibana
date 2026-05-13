@@ -8,27 +8,17 @@
 import { i18n } from '@kbn/i18n';
 import type { SupportedLogo } from '../../shared/logo_icon';
 
-export interface MoreIntegrationTileDefinition {
+export interface MiniIntegrationTileDefinition {
   id: string;
   title: string;
   logo: SupportedLogo;
 }
 
-export const BROWSE_ALL_LOGOS: readonly SupportedLogo[] = [
-  'nginx',
-  'rabbitmq',
-  'apache',
-  'couchbase',
-  'logstash',
-  'redis',
-  'mysql',
-];
-
-export const MORE_INTEGRATION_TILES: readonly MoreIntegrationTileDefinition[] = [
+export const MINI_INTEGRATION_TILES: readonly MiniIntegrationTileDefinition[] = [
   {
     id: 'confluence',
     title: i18n.translate(
-      'xpack.observability_onboarding.integrationsGrid.moreIntegrations.tile.confluence.title',
+      'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.miniIntegrationTile.confluence.title',
       { defaultMessage: 'Confluence' }
     ),
     logo: 'confluence',
@@ -36,7 +26,7 @@ export const MORE_INTEGRATION_TILES: readonly MoreIntegrationTileDefinition[] = 
   {
     id: 'salesforce',
     title: i18n.translate(
-      'xpack.observability_onboarding.integrationsGrid.moreIntegrations.tile.salesforce.title',
+      'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.miniIntegrationTile.salesforce.title',
       { defaultMessage: 'Salesforce' }
     ),
     logo: 'salesforce',
@@ -44,7 +34,7 @@ export const MORE_INTEGRATION_TILES: readonly MoreIntegrationTileDefinition[] = 
   {
     id: 'slack',
     title: i18n.translate(
-      'xpack.observability_onboarding.integrationsGrid.moreIntegrations.tile.slack.title',
+      'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.miniIntegrationTile.slack.title',
       { defaultMessage: 'Slack' }
     ),
     logo: 'slack',
@@ -52,7 +42,7 @@ export const MORE_INTEGRATION_TILES: readonly MoreIntegrationTileDefinition[] = 
   {
     id: 'splunk',
     title: i18n.translate(
-      'xpack.observability_onboarding.integrationsGrid.moreIntegrations.tile.splunk.title',
+      'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.miniIntegrationTile.splunk.title',
       { defaultMessage: 'Splunk' }
     ),
     logo: 'splunk',
@@ -60,7 +50,7 @@ export const MORE_INTEGRATION_TILES: readonly MoreIntegrationTileDefinition[] = 
   {
     id: 'jira',
     title: i18n.translate(
-      'xpack.observability_onboarding.integrationsGrid.moreIntegrations.tile.jira.title',
+      'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.miniIntegrationTile.jira.title',
       { defaultMessage: 'Jira' }
     ),
     logo: 'jira',

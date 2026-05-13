@@ -11,13 +11,22 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ObservabilityOnboardingAppServices } from '../../..';
-import { LogoIcon } from '../../shared/logo_icon';
+import { LogoIcon, type SupportedLogo } from '../../shared/logo_icon';
 import { addPathParamToUrl } from '../../package_list_search_form/use_card_url_rewrite';
-import { BROWSE_ALL_LOGOS } from './tiles_config';
 
-const STACK_OVERLAP = '-8px';
+const LOGO_STACK_OVERLAP = '-8px';
 
-export const BrowseAllTile = () => {
+const STACKED_LOGOS: readonly SupportedLogo[] = [
+  'nginx',
+  'rabbitmq',
+  'apache',
+  'couchbase',
+  'logstash',
+  'redis',
+  'mysql',
+];
+
+export const BrowseAllIntegrationsTile = () => {
   const { euiTheme } = useEuiTheme();
   const {
     services: { application },
@@ -31,7 +40,7 @@ export const BrowseAllTile = () => {
 
   return (
     <EuiCard
-      data-test-subj="observabilityOnboardingMoreIntegrationsBrowseAllTile"
+      data-test-subj="observabilityOnboardingBrowseAllIntegrationsTile"
       titleSize="xs"
       hasBorder
       icon={
@@ -42,13 +51,13 @@ export const BrowseAllTile = () => {
           alignItems="center"
           aria-hidden
         >
-          {BROWSE_ALL_LOGOS.map((logo, index) => (
+          {STACKED_LOGOS.map((logo, index) => (
             <EuiFlexItem
               key={`${logo}-${index}`}
               grow={false}
               css={css`
-                z-index: ${BROWSE_ALL_LOGOS.length - index};
-                margin-left: ${index === 0 ? 0 : STACK_OVERLAP};
+                z-index: ${STACKED_LOGOS.length - index};
+                margin-left: ${index === 0 ? 0 : LOGO_STACK_OVERLAP};
               `}
             >
               <LogoIcon
@@ -64,7 +73,7 @@ export const BrowseAllTile = () => {
         </EuiFlexGroup>
       }
       title={i18n.translate(
-        'xpack.observability_onboarding.integrationsGrid.moreIntegrations.browseAll.title',
+        'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.browseAllIntegrationsTile.title',
         { defaultMessage: 'Browse all' }
       )}
       onClick={handleClick}

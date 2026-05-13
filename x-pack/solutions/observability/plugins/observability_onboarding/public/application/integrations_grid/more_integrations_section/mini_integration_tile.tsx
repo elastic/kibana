@@ -8,18 +8,18 @@
 import React from 'react';
 import { EuiCard, useEuiTheme } from '@elastic/eui';
 import { LogoIcon } from '../../shared/logo_icon';
-import type { MoreIntegrationTileDefinition } from './tiles_config';
+import type { MiniIntegrationTileDefinition } from './mini_tiles_config';
 
 interface Props {
-  tile: MoreIntegrationTileDefinition;
+  tile: MiniIntegrationTileDefinition;
 }
 
-export const MoreIntegrationTile = ({ tile }: Props) => {
+export const MiniIntegrationTile = ({ tile }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   return (
     <EuiCard
-      data-test-subj={`observabilityOnboardingMoreIntegrationsTile-${tile.id}`}
+      data-test-subj={`observabilityOnboardingMiniIntegrationTile-${tile.id}`}
       titleSize="xs"
       hasBorder
       icon={
