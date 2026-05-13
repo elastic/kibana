@@ -26,12 +26,8 @@ export function useServiceMapAlertsTabHref(serviceName: string) {
   );
 
   return useMemo(() => {
-    // The alerts badge is independent from the map's KQL filter (badges aggregate
-    // across every visible service regardless of `kuery`), so the destination tab
-    // must be too — otherwise a service.name filter on the map would hide alerts
-    // for that very service on landing. Env, time range and other query bits
-    // still flow through. The alerts route schema requires `kuery: string`, so we
-    // explicitly reset it to '' instead of dropping the property.
+    // Badges ignore `kuery` (alerts aggregate across all visible services), so the
+    // destination tab clears it too. Route schema requires `kuery: string`.
     const queryWithoutKuery = { ...query, kuery: '' };
 
     const isMobileContext = String(routePath).includes('mobile-services');

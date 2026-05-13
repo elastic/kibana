@@ -282,9 +282,6 @@ describe('ApmEmbeddableContext', () => {
 
       const search = screen.getByTestId('location-probe').getAttribute('data-search') ?? '';
       const params = new URLSearchParams(search);
-      // ENVIRONMENT_ALL.value is the canonical "no env filter" sentinel; whatever
-      // it is, hooks reading `useAnyOfApmParams('/service-map', …)` resolve it as
-      // a real string and the alerts tab link is built with a concrete env.
       expect(params.get('environment')).toBeTruthy();
     });
 
@@ -301,8 +298,6 @@ describe('ApmEmbeddableContext', () => {
     });
 
     it('URL-encodes environment values that contain special characters', () => {
-      // Real-world env names can include `:`, `/`, spaces; make sure they survive
-      // the round-trip so `useAnyOfApmParams` decodes them back correctly.
       render(
         <ApmEmbeddableContext deps={mockDeps} environment="my env / prod">
           <LocationProbe />

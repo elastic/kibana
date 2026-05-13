@@ -58,14 +58,7 @@ export const useServiceMap = ({
   end: string;
   serviceGroupId?: string;
   serviceName?: string;
-  /**
-   * When true and `environment` is a specific env (not `ENVIRONMENT_ALL`), drop spans
-   * whose source or destination service env doesn't match before transforming. Fixes
-   * the trace-fan-out leak: a cross-env trace (e.g. opbeans-go in `opbeans` calling
-   * opbeans-dotnet in `production`) would otherwise pull the other env's services into
-   * the node list via `fetchExitSpanSamplesFromTraceIds`. Default `false` preserves
-   * the existing cross-env trace-topology behaviour on the standalone map.
-   */
+  /** Drop cross-env spans before transforming when `environment` is a specific env. */
   strictEnvironmentScope?: boolean;
 }): UseServiceMapResult => {
   const license = useLicenseContext();
@@ -122,9 +115,6 @@ export const useServiceMap = ({
     if (raw && typeof raw === 'object' && 'spans' in raw) {
       try {
         const response = raw as ServiceMapResponse;
-        // See `strictEnvironmentScope` docs above — the backend filters trace IDs by env
-        // but then pulls every span in those traces (including ones from sibling-env
-        // services). Strip those here when the caller opts in.
         const scopedResponse =
           strictEnvironmentScope && environment !== ENVIRONMENT_ALL.value
             ? {

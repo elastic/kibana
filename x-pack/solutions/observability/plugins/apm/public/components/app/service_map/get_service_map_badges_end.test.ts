@@ -21,19 +21,15 @@ describe('getServiceMapBadgesEnd', () => {
   });
 
   it('extends a past end to "now" so currently-active alerts are not missed', () => {
-    // Mirrors the screenshot scenario: user range ends ~3h before now.
     const past = '2026-05-12T10:11:52.119Z';
     expect(getServiceMapBadgesEnd(past, NOW_MS)).toBe(NOW_ISO);
   });
 
   it('does not extend an end that ends at exactly now', () => {
-    // Boundary: equal to now is treated as "current" — no extension needed.
     expect(getServiceMapBadgesEnd(NOW_ISO, NOW_MS)).toBe(NOW_ISO);
   });
 
-  it('falls back to the original value when the input cannot be parsed (defensive)', () => {
-    // We never want to break badges loading just because the URL provided a
-    // malformed `end` — let `useServiceMapBadges` deal with it downstream.
+  it('falls back to the original value when the input cannot be parsed', () => {
     expect(getServiceMapBadgesEnd('not-a-date', NOW_MS)).toBe('not-a-date');
   });
 

@@ -88,23 +88,11 @@ interface GraphProps {
   fullMapHref?: string;
   /** When true, hides minimap, options panel, and navigation actions that don't apply in dashboard embeds. */
   isEmbedded?: boolean;
-  /**
-   * Optional override for the popover's "Focus map" button visibility. When omitted,
-   * defaults to `!isEmbedded` so dashboard embeds keep hiding it. The alert details
-   * preview sets this to `true` to show "Focus map" inside an embedded context.
-   */
+  /** Override for the popover's Focus map button visibility. Defaults to `!isEmbedded`. */
   showFocusMap?: boolean;
-  /**
-   * Propagated to the popover. When true, the Focus button always navigates to the
-   * standalone APM service map (including for the currently focused service). See
-   * `MapPopoverProps` for the full rationale.
-   */
+  /** Focus button always navigates, even for the currently focused service. */
   alwaysNavigateOnPopoverFocus?: boolean;
-  /**
-   * Propagated to the popover. When true, Service Details / Focus map URLs drop
-   * `kuery`. Used by the alert details preview so the embedded context-specific
-   * filter doesn't follow users into the destination tab. See `ContentsProps`.
-   */
+  /** Strip `kuery` from popover-built URLs (env still flows through). */
   clearKueryOnPopoverNavigation?: boolean;
   /**
    * When set to a service name that exists on the map, that node gets context highlight

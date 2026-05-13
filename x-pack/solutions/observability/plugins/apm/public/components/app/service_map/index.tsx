@@ -176,19 +176,6 @@ export function ServiceMap({
     }
   }, [isFullscreen, bodyClassesToToggle]);
 
-  // Badges aggregate across every visible service regardless of the active KQL —
-  // a `service.name` filter scopes the topology (above) but must not strip badges
-  // from neighbors. Environment still affects badges (it's part of the alerts
-  // document filter, not the user search bar). The popover content queries below
-  // keep `kuery` so per-service stats stay scoped.
-  //
-  // We also extend the badges window's `end` to be at least "now" so currently
-  // active alerts never drop off when the user is looking at a historical range.
-  // Active-alert documents are written on the rule's evaluation cadence, so the
-  // latest doc's `@timestamp` typically sits very close to "now"; a user-picked
-  // window ending in the past would otherwise miss it (see the alert-details
-  // embeddable for the same rationale via `badgesRangeTo`). Start stays as the
-  // user picked it, and the topology query is unaffected.
   const badgesEnd = useMemo(() => getServiceMapBadgesEnd(end), [end]);
 
   const { nodes: nodesForGraph, status: badgesStatus } = useServiceMapBadges({

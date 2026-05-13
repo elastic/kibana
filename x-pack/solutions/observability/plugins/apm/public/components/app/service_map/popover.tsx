@@ -120,16 +120,9 @@ interface MapPopoverProps {
   isEmbedded?: boolean;
   /** Optional override for the Focus map button visibility. Defaults to `!isEmbedded`. */
   showFocusMap?: boolean;
-  /**
-   * When true, the "Focus map" button always navigates to the standalone APM
-   * focused service map, even when clicking the currently focused service.
-   * Default behavior (`false`) centers the node in-map for the focused service
-   * (the user is *already* on that service map, so re-navigating is wasteful).
-   * The alert details preview sets this so users always exit into APM from the
-   * preview, including clicking the alert's own service.
-   */
+  /** Focus button always navigates, even for the currently focused service (default re-centers). */
   alwaysNavigateOnFocus?: boolean;
-  /** Propagated to popover content / buttons. See `ContentsProps`. */
+  /** Strip `kuery` from popover-built URLs (env still flows through). */
   clearKueryOnNavigation?: boolean;
 }
 
@@ -199,11 +192,6 @@ export function MapPopover({
 
   const isAlreadyFocused = focusedServiceName === selectedNodeId;
 
-  // Default: clicking the *currently focused* service re-centers the node (the user is
-  // already on that service map; re-navigating would be a no-op trip through the
-  // router). When `alwaysNavigateOnFocus` is set, skip the centering branch — hosts
-  // like the alert preview want every click to exit into the standalone APM map so
-  // users can leave the embedded preview, even for the alert's own service.
   const onFocusClick =
     isAlreadyFocused && !alwaysNavigateOnFocus
       ? centerSelectedNode

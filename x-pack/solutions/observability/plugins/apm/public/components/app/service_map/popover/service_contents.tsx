@@ -84,12 +84,6 @@ export function ServiceContents({
     return null;
   }
 
-  // The alert details preview seeds the in-memory router with a context-specific
-  // KQL (e.g. `service.name:"opbeans-go" and transaction.name:"..."`). That KQL is
-  // appropriate for scoping the embedded preview map, but carrying it into the
-  // *destination* tab (service overview / focused service map) would hide the
-  // service the user just clicked. Hosts that opt in clear `kuery` here while
-  // keeping `environment` so env scoping still flows through.
   const destinationKuery = clearKueryOnNavigation ? '' : kuery;
 
   const detailsUrl = apmRouter.link('/services/{serviceName}', {

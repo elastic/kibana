@@ -29,8 +29,6 @@ export async function getServiceStats({
   const processorEvent = getProcessorEventForTransactions(searchAggregatedTransactions);
   const shouldQueryMetrics = processorEvent === ProcessorEvent.metric;
 
-  // Shared filter + agg shape across the primary query and the fallback retry.
-  // Only the data source (`apm` field) differs between the two calls.
   const sharedRequestBody = {
     track_total_hits: false,
     size: 0,
@@ -78,24 +76,8 @@ export async function getServiceStats({
 
   let buckets = primaryResponse.aggregations?.services.buckets ?? [];
 
-  // Fallback for the rollup/kuery field-mismatch (#268612 follow-up).
-  //
-  // When `searchAggregatedTransactions` is true we query `ServiceTransactionMetric`,
-  // a per-(service, env, transaction.type) rollup that intentionally does NOT carry
-  // `transaction.name`. If the caller's kuery references `transaction.name` (typical
-  // for the alert-details preview seeded from the alert's source fields, and
-  // possible whenever a user types `transaction.name: "..."` in the standalone map's
-  // KQL bar), the rollup query matches zero docs and the map renders the empty
-  // state — even though raw transaction events would have matched.
-  //
-  // Adding `transaction.name` to ServiceTransactionMetric would explode its
-  // cardinality (per-endpoint instead of per-service) and defeat the whole point
-  // of having two rollup families. Instead, when the cheap rollup comes back empty
-  // AND we had a kuery in the first place, retry once against `TransactionMetric`
-  // (per-transaction-group rollup at 1m), which carries every field the user can
-  // filter on. It's still a rollup — cheaper than raw events — and the second
-  // roundtrip only fires when the first query truly returned nothing, so the
-  // steady-state cost on populated clusters is zero.
+  // `ServiceTransactionMetric` doesn't carry `transaction.name`; retry against the
+  // per-transaction-group `TransactionMetric` rollup when the kuery referenced it.
   const hasKueryFilter = Boolean(kuery && kuery.trim() !== '');
   const shouldRetry = shouldQueryMetrics && buckets.length === 0 && hasKueryFilter;
 

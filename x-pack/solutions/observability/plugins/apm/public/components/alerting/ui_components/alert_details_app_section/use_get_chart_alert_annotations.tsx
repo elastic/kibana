@@ -23,12 +23,7 @@ interface UseGetChartAlertAnnotationsProps {
   alert: TopAlert;
   dateFormat: string;
   showAnnotations: boolean;
-  /**
-   * Controls whether the threshold rect/line is included in the returned annotations.
-   * Defaults to `showAnnotations` (legacy behavior). Set to `false` on charts whose Y axis
-   * isn't in the alert's threshold units (e.g. throughput chart on a latency alert) to
-   * avoid drawing a meaningless line.
-   */
+  /** Include the threshold rect/line in the annotations. Defaults to `showAnnotations`. */
   showThresholdAnnotation?: boolean;
   customAlertEvaluationThreshold?: number;
   normalizeThreshold?: (value: number) => number;
@@ -46,8 +41,6 @@ export const useGetChartAlertAnnotations = ({
 
   if (!showAnnotations && customAlertEvaluationThreshold == null) return undefined;
 
-  // When the caller didn't explicitly opt-out, include threshold annotations whenever
-  // annotations are shown or a custom threshold is provided (legacy behavior).
   const includeThreshold =
     showThresholdAnnotation ?? (showAnnotations || customAlertEvaluationThreshold != null);
 

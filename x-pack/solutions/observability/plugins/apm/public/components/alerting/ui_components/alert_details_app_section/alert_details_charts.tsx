@@ -129,8 +129,6 @@ export function AlertDetailsCharts({
     ),
   };
 
-  // Render the alert's primary metric chart first, followed by the two secondary charts,
-  // all in a single equal-width row matching the alert details design.
   const chartIdsInOrder: ChartId[] = [chartLayout.primary, ...chartLayout.secondary];
 
   return (

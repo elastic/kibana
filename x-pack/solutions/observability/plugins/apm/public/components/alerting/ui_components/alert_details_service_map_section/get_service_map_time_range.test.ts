@@ -8,7 +8,6 @@
 import { getServiceMapTimeRange } from './get_service_map_time_range';
 
 describe('getServiceMapTimeRange', () => {
-  // Pin "now" so active-alert tests are deterministic.
   const NOW = new Date('2024-01-15T13:50:00.000Z').valueOf();
   const NOW_ISO = new Date(NOW).toISOString();
 

@@ -107,9 +107,6 @@ describe('useServiceMap()', () => {
   });
 
   describe('strictEnvironmentScope', () => {
-    // Build two spans where only one is in the requested env. The helper under
-    // test (`filterServiceMapSpansByEnvironment`) is unit-tested separately; here
-    // we just verify the hook *invokes* it via the path → transform handoff.
     const opbeansSpan = {
       spanId: 'span-1',
       spanType: 'external',
@@ -147,15 +144,11 @@ describe('useServiceMap()', () => {
     });
 
     it('passes the raw response through to transform when off (default)', () => {
-      // Regression guard for standalone callers — the existing cross-env trace
-      // topology must keep working unless the caller opts in.
       renderHook(() => useServiceMap({ ...defaultParams, environment: 'opbeans' }));
       expect(mockedTransformToReactFlow).toHaveBeenCalledWith(apiResponse);
     });
 
     it('passes the raw response through when ENVIRONMENT_ALL is selected, even if enabled', () => {
-      // `ENVIRONMENT_ALL` means "no env filter applied at all" — strict scoping
-      // is meaningless and would incorrectly drop every span with any env set.
       renderHook(() =>
         useServiceMap({
           ...defaultParams,
@@ -176,9 +169,6 @@ describe('useServiceMap()', () => {
       );
 
       const transformedArg = mockedTransformToReactFlow.mock.calls[0]?.[0];
-      // `opbeansSpan` is intra-env so it survives. `productionSpan` has a
-      // destination service in `production` and must be filtered out — without
-      // this the React-Flow transform would surface opbeans-dotnet as a node.
       expect((transformedArg as { spans: unknown[] }).spans).toEqual([opbeansSpan]);
     });
   });

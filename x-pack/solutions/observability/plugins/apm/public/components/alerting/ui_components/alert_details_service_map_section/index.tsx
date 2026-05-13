@@ -61,15 +61,8 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
   const kuery = useMemo(() => buildKueryFromAlert(alert), [alert]);
   const filters = useMemo(() => buildFiltersFromAlert(alert), [alert]);
 
-  // Hide the whole panel once the embeddable reports `services === 0` (after the
-  // backend's rollup→raw fallback in getServiceStats). State stays local to this
-  // mount: the alert-details route renders a fresh section per alert, so we don't
-  // need to reset when the alert changes — that's a fresh component instance.
   const [hasNoServices, setHasNoServices] = useState(false);
 
-  // Hide the panel entirely if we can't build a meaningful preview (alert missing a
-  // service or start timestamp, no APM embeddable deps in context), or once we know
-  // there are zero services to draw.
   if (!embeddableDeps || !serviceName || !timeRanges || hasNoServices) {
     return null;
   }
@@ -136,10 +129,6 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
               rangeFrom={rangeFrom}
               rangeTo={rangeTo}
               kuery={kuery}
-              // Seed the in-memory router with the alert's environment so SPA
-              // navigation from the embedded popover/badges (e.g. the alerts
-              // badge) carries it into the destination tab. The badges query
-              // itself already gets `environment` via prop.
               environment={environment}
             >
               <ServiceMapEmbeddable
@@ -149,38 +138,13 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
                 badgesRangeTo={badgesRangeTo}
                 environment={environment}
                 kuery={kuery}
-                // Keep `kuery` scoping the graph data, but let badges aggregate across
-                // all visible services so neighbors with active alerts also light up.
                 badgesKuery=""
-                // Show the popover's "Focus map" button in the alert preview so users
-                // can drill into a focused map for any node they click. Embedded
-                // contexts hide it by default (kept for dashboards).
                 showFocusMapInPopover
-                // From the preview, both popover buttons (Service Details / Focus
-                // map) act as plain exits into standalone APM:
-                //  - Drop `kuery`: the alert-scoped filter (e.g. `transaction.name:"..."`)
-                //    would otherwise hide the very service the user just clicked in
-                //    the destination tab. Env still flows through so destination tab
-                //    stays env-scoped.
-                //  - Always navigate on Focus: even when the clicked service *is*
-                //    the alerting service, exit into the standalone APM map so the
-                //    user can leave the embedded preview entirely (default behaviour
-                //    is to re-center the node in-map, which is a no-op for the
-                //    preview's drill-in workflow).
                 clearKueryOnPopoverNavigation
                 alwaysNavigateOnPopoverFocus
-                // Alerts are env-scoped, so the preview must be too. Without this,
-                // cross-env trace fan-out can pull services from other envs into the
-                // map even though no env-scoped data exists for them — see
-                // `strictEnvironmentScope` on the embeddable for the full rationale.
                 strictEnvironmentScope
                 serviceName={serviceName}
                 core={embeddableDeps.coreStart}
-                // Drives the parent panel's hide-when-empty behaviour. The backend
-                // already falls back from the per-service rollup to the per-txn
-                // rollup before declaring empty (see getServiceStats), so a `true`
-                // here means *neither* data source had services for this alert and
-                // there's nothing useful to draw.
                 onEmptyStateChange={setHasNoServices}
               />
             </ApmEmbeddableContext>

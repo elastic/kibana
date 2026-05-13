@@ -19,11 +19,6 @@ type AlertFields = AlertDetailsAppSectionProps['alert']['fields'];
 function makeAlert(
   fields: Partial<Record<keyof AlertFields, string | undefined>>
 ): AlertDetailsAppSectionProps['alert'] {
-  // Production callers receive a fully-typed `TopAlert` from the obs-shared
-  // alerting framework with ~90 mandatory fields. `buildKueryFromAlert` and
-  // `buildFiltersFromAlert` only read a handful of them, so we stub the rest
-  // — the double cast (`as unknown as ...`) is the standard escape hatch for
-  // minimal, intentionally-partial fixtures.
   return { fields } as unknown as AlertDetailsAppSectionProps['alert'];
 }
 
@@ -62,15 +57,9 @@ describe('buildKueryFromAlert', () => {
   });
 
   it('escapes backslashes inside values (CodeQL fix: backslash-before-quote)', () => {
-    // Before the fix the helper only replaced `"`, so a stray `\` slipped through
-    // and a value like `back\slash"` would render as `back\slash\"` — the `\"`
-    // boundary becomes ambiguous and the parser sees an unterminated string.
     expect(buildKueryFromAlert(makeAlert({ [SERVICE_NAME]: 'back\\slash' }))).toBe(
       'service.name: "back\\\\slash"'
     );
-
-    // Backslash directly in front of a double-quote is the failure mode CodeQL
-    // flagged: both must be escaped, in order, so the closing quote stays unambiguous.
     expect(buildKueryFromAlert(makeAlert({ [SERVICE_NAME]: 'back\\"slash' }))).toBe(
       'service.name: "back\\\\\\"slash"'
     );
@@ -83,8 +72,6 @@ describe('buildKueryFromAlert', () => {
   });
 
   it('does not include service.environment in the kuery', () => {
-    // `environment` flows through as its own prop on the embeddable / URL — it
-    // must not be re-applied as a KQL clause or it would double-filter.
     expect(
       buildKueryFromAlert(
         makeAlert({

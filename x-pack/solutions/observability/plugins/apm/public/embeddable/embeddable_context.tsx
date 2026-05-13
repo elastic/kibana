@@ -58,13 +58,7 @@ export interface ApmEmbeddableContextProps {
   rangeFrom?: string;
   rangeTo?: string;
   kuery?: string;
-  /**
-   * Environment seeded into the in-memory router's URL. Hooks that read URL
-   * params (e.g. `useAnyOfApmParams('/service-map', …)` used by the alerts
-   * badge href) will pick it up so SPA navigation from embedded contexts
-   * carries the alert's env into the destination tab. Defaults to
-   * `ENVIRONMENT_ALL` so callers that don't care keep working.
-   */
+  /** Seeded into the in-memory router URL so hooks reading URL params get a concrete env. */
   environment?: string;
 }
 

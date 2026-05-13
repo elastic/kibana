@@ -8,16 +8,7 @@
 import { createContext, useContext } from 'react';
 import type { EmbeddableDeps } from '../../../embeddable/types';
 
-/**
- * Carries fully-resolved APM `EmbeddableDeps` through React.
- *
- * Populated by `createLazyApmComponentWithContext` for APM components rendered outside
- * the APM app shell (e.g. alert details sections shown by the observability plugin),
- * so that those components can render APM embeddables inside their own
- * `ApmEmbeddableContext` without depending on the async `registerEmbeddables` registry.
- *
- * Will be `null` when the lazy wrapper was created without setup deps (legacy callers).
- */
+/** APM `EmbeddableDeps` for components rendered outside the APM app shell. */
 export const ApmEmbeddableDepsContext = createContext<EmbeddableDeps | null>(null);
 
 export function useApmEmbeddableDeps(): EmbeddableDeps | null {

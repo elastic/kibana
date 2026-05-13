@@ -12,9 +12,6 @@ import type { IEnvOptions } from './get_service_map';
 
 type SearchMock = jest.Mock<Promise<unknown>>;
 
-// Build a minimal IEnvOptions stub. The function only consumes a handful of
-// fields directly; everything else gets passed through to the ES request and is
-// inspected on the mocked `apmEventClient.search` call.
 function makeOptions(
   overrides: Partial<IEnvOptions & { maxNumberOfServices: number }> = {}
 ): IEnvOptions & { maxNumberOfServices: number } {
@@ -74,9 +71,7 @@ describe('getServiceStats — rollup/kuery field-mismatch fallback', () => {
   it('retries against TransactionMetric when the ServiceTransactionMetric rollup returns 0 buckets and a kuery is set', async () => {
     const search: SearchMock = jest
       .fn()
-      // First call (ServiceTransactionMetric): rollup lacks transaction.name → 0 matches.
       .mockResolvedValueOnce(aggResponse([]))
-      // Fallback (TransactionMetric): keyed by transaction.name → returns the service.
       .mockResolvedValueOnce(aggResponse(['opbeans-python']));
     const apmEventClient = { search } as unknown as APMEventClient;
 
@@ -91,7 +86,6 @@ describe('getServiceStats — rollup/kuery field-mismatch fallback', () => {
     expect(getSearchCall(search, 1).params.apm.sources?.[0].documentType).toBe(
       ApmDocumentType.TransactionMetric
     );
-    // Distinct operation name so the fallback is easy to attribute in ES slowlogs / APM telemetry.
     expect(getSearchCall(search, 1).operationName).toBe(
       'get_service_stats_for_service_map_fallback'
     );

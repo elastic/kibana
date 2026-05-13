@@ -41,67 +41,20 @@ export interface ServiceMapEmbeddableProps {
   serviceGroupId?: string;
   core: CoreStart;
   onBlockingError?: (error: Error | undefined) => void;
-  /**
-   * Optional separate time range used for the per-service badges query (alert counts /
-   * SLO stats). Defaults to `[rangeFrom, rangeTo]`. Provide a wider range than the graph
-   * range when you need to guarantee that a specific alert's document `@timestamp` falls
-   * inside the badges window — e.g. in the alert details preview, where the graph range
-   * is intentionally capped for performance but the badges range mirrors the full alert
-   * lifecycle.
-   */
+  /** Separate range for the badges query. Defaults to `[rangeFrom, rangeTo]`. */
   badgesRangeFrom?: string;
   badgesRangeTo?: string;
-  /**
-   * Optional KQL applied only to the badges query. Defaults to `kuery`. Set to `""` to
-   * keep `kuery` scoping the graph while letting badges aggregate freely across every
-   * visible service — used by the alert details preview, where the graph is intentionally
-   * scoped to the alerting service/transaction but badges should appear on every neighbor.
-   */
+  /** KQL for the badges query only. Defaults to `kuery`. Pass `""` to aggregate across all nodes. */
   badgesKuery?: string;
-  /**
-   * Override for the popover's "Focus map" button visibility. When omitted, the button is
-   * hidden in embedded contexts (current dashboard behavior). The alert details preview
-   * sets this to `true` because users want to drill from the alert preview into a focused
-   * service map of the clicked node.
-   */
+  /** Show the popover's "Focus map" button in embedded contexts. Defaults to `!isEmbedded`. */
   showFocusMapInPopover?: boolean;
-  /**
-   * When true, popover-built URLs ("Service Details" / "Focus map") drop `kuery` so the
-   * embedded context-specific filter (e.g. `transaction.name:"..."` for the alert preview)
-   * doesn't follow the user into the destination tab and hide the service they clicked.
-   * `environment` always flows through. Default `false` preserves dashboard behavior of
-   * carrying the dashboard's KQL into the destination tab.
-   */
+  /** Strip `kuery` from popover-built URLs ("Service Details" / "Focus map"); env still flows through. */
   clearKueryOnPopoverNavigation?: boolean;
-  /**
-   * When true, the popover's "Focus map" button always navigates to the standalone APM
-   * service map — including clicks on the currently focused service (where the default
-   * is to just re-center the node in-map). The alert details preview wants every click to
-   * exit into APM so users can leave the embedded preview entirely.
-   */
+  /** Focus button always navigates to standalone APM, even for the currently focused service. */
   alwaysNavigateOnPopoverFocus?: boolean;
-  /**
-   * When true, the embeddable drops cross-environment spans before rendering. Background:
-   * the backend's `getTraceSampleIds` filters traces by env, but
-   * `fetchExitSpanSamplesFromTraceIds` then pulls *every* span from those traces —
-   * including spans from services in different envs that share a trace.id. This means a
-   * trace where opbeans-go (env: opbeans) calls opbeans-dotnet (env: production) will
-   * surface opbeans-dotnet in an opbeans-scoped preview, even though no opbeans-env doc
-   * for opbeans-dotnet exists.
-   *
-   * Default `false` keeps the existing cross-env trace-topology behaviour (useful for
-   * debugging cross-env traffic on the standalone map). The alert details preview opts in
-   * because the user has an env-scoped alert and expects strict env scoping.
-   */
+  /** Drop cross-env spans before rendering when env is set. */
   strictEnvironmentScope?: boolean;
-  /**
-   * Fires whenever the embeddable transitions between "has data" and "definitively empty"
-   * (i.e. `status === SUCCESS && nodes.length === 0`). Loading and error states do NOT
-   * fire — they don't tell us whether the result will be empty. Used by the alert details
-   * preview to hide its whole panel when there are no services to draw, so the user
-   * doesn't see an awkward in-card empty prompt. Dashboard/standalone embeddable callers
-   * leave it unset and the embeddable keeps rendering its built-in `EmptyPrompt`.
-   */
+  /** Fires when the topology is definitively empty (`SUCCESS && nodes.length === 0`). */
   onEmptyStateChange?: (isEmpty: boolean) => void;
 }
 
@@ -159,8 +112,6 @@ export function ServiceMapEmbeddable({
     return { start: parsedStart ?? rangeFrom, end: parsedEnd ?? rangeTo };
   }, [rangeFrom, rangeTo]);
 
-  // Separate time range for badges. Falls back to the graph range when not provided,
-  // so dashboard/standalone callers (which only have one range) are unaffected.
   const { start: badgesStart, end: badgesEnd } = useMemo(() => {
     if (badgesRangeFrom == null || badgesRangeTo == null) {
       return { start, end };
@@ -185,20 +136,13 @@ export function ServiceMapEmbeddable({
     strictEnvironmentScope,
   });
 
-  // Notify the host whenever we transition to a known empty/non-empty topology.
-  // Skipped while loading or on errors — those carry no signal about emptiness,
-  // and firing during loading would briefly hide the host's panel during refresh.
+  // Only fire on SUCCESS — loading/error states carry no emptiness signal.
   useEffect(() => {
     if (!onEmptyStateChange) return;
     if (status !== FETCH_STATUS.SUCCESS) return;
     onEmptyStateChange(data.nodes.length === 0);
   }, [onEmptyStateChange, status, data.nodes.length]);
 
-  // Defaults to the graph `kuery` so dashboard/standalone callers keep applying the
-  // user's filter to both queries. Callers like the alert details preview pass `""` to
-  // keep their service-scoped topology filter while letting badges aggregate across
-  // every visible node (otherwise the focused-service kuery would exclude neighbors'
-  // alerts from the badges aggregation).
   const { nodes: nodesForGraph, status: badgesStatus } = useServiceMapBadges({
     environment,
     start: badgesStart,
@@ -228,12 +172,7 @@ export function ServiceMapEmbeddable({
 
   const isEmpty = data.nodes.length === 0;
   if (status === FETCH_STATUS.SUCCESS && isEmpty) {
-    // A host subscribed via `onEmptyStateChange` has taken ownership of the empty
-    // UI (alert details preview hides the whole panel). Rendering the built-in
-    // EmptyPrompt here would flash on screen for one paint before the parent's
-    // state update unmounts us — `useEffect` runs *after* commit, so the prompt
-    // hits the DOM first. Return null to suppress that flash. Dashboard /
-    // standalone callers that don't pass the callback keep the in-card prompt.
+    // Host owns the empty UI; skip the prompt to avoid a one-frame flash before unmount.
     if (onEmptyStateChange) {
       return null;
     }

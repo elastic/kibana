@@ -49,7 +49,6 @@ const mockedLink = jest.fn(
   }
 );
 
-// Full query coming off the service map's URL; kuery should be dropped, the rest preserved.
 const serviceMapQuery = {
   rangeFrom: 'now-15m',
   rangeTo: 'now',
@@ -81,8 +80,6 @@ describe('useServiceMapAlertsTabHref', () => {
 
       expect(result.current).toContain('/app/apm/services/opbeans-node/alerts');
       const search = new URL(`http://x${result.current}`).searchParams;
-      // The route schema requires `kuery` to be a string; we reset it to '' so
-      // the alerts tab loads unfiltered while the rest of the query carries over.
       expect(search.get('kuery')).toBe('');
     });
 

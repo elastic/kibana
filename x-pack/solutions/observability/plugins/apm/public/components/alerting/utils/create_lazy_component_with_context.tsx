@@ -15,28 +15,13 @@ import { ApmEmbeddableDepsContext } from '../context/apm_embeddable_deps_context
 
 export type ApmCoreSetup = CoreSetup<ApmPluginStartDeps, ApmPluginStart>;
 
-/**
- * Setup-time deps captured by the APM plugin and threaded into rule-type lazy components
- * so that downstream sections (e.g. the alert details service map preview) can render APM
- * embeddables inside their own `ApmEmbeddableContext` without going through the global
- * embeddable registry (which is registered asynchronously and would otherwise race the
- * alert details page render).
- */
+/** Setup-time deps captured by APM and threaded into rule-type lazy components. */
 export type ApmAlertingSetupDeps = Omit<EmbeddableDeps, 'coreStart' | 'pluginsStart'>;
 
 /**
- * Wraps a lazy-loaded component with a `KibanaContextProvider` that resolves APM's own
- * start services, and additionally exposes a fully-resolved `EmbeddableDeps` value via
- * `ApmEmbeddableDepsContext`. This is necessary for APM components that are rendered
- * outside APM's app context (e.g. alert detail sections rendered by the observability
- * plugin) so that:
- *  - `useKibana()` resolves APM's deps (like `apmSourcesAccess`) instead of the host
- *    plugin's deps,
- *  - APM embeddables can be rendered directly (without depending on the async
- *    `registerEmbeddables` registry) by reading deps from context.
- *
- * This mirrors the pattern used by the infra plugin
- * (see `infra/public/hooks/use_kibana.tsx → createLazyComponentWithKibanaContext`).
+ * Wraps a lazy-loaded APM component with APM's `KibanaContextProvider` and exposes
+ * `EmbeddableDeps` via `ApmEmbeddableDepsContext`. Mirrors infra's
+ * `createLazyComponentWithKibanaContext`.
  */
 export const createLazyApmComponentWithContext = <T extends React.ComponentType<any>>(
   coreSetup: ApmCoreSetup,

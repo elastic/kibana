@@ -20,15 +20,8 @@ export interface AlertFilterBadge {
 }
 
 /**
- * Build a KQL string that scopes the service map preview to the alerting context
- * (service + transaction.type + transaction.name). Mirrors the filter badges
- * shown above the map.
- *
- * Values are escaped via `escapeQuotes` from `@kbn/es-query`, which escapes both
- * backslashes and double-quotes — required for KQL "QuotedCharacter" values and
- * what the previous `replace(/"/g, '\\"')` was missing (flagged by CodeQL as
- * "Incomplete string escaping or encoding" because a stray backslash in the
- * input would otherwise pass through and corrupt the quoted token).
+ * KQL scoping the preview to the alerting context. Values are escaped via
+ * `escapeQuotes` (handles backslashes + double-quotes).
  */
 export function buildKueryFromAlert(alert: AlertDetailsAppSectionProps['alert']): string {
   const parts: string[] = [];
@@ -48,11 +41,7 @@ export function buildKueryFromAlert(alert: AlertDetailsAppSectionProps['alert'])
   return parts.join(' and ');
 }
 
-/**
- * Build the user-facing filter chips shown above the service map preview. These
- * are display-only — escaping is not applied here, since chips render the raw
- * value next to the field name (e.g. `service.name: opbeans-node`).
- */
+/** User-facing filter chips shown above the preview. Display only — no escaping. */
 export function buildFiltersFromAlert(
   alert: AlertDetailsAppSectionProps['alert']
 ): AlertFilterBadge[] {

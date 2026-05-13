@@ -327,11 +327,6 @@ describe('ServiceMapEmbeddable', () => {
     });
   });
 
-  // Drives the parent panel's hide-when-empty behaviour in the alert details preview.
-  // The contract: fire ONLY when the topology query has settled (status === SUCCESS),
-  // and report the final emptiness so callers can decide whether to keep the host
-  // panel visible. Loading and error states must NOT fire — they don't tell us anything
-  // about whether the eventual result will be empty.
   describe('onEmptyStateChange callback', () => {
     it('does not fire while the topology query is loading', () => {
       const onEmptyStateChange = jest.fn();
@@ -386,16 +381,12 @@ describe('ServiceMapEmbeddable', () => {
     });
 
     it('suppresses the in-card EmptyPrompt when a host owns the empty UI (no flash before the host unmounts us)', () => {
-      // Regression guard: without this, the embeddable would commit "No services
-      // available" to the DOM for one paint before the host's `setHasNoServices(true)`
-      // re-render unmounted us — useEffect runs after commit.
       mockUseServiceMap.mockReturnValue({
         data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
         status: FETCH_STATUS.SUCCESS,
       });
       const { container } = renderEmbeddable({ onEmptyStateChange: jest.fn() });
       expect(screen.queryByText(/No services available/)).not.toBeInTheDocument();
-      // Nothing visible at all — the host is in charge of what to render in place.
       expect(container.firstChild).toBeNull();
     });
   });
