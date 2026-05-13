@@ -16,6 +16,7 @@ import type {
 } from './types';
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
+type LineNumbersType = monaco.editor.LineNumbersType;
 
 interface ComposeDiscoverTabsProps {
   state: ComposeDiscoverState;
@@ -70,7 +71,7 @@ interface BlockEditorProps {
   onChange: (val: string) => void;
   /** Line number offset — makes the block editor's line numbers continue from the base. */
   lineNumberOffset: number;
-  onEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
+  onEditorMount?: (editor: IStandaloneCodeEditor) => void;
 }
 
 const BlockEditor: React.FC<BlockEditorProps> = ({
@@ -79,18 +80,17 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
   lineNumberOffset,
   onEditorMount,
 }) => {
-  const options = useMemo(
-    () => ({
+  const options = useMemo(() => {
+    const lineNumbers: LineNumbersType | undefined =
+      lineNumberOffset > 0 ? (n: number) => String(n + lineNumberOffset) : undefined;
+    return {
       minimap: { enabled: false },
       automaticLayout: true,
       scrollBeyondLastLine: false,
       fontSize: 13,
-      ...(lineNumberOffset > 0 && {
-        lineNumbers: ((n: number) => String(n + lineNumberOffset)) as unknown as 'on',
-      }),
-    }),
-    [lineNumberOffset]
-  );
+      ...(lineNumbers && { lineNumbers }),
+    };
+  }, [lineNumberOffset]);
 
   return (
     <CodeEditor
@@ -141,9 +141,7 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
     if (safeActiveTab !== state.activeTab) {
       dispatch({ type: 'SET_TAB', tab: safeActiveTab });
     }
-    // Only correct drift — don't re-run when activeTab changes via user clicks.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [safeActiveTab]);
+  }, [safeActiveTab, state.activeTab, dispatch]);
 
   const baseLineCount = state.baseQuery.split('\n').length;
 

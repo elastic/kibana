@@ -30,6 +30,7 @@ import {
   type EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
 import { CodeEditor, ESQL_LANG_ID, type monaco } from '@kbn/code-editor';
+import { i18n } from '@kbn/i18n';
 import type { FormValues } from '../../form/types';
 import { useRuleFormServices } from '../../form/contexts/rule_form_context';
 import { useDataFields } from '../../form/hooks/use_data_fields';
@@ -248,6 +249,12 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
               <EuiSelect
                 options={timeFieldOptions}
                 value={timeField}
+                aria-label={i18n.translate(
+                  'xpack.responseOps.alerting.composeDiscover.timeFieldAriaLabel',
+                  {
+                    defaultMessage: 'Time field for rule execution',
+                  }
+                )}
                 onChange={(e) => setFormValue('timeField', e.target.value)}
                 compressed
                 prepend="Time field"

@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Parser, isColumn } from '@elastic/esql';
 import { useQuery } from '@kbn/react-query';
+import { i18n } from '@kbn/i18n';
 import { getEsqlColumns } from '@kbn/esql-utils';
 import {
   EuiBadge,
@@ -28,11 +29,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import type {
-  ComposeDiscoverState,
-  ComposeDiscoverAction,
-  RecoveryType,
-  StepDefinition,
+import {
+  getStepIds,
+  type ComposeDiscoverState,
+  type ComposeDiscoverAction,
+  type RecoveryType,
+  type StepDefinition,
 } from './types';
 import type { FormValues } from '../../form/types';
 import { QuerySummary } from './query_summary';
@@ -42,6 +44,7 @@ import { splitQuery } from './use_heuristic_split';
 import { RuleDetailsFieldGroup } from '../../form';
 import { ScheduleField } from '../../form/fields/schedule_field';
 import { LookbackWindowField } from '../../form/fields/lookback_window_field';
+import { RecoveryDelayField } from '../../form/fields/recovery_delay_field';
 
 interface ComposeDiscoverFormProps {
   state: ComposeDiscoverState;
@@ -51,31 +54,101 @@ interface ComposeDiscoverFormProps {
 
 // ── Recovery type selector ────────────────────────────────────────────────────
 
+const defaultRecoveryLabel = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.composeDiscover.recoveryType.defaultRecovery.dropDownOptionLabel',
+  {
+    defaultMessage: 'Default recovery',
+  }
+);
+
+const defaultRecoveryDescription = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.composeDiscover.recoveryType.defaultRecovery.description',
+  {
+    defaultMessage: 'Recover automatically when the alert condition is no longer met.',
+  }
+);
+
+const customRecoveryLabel = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.composeDiscover.recoveryType.customRecovery.dropDownOptionLabel',
+  {
+    defaultMessage: 'Custom recovery',
+  }
+);
+
+const customRecoveryDescription = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.composeDiscover.recoveryType.customRecovery.description',
+  {
+    defaultMessage: 'Define a custom recovery condition.',
+  }
+);
+
+const noRecoveryLabel = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.composeDiscover.recoveryType.noRecovery.dropDownOptionLabel',
+  {
+    defaultMessage: 'No recovery',
+  }
+);
+
+const noRecoveryDescription = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.composeDiscover.recoveryType.noRecovery.description',
+  {
+    defaultMessage: 'Do not recover alerts automatically.',
+  }
+);
+
+const noRecoveryComingSoonBadgeLabel = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.composeDiscover.recoveryType.noRecovery.comingSoonBadgeLabel',
+  {
+    defaultMessage: 'Coming soon',
+  }
+);
+
 const RECOVERY_TYPE_OPTIONS: Array<{
   value: RecoveryType;
   inputDisplay: string;
   dropdownDisplay: React.ReactNode;
+  disabled?: boolean;
 }> = [
   {
     value: 'default',
-    inputDisplay: 'Default recovery',
+    inputDisplay: defaultRecoveryLabel,
     dropdownDisplay: (
       <>
-        <strong>Default recovery</strong>
+        <strong>{defaultRecoveryLabel}</strong>
         <EuiText size="s" color="subdued">
-          <p>Recover automatically when the alert condition is no longer met.</p>
+          <p>{defaultRecoveryDescription}</p>
         </EuiText>
       </>
     ),
   },
   {
     value: 'custom',
-    inputDisplay: 'Custom recovery',
+    inputDisplay: customRecoveryLabel,
     dropdownDisplay: (
       <>
-        <strong>Custom recovery</strong>
+        <strong>{customRecoveryLabel}</strong>
         <EuiText size="s" color="subdued">
-          <p>Define a custom recovery condition.</p>
+          <p>{customRecoveryDescription}</p>
+        </EuiText>
+      </>
+    ),
+  },
+  {
+    value: 'none',
+    disabled: true,
+    inputDisplay: noRecoveryLabel,
+    dropdownDisplay: (
+      <>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
+          <EuiFlexItem grow={false}>
+            <strong>{noRecoveryLabel}</strong>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">{noRecoveryComingSoonBadgeLabel}</EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiText size="s" color="subdued">
+          <p>{noRecoveryDescription}</p>
         </EuiText>
       </>
     ),
@@ -359,6 +432,9 @@ function RecoveryConditionStep({
           </EuiFlexGroup>
         </>
       )}
+
+      <EuiSpacer size="m" />
+      <RecoveryDelayField />
     </>
   );
 }
@@ -414,40 +490,33 @@ function NotificationsStep() {
 
 // ── Step definitions ──────────────────────────────────────────────────────────
 
-export const getSteps = (tracking: boolean): StepDefinition[] => {
-  const steps: StepDefinition[] = [
-    {
-      id: 'alertCondition',
-      title: 'Alert Condition',
-      render: (props) => <AlertConditionStep {...props} />,
-      validate: (_methods, s) => s.queryCommitted,
-    },
-  ];
-
-  if (tracking) {
-    steps.push({
-      id: 'recoveryCondition',
-      title: 'Recovery Condition',
-      render: (props) => <RecoveryConditionStep state={props.state} dispatch={props.dispatch} />,
-    });
-  }
-
-  steps.push(
-    {
-      id: 'details',
-      title: 'Details & Artifacts',
-      render: () => <DetailsAndArtifactsStep />,
-      validate: async (methods) => methods.trigger(['metadata.name']),
-    },
-    {
-      id: 'notifications',
-      title: 'Notifications',
-      render: () => <NotificationsStep />,
-    }
-  );
-
-  return steps;
+const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
+  alertCondition: {
+    id: 'alertCondition',
+    title: 'Alert Condition',
+    render: (props) => <AlertConditionStep {...props} />,
+    validate: (_methods, s) => s.queryCommitted,
+  },
+  recoveryCondition: {
+    id: 'recoveryCondition',
+    title: 'Recovery Condition',
+    render: (props) => <RecoveryConditionStep state={props.state} dispatch={props.dispatch} />,
+  },
+  details: {
+    id: 'details',
+    title: 'Details & Artifacts',
+    render: () => <DetailsAndArtifactsStep />,
+    validate: async (methods) => methods.trigger(['metadata.name']),
+  },
+  notifications: {
+    id: 'notifications',
+    title: 'Notifications',
+    render: () => <NotificationsStep />,
+  },
 };
+
+export const getSteps = (tracking: boolean): StepDefinition[] =>
+  getStepIds(tracking).map((id) => STEP_REGISTRY[id]);
 
 // ── Main form component ───────────────────────────────────────────────────────
 

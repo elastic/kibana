@@ -6,13 +6,13 @@
  */
 
 import { useReducer } from 'react';
-import type {
-  ComposeDiscoverState,
-  ComposeDiscoverAction,
-  ComposeDiscoverMode,
-  QueryTab,
-  SandboxTabConfig,
-  StepId,
+import {
+  getStepIds,
+  type ComposeDiscoverState,
+  type ComposeDiscoverAction,
+  type ComposeDiscoverMode,
+  type QueryTab,
+  type SandboxTabConfig,
 } from './types';
 import { guessRecoveryBlock, splitQuery } from './use_heuristic_split';
 
@@ -63,18 +63,6 @@ export const createInitialState = ({
     recoveryType: 'custom',
   };
 };
-
-/**
- * Lightweight step-id list for use in the reducer and getSandboxTabConfig.
- * Mirrors the order in getSteps() (compose_discover_form.tsx) without
- * importing React components, avoiding a circular dependency.
- */
-function getStepIds(tracking: boolean): StepId[] {
-  if (tracking) {
-    return ['alertCondition', 'recoveryCondition', 'details', 'notifications'];
-  }
-  return ['alertCondition', 'details', 'notifications'];
-}
 
 /**
  * Returns which default tab to activate for the Sandbox based on the tab config.

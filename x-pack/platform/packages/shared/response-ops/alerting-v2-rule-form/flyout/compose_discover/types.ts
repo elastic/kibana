@@ -12,11 +12,16 @@ import type { FormValues } from '../../form/types';
 
 export type ComposeDiscoverMode = 'create' | 'edit';
 
-export type RecoveryType = 'default' | 'custom';
+export type RecoveryType = 'default' | 'custom' | 'none';
 
 export type QueryTab = 'base' | 'alert' | 'recovery';
 
 export type StepId = 'alertCondition' | 'recoveryCondition' | 'details' | 'notifications';
+
+export const getStepIds = (tracking: boolean): StepId[] =>
+  tracking
+    ? ['alertCondition', 'recoveryCondition', 'details', 'notifications']
+    : ['alertCondition', 'details', 'notifications'];
 
 export interface StepRenderProps {
   state: ComposeDiscoverState;
