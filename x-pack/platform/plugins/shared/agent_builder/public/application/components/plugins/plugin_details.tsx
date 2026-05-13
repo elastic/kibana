@@ -22,6 +22,7 @@ import {
 import { css } from '@emotion/react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { PluginDefinition } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
@@ -83,6 +84,9 @@ export const PluginDetails: React.FC<PluginDetailsProps> = ({ plugin }) => {
             iconType="arrowLeft"
             href={createAgentBuilderUrl(appPaths.plugins.list)}
             data-test-subj="agentBuilderBackToPluginsButton"
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_PLUGINS_DETAIL}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.managePlugins.DETAIL_BACK_TO_LIST}
+            data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.PLUGIN}
           >
             {labels.plugins.backToPluginsButton}
           </EuiButtonEmpty>,
@@ -155,7 +159,14 @@ export const PluginDetails: React.FC<PluginDetailsProps> = ({ plugin }) => {
             </FieldRow>
             <FieldRow label={labels.plugins.sourceLabel}>
               {plugin.source_url ? (
-                <EuiLink href={plugin.source_url} target="_blank" external>
+                <EuiLink
+                  href={plugin.source_url}
+                  target="_blank"
+                  external
+                  data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_PLUGINS_DETAIL}
+                  data-ebt-action={AGENT_BUILDER_UI_EBT.action.managePlugins.DETAIL_SOURCE_LINK}
+                  data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.PLUGIN}
+                >
                   {plugin.source_url}
                 </EuiLink>
               ) : (
@@ -192,6 +203,9 @@ export const PluginDetails: React.FC<PluginDetailsProps> = ({ plugin }) => {
                     <EuiLink
                       href={createAgentBuilderUrl(appPaths.skills.details({ skillId }))}
                       data-test-subj={`agentBuilderPluginSkillLink-${skillId}`}
+                      data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_PLUGINS_DETAIL}
+                      data-ebt-action={AGENT_BUILDER_UI_EBT.action.managePlugins.DETAIL_SKILL_NAV}
+                      data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.SKILL}
                     >
                       {skillId}
                     </EuiLink>

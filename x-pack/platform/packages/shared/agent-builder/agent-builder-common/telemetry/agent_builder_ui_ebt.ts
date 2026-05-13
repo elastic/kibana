@@ -60,8 +60,10 @@ export const AGENT_BUILDER_UI_EBT = {
     MANAGE_SKILLS: 'agentBuilder.manage.skills',
     MANAGE_SKILLS_TABLE: 'agentBuilder.manage.skills.table',
     MANAGE_SKILLS_AGENT_FLYOUT: 'agentBuilder.manage.skills.agentFlyout',
+    MANAGE_SKILLS_FORM: 'agentBuilder.manage.skills.form',
     MANAGE_PLUGINS: 'agentBuilder.manage.plugins',
     MANAGE_PLUGINS_TABLE: 'agentBuilder.manage.plugins.table',
+    MANAGE_PLUGINS_DETAIL: 'agentBuilder.manage.plugins.detail',
     MANAGE_CONNECTORS: 'agentBuilder.manage.connectors',
     MANAGE_CONNECTORS_TABLE: 'agentBuilder.manage.connectors.table',
     INAPP_CHAT: 'agentBuilder.inappChat',
@@ -239,6 +241,7 @@ export const AGENT_BUILDER_UI_EBT = {
       FLYOUT_LIBRARY_LINK: 'manage_skills_flyout_library_link',
       FLYOUT_SAVE: 'manage_skills_flyout_save',
       FLYOUT_CANCEL: 'manage_skills_flyout_cancel',
+      FORM_SAVE: 'manage_skills_form_save',
     },
     /** Global plugins library */
     managePlugins: {
@@ -249,6 +252,9 @@ export const AGENT_BUILDER_UI_EBT = {
       TABLE_CONTEXT_OPEN: 'manage_plugins_table_context_open',
       TABLE_CONTEXT_VIEW: 'manage_plugins_table_context_view',
       TABLE_CONTEXT_DELETE: 'manage_plugins_table_context_delete',
+      DETAIL_BACK_TO_LIST: 'manage_plugins_detail_back_to_list',
+      DETAIL_SKILL_NAV: 'manage_plugins_detail_skill_nav',
+      DETAIL_SOURCE_LINK: 'manage_plugins_detail_source_link',
     },
     /** Global connectors library (`/manage/connectors`) */
     manageConnectors: {
