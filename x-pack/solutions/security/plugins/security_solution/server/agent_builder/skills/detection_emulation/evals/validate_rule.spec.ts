@@ -64,6 +64,42 @@ interface ConverseResponse {
   traceId?: string;
 }
 
+/** Pending prompt as emitted by the converse API when a tool calls
+ * `prompts.askForConfirmation` (or via declarative `confirmation:`).
+ * The shape mirrors `ConfirmPromptDefinition` from
+ * @kbn/agent-builder-common/agents/prompts. */
+interface PendingPrompt {
+  id: string;
+  type?: string;
+  title?: string;
+  message?: string;
+}
+
+interface ConverseApiResponseShape {
+  conversation_id: string;
+  trace_id?: string;
+  steps: unknown[];
+  response: { message: string; prompts?: PendingPrompt[] };
+}
+
+/**
+ * Auto-confirmation policy for HITL prompts emitted by the agent
+ * during a converse turn.
+ *
+ *  - `'allow'`  — accept every prompt (default; mirrors the prior
+ *                 always-proceed behaviour for examples that don't
+ *                 exercise rejection)
+ *  - `'reject'` — decline every prompt (used by the `userDeclines`
+ *                 example so the agent must honour the cancellation)
+ */
+export type AutoConfirmPolicy = 'allow' | 'reject';
+
+/** Bounded loop ceiling so a malformed agent loop can't run forever
+ * inside a single eval example. 5 is generous — validateRule only
+ * needs a single confirmation today; the per-family `run*Command`
+ * tools share a `once`-scoped policy so they prompt once at most. */
+const MAX_PROMPT_ROUNDS = 5;
+
 class DetectionEmulationChatClient {
   constructor(
     private readonly fetch: HttpHandler,
@@ -74,62 +110,60 @@ class DetectionEmulationChatClient {
   async converse({
     message,
     conversationId,
+    autoConfirm = 'allow',
   }: {
     message: string;
     conversationId?: string;
+    autoConfirm?: AutoConfirmPolicy;
   }): Promise<ConverseResponse> {
     const agentId = process.env.AGENT_BUILDER_AGENT_ID ?? agentBuilderDefaultAgentId;
 
     this.log.info('Calling converse');
 
-    const callConverseApi = async (): Promise<ConverseResponse> => {
+    /**
+     * Calls the converse endpoint once. May return either a final
+     * response or a turn that ends in pending prompts. Returns the
+     * raw API shape so the outer loop can decide whether to continue.
+     */
+    const callConverseApi = async (turnInput: {
+      input?: string;
+      promptResponses?: Record<string, { allow: boolean }>;
+      currentConversationId?: string;
+    }): Promise<ConverseApiResponseShape> => {
+      const body: Record<string, unknown> = {
+        agent_id: agentId,
+        connector_id: this.connectorId,
+      };
+      if (turnInput.currentConversationId) {
+        body.conversation_id = turnInput.currentConversationId;
+      }
+      if (turnInput.input !== undefined) {
+        body.input = turnInput.input;
+      }
+      if (turnInput.promptResponses && Object.keys(turnInput.promptResponses).length > 0) {
+        body.prompts = turnInput.promptResponses;
+      }
+
       const response = await this.fetch('/api/agent_builder/converse', {
         method: 'POST',
         version: '2023-10-31',
-        body: JSON.stringify({
-          agent_id: agentId,
-          connector_id: this.connectorId,
-          conversation_id: conversationId,
-          input: message,
-        }),
+        body: JSON.stringify(body),
       });
 
-      const {
-        conversation_id,
-        response: latestResponse,
-        steps,
-        trace_id,
-      } = response as {
-        conversation_id: string;
-        trace_id?: string;
-        steps: unknown[];
-        response: { message: string };
-      };
-
-      return {
-        conversationId: conversation_id,
-        messages: [{ message }, latestResponse],
-        steps,
-        errors: [],
-        traceId: trace_id,
-      };
+      return response as ConverseApiResponseShape;
     };
 
-    try {
-      // N5: use the @kbn/evals `withRetry` helper instead of `p-retry` so
-      // the spec doesn't pull a third-party dep that isn't on the eval
-      // surface's allowlist (avoids a CI bootstrap surprise the first time
-      // the spec runs). Behaviour difference vs the previous code:
-      // `withRetry` is selective — it retries only on 429s, transient
-      // 5xx (502/503/504), and common network errors (ECONNRESET, etc.).
-      // p-retry retried on any error. The new behaviour is strictly
-      // better here: retrying a 400 schema-validation error or a 401 auth
-      // failure was always wrong; it just hid the symptom for two extra
-      // attempts before failing anyway.
-      //
-      // `maxAttempts: 3` mirrors the old `retries: 2` (initial + 2
-      // retries); `minDelayMs: 2000` mirrors the old `minTimeout`.
-      return await withRetry(callConverseApi, {
+    /** Retry policy is identical to the pre-HITL implementation
+     * (N5 — `withRetry` over transient 5xx / network errors). It now
+     * wraps each individual converse turn rather than the single
+     * round-trip, so a 503 on the auto-confirmation turn retries
+     * the same way an initial 503 would. */
+    const callWithRetry = async (turnInput: {
+      input?: string;
+      promptResponses?: Record<string, { allow: boolean }>;
+      currentConversationId?: string;
+    }): Promise<ConverseApiResponseShape> =>
+      withRetry(() => callConverseApi(turnInput), {
         maxAttempts: 3,
         minDelayMs: 2000,
         label: 'converse',
@@ -141,6 +175,57 @@ class DetectionEmulationChatClient {
           );
         },
       });
+
+    try {
+      // Initial turn.
+      let apiResponse = await callWithRetry({
+        input: message,
+        currentConversationId: conversationId,
+      });
+      const aggregatedSteps: unknown[] = Array.isArray(apiResponse.steps)
+        ? [...apiResponse.steps]
+        : [];
+      let turn = 0;
+
+      // HITL auto-resume loop: if the agent emitted pending prompts,
+      // respond with the configured policy and continue the same
+      // conversation. Loop until the agent returns a turn with no
+      // pending prompts (or the safety ceiling is hit).
+      while (apiResponse.response?.prompts && apiResponse.response.prompts.length > 0) {
+        if (turn >= MAX_PROMPT_ROUNDS) {
+          this.log.warning(
+            `converse: hit MAX_PROMPT_ROUNDS=${MAX_PROMPT_ROUNDS} for conversation [${apiResponse.conversation_id}] — likely a malformed agent loop`
+          );
+          break;
+        }
+        const allow = autoConfirm === 'allow';
+        const promptResponses: Record<string, { allow: boolean }> = {};
+        for (const prompt of apiResponse.response.prompts) {
+          promptResponses[prompt.id] = { allow };
+        }
+        this.log.info(
+          `converse: auto-${allow ? 'accepting' : 'rejecting'} ${
+            apiResponse.response.prompts.length
+          } pending prompt(s)`
+        );
+
+        apiResponse = await callWithRetry({
+          promptResponses,
+          currentConversationId: apiResponse.conversation_id,
+        });
+        if (Array.isArray(apiResponse.steps)) {
+          aggregatedSteps.push(...apiResponse.steps);
+        }
+        turn += 1;
+      }
+
+      return {
+        conversationId: apiResponse.conversation_id,
+        messages: [{ message }, apiResponse.response],
+        steps: aggregatedSteps,
+        errors: [],
+        traceId: apiResponse.trace_id,
+      };
     } catch (error) {
       this.log.error('converse: fatal error');
       return {
@@ -333,12 +418,19 @@ function runScenario({
     examples: [example as Example],
   } satisfies EvaluationDataset;
 
+  // Per-example HITL policy. Examples may opt into rejection by setting
+  // `input.autoConfirm: 'reject'`; everything else accepts (preserves
+  // pre-HITL behaviour for the existing positive examples).
+  const autoConfirm: AutoConfirmPolicy =
+    (example.input as { autoConfirm?: AutoConfirmPolicy } | undefined)?.autoConfirm ?? 'allow';
+
   return executorClient.runExperiment(
     {
       dataset,
       task: async ({ input }) => {
         const response = await chatClient.converse({
           message: (input as { question: string }).question,
+          autoConfirm,
         });
         return {
           messages: response.messages,
@@ -380,6 +472,7 @@ evaluate.describe(
       noMitreTags,
       noSupportedTechniques,
       realExecBlocked,
+      userDeclines,
       alertInvestigation,
       ruleCreation,
     ] = validateRuleDataset.examples;
@@ -480,6 +573,21 @@ evaluate.describe(
         await runScenario({
           name: 'failure: real_execution blocked',
           example: realExecBlocked,
+          chatClient,
+          evaluators,
+          executorClient,
+          traceEsClient,
+          log,
+        });
+      }
+    );
+
+    evaluate(
+      'HITL — user declines real_execution prompt',
+      async ({ chatClient, evaluators, executorClient, traceEsClient, log }) => {
+        await runScenario({
+          name: 'HITL: user declines',
+          example: userDeclines,
           chatClient,
           evaluators,
           executorClient,

@@ -183,4 +183,86 @@ describe('per-family runEmulationCommand tools', () => {
       });
     });
   });
+
+  // ─── HITL: declarative confirmation policy ─────────────────────────────────
+  //
+  // Smoke-tests the framework integration on each per-family tool: the
+  // `confirmation` block must use `askUser: 'once'` so a single accept covers
+  // the whole conversation, and the `getConfirmation` callback must produce a
+  // non-empty title/message + a colour that escalates to 'danger' for
+  // destructive commands. Keeps the helper output reachable from CI without
+  // round-tripping the real prompt manager.
+  describe('HITL declarative confirmation policy', () => {
+    const cases = [
+      {
+        name: 'runProcessCommand',
+        tool: createRunProcessCommandTool(createMockDeps()),
+        destructiveCommand: 'kill-process',
+        nonDestructiveCommand: 'running-processes',
+      },
+      {
+        name: 'runFileCommand',
+        tool: createRunFileCommandTool(createMockDeps()),
+        destructiveCommand: 'upload',
+        nonDestructiveCommand: 'get-file',
+      },
+      {
+        name: 'runNetworkCommand',
+        tool: createRunNetworkCommandTool(createMockDeps()),
+        destructiveCommand: 'isolate',
+        nonDestructiveCommand: 'unisolate',
+      },
+      {
+        name: 'runExecutionCommand',
+        tool: createRunExecutionCommandTool(createMockDeps()),
+        destructiveCommand: 'execute',
+        nonDestructiveCommand: 'cancel',
+      },
+    ];
+
+    it.each(cases)(
+      '$name registers `confirmation: { askUser: "once" }` with a getConfirmation callback',
+      ({ tool }) => {
+        expect(tool.confirmation?.askUser).toBe('once');
+        expect(typeof tool.confirmation?.getConfirmation).toBe('function');
+      }
+    );
+
+    it.each(cases)(
+      '$name renders a destructive-coloured confirmation for [$destructiveCommand]',
+      async ({ tool, destructiveCommand }) => {
+        const result = await tool.confirmation!.getConfirmation!({
+          toolParams: {
+            emulationId: 'em-42',
+            agentType: 'endpoint',
+            endpointIds: ['host-a'],
+            command: destructiveCommand,
+            parameters: {},
+          } as Record<string, unknown>,
+        });
+        expect(result.color).toBe('danger');
+        expect(result.title).toContain(destructiveCommand);
+        expect(result.message).toContain('host-a');
+        expect(result.message).toContain('em-42');
+      }
+    );
+
+    it.each(cases)(
+      '$name renders a warning-coloured confirmation for the non-destructive [$nonDestructiveCommand]',
+      async ({ tool, nonDestructiveCommand }) => {
+        const result = await tool.confirmation!.getConfirmation!({
+          toolParams: {
+            emulationId: 'em-42',
+            agentType: 'endpoint',
+            endpointIds: ['host-a', 'host-b'],
+            command: nonDestructiveCommand,
+            parameters: {},
+          } as Record<string, unknown>,
+        });
+        expect(result.color).toBe('warning');
+        expect(result.title).toContain(nonDestructiveCommand);
+        expect(result.message).toContain('2');
+      }
+    );
+  });
 });

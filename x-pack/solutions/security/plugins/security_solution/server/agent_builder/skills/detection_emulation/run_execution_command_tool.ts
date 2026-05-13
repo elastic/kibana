@@ -23,6 +23,7 @@ import {
   createDefaultRateLimiterConfig,
 } from '../../../lib/detection_emulation/execution/rate_limiter';
 import { withCommandGates } from './with_command_gates';
+import { buildEmulationConfirmation } from './build_emulation_confirmation';
 
 const EXECUTION_FAMILY_COMMANDS = ['execute', 'runscript', 'cancel'] as const;
 
@@ -43,14 +44,12 @@ const runExecutionCommandSchema = z.object({
     .array(z.string().min(1))
     .min(1)
     .describe('Endpoint agent IDs to dispatch the action against (1+).'),
-  command: z
-    .enum(EXECUTION_FAMILY_COMMANDS)
-    .describe(
-      `Execution-family command (HIGHEST IMPACT — runs arbitrary code on the endpoint):
+  command: z.enum(EXECUTION_FAMILY_COMMANDS).describe(
+    `Execution-family command (HIGHEST IMPACT — runs arbitrary code on the endpoint):
 - \`execute\` — \`{ command: string, timeout?: number }\` — run a shell command/executable
 - \`runscript\` — \`{ scriptId: string, scriptInput?: string, timeout?: number }\` — run a script-library entry
 - \`cancel\` — \`{ id: string }\` — cancel a previously-dispatched response action by id`
-    ),
+  ),
   parameters: z
     .record(z.string(), z.unknown())
     .optional()
@@ -98,8 +97,25 @@ types or extra keys fail fast before reaching the EDR connector.
 5. Authenticated caller required
 
 Use this tool when the user wants to run a shell command, run a script-library entry,
-or cancel a previously-dispatched response action.`,
+or cancel a previously-dispatched response action.
+
+**Confirmation:** the agent-builder framework prompts the user once per
+conversation before the first invocation. \`execute\` and \`runscript\` render
+a destructive (red) confirm button; \`cancel\` is treated as recoverable. If
+the user declines, do NOT retry; surface the cancellation and continue with
+unrelated work.`,
     schema: runExecutionCommandSchema,
+    confirmation: {
+      askUser: 'once',
+      getConfirmation: ({ toolParams }) =>
+        buildEmulationConfirmation({
+          family: 'execution',
+          emulationId: toolParams.emulationId,
+          command: toolParams.command,
+          endpointIds: toolParams.endpointIds,
+          parameters: toolParams.parameters,
+        }),
+    },
     handler: async (rawParams, { esClient, spaceId, request }) => {
       const { emulationId, agentType, command } = rawParams;
 

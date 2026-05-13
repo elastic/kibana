@@ -23,6 +23,7 @@ import {
   createDefaultRateLimiterConfig,
 } from '../../../lib/detection_emulation/execution/rate_limiter';
 import { withCommandGates } from './with_command_gates';
+import { buildEmulationConfirmation } from './build_emulation_confirmation';
 
 /**
  * Process-family commands. Restricting the boundary `command` enum to
@@ -50,10 +51,7 @@ const PROCESS_FAMILY_COMMANDS = [
  * boundary, just enforced one step downstream.
  */
 const runProcessCommandSchema = z.object({
-  emulationId: z
-    .string()
-    .min(1)
-    .describe('Unique identifier for the emulation run.'),
+  emulationId: z.string().min(1).describe('Unique identifier for the emulation run.'),
   agentType: z
     .enum(RESPONSE_ACTION_AGENT_TYPE)
     .describe(
@@ -63,15 +61,13 @@ const runProcessCommandSchema = z.object({
     .array(z.string().min(1))
     .min(1)
     .describe('Endpoint agent IDs to dispatch the action against (1+).'),
-  command: z
-    .enum(PROCESS_FAMILY_COMMANDS)
-    .describe(
-      `Process-family command:
+  command: z.enum(PROCESS_FAMILY_COMMANDS).describe(
+    `Process-family command:
 - \`kill-process\` — terminate by \`{ pid: number }\` *or* \`{ entity_id: string }\`
 - \`suspend-process\` — pause by \`{ pid: number }\` *or* \`{ entity_id: string }\`
 - \`running-processes\` — list with no required parameters
 - \`memory-dump\` — \`{ type: 'kernel' }\` *or* \`{ type: 'process', pid: number }\` *or* \`{ type: 'process', entity_id: string }\``
-    ),
+  ),
   parameters: z
     .record(z.string(), z.unknown())
     .optional()
@@ -120,8 +116,28 @@ wrong types) fail fast before reaching the EDR connector.
 5. Authenticated caller required
 
 Use this tool when the user wants to enumerate, terminate, suspend, or dump memory
-for processes on a target endpoint.`,
+for processes on a target endpoint.
+
+**Confirmation:** the agent-builder framework prompts the user once per
+conversation before the first invocation. If the user declines, do NOT
+retry the same operation; surface the cancellation and continue with
+unrelated work.`,
     schema: runProcessCommandSchema,
+    // HITL: declarative confirmation — framework prompts the user once
+    // per conversation before the first invocation. Replaces the older
+    // prose-only "Confirm the user understands the risks" guidance in
+    // the skill body, which the LLM could legitimately ignore.
+    confirmation: {
+      askUser: 'once',
+      getConfirmation: ({ toolParams }) =>
+        buildEmulationConfirmation({
+          family: 'process',
+          emulationId: toolParams.emulationId,
+          command: toolParams.command,
+          endpointIds: toolParams.endpointIds,
+          parameters: toolParams.parameters,
+        }),
+    },
     handler: async (rawParams, { esClient, spaceId, request }) => {
       const { emulationId, agentType, command } = rawParams;
 

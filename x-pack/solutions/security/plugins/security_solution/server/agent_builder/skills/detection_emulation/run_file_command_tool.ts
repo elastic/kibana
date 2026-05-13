@@ -23,6 +23,7 @@ import {
   createDefaultRateLimiterConfig,
 } from '../../../lib/detection_emulation/execution/rate_limiter';
 import { withCommandGates } from './with_command_gates';
+import { buildEmulationConfirmation } from './build_emulation_confirmation';
 
 const FILE_FAMILY_COMMANDS = ['get-file', 'scan', 'upload'] as const;
 
@@ -43,14 +44,12 @@ const runFileCommandSchema = z.object({
     .array(z.string().min(1))
     .min(1)
     .describe('Endpoint agent IDs to dispatch the action against (1+).'),
-  command: z
-    .enum(FILE_FAMILY_COMMANDS)
-    .describe(
-      `File-family command:
+  command: z.enum(FILE_FAMILY_COMMANDS).describe(
+    `File-family command:
 - \`get-file\` — \`{ path: string }\` — retrieve a file from the endpoint
 - \`scan\` — \`{ path: string }\` — trigger a malware scan on the supplied path
 - \`upload\` — \`{ file: opaque, overwrite?: boolean }\` — upload a file to the endpoint (multipart-style; not yet wired through the route)`
-    ),
+  ),
   parameters: z
     .record(z.string(), z.unknown())
     .optional()
@@ -98,8 +97,24 @@ connector.
 5. Authenticated caller required
 
 Use this tool when the user wants to retrieve a file, trigger a malware scan, or
-upload a file to a target endpoint.`,
+upload a file to a target endpoint.
+
+**Confirmation:** the agent-builder framework prompts the user once per
+conversation before the first invocation. If the user declines, do NOT
+retry the same operation; surface the cancellation and continue with
+unrelated work.`,
     schema: runFileCommandSchema,
+    confirmation: {
+      askUser: 'once',
+      getConfirmation: ({ toolParams }) =>
+        buildEmulationConfirmation({
+          family: 'file',
+          emulationId: toolParams.emulationId,
+          command: toolParams.command,
+          endpointIds: toolParams.endpointIds,
+          parameters: toolParams.parameters,
+        }),
+    },
     handler: async (rawParams, { esClient, spaceId, request }) => {
       const { emulationId, agentType, command } = rawParams;
 

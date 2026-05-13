@@ -23,6 +23,7 @@ import {
   createDefaultRateLimiterConfig,
 } from '../../../lib/detection_emulation/execution/rate_limiter';
 import { withCommandGates } from './with_command_gates';
+import { buildEmulationConfirmation } from './build_emulation_confirmation';
 
 const NETWORK_FAMILY_COMMANDS = ['isolate', 'unisolate'] as const;
 
@@ -43,20 +44,16 @@ const runNetworkCommandSchema = z.object({
     .array(z.string().min(1))
     .min(1)
     .describe('Endpoint agent IDs to dispatch the action against (1+).'),
-  command: z
-    .enum(NETWORK_FAMILY_COMMANDS)
-    .describe(
-      `Network-family command:
+  command: z.enum(NETWORK_FAMILY_COMMANDS).describe(
+    `Network-family command:
 - \`isolate\` — block inbound/outbound traffic on the endpoint(s) (Elastic Defend management connection still allowed)
 - \`unisolate\` — release the endpoint(s) from network isolation
 Both accept only an optional \`{ comment: string }\` recorded against the response action.`
-    ),
+  ),
   parameters: z
     .record(z.string(), z.unknown())
     .optional()
-    .describe(
-      'Optional parameters. Only `{ comment?: string }` is supported for this family.'
-    ),
+    .describe('Optional parameters. Only `{ comment?: string }` is supported for this family.'),
 });
 
 export interface RunNetworkCommandToolDeps {
@@ -98,8 +95,24 @@ Defend management); \`unisolate\` restores normal traffic flow.
 5. Authenticated caller required
 
 Use this tool when the user wants to network-isolate (or release) one or more
-endpoints during incident response or attack containment emulation.`,
+endpoints during incident response or attack containment emulation.
+
+**Confirmation:** the agent-builder framework prompts the user once per
+conversation before the first invocation. If the user declines, do NOT
+retry the same operation; surface the cancellation and continue with
+unrelated work.`,
     schema: runNetworkCommandSchema,
+    confirmation: {
+      askUser: 'once',
+      getConfirmation: ({ toolParams }) =>
+        buildEmulationConfirmation({
+          family: 'network',
+          emulationId: toolParams.emulationId,
+          command: toolParams.command,
+          endpointIds: toolParams.endpointIds,
+          parameters: toolParams.parameters,
+        }),
+    },
     handler: async (rawParams, { esClient, spaceId, request }) => {
       const { emulationId, agentType, command } = rawParams;
 

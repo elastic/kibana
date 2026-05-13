@@ -68,9 +68,12 @@ Do **not** use this skill for:
 ### When log_injection confidence is insufficient
 
 If \`confidence < 0.5\` and the user explicitly requests real execution:
-1. Confirm the user has the required privileges and understands the risks.
-2. Call \`validateRule\` with \`mode: 'real_execution'\` and real enrolled \`endpointIds\`.
-3. Report the same output fields.
+1. Call \`validateRule\` with \`mode: 'real_execution'\` and real enrolled \`endpointIds\`.
+2. The agent-builder framework automatically prompts the user for confirmation
+   before any live response actions are dispatched (no prose persuasion needed).
+   If the user declines, the tool returns a \`user_declined\` error — do **not**
+   retry; surface the cancellation and continue with unrelated work.
+3. Report the same output fields once the run completes.
 
 ### Low-level command dispatch
 
@@ -104,8 +107,9 @@ specific command requires (no free-form parameter records).
 
 **Re-run with real execution:**
 > "Re-validate rule abc-123 with live endpoints"
-1. Confirm user intent + privilege
-2. \`validateRule({ ruleId: 'abc-123', endpointIds: ['<real-id>'], mode: 'real_execution' })\`
+1. \`validateRule({ ruleId: 'abc-123', endpointIds: ['<real-id>'], mode: 'real_execution' })\`
+2. The framework prompts the user; if they cancel, acknowledge and stop.
+3. If accepted, report confidence + matched/unmatched signals once the run finishes.
 
 ## Tools
 
@@ -187,11 +191,19 @@ Guards applied by each tool (in order; first failure short-circuits). The four
 | Auth required | ✓ | — | ✓ |
 | RBAC | ✓ (real_execution) | — | ✓ (per-command) |
 | Allowlist | ✓ (real_execution) | — | ✓ |
+| **HITL prompt** | ✓ (real_execution; on-demand, skipped in standalone mode) | — | ✓ (declarative, once per conversation) |
 | Rate limit | ✓ (real_execution, 1 slot/scenario) | — | ✓ (1 slot/command) |
 
 Feature flags: \`detectionEmulationLogInjection\` gates log_injection;
 \`detectionEmulationRealExecution\` gates real_execution and all four
 \`run*Command\` tools.
+
+**HITL behaviour** is enforced by the agent-builder framework, not by skill
+prose. \`validateRule\` uses an on-demand prompt so the safe \`log_injection\`
+mode never asks; the four \`run*Command\` tools use declarative
+\`{ askUser: 'once' }\` so a single confirmation covers the whole conversation.
+Both surfaces honour \`executionMode === 'standalone'\` (sub-agent / eval / A2A
+runs) by skipping the prompt — RBAC + allowlist remain in force.
 
 ## Response Format
 

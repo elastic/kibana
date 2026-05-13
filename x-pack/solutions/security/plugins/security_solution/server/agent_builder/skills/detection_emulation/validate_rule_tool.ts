@@ -7,7 +7,8 @@
 
 import { createHash } from 'crypto';
 import type { Logger } from '@kbn/core/server';
-import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
+import { AgentExecutionMode, ToolType, ToolResultType } from '@kbn/agent-builder-common';
+import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import {
   RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
@@ -158,9 +159,17 @@ Dispatches payloads mapped to the rule's MITRE ATT&CK technique tags, collects r
 
 **Output fields:** \`confidence\`, \`coverage\`, \`precision\`, \`tp\`, \`fp\`, \`caveats\`, \`matched_signals\`, \`unmatched_signals\`, \`report_id\`.
 
+**Confirmation (\`real_execution\` only):** the agent-builder framework prompts the
+user once per scenario before the live response actions are dispatched. If the
+user declines, the tool returns a \`user_declined\` error — do NOT retry; surface
+the cancellation and continue with unrelated work.
+
 Use this tool when the user asks to validate, test, score, or confirm whether a detection rule will fire on a known attack technique.`,
     schema: validateRuleSchema,
-    handler: async (rawParams, { esClient, spaceId, request }) => {
+    handler: async (
+      rawParams,
+      { esClient, spaceId, request, prompts, callContext, executionMode }
+    ) => {
       const {
         ruleId,
         endpointIds,
@@ -293,6 +302,82 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
               ],
             };
           }
+        }
+
+        // Step 3a-bis (real_execution only): on-demand HITL prompt.
+        //
+        // Why here: the prompt fires AFTER feature flag + auth + RBAC +
+        // allowlist (an authoritative no shouldn't waste the user's
+        // attention) and BEFORE the rate-limit acquire (a declined run
+        // shouldn't burn a per-space slot).
+        //
+        // Why on-demand and not declarative: validateRule has TWO modes;
+        // log_injection is safe and must NOT prompt. A `confirmation:
+        // { askUser: 'always' }` block on the tool definition would fire
+        // on every call regardless of mode, hurting the safe path's UX.
+        // On-demand keeps the prompt scoped to the destructive mode.
+        //
+        // Why `executionMode === 'standalone'` skips the prompt: standalone
+        // runs (sub-agent forks, evals, A2A invocations) are non-interactive
+        // by design — there is no human at the other end to consent. The
+        // existing RBAC + allowlist gates remain in force; this just stops
+        // the run from deadlocking on a prompt nobody will answer.
+        if (mode === 'real_execution' && executionMode !== AgentExecutionMode.standalone) {
+          const promptId = `security.detection-emulation.validate-rule.${callContext.toolCallId}`;
+          const status = prompts.checkConfirmationStatus(promptId);
+
+          if (status.status === ConfirmationStatus.rejected) {
+            logger.info(
+              `validate_rule tool: user declined real_execution prompt for rule [${ruleId}]`
+            );
+            return {
+              results: [
+                {
+                  type: ToolResultType.error,
+                  data: {
+                    error_type: 'user_declined',
+                    message: 'User declined to dispatch the live response actions for this rule.',
+                    rule_id: ruleId,
+                    mode,
+                    status_code: 403,
+                    likely_cause:
+                      'Operator cancelled the confirmation prompt; do not retry without an explicit user instruction.',
+                  },
+                },
+              ],
+            };
+          }
+
+          if (status.status === ConfirmationStatus.unprompted) {
+            const wallBudgetSeconds = Math.round(wallBudgetMs / 1000);
+            const endpointSummary =
+              endpointIds.length === 1
+                ? `\`${endpointIds[0]}\``
+                : `${endpointIds.length} endpoints (${endpointIds
+                    .slice(0, 3)
+                    .map((id) => `\`${id}\``)
+                    .join(', ')}${
+                    endpointIds.length > 3 ? `, +${endpointIds.length - 3} more` : ''
+                  })`;
+
+            return prompts.askForConfirmation({
+              id: promptId,
+              title: `Validate rule \`${ruleId}\` with live response actions`,
+              message: [
+                `**Rule:** \`${ruleId}\``,
+                `**Endpoints:** ${endpointSummary}`,
+                `**Mode:** \`real_execution\` — dispatches live EDR response actions to the endpoint(s) above`,
+                `**Agent type:** \`${agentType}\``,
+                `**Wall budget:** ~${wallBudgetSeconds}s for telemetry collection`,
+                '',
+                "This action runs payloads mapped to the rule's MITRE ATT&CK techniques. Cancel if the rule, endpoints, or wall budget look wrong.",
+              ].join('\n'),
+              confirm_text: 'Run live emulation',
+              cancel_text: 'Cancel',
+              color: 'danger' as const,
+            });
+          }
+          // accepted → fall through to the rate-limit acquire below.
         }
 
         // Step 3b (real_execution only): atomic rate-limit acquire. Burns
