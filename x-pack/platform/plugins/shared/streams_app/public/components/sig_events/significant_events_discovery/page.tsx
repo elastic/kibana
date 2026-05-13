@@ -60,6 +60,9 @@ export function SignificantEventsDiscoveryPage() {
       application: { getUrlForApp },
       notifications: { toasts },
     },
+    dependencies: {
+      start: { agentBuilder },
+    },
   } = useKibana();
 
   const {
@@ -77,6 +80,21 @@ export function SignificantEventsDiscoveryPage() {
   );
 
   const { isMemoryEnabled } = useDiscoverySettings();
+
+  const handleOpenSystemOnboarding = useCallback(() => {
+    agentBuilder?.openChat({
+      newConversation: true,
+      sessionTag: 'sigevents-onboarding',
+      initialMessage: i18n.translate(
+        'xpack.streams.significantEventsDiscovery.onboardingInitialMessage',
+        {
+          defaultMessage:
+            'Start the significant-events-onboarding skill to interview me about my system.',
+        }
+      ),
+      autoSendInitialMessage: true,
+    });
+  }, [agentBuilder]);
 
   useStreamsAppBreadcrumbs(() => {
     return [
@@ -222,6 +240,20 @@ export function SignificantEventsDiscoveryPage() {
                 })}
               </EuiButton>
             </EuiFlexItem>
+            {isMemoryEnabled && agentBuilder && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  iconType="discuss"
+                  onClick={handleOpenSystemOnboarding}
+                  data-test-subj="significantEventsSystemOnboardingButton"
+                >
+                  {i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.systemOnboardingButton',
+                    { defaultMessage: 'Tell us about your system' }
+                  )}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         }
         tabs={tabs}

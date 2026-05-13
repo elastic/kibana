@@ -20,6 +20,52 @@ import { registerAgentBuilderAttachments } from './attachments/register_attachme
 import { registerAgentBuilderSmlTypes } from './sml/register_sml_types';
 import { registerSignificantEventsDiscoveryAgents } from './agents/discovery';
 
+type AgentDefinition = Parameters<AgentBuilderPluginSetup['agents']['register']>[0];
+
+const memorySynthesizerAgent: AgentDefinition = {
+  id: 'sigevents.memory.synthesizer',
+  name: 'Memory Synthesizer',
+  description:
+    'Synthesizes significant events knowledge indicators into memory wiki pages using ES|QL read tools and the write_memory_page workflow.',
+  configuration: {
+    skill_ids: ['streams-memory-synthesis'],
+    tools: [],
+  },
+};
+
+const memoryConsolidatorAgent: AgentDefinition = {
+  id: 'sigevents.memory.consolidator',
+  name: 'Memory Consolidator',
+  description:
+    'Curates the memory knowledge base by merging duplicates, removing stale entries, and improving categorization.',
+  configuration: {
+    skill_ids: ['streams-memory-consolidation'],
+    tools: [],
+  },
+};
+
+const conversationScraperAgent: AgentDefinition = {
+  id: 'sigevents.memory.conversation-scraper',
+  name: 'Conversation Scraper',
+  description:
+    'Extracts durable knowledge from AI chat conversations and persists it as memory wiki pages.',
+  configuration: {
+    skill_ids: ['streams-conversation-scraper'],
+    tools: [],
+  },
+};
+
+const systemOnboardingAgent: AgentDefinition = {
+  id: 'sigevents.memory.system-onboarding',
+  name: 'System Onboarding',
+  description:
+    'Interviews the user to build a mental model of their system and stores operational context in the sigevents memory knowledge base.',
+  configuration: {
+    skill_ids: ['significant-events-onboarding'],
+    tools: [],
+  },
+};
+
 export const createMemoryToolsOptions = ({
   getScopedClients,
   server,
@@ -61,9 +107,17 @@ export const registerStreamsAgentBuilder = async ({
   telemetry: EbtTelemetryClient;
   streamsKIsOnboardingClient?: StreamsKIsOnboardingClient;
 }): Promise<void> => {
+  const memoryToolsOptions = createMemoryToolsOptions({ getScopedClients, server, logger });
+
   registerAgentBuilderAttachments({ agentBuilder, getScopedClients, logger });
   registerAgentBuilderSmlTypes({ agentContextLayer, getScopedClients });
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
-  registerAgentBuilderSkills({ agentBuilder, telemetry, streamsKIsOnboardingClient });
+  registerAgentBuilderSkills({ agentBuilder, telemetry, streamsKIsOnboardingClient, memoryToolsOptions });
   registerSignificantEventsDiscoveryAgents(agentBuilder);
+
+  agentBuilder.agents.register(memorySynthesizerAgent);
+  agentBuilder.agents.register(memoryConsolidatorAgent);
+  agentBuilder.agents.register(conversationScraperAgent);
+  agentBuilder.agents.register(systemOnboardingAgent);
+  logger.info('sigevents memory agents registered');
 };

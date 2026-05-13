@@ -88,6 +88,10 @@ export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.security}.agent`,
   `${internalNamespaces.streams}.significant-events.discovery.investigator`,
   `${internalNamespaces.streams}.significant-events.discovery.judge`,
+  'sigevents.memory.synthesizer',
+  'sigevents.memory.consolidator',
+  'sigevents.memory.conversation-scraper',
+  'sigevents.memory.system-onboarding',
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];
@@ -125,6 +129,10 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'significant-events-management',
   'knowledge-indicators-management',
   'ki-identification-management',
+  'streams-memory-synthesis',
+  'streams-memory-consolidation',
+  'streams-conversation-scraper',
+  'significant-events-onboarding',
 
   // Platform – Workflows
   'workflow-authoring',
