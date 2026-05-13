@@ -105,6 +105,9 @@ export const backgroundTaskNodeMapping: SavedObjectsTypeMappingDefinition = {
     last_seen: {
       type: 'date',
     },
+    address: {
+      type: 'keyword',
+    },
   },
 };
 

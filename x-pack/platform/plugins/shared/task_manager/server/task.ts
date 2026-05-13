@@ -570,7 +570,19 @@ export interface ApiKeyOptions {
   regenerateApiKey?: boolean;
 }
 
-export type ScheduleOptions = Record<string, unknown> & ApiKeyOptions;
+export type ScheduleOptions = Record<string, unknown> &
+  ApiKeyOptions & {
+    /**
+     * Requests immediate claiming behavior for latency-sensitive tasks.
+     * Internally this maps to refresh + claim nudge.
+     */
+    requestImmediateClaim?: boolean;
+    /**
+     * Controls SO refresh behavior after scheduling.
+     * Prefer `requestImmediateClaim` for user-facing latency-sensitive paths.
+     */
+    refresh?: boolean;
+  };
 
 // Local event log interface to avoid a circular dependency with @kbn/event-log-plugin in .tsconfig
 export interface TaskEventLogger {

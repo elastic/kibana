@@ -6,13 +6,31 @@
  */
 
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
-import { backgroundTaskNodeSchemaV1 } from '../schemas/background_task_node';
+import {
+  backgroundTaskNodeSchemaV1,
+  backgroundTaskNodeSchemaV2,
+} from '../schemas/background_task_node';
 
 export const backgroundTaskNodeModelVersions: SavedObjectsModelVersionMap = {
   '1': {
     changes: [],
     schemas: {
+      forwardCompatibility: backgroundTaskNodeSchemaV1.extends({}, { unknowns: 'ignore' }),
       create: backgroundTaskNodeSchemaV1,
+    },
+  },
+  '2': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          address: { type: 'keyword' },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: backgroundTaskNodeSchemaV2.extends({}, { unknowns: 'ignore' }),
+      create: backgroundTaskNodeSchemaV2,
     },
   },
 };

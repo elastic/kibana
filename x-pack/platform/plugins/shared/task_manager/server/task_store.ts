@@ -70,6 +70,10 @@ import type { ApiKeyStrategy, ApiKeySOFields, InvalidationTarget } from './api_k
 import { getFirstRunAt } from './lib/get_first_run_at';
 import { isInterval } from './lib/intervals';
 
+interface TaskStoreScheduleOptions extends ApiKeyOptions {
+  refresh?: boolean;
+}
+
 export interface StoreOpts {
   esClient: ElasticsearchClient;
   index: string;
@@ -441,7 +445,7 @@ export class TaskStore {
    */
   public async schedule(
     taskInstance: TaskInstance,
-    options?: ApiKeyOptions
+    options?: TaskStoreScheduleOptions
   ): Promise<ConcreteTaskInstance> {
     return this.executionContextRunner.run(() => this._schedule(taskInstance, options), {
       id: 'schedule',
@@ -449,7 +453,7 @@ export class TaskStore {
   }
   private async _schedule(
     taskInstance: TaskInstance,
-    options?: ApiKeyOptions
+    options?: TaskStoreScheduleOptions
   ): Promise<ConcreteTaskInstance> {
     try {
       this.validateCanEncryptSavedObjects(options?.request);
@@ -478,7 +482,7 @@ export class TaskStore {
           ...apiKeySOFields,
           runAt: getFirstRunAt({ taskInstance: validatedTaskInstance, logger: this.logger }),
         },
-        { id, refresh: false }
+        { id, refresh: options?.refresh ?? false }
       );
       if (
         get(taskInstance, 'schedule.interval', null) == null &&
@@ -509,7 +513,7 @@ export class TaskStore {
    */
   public async bulkSchedule(
     taskInstances: TaskInstance[],
-    options?: ApiKeyOptions
+    options?: TaskStoreScheduleOptions
   ): Promise<ConcreteTaskInstance[]> {
     return this.executionContextRunner.run(() => this._bulkSchedule(taskInstances, options), {
       id: 'bulk-schedule',
@@ -518,7 +522,7 @@ export class TaskStore {
 
   private async _bulkSchedule(
     taskInstances: TaskInstance[],
-    options?: ApiKeyOptions
+    options?: TaskStoreScheduleOptions
   ): Promise<ConcreteTaskInstance[]> {
     try {
       this.validateCanEncryptSavedObjects(options?.request);
@@ -566,7 +570,7 @@ export class TaskStore {
     let savedObjects;
     try {
       savedObjects = await soClient.bulkCreate<SerializedConcreteTaskInstance>(objects, {
-        refresh: false,
+        refresh: options?.refresh ?? false,
         overwrite: true,
       });
       this.adHocTaskCounter.increment(

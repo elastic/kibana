@@ -44,6 +44,9 @@ export const DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION = '30s';
 const FIVE_MIN_IN_MS = 5 * 60 * 1000;
 
 export const DEFAULT_KIBANAS_PER_PARTITION = 2;
+export const CLAIM_NUDGE_STRATEGY_HTTP = 'http';
+export const CLAIM_NUDGE_STRATEGY_GLOBAL_CHECKPOINTS = 'global_checkpoints';
+export const CLAIM_NUDGE_STRATEGY_DISABLED = 'disabled';
 
 export enum ApiKeyType {
   ES = 'es',
@@ -81,6 +84,21 @@ const eventLoopDelaySchema = schema.object({
 const requestTimeoutsConfig = schema.object({
   /* The request timeout config for task manager's updateByQuery default:30s, min:10s, max:10m */
   update_by_query: schema.number({ defaultValue: 1000 * 30, min: 1000 * 10, max: 1000 * 60 * 10 }),
+});
+
+const claimNudgeConfig = schema.object({
+  strategy: schema.oneOf(
+    [
+      schema.literal(CLAIM_NUDGE_STRATEGY_HTTP),
+      schema.literal(CLAIM_NUDGE_STRATEGY_GLOBAL_CHECKPOINTS),
+      schema.literal(CLAIM_NUDGE_STRATEGY_DISABLED),
+    ],
+    { defaultValue: CLAIM_NUDGE_STRATEGY_GLOBAL_CHECKPOINTS }
+  ),
+  http_timeout_ms: schema.number({
+    defaultValue: 2000,
+    min: 100,
+  }),
 });
 
 const validateDuration = (duration: string) => {
@@ -223,6 +241,7 @@ export const configSchema = schema.object(
     claim_strategy: schema.string({ defaultValue: CLAIM_STRATEGY_MGET }),
     request_timeouts: requestTimeoutsConfig,
     auto_calculate_default_ech_capacity: schema.boolean({ defaultValue: false }),
+    claim_nudge: claimNudgeConfig,
   },
   {
     validate: (config) => {

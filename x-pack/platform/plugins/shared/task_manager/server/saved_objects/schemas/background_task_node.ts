@@ -13,4 +13,10 @@ export const backgroundTaskNodeSchemaV1 = schema.object({
   last_seen: schema.string(),
 });
 
-export type BackgroundTaskNode = TypeOf<typeof backgroundTaskNodeSchemaV1>;
+export const backgroundTaskNodeSchemaV2 = schema.object({
+  id: schema.string(),
+  last_seen: schema.string(),
+  address: schema.maybe(schema.string()),
+});
+
+export type BackgroundTaskNode = TypeOf<typeof backgroundTaskNodeSchemaV2>;

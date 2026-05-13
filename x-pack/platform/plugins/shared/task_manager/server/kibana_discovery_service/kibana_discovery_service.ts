@@ -16,6 +16,7 @@ import { isClusterBlockException } from '../lib/errors';
 interface DiscoveryServiceParams {
   config: TaskManagerConfig['discovery'];
   currentNode: string;
+  nodeAddress?: string;
   savedObjectsRepository: ISavedObjectsRepository;
   logger: Logger;
   onNodesCounted?: (numOfNodes: number) => void;
@@ -24,6 +25,7 @@ interface DiscoveryServiceParams {
 interface DiscoveryServiceUpsertParams {
   id: string;
   lastSeen: string;
+  address?: string;
 }
 
 export const DEFAULT_TIMEOUT = 2000;
@@ -38,6 +40,9 @@ export class KibanaDiscoveryService {
   private stopped = false;
   private timer: NodeJS.Timeout | undefined;
   private onNodesCounted?: (numOfNodes: number) => void;
+  private readonly nodeAddress?: string;
+  private hasLoggedAddressAdvertisement = false;
+  private hasLoggedStartupSmokeTest = false;
 
   constructor(opts: DiscoveryServiceParams) {
     this.activeNodesLookBack = opts.config.active_nodes_lookback;
@@ -46,17 +51,19 @@ export class KibanaDiscoveryService {
     this.logger = opts.logger;
     this.currentNode = opts.currentNode;
     this.onNodesCounted = opts.onNodesCounted;
+    this.nodeAddress = opts.nodeAddress;
   }
 
-  private async upsertCurrentNode({ id, lastSeen }: DiscoveryServiceUpsertParams) {
+  private async upsertCurrentNode({ id, lastSeen, address }: DiscoveryServiceUpsertParams) {
     await this.savedObjectsRepository.update<BackgroundTaskNode>(
       BACKGROUND_TASK_NODE_SO_NAME,
       id,
       {
         id,
         last_seen: lastSeen,
+        address,
       },
-      { upsert: { id, last_seen: lastSeen }, refresh: false }
+      { upsert: { id, last_seen: lastSeen, address }, refresh: false }
     );
   }
 
@@ -66,10 +73,28 @@ export class KibanaDiscoveryService {
       const lastSeenDate = new Date();
       const lastSeen = lastSeenDate.toISOString();
       try {
-        await this.upsertCurrentNode({ id: this.currentNode, lastSeen });
+        await this.upsertCurrentNode({
+          id: this.currentNode,
+          lastSeen,
+          address: this.nodeAddress,
+        });
         if (!this.started) {
           this.logger.info('Kibana Discovery Service has been started');
           this.started = true;
+        }
+        if (this.nodeAddress && !this.hasLoggedAddressAdvertisement) {
+          this.logger.info(
+            `[claim_nudge] advertising_address=${this.nodeAddress} for node ${this.currentNode}`
+          );
+          this.hasLoggedAddressAdvertisement = true;
+        }
+        if (!this.hasLoggedStartupSmokeTest) {
+          this.logger.info(
+            `[claim_nudge] startup_smoke_test discovery_upsert_ok node_id=${this.currentNode} advertised_address=${
+              this.nodeAddress ?? 'null'
+            }`
+          );
+          this.hasLoggedStartupSmokeTest = true;
         }
       } catch (e) {
         if (isClusterBlockException(e)) {

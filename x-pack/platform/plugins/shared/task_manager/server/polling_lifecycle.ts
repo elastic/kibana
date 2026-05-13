@@ -83,6 +83,7 @@ export interface TaskPollingLifecycleOpts {
   startingCapacity: number;
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
+  claimNudge$?: Observable<void>;
 }
 
 export type TaskLifecycleEvent =
@@ -148,6 +149,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     startingCapacity,
     apiKeyStrategy,
     eventLogger,
+    claimNudge$,
   }: TaskPollingLifecycleOpts) {
     this.basePathService = basePathService;
     this.logger = logger;
@@ -224,6 +226,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       initialPollInterval: pollInterval,
       pollInterval$: this.pollIntervalConfiguration$,
       pollIntervalDelay$,
+      claimNudge$,
       getCapacity: () => {
         const capacity = this.pool.availableCapacity();
         if (!capacity) {

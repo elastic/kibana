@@ -21,6 +21,7 @@ import type {
   Logger,
   CoreStart,
 } from '@kbn/core/server';
+import { hostname } from 'node:os';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
@@ -47,10 +48,15 @@ import { TaskTypeDictionary } from './task_type_dictionary';
 import type { AggregationOpts, FetchResult, SearchOpts } from './task_store';
 import { TaskStore } from './task_store';
 import { TaskScheduling } from './task_scheduling';
-import { backgroundTaskUtilizationRoute, healthRoute, metricsRoute } from './routes';
+import {
+  backgroundTaskUtilizationRoute,
+  claimNudgeRoute,
+  healthRoute,
+  metricsRoute,
+} from './routes';
 import type { MonitoringStats } from './monitoring';
 import { createMonitoringStats } from './monitoring';
-import type { ConcreteTaskInstance, TaskEventLogger } from './task';
+import { TaskPriority, type ConcreteTaskInstance, type TaskEventLogger } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
@@ -76,6 +82,18 @@ import {
   scheduleInvalidateApiKeyTask,
 } from './invalidate_api_keys/invalidate_api_keys_task';
 import { createApiKeyStrategy } from './api_key_strategy';
+import {
+  GlobalCheckpointsClaimNudgeService,
+  HttpClaimNudgeClient,
+  HttpClaimNudgeService,
+  NoopClaimNudgeService,
+} from './claim_nudge';
+import {
+  CLAIM_NUDGE_STRATEGY_DISABLED,
+  CLAIM_NUDGE_STRATEGY_GLOBAL_CHECKPOINTS,
+  CLAIM_NUDGE_STRATEGY_HTTP,
+} from './config';
+import type { TaskManagerClaimNudgeService } from './claim_nudge';
 
 export interface TaskManagerSetupContract {
   /**
@@ -124,6 +142,8 @@ export interface TaskManagerPluginsSetup {
 }
 
 const LogHealthForBackgroundTasksOnlyMinutes = 60;
+const TaskManagerLatencyProbeTaskType = 'task_manager:latency_probe';
+const TaskManagerLatencyProbeIntervalMs = 10_000;
 
 export class TaskManagerPlugin
   implements
@@ -155,11 +175,13 @@ export class TaskManagerPlugin
   private numOfKibanaInstances$: Subject<number> = new BehaviorSubject(1);
   private canEncryptSavedObjects: boolean;
   private licenseSubscriber?: PublicMethodsOf<LicenseSubscriber>;
+  private claimNudgeService?: TaskManagerClaimNudgeService;
   private invalidateApiKeyFn?: ApiKeyInvalidationFn;
   private taskEventLogger?: TaskEventLogger;
   private invalidateUiamApiKeyFn?: UiamApiKeyInvalidationFn;
   private taskStore?: TaskStore;
   private startContract?: TaskManagerStartContract;
+  private probeScheduleIntervalId?: NodeJS.Timeout;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -176,6 +198,62 @@ export class TaskManagerPlugin
   isNodeBackgroundTasksOnly() {
     const { backgroundTasks, migrator, ui } = this.nodeRoles;
     return backgroundTasks && !migrator && !ui;
+  }
+
+  private deriveNodeAddress({
+    host,
+    port,
+    protocol,
+  }: {
+    host: string;
+    port: number;
+    protocol: 'http' | 'https' | 'socket';
+  }) {
+    const podIp = process.env.POD_IP;
+    const osHostname = hostname();
+    this.logger.info(
+      `[claim_nudge] address_resolution_inputs server.host=${host} server.port=${port} protocol=${protocol} pod_ip=${
+        podIp ?? 'undefined'
+      } os_hostname=${osHostname}`
+    );
+
+    if (protocol === 'socket') {
+      this.logger.info('[claim_nudge] self_address=null (socket protocol is not supported)');
+      return undefined;
+    }
+
+    if (host === 'localhost' || host === '127.0.0.1') {
+      this.logger.info(
+        `[claim_nudge] self_address=null (server.host=${host} is not externally reachable, HTTP nudge will not advertise this node)`
+      );
+      return undefined;
+    }
+
+    const resolvedHost = host === '0.0.0.0' || host === '::' ? podIp || osHostname : host;
+    const address = `${protocol}://${resolvedHost}:${port}`;
+
+    this.logger.info(
+      `[claim_nudge] self_address=${address} (hostname=${resolvedHost}, port=${port}, protocol=${protocol})`
+    );
+    return address;
+  }
+
+  private getClaimNudgeStrategy(isServerless: boolean) {
+    if (this.config.claim_nudge.strategy === CLAIM_NUDGE_STRATEGY_DISABLED) {
+      this.logger.info('[claim_nudge] strategy=disabled (explicit config)');
+      return CLAIM_NUDGE_STRATEGY_DISABLED;
+    }
+
+    if (
+      isServerless &&
+      this.config.claim_nudge.strategy === CLAIM_NUDGE_STRATEGY_GLOBAL_CHECKPOINTS
+    ) {
+      this.logger.info('[claim_nudge] strategy=http (auto-detected: serverless=true)');
+      return CLAIM_NUDGE_STRATEGY_HTTP;
+    }
+
+    this.logger.info(`[claim_nudge] strategy=${this.config.claim_nudge.strategy}`);
+    return this.config.claim_nudge.strategy;
   }
 
   private invalidateApiKey(params: InvalidateAPIKeysParams) {
@@ -259,6 +337,12 @@ export class TaskManagerPlugin
       resetMetrics$: this.resetMetrics$,
       taskManagerId: this.taskManagerId,
     });
+    claimNudgeRoute({
+      router,
+      logger: this.logger,
+      shouldRunTasks: this.shouldRunBackgroundTasks,
+      onClaimNudge: (source: string) => this.claimNudgeService?.emitLocalNudge(source),
+    });
 
     core.status.derivedStatus$.subscribe((status) =>
       this.logger.debug(`status core.status.derivedStatus now set to ${status.level}`)
@@ -302,6 +386,36 @@ export class TaskManagerPlugin
       core.getStartServices,
       this.definitions
     );
+    this.definitions.registerTaskDefinitions({
+      [TaskManagerLatencyProbeTaskType]: {
+        title: 'Task Manager latency probe',
+        timeout: '5m',
+        priority: TaskPriority.Normal,
+        createTaskRunner: ({ taskInstance }) => ({
+          run: async () => {
+            const startedAtMs = Date.now();
+            const params = (taskInstance.params ?? {}) as { scheduleRequestedAtMs?: number };
+            const scheduleRequestedAtMs = params.scheduleRequestedAtMs ?? 0;
+            const scheduledAtMs = taskInstance.scheduledAt.valueOf();
+
+            this.logger.info(
+              `[tm_latency_probe] run_started_at=${new Date(
+                startedAtMs
+              ).toISOString()} schedule_requested_at=${new Date(
+                scheduleRequestedAtMs
+              ).toISOString()} task_scheduled_at=${taskInstance.scheduledAt.toISOString()} delta_from_requested_ms=${
+                startedAtMs - scheduleRequestedAtMs
+              } delta_from_scheduled_ms=${startedAtMs - scheduledAtMs}`
+            );
+
+            return {
+              state: {},
+              shouldDeleteTask: true,
+            };
+          },
+        }),
+      },
+    });
 
     if (this.config.unsafe.exclude_task_types.length) {
       this.logger.warn(
@@ -340,6 +454,13 @@ export class TaskManagerPlugin
     { cloud, licensing }: TaskManagerPluginsStart
   ): TaskManagerStartContract {
     this.licenseSubscriber = new LicenseSubscriber(licensing.license$);
+    const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
+    const claimNudgeStrategy = this.getClaimNudgeStrategy(isServerless);
+    const nodeAddress = this.deriveNodeAddress({
+      host: http.getServerInfo().hostname,
+      port: http.getServerInfo().port,
+      protocol: http.getServerInfo().protocol,
+    });
 
     const savedObjectsRepository = savedObjects.createInternalRepository([
       TASK_SO_NAME,
@@ -351,6 +472,7 @@ export class TaskManagerPlugin
       savedObjectsRepository,
       logger: this.logger,
       currentNode: this.taskManagerId!,
+      nodeAddress,
       config: this.config.discovery,
       onNodesCounted: (numOfNodes: number) => this.numOfKibanaInstances$.next(numOfNodes),
     });
@@ -386,8 +508,22 @@ export class TaskManagerPlugin
       apiKeyStrategy,
     });
     this.taskStore = taskStore;
-
-    const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
+    if (claimNudgeStrategy === CLAIM_NUDGE_STRATEGY_HTTP) {
+      const claimNudgeClient = new HttpClaimNudgeClient({
+        logger: this.logger,
+        kibanaDiscoveryService: this.kibanaDiscoveryService,
+        timeoutMs: this.config.claim_nudge.http_timeout_ms,
+        serverBasePath: http.basePath.serverBasePath,
+      });
+      this.claimNudgeService = new HttpClaimNudgeService(this.logger, claimNudgeClient);
+    } else if (claimNudgeStrategy === CLAIM_NUDGE_STRATEGY_GLOBAL_CHECKPOINTS) {
+      this.claimNudgeService = new GlobalCheckpointsClaimNudgeService(this.logger);
+    } else {
+      this.claimNudgeService = new NoopClaimNudgeService(this.logger);
+    }
+    if (this.shouldRunBackgroundTasks) {
+      this.claimNudgeService.start();
+    }
 
     const defaultCapacity = getDefaultCapacity({
       autoCalculateDefaultEchCapacity: this.config.auto_calculate_default_ech_capacity,
@@ -442,6 +578,7 @@ export class TaskManagerPlugin
         startingCapacity,
         apiKeyStrategy,
         eventLogger: this.taskEventLogger!,
+        claimNudge$: this.claimNudgeService?.claimNudge$,
       });
     }
 
@@ -470,7 +607,54 @@ export class TaskManagerPlugin
       middleware: this.middleware,
       taskManagerId: taskStore.taskManagerId,
       taskPollingLifecycle: this.taskPollingLifecycle,
+      claimNudgeService: this.claimNudgeService,
     });
+
+    if (this.shouldRunBackgroundTasks) {
+      const scheduleProbeTask = () => {
+        const scheduleRequestedAtMs = Date.now();
+        const probeTaskId = `tm-latency-probe-${this.taskManagerId}-${scheduleRequestedAtMs}`;
+        this.logger.info(
+          `[tm_latency_probe] scheduling_one_time_task id=${probeTaskId} schedule_requested_at=${new Date(
+            scheduleRequestedAtMs
+          ).toISOString()}`
+        );
+
+        taskScheduling
+          .schedule(
+            {
+              id: probeTaskId,
+              taskType: TaskManagerLatencyProbeTaskType,
+              params: { scheduleRequestedAtMs },
+              state: {},
+              enabled: true,
+              priority: TaskPriority.Normal,
+            },
+            { requestImmediateClaim: true }
+          )
+          .then(() => {
+            const persistedAtMs = Date.now();
+            this.logger.info(
+              `[tm_latency_probe] task_scheduled id=${probeTaskId} persisted_at=${new Date(
+                persistedAtMs
+              ).toISOString()} persistence_delta_ms=${persistedAtMs - scheduleRequestedAtMs}`
+            );
+          })
+          .catch((error) => {
+            const message = error instanceof Error ? error.message : String(error);
+            this.logger.info(`[tm_latency_probe] failed_scheduling id=${probeTaskId}: ${message}`);
+          });
+      };
+
+      scheduleProbeTask();
+      this.logger.info(
+        `[tm_latency_probe] using setInterval(${TaskManagerLatencyProbeIntervalMs}ms) to schedule one-time probe tasks`
+      );
+      this.probeScheduleIntervalId = setInterval(
+        scheduleProbeTask,
+        TaskManagerLatencyProbeIntervalMs
+      );
+    }
 
     scheduleDeleteInactiveNodesTaskDefinition(this.logger, taskScheduling).catch(() => {});
     scheduleInvalidateApiKeyTask(
@@ -518,6 +702,11 @@ export class TaskManagerPlugin
     // Stop polling for tasks
     if (this.taskPollingLifecycle) {
       this.taskPollingLifecycle.stop();
+    }
+    this.claimNudgeService?.stop();
+    if (this.probeScheduleIntervalId) {
+      clearInterval(this.probeScheduleIntervalId);
+      this.probeScheduleIntervalId = undefined;
     }
 
     if (this.kibanaDiscoveryService?.isStarted()) {

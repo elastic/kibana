@@ -30,6 +30,7 @@ import { calculateNextRunAtFromSchedule } from './lib/get_next_run_at';
 import { TaskAlreadyRunningError } from './lib/errors';
 import type { TaskPollingLifecycle } from './polling_lifecycle';
 import { getExecutionId } from './lib/get_execution_id';
+import type { TaskManagerClaimNudgeService } from './claim_nudge';
 
 const VERSION_CONFLICT_STATUS = 409;
 const NOT_FOUND_STATUS = 404;
@@ -40,6 +41,7 @@ export interface TaskSchedulingOpts {
   middleware: Middleware;
   taskManagerId: string;
   taskPollingLifecycle?: TaskPollingLifecycle; // subscribe to task lifecycle events
+  claimNudgeService?: TaskManagerClaimNudgeService;
 }
 
 /**
@@ -71,6 +73,7 @@ export class TaskScheduling {
   private logger: Logger;
   private middleware: Middleware;
   private readonly taskPolling: TaskPollingLifecycle | undefined;
+  private readonly claimNudgeService: TaskManagerClaimNudgeService | undefined;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -82,6 +85,7 @@ export class TaskScheduling {
     this.middleware = opts.middleware;
     this.store = opts.taskStore;
     this.taskPolling = opts.taskPollingLifecycle;
+    this.claimNudgeService = opts.claimNudgeService;
   }
 
   /**
@@ -95,7 +99,7 @@ export class TaskScheduling {
     options?: ScheduleOptions
   ): Promise<ConcreteTaskInstance> {
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
-      ...omit(options, 'apiKey', 'request'),
+      ...omit(options, 'apiKey', 'request', 'requestImmediateClaim', 'refresh'),
       taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
     });
 
@@ -104,18 +108,34 @@ export class TaskScheduling {
         ? agent.currentTraceparent
         : '';
 
-    return await this.store.schedule(
+    const shouldRequestImmediateClaim =
+      options?.requestImmediateClaim === true || options?.refresh === true;
+    const effectiveRefresh = shouldRequestImmediateClaim ? true : options?.refresh;
+
+    const scheduledTask = await this.store.schedule(
       {
         ...modifiedTask,
         traceparent: traceparent || '',
         enabled: modifiedTask.enabled ?? true,
       },
-      options?.request
+      options?.request || effectiveRefresh !== undefined
         ? {
             request: options?.request,
+            refresh: effectiveRefresh,
           }
         : undefined
     );
+
+    if (shouldRequestImmediateClaim && this.claimNudgeService) {
+      try {
+        await this.claimNudgeService.notify();
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        this.logger.info(`[claim_nudge] notify failed during schedule: ${message}`);
+      }
+    }
+
+    return scheduledTask;
   }
 
   /**
@@ -135,7 +155,7 @@ export class TaskScheduling {
     const modifiedTasks = await Promise.all(
       taskInstances.map(async (taskInstance) => {
         const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
-          ...omit(options, 'apiKey', 'request'),
+          ...omit(options, 'apiKey', 'request', 'requestImmediateClaim', 'refresh'),
           taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
         });
         return {
@@ -148,9 +168,10 @@ export class TaskScheduling {
 
     return await this.store.bulkSchedule(
       modifiedTasks,
-      options?.request
+      options?.request || options?.refresh !== undefined
         ? {
             request: options?.request,
+            refresh: options?.refresh,
           }
         : undefined
     );
