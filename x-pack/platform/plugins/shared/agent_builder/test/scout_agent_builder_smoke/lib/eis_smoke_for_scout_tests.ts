@@ -6,8 +6,8 @@
  */
 
 /**
- * Scout-only copy of EIS smoke helpers (FTR keeps its own under
- * `x-pack/platform/test/agent_builder/smoke_tests/tests/eis_helpers.ts`).
+ * Scout-specific EIS smoke helpers using stdout logging (Playwright has no ToolingLog).
+ * See `@kbn/gen-ai-functional-testing` for the shared ToolingLog-based version.
  */
 
 import { existsSync, readFileSync } from 'fs';

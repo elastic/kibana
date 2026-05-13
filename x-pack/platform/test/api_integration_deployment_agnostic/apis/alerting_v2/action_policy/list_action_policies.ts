@@ -78,10 +78,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('should return created action policies', async () => {
       const createResponse1 = await createPolicy(roleAuthc, 'policy-1');
-      expect(createResponse1.status).to.be(200);
+      expect(createResponse1.status).to.be(201);
 
       const createResponse2 = await createPolicy(roleAuthc, 'policy-2');
-      expect(createResponse2.status).to.be(200);
+      expect(createResponse2.status).to.be(201);
 
       const response = await supertestWithoutAuth
         .get(ACTION_POLICY_API_PATH)
@@ -150,7 +150,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           destinations: [{ type: 'workflow', id: 'wf-alpha-001' }],
           tags: ['production', 'critical'],
         });
-        expect(alphaResp.status).to.be(200);
+        expect(alphaResp.status).to.be(201);
         seedCreatedBy = alphaResp.body.createdBy;
 
         const betaResp = await createPolicy(roleAuthc, 'Beta Policy', {
@@ -158,13 +158,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           destinations: [{ type: 'workflow', id: 'wf-beta-002' }],
           tags: ['staging'],
         });
-        expect(betaResp.status).to.be(200);
+        expect(betaResp.status).to.be(201);
 
         const gammaResp = await createPolicy(roleAuthc, 'Gamma Policy', {
           description: 'Monitors disk space',
           destinations: [{ type: 'workflow', id: 'wf-gamma-003' }],
         });
-        expect(gammaResp.status).to.be(200);
+        expect(gammaResp.status).to.be(201);
       });
 
       after(async () => {

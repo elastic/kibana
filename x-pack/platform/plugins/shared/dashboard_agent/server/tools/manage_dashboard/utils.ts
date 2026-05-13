@@ -78,7 +78,7 @@ const resolvePanelsFromAttachment = (
   }
 
   throw new Error(
-    `Attachment type "${type}" is not supported in add_panels_from_attachments. Only "${AttachmentType.visualization}" is supported.`
+    `Attachment type "${type}" is not supported in add_panels. Only "${AttachmentType.visualization}" is supported.`
   );
 };
 

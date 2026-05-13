@@ -19,6 +19,7 @@ import type {
 import type { CustomRequestHandlerContext, IRouter } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
+import type { InboxPluginSetup } from '@kbn/inbox-plugin/server';
 import type {
   LicensingApiRequestHandlerContext,
   LicensingPluginStart,
@@ -53,6 +54,12 @@ export interface WorkflowsServerPluginSetupDeps {
   spaces: SpacesPluginSetup;
   serverless?: ServerlessServerSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+  /**
+   * Optional Inbox plugin. When present, Workflows registers itself as the
+   * `workflows` source so paused `waitForInput` steps surface in the
+   * cross-cutting Inbox UI / MCP / API.
+   */
+  inbox?: InboxPluginSetup;
 }
 
 export interface WorkflowsServerPluginStartDeps {

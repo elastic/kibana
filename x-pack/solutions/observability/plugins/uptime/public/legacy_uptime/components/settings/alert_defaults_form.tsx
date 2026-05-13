@@ -108,7 +108,7 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
     const { actionTypeId: type } = data?.find((dt) => dt.id === value) ?? {};
     return (
       <ConnectorSpan>
-        <EuiIcon type={actionTypeRegistry.get(type as string).iconClass} />
+        <EuiIcon type={actionTypeRegistry.get(type as string).iconClass} aria-hidden={true} />
         <span>{label}</span>
       </ConnectorSpan>
     );
