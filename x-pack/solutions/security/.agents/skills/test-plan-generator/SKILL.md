@@ -326,7 +326,7 @@ Apply the Core rule before starting: if any ambiguity about scope, acceptance cr
 
 ### Document structure
 
-Follow the template in [`references/document-structure.md`](references/document-structure.md) — it defines the required sections, their order, and the content expected in each.
+Follow the template in [`references/document-structure.md`](references/document-structure.md) — it defines the required sections, their order, and the content expected in each. Read [`references/example-test-plan.md`](references/example-test-plan.md) for a complete worked example showing correct structure, scenario format, and automation coverage lines.
 
 ### Optional sections
 

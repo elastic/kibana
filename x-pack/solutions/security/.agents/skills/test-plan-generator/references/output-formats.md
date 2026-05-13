@@ -20,6 +20,8 @@ Every scenario in the test plan must follow this structure exactly:
 ````markdown
 #### Scenario: <title>
 
+**Priority:** <P0|P1|P2>
+
 **Automation coverage**: <see rules below>
 ```gherkin
 Given ...
@@ -34,6 +36,7 @@ Then ...
 - If tests of multiple types cover the scenario, list each type separately.
 - If no tests cover the scenario, write: `No existing tests found covering this scenario.`
 - Never aggregate counts without naming the specific tests — the goal is full traceability, not a summary number.
+- The count in the summary (e.g. `2 unit tests`) must equal the number of test names listed. Count the names you write before finalising the number.
 
 ---
 
