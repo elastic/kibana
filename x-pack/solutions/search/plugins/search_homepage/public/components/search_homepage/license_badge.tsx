@@ -11,20 +11,11 @@ import { EuiBadge, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { LicenseType } from '@kbn/licensing-types/src/types';
 import { css } from '@emotion/react';
-import { TrialUsageBadge } from '@kbn/search-shared-ui';
 import { useGetLicenseInfo } from '../../hooks/use_get_license_info';
-import { useKibana } from '../../hooks/use_kibana';
 
 export const LicenseBadge = () => {
-  const { isTrial, licenseType } = useGetLicenseInfo();
+  const { licenseType } = useGetLicenseInfo();
   const { euiTheme } = useEuiTheme();
-  const {
-    services: { cloud },
-  } = useKibana();
-
-  if (isTrial) {
-    return <TrialUsageBadge cloud={cloud} />;
-  }
 
   const LICENSE_LABEL: Record<LicenseType, string> = {
     trial: i18n.translate('xpack.searchHomepage.licenseLabel.trial', {

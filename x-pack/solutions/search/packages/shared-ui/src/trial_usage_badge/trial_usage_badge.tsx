@@ -26,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 
 const TRIAL_TOTAL_DAYS = 15;
+const POPOVER_CONTENT_WIDTH = 330;
 
 function getProgressColor(value: number, max: number): 'primary' | 'warning' | 'danger' {
   const percent = (value / max) * 100;
@@ -35,7 +36,7 @@ function getProgressColor(value: number, max: number): 'primary' | 'warning' | '
 }
 
 interface TrialUsageBadgeProps {
-  cloud?: CloudStart;
+  cloud: CloudStart;
 }
 
 export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({ cloud }) => {
@@ -45,7 +46,7 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({ cloud }) => {
   const [billingUrl, setBillingUrl] = useState<string>('');
   useEffect(() => {
     cloud
-      ?.getPrivilegedUrls()
+      .getPrivilegedUrls()
       .then((urls) => {
         if (urls.billingUrl) {
           setBillingUrl(urls.billingUrl);
@@ -54,8 +55,8 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({ cloud }) => {
       .catch(() => {});
   }, [cloud]);
 
-  const trialDaysLeft = cloud?.trialDaysLeft() ?? 0;
-  const daysUsed = TRIAL_TOTAL_DAYS - trialDaysLeft;
+  const trialDaysLeft = 11; // cloud?.trialDaysLeft() ?? 0;
+  const daysUsed = Math.min(Math.max(0, TRIAL_TOTAL_DAYS - trialDaysLeft), TRIAL_TOTAL_DAYS);
   const hasPopoverContent = trialDaysLeft > 0 || billingUrl;
 
   const trialLabel = i18n.translate('xpack.searchSharedUI.trialUsageBadge.trialLabel', {
@@ -107,7 +108,7 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({ cloud }) => {
       >
         <EuiTitle size="xxs">
           <h4>
-            {cloud?.isServerlessEnabled
+            {cloud.isServerlessEnabled
               ? i18n.translate('xpack.searchSharedUI.trialUsageBadge.serverlessTitle', {
                   defaultMessage: 'Elasticsearch Serverless',
                 })
@@ -119,7 +120,11 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({ cloud }) => {
       </EuiPopoverTitle>
 
       {trialDaysLeft > 0 && (
-        <EuiFlexGroup direction="column" gutterSize="none" css={css({ width: 330 })}>
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="none"
+          css={css({ width: POPOVER_CONTENT_WIDTH })}
+        >
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="xs" direction="column">
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="none">
@@ -151,7 +156,7 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({ cloud }) => {
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs">
                     {i18n.translate('xpack.searchSharedUI.trialUsageBadge.daysLeft', {
-                      defaultMessage: '{days} days left',
+                      defaultMessage: '{days} {days, plural, one {day} other {days}} left',
                       values: { days: trialDaysLeft },
                     })}
                   </EuiText>

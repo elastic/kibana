@@ -10,7 +10,7 @@ import React, { useEffect, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { KibanaVersionBadge } from '@kbn/search-shared-ui';
+import { KibanaVersionBadge, TrialUsageBadge } from '@kbn/search-shared-ui';
 import { useAuthenticatedUser } from '../../hooks/use_authenticated_user';
 import { useKibana } from '../../hooks/use_kibana';
 import { BasicMetricBadges } from './basic_metric_badges';
@@ -75,11 +75,11 @@ export const SearchHomepagePage = () => {
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                {(!cloud?.isCloudEnabled || cloud?.isInTrial()) && (
-                  <EuiFlexItem grow={false}>
-                    <LicenseBadge />
-                  </EuiFlexItem>
-                )}
+                {cloud?.isInTrial() ? (
+                  <TrialUsageBadge cloud={cloud} />
+                ) : !cloud?.isCloudEnabled ? (
+                  <LicenseBadge />
+                ) : null}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <span css={VerticalSeparatorStyle} />
