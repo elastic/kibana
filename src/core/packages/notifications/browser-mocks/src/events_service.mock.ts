@@ -20,6 +20,7 @@ const createStartContract = (): jest.Mocked<INotificationEvents> => {
     markAsRead: jest.fn().mockResolvedValue(undefined),
     pin: jest.fn().mockResolvedValue(undefined),
     unpin: jest.fn().mockResolvedValue(undefined),
+    delete: jest.fn().mockResolvedValue(undefined),
     getUnreadCount$: jest.fn(() => unreadCount$.asObservable()),
     getUnreadCount: jest.fn(() => unreadCount$.getValue()),
   };

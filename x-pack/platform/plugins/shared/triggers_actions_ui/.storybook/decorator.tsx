@@ -63,6 +63,7 @@ const notifications: NotificationsStart = {
     markAsRead: () => Promise.resolve(),
     pin: () => Promise.resolve(),
     unpin: () => Promise.resolve(),
+    delete: () => Promise.resolve(),
     getUnreadCount$: () => of(0),
     getUnreadCount: () => 0,
   },
