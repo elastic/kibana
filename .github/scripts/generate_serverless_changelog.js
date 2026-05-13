@@ -217,15 +217,13 @@ const getPrsForServerless = async ({
     return result.nodes.flatMap((node) => node?.associatedPullRequests?.nodes ?? []).filter(Boolean);
   });
 
-  const prs = pullRequests.map((pr) => {
+  return pullRequests.map((pr) => {
     return {
       ...pr,
       user: pr.author,
       html_url: pr.url,
     };
   });
-
-  return Array.from(new Map(prs.map((pr) => [pr.html_url, pr])).values());
 };
 
 const selectReleases = ({ releases, serviceVersion }) => {
