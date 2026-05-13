@@ -10,45 +10,41 @@ import { test, testData } from '../fixtures';
 
 const INDEX_NAME = 'search_profiler_scout_index';
 
-test.describe(
-  'Search Profiler profile execution',
-  { tag: testData.SEARCH_PROFILER_SERVERLESS_TAGS },
-  () => {
-    test.beforeAll(async ({ esClient }) => {
-      await esClient.indices.create({
-        index: INDEX_NAME,
-        mappings: {
-          properties: {
-            message: { type: 'text' },
-          },
+test.describe('Search Profiler profile execution', { tag: testData.SEARCH_PROFILER_TAGS }, () => {
+  test.beforeAll(async ({ esClient }) => {
+    await esClient.indices.create({
+      index: INDEX_NAME,
+      mappings: {
+        properties: {
+          message: { type: 'text' },
         },
-      });
-      await esClient.index({
-        index: INDEX_NAME,
-        document: {
-          message: 'hello scout',
-        },
-        refresh: true,
-      });
+      },
     });
-
-    test.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsSearchProfilerUser();
-      await pageObjects.searchProfiler.goto();
+    await esClient.index({
+      index: INDEX_NAME,
+      document: {
+        message: 'hello scout',
+      },
+      refresh: true,
     });
+  });
 
-    test.afterAll(async ({ esClient }) => {
-      await esClient.indices.delete({ index: INDEX_NAME }).catch(() => {});
-    });
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginAsSearchProfilerUser();
+    await pageObjects.searchProfiler.goto();
+  });
 
-    test('profiles a simple query against a valid index', async ({ pageObjects }) => {
-      await pageObjects.searchProfiler.setIndex(INDEX_NAME);
-      await pageObjects.searchProfiler.setQuery(testData.SIMPLE_QUERY);
+  test.afterAll(async ({ esClient }) => {
+    await esClient.indices.delete({ index: INDEX_NAME }).catch(() => {});
+  });
 
-      await pageObjects.searchProfiler.profile();
+  test('profiles a simple query against a valid index', async ({ pageObjects }) => {
+    await pageObjects.searchProfiler.setIndex(INDEX_NAME);
+    await pageObjects.searchProfiler.setQuery(testData.SIMPLE_QUERY);
 
-      await expect(pageObjects.searchProfiler.profileTree).toBeVisible();
-      await expect(pageObjects.searchProfiler.profileTree).toContainText(INDEX_NAME);
-    });
-  }
-);
+    await pageObjects.searchProfiler.profile();
+
+    await expect(pageObjects.searchProfiler.profileTree).toBeVisible();
+    await expect(pageObjects.searchProfiler.profileTree).toContainText(INDEX_NAME);
+  });
+});

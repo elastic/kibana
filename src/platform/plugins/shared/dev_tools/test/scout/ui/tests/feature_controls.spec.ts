@@ -14,6 +14,7 @@ import { test, testData } from '../fixtures';
 test.describe('Dev Tools feature controls', { tag: tags.stateful.classic }, () => {
   test.afterAll(async ({ apiServices }) => {
     await apiServices.spaces.delete(testData.CUSTOM_SPACE.id).catch(() => {});
+    await apiServices.spaces.delete(testData.CUSTOM_SPACE_DEV_TOOLS_DISABLED.id).catch(() => {});
   });
 
   test('dev tools all privileges allow navigation', async ({ browserAuth, pageObjects }) => {
@@ -23,6 +24,7 @@ test.describe('Dev Tools feature controls', { tag: tags.stateful.classic }, () =
       await pageObjects.devTools.goto(hash);
       await expect(pageObjects.devTools.appContainer(readySubject)).toBeVisible();
     }
+    await expect(pageObjects.devTools.readOnlyBadge).toBeHidden();
   });
 
   test('dev tools read privileges allow navigation', async ({ browserAuth, pageObjects }) => {
@@ -31,6 +33,31 @@ test.describe('Dev Tools feature controls', { tag: tags.stateful.classic }, () =
     for (const { hash, readySubject } of testData.DEV_TOOL_APPS) {
       await pageObjects.devTools.goto(hash);
       await expect(pageObjects.devTools.appContainer(readySubject)).toBeVisible();
+    }
+    await expect(pageObjects.devTools.readOnlyBadge).toBeVisible();
+    await expect(pageObjects.devTools.readOnlyBadge).toHaveAttribute(
+      'data-test-badge-label',
+      'Read only'
+    );
+  });
+
+  test('users without dev tools privileges cannot access dev tools UI', async ({
+    browserAuth,
+    kbnUrl,
+    page,
+    pageObjects,
+  }) => {
+    await browserAuth.loginAsNoDevToolsPrivileges();
+    await page.gotoApp('discover');
+
+    const navLinks = await pageObjects.collapsibleNav.getNavLinks();
+    expect(navLinks).toContain('Discover');
+    expect(navLinks).not.toContain('Dev Tools');
+
+    for (const { hash, readySubject } of testData.DEV_TOOL_APPS) {
+      await page.goto(kbnUrl.app('dev_tools', { pathOptions: { hash } }));
+      await expect(pageObjects.devTools.appContainer(readySubject)).toBeHidden();
+      await expect(page.testSubj.locator('homeApp')).toBeVisible();
     }
   });
 
@@ -53,6 +80,33 @@ test.describe('Dev Tools feature controls', { tag: tags.stateful.classic }, () =
         })
       );
       await expect(pageObjects.devTools.appContainer(readySubject)).toBeVisible();
+    }
+  });
+
+  test('space with dev tools disabled hides and blocks registered dev tool apps', async ({
+    apiServices,
+    browserAuth,
+    kbnUrl,
+    page,
+    pageObjects,
+  }) => {
+    await apiServices.spaces.delete(testData.CUSTOM_SPACE_DEV_TOOLS_DISABLED.id).catch(() => {});
+    await apiServices.spaces.create(testData.CUSTOM_SPACE_DEV_TOOLS_DISABLED);
+    await browserAuth.loginAsDevToolsAll();
+
+    await page.goto(kbnUrl.app('home', { space: testData.CUSTOM_SPACE_DEV_TOOLS_DISABLED.id }));
+    const navLinks = await pageObjects.collapsibleNav.getNavLinks();
+    expect(navLinks).not.toContain('Dev Tools');
+
+    for (const { hash, readySubject } of testData.DEV_TOOL_APPS) {
+      await page.goto(
+        kbnUrl.app('dev_tools', {
+          space: testData.CUSTOM_SPACE_DEV_TOOLS_DISABLED.id,
+          pathOptions: { hash },
+        })
+      );
+      await expect(pageObjects.devTools.appContainer(readySubject)).toBeHidden();
+      await expect(page.testSubj.locator('homeApp')).toBeVisible();
     }
   });
 });

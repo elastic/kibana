@@ -12,12 +12,12 @@ import type { Locator, ScoutPage } from '@kbn/scout';
 export class DevToolsPage {
   public readonly lastBreadcrumb: Locator;
   public readonly readOnlyBadge: Locator;
-  public readonly appNotFoundMessage: Locator;
+  public readonly appNotFoundPageContent: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.lastBreadcrumb = this.page.testSubj.locator('breadcrumb last');
-    this.readOnlyBadge = this.page.getByText('Read only', { exact: true });
-    this.appNotFoundMessage = this.page.getByText('Application Not Found');
+    this.readOnlyBadge = this.page.testSubj.locator('headerBadge');
+    this.appNotFoundPageContent = this.page.testSubj.locator('appNotFoundPageContent');
   }
 
   async goto(hash: string) {

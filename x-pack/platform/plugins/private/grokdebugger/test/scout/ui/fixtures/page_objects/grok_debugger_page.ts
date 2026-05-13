@@ -8,6 +8,20 @@
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
+interface MonacoModel {
+  setValue: (value: string) => void;
+}
+
+interface MonacoBridge {
+  MonacoEnvironment?: {
+    monaco?: {
+      editor?: {
+        getModels: () => MonacoModel[];
+      };
+    };
+  };
+}
+
 export class GrokDebuggerPage {
   readonly container: Locator;
   readonly simulateButton: Locator;
@@ -54,12 +68,32 @@ export class GrokDebuggerPage {
   }
 
   private async setEditorValue(index: number, value: string) {
+    await this.waitForEditorModel(index);
     await this.page.evaluate(
       ({ editorIndex, editorValue }) => {
-        window.MonacoEnvironment!.monaco!.editor.getModels()[editorIndex].setValue(editorValue);
+        const editor = (window as unknown as MonacoBridge).MonacoEnvironment?.monaco?.editor;
+        if (!editor) {
+          throw new Error('MonacoEnvironment.monaco.editor is not available');
+        }
+        const model = editor.getModels()[editorIndex];
+        if (!model) {
+          throw new Error(`Monaco model ${editorIndex} is not available`);
+        }
+        model.setValue(editorValue);
       },
       { editorIndex: index, editorValue: value }
     );
+  }
+
+  private async waitForEditorModel(index: number) {
+    await expect
+      .poll(async () =>
+        this.page.evaluate(() => {
+          const editor = (window as unknown as MonacoBridge).MonacoEnvironment?.monaco?.editor;
+          return editor?.getModels().length ?? 0;
+        })
+      )
+      .toBeGreaterThan(index);
   }
 
   private async getStructuredOutput(): Promise<Record<string, string>> {

@@ -46,6 +46,7 @@ export class SearchProfilerPage {
   }
 
   async setIndex(index: string) {
+    await this.waitForEditorToLoad();
     await this.indexInput.fill(index);
   }
 
