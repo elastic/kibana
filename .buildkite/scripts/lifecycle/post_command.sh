@@ -24,6 +24,7 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   buildkite-agent artifact upload 'target/kibana-fleet/**/*.png'
   buildkite-agent artifact upload 'target/test-metrics/*'
   buildkite-agent artifact upload 'target/test-suites-ci-plan.json'
+  buildkite-agent artifact upload 'target/cypress-results/**/*.ndjson'
   buildkite-agent artifact upload 'test/**/screenshots/diff/*.png'
   buildkite-agent artifact upload 'test/**/screenshots/failure/*.png'
   buildkite-agent artifact upload 'test/**/screenshots/session/*.png'
