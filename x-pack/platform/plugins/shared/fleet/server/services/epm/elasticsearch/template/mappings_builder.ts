@@ -10,12 +10,14 @@ import type { IndexTemplateMappings } from '../../../../types';
 import { PackageInvalidArchiveError } from '../../../../errors';
 
 import { getDefaultProperties } from './mappings';
-import { fieldPath, dynamicPathMatch, fieldTypeRegistry } from './field_type_registry';
+import type { Properties } from './mappings';
+import {
+  fieldPath,
+  dynamicPathMatch,
+  fieldTypeRegistry,
+  dynamicObjectParentProps,
+} from './field_type_registry';
 import type { GroupType } from './field_type_registry';
-
-export interface Properties {
-  [key: string]: any;
-}
 
 export interface MultiFields {
   [key: string]: object;
@@ -32,15 +34,11 @@ export interface DynamicMappingResult {
 
 export interface WalkContext {
   groupFieldName: string | undefined;
-  props: Properties;
+  properties: Properties;
   hasNonDynamicTemplateMappings: boolean;
   hasDynamicTemplateMappings: boolean;
   subobjects: boolean | undefined;
 }
-
-export type WalkResult = Omit<WalkContext, 'props'> & { properties: Properties };
-
-const META_PROP_KEYS = ['metric_type', 'unit'];
 
 export class MappingsBuilder {
   readonly isIndexModeTimeSeries: boolean;
@@ -54,30 +52,24 @@ export class MappingsBuilder {
   }
 
   /**
-   * Walk a list of fields and accumulate their mappings into a WalkResult.
+   * Walk a list of fields and accumulate their mappings into a WalkContext.
    * groupFieldName scopes the dynamic template paths for nested/group fields.
    */
-  build(fields: Field[], groupFieldName?: string): WalkResult {
+  build(fields: Field[], groupFieldName?: string): WalkContext {
     const context: WalkContext = {
       groupFieldName,
-      props: {},
+      properties: {},
       hasNonDynamicTemplateMappings: false,
       hasDynamicTemplateMappings: false,
       subobjects: undefined,
     };
 
-    // TODO: this can happen when the fields property in fields.yml is present but empty.
-    // Maybe validation should be moved to fields/field.ts.
-    if (fields) {
-      fields.forEach((field) => this.processField(context, field));
-    }
+    fields.forEach((field) => this.processField(context, field));
 
-    const { props: properties, ...rest } = context;
-    return { properties, ...rest };
+    return context;
   }
 
   private processField(context: WalkContext, field: Field) {
-    // If type is not defined, assume keyword
     const type = field.type || 'keyword';
 
     if (field.runtime !== undefined) {
@@ -85,18 +77,17 @@ export class MappingsBuilder {
 
       if (type === 'object' && field.object_type) {
         // Runtime field that is also a dynamic template (e.g. labels.* with runtime: true).
-        const pMatch = dynamicPathMatch(path);
         const objectType = field.object_type;
-
+        const fieldAsObjectType = { ...field, type: objectType };
         const handler = fieldTypeRegistry[objectType];
-        const dynResult = handler?.dynamicMapping({ ...field, type: objectType }, this);
-        const runtimeProps = handler?.runtimeMapping({ ...field, type: objectType });
+        const dynResult = handler?.dynamicMapping(fieldAsObjectType, this);
+        const runtimeProps = handler?.runtimeMapping(fieldAsObjectType);
 
         if (dynResult && runtimeProps) {
           this.addDynamicMappingWithIntermediateObjects(
             context,
             path,
-            pMatch,
+            dynamicPathMatch(path),
             dynResult.matchingType,
             dynResult.properties,
             runtimeProps
@@ -107,15 +98,14 @@ export class MappingsBuilder {
       }
 
       const handler = fieldTypeRegistry[type];
-      const runtimeProps = handler?.runtimeMapping(field) ?? { type };
       const runtimeFieldProps = {
         ...getDefaultProperties(field),
-        ...runtimeProps,
+        ...(handler?.runtimeMapping(field) ?? { type }),
       };
       if (typeof field.runtime === 'string') {
         runtimeFieldProps.script = { source: field.runtime.trim() };
       }
-      this.addRuntimeField(path, runtimeFieldProps);
+      this.runtimeFields[path] = runtimeFieldProps;
       return;
     }
 
@@ -155,10 +145,10 @@ export class MappingsBuilder {
       fieldProps = { ...getDefaultProperties(field), type };
     }
 
-    const fieldHasMetaProps = META_PROP_KEYS.some((key) => key in field);
+    const fieldHasMetaProps = 'metric_type' in field || 'unit' in field;
     if (fieldHasMetaProps && type !== 'group' && type !== 'group-nested') {
       const meta: Properties = {};
-      if ('unit' in field) Reflect.set(meta, 'unit', field.unit);
+      if ('unit' in field) meta.unit = field.unit;
       fieldProps.meta = meta;
     }
 
@@ -186,18 +176,14 @@ export class MappingsBuilder {
       return;
     }
 
-    context.props[field.name] = fieldProps;
+    context.properties[field.name] = fieldProps;
   }
 
   private addParentObjectAsStaticProperty(context: WalkContext, field: Field) {
     // Don't add intermediate objects for wildcard names, as it will
     // be added for its parent object.
     if (field.name.includes('*')) return;
-    context.props[field.name] = {
-      type: 'object',
-      dynamic: true,
-      ...(field.subobjects !== undefined && { subobjects: field.subobjects }),
-    };
+    context.properties[field.name] = dynamicObjectParentProps(field.subobjects);
     context.hasNonDynamicTemplateMappings = true;
   }
 
@@ -217,13 +203,12 @@ export class MappingsBuilder {
     for (let i = parts.length - 1; i > 0; i--) {
       const name = parts.slice(0, i).join('.');
       if (!name.includes('*')) continue;
-      this.addDynamicTemplate(name, name, 'object', { type: 'object', dynamic: true });
+      this.addDynamicTemplate(name, name, 'object', dynamicObjectParentProps());
     }
   }
 
   private addObjectAsDynamicMapping(context: WalkContext, field: Field) {
     const path = fieldPath(context.groupFieldName, field.name);
-    const pMatch = dynamicPathMatch(path);
     const objectType = field.object_type!;
 
     if (objectType === 'group') {
@@ -233,7 +218,7 @@ export class MappingsBuilder {
         type: 'object',
         object_type: subField.object_type ?? subField.type,
       }));
-      const mappings = this.build(subFields, fieldPath(context.groupFieldName, field.name));
+      const mappings = this.build(subFields, path);
       if (mappings.hasDynamicTemplateMappings) context.hasDynamicTemplateMappings = true;
       return;
     }
@@ -259,7 +244,7 @@ export class MappingsBuilder {
     this.addDynamicMappingWithIntermediateObjects(
       context,
       path,
-      pMatch,
+      dynamicPathMatch(path),
       result.matchingType,
       result.properties
     );
@@ -269,17 +254,16 @@ export class MappingsBuilder {
   }
 
   private addDynamicTemplate(
-    path: string,
+    name: string,
     pathMatch: string,
     matchingType: string,
     properties: Properties,
     runtimeProperties?: Properties
   ) {
-    const name = path;
     if (name in this.dynamicTemplateNames) {
       if (name.includes('*') && properties?.type === 'object') {
-        // This is a conflicting intermediate object, use the last one so
-        // more specific templates are chosen before.
+        // Conflicting intermediate object: drop the older one so more specific
+        // templates are matched first.
         const index = this.dynamicTemplateNames[name];
         delete this.dynamicTemplateNames[name];
         this.dynamicTemplates.splice(index, 1);
@@ -288,22 +272,14 @@ export class MappingsBuilder {
       }
     }
 
-    const dynamicTemplate: Properties = {};
-    if (runtimeProperties !== undefined) {
-      dynamicTemplate.runtime = runtimeProperties;
-    } else {
-      dynamicTemplate.mapping = properties;
-    }
+    const dynamicTemplate: Properties =
+      runtimeProperties !== undefined ? { runtime: runtimeProperties } : { mapping: properties };
 
     if (matchingType) dynamicTemplate.match_mapping_type = matchingType;
     if (pathMatch) dynamicTemplate.path_match = pathMatch;
 
     const size = this.dynamicTemplates.push({ [name]: dynamicTemplate });
     this.dynamicTemplateNames[name] = size - 1;
-  }
-
-  private addRuntimeField(path: string, properties: Properties) {
-    this.runtimeFields[path] = properties;
   }
 
   toIndexTemplateMappings(

@@ -9,15 +9,9 @@
 import type { Field, Fields } from '../../fields/field';
 
 import { getDefaultProperties, histogram, keyword, scaledFloat } from './mappings';
+import type { Properties } from './mappings';
 import type { MappingsBuilder } from './mappings_builder';
-import type {
-  WalkContext,
-  DynamicMappingResult,
-  Properties,
-  MultiFields,
-} from './mappings_builder';
-
-export type { DynamicMappingResult, Properties, MultiFields };
+import type { WalkContext, DynamicMappingResult, MultiFields } from './mappings_builder';
 
 const DEFAULT_IGNORE_ABOVE = 1024;
 
@@ -64,6 +58,17 @@ const generateNestedProps = (field: Field): Properties => {
   const props = generateDynamicAndEnabled(field);
   if (Object.hasOwn(field, 'include_in_parent')) props.include_in_parent = field.include_in_parent;
   if (Object.hasOwn(field, 'include_in_root')) props.include_in_root = field.include_in_root;
+  return props;
+};
+
+/**
+ * Build the `{ type: 'object', dynamic: true, subobjects? }` placeholder used
+ * as the static parent of a dynamic-template field and as the result of a
+ * dynamic-only group.
+ */
+export const dynamicObjectParentProps = (subobjects?: boolean): Properties => {
+  const props: Properties = { type: 'object', dynamic: true };
+  if (subobjects !== undefined) props.subobjects = subobjects;
   return props;
 };
 
@@ -117,13 +122,13 @@ export abstract class FieldType {
 class KeywordType extends FieldType {
   staticMapping(field: Field): Properties {
     const props = keyword(field);
-    if (field.multi_fields) props.fields = generateMultiFields(field.multi_fields);
+    applyMultiFields(props, field);
     return props;
   }
 
   dynamicMapping(field: Field, builder: MappingsBuilder): DynamicMappingResult {
     const props = keyword(field, true);
-    if (field.multi_fields) props.fields = generateMultiFields(field.multi_fields);
+    applyMultiFields(props, field);
     this.applyTimeSeriesDimension(props, field, builder);
     return {
       properties: props,
@@ -151,7 +156,7 @@ class TextLikeType extends FieldType {
       ...buildTextExtras(field, { isDynamic: false }),
       type: this.esType,
     };
-    if (field.multi_fields) props.fields = generateMultiFields(field.multi_fields);
+    applyMultiFields(props, field);
     return props;
   }
 
@@ -161,7 +166,7 @@ class TextLikeType extends FieldType {
       ...buildTextExtras(field, { isDynamic: true }),
       type: this.esType,
     };
-    if (field.multi_fields) props.fields = generateMultiFields(field.multi_fields);
+    applyMultiFields(props, field);
     return {
       properties: props,
       matchingType: field.object_type_mapping_type ?? 'string',
@@ -182,7 +187,7 @@ class WildcardType extends FieldType {
     if (field.null_value) props.null_value = field.null_value;
     if (field.ignore_above) props.ignore_above = field.ignore_above;
     props.type = 'wildcard';
-    if (field.multi_fields) props.fields = generateMultiFields(field.multi_fields);
+    applyMultiFields(props, field);
     return props;
   }
 
@@ -192,7 +197,7 @@ class WildcardType extends FieldType {
       ...buildTextExtras(field, { isDynamic: true }),
       type: 'wildcard',
     };
-    if (field.multi_fields) props.fields = generateMultiFields(field.multi_fields);
+    applyMultiFields(props, field);
     return {
       properties: props,
       matchingType: field.object_type_mapping_type ?? 'string',
@@ -267,41 +272,26 @@ class DateType extends FieldType {
   }
 }
 
-class IpType extends FieldType {
+/**
+ * Generic type with no time-series, multi-field, or static/dynamic divergence:
+ * the same properties are emitted in both static and dynamic mappings.
+ */
+class SimpleType extends FieldType {
+  constructor(
+    private readonly buildProps: (field: Field) => Properties,
+    private readonly defaultMatchingType: string
+  ) {
+    super();
+  }
+
   staticMapping(field: Field): Properties {
-    return { ...getDefaultProperties(field), type: 'ip' };
+    return this.buildProps(field);
   }
 
   dynamicMapping(field: Field): DynamicMappingResult {
     return {
-      properties: { ...getDefaultProperties(field), type: 'ip' },
-      matchingType: field.object_type_mapping_type ?? 'string',
-    };
-  }
-}
-
-class HistogramType extends FieldType {
-  staticMapping(field: Field): Properties {
-    return histogram(field);
-  }
-
-  dynamicMapping(field: Field): DynamicMappingResult {
-    return {
-      properties: histogram(field),
-      matchingType: field.object_type_mapping_type ?? '*',
-    };
-  }
-}
-
-class ScaledFloatType extends FieldType {
-  staticMapping(field: Field): Properties {
-    return scaledFloat(field);
-  }
-
-  dynamicMapping(field: Field): DynamicMappingResult {
-    return {
-      properties: scaledFloat(field),
-      matchingType: field.object_type_mapping_type ?? '*',
+      properties: this.buildProps(field),
+      matchingType: field.object_type_mapping_type ?? this.defaultMatchingType,
     };
   }
 }
@@ -421,9 +411,10 @@ export class GroupType extends FieldType {
       if (mappings.subobjects !== undefined) fieldProps.subobjects = mappings.subobjects;
       return { fieldProps, onlyDynamicTemplateMappings: false };
     } else if (mappings.hasDynamicTemplateMappings) {
-      const fieldProps: Properties = { type: 'object', dynamic: true };
-      if (mappings.subobjects !== undefined) fieldProps.subobjects = mappings.subobjects;
-      return { fieldProps, onlyDynamicTemplateMappings: true };
+      return {
+        fieldProps: dynamicObjectParentProps(mappings.subobjects),
+        onlyDynamicTemplateMappings: true,
+      };
     }
 
     return undefined;
@@ -449,9 +440,9 @@ export const fieldTypeRegistry: Readonly<Record<string, FieldType>> = {
   half_float: new NumericType('half_float', 'double'),
   boolean: new BooleanType(),
   date: new DateType(),
-  ip: new IpType(),
-  histogram: new HistogramType(),
-  scaled_float: new ScaledFloatType(),
+  ip: new SimpleType((field) => ({ ...getDefaultProperties(field), type: 'ip' }), 'string'),
+  histogram: new SimpleType(histogram, '*'),
+  scaled_float: new SimpleType(scaledFloat, '*'),
   aggregate_metric_double: new AggregateMetricDoubleType(),
   flattened: new FlattenedType(),
   constant_keyword: new ConstantKeywordType(),
@@ -464,8 +455,12 @@ export const fieldTypeRegistry: Readonly<Record<string, FieldType>> = {
 };
 
 // ---------------------------------------------------------------------------
-// Multi-field helper (used by type subclasses and MappingsBuilder)
+// Multi-field helpers (used by type subclasses and MappingsBuilder)
 // ---------------------------------------------------------------------------
+
+const applyMultiFields = (props: Properties, field: Field): void => {
+  if (field.multi_fields) props.fields = generateMultiFields(field.multi_fields);
+};
 
 export const generateMultiFields = (fields: Fields): MultiFields => {
   const multiFields: MultiFields = {};
