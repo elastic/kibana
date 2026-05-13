@@ -156,6 +156,8 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   version: 'WzEsMV0=',
   name: 'Policy One',
   description: 'Policy description',
+  type: 'global',
+  ruleId: null,
   enabled: true,
   destinations: [{ type: 'workflow', id: 'workflow-1' }],
   matcher: null,
