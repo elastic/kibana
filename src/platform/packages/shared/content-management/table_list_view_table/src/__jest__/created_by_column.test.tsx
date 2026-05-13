@@ -112,7 +112,7 @@ describe('created_by column', () => {
     render(<TableListView {...requiredProps} />);
 
     // wait until first render
-    expect(await screen.findByTestId('itemsInMemTable')).toBeVisible();
+    expect(await screen.findByTestId('listingTable-isLoaded')).toBeVisible();
 
     expect(() => screen.getByTestId(/tableHeaderCell_createdBy/)).toThrow();
   });
@@ -130,7 +130,7 @@ describe('created_by column', () => {
     );
 
     // wait until first render
-    expect(await screen.findByTestId('itemsInMemTable')).toBeVisible();
+    expect(await screen.findByTestId('listingTable-isLoaded')).toBeVisible();
 
     expect(() => screen.getByTestId(/tableHeaderCell_createdBy/)).toThrow();
   });
