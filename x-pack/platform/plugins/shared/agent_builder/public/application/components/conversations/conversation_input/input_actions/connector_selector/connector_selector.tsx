@@ -18,6 +18,7 @@ import {
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useUiPrivileges } from '../../../../../hooks/use_ui_privileges';
 import { useNavigation } from '../../../../../hooks/use_navigation';
@@ -100,6 +101,8 @@ const ConnectorPopoverButton: React.FC<{
       onClick={onClick}
       aria-label={getConnectorButtonAriaLabel(connectorDisplayName)}
       data-test-subj="agentBuilderConnectorSelectorButton"
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_INPUT}
+      data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.CONNECTOR_SELECTOR_OPEN}
     >
       {connectorDisplayName}
     </InputPopoverButton>

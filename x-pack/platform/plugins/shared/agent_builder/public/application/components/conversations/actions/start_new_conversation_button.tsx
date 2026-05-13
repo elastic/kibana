@@ -8,6 +8,7 @@
 import React, { useCallback } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -42,6 +43,8 @@ export const StartNewConversationButton: React.FC = () => {
       fill
       onClick={handleClick}
       data-test-subj="startNewConversationButton"
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUNDS}
+      data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.CONVERSATION_START}
     >
       {NEW_CONVERSATION_BUTTON_LABEL}
     </EuiButton>

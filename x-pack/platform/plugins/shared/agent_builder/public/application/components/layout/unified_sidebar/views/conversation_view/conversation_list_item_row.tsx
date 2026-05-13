@@ -22,6 +22,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { appPaths } from '../../../../../utils/app_paths';
 import { useConversationListMutations } from '../../../../../hooks/use_conversation_list_mutations';
 import {
@@ -137,6 +138,8 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         icon="pencil"
         size="s"
         data-test-subj={`agentBuilderSidebarConversationRename-${conversationId}`}
+        data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_LIST}
+        data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.TITLE_RENAME_OPEN}
         onClick={() => {
           closePopover();
           setIsRenameModalOpen(true);
@@ -149,6 +152,8 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
         size="s"
         data-test-subj={`agentBuilderSidebarConversationDelete-${conversationId}`}
+        data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_LIST}
+        data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.TITLE_DELETE_OPEN}
         css={css`
           color: ${euiTheme.colors.danger};
         `}
@@ -176,6 +181,8 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         togglePopover();
       }}
       data-test-subj={`agentBuilderSidebarConversationMenu-${conversationId}`}
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_LIST}
+      data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.MORE_ACTIONS_OPEN}
     />
   );
 
@@ -199,6 +206,8 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
             css={linkStyles}
             data-test-subj={`agentBuilderSidebarConversation-${conversationId}`}
             onClick={onItemClick}
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_LIST}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.LIST_ITEM_SELECT}
           >
             <EuiTextTruncate text={title || conversationId} />
           </Link>

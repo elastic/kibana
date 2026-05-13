@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import copy from 'copy-to-clipboard';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { useToasts } from '../../../../hooks/use_toasts';
 import { useSendMessage } from '../../../../context/send_message/send_message_context';
 
@@ -70,6 +71,8 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
           onClick={handleCopy}
           color="text"
           data-test-subj="roundResponseCopyButton"
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_RESPONSE}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.RESPONSE_COPY}
         />
       </EuiFlexItem>
       {isLastRound && (
@@ -82,6 +85,8 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
             isDisabled={isRegenerateDisabled}
             isLoading={isRegenerating}
             data-test-subj="roundResponseRegenerateButton"
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_RESPONSE}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.RESPONSE_REGENERATE}
           />
         </EuiFlexItem>
       )}

@@ -18,6 +18,7 @@ import {
 import React, { useState, useMemo } from 'react';
 import type { ConversationRound, ConversationRoundStep } from '@kbn/agent-builder-common';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { css } from '@emotion/react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
@@ -152,6 +153,10 @@ export const RoundThinkingPanel = ({
                       color="text"
                       iconSide="left"
                       onClick={addToDatasetAction?.onClick}
+                      data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_THINKING}
+                      data-ebt-action={
+                        AGENT_BUILDER_UI_EBT.action.conversation.THINKING_ADD_TO_DATASET
+                      }
                     >
                       {addToDatasetAction?.label}
                     </EuiButton>
@@ -164,13 +169,24 @@ export const RoundThinkingPanel = ({
                       color="text"
                       iconSide="left"
                       onClick={() => setShowTraceFlyout(true)}
+                      data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_THINKING}
+                      data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.THINKING_TRACE_OPEN}
                     >
                       {viewTraceButtonLabel}
                     </EuiButton>
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem grow={false}>
-                  <EuiButton iconType="code" color="text" iconSide="left" onClick={toggleFlyout}>
+                  <EuiButton
+                    iconType="code"
+                    color="text"
+                    iconSide="left"
+                    onClick={toggleFlyout}
+                    data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_THINKING}
+                    data-ebt-action={
+                      AGENT_BUILDER_UI_EBT.action.conversation.THINKING_RAW_JSON_OPEN
+                    }
+                  >
                     {rawResponseButtonLabel}
                   </EuiButton>
                 </EuiFlexItem>

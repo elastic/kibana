@@ -205,7 +205,7 @@ export const ConversationSidebarView: React.FC = () => {
                             color="text"
                             onClick={handlePressNewConversation}
                             data-test-subj="agentBuilderSidebarNewConversationButton"
-                            data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION}
+                            data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_LIST}
                             data-ebt-action={
                               AGENT_BUILDER_UI_EBT.action.conversation.CONVERSATION_START
                             }
@@ -223,7 +223,7 @@ export const ConversationSidebarView: React.FC = () => {
                             onClick={() => setIsSearchModalOpen(true)}
                             disabled={!hasConversations}
                             data-test-subj="agentBuilderSidebarSearchChatsButton"
-                            data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION}
+                            data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_LIST}
                             data-ebt-action={
                               AGENT_BUILDER_UI_EBT.action.conversation.CONVERSATION_SEARCH
                             }

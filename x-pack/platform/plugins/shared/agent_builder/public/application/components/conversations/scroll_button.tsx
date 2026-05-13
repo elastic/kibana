@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 
 interface ScrollButtonProps {
   onClick: () => void;
@@ -33,6 +34,8 @@ export const ScrollButton: React.FC<ScrollButtonProps> = ({ onClick }) => {
       iconType="sortDown"
       aria-label="Scroll down"
       onClick={onClick}
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_SCROLL}
+      data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.SCROLL_TO_LATEST}
     />
   );
 };

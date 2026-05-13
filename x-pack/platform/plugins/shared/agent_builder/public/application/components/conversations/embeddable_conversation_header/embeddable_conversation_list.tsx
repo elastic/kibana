@@ -14,6 +14,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useSendMessageContext } from '../../../context/send_message/send_message_context';
 import { useConversationList } from '../../../hooks/use_conversation_list';
@@ -88,6 +89,9 @@ export const EmbeddableConversationList: React.FC<EmbeddableConversationListProp
                 onClose();
               }}
               data-test-subj={`agentBuilderEmbeddableConversation-${conversation.id}`}
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_EMBEDDABLE_HEADER}
+              data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.LIST_ITEM_SELECT}
+              data-ebt-detail={AGENT_BUILDER_UI_EBT.detail.conversation.EMBED_CONVERSATIONS_MENU}
             >
               <EuiTextTruncate text={conversation.title || conversation.id} />
             </button>

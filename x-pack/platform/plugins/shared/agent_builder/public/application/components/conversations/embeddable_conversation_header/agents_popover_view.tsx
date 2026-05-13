@@ -19,6 +19,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useSendMessageContext } from '../../../context/send_message/send_message_context';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
@@ -114,6 +115,9 @@ export const AgentsPopoverView: React.FC<AgentsPopoverViewProps> = ({
               size="s"
               flush="left"
               onClick={onBack}
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_EMBEDDABLE_HEADER}
+              data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.EMBEDDABLE_POPOVER_BACK}
+              data-ebt-detail={AGENT_BUILDER_UI_EBT.detail.conversation.EMBED_AGENTS_MENU}
             >
               {labels.availableAgents}
             </EuiButtonEmpty>
@@ -128,6 +132,9 @@ export const AgentsPopoverView: React.FC<AgentsPopoverViewProps> = ({
               href={agentDetailsHref}
               target="_blank"
               data-test-subj="agentBuilderEmbeddableAgentDetailsButton"
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_EMBEDDABLE_HEADER}
+              data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.MORE_AGENT_DETAILS}
+              data-ebt-detail={AGENT_BUILDER_UI_EBT.detail.conversation.EMBED_AGENTS_MENU}
             >
               {labels.agentDetails}
             </EuiButton>

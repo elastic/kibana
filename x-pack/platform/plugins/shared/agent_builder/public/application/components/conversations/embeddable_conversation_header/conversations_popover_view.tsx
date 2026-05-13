@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useSendMessageContext } from '../../../context/send_message/send_message_context';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
@@ -142,6 +143,8 @@ export const ConversationsPopoverView: React.FC<ConversationsPopoverViewProps> =
               iconType="plus"
               onClick={handleNewChat}
               data-test-subj="agentBuilderEmbeddableNewChatButton"
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_EMBEDDABLE_HEADER}
+              data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.CONVERSATION_START}
             >
               {labels.newChat}
             </EuiButton>

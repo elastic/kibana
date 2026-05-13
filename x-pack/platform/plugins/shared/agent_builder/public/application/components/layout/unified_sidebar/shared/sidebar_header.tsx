@@ -102,7 +102,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
               onClick={() =>
                 navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }))
               }
-              data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION}
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_LIST}
               data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.CONVERSATION_START}
               data-ebt-detail={AGENT_BUILDER_UI_EBT.detail.sidebarChrome.NEW_CONVERSATION_CONDENSED}
             />

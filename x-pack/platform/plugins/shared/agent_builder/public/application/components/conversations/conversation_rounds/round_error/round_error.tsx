@@ -13,6 +13,7 @@ import {
   isWorkflowAbortedError,
   isWorkflowExecutionError,
 } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
@@ -112,6 +113,8 @@ export const RoundError: React.FC<RoundErrorProps> = ({ error, errorSteps, onRet
             iconType="refresh"
             onClick={onRetry}
             aria-label={labels.retryAriaLabel}
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUNDS}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.ROUND_ERROR_RETRY}
           >
             {labels.tryAgain}
           </EuiButtonEmpty>

@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { useConversationTitle, useHasPersistedConversation } from '../../../hooks/use_conversation';
 import { DeleteConversationModal } from '../delete_conversation_modal';
 import { RenameConversationModal } from '../rename_conversation_modal';
@@ -74,6 +75,8 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
         setIsRenameModalOpen(true);
       }}
       data-test-subj="agentBuilderConversationRenameButton"
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_TITLE}
+      data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.TITLE_RENAME_OPEN}
     >
       {labels.rename}
     </EuiContextMenuItem>,
@@ -88,6 +91,8 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
         color: ${euiTheme.colors.danger};
       `}
       data-test-subj="agentBuilderConversationDeleteButton"
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_TITLE}
+      data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.TITLE_DELETE_OPEN}
     >
       {labels.delete}
     </EuiContextMenuItem>,
@@ -114,6 +119,8 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
       aria-expanded={isPopoverOpen}
       css={titleButtonStyles}
       data-test-subj="agentBuilderConversationTitleButton"
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_TITLE}
+      data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.TITLE_POPOVER_OPEN}
     >
       <span id={ariaLabelledBy}>{displayedTitle}</span>
     </EuiButtonEmpty>

@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { useConversationList } from '../../hooks/use_conversation_list';
 import {
   createActiveConversationListItemStyles,
@@ -112,6 +113,8 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
                   onClose();
                 }}
                 data-test-subj={`agentBuilderConversationSearchResult-${conversation.id}`}
+                data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_SEARCH_MODAL}
+                data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.SEARCH_RESULT_SELECT}
               >
                 <EuiTextTruncate text={conversation.title || conversation.id} />
               </button>
@@ -129,6 +132,7 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
       outsideClickCloses={true}
       style={{ width: MODAL_WIDTH }}
       data-test-subj="agentBuilderConversationSearchModal"
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_SEARCH_MODAL}
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>{labels.title}</EuiModalHeaderTitle>

@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { useNavigation } from '../../../hooks/use_navigation';
 import {
   useAgentId,
@@ -184,6 +185,8 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
           icon="beaker"
           size="s"
           data-test-subj="agentBuilderAddConversationToDataset"
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_HEADER}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.MORE_ADD_TO_DATASET}
           onClick={onAddConversationToDataset}
         >
           {fullscreenLabels.addToDataset}
@@ -199,6 +202,8 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
       disabled={!manageAgents}
       onClick={closePopover}
       href={agentId ? createAgentBuilderUrl(appPaths.agent.overview({ agentId })) : undefined}
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_HEADER}
+      data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.MORE_AGENT_DETAILS}
     >
       {fullscreenLabels.agentDetails}
     </EuiContextMenuItem>,
@@ -210,6 +215,8 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
             size="s"
             disabled={!conversationId}
             data-test-subj="agentBuilderFullScreenMenuItem"
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_HEADER}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.MORE_FULL_SCREEN}
             onClick={handleOpenFullScreen}
           >
             {fullScreenMenuItemLabel}
@@ -224,6 +231,8 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
             onClick={closePopover}
             href={application.getUrlForApp('management', { path: '/ai/genAiSettings' })}
             data-test-subj="agentBuilderGenAiSettingsButton"
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_HEADER}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.MORE_GENAI_SETTINGS}
           >
             {fullscreenLabels.genAiSettings}
           </EuiContextMenuItem>,
@@ -240,6 +249,8 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
       disabled={!manageAgents}
       onClick={closePopover}
       href={agentId ? createAgentBuilderUrl(appPaths.agent.overview({ agentId })) : undefined}
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_HEADER}
+      data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.MORE_AGENT_DETAILS}
     >
       {fullscreenLabels.agentDetails}
     </EuiContextMenuItem>,
@@ -251,6 +262,8 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
             onClick={closePopover}
             href={application.getUrlForApp('management', { path: '/ai/genAiSettings' })}
             data-test-subj="agentBuilderGenAiSettingsButton"
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_HEADER}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.MORE_GENAI_SETTINGS}
           >
             {fullscreenLabels.genAiSettings}
           </EuiContextMenuItem>,
@@ -273,7 +286,13 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
   return (
     <>
       <EuiPopover
-        button={<EuiButtonIcon {...buttonProps} />}
+        button={
+          <EuiButtonIcon
+            {...buttonProps}
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_HEADER}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.MORE_ACTIONS_OPEN}
+          />
+        }
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         panelPaddingSize="xs"

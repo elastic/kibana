@@ -16,6 +16,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { borderRadiusXlStyles } from '../../../common.styles';
 import { AttachmentPillsRow } from './conversation_input/attachment_pills_row';
 
@@ -54,7 +55,13 @@ export const StaleAttachmentsPanel: React.FC<StaleAttachmentsPanelProps> = ({
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButton size="s" fill onClick={onAddToInput}>
+            <EuiButton
+              size="s"
+              fill
+              onClick={onAddToInput}
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_STALE_ATTACHMENTS}
+              data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.STALE_ATTACHMENT_RETRY}
+            >
               <FormattedMessage
                 id="xpack.agentBuilder.conversation.staleAttachments.stageButton"
                 defaultMessage="Use updated versions"
@@ -62,7 +69,12 @@ export const StaleAttachmentsPanel: React.FC<StaleAttachmentsPanelProps> = ({
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" onClick={onDismiss}>
+            <EuiButtonEmpty
+              size="s"
+              onClick={onDismiss}
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_STALE_ATTACHMENTS}
+              data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.STALE_ATTACHMENT_DISMISS}
+            >
               <FormattedMessage
                 id="xpack.agentBuilder.conversation.staleAttachments.dismissButton"
                 defaultMessage="Dismiss"

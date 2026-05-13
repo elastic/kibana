@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiButtonIcon, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { MoreActionsButton } from './more_actions_button';
 
@@ -43,6 +44,8 @@ export const ConversationRightActions: React.FC<ConversationRightActionsProps> =
           size="m"
           onClick={onClose}
           aria-label={labels.close}
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_EMBEDDABLE_HEADER}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.EMBEDDABLE_CLOSE}
         />
       )}
     </EuiFlexGroup>

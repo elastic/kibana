@@ -19,6 +19,7 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ConfirmPromptDefinition, ConfirmPromptColor } from '@kbn/agent-builder-common/agents';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { borderRadiusXlStyles } from '../../../../../common.styles';
 
 const defaultLabels = {
@@ -126,6 +127,8 @@ export const ConfirmationPrompt: React.FC<ConfirmationPromptProps> = ({
               size="s"
               color={isAnswered && answeredValue === false ? 'danger' : 'text'}
               data-test-subj="agentBuilderConfirmationPromptCancelButton"
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_PROMPT}
+              data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.CONFIRMATION_REJECT}
             >
               {cancelText}
             </EuiButtonEmpty>
@@ -139,6 +142,8 @@ export const ConfirmationPrompt: React.FC<ConfirmationPromptProps> = ({
               size="s"
               color={isAnswered && answeredValue === true ? 'success' : color}
               data-test-subj="agentBuilderConfirmationPromptConfirmButton"
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_PROMPT}
+              data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.CONFIRMATION_ACCEPT}
             >
               {confirmText}
             </EuiButton>

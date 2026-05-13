@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { useSendMessage } from '../../../../context/send_message/send_message_context';
 
 interface ConversationActionButtonProps {
@@ -52,6 +53,8 @@ export const ConversationActionButton: React.FC<ConversationActionButtonProps> =
           resetToPendingMessage();
         }
       }}
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_INPUT}
+      data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.MESSAGE_CANCEL}
     />
   ) : (
     <EuiButtonIcon
@@ -62,6 +65,8 @@ export const ConversationActionButton: React.FC<ConversationActionButtonProps> =
       size="s"
       disabled={isSubmitDisabled}
       onClick={onSubmit}
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_INPUT}
+      data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.MESSAGE_SUBMIT}
     />
   );
 };
