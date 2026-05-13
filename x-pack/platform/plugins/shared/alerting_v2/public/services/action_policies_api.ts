@@ -66,7 +66,7 @@ export class ActionPoliciesApi {
   }
 
   public async updateActionPolicy(id: string, data: UpdateActionPolicyBody) {
-    return this.http.put<ActionPolicyResponse>(`${ALERTING_V2_ACTION_POLICY_API_PATH}/${id}`, {
+    return this.http.patch<ActionPolicyResponse>(`${ALERTING_V2_ACTION_POLICY_API_PATH}/${id}`, {
       body: JSON.stringify(data),
     });
   }

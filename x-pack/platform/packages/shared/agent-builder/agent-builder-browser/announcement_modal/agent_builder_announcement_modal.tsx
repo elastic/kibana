@@ -39,7 +39,7 @@ const VARIANT_CONTENT: Record<
   '2a': PriorAssistantAdminRevert,
 };
 
-const MODAL_MAX_WIDTH = 576;
+const MODAL_MAX_WIDTH = 570;
 
 /** Header product icon gradient (design: blue → purple). */
 const AGENT_PRODUCT_ICON_GRADIENT_START = '#1750BA';
