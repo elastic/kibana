@@ -21,6 +21,12 @@ const ALERT_STATE_NAMESPACE = `${ALERT_NAMESPACE}.state` as const;
 // kibana.space_ids - space ID(s) of the rule that created this alert
 const SPACE_IDS = `${KIBANA_NAMESPACE}.space_ids` as const;
 
+// kibana.cps_scope_expression - resolved NPRE expression for the CPS scope of the rule that created this alert
+const CPS_SCOPE_EXPRESSION = `${KIBANA_NAMESPACE}.cps_scope.expression` as const;
+
+// kibana.cps_scope_linked_projects - project IDs that linked in the CPS scope of the rule that created this alert
+const CPS_SCOPE_LINKED_PROJECTS = `${KIBANA_NAMESPACE}.cps_scope.linked_projects` as const;
+
 // kibana.version - Kibana version that this alert was created
 const VERSION = `${KIBANA_NAMESPACE}.version` as const;
 
@@ -207,6 +213,8 @@ export const fields = {
   ALERT_SCHEDULED_ACTION_DATE,
   ALERT_SCHEDULED_ACTION_THROTTLING,
   SPACE_IDS,
+  CPS_SCOPE_EXPRESSION,
+  CPS_SCOPE_LINKED_PROJECTS,
   TIMESTAMP,
   VERSION,
   ALERT_MUTED,
@@ -265,6 +273,8 @@ export {
   ALERT_SCHEDULED_ACTION_DATE,
   ALERT_SCHEDULED_ACTION_THROTTLING,
   SPACE_IDS,
+  CPS_SCOPE_EXPRESSION,
+  CPS_SCOPE_LINKED_PROJECTS,
   TIMESTAMP,
   VERSION,
   ALERT_MUTED,
