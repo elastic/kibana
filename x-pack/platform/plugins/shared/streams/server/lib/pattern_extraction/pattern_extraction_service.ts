@@ -76,15 +76,21 @@ export class PatternExtractionService implements IPatternExtractionService {
     try {
       return await worker.run(payload, { signal: controller.signal });
     } catch (err: unknown) {
+      // Two failure modes need to surface as the canonical timeout:
+      //  1. OUR timer fired and aborted the task (`AbortError` from
+      //     Piscina) — recover the pool if it's still the active one.
+      //  2. ANOTHER concurrent task's timer fired first, swapped the
+      //     pool, and called `destroy()` on the pool WE submitted to.
+      //     Piscina kills queued / in-flight tasks on a destroyed pool
+      //     with `Error('Terminating worker thread')` — NOT an
+      //     `AbortError`. Without normalization that message would
+      //     leak to the caller, even though the root cause is exactly
+      //     the same as case 1 (the slow-regex timeout).
+      const ourTimerFired = controller.signal.aborted;
+      const poolWasReplaced = this.worker !== worker;
+
       if (err instanceof Error && err.name === 'AbortError') {
-        // Distinguish "our timer fired" (real timeout — worker is stuck on
-        // the dangerously-slow regex extraction and we need a fresh pool)
-        // from "another concurrent task already replaced the pool and our
-        // task got cancelled as collateral damage" (the captured `worker`
-        // is no longer the active pool — destroying it would either
-        // double-destroy or, worse, take down the freshly-created pool).
-        const ourTimerFired = controller.signal.aborted;
-        if (ourTimerFired && this.worker === worker) {
+        if (ourTimerFired && !poolWasReplaced) {
           this.worker = this.createWorkerPool();
           // Fire-and-forget: don't make the caller wait for the slow
           // worker thread to finish its CPU-bound loop before we can
@@ -98,6 +104,10 @@ export class PatternExtractionService implements IPatternExtractionService {
             );
           });
         }
+        throw new Error('Pattern extraction task timed out');
+      }
+
+      if (poolWasReplaced) {
         throw new Error('Pattern extraction task timed out');
       }
       throw err;
