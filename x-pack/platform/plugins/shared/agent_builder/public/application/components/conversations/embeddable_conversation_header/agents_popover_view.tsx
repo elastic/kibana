@@ -20,7 +20,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
-import { useSendMessageContext } from '../../../context/send_message/send_message_context';
+import { useStreamingContext } from '../../../context/streaming/streaming_context';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
@@ -56,7 +56,7 @@ export const AgentsPopoverView: React.FC<AgentsPopoverViewProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const { agentId, setAgentId } = useConversationContext();
-  const { removeAllErrors } = useSendMessageContext();
+  const { removeAllErrors } = useStreamingContext();
   const { agents } = useAgentBuilderAgents();
   const { agentOptions, renderAgentOption } = useAgentOptions({ agents, selectedAgentId: agentId });
 
