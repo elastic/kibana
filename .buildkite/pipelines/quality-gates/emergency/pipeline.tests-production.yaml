@@ -28,7 +28,7 @@ steps:
         CHECK_SYNTHETICS_TAG: serverless-platform-core-validation
 
   - label: ':memo: Trigger serverless changelog'
-    if: build.env("ENVIRONMENT") == "production-noncanary" && build.env("DEPLOYMENT_SLICES") =~ /(^|.*, *)production-noncanary-ds-5( *,.*|$)/
+    if: build.env("ENVIRONMENT") == "production-noncanary" && build.env("DEPLOYMENT_SLICES") =~ /(^|.*, *)production-noncanary-ds-5( *,.*|$$)/
     command: .buildkite/scripts/pipelines/quality_gates/trigger_serverless_changelog_workflow.sh
     env:
       SERVICE_VERSION: ${SERVICE_VERSION:-""}
