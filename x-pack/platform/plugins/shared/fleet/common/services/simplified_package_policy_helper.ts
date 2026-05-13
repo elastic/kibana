@@ -19,8 +19,10 @@ import { DATASET_VAR_NAME } from '../constants';
 
 import { PackagePolicyValidationError } from '../errors';
 
-import { packageToPackagePolicy, getInputEffectiveName } from '.';
+import { packageToPackagePolicy, getInputEffectiveName, buildInputKey } from '.';
 import { isInputAllowedForDeploymentMode } from './agentless_policy_helper';
+import { doesPackageHaveIntegrations } from './packages_with_integrations';
+import { getNormalizedInputs } from './policy_template';
 
 export type SimplifiedVars = Record<
   string,
@@ -65,6 +67,7 @@ export interface SimplifiedPackagePolicy {
   vars?: SimplifiedVars;
   var_group_selections?: Record<string, string>;
   inputs?: SimplifiedInputs;
+  policy_template?: string;
   supports_agentless?: boolean | null;
   supports_cloud_connector?: boolean | null;
   additional_datastreams_permissions?: string[] | null;
@@ -176,12 +179,55 @@ function assignVariables(
 type StreamsMap = Map<string, NewPackagePolicyInputStream>;
 type InputMap = Map<string, { input: NewPackagePolicyInput; streams: StreamsMap }>;
 
+/**
+ * Infers the target policy template from the input keys provided in the simplified
+ * package policy body, when the package has multiple policy templates.
+ *
+ * Input keys in multi-template packages follow the shape `<policy_template>-<effectiveInputName>`,
+ * where the policy template name can itself contain `-` (e.g. `apache-agentless`). We therefore
+ * match by equality against the full canonical key for each known (template, input) pair, rather
+ * than splitting on `-`.
+ *
+ * Returns the inferred template name when all provided keys belong to a single template, and
+ * `undefined` otherwise (no inputs, single-template package, keys spanning multiple templates,
+ * or keys that don't match any known input).
+ */
+export function inferPolicyTemplateFromInputs(
+  inputs: SimplifiedInputs | undefined,
+  packageInfo: PackageInfo
+): string | undefined {
+  const inputKeys = inputs ? Object.keys(inputs) : [];
+  if (inputKeys.length === 0 || !doesPackageHaveIntegrations(packageInfo)) {
+    return undefined;
+  }
+
+  const keyToTemplate = new Map<string, string>();
+  packageInfo.policy_templates?.forEach((policyTemplate) => {
+    getNormalizedInputs(policyTemplate).forEach((packageInput) => {
+      keyToTemplate.set(
+        buildInputKey(getInputEffectiveName(packageInput), policyTemplate.name, true),
+        policyTemplate.name
+      );
+    });
+  });
+
+  let matched: string | undefined;
+  for (const inputKey of inputKeys) {
+    const template = keyToTemplate.get(inputKey);
+    if (!template || (matched && matched !== template)) {
+      return undefined;
+    }
+    matched = template;
+  }
+
+  return matched;
+}
+
 export function simplifiedPackagePolicytoNewPackagePolicy(
   data: SimplifiedPackagePolicy,
   packageInfo: PackageInfo,
   options?: {
     experimental_data_stream_features?: ExperimentalDataStreamFeature[];
-    policyTemplate?: string;
   }
 ): NewPackagePolicy {
   const {
@@ -199,7 +245,15 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
     cloud_connector_id: cloudConnectorId,
     additional_datastreams_permissions: additionalDatastreamsPermissions,
     global_data_tags: globalDataTags,
+    policy_template: explicitPolicyTemplate,
   } = data;
+
+  // When the caller does not provide `policy_template`, infer it from the input keys so that
+  // multi-template packages don't include inputs from unrelated templates in the resulting
+  // NewPackagePolicy. This avoids spurious deployment-mode validation failures (see #268930).
+  const policyTemplate =
+    explicitPolicyTemplate ?? inferPolicyTemplateFromInputs(inputs, packageInfo);
+
   const packagePolicy = {
     ...packageToPackagePolicy(
       packageInfo,
@@ -207,7 +261,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
       namespace,
       name,
       description,
-      options?.policyTemplate
+      policyTemplate
     ),
     supports_agentless: supportsAgentless,
     supports_cloud_connector: supportsCloudConnector,

@@ -27,14 +27,6 @@ export const CreateAgentlessPolicyRequestSchema = {
     policy_ids: undefined,
     supports_agentless: undefined,
     output_id: undefined,
-    policy_template: schema.maybe(
-      schema.string({
-        meta: {
-          description:
-            'The policy template to use for the agentless package policy. If not provided, the default policy template will be used.',
-        },
-      })
-    ),
     // Only available for agentless integration policies.
     // On standard package policies this field is rejected by server-side validation.
     global_data_tags: schema.maybe(

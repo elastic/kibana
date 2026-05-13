@@ -539,6 +539,101 @@ describe('Package policy service', () => {
       ).rejects.toThrowError(/Input tcp in test is not allowed for deployment mode 'agentless'/);
     });
 
+    // Regression test for https://github.com/elastic/kibana/issues/268930
+    it('should not throw when a disabled input from a secondary agentless-only template is present', async () => {
+      // Reproduces the state produced by simplifiedPackagePolicytoNewPackagePolicy after the fix:
+      // the otel template's input is enabled, and the apache-agentless template's input is
+      // disabled. validateDeploymentModesForInputs must not reject the disabled input.
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = createSavedObjectClientMock();
+
+      soClient.create.mockResolvedValueOnce({
+        id: 'test-package-policy',
+        attributes: {},
+        references: [],
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+
+      mockAgentPolicyGet(undefined, { supports_agentless: false, package_policies: [] });
+
+      const multiTemplatePkgInfo: PackageInfo = {
+        name: 'good_v3',
+        title: 'Good v3',
+        version: '1.0.0',
+        description: 'Test package with two policy templates',
+        type: 'integration',
+        format_version: '3.0.0',
+        owner: { github: 'elastic/fleet' },
+        policy_templates: [
+          {
+            name: 'otel',
+            title: 'OTel template',
+            description: 'Non-agentless template',
+            inputs: [{ type: 'otelcol', title: 'OTel collector', description: '' }],
+            multiple: true,
+          },
+          {
+            name: 'apache-agentless',
+            title: 'Apache agentless template',
+            description: 'Agentless-only template',
+            deployment_modes: {
+              agentless: { enabled: true },
+              default: { enabled: false },
+            },
+            inputs: [
+              {
+                type: 'aws/s3',
+                title: 'AWS S3',
+                description: '',
+                deployment_modes: ['agentless'],
+              },
+            ],
+            multiple: false,
+          },
+        ],
+        data_streams: [],
+        latestVersion: '1.0.0',
+        keepPoliciesUpToDate: false,
+        status: 'not_installed',
+      } as unknown as PackageInfo;
+
+      await expect(
+        packagePolicyService.create(
+          soClient,
+          esClient,
+          {
+            name: 'good-v3-otel',
+            namespace: 'default',
+            enabled: true,
+            policy_id: 'test',
+            policy_ids: ['test'],
+            package: { name: 'good_v3', title: 'Good v3', version: '1.0.0' },
+            inputs: [
+              {
+                type: 'otelcol',
+                policy_template: 'otel',
+                enabled: true,
+                streams: [],
+              },
+              {
+                // agentless-only input from the unrelated 'apache-agentless' template;
+                // simplifiedPackagePolicytoNewPackagePolicy disables it via template inference.
+                type: 'aws/s3',
+                policy_template: 'apache-agentless',
+                enabled: false,
+                streams: [],
+              },
+            ],
+          },
+          {
+            id: 'test-package-policy',
+            skipUniqueNameVerification: true,
+            packageInfo: multiTemplatePkgInfo,
+          }
+        )
+      ).resolves.toBeDefined();
+    });
+
     it('should throw validation error when global_data_tags is set on a non-agentless package policy', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const soClient = createSavedObjectClientMock();
