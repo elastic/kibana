@@ -57,11 +57,13 @@ export const FlyoutLastTestRun = ({
   loading,
   configId,
   locationId,
+  remoteName,
 }: {
   latestPing?: Ping;
   loading: boolean;
   configId: string;
   locationId: string;
+  remoteName?: string;
 }) => {
   const { euiTheme } = useEuiTheme();
   const { basePath } = useSyntheticsSettingsContext();
@@ -131,7 +133,13 @@ export const FlyoutLastTestRun = ({
               fontWeight: euiTheme.font.weight.semiBold,
             }}
           >
-            {latestPing.state?.id && (
+            {/*
+              For remote monitors the SO does not exist on the local cluster,
+              so this link would land on a 404/empty error-details page. Hide
+              the button in v1; a follow-up can extend the remote-URL helper
+              with a `/errors/<stateId>` variant. See #267516.
+            */}
+            {latestPing.state?.id && !remoteName && (
               <EuiButton
                 data-test-subj="flyoutViewErrorDetails"
                 color="danger"
@@ -165,18 +173,21 @@ export const FlyoutSummaryKPIs = ({
   from,
   to,
   dateLabel,
+  remoteName,
 }: {
   monitorId: string;
   locationLabel: string;
   from: string;
   to: string;
   dateLabel: string;
+  remoteName?: string;
 }) => {
   const { data, loading } = useMonitorSummaryStats({
     monitorId,
     locationLabel,
     from,
     to,
+    remoteName,
   });
 
   const availabilityColor =
