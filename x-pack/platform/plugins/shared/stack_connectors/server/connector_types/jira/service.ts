@@ -256,6 +256,7 @@ export const createExternalService = (
           error.response?.data
         )}`
       );
+
       throw error;
     }
   };
