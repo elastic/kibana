@@ -197,6 +197,14 @@ new relevance scores. `FUSE` enables hybrid search to combine and score results 
         TAU
     </mathematical-functions>
 
+    <counter-functions>
+       Use with `TS` for fields with `ts_metric: counter`.
+
+       RATE: Calculates the per-second average rate of increase
+       IRATE: Calculates the per-second rate between the last two data points
+       INCREASE: Calculates the absolute increase in a time window
+    </counter-functions>
+
     <multivalue-functions>
         Multivalue function are used to manipulate and transform multi-value fields.
 

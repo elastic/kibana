@@ -6,21 +6,22 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import type { EsqlPrompts } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base/load_data';
 import type { ResolvedResourceWithSampling } from '../utils/resources';
 import { formatResourceWithSampledValues } from '../utils/resources';
 import type { Action } from './actions';
 import { formatAction } from './actions';
 import { getEsqlInstructions } from './prompts/instructions_template';
+import type { EsqlLoadedDocumentation } from './documentation';
+import { EsqlDocEntry } from './documentation';
 
 export const createRequestDocumentationPrompt = ({
   nlQuery,
   resource,
-  prompts,
+  documentation,
 }: {
   nlQuery: string;
   resource: ResolvedResourceWithSampling;
-  prompts: EsqlPrompts;
+  documentation: EsqlLoadedDocumentation;
 }): BaseMessageLike[] => {
   return [
     [
@@ -31,17 +32,7 @@ Your current task is to examine the information provided by the user, and to req
 from the ES|QL handbook to help you get the right information needed to generate a query.
 That documentation will be used in a later step to actually generate the query.
 
-## Documentation
-
-Below are the ES|QL syntax and some examples from the official ES|QL documentation.
-
-<syntax-overview>
-${prompts.syntax}
-</syntax-overview>
-
-<esql-examples>
-${prompts.examples}
-</esql-examples>`,
+${getDocumentationSection({ resource, documentation })}`,
     ],
     [
       'user',
@@ -61,8 +52,8 @@ Now, based on that information, request documentation from the ES|QL handbook to
 export const createGenerateEsqlPrompt = ({
   nlQuery,
   resource,
+  documentation,
   previousActions,
-  prompts,
   additionalInstructions,
   additionalContext,
   rowLimit,
@@ -70,7 +61,7 @@ export const createGenerateEsqlPrompt = ({
 }: {
   nlQuery: string;
   resource: ResolvedResourceWithSampling;
-  prompts: EsqlPrompts;
+  documentation: EsqlLoadedDocumentation;
   previousActions: Action[];
   additionalInstructions?: string;
   additionalContext?: string;
@@ -89,15 +80,7 @@ Your current task is to respond to the user's question by providing a valid ES|Q
 
 Please use the information accessible from your past actions when relevant.
 
-## Documentation
-
-<syntax-overview>
-${prompts.syntax}
-</syntax-overview>
-
-<esql-examples>
-${prompts.examples}
-</esql-examples>
+${getDocumentationSection({ resource, documentation })}
 
 ## Instructions
 
@@ -137,4 +120,33 @@ Now, based on that information, please generate the ES|QL query.`,
     ],
     ...previousActions.flatMap((a) => formatAction(a)),
   ];
+};
+
+const getDocumentationSection = ({
+  resource,
+  documentation,
+}: {
+  resource: ResolvedResourceWithSampling;
+  documentation: EsqlLoadedDocumentation;
+}): string => {
+  const isTsdb = resource.isTsdb;
+
+  return `## Documentation
+
+Below are the ES|QL syntax and some examples from the official ES|QL documentation.
+
+<syntax-overview>
+${documentation.getDocContent(EsqlDocEntry.syntax)}
+</syntax-overview>
+${
+  isTsdb
+    ? `\n<tsds-documentation>
+${documentation.getDocContent(EsqlDocEntry.tsQueries)}
+</tsds-documentation>`
+    : ''
+}
+
+<esql-examples>
+${documentation.getDocContent(EsqlDocEntry.examples)}
+</esql-examples>`;
 };

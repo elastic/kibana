@@ -1,4 +1,4 @@
-<examples>
+## ES|QL query examples
 
 ```esql
 // What are the 10 latest errors from the logs?
@@ -124,20 +124,11 @@ FROM logs
 ```
 
 ```esql
-// Find the latest articles from the "hr" category, and return their titles and document ids
-FROM articles METADATA _id
-| WHERE category == "hr"
-| KEEP _id, title
-| SORT publish_date DESC
-| LIMIT 100
-```
-
-```esql
-// Find products with a description matching "wireless headphones" and sort them by relevance
-FROM products METADATA _score
+// Find products matching "wireless headphones", return their document ids and relevance scores, sorted by score
+FROM products METADATA _id, _score
 | WHERE MATCH(description, "wireless headphones")
 | SORT _score DESC
-| KEEP name, description, _score
+| KEEP _id, name, description, _score
 | LIMIT 100
 ```
 
@@ -160,4 +151,4 @@ FROM sales
 | KEEP date, daily_revenue, change_type, significance
 | SORT date
 ```
-</examples>
+

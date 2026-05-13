@@ -73,6 +73,15 @@ export const getEsqlInstructions = (params: InstructionsTemplateParams = {}): st
 
     Unless specified otherwise, full text searches should always be done using MATCH in favor of other search functions.
 
+    ## Use TS instead of FROM for time series
+
+    When the resource supports it (\`is-tsds\` is true) use the \`TS\` source command instead of \`FROM\` for time series data streams (TSDS) indices.
+    This ensures that time series aggregations are performed correctly and efficiently, and allows using time-serie specific functions such as TBUCKET or RATE.
+
+    The only reasons to **not** use \`TS\` for time series are:
+    - request is about returning raw documents (no aggregations)
+    - user explicitly asked to use FROM
+
     ## ES|QL query formatting
 
     - All generated ES|QL queries must be wrapped with \`\`\`esql and \`\`\`
@@ -88,12 +97,13 @@ export const getEsqlInstructions = (params: InstructionsTemplateParams = {}): st
     ${
       disableNamedParams
         ? ''
-        : `## using named parameters for start and end time periods
+        : `## Using named parameters for start and end time periods
 
-    You should ALWAYS use named parameters for start and end time in WHERE conditions or BUCKET ranges (?_tstart and ?_tend),
+    You should ALWAYS use named parameters (?_tstart and ?_tend) for start and end time in WHERE conditions, BUCKET ranges or TRANGE ,
     examples:
-     "FROM myindex | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend"
-     "FROM myindex | ... BUCKET(@timestamp, 50, ?_tstart, ?_tend)"
+    - "FROM myindex | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend"
+    - "FROM myindex | ... BUCKET(@timestamp, 50, ?_tstart, ?_tend)"
+    - "TS mytsds | WHERE TRANGE(?_tstart, ?_tend)"
 
     NEVER hardcode time ranges into the query itself (absolute or using now() syntax)
 
