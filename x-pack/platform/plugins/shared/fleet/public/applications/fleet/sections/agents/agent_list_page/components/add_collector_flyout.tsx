@@ -43,6 +43,7 @@ import {
   useGetFleetServerHosts,
   useFleetStatus,
   useDefaultOutput,
+  useStartServices,
 } from '../../../../hooks';
 import { AgentEnrollmentConfirmationStep, usePollingAgentCount } from '../../../../components';
 import { useGetCreateApiKey } from '../../../../../../components/agent_enrollment_flyout/hooks';
@@ -133,6 +134,7 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
   onClickViewAgents,
 }) => {
   const instanceUid = useRef(uuidv4());
+  const { cloud } = useStartServices();
 
   const {
     apiKeyEncoded: esApiKeyEncoded,
@@ -169,6 +171,7 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
   const [serviceName, setServiceName] = useState('otel-collector-group');
   const [serviceNameOverridden, setServiceNameOverridden] = useState(false);
   const [collectorDisplayName, setCollectorDisplayName] = useState('${env:HOSTNAME}');
+  const [configName, setConfigName] = useState('');
   const [configDescription, setConfigDescription] = useState('');
   const [tags, setTags] = useState('');
   const [environment, setEnvironment] = useState('');
@@ -205,6 +208,7 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
       'elastic.collector.group_name': groupDisplayName,
       'elastic.collector.group': collectorGroup,
       'elastic.display.name': collectorDisplayName,
+      ...(configName ? { 'config.name': configName } : {}),
       ...(configDescription ? { 'config.description': configDescription } : {}),
       ...(tags.trim() ? { tags } : {}),
       ...(environment ? { 'deployment.environment.name': environment } : {}),
@@ -236,7 +240,9 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
             http: {
               endpoint: `${defaultFleetServerHost}/v1/opamp`,
               headers: { Authorization: `ApiKey ${token}` },
-              tls: { insecure_skip_verify: true },
+              ...(!cloud?.isCloudEnabled && {
+                tls: { insecure_skip_verify: true },
+              }),
             },
           },
           instance_uid: instanceUid.current,
@@ -290,6 +296,7 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
     collectorGroup,
     serviceName,
     collectorDisplayName,
+    configName,
     configDescription,
     tags,
     environment,
@@ -297,6 +304,7 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
     defaultEsHost,
     token,
     esApiKeyEncoded,
+    cloud?.isCloudEnabled,
   ]);
 
   const steps = [
@@ -412,6 +420,24 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
                 onChange={(e) => setCollectorDisplayName(e.target.value)}
                 onBlur={() => touch('collectorDisplayName')}
                 data-test-subj="collectorDisplayNameInput"
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              fullWidth
+              label={i18n.translate('xpack.fleet.addCollectorFlyout.form.configNameLabel', {
+                defaultMessage: 'Config name',
+              })}
+              helpText={i18n.translate('xpack.fleet.addCollectorFlyout.form.configNameHelpText', {
+                defaultMessage:
+                  'Optional. Short name for this collector configuration, e.g. "webserver-logs". Used as the config label in Fleet.',
+              })}
+            >
+              <EuiFieldText
+                fullWidth
+                prepend="config.name:"
+                value={configName}
+                onChange={(e) => setConfigName(e.target.value)}
+                data-test-subj="configNameInput"
               />
             </EuiFormRow>
             <EuiFormRow

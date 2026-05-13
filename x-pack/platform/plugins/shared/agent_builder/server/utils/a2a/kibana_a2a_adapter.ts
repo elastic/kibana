@@ -14,10 +14,25 @@ import {
   A2AError,
 } from '@a2a-js/sdk/server';
 import type { AgentCard } from '@a2a-js/sdk';
+import { isAgentBuilderError } from '@kbn/agent-builder-common';
 
 import type { InternalStartServices } from '../../services';
 import { createAgentCard } from './create_agent_card';
 import { KibanaAgentExecutor } from './kibana_agent_executor';
+
+const statusCodeForError = (error: unknown): number => {
+  if (isAgentBuilderError(error) && typeof error.meta?.statusCode === 'number') {
+    return error.meta.statusCode;
+  }
+  return 500;
+};
+
+const describeError = (error: unknown): string => {
+  if (isAgentBuilderError(error)) {
+    return `[${error.code}] ${error.message}`;
+  }
+  return `${error}`;
+};
 
 /**
  * Kibana adapter for the A2A SDK
@@ -89,8 +104,8 @@ export class KibanaA2AAdapter {
     } catch (error) {
       this.logger.error(`A2A: Failed to serve agent card for ${agentId}: ${error}`);
       return res.customError({
-        statusCode: 500,
-        body: { message: `Failed to serve agent card: ${error}` },
+        statusCode: statusCodeForError(error),
+        body: { message: `Failed to serve agent card: ${describeError(error)}` },
       });
     }
   }
@@ -132,8 +147,8 @@ export class KibanaA2AAdapter {
       }
 
       return res.customError({
-        statusCode: 500,
-        body: { message: `Internal server error: ${error}` },
+        statusCode: statusCodeForError(error),
+        body: { message: `Internal server error: ${describeError(error)}` },
       });
     }
   }

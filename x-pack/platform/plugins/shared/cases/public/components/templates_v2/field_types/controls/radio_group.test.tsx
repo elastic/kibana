@@ -88,6 +88,16 @@ describe('RadioGroup', () => {
       expect(screen.getByLabelText('high')).toBeChecked();
     });
 
+    it('shows Optional label when isRequired is false', () => {
+      render(<FormWrapper isRequired={false} onSubmitResult={jest.fn()} />);
+      expect(screen.getByText('Optional')).toBeInTheDocument();
+    });
+
+    it('does not show Optional label when isRequired is true', () => {
+      render(<FormWrapper isRequired onSubmitResult={jest.fn()} />);
+      expect(screen.queryByText('Optional')).not.toBeInTheDocument();
+    });
+
     it('shows the first option selected when form value is empty string (yaml sync with no default)', async () => {
       // useYamlFormSync sets the field to '' when metadata.default is absent.
       // The component must sync the stored value to options[0] so the UI and

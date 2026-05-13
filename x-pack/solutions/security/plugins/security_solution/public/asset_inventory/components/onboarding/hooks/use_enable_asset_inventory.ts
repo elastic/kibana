@@ -7,29 +7,34 @@
 
 import { useMutation } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
-import type {
-  AssetInventoryEnableResponse,
-  AssetInventoryServerApiError,
-} from '../../../../../common/api/asset_inventory/types';
+import type { AssetInventoryServerApiError } from '../../../../../common/api/asset_inventory/types';
+import { useInstallEntityStoreMutation } from '../../../../entity_analytics/components/entity_store/hooks/use_entity_store';
 import { useAssetInventoryRoutes } from '../../../hooks/use_asset_inventory_routes';
 import { useAssetInventoryStatus } from '../../../hooks/use_asset_inventory_status';
 import { useOnboardingSuccessCallout } from './use_onboarding_success_callout';
 
 /**
- * Hook with related business logic for enabling Asset Inventory
+ * Hook with related business logic for enabling Asset Inventory.
+ *
+ * Asset Inventory now relies entirely on the Entity Store v2 lifecycle. Enabling triggers:
+ * 1. POST /api/security/entity_store/install (all 4 entity types via the shared mutation),
+ * 2. POST /api/asset_inventory/install_data_view (creates the per-space data view and
+ *    bootstraps asset criticality resources required by the entity store transforms).
  */
 export const useEnableAssetInventory = () => {
-  const { postEnableAssetInventory } = useAssetInventoryRoutes();
+  const { mutateAsync: installEntityStore } = useInstallEntityStoreMutation();
+  const { postInstallAssetInventoryDataView } = useAssetInventoryRoutes();
   const { refetch: refetchStatus } = useAssetInventoryStatus();
   const { showOnboardingSuccessCallout } = useOnboardingSuccessCallout();
 
-  const mutation = useMutation<AssetInventoryEnableResponse, AssetInventoryServerApiError>(
-    postEnableAssetInventory,
+  const mutation = useMutation<unknown, AssetInventoryServerApiError>(
+    async () => {
+      await installEntityStore();
+      await postInstallAssetInventoryDataView();
+    },
     {
       onSuccess: () => {
-        // ensure the success callout will be visible after enabling Asset Inventory
         showOnboardingSuccessCallout();
-        // re-fetch the status API to update the UI
         refetchStatus();
       },
     }

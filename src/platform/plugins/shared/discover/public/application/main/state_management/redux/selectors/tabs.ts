@@ -55,3 +55,8 @@ export const selectIsTabsBarHidden = createSelector(
   (state: DiscoverInternalState) => state.tabsBarVisibility,
   (tabsBarVisibility) => tabsBarVisibility === TabsBarVisibility.hidden
 );
+
+export const selectPersistedDiscoverSession = (state: DiscoverInternalState) =>
+  state.persistedDiscoverSession;
+
+export const selectSavedDataViews = (state: DiscoverInternalState) => state.savedDataViews;

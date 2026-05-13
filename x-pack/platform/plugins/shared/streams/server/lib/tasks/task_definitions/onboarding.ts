@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type {
-  GeneratedSignificantEventQuery,
   IdentifyFeaturesResult,
   OnboardingResult,
   SignificantEventsQueriesGenerationResult,
@@ -15,14 +14,13 @@ import type {
 } from '@kbn/streams-schema';
 import { OnboardingStep, TaskStatus } from '@kbn/streams-schema';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
-import { v4 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LogMeta } from '@kbn/logging';
 import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
 import type { StreamsTaskType, TaskContext } from '.';
 import { getErrorMessage, parseError } from '../../streams/errors/parse_error';
-import type { QueryClient } from '../../streams/assets/query/query_client';
-import type { StreamsClient } from '../../streams/client';
+import { shouldIdentifyFeatures } from '../../sig_events/features/should_identify_features';
+import { persistQueries } from '../../sig_events/persist_queries';
 import { cancellableTask } from '../cancellable_task';
 import type { TaskClient } from '../task_client';
 import type { TaskParams } from '../types';
@@ -44,7 +42,6 @@ export interface OnboardingTaskParams {
   from: number;
   to: number;
   steps: OnboardingStep[];
-  saveQueries: boolean;
   connectors?: {
     features?: string;
     queries?: string;
@@ -53,35 +50,11 @@ export interface OnboardingTaskParams {
 
 export const STREAMS_ONBOARDING_TASK_TYPE = 'streams_onboarding';
 
-export function getOnboardingTaskId(streamName: string, saveQueries: boolean = true) {
-  const base = `${STREAMS_ONBOARDING_TASK_TYPE}_${streamName}`;
-  return saveQueries ? base : `${base}_no_save_queries`;
+export function getOnboardingTaskId(streamName: string) {
+  return `${STREAMS_ONBOARDING_TASK_TYPE}_${streamName}`;
 }
 
-const FEATURES_IDENTIFICATION_RECENCY_MS = 12 * 60 * 60 * 1000; // 12 hours
-
-async function areFeaturesUpToDate({
-  taskClient,
-  featuresTaskId,
-}: {
-  taskClient: TaskClient<StreamsTaskType>;
-  featuresTaskId: string;
-}) {
-  const featuresTask = await taskClient.get<
-    FeaturesIdentificationTaskParams,
-    IdentifyFeaturesResult
-  >(featuresTaskId);
-
-  if (featuresTask.status !== TaskStatus.Completed) {
-    return false;
-  }
-
-  return Boolean(
-    featuresTask.last_completed_at &&
-      Date.now() - new Date(featuresTask.last_completed_at).getTime() <
-        FEATURES_IDENTIFICATION_RECENCY_MS
-  );
-}
+const FEATURES_IDENTIFICATION_THRESHOLD_HOURS = 12;
 
 export function createStreamsOnboardingTask(taskContext: TaskContext) {
   return {
@@ -96,13 +69,21 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
               }
               const { fakeRequest } = runContext;
 
-              const { streamName, from, to, steps, saveQueries, connectors, _task } = runContext
-                .taskInstance.params as TaskParams<OnboardingTaskParams>;
+              const { streamName, from, to, steps, connectors, _task } = runContext.taskInstance
+                .params as TaskParams<OnboardingTaskParams>;
 
-              const { taskClient, queryClient, streamsClient, uiSettingsClient } =
-                await taskContext.getScopedClients({
-                  request: fakeRequest,
-                });
+              const {
+                taskClient,
+                getQueryClient,
+                getFeatureClient,
+                streamsClient,
+                uiSettingsClient,
+              } = await taskContext.getScopedClients({
+                request: fakeRequest,
+                rulesClientOptions: { cloneApiKeysOnCreate: true },
+              });
+
+              const featureClient = await getFeatureClient();
 
               try {
                 let featuresTaskResult: TaskResult<IdentifyFeaturesResult> | undefined;
@@ -117,31 +98,33 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                       const isFeaturesOnlyStep =
                         steps.length === 1 && steps[0] === OnboardingStep.FeaturesIdentification;
 
-                      if (
-                        !isFeaturesOnlyStep &&
-                        (await areFeaturesUpToDate({ taskClient, featuresTaskId }))
-                      ) {
-                        featuresTaskResult = await taskClient.getStatus<
-                          FeaturesIdentificationTaskParams,
-                          IdentifyFeaturesResult
-                        >(featuresTaskId);
-                      } else {
-                        await scheduleFeaturesIdentificationTask(
-                          {
-                            start: from,
-                            end: to,
-                            streamName,
-                            connectorId: connectors?.features,
-                          },
-                          taskClient,
-                          fakeRequest
-                        );
+                      if (!isFeaturesOnlyStep) {
+                        const { shouldIdentify } = await shouldIdentifyFeatures({
+                          featureClient,
+                          streamName,
+                          thresholdHours: FEATURES_IDENTIFICATION_THRESHOLD_HOURS,
+                        });
 
-                        featuresTaskResult = await waitForSubtask<
-                          FeaturesIdentificationTaskParams,
-                          IdentifyFeaturesResult
-                        >(featuresTaskId, runContext.taskInstance.id, taskClient);
+                        if (!shouldIdentify) {
+                          break;
+                        }
                       }
+
+                      await scheduleFeaturesIdentificationTask(
+                        {
+                          start: from,
+                          end: to,
+                          streamName,
+                          connectorId: connectors?.features,
+                        },
+                        taskClient,
+                        fakeRequest
+                      );
+
+                      featuresTaskResult = await waitForSubtask<
+                        FeaturesIdentificationTaskParams,
+                        IdentifyFeaturesResult
+                      >(featuresTaskId, runContext.taskInstance.id, taskClient, taskContext.logger);
 
                       if (featuresTaskResult.status !== TaskStatus.Completed) {
                         return;
@@ -164,18 +147,16 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                       queriesTaskResult = await waitForSubtask<
                         SignificantEventsQueriesGenerationTaskParams,
                         SignificantEventsQueriesGenerationResult
-                      >(queriesTaskId, runContext.taskInstance.id, taskClient);
+                      >(queriesTaskId, runContext.taskInstance.id, taskClient, taskContext.logger);
 
                       if (queriesTaskResult.status !== TaskStatus.Completed) {
                         return;
                       }
 
-                      if (saveQueries) {
-                        await persistQueries(streamName, queriesTaskResult.queries, {
-                          queryClient,
-                          streamsClient,
-                        });
-                      }
+                      await persistQueries(streamName, queriesTaskResult.queries, {
+                        queryClient: await getQueryClient(),
+                        streamsClient,
+                      });
                       break;
 
                     default:
@@ -190,7 +171,6 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                     from,
                     to,
                     steps,
-                    saveQueries,
                     connectors,
                   },
                   { featuresTaskResult, queriesTaskResult }
@@ -266,7 +246,6 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                     from,
                     to,
                     steps,
-                    saveQueries,
                     connectors,
                   },
                   errorMessage
@@ -290,9 +269,15 @@ const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 async function waitForSubtask<TParams extends {} = {}, TPayload extends {} = {}>(
   subtaskId: string,
   parentTaskId: string,
-  taskClient: TaskClient<StreamsTaskType>
+  taskClient: TaskClient<StreamsTaskType>,
+  logger: Logger
 ): Promise<TaskResult<TPayload>> {
+  let lastStatus: TaskStatus | undefined;
+  let pollCount = 0;
+  const startedAt = Date.now();
+
   while (true) {
+    pollCount++;
     const parentTask = await taskClient.get(parentTaskId);
 
     if (parentTask.status === TaskStatus.BeingCanceled) {
@@ -301,11 +286,21 @@ async function waitForSubtask<TParams extends {} = {}, TPayload extends {} = {}>
 
     const result = await taskClient.getStatus<TParams, TPayload>(subtaskId);
 
+    if (result.status !== lastStatus) {
+      logger.debug(`Subtask ${subtaskId}: status changed to ${result.status}`);
+      lastStatus = result.status;
+    }
+
     if (result.status === TaskStatus.Failed) {
       throw new Error(`Subtask with ID ${subtaskId} has failed. Error: ${result.error}.`);
     }
 
     if (![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(result.status)) {
+      logger.debug(
+        `Subtask ${subtaskId} finished with status ${result.status} after ${pollCount} polls (${
+          Date.now() - startedAt
+        }ms)`
+      );
       return result;
     }
 
@@ -351,36 +346,4 @@ async function scheduleQueriesGenerationTask(
   });
 
   return id;
-}
-
-export async function persistQueries(
-  streamName: string,
-  queries: GeneratedSignificantEventQuery[],
-  deps: {
-    queryClient: QueryClient;
-    streamsClient: StreamsClient;
-  }
-) {
-  const { queryClient, streamsClient } = deps;
-
-  if (queries.length === 0) {
-    return;
-  }
-
-  const definition = await streamsClient.getStream(streamName);
-
-  await queryClient.bulk(
-    definition,
-    queries.map((query) => ({
-      index: {
-        id: v4(),
-        esql: query.esql,
-        title: query.title,
-        description: query.description,
-        severity_score: query.severity_score,
-        evidence: query.evidence,
-      },
-    })),
-    { createRules: false }
-  );
 }

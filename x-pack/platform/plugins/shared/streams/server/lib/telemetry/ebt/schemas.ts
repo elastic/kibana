@@ -14,6 +14,8 @@ import type {
   StreamsStateErrorProps,
   StreamsProcessingPipelineSuggestedProps,
   StreamsFeaturesIdentifiedProps,
+  StreamsAgentBuilderKnowledgeIndicatorCreatedProps,
+  StreamsAgentToolKiIdentificationStartedProps,
 } from './types';
 
 const streamsEndpointLatencySchema: RootSchema<StreamEndpointLatencyProps> = {
@@ -352,6 +354,70 @@ const streamsFeaturesIdentifiedSchema: RootSchema<StreamsFeaturesIdentifiedProps
   },
 };
 
+const streamsAgentBuilderKnowledgeIndicatorCreatedSchema: RootSchema<StreamsAgentBuilderKnowledgeIndicatorCreatedProps> =
+  {
+    ki_kind: {
+      type: 'keyword',
+      _meta: {
+        description: 'The kind of KI created by the agent builder tool: feature or query',
+      },
+    },
+    tool_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'The tool that created the KI',
+      },
+    },
+    success: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether KI creation succeeded',
+      },
+    },
+    stream_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the Stream',
+      },
+    },
+    stream_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of the stream: wired, classic, query, or unknown',
+      },
+    },
+    error_message: {
+      type: 'text',
+      _meta: {
+        description: 'Error message when KI creation fails',
+        optional: true,
+      },
+    },
+  };
+
+const streamsAgentToolKiIdentificationStartedSchema: RootSchema<StreamsAgentToolKiIdentificationStartedProps> =
+  {
+    success: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether starting KI identification succeeded',
+      },
+    },
+    stream_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the Stream',
+      },
+    },
+    error_message: {
+      type: 'text',
+      _meta: {
+        description: 'Error message when KI identification start fails',
+        optional: true,
+      },
+    },
+  };
+
 export {
   streamsEndpointLatencySchema,
   streamsStateErrorSchema,
@@ -360,4 +426,6 @@ export {
   streamsInsightsGeneratedSchema,
   streamsProcessingPipelineSuggestedSchema,
   streamsFeaturesIdentifiedSchema,
+  streamsAgentBuilderKnowledgeIndicatorCreatedSchema,
+  streamsAgentToolKiIdentificationStartedSchema,
 };

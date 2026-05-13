@@ -85,6 +85,9 @@ export function registerSkillsRoutes({
             }),
           },
         },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/skills_list.yaml'),
+        },
       },
       wrapHandler(async (ctx, request, response) => {
         const { skills: skillService } = getInternalServices();
@@ -123,6 +126,9 @@ export function registerSkillsRoutes({
           request: {
             params: SKILL_ID_PARAMS_SCHEMA,
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/skills_get_by_id.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -193,6 +199,9 @@ export function registerSkillsRoutes({
             }),
           },
         },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/skills_create.yaml'),
+        },
       },
       wrapHandler(async (ctx, request, response) => {
         const parseResult = skillCreateRequestSchema.safeParse(request.body);
@@ -205,7 +214,7 @@ export function registerSkillsRoutes({
         const { skills: skillService, auditLogService } = getInternalServices();
         const registry = await skillService.getRegistry({ request });
         const skill = await registry.create(createRequest);
-        analyticsService?.reportSkillCreated({ skillId: skill.id });
+        analyticsService?.reportSkillCreated({ skillId: skill.id, origin: 'custom' });
         auditLogService.logSkillCreated(request, { skillId: skill.id });
         const publicSkill = await internalToPublicDefinition(skill);
         return response.ok<CreateSkillResponse>({
@@ -267,6 +276,9 @@ export function registerSkillsRoutes({
             }),
           },
         },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/skills_update.yaml'),
+        },
       },
       wrapHandler(async (ctx, request, response) => {
         const parseResult = skillUpdateRequestSchema.safeParse(request.body);
@@ -280,7 +292,7 @@ export function registerSkillsRoutes({
         const update: UpdateSkillPayload = parseResult.data;
         const registry = await skillService.getRegistry({ request });
         const skill = await registry.update(skillId, update);
-        analyticsService?.reportSkillUpdated({ skillId: skill.id });
+        analyticsService?.reportSkillUpdated({ skillId: skill.id, origin: 'custom' });
         auditLogService.logSkillUpdated(request, { skillId: skill.id });
         const publicSkill = await internalToPublicDefinition(skill);
         return response.ok<UpdateSkillResponse>({
@@ -376,7 +388,7 @@ export function registerSkillsRoutes({
         try {
           const success = await registry.delete(skillId);
           if (success) {
-            analyticsService?.reportSkillDeleted({ skillId });
+            analyticsService?.reportSkillDeleted({ skillId, origin: 'custom' });
             auditLogService.logSkillDeleted(request, { skillId });
           } else {
             auditLogService.logSkillDeleted(request, {

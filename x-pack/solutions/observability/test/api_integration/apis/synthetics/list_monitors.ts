@@ -7,6 +7,7 @@
 import expect from '@kbn/expect';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import type { FtrProviderContext } from '../../ftr_provider_context';
+import { cleanSyntheticsTestData } from './services/private_location_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('ListMonitorsAPI', function () {
@@ -25,7 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
     const SECOND_LOCATION = 'dev2';
 
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
 
       // Create test monitors with different tags
       const monitorA = {
@@ -56,7 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
     });
 
     describe('useLogicalAndFor parameter', () => {

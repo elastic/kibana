@@ -10,13 +10,21 @@ import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mock
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { EVALS_RUN_URL, API_VERSIONS } from '@kbn/evals-common';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { registerGetRunRoute } from './get_run';
 
 describe('GET /internal/evals/runs/{runId}', () => {
   const setup = () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
-    registerGetRunRoute({ router, logger });
+    registerGetRunRoute({
+      router,
+      logger,
+      canEncrypt: false,
+      getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
+      getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+    });
 
     const versionedRouter = router.versioned as MockedVersionedRouter;
     const { handler } = versionedRouter.getRoute('get', EVALS_RUN_URL).versions[

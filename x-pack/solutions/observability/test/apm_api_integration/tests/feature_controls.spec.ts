@@ -132,7 +132,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     },
     {
       req: {
-        url: `/internal/apm/traces/foo?start=${start}&end=${end}&entryTransactionId=foo`,
+        url: `/internal/apm/unified_traces/foo?start=${start}&end=${end}&entryTransactionId=foo`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,

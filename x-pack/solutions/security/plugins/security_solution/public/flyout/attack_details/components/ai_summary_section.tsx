@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState } from 'react';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import { EuiIcon, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiIcon, EuiPanel, EuiSpacer, EuiSwitch, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { AttackDiscoveryMarkdownFormatter } from '../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
 import { useOverviewTabData } from '../hooks/use_overview_tab_data';
 import { ExpandableSection } from '../../../flyout_v2/shared/components/expandable_section';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { useExpandSection } from '../../../flyout_v2/shared/hooks/use_expand_section';
+import { AISummarySectionSettings } from './ai_summary_section_settings';
 
 const KEY = 'aisummary';
 
@@ -37,10 +40,23 @@ export const AISummarySection = memo(() => {
     detailsMarkdownWithReplacements,
   } = useOverviewTabData();
 
-  // for showing / hiding anonymized data
-  const [showAnonymized, setShowAnonymized] = useState<boolean>(false);
+  const hasAnonymizedContent = useMemo(
+    () => summaryMarkdown.trim() !== '' || detailsMarkdown.trim() !== '',
+    [detailsMarkdown, summaryMarkdown]
+  );
 
-  const onToggleShowAnonymized = useCallback(() => setShowAnonymized((current) => !current), []);
+  const [showAnonymized, setShowAnonymized] = useState<boolean>(false);
+  const onChangeShowAnonymized = useCallback((event: EuiSwitchEvent) => {
+    setShowAnonymized(event.target.checked);
+  }, []);
+
+  const [isPopoverOpen, setPopover] = useState(false);
+  const openPopover = useCallback(() => {
+    setPopover((open) => !open);
+  }, []);
+  const closePopover = useCallback(() => {
+    setPopover(false);
+  }, []);
 
   return (
     <ExpandableSection
@@ -65,26 +81,22 @@ export const AISummarySection = memo(() => {
       sectionId={KEY}
       gutterSize="s"
       data-test-subj={KEY}
+      extraAction={
+        <AISummarySectionSettings
+          showAnonymized={showAnonymized}
+          onChangeShowAnonymized={onChangeShowAnonymized}
+          closePopover={closePopover}
+          openPopover={openPopover}
+          isPopoverOpen={isPopoverOpen}
+          hasAnonymizedContent={hasAnonymizedContent}
+        />
+      }
     >
-      <EuiSwitch
-        checked={showAnonymized}
-        compressed
-        data-test-subj="overview-tab-toggle-anonymized"
-        label={
-          <FormattedMessage
-            id="xpack.securitySolution.attackDetailsFlyout.overview.AISummary.showAnonymizedLabel"
-            defaultMessage="Show anonymized values"
-          />
-        }
-        onChange={onToggleShowAnonymized}
-      />
-
-      <EuiSpacer size="s" />
-
       <EuiPanel hasBorder data-test-subj="overview-tab-ai-summary-panel">
         <div data-test-subj="overview-tab-ai-summary-content">
           <AttackDiscoveryMarkdownFormatter
-            disableActions
+            scopeId={TableId.alertsOnAttacksPage}
+            disableActions={showAnonymized}
             markdown={showAnonymized ? summaryMarkdown : summaryMarkdownWithReplacements}
           />
         </div>
@@ -104,7 +116,8 @@ export const AISummarySection = memo(() => {
 
         <div data-test-subj="overview-tab-ai-background-content">
           <AttackDiscoveryMarkdownFormatter
-            disableActions
+            disableActions={showAnonymized}
+            scopeId={TableId.alertsOnAttacksPage}
             markdown={showAnonymized ? detailsMarkdown : detailsMarkdownWithReplacements}
           />
         </div>

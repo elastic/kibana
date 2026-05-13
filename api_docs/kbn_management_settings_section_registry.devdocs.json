@@ -62,6 +62,7 @@
                     "lineNumber": 51,
                     "columnNumber": 23,
                     "deprecated": false,
+                    "docsReferencedTypeName": "RegistryComponent",
                     "trackAdoption": false,
                     "isRequired": true
                   },
@@ -79,6 +80,7 @@
                     "lineNumber": 51,
                     "columnNumber": 53,
                     "deprecated": false,
+                    "docsReferencedTypeName": "QueryMatchFn",
                     "trackAdoption": false,
                     "isRequired": true
                   }
@@ -117,6 +119,7 @@
                     "lineNumber": 61,
                     "columnNumber": 24,
                     "deprecated": false,
+                    "docsReferencedTypeName": "RegistryComponent",
                     "trackAdoption": false,
                     "isRequired": true
                   },
@@ -134,6 +137,7 @@
                     "lineNumber": 61,
                     "columnNumber": 54,
                     "deprecated": false,
+                    "docsReferencedTypeName": "QueryMatchFn",
                     "trackAdoption": false,
                     "isRequired": true
                   }

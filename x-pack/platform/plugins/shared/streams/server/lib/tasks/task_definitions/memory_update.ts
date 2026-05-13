@@ -106,6 +106,7 @@ export function createStreamsMemoryUpdateTask(taskContext: TaskContext) {
                   esClient: scopedClusterClient.asCurrentUser,
                   insightClient,
                   payload,
+                  abortSignal: runContext.abortController.signal,
                 });
 
                 taskLogger.info(`Memory update trigger "${triggerId}" completed successfully`);

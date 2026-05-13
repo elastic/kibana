@@ -22,7 +22,7 @@ import { css as classNameCss } from '@emotion/css';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
-import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
+import type { MonacoMessage } from '@kbn/code-editor';
 import { filterDataErrors } from '../helpers';
 import type { DataErrorsControl } from '../types';
 import { DataErrorsSwitch } from './data_errors_switch';
@@ -155,13 +155,14 @@ export function ErrorsWarningsFooterPopover({
     return items;
   }, [items, dataErrorsControl]);
 
-  const { color, message } = getConstsByType(type, visibleItems.length);
+  const { color, message, label } = getConstsByType(type, visibleItems.length);
   const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
 
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
         <EuiPopover
+          aria-label={label}
           anchorPosition="downLeft"
           hasArrow={false}
           panelPaddingSize="none"

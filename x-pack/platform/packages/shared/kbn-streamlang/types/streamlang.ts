@@ -27,12 +27,13 @@ export const conditionWithStepsSchema: z.ZodType<ConditionWithSteps> = z
       conditionSchema,
       z.object({
         steps: z.array(streamlangStepSchema),
+        else: z.array(streamlangStepSchema).optional(),
       })
     )
   )
   .meta({ id: 'ConditionWithSteps' });
 
-export type ConditionWithSteps = Condition & { steps: StreamlangStep[] };
+export type ConditionWithSteps = Condition & { steps: StreamlangStep[]; else?: StreamlangStep[] };
 
 /**
  * Nested condition block (recursive)

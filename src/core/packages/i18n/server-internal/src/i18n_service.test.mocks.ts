@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const getKibanaTranslationFilesMock = jest.fn();
+export const getAllKibanaTranslationFilesMock = jest.fn();
+export const groupFilesByLocaleMock = jest.fn().mockReturnValue({});
+export const computeLocaleFileHashMock = jest.fn().mockResolvedValue('mock-file-hash');
 jest.doMock('./get_kibana_translation_files', () => ({
-  getKibanaTranslationFiles: getKibanaTranslationFilesMock,
+  getAllKibanaTranslationFiles: getAllKibanaTranslationFilesMock,
+  groupFilesByLocale: groupFilesByLocaleMock,
+  computeLocaleFileHash: computeLocaleFileHashMock,
 }));
 
 export const initTranslationsMock = jest.fn();

@@ -11,9 +11,9 @@ import type { DownloadableContent } from '@kbn/share-plugin/public';
 import { downloadFileAs } from '@kbn/share-plugin/public';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import type { WorkflowApi } from '@kbn/workflows-ui';
+import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
 import { extractReferencedWorkflowIds } from './export/extract_workflow_references';
 import { generateWorkflowsZip } from './export/generate_zip_archive';
-import { stringifyWorkflowDefinition } from '../../../common/lib/yaml';
 
 const FALLBACK_FILENAME = 'workflow_export';
 

@@ -14,6 +14,8 @@ import {
   API_VERSIONS,
   TRACES_INDEX_PATTERN,
 } from '@kbn/evals-common';
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { registerGetProjectTracesRoute } from './get_project_traces';
 
 const emptySpanCountResponse = {
@@ -26,7 +28,13 @@ describe('GET /internal/evals/tracing/projects/{projectName}/traces', () => {
   const setup = () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
-    registerGetProjectTracesRoute({ router, logger });
+    registerGetProjectTracesRoute({
+      router,
+      logger,
+      canEncrypt: false,
+      getEncryptedSavedObjectsStart: async () => ({} as EncryptedSavedObjectsPluginStart),
+      getInternalRemoteConfigsSoClient: async () => ({} as SavedObjectsClientContract),
+    });
 
     const versionedRouter = router.versioned as MockedVersionedRouter;
     const { handler } = versionedRouter.getRoute('get', EVALS_TRACING_PROJECT_TRACES_URL).versions[

@@ -42,7 +42,6 @@ interface PluginLibraryPanelProps {
   allPlugins: PluginDefinition[];
   activePluginIdSet: Set<string>;
   onTogglePlugin: (plugin: PluginDefinition, isActive: boolean) => void;
-  mutatingPluginId: string | null;
   autoPluginIdSet?: Set<string>;
 }
 
@@ -51,7 +50,6 @@ export const PluginLibraryPanel: React.FC<PluginLibraryPanelProps> = ({
   allPlugins,
   activePluginIdSet,
   onTogglePlugin,
-  mutatingPluginId,
   autoPluginIdSet,
 }) => {
   const readOnlyItemIdSet = useMemo(
@@ -65,7 +63,6 @@ export const PluginLibraryPanel: React.FC<PluginLibraryPanelProps> = ({
       allItems={allPlugins}
       activeItemIdSet={activePluginIdSet}
       onToggleItem={onTogglePlugin}
-      mutatingItemId={mutatingPluginId}
       flyoutTitleId="pluginLibraryFlyoutTitle"
       libraryLabels={libraryLabels}
       manageLibraryPath={appPaths.plugins.list}

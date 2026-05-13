@@ -156,10 +156,12 @@ export function getDashboardApi({
     const { panels, pinned_panels } = layoutManager.internalApi.serializeLayout();
     const unifiedSearchState = unifiedSearchManager.internalApi.getState();
     const projectRoutingState = projectRoutingManager?.internalApi.getState();
+    const accessControlState = accessControlManager.internalApi.getState();
     return {
       ...settingsManager.internalApi.serializeSettings(),
       ...unifiedSearchState,
       ...projectRoutingState,
+      ...accessControlState,
       panels,
       pinned_panels,
     } satisfies DashboardState;
@@ -282,7 +284,6 @@ export function getDashboardApi({
     setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
     type: DASHBOARD_API_TYPE as 'dashboard',
     uuid: v4(),
-    getPassThroughContext: () => creationOptions?.getPassThroughContext?.(),
     createdBy: readResult?.meta?.created_by,
     user,
     // TODO: accessControl$ and changeAccessMode should be moved to internalApi

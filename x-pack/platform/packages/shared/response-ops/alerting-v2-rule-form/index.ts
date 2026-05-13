@@ -8,6 +8,10 @@
 // Pre-composed flyouts (lazy loaded) - recommended for most use cases
 export { DynamicRuleFormFlyout, StandaloneRuleFormFlyout } from './flyout';
 
+// Compose Discover flyout — stepped Edit Form + Discover Sandbox
+export { ComposeDiscoverFlyout } from './flyout/compose_discover';
+export type { ComposeDiscoverFlyoutProps } from './flyout/compose_discover';
+
 // Lazy components (without Suspense wrapper) - for consumers who need full control
 export {
   LazyDynamicRuleFormFlyout,
@@ -35,6 +39,15 @@ export {
   mapFormValuesToCreateRequest,
   mapFormValuesToUpdateRequest,
   mapRuleResponseToFormValues,
+} from './form';
+
+// Field groups — for composing custom form layouts
+export {
+  RuleDetailsFieldGroup,
+  ConditionFieldGroup,
+  RuleExecutionFieldGroup,
+  AlertConditionsFieldGroup,
+  KindField,
 } from './form';
 
 // Types

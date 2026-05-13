@@ -18,9 +18,10 @@ import {
   EuiBadge,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useBasePath } from '../../../common/lib/kibana';
+import { useBasePath, useKibana } from '../../../common/lib/kibana';
+import { SiemReadinessEventTypes } from '../../../common/lib/telemetry/events/siem_readiness/types';
 
 interface StatusInfo {
   status: string;
@@ -32,25 +33,39 @@ interface IntegrationSelectablePopoverProps extends Pick<EuiSelectableProps, 'op
   showOnlySelectable?: boolean;
   statusMap?: Map<string, StatusInfo>;
   disabled?: boolean;
+  telemetrySource?: string;
 }
 
 export const IntegrationSelectablePopover = (props: IntegrationSelectablePopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const { options, showOnlySelectable, statusMap, disabled = false } = props;
+  const { options, showOnlySelectable, statusMap, disabled = false, telemetrySource = '' } = props;
   const { euiTheme } = useEuiTheme();
   const basePath = useBasePath();
+  const { telemetry } = useKibana().services;
 
-  const handleChange: EuiSelectableProps['onChange'] = (newOptions) => {
-    // Find the selected option
-    const selectedOption = newOptions.find((option) => option.checked === 'on');
+  const handleChange: EuiSelectableProps['onChange'] = useCallback(
+    (newOptions: EuiSelectableOption[]) => {
+      const selectedOption = newOptions.find((option) => option.checked === 'on');
 
-    if (selectedOption?.key) {
-      // Navigate to the integration detail page
-      const integrationUrl = `${basePath}/app/integrations/detail/${selectedOption.key}`;
-      window.open(integrationUrl, '_blank', 'noopener,noreferrer');
-      setIsPopoverOpen(false);
-    }
-  };
+      if (selectedOption?.key) {
+        telemetry.reportEvent(SiemReadinessEventTypes.IntegrationClicked, {
+          integrationPackage: selectedOption.key,
+          source: telemetrySource,
+        });
+        const integrationUrl = `${basePath}/app/integrations/detail/${selectedOption.key}`;
+        window.open(integrationUrl, '_blank', 'noopener,noreferrer');
+        setIsPopoverOpen(false);
+      }
+    },
+    [basePath, telemetry, telemetrySource]
+  );
+
+  const handlePopoverOpen = useCallback(() => {
+    telemetry.reportEvent(SiemReadinessEventTypes.IntegrationPopoverOpened, {
+      source: telemetrySource,
+    });
+    setIsPopoverOpen(true);
+  }, [telemetry, telemetrySource]);
 
   const renderOption = (option: EuiSelectableOption) => {
     const statusInfo = statusMap?.get(option.key as string);
@@ -120,7 +135,9 @@ export const IntegrationSelectablePopover = (props: IntegrationSelectablePopover
             <EuiFlexItem grow={false}>
               <EuiLink
                 color={disabled ? 'subdued' : 'primary'}
-                onClick={() => !disabled && setIsPopoverOpen(!isPopoverOpen)}
+                onClick={() =>
+                  !disabled && (isPopoverOpen ? setIsPopoverOpen(false) : handlePopoverOpen())
+                }
                 style={disabled ? { cursor: 'default' } : undefined}
               >
                 {i18n.translate(
@@ -134,7 +151,9 @@ export const IntegrationSelectablePopover = (props: IntegrationSelectablePopover
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 isDisabled={disabled}
-                onClick={() => !disabled && setIsPopoverOpen(!isPopoverOpen)}
+                onClick={() =>
+                  !disabled && (isPopoverOpen ? setIsPopoverOpen(false) : handlePopoverOpen())
+                }
                 color="text"
                 size="xs"
                 style={{

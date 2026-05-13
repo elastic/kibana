@@ -7,7 +7,16 @@
 
 import type { MouseEventHandler } from 'react';
 import React from 'react';
-import { EuiBadge, EuiToolTip, EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
+import {
+  EuiBadge,
+  EuiToolTip,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  useEuiMinBreakpoint,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SloStatus } from '../../../../common/service_inventory';
 
@@ -118,6 +127,7 @@ export function SloStatusBadge({
   serviceName,
   onClick,
   hideTooltip = false,
+  compactLabelOnNarrowScreens = false,
 }: {
   sloStatus: SloStatus | 'noSLOs';
   sloCount?: number;
@@ -126,7 +136,14 @@ export function SloStatusBadge({
   onClick?: MouseEventHandler<HTMLButtonElement>;
   /** When true, no EuiToolTip (e.g. service map). Inventory and other callers omit this. */
   hideTooltip?: boolean;
+  /**
+   * When true and the status shows a numeric count, xs/s viewports show icon + count only
+   * (full label from `m` breakpoint up) to avoid wrapping on the service map.
+   */
+  compactLabelOnNarrowScreens?: boolean;
 }) {
+  /** Min-width `m` only — avoid `useEuiBreakpoint(['m','l','xl'])`, which can cap at `xl` and hide the wide label on larger viewports. */
+  const mUpMedia = useEuiMinBreakpoint('m');
   const config = SLO_STATUS_CONFIG[sloStatus];
   const cappedCount =
     config.showCount && sloCount
@@ -134,6 +151,26 @@ export function SloStatusBadge({
         ? `${SLO_COUNT_CAP}+`
         : sloCount
       : undefined;
+
+  const useNarrowCompact =
+    compactLabelOnNarrowScreens && config.showCount && cappedCount !== undefined;
+
+  const responsiveCompactRowStyles = useNarrowCompact
+    ? css`
+        .apmSloBadgeNarrowCount {
+          display: block;
+          ${mUpMedia} {
+            display: none;
+          }
+        }
+        .apmSloBadgeWideLabel {
+          display: none;
+          ${mUpMedia} {
+            display: block;
+          }
+        }
+      `
+    : undefined;
 
   const badge = (
     <EuiBadge
@@ -144,13 +181,30 @@ export function SloStatusBadge({
         ? { onClick, onClickAriaLabel: config.ariaLabel(serviceName) }
         : { 'aria-label': config.ariaLabel(serviceName) })}
     >
-      <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+        wrap={false}
+        css={responsiveCompactRowStyles}
+      >
         <EuiFlexItem grow={false}>
           <EuiIcon type="chartGauge" aria-hidden={true} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs">{config.badgeLabel(cappedCount)}</EuiText>
-        </EuiFlexItem>
+        {useNarrowCompact ? (
+          <>
+            <EuiFlexItem grow={false} className="apmSloBadgeNarrowCount">
+              <EuiText size="xs">{cappedCount}</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} className="apmSloBadgeWideLabel">
+              <EuiText size="xs">{config.badgeLabel(cappedCount)}</EuiText>
+            </EuiFlexItem>
+          </>
+        ) : (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">{config.badgeLabel(cappedCount)}</EuiText>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiBadge>
   );

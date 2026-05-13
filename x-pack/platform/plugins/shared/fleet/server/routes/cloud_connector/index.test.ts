@@ -1559,7 +1559,9 @@ describe('Cloud Connector API', () => {
       expect(mockPackagePolicyService.list).toHaveBeenCalledWith(expect.any(Object), {
         page: 1,
         perPage: 10,
-        kuery: 'fleet-package-policies.attributes.cloud_connector_id:"connector-123"',
+        kuery: expect.stringContaining(
+          'fleet-package-policies.attributes.cloud_connector_id:"connector-123"'
+        ),
       });
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -1648,7 +1650,9 @@ describe('Cloud Connector API', () => {
       expect(mockPackagePolicyService.list).toHaveBeenCalledWith(expect.any(Object), {
         page: 3,
         perPage: 5,
-        kuery: 'fleet-package-policies.attributes.cloud_connector_id:"connector-123"',
+        kuery: expect.stringContaining(
+          'fleet-package-policies.attributes.cloud_connector_id:"connector-123"'
+        ),
       });
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -1728,6 +1732,106 @@ describe('Cloud Connector API', () => {
         statusCode: 400,
         body: {
           message: 'Database error',
+        },
+      });
+    });
+
+    it('should exclude hidden packages (verifier_otel) via kuery filter', async () => {
+      const mockCloudConnector: CloudConnector = {
+        id: 'connector-123',
+        name: 'test-connector',
+        cloudProvider: 'aws' as CloudProvider,
+        vars: {
+          role_arn: { value: 'arn:aws:iam::123456789012:role/TestRole', type: 'text' },
+          external_id: { value: { id: 'secret-id', isSecretRef: true }, type: 'password' },
+        },
+        packagePolicyCount: 3,
+        created_at: '2023-01-01T00:00:00.000Z',
+        updated_at: '2023-01-01T00:00:00.000Z',
+      };
+
+      mockCloudConnectorService.getById.mockResolvedValue(mockCloudConnector);
+      // Simulate what ES returns after the kuery filter excludes verifier_otel
+      mockPackagePolicyService.list.mockResolvedValue({
+        items: [
+          {
+            id: 'policy-1',
+            name: 'CSPM Policy',
+            package: {
+              name: 'cloud_security_posture',
+              title: 'Cloud Security Posture',
+              version: '1.0.0',
+            },
+            policy_ids: ['agent-policy-1'],
+            created_at: '2023-01-01T00:00:00.000Z',
+            updated_at: '2023-01-02T00:00:00.000Z',
+          },
+          {
+            id: 'policy-3',
+            name: 'Asset Inventory Policy',
+            package: {
+              name: 'cloud_asset_inventory',
+              title: 'Cloud Asset Inventory',
+              version: '2.0.0',
+            },
+            policy_ids: ['agent-policy-3'],
+            created_at: '2023-01-01T00:00:00.000Z',
+            updated_at: '2023-01-02T00:00:00.000Z',
+          },
+        ],
+        total: 2,
+        page: 1,
+        perPage: 10,
+      } as any);
+
+      const request = httpServerMock.createKibanaRequest({
+        params: { cloudConnectorId: 'connector-123' },
+        query: {},
+      });
+
+      await getCloudConnectorUsageHandler(context, request, response);
+
+      // Verify the kuery includes the NOT filter for hidden packages
+      expect(mockPackagePolicyService.list).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          kuery: expect.stringContaining(
+            'NOT fleet-package-policies.attributes.package.name:"verifier_otel"'
+          ),
+        })
+      );
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          items: [
+            {
+              id: 'policy-1',
+              name: 'CSPM Policy',
+              package: {
+                name: 'cloud_security_posture',
+                title: 'Cloud Security Posture',
+                version: '1.0.0',
+              },
+              policy_ids: ['agent-policy-1'],
+              created_at: '2023-01-01T00:00:00.000Z',
+              updated_at: '2023-01-02T00:00:00.000Z',
+            },
+            {
+              id: 'policy-3',
+              name: 'Asset Inventory Policy',
+              package: {
+                name: 'cloud_asset_inventory',
+                title: 'Cloud Asset Inventory',
+                version: '2.0.0',
+              },
+              policy_ids: ['agent-policy-3'],
+              created_at: '2023-01-01T00:00:00.000Z',
+              updated_at: '2023-01-02T00:00:00.000Z',
+            },
+          ],
+          total: 2,
+          page: 1,
+          perPage: 10,
         },
       });
     });

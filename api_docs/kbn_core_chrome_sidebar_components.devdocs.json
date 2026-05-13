@@ -143,6 +143,7 @@
             "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SidebarAppId",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -570,7 +571,7 @@
               "Current app status (reactive)"
             ],
             "signature": [
-              "\"pending\" | \"available\" | \"unavailable\""
+              "\"pending\" | \"unavailable\" | \"available\""
             ],
             "path": "src/core/packages/chrome/sidebar/sidebar-components/src/hooks/use_sidebar.tsx",
             "lineNumber": 59,

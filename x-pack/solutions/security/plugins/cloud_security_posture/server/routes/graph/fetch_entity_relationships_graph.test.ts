@@ -69,6 +69,7 @@ describe('fetchEntityRelationships', () => {
       // Verify query uses v2 index and LOOKUP JOIN
       expect(query).toContain(`FROM ${indexName}`);
       expect(query).toContain(`LOOKUP JOIN ${indexName} ON entity.id`);
+      expect(query).toContain('`entity.relationships.owns.ids`');
     });
 
     it('should return empty result when entities index is not in lookup mode', async () => {
@@ -151,11 +152,22 @@ describe('fetchEntityRelationships', () => {
           'entity.id': ['entity-1', 'entity-2', 'entity-3'],
         },
       });
-      // Verify it queries for entities that have these IDs in their relationships (all fields)
+      const ids = ['entity-1', 'entity-2', 'entity-3'];
+
+      // Relationship bags: match `entity.relationships.<leaf>.ids`; resolution uses resolved_to path
       ENTITY_RELATIONSHIP_FIELDS.forEach((field) => {
+        if (field === 'resolution.resolved_to') {
+          expect(filterArg.bool.should).toContainEqual({
+            terms: {
+              'entity.relationships.resolution.resolved_to': ids,
+            },
+          });
+          return;
+        }
+
         expect(filterArg.bool.should).toContainEqual({
           terms: {
-            [`entity.relationships.${field}`]: ['entity-1', 'entity-2', 'entity-3'],
+            [`entity.relationships.${field}.ids`]: ids,
           },
         });
       });
@@ -311,6 +323,7 @@ describe('fetchEntityRelationships', () => {
       const query = esqlCallArgs[0].query;
 
       // Verify doc data fields are generated
+      expect(query).toContain('_rel_targets_owns');
       expect(query).toContain('actorsDocData');
       expect(query).toContain('targetsDocData');
       expect(query).toContain('availableInEntityStore');

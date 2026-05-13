@@ -36,7 +36,7 @@ export const AgentBuilderTools = () => {
   return (
     <KibanaPageTemplate data-test-subj="agentBuilderToolsPage">
       <KibanaPageTemplate.Header
-        pageTitle={labels.tools.title}
+        pageTitle={labels.tools.libraryTitle}
         description={
           <FormattedMessage
             id="xpack.agentBuilder.tools.toolsDescription"
@@ -44,7 +44,7 @@ export const AgentBuilderTools = () => {
             values={{
               learnMoreLink: (
                 <EuiLink
-                  href={docLinksService.tools}
+                  href={docLinksService.agentBuilderTools}
                   target="_blank"
                   aria-label={i18n.translate(
                     'xpack.agentBuilder.tools.toolsDocumentationAriaLabel',

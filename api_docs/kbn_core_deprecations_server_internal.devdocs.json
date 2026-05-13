@@ -34,7 +34,15 @@
             "tags": [],
             "label": "asScopedToClient",
             "description": [
-              "\nCreates a {@link DeprecationsClient} with provided SO client and ES client."
+              "\nCreates a ",
+              {
+                "pluginId": "@kbn/core-deprecations-server-internal",
+                "scope": "server",
+                "docId": "kibKbnCoreDeprecationsServerInternalPluginApi",
+                "section": "def-server.DeprecationsClient",
+                "text": "DeprecationsClient"
+              },
+              " with provided SO client and ES client."
             ],
             "signature": [
               "(esClient: ",
@@ -68,6 +76,7 @@
                 "lineNumber": 42,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "IScopedClusterClient",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -87,6 +96,7 @@
                 "lineNumber": 43,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsClientContract",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -105,6 +115,7 @@
                 "lineNumber": 44,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }

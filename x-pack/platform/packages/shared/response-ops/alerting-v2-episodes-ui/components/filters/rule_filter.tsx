@@ -7,11 +7,11 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiPopover, EuiFilterButton } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import useAsync from 'react-use/lib/useAsync';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { InlineFilterPopover } from './inline_filter_popover';
+import * as i18n from './translations';
 import { fetchRulesSearch } from '../../apis/fetch_rules_search';
 
 const RULE_SEARCH_DEBOUNCE_MS = 250;
@@ -66,9 +66,7 @@ export function AlertEpisodesRuleFilter({
 
   return (
     <EuiPopover
-      aria-label={i18n.translate('xpack.alertingV2EpisodesUi.ruleFilter.ariaLabel', {
-        defaultMessage: 'Rule filter',
-      })}
+      aria-label={i18n.RULE_FILTER_ARIA_LABEL}
       button={
         <EuiFilterButton
           iconType="arrowDown"
@@ -80,9 +78,7 @@ export function AlertEpisodesRuleFilter({
           numActiveFilters={selectedRuleId ? 1 : undefined}
           data-test-subj={`${dataTestSubj}-button`}
         >
-          {i18n.translate('xpack.alertingV2EpisodesUi.ruleFilter.label', {
-            defaultMessage: 'Rule',
-          })}
+          {i18n.RULE_FILTER_LABEL}
         </EuiFilterButton>
       }
       isOpen={isOpen}
@@ -98,15 +94,8 @@ export function AlertEpisodesRuleFilter({
         searchable={true}
         searchValue={search}
         onSearchChange={setSearch}
-        searchPlaceholder={i18n.translate(
-          'xpack.alertingV2EpisodesUi.ruleFilter.searchPlaceholder',
-          {
-            defaultMessage: 'Search rules…',
-          }
-        )}
-        emptyMessage={i18n.translate('xpack.alertingV2EpisodesUi.ruleFilter.noMatch', {
-          defaultMessage: 'No matching rules',
-        })}
+        searchPlaceholder={i18n.RULE_FILTER_SEARCH_PLACEHOLDER}
+        emptyMessage={i18n.RULE_FILTER_NO_MATCH}
         data-test-subj={`${dataTestSubj}-popover`}
       />
     </EuiPopover>

@@ -9,11 +9,11 @@ import React from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
+  EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -24,16 +24,17 @@ import { labels } from '../../../utils/i18n';
 
 const { agentOverview: overviewLabels } = labels;
 
-const cardStyles = css`
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 40px;
-  align-items: flex-start;
-`;
+const CARD_BODY_BLOCK_SIZE = '275px';
 
 const settingRowStyles = css`
   width: 100%;
+`;
+const instructionsContainerStyles = css`
+  max-block-size: ${CARD_BODY_BLOCK_SIZE};
+  overflow: auto;
+`;
+const instructionsTextStyles = css`
+  white-space: pre-wrap;
 `;
 
 export interface SettingsSectionProps {
@@ -67,46 +68,72 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
         <h2>{overviewLabels.customizationsTitle}</h2>
       </EuiTitle>
 
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
 
-      <EuiFlexGroup gutterSize="m" alignItems="stretch">
+      <EuiFlexGroup gutterSize="m" alignItems="flexStart">
         {/* Custom Instructions Card */}
         <EuiFlexItem grow={1}>
-          <EuiPanel hasBorder paddingSize="l" css={cardStyles}>
-            <div>
-              <EuiTitle size="xs">
-                <h3>{overviewLabels.customInstructionsTitle}</h3>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <EuiText size="s" color="subdued">
-                {currentInstructions || overviewLabels.customInstructionsOnboardingText}
-              </EuiText>
-            </div>
-            {!currentInstructions && canEditAgent ? (
-              <EuiButtonEmpty
-                size="s"
-                flush="left"
-                onClick={onOpenEditFlyout}
-                data-test-subj="agentOverviewAddInstructionsLink"
-              >
-                {overviewLabels.addInstructionsLink}
-              </EuiButtonEmpty>
-            ) : null}
-          </EuiPanel>
+          <EuiCard
+            hasBorder
+            display="plain"
+            paddingSize="m"
+            title={overviewLabels.customInstructionsTitle}
+            titleElement="h3"
+            titleSize="xs"
+            description={overviewLabels.customInstructionsSubtitle}
+            textAlign="left"
+            onClick={canEditAgent ? onOpenEditFlyout : undefined}
+            footer={
+              !currentInstructions && canEditAgent ? (
+                <EuiButtonEmpty
+                  size="s"
+                  flush="left"
+                  data-test-subj="agentOverviewAddInstructionsLink"
+                >
+                  {overviewLabels.addInstructionsLink}
+                </EuiButtonEmpty>
+              ) : undefined
+            }
+            css={css`
+              height: 100%;
+              .euiCard__content p {
+                color: ${euiTheme.colors.textSubdued};
+              }
+            `}
+          >
+            {currentInstructions && (
+              <>
+                <EuiSpacer size="l" />
+                <div css={instructionsContainerStyles}>
+                  <EuiText size="s" color="subdued">
+                    <p css={instructionsTextStyles}>{currentInstructions}</p>
+                  </EuiText>
+                </div>
+              </>
+            )}
+          </EuiCard>
         </EuiFlexItem>
 
         {/* Agent Settings Card */}
         <EuiFlexItem grow={1}>
-          <EuiPanel hasBorder paddingSize="l" css={cardStyles}>
-            <div css={settingRowStyles}>
-              <EuiTitle size="xs">
-                <h3>{overviewLabels.agentSettingsCardTitle}</h3>
-              </EuiTitle>
-              <EuiSpacer size="xs" />
-              <EuiText size="s" color="subdued">
-                {overviewLabels.agentSettingsCardSubtitle}
-              </EuiText>
-            </div>
+          <EuiCard
+            hasBorder
+            display="plain"
+            paddingSize="m"
+            title={overviewLabels.agentSettingsCardTitle}
+            titleElement="h3"
+            titleSize="xs"
+            description={overviewLabels.agentSettingsCardSubtitle}
+            textAlign="left"
+            onClick={canEditAgent ? onOpenEditFlyout : undefined}
+            css={css`
+              height: 100%;
+              .euiCard__content p {
+                color: ${euiTheme.colors.textSubdued};
+              }
+            `}
+          >
+            <EuiSpacer size="l" />
             <EuiFlexGroup
               direction="column"
               gutterSize="s"
@@ -120,7 +147,9 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                       <EuiFlexItem grow={false}>
                         <EuiText
-                          color={enableElasticCapabilities ? 'textPrimary' : 'subdued'}
+                          color={
+                            enableElasticCapabilities ? 'textPrimary' : euiTheme.colors.textDisabled
+                          }
                           size="s"
                         >
                           {overviewLabels.autoIncludeTitle}
@@ -158,7 +187,10 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                       <EuiFlexItem grow>
                         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                           <EuiFlexItem grow={false}>
-                            <EuiText size="s" color={hasWorkflows ? 'textPrimary' : 'subdued'}>
+                            <EuiText
+                              size="s"
+                              color={hasWorkflows ? 'textPrimary' : euiTheme.colors.textDisabled}
+                            >
                               {overviewLabels.preExecutionWorkflowTitle}
                             </EuiText>
                           </EuiFlexItem>
@@ -183,7 +215,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                 </>
               )}
             </EuiFlexGroup>
-          </EuiPanel>
+          </EuiCard>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

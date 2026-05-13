@@ -19,7 +19,7 @@ const DATETIME_SCHEMA = 'datetime';
 export type CellValueProps = Pick<
   ComponentProps<GetTableProp<'renderCellValue'>>,
   /**
-   * Alert data passed from the renderCellValue callback via the AlertWithLegacyFormats interface
+   * Alert data passed from the renderCellValue callback
    */
   | 'alert'
   /**

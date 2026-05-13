@@ -25,11 +25,16 @@ export function stripCustomIdentifiers(dsl: StreamlangDSL): StreamlangDSL {
 
       if (isConditionBlock(step)) {
         // Handle where blocks with nested steps
+        const strippedElse =
+          step.condition.else && step.condition.else.length > 0
+            ? stripFromSteps(step.condition.else)
+            : undefined;
         return {
           ...restOfStep,
           condition: {
             ...step.condition,
             steps: stripFromSteps(step.condition.steps),
+            ...(strippedElse ? { else: strippedElse } : {}),
           },
         };
       } else {
@@ -92,6 +97,9 @@ export function addStepIdentifiers(steps: StreamlangStep[], path = 'root') {
       // Only recurse into nested steps for where blocks
       if (isConditionBlock(step) && Array.isArray(step.condition?.steps)) {
         addStepIdentifiers(step.condition.steps, stepPath);
+        if (Array.isArray(step.condition.else)) {
+          addStepIdentifiers(step.condition.else, `${stepPath}.else`);
+        }
       }
     });
   }
@@ -127,16 +135,6 @@ export interface AdditiveChangesResult {
 }
 
 /**
- * Checks if changes between two DSLs are purely additive (new steps at the end only).
- * 1. Compares steps sequentially from the beginning
- * 2. Stops immediately when finding a difference
- * 3. Only returns new steps if all previous steps match exactly
- *
- * @param previousDSL - The previous state of the DSL
- * @param nextDSL - The new state of the DSL
- * @returns Result indicating if changes are purely additive and what the new steps are
- */
-/**
  * Collects the custom identifiers for a slice of steps (including nested where branches)
  * into the provided set. The set is used instead of an array so callers can union
  * results from multiple branches without worrying about duplicates.
@@ -147,8 +145,13 @@ const collectStepIds = (steps: StreamlangStep[], target: Set<string>) => {
       target.add(step.customIdentifier);
     }
 
-    if (isConditionBlock(step) && step.condition?.steps) {
-      collectStepIds(step.condition.steps, target);
+    if (isConditionBlock(step)) {
+      if (step.condition?.steps) {
+        collectStepIds(step.condition.steps, target);
+      }
+      if (step.condition?.else) {
+        collectStepIds(step.condition.else, target);
+      }
     }
   }
 };
@@ -170,12 +173,13 @@ const stripNestedStepsForComparison = (step: StreamlangStep) => {
   };
 
   if (isConditionBlock(step) && step.condition) {
-    const { steps, ...conditionWithoutSteps } = step.condition;
+    const { steps, else: elseSteps, ...conditionWithoutSteps } = step.condition;
     return {
       ...restOfStep,
       condition: {
         ...conditionWithoutSteps,
         steps: [],
+        else: [],
       },
     };
   }
@@ -232,6 +236,18 @@ const diffStepsForAdditions = (
       // Merge nested additions into the current result so callers receive the
       // identifiers for new nested steps as well as any parent where blocks that changed.
       nestedDiff.newStepIds.forEach((id) => newStepIds.add(id));
+
+      // Also diff else branches
+      const previousElse = previousStep.condition?.else ?? [];
+      const nextElse = nextStep.condition?.else ?? [];
+
+      const elseDiff = diffStepsForAdditions(previousElse, nextElse);
+
+      if (!elseDiff.isPurelyAdditive) {
+        return { isPurelyAdditive: false };
+      }
+
+      elseDiff.newStepIds.forEach((id) => newStepIds.add(id));
     } else if (objectHash(previousStep) !== objectHash(nextStep)) {
       // Non-where steps must be identical
       return { isPurelyAdditive: false };
@@ -286,9 +302,14 @@ export const getProcessorsCount = (dsl: StreamlangDSL): number => {
       if (isActionBlock(step)) {
         // Count action blocks
         count++;
-      } else if (isConditionBlock(step) && step.condition?.steps) {
+      } else if (isConditionBlock(step)) {
         // Recursively traverse nested steps in where blocks
-        traverseSteps(step.condition.steps);
+        if (step.condition?.steps) {
+          traverseSteps(step.condition.steps);
+        }
+        if (step.condition?.else) {
+          traverseSteps(step.condition.else);
+        }
       }
     }
   };

@@ -15,11 +15,11 @@ import {
   LATEST_ALIAS,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
-import { expectedHostEntities } from '../fixtures/entity_extraction_expected';
+import { assertEntitiesEqual, expectedHostEntities } from '../fixtures/entity_extraction_expected';
 import { clearEntityStoreIndices } from '../fixtures/helpers';
 
 apiTest.describe(
-  'Entity Store Logs Extraction with pagination (max 5 docs per page)',
+  'Entity Store Logs Extraction with pagination (entity pages + maxLogsPerPage)',
   { tag: ENTITY_STORE_TAGS },
   () => {
     let defaultHeaders: Record<string, string>;
@@ -69,10 +69,9 @@ apiTest.describe(
     });
 
     apiTest(
-      'Should extract properly extract host with pagination',
-      async ({ apiClient, esClient }) => {
-        const expectedResultCount = 20;
-        const expectedPageCount = 4;
+      'Should extract host with entity pagination (docsLimit 5, wide log slices)',
+      async ({ apiClient, esClient, log }) => {
+        const expectedPageCount = 5;
 
         const extractionResponse = await apiClient.post(
           ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('host'),
@@ -87,7 +86,7 @@ apiTest.describe(
         );
         expect(extractionResponse.statusCode).toBe(200);
         expect(extractionResponse.body.success).toBe(true);
-        expect(extractionResponse.body.count).toBe(expectedResultCount);
+        expect(extractionResponse.body.count).toBe(expectedHostEntities.length);
         expect(extractionResponse.body.pages).toBe(expectedPageCount);
 
         const entities = await esClient.search({
@@ -99,14 +98,68 @@ apiTest.describe(
               },
             },
           },
-          sort: '@timestamp:asc,entity.id:asc',
           size: 1000, // a lot just to be sure we are not capping it
         });
 
-        expect(entities.hits.hits).toHaveLength(expectedResultCount);
-        // it's deterministic because of the SHA-256 id
-        // manually checking object until we have a snapshot matcher
-        expect(entities.hits.hits).toMatchObject(expectedHostEntities);
+        assertEntitiesEqual(expectedHostEntities, entities.hits.hits, (msg) => log.error(msg));
+      }
+    );
+
+    apiTest(
+      'Should run more ESQL pages when maxLogsPerPage narrows log slices',
+      async ({ apiClient, esClient, log }) => {
+        const minimumPagesWithEntityPaginationOnly = 4;
+
+        const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: { logExtraction: { maxLogsPerPage: 2 } },
+        });
+        expect(update.statusCode).toBe(200);
+
+        await esClient.deleteByQuery({
+          index: LATEST_ALIAS,
+          refresh: true,
+          query: {
+            bool: {
+              filter: {
+                term: { 'entity.EngineMetadata.Type': 'host' },
+              },
+            },
+          },
+        });
+
+        const extractionResponse = await apiClient.post(
+          ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('host'),
+          {
+            headers: internalHeaders,
+            responseType: 'json',
+            body: {
+              fromDateISO: '2026-01-20T11:00:00Z',
+              toDateISO: '2026-01-20T13:00:00Z',
+            },
+          }
+        );
+        expect(extractionResponse.statusCode).toBe(200);
+        expect(extractionResponse.body.success).toBe(true);
+        // We process some entities twice because they didn't fall in the same logs page
+        expect(extractionResponse.body.count).toBeGreaterThan(expectedHostEntities.length);
+        expect(extractionResponse.body.pages).toBeGreaterThan(minimumPagesWithEntityPaginationOnly);
+
+        const entities = await esClient.search({
+          index: LATEST_ALIAS,
+          query: {
+            bool: {
+              filter: {
+                term: { 'entity.EngineMetadata.Type': 'host' },
+              },
+            },
+          },
+          sort: '@timestamp:asc,entity.id:asc',
+          size: 1000,
+        });
+
+        assertEntitiesEqual(expectedHostEntities, entities.hits.hits, (msg) => log.error(msg));
       }
     );
   }

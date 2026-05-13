@@ -49,7 +49,6 @@ export interface LibraryPanelProps<T extends LibraryItem> {
   allItems: T[];
   activeItemIdSet: Set<string>;
   onToggleItem: (item: T, isActive: boolean) => void;
-  mutatingItemId: string | null;
   flyoutTitleId: string;
   libraryLabels: LibraryPanelLabels;
   manageLibraryPath: string;
@@ -67,7 +66,6 @@ export const LibraryPanel = <T extends LibraryItem>({
   allItems,
   activeItemIdSet,
   onToggleItem,
-  mutatingItemId,
   flyoutTitleId,
   libraryLabels,
   manageLibraryPath,
@@ -172,7 +170,6 @@ export const LibraryPanel = <T extends LibraryItem>({
                   description={item.description}
                   isActive={activeItemIdSet.has(item.id)}
                   onToggle={(checked) => onToggleItem(item, checked)}
-                  isMutating={mutatingItemId === item.id}
                   isDisabled={disabledItemIdSet?.has(item.id)}
                   isReadOnly={readOnlyItemIdSet?.has(item.id)}
                   disabledBadgeLabel={libraryLabels.disabledBadgeLabel}

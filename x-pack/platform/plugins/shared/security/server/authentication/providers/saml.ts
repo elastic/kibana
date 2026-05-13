@@ -710,13 +710,16 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
 
     this.logger.debug('Request has been authenticated via refreshed token.');
     const { accessToken, refreshToken, authenticationInfo } = refreshTokenResult;
+
+    const isUiamToken = this.isUiamToken(accessToken);
+
     return AuthenticationResult.succeeded(
       this.authenticationInfoToAuthenticatedUser(authenticationInfo),
       {
-        authHeaders: {
-          authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
-        },
-        ...(this.isUiamToken(accessToken) && {
+        authHeaders: isUiamToken
+          ? this.options.uiam.getAuthenticationHeaders(accessToken)
+          : { authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString() },
+        ...(isUiamToken && {
           userProfileGrant: {
             type: 'uiamAccessToken',
             accessToken,
@@ -764,6 +767,11 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
       );
 
       // Store request id in the state so that we can reuse it once we receive `SAMLResponse`.
+      // Only override cookie options when serving over HTTPS: Safari (unlike Chrome) refuses
+      // to set or send `Secure` cookies over plain HTTP — even on localhost — which caused
+      // the session cookie to be lost between the SAML handshake and the ACS callback,
+      // resulting in an empty `ids` array sent to Elasticsearch. Falling back to the default
+      // cookie options over HTTP keeps the handshake working in dev/Safari setups.
       return AuthenticationResult.redirectTo(redirect, {
         state: {
           requestIdMap: this.updateRequestIdMap(
@@ -773,7 +781,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
           ),
           realm,
         },
-        stateCookieOptions: { sameSite: 'None', isSecure: true },
+        ...(this.isHttps() ? { stateCookieOptions: { sameSite: 'None', isSecure: true } } : {}),
       });
     } catch (err) {
       this.logger.debug(() => `Failed to initiate SAML handshake: ${getDetailedErrorMessage(err)}`);
@@ -865,6 +873,14 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
     this.logger.debug('User session has been successfully invalidated.');
 
     return redirect;
+  }
+
+  /**
+   * Returns true if the Kibana server is configured to be served over HTTPS.
+   */
+  private isHttps() {
+    const { publicBaseUrl } = this.options.basePath;
+    return new URL(publicBaseUrl ?? this.options.getServerBaseURL()).protocol === 'https:';
   }
 
   /**

@@ -231,6 +231,7 @@
                 "lineNumber": 54,
                 "columnNumber": 41,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExistsOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -244,7 +245,9 @@
             "tags": [],
             "label": "existOrFail",
             "description": [
-              "\nGet a promise that resolves when an element exists, if the element doesn't exist\nbefore the timeout is reached the promise will reject with an error.\n\nThis method is intended to be used as success critieria when something is expected\nto exist. The default 2 minute timeout is not appropriate for all conditions, but\nhard-coding timeouts all over tests is also bad, so please use your best judgement.\n\nThe options are equal to the options accepted by the {@link #exists} method except\nthat `options.timeout` defaults to the `timeouts.try` config, or 2 minutes."
+              "\nGet a promise that resolves when an element exists, if the element doesn't exist\nbefore the timeout is reached the promise will reject with an error.\n\nThis method is intended to be used as success critieria when something is expected\nto exist. The default 2 minute timeout is not appropriate for all conditions, but\nhard-coding timeouts all over tests is also bad, so please use your best judgement.\n\nThe options are equal to the options accepted by the ",
+              "#exists",
+              " method except\nthat `options.timeout` defaults to the `timeouts.try` config, or 2 minutes."
             ],
             "signature": [
               "(selector: string, existsOptions?: ExistsOptions | undefined) => Promise<void>"
@@ -286,6 +289,7 @@
                 "lineNumber": 74,
                 "columnNumber": 46,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExistsOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -341,6 +345,7 @@
                 "lineNumber": 94,
                 "columnNumber": 48,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExistsOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -517,6 +522,7 @@
                 "lineNumber": 139,
                 "columnNumber": 55,
                 "deprecated": false,
+                "docsReferencedTypeName": "TimeoutOpt",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -587,6 +593,7 @@
                 "lineNumber": 154,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TimeoutOpt",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -847,6 +854,7 @@
                 "lineNumber": 192,
                 "columnNumber": 44,
                 "deprecated": false,
+                "docsReferencedTypeName": "WebElementWrapper",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -922,6 +930,7 @@
                 "lineNumber": 202,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "WebElementWrapper",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -997,6 +1006,7 @@
                 "lineNumber": 213,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "WebElementWrapper",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1312,6 +1322,7 @@
                 "lineNumber": 278,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SetValueOptions",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2413,6 +2424,7 @@
                 "lineNumber": 48,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "WebDriver",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2470,6 +2482,7 @@
                 "lineNumber": 51,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolingLog",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2493,6 +2506,7 @@
                 "lineNumber": 52,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Browsers",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2529,6 +2543,7 @@
                 "lineNumber": 70,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "WebElement",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2564,6 +2579,7 @@
                 "lineNumber": 72,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "WebDriver",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2621,6 +2637,7 @@
                 "lineNumber": 75,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolingLog",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2644,6 +2661,7 @@
                 "lineNumber": 76,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Browsers",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2876,6 +2894,7 @@
                 "lineNumber": 253,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "ClearOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2918,6 +2937,7 @@
                 "lineNumber": 269,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "TypeOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2993,6 +3013,7 @@
                 "lineNumber": 308,
                 "columnNumber": 47,
                 "deprecated": false,
+                "docsReferencedTypeName": "TypeOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4082,6 +4103,7 @@
                 "lineNumber": 745,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScrollIntoViewOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -5406,6 +5428,7 @@
                 "lineNumber": 86,
                 "columnNumber": 6,
                 "deprecated": false,
+                "docsReferencedTypeName": "CustomCheerio",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5612,6 +5635,7 @@
                 "lineNumber": 96,
                 "columnNumber": 8,
                 "deprecated": false,
+                "docsReferencedTypeName": "CustomCheerio",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5942,6 +5966,7 @@
                 "lineNumber": 102,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "CustomCheerio",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -6523,6 +6548,7 @@
                 "lineNumber": 116,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "CustomCheerio",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -6913,6 +6939,7 @@
                 "lineNumber": 124,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "CustomCheerio",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -7361,6 +7388,7 @@
                 "lineNumber": 138,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "CustomCheerio",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -7771,6 +7799,7 @@
                 "lineNumber": 144,
                 "columnNumber": 7,
                 "deprecated": false,
+                "docsReferencedTypeName": "CustomCheerio",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -8190,6 +8219,7 @@
                 "lineNumber": 158,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "CustomCheerio",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -8400,6 +8430,7 @@
                 "lineNumber": 163,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "Document",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -8658,6 +8689,7 @@
                 "lineNumber": 166,
                 "columnNumber": 7,
                 "deprecated": false,
+                "docsReferencedTypeName": "CustomCheerio",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -8801,6 +8833,7 @@
                 "lineNumber": 172,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "CustomCheerio",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -8858,6 +8891,7 @@
                 "lineNumber": 173,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "CustomCheerio",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -9027,6 +9061,7 @@
                 "lineNumber": 176,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "Document",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -9219,6 +9254,7 @@
                 "lineNumber": 178,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "CustomCheerio",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -9405,6 +9441,7 @@
                 "lineNumber": 181,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "Document",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -9597,6 +9634,7 @@
                 "lineNumber": 183,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "CustomCheerio",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -9783,6 +9821,7 @@
                 "lineNumber": 186,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "Document",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -9975,6 +10014,7 @@
                 "lineNumber": 188,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "CustomCheerio",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -10128,6 +10168,7 @@
                 "lineNumber": 191,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Document",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -10202,6 +10243,7 @@
                 "lineNumber": 192,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "CustomCheerio",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -10371,6 +10413,7 @@
                 "lineNumber": 195,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "Document",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -10563,6 +10606,7 @@
                 "lineNumber": 197,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "CustomCheerio",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -10716,6 +10760,7 @@
                 "lineNumber": 200,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "Document",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -10790,6 +10835,7 @@
                 "lineNumber": 201,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "CustomCheerio",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -11207,6 +11253,7 @@
                 "lineNumber": 208,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "CustomCheerio",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -11607,6 +11654,7 @@
                 "lineNumber": 220,
                 "columnNumber": 8,
                 "deprecated": false,
+                "docsReferencedTypeName": "Document",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -11681,6 +11729,7 @@
                 "lineNumber": 221,
                 "columnNumber": 8,
                 "deprecated": false,
+                "docsReferencedTypeName": "CustomCheerio",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -12281,6 +12330,7 @@
                 "lineNumber": 229,
                 "columnNumber": 7,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -12593,6 +12643,7 @@
                 "lineNumber": 28,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "Document",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -12765,6 +12816,7 @@
                 "lineNumber": 32,
                 "columnNumber": 8,
                 "deprecated": false,
+                "docsReferencedTypeName": "CustomCheerio",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -13007,6 +13059,7 @@
                 "lineNumber": 34,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Omit",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -13603,7 +13656,7 @@
                 "id": "def-common.services.retryOnStale.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{ getService }",
                 "description": [],
                 "signature": [
                   {
@@ -13619,6 +13672,7 @@
                 "lineNumber": 17,
                 "columnNumber": 38,
                 "deprecated": false,
+                "docsReferencedTypeName": "FtrProviderContext",
                 "trackAdoption": false
               }
             ]
@@ -13665,7 +13719,7 @@
                 "id": "def-common.services.__webdriver__.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{ getService }",
                 "description": [],
                 "signature": [
                   {
@@ -13681,6 +13735,7 @@
                 "lineNumber": 16,
                 "columnNumber": 38,
                 "deprecated": false,
+                "docsReferencedTypeName": "FtrProviderContext",
                 "trackAdoption": false
               }
             ]
@@ -13733,6 +13788,7 @@
                 "lineNumber": 543,
                 "columnNumber": 36,
                 "deprecated": false,
+                "docsReferencedTypeName": "FtrProviderContext",
                 "trackAdoption": false
               }
             ]
@@ -13806,6 +13862,7 @@
                 "lineNumber": 917,
                 "columnNumber": 39,
                 "deprecated": false,
+                "docsReferencedTypeName": "FtrProviderContext",
                 "trackAdoption": false
               }
             ]

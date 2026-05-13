@@ -155,6 +155,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
         className,
         css: attachmentViewObject.css,
         event: attachmentViewObject.event,
+        eventColor: attachmentViewObject.eventColor,
         'data-test-subj': `comment-${attachment.type}-${attachmentTypeId}`,
         timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
         timelineAvatar: attachmentViewObject.timelineAvatar,

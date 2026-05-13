@@ -10,6 +10,14 @@
 export const MOCK_IDP_LOGIN_PATH = '/mock_idp/login';
 export const MOCK_IDP_LOGOUT_PATH = '/mock_idp/logout';
 
+// Fixed base path used when running stateful Kibana with the SAML Mock IdP. Having a stable value
+// (instead of the random base path the dev proxy generates by default) keeps SP/ACS endpoints in
+// the Elasticsearch SAML realm aligned with Kibana's URL across restarts.
+export const MOCK_IDP_KIBANA_BASE_PATH = '/kbn';
+
+// Externally-visible Kibana URL — must match the SAML realm's `kibana_url` exactly.
+export const MOCK_IDP_KIBANA_URL = `http://localhost:5601${MOCK_IDP_KIBANA_BASE_PATH}`;
+
 // These are the values that dev UIAM service is configured with (openssl rand 32 | base64).
 export const MOCK_IDP_UIAM_SIGNING_SECRET = 'MnpT2a582F/LiRbocLHLnSF2SYElqTUdmQvBpVn+51Q=';
 export const MOCK_IDP_UIAM_SHARED_SECRET = 'Dw7eRt5yU2iO9pL3aS4dF6gH8jK0lZ1xC2vB3nM4qW5=';
@@ -19,6 +27,10 @@ export const MOCK_IDP_UIAM_ORG_ADMIN_API_KEY =
 export const MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS = 'api-keys';
 export const MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS = 'users';
 export const MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION = 'token-invalidation';
+export const MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_CLIENTS = 'oauth-clients';
+export const MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_AUTHORIZATION_CODES =
+  'oauth-authorization-codes';
+export const MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS = 'oauth-app-connections';
 export const MOCK_IDP_UIAM_COSMOS_DB_NAME = 'uiam-db';
 // Cosmos DB emulator uses a fixed key. For production, this should be retrieved from configuration.
 export const MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY =
@@ -52,6 +64,8 @@ export const MOCK_IDP_UIAM_SERVICE_INTERNAL_URL =
   process.env.MOCK_IDP_UIAM_SERVICE_INTERNAL_URL || 'https://uiam:8443';
 export const MOCK_IDP_UIAM_SERVICE_URL =
   process.env.MOCK_IDP_UIAM_SERVICE_URL || 'https://localhost:8443';
+export const MOCK_IDP_UIAM_OAUTH_BASE_URL =
+  process.env.MOCK_IDP_UIAM_OAUTH_BASE_URL || `https://localhost:8444/oauth2`;
 
 export const MOCK_IDP_REALM_NAME = 'cloud-saml-kibana';
 export const MOCK_IDP_REALM_TYPE = 'saml';

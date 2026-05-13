@@ -9,14 +9,14 @@
 import type { FormBasedLayer, DatatableVisualizationState, TextBasedLayer } from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { DatatableState } from '../../../../schema';
+import type { DatatableConfig } from '../../../../schema';
 import {
   buildDataSourceStateESQL,
   buildDataSourceStateNoESQL,
   generateApiLayer,
   isTextBasedLayer,
 } from '../../../utils';
-import { convertAppearanceToAPIFormat } from './appearance';
+import { convertStylingToAPIFormat } from './styling';
 import { convertDatatableColumnsToAPI } from './columns';
 
 export function buildVisualizationAPI(
@@ -26,7 +26,7 @@ export function buildVisualizationAPI(
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
-): DatatableState {
+): DatatableConfig {
   if (isTextBasedLayer(layer)) {
     const dataSource = buildDataSourceStateESQL(layer);
 
@@ -37,7 +37,7 @@ export function buildVisualizationAPI(
       data_source: dataSource,
       ...generateApiLayer(layer),
       ...columns,
-      ...convertAppearanceToAPIFormat(visualization, columnIdMapping),
+      ...convertStylingToAPIFormat(visualization, columnIdMapping),
     };
   }
 
@@ -56,6 +56,6 @@ export function buildVisualizationAPI(
     data_source: dataSource,
     ...generateApiLayer(layer),
     ...columns,
-    ...convertAppearanceToAPIFormat(visualization, columnIdMapping),
+    ...convertStylingToAPIFormat(visualization, columnIdMapping),
   };
 }

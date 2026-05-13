@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import deepmerge from 'deepmerge';
 import { useSelector } from 'react-redux';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsSelectors, sourcererSelectors } from '../../../../common/store';
@@ -57,7 +58,6 @@ export const useObservedHost = (
     ? experimentalSecurityDefaultIndexPatterns
     : oldSecurityDefaultPatterns;
 
-  // Same as useObservedUser: use entity-store observed fields only when a store record exists.
   const useEntityStoreObservedData = Boolean(
     entityFromStore?.entityRecord ?? entityFromStore?.entity
   );
@@ -67,19 +67,18 @@ export const useObservedHost = (
       endDate: to,
       startDate: from,
       hostName,
+      entityId: useEntityStoreObservedData ? entityFromStore?.entityRecord?.entity?.id : undefined,
       indexNames: securityDefaultPatterns,
       id: HOST_PANEL_RISK_SCORE_QUERY_ID,
-      skip: isInitializing || useEntityStoreObservedData,
+      skip: isInitializing,
     });
 
   useQueryInspector({
     deleteQuery,
-    inspect: useEntityStoreObservedData ? entityFromStore?.inspect : inspectObservedHost,
-    loading: useEntityStoreObservedData ? entityFromStore?.isLoading ?? false : isLoading,
+    inspect: inspectObservedHost,
+    loading: isLoading,
     queryId: HOST_PANEL_OBSERVED_HOST_QUERY_ID,
-    refetch: useEntityStoreObservedData
-      ? entityFromStore?.refetch ?? (() => {})
-      : refetchHostDetails,
+    refetch: refetchHostDetails,
     setQuery,
   });
 
@@ -104,8 +103,9 @@ export const useObservedHost = (
   return useMemo((): ObservedHostResult => {
     if (useEntityStoreObservedData && entityFromStore) {
       return {
-        details: (entityFromStore.entity ?? {}) as HostItem,
-        isLoading: entityFromStore.isLoading,
+        // merge with entity store record
+        details: deepmerge(hostDetails, entityFromStore.entityRecord ?? {}),
+        isLoading: isLoading || entityFromStore.isLoading,
         firstSeen: {
           date: entityFromStore.firstSeen ?? undefined,
           isLoading: entityFromStore.isLoading,
@@ -116,8 +116,8 @@ export const useObservedHost = (
         },
         entityRecord: entityFromStore.entityRecord ?? null,
         refetchEntityStore: entityFromStore.refetch,
-        observedDetailsInspect: undefined,
-        refetchObservedDetails: undefined,
+        observedDetailsInspect: inspectObservedHost,
+        refetchObservedDetails: refetchHostDetails,
       };
     }
     return {

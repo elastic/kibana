@@ -10,7 +10,7 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { findSimilarCasesStepCommonDefinition } from '../../../common/workflows/steps/find_similar_cases';
 import type { CasesClient } from '../../client';
 import { FIND_SIMILAR_CASES_FAILED_MESSAGE } from './translations';
-import { getCasesClientFromStepsContext } from './utils';
+import { getCasesClientFromStepsContext, safeParseCaseForWorkflowOutput } from './utils';
 
 export const findSimilarCasesStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
@@ -27,7 +27,10 @@ export const findSimilarCasesStepDefinition = (
           perPage: input.perPage,
         });
 
-        const output = findSimilarCasesStepCommonDefinition.outputSchema.parse(similarCases);
+        const output = safeParseCaseForWorkflowOutput(
+          findSimilarCasesStepCommonDefinition.outputSchema,
+          similarCases
+        );
 
         return { output };
       } catch (_error) {

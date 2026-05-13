@@ -17,6 +17,8 @@ components:
     UpdateableMonitoringEntitySourceProperties:
       type: object
       properties:
+        type:
+          $ref: "#/components/schemas/EntitySourceType"
         name:
           type: string
         indexPattern:
@@ -39,6 +41,8 @@ components:
           $ref: "#/components/schemas/Filter"
         integrations:
           $ref: "#/components/schemas/Integrations"
+        range:
+          $ref: "#/components/schemas/DateRange"
 
     UpdateEntitySourceNoadditionalProps:
       allOf:
@@ -51,8 +55,6 @@ components:
         - $ref: "#/components/schemas/UpdateableMonitoringEntitySourceProperties"
         - type: object
           properties:
-            type:
-              $ref: "#/components/schemas/EntitySourceType"
             managed:
               type: boolean
 
@@ -101,6 +103,20 @@ components:
           properties:
             id:
               type: string
+
+    DateRange:
+      description: Defines the lookback period for filtering source data by timestamp.
+      type: object
+      required:
+        - start
+        - end
+      properties:
+        start:
+          type: string
+          description: Start of the lookback period (date math or ISO string, e.g. "now-10d")
+        end:
+          type: string
+          description: End of the lookback period (date math or ISO string, e.g. "now")
 
     Integrations:
       type: object

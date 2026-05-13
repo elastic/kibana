@@ -8,10 +8,11 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
   ContentListProvider,
+  contentListQueryClient,
   type FindItemsResult,
   type FindItemsParams,
 } from '@kbn/content-list-provider';
@@ -67,9 +68,13 @@ interface CreateWrapperOptions {
   tagsService?: ContentManagementTagsServices;
 }
 
-const createWrapper =
-  (options: CreateWrapperOptions = {}) =>
-  ({ children }: { children: React.ReactNode }) => {
+let providerIdCounter = 0;
+const nextProviderId = () => `toolbar-test-list-${++providerIdCounter}`;
+
+const createWrapper = (options: CreateWrapperOptions = {}) => {
+  const providerId = nextProviderId();
+
+  return ({ children }: { children: React.ReactNode }) => {
     const { sortingDisabled, searchDisabled, searchPlaceholder, sortFields, tagsService } = options;
 
     const features = {
@@ -79,7 +84,7 @@ const createWrapper =
 
     return (
       <ContentListProvider
-        id="test-list"
+        id={providerId}
         labels={{
           entity: 'dashboard',
           entityPlural: 'dashboards',
@@ -93,14 +98,20 @@ const createWrapper =
       </ContentListProvider>
     );
   };
+};
 
 describe('ContentListToolbar', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
+  afterEach(() => {
+    contentListQueryClient.cancelQueries();
+    contentListQueryClient.clear();
+  });
+
   describe('rendering', () => {
-    it('renders a search bar', () => {
+    it('renders a search bar once the initial fetch resolves', async () => {
       const Wrapper = createWrapper();
       render(
         <Wrapper>
@@ -108,10 +119,36 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      expect(screen.getByTestId('contentListToolbar-searchBox')).toBeInTheDocument();
+      // Phase is 'initialLoad' on first render; the skeleton stands in for
+      // the search bar until the first fetch settles.
+      expect(await screen.findByTestId('contentListToolbar-searchBox')).toBeInTheDocument();
     });
 
-    it('applies custom data-test-subj prefix to the search box', () => {
+    it('renders a skeleton during the initialLoad phase', () => {
+      // Use a dedicated provider id + never-resolving findItems so phase
+      // stays 'initialLoad' long enough to observe the skeleton
+      // synchronously. A unique id prevents the shared module-level query
+      // cache from replaying a previous test's resolved data here.
+      contentListQueryClient.cancelQueries();
+      contentListQueryClient.clear();
+      const neverResolves = jest.fn(
+        (_params: FindItemsParams) => new Promise<FindItemsResult>(() => undefined)
+      );
+
+      render(
+        <ContentListProvider
+          id="toolbar-skeleton-test"
+          labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
+          dataSource={{ findItems: neverResolves }}
+        >
+          <ContentListToolbar />
+        </ContentListProvider>
+      );
+
+      expect(screen.getByTestId('contentListToolbar-skeleton')).toBeInTheDocument();
+    });
+
+    it('applies custom data-test-subj prefix to the search box', async () => {
       const Wrapper = createWrapper();
       render(
         <Wrapper>
@@ -119,12 +156,12 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      expect(screen.getByTestId('my-toolbar-searchBox')).toBeInTheDocument();
+      expect(await screen.findByTestId('my-toolbar-searchBox')).toBeInTheDocument();
     });
   });
 
   describe('search box', () => {
-    it('uses the default placeholder when none is configured', () => {
+    it('uses the default placeholder when none is configured', async () => {
       const Wrapper = createWrapper();
       render(
         <Wrapper>
@@ -132,11 +169,11 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+      const searchBox = await screen.findByTestId('contentListToolbar-searchBox');
       expect(searchBox).toHaveAttribute('placeholder', 'Search\u2026');
     });
 
-    it('renders the search box as enabled by default', () => {
+    it('renders the search box as enabled by default', async () => {
       const Wrapper = createWrapper();
       render(
         <Wrapper>
@@ -144,11 +181,11 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+      const searchBox = await screen.findByTestId('contentListToolbar-searchBox');
       expect(searchBox).not.toBeDisabled();
     });
 
-    it('renders the search box as disabled when search is disabled', () => {
+    it('renders the search box as disabled when search is disabled', async () => {
       const Wrapper = createWrapper({ searchDisabled: true });
       render(
         <Wrapper>
@@ -156,7 +193,7 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+      const searchBox = await screen.findByTestId('contentListToolbar-searchBox');
       expect(searchBox).toBeDisabled();
     });
 
@@ -168,7 +205,7 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+      const searchBox = await screen.findByTestId('contentListToolbar-searchBox');
       await userEvent.type(searchBox, 'dashboard');
 
       // Wait for the incremental search to trigger a refetch with the typed text.
@@ -186,7 +223,7 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+      const searchBox = await screen.findByTestId('contentListToolbar-searchBox');
       expect(searchBox).toHaveValue('');
 
       await userEvent.type(searchBox, 'test query');
@@ -196,21 +233,14 @@ describe('ContentListToolbar', () => {
       });
     });
 
-    it('uses the configured search placeholder', () => {
-      const Wrapper = createWrapper({ searchPlaceholder: 'Search dashboards...' });
-      render(
-        <Wrapper>
-          <ContentListToolbar />
-        </Wrapper>
-      );
-
-      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
-      expect(searchBox).toHaveAttribute('placeholder', 'Search dashboards...');
-    });
-  });
-
-  describe('sort filter', () => {
-    it('renders the sort filter when sorting is enabled', () => {
+    it('does not crash and remains operable after a parse error', async () => {
+      // EuiSearchBar fires onChange with { error, query: null, queryText } when
+      // the user types a syntactically invalid query (e.g. an unclosed paren).
+      // The handler must NOT pass the raw error text to the controlled `query`
+      // prop: EuiSearchBar's getDerivedStateFromProps calls parseQuery on any
+      // new prop value and would throw if the string is unparseable, crashing
+      // the component. Instead, we return early and let EuiSearchBar maintain
+      // the error text in its own internal state.
       const Wrapper = createWrapper();
       render(
         <Wrapper>
@@ -218,10 +248,57 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      expect(screen.getByTestId('contentListSortRenderer')).toBeInTheDocument();
+      const searchBox = await screen.findByTestId('contentListToolbar-searchBox');
+
+      // Type a valid query so there is a known good state.
+      fireEvent.change(searchBox, { target: { value: 'hello' } });
+      await waitFor(() => {
+        const lastCall = mockFindItems.mock.calls[mockFindItems.mock.calls.length - 1];
+        expect(lastCall[0].searchQuery).toBe('hello');
+      });
+
+      // Type a query with a parse error (unclosed paren).
+      // EuiSearchBar fires onChange with { error, query: null }; the handler
+      // returns early to avoid passing the unparseable string back to the prop.
+      fireEvent.change(searchBox, { target: { value: 'hello (unclosed' } });
+
+      // The search bar must still be in the DOM — the component did not crash.
+      expect(screen.getByTestId('contentListToolbar-searchBox')).toBeInTheDocument();
+
+      // Subsequent valid typing must continue to work normally.
+      fireEvent.change(searchBox, { target: { value: 'hello again' } });
+      await waitFor(() => {
+        const lastCall = mockFindItems.mock.calls[mockFindItems.mock.calls.length - 1];
+        expect(lastCall[0].searchQuery).toBe('hello again');
+      });
     });
 
-    it('does not render the sort filter when sorting is disabled', () => {
+    it('uses the configured search placeholder', async () => {
+      const Wrapper = createWrapper({ searchPlaceholder: 'Search dashboards...' });
+      render(
+        <Wrapper>
+          <ContentListToolbar />
+        </Wrapper>
+      );
+
+      const searchBox = await screen.findByTestId('contentListToolbar-searchBox');
+      expect(searchBox).toHaveAttribute('placeholder', 'Search dashboards...');
+    });
+  });
+
+  describe('sort filter', () => {
+    it('renders the sort filter when sorting is enabled', async () => {
+      const Wrapper = createWrapper();
+      render(
+        <Wrapper>
+          <ContentListToolbar />
+        </Wrapper>
+      );
+
+      expect(await screen.findByTestId('contentListSortRenderer')).toBeInTheDocument();
+    });
+
+    it('does not render the sort filter when sorting is disabled', async () => {
       const Wrapper = createWrapper({ sortingDisabled: true });
       render(
         <Wrapper>
@@ -229,12 +306,13 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
+      await screen.findByTestId('contentListToolbar-searchBox');
       expect(screen.queryByTestId('contentListSortRenderer')).not.toBeInTheDocument();
     });
   });
 
   describe('declarative filter children', () => {
-    it('renders sort filter from declarative children', () => {
+    it('renders sort filter from declarative children', async () => {
       const { Filters } = ContentListToolbar;
       const Wrapper = createWrapper();
 
@@ -248,10 +326,10 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      expect(screen.getByTestId('contentListSortRenderer')).toBeInTheDocument();
+      expect(await screen.findByTestId('contentListSortRenderer')).toBeInTheDocument();
     });
 
-    it('falls back to default filter order when Filters has no valid children', () => {
+    it('falls back to default filter order when Filters has no valid children', async () => {
       const { Filters } = ContentListToolbar;
       const Wrapper = createWrapper();
 
@@ -266,10 +344,10 @@ describe('ContentListToolbar', () => {
       );
 
       // Should still render the sort filter from defaults.
-      expect(screen.getByTestId('contentListSortRenderer')).toBeInTheDocument();
+      expect(await screen.findByTestId('contentListSortRenderer')).toBeInTheDocument();
     });
 
-    it('falls back to default filter order when no Filters child provided', () => {
+    it('falls back to default filter order when no Filters child provided', async () => {
       const Wrapper = createWrapper();
 
       render(
@@ -280,10 +358,10 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      expect(screen.getByTestId('contentListSortRenderer')).toBeInTheDocument();
+      expect(await screen.findByTestId('contentListSortRenderer')).toBeInTheDocument();
     });
 
-    it('ignores non-element children (null, strings)', () => {
+    it('ignores non-element children (null, strings)', async () => {
       const Wrapper = createWrapper();
 
       render(
@@ -296,10 +374,10 @@ describe('ContentListToolbar', () => {
       );
 
       // Should fall back to default filters.
-      expect(screen.getByTestId('contentListSortRenderer')).toBeInTheDocument();
+      expect(await screen.findByTestId('contentListSortRenderer')).toBeInTheDocument();
     });
 
-    it('resolves Filters wrapped in a Fragment', () => {
+    it('resolves Filters wrapped in a Fragment', async () => {
       const { Filters } = ContentListToolbar;
       const Wrapper = createWrapper();
 
@@ -315,12 +393,12 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      expect(screen.getByTestId('contentListSortRenderer')).toBeInTheDocument();
+      expect(await screen.findByTestId('contentListSortRenderer')).toBeInTheDocument();
     });
   });
 
-  describe('tag filter integration with parseSearchQuery', () => {
-    it('calls parseSearchQuery and passes parsed tags to findItems', async () => {
+  describe('tag filter integration with query model', () => {
+    it('parses tag syntax and passes resolved tag IDs to findItems', async () => {
       const Wrapper = createWrapper({ tagsService: mockTagsService });
       render(
         <Wrapper>
@@ -328,14 +406,16 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
-      await userEvent.type(searchBox, 'tag:Production my query');
+      const searchBox = await screen.findByTestId('contentListToolbar-searchBox');
 
-      await waitFor(() => {
-        expect(mockParseSearchQuery).toHaveBeenCalledWith('tag:Production my query');
-      });
+      // Use fireEvent.change to set the full query at once, avoiding
+      // EuiSearchBar's controlled-component round-trip on intermediate states
+      // (e.g., `tag:P` would be unresolvable and clear the input).
+      fireEvent.change(searchBox, { target: { value: 'tag:Production my query' } });
 
       // Verify that `findItems` receives the parsed search query and tag filters.
+      // The generic parser uses field definitions (derived from tags service) to
+      // resolve "Production" → "tag-1".
       await waitFor(() => {
         const lastCall = mockFindItems.mock.calls[mockFindItems.mock.calls.length - 1];
         expect(lastCall[0].searchQuery).toBe('my query');
@@ -354,7 +434,7 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+      const searchBox = await screen.findByTestId('contentListToolbar-searchBox');
       await userEvent.type(searchBox, 'plain search');
 
       await waitFor(() => {
@@ -372,7 +452,7 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+      const searchBox = await screen.findByTestId('contentListToolbar-searchBox');
       await userEvent.type(searchBox, 'tag:Production my query');
 
       // Without tags service, the entire text is treated as the search query.
@@ -391,12 +471,8 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
-      await userEvent.type(searchBox, 'tag:"New World" my query');
-
-      await waitFor(() => {
-        expect(mockParseSearchQuery).toHaveBeenCalledWith('tag:"New World" my query');
-      });
+      const searchBox = await screen.findByTestId('contentListToolbar-searchBox');
+      fireEvent.change(searchBox, { target: { value: 'tag:"New World" my query' } });
 
       await waitFor(() => {
         const lastCall = mockFindItems.mock.calls[mockFindItems.mock.calls.length - 1];
@@ -408,8 +484,7 @@ describe('ContentListToolbar', () => {
       });
     });
 
-    it('preserves existing filters when parseSearchQuery throws', async () => {
-      // First render with a working parser so we can establish a known filter state.
+    it('passes unresolvable tag values through as raw filter values', async () => {
       const Wrapper = createWrapper({ tagsService: mockTagsService });
       render(
         <Wrapper>
@@ -417,30 +492,19 @@ describe('ContentListToolbar', () => {
         </Wrapper>
       );
 
-      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+      const searchBox = await screen.findByTestId('contentListToolbar-searchBox');
 
-      // Set up initial state: type a valid tag query to populate filters.
-      await userEvent.type(searchBox, 'tag:Production');
-      await waitFor(() => {
-        expect(mockFindItems.mock.calls.length).toBeGreaterThan(0);
-        const lastCall = mockFindItems.mock.calls[mockFindItems.mock.calls.length - 1];
-        expect(lastCall[0].filters.tag).toEqual({ include: ['tag-1'], exclude: [] });
-      });
+      // Set a tag name that doesn't match any known tag.
+      fireEvent.change(searchBox, { target: { value: 'tag:Unknown my query' } });
 
-      // Now make the parser throw on the next keystroke.
-      mockParseSearchQuery.mockImplementationOnce(() => {
-        throw new Error('parse failure');
-      });
-
-      // Type another character to trigger a new change event.
-      await userEvent.type(searchBox, ' x');
-
-      // The existing tag filter should be preserved; the raw queryText must not
-      // become the `search` value (which would leak tag syntax to findItems).
+      // The tag clause is still extracted from search text (not leaked as
+      // raw `tag:Unknown`). The unresolvable display value is passed through
+      // as a raw filter value — it won't match any item but prevents the
+      // field syntax from appearing in the free-text search.
       await waitFor(() => {
         const lastCall = mockFindItems.mock.calls[mockFindItems.mock.calls.length - 1];
-        expect(lastCall[0].filters.tag).toEqual({ include: ['tag-1'], exclude: [] });
-        expect(lastCall[0].searchQuery).not.toContain('tag:');
+        expect(lastCall[0].searchQuery).toBe('my query');
+        expect(lastCall[0].filters.tag).toEqual({ include: ['Unknown'], exclude: [] });
       });
     });
   });

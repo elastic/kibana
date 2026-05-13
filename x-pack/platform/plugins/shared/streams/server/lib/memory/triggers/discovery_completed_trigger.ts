@@ -34,7 +34,7 @@ export const discoveryCompletedTrigger: MemoryUpdateTrigger = {
   description:
     'Fires after insights discovery completes. Synthesizes discovery insights into wiki pages organized by categories.',
   execute: async (context) => {
-    const { memory, logger, trigger, inferenceClient } = context;
+    const { memory, logger, trigger, inferenceClient, abortSignal } = context;
     const { insights } = trigger.payload as {
       insights: DiscoveryInsight[];
     };
@@ -62,6 +62,10 @@ export const discoveryCompletedTrigger: MemoryUpdateTrigger = {
     const allEntries = await memory.listAll();
 
     for (const { streamName, streamInsights } of streamGroups) {
+      if (abortSignal?.aborted) {
+        throw new Error('Request was aborted');
+      }
+
       try {
         const existingPages = formatExistingPages(allEntries);
 
@@ -76,6 +80,7 @@ export const discoveryCompletedTrigger: MemoryUpdateTrigger = {
             existingPages,
           },
           maxSteps: 10,
+          abortSignal,
           toolCallbacks: {
             read_memory_page: createReadMemoryPageCallback({ memory }),
             write_memory_page: createWriteMemoryPageCallback({

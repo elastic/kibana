@@ -25,9 +25,8 @@ import {
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import { createToolNotFoundError } from '@kbn/inference-plugin/common/chat_complete/errors';
 import type { AnalyticsServiceStart } from '@kbn/core/server';
-import type { Connector } from '@kbn/actions-plugin/server';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import { isToolValidationError } from '@kbn/inference-common';
+import { type InferenceConnector, isToolValidationError } from '@kbn/inference-common';
 import { getInferenceConnectorInfo } from '../../../../common/utils/get_inference_connector';
 import type { ToolCallEvent } from '../../../analytics/tool_call';
 import { toolCallEventType } from '../../../analytics/tool_call';
@@ -76,7 +75,7 @@ export function executeFunctionAndCatchError({
   connectorId: string;
   simulateFunctionCalling: boolean;
   analytics: AnalyticsServiceStart;
-  connector?: Connector;
+  connector?: InferenceConnector;
   scopes: AssistantScope[];
 }): Observable<MessageOrChatEvent> {
   return withExecuteToolSpan(name, { tool: { input: args } }, (span) => {
@@ -103,9 +102,10 @@ export function executeFunctionAndCatchError({
 
     return executeFunctionResponse$.pipe(
       tap(() => {
+        const connectorInfo = getInferenceConnectorInfo(connector);
         analytics.reportEvent<ToolCallEvent>(toolCallEventType, {
           toolName: name,
-          connector: getInferenceConnectorInfo(connector),
+          connector: connectorInfo,
           scopes,
         });
       }),
@@ -240,7 +240,7 @@ export function continueConversation({
   connectorId: string;
   simulateFunctionCalling: boolean;
   analytics: AnalyticsServiceStart;
-  connector?: Connector;
+  connector?: InferenceConnector;
   scopes: AssistantScope[];
 }): Observable<MessageOrChatEvent> {
   let nextFunctionCallsLeft = functionCallsLeft;

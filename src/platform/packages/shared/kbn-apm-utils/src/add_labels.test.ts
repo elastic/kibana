@@ -32,6 +32,7 @@ jest.mock('@opentelemetry/api', () => ({
 
 interface MockSpan {
   setAttributes: jest.Mock<void, [Record<string, AttributeValue>]>;
+  isRecording: jest.Mock<boolean>;
 }
 
 interface MockApm {
@@ -46,6 +47,7 @@ const getActiveSpanMock = trace.getActiveSpan as jest.MockedFunction<typeof trac
 
 const createMockSpan = (): MockSpan => ({
   setAttributes: jest.fn(),
+  isRecording: jest.fn().mockReturnValue(true),
 });
 
 const getTransactionAddLabelsMock = (): jest.Mock<void, [Labels, boolean?]> => {
@@ -94,6 +96,21 @@ describe('add_labels', () => {
         'kibana.count': 3,
         'kibana.enabled': true,
       });
+    });
+
+    it('does not call setAttributes on active OTel span if the span is ended', () => {
+      const span = createMockSpan();
+      span.isRecording.mockReturnValue(false);
+
+      getActiveSpanMock.mockReturnValue(span as never);
+
+      addSpanLabels({
+        foo: 'bar',
+        count: 3,
+        enabled: true,
+      });
+
+      expect(span.setAttributes).not.toHaveBeenCalled();
     });
 
     it('filters out null and undefined label values before OTel write', () => {
@@ -180,6 +197,21 @@ describe('add_labels', () => {
         'kibana.count': 3,
         'kibana.enabled': true,
       });
+    });
+
+    it('does not call setAttributes on active OTel span if the span is ended', () => {
+      const span = createMockSpan();
+      span.isRecording.mockReturnValue(false);
+
+      getActiveSpanMock.mockReturnValue(span as never);
+
+      addTransactionLabels({
+        foo: 'bar',
+        count: 3,
+        enabled: true,
+      });
+
+      expect(span.setAttributes).not.toHaveBeenCalled();
     });
 
     it('forwards isString option to apm.currentTransaction.addLabels', () => {

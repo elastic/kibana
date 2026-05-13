@@ -20,7 +20,6 @@
     "@kbn/react-kibana-context-render",
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-page-kibana-template",
-    "@kbn/inference-common",
     "@kbn/i18n",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/actions-plugin",
@@ -40,9 +39,7 @@
     "@kbn/inference-connectors",
     "@kbn/ai-assistant-connector-selector-action",
     "@kbn/core-application-browser",
-    "@kbn/workflows-extensions",
     "@kbn/zod",
-    "@kbn/workflows",
   ],
   "exclude": [
     "target/**/*"

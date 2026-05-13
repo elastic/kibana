@@ -13,7 +13,7 @@ import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extens
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks';
 import { z } from '@kbn/zod/v4';
 import { flattenOptions, getActionOptions } from './get_action_options';
-import { getAllConnectors } from '../../../../common/schema';
+import { getAllConnectors, isDeprecatedStepType } from '../../../../common/schema';
 import { getStepIconType } from '../../../shared/ui/step_icons/get_step_icon_type';
 import { triggerSchemas } from '../../../trigger_schemas';
 import type { ActionOptionData } from '../types';
@@ -21,6 +21,7 @@ import { isActionGroup, isActionOption } from '../types';
 
 jest.mock('../../../../common/schema', () => ({
   getAllConnectors: jest.fn(),
+  isDeprecatedStepType: jest.fn(() => false),
 }));
 jest.mock('../../../trigger_schemas', () => ({
   triggerSchemas: { getTriggerDefinitions: jest.fn(() => []) },
@@ -59,6 +60,7 @@ describe('getActionOptions', () => {
     mockWorkflowsExtensions = workflowsExtensionsMock.createStart();
 
     (getAllConnectors as jest.Mock).mockReturnValue([]);
+    (isDeprecatedStepType as jest.Mock).mockReturnValue(false);
     (isDynamicConnector as jest.MockedFunction<typeof isDynamicConnector>).mockImplementation(
       () => false
     );
@@ -333,6 +335,28 @@ describe('getActionOptions', () => {
       if (isActionOption(option)) {
         expect(option.iconType).toBe('logoKibana');
       }
+    }
+  });
+
+  it('should hide deprecated connectors from the actions menu', () => {
+    const mockConnector = {
+      type: 'kibana.createCase',
+      description: 'Create a case',
+      summary: 'Create a case',
+    };
+
+    (getAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+    (isDeprecatedStepType as jest.Mock).mockImplementation(
+      (stepType: string) => stepType === 'kibana.createCase'
+    );
+    mockWorkflowsExtensions.getStepDefinition.mockReturnValue(undefined);
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const kibanaGroup = result.find((group) => group.id === 'kibana');
+
+    expect(kibanaGroup).toBeDefined();
+    if (kibanaGroup && isActionGroup(kibanaGroup)) {
+      expect(kibanaGroup.options).toHaveLength(0);
     }
   });
 

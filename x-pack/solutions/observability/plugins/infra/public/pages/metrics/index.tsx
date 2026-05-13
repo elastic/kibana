@@ -12,11 +12,7 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { EuiHeaderLinks, EuiHeaderLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  FeatureFeedbackButton,
-  HeaderMenuPortal,
-  useLinkProps,
-} from '@kbn/observability-shared-plugin/public';
+import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
@@ -38,14 +34,9 @@ import { ReactQueryProvider } from '../../containers/react_query_provider';
 import { usePluginConfig } from '../../containers/plugin_config_context';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
 import { OnboardingFlow } from '../../components/shared/templates/no_data_config';
-import { SurveySection } from './inventory_view/components/survey_section';
-import { useKibanaEnvironmentContext } from '../../hooks/use_kibana';
-
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
   defaultMessage: 'Add data',
 });
-const HOSTS_FEEDBACK_LINK = 'https://ela.st/host-feedback';
-const METRICS_EXPLORER_FEEDBACK_URL = 'https://ela.st/survey-infra-metricsexplorer';
 
 const MetricsExplorerPage = dynamic(() =>
   import('./metrics_explorer').then((mod) => ({ default: mod.MetricsExplorerPage }))
@@ -86,11 +77,6 @@ export const InfrastructurePage = () => {
                 <EuiFlexGroup responsive={false} gutterSize="s">
                   <EuiFlexItem>
                     <EuiHeaderLinks gutterSize="xs">
-                      <Routes>
-                        <HeaderLinkFeedbackButtonRoute path="/inventory" />
-                        <HeaderLinkFeedbackButtonRoute path="/explorer" />
-                        <HeaderLinkFeedbackButtonRoute path="/hosts" />
-                      </Routes>
                       <Routes>
                         <HeaderLinkAnomalyFlyoutRoute path="/inventory" />
                         <HeaderLinkAnomalyFlyoutRoute path="/hosts" />
@@ -194,45 +180,6 @@ const HeaderLinkAddDataRoute = ({
         >
           {ADD_DATA_LABEL}
         </EuiHeaderLink>
-      )}
-    />
-  );
-};
-
-const feedbackLinksPathMap = {
-  '/hosts': { formUrl: HOSTS_FEEDBACK_LINK, dts: 'infraHostsPageTellUsWhatYouThinkButton' },
-  '/explorer': {
-    formUrl: METRICS_EXPLORER_FEEDBACK_URL,
-    dts: 'infraMetricsExplorerFeedbackLink',
-  },
-};
-
-const HeaderLinkFeedbackButtonRoute = ({
-  path,
-  exact,
-}: {
-  path: keyof typeof feedbackLinksPathMap | '/inventory';
-  exact?: boolean;
-}) => {
-  const { kibanaVersion, isCloudEnv, isServerlessEnv } = useKibanaEnvironmentContext();
-
-  if (path === '/inventory') {
-    return <Route path={path} exact={exact} render={() => <SurveySection />} />;
-  }
-
-  return (
-    <Route
-      path={path}
-      exact={exact}
-      render={() => (
-        <FeatureFeedbackButton
-          data-test-subj={feedbackLinksPathMap[path]?.dts ?? 'infraInventoryFeedbackLink'}
-          formUrl={feedbackLinksPathMap[path]?.formUrl}
-          kibanaVersion={kibanaVersion}
-          isCloudEnv={isCloudEnv}
-          isServerlessEnv={isServerlessEnv}
-          sanitizedPath={path}
-        />
       )}
     />
   );

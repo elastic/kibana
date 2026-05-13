@@ -37,7 +37,10 @@
     "@kbn/share-plugin",
     "@kbn/es-query",
     "@kbn/presentation-util",
-    "@kbn/kibana-utils-plugin"
+    "@kbn/kibana-utils-plugin",
+    "@kbn/dashboard-navigation-options-common",
+    "@kbn/dashboard-navigation-options-components",
+    "@kbn/dashboard-navigation-options-schema"
   ],
   "exclude": ["target/**/*"]
 }

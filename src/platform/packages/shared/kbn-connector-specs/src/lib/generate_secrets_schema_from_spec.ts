@@ -14,19 +14,24 @@ import { getSchemaForAuthType } from '.';
 
 interface GenerateOptions {
   isPfxEnabled?: boolean;
+  isEarsEnabled?: boolean;
   authMode?: AuthMode | '';
 }
 
 export const generateSecretsSchemaFromSpec = (
   authSpec: ConnectorSpec['auth'],
-  { isPfxEnabled, authMode }: GenerateOptions = {
+  { isPfxEnabled, isEarsEnabled, authMode }: GenerateOptions = {
     isPfxEnabled: true,
+    isEarsEnabled: false,
   }
 ) => {
   const secretSchemas: z.core.$ZodTypeDiscriminable[] = [];
   for (const authType of authSpec?.types || []) {
     const schema = getSchemaForAuthType(authType);
     if (schema.id === 'pfx_certificate' && !isPfxEnabled) {
+      continue;
+    }
+    if (schema.id === 'ears' && !isEarsEnabled) {
       continue;
     }
 

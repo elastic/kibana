@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { RuleApiResponse } from '../../../services/rules_api';
+import { RuleProvider } from '../rule_context';
 import { RuleMetadata } from './rule_metadata';
 
 jest.mock('@kbn/core-di-browser');
@@ -41,7 +42,9 @@ const baseRule: RuleApiResponse = {
 const renderMetadata = (rule: RuleApiResponse) =>
   render(
     <I18nProvider>
-      <RuleMetadata rule={rule} />
+      <RuleProvider rule={rule}>
+        <RuleMetadata />
+      </RuleProvider>
     </I18nProvider>
   );
 
