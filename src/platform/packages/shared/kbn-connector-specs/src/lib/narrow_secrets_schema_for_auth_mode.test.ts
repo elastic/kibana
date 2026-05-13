@@ -9,12 +9,10 @@
 
 import { z, ZodDiscriminatedUnion, ZodObject } from '@kbn/zod/v4';
 import { SharepointOnline } from '../specs/sharepoint_online/sharepoint_online';
+import { AUTH_MODE_BY_AUTH_TYPE_ID } from '../auth_mode_by_auth_type_id';
 import { fromConnectorSpecSchema, type ConnectorZodSchema } from './deserialize_connector_spec';
 import { generateSecretsSchemaFromSpec } from './generate_secrets_schema_from_spec';
-import {
-  AUTH_MODE_BY_AUTH_TYPE_ID,
-  narrowSecretsSchemaForAuthMode,
-} from './narrow_secrets_schema_for_auth_mode';
+import { narrowSecretsSchemaForAuthMode } from './narrow_secrets_schema_for_auth_mode';
 import { serializeConnectorSpec } from './serialize_connector_spec';
 
 // Extracts allowed `authType` discriminator values from `secrets` so tests can assert that

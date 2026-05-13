@@ -19,5 +19,6 @@ export { normalizeAuthorizationHeaderValue } from './src/auth_types/oauth_authz_
 
 export { ConnectorAuthorizationError, isConnectorAuthorizationError } from './src/errors';
 export type { ConnectorAuthorizationReason } from './src/errors';
+export { AUTH_MODE_BY_AUTH_TYPE_ID } from './src/auth_mode_by_auth_type_id';
 export { getMeta, setMeta, addMeta } from './src/connector_spec_ui';
 export type { BaseMetadata } from './src/connector_spec_ui';

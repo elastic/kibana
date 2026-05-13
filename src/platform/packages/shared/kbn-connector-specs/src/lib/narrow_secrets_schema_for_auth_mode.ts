@@ -9,28 +9,9 @@
 
 import { z, ZodDiscriminatedUnion, ZodObject, type ZodRawShape } from '@kbn/zod/v4';
 import type { AuthMode } from '../connector_spec';
-import * as allAuthTypes from '../all_auth_types';
+import { getAuthModeForAuthTypeId } from '../auth_mode_by_auth_type_id';
 import type { ConnectorZodSchema } from './deserialize_connector_spec';
 import { getMeta } from '../connector_spec_ui';
-
-function isAuthTypeSpecEntry(value: unknown): value is { id: string; authMode?: AuthMode } {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    'id' in value &&
-    typeof (value as { id: unknown }).id === 'string'
-  );
-}
-
-export const AUTH_MODE_BY_AUTH_TYPE_ID: Record<string, AuthMode> = Object.fromEntries(
-  Object.values(allAuthTypes)
-    .filter(isAuthTypeSpecEntry)
-    .map((spec) => [spec.id, spec.authMode ?? 'shared'])
-) as Record<string, AuthMode>;
-
-function resolveAuthModeForAuthTypeId(authTypeId: string): AuthMode {
-  return AUTH_MODE_BY_AUTH_TYPE_ID[authTypeId] ?? 'shared';
-}
 
 function toDiscriminatedUnionOptions(
   filteredOptions: Array<ZodObject<ZodRawShape>>
@@ -64,7 +45,7 @@ export function narrowSecretsSchemaForAuthMode(
     if (!(discField instanceof z.ZodLiteral) || typeof discField.value !== 'string') {
       continue;
     }
-    if (resolveAuthModeForAuthTypeId(discField.value) === authMode) {
+    if (getAuthModeForAuthTypeId(discField.value) === authMode) {
       filteredOptions.push(option);
     }
   }
