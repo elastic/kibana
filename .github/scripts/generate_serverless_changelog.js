@@ -202,7 +202,6 @@ const getPrsForServerless = async ({
     }
   `;
 
-  const pullRequests = [];
   const chunks = chunk(commitNodeIds, 20);
   const results = await Promise.all(
     chunks.map((commitNodeIdChunk) => {
@@ -214,16 +213,8 @@ const getPrsForServerless = async ({
     })
   );
 
-  results.forEach((result) => {
-    result.nodes.forEach((node) => {
-      if (node?.associatedPullRequests) {
-        node.associatedPullRequests.nodes?.forEach((pr) => {
-          if (pr) {
-            pullRequests.push(pr);
-          }
-        });
-      }
-    });
+  const pullRequests = results.flatMap((result) => {
+    return result.nodes.flatMap((node) => node?.associatedPullRequests?.nodes ?? []).filter(Boolean);
   });
 
   const prs = pullRequests.map((pr) => {
