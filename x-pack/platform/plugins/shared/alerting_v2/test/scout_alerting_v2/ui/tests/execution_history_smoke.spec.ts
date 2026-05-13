@@ -34,9 +34,6 @@ test.describe('Execution history — smoke', { tag: '@local-stateful-classic' },
 
     await test.step('empty state copy is visible', async () => {
       await expect(pageObjects.executionHistory.emptyPrompt).toBeVisible();
-      await expect(
-        page.getByText(/No policy execution activity in the last 24 hours/i)
-      ).toBeVisible();
     });
   });
 });

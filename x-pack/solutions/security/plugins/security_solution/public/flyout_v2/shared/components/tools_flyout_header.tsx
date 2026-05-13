@@ -10,7 +10,7 @@ import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { type DataTableRecord } from '@kbn/discover-utils';
 import { Timestamp } from './timestamp';
-import { DocumentSeverity } from '../../document/components/severity';
+import { DocumentSeverity } from '../../document/main/components/severity';
 import type { CellActionRenderer } from './cell_actions';
 import { noopCellActionRenderer } from './cell_actions';
 import { ToolsFlyoutTitle } from './tools_flyout_title';
