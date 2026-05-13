@@ -365,6 +365,7 @@ export class SecurityPlugin
       analyticsService: this.analyticsService.setup({ analytics: core.analytics }),
       buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
       docLinks: core.docLinks,
+      i18n: core.i18n,
     });
 
     return Object.freeze<SecurityPluginSetup>({

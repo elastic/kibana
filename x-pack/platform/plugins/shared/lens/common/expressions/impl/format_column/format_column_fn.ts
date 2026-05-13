@@ -75,6 +75,7 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
                   suffix,
                   ...otherArgs,
                 }),
+                decimals,
               },
             };
             return withParams(col, serializedFormat as Record<string, unknown>);
@@ -105,6 +106,7 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
               suffix,
               ...otherArgs,
             }),
+            decimals,
           };
           // Some parent formatters are multi-fields and wrap the custom format into a "paramsPerField"
           // property. Here the format is passed to this property to make it work properly

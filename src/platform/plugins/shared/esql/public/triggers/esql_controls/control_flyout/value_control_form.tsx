@@ -53,6 +53,7 @@ interface ValueControlFormProps {
   controlFlyoutType: EsqlControlType;
   queryString: string;
   setControlState: (state: OptionsListESQLControlState) => void;
+  setIsValid: (isValid: boolean) => void;
   initialState?: OptionsListESQLControlState;
   valuesRetrieval?: string;
   timeRange?: TimeRange;
@@ -61,8 +62,8 @@ interface ValueControlFormProps {
 
 const SUGGESTED_INTERVAL_VALUES = ['5 minutes', '1 hour', '1 day', '1 week', '1 month'];
 const INITIAL_EMPTY_STATE_QUERY = `/** Example
-To get the agent field values use: 
-FROM logs-* 
+To get the agent field values use:
+FROM logs-*
 |  WHERE @timestamp <=?_tend and @timestamp >?_tstart
 | STATS BY agent
 */`;
@@ -75,6 +76,7 @@ export function ValueControlForm({
   controlFlyoutType,
   search,
   setControlState,
+  setIsValid,
   valuesRetrieval,
   timeRange,
   esqlVariables,
@@ -212,16 +214,21 @@ export function ValueControlForm({
           setSelectedValues(options);
           setAvailableValuesOptions(options);
           setEsqlQueryErrors([]);
+          setIsValid(true);
+        } else {
+          setIsValid(false);
         }
+
         setValuesQuery(query);
       } catch (e) {
         if (e instanceof DOMException && e.name === 'AbortError') {
           return;
         }
+        setIsValid(false);
         setEsqlQueryErrors([e]);
       }
     },
-    [isMounted, search, timeRange, esqlVariables, core.uiSettings]
+    [isMounted, search, timeRange, esqlVariables, core.uiSettings, setIsValid]
   );
 
   const setSuggestedQuery = useCallback(async () => {
@@ -320,6 +327,7 @@ export function ValueControlForm({
           <ESQLLangEditor
             query={{ esql: valuesQuery }}
             onTextLangQueryChange={(q) => {
+              setIsValid(false);
               setValuesQuery(q.esql);
             }}
             disableAutoFocus={true}

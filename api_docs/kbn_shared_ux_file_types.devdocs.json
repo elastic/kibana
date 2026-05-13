@@ -397,7 +397,15 @@
             "tags": [],
             "label": "list",
             "description": [
-              "\nList all file objects, of a given {@link FileKindBrowser}.\n"
+              "\nList all file objects, of a given ",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.FileKindBrowser",
+                "text": "FileKindBrowser"
+              },
+              ".\n"
             ],
             "signature": [
               "(args: { kind: string; status?: string | string[] | undefined; extension?: string | string[] | undefined; mimeType?: string | string[] | undefined; name?: string | string[] | undefined; meta?: M | undefined; } & ",
@@ -692,6 +700,7 @@
                 "lineNumber": 125,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "Pick",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1279,7 +1288,15 @@
             "tags": [],
             "label": "status",
             "description": [
-              "\nThe current status of the file.\n\nSee {@link FileStatus} for more details."
+              "\nThe current status of the file.\n\nSee ",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.FileStatus",
+                "text": "FileStatus"
+              },
+              " for more details."
             ],
             "signature": [
               "\"AWAITING_UPLOAD\" | \"UPLOADING\" | \"READY\" | \"UPLOAD_ERROR\" | \"DELETED\""

@@ -49,6 +49,7 @@
             "lineNumber": 132,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "EntriesArray",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -256,6 +257,7 @@
             "lineNumber": 683,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewFieldBase",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -521,6 +523,7 @@
             "lineNumber": 594,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "OperatorOption",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -544,6 +547,7 @@
             "lineNumber": 595,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FormattedBuilderEntry",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -615,6 +619,7 @@
             "lineNumber": 351,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FormattedBuilderEntry",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -640,6 +645,7 @@
             "lineNumber": 352,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewFieldBase",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -703,6 +709,7 @@
             "lineNumber": 423,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FormattedBuilderEntry",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -722,6 +729,7 @@
             "lineNumber": 424,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ListSchema",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -785,6 +793,7 @@
             "lineNumber": 450,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FormattedBuilderEntry",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -867,6 +876,7 @@
             "lineNumber": 498,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FormattedBuilderEntry",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -957,6 +967,7 @@
             "lineNumber": 652,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FormattedBuilderEntry",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -982,6 +993,7 @@
             "lineNumber": 653,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "OperatorOption",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1045,6 +1057,7 @@
             "lineNumber": 546,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FormattedBuilderEntry",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1119,6 +1132,7 @@
             "lineNumber": 221,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "BuilderEntry",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1229,6 +1243,7 @@
             "lineNumber": 203,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "BuilderEntry",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1299,6 +1314,7 @@
             "lineNumber": 307,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewBase",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1324,6 +1340,7 @@
             "lineNumber": 308,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FormattedBuilderEntry",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1375,6 +1392,7 @@
             "lineNumber": 17,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "GetFiltersParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1444,6 +1462,7 @@
             "lineNumber": 852,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewBase",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1508,6 +1527,7 @@
             "lineNumber": 855,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EntryNested",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -1595,6 +1615,7 @@
             "lineNumber": 793,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewBase",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1620,6 +1641,7 @@
             "lineNumber": 794,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "BuilderEntry",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1755,6 +1777,7 @@
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ExceptionListFilter",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1930,6 +1953,7 @@
             "lineNumber": 989,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewField",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2078,6 +2102,7 @@
             "lineNumber": 696,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FormattedBuilderEntry",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2095,6 +2120,7 @@
             "lineNumber": 697,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ExceptionListType",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2193,6 +2219,7 @@
             "lineNumber": 182,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "BuilderEntry",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2370,6 +2397,7 @@
             "lineNumber": 247,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ExceptionsBuilderExceptionItem",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2443,6 +2471,7 @@
             "lineNumber": 10,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "EntriesArray",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2602,6 +2631,7 @@
             "lineNumber": 70,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "BuilderEntry",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3869,7 +3899,9 @@
             "type": "string",
             "tags": [],
             "label": "message",
-            "description": [],
+            "description": [
+              "\nThe \"does not match\" operator supports wildcard patterns (*, ?) and uses WILDCARD type.\nThis renders AutocompleteFieldWildcardComponent in the UI."
+            ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "lineNumber": 116,
             "columnNumber": 3,
@@ -3882,7 +3914,9 @@
             "type": "string",
             "tags": [],
             "label": "operator",
-            "description": [],
+            "description": [
+              "\nThe \"does not match\" operator supports wildcard patterns (*, ?) and uses WILDCARD type.\nThis renders AutocompleteFieldWildcardComponent in the UI."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-io-ts-list-types",
@@ -3905,7 +3939,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "\nThe \"does not match\" operator supports wildcard patterns (*, ?) and uses WILDCARD type.\nThis renders AutocompleteFieldWildcardComponent in the UI."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-io-ts-list-types",
@@ -3928,7 +3964,9 @@
             "type": "string",
             "tags": [],
             "label": "value",
-            "description": [],
+            "description": [
+              "\nThe \"does not match\" operator supports wildcard patterns (*, ?) and uses WILDCARD type.\nThis renders AutocompleteFieldWildcardComponent in the UI."
+            ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "lineNumber": 121,
             "columnNumber": 3,
@@ -4311,7 +4349,9 @@
             "type": "string",
             "tags": [],
             "label": "message",
-            "description": [],
+            "description": [
+              "\nThe \"is not\" operator (UI label) uses MATCH type in the code.\nThis renders AutocompleteFieldMatchComponent in the UI."
+            ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "lineNumber": 34,
             "columnNumber": 3,
@@ -4324,7 +4364,9 @@
             "type": "string",
             "tags": [],
             "label": "operator",
-            "description": [],
+            "description": [
+              "\nThe \"is not\" operator (UI label) uses MATCH type in the code.\nThis renders AutocompleteFieldMatchComponent in the UI."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-io-ts-list-types",
@@ -4347,7 +4389,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "\nThe \"is not\" operator (UI label) uses MATCH type in the code.\nThis renders AutocompleteFieldMatchComponent in the UI."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-io-ts-list-types",
@@ -4370,7 +4414,9 @@
             "type": "string",
             "tags": [],
             "label": "value",
-            "description": [],
+            "description": [
+              "\nThe \"is not\" operator (UI label) uses MATCH type in the code.\nThis renders AutocompleteFieldMatchComponent in the UI."
+            ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "lineNumber": 39,
             "columnNumber": 3,
@@ -4489,7 +4535,9 @@
             "type": "string",
             "tags": [],
             "label": "message",
-            "description": [],
+            "description": [
+              "\nThe \"is\" operator (UI label) uses MATCH type in the code.\nThis renders AutocompleteFieldMatchComponent in the UI.\nNote: The \"matches\" operator uses WILDCARD type (not MATCH) despite the similar name."
+            ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "lineNumber": 21,
             "columnNumber": 3,
@@ -4502,7 +4550,9 @@
             "type": "string",
             "tags": [],
             "label": "operator",
-            "description": [],
+            "description": [
+              "\nThe \"is\" operator (UI label) uses MATCH type in the code.\nThis renders AutocompleteFieldMatchComponent in the UI.\nNote: The \"matches\" operator uses WILDCARD type (not MATCH) despite the similar name."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-io-ts-list-types",
@@ -4525,7 +4575,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "\nThe \"is\" operator (UI label) uses MATCH type in the code.\nThis renders AutocompleteFieldMatchComponent in the UI.\nNote: The \"matches\" operator uses WILDCARD type (not MATCH) despite the similar name."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-io-ts-list-types",
@@ -4548,7 +4600,9 @@
             "type": "string",
             "tags": [],
             "label": "value",
-            "description": [],
+            "description": [
+              "\nThe \"is\" operator (UI label) uses MATCH type in the code.\nThis renders AutocompleteFieldMatchComponent in the UI.\nNote: The \"matches\" operator uses WILDCARD type (not MATCH) despite the similar name."
+            ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "lineNumber": 26,
             "columnNumber": 3,
@@ -4579,7 +4633,9 @@
             "type": "string",
             "tags": [],
             "label": "message",
-            "description": [],
+            "description": [
+              "\nThe \"matches\" operator (UI label) uses WILDCARD type in the code (not MATCH type).\nThis is because \"matches\" supports wildcard patterns (*, ?) and renders\nAutocompleteFieldWildcardComponent in the UI.\nNote: The \"is\" operator uses MATCH type and renders AutocompleteFieldMatchComponent."
+            ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "lineNumber": 103,
             "columnNumber": 3,
@@ -4592,7 +4648,9 @@
             "type": "string",
             "tags": [],
             "label": "operator",
-            "description": [],
+            "description": [
+              "\nThe \"matches\" operator (UI label) uses WILDCARD type in the code (not MATCH type).\nThis is because \"matches\" supports wildcard patterns (*, ?) and renders\nAutocompleteFieldWildcardComponent in the UI.\nNote: The \"is\" operator uses MATCH type and renders AutocompleteFieldMatchComponent."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-io-ts-list-types",
@@ -4615,7 +4673,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "\nThe \"matches\" operator (UI label) uses WILDCARD type in the code (not MATCH type).\nThis is because \"matches\" supports wildcard patterns (*, ?) and renders\nAutocompleteFieldWildcardComponent in the UI.\nNote: The \"is\" operator uses MATCH type and renders AutocompleteFieldMatchComponent."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-io-ts-list-types",
@@ -4638,7 +4698,9 @@
             "type": "string",
             "tags": [],
             "label": "value",
-            "description": [],
+            "description": [
+              "\nThe \"matches\" operator (UI label) uses WILDCARD type in the code (not MATCH type).\nThis is because \"matches\" supports wildcard patterns (*, ?) and renders\nAutocompleteFieldWildcardComponent in the UI.\nNote: The \"is\" operator uses MATCH type and renders AutocompleteFieldMatchComponent."
+            ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "lineNumber": 108,
             "columnNumber": 3,

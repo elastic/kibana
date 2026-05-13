@@ -158,7 +158,6 @@ export const ControlsContent = ({
         filters={[...filters, ...schemaFilters]}
       />
       <SchemaSelector
-        isHostsView
         onChange={onPreferredSchemaChange}
         schemas={schemas}
         value={schema ?? DEFAULT_SCHEMA}
@@ -169,9 +168,14 @@ export const ControlsContent = ({
 };
 
 const ControlGroupContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: start;
+  gap: ${(props) => props.theme.euiTheme.size.s};
+  flex-wrap: wrap;
+  min-height: ${(props) => props.theme.euiTheme.size.xxl};
+
   .controlGroup {
-    min-height: ${(props) => props.theme.euiTheme.size.xxl};
-    align-items: start;
-    margin-bottom: ${(props) => props.theme.euiTheme.size.s};
+    display: contents;
   }
 `;

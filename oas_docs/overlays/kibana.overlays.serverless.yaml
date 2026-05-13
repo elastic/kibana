@@ -64,6 +64,16 @@ actions:
         description: Workflows documentation
         url: https://www.elastic.co/docs/explore-analyze/workflows
       x-displayName: 'Workflows'
+# Remove APM source maps - not supported in Serverless
+  - target: "$.paths['/api/apm/sourcemaps']"
+    description: Remove APM source maps - not supported in Serverless
+    remove: true
+  - target: "$.paths['/api/apm/sourcemaps/{id}']"
+    description: Remove APM source maps - not supported in Serverless
+    remove: true
+  - target: "$.tags[?(@.name=='APM sourcemaps')]"
+    description: Remove APM source maps tag - no operations use it in Serverless
+    remove: true
 # Remove extra tags from operations
   - target: "$.paths[*][*].tags[1:]"
     description: Remove all but first tag from operations

@@ -135,6 +135,14 @@ editor:
         - '.ml-anomalies-*'
       privileges:
         - read
+    - names:
+        - 'kibana_sample_data_*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+        - 'write'
+        - 'manage'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:

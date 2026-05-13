@@ -88,6 +88,9 @@ dependsOn:
   - '@kbn/core-chrome-browser'
   - '@kbn/scout'
   - '@kbn/core-http-browser'
+  - '@kbn/core-logging-server-mocks'
+  - '@kbn/core-http-request-handler-context-server'
+  - '@kbn/core-security-server'
   - '@kbn/es'
   - '@kbn/dev-utils'
 tags:
@@ -103,6 +106,8 @@ fileGroups:
     - scripts/**/*
     - scripts/**/*.json
     - server/**/*
+    - test/scout/**/*
+    - common/schemas/*/*.json
     - test/scout_osquery/**/*
     - public/common/schemas/*/*.json
     - '!target/**/*'

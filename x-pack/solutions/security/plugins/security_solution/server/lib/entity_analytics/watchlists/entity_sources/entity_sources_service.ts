@@ -254,21 +254,6 @@ export const createEntitySourcesService = ({
     };
 
     const { sources } = await descriptorClient.list({});
-    const entitiesBySource = await Promise.all(
-      sources
-        .filter((s) => sourceIds.includes(s.id))
-        .map(async (source) => {
-          const identity = buildIdentityProvider(source);
-          const { entityIdsByType, watchlistsByEuid, ...rest } =
-            await watchlistEntitiesService.listEntityStoreEntities(identity);
-          return {
-            sourceId: source.id,
-            entityStoreEntityIdsByType: entityIdsByType,
-            watchlistsByEuid,
-            ...rest,
-          };
-        })
-    );
 
     const indexSyncService = createIndexSyncService({
       esClient,
@@ -278,7 +263,44 @@ export const createEntitySourcesService = ({
       watchlist: meta,
     });
 
-    await indexSyncService.plainIndexSync(entitiesBySource);
+    await Promise.all(
+      sources
+        .filter((s) => sourceIds.includes(s.id))
+        .map(async (source) => {
+          const identity = buildIdentityProvider(source);
+          let prevMaxEntityId: string | undefined;
+          let lastWatchlistsByEuid: WatchlistsByEuid = new Map();
+
+          for await (const page of watchlistEntitiesService.listEntityStoreEntities(identity)) {
+            await indexSyncService.plainIndexSync([
+              {
+                source,
+                entityStoreEntityIdsByType: page.entityIdsByType,
+                correlationMap: page.correlationMap,
+                watchlistsByEuid: page.watchlistsByEuid,
+                pageRange: { gt: prevMaxEntityId, lte: page.maxEntityId },
+              },
+            ]);
+            prevMaxEntityId = page.maxEntityId;
+            lastWatchlistsByEuid = page.watchlistsByEuid;
+            if (abortSignal?.aborted) return;
+          }
+
+          if (abortSignal?.aborted) return;
+
+          // Tail pass: catch watchlist entries with entity.id beyond the last store page.
+          // Empty correlationMap causes detectForIndexSource to no-op (no correlation values to query).
+          await indexSyncService.plainIndexSync([
+            {
+              source,
+              entityStoreEntityIdsByType: { user: [], host: [], service: [], generic: [] },
+              correlationMap: new Map(),
+              watchlistsByEuid: lastWatchlistsByEuid,
+              pageRange: prevMaxEntityId ? { gt: prevMaxEntityId } : undefined,
+            },
+          ]);
+        })
+    );
 
     if (isAborted(abortSignal, `after index sync for watchlist ${watchlistId}, skipping cleanup`))
       return;

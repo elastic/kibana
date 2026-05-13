@@ -348,6 +348,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
                       expirationDate={liveQueryDetails?.expiration}
                       agentIds={liveQueryDetails?.agents}
                       showResultsHeader
+                      tags={liveQueryDetails?.tags}
                       addToTimeline={addToTimeline}
                     />
                   ) : (

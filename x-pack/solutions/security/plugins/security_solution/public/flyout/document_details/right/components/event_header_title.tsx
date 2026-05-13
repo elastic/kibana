@@ -6,14 +6,14 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
-import { Timestamp } from '../../../../flyout_v2/document/components/timestamp';
+import { Timestamp } from '../../../../flyout_v2/shared/components/timestamp';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { DocumentSeverity } from '../../../../flyout_v2/document/components/severity';
+import { DocumentSeverity } from '../../../../flyout_v2/document/main/components/severity';
 import { FlyoutTitle } from '../../../../flyout_v2/shared/components/flyout_title';
-import { getDocumentTitle } from '../../../../flyout_v2/document/utils/get_header_title';
-import { EVENT_TITLE_TEST_ID } from '../../../../flyout_v2/document/components/test_ids';
+import { getDocumentTitle } from '../../../../flyout_v2/document/main/utils/get_header_title';
+import { EVENT_TITLE_TEST_ID } from '../../../../flyout_v2/document/main/components/test_ids';
 
 /**
  * Event details flyout right section header
@@ -28,9 +28,10 @@ export const EventHeaderTitle = memo(() => {
       <DocumentSeverity hit={hit}>
         <EuiSpacer size="m" />
       </DocumentSeverity>
-      <Timestamp hit={hit}>
-        <EuiSpacer size="xs" />
-      </Timestamp>
+      <EuiText size="s">
+        <Timestamp hit={hit} />
+      </EuiText>
+      <EuiSpacer size="xs" />
       <FlyoutTitle title={title} iconType={'analyzeEvent'} data-test-subj={EVENT_TITLE_TEST_ID} />
     </>
   );

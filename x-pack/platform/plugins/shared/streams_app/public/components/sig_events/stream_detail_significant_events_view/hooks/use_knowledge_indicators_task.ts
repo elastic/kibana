@@ -128,7 +128,7 @@ export function useKnowledgeIndicatorsTask({ streamName, onComplete, onError }: 
   useQuery<TaskResult<OnboardingResult>, Error>({
     queryKey: ['knowledgeIndicatorsTaskStatus', streamName],
     queryFn: fetchStatus,
-    enabled: isPending && !scheduleTaskMutation.isLoading && !cancelTaskMutation.isLoading,
+    enabled: !scheduleTaskMutation.isLoading && !cancelTaskMutation.isLoading,
     refetchInterval: 2000,
   });
 

@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export const ConfigMap = {
   id: z.string(),
@@ -15,7 +15,7 @@ export const ConfigMap = {
   fieldType: z.string(),
 };
 
-export const ConfigMapSchema = z.object(ConfigMap).strict();
+export const ConfigMapSchema = lazySchema(() => z.object(ConfigMap).strict());
 
 export const ConfigMapping = {
   ruleNameConfig: ConfigMapSchema.nullable().default(null),
@@ -27,7 +27,7 @@ export const ConfigMapping = {
   descriptionConfig: ConfigMapSchema.nullable().default(null),
 };
 
-export const ConfigMappingSchema = z.object(ConfigMapping).strict();
+export const ConfigMappingSchema = lazySchema(() => z.object(ConfigMapping).strict());
 
 export const SwimlaneServiceConfiguration = {
   apiUrl: z.string(),
@@ -36,13 +36,17 @@ export const SwimlaneServiceConfiguration = {
   mappings: ConfigMappingSchema,
 };
 
-export const SwimlaneServiceConfigurationSchema = z.object(SwimlaneServiceConfiguration).strict();
+export const SwimlaneServiceConfigurationSchema = lazySchema(() =>
+  z.object(SwimlaneServiceConfiguration).strict()
+);
 
 export const SwimlaneSecretsConfiguration = {
   apiToken: z.string(),
 };
 
-export const SwimlaneSecretsConfigurationSchema = z.object(SwimlaneSecretsConfiguration).strict();
+export const SwimlaneSecretsConfigurationSchema = lazySchema(() =>
+  z.object(SwimlaneSecretsConfiguration).strict()
+);
 
 const SwimlaneFields = {
   alertId: z.string().nullable().default(null),
@@ -53,26 +57,30 @@ const SwimlaneFields = {
   description: z.string().nullable().default(null),
 };
 
-export const ExecutorSubActionPushParamsSchema = z
-  .object({
-    incident: z
-      .object({
-        ...SwimlaneFields,
-        externalId: z.string().nullable().default(null),
-      })
-      .strict(),
-    comments: z
-      .array(z.object({ comment: z.string(), commentId: z.string() }).strict())
-      .nullable()
-      .default(null),
-  })
-  .strict();
-
-export const ExecutorParamsSchema = z.discriminatedUnion('subAction', [
+export const ExecutorSubActionPushParamsSchema = lazySchema(() =>
   z
     .object({
-      subAction: z.literal('pushToService'),
-      subActionParams: ExecutorSubActionPushParamsSchema,
+      incident: z
+        .object({
+          ...SwimlaneFields,
+          externalId: z.string().nullable().default(null),
+        })
+        .strict(),
+      comments: z
+        .array(z.object({ comment: z.string(), commentId: z.string() }).strict())
+        .nullable()
+        .default(null),
     })
-    .strict(),
-]);
+    .strict()
+);
+
+export const ExecutorParamsSchema = lazySchema(() =>
+  z.discriminatedUnion('subAction', [
+    z
+      .object({
+        subAction: z.literal('pushToService'),
+        subActionParams: ExecutorSubActionPushParamsSchema,
+      })
+      .strict(),
+  ])
+);

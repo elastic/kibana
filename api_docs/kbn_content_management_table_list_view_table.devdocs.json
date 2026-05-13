@@ -139,7 +139,7 @@
             "id": "def-public.TableListViewTable.$1",
             "type": "Object",
             "tags": [],
-            "label": "__0",
+            "label": "{\n  tableCaption,\n  entityName,\n  entityNamePlural,\n  initialFilter: initialQuery,\n  headingId,\n  initialPageSize,\n  urlStateEnabled = true,\n  customSortingOptions,\n  customTableColumn,\n  emptyPrompt,\n  rowItemActions,\n  findItems,\n  createItem,\n  editItem,\n  deleteItems,\n  getDetailViewLink,\n  getOnClickTitle,\n  id: listingId = 'userContent',\n  contentEditor = { enabled: false },\n  titleColumnName,\n  withoutPageTemplateWrapper,\n  onFetchSuccess,\n  refreshListBouncer,\n  setPageDataTestSubject,\n  createdByEnabled = false,\n  recentlyAccessed,\n}",
             "description": [],
             "signature": [
               {
@@ -155,6 +155,7 @@
             "lineNumber": 314,
             "columnNumber": 68,
             "deprecated": false,
+            "docsReferencedTypeName": "TableListViewTableProps",
             "trackAdoption": false
           }
         ],
@@ -330,7 +331,7 @@
                 "id": "def-public.TableListViewKibanaDependencies.FormattedRelative.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n  value: valueInput,\n  updateIntervalInSeconds,\n}",
                 "description": [],
                 "signature": [
                   {
@@ -345,6 +346,7 @@
                 "lineNumber": 25,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "FormattedRelativeProps",
                 "trackAdoption": false
               }
             ]
@@ -664,6 +666,7 @@
                 "lineNumber": 95,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -807,6 +810,7 @@
                 "lineNumber": 105,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -845,6 +849,7 @@
                 "lineNumber": 107,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -937,6 +942,7 @@
                 "lineNumber": 113,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               }

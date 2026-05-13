@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
 import { isTriggerType } from '@kbn/workflows';
+import { useWorkflowsMonacoTheme, WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
 import type { z } from '@kbn/zod/v4';
 import { ActionsMenuButton } from './actions_menu_button';
 import {
@@ -28,9 +29,11 @@ import {
   useLineDifferencesDecorations,
   useStepDecorationsInExecution,
   useTriggerTypeDecorations,
+  useWorkflowEventsOnDecorations,
   useWorkflowIdDecorations,
 } from './decorations';
 import { DocumentationLink } from './documentation_link';
+import { EditorSettingsPopover } from './editor_settings_popover';
 import type { ExtraAction } from './extra_actions_bar';
 import { ExtraActionsBar } from './extra_actions_bar';
 import { useAgentBuilderIntegration } from './hooks/use_agent_builder_integration';
@@ -52,6 +55,7 @@ import {
 import {
   selectEditorWorkflowLookup,
   selectEditorYaml,
+  selectEditorYamlLineCounter,
   selectExecution,
   selectHasChanges,
   selectHighlightedStepId,
@@ -108,10 +112,6 @@ import {
   EXECUTION_YAML_SNAPSHOT_CLASS,
   useWorkflowEditorStyles,
 } from '../styles/use_workflow_editor_styles';
-import {
-  useWorkflowsMonacoTheme,
-  WORKFLOWS_MONACO_EDITOR_THEME,
-} from '../styles/use_workflows_monaco_theme';
 
 const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   minimap: { enabled: false },
@@ -127,6 +127,8 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   fontSize: 14,
   lineHeight: 23, // default ~21px + 2px
   renderWhitespace: 'none',
+  roundedSelection: false,
+  guides: { indentation: true },
   wordWrap: 'on',
   wordWrapColumn: 80,
   wrappingIndent: 'indent',
@@ -225,6 +227,7 @@ export const WorkflowYAMLEditor = ({
   const workflowDefinition = useSelector(selectWorkflowDefinition);
   // The current yaml document in the editor (could be unsaved)
   const yamlDocument = useSelector(selectEditorYamlDocument);
+  const yamlLineCounter = useSelector(selectEditorYamlLineCounter);
   const yamlDocumentRef = useRef<YAML.Document | null>(yamlDocument ?? null);
   yamlDocumentRef.current = yamlDocument || null;
 
@@ -507,6 +510,14 @@ export const WorkflowYAMLEditor = ({
     readOnly: isExecutionYaml,
   });
 
+  useWorkflowEventsOnDecorations({
+    editor: editorRef.current,
+    yamlDocument: yamlDocument || null,
+    yamlLineCounter,
+    isEditorMounted,
+    readOnly: isExecutionYaml,
+  });
+
   useWorkflowIdDecorations({
     editor: editorRef.current,
     yamlDocument: yamlDocument || null,
@@ -735,8 +746,13 @@ export const WorkflowYAMLEditor = ({
         content: <KeyboardShortcutsPopover />,
         showInReadOnly: true,
       },
+      {
+        id: 'editor-settings',
+        content: <EditorSettingsPopover editorRef={editorRef} />,
+        showInReadOnly: true,
+      },
     ],
-    [openActionsPopover]
+    [openActionsPopover, editorRef]
   );
 
   // These were triggering rerendering of the actions containers on every scroll, because they were

@@ -67,6 +67,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "LogRateAnalysisType",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -186,6 +187,7 @@
             "lineNumber": 19,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -303,6 +305,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "WindowParameters",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -360,6 +363,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "LogRateAnalysisType",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -543,6 +547,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "WindowParameters",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -626,6 +631,7 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "WindowParameters",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -908,6 +914,7 @@
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DocumentCountStatsChangePoint",
             "trackAdoption": false,
             "isRequired": false
           }

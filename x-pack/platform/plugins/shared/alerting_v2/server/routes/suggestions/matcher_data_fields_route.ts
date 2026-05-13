@@ -9,17 +9,17 @@ import type { RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { MatcherSuggestionsService } from '../../lib/services/matcher_suggestions_service/matcher_suggestions_service';
-import { ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
+import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 
 @injectable()
 export class MatcherDataFieldsRoute extends BaseAlertingRoute {
   static method = 'get' as const;
-  static path = `${ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/suggestions/data_fields`;
+  static path = `${ALERTING_V2_ACTION_POLICY_API_PATH}/suggestions/data_fields`;
   static security: RouteSecurity = {
     authz: {
-      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.notificationPolicies.read],
+      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.actionPolicies.read],
     },
   };
   static routeOptions = {
