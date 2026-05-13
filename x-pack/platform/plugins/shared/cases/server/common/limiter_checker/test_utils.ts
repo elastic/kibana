@@ -14,7 +14,10 @@ import type {
   ExternalReferenceAttachmentPayload,
 } from '../../../common/types/domain';
 import type { UnifiedReferenceAttachmentPayload } from '../../../common/types/domain/attachment/v2';
-import { LEGACY_FILE_ATTACHMENT_TYPE, SECURITY_ALERT_ATTACHMENT_TYPE } from '../../../common/constants';
+import {
+  LEGACY_FILE_ATTACHMENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+} from '../../../common/constants';
 import type { FileAttachmentRequest } from '../types';
 
 export const createUserRequests = (num: number): UserCommentAttachmentPayload[] => {
