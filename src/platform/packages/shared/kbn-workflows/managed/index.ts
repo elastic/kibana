@@ -8,15 +8,6 @@
  */
 
 import {
-  EXAMPLE_MANAGED_WORKFLOW,
-  EXAMPLE_MANAGED_WORKFLOW_ID,
-} from './definitions/workflows_extensions_example';
-import type {
-  ManagedWorkflowDefinition,
-  ManagedWorkflowManagement,
-  ManagedWorkflowTemplateValues,
-} from './types';
-import {
   STREAMS_KI_CONTINUOUS_EXTRACTION_WORKFLOW,
   STREAMS_KI_CONTINUOUS_EXTRACTION_WORKFLOW_ID,
   STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW,
@@ -25,7 +16,16 @@ import {
   STREAMS_KI_ONBOARDING_WORKFLOW_ID,
   STREAMS_KI_QUERIES_GENERATION_WORKFLOW,
   STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID,
-} from './workflows';
+} from './definitions/streams_ki/streams_ki_workflows';
+import {
+  EXAMPLE_MANAGED_WORKFLOW,
+  EXAMPLE_MANAGED_WORKFLOW_ID,
+} from './definitions/workflows_extensions_example';
+import type {
+  ManagedWorkflowDefinition,
+  ManagedWorkflowManagement,
+  ManagedWorkflowTemplateValues,
+} from './types';
 
 export type { ManagedWorkflowDefinition, ManagedWorkflowManagement, ManagedWorkflowTemplateValues };
 

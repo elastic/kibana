@@ -7,71 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import STREAMS_KI_CONTINUOUS_EXTRACTION_YAML from '../streams_ki_continuous_extraction.yaml';
-import STREAMS_KI_FEATURES_IDENTIFICATION_YAML from '../streams_ki_features_identification.yaml';
-import STREAMS_KI_ONBOARDING_YAML from '../streams_ki_onboarding.yaml';
-import STREAMS_KI_QUERIES_GENERATION_YAML from '../streams_ki_queries_generation.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../types';
-
-// ─── Streams KI Workflows ────────────────────────────────────────────────────
-
-export const STREAMS_KI_CONTINUOUS_EXTRACTION_WORKFLOW_ID =
-  'system-streams-ki-continuous-extraction';
-
-export const STREAMS_KI_CONTINUOUS_EXTRACTION_WORKFLOW: ManagedWorkflowDefinition = {
-  id: STREAMS_KI_CONTINUOUS_EXTRACTION_WORKFLOW_ID,
-  pluginId: 'streams',
-  yaml: STREAMS_KI_CONTINUOUS_EXTRACTION_YAML,
-  management: {
-    lifecycle: 'static',
-    versionStrategy: 'auto',
-    enablement: 'restorable',
-  },
-  version: 1,
-};
-
-export const STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID =
-  'system-streams-ki-features-identification';
-
-export const STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW: ManagedWorkflowDefinition = {
-  id: STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
-  pluginId: 'streams',
-  yaml: STREAMS_KI_FEATURES_IDENTIFICATION_YAML,
-  management: {
-    lifecycle: 'static',
-    versionStrategy: 'auto',
-    enablement: 'enforced',
-  },
-  version: 1,
-};
-
-export const STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID = 'system-streams-ki-queries-generation';
-
-export const STREAMS_KI_QUERIES_GENERATION_WORKFLOW: ManagedWorkflowDefinition = {
-  id: STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID,
-  pluginId: 'streams',
-  yaml: STREAMS_KI_QUERIES_GENERATION_YAML,
-  management: {
-    lifecycle: 'static',
-    versionStrategy: 'auto',
-    enablement: 'enforced',
-  },
-  version: 1,
-};
-
-export const STREAMS_KI_ONBOARDING_WORKFLOW_ID = 'system-streams-ki-onboarding';
-
-export const STREAMS_KI_ONBOARDING_WORKFLOW: ManagedWorkflowDefinition = {
-  id: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
-  pluginId: 'streams',
-  yaml: STREAMS_KI_ONBOARDING_YAML,
-  management: {
-    lifecycle: 'static',
-    versionStrategy: 'auto',
-    enablement: 'enforced',
-  },
-  version: 1,
-};
 
 export const EXAMPLE_MANAGED_WORKFLOW_ID = 'system-example-greeting';
 
