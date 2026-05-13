@@ -137,6 +137,8 @@ export async function catchError(
         if (stepExecutionRuntime.stepExecutionExists()) {
           stepExecutionRuntime.failStep(new ExecutionError(workflowError));
         }
+
+        params.workflowExecutionDriver.stop();
       }
     }
   } catch (error) {

@@ -27,20 +27,19 @@ export class WorkflowExecutionDriver {
   private currentNodeId: string | undefined;
   private nextNodeId: string | undefined;
   private executing = true;
-  private currentScopeStack: WorkflowScopeStack = WorkflowScopeStack.fromStackFrames([]);
-  private currentScopeId: string | undefined;
+  private _currentStackFrames: StackFrame[] = [];
 
   constructor(init: WorkflowExecutionDriverInit) {
     this.workflowGraph = init.workflowExecutionGraph;
     this.currentNodeId = init.nodeId || this.workflowGraph.topologicalOrder[0];
-    this.currentScopeStack = init.stackFrames
-      ? WorkflowScopeStack.fromStackFrames(init.stackFrames)
-      : WorkflowScopeStack.fromStackFrames([]);
+    this._currentStackFrames = init.stackFrames ?? [];
   }
 
   public get isExecuting(): boolean {
     return this.executing;
   }
+
+  public errorVar: Error | undefined;
 
   /**
    * Starts the execution driver: execution and persistence loops run while `isExecuting` is true.
@@ -61,23 +60,12 @@ export class WorkflowExecutionDriver {
   }
 
   handleStartOfCycle(): void {
-    if (this.currentNode?.type.startsWith('exit-')) {
-      this.currentScopeStack = this.currentScopeStack.exitScope();
-    }
+    // this.syncScopeStack();
   }
 
   handleEndOfCycle(): void {
-    if (this.currentNode?.type.startsWith('enter-')) {
-      this.currentScopeStack = this.currentScopeStack.enterScope({
-        nodeId: this.currentNode.id,
-        nodeType: this.currentNode.type,
-        stepId: this.currentNode.stepId,
-        scopeId: this.currentScopeId,
-      });
-    }
-
     this.currentNodeId = this.nextNodeId;
-    this.currentScopeId = undefined;
+    this.syncScopeStack();
   }
 
   public get currentNode(): GraphNodeUnion | null {
@@ -105,8 +93,6 @@ export class WorkflowExecutionDriver {
   }
 
   public navigateToNextNode(): void {
-    // const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
-    // const currentNodeId = workflowExecution.currentNodeId;
     this.nextNodeId = this.nodeAfter(this.currentNodeId);
   }
 
@@ -115,12 +101,22 @@ export class WorkflowExecutionDriver {
   }
 
   public get currentStackFrames(): StackFrame[] {
-    // prevents consumer from modifying the stack frames in the current scope stack
-    return WorkflowScopeStack.fromStackFrames(this.currentScopeStack.stackFrames).stackFrames;
+    return WorkflowScopeStack.fromStackFrames(this._currentStackFrames).stackFrames;
   }
 
   public setCurrentScopeId(scopeId?: string): void {
-    this.currentScopeId = scopeId;
+    if (!this.currentNode) {
+      return;
+    }
+
+    this._currentStackFrames = WorkflowScopeStack.fromStackFrames(
+      this._currentStackFrames
+    ).enterScope({
+      nodeId: this.currentNode.id,
+      nodeType: this.currentNode.type,
+      stepId: this.currentNode.stepId,
+      scopeId,
+    }).stackFrames;
   }
 
   private nodeAfter(nodeId: string | undefined): string | undefined {
@@ -130,5 +126,36 @@ export class WorkflowExecutionDriver {
       return topologicalOrder[index + 1];
     }
     return undefined;
+  }
+
+  private syncScopeStack(): void {
+    if (!this.currentNodeId) {
+      return;
+    }
+
+    const scopesMap = new Map<string, string | undefined>();
+
+    for (const scope of this._currentStackFrames) {
+      for (const nestedScope of scope.nestedScopes) {
+        scopesMap.set(nestedScope.nodeId, nestedScope.scopeId);
+      }
+    }
+
+    const nodesStack = this.workflowGraph.getNodeStack(this.currentNodeId);
+
+    let currentNodeScope = new WorkflowScopeStack();
+
+    for (const nodeId of nodesStack) {
+      const nodeFromGraph = this.workflowGraph.getNode(nodeId);
+
+      currentNodeScope = currentNodeScope.enterScope({
+        nodeId: nodeFromGraph.id,
+        nodeType: nodeFromGraph.type,
+        stepId: nodeFromGraph.stepId,
+        scopeId: scopesMap.get(nodeFromGraph.id),
+      });
+    }
+
+    this._currentStackFrames = currentNodeScope.stackFrames;
   }
 }

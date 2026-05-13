@@ -97,6 +97,11 @@ export class WorkflowGraph {
         stack.pop();
       }
     }
+
+    if (this.getNode(nodeId).type.startsWith('exit-')) {
+      stack.pop();
+    }
+
     return stack;
   }
 

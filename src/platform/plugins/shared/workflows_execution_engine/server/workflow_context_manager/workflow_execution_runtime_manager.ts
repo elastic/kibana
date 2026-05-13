@@ -138,6 +138,27 @@ export class WorkflowExecutionRuntimeManager {
     return [...this.executionDriver.currentStackFrames];
   }
 
+  /**
+   * Enters a new scope in the workflow execution context.
+   *
+   * This method creates a new scope frame and pushes it onto the scope stack, establishing
+   * a new execution context for nested workflow operations. Scopes are used to track
+   * hierarchical execution contexts such as loops, conditionals, or sub-workflows.
+   *
+   * @param subScopeId - Optional identifier for the sub-scope being entered
+   *
+   * @remarks
+   * This method includes a guard condition that prevents scope entry if the current node
+   * is not an appropriate "enter" node. The scope update will be silently ignored if:
+   * - The current node type does not start with 'enter' (e.g., 'enter-foreach', 'enter-if', etc)
+   *
+   * This guard ensures that scopes are only created at the correct workflow execution points,
+   * maintaining the integrity of the execution context hierarchy.
+   */
+  public enterScope(subScopeId?: string): void {
+    this.workflowExecutionDriver.setCurrentScopeId(subScopeId);
+  }
+
   public setWorkflowOutputs(outputs: Record<string, unknown>): void {
     this.workflowExecutionState.updateWorkflowExecution({
       context: {
