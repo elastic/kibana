@@ -4,19 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable max-classes-per-file */
 
 import type { Field, Fields } from '../../fields/field';
 
 import { getDefaultProperties, histogram, keyword, scaledFloat } from './mappings';
 import type { Properties } from './mappings';
-import type { MappingsBuilder } from './mappings_builder';
-import type { WalkContext, DynamicMappingResult, MultiFields } from './mappings_builder';
+import type { MappingsBuilder, WalkContext } from './mappings_builder';
 
 const DEFAULT_IGNORE_ABOVE = 1024;
 
 // ---------------------------------------------------------------------------
-// Shared helpers used by multiple type classes
+// Shared helpers
 // ---------------------------------------------------------------------------
 
 export const fieldPath = (groupFieldName: string | undefined, name: string) =>
@@ -72,114 +70,117 @@ export const dynamicObjectParentProps = (subobjects?: boolean): Properties => {
   return props;
 };
 
+const applyTimeSeriesMetric = (props: Properties, field: Field, builder: MappingsBuilder): void => {
+  if (builder.isIndexModeTimeSeries && field.metric_type) {
+    props.time_series_metric = field.metric_type;
+  }
+};
+
+const applyTimeSeriesDimension = (
+  props: Properties,
+  field: Field,
+  builder: MappingsBuilder
+): void => {
+  if (builder.isIndexModeTimeSeries && field.dimension) {
+    props.time_series_dimension = field.dimension;
+  }
+};
+
 // ---------------------------------------------------------------------------
-// Base class
+// Handler types
 // ---------------------------------------------------------------------------
+
+export interface DynamicMappingResult {
+  properties: Properties;
+  matchingType: string;
+}
+
+export interface MultiFields {
+  [key: string]: object;
+}
+
+export interface GroupMappingResult {
+  fieldProps: Properties;
+  /** True when this group's result only comes from dynamic template children, no static props. */
+  onlyDynamicTemplateMappings: boolean;
+}
 
 /**
- * Base class for all ES field types. Default implementations are no-ops so
- * subclasses only override the contexts that apply to them, preserving
- * current silent-skip behavior for unsupported combinations.
+ * Per-ES-type handler. Every method is optional: omit a method to silently
+ * skip that mapping context. `mapGroup` is only used by the `group` type.
  */
-export abstract class FieldType {
-  staticMapping(
-    _field: Field,
-    _builder: MappingsBuilder,
-    _context: WalkContext
-  ): Properties | undefined {
-    return undefined;
-  }
-
-  dynamicMapping(_field: Field, _builder: MappingsBuilder): DynamicMappingResult | undefined {
-    return undefined;
-  }
-
-  multiFieldMapping(_field: Field): Properties | undefined {
-    return undefined;
-  }
-
-  runtimeMapping(_field: Field): Properties | undefined {
-    return undefined;
-  }
-
-  protected applyTimeSeriesMetric(props: Properties, field: Field, builder: MappingsBuilder) {
-    if (builder.isIndexModeTimeSeries && field.metric_type) {
-      props.time_series_metric = field.metric_type;
-    }
-  }
-
-  protected applyTimeSeriesDimension(props: Properties, field: Field, builder: MappingsBuilder) {
-    if (builder.isIndexModeTimeSeries && field.dimension) {
-      props.time_series_dimension = field.dimension;
-    }
-  }
+export interface FieldTypeHandler {
+  staticMapping?: (
+    field: Field,
+    builder: MappingsBuilder,
+    context: WalkContext
+  ) => Properties | undefined;
+  dynamicMapping?: (field: Field, builder: MappingsBuilder) => DynamicMappingResult | undefined;
+  multiFieldMapping?: (field: Field) => Properties | undefined;
+  runtimeMapping?: (field: Field) => Properties | undefined;
+  mapGroup?: (
+    field: Field,
+    builder: MappingsBuilder,
+    context: WalkContext
+  ) => GroupMappingResult | undefined;
 }
 
 // ---------------------------------------------------------------------------
-// Per-type subclasses
+// Handlers
 // ---------------------------------------------------------------------------
 
-class KeywordType extends FieldType {
-  staticMapping(field: Field): Properties {
+const keywordType: FieldTypeHandler = {
+  staticMapping(field) {
     const props = keyword(field);
     applyMultiFields(props, field);
     return props;
-  }
-
-  dynamicMapping(field: Field, builder: MappingsBuilder): DynamicMappingResult {
+  },
+  dynamicMapping(field, builder) {
     const props = keyword(field, true);
     applyMultiFields(props, field);
-    this.applyTimeSeriesDimension(props, field, builder);
+    applyTimeSeriesDimension(props, field, builder);
     return {
       properties: props,
       matchingType: field.object_type_mapping_type ?? 'string',
     };
-  }
-
-  multiFieldMapping(field: Field): Properties {
+  },
+  multiFieldMapping(field) {
     return keyword(field);
-  }
-
-  runtimeMapping(_field: Field): Properties {
+  },
+  runtimeMapping() {
     return { type: 'keyword' };
-  }
-}
+  },
+};
 
-class TextLikeType extends FieldType {
-  constructor(protected readonly esType: string) {
-    super();
-  }
-
-  staticMapping(field: Field): Properties {
+const textLikeType = (esType: string): FieldTypeHandler => ({
+  staticMapping(field) {
     const props = {
       ...getDefaultProperties(field),
       ...buildTextExtras(field, { isDynamic: false }),
-      type: this.esType,
+      type: esType,
     };
     applyMultiFields(props, field);
     return props;
-  }
-
-  dynamicMapping(field: Field): DynamicMappingResult {
+  },
+  dynamicMapping(field) {
     const props = {
       ...getDefaultProperties(field),
       ...buildTextExtras(field, { isDynamic: true }),
-      type: this.esType,
+      type: esType,
     };
     applyMultiFields(props, field);
     return {
       properties: props,
       matchingType: field.object_type_mapping_type ?? 'string',
     };
-  }
+  },
+  multiFieldMapping(field) {
+    return { ...buildTextExtras(field, { isDynamic: false }), type: esType };
+  },
+});
 
-  multiFieldMapping(field: Field): Properties {
-    return { ...buildTextExtras(field, { isDynamic: false }), type: this.esType };
-  }
-}
-
-class WildcardType extends FieldType {
-  staticMapping(field: Field): Properties {
+const wildcardType: FieldTypeHandler = {
+  staticMapping(field) {
     const props: Properties = {
       ...getDefaultProperties(field),
       ignore_above: DEFAULT_IGNORE_ABOVE,
@@ -189,9 +190,8 @@ class WildcardType extends FieldType {
     props.type = 'wildcard';
     applyMultiFields(props, field);
     return props;
-  }
-
-  dynamicMapping(field: Field): DynamicMappingResult {
+  },
+  dynamicMapping(field) {
     const props = {
       ...getDefaultProperties(field),
       ...buildTextExtras(field, { isDynamic: true }),
@@ -202,111 +202,95 @@ class WildcardType extends FieldType {
       properties: props,
       matchingType: field.object_type_mapping_type ?? 'string',
     };
-  }
-}
+  },
+};
 
 /**
- * Handles all numeric types. The esType is what gets written to the mapping;
- * the defaultMatchingType is the ES match_mapping_type for dynamic templates.
+ * Handles all numeric types. esType is what gets written to the mapping;
+ * defaultMatchingType is the ES match_mapping_type for dynamic templates.
  * 'integer' is handled by passing esType='long' since ES maps integers as long.
  */
-class NumericType extends FieldType {
-  constructor(private readonly esType: string, private readonly defaultMatchingType: string) {
-    super();
-  }
-
-  staticMapping(field: Field, builder: MappingsBuilder): Properties {
-    const props = { ...getDefaultProperties(field), type: this.esType };
-    this.applyTimeSeriesMetric(props, field, builder);
+const numericType = (esType: string, defaultMatchingType: string): FieldTypeHandler => ({
+  staticMapping(field, builder) {
+    const props = { ...getDefaultProperties(field), type: esType };
+    applyTimeSeriesMetric(props, field, builder);
     return props;
-  }
-
-  dynamicMapping(field: Field, builder: MappingsBuilder): DynamicMappingResult {
-    const props = { ...getDefaultProperties(field), type: this.esType };
-    this.applyTimeSeriesMetric(props, field, builder);
-    this.applyTimeSeriesDimension(props, field, builder);
+  },
+  dynamicMapping(field, builder) {
+    const props = { ...getDefaultProperties(field), type: esType };
+    applyTimeSeriesMetric(props, field, builder);
+    applyTimeSeriesDimension(props, field, builder);
     return {
       properties: props,
-      matchingType: field.object_type_mapping_type ?? this.defaultMatchingType,
+      matchingType: field.object_type_mapping_type ?? defaultMatchingType,
     };
-  }
+  },
+  multiFieldMapping() {
+    return { type: esType };
+  },
+  runtimeMapping() {
+    return { type: esType };
+  },
+});
 
-  multiFieldMapping(_field: Field): Properties {
-    return { type: this.esType };
-  }
-
-  runtimeMapping(_field: Field): Properties {
-    return { type: this.esType };
-  }
-}
-
-class BooleanType extends FieldType {
-  staticMapping(field: Field, builder: MappingsBuilder): Properties {
+const booleanType: FieldTypeHandler = {
+  staticMapping(field, builder) {
     const props = { ...getDefaultProperties(field), type: 'boolean' };
-    this.applyTimeSeriesMetric(props, field, builder);
+    applyTimeSeriesMetric(props, field, builder);
     return props;
-  }
-
-  dynamicMapping(field: Field, builder: MappingsBuilder): DynamicMappingResult {
+  },
+  dynamicMapping(field, builder) {
     const props = { ...getDefaultProperties(field), type: 'boolean' };
-    this.applyTimeSeriesMetric(props, field, builder);
-    this.applyTimeSeriesDimension(props, field, builder);
+    applyTimeSeriesMetric(props, field, builder);
+    applyTimeSeriesDimension(props, field, builder);
     return {
       properties: props,
       matchingType: field.object_type_mapping_type ?? 'boolean',
     };
-  }
-
-  runtimeMapping(_field: Field): Properties {
+  },
+  runtimeMapping() {
     return { type: 'boolean' };
-  }
-}
+  },
+};
 
-class DateType extends FieldType {
-  staticMapping(field: Field): Properties {
+const dateType: FieldTypeHandler = {
+  staticMapping(field) {
     return { ...getDefaultProperties(field), ...buildDateMapping(field), type: 'date' };
-  }
-
-  runtimeMapping(field: Field): Properties {
+  },
+  runtimeMapping(field) {
     return { ...buildDateMapping(field), type: 'date' };
-  }
-}
+  },
+};
 
 /**
  * Generic type with no time-series, multi-field, or static/dynamic divergence:
  * the same properties are emitted in both static and dynamic mappings.
  */
-class SimpleType extends FieldType {
-  constructor(
-    private readonly buildProps: (field: Field) => Properties,
-    private readonly defaultMatchingType: string
-  ) {
-    super();
-  }
-
-  staticMapping(field: Field): Properties {
-    return this.buildProps(field);
-  }
-
-  dynamicMapping(field: Field): DynamicMappingResult {
+const simpleType = (
+  buildProps: (field: Field) => Properties,
+  defaultMatchingType: string
+): FieldTypeHandler => ({
+  staticMapping(field) {
+    return buildProps(field);
+  },
+  dynamicMapping(field) {
     return {
-      properties: this.buildProps(field),
-      matchingType: field.object_type_mapping_type ?? this.defaultMatchingType,
+      properties: buildProps(field),
+      matchingType: field.object_type_mapping_type ?? defaultMatchingType,
     };
-  }
-}
+  },
+});
 
-class AggregateMetricDoubleType extends FieldType {
-  staticMapping(field: Field): Properties {
+const aggregateMetricDoubleType: FieldTypeHandler = {
+  staticMapping(field) {
     return {
       ...getDefaultProperties(field),
       metrics: field.metrics,
       default_metric: field.default_metric,
       type: 'aggregate_metric_double',
     };
-  }
-
-  dynamicMapping(field: Field): DynamicMappingResult {
+  },
+  dynamicMapping(field) {
     return {
       properties: {
         ...getDefaultProperties(field),
@@ -316,58 +300,60 @@ class AggregateMetricDoubleType extends FieldType {
       },
       matchingType: field.object_type_mapping_type ?? '*',
     };
-  }
-}
+  },
+};
 
-class FlattenedType extends FieldType {
-  staticMapping(field: Field): Properties {
+const flattenedType: FieldTypeHandler = {
+  staticMapping(field) {
     const props = { ...getDefaultProperties(field), type: 'flattened' };
     if (field.ignore_above) props.ignore_above = field.ignore_above;
     return props;
-  }
-
-  dynamicMapping(field: Field): DynamicMappingResult {
+  },
+  // TODO: static mapping copies `field.ignore_above`, dynamic mapping silently
+  // drops it. Confirm whether this divergence is intentional legacy behavior
+  // before unifying the two builders.
+  dynamicMapping(field) {
     return {
       properties: { ...getDefaultProperties(field), type: 'flattened' },
       matchingType: field.object_type_mapping_type ?? 'object',
     };
-  }
-}
+  },
+};
 
-class ConstantKeywordType extends FieldType {
-  staticMapping(field: Field): Properties {
+const constantKeywordType: FieldTypeHandler = {
+  staticMapping(field) {
     const props: Properties = { ...getDefaultProperties(field), type: 'constant_keyword' };
     if (field.value) props.value = field.value;
     return props;
-  }
-}
+  },
+};
 
-class AliasType extends FieldType {
-  staticMapping(field: Field): Properties {
-    // Assumes alias fields were validated in an earlier step.
-    // Adding a path to a field that doesn't exist would result in an error when the template is added to ES.
+const aliasType: FieldTypeHandler = {
+  // Assumes alias fields were validated in an earlier step.
+  // Adding a path to a field that doesn't exist would result in an error when the template is added to ES.
+  staticMapping(field) {
     return { ...getDefaultProperties(field), type: 'alias', path: field.path };
-  }
-}
+  },
+};
 
-class ArrayType extends FieldType {
-  staticMapping(field: Field): Properties {
-    // Assumes array fields were validated in an earlier step.
-    // Adding an array field with no object_type would result in an error when the template is added to ES.
+const arrayType: FieldTypeHandler = {
+  // Assumes array fields were validated in an earlier step.
+  // Adding an array field with no object_type would result in an error when the template is added to ES.
+  staticMapping(field) {
     const props = getDefaultProperties(field);
     if (field.object_type) props.type = field.object_type;
     return props;
-  }
-}
+  },
+};
 
-class ObjectType extends FieldType {
-  staticMapping(field: Field): Properties {
+const objectType: FieldTypeHandler = {
+  staticMapping(field) {
     return { ...getDefaultProperties(field), ...generateDynamicAndEnabled(field), type: 'object' };
-  }
-}
+  },
+};
 
-class NestedType extends FieldType {
-  staticMapping(field: Field, builder: MappingsBuilder, context: WalkContext): Properties {
+const nestedType: FieldTypeHandler = {
+  staticMapping(field, builder, context) {
     const props: Properties = { ...generateNestedProps(field), type: 'nested' };
     if (field.fields) {
       props.properties = builder.build(
@@ -376,27 +362,17 @@ class NestedType extends FieldType {
       ).properties;
     }
     return props;
-  }
-}
+  },
+};
 
-export interface GroupMappingResult {
-  fieldProps: Properties;
-  /** True when this group's result only comes from dynamic template children, no static props. */
-  onlyDynamicTemplateMappings: boolean;
-}
-
-export class GroupType extends FieldType {
+const groupType: FieldTypeHandler = {
   /**
    * Returns a GroupMappingResult so the walker can propagate the outer
    * hasDynamicTemplateMappings flag correctly (only when the group itself
    * has no static children, i.e. only dynamic template mappings).
    * Returns undefined when the group has no mappings to emit.
    */
-  mapGroup(
-    field: Field,
-    builder: MappingsBuilder,
-    context: WalkContext
-  ): GroupMappingResult | undefined {
+  mapGroup(field, builder, context) {
     const mappings = builder.build(field.fields!, fieldPath(context.groupFieldName, field.name));
 
     if (mappings.hasNonDynamicTemplateMappings) {
@@ -418,44 +394,48 @@ export class GroupType extends FieldType {
     }
 
     return undefined;
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Registry: maps every supported field type string to its handler instance
-// ---------------------------------------------------------------------------
-
-export const fieldTypeRegistry: Readonly<Record<string, FieldType>> = {
-  keyword: new KeywordType(),
-  text: new TextLikeType('text'),
-  match_only_text: new TextLikeType('match_only_text'),
-  wildcard: new WildcardType(),
-  long: new NumericType('long', 'long'),
-  integer: new NumericType('long', 'long'), // integer maps to long
-  short: new NumericType('short', 'long'),
-  byte: new NumericType('byte', 'long'),
-  unsigned_long: new NumericType('unsigned_long', 'long'),
-  double: new NumericType('double', 'double'),
-  float: new NumericType('float', 'double'),
-  half_float: new NumericType('half_float', 'double'),
-  boolean: new BooleanType(),
-  date: new DateType(),
-  ip: new SimpleType((field) => ({ ...getDefaultProperties(field), type: 'ip' }), 'string'),
-  histogram: new SimpleType(histogram, '*'),
-  scaled_float: new SimpleType(scaledFloat, '*'),
-  aggregate_metric_double: new AggregateMetricDoubleType(),
-  flattened: new FlattenedType(),
-  constant_keyword: new ConstantKeywordType(),
-  alias: new AliasType(),
-  array: new ArrayType(),
-  object: new ObjectType(),
-  nested: new NestedType(),
-  'group-nested': new NestedType(), // treated identically to nested
-  group: new GroupType(),
+  },
 };
 
 // ---------------------------------------------------------------------------
-// Multi-field helpers (used by type subclasses and MappingsBuilder)
+// Registry: maps every supported field type string to its handler
+// ---------------------------------------------------------------------------
+
+export const fieldTypeRegistry: Readonly<Record<string, FieldTypeHandler>> = {
+  keyword: keywordType,
+  text: textLikeType('text'),
+  match_only_text: textLikeType('match_only_text'),
+  wildcard: wildcardType,
+  long: numericType('long', 'long'),
+  integer: numericType('long', 'long'), // integer maps to long
+  short: numericType('short', 'long'),
+  byte: numericType('byte', 'long'),
+  unsigned_long: numericType('unsigned_long', 'long'),
+  double: numericType('double', 'double'),
+  float: numericType('float', 'double'),
+  half_float: numericType('half_float', 'double'),
+  boolean: booleanType,
+  date: dateType,
+  ip: simpleType((field) => ({ ...getDefaultProperties(field), type: 'ip' }), 'string'),
+  histogram: simpleType(histogram, '*'),
+  scaled_float: simpleType(scaledFloat, '*'),
+  aggregate_metric_double: aggregateMetricDoubleType,
+  flattened: flattenedType,
+  constant_keyword: constantKeywordType,
+  alias: aliasType,
+  array: arrayType,
+  object: objectType,
+  nested: nestedType,
+  'group-nested': nestedType, // treated identically to nested
+  group: groupType,
+};
+
+// ---------------------------------------------------------------------------
+// Multi-field helpers
+//
+// Defined at the bottom because generateMultiFields references the registry
+// above. Handler methods reference applyMultiFields, but only at call time
+// (lazily), so the forward reference is safe.
 // ---------------------------------------------------------------------------
 
 const applyMultiFields = (props: Properties, field: Field): void => {
@@ -464,12 +444,10 @@ const applyMultiFields = (props: Properties, field: Field): void => {
 
 export const generateMultiFields = (fields: Fields): MultiFields => {
   const multiFields: MultiFields = {};
-  if (fields) {
-    fields.forEach((f: Field) => {
-      const handler = f.type ? fieldTypeRegistry[f.type] : undefined;
-      const mapped = handler?.multiFieldMapping(f);
-      if (mapped) multiFields[f.name] = mapped;
-    });
-  }
+  fields.forEach((f: Field) => {
+    const handler = f.type ? fieldTypeRegistry[f.type] : undefined;
+    const mapped = handler?.multiFieldMapping?.(f);
+    if (mapped) multiFields[f.name] = mapped;
+  });
   return multiFields;
 };

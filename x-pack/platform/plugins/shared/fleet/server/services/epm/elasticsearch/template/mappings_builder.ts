@@ -17,19 +17,9 @@ import {
   fieldTypeRegistry,
   dynamicObjectParentProps,
 } from './field_type_registry';
-import type { GroupType } from './field_type_registry';
 
-export interface MultiFields {
-  [key: string]: object;
-}
-
-export interface RuntimeFields {
+interface RuntimeFields {
   [key: string]: any;
-}
-
-export interface DynamicMappingResult {
-  properties: Properties;
-  matchingType: string;
 }
 
 export interface WalkContext {
@@ -73,39 +63,7 @@ export class MappingsBuilder {
     const type = field.type || 'keyword';
 
     if (field.runtime !== undefined) {
-      const path = fieldPath(context.groupFieldName, field.name);
-
-      if (type === 'object' && field.object_type) {
-        // Runtime field that is also a dynamic template (e.g. labels.* with runtime: true).
-        const objectType = field.object_type;
-        const fieldAsObjectType = { ...field, type: objectType };
-        const handler = fieldTypeRegistry[objectType];
-        const dynResult = handler?.dynamicMapping(fieldAsObjectType, this);
-        const runtimeProps = handler?.runtimeMapping(fieldAsObjectType);
-
-        if (dynResult && runtimeProps) {
-          this.addDynamicMappingWithIntermediateObjects(
-            context,
-            path,
-            dynamicPathMatch(path),
-            dynResult.matchingType,
-            dynResult.properties,
-            runtimeProps
-          );
-          this.addParentObjectAsStaticProperty(context, field);
-        }
-        return;
-      }
-
-      const handler = fieldTypeRegistry[type];
-      const runtimeFieldProps = {
-        ...getDefaultProperties(field),
-        ...(handler?.runtimeMapping(field) ?? { type }),
-      };
-      if (typeof field.runtime === 'string') {
-        runtimeFieldProps.script = { source: field.runtime.trim() };
-      }
-      this.runtimeFields[path] = runtimeFieldProps;
+      this.addRuntimeField(context, field, type);
       return;
     }
 
@@ -118,8 +76,7 @@ export class MappingsBuilder {
     let fieldProps: Properties;
 
     if (type === 'group') {
-      const groupHandler = handler as GroupType;
-      const groupResult = groupHandler.mapGroup(field, this, context);
+      const groupResult = handler?.mapGroup?.(field, this, context);
       if (groupResult === undefined) return;
 
       fieldProps = groupResult.fieldProps;
@@ -137,7 +94,7 @@ export class MappingsBuilder {
         fieldProps.dynamic = true;
       }
     } else if (handler) {
-      const mapped = handler.staticMapping(field, this, context);
+      const mapped = handler.staticMapping?.(field, this, context);
       if (mapped === undefined) return;
       fieldProps = mapped;
     } else {
@@ -145,6 +102,11 @@ export class MappingsBuilder {
       fieldProps = { ...getDefaultProperties(field), type };
     }
 
+    // TODO: when a field has `metric_type` but no `unit`, this assigns
+    // `fieldProps.meta = {}` (an empty object). `meta` only ever populates
+    // `unit`, so the `metric_type` half of the guard looks unintentional.
+    // Confirm whether the empty-meta artifact is expected by downstream
+    // consumers before changing behavior.
     const fieldHasMetaProps = 'metric_type' in field || 'unit' in field;
     if (fieldHasMetaProps && type !== 'group' && type !== 'group-nested') {
       const meta: Properties = {};
@@ -177,6 +139,42 @@ export class MappingsBuilder {
     }
 
     context.properties[field.name] = fieldProps;
+  }
+
+  private addRuntimeField(context: WalkContext, field: Field, type: string) {
+    const path = fieldPath(context.groupFieldName, field.name);
+
+    if (type === 'object' && field.object_type) {
+      // Runtime field that is also a dynamic template (e.g. labels.* with runtime: true).
+      const objectType = field.object_type;
+      const fieldAsObjectType = { ...field, type: objectType };
+      const handler = fieldTypeRegistry[objectType];
+      const dynResult = handler?.dynamicMapping?.(fieldAsObjectType, this);
+      const runtimeProps = handler?.runtimeMapping?.(fieldAsObjectType);
+
+      if (dynResult && runtimeProps) {
+        this.addDynamicMappingWithIntermediateObjects(
+          context,
+          path,
+          dynamicPathMatch(path),
+          dynResult.matchingType,
+          dynResult.properties,
+          runtimeProps
+        );
+        this.addParentObjectAsStaticProperty(context, field);
+      }
+      return;
+    }
+
+    const handler = fieldTypeRegistry[type];
+    const runtimeFieldProps = {
+      ...getDefaultProperties(field),
+      ...(handler?.runtimeMapping?.(field) ?? { type }),
+    };
+    if (typeof field.runtime === 'string') {
+      runtimeFieldProps.script = { source: field.runtime.trim() };
+    }
+    this.runtimeFields[path] = runtimeFieldProps;
   }
 
   private addParentObjectAsStaticProperty(context: WalkContext, field: Field) {
@@ -224,7 +222,7 @@ export class MappingsBuilder {
     }
 
     const handler = fieldTypeRegistry[objectType];
-    const result = handler?.dynamicMapping({ ...field, type: objectType }, this);
+    const result = handler?.dynamicMapping?.({ ...field, type: objectType }, this);
 
     if (!result) {
       // Preserve original behavior: unsupported or unknown object_type always throws.
@@ -264,6 +262,11 @@ export class MappingsBuilder {
       if (name.includes('*') && properties?.type === 'object') {
         // Conflicting intermediate object: drop the older one so more specific
         // templates are matched first.
+        // TODO: this splice does NOT update the recorded indices of entries
+        // after `index` in `dynamicTemplateNames`. A subsequent conflict on a
+        // later template would splice the wrong entry. Switch to a stable
+        // store (e.g. tombstone the entry then compact at the end) before
+        // adding more callers of the conflict-resolution path.
         const index = this.dynamicTemplateNames[name];
         delete this.dynamicTemplateNames[name];
         this.dynamicTemplates.splice(index, 1);
