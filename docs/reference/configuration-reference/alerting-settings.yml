@@ -1336,7 +1336,7 @@ groups:
           - "stack: ga 7.15, removed 9.0"
           - "ech: ga"
           - "self: ga"
-        deprecation_details: "Ignored since 9.0. Ephemeral tasks were removed. Remove this setting."
+        deprecation_details: "Ignored since 9.0. Ephemeral tasks were removed. If you are upgrading your cluster or using the current version, you must remove this setting from your `kibana.yml` file to avoid configuration errors."
 
       - setting: xpack.alerting.defaultRuleTaskTimeout
         description: |
