@@ -32,9 +32,11 @@ import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import type { WorkflowsExecutionEngineConfig } from './config';
 import {
   checkAndSkipIfExistingScheduledExecution,
+  executeWorkflowSync,
   resumeWorkflow,
   runWorkflow,
 } from './execution_functions';
+import type { ExecuteWorkflowSyncInput } from './execution_functions/execute_workflow_sync';
 import { cancelWaitingWorkflow } from './lib/cancel_waiting_workflow';
 import { checkLicense } from './lib/check_license';
 import { getAuthenticatedUser } from './lib/get_user';
@@ -1297,6 +1299,14 @@ export class WorkflowsExecutionEnginePlugin
       cancelAllActiveWorkflowExecutions,
       resumeWorkflowExecution,
       triggerEvents,
+      executeWorkflowSync: (
+        input: Omit<ExecuteWorkflowSyncInput, 'getStepDefinition' | 'logger'>
+      ) =>
+        executeWorkflowSync({
+          ...input,
+          getStepDefinition: (stepType) => plugins.workflowsExtensions.getStepDefinition(stepType),
+          logger: this.logger,
+        }),
     };
   }
 

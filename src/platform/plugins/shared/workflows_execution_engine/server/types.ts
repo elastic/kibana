@@ -22,6 +22,10 @@ import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
+import type {
+  ExecuteWorkflowSyncInput,
+  ExecuteWorkflowSyncResult,
+} from './execution_functions/execute_workflow_sync';
 import type { EmitEvent } from './trigger_events/trigger_event_handler';
 import type { IWorkflowEventLoggerService } from './workflow_event_logger';
 
@@ -45,6 +49,8 @@ export interface TriggerEventsContract {
   maxEventChainDepth: number;
 }
 
+export type { ExecuteWorkflowSyncInput, ExecuteWorkflowSyncResult };
+
 export interface WorkflowsExecutionEnginePluginStart {
   executeWorkflow: ExecuteWorkflow;
   executeWorkflowStep: ExecuteWorkflowStep;
@@ -55,6 +61,9 @@ export interface WorkflowsExecutionEnginePluginStart {
   scheduleWorkflow: ScheduleWorkflow;
   bulkScheduleWorkflow: BulkScheduleWorkflow;
   triggerEvents: TriggerEventsContract;
+  executeWorkflowSync: (
+    input: Omit<ExecuteWorkflowSyncInput, 'getStepDefinition' | 'logger'>
+  ) => Promise<ExecuteWorkflowSyncResult>;
 }
 
 export interface WorkflowsExecutionEnginePluginSetupDeps {
