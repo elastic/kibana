@@ -273,6 +273,32 @@ export function NotificationCenterApp({
           ))
         )}
       </SidebarBody>
+      {onOpenStackManagement && (
+        <div data-test-subj="notificationCenterSidebarFooter">
+          <EuiHorizontalRule margin="none" />
+          <EuiFlexGroup
+            justifyContent="flexEnd"
+            gutterSize="s"
+            responsive={false}
+            style={{ padding: '8px 12px' }}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                iconType="popout"
+                iconSide="right"
+                onClick={() => {
+                  onClose();
+                  onOpenStackManagement();
+                }}
+                data-test-subj="notificationCenterOpenStackManagement"
+              >
+                Notification Center
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+      )}
     </>
   );
 }

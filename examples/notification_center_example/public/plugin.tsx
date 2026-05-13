@@ -17,6 +17,7 @@ import { NotificationEventsProvider } from '@kbn/core-notifications-browser-hook
 import { registerDemoTypes } from './event_types';
 import { notificationCenterAppId } from './notification_center_app';
 import { HeaderNotificationButton } from './header_notification_button';
+import { notificationStackManagementAppId } from './stack_management';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
@@ -42,7 +43,13 @@ export class NotificationCenterExamplePlugin implements Plugin<void, void, Setup
         return function NotificationCenterAppWithProvider(props: SidebarComponentProps) {
           return (
             <NotificationEventsProvider events={events} spaces={spaces}>
-              <NotificationCenterApp {...props} />
+              <NotificationCenterApp
+                {...props}
+                uiSettings={coreStart.uiSettings}
+                onOpenStackManagement={() =>
+                  coreStart.application.navigateToApp(notificationStackManagementAppId)
+                }
+              />
             </NotificationEventsProvider>
           );
         };
@@ -70,6 +77,16 @@ export class NotificationCenterExamplePlugin implements Plugin<void, void, Setup
           element
         );
         return () => ReactDOM.unmountComponentAtNode(element);
+      },
+    });
+
+    core.application.register({
+      id: notificationStackManagementAppId,
+      title: 'Notification Center',
+      async mount({ element }: AppMountParameters) {
+        const [coreStart, { spaces }] = await core.getStartServices();
+        const { renderApp } = await import('./stack_management/render_app');
+        return renderApp(element, coreStart, spaces);
       },
     });
 
