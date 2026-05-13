@@ -27,7 +27,6 @@ export const ModelsCallout = ({
 }: ModelsCalloutProps) => {
   return (
     <>
-      <EuiSpacer size="l" />
       <EuiCallOut
         title={title}
         color={color}
@@ -42,6 +41,7 @@ export const ModelsCallout = ({
           ))}
         </ul>
       </EuiCallOut>
+      <EuiSpacer size="l" />
     </>
   );
 };

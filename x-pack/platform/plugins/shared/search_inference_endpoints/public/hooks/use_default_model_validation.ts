@@ -69,16 +69,9 @@ export const useDefaultModelValidation = (
       );
     } else if (selectedConnector && selectedConnector.metadata) {
       const modelStatus = getModelStatus(selectedConnector.metadata);
-      if (
-        modelStatus === EisModelStatus.DeprecatedEOL ||
-        modelStatus === EisModelStatus.Deprecated
-      ) {
+      if (modelStatus === EisModelStatus.DeprecatedEOL) {
         const eolDate = getModelEOLDate(selectedConnector.metadata)?.format('l') ?? null;
-        errors.push(
-          modelStatus === EisModelStatus.DeprecatedEOL
-            ? getModelEOLMessage(eolDate)
-            : getModelDeprecatedMessage(eolDate)
-        );
+        errors.push(getModelEOLMessage(eolDate));
       }
     }
 

@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { Location } from 'history';
 import { useHistory } from 'react-router-dom';
+import { NO_DEFAULT_MODEL } from '../../../common/constants';
 import { docLinks } from '../../../common/doc_links';
 import { FeatureSection } from './feature_section';
 import { DefaultModelSection } from './default_model_section';
@@ -82,6 +83,19 @@ export const ModelSettings: React.FC = () => {
     const eolModels = new Set<string>();
     const deprecatedModels = new Set<string>();
 
+    if (defaultModelState.defaultModelId !== NO_DEFAULT_MODEL) {
+      const depInfo = deprecatedEndpointsMap.get(defaultModelState.defaultModelId);
+      if (depInfo) {
+        switch (depInfo.status) {
+          case EisModelStatus.DeprecatedEOL:
+            eolModels.add(depInfo.name);
+            break;
+          case EisModelStatus.Deprecated:
+            deprecatedModels.add(depInfo.name);
+            break;
+        }
+      }
+    }
     for (const sec of sections) {
       for (const childFeature of sec.children) {
         const selectedEndpointIds =
@@ -103,7 +117,7 @@ export const ModelSettings: React.FC = () => {
     }
 
     return [Array.from(deprecatedModels), Array.from(eolModels)];
-  }, [deprecatedEndpointsMap, sections, assignments]);
+  }, [deprecatedEndpointsMap, sections, assignments, defaultModelState.defaultModelId]);
 
   const isDirty = isFeatureDirty || isDefaultModelDirty;
   const hasNoModels = !connectorsLoading && connectors && !connectors.length;
@@ -236,84 +250,82 @@ export const ModelSettings: React.FC = () => {
         data-test-subj="modelSettingsContent"
         restrictWidth={true}
       >
+        {showFeatureSections && invalidEndpointIds.size > 0 && (
+          <>
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.searchInferenceEndpoints.settings.invalidEndpoints.title',
+                {
+                  defaultMessage: 'Some assigned inference endpoints are no longer available',
+                }
+              )}
+              color="danger"
+              iconType="warning"
+              data-test-subj="invalidEndpointsCallout"
+              announceOnMount
+            >
+              <p>
+                {i18n.translate(
+                  'xpack.searchInferenceEndpoints.settings.invalidEndpoints.description',
+                  {
+                    defaultMessage:
+                      'The following endpoints could not be found:\n{endpointList}.\nFeatures using these endpoints may not work as expected.',
+                    values: {
+                      endpointList: [...invalidEndpointIds].join(', '),
+                    },
+                  }
+                )}
+              </p>
+            </EuiCallOut>
+            <EuiSpacer size="l" />
+          </>
+        )}
+        {showFeatureSections && eolAssignedModels.length > 0 && (
+          <ModelsCallout
+            title={i18n.translate(
+              'xpack.searchInferenceEndpoints.settings.eolModelsCallout.title',
+              {
+                defaultMessage: 'Some assigned models have reached end of life',
+              }
+            )}
+            message={i18n.translate(
+              'xpack.searchInferenceEndpoints.settings.eolModelsCallout.description',
+              {
+                defaultMessage:
+                  'Features using these models may not work as expected. The following models are have reached end of life and are no longer available:',
+              }
+            )}
+            modelList={eolAssignedModels}
+            color="danger"
+            data-test-subj="eolModelsCallout"
+          />
+        )}
+        {showFeatureSections && deprecatedAssignedModels.length > 0 && (
+          <ModelsCallout
+            title={i18n.translate(
+              'xpack.searchInferenceEndpoints.settings.deprecatedModelsCallout.title',
+              {
+                defaultMessage: 'Some assigned models are deprecated',
+              }
+            )}
+            message={i18n.translate(
+              'xpack.searchInferenceEndpoints.settings.deprecatedModelsCallout.description',
+              {
+                defaultMessage: `Features using these models should be updated before the end-of-life date. The following models are deprecated:`,
+              }
+            )}
+            modelList={deprecatedAssignedModels}
+            color="warning"
+            data-test-subj="deprecatedModelsCallout"
+          />
+        )}
         <DefaultModelSection
           defaultModelSettings={defaultModelSettings}
           validation={defaultModelValidation}
         />
         {showFeatureSections && (
           <>
-            {invalidEndpointIds.size > 0 && (
-              <>
-                <EuiSpacer size="l" />
-                <EuiCallOut
-                  title={i18n.translate(
-                    'xpack.searchInferenceEndpoints.settings.invalidEndpoints.title',
-                    {
-                      defaultMessage: 'Some assigned inference endpoints are no longer available',
-                    }
-                  )}
-                  color="danger"
-                  iconType="warning"
-                  data-test-subj="invalidEndpointsCallout"
-                  announceOnMount
-                >
-                  <p>
-                    {i18n.translate(
-                      'xpack.searchInferenceEndpoints.settings.invalidEndpoints.description',
-                      {
-                        defaultMessage:
-                          'The following endpoints could not be found:\n{endpointList}.\nFeatures using these endpoints may not work as expected.',
-                        values: {
-                          endpointList: [...invalidEndpointIds].join(', '),
-                        },
-                      }
-                    )}
-                  </p>
-                </EuiCallOut>
-              </>
-            )}
-            {eolAssignedModels.length > 0 && (
-              <ModelsCallout
-                title={i18n.translate(
-                  'xpack.searchInferenceEndpoints.settings.eolModelsCallout.title',
-                  {
-                    defaultMessage: 'Some assigned models have reached end of life',
-                  }
-                )}
-                message={i18n.translate(
-                  'xpack.searchInferenceEndpoints.settings.eolModelsCallout.description',
-                  {
-                    defaultMessage:
-                      'Features using these models may not work as expected. The following models are have reached end of life and are no longer available:',
-                  }
-                )}
-                modelList={eolAssignedModels}
-                color="danger"
-                data-test-subj="eolModelsCallout"
-              />
-            )}
-            {deprecatedAssignedModels.length > 0 && (
-              <ModelsCallout
-                title={i18n.translate(
-                  'xpack.searchInferenceEndpoints.settings.deprecatedModelsCallout.title',
-                  {
-                    defaultMessage: 'Some assigned models are deprecated',
-                  }
-                )}
-                message={i18n.translate(
-                  'xpack.searchInferenceEndpoints.settings.deprecatedModelsCallout.description',
-                  {
-                    defaultMessage: `Features using these models should be updated before the end-of-life date. The following models are deprecated:`,
-                  }
-                )}
-                modelList={deprecatedAssignedModels}
-                color="warning"
-                data-test-subj="deprecatedModelsCallout"
-              />
-            )}
-
             <EuiSpacer size="xl" />
-
             {sections.length === 0 ? (
               <EuiEmptyPrompt
                 iconType="gear"

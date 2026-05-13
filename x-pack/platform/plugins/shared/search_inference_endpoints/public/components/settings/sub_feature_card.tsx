@@ -260,7 +260,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
             min-inline-size: min(20rem, 50%);
           `}
         >
-          <EuiPanel paddingSize="s" hasBorder={false}>
+          <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
             <EuiText size="xs" color="subdued">
               <strong>
                 {i18n.translate('xpack.searchInferenceEndpoints.settings.assignedModels', {
