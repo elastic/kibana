@@ -15,8 +15,6 @@ TS index_pattern [METADATA fields]
 
 - `FROM` treats every document as an independent row. `TS` adds that time series context: it groups and aggregates data points by time series before any other aggregation run
 - A `TS | STATS` query normally has two aggregation phases. The inner phase reduces samples inside each time series; the outer phase groups and combines those per-series results.
-  - The default inner aggregation is `LAST_OVER_TIME`, which is why `TS metrics | STATS AVG(cpu_usage)` and `FROM metrics | STATS AVG(cpu_usage)` can return different numbers.
-
 
 ## Inner/Outer aggregation phases
 
@@ -25,46 +23,20 @@ The first `STATS` after a `TS` command uses a two-level aggregation model:
 1. **Inner function** (time series aggregation) -- evaluated per individual time series (e.g. `RATE`, `AVG_OVER_TIME`)
 2. **Outer function** (standard aggregation) -- aggregates inner results across groups (e.g. `SUM`, `AVG`, `MAX`)
 
-```esql
-TS metrics
-| STATS SUM(RATE(search_requests)) BY TBUCKET(1 hour), host
-//     ^^^  ^^^^                       inner: RATE per time series
-//     outer: SUM across time series sharing the same host + bucket
-```
+In `SUM(RATE(request_count)) BY datacenter, TBUCKET(5m)`:
 
-A single host can map to multiple underlying time series. The outer `SUM` combines the per-time-series rates into one
-value per host per bucket. Use `SUM` as the outer function for counters (rates are additive). Use `AVG` or `MAX` for
-gauges depending on intent.
+- `RATE(request_count)` is the **inner** aggregation - It runs per time series.
+- `SUM(...)` is the **outer** aggregation - It combines time series within the same `datacenter` and bucket.
+- `TBUCKET(5m)` defines the bucket boundaries (equivalent to `BUCKET(@timestamp, 5m)`).
 
-If the inner function is omitted, `LAST_OVER_TIME()` is assumed implicitly:
 
-```esql
-// These two queries are equivalent
-TS metrics | STATS AVG(memory_usage)
-TS metrics | STATS AVG(LAST_OVER_TIME(memory_usage))
-```
-
-Use a time series function directly without an outer aggregation to get one value per time series
-per bucket:
-
-```esql
-TS metrics
-| WHERE TRANGE(1 day)
-| STATS RATE(search_requests) BY TBUCKET(1 hour)
-```
-
-Nesting two time series functions is **not allowed** and causes an error:
-
-```esql
-// INVALID -- nested time series functions
-TS metrics | STATS AVG_OVER_TIME(RATE(memory_usage))
-```
+- The default inner aggregation is `LAST_OVER_TIME` (which is why `TS metrics | STATS AVG(cpu_usage)` and `FROM metrics | STATS AVG(cpu_usage)` can return different numbers)
+- The outer aggregation is optional.
 
 ## Time Series Aggregation Functions
 
 All functions below are available under `TS ... | STATS`. Each accepts a required field argument and an optional sliding
-window (`time_duration`). The window must be a multiple of the `TBUCKET` interval. If omitted, the bucket interval
-is used as the window.
+window (`time_duration`). The window must be a multiple of the `TBUCKET` interval. If omitted, the bucket interval is used as the window.
 
 ### Counter Functions
 
@@ -192,39 +164,6 @@ TS metrics
 | STATS AVG(AVG_OVER_TIME(cpu_percent)) BY TBUCKET(5 minute), service
 ```
 
-## TRANGE Time Filter
-
-Filter data by time range using `@timestamp`. Prefer `TRANGE` over manual `WHERE @timestamp > NOW() - ...` filters.
-
-**Syntax:**
-
-```esql
-// Offset from now (last N time units)
-WHERE TRANGE(offset)
-
-// Explicit start and end
-WHERE TRANGE(start, end)
-```
-
-**Examples:**
-
-```esql
-// Last hour
-TS metrics
-| WHERE TRANGE(1 hour)
-| STATS SUM(RATE(requests)) BY TBUCKET(1 minute), host
-
-// Explicit time range
-TS metrics
-| WHERE TRANGE("2024-05-10T00:00:00Z", "2024-05-10T01:00:00Z")
-| STATS SUM(RATE(requests)) BY TBUCKET(5 minute), host
-
-// Epoch milliseconds
-// k8s is an example of a TSDS index, to showcase that time series indexes do not have to be called metrics
-FROM k8s
-| WHERE TRANGE(1715300236000, 1715300282000)
-```
-
 ## CLAMP Functions
 
 Bound metric values to a range. Useful for capping outliers or enforcing value limits in time series analysis.
@@ -244,6 +183,25 @@ TS k8s
 // Aggregate with clamped values
 TS k8s
 | STATS total = SUM(CLAMP_MAX(network.cost, 1)) BY TBUCKET(1 minute)
+```
+
+## Post-process TS results with ES|QL
+
+The first `STATS` command is the boundary between time series processing and regular ES|QL processing.
+Before that first `STATS`, `TS` needs to keep the data grouped by `_tsid`, so commands that change row order or shape are not allowed.
+After that first `STATS`, the output is a regular ES|QL table.
+You can sort it, limit it, join lookup data, enrich it, or compute derived columns.
+
+For example, this query calculates average CPU per host and bucket, finds the maximum bucketed average for each host, and returns the ratio:
+
+```esql
+TS metrics-*
+| WHERE TRANGE(1h)
+| STATS avg_cpu = AVG(AVG_OVER_TIME(cpu_usage)) BY host.name, time_bucket = TBUCKET(5m)
+| INLINE STATS max_avg_cpu = MAX(avg_cpu) BY host.name
+| EVAL cpu_ratio = avg_cpu / max_avg_cpu
+| KEEP host.name, time_bucket, cpu_ratio
+| SORT host.name, time_bucket DESC
 ```
 
 ## Common Query Patterns
@@ -308,12 +266,21 @@ TS k8s
 | STATS SUM(IRATE(network.total_bytes_in)) BY cluster, TBUCKET(10 minute)
 ```
 
-### Sliding Window Rate (9.3+)
+### Sliding Window Rate
 
 ```esql
 TS metrics
 | WHERE TRANGE(1 hour)
 | STATS AVG(RATE(requests, 10m)) BY TBUCKET(1m), host
+```
+
+### COUNT(*) equivalent
+
+```esql
+TS logs
+| WHERE TRANGE(?_tstart, ?_tend)
+| STATS `Log Volume` = sum(count_over_time(@timestamp)) BY `Month` = TBUCKET(1 month)
+| SORT `Month` ASC
 ```
 
 ## Guidelines
@@ -329,3 +296,4 @@ TS metrics
   `SUM(RATE(foo)) + SUM(RATE(bar))` may produce nulls for mismatched dimensions.
 - `COUNT()` and `COUNT(*)` is not supported with TS
 - Cannot combine with `FORK` before `STATS` is applied
+- For `TS`, prefer `TRANGE` over manual `WHERE @timestamp > NOW() - ...` filters.
