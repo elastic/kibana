@@ -235,6 +235,8 @@ export const ENABLE_DE_HEALTH_UI_SETTING =
 /** This Kibana Advanced Setting specifies the URL of the News feed widget */
 export const NEWS_FEED_URL_SETTING = 'securitySolution:newsFeedUrl' as const;
 
+export const TEST_PR_BASELINE = true;
+
 /** The default value for News feed widget */
 export const NEWS_FEED_URL_SETTING_DEFAULT = 'https://feeds.elastic.co/security-solution' as const;
 
