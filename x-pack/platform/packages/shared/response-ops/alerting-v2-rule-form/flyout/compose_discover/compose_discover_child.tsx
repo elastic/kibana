@@ -29,8 +29,7 @@ import {
   type EuiDataGridColumn,
   type EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
-import { CodeEditor } from '@kbn/code-editor';
-import { ESQL_LANG_ID } from '@kbn/code-editor';
+import { CodeEditor, ESQL_LANG_ID, type monaco } from '@kbn/code-editor';
 import type { FormValues } from '../../form/types';
 import { useRuleFormServices } from '../../form/contexts/rule_form_context';
 import { useDataFields } from '../../form/hooks/use_data_fields';
@@ -44,6 +43,8 @@ interface ComposeDiscoverChildProps {
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   /** Controls whether the Sandbox renders a single editor or a Base/Alert/Recovery tab layout. */
   tabConfig: SandboxTabConfig;
+  onAlertEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
+  onRecoveryEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
   onClose: () => void;
 }
 
@@ -60,6 +61,8 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
   state,
   dispatch,
   tabConfig,
+  onAlertEditorMount,
+  onRecoveryEditorMount,
   onClose,
 }) => {
   const services = useRuleFormServices();
@@ -281,7 +284,13 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
         {/* ── 2. Editor — bordered panel ──────────────────────────────── */}
         <EuiPanel hasBorder paddingSize="s" style={{ ...editorPanelStyles }}>
           {isSplit ? (
-            <ComposeDiscoverTabs state={state} dispatch={dispatch} tabConfig={tabConfig} />
+            <ComposeDiscoverTabs
+              state={state}
+              dispatch={dispatch}
+              tabConfig={tabConfig}
+              onAlertEditorMount={onAlertEditorMount}
+              onRecoveryEditorMount={onRecoveryEditorMount}
+            />
           ) : (
             <CodeEditor
               languageId={ESQL_LANG_ID}

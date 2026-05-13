@@ -7,20 +7,22 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { EuiTab, EuiTabs, EuiSpacer, EuiPanel, EuiText } from '@elastic/eui';
-import { CodeEditor, ESQL_LANG_ID } from '@kbn/code-editor';
+import { CodeEditor, ESQL_LANG_ID, type monaco } from '@kbn/code-editor';
 import type {
   ComposeDiscoverState,
   ComposeDiscoverAction,
   QueryTab,
   SandboxTabConfig,
 } from './types';
-import { useSplitQueryCompletion } from './use_split_query_completion';
-import { useRuleFormServices } from '../../form/contexts/rule_form_context';
+
+type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 
 interface ComposeDiscoverTabsProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   tabConfig: SandboxTabConfig;
+  onAlertEditorMount?: (editor: IStandaloneCodeEditor) => void;
+  onRecoveryEditorMount?: (editor: IStandaloneCodeEditor) => void;
   /**
    * When true, only the editor content is rendered — the tab bar is omitted.
    * Used when the parent renders tabs in the flyout header instead.
@@ -68,7 +70,7 @@ interface BlockEditorProps {
   onChange: (val: string) => void;
   /** Line number offset — makes the block editor's line numbers continue from the base. */
   lineNumberOffset: number;
-  onEditorMount?: (editor: import('@kbn/code-editor').monaco.editor.IStandaloneCodeEditor) => void;
+  onEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
 }
 
 const BlockEditor: React.FC<BlockEditorProps> = ({
@@ -124,9 +126,10 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
   state,
   dispatch,
   tabConfig,
+  onAlertEditorMount,
+  onRecoveryEditorMount,
   hideTabBar = false,
 }) => {
-  const { data } = useRuleFormServices();
   const tabIds = visibleTabIds(tabConfig);
   const visibleTabs = TAB_DEFINITIONS.filter((t) => tabIds.includes(t.id));
 
@@ -141,17 +144,6 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
     // Only correct drift — don't re-run when activeTab changes via user clicks.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [safeActiveTab]);
-
-  // Split-query autocomplete: alert and recovery block editors prepend baseQuery so
-  // that ES|QL can resolve column names produced by STATS, EVAL, etc.
-  const { onEditorMount: onAlertEditorMount } = useSplitQueryCompletion({
-    baseQuery: state.baseQuery,
-    search: data.search.search,
-  });
-  const { onEditorMount: onRecoveryEditorMount } = useSplitQueryCompletion({
-    baseQuery: state.baseQuery,
-    search: data.search.search,
-  });
 
   const baseLineCount = state.baseQuery.split('\n').length;
 

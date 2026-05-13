@@ -5,11 +5,34 @@
  * 2.0.
  */
 
+import type React from 'react';
+import type { UseFormReturn } from 'react-hook-form';
+import type { RuleFormServices } from '../../form/contexts/rule_form_context';
+import type { FormValues } from '../../form/types';
+
 export type ComposeDiscoverMode = 'create' | 'edit';
 
 export type RecoveryType = 'default' | 'custom';
 
 export type QueryTab = 'base' | 'alert' | 'recovery';
+
+export type StepId = 'alertCondition' | 'recoveryCondition' | 'details' | 'notifications';
+
+export interface StepRenderProps {
+  state: ComposeDiscoverState;
+  dispatch: React.Dispatch<ComposeDiscoverAction>;
+  services: RuleFormServices;
+}
+
+export interface StepDefinition {
+  id: StepId;
+  title: string;
+  render: (props: StepRenderProps) => React.ReactNode;
+  validate?: (
+    methods: UseFormReturn<FormValues>,
+    state: ComposeDiscoverState
+  ) => Promise<boolean> | boolean;
+}
 
 /**
  * Describes which tabs the Discover Sandbox should show.

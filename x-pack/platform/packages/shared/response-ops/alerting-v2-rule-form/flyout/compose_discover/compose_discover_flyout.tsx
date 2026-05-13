@@ -28,18 +28,17 @@ import {
   mapFormValuesToUpdateRequest,
 } from '../../form/utils/rule_request_mappers';
 import type { ComposeDiscoverMode } from './types';
-import {
-  useComposeDiscoverState,
-  getStepTitles,
-  getSandboxTabConfig,
-} from './use_compose_discover_state';
-import { ComposeDiscoverForm } from './compose_discover_form';
+import { useComposeDiscoverState, getSandboxTabConfig } from './use_compose_discover_state';
+import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
 import { ComposeDiscoverChild } from './compose_discover_child';
 import { useEsqlAutocomplete } from './use_esql_providers';
+import { useSplitQueryCompletion } from './use_split_query_completion';
 
-// These hooks live in the plugin, not the package — imported via the plugin's hook layer
-// when this flyout is rendered in the rules list page.
-// For now they are passed as props to keep the package boundary clean.
+/*
+ * These hooks live in the plugin, not the package — imported via the plugin's hook layer
+ * when this flyout is rendered in the rules list page.
+ * For now they are passed as props to keep the package boundary clean.
+ */
 export interface ComposeDiscoverFlyoutProps {
   historyKey: symbol;
   mode?: ComposeDiscoverMode;
@@ -84,9 +83,11 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   onUpdateRule,
   isSaving = false,
 }) => {
-  // ── UI state (step navigation, sandbox open/close, tab selection, etc.) ──
-  // In edit mode, seed the sandbox draft with the rule's existing query so the
-  // Alert Condition step shows the current query summary instead of "No query defined".
+  /*
+   * ── UI state (step navigation, sandbox open/close, tab selection, etc.) ──
+   * In edit mode, seed the sandbox draft with the rule's existing query so the
+   * Alert Condition step shows the current query summary instead of "No query defined".
+   */
   const initialSandboxQuery =
     mode === 'edit'
       ? rule
@@ -97,6 +98,20 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
 
   // Registered once here so providers persist across Sandbox open/close cycles.
   useEsqlAutocomplete(services);
+
+  /*
+   * Split-query completion for alert and recovery block editors. Registered at
+   * the flyout level so providers survive Sandbox (child) open/close cycles and
+   * are immune to React Strict Mode double-mount disposal.
+   */
+  const { onEditorMount: onAlertEditorMount } = useSplitQueryCompletion({
+    baseQuery: uiState.baseQuery,
+    search: services.data.search.search,
+  });
+  const { onEditorMount: onRecoveryEditorMount } = useSplitQueryCompletion({
+    baseQuery: uiState.baseQuery,
+    search: services.data.search.search,
+  });
 
   // ── Form values (submitted to the API) ──
   const defaultValues = useMemo<FormValues>(() => {
@@ -133,14 +148,17 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   const isCreate = mode === 'create';
   const title = isCreate ? 'Create alert rule' : 'Edit alert rule';
 
-  const stepTitles = getStepTitles(uiState.tracking);
-  const isLastStep = uiState.step === stepTitles.length - 1;
+  const steps = getSteps(uiState.tracking);
+  const currentStep = steps[uiState.step];
+  const isLastStep = uiState.step === steps.length - 1;
 
-  // Sync the committed query into RHF whenever the user applies changes from the Sandbox.
-  // When tracking is disabled: sync fullQuery → evaluation.query.base.
-  // When tracking is enabled:  sync baseQuery → evaluation.query.base (the base portion is
-  //   what the rule executor runs; the alert block is stored separately).
-  // timeField and grouping are written directly to RHF by the form components via useFormContext.
+  /*
+   * Sync the committed query into RHF whenever the user applies changes from the Sandbox.
+   * When tracking is disabled: sync fullQuery → evaluation.query.base.
+   * When tracking is enabled:  sync baseQuery → evaluation.query.base (the base portion is
+   *   what the rule executor runs; the alert block is stored separately).
+   * timeField and grouping are written directly to RHF by the form components via useFormContext.
+   */
   useEffect(() => {
     if (!uiState.queryCommitted) return;
     const queryBase = uiState.tracking ? uiState.baseQuery : uiState.fullQuery;
@@ -157,19 +175,13 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
     }
   });
 
-  // Details & Artifacts step index depends on whether tracking is active (inserts Recovery step).
-  const detailsStepIndex = uiState.tracking ? 2 : 1;
-
   const handleNext = useCallback(async () => {
-    // Step 0: require a committed query before advancing
-    if (uiState.step === 0 && !uiState.queryCommitted) return;
-    // Details & Artifacts step: validate the rule name before advancing
-    if (uiState.step === detailsStepIndex) {
-      const valid = await methods.trigger(['metadata.name']);
+    if (currentStep?.validate) {
+      const valid = await currentStep.validate(methods, uiState);
       if (!valid) return;
     }
     dispatch({ type: 'GO_NEXT' });
-  }, [uiState.step, uiState.queryCommitted, detailsStepIndex, methods, dispatch]);
+  }, [currentStep, methods, uiState, dispatch]);
 
   return (
     <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
@@ -225,7 +237,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                     ) : (
                       <EuiToolTip
                         content={
-                          uiState.step === 0 && !uiState.queryCommitted
+                          currentStep?.id === 'alertCondition' && !uiState.queryCommitted
                             ? 'Define a query in the editor before continuing'
                             : undefined
                         }
@@ -235,7 +247,8 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                           iconType="arrowRight"
                           iconSide="right"
                           isDisabled={
-                            uiState.childOpen || (uiState.step === 0 && !uiState.queryCommitted)
+                            uiState.childOpen ||
+                            (currentStep?.id === 'alertCondition' && !uiState.queryCommitted)
                           }
                           onClick={handleNext}
                           data-test-subj="composeDiscoverNext"
@@ -255,6 +268,8 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
               state={uiState}
               dispatch={dispatch}
               tabConfig={getSandboxTabConfig(uiState)}
+              onAlertEditorMount={onAlertEditorMount}
+              onRecoveryEditorMount={onRecoveryEditorMount}
               onClose={() => dispatch({ type: 'CLOSE_CHILD' })}
             />
           )}

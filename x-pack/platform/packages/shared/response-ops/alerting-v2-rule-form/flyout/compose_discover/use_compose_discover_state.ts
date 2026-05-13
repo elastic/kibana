@@ -12,6 +12,7 @@ import type {
   ComposeDiscoverMode,
   QueryTab,
   SandboxTabConfig,
+  StepId,
 } from './types';
 import { guessRecoveryBlock } from './use_heuristic_split';
 
@@ -35,14 +36,15 @@ const createInitialState = (
 });
 
 /**
- * Returns the ordered list of step titles based on current tracking state.
- * When tracking is enabled a Recovery Condition step is inserted after Alert Condition.
+ * Lightweight step-id list for use in the reducer and getSandboxTabConfig.
+ * Mirrors the order in getSteps() (compose_discover_form.tsx) without
+ * importing React components, avoiding a circular dependency.
  */
-export function getStepTitles(tracking: boolean): string[] {
+function getStepIds(tracking: boolean): StepId[] {
   if (tracking) {
-    return ['Alert Condition', 'Recovery Condition', 'Details & Artifacts', 'Notifications'];
+    return ['alertCondition', 'recoveryCondition', 'details', 'notifications'];
   }
-  return ['Alert Condition', 'Details & Artifacts', 'Notifications'];
+  return ['alertCondition', 'details', 'notifications'];
 }
 
 /**
@@ -57,18 +59,17 @@ function defaultTabForConfig(tabConfig: SandboxTabConfig): QueryTab {
 /**
  * Returns the SandboxTabConfig for the current state.
  *
- * step 0 (Alert Condition) + tracking  → base-alert
- * step 1 (Recovery Condition) + custom → base-recovery
- * everything else                      → single
+ * alertCondition    + tracking  → base-alert
+ * recoveryCondition + custom    → base-recovery
+ * everything else               → single
  */
 export function getSandboxTabConfig(state: ComposeDiscoverState): SandboxTabConfig {
   if (!state.tracking) return { type: 'single' };
 
-  const stepTitles = getStepTitles(state.tracking);
-  const currentStep = stepTitles[state.step] ?? '';
+  const stepId = getStepIds(state.tracking)[state.step];
 
-  if (currentStep === 'Alert Condition') return { type: 'base-alert' };
-  if (currentStep === 'Recovery Condition' && state.recoveryType === 'custom') {
+  if (stepId === 'alertCondition') return { type: 'base-alert' };
+  if (stepId === 'recoveryCondition' && state.recoveryType === 'custom') {
     return { type: 'base-recovery' };
   }
   return { type: 'single' };
@@ -129,8 +130,8 @@ function reducer(state: ComposeDiscoverState, action: ComposeDiscoverAction): Co
     case 'SET_STEP':
       return { ...state, step: action.step };
     case 'GO_NEXT': {
-      const steps = getStepTitles(state.tracking);
-      const nextStep = Math.min(state.step + 1, steps.length - 1);
+      const stepCount = getStepIds(state.tracking).length;
+      const nextStep = Math.min(state.step + 1, stepCount - 1);
       return { ...state, step: nextStep, childOpen: false };
     }
     case 'GO_BACK': {

@@ -28,7 +28,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import type { ComposeDiscoverState, ComposeDiscoverAction, RecoveryType } from './types';
+import type {
+  ComposeDiscoverState,
+  ComposeDiscoverAction,
+  RecoveryType,
+  StepDefinition,
+} from './types';
 import type { FormValues } from '../../form/types';
 import { QuerySummary } from './query_summary';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
@@ -407,6 +412,43 @@ function NotificationsStep() {
   );
 }
 
+// ── Step definitions ──────────────────────────────────────────────────────────
+
+export const getSteps = (tracking: boolean): StepDefinition[] => {
+  const steps: StepDefinition[] = [
+    {
+      id: 'alertCondition',
+      title: 'Alert Condition',
+      render: (props) => <AlertConditionStep {...props} />,
+      validate: (_methods, s) => s.queryCommitted,
+    },
+  ];
+
+  if (tracking) {
+    steps.push({
+      id: 'recoveryCondition',
+      title: 'Recovery Condition',
+      render: (props) => <RecoveryConditionStep state={props.state} dispatch={props.dispatch} />,
+    });
+  }
+
+  steps.push(
+    {
+      id: 'details',
+      title: 'Details & Artifacts',
+      render: () => <DetailsAndArtifactsStep />,
+      validate: async (methods) => methods.trigger(['metadata.name']),
+    },
+    {
+      id: 'notifications',
+      title: 'Notifications',
+      render: () => <NotificationsStep />,
+    }
+  );
+
+  return steps;
+};
+
 // ── Main form component ───────────────────────────────────────────────────────
 
 export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({
@@ -414,32 +456,6 @@ export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({
   dispatch,
   services,
 }) => {
-  // Route by step index — avoids silent breakage if step titles change.
-  // When tracking is off: 0=Alert 1=Details 2=Notifications
-  // When tracking is on:  0=Alert 1=Recovery 2=Details 3=Notifications
-  if (!state.tracking) {
-    switch (state.step) {
-      case 0:
-        return <AlertConditionStep state={state} dispatch={dispatch} services={services} />;
-      case 1:
-        return <DetailsAndArtifactsStep />;
-      case 2:
-        return <NotificationsStep />;
-      default:
-        return null;
-    }
-  }
-
-  switch (state.step) {
-    case 0:
-      return <AlertConditionStep state={state} dispatch={dispatch} services={services} />;
-    case 1:
-      return <RecoveryConditionStep state={state} dispatch={dispatch} />;
-    case 2:
-      return <DetailsAndArtifactsStep />;
-    case 3:
-      return <NotificationsStep />;
-    default:
-      return null;
-  }
+  const steps = getSteps(state.tracking);
+  return steps[state.step].render({ state, dispatch, services });
 };
