@@ -134,7 +134,7 @@ export class ManagedWorkflowsService {
         await this.installManagedWorkflowOnce(id, options, registeredPluginId);
         return;
       } catch (error) {
-        if (!isVersionConflictError(error)) {
+        if (!isVersionConflictError(error) || attempt === MAX_MANAGED_INSTALL_RETRIES) {
           throw error;
         }
 
