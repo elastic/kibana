@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type { KibanaResponseFactory, RouteConfigOptions, RouteMethod } from '@kbn/core-http-server';
+import type { Logger } from '@kbn/logging';
 import { BaseAlertingRoute } from './base_alerting_route';
 import { createRouteDependencies } from './test_utils';
 
@@ -34,11 +35,13 @@ class TestRoute extends BaseAlertingRoute {
 
 describe('BaseAlertingRoute', () => {
   let response: jest.Mocked<KibanaResponseFactory>;
+  let logger: jest.Mocked<Logger>;
   let route: TestRoute;
 
   beforeEach(() => {
     const deps = createRouteDependencies();
     response = deps.response;
+    logger = deps.logger;
     route = new TestRoute(deps.ctx);
   });
 
@@ -75,6 +78,27 @@ describe('BaseAlertingRoute', () => {
         error: 'Internal Server Error',
       }),
     });
+  });
+
+  it('logs 5xx errors at error level with the original error attached', async () => {
+    const cause = new TypeError('boom');
+    route.executeFn.mockRejectedValue(cause);
+
+    await route.handle();
+
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('test route error'), {
+      error: cause,
+    });
+    expect(logger.debug).not.toHaveBeenCalled();
+  });
+
+  it('logs 4xx errors at debug level only', async () => {
+    route.executeFn.mockRejectedValue(Boom.notFound('rule not found'));
+
+    await route.handle();
+
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('test route error'));
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   describe('static options merging', () => {
