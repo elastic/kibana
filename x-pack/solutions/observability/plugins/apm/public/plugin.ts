@@ -308,34 +308,13 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       )
     );
 
-    const getApmDataHelper = async () => {
-      const { fetchLatencyOverallTransactionDistribution } = await import(
-        './services/rest/fetch_latency_overall_transaction_distribution'
-      );
-      const { fetchLatencyOverallSpanDistribution } = await import(
-        './services/rest/fetch_latency_overall_span_distribution'
-      );
-      const { hasFleetApmIntegrations } = await import('./tutorial/tutorial_apm_fleet_check');
-
-      const { createCallApmApi } = await import('./services/rest/create_call_apm_api');
-
-      // have to do this here as well in case app isn't mounted yet
-      createCallApmApi(core);
-
-      return {
-        hasFleetApmIntegrations,
-        fetchLatencyOverallTransactionDistribution,
-        fetchLatencyOverallSpanDistribution,
-      };
-    };
-
     this.telemetry.setup({ analytics: core.analytics });
 
     // Registers a status check callback for the tutorial to call and verify if the APM integration is installed on fleet.
     pluginSetupDeps.home?.tutorials.registerCustomStatusCheck(
       'apm_fleet_server_status_check',
       async () => {
-        const { hasFleetApmIntegrations } = await getApmDataHelper();
+        const { hasFleetApmIntegrations } = await import('./tutorial/tutorial_apm_fleet_check');
         return hasFleetApmIntegrations();
       }
     );
@@ -418,7 +397,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     plugins.discoverShared.features.registry.register({
       id: 'observability-traces-fetch-latency-overall-transaction-distribution',
       fetchLatencyOverallTransactionDistribution: async (params, signal) => {
-        const { fetchLatencyOverallTransactionDistribution } = await getApmDataHelper();
+        const { fetchLatencyOverallTransactionDistribution } = await import(
+          './services/rest/fetch_latency_overall_transaction_distribution'
+        );
         return fetchLatencyOverallTransactionDistribution(params, signal);
       },
     });
@@ -426,7 +407,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     plugins.discoverShared.features.registry.register({
       id: 'observability-traces-fetch-latency-overall-span-distribution',
       fetchLatencyOverallSpanDistribution: async (params, signal) => {
-        const { fetchLatencyOverallSpanDistribution } = await getApmDataHelper();
+        const { fetchLatencyOverallSpanDistribution } = await import(
+          './services/rest/fetch_latency_overall_span_distribution'
+        );
         return fetchLatencyOverallSpanDistribution(params, signal);
       },
     });

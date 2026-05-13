@@ -71,6 +71,7 @@ import { getServiceTransactionTypes } from './get_service_transaction_types';
 import { getServicesAlerts } from './get_services/get_service_alerts';
 import { getServicesItems } from './get_services/get_services_items';
 import { getThroughput } from './get_throughput';
+import { getServiceTransactionDetailedStatsPeriods } from './get_services_detailed_statistics/get_service_transaction_detailed_statistics';
 
 const servicesRoute = createApmServerRoute({
   endpoint: routeDefinitions.services.servicesList.endpoint,
