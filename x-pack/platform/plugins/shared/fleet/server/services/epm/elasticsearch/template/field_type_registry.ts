@@ -305,7 +305,7 @@ const aggregateMetricDoubleType: FieldTypeHandler = {
 
 const flattenedType: FieldTypeHandler = {
   staticMapping(field) {
-    const props = { ...getDefaultProperties(field), type: 'flattened' };
+    const props: Properties = { ...getDefaultProperties(field), type: 'flattened' };
     if (field.ignore_above) props.ignore_above = field.ignore_above;
     return props;
   },

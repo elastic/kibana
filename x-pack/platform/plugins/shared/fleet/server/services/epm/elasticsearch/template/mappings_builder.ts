@@ -145,16 +145,18 @@ export class MappingsBuilder {
   private processGroup(context: WalkContext, field: Field): Properties | undefined {
     const handler = fieldTypeRegistry.group;
     const groupResult = handler?.mapGroup?.(field, this, context);
-    if (groupResult === undefined) return undefined;
 
-    const fieldProps = groupResult.fieldProps;
+    // A group with `object_type` (typically inherited from a sibling object via
+    // dedupFields) still emits the dynamic mapping and a placeholder property,
+    // even when the group's children produce no mappings of their own.
+    if (!groupResult && !field.object_type) return undefined;
 
-    // Only propagate hasDynamicTemplateMappings upward when the group produced
-    // no static properties — matching original behavior.
-    if (groupResult.onlyDynamicTemplateMappings) context.hasDynamicTemplateMappings = true;
+    const fieldProps: Properties = groupResult?.fieldProps ?? dynamicObjectParentProps();
 
-    // A group that also has an object_type was merged with an object during deduplication.
-    // Generate the dynamic mapping for the object side too, and mark the group as dynamic.
+    // Propagate hasDynamicTemplateMappings only when the group produced no
+    // static properties — matching original behavior.
+    if (groupResult?.onlyDynamicTemplateMappings) context.hasDynamicTemplateMappings = true;
+
     if (field.object_type) {
       this.addObjectAsDynamicMapping(context, field);
       context.hasDynamicTemplateMappings = true;

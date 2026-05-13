@@ -3402,5 +3402,78 @@ describe('EPM template', () => {
         expect(mapping.ignore_above).toBeUndefined();
       });
     });
+
+    // --- group + object_type (deduplication merge) ---
+    //
+    // dedupFields() in fields/field.ts merges a sibling `object` field carrying
+    // `object_type` into an existing `group` field, so the deduped group ends up
+    // with both `fields` and an inherited `object_type`. The mapper must emit the
+    // dynamic template for that object_type — and the parent object placeholder —
+    // even when the group's `fields` end up producing no static or dynamic
+    // mappings of their own (e.g. empty fields after alias validation removes
+    // dangling aliases, or children that are all runtime fields).
+
+    describe('group + object_type — from dedup merging an object into a group', () => {
+      it('with non-empty static children produces both properties and dynamic template', () => {
+        const result = generateMappings([
+          {
+            name: 'a',
+            type: 'group',
+            object_type: 'keyword',
+            fields: [{ name: 'b', type: 'keyword' }],
+          },
+        ]);
+
+        expect(result.properties).toEqual({
+          a: {
+            type: 'object',
+            dynamic: true,
+            properties: { b: { type: 'keyword', ignore_above: 1024 } },
+          },
+        });
+        expect(result.dynamic_templates).toHaveLength(1);
+        const entry = (result.dynamic_templates as any[])[0];
+        expect(Object.values(entry)[0]).toMatchObject({
+          mapping: { type: 'keyword' },
+          match_mapping_type: 'string',
+          path_match: 'a.*',
+        });
+      });
+
+      it('with empty fields still produces dynamic template and placeholder property', () => {
+        const result = generateMappings([
+          {
+            name: 'a',
+            type: 'group',
+            object_type: 'keyword',
+            fields: [],
+          },
+        ]);
+
+        expect(result.properties).toEqual({ a: { type: 'object', dynamic: true } });
+        expect(result.dynamic_templates).toHaveLength(1);
+        const entry = (result.dynamic_templates as any[])[0];
+        expect(Object.values(entry)[0]).toMatchObject({
+          mapping: { type: 'keyword' },
+          match_mapping_type: 'string',
+          path_match: 'a.*',
+        });
+      });
+
+      it('with only-runtime children still produces dynamic template and placeholder property', () => {
+        const result = generateMappings([
+          {
+            name: 'a',
+            type: 'group',
+            object_type: 'keyword',
+            fields: [{ name: 'b', type: 'keyword', runtime: true }],
+          },
+        ]);
+
+        expect(result.properties).toEqual({ a: { type: 'object', dynamic: true } });
+        expect(result.dynamic_templates).toHaveLength(1);
+        expect(result.runtime).toEqual({ 'a.b': { type: 'keyword' } });
+      });
+    });
   });
 });
