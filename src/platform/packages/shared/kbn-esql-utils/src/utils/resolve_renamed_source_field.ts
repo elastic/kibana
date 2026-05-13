@@ -92,15 +92,6 @@ export function resolveRenamedSourceField(fieldName: string, query: string): str
   const wouldUnwindIntoNonRenameSynthetic = (oldName: string) =>
     fullSummary.newColumns.has(oldName) && !renameOutputNames.has(oldName);
 
-  if (fullSummary.newColumns.has(fieldName) && !renameOutputNames.has(fieldName)) {
-    const fieldTouchesRename = mergedPairs.some(([newName, oldName]) =>
-      [newName, oldName].includes(fieldName)
-    );
-    if (!fieldTouchesRename) {
-      return fieldName;
-    }
-  }
-
   const { root } = Parser.parse(query);
   const renameDefIndex = getLastRenameCommandIndexForNewName(root.commands, fieldName, query);
   if (
