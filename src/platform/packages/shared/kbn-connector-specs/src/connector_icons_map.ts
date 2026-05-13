@@ -177,6 +177,10 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   [
+    '.hubspot',
+    lazy(() => import(/* webpackChunkName: "connectorIconHubspot" */ './specs/hubspot/icon')),
+  ],
+  [
     '.microsoft-teams',
     lazy(
       () =>
