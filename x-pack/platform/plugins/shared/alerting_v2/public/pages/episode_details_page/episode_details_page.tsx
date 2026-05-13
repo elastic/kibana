@@ -448,24 +448,24 @@ export function EpisodeDetailsPage() {
               grow
               paddingSize="none"
               css={css`
+                ${smallMediaQuery} {
+                  [class*='InternalDocViewerTable'] {
+                    display: block;
+                    height: unset;
+                  }
+                }
+
                 ${largeMediaQuery} {
-                  // Surgically pad the doc-viewer table's search-input row
-                  // and the toggles row on the right so the controls don't
-                  // sit flush against the panel edge. Each \`:has()\` is
-                  // anchored on a stable direct child so the rule matches
-                  // the exact EuiFlexItem wrapper and not any ancestor that
-                  // happens to contain the descendant: the search row's
-                  // direct child is an \`EuiFormControlLayout\` (the search
-                  // input wrapper), and the toggles row's direct child is
-                  // an \`EuiFlexGroup\` containing \`EuiSwitch\` items.
-                  [class*='euiFlexItem']:has(
-                      > [class*='euiFormControlLayout']
-                        [data-test-subj='unifiedDocViewerFieldsSearchInput']
-                    ),
-                  [class*='euiFlexItem']:has(
-                      > [class*='euiFlexGroup'] > [class*='euiFlexItem'] > [class*='euiSwitch']
-                    ) {
-                    padding-right: ${euiTheme.size.s};
+                  // The doc-viewer table uses a fixed height by default; set
+                  // it to 100% so it fills the available flex height instead
+                  // of measuring against \`window.innerHeight\`.
+                  [class*='InternalDocViewerTable'] {
+                    height: 100%;
+
+                    & > :nth-child(2),
+                    & > :nth-child(4) {
+                      padding-right: ${euiTheme.size.s};
+                    }
                   }
                 }
               `}
