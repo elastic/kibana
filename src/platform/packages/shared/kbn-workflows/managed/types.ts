@@ -13,9 +13,11 @@ export interface ManagedWorkflowManagement {
   enablement: 'enforced' | 'restorable';
 }
 
-export type ManagedWorkflowTemplateValues = object;
+export interface ManagedWorkflowTemplateValues {
+  [key: string]: unknown;
+}
 
-type ManagedWorkflowDefinitionSource<TValues extends object> =
+type ManagedWorkflowDefinitionSource<TValues extends ManagedWorkflowTemplateValues> =
   | {
       yaml: string;
       yamlTemplate?: never;
@@ -25,7 +27,9 @@ type ManagedWorkflowDefinitionSource<TValues extends object> =
       yamlTemplate(values: TValues): string;
     };
 
-export type ManagedWorkflowDefinition<TValues extends object = ManagedWorkflowTemplateValues> = {
+export type ManagedWorkflowDefinition<
+  TValues extends ManagedWorkflowTemplateValues = ManagedWorkflowTemplateValues
+> = {
   id: string;
   pluginId: string;
   version: number;

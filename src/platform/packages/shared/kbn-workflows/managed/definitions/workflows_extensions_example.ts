@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ManagedWorkflowDefinition } from '../types';
+import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../types';
 
 export const EXAMPLE_MANAGED_WORKFLOW_ID = 'system-example-greeting';
 
-export interface ExampleManagedWorkflowTemplateValues {
+export interface ExampleManagedWorkflowTemplateValues extends ManagedWorkflowTemplateValues {
   recipient: string;
 }
 
@@ -22,10 +22,7 @@ export const EXAMPLE_MANAGED_WORKFLOW = {
   yamlTemplate: ({ recipient }) => `name: Example Greeting - ${recipient}
 enabled: true
 triggers:
-  - type: workflows.failed
-    on:
-      # Filter the subscription by using KQL, use event.* to target event properties
-      condition: not event.workflow.isErrorHandler:true
+  - type: manual
 steps:
   - name: greet
     type: console
