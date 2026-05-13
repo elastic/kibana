@@ -116,7 +116,7 @@ export const scheduleRequestSchema = schema.object(
   },
   {
     validate: validateScheduleV1,
-    meta: { id: 'snooze_schedule_request' },
+    meta: { id: 'schedule_request' },
   }
 );
 
@@ -193,5 +193,5 @@ export const scheduleResponseSchema = schema.object(
       })
     ),
   },
-  { meta: { id: 'snooze_schedule_response' } }
+  { meta: { id: 'schedule_response' } }
 );
