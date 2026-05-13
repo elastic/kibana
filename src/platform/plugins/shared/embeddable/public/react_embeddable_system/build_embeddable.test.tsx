@@ -11,6 +11,7 @@ import React from 'react';
 import type { EmbeddableFactory } from './types';
 import { buildEmbeddable } from './build_embeddable';
 import { PhaseTracker } from './phase_tracker';
+import { of } from 'rxjs';
 
 const phaseTracker = new PhaseTracker(performance.now());
 
@@ -22,6 +23,7 @@ const testEmbeddableFactory: EmbeddableFactory<{ name: string; bork: string }> =
         name: initialState.name,
         bork: initialState.bork,
       }),
+      anyStateChange$: of(),
       applySerializedState: jest.fn(),
     });
     return {

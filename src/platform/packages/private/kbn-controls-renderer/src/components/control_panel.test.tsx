@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 
 import { OPTIONS_LIST_CONTROL, DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
 import {
@@ -55,6 +55,7 @@ const mockOptionsListFactory: EmbeddableFactory<{ type: typeof OPTIONS_LIST_CONT
       serializeState: () => ({
         type: OPTIONS_LIST_CONTROL,
       }),
+      anyStateChange$: of(),
       applySerializedState: () => undefined,
     });
     return {

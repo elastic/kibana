@@ -14,6 +14,7 @@ import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { EuiCodeBlock, EuiPanel, EuiTitle } from '@elastic/eui';
 import { FILTER_DEBUGGER_EMBEDDABLE_ID } from './constants';
+import { of } from 'rxjs';
 
 export type Api = DefaultEmbeddableApi<{}>;
 
@@ -21,6 +22,7 @@ export const factory: EmbeddableFactory<{}, Api> = {
   type: FILTER_DEBUGGER_EMBEDDABLE_ID,
   buildEmbeddable: async ({ finalizeApi, parentApi }) => {
     const api = finalizeApi({
+      anyStateChange$: of(),
       serializeState: () => ({}),
       applySerializedState: () => undefined,
     });
