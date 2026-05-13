@@ -31,7 +31,6 @@ type StepInput =
         description?: string;
         user_id?: string;
         references?: string[];
-        permissions?: string[];
       }>;
     }
   | { originId: string; attachmentType: string; action: 'delete' };

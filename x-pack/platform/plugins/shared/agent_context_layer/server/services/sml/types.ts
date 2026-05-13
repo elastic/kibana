@@ -105,6 +105,40 @@ export interface SmlTypeDefinition {
   ) => Promise<AttachmentInput<string, unknown> | undefined>;
 
   /**
+   * Resolve "who can see chunks for this `originId`, and in which spaces?"
+   *
+   * This hook is the **sole** source of truth for chunk auth metadata when
+   * chunks are written via direct mode (e.g. through the SML index-attachment
+   * workflow step). The indexer:
+   *
+   *   1. Calls this hook with the caller's current `spaceId`.
+   *   2. Rejects the write when the hook returns `undefined` (origin doesn't
+   *      exist or isn't accessible from `spaceId` — this is also how
+   *      cross-space writes are prevented).
+   *   3. Tags every produced chunk with the returned `spaces` (overwriting
+   *      whatever the caller passed) and `permissions` (overwriting any
+   *      per-chunk values the caller may have supplied).
+   *
+   * Implementations should:
+   *   - Be cheap (one saved-object `get` or equivalent).
+   *   - Return `undefined` (rather than throwing) when the origin can't be
+   *     resolved — the indexer interprets that as "deny this write".
+   *   - Only return `spaces` that include `spaceId`, otherwise the indexer
+   *     will reject the write as cross-space.
+   *
+   * Resolved mode (crawler) does **not** call this hook — it uses the chunks
+   * and permissions returned by `getSmlData`, and the spaces returned by
+   * `list`. The hook is therefore optional: types that are never written via
+   * direct mode (e.g. crawler-only types) can omit it, in which case any
+   * attempt to direct-write the type is rejected.
+   */
+  resolveOriginAccess?: (
+    originId: string,
+    context: SmlContext,
+    spaceId: string
+  ) => Promise<{ spaces: string[]; permissions: string[] } | undefined>;
+
+  /**
    * Optional: custom crawl interval for the crawler.
    * Defaults to '10m' if not provided.
    */
@@ -243,10 +277,13 @@ export interface SmlService {
    * Index a single attachment (event-driven).
    *
    * Behavior depends on the effective `source`:
-   * - `direct`: caller supplies `chunks`. The indexer wipes any pre-existing
-   *   chunks for `originId` (regardless of source) and writes the supplied
-   *   chunks tagged with `source: 'direct'`. For `action: 'delete'` it wipes
-   *   all chunks for the origin.
+   * - `direct`: caller supplies `chunks` (and **must** supply `spaceId`).
+   *   The indexer calls the type's `resolveOriginAccess(originId, ctx,
+   *   spaceId)` hook to determine the effective `spaces` and `permissions`,
+   *   wipes any pre-existing chunks for `originId` (regardless of source),
+   *   and writes the supplied chunks tagged with `source: 'direct'`. For
+   *   `action: 'delete'` it wipes all chunks for the origin after the same
+   *   access check.
    * - `resolved`: the indexer calls `getSmlData(originId)` via the registered
    *   type. If chunks tagged `source: 'direct'` already exist for this origin,
    *   the operation is **skipped** to preserve the user's override.
@@ -258,7 +295,18 @@ export interface SmlService {
     originId: string;
     attachmentType: string;
     action: SmlIndexAction;
+    /**
+     * Target spaces for **resolved** writes (typically supplied by the
+     * crawler from `SmlListItem.spaces`). Ignored in direct mode — the
+     * effective spaces are read from `resolveOriginAccess` instead.
+     */
     spaces: string[];
+    /**
+     * Caller's current space. Required for **direct** writes — used to call
+     * `resolveOriginAccess` and to reject cross-space attempts. Optional /
+     * unused for resolved writes.
+     */
+    spaceId?: string;
     esClient: ElasticsearchClient;
     savedObjectsClient: SavedObjectsClientContract;
     logger: Logger;

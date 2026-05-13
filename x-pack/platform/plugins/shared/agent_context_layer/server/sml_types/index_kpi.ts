@@ -27,6 +27,8 @@ export const INDEX_KPI_SML_TYPE = 'index_kpi';
  *   - `getSmlData`: returns `undefined` (no resolver path; direct chunks win).
  *   - `toAttachment`: returns `undefined` (agents see the chunk content from
  *     semantic search; no dedicated attachment renderer is registered yet).
+ *   - `resolveOriginAccess`: scopes each KPI to the caller's space with no
+ *     additional permission requirements (see notes below).
  *
  * These hooks are mandatory on `SmlTypeDefinition`; keeping them no-op is the
  * canonical pattern for workflow-fed types.
@@ -41,4 +43,26 @@ export const indexKpiSmlType: SmlTypeDefinition = {
   getSmlData: async () => undefined,
 
   toAttachment: async () => undefined,
+
+  /**
+   * Direct-mode access for `index_kpi`.
+   *
+   * `index_kpi` origins are synthetic (`<indexPattern>::<kpiName>`) — there
+   * is no underlying saved object to look up. We therefore scope each KPI
+   * to the **caller's current space** and require no extra permissions
+   * beyond the platform-level `agentContextLayer:write` check that the
+   * start contract already enforces.
+   *
+   * Consequences:
+   *  - Cross-space write protection is naturally enforced: the indexer
+   *    only writes chunks tagged with the caller's space, so a workflow in
+   *    space `default` can never produce a chunk visible in space `marketing`.
+   *  - Per-index read permissions are NOT checked here. Tightening this
+   *    (e.g. requiring `read` on the underlying index pattern) is a future
+   *    enhancement; the current model trusts space membership.
+   */
+  resolveOriginAccess: async (_originId, _context, spaceId) => ({
+    spaces: [spaceId],
+    permissions: [],
+  }),
 };

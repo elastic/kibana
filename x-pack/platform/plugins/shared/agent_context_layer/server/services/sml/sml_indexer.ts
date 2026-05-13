@@ -28,16 +28,25 @@ export interface SmlIndexer {
    *
    * The operation runs in one of two modes:
    *  - **`direct`**: caller supplies `chunks` (or sets `source: 'direct'`
-   *    explicitly). The indexer wipes any pre-existing chunks for `originId`
-   *    (regardless of source) and writes the supplied chunks tagged with
-   *    `source: 'direct'`. For `action: 'delete'` all chunks for the origin
-   *    are wiped.
+   *    explicitly). The indexer calls the registered type's
+   *    `resolveOriginAccess(originId, ctx, spaceId)` hook to determine the
+   *    effective `spaces` and `permissions` for the write. The hook also
+   *    acts as the cross-space gate: if it returns `undefined`, or if
+   *    `spaceId` is not in the returned `spaces`, the operation is rejected
+   *    with {@link SmlAccessError}. On success, the indexer wipes any
+   *    pre-existing chunks for `originId` (regardless of source) and writes
+   *    the supplied chunks tagged with `source: 'direct'`, the resolved
+   *    `spaces`, and the resolved per-chunk `permissions`. For
+   *    `action: 'delete'` all chunks for the origin are wiped after the
+   *    same access check.
    *  - **`resolved`**: caller omits `chunks` (or sets `source: 'resolved'`).
    *    The indexer looks up the registered type, calls its `getSmlData(originId)`
    *    hook, and writes the result tagged with `source: 'resolved'`. If chunks
    *    tagged `source: 'direct'` already exist for this origin, the operation
    *    is **skipped** to preserve the user's override. The same protection
-   *    applies to `action: 'delete'` in resolved mode.
+   *    applies to `action: 'delete'` in resolved mode. `resolveOriginAccess`
+   *    is NOT consulted in resolved mode — the crawler is trusted, and
+   *    `spaces`/`permissions` come from the caller / `getSmlData`.
    *
    * `source` is inferred when not provided: `'direct'` if `chunks` is set,
    * otherwise `'resolved'`.
@@ -49,7 +58,17 @@ export interface SmlIndexer {
     originId: string;
     attachmentType: string;
     action: SmlIndexAction;
+    /**
+     * Target spaces for resolved writes. Ignored in direct mode — the
+     * effective spaces come from `resolveOriginAccess`.
+     */
     spaces: string[];
+    /**
+     * Caller's current space. Required for direct mode (used to call
+     * `resolveOriginAccess` and validate cross-space writes). Optional /
+     * unused for resolved writes.
+     */
+    spaceId?: string;
     esClient: ElasticsearchClient;
     savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
     logger: Logger;
@@ -58,6 +77,22 @@ export interface SmlIndexer {
     /** Explicit source; defaults to inferred (direct if chunks else resolved). */
     source?: SmlDocumentSource;
   }) => Promise<void>;
+}
+
+/**
+ * Error thrown by the indexer when a direct-mode write is rejected for an
+ * authorization reason (origin doesn't resolve, type doesn't support direct
+ * writes, caller is writing into a space the origin doesn't live in, ...).
+ *
+ * Separate from generic indexing failures so upstream surfaces (route
+ * handlers, workflow steps) can map it to a 403/forbidden-style response
+ * rather than a 500.
+ */
+export class SmlAccessError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'SmlAccessError';
+  }
 }
 
 export const createSmlIndexer = ({ registry, logger }: SmlIndexerDeps): SmlIndexer => {
@@ -78,6 +113,7 @@ class SmlIndexerImpl implements SmlIndexer {
     attachmentType,
     action,
     spaces,
+    spaceId,
     esClient,
     savedObjectsClient,
     logger: contextLogger,
@@ -88,6 +124,7 @@ class SmlIndexerImpl implements SmlIndexer {
     attachmentType: string;
     action: SmlIndexAction;
     spaces: string[];
+    spaceId?: string;
     esClient: ElasticsearchClient;
     savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
     logger: Logger;
@@ -101,6 +138,35 @@ class SmlIndexerImpl implements SmlIndexer {
         ', '
       )}]`
     );
+
+    // Direct-mode access gate.
+    //
+    // For every direct-mode operation (create / update / delete / empty
+    // chunks) we resolve the origin's access metadata via the type's
+    // `resolveOriginAccess` hook BEFORE touching the index. This is the
+    // only point at which:
+    //   - cross-space writes are rejected (callerSpaceId must be one of
+    //     the origin's spaces, or `*`),
+    //   - per-chunk `permissions` and write `spaces` are derived from the
+    //     origin's authoritative metadata (overriding whatever the caller
+    //     supplied).
+    //
+    // Resolved-mode (crawler) writes skip this — the crawler is trusted
+    // and supplies spaces from `SmlListItem` + permissions from `getSmlData`.
+    let effectiveSpaces: string[] = spaces;
+    let effectivePermissions: string[] | undefined;
+    if (source === 'direct') {
+      const access = await this.resolveDirectAccess({
+        originId,
+        attachmentType,
+        spaceId,
+        esClient,
+        savedObjectsClient,
+        contextLogger,
+      });
+      effectiveSpaces = access.spaces;
+      effectivePermissions = access.permissions;
+    }
 
     if (action === 'delete') {
       if (source === 'resolved') {
@@ -201,8 +267,12 @@ class SmlIndexerImpl implements SmlIndexer {
         content: chunk.content,
         created_at: now,
         updated_at: now,
-        spaces,
-        permissions: chunk.permissions ?? [],
+        spaces: effectiveSpaces,
+        // In direct mode `effectivePermissions` is the authoritative value
+        // returned by `resolveOriginAccess` — it overrides any per-chunk
+        // permissions the caller may have supplied. In resolved mode we
+        // keep `chunk.permissions` (set by the type's `getSmlData` hook).
+        permissions: effectivePermissions ?? chunk.permissions ?? [],
         source,
       };
       if (chunk.description !== undefined) {
@@ -253,6 +323,91 @@ class SmlIndexerImpl implements SmlIndexer {
         throw error;
       }
     }
+  }
+
+  /**
+   * Run the direct-mode access gate for a write/delete.
+   *
+   * Resolves the origin's authoritative `{ spaces, permissions }` via the
+   * registered type's `resolveOriginAccess` hook. Throws
+   * {@link SmlAccessError} when:
+   *   - `spaceId` wasn't provided (direct mode always needs a caller space),
+   *   - the type isn't registered,
+   *   - the type doesn't implement `resolveOriginAccess` (it isn't direct-
+   *     writable by design),
+   *   - the hook returns `undefined` (origin doesn't exist or isn't reachable
+   *     from `spaceId`),
+   *   - the returned `spaces` don't include `spaceId` (and aren't `['*']`).
+   */
+  private async resolveDirectAccess({
+    originId,
+    attachmentType,
+    spaceId,
+    esClient,
+    savedObjectsClient,
+    contextLogger,
+  }: {
+    originId: string;
+    attachmentType: string;
+    spaceId: string | undefined;
+    esClient: ElasticsearchClient;
+    savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
+    contextLogger: Logger;
+  }): Promise<{ spaces: string[]; permissions: string[] }> {
+    if (!spaceId) {
+      throw new SmlAccessError(
+        `Direct-mode write for origin '${originId}' requires a spaceId — refusing to index without a caller space.`
+      );
+    }
+    const definition = this.registry.get(attachmentType);
+    if (!definition) {
+      throw new SmlAccessError(
+        `Unknown SML attachment type '${attachmentType}' for origin '${originId}'`
+      );
+    }
+    if (!definition.resolveOriginAccess) {
+      throw new SmlAccessError(
+        `SML type '${attachmentType}' is not direct-writable (no resolveOriginAccess hook)`
+      );
+    }
+
+    const context: SmlContext = {
+      esClient,
+      savedObjectsClient: savedObjectsClient as SavedObjectsClientContract,
+      logger: contextLogger,
+    };
+
+    let access: { spaces: string[]; permissions: string[] } | undefined;
+    try {
+      access = await definition.resolveOriginAccess(originId, context, spaceId);
+    } catch (error) {
+      // Treat hook errors as a deny — the type's resolver failed, we can't
+      // safely auto-derive permissions, so reject the write.
+      this.logger.warn(
+        `SML indexer: resolveOriginAccess threw for origin '${originId}' (type '${attachmentType}'): ${
+          (error as Error).message
+        } — denying direct write`
+      );
+      throw new SmlAccessError(
+        `Failed to resolve access for origin '${originId}' of type '${attachmentType}': ${
+          (error as Error).message
+        }`
+      );
+    }
+
+    if (!access) {
+      throw new SmlAccessError(
+        `Origin '${originId}' of type '${attachmentType}' is not accessible from space '${spaceId}'`
+      );
+    }
+    if (!access.spaces.includes(spaceId) && !access.spaces.includes('*')) {
+      throw new SmlAccessError(
+        `Cross-space write blocked: origin '${originId}' of type '${attachmentType}' belongs to spaces [${access.spaces.join(
+          ', '
+        )}] which does not include caller space '${spaceId}'`
+      );
+    }
+    return access;
   }
 
   /**

@@ -33,7 +33,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
     privileges: {
       all: {
         app: [AGENT_CONTEXT_LAYER_APP_ID],
-        api: [apiPrivileges.readAgentContextLayer],
+        api: [apiPrivileges.readAgentContextLayer, apiPrivileges.writeAgentContextLayer],
         catalogue: [AGENT_CONTEXT_LAYER_APP_ID],
         // The base privileges grant API access to read/write SML data; the
         // management page itself is gated by the independent

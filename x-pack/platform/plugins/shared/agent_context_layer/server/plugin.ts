@@ -7,6 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { apiPrivileges } from '../common/features';
 import type {
   AgentContextLayerPluginSetup,
   AgentContextLayerPluginStart,
@@ -151,6 +152,8 @@ export class AgentContextLayerPlugin
       this.logger.error(`Failed to schedule SML crawler tasks: ${error.message}`);
     });
 
+    const securityAuthz = security?.authz;
+
     const startContract: AgentContextLayerPluginStart = {
       search: smlService.search,
       checkItemsAccess: smlService.checkItemsAccess,
@@ -158,6 +161,26 @@ export class AgentContextLayerPlugin
       getTypeDefinition: smlService.getTypeDefinition,
       resolveSmlAttachItems: (params) => resolveSmlAttachItems({ ...params, sml: smlService }),
       indexAttachment: async (params) => {
+        // Gate every user-driven write on the `sml:write` API privilege.
+        // The crawler bypasses this start contract (it talks to the
+        // internal SmlService directly as the Kibana service account),
+        // so internal background indexing is unaffected.
+        if (securityAuthz) {
+          const checkPrivileges = securityAuthz.checkPrivilegesDynamicallyWithRequest(
+            params.request
+          );
+          const { hasAllRequested } = await checkPrivileges({
+            kibana: [
+              securityAuthz.actions.api.get(apiPrivileges.writeAgentContextLayer),
+            ],
+          });
+          if (!hasAllRequested) {
+            throw new Error(
+              `Forbidden: caller is missing the '${apiPrivileges.writeAgentContextLayer}' privilege required to index SML attachments.`
+            );
+          }
+        }
+
         const soClient = savedObjects.getScopedClient(params.request, {
           ...(params.includedHiddenTypes?.length
             ? { includedHiddenTypes: params.includedHiddenTypes }
@@ -169,7 +192,12 @@ export class AgentContextLayerPlugin
           originId: params.originId,
           attachmentType: params.attachmentType,
           action: params.action,
+          // For direct mode (chunks supplied) the indexer derives the
+          // effective spaces from `resolveOriginAccess` and ignores
+          // this value, so passing the caller's space here is just a
+          // sensible default for resolved-mode fallbacks.
           spaces: [spaceId],
+          spaceId,
           esClient: elasticsearch.client.asInternalUser,
           savedObjectsClient: soClient,
           logger: this.logger.get('sml'),

@@ -29,6 +29,16 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
  */
 export const SmlIndexAttachmentStepTypeId = 'agentContextLayer.smlIndexAttachment';
 
+/**
+ * Per-chunk input for the step.
+ *
+ * `permissions` is intentionally **not** exposed here. The SML indexer
+ * derives the effective `permissions` (and `spaces`) for every chunk from
+ * the registered type's `resolveOriginAccess(originId, ctx, spaceId)` hook,
+ * which is the sole source of truth for chunk authorization. Letting
+ * workflow authors set permissions directly would let a workflow forge
+ * privileges or bypass the cross-space write guard.
+ */
 const ChunkSchema = z.object({
   type: z.string().min(1).describe('Chunk type (e.g., "visualization", "dashboard").'),
   title: z.string().min(1).describe('Display title for the chunk.'),
@@ -36,10 +46,6 @@ const ChunkSchema = z.object({
   description: z.string().optional().describe('Optional longer summary indexed as semantic_text.'),
   user_id: z.string().optional().describe('Optional owner/last-modifier user id.'),
   references: z.array(z.string()).optional().describe('Optional list of referenced SML chunk ids.'),
-  permissions: z
-    .array(z.string())
-    .optional()
-    .describe('Optional Kibana privilege strings required to view the chunk later.'),
 });
 
 /**

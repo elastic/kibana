@@ -114,6 +114,7 @@ class SmlServiceImpl implements SmlServiceInstance {
           attachmentType: params.attachmentType,
           action: params.action,
           spaces: params.spaces,
+          spaceId: params.spaceId,
           esClient: params.esClient,
           savedObjectsClient: params.savedObjectsClient,
           logger: params.logger,

@@ -57,6 +57,10 @@ export const createSmlIndexAttachmentStepDefinition = ({
             source: 'direct',
           });
         } else {
+          // We deliberately do NOT forward `permissions` — the indexer
+          // derives the authoritative `permissions` (and `spaces`) for each
+          // chunk from the registered type's `resolveOriginAccess` hook.
+          // See `SmlTypeDefinition.resolveOriginAccess` for the rationale.
           const chunks: SmlChunk[] = input.chunks.map((chunk) => ({
             type: chunk.type,
             title: chunk.title,
@@ -64,7 +68,6 @@ export const createSmlIndexAttachmentStepDefinition = ({
             ...(chunk.description !== undefined ? { description: chunk.description } : {}),
             ...(chunk.user_id !== undefined ? { user_id: chunk.user_id } : {}),
             ...(chunk.references !== undefined ? { references: chunk.references } : {}),
-            ...(chunk.permissions !== undefined ? { permissions: chunk.permissions } : {}),
           }));
 
           await startContract.indexAttachment({

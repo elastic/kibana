@@ -54,6 +54,15 @@ const createMockSmlTypeDefinition = (
   list: jest.fn(),
   getSmlData: jest.fn(),
   toAttachment: jest.fn(),
+  // Permissive default: grants access in the caller's space with no extra
+  // permission requirements. Individual tests override this when they need
+  // to exercise rejection paths (missing hook, cross-space, etc).
+  resolveOriginAccess: jest
+    .fn()
+    .mockImplementation(async (_id: string, _ctx: unknown, spaceId: string) => ({
+      spaces: [spaceId],
+      permissions: [],
+    })),
   ...overrides,
 });
 
@@ -70,6 +79,7 @@ const createIndexerParams = (
     attachmentType: string;
     action: 'create' | 'update' | 'delete';
     spaces: string[];
+    spaceId: string;
     esClient: jest.Mocked<ElasticsearchClient>;
     logger: ReturnType<typeof createMockLogger>;
   }> = {}
@@ -78,6 +88,10 @@ const createIndexerParams = (
   attachmentType: 'lens',
   action: 'create' as const,
   spaces: ['default'],
+  // `spaceId` is required by the indexer's direct-mode access gate.
+  // Resolved-mode tests don't read it, so providing a default here keeps
+  // both modes simple.
+  spaceId: 'default',
   esClient: createMockEsClient(),
   savedObjectsClient: {} as unknown as ISavedObjectsRepository,
   logger: createMockLogger(),
@@ -415,14 +429,21 @@ describe('createSmlIndexer', () => {
     });
 
     describe('direct mode (caller-supplied chunks)', () => {
-      it('uses caller-supplied chunks and does NOT call getSmlData', async () => {
+      it('overrides caller-supplied spaces/permissions with values from resolveOriginAccess', async () => {
         const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
         const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
         (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
 
         const getSmlData = jest.fn();
+        // resolveOriginAccess is the authoritative source: it grants the
+        // caller's space and a fixed permission, ignoring whatever the
+        // caller passed.
+        const resolveOriginAccess = jest.fn().mockResolvedValue({
+          spaces: ['default'],
+          permissions: ['saved_object:dashboard/get'],
+        });
         const registry = createMockRegistry(
-          createMockSmlTypeDefinition({ id: 'lens', getSmlData })
+          createMockSmlTypeDefinition({ id: 'lens', getSmlData, resolveOriginAccess })
         );
         const logger = createMockLogger();
         const esClient = createMockEsClient();
@@ -433,7 +454,10 @@ describe('createSmlIndexer', () => {
             originId: 'direct-1',
             attachmentType: 'lens',
             action: 'create',
+            // Caller TRIES to write to a space that doesn't match the
+            // origin — must be ignored in favor of resolveOriginAccess.
             spaces: ['s1'],
+            spaceId: 'default',
             esClient,
             logger,
           }),
@@ -442,12 +466,19 @@ describe('createSmlIndexer', () => {
               type: 'lens',
               title: 'Direct title',
               content: 'Direct content',
+              // Caller also tries to set its own permissions — must be
+              // overridden by the hook.
               permissions: ['perm-x'],
             },
           ],
         });
 
         expect(getSmlData).not.toHaveBeenCalled();
+        expect(resolveOriginAccess).toHaveBeenCalledWith(
+          'direct-1',
+          expect.objectContaining({ esClient }),
+          'default'
+        );
         expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
         expect(bulkMock).toHaveBeenCalledTimes(1);
         const op = bulkMock.mock.calls[0][0].operations[0];
@@ -460,37 +491,218 @@ describe('createSmlIndexer', () => {
           content: 'Direct content',
           created_at: expect.any(String),
           updated_at: expect.any(String),
-          spaces: ['s1'],
-          permissions: ['perm-x'],
+          // Hook-derived, not caller-supplied.
+          spaces: ['default'],
+          permissions: ['saved_object:dashboard/get'],
           source: 'direct',
         });
       });
 
-      it('indexes direct chunks even when the type is NOT registered', async () => {
-        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
-        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
-        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
-
+      it('rejects direct writes for unregistered types', async () => {
         const registry = createMockRegistry(undefined);
         registry.list.mockReturnValue([]);
         const logger = createMockLogger();
         const esClient = createMockEsClient();
         const indexer = createSmlIndexer({ registry, logger });
 
+        await expect(
+          indexer.indexAttachment({
+            ...createIndexerParams({
+              originId: 'direct-2',
+              attachmentType: 'unregistered',
+              action: 'create',
+              esClient,
+              logger,
+            }),
+            chunks: [{ type: 'unregistered', title: 't', content: 'c' }],
+          })
+        ).rejects.toThrow(/Unknown SML attachment type/);
+        expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+      });
+
+      it('rejects direct writes when the type does not implement resolveOriginAccess', async () => {
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({
+            id: 'lens',
+            getSmlData: jest.fn(),
+            resolveOriginAccess: undefined,
+          })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await expect(
+          indexer.indexAttachment({
+            ...createIndexerParams({
+              originId: 'direct-3',
+              attachmentType: 'lens',
+              action: 'create',
+              esClient,
+              logger,
+            }),
+            chunks: [{ type: 'lens', title: 't', content: 'c' }],
+          })
+        ).rejects.toThrow(/not direct-writable/);
+      });
+
+      it('rejects direct writes when no caller space is provided', async () => {
+        const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await expect(
+          indexer.indexAttachment({
+            ...createIndexerParams({
+              originId: 'direct-4',
+              attachmentType: 'lens',
+              action: 'create',
+              esClient,
+              logger,
+            }),
+            spaceId: undefined,
+            chunks: [{ type: 'lens', title: 't', content: 'c' }],
+          })
+        ).rejects.toThrow(/requires a spaceId/);
+      });
+
+      it('rejects direct writes when resolveOriginAccess returns undefined', async () => {
+        const resolveOriginAccess = jest.fn().mockResolvedValue(undefined);
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', resolveOriginAccess })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await expect(
+          indexer.indexAttachment({
+            ...createIndexerParams({
+              originId: 'direct-5',
+              attachmentType: 'lens',
+              action: 'create',
+              esClient,
+              logger,
+            }),
+            chunks: [{ type: 'lens', title: 't', content: 'c' }],
+          })
+        ).rejects.toThrow(/not accessible from space/);
+      });
+
+      it('rejects cross-space writes when caller space is not in the origin spaces', async () => {
+        const resolveOriginAccess = jest.fn().mockResolvedValue({
+          spaces: ['other-space'],
+          permissions: [],
+        });
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', resolveOriginAccess })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await expect(
+          indexer.indexAttachment({
+            ...createIndexerParams({
+              originId: 'direct-6',
+              attachmentType: 'lens',
+              action: 'create',
+              spaceId: 'default',
+              esClient,
+              logger,
+            }),
+            chunks: [{ type: 'lens', title: 't', content: 'c' }],
+          })
+        ).rejects.toThrow(/Cross-space write blocked/);
+      });
+
+      it('accepts writes when the origin lives in multiple spaces including the caller space', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const resolveOriginAccess = jest.fn().mockResolvedValue({
+          spaces: ['default', 'marketing'],
+          permissions: ['perm'],
+        });
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', resolveOriginAccess })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
         await indexer.indexAttachment({
           ...createIndexerParams({
-            originId: 'direct-2',
-            attachmentType: 'unregistered',
+            originId: 'direct-7',
+            attachmentType: 'lens',
             action: 'create',
+            spaceId: 'default',
             esClient,
             logger,
           }),
-          chunks: [{ type: 'unregistered', title: 't', content: 'c' }],
+          chunks: [{ type: 'lens', title: 't', content: 'c' }],
         });
 
-        expect(registry.get).not.toHaveBeenCalled();
-        expect(logger.warn).not.toHaveBeenCalledWith(expect.stringContaining('type definition'));
-        expect(bulkMock).toHaveBeenCalledTimes(1);
+        const op = bulkMock.mock.calls[0][0].operations[0];
+        expect(op.index.document.spaces).toEqual(['default', 'marketing']);
+        expect(op.index.document.permissions).toEqual(['perm']);
+      });
+
+      it('accepts writes when the origin spaces include the wildcard', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const resolveOriginAccess = jest.fn().mockResolvedValue({
+          spaces: ['*'],
+          permissions: [],
+        });
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', resolveOriginAccess })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment({
+          ...createIndexerParams({
+            originId: 'direct-8',
+            attachmentType: 'lens',
+            action: 'create',
+            spaceId: 'default',
+            esClient,
+            logger,
+          }),
+          chunks: [{ type: 'lens', title: 't', content: 'c' }],
+        });
+
+        const op = bulkMock.mock.calls[0][0].operations[0];
+        expect(op.index.document.spaces).toEqual(['*']);
+      });
+
+      it('treats a thrown resolveOriginAccess as a deny', async () => {
+        const resolveOriginAccess = jest.fn().mockRejectedValue(new Error('boom'));
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', resolveOriginAccess })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await expect(
+          indexer.indexAttachment({
+            ...createIndexerParams({
+              originId: 'direct-9',
+              attachmentType: 'lens',
+              action: 'create',
+              esClient,
+              logger,
+            }),
+            chunks: [{ type: 'lens', title: 't', content: 'c' }],
+          })
+        ).rejects.toThrow(/Failed to resolve access/);
       });
 
       it('treats an empty chunks array as a soft delete', async () => {
