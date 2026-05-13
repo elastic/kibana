@@ -8,7 +8,7 @@
  */
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, euiPaletteColorBlind } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { TraceMetricsProvider } from './context/trace_metrics_context';
 import { useEsqlQueryInfo } from '../../../hooks/use_esql_query_info';
 import { ErrorRateChart } from './error_rate';
@@ -17,6 +17,7 @@ import { ThroughputChart } from './throughput';
 import { ChartsGrid } from '../../charts_grid';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { extractUsedMetadataFields } from '../../../utils';
+import { TraceBreakdownSelector } from './trace_breakdown_selector';
 
 export const chartPalette = euiPaletteColorBlind({ rotations: 2 });
 
@@ -55,11 +56,32 @@ function TraceMetricsGrid({
     });
   }, [esqlQuery.metadataFields, filters]);
 
+  const [breakdownField, setBreakdownField] = useState<string | undefined>();
+
+  const traceDimensions = useMemo(
+    () => [
+      'service.name',
+      'service.environment',
+      'transaction.type',
+      'transaction.name',
+      'span.name',
+      'http.response.status_code',
+    ],
+    []
+  );
+
   const toolbar = useMemo(
     () => ({
       toggleActions: renderToggleActions(),
+      leftSide: (
+        <TraceBreakdownSelector
+          fields={traceDimensions}
+          selectedField={breakdownField}
+          onChange={setBreakdownField}
+        />
+      ),
     }),
-    [renderToggleActions]
+    [renderToggleActions, traceDimensions, breakdownField]
   );
 
   const indexPattern = dataView?.getIndexPattern();
@@ -87,6 +109,7 @@ function TraceMetricsGrid({
           discoverFetch$,
           actions,
           profileId,
+          breakdownField,
         }}
       >
         <EuiPanel
