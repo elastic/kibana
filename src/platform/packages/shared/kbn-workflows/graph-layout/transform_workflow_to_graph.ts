@@ -126,13 +126,16 @@ function transformInternal(
     // this with the leaves of their branches.
     let exitIds: string[] = [id];
 
-    // Top-level foreach renders as a group container; deeper foreach renders flat.
-    const isTopLevelForeach =
-      step.type === 'foreach' && 'steps' in step && Array.isArray(step.steps) && depth === 0;
+    // Every foreach with a `steps` body renders as a group container, at any
+    // nesting depth. The container is a self-contained "folder": one edge in
+    // (from the previous outer step), one edge out (to the next outer step),
+    // and inner steps only connect to each other.
+    const isForeachGroup =
+      step.type === 'foreach' && 'steps' in step && Array.isArray(step.steps);
 
-    if (isTopLevelForeach) {
-      // Render the container as a `foreachGroup` node (dashed wrapper).
-      // The regular step node would overlap with the inner children.
+    if (isForeachGroup) {
+      // Render the container as a `foreachGroup` node (full-width header +
+      // body). The regular step node would overlap with the inner children.
       const groupNode: PreLayoutForeachGroupNode = {
         id,
         type: 'foreachGroup',
@@ -150,20 +153,12 @@ function transformInternal(
       });
       foreachGroups.push(...inner.foreachGroups);
 
-      if (childSteps.length > 0) {
-        const firstNestedId = inner.nodes[0]?.id;
-        if (firstNestedId) {
-          edges.push({
-            id: `${id}:${firstNestedId}`,
-            source: id,
-            target: firstNestedId,
-            branchType: 'foreachBody',
-            label: 'for each item',
-          });
-        }
-      }
-      // The foreach group is rendered as a contained body, so the next sibling
-      // joins from the foreach step itself (not from the inner leaves).
+      // The foreach group is a self-contained "folder": one edge in (from the
+      // previous sibling to the group itself), one edge out (the next sibling
+      // joins from the group's id via `exitIds = [id]` below), and the inner
+      // steps only connect to each other. Deliberately NOT adding an edge
+      // from the group to its first inner step — that line would cross the
+      // container boundary and clutter the diagram.
     } else {
       const stepNode: PreLayoutStepNode = {
         id,
@@ -224,29 +219,6 @@ function transformInternal(
       }
 
       exitIds = branchExits;
-    } else if (
-      !isTopLevelForeach &&
-      step.type === 'foreach' &&
-      'steps' in step &&
-      Array.isArray(step.steps)
-    ) {
-      // Nested foreach renders flat
-      const childSteps = getStepProp<Step[]>(step, 'steps') ?? [];
-      const inner = transformInternal([], childSteps, depth + 1, ids);
-      nodes.push(...inner.nodes);
-      edges.push(...inner.edges);
-      foreachGroups.push(...inner.foreachGroups);
-      const firstId = inner.nodes[0]?.id;
-      if (firstId) {
-        edges.push({
-          id: `${id}:${firstId}`,
-          source: id,
-          target: firstId,
-          branchType: 'foreachBody',
-          label: 'for each item',
-        });
-      }
-      // After the loop the next sibling joins from the loop step itself.
     } else if (
       step.type === 'parallel' &&
       'branches' in step &&

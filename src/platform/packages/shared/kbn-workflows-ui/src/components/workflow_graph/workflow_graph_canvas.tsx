@@ -38,7 +38,11 @@ const EDGE_TYPES: EdgeTypes = {
   workflowEdge: WorkflowGraphEdge,
 };
 
-const DEFAULT_EDGE_OPTIONS = { type: 'workflowEdge' } as const;
+// `zIndex: -1` forces React Flow to render the edge layer strictly below
+// every node — without this, edges connected to parent (`foreachGroup`)
+// nodes can paint above the parent's body, so the trunk-stub overshoot
+// at the target arrow becomes visible through the foreach header.
+const DEFAULT_EDGE_OPTIONS = { type: 'workflowEdge', zIndex: -1 } as const;
 const PRO_OPTIONS = { hideAttribution: true } as const;
 // Predefined zoom for the initial graph view; user can zoom in/out from
 // the bar afterwards. Picked to match the readability shown in the design.
@@ -153,7 +157,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
       ];
     }
     const widthOf = (n: (typeof decoratedNodes)[number]) =>
-      typeof n.width === 'number' ? n.width : 280;
+      typeof n.width === 'number' ? n.width : 300;
     const heightOf = (n: (typeof decoratedNodes)[number]) =>
       typeof n.height === 'number' ? n.height : 64;
     const xs = decoratedNodes.map((n) => n.position.x);
@@ -266,6 +270,13 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
             onPaneClick={previewMode ? undefined : handlePaneClick}
             nodesDraggable={false}
             nodesConnectable={false}
+            // Prevent React Flow from boosting a selected node's z-index above
+            // its siblings / parent. Without this, selecting an inner step of
+            // a foreach group lifts the (transparent) group body above the
+            // outer edges that pass behind it, making those edges visible
+            // through the body.
+            elevateNodesOnSelect={false}
+            elevateEdgesOnSelect={false}
             elementsSelectable={!previewMode}
             panOnScroll={!previewMode}
             panOnDrag={!previewMode}

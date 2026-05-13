@@ -9,15 +9,13 @@
 
 import {
   EuiButtonIcon,
-  EuiContextMenuPanel,
   EuiIcon,
   EuiLoadingSpinner,
-  EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
 import { Handle, Position } from '@xyflow/react';
 import type { Node, NodeProps } from '@xyflow/react';
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus, TRIGGER_STEP_TYPES } from '@kbn/workflows';
@@ -32,6 +30,28 @@ export interface WorkflowGraphNodeData extends Record<string, unknown> {
   searchActive?: boolean;
   /** Icon-only compact render (workflow-list popover). */
   preview?: boolean;
+  /**
+   * Raw step definition attached by `transformWorkflowToGraph`. Read by the
+   * node to surface configuration the row UI cares about (e.g. retry-on-failure
+   * `max-attempts` for the badge) without having to thread the workflow YAML
+   * down a second time.
+   */
+  step?: {
+    retry?: { 'max-attempts'?: number };
+    'on-failure'?: { retry?: { 'max-attempts'?: number } };
+  };
+}
+
+/**
+ * Extract the configured `retry.max-attempts` for a step, looking at both
+ * the step-level `retry` shortcut and the canonical `on-failure.retry` block.
+ * Returns `undefined` when retry isn't configured.
+ */
+function getStepMaxAttempts(step: WorkflowGraphNodeData['step']): number | undefined {
+  const fromDirect = step?.retry?.['max-attempts'];
+  const fromOnFailure = step?.['on-failure']?.retry?.['max-attempts'];
+  const value = fromDirect ?? fromOnFailure;
+  return typeof value === 'number' && value > 0 ? value : undefined;
 }
 
 const STEP_TYPE_ICON: Record<string, string> = {
@@ -97,17 +117,18 @@ function getPalette(stepType: string, isTrigger: boolean | undefined) {
 }
 
 export function WorkflowGraphNode(node: NodeProps<Node<WorkflowGraphNodeData>>) {
-  const { stepType, label, isTrigger, stepExecution, matchesSearch, searchActive, preview } =
+  const { stepType, label, isTrigger, stepExecution, matchesSearch, searchActive, preview, step } =
     node.data;
   const palette = getPalette(stepType, isTrigger);
   const dimmed = searchActive && !matchesSearch;
   const iconType = getNodeIcon(stepType);
+  const maxAttempts = getStepMaxAttempts(step);
   const targetHandlePos = node.targetPosition ?? Position.Top;
   const sourceHandlePos = node.sourcePosition ?? Position.Bottom;
 
   const isActive = node.selected;
   const [isHovered, setIsHovered] = useState(false);
-  const { onStepRun, canRunSteps, onOpenStepMenu, renderStepMenuItems } = useWorkflowGraphActions();
+  const { onStepRun, canRunSteps } = useWorkflowGraphActions();
   const execStatus = stepExecution?.status;
   const isRunning =
     execStatus === ExecutionStatus.RUNNING ||
@@ -119,12 +140,6 @@ export function WorkflowGraphNode(node: NodeProps<Node<WorkflowGraphNodeData>>) 
     execStatus === ExecutionStatus.FAILED ||
     execStatus === ExecutionStatus.TIMED_OUT ||
     execStatus === ExecutionStatus.CANCELLED;
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const closeMenu = useCallback(() => setIsMenuOpen(false), []);
-  const openMenu = useCallback(() => {
-    onOpenStepMenu?.(label);
-    setIsMenuOpen(true);
-  }, [onOpenStepMenu, label]);
   const borderColor = isActive
     ? palette.activeBorder
     : isSuccess
@@ -152,9 +167,6 @@ export function WorkflowGraphNode(node: NodeProps<Node<WorkflowGraphNodeData>>) 
     ? NODE_SHADOW_MEDIUM
     : NODE_SHADOW_SMALL;
   const runLabel = i18n.translate('workflowsUi.graphNode.runStep', { defaultMessage: 'Run step' });
-  const moreLabel = i18n.translate('workflowsUi.graphNode.moreActions', {
-    defaultMessage: 'More actions',
-  });
 
   // Compact icon-only render for the workflow-list hover preview. All hooks
   // above are still called every render, so the early return is safe.
@@ -205,8 +217,12 @@ export function WorkflowGraphNode(node: NodeProps<Node<WorkflowGraphNodeData>>) 
           overflow: 'hidden',
           display: 'flex',
           alignItems: 'center',
-          paddingRight: showActions || hasStatusIcon ? 16 : 6,
           gap: 12,
+          // 16px gutter on the right whenever any meta is present (retry badge,
+          // status icon, or hover action) so the retry badge sits at the
+          // design's 16px inset from the step's right edge.
+          paddingRight:
+            showActions || hasStatusIcon || maxAttempts != null ? 16 : 6,
           boxShadow: shadow,
           opacity: dimmed ? 0.4 : 1,
           transition:
@@ -268,6 +284,49 @@ export function WorkflowGraphNode(node: NodeProps<Node<WorkflowGraphNodeData>>) 
         >
           {label}
         </span>
+        {/* Retry-on-failure badge: the configured max-attempts taken from
+            either `step.retry` or `step['on-failure'].retry`. Mirrors the
+            badge in the execution detail step list. See Figma 10735:23813. */}
+        {maxAttempts != null && (
+          <EuiToolTip
+            content={i18n.translate('workflowsUi.graphNode.retryBadgeTooltip', {
+              defaultMessage:
+                'Retries on failure up to {count, plural, one {# attempt} other {# attempts}}',
+              values: { count: maxAttempts },
+            })}
+            disableScreenReaderOutput
+          >
+            <div
+              data-test-subj="workflowGraphNodeRetryBadge"
+              aria-label={i18n.translate('workflowsUi.graphNode.retryBadgeAria', {
+                defaultMessage: '{count, plural, one {# retry} other {# retries}} on failure',
+                values: { count: maxAttempts },
+              })}
+              css={{
+                flex: '0 0 auto',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4,
+                paddingLeft: 8,
+                paddingRight: 8,
+                paddingTop: 2,
+                paddingBottom: 2,
+                borderRadius: 999,
+                background: '#fce4e8',
+                border: `1px solid rgba(189, 39, 30, 0.3)`,
+                color: STATUS_FAIL,
+                fontFamily: 'Inter, sans-serif',
+                fontSize: 12,
+                fontWeight: 400,
+                lineHeight: 1,
+                fontVariantNumeric: 'tabular-nums',
+              }}
+            >
+              <EuiIcon type="refresh" size="s" color={STATUS_FAIL} aria-hidden />
+              <span>{maxAttempts}</span>
+            </div>
+          </EuiToolTip>
+        )}
         {hasStatusIcon && (
           <div
             css={{
@@ -330,35 +389,6 @@ export function WorkflowGraphNode(node: NodeProps<Node<WorkflowGraphNodeData>>) 
                 data-test-subj="workflowGraphNodeRunStep"
               />
             </EuiToolTip>
-            <EuiPopover
-              isOpen={isMenuOpen}
-              closePopover={closeMenu}
-              panelPaddingSize="none"
-              anchorPosition="downRight"
-              button={
-                <EuiToolTip content={moreLabel} disableScreenReaderOutput>
-                  <EuiButtonIcon
-                    iconType="boxesVertical"
-                    size="s"
-                    color="text"
-                    aria-label={moreLabel}
-                    onClick={(e: React.MouseEvent) => {
-                      e.stopPropagation();
-                      if (isMenuOpen) closeMenu();
-                      else openMenu();
-                    }}
-                    isDisabled={!renderStepMenuItems}
-                    data-test-subj="workflowGraphNodeMore"
-                  />
-                </EuiToolTip>
-              }
-            >
-              {renderStepMenuItems && (
-                <EuiContextMenuPanel
-                  items={React.Children.toArray(renderStepMenuItems(closeMenu)) as JSX.Element[]}
-                />
-              )}
-            </EuiPopover>
           </div>
         )}
       </div>
