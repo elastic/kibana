@@ -414,9 +414,18 @@ export const addEditorKeyBindings = (
         label: i18n.translate('esqlEditor.query.generateFromCommentLabel', {
           defaultMessage: 'Generate query from comment',
         }),
+<<<<<<< HEAD
         // eslint-disable-next-line no-bitwise
         keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyJ],
         run: () => onGenerateFromComment(),
+=======
+        description: i18n.translate(
+          'esqlEditor.query.generateFromCommentKeyboardShortcutsDescription',
+          {
+            defaultMessage: 'Use AI to generate a query from a comment in the editor',
+          }
+        ),
+>>>>>>> 4ff3985953490 (add appropriate meta information for shortcuts)
       })
     );
   }

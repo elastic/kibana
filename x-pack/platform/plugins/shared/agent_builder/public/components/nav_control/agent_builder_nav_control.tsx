@@ -83,6 +83,9 @@ export function AgentBuilderNavControl() {
         keys: 'Mod+;',
         scope: 'global',
         label: i18n.translate('xpack.agentBuilder.navControl.toggleChatShortcutLabel', {
+          defaultMessage: 'Toggle Agent Builder',
+        }),
+        description: i18n.translate('xpack.agentBuilder.navControl.toggleChatShortcutDescription', {
           defaultMessage: 'Open or close Agent Builder',
         }),
       },
