@@ -15,6 +15,7 @@ import type {
 import {
   createEsqlEquivalenceEvaluator,
   createSkillInvocationEvaluator,
+  createTrajectoryEvaluator,
   selectEvaluators,
 } from '@kbn/evals';
 import type { BoundInferenceClient } from '@kbn/inference-common';
@@ -43,6 +44,8 @@ export interface RuleGenerationTaskOutput {
    * correlate the row to a specific agent interaction.
    */
   traceId?: string;
+  /** Tool IDs invoked during this round, in order. Consumed by the trajectory evaluator. */
+  toolCalls?: string[];
 }
 
 // ---------------------------------------------------------------------------
@@ -447,6 +450,58 @@ export function createRuleDescriptionEvaluator(
 }
 
 // ---------------------------------------------------------------------------
+// Trajectory evaluator — tool-call sequence vs. golden path
+// ---------------------------------------------------------------------------
+
+/**
+ * Default golden tool sequence for a reference rule.
+ *
+ * The detection-rule-edit SKILL.md instructs the agent to use exactly
+ * `security.create_detection_rule` for new-rule creation (which is all this
+ * suite exercises). `attachment_update` is reserved for edits, which this
+ * suite does NOT test. Negative-case prompts should produce no tool calls.
+ *
+ * If a ReferenceRule sets `tool_sequence` explicitly, that overrides the default.
+ */
+function defaultGoldenSequence(expected: Partial<ReferenceRule> | null | undefined): string[] {
+  if (expected?.tool_sequence !== undefined) {
+    return expected.tool_sequence;
+  }
+  if (expected?.category === 'negative') {
+    return [];
+  }
+  return ['security.create_detection_rule'];
+}
+
+/**
+ * Trajectory evaluator scoring tool-call alignment.
+ *
+ * Coverage matters more than strict order for this suite (the
+ * `security.create_detection_rule` tool's a-tool-handles-everything contract
+ * means there's no canonical multi-tool order to enforce), so coverage weight
+ * is the dominant factor.
+ *
+ * Wrapping: agent/env errors and missing-index failures already return N/A via
+ * `skipAgentErrors` / `skipMissingIndexFailures`, so we don't double-wrap.
+ */
+function createRuleTrajectoryEvaluator(): Evaluator<RuleExample, RuleGenerationTaskOutput> {
+  const inner = createTrajectoryEvaluator({
+    extractToolCalls: (output: unknown) =>
+      (output as RuleGenerationTaskOutput)?.toolCalls ?? [],
+    goldenPathExtractor: (expected: unknown) =>
+      defaultGoldenSequence(expected as Partial<ReferenceRule>),
+    orderWeight: 0.4,
+    coverageWeight: 0.6,
+  });
+
+  // Rename so the report column is descriptive rather than the generic 'trajectory'.
+  return {
+    ...inner,
+    name: 'Tool Trajectory',
+  } as Evaluator<RuleExample, RuleGenerationTaskOutput>;
+}
+
+// ---------------------------------------------------------------------------
 // Factory — mirrors the agent-builder createEvaluateDataset pattern
 // ---------------------------------------------------------------------------
 
@@ -499,6 +554,9 @@ export function createEvaluateDataset({
     // skip(skipNegativeCases(createRuleDescriptionEvaluator(evaluators))),
     // Rejection — scores 1 when model correctly refuses a negative case, N/A otherwise
     skip(createRejectionEvaluator()),
+    // Tool Trajectory — tool-call coverage + order vs. the golden sequence the
+    // detection-rule-edit SKILL.md prescribes. Applies to negatives too (golden = []).
+    skip(createRuleTrajectoryEvaluator()),
     // Trace-based observability (zero per-example LLM cost — reads OTel spans).
     // The `reportDisplayOptions` in evaluate.ts has already declared formatting for these.
     ...Object.values(evaluators.traceBasedEvaluators),
@@ -544,7 +602,7 @@ export function createEvaluateDataset({
                 // so dataset summaries don't misclassify correct behavior as an "agent error".
                 succeeded++;
                 log.info('[Task] Negative case: model refused to generate a rule (expected)');
-                return { traceId: taskResult.traceId };
+                return { traceId: taskResult.traceId, toolCalls: taskResult.toolCalls };
               }
 
               const isMissingIndex =
@@ -562,6 +620,7 @@ export function createEvaluateDataset({
               return {
                 error: taskResult.error || 'No rule returned from agent',
                 traceId: taskResult.traceId,
+                toolCalls: taskResult.toolCalls,
               };
             }
 

@@ -67,6 +67,12 @@ export class SecurityRuleGenerationClient {
     generatedRule?: Partial<ReferenceRule>;
     error?: string;
     traceId?: string;
+    /**
+     * Tool IDs invoked during the conversation, in order. Powers the trajectory
+     * evaluator. `filestore.read` is filtered out because those are SKILL.md
+     * loads that the skill-invocation evaluator already covers.
+     */
+    toolCalls?: string[];
   }> {
     const payload = {
       agent_id: THREAT_HUNTING_AGENT_ID,
@@ -119,11 +125,13 @@ export class SecurityRuleGenerationClient {
     const traceId = Array.isArray(syncResponse.trace_id)
       ? syncResponse.trace_id[0]
       : syncResponse.trace_id;
+    const toolCalls = extractInvokedToolIds(syncResponse);
 
     if (extracted.ruleData) {
       return {
         generatedRule: mapGeneratedRule(extracted.ruleData),
         traceId,
+        toolCalls,
       };
     }
 
@@ -135,9 +143,25 @@ export class SecurityRuleGenerationClient {
     return {
       error: extracted.error || 'No rule returned from agent',
       traceId,
+      toolCalls,
     };
   }
 }
+
+/**
+ * Extracts tool IDs in invocation order from a ConverseResponse, dropping
+ * `filestore.read` calls — those are SKILL.md loads, already covered by
+ * the skill-invocation evaluator, and would otherwise dominate the
+ * trajectory evaluator's "extra tools" list.
+ */
+const extractInvokedToolIds = (response: ConverseResponse): string[] => {
+  return (
+    response.steps
+      ?.filter((step) => step.type === 'tool_call' && !!step.tool_id)
+      .map((step) => step.tool_id as string)
+      .filter((id) => id !== 'filestore.read') ?? []
+  );
+};
 
 const extractRuleDataFromToolResults = (
   results?: ToolResult[]
