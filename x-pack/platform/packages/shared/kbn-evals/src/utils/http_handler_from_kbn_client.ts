@@ -34,8 +34,10 @@ export function httpHandlerFromKbnClient({
 
     const { method = 'GET', body, asResponse, rawResponse, query, signal, headers } = options;
 
-    // Add a W3C baggage entry so Kibana can tag OTEL spans with the eval run id.
+    // Add a W3C baggage entry so Kibana can tag OTel spans with the eval run id.
     // This enables correlating traces (traces-*) with eval score docs (kibana-evaluations*) via run_id.
+    // The evaluate fixture updates TEST_RUN_ID to the per-model run ID after
+    // connector resolution, so inference/evaluation requests carry the correct value.
     const runId = process.env.TEST_RUN_ID;
     const nextHeaders: Record<string, string> = headers
       ? ({ ...(headers as Record<string, unknown>) } as Record<string, string>)

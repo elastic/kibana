@@ -280,6 +280,12 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       }
 
       const currentRunId = `${baseRunId}-${connector.id}`;
+      log.info(`Run ID for this worker: ${currentRunId}`);
+
+      // Update the env var so the fetch fixture's baggage header
+      // (read lazily via process.env.TEST_RUN_ID) uses the per-model run ID.
+      // Each Playwright worker is a separate process, so this is safe.
+      process.env.TEST_RUN_ID = currentRunId;
 
       const shouldPreflightExport =
         process.env.KBN_EVALS_SKIP_PREFLIGHT_EXPORT !== 'true' &&
