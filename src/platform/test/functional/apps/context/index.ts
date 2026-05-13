@@ -29,7 +29,6 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     });
 
     after(async () => {
-      await PageObjects.discover.resetQueryMode();
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/visualize.json'
       );

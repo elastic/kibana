@@ -42,7 +42,12 @@ export class DiscoverPageObject extends FtrService {
   public readonly APP_ID = 'discover';
 
   public async navigateToApp(discoverMode?: 'classic' | 'esql') {
-    if (discoverMode) await this.setQueryMode(discoverMode);
+    if (discoverMode) {
+      // To set a local storage item, the browser must be in a valid URL, so if it isn't it first navigates there
+      const isInDiscoverApp = (await this.browser.getCurrentUrl()).includes(this.APP_ID);
+      if (!isInDiscoverApp) await this.common.navigateToApp(this.APP_ID);
+      await this.setQueryMode(discoverMode);
+    }
     await this.common.navigateToApp(this.APP_ID);
   }
 

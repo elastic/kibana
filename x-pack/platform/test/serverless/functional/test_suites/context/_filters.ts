@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'discover:rowHeightOption': 0, // to have more grid rows visible at once
       });
       await PageObjects.svlCommonPage.loginAsViewer();
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.navigateToApp('classic');
     });
 
     beforeEach(async function () {
