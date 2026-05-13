@@ -1,5 +1,5 @@
 {
-  "sha1": "ffececbd53425b5350c70aa3b582a1a408bc73b4",
+  "sha1": "ba547c625fe3f99f8037b06da3285b0743fcd089",
   "tests": [
     {
       "id": "2b226b45edecc17-e395ce97cca539e",
@@ -2868,7 +2868,7 @@
     {
       "id": "3f42f5552bb7860-c5bc8c37cddfe39",
       "title": "Entity Store Status API tests Should return status \"running\" with all 4 engine types \"started\" after a full install",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -2877,14 +2877,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/status.spec.ts",
-        "line": 41,
+        "line": 40,
         "column": 10
       }
     },
     {
       "id": "3f42f5552bb7860-1d1c1e9c8f31ccc",
       "title": "Entity Store Status API tests Should return status \"not_installed\" and an empty engines array when the store is uninstalled",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -2893,14 +2893,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/status.spec.ts",
-        "line": 59,
+        "line": 58,
         "column": 10
       }
     },
     {
       "id": "3f42f5552bb7860-0ad307183e734d5",
       "title": "Entity Store Status API tests Should return overall status \"running\" when 3 engines are \"started\" and 1 is \"stopped\"",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -2909,14 +2909,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/status.spec.ts",
-        "line": 71,
+        "line": 70,
         "column": 10
       }
     },
     {
       "id": "3f42f5552bb7860-d7d0ca0ad16f60f",
       "title": "Entity Store Status API tests Should return overall status \"stopped\" when all 4 engines are stopped",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -2925,14 +2925,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/status.spec.ts",
-        "line": 90,
+        "line": 89,
         "column": 10
       }
     },
     {
       "id": "270f59aeaa95d29-28713530a997c3b",
       "title": "Entity Store Stop API tests Should stop all engines when entityTypes is omitted",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -2941,14 +2941,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/stop.spec.ts",
-        "line": 41,
+        "line": 40,
         "column": 10
       }
     },
     {
       "id": "270f59aeaa95d29-aa33d601f385a4b",
       "title": "Entity Store Stop API tests Should stop a single entity type",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -2957,14 +2957,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/stop.spec.ts",
-        "line": 58,
+        "line": 57,
         "column": 10
       }
     },
     {
       "id": "270f59aeaa95d29-a0aa63d27758325",
       "title": "Entity Store Stop API tests Should return 200 when stopping an entity type that is already stopped",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -2973,14 +2973,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/stop.spec.ts",
-        "line": 79,
+        "line": 78,
         "column": 10
       }
     },
     {
       "id": "270f59aeaa95d29-ab6423bd19e4ff9",
       "title": "Entity Store Stop API tests Should return 200 when stopping on an uninstalled store",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -2989,7 +2989,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/stop.spec.ts",
-        "line": 98,
+        "line": 97,
         "column": 10
       }
     },

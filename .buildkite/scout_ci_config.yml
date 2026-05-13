@@ -18,6 +18,7 @@ plugins:
     - discover
     - discover_enhanced
     - entity_store
+    - error_boundary_example
     - exploratory_view
     - fleet
     - flyoutSystemExamples
@@ -25,7 +26,9 @@ plugins:
     - global_search
     - index_management
     - infra
+    - ingest_pipelines
     - intercepts
+    - kibana_overview
     - lens
     - logstash
     - maps

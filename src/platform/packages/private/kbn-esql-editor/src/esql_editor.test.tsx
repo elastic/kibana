@@ -24,10 +24,10 @@ import { ESQLEditor } from './esql_editor';
 import type { ESQLEditorProps } from './types';
 
 const mockValidate = jest.fn().mockResolvedValue({ errors: [], warnings: [] });
-jest.mock('@kbn/monaco', () => ({
-  ...jest.requireActual('@kbn/monaco'),
+jest.mock('@kbn/code-editor', () => ({
+  ...jest.requireActual('@kbn/code-editor'),
   ESQLLang: {
-    ...jest.requireActual('@kbn/monaco').ESQLLang,
+    ...jest.requireActual('@kbn/code-editor').ESQLLang,
     getEsqlLanguage: jest.fn(() => ({
       id: 'esql',
       name: 'ESQL',
