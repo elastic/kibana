@@ -93,10 +93,13 @@ dependsOn:
   - '@kbn/dev-cli-runner'
   - '@kbn/core-security-server'
   - '@kbn/workflows-management-plugin'
+  - '@kbn/workflows-extensions'
   - '@kbn/workflows'
   - '@kbn/agent-builder-plugin'
   - '@kbn/data-streams'
   - '@kbn/es-mappings'
+  - '@kbn/core-http-server-utils'
+  - '@kbn/spaces-utils'
 tags:
   - plugin
   - prod
