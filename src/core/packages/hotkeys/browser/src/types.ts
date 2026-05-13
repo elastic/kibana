@@ -57,6 +57,14 @@ export interface HotkeyDefinition {
   scope?: HotkeyScope;
   /** Owning application id. Auto-attached when registering via {@link AppScopedHotkeys}. */
   appId?: string;
+  /**
+   * Stable namespaced id for linking registrations to a product area (e.g. `discover:documentExplorer`).
+   * Used for cheat-sheet filtering when the panel is opened via `openToFeature` on the hotkeys sidebar app; immutable after register.
+   * Prefer {@link group} for human-readable headings (often i18n).
+   *
+   * @public
+   */
+  featureId?: string;
   /** Optional grouping key within a scope (e.g. `Navigation`, `Layout`). */
   group?: string;
   /** Soft-disable without unregistering. Defaults to `true`. */
@@ -120,6 +128,8 @@ declare module '@tanstack/hotkeys' {
       description?: string;
       scope: HotkeyScope;
       appId?: string;
+      /** Optional; included when {@link HotkeyDefinition.featureId} was set at registration. */
+      featureId?: string;
       group?: string;
       /**
        * The chord that was declared when the hotkey was first registered,

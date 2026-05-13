@@ -21,6 +21,8 @@ import type {
   AppScopedHotkeys,
   HotkeyDefinition,
   HotkeyHandle,
+  HotkeysSidebarActions,
+  HotkeysSidebarState,
   HotkeysSetup,
   HotkeysStart,
 } from '@kbn/core-hotkeys-browser';
@@ -34,6 +36,7 @@ import {
   type HotkeyOverride,
   type HotkeyOverridesSource,
 } from './lib/overrides_source';
+import { createHotkeysSidebarStore } from '../hotkeys_sidebar_store';
 
 export const OPEN_CHEAT_SHEET_HOTKEY_ID = 'platform:hotkeys.openCheatSheet';
 
@@ -67,15 +70,11 @@ interface InternalEntry {
   lastResolvedEnabled: boolean;
 }
 
-const buildMeta = (def: HotkeyDefinition) => ({
+const buildMeta = ({ scope, keys, defaultKeys, ...defs }: HotkeyDefinition) => ({
   kibana: {
-    id: def.id,
-    label: def.label,
-    description: def.description,
-    scope: def.scope ?? 'context',
-    appId: def.appId,
-    group: def.group,
-    defaultKeys: def.defaultKeys ?? def.keys,
+    scope: scope ?? 'context',
+    defaultKeys: defaultKeys ?? keys,
+    ...defs,
   },
 });
 
@@ -114,14 +113,16 @@ export class HotkeysService {
   public setup({ chrome }: SetupDeps): HotkeysSetup {
     this.hotkeysAppUpdater = chrome.sidebar.registerApp({
       appId: 'hotkeys',
+      store: createHotkeysSidebarStore(),
       loadComponent: () =>
         import('../components/hotkeys_cheat_sheet').then((m) => {
-          return Promise.resolve((props: SidebarComponentProps) =>
-            createElement(m.HotkeysCheatSheet, {
-              ...props,
-              getRegistrations$: () => this.derived.registrations$,
-              getCurrentAppId$: () => this.currentAppId$ ?? EMPTY,
-            })
+          return Promise.resolve(
+            (props: SidebarComponentProps<HotkeysSidebarState, HotkeysSidebarActions>) =>
+              createElement(m.HotkeysCheatSheet, {
+                ...props,
+                getRegistrations$: () => this.derived.registrations$,
+                getCurrentAppId$: () => this.currentAppId$ ?? EMPTY,
+              })
           );
         }),
       status: 'pending',

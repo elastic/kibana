@@ -9,3 +9,4 @@
 
 export type { AppScopedHotkeys, HotkeyDefinition, HotkeyHandle, HotkeyScope } from './src/types';
 export type { HotkeysSetup, HotkeysStart } from './src/contracts';
+export type { HotkeysSidebarActions, HotkeysSidebarState } from './src/hotkeys_sidebar';

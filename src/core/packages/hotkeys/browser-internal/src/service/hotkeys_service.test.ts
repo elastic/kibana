@@ -97,6 +97,24 @@ describe('HotkeysService', () => {
       });
     });
 
+    it('projects featureId onto derived registrations', async () => {
+      const start = bootstrapHotkeys(service);
+      start.register(
+        {
+          id: 'feat:a',
+          keys: 'Mod+1',
+          label: 'Feature shortcut',
+          scope: 'global',
+          featureId: 'discover:documentTable',
+        },
+        jest.fn()
+      );
+      const regs = await takeRegistrations(service);
+      expect(regs.find((r) => r.id === 'feat:a')).toMatchObject({
+        featureId: 'discover:documentTable',
+      });
+    });
+
     it('ignores a caller-supplied defaultKeys and derives it from keys', async () => {
       const start = bootstrapHotkeys(service);
       start.register(
