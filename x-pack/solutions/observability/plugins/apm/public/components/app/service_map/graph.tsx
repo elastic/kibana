@@ -90,6 +90,12 @@ interface GraphProps {
   fullMapHref?: string;
   /** When true, hides minimap, options panel, and navigation actions that don't apply in dashboard embeds. */
   isEmbedded?: boolean;
+  /** Override for the popover's Focus map button visibility. Defaults to `!isEmbedded`. */
+  showFocusMap?: boolean;
+  /** Focus button always navigates, even for the currently focused service. */
+  alwaysNavigateOnPopoverFocus?: boolean;
+  /** Strip `kuery` from popover-built URLs (env still flows through). */
+  clearKueryOnPopoverNavigation?: boolean;
   /**
    * When set to a service name that exists on the map, that node gets context highlight
    * (frame, fill, primary node ring). Blue edges/markers remain tied to explicit selection only.
@@ -110,6 +116,9 @@ function GraphInner({
   onToggleFullscreen,
   fullMapHref,
   isEmbedded = false,
+  showFocusMap,
+  alwaysNavigateOnPopoverFocus,
+  clearKueryOnPopoverNavigation,
   highlightedServiceName,
 }: GraphProps) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
@@ -591,62 +600,27 @@ function GraphInner({
                     data-test-subj="serviceMapZoomOutButton"
                     css={mapToolbarControlIconCss}
                   />
-                  {!isEmbedded && (
-                    <EuiButtonIcon
-                      display="empty"
-                      color="text"
-                      size="s"
-                      iconType="crosshair"
-                      onClick={() => fitView(getFitViewOptions())}
-                      title={fitViewLabel}
-                      aria-label={fitViewLabel}
-                      data-test-subj="serviceMapFitViewButton"
-                      css={mapToolbarControlIconCss}
-                    />
-                  )}
-                  {fullMapHref && (
-                    <EuiButtonIcon
-                      display="empty"
-                      color="text"
-                      size="s"
-                      iconType="apps"
-                      href={fullMapHref}
-                      title={viewFullMapButtonLabel}
-                      aria-label={viewFullMapButtonLabel}
-                      data-test-subj="serviceMapViewFullMapButton"
-                      css={mapToolbarControlIconCss}
-                    />
-                  )}
-                  {onToggleFullscreen && (
-                    <EuiButtonIcon
-                      display="empty"
-                      color="text"
-                      size="s"
-                      iconType={isFullscreen ? 'fullScreenExit' : 'fullScreen'}
-                      onClick={onToggleFullscreen}
-                      title={fullscreenButtonLabel}
-                      aria-label={fullscreenButtonLabel}
-                      data-test-subj="serviceMapFullScreenButton"
-                      css={mapToolbarControlIconCss}
-                    />
-                  )}
-                </EuiFlexGroup>
-              </EuiPanel>
-            </Panel>
-            {!isEmbedded && <ServiceMapMinimap />}
-          </ReactFlow>
-          <MapPopover
-            selectedNode={selectedNodeForPopover}
-            selectedEdge={selectedEdgeForPopover}
-            focusedServiceName={serviceName}
-            environment={environment}
-            kuery={kuery}
-            start={start}
-            end={end}
-            onClose={handlePopoverClose}
-            isEmbedded={isEmbedded}
-          />
-        </div>
+                )}
+              </EuiFlexGroup>
+            </EuiPanel>
+          </Panel>
+          {!isEmbedded && <ServiceMapMinimap />}
+        </ReactFlow>
+        <MapPopover
+          selectedNode={selectedNodeForPopover}
+          selectedEdge={selectedEdgeForPopover}
+          focusedServiceName={serviceName}
+          environment={environment}
+          kuery={kuery}
+          start={start}
+          end={end}
+          onClose={handlePopoverClose}
+          isEmbedded={isEmbedded}
+          showFocusMap={showFocusMap}
+          alwaysNavigateOnFocus={alwaysNavigateOnPopoverFocus}
+          clearKueryOnNavigation={clearKueryOnPopoverNavigation}
+        />
+      </div>
       </ServiceMapAlertsNavigateProvider>
     </ServiceMapSearchProvider>
   );
