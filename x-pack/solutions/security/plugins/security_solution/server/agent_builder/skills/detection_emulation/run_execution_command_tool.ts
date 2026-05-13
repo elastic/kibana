@@ -55,13 +55,15 @@ const runExecutionCommandSchema = z.object({
     `Execution-family command (HIGHEST IMPACT — runs arbitrary code on the endpoint):
 - \`execute\` — \`{ command: string, timeout?: number }\` — run a shell command/executable
 - \`runscript\` — \`{ scriptId: string, scriptInput?: string, timeout?: number }\` — run a script-library entry
-- \`cancel\` — \`{ id: string }\` — cancel a previously-dispatched response action by id`
+- \`cancel\` — \`{ id: string }\` — cancel a previously-dispatched response action by id
+
+Every command in this family ALSO accepts an optional \`comment: string\` in \`parameters\` — recorded against the response-action audit trail. Strongly recommended for \`execute\` and \`runscript\` so an auditor can see *why* the code ran (e.g. \`{ command: 'whoami', comment: 'verify hostname for rule X validation' }\`).`
   ),
   parameters: z
     .record(z.string(), z.unknown())
     .optional()
     .describe(
-      'Command-specific parameters (strictly validated server-side per command). See `command` description for the required shape.'
+      'Command-specific parameters (strictly validated server-side per command). See `command` description for the required shape. Every command additionally accepts an optional `{ comment: string }` attached to the response-action audit trail.'
     ),
 });
 

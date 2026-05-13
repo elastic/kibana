@@ -72,14 +72,16 @@ const runProcessCommandSchema = z.object({
     `Process-family command:
 - \`kill-process\` — terminate by \`{ pid: number }\` *or* \`{ entity_id: string }\`
 - \`suspend-process\` — pause by \`{ pid: number }\` *or* \`{ entity_id: string }\`
-- \`running-processes\` — list with no required parameters
-- \`memory-dump\` — \`{ type: 'kernel' }\` *or* \`{ type: 'process', pid: number }\` *or* \`{ type: 'process', entity_id: string }\``
+- \`running-processes\` — list (no required parameters)
+- \`memory-dump\` — \`{ type: 'kernel' }\` *or* \`{ type: 'process', pid: number }\` *or* \`{ type: 'process', entity_id: string }\`
+
+Every command in this family ALSO accepts an optional \`comment: string\` in \`parameters\` — recorded against the response-action audit trail. Use it when running on behalf of a human operator (e.g. \`{ comment: 'sweep for rogue PowerShell' }\`).`
   ),
   parameters: z
     .record(z.string(), z.unknown())
     .optional()
     .describe(
-      'Command-specific parameters (strictly validated server-side per command). See `command` description for the required shape.'
+      'Command-specific parameters (strictly validated server-side per command). See `command` description for the required shape. Every command additionally accepts an optional `{ comment: string }` attached to the response-action audit trail.'
     ),
 });
 

@@ -55,13 +55,15 @@ const runFileCommandSchema = z.object({
     `File-family command:
 - \`get-file\` — \`{ path: string }\` — retrieve a file from the endpoint
 - \`scan\` — \`{ path: string }\` — trigger a malware scan on the supplied path
-- \`upload\` — \`{ file: opaque, overwrite?: boolean }\` — upload a file to the endpoint (multipart-style; not yet wired through the route)`
+- \`upload\` — \`{ file: opaque, overwrite?: boolean }\` — upload a file to the endpoint (multipart-style; not yet wired through the route)
+
+Every command in this family ALSO accepts an optional \`comment: string\` in \`parameters\` — recorded against the response-action audit trail.`
   ),
   parameters: z
     .record(z.string(), z.unknown())
     .optional()
     .describe(
-      'Command-specific parameters (strictly validated server-side per command). See `command` description for the required shape.'
+      'Command-specific parameters (strictly validated server-side per command). See `command` description for the required shape. Every command additionally accepts an optional `{ comment: string }` attached to the response-action audit trail.'
     ),
 });
 

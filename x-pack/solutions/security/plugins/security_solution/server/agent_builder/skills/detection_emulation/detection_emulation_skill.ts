@@ -176,8 +176,10 @@ lands. Do not attempt to dispatch against these agent types; the call will fail 
 The schema is a discriminated union on \`command\`, so misspelled fields, extra keys,
 or wrong types fail fast with a Zod error before reaching the EDR connector.
 
-\`parameters.comment\` (optional, where supported): attached to the response-actions
-audit trail.
+\`parameters.comment\` (optional, ALL commands): attached to the response-actions
+audit trail. Strongly recommended for destructive commands (\`execute\`, \`runscript\`,
+\`kill-process\`, \`suspend-process\`, \`isolate\`) so an auditor can see *why* the
+action ran. Example: \`{ command: 'whoami', comment: 'verify hostname for rule X' }\`.
 
 ## Guardrails
 

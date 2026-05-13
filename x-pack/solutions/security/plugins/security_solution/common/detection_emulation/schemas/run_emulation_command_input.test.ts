@@ -92,6 +92,64 @@ describe('RunEmulationCommandInputSchema', () => {
     });
   });
 
+  it('accepts an optional `comment` on every supported command (audit-trail invariant)', () => {
+    // Locks the contract that the per-family agent-builder tools' docstrings
+    // make to the LLM ("every command also accepts an optional `comment:
+    // string` recorded against the response-action audit trail"). If anyone
+    // adds a new `command` variant without `comment`, or drops `comment`
+    // from an existing variant, this test fails — the docstrings would
+    // then be lying to the LLM and the LLM would silently omit operator
+    // attribution from dispatched actions. See `optionalCommentParams` /
+    // `cancelParams` / `processRefParams` / etc. in
+    // `run_emulation_command_input.ts`.
+    const cases: Array<{ command: string; parameters: Record<string, unknown> }> = [
+      { command: 'isolate', parameters: { comment: 'audit' } },
+      { command: 'unisolate', parameters: { comment: 'audit' } },
+      { command: 'running-processes', parameters: { comment: 'audit' } },
+      { command: 'cancel', parameters: { id: 'action-abc', comment: 'audit' } },
+      { command: 'kill-process', parameters: { pid: 1, comment: 'audit' } },
+      { command: 'suspend-process', parameters: { pid: 1, comment: 'audit' } },
+      { command: 'memory-dump', parameters: { type: 'process', pid: 1, comment: 'audit' } },
+      { command: 'memory-dump', parameters: { type: 'kernel', comment: 'audit' } },
+      { command: 'get-file', parameters: { path: '/tmp/file', comment: 'audit' } },
+      { command: 'scan', parameters: { path: '/tmp/scan', comment: 'audit' } },
+      { command: 'execute', parameters: { command: 'whoami', comment: 'audit' } },
+      { command: 'runscript', parameters: { scriptId: 'script-1', comment: 'audit' } },
+      { command: 'upload', parameters: { file: {}, overwrite: true, comment: 'audit' } },
+    ];
+
+    // Sanity: this test must cover every command in the discriminated union.
+    // Dedupe `cases` because a single command (e.g. `memory-dump`) can have
+    // multiple parameter shapes worth exercising, while the discriminated
+    // union has exactly one variant per command literal. Drift here means a
+    // new command landed without an audit-comment test case — exactly the
+    // regression we're guarding against.
+    const variantCommands = RunEmulationCommandInputSchema.options.map(
+      (variant) => variant.shape.command.value
+    );
+    const coveredCommands = [...new Set(cases.map((c) => c.command))];
+    expect(coveredCommands.sort()).toEqual(variantCommands.sort());
+
+    cases.forEach(({ command, parameters }) => {
+      const result = RunEmulationCommandInputSchema.safeParse({
+        emulationId: 'test-emulation-123',
+        agentType: 'endpoint',
+        endpointIds: ['endpoint-id-1'],
+        command,
+        parameters,
+      });
+      expect({
+        command,
+        success: result.success,
+        errors: result.success ? null : result.error.issues,
+      }).toEqual({
+        command,
+        success: true,
+        errors: null,
+      });
+    });
+  });
+
   it('rejects `memory-dump` with type=process but no pid or entity_id', () => {
     const result = RunEmulationCommandInputSchema.safeParse({
       emulationId: 'e',
