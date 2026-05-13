@@ -2,7 +2,6 @@ const GITHUB_OWNER = 'elastic';
 const KIBANA_REPO = 'kibana';
 const SERVERLESS_GITOPS_REPO = 'serverless-gitops';
 const VERSIONS_FILE_PATH = 'services/kibana/versions.yaml';
-const SERVERLESS_EXCLUDED_LABELS = ['backport', 'release_note:skip', 'reverted'];
 
 const requiredEnv = (name) => {
   const value = process.env[name];
@@ -81,8 +80,6 @@ const findKibanaServerlessDeployedCommit = async ({
 };
 
 const matchKibanaTagsToReleaseCommits = async ({ github, serverlessReleases }) => {
-  const releaseShaLength = serverlessReleases[0]?.kibanaSha.length;
-  const releaseShas = new Set(serverlessReleases.map(({ kibanaSha }) => kibanaSha));
   const tagsByReleaseSha = new Map();
 
   for await (const response of github.paginate.iterator(github.rest.repos.listTags, {
@@ -91,10 +88,10 @@ const matchKibanaTagsToReleaseCommits = async ({ github, serverlessReleases }) =
     per_page: 100,
   })) {
     for (const tag of response.data) {
-      const releaseSha = tag.commit.sha.slice(0, releaseShaLength);
+      const release = serverlessReleases.find(({ kibanaSha }) => tag.commit.sha.startsWith(kibanaSha));
 
-      if (releaseShas.has(releaseSha)) {
-        tagsByReleaseSha.set(releaseSha, tag);
+      if (release) {
+        tagsByReleaseSha.set(release.kibanaSha, tag);
       }
     }
 
@@ -152,8 +149,6 @@ const getPrsForServerless = async ({
   github,
   serverlessReleases,
   selectedServerlessSHAs,
-  excludedLabels = [],
-  includedLabels = [],
 }) => {
   if (selectedServerlessSHAs.size !== 2) {
     throw new Error('Exactly two serverless releases must be selected');
@@ -200,11 +195,6 @@ const getPrsForServerless = async ({
               author {
                 login
               }
-              labels(first: 50) {
-                nodes {
-                  name
-                }
-              }
             }
           }
         }
@@ -228,16 +218,8 @@ const getPrsForServerless = async ({
     result.nodes.forEach((node) => {
       if (node?.associatedPullRequests) {
         node.associatedPullRequests.nodes?.forEach((pr) => {
-          if (pr?.labels?.nodes) {
-            const prLabels = pr.labels.nodes.map((label) => label.name);
-            const hasExcludedLabel = prLabels.some((label) => excludedLabels.includes(label));
-            const hasIncludedLabel =
-              includedLabels.length === 0 ||
-              prLabels.some((label) => includedLabels.includes(label));
-
-            if (!hasExcludedLabel && hasIncludedLabel) {
-              pullRequests.push(pr);
-            }
+          if (pr) {
+            pullRequests.push(pr);
           }
         });
       }
@@ -247,7 +229,6 @@ const getPrsForServerless = async ({
   const prs = pullRequests.map((pr) => {
     return {
       ...pr,
-      labels: pr.labels?.nodes ?? [],
       user: pr.author,
       html_url: pr.url,
     };
@@ -308,7 +289,6 @@ const generateServerlessChangelog = async ({ github }) => {
     github,
     serverlessReleases: releases,
     selectedServerlessSHAs: new Set([newer.kibanaSha, older.kibanaSha]),
-    excludedLabels: SERVERLESS_EXCLUDED_LABELS,
   });
 
   console.log(prs.map(({ html_url: htmlUrl }) => htmlUrl).sort().join('\n'));
