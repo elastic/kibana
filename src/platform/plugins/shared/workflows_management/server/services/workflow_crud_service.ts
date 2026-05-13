@@ -37,7 +37,6 @@ import {
   prepareWorkflowDocumentFromYaml,
   workflowYamlDeclaresTopLevelEnabled,
 } from '../api/lib/workflow_prepare';
-import type { ManagedWorkflowMetadata } from '../api/lib/workflow_prepare';
 import type { DeleteWorkflowsResponse } from '../api/workflows_management_api';
 import type { BulkFailureEntry, BulkWorkflowEntry } from '../lib/bulk_id_helpers';
 import {
@@ -144,7 +143,6 @@ export class WorkflowCrudService {
     now: Date;
     spaceId: string;
     request?: KibanaRequest;
-    managedWorkflowMetadata?: ManagedWorkflowMetadata;
     yaml: string;
   }): Promise<{ id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml }> {
     const registeredTriggerIds =
@@ -166,7 +164,6 @@ export class WorkflowCrudService {
       now: params.now,
       spaceId: params.spaceId,
       triggerDefinitions,
-      managedWorkflowMetadata: params.managedWorkflowMetadata,
     });
   }
 

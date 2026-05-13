@@ -32,19 +32,6 @@ export const computeDefinitionHash = (yaml: string): string => {
   return createHash('sha256').update(yaml.trim()).digest('hex');
 };
 
-export type ManagedWorkflowMetadata = Partial<
-  Pick<
-    WorkflowProperties,
-    | 'managed'
-    | 'managedBy'
-    | 'definitionHash'
-    | 'managedTemplateValues'
-    | 'originManagedWorkflowId'
-    | 'lifecycle'
-    | 'managedVersion'
-  >
->;
-
 /** True when the YAML root map includes `enabled` (before Zod defaults). */
 export const workflowYamlDeclaresTopLevelEnabled = (yamlString: string): boolean => {
   const parsed = parseYamlToJSONWithoutValidation(yamlString);
@@ -66,7 +53,6 @@ export const prepareWorkflowDocumentFromYaml = (params: {
   now: Date;
   spaceId: string;
   triggerDefinitions?: Array<{ id: string; eventSchema: z.ZodType }>;
-  managedWorkflowMetadata?: ManagedWorkflowMetadata;
 }): { id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml } => {
   const {
     id: providedId,
@@ -76,7 +62,6 @@ export const prepareWorkflowDocumentFromYaml = (params: {
     now,
     spaceId,
     triggerDefinitions,
-    managedWorkflowMetadata,
   } = params;
 
   let workflowToCreate: EsWorkflowCreate = {
@@ -119,7 +104,6 @@ export const prepareWorkflowDocumentFromYaml = (params: {
     deleted_at: null,
     created_at: now.toISOString(),
     updated_at: now.toISOString(),
-    ...managedWorkflowMetadata,
   };
 
   return { id, workflowData, definition: workflowToCreate.definition };
