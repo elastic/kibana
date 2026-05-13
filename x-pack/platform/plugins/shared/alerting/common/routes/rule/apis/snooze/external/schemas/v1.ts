@@ -19,27 +19,21 @@ export const snoozeParamsSchema = schema.object({
   }),
 });
 
-export const snoozeBodySchema = schema.object(
-  {
+export const snoozeBodySchema = schema.object({
+  schedule: schema.object({
+    custom: schema.maybe(scheduleRequestSchemaV1),
+  }),
+});
+
+export const snoozeResponseSchema = schema.object({
+  body: schema.object({
     schedule: schema.object({
+      id: schema.string({
+        meta: {
+          description: 'Identifier of the snooze schedule.',
+        },
+      }),
       custom: schema.maybe(scheduleRequestSchemaV1),
     }),
-  },
-  { meta: { id: 'snooze_rule_request' } }
-);
-
-export const snoozeResponseSchema = schema.object(
-  {
-    body: schema.object({
-      schedule: schema.object({
-        id: schema.string({
-          meta: {
-            description: 'Identifier of the snooze schedule.',
-          },
-        }),
-        custom: schema.maybe(scheduleRequestSchemaV1),
-      }),
-    }),
-  },
-  { meta: { id: 'snooze_rule_response' } }
-);
+  }),
+});

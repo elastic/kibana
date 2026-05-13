@@ -201,9 +201,6 @@ export const typesRulesSchema = schema.object(
 
 export const typesRulesResponseBodySchema = schema.arrayOf(typesRulesSchema);
 
-export const typesRulesResponseSchema = schema.object(
-  {
-    body: typesRulesResponseBodySchema,
-  },
-  { meta: { id: 'rule_types_response' } }
-);
+export const typesRulesResponseSchema = schema.object({
+  body: typesRulesResponseBodySchema,
+});
