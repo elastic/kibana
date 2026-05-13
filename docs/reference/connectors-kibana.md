@@ -187,7 +187,7 @@ Looking up these identifiers is limited to Elastic Cloud organization administra
 
 1. Copy the identifier from the header. The identifier is the substring after `deployment:` or `project:`.
 2. Open the [Elastic Cloud console](https://cloud.elastic.co) and sign in.
-3. Go to the management pages for deployments or projects, and enter the ID in the search field to find the matching deployment or project.
+3. Go to the **Hosted** (for {{ech}} deployments) or **Serverless** (for Serverless projects) page, and enter the ID in the search field to find the matching deployment or project.
 
 
 ## Monitoring connectors [monitoring-connectors]
