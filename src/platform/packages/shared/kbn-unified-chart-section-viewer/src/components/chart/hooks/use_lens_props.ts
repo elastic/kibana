@@ -12,6 +12,7 @@ import {
   type LensAttributes,
   type LensConfig,
   type LensESQLDataset,
+  type LensLegendConfig,
   type LensSeriesLayer,
   type LensYBoundsConfig,
 } from '@kbn/lens-embeddable-utils';
@@ -60,6 +61,7 @@ export const useLensProps = ({
   chartRef,
   chartLayers,
   yBounds,
+  legend,
   error,
   userMessages,
   profileId,
@@ -71,6 +73,7 @@ export const useLensProps = ({
   chartRef?: React.RefObject<HTMLDivElement>;
   chartLayers: LensSeriesLayer[];
   yBounds?: LensYBoundsConfig;
+  legend?: LensLegendConfig;
   error?: Error;
   userMessages?: EmbeddableComponentProps['userMessages'];
   profileId: string;
@@ -80,7 +83,7 @@ export const useLensProps = ({
 
   useEffect(() => {
     chartConfigUpdates$.current.next(void 0);
-  }, [query, title, chartLayers, yBounds, error, userMessages, profileId]);
+  }, [query, title, chartLayers, yBounds, legend, error, userMessages, profileId]);
 
   // creates a stable function that builds the Lens attributes
   const buildAttributesFn = useLatest(async () => {
@@ -88,7 +91,7 @@ export const useLensProps = ({
     // force Lens to build with no datasource on error to show the error message
     if (!chartLayers.length && !error) return null;
 
-    const lensParams = buildLensParams({ query, title, chartLayers, yBounds });
+    const lensParams = buildLensParams({ query, title, chartLayers, yBounds, legend });
     const builder = new LensConfigBuilder(services.dataViews);
 
     const result = (await builder.build(lensParams, {
@@ -186,11 +189,13 @@ const buildLensParams = ({
   title,
   chartLayers,
   yBounds,
+  legend,
 }: {
   query: string;
   title: string;
   chartLayers: LensSeriesLayer[];
   yBounds?: LensYBoundsConfig;
+  legend?: LensLegendConfig;
 }): LensConfig => {
   return {
     chartType: 'xy',
@@ -198,9 +203,7 @@ const buildLensParams = ({
       esql: query,
     },
     title,
-    legend: {
-      show: false,
-    },
+    legend: legend ?? { show: false },
     axisTitleVisibility: {
       showXAxisTitle: false,
       showYAxisTitle: false,
