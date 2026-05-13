@@ -78,6 +78,9 @@ sandbox:
   agent: awf
 
 safe-outputs:
+  # TODO: remove after testing
+  # https://github.github.com/gh-aw/reference/staged-mode/
+  staged: true
   activation-comments: true
   footer: true
   report-failure-as-issue: false
