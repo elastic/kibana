@@ -1072,7 +1072,7 @@ export const hasEntryEscaping = (builderEntry: BuilderEntry): boolean =>
   builderEntry.type !== 'list' &&
   'value' in builderEntry &&
   typeof builderEntry.value === 'string' &&
-  (builderEntry.value.includes('\\\\') ||
+  (builderEntry.value.includes('\\\\', 1) ||
     builderEntry.value.includes('\\*') ||
     builderEntry.value.includes('\\?'));
 

@@ -319,6 +319,17 @@ describe('Helpers', () => {
       ).toBe(true);
     });
 
+    test('returns false when a match value is a valid network path', () => {
+      expect(
+        hasEntryEscaping({
+          type: 'match',
+          value: '\\\\server\\share\\path',
+          field: '',
+          operator: 'included',
+        })
+      ).toBe(false);
+    });
+
     test('returns false when a match value does not contain backslash escapes', () => {
       expect(
         hasEntryEscaping({ type: 'match', value: 'normal*?', field: '', operator: 'included' })
