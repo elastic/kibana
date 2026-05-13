@@ -60,6 +60,7 @@ steps:
           document:
             "@timestamp": "{{ now }}"
             subscription_id: "{{ item._id }}"
+            space_id: "{{ item._source.space_id | default: 'default' }}"
             time_range:
               from: "{{ now | date_minus: 7, 'days' }}"
               to: "{{ now }}"

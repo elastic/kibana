@@ -10,6 +10,6 @@
     "browser": true,
     "configPath": ["xpack", "threatIntelligence"],
     "requiredPlugins": ["agentBuilder", "features"],
-    "optionalPlugins": ["workflowsManagement", "securitySolution", "taskManager"]
+    "optionalPlugins": ["workflowsManagement", "securitySolution", "spaces", "taskManager"]
   }
 }

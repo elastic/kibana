@@ -6,7 +6,12 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { THREAT_INTEL_SOURCES_INDEX } from '../../common';
+import {
+  GLOBAL_SPACE_ID,
+  THREAT_CATEGORIES,
+  THREAT_INTEL_SOURCES_INDEX,
+  type ThreatCategory,
+} from '../../common';
 
 /**
  * Curated starter set of default sources. The original repo bundled the full
@@ -19,17 +24,16 @@ import { THREAT_INTEL_SOURCES_INDEX } from '../../common';
  *   1. First-party vendor research blogs (Mandiant, Unit 42, Talos, CrowdStrike,
  *      Microsoft, Google TAG, Trend Micro, Elastic Security Labs).
  *   2. Government / CERT advisories that publish a stable RSS endpoint (CISA,
- *      UK NCSC, AU ACSC, NVD, US-CERT).
+ *      UK NCSC, AU ACSC, NVD, US-CERT, CCCS, ENISA, JPCERT, BSI).
  *   3. Reputable independent / investigative outlets that the wider community
  *      already treats as authoritative (KrebsOnSecurity, BleepingComputer,
  *      DarkReading, The Hacker News, SecurityWeek).
  *   4. Ransomware/extortion-leak watch feeds (RansomLook).
  *
- * Coverage across the PRD's 15-category taxonomy is intentional: every
- * built-in category (`malware`, `ransomware`, `apt`, `vulnerability`,
- * `data-breach`, `phishing`, `cloud`, `supply-chain`, `cybercrime`,
- * `insider-threat`, `iot`, `ot-ics`, `government-policy`,
- * `privacy-compliance`, `research-tools`) has at least one feed below.
+ * Coverage across the PRD's 15-category taxonomy is enforced by the
+ * `categoryCoverage` invariant assertion below: every built-in category has
+ * at least **two** distinct feeds so the dashboard's category panel isn't a
+ * one-source view.
  *
  * Elastic Security Labs is the canonical built-in `vendor_api` source so the
  * skill has at least one working ingestion path on a fresh install.
@@ -232,8 +236,15 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
     config: { url: 'https://www.ransomlook.io/feeds/news.xml' },
     tags: ['ransomware', 'extortion', 'cybercrime'],
   },
+  {
+    id: 'rss:ransomware-live',
+    adapter_type: 'rss',
+    name: 'Ransomware.live',
+    config: { url: 'https://www.ransomware.live/rss.xml' },
+    tags: ['ransomware', 'extortion'],
+  },
 
-  // --- IoT / niche --------------------------------------------------------
+  // --- IoT / OT-ICS niche -------------------------------------------------
   {
     id: 'rss:iot-security-foundation',
     adapter_type: 'rss',
@@ -241,7 +252,248 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
     config: { url: 'https://iotsecurityfoundation.org/feed/' },
     tags: ['iot', 'research'],
   },
+  {
+    id: 'rss:claroty-team82',
+    adapter_type: 'rss',
+    name: 'Claroty Team82 Research',
+    config: { url: 'https://claroty.com/team82/research/rss.xml' },
+    tags: ['vendor', 'research', 'ot-ics', 'iot'],
+  },
+  {
+    id: 'rss:dragos-blog',
+    adapter_type: 'rss',
+    name: 'Dragos Blog',
+    config: { url: 'https://www.dragos.com/blog/feed/' },
+    tags: ['vendor', 'research', 'ot-ics'],
+  },
+  {
+    id: 'rss:nozomi-labs',
+    adapter_type: 'rss',
+    name: 'Nozomi Networks Labs',
+    config: { url: 'https://www.nozominetworks.com/blog/feed/' },
+    tags: ['vendor', 'research', 'ot-ics', 'iot'],
+  },
+
+  // --- Cloud / SaaS -------------------------------------------------------
+  {
+    id: 'rss:aws-security',
+    adapter_type: 'rss',
+    name: 'AWS Security Blog',
+    config: { url: 'https://aws.amazon.com/blogs/security/feed/' },
+    tags: ['vendor', 'advisories', 'cloud'],
+  },
+  {
+    id: 'rss:gcp-security',
+    adapter_type: 'rss',
+    name: 'Google Cloud Security Blog',
+    config: { url: 'https://cloud.google.com/blog/products/identity-security/rss' },
+    tags: ['vendor', 'advisories', 'cloud'],
+  },
+  {
+    id: 'rss:datadog-security-labs',
+    adapter_type: 'rss',
+    name: 'Datadog Security Labs',
+    config: { url: 'https://securitylabs.datadoghq.com/rss/feed.xml' },
+    tags: ['vendor', 'research', 'cloud', 'supply-chain'],
+  },
+
+  // --- Phishing / credential abuse ---------------------------------------
+  {
+    id: 'rss:phishlabs',
+    adapter_type: 'rss',
+    name: 'Fortra PhishLabs',
+    config: { url: 'https://www.fortra.com/blog/feed' },
+    tags: ['vendor', 'research', 'phishing'],
+  },
+  {
+    id: 'rss:openphish-news',
+    adapter_type: 'rss',
+    name: 'OpenPhish Notices',
+    config: { url: 'https://openphish.com/feed.txt' },
+    tags: ['phishing', 'feed'],
+  },
+
+  // --- Supply chain / open-source -----------------------------------------
+  {
+    id: 'rss:reversinglabs-blog',
+    adapter_type: 'rss',
+    name: 'ReversingLabs Blog',
+    config: { url: 'https://www.reversinglabs.com/blog/rss.xml' },
+    tags: ['vendor', 'research', 'supply-chain', 'malware'],
+  },
+  {
+    id: 'rss:snyk-vulnerability-db',
+    adapter_type: 'rss',
+    name: 'Snyk Vulnerability Disclosures',
+    config: { url: 'https://snyk.io/vuln/feed.xml' },
+    tags: ['vendor', 'advisories', 'supply-chain', 'vulnerability'],
+  },
+  {
+    id: 'rss:github-advisory-database',
+    adapter_type: 'rss',
+    name: 'GitHub Advisory Database',
+    config: { url: 'https://github.com/advisories.atom' },
+    tags: ['advisories', 'supply-chain', 'vulnerability'],
+  },
+
+  // --- Data breach / leak tracking ---------------------------------------
+  {
+    id: 'rss:hibp-feed',
+    adapter_type: 'rss',
+    name: 'Have I Been Pwned Latest Breaches',
+    config: { url: 'https://feeds.feedburner.com/HaveIBeenPwnedLatestBreaches' },
+    tags: ['data-breach'],
+  },
+  {
+    id: 'rss:databreaches-net',
+    adapter_type: 'rss',
+    name: 'DataBreaches.net',
+    config: { url: 'https://www.databreaches.net/feed/' },
+    tags: ['data-breach', 'cybercrime'],
+  },
+
+  // --- Insider threat / fraud --------------------------------------------
+  {
+    id: 'rss:cert-insider-threat',
+    adapter_type: 'rss',
+    name: 'CERT Insider Threat Center',
+    config: { url: 'https://insights.sei.cmu.edu/insider-threat/feed/' },
+    tags: ['research', 'insider-threat'],
+  },
+  {
+    id: 'rss:ic3-public',
+    adapter_type: 'rss',
+    name: 'FBI IC3 Public Service Announcements',
+    config: { url: 'https://www.ic3.gov/Media/News/RssFeed' },
+    tags: ['government', 'cybercrime', 'insider-threat'],
+  },
+
+  // --- Government / CERT (extended) --------------------------------------
+  {
+    id: 'rss:cccs-canada',
+    adapter_type: 'rss',
+    name: 'Canadian Centre for Cyber Security',
+    config: { url: 'https://www.cyber.gc.ca/api/cccs/threats/v1/rss/en' },
+    tags: ['government', 'advisories', 'government-policy'],
+  },
+  {
+    id: 'rss:enisa',
+    adapter_type: 'rss',
+    name: 'ENISA News',
+    config: { url: 'https://www.enisa.europa.eu/rss/news' },
+    tags: ['government', 'government-policy', 'privacy-compliance'],
+  },
+  {
+    id: 'rss:bsi-de',
+    adapter_type: 'rss',
+    name: 'German BSI CERT-Bund WID',
+    config: { url: 'https://wid.cert-bund.de/content/public/securityAdvisory/rss' },
+    tags: ['government', 'advisories'],
+  },
+  {
+    id: 'rss:jpcert',
+    adapter_type: 'rss',
+    name: 'JPCERT/CC Alerts',
+    config: { url: 'https://www.jpcert.or.jp/english/rss/jpcert-en.rdf' },
+    tags: ['government', 'advisories'],
+  },
+
+  // --- Privacy / compliance ----------------------------------------------
+  {
+    id: 'rss:iapp-news',
+    adapter_type: 'rss',
+    name: 'IAPP Privacy Tracker',
+    config: { url: 'https://iapp.org/news/rss/' },
+    tags: ['privacy-compliance', 'government-policy'],
+  },
+  {
+    id: 'rss:edps-news',
+    adapter_type: 'rss',
+    name: 'European Data Protection Supervisor',
+    config: { url: 'https://www.edps.europa.eu/press-publications/press-news/rss_en' },
+    tags: ['government', 'privacy-compliance'],
+  },
+
+  // --- APT / nation-state tracking ---------------------------------------
+  {
+    id: 'rss:volexity',
+    adapter_type: 'rss',
+    name: 'Volexity Threat Research',
+    config: { url: 'https://www.volexity.com/blog/feed/' },
+    tags: ['vendor', 'research', 'apt'],
+  },
+  {
+    id: 'rss:eset-welivesecurity',
+    adapter_type: 'rss',
+    name: 'ESET WeLiveSecurity',
+    config: { url: 'https://www.welivesecurity.com/feed/' },
+    tags: ['vendor', 'research', 'apt', 'malware'],
+  },
+
+  // --- Research tools / OSINT --------------------------------------------
+  {
+    id: 'rss:malwarebytes-labs',
+    adapter_type: 'rss',
+    name: 'Malwarebytes Labs',
+    config: { url: 'https://www.malwarebytes.com/blog/feed' },
+    tags: ['vendor', 'research', 'malware', 'research-tools'],
+  },
+  {
+    id: 'rss:sans-isc',
+    adapter_type: 'rss',
+    name: 'SANS Internet Storm Center Diaries',
+    config: { url: 'https://isc.sans.edu/rssfeed_full.xml' },
+    tags: ['research', 'research-tools'],
+  },
 ];
+
+/**
+ * Build-time invariant: every category in `THREAT_CATEGORIES` must have
+ * **at least two** seeded feeds. If a future PR drops below the threshold
+ * we throw at plugin start so the regression is caught in dev, not in prod.
+ *
+ * Listed here rather than computed because some categories are intentionally
+ * served by feeds tagged with related keywords (e.g. `extortion` covers
+ * `ransomware`); the explicit map prevents drift.
+ */
+const REQUIRED_MIN_FEEDS_PER_CATEGORY = 2;
+const CATEGORY_KEYWORDS: Record<ThreatCategory, readonly string[]> = {
+  apt: ['apt'],
+  malware: ['malware'],
+  ransomware: ['ransomware', 'extortion'],
+  vulnerability: ['vulnerability', 'advisories'],
+  'data-breach': ['data-breach'],
+  phishing: ['phishing'],
+  cloud: ['cloud'],
+  'supply-chain': ['supply-chain'],
+  cybercrime: ['cybercrime'],
+  'insider-threat': ['insider-threat'],
+  iot: ['iot'],
+  'ot-ics': ['ot-ics'],
+  'government-policy': ['government-policy', 'government'],
+  'privacy-compliance': ['privacy-compliance'],
+  'research-tools': ['research-tools', 'research'],
+};
+
+export const verifyCategoryCoverage = (
+  sources: readonly DefaultSource[] = DEFAULT_SOURCES
+): void => {
+  const gaps: string[] = [];
+  for (const category of THREAT_CATEGORIES) {
+    const keywords = CATEGORY_KEYWORDS[category];
+    const matchCount = sources.filter((s) => s.tags.some((t) => keywords.includes(t))).length;
+    if (matchCount < REQUIRED_MIN_FEEDS_PER_CATEGORY) {
+      gaps.push(`${category} (only ${matchCount})`);
+    }
+  }
+  if (gaps.length > 0) {
+    throw new Error(
+      `DEFAULT_SOURCES is missing >=${REQUIRED_MIN_FEEDS_PER_CATEGORY} feeds for: ${gaps.join(
+        ', '
+      )}`
+    );
+  }
+};
 
 /**
  * Idempotent seeding — inserts each default source by stable id with
@@ -257,6 +509,7 @@ export const seedDefaultSources = async ({
   logger: Logger;
 }): Promise<void> => {
   const log = logger.get('seed-default-sources');
+  verifyCategoryCoverage();
   const now = new Date().toISOString();
 
   for (const src of DEFAULT_SOURCES) {
@@ -276,6 +529,9 @@ export const seedDefaultSources = async ({
           enabled: true,
           config: src.config,
           tags: src.tags,
+          // Seeded sources are visible from every space; operator-added
+          // sources are tagged with the originating space.
+          space_id: GLOBAL_SPACE_ID,
           created_at: now,
           updated_at: now,
         },

@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter, Logger } from '@kbn/core/server';
 import {
   SEVERITY_LEVELS,
   SUBMIT_SUBSCRIPTION_API_PATH,
@@ -14,6 +13,8 @@ import {
   type SeverityLevel,
 } from '../../common';
 import { persistSubscription } from '../agent_builder/tools';
+import { resolveCurrentSpaceId } from '../lib/space_filter';
+import type { RouteRegistrationDeps } from '.';
 
 const submitBodySchema = schema.object({
   tags: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
@@ -45,7 +46,11 @@ const submitBodySchema = schema.object({
  * HTTP boundary; the underlying ES write still runs as the current user
  * so role-based document/field-level rules also apply.
  */
-export const registerSubmitSubscriptionRoute = (router: IRouter, logger: Logger): void => {
+export const registerSubmitSubscriptionRoute = ({
+  router,
+  logger,
+  getSpacesService,
+}: RouteRegistrationDeps): void => {
   router.versioned
     .post({
       path: SUBMIT_SUBSCRIPTION_API_PATH,
@@ -68,6 +73,7 @@ export const registerSubmitSubscriptionRoute = (router: IRouter, logger: Logger)
       async (context, request, response) => {
         const core = await context.core;
         const esClient = core.elasticsearch.client.asCurrentUser;
+        const spaceId = resolveCurrentSpaceId(getSpacesService(), request);
         try {
           const result = await persistSubscription(esClient, {
             tags: request.body.tags,
@@ -77,6 +83,7 @@ export const registerSubmitSubscriptionRoute = (router: IRouter, logger: Logger)
             schedule_rrule: request.body.schedule_rrule,
             delivery: request.body.delivery,
             template_id: request.body.template_id,
+            space_id: spaceId,
           });
           return response.ok({
             body: {

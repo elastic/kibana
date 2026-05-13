@@ -10,6 +10,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import {
+  GLOBAL_SPACE_ID,
   SEVERITY_LEVELS,
   SOURCE_TYPES,
   THREAT_CATEGORIES,
@@ -102,9 +103,11 @@ export const searchReportsTool: BuiltinSkillBoundedTool<typeof searchReportsSche
       categories,
       regions,
     },
-    { esClient, logger }
+    { esClient, logger, spaceId }
   ) => {
-    const filters: Array<Record<string, unknown>> = [];
+    const filters: Array<Record<string, unknown>> = [
+      { terms: { space_id: [spaceId, GLOBAL_SPACE_ID] } },
+    ];
     if (sourceTypes?.length) filters.push({ terms: { 'source.type': sourceTypes } });
     if (timeRange) {
       filters.push({ range: { '@timestamp': { gte: timeRange.from, lte: timeRange.to } } });

@@ -9,15 +9,28 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
+  EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
+  EuiComboBox,
+  type EuiComboBoxOptionOption,
   EuiEmptyPrompt,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiHorizontalRule,
   EuiLoadingSpinner,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  useGeneratedHtmlId,
   EuiPageTemplate,
   EuiPanel,
   EuiProgress,
+  EuiSelect,
   EuiSpacer,
   EuiStat,
   EuiText,
@@ -26,8 +39,15 @@ import {
 import type { CoreStart } from '@kbn/core/public';
 import {
   DASHBOARD_OVERVIEW_API_PATH,
+  DEFAULT_REGIONS_SETTING_KEY,
+  SAVED_VIEWS_API_PATH,
+  THREAT_CATEGORIES,
+  THREAT_REGIONS,
   type DashboardOverviewResponse,
+  type SavedViewSummary,
   type SeverityLevel,
+  type ThreatCategory,
+  type ThreatRegion,
 } from '../../common';
 
 interface Props {
@@ -41,10 +61,31 @@ const SEVERITY_COLOR: Record<SeverityLevel, string> = {
   critical: 'danger',
 };
 
+interface FilterState {
+  regions: ThreatRegion[];
+  categories: ThreatCategory[];
+}
+
+const emptyFilters: FilterState = { regions: [], categories: [] };
+
 export const IntelligenceHubApp: React.FC<Props> = ({ core }) => {
   const [data, setData] = useState<DashboardOverviewResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState<FilterState>(emptyFilters);
+  const [savedViews, setSavedViews] = useState<SavedViewSummary[]>([]);
+  const [activeViewId, setActiveViewId] = useState<string>('');
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [savedViewsLoaded, setSavedViewsLoaded] = useState(false);
+
+  // Pre-fill region filter from the per-space advanced setting on first mount.
+  useEffect(() => {
+    const defaultRegions = (core.uiSettings.get(DEFAULT_REGIONS_SETTING_KEY, []) ??
+      []) as ThreatRegion[];
+    if (defaultRegions.length > 0) {
+      setFilters((prev) => ({ ...prev, regions: defaultRegions }));
+    }
+  }, [core.uiSettings]);
 
   const fetchOverview = useCallback(async () => {
     setLoading(true);
@@ -52,6 +93,10 @@ export const IntelligenceHubApp: React.FC<Props> = ({ core }) => {
     try {
       const response = await core.http.get<DashboardOverviewResponse>(DASHBOARD_OVERVIEW_API_PATH, {
         version: '1',
+        query: {
+          ...(filters.regions.length ? { regions: filters.regions } : {}),
+          ...(filters.categories.length ? { categories: filters.categories } : {}),
+        },
       });
       setData(response);
     } catch (err) {
@@ -59,11 +104,83 @@ export const IntelligenceHubApp: React.FC<Props> = ({ core }) => {
     } finally {
       setLoading(false);
     }
+  }, [core.http, filters]);
+
+  const fetchSavedViews = useCallback(async () => {
+    try {
+      const response = await core.http.get<{ views: SavedViewSummary[] }>(SAVED_VIEWS_API_PATH, {
+        version: '1',
+      });
+      setSavedViews(response.views ?? []);
+    } catch {
+      // Swallow — saved views are optional. Lack of permissions etc.
+      // shouldn't kill the dashboard.
+      setSavedViews([]);
+    } finally {
+      setSavedViewsLoaded(true);
+    }
   }, [core.http]);
 
   useEffect(() => {
     fetchOverview();
   }, [fetchOverview]);
+
+  useEffect(() => {
+    fetchSavedViews();
+  }, [fetchSavedViews]);
+
+  const applySavedView = useCallback(
+    (id: string) => {
+      const found = savedViews.find((v) => v.id === id);
+      if (!found) return;
+      setActiveViewId(id);
+      setFilters({
+        regions: found.filters.regions ?? [],
+        categories: found.filters.categories ?? [],
+      });
+    },
+    [savedViews]
+  );
+
+  const saveCurrentView = useCallback(
+    async (name: string, description?: string) => {
+      try {
+        const created = await core.http.post<SavedViewSummary>(SAVED_VIEWS_API_PATH, {
+          version: '1',
+          body: JSON.stringify({
+            name,
+            description,
+            filters: {
+              ...(filters.regions.length ? { regions: filters.regions } : {}),
+              ...(filters.categories.length ? { categories: filters.categories } : {}),
+            },
+          }),
+        });
+        setSavedViews((prev) => [created, ...prev]);
+        setActiveViewId(created.id);
+        setShowSaveModal(false);
+      } catch (err) {
+        core.notifications.toasts.addDanger({
+          title: i18n.translate('xpack.threatIntelligence.app.saveViewFailedTitle', {
+            defaultMessage: 'Failed to save view',
+          }),
+          text:
+            (err as { body?: { message?: string }; message?: string }).body?.message ??
+            (err as Error).message,
+        });
+      }
+    },
+    [core.http, core.notifications.toasts, filters.regions, filters.categories]
+  );
+
+  const exportToPdf = useCallback(() => {
+    // No hard dependency on the Reporting plugin: trigger the browser's
+    // print-to-PDF flow. Reporting integration is intentionally out of
+    // scope for v1 because it adds a heavyweight optional plugin
+    // dependency; this fallback is good enough for the "Export to PDF"
+    // PRD requirement and is easy to swap to `share.url.locators` later.
+    window.print();
+  }, []);
 
   const content = useMemo(() => {
     if (loading && !data) {
@@ -117,9 +234,216 @@ export const IntelligenceHubApp: React.FC<Props> = ({ core }) => {
               })
             : undefined
         }
+        rightSideItems={[
+          <EuiButton
+            key="export"
+            iconType="exportAction"
+            color="text"
+            onClick={exportToPdf}
+            data-test-subj="threatIntelExportPdfBtn"
+          >
+            {i18n.translate('xpack.threatIntelligence.app.exportPdfBtn', {
+              defaultMessage: 'Export to PDF',
+            })}
+          </EuiButton>,
+          <EuiButton
+            key="save"
+            iconType="save"
+            onClick={() => setShowSaveModal(true)}
+            data-test-subj="threatIntelSaveViewBtn"
+          >
+            {i18n.translate('xpack.threatIntelligence.app.saveViewBtn', {
+              defaultMessage: 'Save view',
+            })}
+          </EuiButton>,
+        ]}
       />
-      <EuiPageTemplate.Section>{content}</EuiPageTemplate.Section>
+      <EuiPageTemplate.Section>
+        <FilterBar
+          filters={filters}
+          onFiltersChange={setFilters}
+          savedViews={savedViews}
+          activeViewId={activeViewId}
+          onApplySavedView={applySavedView}
+          savedViewsLoaded={savedViewsLoaded}
+        />
+        <EuiSpacer size="m" />
+        {content}
+      </EuiPageTemplate.Section>
+      {showSaveModal ? (
+        <SaveViewModal onCancel={() => setShowSaveModal(false)} onSave={saveCurrentView} />
+      ) : null}
     </EuiPageTemplate>
+  );
+};
+
+const FilterBar: React.FC<{
+  filters: FilterState;
+  onFiltersChange: (next: FilterState) => void;
+  savedViews: SavedViewSummary[];
+  activeViewId: string;
+  onApplySavedView: (id: string) => void;
+  savedViewsLoaded: boolean;
+}> = ({
+  filters,
+  onFiltersChange,
+  savedViews,
+  activeViewId,
+  onApplySavedView,
+  savedViewsLoaded,
+}) => {
+  const regionOptions = useMemo(() => THREAT_REGIONS.map((r) => ({ label: r, value: r })), []);
+  const categoryOptions = useMemo(() => THREAT_CATEGORIES.map((c) => ({ label: c, value: c })), []);
+
+  return (
+    <EuiPanel hasBorder paddingSize="m">
+      <EuiFlexGroup gutterSize="m" wrap alignItems="flexEnd">
+        <EuiFlexItem style={{ minWidth: 240 }}>
+          <EuiFormRow
+            label={i18n.translate('xpack.threatIntelligence.app.filterRegions', {
+              defaultMessage: 'Regions',
+            })}
+          >
+            <EuiComboBox
+              options={regionOptions}
+              selectedOptions={filters.regions.map((r) => ({ label: r, value: r }))}
+              onChange={(opts: Array<EuiComboBoxOptionOption<string>>) =>
+                onFiltersChange({
+                  ...filters,
+                  regions: opts.map((o) => o.value as ThreatRegion),
+                })
+              }
+              placeholder={i18n.translate('xpack.threatIntelligence.app.filterRegionsPlaceholder', {
+                defaultMessage: 'All regions',
+              })}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem style={{ minWidth: 240 }}>
+          <EuiFormRow
+            label={i18n.translate('xpack.threatIntelligence.app.filterCategories', {
+              defaultMessage: 'Categories',
+            })}
+          >
+            <EuiComboBox
+              options={categoryOptions}
+              selectedOptions={filters.categories.map((c) => ({ label: c, value: c }))}
+              onChange={(opts: Array<EuiComboBoxOptionOption<string>>) =>
+                onFiltersChange({
+                  ...filters,
+                  categories: opts.map((o) => o.value as ThreatCategory),
+                })
+              }
+              placeholder={i18n.translate(
+                'xpack.threatIntelligence.app.filterCategoriesPlaceholder',
+                {
+                  defaultMessage: 'All categories',
+                }
+              )}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem style={{ minWidth: 240 }}>
+          <EuiFormRow
+            label={i18n.translate('xpack.threatIntelligence.app.filterSavedView', {
+              defaultMessage: 'Saved view',
+            })}
+          >
+            <EuiSelect
+              options={[
+                {
+                  value: '',
+                  text: savedViewsLoaded
+                    ? i18n.translate('xpack.threatIntelligence.app.filterSavedViewBlank', {
+                        defaultMessage: '— none —',
+                      })
+                    : i18n.translate('xpack.threatIntelligence.app.filterSavedViewLoading', {
+                        defaultMessage: 'Loading…',
+                      }),
+                },
+                ...savedViews.map((v) => ({ value: v.id, text: v.name })),
+              ]}
+              value={activeViewId}
+              onChange={(e) => onApplySavedView(e.target.value)}
+              disabled={!savedViewsLoaded || savedViews.length === 0}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        {filters.regions.length > 0 || filters.categories.length > 0 ? (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty size="s" iconType="cross" onClick={() => onFiltersChange(emptyFilters)}>
+              {i18n.translate('xpack.threatIntelligence.app.filtersClear', {
+                defaultMessage: 'Clear',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+};
+
+const SaveViewModal: React.FC<{
+  onCancel: () => void;
+  onSave: (name: string, description?: string) => void;
+}> = ({ onCancel, onSave }) => {
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const canSave = name.trim().length > 0;
+  const modalTitleId = useGeneratedHtmlId();
+
+  return (
+    <EuiModal onClose={onCancel} aria-labelledby={modalTitleId}>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle id={modalTitleId}>
+          {i18n.translate('xpack.threatIntelligence.app.saveViewModalTitle', {
+            defaultMessage: 'Save current view',
+          })}
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <EuiFormRow
+          label={i18n.translate('xpack.threatIntelligence.app.saveViewNameLabel', {
+            defaultMessage: 'Name',
+          })}
+        >
+          <EuiFieldText
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            maxLength={120}
+            data-test-subj="threatIntelSaveViewNameInput"
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('xpack.threatIntelligence.app.saveViewDescriptionLabel', {
+            defaultMessage: 'Description (optional)',
+          })}
+        >
+          <EuiFieldText
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            maxLength={2000}
+          />
+        </EuiFormRow>
+      </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButtonEmpty onClick={onCancel}>
+          {i18n.translate('xpack.threatIntelligence.app.saveViewCancel', {
+            defaultMessage: 'Cancel',
+          })}
+        </EuiButtonEmpty>
+        <EuiButton
+          fill
+          isDisabled={!canSave}
+          onClick={() => onSave(name.trim(), description.trim() || undefined)}
+          data-test-subj="threatIntelSaveViewSubmitBtn"
+        >
+          {i18n.translate('xpack.threatIntelligence.app.saveViewSubmit', {
+            defaultMessage: 'Save',
+          })}
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
   );
 };
 

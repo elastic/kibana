@@ -7,6 +7,7 @@
 
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -15,11 +16,13 @@ import type {
 export interface ThreatIntelligenceSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
   features: FeaturesPluginSetup;
+  spaces?: SpacesPluginSetup;
   taskManager?: TaskManagerSetupContract;
 }
 
 export interface ThreatIntelligenceStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
+  spaces?: SpacesPluginStart;
   taskManager?: TaskManagerStartContract;
 }
 

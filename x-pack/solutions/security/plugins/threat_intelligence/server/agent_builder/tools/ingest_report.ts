@@ -11,6 +11,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import {
+  GLOBAL_SPACE_ID,
   SEVERITY_LEVELS,
   THREAT_INTEL_TOOL_IDS,
   THREAT_REPORTS_DATA_STREAM,
@@ -65,7 +66,7 @@ export const ingestReportTool: BuiltinSkillBoundedTool<typeof ingestReportSchema
       severity,
       language,
     },
-    { esClient, logger }
+    { esClient, logger, spaceId }
   ) => {
     const fp = fingerprint(`${title}\n${bodyText}`);
     const now = new Date().toISOString();
@@ -78,7 +79,17 @@ export const ingestReportTool: BuiltinSkillBoundedTool<typeof ingestReportSchema
         index: THREAT_REPORTS_DATA_STREAM,
         size: 1,
         _source: false,
-        query: { term: { content_fingerprint: fp } },
+        // Dedup is scoped to the current space + the global sentinel: the same
+        // advisory in another space is *not* a duplicate (per-space isolation),
+        // but a global-tagged seed is everyone's canonical copy.
+        query: {
+          bool: {
+            filter: [
+              { term: { content_fingerprint: fp } },
+              { terms: { space_id: [spaceId, GLOBAL_SPACE_ID] } },
+            ],
+          },
+        },
       });
 
       const total =
@@ -109,6 +120,7 @@ export const ingestReportTool: BuiltinSkillBoundedTool<typeof ingestReportSchema
         document: {
           '@timestamp': now,
           content_fingerprint: fp,
+          space_id: spaceId,
           source: {
             type: 'manual',
             name: sourceName,

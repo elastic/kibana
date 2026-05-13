@@ -42,8 +42,19 @@ import {
  * category-breakdown / "Affects You" panels and by `search_reports`'s new
  * `categories[]` / `regions[]` filters. Both arrays are closed enums
  * (see `THREAT_CATEGORIES` / `THREAT_REGIONS` in `common/constants.ts`).
+ *
+ * v6: adds `space_id` (keyword) to `threat-reports-*` and to each
+ * companion index (`.threat-intel-sources`, `.threat-intel-subscriptions`,
+ * `.threat-intel-digests`). Single global index, logical per-space
+ * isolation: routes filter by `request.getSpaceId()` and writes tag the
+ * current space. The sentinel `'*'` means "all spaces" and is reserved
+ * for built-ins (seeded sources, global subscriptions) so default content
+ * stays visible regardless of which space the request originated from.
  */
-const TEMPLATE_VERSION = 5;
+const TEMPLATE_VERSION = 6;
+
+/** Keyword sentinel meaning "visible from every space". */
+export const SPACE_ID_GLOBAL = '*' as const;
 
 const TEMPLATE_META = { managed_by: 'threat_intelligence', version: TEMPLATE_VERSION };
 
@@ -83,6 +94,9 @@ const threatReportsTemplate = {
       properties: {
         '@timestamp': { type: 'date' as const },
         content_fingerprint: { type: 'keyword' as const },
+        // Logical per-space isolation tag. `'*'` = visible from every
+        // space. Routes filter by current space + `'*'`.
+        space_id: { type: 'keyword' as const },
         source: {
           properties: {
             type: { type: 'keyword' as const },
@@ -212,6 +226,7 @@ const COMPANION_INDEX_TEMPLATES: Array<{
             enabled: { type: 'boolean' },
             config: { type: 'object', enabled: false },
             tags: { type: 'keyword' },
+            space_id: { type: 'keyword' },
             created_at: { type: 'date' },
             updated_at: { type: 'date' },
           },
@@ -248,6 +263,7 @@ const COMPANION_INDEX_TEMPLATES: Array<{
             workflow_id: { type: 'keyword' },
             human_summary: { type: 'text' },
             template_id: { type: 'keyword' },
+            space_id: { type: 'keyword' },
             created_at: { type: 'date' },
             updated_at: { type: 'date' },
           },
@@ -337,6 +353,7 @@ const COMPANION_INDEX_TEMPLATES: Array<{
             report_ids: { type: 'keyword' },
             delivered: { type: 'boolean' },
             delivery_error: { type: 'text', index: false },
+            space_id: { type: 'keyword' },
           },
         },
       },

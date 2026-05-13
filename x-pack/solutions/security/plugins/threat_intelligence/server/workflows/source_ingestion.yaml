@@ -57,6 +57,7 @@ steps:
                     document:
                       "@timestamp": "{{ now }}"
                       content_fingerprint: "{{ steps.rss_fetch.output.body | sha256 }}"
+                      space_id: "{{ item._source.space_id | default: '*' }}"
                       source:
                         type: rss
                         name: "{{ item._source.name }}"
@@ -94,6 +95,7 @@ steps:
                     document:
                       "@timestamp": "{{ now }}"
                       content_fingerprint: "{{ steps.stix_pull.output.body | sha256 }}"
+                      space_id: "{{ item._source.space_id | default: '*' }}"
                       source:
                         type: stix
                         name: "{{ item._source.name }}"
@@ -130,6 +132,7 @@ steps:
                     document:
                       "@timestamp": "{{ now }}"
                       content_fingerprint: "{{ steps.taxii_poll.output.body | sha256 }}"
+                      space_id: "{{ item._source.space_id | default: '*' }}"
                       source:
                         type: taxii
                         name: "{{ item._source.name }}"
@@ -164,6 +167,7 @@ steps:
                     document:
                       "@timestamp": "{{ now }}"
                       content_fingerprint: "{{ steps.vendor_call.output.body | sha256 }}"
+                      space_id: "{{ item._source.space_id | default: '*' }}"
                       source:
                         type: vendor_api
                         name: "{{ item._source.name }}"

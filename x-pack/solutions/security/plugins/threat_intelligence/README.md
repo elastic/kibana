@@ -4,13 +4,13 @@ Source-agnostic threat intelligence skill for Agent Builder. Surfaces external
 threat-intel feeds, ad-hoc analyst pastes, and behavioral detection-rule
 proposals through the **`threat-intelligence`** Agent Builder skill.
 
-## What ships in v1 (Phase A)
+## What ships in v1 (Phase A + Phase C)
 
 - A `threat-reports-*` data stream (`semantic_text` + BM25 mirror fields, RRF
   hybrid retriever, content-fingerprinted dedup, `extracted.ioc_set_hash` and
   `provenance.related_reports[]` slots for cross-report correlation).
-- An Agent Builder skill **`threat-intelligence`** with six inline tools
-  (one slot reserved for Phase C):
+- An Agent Builder skill **`threat-intelligence`** with seven inline tools
+  (the skill cap):
   - `threat_intel.search_reports` — semantic + BM25 hybrid search. Supports
     `categories[]` and `regions[]` filters backed by the v5 schema
     additions.
@@ -39,6 +39,17 @@ proposals through the **`threat-intelligence`** Agent Builder skill.
     (`daily-threat-debrief`, `weekly-ciso-digest`, `ransomware-watch`) and
     `delivery_connector_id` to nominate which configured actions connector
     to dispatch through.
+  - `threat_intel.generalize_from_telemetry` — **Phase C**. Closes the
+    brittle-alert → durable-behavioral-rule feedback loop. Caller (the
+    agent) hands in a pre-fetched set of `.alerts-security.alerts-*`
+    samples; the tool runs the same behavioral extraction prompt as
+    `hunt_behavior` against the alert summaries, validates candidates
+    against the ATT&CK catalog, and persists a synthetic
+    `source.type: "telemetry"` row to `threat-reports-*` so the same
+    finding appears in `coverage_gap` / `search_reports` / the
+    dashboard. Returns the same `behaviors` + `attachment_hints` shape
+    as `hunt_behavior` so the downstream rendering and Detection
+    Engine handoff are unchanged.
 - Registry tools:
   - `threat_intel.extract_iocs` — used by Workflow 2.
   - `threat_intel.analyse_environment` — coarse environment profile
@@ -84,8 +95,23 @@ proposals through the **`threat-intelligence`** Agent Builder skill.
   `throwUnrecoverableError`, and persists a `lastSyncedAt` cursor under
   `stateSchemaByVersion[1]`. Gated on the `iocIndicatorSyncEnabled`
   experimental flag and the optional `taskManager` plugin.
-- A small seeded set of default sources so the skill is useful on a fresh
-  install before the operator expands the source list.
+- A curated **vetted catalog** of ~50 default sources seeded on a fresh
+  install: first-party vendor research blogs (Mandiant, Unit 42, Talos,
+  CrowdStrike, Microsoft, Google TAG, Trend Micro, Wiz, Volexity, ESET,
+  Malwarebytes, Datadog Security Labs, ...), government / CERT advisories
+  (CISA, NCSC, ACSC, NVD, CCCS, ENISA, JPCERT, BSI), reputable
+  independent / investigative outlets (KrebsOnSecurity, BleepingComputer,
+  DarkReading, The Hacker News, SecurityWeek, The Record), ransomware
+  watch feeds (RansomLook, Ransomware.live), cloud / SaaS (AWS, GCP,
+  Datadog), supply-chain (ReversingLabs, Snyk, GitHub advisories),
+  breach trackers (HIBP, DataBreaches.net), insider-threat (CERT-CMU,
+  FBI IC3), privacy (IAPP, EDPS), OT/ICS (Claroty Team82, Dragos,
+  Nozomi), and research tools (SANS ISC). A
+  `verifyCategoryCoverage` assertion in `seed_default_sources.ts`
+  fails plugin start if any of the 15 PRD categories drops below two
+  feeds, so the catalog can't regress silently. We do not bundle the
+  upstream 214-feed list verbatim — the long tail is operator-extended
+  via the `manage_sources` flow.
 - A **Kibana app** at `Security > Intelligence Hub` (`app/threatIntelligence`)
   that renders a visual overview dashboard — stats ribbon (total /
   critical / high / affects-you), category breakdown, geographic
@@ -96,29 +122,39 @@ proposals through the **`threat-intelligence`** Agent Builder skill.
   a single internal aggregation endpoint
   (`GET /internal/threat_intelligence/dashboard/overview`) gated by
   the `threatIntelligence_read` privilege.
+  - A **filter bar** with `regions[]` and `categories[]` multi-select plus
+    a saved-view selector.
+  - **Saved views** — CRUD over the `threat-intelligence-saved-view`
+    saved-object type via `/internal/threat_intelligence/saved_views`.
+    Persists the filter set so users can name + share dashboard cuts.
+  - **Location-aware defaults** — the per-space advanced setting
+    `securitySolution:threatIntelligence:defaultRegions` pre-fills the
+    `regions` filter on first load (operator-tuned per tenant).
+  - **Export to PDF** — uses the browser's native print-to-PDF dialog.
+    Intentionally no hard dependency on the Reporting plugin; the
+    fallback satisfies the PRD requirement and is easy to swap to
+    `share.url.locators` later.
 
 ## Phased scope
 
-- **Phase A (v1)** — external feeds + analyst paste + behavioral hunting (this
-  release).
+- **Phase A (v1)** — external feeds + analyst paste + behavioral hunting
+  (this release).
 - **Phase B (deps)** — replaces the `threat-intel-subscription-confirmation`
   card with an `interactive_form` attachment once that platform primitive
   lands, and replaces the **Deploy** button's clipboard-then-navigate hop on
   `threat-intel-finding-card` with a structured prefill payload sent
   directly to the Detection Engine rule create page (the current handoff
   works but loses one click). Owned by the platform team.
-- **Phase C (deferred)** — `threat_intel.generalize_from_telemetry`. Reads
-  alert documents via the existing `security.alerts` registry tool, runs the
-  same behavioral-extraction prompt, writes a `source.type: 'telemetry'`
-  entry into `threat-reports-*`, and delegates to
-  `security.create_detection_rule`. The `source.type` enum and the
-  `provenance.source_doc_ref` schema slot are reserved now so Phase C is
-  purely additive.
-
-The skill description is deliberately **honest about Phase A's scope**. It does
-not promise telemetry-input or feedback-loop functionality — phrasings like
-"generalize this alert" or "this alert keeps firing on rotating hashes" are
-reserved for Phase C so the agent's tool selector doesn't oversell.
+- **Phase C (in this release)** — `threat_intel.generalize_from_telemetry`.
+  Reads pre-fetched alert documents (via the existing `security.alerts`
+  registry tool the agent calls first), runs the same behavioral
+  extraction prompt as `hunt_behavior` against alert summaries, writes a
+  synthetic `source.type: 'telemetry'` entry into `threat-reports-*`, and
+  returns proposals shaped for the same finding-card rendering and
+  `security.create_detection_rule` handoff as `hunt_behavior`. The
+  `source.type` enum value `telemetry` and the
+  `provenance.source_doc_ref` schema slot were reserved in earlier
+  index-template versions so this tool is purely additive.
 
 ## Detection model
 
@@ -225,22 +261,40 @@ PRD's three-tier privilege model:
 
 | Tier | Kibana privilege | Grants |
 |------|------------------|--------|
-| `read` | feature `read` | Search reports, view subscriptions, hunt against the environment, view sources. |
-| `write` | feature `all` minus the `manageSources` sub-feature | `read` plus create / delete subscriptions and ingest analyst-paste reports. |
+| `read` | feature `read` | Search reports, view subscriptions, hunt against the environment, view sources, read saved views. |
+| `write` | feature `all` minus the `manageSources` sub-feature | `read` plus create / delete subscriptions, ingest analyst-paste reports, manage saved views. |
 | `admin` | feature `all` | `write` plus manage feed sources (add / edit / disable). |
 
 Routes thread these through `security.authz.requiredPrivileges`. Granular
 sub-feature toggling is exposed in Role Management.
 
-Per-space data isolation (the PRD's `.cisonews-*-{space}` pattern) is **not**
-implemented in this release. The indices live globally because the bundled
-workflows execute on a global schedule with no space context — making them
-per-space would require either deploying one workflow per space (operator
-burden) or threading space-aware index resolution through every step in the
-workflow YAMLs. Instead the plugin uses the standard Kibana RBAC boundary
-(feature privileges + ES role mappings) to scope access. Future work that
-introduces per-space isolation should pair it with a per-space workflow
-deployment story.
+License: the feature registers with `minimumLicense: 'platinum'` (PRD baseline).
+Some downstream capabilities still gate higher at runtime — Agent Builder and
+the bundled Workflows are Enterprise-only — so on a Platinum cluster the
+dashboard, source catalog, search, saved views, and subscription routes are
+usable, but the ingestion workflows and the skill itself require Enterprise.
+This is intentional: a CISO on Platinum can consume threat intel an Enterprise
+neighbour aggregated for them, even before their org upgrades the workflow tier.
+
+### Per-space isolation
+
+Implemented as a **logical** tag, not separate per-space indices. Every
+plugin-owned document carries a `space_id` keyword:
+
+- **Reads** filter by `{ terms: { space_id: [currentSpace, '*'] } }` so each
+  space sees only its own rows plus the `'*'`-tagged built-ins.
+- **Writes** from HTTP routes resolve `request.getSpaceId()` via the optional
+  `spaces` plugin (falls back to `'default'` when the plugin is missing).
+- **Workflows** propagate `space_id` from the originating source row to each
+  ingested report, and from the originating subscription to each delivered
+  digest, so single global workflow schedules continue to work without
+  per-space deployment.
+- **Seeded sources** are tagged `space_id: '*'` so the bundled catalog is
+  visible from every space.
+
+This is a deliberate departure from the PRD's `.cisonews-*-{space}` pattern.
+Operationally simpler (one set of indices, one workflow deployment) and
+covers the same isolation surface for the dashboard + agent reads.
 
 ## Trade-offs accepted
 

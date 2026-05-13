@@ -12,6 +12,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { parseExperimentalConfigValue, type ExperimentalFeatures } from '../common';
 import type { ThreatIntelligenceConfig } from './config';
 import type {
@@ -25,8 +26,10 @@ import { registerAttachmentTypes } from './agent_builder/attachments';
 import { analyseEnvironmentTool, extractIocsTool } from './agent_builder/tools';
 import { registerThreatIntelligenceFeature } from './features';
 import { registerRoutes } from './routes';
+import { SavedViewType } from './saved_objects/saved_view';
 import { installIndexTemplates } from './setup/index_templates';
 import { seedDefaultSources } from './setup/seed_default_sources';
+import { threatIntelligenceUiSettings } from './ui_settings';
 import { registerIocIndicatorSyncTask, scheduleIocIndicatorSyncTask } from './tasks';
 
 export class ThreatIntelligencePlugin
@@ -40,6 +43,10 @@ export class ThreatIntelligencePlugin
 {
   private readonly logger: Logger;
   private readonly experimentalFeatures: ExperimentalFeatures;
+  // Captured during start() so routes registered in setup() can look up the
+  // current request's space at call-time without needing the spaces plugin
+  // at setup boundary.
+  private spacesService: SpacesServiceStart | undefined;
 
   constructor(initializerContext: PluginInitializerContext<ThreatIntelligenceConfig>) {
     this.logger = initializerContext.logger.get();
@@ -65,6 +72,13 @@ export class ThreatIntelligencePlugin
     // `security.authz.requiredPrivileges`.
     registerThreatIntelligenceFeature({ features });
 
+    // Saved-objects type backing the dashboard's saved-view feature.
+    coreSetup.savedObjects.registerType(SavedViewType);
+
+    // Per-space advanced setting for the dashboard's location-aware
+    // default region filter.
+    coreSetup.uiSettings.register(threatIntelligenceUiSettings);
+
     // `extract_iocs` is registered globally so Workflow 2 can invoke it
     // directly via a `builtin` step. `analyse_environment` is registered
     // globally so the orchestrating agent can call it through the registry
@@ -83,7 +97,11 @@ export class ThreatIntelligencePlugin
     // experimental skill flag is off — listing existing subscriptions or
     // submitting via the form should not require the skill.
     const router = coreSetup.http.createRouter();
-    registerRoutes(router, this.logger);
+    registerRoutes({
+      router,
+      logger: this.logger,
+      getSpacesService: () => this.spacesService,
+    });
 
     if (this.experimentalFeatures.threatIntelligenceSkillEnabled) {
       registerSkills(agentBuilder);
@@ -121,6 +139,11 @@ export class ThreatIntelligencePlugin
     coreStart: CoreStart,
     startDeps: ThreatIntelligenceStartDependencies
   ): ThreatIntelligencePluginStart {
+    // Optional: capture the spaces service so routes can resolve the
+    // current space id per request. When the spaces plugin is absent the
+    // route helpers fall back to `'default'`.
+    this.spacesService = startDeps.spaces?.spacesService;
+
     // Index template installation + seeding are best-effort — they should not
     // block start. Errors are logged but the plugin continues so the rest of
     // Kibana stays healthy. Seed runs only after templates succeed because the

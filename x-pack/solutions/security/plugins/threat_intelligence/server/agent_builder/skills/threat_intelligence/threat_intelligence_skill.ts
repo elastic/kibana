@@ -15,19 +15,20 @@ import {
   manageSubscriptionsTool,
   coverageGapTool,
   huntForThreatTool,
+  generalizeFromTelemetryTool,
 } from '../../tools';
 
 /**
  * Source-agnostic threat intelligence skill.
  *
- * Phase A surface: external feeds + analyst paste + behavioral hunting.
- * Phase C will add `threat_intel.generalize_from_telemetry` (alert -> durable rule
- * feedback loop) — schema and slot accounting reserve room for it.
+ * Phase A + C surface: external feeds + analyst paste + behavioral hunting,
+ * plus the alert-generalization feedback loop
+ * (`threat_intel.generalize_from_telemetry`).
  *
  * Description string is the discoverability surface — keep the user-facing
- * phrasings broad ("threat intel", "CISO News", "vendor advisory", ...) but do NOT
- * promise telemetry-input/feedback-loop capability in v1; that wording is
- * reserved for Phase C so the agent's tool selector doesn't oversell.
+ * phrasings broad ("threat intel", "CISO News", "vendor advisory",
+ * "generalize this alert", ...) so the agent's tool selector finds the
+ * skill from a wide range of analyst phrasings.
  */
 export const threatIntelligenceSkill = defineSkillType({
   id: THREAT_INTELLIGENCE_SKILL_ID,
@@ -38,11 +39,13 @@ export const threatIntelligenceSkill = defineSkillType({
     'Surface threat intelligence from external feeds (RSS, STIX/TAXII, vendor advisories) and ' +
     'analyst-pasted reports. Propose durable behavioral detection rules from the techniques ' +
     'described in those reports by extracting MITRE ATT&CK techniques with an LLM and validating ' +
-    'them against the canonical Kibana ATT&CK catalog. ' +
+    'them against the canonical Kibana ATT&CK catalog. Generalize sets of brittle alerts ' +
+    '(firing on rotating IOCs) into durable behavioral rules. ' +
     'Manage scheduled email/Slack digest subscriptions. ' +
     'Use when the user asks about: threat intel, CISO News, weekly digest, emerging threats, ' +
-    'CVE in the wild, vendor advisory, incident postmortem, hunt for the behavior class, or ' +
-    'build a durable detection from this hash.',
+    'CVE in the wild, vendor advisory, incident postmortem, hunt for the behavior class, ' +
+    'build a durable detection from this hash, generalize this alert, or this alert keeps ' +
+    'firing on rotating hashes.',
   content: `# Threat Intelligence Skill
 
 ## When to Use This Skill
@@ -114,6 +117,19 @@ identifiers; behavior is durable because it's constrained by the OS.**
   Detection Engine rules) and from the retrospective
   \`hit_provenance_backfill\` workflow (which attributes existing alerts back
   to reports).
+- **${THREAT_INTEL_TOOL_IDS.generalizeFromTelemetry}** — Closes the
+  brittle-alert → durable-behavioral-rule feedback loop. Takes a pre-fetched
+  set of \`.alerts-security.alerts-*\` samples (the agent pulls them via
+  \`security.alerts\` first), runs the same behavioral extraction prompt as
+  \`hunt_behavior\` against the alert summaries, validates candidates
+  against the ATT&CK catalog, and persists a synthetic
+  \`source.type: 'telemetry'\` row to \`threat-reports-*\` so the same
+  finding appears in \`coverage_gap\` / \`search_reports\` / the dashboard.
+  Returns the same \`behaviors\` + \`attachment_hints\` shape as
+  \`hunt_behavior\` so the downstream rendering and Detection Engine handoff
+  are unchanged. Use when the user asks "generalize this alert", "this
+  alert keeps firing on rotating hashes — make a durable rule", or "turn
+  these detections into something the adversary can't sidestep".
 - **${THREAT_INTEL_TOOL_IDS.manageSubscriptions}** — One tool, three actions:
   \`create\` / \`list\` / \`delete\`. For \`create\`, optional \`template_id\`
   bootstraps from a pre-staged preset (\`daily-threat-debrief\`,
@@ -206,6 +222,24 @@ Registry tools available via this skill:
    and a recommended next step (open a case via \`${platformCoreTools.cases}\`
    when any host is matched in \`.alerts-security.alerts-*\`).
 
+### For alert-generalization requests ("generalize this alert")
+
+1. Call \`security.alerts\` to pull 3-10 recent samples of the alert
+   pattern the user is asking about. Filter on
+   \`kibana.alert.rule.name\` and/or a shared technique id when known.
+2. For each alert, compose a one-paragraph \`summary\` of the relevant
+   ECS fields (\`host.name\`, \`process.name\`, \`process.command_line\`,
+   \`file.hash.sha256\`, \`source.ip\`, ...). Skip noisy fields that
+   don't help characterize the behavior.
+3. Call \`${THREAT_INTEL_TOOL_IDS.generalizeFromTelemetry}\` with the
+   user's analyst question and the alert samples. The tool persists a
+   synthetic \`threat-reports-*\` row and returns the same
+   \`behaviors\` + \`attachment_hints\` shape as \`hunt_behavior\`.
+4. Emit one \`threat-intel-finding-card\` per surviving behavior (the
+   hints already carry \`report_title\` / \`report_source_name\`). When
+   \`security.create_detection_rule\` is available, call it for the
+   highest-confidence behavior with the proposed ES|QL body.
+
 ### For Streams-hunt requests ("turn that behavior into a Streams KI")
 
 If the user asks for a long-running Streams hunt, materialization of a
@@ -232,9 +266,8 @@ The user may surface this skill with any of:
 - "this Mandiant blog describes a new technique — build a detection"
 - "incident postmortem to durable rule"
 - "hunt for the behavior class behind these IOCs"
-
-Phrasings reserved for Phase C (do NOT promise these in v1): "generalize this
-alert", "this alert keeps firing on rotating hashes — build a durable rule".
+- "generalize this alert"
+- "this alert keeps firing on rotating hashes — make a durable rule"
 `,
   getInlineTools: () => [
     searchReportsTool,
@@ -243,14 +276,12 @@ alert", "this alert keeps firing on rotating hashes — build a durable rule".
     coverageGapTool,
     huntForThreatTool,
     manageSubscriptionsTool,
-    // 6 inline (cap is 7). One slot reserved for Phase C
-    // (`threat_intel.generalize_from_telemetry`). The previous
-    // `create_subscription` + `list_subscriptions` pair was merged into
-    // `manage_subscriptions` (action: create | list | delete) so adding
-    // `hunt_for_threat` did not blow the cap. `analyse_environment` lives
-    // in the registry tool list below — it is invoked occasionally to
-    // tailor feed recommendations and does not need a permanent inline
-    // slot.
+    generalizeFromTelemetryTool,
+    // 7 inline tools — at the hard cap. Reordering or adding a new tool
+    // requires demoting one of the above to the registry list below.
+    // `analyse_environment` lives in the registry tool list since it is
+    // invoked occasionally to tailor feed recommendations and does not
+    // need a permanent inline slot.
   ],
   getRegistryTools: () => [
     'security.create_detection_rule',

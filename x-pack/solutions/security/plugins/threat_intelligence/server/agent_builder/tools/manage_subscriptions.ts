@@ -11,6 +11,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import {
+  GLOBAL_SPACE_ID,
   SEVERITY_LEVELS,
   SUBSCRIPTION_TEMPLATE_IDS,
   THREAT_INTEL_SUBSCRIPTIONS_INDEX,
@@ -32,6 +33,12 @@ export interface PersistSubscriptionInput {
   delivery: { type: 'email' | 'slack'; target: string; connector_id?: string };
   template_id?: string;
   owner?: string;
+  /**
+   * Logical per-space isolation tag. Routes resolve `request.getSpaceId()`
+   * and pass it here; agent-builder tool invocations leave it undefined,
+   * in which case the row defaults to `'default'`.
+   */
+  space_id?: string;
 }
 
 export interface PersistSubscriptionResult {
@@ -71,6 +78,7 @@ export const persistSubscription = async (
       delivery: input.delivery,
       human_summary: humanSummary,
       template_id: input.template_id,
+      space_id: input.space_id ?? 'default',
       created_at: now,
       updated_at: now,
     },
@@ -221,7 +229,7 @@ export const manageSubscriptionsTool: BuiltinSkillBoundedTool<typeof manageSubsc
     'returns parameters for an editable confirmation card that submits directly to the ' +
     "plugin's internal route.",
   schema: manageSubscriptionsSchema,
-  handler: async (input, { esClient, logger }) => {
+  handler: async (input, { esClient, logger, spaceId }) => {
     const client = esClient.asCurrentUser;
 
     if (input.action === 'list') {
@@ -231,6 +239,11 @@ export const manageSubscriptionsTool: BuiltinSkillBoundedTool<typeof manageSubsc
           index: THREAT_INTEL_SUBSCRIPTIONS_INDEX,
           size,
           sort: [{ created_at: { order: 'desc' } }],
+          query: {
+            bool: {
+              filter: [{ terms: { space_id: [spaceId, GLOBAL_SPACE_ID] } }],
+            },
+          },
         });
         const subscriptions = (response.hits.hits ?? []).map((hit) => ({
           subscription_id: hit._id,
@@ -386,6 +399,7 @@ export const manageSubscriptionsTool: BuiltinSkillBoundedTool<typeof manageSubsc
         schedule_rrule: resolved.schedule_rrule,
         delivery: resolved.delivery,
         template_id: resolved.template_id,
+        space_id: spaceId,
       });
       return {
         results: [

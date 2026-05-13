@@ -8,7 +8,11 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { THREAT_INTELLIGENCE_API_PRIVILEGES, THREAT_INTELLIGENCE_FEATURE_ID } from '../common';
+import {
+  SAVED_VIEW_SO_TYPE,
+  THREAT_INTELLIGENCE_API_PRIVILEGES,
+  THREAT_INTELLIGENCE_FEATURE_ID,
+} from '../common';
 
 /**
  * Three-tier privilege model matching the PRD's read / write / admin split:
@@ -23,8 +27,14 @@ import { THREAT_INTELLIGENCE_API_PRIVILEGES, THREAT_INTELLIGENCE_FEATURE_ID } fr
  * privilege withheld; Kibana's role management UI lets admins assign the
  * granular sub-feature breakdown.
  *
- * Enterprise license required (the plugin's downstream consumers — inference,
- * Detection Engine, workflows — all gate at Enterprise).
+ * License: **Platinum** matches the PRD's "Platinum+" baseline. Individual
+ * downstream gates still apply at runtime — workflows + Agent Builder skills
+ * are Enterprise-only today, so on a Platinum cluster the dashboard, source
+ * catalog, search, and subscription routes are usable but the ingestion
+ * workflows and the agent skill require Enterprise. This is intentional:
+ * we want CISOs on Platinum to be able to *consume* threat intel that an
+ * Enterprise neighbour aggregated for them, even before their org upgrades
+ * the workflow tier.
  */
 export const registerThreatIntelligenceFeature = ({
   features,
@@ -36,7 +46,7 @@ export const registerThreatIntelligenceFeature = ({
     name: i18n.translate('xpack.threatIntelligence.feature.name', {
       defaultMessage: 'Threat Intelligence',
     }),
-    minimumLicense: 'enterprise',
+    minimumLicense: 'platinum',
     order: 1100,
     category: DEFAULT_APP_CATEGORIES.security,
     app: [THREAT_INTELLIGENCE_FEATURE_ID],
@@ -49,14 +59,14 @@ export const registerThreatIntelligenceFeature = ({
           THREAT_INTELLIGENCE_API_PRIVILEGES.writeSubscriptions,
         ],
         catalogue: [],
-        savedObject: { all: [], read: [] },
-        ui: ['show', 'createSubscription', 'manageSubscriptions'],
+        savedObject: { all: [SAVED_VIEW_SO_TYPE], read: [SAVED_VIEW_SO_TYPE] },
+        ui: ['show', 'createSubscription', 'manageSubscriptions', 'createSavedView'],
       },
       read: {
         app: [THREAT_INTELLIGENCE_FEATURE_ID],
         api: [THREAT_INTELLIGENCE_API_PRIVILEGES.read],
         catalogue: [],
-        savedObject: { all: [], read: [] },
+        savedObject: { all: [], read: [SAVED_VIEW_SO_TYPE] },
         ui: ['show'],
       },
     },

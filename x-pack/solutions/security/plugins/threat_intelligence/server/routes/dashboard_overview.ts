@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { ElasticsearchClient, IRouter, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   DASHBOARD_OVERVIEW_API_PATH,
   THREAT_INTELLIGENCE_API_PRIVILEGES,
@@ -16,6 +16,8 @@ import {
   type ThreatCategory,
   type ThreatRegion,
 } from '../../common';
+import { buildSpaceFilterTerms, resolveCurrentSpaceId } from '../lib/space_filter';
+import type { RouteRegistrationDeps } from '.';
 
 const DEFAULT_LOOKBACK_DAYS = 7;
 const ALERTS_INDEX_PATTERN = '.alerts-security.alerts-*';
@@ -152,7 +154,11 @@ const fetchAlertsImpact = async (esClient: ElasticsearchClient, from: string, to
  * fanning out to multiple endpoints. Gated on the `read` tier of the
  * `threatIntelligence` Kibana feature.
  */
-export const registerDashboardOverviewRoute = (router: IRouter, logger: Logger): void => {
+export const registerDashboardOverviewRoute = ({
+  router,
+  logger,
+  getSpacesService,
+}: RouteRegistrationDeps): void => {
   router.versioned
     .get({
       path: DASHBOARD_OVERVIEW_API_PATH,
@@ -177,7 +183,8 @@ export const registerDashboardOverviewRoute = (router: IRouter, logger: Logger):
           new Date(now - DEFAULT_LOOKBACK_DAYS * 24 * 60 * 60 * 1000).toISOString();
         const to = request.query.to ?? new Date(now).toISOString();
 
-        const filters: Array<Record<string, unknown>> = [];
+        const currentSpaceId = resolveCurrentSpaceId(getSpacesService(), request);
+        const filters: Array<Record<string, unknown>> = [buildSpaceFilterTerms(currentSpaceId)];
         if (request.query.regions?.length) {
           filters.push({ terms: { 'geography.regions': request.query.regions } });
         }

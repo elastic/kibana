@@ -21,6 +21,7 @@
     "@kbn/react-kibana-context-render",
     "@kbn/securitysolution-mitre-catalog",
     "@kbn/securitysolution-rules",
+    "@kbn/spaces-plugin",
     "@kbn/task-manager-plugin"
   ],
   "exclude": ["target/**/*"]

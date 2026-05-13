@@ -11,6 +11,7 @@ export {
   PLUGIN_NAME,
   THREAT_INTELLIGENCE_FEATURE_ID,
   THREAT_INTELLIGENCE_API_PRIVILEGES,
+  GLOBAL_SPACE_ID,
   THREAT_REPORTS_DATA_STREAM,
   THREAT_REPORTS_INDEX_PATTERN,
   THREAT_INTEL_SOURCES_INDEX,
@@ -28,6 +29,9 @@ export {
   HUNT_FOR_THREAT_INDEX_PATTERNS,
   SUBMIT_SUBSCRIPTION_API_PATH,
   DASHBOARD_OVERVIEW_API_PATH,
+  SAVED_VIEWS_API_PATH,
+  SAVED_VIEW_SO_TYPE,
+  DEFAULT_REGIONS_SETTING_KEY,
 } from './constants';
 export type { ExperimentalFeatures } from './experimental_features';
 export { allowedExperimentalValues, parseExperimentalConfigValue } from './experimental_features';
@@ -45,3 +49,4 @@ export {
   severityFromConfidence,
 } from './rule_export';
 export type { DashboardOverviewResponse } from './dashboard_types';
+export type { SavedViewAttributes, SavedViewSummary } from './saved_views';
