@@ -17,7 +17,7 @@ import {
  * Keeping these on a single base object makes the discriminated union
  * below readable: each variant only spells out the parts that differ.
  */
-const commonFields = {
+export const commonFields = {
   /** Unique identifier for the emulation run. */
   emulationId: z.string().min(1),
   /** EDR agent type — must be one of the supported types. */
@@ -27,7 +27,10 @@ const commonFields = {
 } as const;
 
 /** Optional human-readable comment recorded against the response action. */
-const optionalCommentParams = z.object({ comment: z.string().optional() }).strict().optional();
+export const optionalCommentParams = z
+  .object({ comment: z.string().optional() })
+  .strict()
+  .optional();
 
 /**
  * `kill-process` and `suspend-process` accept *either* a `pid` (number) or
@@ -53,7 +56,7 @@ const processRefByEntityId = z
   })
   .strict();
 
-const processRefParams = z.union([processRefByPid, processRefByEntityId]);
+export const processRefParams = z.union([processRefByPid, processRefByEntityId]);
 
 /**
  * `memory-dump` accepts:
@@ -87,14 +90,14 @@ const memoryDumpProcessByEntityId = z
   })
   .strict();
 
-const memoryDumpParams = z.union([
+export const memoryDumpParams = z.union([
   memoryDumpKernelParams,
   memoryDumpProcessByPid,
   memoryDumpProcessByEntityId,
 ]);
 
 /** `cancel` cancels a previously-dispatched action by its `id`. */
-const cancelParams = z
+export const cancelParams = z
   .object({
     comment: z.string().optional(),
     id: z.string().min(1),
@@ -102,7 +105,7 @@ const cancelParams = z
   .strict();
 
 /** `get-file` and `scan` both take a single absolute path on the host. */
-const pathParams = z
+export const pathParams = z
   .object({
     comment: z.string().optional(),
     path: z.string().min(1),
@@ -110,7 +113,7 @@ const pathParams = z
   .strict();
 
 /** `execute` runs a shell command with an optional timeout. */
-const executeParams = z
+export const executeParams = z
   .object({
     comment: z.string().optional(),
     command: z.string().min(1),
@@ -125,7 +128,7 @@ const executeParams = z
  * external connector client (today only `endpoint` is wired), the
  * endpoint shape is the only one we can validate strictly.
  */
-const runscriptParams = z
+export const runscriptParams = z
   .object({
     comment: z.string().optional(),
     scriptId: z.string().min(1),
@@ -141,7 +144,7 @@ const runscriptParams = z
  * wired the field is accepted as `unknown` so the runner cast still
  * compiles.
  */
-const uploadParams = z
+export const uploadParams = z
   .object({
     comment: z.string().optional(),
     file: z.unknown(),

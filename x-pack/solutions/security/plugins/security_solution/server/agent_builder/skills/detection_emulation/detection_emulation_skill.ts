@@ -10,7 +10,10 @@ import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definitio
 import type { ConfigType } from '../../../config';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
-import { createRunEmulationCommandTool } from './run_emulation_command_tool';
+import { createRunProcessCommandTool } from './run_process_command_tool';
+import { createRunFileCommandTool } from './run_file_command_tool';
+import { createRunNetworkCommandTool } from './run_network_command_tool';
+import { createRunExecutionCommandTool } from './run_execution_command_tool';
 import { createValidateRuleTool } from './validate_rule_tool';
 import { createGetEmulationHistoryTool } from './get_emulation_history_tool';
 
@@ -26,13 +29,16 @@ export const getDetectionEmulationSkill = (ctx: DetectionEmulationSkillContext) 
     id: 'detection-emulation',
     name: 'detection-emulation',
     basePath: 'skills/security/endpoint',
-    description: `Validate Elastic Security detection rules by running attack emulation scenarios and measuring whether the rules fire on MITRE ATT&CK techniques. Provides tools to validate rules, review past emulation history, and dispatch low-level response actions against endpoint agents.`,
+    description: `Validate Elastic Security detection rules by running attack emulation scenarios and measuring whether the rules fire on MITRE ATT&CK techniques. Provides tools to validate rules, review past emulation history, and dispatch low-level response actions (process, file, network, execution families) against endpoint agents.`,
     content: `# Detection Emulation Skill
 
 > **Tool IDs:** when the LLM judge or downstream consumers reference these tools by their canonical registered IDs:
 > - \`validateRule\` → \`security.detection-emulation.validate-rule\`
 > - \`getEmulationHistory\` → \`security.detection-emulation.get-history\`
-> - \`runEmulationCommand\` → \`security.detection-emulation.run-command\`
+> - \`runProcessCommand\` → \`security.detection-emulation.run-process-command\`
+> - \`runFileCommand\` → \`security.detection-emulation.run-file-command\`
+> - \`runNetworkCommand\` → \`security.detection-emulation.run-network-command\`
+> - \`runExecutionCommand\` → \`security.detection-emulation.run-execution-command\`
 
 ## When to Use
 
@@ -68,10 +74,20 @@ If \`confidence < 0.5\` and the user explicitly requests real execution:
 
 ### Low-level command dispatch
 
-Use \`runEmulationCommand\` only when the user needs to fire a specific response action
-outside of a full \`validateRule\` flow (e.g. testing a single \`execute\` command by hand).
-Do not use it as a substitute for \`validateRule\` — it does not score, collect telemetry,
-or write history.
+Use the per-family \`run*Command\` tools only when the user needs to fire a specific
+response action outside of a full \`validateRule\` flow (e.g. testing a single
+\`execute\` command by hand). Do not use them as a substitute for \`validateRule\` —
+they do not score, collect telemetry, or write history.
+
+Pick the right family by the command:
+- **Process** (\`runProcessCommand\`): \`kill-process\`, \`suspend-process\`,
+  \`running-processes\`, \`memory-dump\`.
+- **File** (\`runFileCommand\`): \`get-file\`, \`scan\`, \`upload\`.
+- **Network** (\`runNetworkCommand\`): \`isolate\`, \`unisolate\`.
+- **Execution** (\`runExecutionCommand\`): \`execute\`, \`runscript\`, \`cancel\`.
+
+Each family has a typed \`parameters\` shape — the tool schema documents what the
+specific command requires (no free-form parameter records).
 
 ## Examples
 
@@ -126,48 +142,56 @@ Returns past validation runs for a rule, newest-first.
 
 Results are space-scoped — reports from other spaces are not visible.
 
-### \`runEmulationCommand\`
+### \`runProcessCommand\` / \`runFileCommand\` / \`runNetworkCommand\` / \`runExecutionCommand\`
 
-Dispatches a single Elastic Security response action to one or more Elastic Defend
-endpoints. Returns \`action_id\` and \`status\`; does **not** poll for results.
+Each of the four \`run*Command\` tools dispatches a single Elastic Security response
+action to one or more Elastic Defend endpoints. Returns \`action_id\` and \`status\`;
+does **not** poll for results.
 
 Currently only the \`endpoint\` agent type is wired — \`sentinel_one\`, \`crowdstrike\`, and
-\`microsoft_defender_endpoint\` are not yet supported until external connector resolution lands.
-Do not attempt to dispatch against these agent types; the call will fail with 400.
+\`microsoft_defender_endpoint\` are not yet supported until external connector resolution
+lands. Do not attempt to dispatch against these agent types; the call will fail with 400.
 
-**Supported commands and required parameters:**
+**Per-family commands and required \`parameters\` shapes (validated by Zod):**
 
-| \`command\` | Required \`parameters\` |
-|---|---|
-| \`isolate\` | (none) |
-| \`unisolate\` | (none) |
-| \`kill-process\` | \`pid: number\` *or* \`entity_id: string\` |
-| \`suspend-process\` | \`pid: number\` *or* \`entity_id: string\` |
-| \`running-processes\` | (none) |
-| \`get-file\` | \`path: string\` |
-| \`execute\` | \`command: string\`, \`timeout?: number\` |
-| \`upload\` | \`file: File\`, \`overwrite?: boolean\` |
-| \`scan\` | \`path: string\` |
-| \`runscript\` | \`script: string\`, \`timeout?: number\` |
-| \`cancel\` | (none) |
-| \`memory-dump\` | \`pid: number\` *or* \`entity_id: string\` |
+| Tool | \`command\` | Required \`parameters\` |
+|---|---|---|
+| \`runProcessCommand\` | \`kill-process\` | \`pid: number\` *or* \`entity_id: string\` |
+| \`runProcessCommand\` | \`suspend-process\` | \`pid: number\` *or* \`entity_id: string\` |
+| \`runProcessCommand\` | \`running-processes\` | (optional \`comment\`) |
+| \`runProcessCommand\` | \`memory-dump\` | \`pid: number\` *or* \`entity_id: string\` |
+| \`runFileCommand\` | \`get-file\` | \`path: string\` |
+| \`runFileCommand\` | \`scan\` | \`path: string\` |
+| \`runFileCommand\` | \`upload\` | \`file: opaque\`, \`overwrite?: boolean\` |
+| \`runNetworkCommand\` | \`isolate\` | (optional \`comment\`) |
+| \`runNetworkCommand\` | \`unisolate\` | (optional \`comment\`) |
+| \`runExecutionCommand\` | \`execute\` | \`command: string\`, \`timeout?: number\` |
+| \`runExecutionCommand\` | \`runscript\` | \`scriptId: string\`, \`scriptInput?: string\`, \`timeout?: number\` |
+| \`runExecutionCommand\` | \`cancel\` | \`id: string\` |
 
-\`parameters.comment\` (optional, any command): attached to the response-actions audit trail.
+The schema is a discriminated union on \`command\`, so misspelled fields, extra keys,
+or wrong types fail fast with a Zod error before reaching the EDR connector.
+
+\`parameters.comment\` (optional, where supported): attached to the response-actions
+audit trail.
 
 ## Guardrails
 
-Guards applied by each tool (in order; first failure short-circuits):
+Guards applied by each tool (in order; first failure short-circuits). The four
+\`run*Command\` tools share the same gate sequence (centralised in
+\`with_command_gates.ts\`):
 
-| Guard | \`validateRule\` | \`getEmulationHistory\` | \`runEmulationCommand\` |
+| Guard | \`validateRule\` | \`getEmulationHistory\` | \`run*Command\` (all four) |
 |---|---|---|---|
 | Feature flag | ✓ (per-mode) | — | ✓ (realExecution) |
 | Auth required | ✓ | — | ✓ |
-| RBAC (real_execution) | ✓ | — | ✓ (per-command) |
+| RBAC | ✓ (real_execution) | — | ✓ (per-command) |
 | Allowlist | ✓ (real_execution) | — | ✓ |
 | Rate limit | ✓ (real_execution, 1 slot/scenario) | — | ✓ (1 slot/command) |
 
 Feature flags: \`detectionEmulationLogInjection\` gates log_injection;
-\`detectionEmulationRealExecution\` gates real_execution and \`runEmulationCommand\`.
+\`detectionEmulationRealExecution\` gates real_execution and all four
+\`run*Command\` tools.
 
 ## Response Format
 
@@ -182,8 +206,11 @@ Always include in your response to the user:
 - **Caveats** — surface any entries from the \`caveats\` array (scoring edge cases)
 `,
     getInlineTools: () => [
-      createRunEmulationCommandTool(ctx),
       createValidateRuleTool(ctx),
       createGetEmulationHistoryTool(ctx),
+      createRunProcessCommandTool(ctx),
+      createRunFileCommandTool(ctx),
+      createRunNetworkCommandTool(ctx),
+      createRunExecutionCommandTool(ctx),
     ],
   });

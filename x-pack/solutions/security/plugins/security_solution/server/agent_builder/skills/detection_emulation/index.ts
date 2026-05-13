@@ -7,4 +7,7 @@
 
 export { getDetectionEmulationSkill } from './detection_emulation_skill';
 export type { DetectionEmulationSkillContext } from './detection_emulation_skill';
-export { createRunEmulationCommandTool } from './run_emulation_command_tool';
+export { createRunProcessCommandTool } from './run_process_command_tool';
+export { createRunFileCommandTool } from './run_file_command_tool';
+export { createRunNetworkCommandTool } from './run_network_command_tool';
+export { createRunExecutionCommandTool } from './run_execution_command_tool';
