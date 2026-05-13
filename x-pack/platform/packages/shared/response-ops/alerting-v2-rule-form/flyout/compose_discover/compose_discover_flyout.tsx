@@ -87,14 +87,18 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
    * ── UI state (step navigation, sandbox open/close, tab selection, etc.) ──
    * In edit mode, seed the sandbox draft with the rule's existing query so the
    * Alert Condition step shows the current query summary instead of "No query defined".
+   * When the persisted rule has a custom recovery query, the initial state
+   * infers that tracking was active and reconstructs the split.
    */
-  const initialSandboxQuery =
-    mode === 'edit'
-      ? rule
-        ? mapRuleResponseToFormValues(rule).evaluation?.query?.base ?? ''
-        : ''
-      : '';
-  const [uiState, dispatch] = useComposeDiscoverState(mode, initialSandboxQuery);
+  const initialMapped = mode === 'edit' && rule ? mapRuleResponseToFormValues(rule) : undefined;
+  const [uiState, dispatch] = useComposeDiscoverState({
+    mode,
+    initialQuery: initialMapped?.evaluation?.query?.base ?? '',
+    initialRecoveryQuery:
+      initialMapped?.recoveryPolicy?.type === 'query'
+        ? initialMapped.recoveryPolicy.query?.base ?? undefined
+        : undefined,
+  });
 
   // Registered once here so providers persist across Sandbox open/close cycles.
   useEsqlAutocomplete(services);
@@ -154,18 +158,52 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
 
   /*
    * Sync the committed query into RHF whenever the user applies changes from the Sandbox.
-   * When tracking is disabled: sync fullQuery → evaluation.query.base.
-   * When tracking is enabled:  sync baseQuery → evaluation.query.base (the base portion is
-   *   what the rule executor runs; the alert block is stored separately).
+   * evaluation.query.base always contains the full runnable query — the base/alertBlock
+   * split is a UI-only concern. On load, splitQuery() reconstructs the split.
    * timeField and grouping are written directly to RHF by the form components via useFormContext.
    */
   useEffect(() => {
     if (!uiState.queryCommitted) return;
-    const queryBase = uiState.tracking ? uiState.baseQuery : uiState.fullQuery;
+    const queryBase = uiState.tracking
+      ? [uiState.baseQuery, uiState.alertBlock].filter(Boolean).join('\n')
+      : uiState.fullQuery;
     if (queryBase) {
       methods.setValue('evaluation', { query: { base: queryBase } });
     }
-  }, [uiState.fullQuery, uiState.baseQuery, uiState.tracking, uiState.queryCommitted, methods]);
+  }, [
+    uiState.fullQuery,
+    uiState.baseQuery,
+    uiState.alertBlock,
+    uiState.tracking,
+    uiState.queryCommitted,
+    methods,
+  ]);
+
+  /*
+   * Sync recovery policy into RHF.
+   * When tracking + custom recovery: assemble base + recoveryBlock into a full
+   * query and store it under recoveryPolicy.query.base (type 'query').
+   * Otherwise: reset to the default no_breach policy.
+   */
+  useEffect(() => {
+    if (!uiState.queryCommitted) return;
+    if (uiState.tracking && uiState.recoveryType === 'custom') {
+      const recoveryQuery = [uiState.baseQuery, uiState.recoveryBlock].filter(Boolean).join('\n');
+      methods.setValue('recoveryPolicy', {
+        type: 'query',
+        query: { base: recoveryQuery },
+      });
+    } else {
+      methods.setValue('recoveryPolicy', { type: 'no_breach' });
+    }
+  }, [
+    uiState.tracking,
+    uiState.recoveryType,
+    uiState.baseQuery,
+    uiState.recoveryBlock,
+    uiState.queryCommitted,
+    methods,
+  ]);
 
   const handleSubmit = methods.handleSubmit((values) => {
     if (isCreate) {

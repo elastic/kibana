@@ -14,26 +14,55 @@ import type {
   SandboxTabConfig,
   StepId,
 } from './types';
-import { guessRecoveryBlock } from './use_heuristic_split';
+import { guessRecoveryBlock, splitQuery } from './use_heuristic_split';
 
-const createInitialState = (
-  mode: ComposeDiscoverMode,
-  initialSandboxQuery = ''
-): ComposeDiscoverState => ({
+export interface InitialStateConfig {
+  mode: ComposeDiscoverMode;
+  initialQuery?: string;
+  /**
+   * If the persisted rule had recovery_policy.type === 'query', pass the
+   * full recovery query here. createInitialState will infer that tracking
+   * was active and reconstruct the split state (base / alertBlock /
+   * recoveryBlock) so the edit form opens in tracking mode.
+   */
+  initialRecoveryQuery?: string;
+}
+
+export const createInitialState = ({
   mode,
-  step: 0,
-  tracking: false,
-  fullQuery: initialSandboxQuery,
-  baseQuery: '',
-  alertBlock: '',
-  recoveryBlock: '',
-  recoveryType: 'default',
-  activeTab: 'alert',
-  childOpen: mode === 'create',
-  queryCommitted: mode === 'edit',
-  sandboxDateStart: 'now-15m',
-  sandboxDateEnd: 'now',
-});
+  initialQuery = '',
+  initialRecoveryQuery,
+}: InitialStateConfig): ComposeDiscoverState => {
+  const base: ComposeDiscoverState = {
+    mode,
+    step: 0,
+    tracking: false,
+    fullQuery: initialQuery,
+    baseQuery: '',
+    alertBlock: '',
+    recoveryBlock: '',
+    recoveryType: 'default',
+    activeTab: 'alert',
+    childOpen: mode === 'create',
+    queryCommitted: mode === 'edit',
+    sandboxDateStart: 'now-15m',
+    sandboxDateEnd: 'now',
+  };
+
+  if (!initialRecoveryQuery) return base;
+
+  const evalSplit = splitQuery(initialQuery);
+  const recoverySplit = splitQuery(initialRecoveryQuery);
+
+  return {
+    ...base,
+    tracking: true,
+    baseQuery: evalSplit.base,
+    alertBlock: evalSplit.alertBlock,
+    recoveryBlock: recoverySplit.alertBlock,
+    recoveryType: 'custom',
+  };
+};
 
 /**
  * Lightweight step-id list for use in the reducer and getSandboxTabConfig.
@@ -75,7 +104,10 @@ export function getSandboxTabConfig(state: ComposeDiscoverState): SandboxTabConf
   return { type: 'single' };
 }
 
-function reducer(state: ComposeDiscoverState, action: ComposeDiscoverAction): ComposeDiscoverState {
+export function reducer(
+  state: ComposeDiscoverState,
+  action: ComposeDiscoverAction
+): ComposeDiscoverState {
   switch (action.type) {
     case 'SET_FULL_QUERY':
       return { ...state, fullQuery: action.query };
@@ -172,9 +204,6 @@ function reducer(state: ComposeDiscoverState, action: ComposeDiscoverAction): Co
   }
 }
 
-export const useComposeDiscoverState = (
-  mode: ComposeDiscoverMode = 'create',
-  initialSandboxQuery = ''
-) => {
-  return useReducer(reducer, undefined, () => createInitialState(mode, initialSandboxQuery));
+export const useComposeDiscoverState = (config: InitialStateConfig) => {
+  return useReducer(reducer, undefined, () => createInitialState(config));
 };
