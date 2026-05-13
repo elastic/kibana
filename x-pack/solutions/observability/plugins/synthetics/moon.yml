@@ -126,6 +126,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/content-management-utils'
   - '@kbn/presentation-publishing-schemas'
+  - '@kbn/zod'
   - '@kbn/maintenance-windows-plugin'
   - '@kbn/observability-agent-builder-plugin'
   - '@kbn/agent-builder-browser'

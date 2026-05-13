@@ -33,7 +33,6 @@ dependsOn:
   - '@kbn/presentation-publishing'
   - '@kbn/analytics'
   - '@kbn/content-management-utils'
-  - '@kbn/config-schema'
   - '@kbn/std'
   - '@kbn/licensing-types'
   - '@kbn/licensing-plugin'
@@ -47,6 +46,7 @@ dependsOn:
   - '@kbn/data-plugin'
   - '@kbn/unified-search-plugin'
   - '@kbn/kibana-react-plugin'
+  - '@kbn/zod'
 tags:
   - plugin
   - prod
