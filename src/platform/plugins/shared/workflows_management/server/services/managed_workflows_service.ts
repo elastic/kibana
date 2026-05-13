@@ -28,7 +28,7 @@ import type { WorkflowCrudService } from './workflow_crud_service';
 import { computeDefinitionHash, getTriggerTypesFromDefinition } from '../api/lib/workflow_prepare';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
-const MANAGED_WORKFLOW_SYSTEM_USER = 'system';
+const MANAGED_WORKFLOW_SYSTEM_USER = 'elastic/kibana';
 
 interface ManagedWorkflowsServiceDeps {
   crudService: WorkflowCrudService;

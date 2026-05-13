@@ -128,6 +128,8 @@ export class WorkflowsPlugin
       // plugins cannot depend on workflows_management. Pass the setup-time owner
       // snapshot into workflows_management for storage reconciliation.
       const registeredOwnerPluginIds = plugins.workflowsExtensions.getManagedWorkflowPluginIds();
+      // Safe to run in the background: this cleanup only removes docs for owners
+      // missing from the setup-time registry, so it cannot race valid start installs.
       void this.runGlobalOrphanCleanup(registeredOwnerPluginIds);
     }
 

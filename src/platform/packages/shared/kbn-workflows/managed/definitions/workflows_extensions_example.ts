@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import STREAMS_KI_CONTINUOUS_EXTRACTION_YAML from './streams_ki_continuous_extraction.yaml';
-import STREAMS_KI_FEATURES_IDENTIFICATION_YAML from './streams_ki_features_identification.yaml';
-import STREAMS_KI_ONBOARDING_YAML from './streams_ki_onboarding.yaml';
-import STREAMS_KI_QUERIES_GENERATION_YAML from './streams_ki_queries_generation.yaml';
-import type { ManagedWorkflowDefinition } from '../types';
+import STREAMS_KI_CONTINUOUS_EXTRACTION_YAML from '../streams_ki_continuous_extraction.yaml';
+import STREAMS_KI_FEATURES_IDENTIFICATION_YAML from '../streams_ki_features_identification.yaml';
+import STREAMS_KI_ONBOARDING_YAML from '../streams_ki_onboarding.yaml';
+import STREAMS_KI_QUERIES_GENERATION_YAML from '../streams_ki_queries_generation.yaml';
+import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../types';
 
 // ─── Streams KI Workflows ────────────────────────────────────────────────────
 
@@ -27,6 +27,7 @@ export const STREAMS_KI_CONTINUOUS_EXTRACTION_WORKFLOW: ManagedWorkflowDefinitio
     versionStrategy: 'auto',
     enablement: 'restorable',
   },
+  version: 1,
 };
 
 export const STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID =
@@ -41,6 +42,7 @@ export const STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW: ManagedWorkflowDefinit
     versionStrategy: 'auto',
     enablement: 'enforced',
   },
+  version: 1,
 };
 
 export const STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID = 'system-streams-ki-queries-generation';
@@ -54,6 +56,7 @@ export const STREAMS_KI_QUERIES_GENERATION_WORKFLOW: ManagedWorkflowDefinition =
     versionStrategy: 'auto',
     enablement: 'enforced',
   },
+  version: 1,
 };
 
 export const STREAMS_KI_ONBOARDING_WORKFLOW_ID = 'system-streams-ki-onboarding';
@@ -67,11 +70,12 @@ export const STREAMS_KI_ONBOARDING_WORKFLOW: ManagedWorkflowDefinition = {
     versionStrategy: 'auto',
     enablement: 'enforced',
   },
+  version: 1,
 };
 
 export const EXAMPLE_MANAGED_WORKFLOW_ID = 'system-example-greeting';
 
-export interface ExampleManagedWorkflowTemplateValues {
+export interface ExampleManagedWorkflowTemplateValues extends ManagedWorkflowTemplateValues {
   recipient: string;
 }
 
@@ -82,10 +86,7 @@ export const EXAMPLE_MANAGED_WORKFLOW = {
   yamlTemplate: ({ recipient }) => `name: Example Greeting - ${recipient}
 enabled: true
 triggers:
-  - type: workflows.failed
-    on:
-      # Filter the subscription by using KQL, use event.* to target event properties
-      condition: not event.workflow.isErrorHandler:true
+  - type: manual
 steps:
   - name: greet
     type: console

@@ -37,6 +37,9 @@ export type ExecuteManagedWorkflowOptions<TId extends ManagedWorkflowId = Manage
   metadata?: Record<string, unknown>;
 };
 
+/**
+ * Requestless lifecycle API returned by the managed workflows system provider.
+ */
 export interface RegisteredManagedWorkflowsLifecycleApi {
   install: <TId extends ManagedWorkflowId>(
     id: TId,
@@ -56,6 +59,9 @@ export interface RegisteredManagedWorkflowsLifecycleApi {
   ready: () => Promise<void>;
 }
 
+/**
+ * Plugin-bound API for managed workflow operations that do not require a Kibana request.
+ */
 export interface RegisteredManagedWorkflowsApi extends RegisteredManagedWorkflowsLifecycleApi {
   execute: <TId extends ManagedWorkflowId>(
     id: TId,
@@ -63,6 +69,9 @@ export interface RegisteredManagedWorkflowsApi extends RegisteredManagedWorkflow
   ) => Promise<string>;
 }
 
+/**
+ * Request-scoped workflows client API; pluginId is supplied by workflows_extensions.
+ */
 export interface ManagedWorkflowsApi {
   install: <TId extends ManagedWorkflowId>(
     pluginId: string,
@@ -81,6 +90,9 @@ export interface ManagedWorkflowsApi {
   ) => Promise<string>;
 }
 
+/**
+ * Consumer-facing managed workflows client returned by workflows_extensions.
+ */
 export interface PluginScopedManagedWorkflowsApi extends RegisteredManagedWorkflowsLifecycleApi {
   execute: <TId extends ManagedWorkflowId>(
     request: KibanaRequest,
