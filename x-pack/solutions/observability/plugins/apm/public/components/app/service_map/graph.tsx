@@ -600,27 +600,65 @@ function GraphInner({
                     data-test-subj="serviceMapZoomOutButton"
                     css={mapToolbarControlIconCss}
                   />
-                )}
-              </EuiFlexGroup>
-            </EuiPanel>
-          </Panel>
-          {!isEmbedded && <ServiceMapMinimap />}
-        </ReactFlow>
-        <MapPopover
-          selectedNode={selectedNodeForPopover}
-          selectedEdge={selectedEdgeForPopover}
-          focusedServiceName={serviceName}
-          environment={environment}
-          kuery={kuery}
-          start={start}
-          end={end}
-          onClose={handlePopoverClose}
-          isEmbedded={isEmbedded}
-          showFocusMap={showFocusMap}
-          alwaysNavigateOnFocus={alwaysNavigateOnPopoverFocus}
-          clearKueryOnNavigation={clearKueryOnPopoverNavigation}
-        />
-      </div>
+                  {!isEmbedded && (
+                    <EuiButtonIcon
+                      display="empty"
+                      color="text"
+                      size="s"
+                      iconType="crosshair"
+                      onClick={() => fitView(getFitViewOptions())}
+                      title={fitViewLabel}
+                      aria-label={fitViewLabel}
+                      data-test-subj="serviceMapFitViewButton"
+                      css={mapToolbarControlIconCss}
+                    />
+                  )}
+                  {fullMapHref && (
+                    <EuiButtonIcon
+                      display="empty"
+                      color="text"
+                      size="s"
+                      iconType="apps"
+                      href={fullMapHref}
+                      title={viewFullMapButtonLabel}
+                      aria-label={viewFullMapButtonLabel}
+                      data-test-subj="serviceMapViewFullMapButton"
+                      css={mapToolbarControlIconCss}
+                    />
+                  )}
+                  {onToggleFullscreen && (
+                    <EuiButtonIcon
+                      display="empty"
+                      color="text"
+                      size="s"
+                      iconType={isFullscreen ? 'fullScreenExit' : 'fullScreen'}
+                      onClick={onToggleFullscreen}
+                      title={fullscreenButtonLabel}
+                      aria-label={fullscreenButtonLabel}
+                      data-test-subj="serviceMapFullScreenButton"
+                      css={mapToolbarControlIconCss}
+                    />
+                  )}
+                </EuiFlexGroup>
+              </EuiPanel>
+            </Panel>
+            {!isEmbedded && <ServiceMapMinimap />}
+          </ReactFlow>
+          <MapPopover
+            selectedNode={selectedNodeForPopover}
+            selectedEdge={selectedEdgeForPopover}
+            focusedServiceName={serviceName}
+            environment={environment}
+            kuery={kuery}
+            start={start}
+            end={end}
+            onClose={handlePopoverClose}
+            isEmbedded={isEmbedded}
+            showFocusMap={showFocusMap}
+            alwaysNavigateOnFocus={alwaysNavigateOnPopoverFocus}
+            clearKueryOnNavigation={clearKueryOnPopoverNavigation}
+          />
+        </div>
       </ServiceMapAlertsNavigateProvider>
     </ServiceMapSearchProvider>
   );
