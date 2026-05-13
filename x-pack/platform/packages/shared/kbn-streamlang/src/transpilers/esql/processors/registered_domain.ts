@@ -7,6 +7,7 @@
 
 import type { ESQLAstCommand } from '@elastic/esql/types';
 import { Builder } from '@elastic/esql';
+import { isAlwaysCondition } from '../../../../types/conditions';
 import type { RegisteredDomainProcessor } from '../../../../types/processors';
 import {
   buildIgnoreMissingFilter,
@@ -15,7 +16,11 @@ import {
   buildDropColumns,
 } from './common';
 
-const DOMAIN_FIELDS = ['domain', 'registered_domain', 'subdomain', 'top_level_domain'] as const;
+const internalColumnPrefix = '__streamlang_registered_domain';
+
+const internalExpressionColumn = '__streamlang_registered_domain_expression';
+
+const DOMAIN_FIELDS = ['domain', 'registered_domain', 'subdomain', 'top_level_domain'];
 
 /**
  * Converts a Streamlang RegisteredDomainProcessor into a list of ES|QL AST commands.
@@ -36,12 +41,12 @@ const DOMAIN_FIELDS = ['domain', 'registered_domain', 'subdomain', 'top_level_do
  *
  *    Generates:
  *    ```txt
- *    | REGISTERED_DOMAIN _temp_domain = fqdn
- *    | EVAL `domain.domain`              = COALESCE(`_temp_domain.domain`,             `domain.domain`),
- *           `domain.registered_domain`   = COALESCE(`_temp_domain.registered_domain`,  `domain.registered_domain`),
- *           `domain.subdomain`           = COALESCE(`_temp_domain.subdomain`,           `domain.subdomain`),
- *           `domain.top_level_domain`    = COALESCE(`_temp_domain.top_level_domain`,    `domain.top_level_domain`)
- *    | DROP `_temp_domain.domain`, `_temp_domain.registered_domain`, `_temp_domain.subdomain`, `_temp_domain.top_level_domain`
+ *    | REGISTERED_DOMAIN __streamlang_registered_domain = fqdn
+ *    | EVAL `domain.domain`              = COALESCE(`__streamlang_registered_domain.domain`,             `domain.domain`),
+ *           `domain.registered_domain`   = COALESCE(`__streamlang_registered_domain.registered_domain`,  `domain.registered_domain`),
+ *           `domain.subdomain`           = COALESCE(`__streamlang_registered_domain.subdomain`,           `domain.subdomain`),
+ *           `domain.top_level_domain`    = COALESCE(`__streamlang_registered_domain.top_level_domain`,    `domain.top_level_domain`)
+ *    | DROP `__streamlang_registered_domain.domain`, `__streamlang_registered_domain.registered_domain`, `__streamlang_registered_domain.subdomain`, `__streamlang_registered_domain.top_level_domain`
  *    ```
  *
  * @example Conditional:
@@ -60,13 +65,13 @@ const DOMAIN_FIELDS = ['domain', 'registered_domain', 'subdomain', 'top_level_do
  *
  *    Generates:
  *    ```txt
- *    | EVAL _temp_expression = CASE(NOT(fqdn IS NULL), fqdn, "")
- *    | REGISTERED_DOMAIN _temp_domain = _temp_expression
- *    | EVAL `domain.domain`              = COALESCE(`_temp_domain.domain`,            `domain.domain`),
- *           `domain.registered_domain`   = COALESCE(`_temp_domain.registered_domain`, `domain.registered_domain`),
- *           `domain.subdomain`           = COALESCE(`_temp_domain.subdomain`,          `domain.subdomain`),
- *           `domain.top_level_domain`    = COALESCE(`_temp_domain.top_level_domain`,   `domain.top_level_domain`)
- *    | DROP `_temp_domain.domain`, `_temp_domain.registered_domain`, `_temp_domain.subdomain`, `_temp_domain.top_level_domain`, `_temp_expression`
+ *    | EVAL __streamlang_registered_domain_expression = CASE(NOT(fqdn IS NULL), fqdn, "")
+ *    | REGISTERED_DOMAIN __streamlang_registered_domain = __streamlang_registered_domain_expression
+ *    | EVAL `domain.domain`              = COALESCE(`__streamlang_registered_domain.domain`,            `domain.domain`),
+ *           `domain.registered_domain`   = COALESCE(`__streamlang_registered_domain.registered_domain`, `domain.registered_domain`),
+ *           `domain.subdomain`           = COALESCE(`__streamlang_registered_domain.subdomain`,          `domain.subdomain`),
+ *           `domain.top_level_domain`    = COALESCE(`__streamlang_registered_domain.top_level_domain`,   `domain.top_level_domain`)
+ *    | DROP `__streamlang_registered_domain.domain`, `__streamlang_registered_domain.registered_domain`, `__streamlang_registered_domain.subdomain`, `__streamlang_registered_domain.top_level_domain`, `__streamlang_registered_domain_expression`
  *    ```
  */
 export function convertRegisteredDomainProcessorToESQL(
@@ -74,7 +79,8 @@ export function convertRegisteredDomainProcessorToESQL(
 ): ESQLAstCommand[] {
   const { prefix, expression, ignore_missing = true } = processor;
 
-  const isConditional = 'where' in processor && processor.where && !('always' in processor.where);
+  const isConditional =
+    'where' in processor && processor.where && !isAlwaysCondition(processor.where);
 
   const commands: ESQLAstCommand[] = [];
 
@@ -84,7 +90,7 @@ export function convertRegisteredDomainProcessorToESQL(
   }
 
   if (isConditional) {
-    commands.push(buildConditionalEval(processor.where!, expression, '_temp_expression'));
+    commands.push(buildConditionalEval(processor.where!, expression, internalExpressionColumn));
   }
 
   commands.push(
@@ -92,18 +98,18 @@ export function convertRegisteredDomainProcessorToESQL(
       name: 'registered_domain',
       args: [
         Builder.expression.func.binary('=', [
-          Builder.expression.column('_temp_domain'),
-          Builder.expression.column(isConditional ? '_temp_expression' : expression),
+          Builder.expression.column(internalColumnPrefix),
+          Builder.expression.column(isConditional ? internalExpressionColumn : expression),
         ]),
       ],
     })
   );
 
-  commands.push(buildCoalescePrefixedFieldsEval(DOMAIN_FIELDS, '_temp_domain', prefix));
+  commands.push(buildCoalescePrefixedFieldsEval(DOMAIN_FIELDS, internalColumnPrefix, prefix));
 
-  const dropColumns = DOMAIN_FIELDS.map((field) => `_temp_domain.${field}`);
+  const dropColumns = DOMAIN_FIELDS.map((field) => `${internalColumnPrefix}.${field}`);
   if (isConditional) {
-    dropColumns.push('_temp_expression');
+    dropColumns.push(internalExpressionColumn);
   }
   commands.push(buildDropColumns(dropColumns));
 

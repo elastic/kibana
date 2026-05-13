@@ -186,7 +186,7 @@ export function buildConditionalEval(
  * @returns EVAL command: `EVAL <targetPrefix>.<f> = COALESCE(<tempPrefix>.<f>, <targetPrefix>.<f>), ...`
  */
 export function buildCoalescePrefixedFieldsEval(
-  fields: readonly string[],
+  fields: string[],
   tempPrefix: string,
   targetPrefix: string
 ): ESQLAstCommand {
