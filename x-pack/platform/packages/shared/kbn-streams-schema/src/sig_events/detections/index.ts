@@ -23,13 +23,14 @@ const baseDetectionFields = {
   workflow_execution_id: z.string(),
   resolution_lookback_minutes: z.number().int(),
   detection_evidence: detectionEvidenceSchema,
-  superseded: z.boolean().optional(),
+  superseded: z.boolean(),
   superseded_at: z.iso.datetime().optional(),
   processed_by: z.string().optional(),
 };
 
 const fullDetectionSchema = z.object({
   ...baseDetectionFields,
+  silent: z.literal(false),
   alert_samples: z.array(z.unknown()),
   rules_activity: z.array(z.unknown()),
   peak_30m_alert_count: z.number().int(),
@@ -41,6 +42,9 @@ const silentDetectionSchema = z.object({
   peak_30m_alert_count: z.number().int().optional(),
 });
 
-export const detectionSchema = z.union([fullDetectionSchema, silentDetectionSchema]);
+export const detectionSchema = z.discriminatedUnion('silent', [
+  fullDetectionSchema,
+  silentDetectionSchema,
+]);
 
 export type Detection = z.infer<typeof detectionSchema>;
