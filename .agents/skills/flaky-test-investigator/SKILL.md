@@ -6,7 +6,9 @@ description: >-
 
 # Flaky Test Investigator
 
-Investigate a flaky Scout, FTR, or Jest test failure. Start from any of these inputs:
+Investigate a flaky Scout, FTR, or Jest test failure and identify a fix if one is available.
+
+Start from any of these inputs:
 
 - A link to the GitHub `failed-test` issue. Prefer the latest failure, but review all of them.
 - A test file path, plus the branch it failed on (defaults to `main`).
@@ -14,15 +16,20 @@ Investigate a flaky Scout, FTR, or Jest test failure. Start from any of these in
 
 ## Prerequisites
 
-More access means a better investigation:
+More access means more context on the failure:
 
-- GitHub API
-- Buildkite API
-- AppEx QA cluster
+- **GitHub API.** Run `gh auth status` to confirm `gh` is authenticated.
+  - Caveat: `failed-test` issues are not always current. Closing them is up to the development teams; the convention is that if no new failure appears within 2–3 weeks, the issue can be closed.
+- **Buildkite API** (for logs).
+- **AppEx QA cluster.**
 
 TODO: add access instructions (environment variables, cluster queries).
 
-## Where did the test fail?
+# Background
+
+Read this section once. Refer back to it as needed during the investigation.
+
+## Cloud and local pipelines
 
 Tests run either on Elastic Cloud ("Cloud pipeline") or on the machine that triggered the run ("local pipeline", a.k.a. "Kibana CI"). A test that passes locally on the agent's machine may still fail on Cloud. Use the pipeline name to identify where the test ran.
 
@@ -52,47 +59,69 @@ A pass on a developer's machine, in Kibana CI, or in the flaky test runner does 
 
 Runs can stop unexpectedly due to agent loss. Buildkite retries these automatically.
 
-### Recognize environment failures
+### Finding the Kibana commit a Cloud run used
 
-TODO.
-
-## How often is the test failing?
-
-Answer:
-
-- Is it failing consistently?
-- Is it failing on both local and Cloud pipelines?
-- When did it first fail, and when did it last pass?
-
-# Investigation strategies
-
-## Before proposing a fix, consider alternatives
-
-Before attempting a fix or digging deeper, consider:
-
-- **Delete the test.** Do other tests already cover what this one is testing?
-- **Refactor or downgrade the test.** See "Pick the right test type" in `docs/extend/scout/best-practices.md`. A functional test can often become an API, component, or Jest unit/integration test.
-- **Update the tags.** Are the test's tags still appropriate? Should it run on Cloud? Should it be excluded from certain serverless solution types (e.g. Security)?
-
-## When did it start failing?
-
-Check the timestamps of the last successful run and the first failure.
-
-Cloud pipelines do not build Kibana from source — they use a Kibana commit that may lag `main` by several hours. Look for `Build hash:` in the Buildkite logs (e.g. `Build hash: 3927e36048a3a57f0657e06bc224736af8e322f8`):
+Cloud pipelines do not build Kibana from source — they use a Kibana commit that may lag `main` by several hours. To identify which commit a run used, look for `Build hash:` in the Buildkite logs (e.g. `Build hash: 3927e36048a3a57f0657e06bc224736af8e322f8`):
 
 - **Serverless Cloud projects:** under `Project information`. The log group starts with `Create {security|observability|...} project`.
 - **Stateful Cloud deployments:** under `Deployment information`. The log group starts with `Create deployment`.
 
-## On which pipelines did it fail?
+## How tests are distributed across servers
 
-Collect Buildkite URLs.
-
-Ideally, query the AppEx QA cluster — see `appex-qa-cluster-queries.md`. Otherwise, read the comments on the `failed-test` issue to gauge frequency.
-
-## Did it fail because of a polluted test environment?
+How tests share or isolate test servers affects whether one test can be polluted by another.
 
 - **Scout:** tests are split into lanes. All Playwright configs in the same lane run against the same test servers, so state can leak between configs.
 - **FTR:** tests are divided into groups. A fresh set of test servers is started for each config, so cross-config pollution is unlikely.
+
+# Investigation: understand the bigger picture
+
+Don't just inspect the latest failure. Build a picture of the failure over time — recent failures are the most relevant, but the full history is what reveals the pattern.
+
+## Guiding questions
+
+- **Where is the test currently running?** Both local and Cloud pipelines, or just one? Query the AppEx QA cluster to see all recent runs.
+- **Is it failing consistently?** Place the test on the spectrum from "very occasional" to "fails every run".
+- **Is it failing on both local and Cloud pipelines, or just one?**
+- **Did it fail in builds with many other test failures?** That points to a broader test environment issue rather than a problem with this test.
+- **When did it first fail, and when did it last pass?** This narrows down the Kibana commit or PR that may have introduced the flakiness.
+
+## When did it start failing?
+
+Compare the timestamps of the last successful run and the first failure. For Cloud runs, look up the Kibana commit each one used (see "Finding the Kibana commit a Cloud run used" in Background) so you can pinpoint which commit introduced the regression.
+
+## On which pipelines did it fail?
+
+For each Buildkite URL the test failed in:
+
+- Understand the pipeline type (Cloud or local)
+- Understand the test server configuration (for Scout and Jest tests, are the tests using **default** or **custom test servers** configuration?)
+  - Tip: reference `docs/extend/scout/feature-flags.md#custom-server-configs-reach-out-to-appex-qa-first-scout-feature-flags-custom-servers` for more information on custom servers configs in Scout.
+
+Ideally, query the AppEx QA cluster — see `appex-qa-cluster-queries.md`. Otherwise, read the comments on the `failed-test` issue to gauge frequency.
+
+## Did the environment cause the failure?
+
+Signs the environment is at fault rather than the test itself:
+
+- **The build had many unrelated failures**: a broad pattern of failures across unrelated tests in the same build points to an infrastructure issue (agent problems, network, downstream service outage).
+- **The test was polluted by another test**: most likely for Scout tests sharing a lane (see "How tests are distributed across servers"). Look at which other tests ran against the same servers in the failing build.
+- **The failure screenshot** could sometimes help. Example: it shows a loading Kibana logo, typically indicating that Kibana isn't completely operational.
+
+## Recognize environment failures
+
+TODO.
+
+# Investigation: assess the test itself
+
+Once you understand the failure pattern, evaluate whether the test is worth fixing as-is.
+
+## Consider alternatives before fixing
+
+Before attempting a fix, consider:
+
+- **Delete the test.** Do other tests already cover what this one is testing?
+- **Refactor or downgrade the test.** See "Pick the right test type" in `docs/extend/scout/best-practices.md`. A functional test can often become an API, component, or Jest unit/integration test.
+- **Update the tags.** Are the test's tags still appropriate? Should it run on Cloud? Should it be excluded from certain serverless solution types (e.g. Security)?
 
 ## Does the test follow best practices?
 
@@ -104,3 +133,9 @@ Common best-practice violations that cause flakiness:
 - **Wait for complex UI to finish rendering** (`docs/extend/kibana/scout/ui-best-practices#wait-for-complex-components-to-fully-render`).
 
 Scout and FTR tests should also follow the general best practices in `docs/extend/scout/best-practices.md`, the UI best practices in `docs/extend/scout/ui-best-practices.md`, and the API best practices in `docs/extend/scout/api-best-practices.md`.
+
+# Fixing pitfalls
+
+- **Increasing timeouts**: raising a timeout shouldn't be the first fix class that comes to mind. Treat it as a last resort and exhaust other options first.
+- **Making substantial changes to the test**: don't update assertions or weaken the test coverage just to make the test pass.
+- **Reduce coverage surface**: don't simply remove tags so that the test isn't run in certain environments (e.g., Cloud) or in certain project types (e.g., serverless Security project).
