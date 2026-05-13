@@ -68,22 +68,53 @@ In CI the trace-based evaluators query the `tracingEs` cluster declared in `kbn-
 
 This suite replaces the legacy LangSmith-based `DefaultAssistantGraph` evaluation. The four ES|QL evaluators above are the parity baseline (LangSmith covered the same dimensions: query validity, execution success, result equivalence, functional equivalence). End-to-end verification with the live Agent Builder `converse` loop confirms the agent loop, ES|QL extractor, and fixture indices all pull their weight end-to-end. The five trace-based observability evaluators are additive — LangSmith did not expose those metrics as scored evaluators and they require no parity-equivalent in the prior suite.
 
-### Verified runs (v1 baseline)
+### Verified runs
 
-End-to-end six-model EIS fanout in Buildkite [build #441763](https://buildkite.com/elastic/kibana-pull-request/builds/441763) on commit `35c64e3` — 1,680 score documents and 138 K OTel spans landed in the golden cluster (`kibana-evaluations` data stream). Judge for every run was `google-gemini-3.1-pro`; all 31 dataset examples ran for each task model.
+Two end-to-end EIS fanouts in Buildkite, same suite, same 31-example dataset, same `google-gemini-3.1-pro` judge, different commits:
 
-| Task model (EIS) | Validity | ExecValidity | FuncEq | ResultEq |
+- **v1 baseline** — [build #441763](https://buildkite.com/elastic/kibana-pull-request/builds/441763) on commit `35c64e3`. Six EIS models. 1,680 score documents and 138 K OTel spans landed in the golden cluster (`kibana-evaluations` data stream). Measured **before** the two suite-local quality fixes — framework's binary `Yes/No` FuncEq judge, no `?_tstart` / `?_tend` substitution, no SQL pre-check guard.
+- **v2 baseline** — [build #442113](https://buildkite.com/elastic/kibana-pull-request/builds/442113) on commit `dcee5ce`. Twelve models in one fanout (six weekly EIS + six LiteLLM OSS — same set the `alerts-rag` suite uses). 3,348 score documents in the same data stream. Measured **after** the three suite-local fixes (calibrated 3-point FuncEq rubric + `?_tstart`/`?_tend` substitution + `extract_esql` SQL pre-check guard + FuncEq defensive guard for missing tool calls). Every score document is stamped with `evaluator.metadata.judgeVersion=v2` so trending dashboards can keep both eras side-by-side or filter to one.
+
+#### v1 → v2 lift on the same six EIS models
+
+| Task model (EIS) | Validity v1→v2 | ExecValidity v1→v2 | FuncEq v1→v2 | ResultEq v1→v2 |
 |---|---|---|---|---|
-| `anthropic-claude-4.6-sonnet` | 0.97 | 0.81 | 0.07 | 0.42 |
-| `anthropic-claude-4.6-opus`   | 0.97 | 0.66 | 0.03 | 0.26 |
-| `google-gemini-3.1-pro`       | 0.97 | 0.76 | 0.03 | 0.42 |
-| `google-gemini-3.0-flash`     | 0.87 | 0.63 | 0.10 | 0.26 |
-| `openai-gpt-5.4`              | 0.97 | 0.69 | 0.10 | 0.29 |
-| `openai-gpt-oss-120b`         | 0.29 | 0.16 | 0.03 | 0.03 |
+| `openai-gpt-5.4`              | 0.97 → 0.97 (**+0.00**) | 0.69 → 0.97 (**+0.28**) | 0.10 → 0.19 (**+0.09**) | 0.29 → 0.61 (**+0.32**) |
+| `anthropic-claude-4.6-opus`   | 0.97 → 1.00 (**+0.03**) | 0.66 → 0.95 (**+0.29**) | 0.03 → 0.15 (**+0.12**) | 0.26 → 0.58 (**+0.32**) |
+| `anthropic-claude-4.6-sonnet` | 0.97 → 0.97 (**+0.00**) | 0.81 → 0.90 (**+0.09**) | 0.07 → 0.18 (**+0.11**) | 0.42 → 0.52 (**+0.10**) |
+| `google-gemini-3.1-pro`       | 0.97 → 0.97 (**+0.00**) | 0.76 → 0.79 (**+0.03**) | 0.03 → 0.21 (**+0.18**) | 0.42 → 0.48 (**+0.06**) |
+| `google-gemini-3.0-flash`     | 0.87 → 0.90 (**+0.03**) | 0.63 → 0.77 (**+0.14**) | 0.10 → 0.32 (**+0.22**) | 0.26 → 0.42 (**+0.16**) |
+| `openai-gpt-oss-120b`         | 0.29 → 0.58 (**+0.29**) | 0.16 → 0.08 (**-0.08**) | 0.03 → 0.03 (**+0.00**) | 0.03 → 0.03 (**+0.00**) |
+| **EIS-6 mean**                | 0.84 → 0.90 (**+0.06**) | 0.62 → 0.74 (**+0.12**) | 0.06 → 0.18 (**+0.12**) | 0.28 → 0.44 (**+0.16**) |
 
-These are the **v1 baseline**: measured with the framework's binary `Yes/No` FuncEq judge AND without `?_tstart` / `?_tend` substitution at the ES boundary, so they undercount cases where the candidate query was actually correct but tripped one of those mechanical issues. The two suite-local quality fixes ([Calibrated FuncEq + bind-param substitution](#calibrated-funceq--bind-param-substitution)) are expected to raise ExecValidity (substitution unblocks the candidates that were failing on `parsing_exception: Unknown query parameter [_tstart]`) and shift FuncEq from a 0/1 to a 0/0.5/1 distribution that gives partial credit for "equivalent with caveats" candidates. The first CI run after those commits lands the **v2 baseline**, every score document stamped with `evaluator.metadata.judgeVersion=v2` so trending dashboards can keep both eras side-by-side or filter to one.
+ExecValidity, FuncEq and ResultEq all moved in the expected direction at the mean (+12 / +12 / +16 percentage points). Per-model attribution:
 
-`openai-gpt-oss-120b` is the canary for the `extract_esql` SQL pre-check guard — it emits raw SQL (`SELECT ... FROM ... JOIN ... ON`, `ALTER TABLE`, `OFFSET N`) for a meaningful share of examples. The guard returns an empty extraction for non-ES|QL output so Validity scores those candidates 0 instead of accidentally letting a sliced SQL fragment pass as ES|QL.
+- **`?_tstart` / `?_tend` substitution** carries most of the ExecValidity lift. `openai-gpt-5.4` (+0.28) and `anthropic-claude-4.6-opus` (+0.29) were the heaviest users of bind-parameter syntax in v1; now those queries actually execute against ES instead of failing on `parsing_exception: Unknown query parameter [_tstart]`.
+- **Calibrated 3-point FuncEq rubric** carries the FuncEq lift. v1 emitted a binary `equivalent`/`not_equivalent`; v2 adds a `partial` band (score = 0.5) for queries that differ only in projection columns or row ordering. `google-gemini-3.0-flash` (+0.22) and `google-gemini-3.1-pro` (+0.18) benefit most — they tend to produce semantically right queries with cosmetic differences.
+- **`extract_esql` SQL pre-check guard** is the `openai-gpt-oss-120b` story. v1 Validity was 0.29 because mangled SQL output was reaching the AST validator and getting partial credit for `FROM` heuristics. v2 returns an empty extraction for non-ES|QL output → Validity climbs to 0.58 on the queries the model does emit as ES|QL, and ExecValidity drops to 0.08 (those empty-extraction examples correctly fail Exec instead of falsely passing). Net effect: signal is now honest — `gpt-oss-120b` collapses on this task, and the suite reports that cleanly instead of inflating Validity with junk.
+- **FuncEq defensive guard** (commit `dcee5ce`) doesn't move EIS-6 numbers materially because EIS models rarely emit the giant thinking traces that trip the judge; it lands as load-bearing for the OSS side, where Kimi-thinking variants previously crashed the judge mid-run and aborted entire connector evaluations.
+
+#### v2 OSS-6 callout
+
+The same v2 build extends to six LiteLLM OSS connectors (`models:weekly-eis-models` + six `models:llm-gateway/<id>` labels, the alerts-rag lineup minus the two upstream-broken Mistral entries):
+
+| Task model (OSS) | Validity | ExecValidity | FuncEq | ResultEq |
+|---|---|---|---|---|
+| `DeepSeek-V4-Flash` | 0.87 | 0.81 | 0.11 | 0.45 |
+| `Kimi-K2-Thinking`  | 0.90 | 0.69 | 0.15 | 0.29 |
+| `Kimi-K2.5`         | 0.84 | 0.65 | 0.19 | 0.29 |
+| `Kimi-K2.6`         | 0.94 | 0.48 | 0.06 | 0.29 |
+| `Ministral-3B`      | 0.90 | 0.00 | 0.02 | 0.00 |
+| `Codestral-2501`    | 0.71 | 0.02 | 0.03 | 0.00 |
+| **OSS-6 mean**      | 0.86 | 0.44 | 0.09 | 0.22 |
+
+`DeepSeek-V4-Flash` clears the EIS-6 ExecValidity mean (0.81 vs 0.74), confirming OSS connectors are evaluable end-to-end on this suite. `Ministral-3B` and `Codestral-2501` collapse on ExecValidity (~0%) — they hallucinate schema (`FROM logs.* ALL_USERS` etc.) and the queries don't execute against the fixture indices. Same root cause the SQL guard catches for `gpt-oss-120b`: too small / too specialized for ES|QL generation. The suite catches it; no eval-framework gap.
+
+#### Dominant residual error
+
+`Func Eq` is consistently lower than `Result Eq` across every model — many candidates execute and return the same rows as the gold query, but the LLM judge still marks them `not_equivalent` because of stylistic differences (column alias, projection order). This is the lift target for the next cycle (suite-local rubric refinement or a ResEq-backed FuncEq override); it's explicitly out of scope for this PR.
+
+The dataset, the suite, and the trace pipeline are all instrumented now — every v2 score document has `evaluator.score`, `evaluator.label`, `evaluator.explanation`, and `evaluator.metadata.fallback` so dashboards can isolate this failure mode without re-running the suite.
 
 ---
 
