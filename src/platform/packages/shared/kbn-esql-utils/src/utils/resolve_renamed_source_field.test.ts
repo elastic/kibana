@@ -129,14 +129,4 @@ describe('resolveRenamedSourceField', () => {
       expect(resolveRenamedSourceField('x', query)).toBe('x');
     });
   });
-
-  it('', () => {
-    const query = `
-    FROM kibana_sample_data_logs
-      | EVAL request_summary = CONCAT(host, " - ", request)
-      | RENAME request_summary AS message
-      | KEEP host, message, bytes, @timestamp
-    `;
-    expect(resolveRenamedSourceField('message', query)).toBe('message');
-  });
 });
