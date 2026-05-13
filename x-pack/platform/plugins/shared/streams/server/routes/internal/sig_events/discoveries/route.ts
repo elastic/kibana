@@ -58,13 +58,13 @@ const discoveriesSearchRoute = createServerRoute({
   },
 });
 
-const discoveriesLatestPerSlugRoute = createServerRoute({
-  endpoint: 'POST /internal/sig_events/discoveries/_latest_per_slug',
+const discoveriesCurrentPerSlugRoute = createServerRoute({
+  endpoint: 'POST /internal/sig_events/discoveries/_current_per_slug',
   options: {
     access: 'internal',
-    summary: 'Get latest discovery per slug',
+    summary: 'Get current discovery per slug',
     description:
-      'Search discovery entities returning the latest derived state per discovery_slug (instead of per discovery_id).',
+      'Return the current discovery per discovery_slug (collapsed before filtering). A slug whose latest discovery does not match the filters is omitted, even if older matching discoveries exist.',
   },
   security: {
     authz: {
@@ -84,7 +84,7 @@ const discoveriesLatestPerSlugRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    return getDiscoveryClient().findLatestPerSlug(params.body);
+    return getDiscoveryClient().findCurrentPerSlug(params.body);
   },
 });
 
@@ -116,6 +116,6 @@ const discoveriesBulkCreateRoute = createServerRoute({
 
 export const internalSigEventsDiscoveriesRoutes = {
   ...discoveriesSearchRoute,
-  ...discoveriesLatestPerSlugRoute,
+  ...discoveriesCurrentPerSlugRoute,
   ...discoveriesBulkCreateRoute,
 };

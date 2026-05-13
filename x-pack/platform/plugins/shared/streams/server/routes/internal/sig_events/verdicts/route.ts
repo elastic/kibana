@@ -47,13 +47,13 @@ const verdictsSearchRoute = createServerRoute({
   },
 });
 
-const verdictsLatestPerSlugRoute = createServerRoute({
-  endpoint: 'POST /internal/sig_events/verdicts/_latest_per_slug',
+const verdictsCurrentPerSlugRoute = createServerRoute({
+  endpoint: 'POST /internal/sig_events/verdicts/_current_per_slug',
   options: {
     access: 'internal',
-    summary: 'Get latest verdict per slug',
+    summary: 'Get current verdict per slug',
     description:
-      'Search verdict entities returning the latest derived state per discovery_slug (instead of per verdict_id).',
+      'Return the current verdict per discovery_slug (collapsed before filtering). A slug whose latest verdict does not match the filters is omitted, even if older matching verdicts exist.',
   },
   security: {
     authz: {
@@ -68,7 +68,7 @@ const verdictsLatestPerSlugRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    return getVerdictClient().findLatestPerSlug(params.body);
+    return getVerdictClient().findCurrentPerSlug(params.body);
   },
 });
 
@@ -133,7 +133,7 @@ const verdictsBulkCreateRoute = createServerRoute({
 
 export const internalSigEventsVerdictsRoutes = {
   ...verdictsSearchRoute,
-  ...verdictsLatestPerSlugRoute,
+  ...verdictsCurrentPerSlugRoute,
   ...verdictsReviewedSummaryRoute,
   ...verdictsBulkCreateRoute,
 };

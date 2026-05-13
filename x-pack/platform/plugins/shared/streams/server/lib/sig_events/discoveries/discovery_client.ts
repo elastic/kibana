@@ -59,6 +59,17 @@ export class DiscoveryClient {
     });
   }
 
+  /**
+   * Returns the latest discovery matching the provided filters, per
+   * `discovery_id`.
+   *
+   * Pipeline: apply filters → collapse to the most recent row per id.
+   *
+   * Semantically: "for each discovery, was there ever a matching row, and if
+   * so which is the most recent?" Contrast with {@link findCurrentPerSlug},
+   * which collapses first and may omit slugs whose current discovery does not
+   * match.
+   */
   async findLatest(options: DiscoveriesSearchOptions = {}): Promise<{ hits: Discovery[] }> {
     let query = baseSpaceScopedQuery(DISCOVERIES_DATA_STREAM, this.clients.space);
 
@@ -87,7 +98,19 @@ export class DiscoveryClient {
     return executeSourceQuery<Discovery>(this.clients.esClient, query);
   }
 
-  async findLatestPerSlug(options: DiscoveriesSearchOptions = {}): Promise<{ hits: Discovery[] }> {
+  /**
+   * Returns the current discovery per `discovery_slug`, then drops slugs whose
+   * current discovery does not match the provided filters.
+   *
+   * Pipeline: collapse to the most recent row per slug → apply filters.
+   *
+   * Semantically: "what is the current discovery of each slug, and does it
+   * match the filters?" A slug whose latest discovery does not match is
+   * omitted, even if older matching discoveries exist. Contrast with
+   * {@link findLatest}, which filters first and returns the latest *matching*
+   * discovery per `discovery_id`.
+   */
+  async findCurrentPerSlug(options: DiscoveriesSearchOptions = {}): Promise<{ hits: Discovery[] }> {
     let query = baseSpaceScopedQuery(DISCOVERIES_DATA_STREAM, this.clients.space);
 
     query = applyTimeWindow(query, options);

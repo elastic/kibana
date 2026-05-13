@@ -64,6 +64,15 @@ export class VerdictClient {
     });
   }
 
+  /**
+   * Returns the latest verdict matching the provided filters, per `verdict_id`.
+   *
+   * Pipeline: apply filters → collapse to the most recent row per id.
+   *
+   * Semantically: "for each verdict, was there ever a matching row, and if so
+   * which is the most recent?" Contrast with {@link findCurrentPerSlug}, which
+   * collapses first and may omit slugs whose current verdict does not match.
+   */
   async findLatest(options: VerdictsSearchOptions = {}): Promise<{ hits: Verdict[] }> {
     let query = baseSpaceScopedQuery(VERDICTS_DATA_STREAM, this.clients.space);
     query = applyTimeWindow(query, options);
@@ -83,7 +92,18 @@ export class VerdictClient {
     return executeSourceQuery<Verdict>(this.clients.esClient, query);
   }
 
-  async findLatestPerSlug(options: VerdictsSearchOptions = {}): Promise<{ hits: Verdict[] }> {
+  /**
+   * Returns the current verdict per `discovery_slug`, then drops slugs whose
+   * current verdict does not match the provided filters.
+   *
+   * Pipeline: collapse to the most recent row per slug → apply filters.
+   *
+   * Semantically: "what is the current verdict of each slug, and does it match
+   * the filters?" A slug whose latest verdict does not match is omitted, even
+   * if older matching verdicts exist. Contrast with {@link findLatest}, which
+   * filters first and returns the latest *matching* verdict per `verdict_id`.
+   */
+  async findCurrentPerSlug(options: VerdictsSearchOptions = {}): Promise<{ hits: Verdict[] }> {
     let query = baseSpaceScopedQuery(VERDICTS_DATA_STREAM, this.clients.space);
 
     query = applyTimeWindow(query, options);
