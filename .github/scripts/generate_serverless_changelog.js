@@ -81,15 +81,30 @@ const findKibanaServerlessDeployedCommit = async ({
 };
 
 const matchKibanaTagsToReleaseCommits = async ({ github, serverlessReleases }) => {
-  // Need to retrieve all the tags because ref tags are always last.
-  const tags = await github.paginate(github.rest.repos.listTags, {
+  const releaseShaLength = serverlessReleases[0]?.kibanaSha.length;
+  const releaseShas = new Set(serverlessReleases.map(({ kibanaSha }) => kibanaSha));
+  const tagsByReleaseSha = new Map();
+
+  for await (const response of github.paginate.iterator(github.rest.repos.listTags, {
     owner: GITHUB_OWNER,
     repo: KIBANA_REPO,
     per_page: 100,
-  });
+  })) {
+    for (const tag of response.data) {
+      const releaseSha = tag.commit.sha.slice(0, releaseShaLength);
+
+      if (releaseShas.has(releaseSha)) {
+        tagsByReleaseSha.set(releaseSha, tag);
+      }
+    }
+
+    if (tagsByReleaseSha.size === serverlessReleases.length) {
+      break;
+    }
+  }
 
   return serverlessReleases.flatMap((release) => {
-    const tagForReleaseCommit = tags.find((tag) => tag.commit.sha.startsWith(release.kibanaSha));
+    const tagForReleaseCommit = tagsByReleaseSha.get(release.kibanaSha);
 
     if (!tagForReleaseCommit) {
       console.warn(`No tag found for the release commit ${release.kibanaSha}, removing.`);
