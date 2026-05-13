@@ -864,6 +864,82 @@ describe('function validation', () => {
     ]);
   });
 
+  describe('param with hint.kind === "aggregation"', () => {
+    beforeEach(() => {
+      setTestFunctions([
+        {
+          name: 'agg_outer',
+          type: FunctionDefinitionTypes.AGG,
+          description: '',
+          locationsAvailable: [Location.STATS],
+          signatures: [
+            {
+              params: [
+                {
+                  name: 'aggregation',
+                  type: 'double',
+                  optional: false,
+                  hint: { kind: 'aggregation' },
+                },
+              ],
+              returnType: 'double',
+            },
+          ],
+        },
+        {
+          name: 'agg_inner',
+          type: FunctionDefinitionTypes.AGG,
+          description: '',
+          locationsAvailable: [Location.STATS],
+          signatures: [
+            {
+              params: [{ name: 'field', type: 'double', optional: false }],
+              returnType: 'double',
+            },
+          ],
+        },
+        {
+          name: 'scalar_inner',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.STATS],
+          signatures: [
+            {
+              params: [{ name: 'field', type: 'double', optional: false }],
+              returnType: 'double',
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('allows a nested aggregation at the hint-marked position', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors('FROM a_index | STATS AGG_OUTER(AGG_INNER(doubleField))', []);
+    });
+
+    it('reports an error when the hint-marked position receives a non-aggregation function', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors('FROM a_index | STATS AGG_OUTER(SCALAR_INNER(doubleField))', [
+        'This argument of AGG_OUTER must be an aggregation function.',
+      ]);
+    });
+
+    it('reports an error when the hint-marked position receives a column', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors('FROM a_index | STATS AGG_OUTER(doubleField)', [
+        'This argument of AGG_OUTER must be an aggregation function.',
+      ]);
+    });
+
+    it('still forbids nested aggregations inside the inner aggregation (the rule is only lifted at the hint position)', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors('FROM a_index | STATS AGG_OUTER(AGG_INNER(AGG_INNER(doubleField)))', [
+        'Aggregation functions cannot be nested. Found AGG_INNER in AGG_INNER.',
+      ]);
+    });
+  });
+
   it('should ignore a function whose name is defined by a parameter', async () => {
     const { expectErrors } = await setup();
 
