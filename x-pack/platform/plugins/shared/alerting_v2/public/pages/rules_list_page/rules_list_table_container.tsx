@@ -32,6 +32,11 @@ export interface RulesListTableContainerProps {
   sortDirection?: 'asc' | 'desc';
   isLoading: boolean;
   onTableChange: (criteria: Criteria<RuleApiResponse>) => void;
+  /**
+   * When provided, the pencil icon routes to this handler instead of opening
+   * the internal QuickEditRuleFlyout. Use to redirect to the new stepped flyout.
+   */
+  onEditInFlyout?: (rule: RuleApiResponse) => void;
 }
 
 export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = ({
@@ -46,6 +51,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   sortDirection,
   isLoading,
   onTableChange,
+  onEditInFlyout,
 }) => {
   const { navigateToUrl } = useService(CoreStart('application'));
   const { basePath } = useService(CoreStart('http'));
@@ -148,8 +154,12 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
           setExpandedRuleId(r.id);
         }}
         onQuickEdit={(r) => {
-          setExpandedRuleId(null);
-          setQuickEditRuleId(r.id);
+          if (onEditInFlyout) {
+            onEditInFlyout(r);
+          } else {
+            setExpandedRuleId(null);
+            setQuickEditRuleId(r.id);
+          }
         }}
         onEdit={(r) => navigateToUrl(basePath.prepend(paths.ruleEdit(r.id)))}
         onClone={(r) =>
@@ -166,8 +176,13 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
           rule={expandedRule}
           onClose={() => setExpandedRuleId(null)}
           onQuickEdit={(r) => {
-            setExpandedRuleId(null);
-            setQuickEditRuleId(r.id);
+            if (onEditInFlyout) {
+              setExpandedRuleId(null);
+              onEditInFlyout(r);
+            } else {
+              setExpandedRuleId(null);
+              setQuickEditRuleId(r.id);
+            }
           }}
           onEdit={(r) => navigateToUrl(basePath.prepend(paths.ruleEdit(r.id)))}
           onClone={(r) =>
