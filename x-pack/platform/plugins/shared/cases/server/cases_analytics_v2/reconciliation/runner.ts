@@ -7,7 +7,7 @@
 
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
-import { nodeBuilder } from '@kbn/es-query';
+import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import type { CasesAnalyticsV2WriterContract } from '../writer';
@@ -79,8 +79,26 @@ export async function runReconciliation({
   // KQL-ish filter the SO client accepts. `attributes.` prefix is required —
   // SOs are stored namespaced under their type, so the filter applies inside
   // that namespace.
+  //
+  // **Why two clauses, not one.** Newly-created cases land in the SO store
+  // with `updated_at = null` (`transformNewCase` in common/utils.ts). A
+  // filter that only matches `updated_at > lastRunAt` would never see them,
+  // and the very scenario this backstop exists for — fire-and-forget write
+  // failed at create time — would stay broken forever. So:
+  //   - clause 1: updated_at > lastRunAt          (existing case, patched)
+  //   - clause 2: updated_at IS MISSING/NULL
+  //               AND created_at > lastRunAt      (case never patched, still
+  //                                                missed by the writer)
+  // `fromKueryExpression('not <field>:*')` is the standard KQL idiom for
+  // "field is missing or null" — there's no nodeBuilder helper for it.
   const filter = lastRunAt
-    ? nodeBuilder.range(`${CASE_SAVED_OBJECT}.attributes.updated_at`, 'gt', lastRunAt)
+    ? nodeBuilder.or([
+        nodeBuilder.range(`${CASE_SAVED_OBJECT}.attributes.updated_at`, 'gt', lastRunAt),
+        nodeBuilder.and([
+          fromKueryExpression(`not ${CASE_SAVED_OBJECT}.attributes.updated_at:*`),
+          nodeBuilder.range(`${CASE_SAVED_OBJECT}.attributes.created_at`, 'gt', lastRunAt),
+        ]),
+      ])
     : undefined;
 
   // Open a PIT (Point-In-Time) so paging is consistent against a fixed
@@ -89,18 +107,23 @@ export async function runReconciliation({
 
   let processed = 0;
   let searchAfter: SortResults | undefined;
+  // Per-space counts for the summary log line. On a heavily-tenanted cluster
+  // "where did the missing case live?" is much easier to answer when the
+  // reconciliation log already tells you which spaces produced output.
+  const processedBySpace = new Map<string, number>();
 
   try {
     while (true) {
       const page = await savedObjectsClient.find<CasePersistedAttributes>({
         type: CASE_SAVED_OBJECT,
         filter,
-        // Walking by `updated_at` ascending means the runner always processes
-        // older edits before newer ones, which is the order that matches
-        // user-perceived edit time. Doesn't affect correctness — the writer's
-        // upsert is order-independent — but it does mean dashboards reflect
-        // a coherent progression as the tick runs.
-        sortField: 'updated_at',
+        // Sorting by `created_at` (always non-null) rather than `updated_at`
+        // (null on new cases) keeps PIT + searchAfter pagination stable —
+        // search_after with a null cursor value can skip or duplicate docs
+        // depending on the field's `missing` semantics. Created order isn't
+        // user-perceived edit order, but order doesn't matter for analytics
+        // correctness (upsert is idempotent).
+        sortField: 'created_at',
         sortOrder: 'asc',
         perPage: PAGE_SIZE,
         pit: { id: pit.id },
@@ -116,6 +139,12 @@ export async function runReconciliation({
         // own errors. The runner counts attempts, not successes.
         writer.upsertCase(so);
         processed++;
+        // Bucket by space for the summary log. Cases SOs are
+        // namespace-scoped (`multiple-isolated`); `namespaces` is always a
+        // single-element array. `??` defaults to 'default' for the
+        // theoretical edge case where the array is empty.
+        const space = so.namespaces?.[0] ?? 'default';
+        processedBySpace.set(space, (processedBySpace.get(space) ?? 0) + 1);
       }
 
       // The last result's `sort` field is the cursor for the next page.
@@ -131,8 +160,19 @@ export async function runReconciliation({
     await savedObjectsClient.closePointInTime(pit.id);
   }
 
+  // Per-space breakdown for the log line — formatted as `space=N` pairs,
+  // sorted by count descending so the loudest spaces lead. Omitted when no
+  // cases were processed (the message is already trivially "processed=0").
+  const perSpaceSummary =
+    processedBySpace.size === 0
+      ? ''
+      : ` by_space={${[...processedBySpace.entries()]
+          .sort((a, b) => b[1] - a[1])
+          .map(([space, n]) => `${space}=${n}`)
+          .join(', ')}}`;
+
   logger.info(
-    `cases-analyticsV2: reconciliation processed=${processed} lastRunAt=${
+    `cases-analyticsV2: reconciliation processed=${processed}${perSpaceSummary} lastRunAt=${
       lastRunAt ?? '<none>'
     } newLastRunAt=${tickStartedAt}`
   );
