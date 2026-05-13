@@ -40,9 +40,7 @@ describe('ErrorCallout', () => {
     const ERROR = new Error('My error');
     const TITLE = 'Error title';
 
-    renderErrorCallout(
-      <ErrorCallout error={ERROR} title={TITLE} showErrorDialog={jest.fn()} />
-    );
+    renderErrorCallout(<ErrorCallout error={ERROR} title={TITLE} showErrorDialog={jest.fn()} />);
 
     expect(screen.getByText(TITLE)).toBeVisible();
     expect(screen.getByText(ERROR.message)).toBeVisible();
@@ -101,12 +99,7 @@ describe('ErrorCallout', () => {
     const ESQL_HREF = 'https://example.test/esql-reference';
 
     renderErrorCallout(
-      <ErrorCallout
-        error={ERROR}
-        isEsqlMode
-        title={TITLE}
-        esqlReferenceHref={ESQL_HREF}
-      />
+      <ErrorCallout error={ERROR} isEsqlMode title={TITLE} esqlReferenceHref={ESQL_HREF} />
     );
 
     const link = screen.getByRole('link', { name: /open es\|ql reference/i });
