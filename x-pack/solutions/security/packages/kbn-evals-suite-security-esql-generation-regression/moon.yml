@@ -22,7 +22,9 @@ dependsOn:
   - '@kbn/esql-language'
   - '@kbn/evals'
   - '@kbn/inference-common'
+  - '@kbn/inference-prompt-utils'
   - '@kbn/tooling-log'
+  - '@kbn/zod'
 tags:
   - functional-tests
   - package
