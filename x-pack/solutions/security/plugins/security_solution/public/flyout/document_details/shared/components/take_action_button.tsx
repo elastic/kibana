@@ -19,7 +19,7 @@ import { EventFiltersFlyout } from '../../../../management/pages/event_filters/v
 import { OsqueryFlyout } from '../../../../detections/components/osquery/osquery_flyout';
 import { useDocumentDetailsContext } from '../context';
 import { useHostIsolation } from '../hooks/use_host_isolation';
-import { useRefetchByScope } from '../../../../flyout_v2/document/hooks/use_refetch_by_scope';
+import { useRefetchByScope } from '../../../../flyout_v2/document/main/hooks/use_refetch_by_scope';
 import { useExceptionFlyout } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_flyout';
 import { isActiveTimeline } from '../../../../helpers';
 import { useEventFilterModal } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_modal';

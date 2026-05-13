@@ -208,8 +208,14 @@ export class UpdateSLO {
 
       await Promise.all([this.deleteRollupData(slo), this.deleteSummaryData(slo)]);
     } catch (err) {
-      // Any errors here should not prevent moving forward.
-      // Worst case we keep rolling up data for the previous revision number.
+      // Don't block the update on cleanup failures, but surface them in logs so
+      // stale transforms and orphan summary documents become diagnosable.
+      // SDH #6202.
+      this.logger.warn(
+        `Failed to clean up resources for previous revision of SLO ` +
+          `[id=${slo.id}, revision=${slo.revision}]. ` +
+          `Old resources may continue producing data. ${err}`
+      );
     }
   }
 
