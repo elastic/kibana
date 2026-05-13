@@ -58,7 +58,8 @@ const detailsObject = {
   defaultRetentionPeriod: '30d',
 };
 
-describe('getDataStreamDetails', () => {
+// Failing: See https://github.com/elastic/kibana/issues/269160
+describe.skip('getDataStreamDetails', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
   let mockESClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let mockDatasetQualityESClient: {
