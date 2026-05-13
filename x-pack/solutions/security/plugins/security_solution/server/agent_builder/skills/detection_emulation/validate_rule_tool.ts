@@ -36,6 +36,14 @@ import {
   type EmulationReportPhase,
 } from '../../../lib/detection_emulation/emulation_report_type';
 import { EmulationRunner } from '../../../lib/detection_emulation/execution/runner';
+import {
+  EmulationAllowlist,
+  createDefaultAllowlistConfig,
+} from '../../../lib/detection_emulation/execution/allowlist';
+import {
+  EmulationRateLimiter,
+  createDefaultRateLimiterConfig,
+} from '../../../lib/detection_emulation/execution/rate_limiter';
 import { validateRuleSchema } from './validate_rule_input';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -120,6 +128,13 @@ export const createValidateRuleTool = (
 ): BuiltinSkillBoundedTool<typeof validateRuleSchema> => {
   const { core, endpointService, config, logger } = deps;
 
+  // Constructed once at registration so the rate-limit window and
+  // allowlist set are shared across all invocations of the tool. Per-call
+  // construction would defeat the per-space rate window. Mirrors the
+  // pattern in run_emulation_command_tool.ts and validate_rule/route.ts.
+  const allowlist = new EmulationAllowlist(createDefaultAllowlistConfig(), logger);
+  const rateLimiter = new EmulationRateLimiter(createDefaultRateLimiterConfig(), logger);
+
   return {
     id: 'security.detection-emulation.validate-rule',
     type: ToolType.builtin,
@@ -149,6 +164,11 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
       const { ruleId, endpointIds, mode = 'log_injection', wallBudgetMs: rawBudget } = rawParams;
       const wallBudgetMs = Math.min(rawBudget ?? WALL_BUDGET_DEFAULT_MS, WALL_BUDGET_CEILING_MS);
 
+      // I1: token from rate-limit acquire (real_execution only). Released in
+      // the unified catch when any downstream step throws after acquire so a
+      // caller-side retry isn't penalised by the rate-limit slot the failed
+      // attempt consumed.
+      let rateLimitToken: ReturnType<typeof rateLimiter.acquire>['token'];
       try {
         // Step 1: Feature flag gate — each mode is independently gated.
         const featureFlags = getDetectionEmulationFeatureFlags(config.experimentalFeatures);
@@ -240,6 +260,68 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
           }
         }
 
+        // Step 3a (real_execution only): host allowlist. Mirrors the
+        // run_emulation_command_tool.ts gate so the validateRule path
+        // cannot bypass the allowlist that runEmulationCommand enforces.
+        // Returns the *full* set of blocked endpoints so operators see
+        // every host that needs remediation in one error response.
+        if (mode === 'real_execution') {
+          const allowlistResult = allowlist.validate(endpointIds);
+          if (!allowlistResult.allowed) {
+            logger.warn(
+              `validate_rule tool blocked by allowlist for rule [${ruleId}]: ${allowlistResult.error}`
+            );
+            return {
+              results: [
+                {
+                  type: ToolResultType.error,
+                  data: {
+                    error_type: 'authorization_error',
+                    message: allowlistResult.error ?? 'Endpoints not in allowlist.',
+                    blocked_endpoints: allowlistResult.blockedEndpoints,
+                    rule_id: ruleId,
+                    status_code: 403,
+                    likely_cause: 'One or more endpoints are not in the emulation allowlist.',
+                  },
+                },
+              ],
+            };
+          }
+        }
+
+        // Step 3b (real_execution only): atomic rate-limit acquire. Burns
+        // ONE slot per validateRule call (using `ruleId` as the emulation
+        // key) regardless of how many payloads end up dispatched in
+        // Step 5 — a single rule validation must not consume N slots.
+        // The token is released on any post-acquire failure via the
+        // unified catch below.
+        if (mode === 'real_execution') {
+          const acquireResult = rateLimiter.acquire(spaceId, ruleId, 'validate-rule');
+          if (!acquireResult.allowed) {
+            logger.warn(
+              `validate_rule tool blocked by rate limiter for rule [${ruleId}]: ${acquireResult.error}`
+            );
+            return {
+              results: [
+                {
+                  type: ToolResultType.error,
+                  data: {
+                    error_type: 'rate_limit_error',
+                    message: acquireResult.error ?? 'Rate limit exceeded.',
+                    current_count: acquireResult.currentCount,
+                    max_commands: acquireResult.maxCommands,
+                    reset_ms: acquireResult.resetMs,
+                    rule_id: ruleId,
+                    status_code: 429,
+                    likely_cause: 'Rate limit exceeded for this space.',
+                  },
+                },
+              ],
+            };
+          }
+          rateLimitToken = acquireResult.token;
+        }
+
         // Step 4: Scenario generator — derives payload set from the rule's MITRE tags.
         const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
         const scenarioResult = await generateScenario(
@@ -248,6 +330,11 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
         );
 
         if (!scenarioResult.ok) {
+          // Release the rate-limit slot we reserved before scenario gen —
+          // a `no_mitre_tags` / `no_supported_techniques` failure should not
+          // count against the per-space window since no payload was dispatched.
+          rateLimiter.release(rateLimitToken);
+          rateLimitToken = undefined;
           const failureData = scenarioFailureData(scenarioResult.reason);
           return {
             results: [
@@ -445,6 +532,11 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
           ],
         };
       } catch (err) {
+        // Release the rate-limit slot on any post-acquire failure so a
+        // caller-side retry isn't penalised by the slot consumed by this
+        // failed attempt. Safe to call with `undefined` — release is a
+        // no-op when the token is missing.
+        rateLimiter.release(rateLimitToken);
         const error = err as Error;
         logger.error(`[validate_rule tool] Failed for rule [${ruleId}]: ${error.message}`, {
           tags: ['detection-emulation'],

@@ -35,6 +35,12 @@ import {
   type EmulationReportPhase,
 } from '../../emulation_report_type';
 import { EmulationRunner } from '../../execution/runner';
+import {
+  EmulationAllowlist,
+  createDefaultAllowlistConfig,
+  createRestrictiveAllowlistConfig,
+} from '../../execution/allowlist';
+import { EmulationRateLimiter, createDefaultRateLimiterConfig } from '../../execution/rate_limiter';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -64,6 +70,12 @@ const MESSAGES = {
   }),
   noSupportedTechniques: i18n.translate(`${I18N_PREFIX}.noSupportedTechniques`, {
     defaultMessage: "None of the rule's techniques have emulation payloads in the library.",
+  }),
+  endpointsNotInAllowlist: i18n.translate(`${I18N_PREFIX}.endpointsNotInAllowlist`, {
+    defaultMessage: 'Endpoints not in allowlist.',
+  }),
+  rateLimitExceeded: i18n.translate(`${I18N_PREFIX}.rateLimitExceeded`, {
+    defaultMessage: 'Rate limit exceeded.',
   }),
   internalError: i18n.translate(`${I18N_PREFIX}.internalError`, {
     defaultMessage: 'Failed to validate the rule via detection emulation.',
@@ -111,8 +123,43 @@ const mapScenarioFailure = (
 export const validateRuleRoute = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
-  logger: Logger
+  logger: Logger,
+  {
+    allowlist: allowlistOverride,
+    rateLimiter: rateLimiterOverride,
+  }: {
+    allowlist?: EmulationAllowlist;
+    rateLimiter?: EmulationRateLimiter;
+  } = {}
 ): void => {
+  // Constructed once per route registration so the per-space rate window
+  // is shared across requests. Test injection (`*Override`) lets the suite
+  // exercise the blocking branches without standing up the full
+  // config-loading pipeline. Mirrors run_command/route.ts wiring.
+  const emulationConfig = config.detectionEmulation;
+
+  const allowlist =
+    allowlistOverride ??
+    (() => {
+      const cfg = emulationConfig?.allowlist;
+      if (!cfg) {
+        return new EmulationAllowlist(createDefaultAllowlistConfig(), logger);
+      }
+      return new EmulationAllowlist(
+        cfg.allowAll
+          ? { allowAll: true, allowedHosts: new Set() }
+          : createRestrictiveAllowlistConfig(cfg.endpointIds),
+        logger
+      );
+    })();
+
+  const rateLimiter =
+    rateLimiterOverride ??
+    new EmulationRateLimiter(
+      emulationConfig?.rateLimiter ?? createDefaultRateLimiterConfig(),
+      logger
+    );
+
   router.versioned
     .post({
       path: DETECTION_ENGINE_EMULATION_VALIDATE_RULE_URL,
@@ -141,6 +188,9 @@ export const validateRuleRoute = (
       async (context, request, response): Promise<IKibanaResponse> => {
         const siemResponse = buildSiemResponse(response);
 
+        // I1: token from rate-limit acquire (real_execution only). Released
+        // in the unified catch when any downstream step throws after acquire.
+        let rateLimitToken: ReturnType<typeof rateLimiter.acquire>['token'];
         try {
           const {
             ruleId,
@@ -193,6 +243,52 @@ export const validateRuleRoute = (
             }
           }
 
+          // Step 3a (real_execution only): host allowlist. Mirrors the
+          // run_command/route.ts gate so the validateRule REST path cannot
+          // bypass the allowlist that runEmulationCommand enforces.
+          // Returns the *full* set of blocked endpoints so operators see
+          // every host that needs remediation in one error response.
+          if (mode === 'real_execution') {
+            const allowlistResult = allowlist.validate(endpointIds);
+            if (!allowlistResult.allowed) {
+              logger.warn(
+                `[validate_rule] blocked by allowlist for rule [${ruleId}]: ${allowlistResult.error}`
+              );
+              return siemResponse.error({
+                statusCode: 403,
+                body: {
+                  message: MESSAGES.endpointsNotInAllowlist,
+                  blocked_endpoints: allowlistResult.blockedEndpoints,
+                },
+              });
+            }
+          }
+
+          // Step 3b (real_execution only): atomic rate-limit acquire. Burns
+          // ONE slot per validateRule call (using `ruleId` as the emulation
+          // key) regardless of how many payloads end up dispatched in
+          // Step 5 — a single rule validation must not consume N slots.
+          // The token is released on any post-acquire failure via the
+          // unified catch below.
+          if (mode === 'real_execution') {
+            const acquireResult = rateLimiter.acquire(spaceId, ruleId, 'validate-rule');
+            if (!acquireResult.allowed) {
+              logger.warn(
+                `[validate_rule] blocked by rate limiter for rule [${ruleId}]: ${acquireResult.error}`
+              );
+              return siemResponse.error({
+                statusCode: 429,
+                body: {
+                  message: MESSAGES.rateLimitExceeded,
+                  current_count: acquireResult.currentCount,
+                  max_commands: acquireResult.maxCommands,
+                  reset_ms: acquireResult.resetMs,
+                },
+              });
+            }
+            rateLimitToken = acquireResult.token;
+          }
+
           // Step 4: Scenario generator — derives payload set from the rule's MITRE tags.
           const rulesClient = await ctx.alerting.getRulesClient();
           const scenarioResult = await generateScenario(
@@ -201,6 +297,12 @@ export const validateRuleRoute = (
           );
 
           if (!scenarioResult.ok) {
+            // Release the rate-limit slot we reserved before scenario gen —
+            // a `no_mitre_tags` / `no_supported_techniques` failure should
+            // not count against the per-space window since no payload was
+            // dispatched.
+            rateLimiter.release(rateLimitToken);
+            rateLimitToken = undefined;
             return mapScenarioFailure(scenarioResult.reason, siemResponse, logger);
           }
 
@@ -387,6 +489,11 @@ export const validateRuleRoute = (
             },
           });
         } catch (err) {
+          // Release the rate-limit slot on any post-acquire failure so a
+          // caller-side retry isn't penalised by the slot consumed by this
+          // failed attempt. Safe to call with `undefined` — release is a
+          // no-op when the token is missing.
+          rateLimiter.release(rateLimitToken);
           const error = transformError(err);
           logger.error(`[validate_rule] ${error.message}`);
           return siemResponse.error({

@@ -1,0 +1,207 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { ConfigType } from '../../../../config';
+import { validateRuleRoute } from './route';
+import { serverMock } from '../../../detection_engine/routes/__mocks__/server';
+import { requestContextMock } from '../../../detection_engine/routes/__mocks__/request_context';
+import { requestMock } from '../../../detection_engine/routes/__mocks__/request';
+import { DETECTION_ENGINE_EMULATION_VALIDATE_RULE_URL } from '../../../../../common/constants';
+import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
+import { EmulationAllowlist, createRestrictiveAllowlistConfig } from '../../execution/allowlist';
+import { EmulationRateLimiter } from '../../execution/rate_limiter';
+import { generateScenario } from '../../scenario_generator';
+
+// Stub the scenario generator so log_injection requests that pass the safety
+// gates short-circuit at scenario generation instead of dragging in the full
+// rules-client + payload-library + telemetry chain. The real scenario logic
+// has its own unit tests; here we only care that the gates fire (or don't).
+jest.mock('../../scenario_generator', () => ({
+  generateScenario: jest.fn(),
+}));
+
+const FEATURE_ENABLED_CONFIG = {
+  experimentalFeatures: {
+    detectionEmulationRealExecution: true,
+    detectionEmulationLogInjection: true,
+  },
+} as unknown as ConfigType;
+
+/**
+ * Validate-rule's auth gate (Step 2) refuses to dispatch when no
+ * authenticated user is present. Tests targeting later gates must opt in
+ * to an authenticated identity.
+ */
+const stubAuthenticatedUser = (
+  context: ReturnType<typeof requestContextMock.createTools>['context'],
+  username = 'test-user'
+) => {
+  (context.core.security.authc.getCurrentUser as jest.Mock).mockReturnValue({ username });
+};
+
+const buildRealExecutionRequest = (overrides: Partial<Record<string, unknown>> = {}) =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_EMULATION_VALIDATE_RULE_URL,
+    body: {
+      ruleId: 'rule-under-test',
+      endpointIds: ['agent-1'],
+      mode: 'real_execution',
+      ...overrides,
+    },
+  });
+
+const buildLogInjectionRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_EMULATION_VALIDATE_RULE_URL,
+    body: {
+      ruleId: 'rule-under-test',
+      endpointIds: ['blocked-host', 'another-blocked-host'],
+      mode: 'log_injection',
+    },
+  });
+
+// ─── Allowlist gate ──────────────────────────────────────────────────────────
+
+describe('validateRuleRoute — allowlist gate', () => {
+  let server: ReturnType<typeof serverMock.create>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+    server = serverMock.create();
+    (generateScenario as jest.Mock).mockReset();
+  });
+
+  it('returns 403 with blocked_endpoints when real_execution targets a non-allowlisted host', async () => {
+    const allowlist = new EmulationAllowlist(
+      createRestrictiveAllowlistConfig(['allowed-host']),
+      logger
+    );
+    validateRuleRoute(server.router, FEATURE_ENABLED_CONFIG, logger, { allowlist });
+
+    const { context } = requestContextMock.createTools();
+    stubAuthenticatedUser(context);
+    context.securitySolution.getEndpointAuthz.mockResolvedValue(
+      getEndpointAuthzInitialStateMock({ canWriteExecuteOperations: true })
+    );
+
+    const response = await server.inject(
+      buildRealExecutionRequest({ endpointIds: ['blocked-host'] }),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toBe(403);
+    expect(response.body.message).toMatchObject({
+      blocked_endpoints: ['blocked-host'],
+    });
+    // The allowlist gate must fire BEFORE scenario generation runs — otherwise
+    // a blocked request would still consume rules-client / payload-library work.
+    expect(generateScenario as jest.Mock).not.toHaveBeenCalled();
+  });
+});
+
+// ─── Rate-limit gate ─────────────────────────────────────────────────────────
+
+describe('validateRuleRoute — rate limiter gate', () => {
+  let server: ReturnType<typeof serverMock.create>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  // maxCommands: 0 immediately exhausts the limit regardless of spaceId — 0 >= 0 is
+  // always true, so acquire() always returns { allowed: false }.
+  const makeExhaustedRateLimiter = () =>
+    new EmulationRateLimiter({ maxCommands: 0, windowMs: 60_000, disabled: false }, logger);
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+    server = serverMock.create();
+    (generateScenario as jest.Mock).mockReset();
+  });
+
+  it('returns 429 when real_execution exceeds the per-space rate limit', async () => {
+    const rateLimiter = makeExhaustedRateLimiter();
+    validateRuleRoute(server.router, FEATURE_ENABLED_CONFIG, logger, { rateLimiter });
+
+    const { context } = requestContextMock.createTools();
+    stubAuthenticatedUser(context);
+    context.securitySolution.getEndpointAuthz.mockResolvedValue(
+      getEndpointAuthzInitialStateMock({ canWriteExecuteOperations: true })
+    );
+
+    const response = await server.inject(
+      buildRealExecutionRequest(),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toBe(429);
+    expect(response.body.message).toMatchObject({
+      current_count: 0,
+      max_commands: 0,
+    });
+    // The rate-limit gate must fire BEFORE scenario generation runs so an
+    // exhausted window doesn't waste payload-library work on a request that
+    // will be rejected.
+    expect(generateScenario as jest.Mock).not.toHaveBeenCalled();
+  });
+});
+
+// ─── log_injection bypasses the safety gates ─────────────────────────────────
+
+describe('validateRuleRoute — log_injection mode', () => {
+  let server: ReturnType<typeof serverMock.create>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+    server = serverMock.create();
+    (generateScenario as jest.Mock).mockReset();
+    // Short-circuit: scenario generation reports rule-not-found so the request
+    // returns 404 from the scenario-failure path. We assert the response is
+    // anything *but* 403/429, which would mean a safety gate blocked.
+    (generateScenario as jest.Mock).mockResolvedValue({
+      ok: false,
+      reason: 'rule_not_found',
+    });
+  });
+
+  it('passes through the safety gates even when allowlist + rate limiter would block real_execution', async () => {
+    // Both safety primitives configured to block: a restrictive allowlist that
+    // permits no hosts, and an exhausted rate limiter. log_injection must
+    // ignore both — the destructive-action safeguards do not apply to the
+    // synthetic-document path.
+    const allowlist = new EmulationAllowlist(createRestrictiveAllowlistConfig([]), logger);
+    const rateLimiter = new EmulationRateLimiter(
+      { maxCommands: 0, windowMs: 60_000, disabled: false },
+      logger
+    );
+    validateRuleRoute(server.router, FEATURE_ENABLED_CONFIG, logger, { allowlist, rateLimiter });
+
+    const { context } = requestContextMock.createTools();
+    stubAuthenticatedUser(context);
+    context.securitySolution.getEndpointAuthz.mockResolvedValue(getEndpointAuthzInitialStateMock());
+
+    const response = await server.inject(
+      buildLogInjectionRequest(),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).not.toBe(403);
+    expect(response.status).not.toBe(429);
+    // Scenario generation was reached (the gates didn't short-circuit it),
+    // and the route surfaced the scenario-not-found failure.
+    expect(generateScenario as jest.Mock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ruleId: 'rule-under-test',
+        mode: 'log_injection',
+      }),
+      expect.anything()
+    );
+    expect(response.status).toBe(404);
+  });
+});

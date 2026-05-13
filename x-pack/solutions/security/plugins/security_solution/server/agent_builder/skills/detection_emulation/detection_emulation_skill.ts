@@ -152,8 +152,8 @@ Guards applied by each tool (in order; first failure short-circuits):
 | Feature flag | ✓ (per-mode) | — | ✓ (realExecution) |
 | Auth required | ✓ | — | ✓ |
 | RBAC (real_execution) | ✓ | — | ✓ (per-command) |
-| Allowlist | — | — | ✓ |
-| Rate limit | — | — | ✓ |
+| Allowlist | ✓ (real_execution) | — | ✓ |
+| Rate limit | ✓ (real_execution, 1 slot/scenario) | — | ✓ (1 slot/command) |
 
 Feature flags: \`detectionEmulationLogInjection\` gates log_injection;
 \`detectionEmulationRealExecution\` gates real_execution and \`runEmulationCommand\`.
