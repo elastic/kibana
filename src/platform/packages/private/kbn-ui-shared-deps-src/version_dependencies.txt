@@ -2,12 +2,11 @@
 @babel/plugin-syntax-numeric-separator@7.10.4
 @babel/plugin-transform-numeric-separator@7.24.7
 @babel/runtime@7.28.4
-@jridgewell/gen-mapping@0.3.5
+@jridgewell/gen-mapping@0.3.13
 @jridgewell/resolve-uri@3.1.2
-@jridgewell/set-array@1.2.1
 @jridgewell/source-map@0.3.5
 @jridgewell/sourcemap-codec@1.5.5
-@jridgewell/trace-mapping@0.3.25
+@jridgewell/trace-mapping@0.3.31
 @types/eslint-scope@3.7.7
 @types/eslint@8.44.2
 @types/estree@0.0.50
