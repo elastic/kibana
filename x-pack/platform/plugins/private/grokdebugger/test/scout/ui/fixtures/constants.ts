@@ -15,7 +15,7 @@ export const GROK_DEBUGGER_TAGS = [
 
 export const GROK_DEBUGGER_USER_ROLE = {
   elasticsearch: {
-    cluster: ['manage_pipeline', 'cluster:monitor/nodes/info'],
+    cluster: ['manage_pipeline', 'monitor'],
   },
   kibana: [
     {
