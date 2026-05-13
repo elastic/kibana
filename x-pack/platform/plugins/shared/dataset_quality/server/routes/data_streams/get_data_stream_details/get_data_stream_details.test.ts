@@ -15,7 +15,13 @@ import { getDataStreamsMeteringStats } from '../get_data_streams_metering_stats'
 import { getDataStreamDetails } from '.';
 
 jest.mock('../../../services');
-jest.mock('../../../utils');
+jest.mock('../../../utils', () => {
+  const actual = jest.requireActual('../../../utils');
+  return {
+    ...actual,
+    createDatasetQualityESClient: jest.fn(),
+  };
+});
 jest.mock('../failed_docs/get_failed_docs');
 jest.mock('../get_data_streams');
 jest.mock('../get_data_streams_metering_stats');
@@ -128,8 +134,11 @@ describe('getDataStreamDetails', () => {
         'host.name': {
           keyword: { type: 'keyword', aggregatable: true },
         },
+        'service.name': {
+          keyword: { type: 'keyword', aggregatable: true },
+        },
       },
-    } as unknown as Awaited<ReturnType<typeof mockESClient.fieldCaps>>);
+    } as unknown as Awaited<ReturnType<typeof mockDatasetQualityESClient.fieldCaps>>);
   });
 
   afterEach(() => {
@@ -182,6 +191,21 @@ describe('getDataStreamDetails', () => {
           ['monitor', 'read_failure_store', 'manage_failure_store'],
           true
         );
+
+        expect(mockDatasetQualityESClient.fieldCaps).toHaveBeenCalledWith({
+          index: 'logs-test-default',
+          fields: ['*'],
+          include_unmapped: false,
+          index_filter: {
+            range: {
+              '@timestamp': {
+                gte: 1234567890,
+                lte: 1234567900,
+                format: 'epoch_millis',
+              },
+            },
+          },
+        });
       });
 
       it('throws when user lacks privileges', async () => {
@@ -239,6 +263,45 @@ describe('getDataStreamDetails', () => {
           forbid_closed_indices: false,
         });
         expect(result).toMatchObject(detailsObject);
+      });
+
+      it('omits service.name agg when the field is not aggregatable (e.g. text without keyword)', async () => {
+        mockDatasetQualityESClient.fieldCaps.mockResolvedValue({
+          fields: {
+            'host.name': {
+              keyword: { type: 'keyword', aggregatable: true },
+            },
+            'service.name': {
+              text: { type: 'text', aggregatable: false },
+            },
+          },
+        } as unknown as Awaited<ReturnType<typeof mockDatasetQualityESClient.fieldCaps>>);
+
+        mockDatasetQualityESClient.search.mockResolvedValue({
+          aggregations: {
+            total_count: { value: 1000 },
+            degraded_count: { doc_count: 50 },
+            'host.name': {
+              buckets: [{ key: 'host1' }, { key: 'host2' }],
+            },
+          },
+        });
+
+        const result = await getDataStreamDetails({
+          esClient,
+          dataStream: 'logs-test-default',
+          start: 1234567890,
+          end: 1234567900,
+          isServerless: false,
+          isSecurityEnabled: true,
+        });
+
+        const searchCall = mockDatasetQualityESClient.search.mock.calls[0][0] as {
+          aggs: Record<string, unknown>;
+        };
+        expect(searchCall.aggs).not.toHaveProperty('service.name');
+        expect(result.services).toEqual({});
+        expect(result.hosts).toEqual({ 'host.name': ['host1', 'host2'] });
       });
 
       it('calculates average document size correctly when docs count is zero', async () => {

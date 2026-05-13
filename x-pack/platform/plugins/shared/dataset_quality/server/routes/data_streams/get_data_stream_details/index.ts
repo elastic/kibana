@@ -15,7 +15,7 @@ import {
 } from '../../../../common/constants';
 import { _IGNORED } from '../../../../common/es_fields';
 import { datasetQualityPrivileges } from '../../../services';
-import { createDatasetQualityESClient } from '../../../utils';
+import { createDatasetQualityESClient, isFieldAggregatable } from '../../../utils';
 import { rangeQuery } from '../../../utils/queries';
 import { getFailedDocsPaginated } from '../failed_docs/get_failed_docs';
 import { getDataStreams } from '../get_data_streams';
@@ -121,11 +121,6 @@ type TermAggregation = Record<string, { terms: { field: string; size: number } }
 
 const MAX_HOSTS = MAX_HOSTS_METRIC_VALUE + 1; // Adding 1 so that we can show e.g. '50+'
 
-// Gather service.name terms
-const serviceNamesAgg: TermAggregation = {
-  ['service.name']: { terms: { field: 'service.name', size: MAX_HOSTS } },
-};
-
 const entityFields = [
   'host.name',
   'container.id',
@@ -136,17 +131,11 @@ const entityFields = [
   'aws.sqs.queue.name',
 ];
 
-function isFieldAggregatable(
-  fieldCapsResponse: Awaited<ReturnType<ElasticsearchClient['fieldCaps']>>,
-  fieldName: string
-): boolean {
-  const fieldCaps = fieldCapsResponse.fields[fieldName];
-  if (!fieldCaps) {
-    return false;
-  }
-
-  return Object.values(fieldCaps).every((caps) => caps.aggregatable === true);
-}
+const buildTermsAgg = (fields: string[]): TermAggregation =>
+  fields.reduce(
+    (acc, field) => ({ ...acc, [field]: { terms: { field, size: MAX_HOSTS } } }),
+    {} as TermAggregation
+  );
 
 async function getDataStreamSummaryStats(
   esClient: ElasticsearchClient,
@@ -165,17 +154,21 @@ async function getDataStreamSummaryStats(
     index: dataStream,
     fields: ['*'],
     include_unmapped: false,
+    index_filter: {
+      ...rangeQuery(start, end)[0],
+    },
   });
 
-  const aggregatableFields = entityFields.filter((field) =>
+  const aggregatableHostFields = entityFields.filter((field) =>
     isFieldAggregatable(fieldCapsResponse, field)
   );
 
-  // Gather host terms like 'host', 'pod', 'container'
-  const hostsAgg = aggregatableFields.reduce(
-    (acc, idField) => ({ ...acc, [idField]: { terms: { field: idField, size: MAX_HOSTS } } }),
-    {} as TermAggregation
-  );
+  // service.name may be text-mapped without fielddata; guard the agg.
+  const serviceNamesAgg: TermAggregation = isFieldAggregatable(fieldCapsResponse, 'service.name')
+    ? buildTermsAgg(['service.name'])
+    : {};
+
+  const hostsAgg = buildTermsAgg(aggregatableHostFields);
 
   const response = await datasetQualityESClient.search({
     index: dataStream,
