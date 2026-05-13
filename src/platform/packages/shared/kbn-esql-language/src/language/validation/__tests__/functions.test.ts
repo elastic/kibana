@@ -1153,5 +1153,20 @@ describe('function validation', () => {
         getNoValidCallSignatureError('conditional_mock', ['keyword', 'keyword']),
       ]);
     });
+
+    it('allows null as a result value for any value type', async () => {
+      const { expectErrors } = await setup();
+
+      await expectErrors(
+        'FROM index | EVAL result = CONDITIONAL_MOCK(booleanField, "text", booleanField, null)',
+        []
+      );
+    });
+
+    it('allows null as the elseValue for any value type', async () => {
+      const { expectErrors } = await setup();
+
+      await expectErrors('FROM index | EVAL result = CONDITIONAL_MOCK(booleanField, 42, null)', []);
+    });
   });
 });

@@ -160,6 +160,7 @@ function areRepeatingValuesCompatible(givenTypes: Array<SupportedDataType | 'unk
 
   return rest.every(
     (type) =>
+      type === 'null' ||
       type === 'unknown' ||
       type === 'param' ||
       type === first ||
