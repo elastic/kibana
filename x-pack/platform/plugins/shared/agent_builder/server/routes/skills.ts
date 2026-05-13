@@ -63,7 +63,8 @@ export function registerSkillsRoutes({
       security: AGENT_BUILDER_READ_SECURITY,
       access: 'public',
       summary: 'List skills',
-      description: 'List all available skills (built-in and user-created).',
+      description:
+        'List all available skills (built-in and user-created). To learn more about Agent Builder skills, refer to the [skills documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/skills).',
       options: {
         tags: ['skills', 'oas-tag:agent builder'],
         availability: {
@@ -110,7 +111,8 @@ export function registerSkillsRoutes({
       security: AGENT_BUILDER_READ_SECURITY,
       access: 'public',
       summary: 'Get a skill by id',
-      description: 'Get a specific skill by ID.',
+      description:
+        'Get a specific skill by ID. To learn more about Agent Builder skills, refer to the [skills documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/skills).',
       options: {
         tags: ['skills', 'oas-tag:agent builder'],
         availability: {
@@ -156,7 +158,8 @@ export function registerSkillsRoutes({
       security: SKILLS_WRITE_SECURITY,
       access: 'public',
       summary: 'Create a skill',
-      description: 'Create a new user-defined skill.',
+      description:
+        'Create a new user-defined skill. To learn more about Agent Builder skills, refer to the [skills documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/skills).',
       options: {
         tags: ['skills', 'oas-tag:agent builder'],
         availability: {
@@ -230,7 +233,8 @@ export function registerSkillsRoutes({
       security: SKILLS_WRITE_SECURITY,
       access: 'public',
       summary: 'Update a skill',
-      description: 'Update an existing user-created skill.',
+      description:
+        'Update an existing user-created skill. To learn more about Agent Builder skills, refer to the [skills documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/skills).',
       options: {
         tags: ['skills', 'oas-tag:agent builder'],
         availability: {
@@ -309,7 +313,7 @@ export function registerSkillsRoutes({
       access: 'public',
       summary: 'Delete a skill',
       description:
-        'Delete a user-created skill by ID. If agents still reference the skill, the request returns 409 unless force=true, which removes the skill from agents first. Built-in skills cannot be deleted.',
+        'Delete a user-created skill by ID. If agents still reference the skill, the request returns 409 unless force=true, which removes the skill from agents first. Built-in skills cannot be deleted. To learn more about Agent Builder skills, refer to the [skills documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/skills).',
       options: {
         tags: ['skills', 'oas-tag:agent builder'],
         availability: {
