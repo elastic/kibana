@@ -16,7 +16,12 @@ import {
   type InboxRequestContext,
 } from '@kbn/inbox-plugin/server';
 import { ExecutionStatus } from '@kbn/workflows';
-import { buildWorkflowSourceId, parseWorkflowSourceId, toInboxAction } from './to_inbox_action';
+import {
+  buildWorkflowSourceId,
+  parseWorkflowSourceId,
+  toInboxAction,
+  toInboxHistoryAction,
+} from './to_inbox_action';
 import type { WorkflowsManagementApi } from '../api/workflows_management_api';
 
 export const WORKFLOWS_INBOX_SOURCE_APP = 'workflows' as const;
@@ -70,6 +75,21 @@ export const createWorkflowsInboxProvider = ({
 
       return {
         actions: results.map(toInboxAction),
+        total,
+      };
+    },
+
+    async listProcessed(
+      _params: InboxActionProviderListParams,
+      ctx: InboxRequestContext
+    ): Promise<InboxActionProviderListResult> {
+      const { results, total } = await api.listProcessedWaitForInputSteps(ctx.spaceId, {
+        page: 1,
+        perPage: pageSize,
+      });
+
+      return {
+        actions: results.map(toInboxHistoryAction),
         total,
       };
     },
@@ -133,6 +153,26 @@ export const createWorkflowsInboxProvider = ({
           `step execution ${parsed.stepExecutionId} is already settled (finishedAt=${
             stepExecution.finishedAt ?? 'unset'
           }${stepExecution.error ? `, error=${stepExecution.error.type}` : ''})`
+        );
+      }
+
+      // Audit-stamp the step doc *before* scheduling the resume so the
+      // "responded but not yet resumed" window is observable to every
+      // client (Kibana inbox, Slack, agent builder, raw API). Doing this
+      // first is intentional: if the audit write succeeds and the
+      // resume schedule fails, the next list pass will surface a step
+      // with `respondedAt` set but still in `WAITING_FOR_INPUT` — the
+      // engine timeout monitor / a manual retry can then drive it
+      // forward. The reverse ordering would let a responder see "no
+      // change" on a successful resume that beat its own audit write.
+      try {
+        await api.markStepAsResponded(parsed.stepExecutionId, ctx.request, 'inbox', ctx.spaceId);
+      } catch (error) {
+        // Don't block the response on audit failure — the workflow
+        // resume is the user-visible primitive. Log loudly so we notice
+        // pattern-level failures.
+        logger.warn(
+          `Workflows inbox provider failed to mark step ${parsed.stepExecutionId} as responded; proceeding with resume: ${error}`
         );
       }
 

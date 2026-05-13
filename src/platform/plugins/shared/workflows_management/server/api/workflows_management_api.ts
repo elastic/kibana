@@ -617,6 +617,43 @@ export class WorkflowsManagementApi {
     return this.workflowsService.listWaitingForInputSteps(spaceId, params);
   }
 
+  /**
+   * Cross-workflow listing of `waitForInput` step executions that have
+   * already terminated (a response was submitted, or the step
+   * settled abnormally). Consumed by the Inbox plugin's workflows provider
+   * to populate the processed-history audit log.
+   */
+  public async listProcessedWaitForInputSteps(
+    spaceId: string,
+    params: { page?: number; perPage?: number } = {}
+  ): Promise<{ results: EsWorkflowStepExecution[]; total: number }> {
+    return this.workflowsService.listProcessedWaitForInputSteps(spaceId, params);
+  }
+
+  /**
+   * Records the HITL audit fields (`respondedBy`, `respondedAt`,
+   * `channel`) on a `wait_for_input` step doc the moment a responder
+   * submits a response — *before* Task Manager runs the resume. This
+   * lets every client (Kibana inbox, Slack, agent builder, raw API)
+   * detect the "responded but not yet resumed" state by reading the
+   * step doc directly. See `WorkflowExecutionQueryService.markStepAsResponded`.
+   *
+   * The responder username is resolved server-side from `request` via
+   * the security service, so callers cannot spoof the audit identity.
+   *
+   * Returns `true` on update, `false` if the step doc was already
+   * removed (e.g. workflow concurrently terminated). Throws on transport
+   * / unexpected ES errors.
+   */
+  public async markStepAsResponded(
+    stepExecutionId: string,
+    request: KibanaRequest,
+    channel: string,
+    spaceId: string
+  ): Promise<boolean> {
+    return this.workflowsService.markStepAsResponded(stepExecutionId, request, channel, spaceId);
+  }
+
   public async getWorkflowStats(spaceId: string, options?: { includeExecutionStats?: boolean }) {
     return this.workflowsService.getWorkflowStats(spaceId, options);
   }

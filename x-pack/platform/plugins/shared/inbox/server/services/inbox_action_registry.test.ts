@@ -7,6 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
+import type { InboxAction } from '@kbn/inbox-common';
 import { InboxActionRegistry, isUnknownInboxSourceAppError } from './inbox_action_registry';
 import type { InboxActionProvider, InboxRequestContext } from './inbox_action_provider';
 import {
@@ -21,17 +22,30 @@ const ctx = (): InboxRequestContext => ({
 
 const fakeProvider = (
   sourceApp: string,
-  actions = createStubInboxActions(3, { source_app: sourceApp })
-): jest.Mocked<InboxActionProvider> => ({
-  sourceApp,
-  list: jest.fn<ReturnType<InboxActionProvider['list']>, Parameters<InboxActionProvider['list']>>(
-    async () => ({ actions, total: actions.length })
-  ),
-  respond: jest.fn<
-    ReturnType<InboxActionProvider['respond']>,
-    Parameters<InboxActionProvider['respond']>
-  >(async () => {}),
-});
+  actions = createStubInboxActions(3, { source_app: sourceApp }),
+  options: { withListProcessed?: boolean | InboxAction[] } = { withListProcessed: false }
+): jest.Mocked<InboxActionProvider> => {
+  const provider: jest.Mocked<InboxActionProvider> = {
+    sourceApp,
+    list: jest.fn<ReturnType<InboxActionProvider['list']>, Parameters<InboxActionProvider['list']>>(
+      async () => ({ actions, total: actions.length })
+    ),
+    respond: jest.fn<
+      ReturnType<InboxActionProvider['respond']>,
+      Parameters<InboxActionProvider['respond']>
+    >(async () => {}),
+  };
+  if (options.withListProcessed) {
+    const historyActions = Array.isArray(options.withListProcessed)
+      ? options.withListProcessed
+      : actions.map((action) => ({ ...action, status: 'approved' as const }));
+    provider.listProcessed = jest.fn(async () => ({
+      actions: historyActions,
+      total: historyActions.length,
+    }));
+  }
+  return provider;
+};
 
 describe('InboxActionRegistry', () => {
   let logger: ReturnType<typeof loggerMock.create>;
@@ -181,6 +195,86 @@ describe('InboxActionRegistry', () => {
       expect(result.actions.map((a) => a.id)).toEqual(['healthy-1']);
       expect(result.total).toBe(1);
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('workflows'));
+    });
+  });
+
+  describe('listHistory()', () => {
+    it('returns empty when no providers are registered', async () => {
+      const result = await registry.listHistory({ page: 1, perPage: 25 }, ctx());
+      expect(result).toEqual({ actions: [], total: 0 });
+    });
+
+    it('skips providers that do not implement listProcessed', async () => {
+      // The optional contract lets providers ship pending-only first; the
+      // registry must treat missing implementations as "no rows" so the
+      // history listing still works when only one provider supports it.
+      const noHistory = fakeProvider('legacy');
+      const withHistory = fakeProvider(
+        'workflows',
+        createStubInboxActions(2, { source_app: 'workflows' }),
+        { withListProcessed: true }
+      );
+      registry.register(noHistory);
+      registry.register(withHistory);
+
+      const result = await registry.listHistory({ page: 1, perPage: 25 }, ctx());
+
+      expect(noHistory.listProcessed).toBeUndefined();
+      expect(withHistory.listProcessed).toHaveBeenCalledTimes(1);
+      expect(result.total).toBe(2);
+    });
+
+    it('merge-sorts history by responded_at desc, falling back to created_at when missing', async () => {
+      const historyA = createStubInboxAction({
+        id: 'a',
+        source_app: 'workflows',
+        status: 'approved',
+        created_at: '2026-04-24T09:00:00.000Z',
+        responded_at: '2026-04-24T12:00:00.000Z',
+      });
+      const historyB = createStubInboxAction({
+        id: 'b',
+        source_app: 'evals',
+        status: 'approved',
+        created_at: '2026-04-24T11:00:00.000Z',
+        // No responded_at → falls back to created_at for ordering
+      });
+      const historyC = createStubInboxAction({
+        id: 'c',
+        source_app: 'workflows',
+        status: 'approved',
+        created_at: '2026-04-24T08:00:00.000Z',
+        responded_at: '2026-04-24T10:00:00.000Z',
+      });
+      registry.register(
+        fakeProvider('workflows', [], {
+          withListProcessed: [historyA, historyC],
+        })
+      );
+      registry.register(fakeProvider('evals', [], { withListProcessed: [historyB] }));
+
+      const result = await registry.listHistory({ page: 1, perPage: 25 }, ctx());
+
+      expect(result.actions.map((a) => a.id)).toEqual(['a', 'b', 'c']);
+      expect(result.total).toBe(3);
+    });
+
+    it('treats a single provider failure as empty and does not short-circuit other providers', async () => {
+      const failing = fakeProvider('workflows', [], { withListProcessed: true });
+      (failing.listProcessed as jest.Mock).mockRejectedValueOnce(new Error('boom'));
+      const healthy = fakeProvider('evals', [], {
+        withListProcessed: [
+          createStubInboxAction({ id: 'healthy-1', source_app: 'evals', status: 'approved' }),
+        ],
+      });
+      registry.register(failing);
+      registry.register(healthy);
+
+      const result = await registry.listHistory({ page: 1, perPage: 25 }, ctx());
+
+      expect(result.actions.map((a) => a.id)).toEqual(['healthy-1']);
+      expect(result.total).toBe(1);
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('listProcessed'));
     });
   });
 

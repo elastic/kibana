@@ -268,7 +268,15 @@ export class WorkflowExecutionQueryService {
         query: {
           bool: {
             must: [{ term: { spaceId } }, { term: { status: 'waiting_for_input' } }],
-            must_not: [{ exists: { field: 'finishedAt' } }],
+            // A step doc with `respondedAt` set has already received a
+            // response — Task Manager simply hasn't run the resume yet.
+            // Filter those out of pending so the row drops from the
+            // user's "needs my action" list the moment they submit. The
+            // processed listing picks them up immediately so the audit
+            // feed populates with no perceptible gap, and the row will
+            // settle out of the responded-but-not-resumed window once
+            // the engine writes `finishedAt`.
+            must_not: [{ exists: { field: 'finishedAt' } }, { exists: { field: 'respondedAt' } }],
           },
         },
         sort: [{ startedAt: { order: 'desc' } }],
@@ -320,6 +328,110 @@ export class WorkflowExecutionQueryService {
     // slightly optimistic, but it is monotonically corrected as the user
     // pages through. A precise cardinality would require a second
     // aggregation per call, which isn't worth it for a transient state.
+    return { results, total: Math.max(0, total - dropped) };
+  }
+
+  /**
+   * Cross-workflow fan-out for terminated `waitForInput` step executions in a
+   * space — i.e. steps that have already received a response (or been
+   * cancelled / errored out). Used by the Inbox plugin to render the
+   * processed-actions audit log below the pending list.
+   *
+   * Filters by indexed `stepType: 'waitForInput'` (added to the step
+   * execution mapping for this very purpose; pre-deploy terminated rows
+   * therefore won't be queryable by this field — acceptable for a brand-new
+   * feature). Status filter intentionally accepts `completed`, `failed` and
+   * `cancelled` so the audit log still surfaces rows where the workflow
+   * settled abnormally after a response was submitted.
+   *
+   * Same orphan-filtering rule as the pending listing: rows whose parent
+   * workflow has been soft-deleted are dropped.
+   */
+  async listProcessedWaitForInputSteps(
+    spaceId: string,
+    { page = 1, perPage = 25 }: { page?: number; perPage?: number } = {}
+  ): Promise<{ results: EsWorkflowStepExecution[]; total: number }> {
+    const from = Math.max(0, (page - 1) * perPage);
+    let response: estypes.SearchResponse<EsWorkflowStepExecution>;
+    try {
+      response = await this.deps.esClient.search<EsWorkflowStepExecution>({
+        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+        query: {
+          bool: {
+            must: [{ term: { spaceId } }, { term: { stepType: 'waitForInput' } }],
+            // A step belongs in the audit feed when it has either:
+            //   (a) actually terminated (`finishedAt` + a terminal
+            //       status — the engine resumed and ran the step body), or
+            //   (b) been audit-stamped via `markStepAsResponded` but not
+            //       yet resumed by Task Manager (`respondedAt` set, status
+            //       still `waiting_for_input`). Surfacing (b) immediately
+            //       is what makes the inbox feel multi-client safe — every
+            //       responder sees the response land regardless of which
+            //       Task Manager polled the resume task.
+            should: [
+              {
+                bool: {
+                  must: [
+                    { exists: { field: 'finishedAt' } },
+                    { terms: { status: ['completed', 'failed', 'cancelled'] } },
+                  ],
+                },
+              },
+              { exists: { field: 'respondedAt' } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+        // `respondedAt` is set the moment a response arrives; for the
+        // brief responded-but-not-resumed window it precedes
+        // `finishedAt`. Sorting on it (with `finishedAt` as a tiebreak)
+        // keeps the audit feed stable: the row's relative position
+        // doesn't shift when the engine eventually writes `finishedAt`.
+        sort: [
+          { respondedAt: { order: 'desc', missing: '_last' } },
+          { finishedAt: { order: 'desc', missing: '_last' } },
+        ],
+        from,
+        size: perPage,
+        track_total_hits: true,
+      });
+    } catch (error) {
+      if (isIndexNotFoundError(error)) {
+        return { results: [], total: 0 };
+      }
+      this.deps.logger.error(`Failed to list processed wait-for-input step executions: ${error}`);
+      throw error;
+    }
+
+    const total =
+      typeof response.hits.total === 'number'
+        ? response.hits.total
+        : response.hits.total?.value ?? 0;
+
+    const allResults = response.hits.hits
+      .map((hit) => hit._source)
+      .filter((src): src is EsWorkflowStepExecution => Boolean(src));
+
+    if (allResults.length === 0) {
+      return { results: allResults, total };
+    }
+
+    const distinctWorkflowIds = Array.from(
+      new Set(
+        allResults
+          .map((r) => r.workflowId)
+          .filter((id): id is string => typeof id === 'string' && id.length > 0)
+      )
+    );
+
+    const aliveIds = await this.getAliveWorkflowIds(distinctWorkflowIds, spaceId);
+
+    if (aliveIds === null) {
+      return { results: allResults, total };
+    }
+
+    const results = allResults.filter((r) => r.workflowId && aliveIds.has(r.workflowId));
+    const dropped = allResults.length - results.length;
     return { results, total: Math.max(0, total - dropped) };
   }
 
@@ -385,5 +497,75 @@ export class WorkflowExecutionQueryService {
     }
 
     return response.hits.hits[0]._source ?? null;
+  }
+
+  /**
+   * Synchronously records HITL audit metadata on the step execution doc
+   * the moment a responder submits a response — *before* the engine's
+   * Task Manager flow has a chance to run the resume.  Because the
+   * fields land on the step row itself, every client (Kibana inbox,
+   * Slack, agent builder, raw API) can detect the
+   * "responded but not yet resumed" state simply by reading
+   * `.workflows-step-executions`.  No per-client overlay state required.
+   *
+   * Refresh = `wait_for` so the immediate refetch on the inbox client
+   * (after the respond mutation settles) sees the audit fields and can
+   * render the "Responded" overlay without an extra round trip. The
+   * latency is bounded — ES refresh interval applies once per shard.
+   *
+   * Returns `true` if the doc was updated, `false` if the doc was not
+   * found (already terminated / wrong space). Throws on transport / ES
+   * errors so callers can decide whether to retry.
+   */
+  async markStepAsResponded(
+    stepExecutionId: string,
+    audit: { respondedBy: string; respondedAt: string; channel: string },
+    spaceId: string
+  ): Promise<boolean> {
+    try {
+      await this.deps.esClient.update({
+        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+        id: stepExecutionId,
+        // Scripted update guarded on `spaceId` so a misrouted call can't
+        // stamp audit fields on the wrong space's doc. In practice the
+        // caller (workflows inbox provider) has already verified the
+        // step belongs to the active space, but treating the index as
+        // append-mostly + space-scoped at every write is cheap defence.
+        script: {
+          source:
+            'if (ctx._source.spaceId == params.spaceId) {' +
+            '  ctx._source.respondedBy = params.respondedBy;' +
+            '  ctx._source.respondedAt = params.respondedAt;' +
+            '  ctx._source.channel = params.channel;' +
+            '} else { ctx.op = "noop"; }',
+          lang: 'painless',
+          params: {
+            spaceId,
+            respondedBy: audit.respondedBy,
+            respondedAt: audit.respondedAt,
+            channel: audit.channel,
+          },
+        },
+        refresh: 'wait_for',
+      });
+      return true;
+    } catch (error) {
+      if (
+        error?.statusCode === 404 ||
+        error?.meta?.body?.result === 'not_found' ||
+        error?.body?.result === 'not_found'
+      ) {
+        // Step doc is gone — workflow likely already terminated. The
+        // pre-respond conflict check should have caught this; reaching
+        // here means a race (e.g. timeout monitor flipped status during
+        // the response). Surface as a soft "no-op" so the caller can
+        // decide.
+        return false;
+      }
+      this.deps.logger.error(
+        `Failed to mark step execution ${stepExecutionId} as responded: ${error}`
+      );
+      throw error;
+    }
   }
 }

@@ -10,12 +10,11 @@
 import { createIndexes } from './create_indexes';
 
 jest.mock('./create_index', () => ({
-  createIndexWithMappings: jest.fn().mockResolvedValue(undefined),
   createOrUpdateIndex: jest.fn().mockResolvedValue(undefined),
 }));
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { createIndexWithMappings, createOrUpdateIndex } = require('./create_index');
+const { createOrUpdateIndex } = require('./create_index');
 
 describe('createIndexes', () => {
   const esClient = {} as any;
@@ -25,27 +24,20 @@ describe('createIndexes', () => {
     jest.clearAllMocks();
   });
 
-  it('creates both execution and step execution indexes', async () => {
+  it('uses createOrUpdateIndex for both execution and step execution indexes so additive mapping changes flow into existing installations on start', async () => {
+    // Regression: previously the step execution index used the
+    // one-shot `createIndexWithMappings`, which short-circuits when the
+    // index already exists. New fields (e.g. the HITL audit trio
+    // `respondedBy`/`respondedAt`/`channel` for inbox multi-client
+    // safety) therefore couldn't be added without a manual reindex.
     await createIndexes({ esClient, logger });
 
     expect(createOrUpdateIndex).toHaveBeenCalledWith(
-      expect.objectContaining({
-        indexName: '.workflows-executions',
-      })
+      expect.objectContaining({ indexName: '.workflows-executions', esClient, logger })
     );
-    expect(createIndexWithMappings).toHaveBeenCalledWith(
-      expect.objectContaining({
-        indexName: '.workflows-step-executions',
-      })
+    expect(createOrUpdateIndex).toHaveBeenCalledWith(
+      expect.objectContaining({ indexName: '.workflows-step-executions', esClient, logger })
     );
-  });
-
-  it('passes esClient and logger to both calls', async () => {
-    await createIndexes({ esClient, logger });
-
-    expect(createOrUpdateIndex).toHaveBeenCalledWith(expect.objectContaining({ esClient, logger }));
-    expect(createIndexWithMappings).toHaveBeenCalledWith(
-      expect.objectContaining({ esClient, logger })
-    );
+    expect(createOrUpdateIndex).toHaveBeenCalledTimes(2);
   });
 });

@@ -27,6 +27,7 @@ describe('WorkflowExecutionQueryService', () => {
       search: jest.fn(),
       get: jest.fn(),
       mget: jest.fn(),
+      update: jest.fn(),
     } as any;
     mockLogger = loggerMock.create();
     mockEventLoggerService = {
@@ -425,12 +426,19 @@ describe('WorkflowExecutionQueryService', () => {
       expect(result.results[0].stepType).toBe('waitForInput');
     });
 
-    it('excludes step executions that already have finishedAt set', async () => {
-      // Regression: a race between the workflow-level timeout monitor and the
-      // waitForInput step could leave a doc with `status: waiting_for_input`
-      // AND `finishedAt` set (the step is actually terminal). Such docs must
-      // not resurface in the Inbox — responding to them is a no-op because the
-      // parent workflow execution is already finished.
+    it('excludes step executions that already have finishedAt or respondedAt set', async () => {
+      // Regression #1: a race between the workflow-level timeout monitor
+      // and the waitForInput step could leave a doc with
+      // `status: waiting_for_input` AND `finishedAt` set (the step is
+      // actually terminal). Such docs must not resurface in the Inbox —
+      // responding to them is a no-op because the parent workflow
+      // execution is already finished.
+      //
+      // Regression #2: when a responder submits via Kibana / Slack /
+      // agent builder, the inbox provider stamps `respondedAt` on the
+      // step doc *before* Task Manager runs the resume. Pending must
+      // exclude these so the row drops the moment any client submits —
+      // history picks them up immediately as "Processing…".
       mockEsClient.search.mockResolvedValueOnce({
         hits: { hits: [], total: { value: 0 } },
       } as any);
@@ -440,7 +448,10 @@ describe('WorkflowExecutionQueryService', () => {
       const searchArgs = mockEsClient.search.mock.calls[0][0] as {
         query: { bool: { must_not?: Array<Record<string, unknown>> } };
       };
-      expect(searchArgs.query.bool.must_not).toEqual([{ exists: { field: 'finishedAt' } }]);
+      expect(searchArgs.query.bool.must_not).toEqual([
+        { exists: { field: 'finishedAt' } },
+        { exists: { field: 'respondedAt' } },
+      ]);
     });
 
     it('paginates via from/size derived from page/perPage', async () => {
@@ -609,6 +620,225 @@ describe('WorkflowExecutionQueryService', () => {
         expect(result.results).toEqual([]);
         expect(result.total).toBe(0);
       });
+    });
+  });
+
+  describe('listProcessedWaitForInputSteps', () => {
+    // Inbox history (audit-log) listing — terminated `waitForInput` step
+    // executions across all workflows in the space, sorted by `finishedAt`
+    // desc.  Pending-vs-processed parity is enforced here so a future
+    // refactor to the pending listing can't silently change history.
+    const buildProcessedHit = (overrides: Record<string, unknown> = {}) => ({
+      _id: 'doc-1',
+      _source: {
+        id: 'doc-1',
+        stepId: 'ask',
+        stepType: 'waitForInput',
+        status: 'completed',
+        spaceId: 'default',
+        workflowId: 'wf-1',
+        workflowRunId: 'run-1',
+        startedAt: '2026-04-28T15:00:00.000Z',
+        finishedAt: '2026-04-28T15:30:00.000Z',
+        output: { approved: true },
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+        topologicalIndex: 0,
+        scopeStack: [],
+        isTestRun: false,
+        ...overrides,
+      },
+    });
+
+    const mockAliveWorkflowsLookup = (aliveIds: string[]) => {
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: aliveIds.map((id) => ({ _id: id })),
+          total: { value: aliveIds.length },
+        },
+      } as any);
+    };
+
+    it('matches either terminated steps or audit-stamped (responded but not yet resumed) steps', async () => {
+      // Two source-of-truth windows feed the audit feed:
+      //   1. Fully terminated rows: `finishedAt` set, status ∈
+      //      `completed | failed | cancelled`.
+      //   2. Audit-stamped rows from `markStepAsResponded`: `respondedAt`
+      //      set, status still `waiting_for_input` (Task Manager hasn't
+      //      run the resume yet).  This window is what makes the inbox
+      //      multi-client safe — every client sees the response land
+      //      regardless of which Task Manager polls first.
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: { hits: [buildProcessedHit()], total: { value: 1 } },
+      } as any);
+      mockAliveWorkflowsLookup(['wf-1']);
+
+      const result = await service.listProcessedWaitForInputSteps('default');
+
+      expect(mockEsClient.search).toHaveBeenCalledTimes(2);
+      const searchArgs = mockEsClient.search.mock.calls[0][0] as {
+        index: string;
+        query: {
+          bool: {
+            must: Array<Record<string, unknown>>;
+            should?: Array<Record<string, unknown>>;
+            minimum_should_match?: number;
+          };
+        };
+        sort: unknown;
+      };
+      expect(searchArgs.index).toBe(WORKFLOWS_STEP_EXECUTIONS_INDEX);
+      expect(searchArgs.query.bool.must).toEqual(
+        expect.arrayContaining([
+          { term: { spaceId: 'default' } },
+          { term: { stepType: 'waitForInput' } },
+        ])
+      );
+      expect(searchArgs.query.bool.should).toEqual([
+        {
+          bool: {
+            must: [
+              { exists: { field: 'finishedAt' } },
+              { terms: { status: ['completed', 'failed', 'cancelled'] } },
+            ],
+          },
+        },
+        { exists: { field: 'respondedAt' } },
+      ]);
+      expect(searchArgs.query.bool.minimum_should_match).toBe(1);
+      expect(searchArgs.sort).toEqual([
+        { respondedAt: { order: 'desc', missing: '_last' } },
+        { finishedAt: { order: 'desc', missing: '_last' } },
+      ]);
+      expect(result.total).toBe(1);
+      expect(result.results).toHaveLength(1);
+    });
+
+    it('paginates via from/size derived from page/perPage', async () => {
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: { hits: [], total: { value: 0 } },
+      } as any);
+
+      await service.listProcessedWaitForInputSteps('default', { page: 4, perPage: 10 });
+
+      const searchArgs = mockEsClient.search.mock.calls[0][0] as { from: number; size: number };
+      expect(searchArgs.size).toBe(10);
+      expect(searchArgs.from).toBe(30);
+    });
+
+    it('swallows index_not_found_exception with an empty result (cold install case)', async () => {
+      mockEsClient.search.mockRejectedValueOnce(
+        new errors.ResponseError({
+          statusCode: 404,
+          body: { error: { type: 'index_not_found_exception' } },
+          headers: {},
+          meta: {} as any,
+          warnings: [],
+        })
+      );
+
+      const result = await service.listProcessedWaitForInputSteps('default');
+
+      expect(result).toEqual({ results: [], total: 0 });
+    });
+
+    it('logs and rethrows for any other ES failure', async () => {
+      mockEsClient.search.mockRejectedValueOnce(new Error('boom'));
+
+      await expect(service.listProcessedWaitForInputSteps('default')).rejects.toThrow('boom');
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to list processed wait-for-input step executions')
+      );
+    });
+
+    it('drops history rows whose parent workflow has been soft-deleted', async () => {
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: [
+            buildProcessedHit({ id: 'doc-1', workflowId: 'wf-alive' }),
+            buildProcessedHit({ id: 'doc-2', workflowId: 'wf-deleted' }),
+          ],
+          total: { value: 2 },
+        },
+      } as any);
+      mockAliveWorkflowsLookup(['wf-alive']);
+
+      const result = await service.listProcessedWaitForInputSteps('default');
+
+      expect(result.results.map((r) => r.id)).toEqual(['doc-1']);
+      expect(result.total).toBe(1);
+    });
+  });
+
+  describe('markStepAsResponded', () => {
+    // Synchronous audit-stamp on the step doc — the bridge that lets
+    // every client (Kibana inbox, Slack, agent builder, raw API) see
+    // "responded but not yet resumed" without per-client overlay state.
+    // Surgical extension of the workflow-execution-level audit fields
+    // tracked in [kibana#256603](https://github.com/elastic/kibana/pull/256603).
+    const audit = {
+      respondedBy: 'alice',
+      respondedAt: '2026-04-29T10:00:00.000Z',
+      channel: 'inbox',
+    };
+
+    it('issues a scripted partial update guarded on spaceId with refresh: wait_for', async () => {
+      // refresh=wait_for is what makes the immediate refetch on the
+      // inbox client (after the respond mutation settles) see the
+      // audit fields. spaceId guard is defence-in-depth: a misrouted
+      // call cannot stamp a doc in another space, even though the
+      // caller has already verified ownership.
+      (mockEsClient.update as jest.Mock).mockResolvedValueOnce({});
+
+      const ok = await service.markStepAsResponded('step-exec-1', audit, 'default');
+
+      expect(ok).toBe(true);
+      const args = (mockEsClient.update as jest.Mock).mock.calls[0][0] as {
+        index: string;
+        id: string;
+        refresh: string;
+        script: { source: string; lang: string; params: Record<string, unknown> };
+      };
+      expect(args.index).toBe(WORKFLOWS_STEP_EXECUTIONS_INDEX);
+      expect(args.id).toBe('step-exec-1');
+      expect(args.refresh).toBe('wait_for');
+      expect(args.script.lang).toBe('painless');
+      expect(args.script.source).toContain('ctx._source.spaceId == params.spaceId');
+      expect(args.script.source).toContain('ctx._source.respondedBy = params.respondedBy');
+      expect(args.script.source).toContain('ctx._source.respondedAt = params.respondedAt');
+      expect(args.script.source).toContain('ctx._source.channel = params.channel');
+      expect(args.script.params).toEqual({ spaceId: 'default', ...audit });
+    });
+
+    it('returns false (not throws) when the step doc is gone', async () => {
+      // Concurrent termination — e.g. the workflow timeout monitor flipped
+      // the step status between the pre-respond freshness check and the
+      // audit write. The provider treats this as a soft no-op so the
+      // resume call proceeds (and surfaces the real conflict).
+      (mockEsClient.update as jest.Mock).mockRejectedValueOnce(
+        new errors.ResponseError({
+          statusCode: 404,
+          body: { error: { type: 'document_missing_exception' } },
+          headers: {},
+          meta: {} as any,
+          warnings: [],
+        })
+      );
+
+      const ok = await service.markStepAsResponded('step-exec-gone', audit, 'default');
+
+      expect(ok).toBe(false);
+    });
+
+    it('logs and rethrows on any other ES failure so the caller can decide', async () => {
+      (mockEsClient.update as jest.Mock).mockRejectedValueOnce(new Error('boom'));
+
+      await expect(service.markStepAsResponded('step-exec-1', audit, 'default')).rejects.toThrow(
+        'boom'
+      );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to mark step execution step-exec-1 as responded')
+      );
     });
   });
 });

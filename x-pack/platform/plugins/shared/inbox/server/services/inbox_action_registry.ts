@@ -106,6 +106,40 @@ export class InboxActionRegistry {
     params: InboxActionRegistryListParams,
     ctx: InboxRequestContext
   ): Promise<InboxActionRegistryListResult> {
+    return this.fanOutAndPaginate(params, ctx, {
+      method: 'list',
+      sortKey: (action) => action.created_at,
+    });
+  }
+
+  /**
+   * History/audit-log fan-out. Providers that don't implement
+   * {@link InboxActionProvider.listProcessed} are silently skipped, so the
+   * inbox surface still works alongside providers that ship pending-only.
+   *
+   * Sort key is `responded_at ?? created_at` desc — when the responder
+   * timestamp is missing (older rows, or providers that haven't been
+   * updated for the audit fields) we fall back to the action's creation
+   * timestamp so ordering stays stable.
+   */
+  async listHistory(
+    params: InboxActionRegistryListParams,
+    ctx: InboxRequestContext
+  ): Promise<InboxActionRegistryListResult> {
+    return this.fanOutAndPaginate(params, ctx, {
+      method: 'listProcessed',
+      sortKey: (action) => action.responded_at ?? action.created_at,
+    });
+  }
+
+  private async fanOutAndPaginate(
+    params: InboxActionRegistryListParams,
+    ctx: InboxRequestContext,
+    options: {
+      method: 'list' | 'listProcessed';
+      sortKey: (action: InboxAction) => string;
+    }
+  ): Promise<InboxActionRegistryListResult> {
     const { sourceApp, status, page, perPage } = params;
     const scoped = sourceApp ? this.providers.get(sourceApp) : undefined;
     const targetProviders = sourceApp
@@ -118,10 +152,19 @@ export class InboxActionRegistry {
       return { actions: [], total: 0 };
     }
 
+    const { method, sortKey } = options;
+
     const results = await Promise.all(
       targetProviders.map(async (provider) => {
+        const handler = provider[method];
+        // Providers can opt out of `listProcessed` (it's optional on the
+        // contract). Treat missing implementations as "no rows from this
+        // source" so the registry-level pagination stays consistent.
+        if (typeof handler !== 'function') {
+          return { actions: [], total: 0 };
+        }
         try {
-          const result = await provider.list({ status }, ctx);
+          const result = await handler.call(provider, { status }, ctx);
           // Providers may report a pre-pagination `total` larger than the
           // number of actions they return (the workflows provider asks the
           // management service for a bounded slice). If we expose that
@@ -136,7 +179,9 @@ export class InboxActionRegistry {
           }
           return result;
         } catch (err) {
-          this.logger.error(`Inbox action provider "${provider.sourceApp}" failed to list: ${err}`);
+          this.logger.error(
+            `Inbox action provider "${provider.sourceApp}" failed to ${method}: ${err}`
+          );
           return { actions: [], total: 0 };
         }
       })
@@ -144,7 +189,7 @@ export class InboxActionRegistry {
 
     const merged = results
       .flatMap((result) => result.actions)
-      .sort((a, b) => b.created_at.localeCompare(a.created_at));
+      .sort((a, b) => sortKey(b).localeCompare(sortKey(a)));
 
     // Use the merged length so `total` is always consistent with what the
     // registry can actually page through. This avoids the empty-page

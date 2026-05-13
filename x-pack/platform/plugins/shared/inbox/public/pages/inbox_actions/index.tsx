@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageSection,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -24,6 +25,7 @@ import {
 import type { InboxAction, InboxActionStatus } from '@kbn/inbox-common';
 import { DEFAULT_INBOX_ACTIONS_PER_PAGE } from '@kbn/inbox-common';
 import { useInboxActions } from '../../hooks/use_inbox_api';
+import { InboxHistoryFeed } from './components/inbox_history_feed';
 import { RespondFlyout } from './components/respond_flyout';
 import { TimeoutChip } from './components/timeout_chip';
 import * as i18n from './translations';
@@ -152,34 +154,42 @@ export const InboxActionsPage: React.FC = () => {
         <p>{i18n.PAGE_DESCRIPTION}</p>
       </EuiText>
       <EuiSpacer size="l" />
-      {error ? (
-        <EuiEmptyPrompt
-          color="danger"
-          iconType="warning"
-          title={<h2>{i18n.LOAD_ERROR_TITLE}</h2>}
-          body={<p>{i18n.getLoadErrorBody(String(error))}</p>}
-          actions={[
-            <EuiButton key="retry" onClick={() => refetch()} iconType="refresh">
-              {i18n.RETRY_BUTTON}
-            </EuiButton>,
-          ]}
-        />
-      ) : !isLoading && items.length === 0 ? (
-        <EuiEmptyPrompt
-          iconType="email"
-          title={<h2>{i18n.EMPTY_TITLE}</h2>}
-          body={<p>{i18n.EMPTY_BODY}</p>}
-        />
-      ) : (
-        <EuiBasicTable<InboxAction>
-          tableCaption={i18n.TABLE_CAPTION}
-          items={items}
-          columns={columns}
-          loading={isLoading}
-          pagination={pagination}
-          onChange={onTableChange}
-        />
-      )}
+      <EuiPanel hasBorder paddingSize="l" data-test-subj="inboxPendingSection">
+        <EuiTitle size="m">
+          <h2>{i18n.PENDING_SECTION_TITLE}</h2>
+        </EuiTitle>
+        <EuiSpacer size="m" />
+        {error ? (
+          <EuiEmptyPrompt
+            color="danger"
+            iconType="warning"
+            title={<h3>{i18n.LOAD_ERROR_TITLE}</h3>}
+            body={<p>{i18n.getLoadErrorBody(String(error))}</p>}
+            actions={[
+              <EuiButton key="retry" onClick={() => refetch()} iconType="refresh">
+                {i18n.RETRY_BUTTON}
+              </EuiButton>,
+            ]}
+          />
+        ) : !isLoading && items.length === 0 ? (
+          <EuiEmptyPrompt
+            iconType="email"
+            title={<h3>{i18n.EMPTY_TITLE}</h3>}
+            body={<p>{i18n.EMPTY_BODY}</p>}
+          />
+        ) : (
+          <EuiBasicTable<InboxAction>
+            tableCaption={i18n.TABLE_CAPTION}
+            items={items}
+            columns={columns}
+            loading={isLoading}
+            pagination={pagination}
+            onChange={onTableChange}
+          />
+        )}
+      </EuiPanel>
+      <EuiSpacer size="l" />
+      <InboxHistoryFeed />
       {activeAction ? (
         <RespondFlyout
           action={activeAction}

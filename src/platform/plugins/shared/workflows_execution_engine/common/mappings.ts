@@ -97,6 +97,35 @@ export const WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     status: {
       type: 'keyword',
     },
+    // Indexed so we can filter HITL `wait_for_input` step executions across
+    // all workflows in a space (Inbox history listing). Step type is always
+    // present in `_source`; lifting it into the index mapping is additive
+    // (`putMapping` handles existing indices in place — see
+    // `createOrUpdateIndex`). Pre-deploy terminated rows won't be queryable
+    // by this field until they are rewritten, which is acceptable for a
+    // brand-new feature.
+    stepType: {
+      type: 'keyword',
+    },
+    // HITL audit fields: written synchronously when a responder submits a
+    // response (before Task Manager runs the resume). Lets every client
+    // (Kibana inbox, Slack bot, agent builder, raw API) detect "responded
+    // but not yet resumed" by reading the same step doc — no per-client
+    // overlay state required. These are the strategic surgical extension
+    // of the workflow-execution-level audit fields tracked in
+    // [kibana#256603](https://github.com/elastic/kibana/pull/256603) /
+    // [security-team#16706](https://github.com/elastic/security-team/issues/16706);
+    // keeping the audit on the step row makes the data durable across
+    // multiple HITL steps in the same workflow execution.
+    respondedBy: {
+      type: 'keyword',
+    },
+    respondedAt: {
+      type: 'date',
+    },
+    channel: {
+      type: 'keyword',
+    },
     isTestRun: {
       type: 'boolean',
     },

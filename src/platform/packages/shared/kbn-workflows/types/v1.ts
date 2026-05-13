@@ -185,6 +185,20 @@ export interface EsWorkflowStepExecution {
 
   /** Specific step execution instance state. Used by loops, retries, etc to track execution context. */
   state?: Record<string, unknown>;
+
+  /**
+   * HITL audit: server-resolved username of the responder who submitted
+   * the response. Written synchronously when the response is received,
+   * before Task Manager schedules the resume — so every client (Kibana
+   * inbox, Slack, agent builder, API) can observe the "responded but not
+   * yet resumed" state on this single doc without joining the workflow
+   * execution context.
+   */
+  respondedBy?: string;
+  /** ISO timestamp matching `respondedBy`. */
+  respondedAt?: string;
+  /** Surface that submitted the response — `'inbox' | 'slack' | 'agent' | 'kibana' | …` */
+  channel?: string;
 }
 
 export type WorkflowStepExecutionDto = Omit<EsWorkflowStepExecution, 'spaceId'>;

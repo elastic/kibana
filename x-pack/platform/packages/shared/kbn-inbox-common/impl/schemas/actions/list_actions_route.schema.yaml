@@ -132,6 +132,11 @@ components:
             - timed_out
           nullable: true
           description: Distinguishes a human response from a timeout-default resolution
+        response_input:
+          type: object
+          additionalProperties: true
+          nullable: true
+          description: Payload submitted by the responder (echoed back so audit-log surfaces can render what was submitted). Null while the action is still pending.
       required:
         - id
         - title

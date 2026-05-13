@@ -56,6 +56,18 @@ export interface InboxActionProvider {
     ctx: InboxRequestContext
   ): Promise<InboxActionProviderListResult>;
 
+  /**
+   * Returns processed (audit-log) inbox actions — i.e. items that have
+   * already received a response or otherwise terminated. Optional so
+   * providers can ship the pending-only contract first and add history in
+   * a follow-up. Providers that don't implement this are silently skipped
+   * by the registry's history fan-out.
+   */
+  listProcessed?(
+    params: InboxActionProviderListParams,
+    ctx: InboxRequestContext
+  ): Promise<InboxActionProviderListResult>;
+
   respond(
     sourceId: string,
     input: Record<string, unknown>,

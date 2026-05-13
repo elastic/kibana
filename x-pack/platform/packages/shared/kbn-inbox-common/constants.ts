@@ -10,6 +10,7 @@ export const INBOX_PLUGIN_NAME = 'Inbox' as const;
 
 export const INBOX_INTERNAL_URL = '/internal/inbox' as const;
 export const INBOX_ACTIONS_URL = `${INBOX_INTERNAL_URL}/actions` as const;
+export const INBOX_ACTIONS_HISTORY_URL = `${INBOX_ACTIONS_URL}/history` as const;
 
 /**
  * Parameterized template for the respond-to-action route. Use

@@ -14,9 +14,19 @@ export interface InboxActionsListFilters {
   perPage?: number;
 }
 
+export interface InboxActionsHistoryFilters {
+  sourceApp?: string;
+  page?: number;
+  perPage?: number;
+}
+
 export const queryKeys = {
   actions: {
     all: ['inbox', 'actions'] as const,
     list: (filters?: InboxActionsListFilters) => ['inbox', 'actions', 'list', filters] as const,
+  },
+  history: {
+    all: ['inbox', 'history'] as const,
+    list: (filters?: InboxActionsHistoryFilters) => ['inbox', 'history', 'list', filters] as const,
   },
 };

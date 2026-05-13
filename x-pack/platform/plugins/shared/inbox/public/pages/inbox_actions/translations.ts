@@ -143,3 +143,100 @@ export const getTimedOutBannerText = (timestamp: string) =>
       'This action timed out on {timestamp}. The default response was applied automatically.',
     values: { timestamp },
   });
+
+export const PENDING_SECTION_TITLE = i18n.translate(
+  'xpack.inbox.actionsPage.pendingSection.title',
+  {
+    defaultMessage: 'Awaiting response',
+  }
+);
+
+export const HISTORY_SECTION_TITLE = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.title',
+  {
+    defaultMessage: 'History',
+  }
+);
+
+export const HISTORY_SECTION_DESCRIPTION = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.description',
+  {
+    defaultMessage: 'Audit trail of inbox actions that have already been processed.',
+  }
+);
+
+export const HISTORY_EMPTY_TITLE = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.empty.title',
+  {
+    defaultMessage: 'No processed actions yet',
+  }
+);
+
+export const HISTORY_EMPTY_BODY = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.empty.body',
+  {
+    defaultMessage: 'Once a responder approves or rejects an inbox action, it will show up here.',
+  }
+);
+
+export const HISTORY_LOAD_ERROR_TITLE = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.loadError.title',
+  {
+    defaultMessage: 'Unable to load inbox history',
+  }
+);
+
+export const getHistoryLoadErrorBody = (error: string) =>
+  i18n.translate('xpack.inbox.actionsPage.historySection.loadError.body', {
+    defaultMessage: 'Something went wrong while fetching the inbox history: {error}',
+    values: { error },
+  });
+
+export const HISTORY_SYSTEM_RESPONDER = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.systemResponder',
+  {
+    defaultMessage: 'system',
+  }
+);
+
+export const HISTORY_DEFAULT_CHANNEL = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.defaultChannel',
+  {
+    defaultMessage: 'inbox',
+  }
+);
+
+export const HISTORY_PROCESSING_BADGE = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.processingBadge',
+  {
+    defaultMessage: 'Processing…',
+  }
+);
+
+export const HISTORY_TIMED_OUT_BADGE = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.timedOutBadge',
+  {
+    defaultMessage: 'Timed out',
+  }
+);
+
+export const HISTORY_PROMPT_LABEL = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.promptLabel',
+  {
+    defaultMessage: 'Prompt',
+  }
+);
+
+export const HISTORY_RESPONSE_LABEL = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.responseLabel',
+  {
+    defaultMessage: 'Response',
+  }
+);
+
+export const HISTORY_NO_RESPONSE_PAYLOAD = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.noResponsePayload',
+  {
+    defaultMessage: 'No response payload was recorded.',
+  }
+);

@@ -8,7 +8,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { createIndexWithMappings, createOrUpdateIndex } from './create_index';
+import { createOrUpdateIndex } from './create_index';
 import {
   WORKFLOWS_EXECUTIONS_INDEX,
   WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
@@ -23,6 +23,12 @@ interface CreateIndexesOptions {
 
 export async function createIndexes(options: CreateIndexesOptions): Promise<void> {
   const { esClient, logger } = options;
+  // Both indices use `createOrUpdateIndex` so additive mapping changes
+  // (new fields like the HITL audit trio `respondedBy`/`respondedAt`/
+  // `channel` for inbox multi-client safety) flow into existing
+  // installations on plugin start without a manual reindex.
+  // `putMapping` is additive — it won't try to change existing field
+  // types — so re-running on every start is idempotent.
   await Promise.all([
     createOrUpdateIndex({
       esClient,
@@ -30,7 +36,7 @@ export async function createIndexes(options: CreateIndexesOptions): Promise<void
       mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
       logger,
     }),
-    createIndexWithMappings({
+    createOrUpdateIndex({
       esClient,
       indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,

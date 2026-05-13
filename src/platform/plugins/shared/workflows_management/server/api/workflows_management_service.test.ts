@@ -309,4 +309,37 @@ describe('WorkflowsService (facade)', () => {
       }
     });
   });
+
+  describe('markStepAsResponded', () => {
+    it('resolves the responder via the security service and delegates with full audit metadata', async () => {
+      // The service owns username resolution so each entry point
+      // (Kibana inbox, Slack, agent builder, raw API) can't spoof the
+      // audit identity. Behavioural coverage of the underlying ES
+      // update lives in `workflow_execution_query_service.test.ts`.
+      const markSpy = jest
+        .spyOn(WorkflowExecutionQueryService.prototype, 'markStepAsResponded')
+        .mockResolvedValue(true as never);
+      try {
+        const service = await buildService();
+        const request = { headers: {} } as unknown as Parameters<
+          typeof service.markStepAsResponded
+        >[1];
+        await service.markStepAsResponded('step-exec-1', request, 'inbox', 'default');
+
+        expect(markSpy).toHaveBeenCalledWith(
+          'step-exec-1',
+          expect.objectContaining({
+            channel: 'inbox',
+            // The mock security service returns `system` for fake
+            // requests; the real service swaps in the actual user.
+            respondedBy: expect.any(String),
+            respondedAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+          }),
+          'default'
+        );
+      } finally {
+        markSpy.mockRestore();
+      }
+    });
+  });
 });

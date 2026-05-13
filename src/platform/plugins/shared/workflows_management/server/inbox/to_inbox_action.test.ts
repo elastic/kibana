@@ -9,7 +9,12 @@
 
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import { buildWorkflowSourceId, parseWorkflowSourceId, toInboxAction } from './to_inbox_action';
+import {
+  buildWorkflowSourceId,
+  parseWorkflowSourceId,
+  toInboxAction,
+  toInboxHistoryAction,
+} from './to_inbox_action';
 
 const buildStep = (overrides: Partial<EsWorkflowStepExecution> = {}): EsWorkflowStepExecution => ({
   spaceId: 'default',
@@ -109,5 +114,120 @@ describe('toInboxAction', () => {
       })
     );
     expect(action.input_schema).toBeUndefined();
+  });
+});
+
+describe('toInboxHistoryAction', () => {
+  const buildCompletedStep = (
+    overrides: Partial<EsWorkflowStepExecution> = {}
+  ): EsWorkflowStepExecution =>
+    buildStep({
+      status: ExecutionStatus.COMPLETED,
+      finishedAt: '2026-04-24T12:30:00.000Z',
+      output: { approved: true, reason: 'looks good' },
+      ...overrides,
+    });
+
+  it('coerces every responded item to status: approved (v1 placeholder until kibana#256603 lands)', () => {
+    const action = toInboxHistoryAction(buildCompletedStep());
+    expect(action.status).toBe('approved');
+  });
+
+  it('marks completed steps with response_mode: responded', () => {
+    const action = toInboxHistoryAction(buildCompletedStep());
+    expect(action.response_mode).toBe('responded');
+  });
+
+  it('marks failed steps with response_mode: timed_out (covers workflow-timeout monitor races)', () => {
+    const action = toInboxHistoryAction(
+      buildCompletedStep({
+        status: ExecutionStatus.FAILED,
+        error: { type: 'TimeoutError', message: 'timed out' },
+      })
+    );
+    expect(action.status).toBe('approved');
+    expect(action.response_mode).toBe('timed_out');
+  });
+
+  it('marks cancelled steps with response_mode: timed_out without leaking workflow status into the inbox enum', () => {
+    const action = toInboxHistoryAction(
+      buildCompletedStep({ status: ExecutionStatus.CANCELLED, output: undefined })
+    );
+    expect(action.status).toBe('approved');
+    expect(action.response_mode).toBe('timed_out');
+  });
+
+  it('exposes the responder payload as response_input', () => {
+    const action = toInboxHistoryAction(buildCompletedStep());
+    expect(action.response_input).toEqual({ approved: true, reason: 'looks good' });
+  });
+
+  it('returns response_input: null when the step has no output', () => {
+    const action = toInboxHistoryAction(buildCompletedStep({ output: undefined }));
+    expect(action.response_input).toBeNull();
+  });
+
+  it('returns response_input: null when the step output is not a plain object', () => {
+    const action = toInboxHistoryAction(buildCompletedStep({ output: ['arr', 'output'] }));
+    expect(action.response_input).toBeNull();
+  });
+
+  it('reads responded_by/at/channel directly from the step doc audit fields', () => {
+    // These fields are populated synchronously by `markStepAsResponded`
+    // before the engine resumes — see HITL multi-client design.
+    const action = toInboxHistoryAction(
+      buildCompletedStep({
+        respondedAt: '2026-04-24T12:25:00.000Z',
+        respondedBy: 'alice',
+        channel: 'inbox',
+      })
+    );
+    expect(action.responded_at).toBe('2026-04-24T12:25:00.000Z');
+    expect(action.responded_by).toBe('alice');
+    expect(action.channel).toBe('inbox');
+  });
+
+  it('falls back to finishedAt for legacy rows without respondedAt audit fields', () => {
+    // Legacy / abnormal-termination case (no human responded): the
+    // audit fields are absent so the responder column will simply
+    // render empty.
+    const action = toInboxHistoryAction(buildCompletedStep());
+    expect(action.responded_at).toBe('2026-04-24T12:30:00.000Z');
+    expect(action.responded_by).toBeNull();
+    expect(action.channel).toBeNull();
+  });
+
+  it('marks the responded-but-not-yet-resumed window with respondedAt set + null response_input', () => {
+    // Source-of-truth window #1: `markStepAsResponded` has fired but
+    // Task Manager hasn't run the resume yet. Status is still
+    // `WAITING_FOR_INPUT`, `finishedAt` is unset, `output` is unset —
+    // so `response_input` is null. The UI uses (`response_mode` ===
+    // `responded` && `response_input` == null) to render the
+    // "Processing…" badge in the audit feed.
+    const action = toInboxHistoryAction(
+      buildStep({
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        respondedAt: '2026-04-24T12:25:00.000Z',
+        respondedBy: 'alice',
+        channel: 'inbox',
+      })
+    );
+    expect(action.responded_at).toBe('2026-04-24T12:25:00.000Z');
+    expect(action.responded_by).toBe('alice');
+    expect(action.response_mode).toBe('responded');
+    expect(action.response_input).toBeNull();
+  });
+
+  it('keeps the source_id stable across the responded-but-not-resumed and resumed windows', () => {
+    const action = toInboxHistoryAction(buildCompletedStep());
+    expect(action.source_id).toBe('wf-1:run-1:step-exec-1');
+    expect(action.id).toBe(action.source_id);
+  });
+
+  it('falls back to a generated title when the step has no rendered prompt', () => {
+    const action = toInboxHistoryAction(
+      buildCompletedStep({ input: { schema: { type: 'object' } } })
+    );
+    expect(action.title).toBe('Step "wait_approval" was processed');
   });
 });

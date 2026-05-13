@@ -51,10 +51,24 @@ const ctx = () => ({
 const fakeApi = () => {
   const api: Partial<WorkflowsManagementApi> = {
     listWaitingForInputSteps: jest.fn(async () => ({ results: [buildStep()], total: 1 })),
+    listProcessedWaitForInputSteps: jest.fn(async () => ({
+      results: [
+        buildStep({
+          id: 'step-exec-2',
+          status: ExecutionStatus.COMPLETED,
+          finishedAt: '2026-04-24T12:30:00.000Z',
+          output: { approved: true, reason: 'looks good' },
+        }),
+      ],
+      total: 1,
+    })),
     resumeWorkflowExecution: jest.fn(async () => {}),
     // Default to "step is still waiting" so existing happy-path tests
     // remain unchanged after we added pre-resume verification.
     getStepExecution: jest.fn(async () => buildStep()),
+    // Audit-stamp on the step doc fires synchronously before the
+    // resume — see HITL multi-client design.
+    markStepAsResponded: jest.fn(async () => true),
   };
   return api as jest.Mocked<WorkflowsManagementApi>;
 };
@@ -102,6 +116,42 @@ describe('createWorkflowsInboxProvider', () => {
     });
   });
 
+  describe('listProcessed()', () => {
+    it('delegates to listProcessedWaitForInputSteps and maps results to history InboxActions', async () => {
+      const api = fakeApi();
+      const provider = createWorkflowsInboxProvider({ api, logger: loggerMock.create() });
+
+      const result = await provider.listProcessed!({}, ctx());
+
+      expect(api.listProcessedWaitForInputSteps).toHaveBeenCalledWith(
+        'default',
+        expect.objectContaining({ page: 1, perPage: 1000 })
+      );
+      expect(result.total).toBe(1);
+      expect(result.actions[0]).toMatchObject({
+        source_app: 'workflows',
+        // v1 placeholder until per-action approve/reject conventions
+        // ride on top of the new respondedBy/At/channel audit fields.
+        status: 'approved',
+        response_mode: 'responded',
+        response_input: { approved: true, reason: 'looks good' },
+      });
+    });
+
+    it('returns an empty list when there is no processed history', async () => {
+      const api = fakeApi();
+      (api.listProcessedWaitForInputSteps as jest.Mock).mockResolvedValueOnce({
+        results: [],
+        total: 0,
+      });
+      const provider = createWorkflowsInboxProvider({ api, logger: loggerMock.create() });
+
+      const result = await provider.listProcessed!({}, ctx());
+
+      expect(result).toEqual({ actions: [], total: 0 });
+    });
+  });
+
   describe('respond()', () => {
     it('calls resumeWorkflowExecution with the parsed executionId and the opaque input', async () => {
       const api = fakeApi();
@@ -116,6 +166,55 @@ describe('createWorkflowsInboxProvider', () => {
         'default',
         { approved: true, reason: 'contained' },
         c.request
+      );
+    });
+
+    it('audit-stamps the step doc with channel="inbox" before scheduling the resume', async () => {
+      // Why this ordering matters:
+      //   1. `markStepAsResponded` writes `respondedAt` with
+      //      `refresh: 'wait_for'`, which immediately drops the row from
+      //      pending (it has `must_not: respondedAt`) and surfaces it in
+      //      history (`should: respondedAt`). This is the bridge that
+      //      makes the inbox multi-client safe — every client sees the
+      //      response land regardless of which Task Manager polls the
+      //      resume task first.
+      //   2. If the resume schedule fails *after* the audit write, the
+      //      next list pass surfaces a row with `respondedAt` set but
+      //      still in `WAITING_FOR_INPUT` — recoverable. The reverse
+      //      ordering would let a successful resume race past its own
+      //      audit write.
+      const api = fakeApi();
+      const provider = createWorkflowsInboxProvider({ api, logger: loggerMock.create() });
+      const c = ctx();
+
+      await provider.respond('wf-1:run-1:step-exec-1', { approved: true }, c);
+
+      expect(api.markStepAsResponded).toHaveBeenCalledWith(
+        'step-exec-1',
+        c.request,
+        'inbox',
+        'default'
+      );
+      const auditOrder = (api.markStepAsResponded as jest.Mock).mock.invocationCallOrder[0];
+      const resumeOrder = (api.resumeWorkflowExecution as jest.Mock).mock.invocationCallOrder[0];
+      expect(auditOrder).toBeLessThan(resumeOrder);
+    });
+
+    it('proceeds with the resume even if the audit-stamp write fails', async () => {
+      // The resume is the user-visible primitive. A logged-but-non-fatal
+      // failure on the audit write keeps the system forward-progressing
+      // — the worst case is a transient missed audit row, which the
+      // engine's own `finishedAt` write will repair on the next refetch.
+      const api = fakeApi();
+      (api.markStepAsResponded as jest.Mock).mockRejectedValueOnce(new Error('audit boom'));
+      const logger = loggerMock.create();
+      const provider = createWorkflowsInboxProvider({ api, logger });
+
+      await provider.respond('wf-1:run-1:step-exec-1', { approved: true }, ctx());
+
+      expect(api.resumeWorkflowExecution).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('failed to mark step step-exec-1 as responded')
       );
     });
 

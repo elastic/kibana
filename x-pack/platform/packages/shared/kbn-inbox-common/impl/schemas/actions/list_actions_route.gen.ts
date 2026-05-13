@@ -75,6 +75,10 @@ export const InboxAction = lazySchema(() =>
      * Distinguishes a human response from a timeout-default resolution
      */
     response_mode: z.enum(['pending', 'responded', 'timed_out']).nullable().optional(),
+    /**
+     * Payload submitted by the responder (echoed back so audit-log surfaces can render what was submitted). Null while the action is still pending.
+     */
+    response_input: z.object({}).catchall(z.unknown()).nullable().optional(),
   })
 );
 export type InboxAction = z.infer<typeof InboxAction>;
