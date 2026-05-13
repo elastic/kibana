@@ -23,7 +23,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { paths } from '../../constants';
 
-export const RuleCreateOptionsPanel: React.FC = () => {
+interface RuleCreateOptionsPanelProps {
+  onCreateEsqlRule?: () => void;
+}
+
+export const RuleCreateOptionsPanel: React.FC<RuleCreateOptionsPanelProps> = ({
+  onCreateEsqlRule,
+}) => {
   const basePath = useService(CoreStart('http')).basePath;
   const { euiTheme } = useEuiTheme();
 
@@ -69,7 +75,8 @@ export const RuleCreateOptionsPanel: React.FC = () => {
                     'Create as an ES|QL query with live preview. YAML editor available.',
                 }
               )}
-              href={basePath.prepend(paths.ruleCreate)}
+              href={onCreateEsqlRule ? undefined : basePath.prepend(paths.ruleCreate)}
+              onClick={onCreateEsqlRule}
               icon={<EuiIcon type="productDiscover" color="text" size="l" aria-hidden={true} />}
             />
           </EuiFlexItem>

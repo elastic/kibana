@@ -35,9 +35,13 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'http') {
       return { basePath: { prepend: (p: string) => p } };
     }
-    throw new Error(`Unexpected token in useService mock: ${String(token)}`);
+    return {};
   },
   CoreStart: (key: string) => key,
+}));
+
+jest.mock('@kbn/alerting-v2-rule-form', () => ({
+  ComposeDiscoverFlyout: () => <div data-test-subj="composeDiscoverFlyout" />,
 }));
 
 const mockUseFetchRules = jest.fn();
@@ -237,6 +241,21 @@ describe('RulesListPage', () => {
       screen.getByRole('heading', { level: 2, name: /welcome to the new alerting experience/i })
     ).toBeInTheDocument();
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
+  });
+
+  it('opens the create rule flyout from the empty state ES|QL rule tile', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: [], total: 0, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
+
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
   });
 
   it('shows correct "Showing" range when rules exist', () => {
