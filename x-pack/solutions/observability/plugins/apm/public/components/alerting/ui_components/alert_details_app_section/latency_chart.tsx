@@ -58,6 +58,8 @@ export function LatencyChart({
   filters,
   threshold,
   ruleTypeId,
+  compact,
+  showAlertAnnotations,
 }: {
   alert: TopAlert;
   transactionType?: string;
@@ -80,6 +82,10 @@ export function LatencyChart({
   kuery?: string;
   filters?: BoolQuery;
   ruleTypeId?: ApmRuleType;
+  /** When true, hide the threshold side panel even if `threshold` is provided. */
+  compact?: boolean;
+  /** When set, overrides the default annotation behavior (which is keyed off `threshold`). */
+  showAlertAnnotations?: boolean;
 }) {
   const {
     services: { uiSettings },
@@ -143,7 +149,8 @@ export function LatencyChart({
   const alertAnnotations = useGetChartAlertAnnotations({
     alert,
     customAlertEvaluationThreshold,
-    showAnnotations: !!threshold,
+    showAnnotations: showAlertAnnotations ?? !!threshold,
+    showThresholdAnnotation: !!threshold,
     dateFormat,
   });
 
@@ -218,12 +225,12 @@ export function LatencyChart({
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexGroup direction="row" gutterSize="m">
-          {!!threshold && (
+          {!!threshold && !compact && (
             <EuiFlexItem style={{ minWidth: THRESHOLD_SIDEBAR_MIN_WIDTH }} grow={1}>
               {threshold}
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={!!threshold ? 5 : undefined}>
+          <EuiFlexItem grow={!!threshold && !compact ? 5 : undefined}>
             <TimeseriesChart
               id="latencyChart"
               annotations={alertAnnotations}
