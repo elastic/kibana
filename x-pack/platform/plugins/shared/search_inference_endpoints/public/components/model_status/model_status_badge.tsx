@@ -17,16 +17,17 @@ export interface ModelStatusBadgeProps {
   status: EisModelStatus;
   id: string;
   metadata: EisInferenceEndpointMetadata | undefined;
+  iconOnly?: boolean;
 }
 
-export const ModelStatusBadge = ({ status, id, metadata }: ModelStatusBadgeProps) => {
+export const ModelStatusBadge = ({ status, id, metadata, iconOnly }: ModelStatusBadgeProps) => {
   switch (status) {
     case EisModelStatus.Preview:
-      return <ModelPreviewBadge id={id} />;
+      return iconOnly ? null : <ModelPreviewBadge id={id} />;
     case EisModelStatus.Deprecated:
-      return <ModelDeprecatedBadge id={id} metadata={metadata} />;
+      return <ModelDeprecatedBadge id={id} metadata={metadata} iconOnly={iconOnly} />;
     case EisModelStatus.DeprecatedEOL:
-      return <ModelEOLBadge id={id} metadata={metadata} />;
+      return <ModelEOLBadge id={id} metadata={metadata} iconOnly={iconOnly} />;
     default:
       return null;
   }

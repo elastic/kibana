@@ -17,9 +17,10 @@ import { getModelDeprecatedMessage } from '../../utils/eis_utils';
 interface ModelDeprecatedBadgeProps {
   id: string;
   metadata: EisInferenceEndpointMetadata | undefined;
+  iconOnly?: boolean;
 }
 
-export const ModelDeprecatedBadge = ({ id, metadata }: ModelDeprecatedBadgeProps) => {
+export const ModelDeprecatedBadge = ({ id, metadata, iconOnly }: ModelDeprecatedBadgeProps) => {
   const eolDate = useFormattedEOLDate(metadata);
 
   const tooltipContent = getModelDeprecatedMessage(eolDate);
@@ -41,9 +42,11 @@ export const ModelDeprecatedBadge = ({ id, metadata }: ModelDeprecatedBadgeProps
         color="warning"
         data-test-subj={`modelDeprecatedBadge-${id}`}
       >
-        {i18n.translate('xpack.searchInferenceEndpoints.eisModelCard.deprecatedBadge.content', {
-          defaultMessage: 'Deprecated',
-        })}
+        {iconOnly
+          ? null
+          : i18n.translate('xpack.searchInferenceEndpoints.eisModelCard.deprecatedBadge.content', {
+              defaultMessage: 'Deprecated',
+            })}
       </EuiBadge>
     </EuiToolTip>
   );

@@ -17,9 +17,10 @@ import { getModelEOLMessage } from '../../utils/eis_utils';
 interface ModelEOLBadgeProps {
   id: string;
   metadata: EisInferenceEndpointMetadata | undefined;
+  iconOnly?: boolean;
 }
 
-export const ModelEOLBadge = ({ id, metadata }: ModelEOLBadgeProps) => {
+export const ModelEOLBadge = ({ id, metadata, iconOnly }: ModelEOLBadgeProps) => {
   const eolDate = useFormattedEOLDate(metadata);
 
   const tooltipContent = getModelEOLMessage(eolDate);
@@ -41,9 +42,14 @@ export const ModelEOLBadge = ({ id, metadata }: ModelEOLBadgeProps) => {
         color="danger"
         data-test-subj={`modelEolBadge-${id}`}
       >
-        {i18n.translate('xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.content', {
-          defaultMessage: 'End of life',
-        })}
+        {iconOnly
+          ? null
+          : i18n.translate(
+              'xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.content',
+              {
+                defaultMessage: 'End of life',
+              }
+            )}
       </EuiBadge>
     </EuiToolTip>
   );
