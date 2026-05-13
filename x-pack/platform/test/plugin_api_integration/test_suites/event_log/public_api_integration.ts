@@ -167,8 +167,9 @@ export default function ({ getService }: FtrProviderContext) {
     }
 
     describe(`Index Lifecycle`, () => {
-      it('should query across indices matching the Event Log data view', async () => {
-        const indices = ['.kibana-event-log-7.9.0-000001', '.kibana-event-log-8.0.0-000001'];
+      const indices = ['.kibana-event-log-7.9.0-000001', '.kibana-event-log-8.0.0-000001'];
+
+      before(async () => {
         await es.indices.delete({ index: indices, ignore_unavailable: true });
         for (const index of indices) {
           await es.indices.create({
@@ -183,28 +184,30 @@ export default function ({ getService }: FtrProviderContext) {
           ]),
           refresh: true,
         });
+      });
 
-        try {
-          const id = `421f2511-5cd1-44fd-95df-e0df83e354d5`;
+      after(async () => {
+        await es.indices.delete({ index: indices, ignore_unavailable: true });
+      });
 
-          const {
-            body: { data, total },
-          } = await findEventsByIds(undefined, [id], {}, [id]);
+      it('should query across indices matching the Event Log data view', async () => {
+        const id = `421f2511-5cd1-44fd-95df-e0df83e354d5`;
 
-          expect(data.length).to.be(6);
-          expect(total).to.be(6);
+        const {
+          body: { data, total },
+        } = await findEventsByIds(undefined, [id], {}, [id]);
 
-          expect(data.map((foundEvent: IEvent) => foundEvent?.message)).to.eql([
-            'test 2020-10-28T15:19:53.825Z',
-            'test 2020-10-28T15:19:54.849Z',
-            'test 2020-10-28T15:19:54.881Z',
-            'test 2020-10-28T15:19:55.913Z',
-            'test 2020-10-28T15:19:55.938Z',
-            'test 2020-10-28T15:19:55.962Z',
-          ]);
-        } finally {
-          await es.indices.delete({ index: indices, ignore_unavailable: true });
-        }
+        expect(data.length).to.be(6);
+        expect(total).to.be(6);
+
+        expect(data.map((foundEvent: IEvent) => foundEvent?.message)).to.eql([
+          'test 2020-10-28T15:19:53.825Z',
+          'test 2020-10-28T15:19:54.849Z',
+          'test 2020-10-28T15:19:54.881Z',
+          'test 2020-10-28T15:19:55.913Z',
+          'test 2020-10-28T15:19:55.938Z',
+          'test 2020-10-28T15:19:55.962Z',
+        ]);
       });
     });
 
