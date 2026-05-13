@@ -29,5 +29,5 @@ export const buildRuleUpdatesForUiam = (
     attributes: { ...attributes, uiamApiKey },
     version,
     mergeAttributes: false,
-    ...(namespace ? { namespace } : {}),
+    ...(namespace !== undefined ? { namespace } : {}),
   }));

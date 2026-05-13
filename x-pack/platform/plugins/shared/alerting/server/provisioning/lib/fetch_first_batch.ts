@@ -58,9 +58,6 @@ export const fetchFirstBatchOfRulesToConvert = async (
       id: so.id,
       attributes: so.attributes,
       version: so.version,
-      // `alert` is a `multiple-isolated` SO type, so `namespaces` always contains
-      // exactly one entry: the space the rule lives in. Capture it so downstream
-      // bulkUpdate can target that space instead of the default one.
       namespace: so.namespaces?.[0],
     }));
     return { rules, hasMore };
