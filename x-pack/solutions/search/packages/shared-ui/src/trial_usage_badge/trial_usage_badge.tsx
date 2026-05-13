@@ -110,7 +110,7 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({ cloud }) => {
           <h4>
             {cloud.isServerlessEnabled
               ? i18n.translate('xpack.searchSharedUI.trialUsageBadge.serverlessTitle', {
-                  defaultMessage: 'Elasticsearch Serverless',
+                  defaultMessage: 'Elastic Cloud Serverless',
                 })
               : i18n.translate('xpack.searchSharedUI.trialUsageBadge.cloudHostedTitle', {
                   defaultMessage: 'Elastic Cloud Hosted',

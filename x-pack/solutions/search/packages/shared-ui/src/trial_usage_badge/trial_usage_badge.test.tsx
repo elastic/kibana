@@ -124,7 +124,7 @@ describe('TrialUsageBadge', () => {
   });
 
   describe('popover title', () => {
-    it('shows "Elasticsearch Serverless" when serverless', async () => {
+    it('shows "Elastic Cloud Serverless" when serverless', async () => {
       const cloud = createCloudMock({
         trialDaysLeft: 5,
         isServerlessEnabled: true,
@@ -133,7 +133,7 @@ describe('TrialUsageBadge', () => {
 
       await userEvent.click(getByTestSubj(container, 'trialUsageBadge')!);
 
-      expect(getByText('Elasticsearch Serverless')).toBeInTheDocument();
+      expect(getByText('Elastic Cloud Serverless')).toBeInTheDocument();
     });
 
     it('shows "Elastic Cloud Hosted" when not serverless', async () => {
