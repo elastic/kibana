@@ -24,13 +24,6 @@ export interface AgentAclCapabilities {
  * server-side; this map exists to render UI tooltips and explanatory copy.
  */
 export const ROLE_CAPABILITIES: Record<AgentAclRole, AgentAclCapabilities> = {
-  [AgentAclRole.Viewer]: {
-    see: true,
-    use: false,
-    read: true,
-    update: false,
-    delete: false,
-  },
   [AgentAclRole.User]: {
     see: true,
     use: true,
@@ -55,9 +48,6 @@ export const ROLE_CAPABILITIES: Record<AgentAclRole, AgentAclCapabilities> = {
 };
 
 export const ROLE_LABEL: Record<AgentAclRole, string> = {
-  [AgentAclRole.Viewer]: i18n.translate('xpack.agentBuilder.acl.role.viewer.label', {
-    defaultMessage: 'Viewer',
-  }),
   [AgentAclRole.User]: i18n.translate('xpack.agentBuilder.acl.role.user.label', {
     defaultMessage: 'User',
   }),
@@ -70,14 +60,11 @@ export const ROLE_LABEL: Record<AgentAclRole, string> = {
 };
 
 export const ROLE_DESCRIPTION: Record<AgentAclRole, string> = {
-  [AgentAclRole.Viewer]: i18n.translate('xpack.agentBuilder.acl.role.viewer.description', {
-    defaultMessage: 'Can find and view this agent.',
-  }),
   [AgentAclRole.User]: i18n.translate('xpack.agentBuilder.acl.role.user.description', {
     defaultMessage: 'Can find, view, and run this agent.',
   }),
   [AgentAclRole.Editor]: i18n.translate('xpack.agentBuilder.acl.role.editor.description', {
-    defaultMessage: 'Viewer + run + edit configuration.',
+    defaultMessage: 'User + edit configuration.',
   }),
   [AgentAclRole.Manager]: i18n.translate('xpack.agentBuilder.acl.role.manager.description', {
     defaultMessage: 'Editor + delete and manage access.',
@@ -85,7 +72,6 @@ export const ROLE_DESCRIPTION: Record<AgentAclRole, string> = {
 };
 
 const ROLE_ORDER: AgentAclRole[] = [
-  AgentAclRole.Viewer,
   AgentAclRole.User,
   AgentAclRole.Editor,
   AgentAclRole.Manager,
@@ -94,8 +80,8 @@ const ROLE_ORDER: AgentAclRole[] = [
 /**
  * Roles that meaningfully grant something on top of a given visibility.
  *
- * For Public/Shared agents the see/use baseline is already global, so Viewer/User entries
- * would be no-ops. We hide them in the role dropdown to prevent misleading rows.
+ * For Public/Shared agents the see/use baseline is already global, so a `User` entry
+ * would be a no-op. We hide it in the role dropdown to prevent misleading rows.
  */
 export const selectableRolesForVisibility = (
   visibility: AgentVisibility | undefined

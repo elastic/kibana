@@ -68,35 +68,13 @@ export const accessFlyoutPeopleHelp = i18n.translate(
   { defaultMessage: 'Grant access to a specific user.' }
 );
 
-export const accessFlyoutRolesSection = i18n.translate(
-  'xpack.agentBuilder.acl.flyout.rolesSectionTitle',
-  { defaultMessage: 'Roles' }
-);
-
-export const accessFlyoutRolesHelp = i18n.translate(
-  'xpack.agentBuilder.acl.flyout.rolesSectionHelp',
-  {
-    defaultMessage:
-      'Grant access to everyone with a Kibana role. Membership follows the role, not specific people.',
-  }
-);
-
 export const accessFlyoutAddPeoplePlaceholder = i18n.translate(
   'xpack.agentBuilder.acl.flyout.addPeoplePlaceholder',
   { defaultMessage: 'Add a user…' }
 );
 
-export const accessFlyoutAddRolesPlaceholder = i18n.translate(
-  'xpack.agentBuilder.acl.flyout.addRolesPlaceholder',
-  { defaultMessage: 'Add a role…' }
-);
-
 export const accessFlyoutNoPeople = i18n.translate('xpack.agentBuilder.acl.flyout.noPeople', {
   defaultMessage: 'No people have been granted direct access.',
-});
-
-export const accessFlyoutNoRoles = i18n.translate('xpack.agentBuilder.acl.flyout.noRoles', {
-  defaultMessage: 'No roles have been granted access.',
 });
 
 // Row controls ────────────────────────────────────────────────────────────────
@@ -109,11 +87,6 @@ export const accessFlyoutRoleAriaLabel = i18n.translate(
 export const accessFlyoutRemoveAriaLabel = i18n.translate(
   'xpack.agentBuilder.acl.flyout.removeAriaLabel',
   { defaultMessage: 'Remove access entry' }
-);
-
-export const accessFlyoutMissingPrincipal = i18n.translate(
-  'xpack.agentBuilder.acl.flyout.missingPrincipal',
-  { defaultMessage: 'No longer exists' }
 );
 
 export const accessFlyoutSaveErrorTitle = i18n.translate(
@@ -161,18 +134,11 @@ export const accessSummaryHiddenDescription = i18n.translate(
   { defaultMessage: 'This agent has custom access controls.' }
 );
 
-export const accessSummaryCount = (users: number, roles: number) =>
+export const accessSummaryCount = (users: number) =>
   i18n.translate('xpack.agentBuilder.acl.summary.count', {
     defaultMessage:
-      '{users, plural, =0 {} one {# user} other {# users}}{both, select, true { · } other {}}{roles, plural, =0 {} one {# role} other {# roles}} {total, plural, one {has} other {have}} additional access.',
-    values: {
-      users,
-      roles,
-      both: users > 0 && roles > 0 ? 'true' : 'false',
-      // Verb agrees with the combined principal count: a single user OR a single role → "has";
-      // any combination totalling two or more (including "1 user · 1 role") → "have".
-      total: users + roles,
-    },
+      '{users, plural, one {# user has} other {# users have}} additional access.',
+    values: { users },
   });
 
 export const accessSummaryLoading = i18n.translate('xpack.agentBuilder.acl.summary.loading', {

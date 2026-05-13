@@ -7,20 +7,15 @@
 
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiSpacer, EuiText, EuiTitle, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
+import { EuiText, EuiTitle, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
 import { type AgentAclEntry, AgentAclRole, type AgentDefinition } from '@kbn/agent-builder-common';
 import { selectableRolesForVisibility } from './role_to_capabilities';
 import { PrincipalRow } from './principal_row';
 import { UserPicker } from './user_picker';
-import { RolePicker } from './role_picker';
-import { useRoles } from '../../../hooks/use_roles';
 import {
   accessFlyoutNoPeople,
-  accessFlyoutNoRoles,
   accessFlyoutPeopleHelp,
   accessFlyoutPeopleSection,
-  accessFlyoutRolesHelp,
-  accessFlyoutRolesSection,
 } from './access_i18n';
 
 interface AccessFormProps {
@@ -29,16 +24,6 @@ interface AccessFormProps {
   isDisabled?: boolean;
   onChange: (entries: AgentAclEntry[]) => void;
 }
-
-const partitionEntries = (entries: AgentAclEntry[]) => {
-  const users: AgentAclEntry[] = [];
-  const roles: AgentAclEntry[] = [];
-  for (const entry of entries) {
-    if (entry.type === 'user') users.push(entry);
-    else if (entry.type === 'role') roles.push(entry);
-  }
-  return { users, roles };
-};
 
 const sectionStyles = (euiTheme: EuiThemeComputed) => css`
   padding-top: ${euiTheme.size.l};
@@ -84,14 +69,6 @@ const Section: React.FC<SectionProps> = ({ title, helpText, children }) => {
 export const AccessForm: React.FC<AccessFormProps> = ({ agent, entries, isDisabled, onChange }) => {
   const { euiTheme } = useEuiTheme();
   const visibility = agent.visibility;
-  const { data: knownRoles } = useRoles();
-
-  const { users, roles } = useMemo(() => partitionEntries(entries), [entries]);
-
-  const knownRoleNames = useMemo(
-    () => new Set((knownRoles ?? []).map((r) => r.name)),
-    [knownRoles]
-  );
 
   const defaultRole = useMemo(() => {
     const allowed = selectableRolesForVisibility(visibility);
@@ -113,62 +90,30 @@ export const AccessForm: React.FC<AccessFormProps> = ({ agent, entries, isDisabl
   };
 
   return (
-    <>
-      <Section title={accessFlyoutPeopleSection} helpText={accessFlyoutPeopleHelp}>
-        <UserPicker
-          excludedUsernames={users.map((u) => u.name)}
-          isDisabled={isDisabled}
-          onAdd={(username) => handleAdd({ type: 'user', name: username, role: defaultRole })}
-        />
-        {users.length === 0 ? (
-          <EuiText size="xs" color="subdued" css={emptyStateStyles(euiTheme)}>
-            {accessFlyoutNoPeople}
-          </EuiText>
-        ) : (
-          <div css={entriesContainerStyles(euiTheme)}>
-            {users.map((entry) => (
-              <PrincipalRow
-                key={`user:${entry.name}`}
-                entry={entry}
-                visibility={visibility}
-                missing={false}
-                isDisabled={isDisabled}
-                onChangeRole={(role) => handleChangeRole(entry, role)}
-                onRemove={() => handleRemove(entry)}
-              />
-            ))}
-          </div>
-        )}
-      </Section>
-
-      <EuiSpacer size="l" />
-
-      <Section title={accessFlyoutRolesSection} helpText={accessFlyoutRolesHelp}>
-        <RolePicker
-          excludedRoles={roles.map((r) => r.name)}
-          isDisabled={isDisabled}
-          onAdd={(roleName) => handleAdd({ type: 'role', name: roleName, role: defaultRole })}
-        />
-        {roles.length === 0 ? (
-          <EuiText size="xs" color="subdued" css={emptyStateStyles(euiTheme)}>
-            {accessFlyoutNoRoles}
-          </EuiText>
-        ) : (
-          <div css={entriesContainerStyles(euiTheme)}>
-            {roles.map((entry) => (
-              <PrincipalRow
-                key={`role:${entry.name}`}
-                entry={entry}
-                visibility={visibility}
-                missing={knownRoles != null && !knownRoleNames.has(entry.name)}
-                isDisabled={isDisabled}
-                onChangeRole={(role) => handleChangeRole(entry, role)}
-                onRemove={() => handleRemove(entry)}
-              />
-            ))}
-          </div>
-        )}
-      </Section>
-    </>
+    <Section title={accessFlyoutPeopleSection} helpText={accessFlyoutPeopleHelp}>
+      <UserPicker
+        excludedUsernames={entries.map((u) => u.name)}
+        isDisabled={isDisabled}
+        onAdd={(username) => handleAdd({ type: 'user', name: username, role: defaultRole })}
+      />
+      {entries.length === 0 ? (
+        <EuiText size="xs" color="subdued" css={emptyStateStyles(euiTheme)}>
+          {accessFlyoutNoPeople}
+        </EuiText>
+      ) : (
+        <div css={entriesContainerStyles(euiTheme)}>
+          {entries.map((entry) => (
+            <PrincipalRow
+              key={`user:${entry.name}`}
+              entry={entry}
+              visibility={visibility}
+              isDisabled={isDisabled}
+              onChangeRole={(role) => handleChangeRole(entry, role)}
+              onRemove={() => handleRemove(entry)}
+            />
+          ))}
+        </div>
+      )}
+    </Section>
   );
 };

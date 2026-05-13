@@ -6,15 +6,22 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { AuthzDisabled } from '@kbn/core-security-server';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import { AGENTS_WRITE_SECURITY } from '../route_security';
 
+/**
+ * Picker endpoints for the access flyout.
+ *
+ * V1 only supports **user** principals — there is no role-listing endpoint here. The
+ * upstream Elasticsearch privilege change required to list roles without
+ * `manage_security` is tracked separately; role grants will land in V2 once that
+ * change is in.
+ */
 export function registerAccessPrincipalsRoutes({ router, logger, coreSetup }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
-  // Suggest user profiles (browser uses coreStart.userProfile.suggest pointing here).
+  // Suggest user profiles (browser calls coreStart.userProfile.suggest pointing here).
   router.post(
     {
       path: '/internal/agent_builder/_suggest_user_profiles',
@@ -53,34 +60,6 @@ export function registerAccessPrincipalsRoutes({ router, logger, coreSetup }: Ro
       });
 
       return response.ok({ body: profiles });
-    })
-  );
-
-  // List predefined (reserved) Elasticsearch roles.
-  router.get(
-    {
-      path: '/internal/agent_builder/predefined_roles',
-      security: {
-        authz: AuthzDisabled.delegateToESClient,
-      },
-      validate: false,
-      options: { access: 'internal' },
-    },
-    wrapHandler(async (ctx, request, response) => {
-      const esClient = (await ctx.core).elasticsearch.client;
-      const elasticsearchRoles = await esClient.asCurrentUser.security.getRole();
-
-      const predefined = Object.entries(elasticsearchRoles)
-        .filter(([, role]) => role.metadata?._reserved === true)
-        .map(([name, role]) => ({
-          name,
-          description:
-            (typeof role.metadata?.description === 'string' && role.metadata.description) ||
-            undefined,
-        }))
-        .sort((a, b) => a.name.localeCompare(b.name));
-
-      return response.ok({ body: predefined });
     })
   );
 }

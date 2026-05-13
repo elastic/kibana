@@ -59,9 +59,10 @@ export const AccessSummaryCard: React.FC<AccessSummaryCardProps> = ({ agent, onM
   // Skip the network call entirely on the default agent — there's nothing to render.
   const { data, isLoading } = useAgentAcl(agent.id, { enabled: canManage && !isDefaultAgent });
 
+  // V1: only user-type entries exist. The filter is a defensive cast in case stale
+  // role entries linger in storage from PoC data — they'll be hidden until V2 lands.
   const userCount = data?.acl.entries.filter((e) => e.type === 'user').length ?? 0;
-  const roleCount = data?.acl.entries.filter((e) => e.type === 'role').length ?? 0;
-  const hasCustom = userCount + roleCount > 0;
+  const hasCustom = userCount > 0;
 
   const previewEntries = useMemo(
     () => (data?.acl.entries ?? []).slice(0, PRINCIPAL_PREVIEW_LIMIT),
@@ -106,9 +107,9 @@ export const AccessSummaryCard: React.FC<AccessSummaryCardProps> = ({ agent, onM
                   content={`${entry.name} — ${ROLE_LABEL[entry.role]}`}
                 >
                   <EuiToken
-                    iconType={entry.type === 'user' ? 'tokenUser' : 'tokenSelector'}
+                    iconType="tokenUser"
                     shape="circle"
-                    color={entry.type === 'user' ? 'euiColorVis1' : 'euiColorVis5'}
+                    color="euiColorVis1"
                     size="s"
                   />
                 </EuiToolTip>
@@ -129,7 +130,7 @@ export const AccessSummaryCard: React.FC<AccessSummaryCardProps> = ({ agent, onM
         </EuiFlexGroup>
         <EuiSpacer size="xs" />
         <EuiText size="xs" color="subdued">
-          {accessSummaryCount(userCount, roleCount)}
+          {accessSummaryCount(userCount)}
         </EuiText>
       </>
     );

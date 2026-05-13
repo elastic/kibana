@@ -120,8 +120,10 @@ export const hasManageAclAccess = ({
  * A non-admin user can list an agent when any of the following holds:
  *   - the agent's visibility is not Private (Public + Shared cover the world by default), OR
  *   - the user is the agent's creator (matched on profile id and/or username), OR
- *   - the agent's ACL has a `type=user` entry naming the current user, OR
- *   - the agent's ACL has a `type=role` entry whose name appears in the current user's roles.
+ *   - the agent's ACL has a `type=user` entry naming the current user.
+ *
+ * V1: only user-type ACL entries are matched. Role-type grants land in V2 once the
+ * upstream Elasticsearch role-listing change is in.
  */
 export const buildReadAccessFilter = ({ user }: { user: CurrentUser }) => {
   const shouldClauses: Array<Record<string, unknown>> = [
@@ -152,23 +154,6 @@ export const buildReadAccessFilter = ({ user }: { user: CurrentUser }) => {
       },
     },
   });
-
-  const userRoles = user.roles ?? [];
-  if (userRoles.length > 0) {
-    shouldClauses.push({
-      nested: {
-        path: 'acl.entries',
-        query: {
-          bool: {
-            filter: [
-              { term: { 'acl.entries.type': 'role' } },
-              { terms: { 'acl.entries.name': userRoles } },
-            ],
-          },
-        },
-      },
-    });
-  }
 
   return {
     bool: {

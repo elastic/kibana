@@ -11,7 +11,6 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiSuperSelect,
   EuiText,
   EuiToken,
@@ -19,33 +18,25 @@ import {
 } from '@elastic/eui';
 import type { AgentAclEntry, AgentAclRole, AgentVisibility } from '@kbn/agent-builder-common';
 import { ROLE_DESCRIPTION, ROLE_LABEL, selectableRolesForVisibility } from './role_to_capabilities';
-import {
-  accessFlyoutMissingPrincipal,
-  accessFlyoutRemoveAriaLabel,
-  accessFlyoutRoleAriaLabel,
-} from './access_i18n';
+import { accessFlyoutRemoveAriaLabel, accessFlyoutRoleAriaLabel } from './access_i18n';
 
 interface PrincipalRowProps {
   entry: AgentAclEntry;
   /** Used to constrain the selectable roles for Public/Shared agents. */
   visibility?: AgentVisibility;
-  /** True when the named principal cannot be resolved (deleted user/role). */
-  missing?: boolean;
   isDisabled?: boolean;
   onChangeRole: (next: AgentAclRole) => void;
   onRemove: () => void;
 }
 
 /**
- * One row in the People or Roles section. Layout:
+ * One row in the People section. Layout:
  *
  *   [icon]  [name]                                    [role select ▾]  [✕]
- *           [warning subtext, only when stale]
  */
 export const PrincipalRow: React.FC<PrincipalRowProps> = ({
   entry,
   visibility,
-  missing,
   isDisabled,
   onChangeRole,
   onRemove,
@@ -96,11 +87,9 @@ export const PrincipalRow: React.FC<PrincipalRowProps> = ({
           <EuiToken
             css={tokenStyles}
             size="m"
-            iconType={entry.type === 'user' ? 'tokenUser' : 'tokenSelector'}
+            iconType="tokenUser"
             shape="circle"
-            color={
-              missing ? 'euiColorVis7' : entry.type === 'user' ? 'euiColorVis1' : 'euiColorVis5'
-            }
+            color="euiColorVis1"
           />
         </EuiFlexItem>
 
@@ -108,26 +97,6 @@ export const PrincipalRow: React.FC<PrincipalRowProps> = ({
           <EuiText size="s">
             <strong>{entry.name}</strong>
           </EuiText>
-          {missing ? (
-            <EuiFlexGroup
-              gutterSize="xs"
-              alignItems="center"
-              responsive={false}
-              css={css`
-                margin-top: ${euiTheme.size.xs};
-                color: ${euiTheme.colors.warningText};
-              `}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="warning" size="s" color="warning" aria-hidden />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="warning">
-                  {accessFlyoutMissingPrincipal}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : null}
         </EuiFlexItem>
 
         <EuiFlexItem

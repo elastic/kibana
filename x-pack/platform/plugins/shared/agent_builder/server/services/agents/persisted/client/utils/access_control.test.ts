@@ -154,30 +154,18 @@ describe('buildVisibilityReadFilter', () => {
     });
   });
 
-  it('adds a role-ACL nested clause when the user has roles', () => {
+  it('does not add a role-ACL clause regardless of user.roles (V1)', () => {
+    // V1 only matches user-type ACL entries; role-type grants land in V2. The filter
+    // shape should be identical whether or not the current user holds Kibana roles.
     const filter = buildVisibilityReadFilter({
       user: { ...ownerUser, roles: ['analyst', 'viewer_role'] },
     });
-    const last = filter.bool.should[filter.bool.should.length - 1] as Record<string, any>;
-    expect(last).toEqual({
-      nested: {
-        path: 'acl.entries',
-        query: {
-          bool: {
-            filter: [
-              { term: { 'acl.entries.type': 'role' } },
-              { terms: { 'acl.entries.name': ['analyst', 'viewer_role'] } },
-            ],
-          },
-        },
-      },
-    });
-  });
-
-  it('omits the role-ACL nested clause when the user has no roles', () => {
-    const filter = buildVisibilityReadFilter({ user: { ...ownerUser, roles: [] } });
-    // Same shape as the first test above (4 clauses, no roles clause).
     expect(filter.bool.should).toHaveLength(4);
+    const types = (filter.bool.should as Array<Record<string, any>>)
+      .flatMap((clause) => clause.nested?.query?.bool?.filter ?? [])
+      .map((f) => f.term?.['acl.entries.type'])
+      .filter(Boolean);
+    expect(types).toEqual(['user']);
   });
 });
 

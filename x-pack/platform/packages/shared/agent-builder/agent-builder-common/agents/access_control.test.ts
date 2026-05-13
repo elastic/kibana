@@ -440,26 +440,14 @@ describe('ACL-aware authorization', () => {
       ).toBeUndefined();
     });
 
-    test('matches a role-type ACL entry against currentUser.roles', () => {
-      expect(
-        getEffectiveAgentRole({
-          visibility: AgentVisibility.Private,
-          owner,
-          acl: aclWith({ type: 'role', name: 'analyst', role: AgentAclRole.Editor }),
-          currentUser: bob,
-          isAdmin: false,
-        })
-      ).toBe(AgentAclRole.Editor);
-    });
-
-    test('picks the highest role across multiple matching entries', () => {
+    test('picks the highest role across multiple matching user entries', () => {
       expect(
         getEffectiveAgentRole({
           visibility: AgentVisibility.Private,
           owner,
           acl: aclWith(
-            { type: 'user', name: 'bob', role: AgentAclRole.Viewer },
-            { type: 'role', name: 'analyst', role: AgentAclRole.Manager }
+            { type: 'user', name: 'bob', role: AgentAclRole.User },
+            { type: 'user', name: 'bob', role: AgentAclRole.Manager }
           ),
           currentUser: bob,
           isAdmin: false,
@@ -520,17 +508,8 @@ describe('ACL-aware authorization', () => {
       isAdmin: false,
     };
 
-    test('Viewer can read but not use, write, delete, or manage ACL', () => {
-      const acl = aclWith({ type: 'user', name: 'bob', role: AgentAclRole.Viewer });
-      const args = { ...privateAgent, acl, currentUser: bob };
-      expect(hasAgentReadAccess(args)).toBe(true);
-      expect(hasAgentUseAccess(args)).toBe(false);
-      expect(hasAgentWriteAccess(args)).toBe(false);
-      expect(canDeleteAgent(args)).toBe(false);
-      expect(canManageAgentAcl(args)).toBe(false);
-    });
-
-    test('User can use but not write, delete, or manage ACL', () => {
+    test('User can see, read, and run but not write, delete, or manage ACL', () => {
+      // V1 has no Viewer tier — see/read and use share the User threshold.
       const acl = aclWith({ type: 'user', name: 'bob', role: AgentAclRole.User });
       const args = { ...privateAgent, acl, currentUser: bob };
       expect(hasAgentReadAccess(args)).toBe(true);
@@ -538,6 +517,14 @@ describe('ACL-aware authorization', () => {
       expect(hasAgentWriteAccess(args)).toBe(false);
       expect(canDeleteAgent(args)).toBe(false);
       expect(canManageAgentAcl(args)).toBe(false);
+    });
+
+    test('no ACL grant on a Private agent denies read and use alike', () => {
+      // Replaces the old "Viewer can read but not use" test; with the Viewer tier
+      // removed, the only way to deny use is to deny read, and vice versa.
+      const args = { ...privateAgent, currentUser: bob };
+      expect(hasAgentReadAccess(args)).toBe(false);
+      expect(hasAgentUseAccess(args)).toBe(false);
     });
 
     test('Editor can write but not delete or manage ACL', () => {

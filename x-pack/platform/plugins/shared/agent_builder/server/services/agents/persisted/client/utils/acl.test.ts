@@ -11,7 +11,7 @@ import { validateAclUpdate } from './acl';
 const entry = (over: Partial<AgentAclEntry> = {}): AgentAclEntry => ({
   type: 'user',
   name: 'alice',
-  role: AgentAclRole.Viewer,
+  role: AgentAclRole.User,
   ...over,
 });
 
@@ -20,11 +20,11 @@ describe('validateAclUpdate', () => {
     expect(validateAclUpdate([])).toBeUndefined();
   });
 
-  test('accepts a list of valid entries', () => {
+  test('accepts a list of valid user entries', () => {
     expect(
       validateAclUpdate([
         entry({ name: 'alice', role: AgentAclRole.Editor }),
-        entry({ type: 'role', name: 'analyst', role: AgentAclRole.User }),
+        entry({ name: 'bob', role: AgentAclRole.User }),
       ])
     ).toBeUndefined();
   });
@@ -41,9 +41,15 @@ describe('validateAclUpdate', () => {
     expect(validateAclUpdate(tooMany)).toMatch(/maximum/);
   });
 
+  test('rejects role-type entries (V1 supports user-only; V2 will add roles)', () => {
+    expect(
+      validateAclUpdate([{ ...entry(), type: 'role' as 'user', name: 'analyst' }])
+    ).toMatch(/type of "user"/);
+  });
+
   test('rejects unknown principal type', () => {
     expect(validateAclUpdate([{ ...entry(), type: 'group' as 'user' }])).toMatch(
-      /type of "user" or "role"/
+      /type of "user"/
     );
   });
 
@@ -64,14 +70,5 @@ describe('validateAclUpdate', () => {
         entry({ name: 'alice', role: AgentAclRole.Manager }),
       ])
     ).toMatch(/Duplicate/);
-  });
-
-  test('allows the same name across different principal types', () => {
-    expect(
-      validateAclUpdate([
-        entry({ type: 'user', name: 'analyst' }),
-        entry({ type: 'role', name: 'analyst' }),
-      ])
-    ).toBeUndefined();
   });
 });

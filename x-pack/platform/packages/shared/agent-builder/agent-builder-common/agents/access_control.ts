@@ -63,17 +63,12 @@ const aclRoleForUser = (
   if (!acl || !currentUser) {
     return undefined;
   }
-  const userRoles = currentUser.roles ?? [];
+  // V1: only user-type entries. Role-type grants land in V2; see the stash branch
+  // `ab/poc-agent-acl-with-roles` for the full implementation.
   let best: AgentAclRole | undefined;
   for (const entry of acl.entries) {
-    if (entry.type === 'user') {
-      if (currentUser.username && entry.name === currentUser.username) {
-        best = maxAclRole(best, entry.role);
-      }
-    } else if (entry.type === 'role') {
-      if (userRoles.includes(entry.name)) {
-        best = maxAclRole(best, entry.role);
-      }
+    if (entry.type === 'user' && currentUser.username && entry.name === currentUser.username) {
+      best = maxAclRole(best, entry.role);
     }
   }
   return best;
@@ -128,11 +123,19 @@ export const canChangeAgentVisibility = (args: AgentAuthzArgs & { agentId?: stri
   return role === 'admin' || role === 'owner' || role === AgentAclRole.Manager;
 };
 
-/** Legacy agents without a visibility field are treated as Public. */
+/**
+ * Whether the current user may see/list/read this agent.
+ *
+ * Legacy agents without a visibility field are treated as Public.
+ *
+ * Read and use access share the same threshold (`User`) — there is no Viewer tier.
+ * Both helpers are kept as separately-named functions so call sites can document
+ * intent ("I'm gating a read" vs "I'm gating a run"), but the rule is one rule.
+ */
 export const hasAgentReadAccess = (args: AgentAuthzArgs): boolean =>
-  meetsThreshold(getEffectiveAgentRole(args), AgentAclRole.Viewer);
+  meetsThreshold(getEffectiveAgentRole(args), AgentAclRole.User);
 
-/** Whether the current user may run/converse with the agent. */
+/** Whether the current user may run/converse with the agent. Alias of {@link hasAgentReadAccess}. */
 export const hasAgentUseAccess = (args: AgentAuthzArgs): boolean =>
   meetsThreshold(getEffectiveAgentRole(args), AgentAclRole.User);
 

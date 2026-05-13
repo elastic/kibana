@@ -25,8 +25,9 @@ export const validateAclUpdate = (entries: AgentAclEntry[]): string | undefined 
   }
   const seen = new Set<string>();
   for (const entry of entries) {
-    if (!entry || (entry.type !== 'user' && entry.type !== 'role')) {
-      return 'Each ACL entry requires a type of "user" or "role"';
+    // V1: only user-type entries are supported. Role-type grants are planned for V2.
+    if (!entry || entry.type !== 'user') {
+      return 'Each ACL entry requires a type of "user"';
     }
     if (typeof entry.name !== 'string' || entry.name.length === 0) {
       return 'Each ACL entry requires a non-empty name';

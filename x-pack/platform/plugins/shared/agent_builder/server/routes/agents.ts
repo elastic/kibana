@@ -554,10 +554,9 @@ export function registerAgentRoutes({
             body: schema.object({
               entries: schema.arrayOf(
                 schema.object({
-                  type: schema.oneOf([schema.literal('user'), schema.literal('role')]),
+                  type: schema.literal('user'),
                   name: schema.string({ minLength: 1, maxLength: 1024 }),
                   role: schema.oneOf([
-                    schema.literal(AgentAclRole.Viewer),
                     schema.literal(AgentAclRole.User),
                     schema.literal(AgentAclRole.Editor),
                     schema.literal(AgentAclRole.Manager),
