@@ -7,24 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ContentManagementPublicSetup } from '@kbn/content-management-plugin/public';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
-import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import type { ContentManagementPublicSetup } from '@kbn/content-management-plugin/public';
 import type { ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public/plugin';
+import { ADD_PANEL_TRIGGER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
-import { ADD_MARKDOWN_ACTION_ID, CONVERT_LEGACY_MARKDOWN_ACTION_ID } from './constants';
 import {
   APP_ICON,
   APP_NAME,
   MARKDOWN_EMBEDDABLE_TYPE,
   MARKDOWN_SAVED_OBJECT_TYPE,
 } from '../common/constants';
-import { setKibanaServices } from './services/kibana_services';
 import type { MarkdownEmbeddableState } from '../server';
+import { ADD_MARKDOWN_ACTION_ID, CONVERT_LEGACY_MARKDOWN_ACTION_ID } from './constants';
 import { setupLegacyVis } from './legacy_vis/setup';
+import { setKibanaServices } from './services/kibana_services';
 
 export interface MarkdownSetupDeps {
   contentManagement: ContentManagementPublicSetup;
@@ -49,16 +48,6 @@ export class DashboardMarkdownPlugin
       return markdownEmbeddableFactory;
     });
 
-    // Registering the markdown saved object type with content management
-    // to support "Add from library" flyout in dashboard
-    // Only 'mSearch' implemented to support markdown saved objects in 'api/content_management/rpc/mSearch' route
-    // CRUD content management routes not implemented and throw
-    contentManagement.registry.register({
-      id: MARKDOWN_SAVED_OBJECT_TYPE,
-      name: 'Markdown',
-      version: { latest: 1 },
-    });
-
     embeddable.registerAddFromLibraryType({
       onAdd: async (container, savedObject) => {
         container.addNewPanel<MarkdownEmbeddableState>(
@@ -76,6 +65,19 @@ export class DashboardMarkdownPlugin
       savedObjectType: MARKDOWN_SAVED_OBJECT_TYPE,
       savedObjectName: APP_NAME,
       getIconForSavedObject: () => APP_ICON,
+      getSavedObjects: async (searchRequest) => {
+        const { markdownClient } = await import('./async_services');
+        const result = await markdownClient.search({ ...searchRequest });
+        return result.markdowns.map(({ id, data, meta }) => {
+          return {
+            type: MARKDOWN_SAVED_OBJECT_TYPE,
+            id,
+            attributes: data,
+            ...meta,
+            references: [],
+          };
+        });
+      },
     });
 
     setupLegacyVis(core.getStartServices, expressions, visualizations);
