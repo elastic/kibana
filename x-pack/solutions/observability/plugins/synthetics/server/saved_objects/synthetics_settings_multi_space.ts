@@ -22,13 +22,13 @@ export const syntheticsSettingsMultiSpace: SavedObjectsType = {
     displayName: i18n.translate(
       'xpack.synthetics.savedObject.syntheticsSettingsMultiSpace.displayName',
       {
-        defaultMessage: 'Synthetics CCS Settings',
+        defaultMessage: 'Synthetics Settings multi-space',
       }
     ),
     importableAndExportable: false,
     getTitle: () =>
       i18n.translate('xpack.synthetics.savedObject.syntheticsSettingsMultiSpace.title', {
-        defaultMessage: 'Synthetics CCS Settings',
+        defaultMessage: 'Synthetics Settings multi-space',
       }),
   },
 };
