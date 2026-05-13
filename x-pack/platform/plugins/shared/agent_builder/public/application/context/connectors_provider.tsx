@@ -9,12 +9,14 @@ import React, { createContext, useCallback, useContext, useMemo, useState } from
 import { EuiConfirmModal, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import { AgentBuilderConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { useQueryClient } from '@kbn/react-query';
 import type { ConnectorItem } from '../../../common/http_api/tools';
 import { useKibana } from '../hooks/use_kibana';
 import { useFlyoutState } from '../hooks/use_flyout_state';
 import { queryKeys } from '../query_keys';
 import { labels } from '../utils/i18n';
+import { reportAgentBuilderUiClick } from '../report_agent_builder_ui_click';
 import {
   useDeleteConnector,
   useBulkDeleteConnectors,
@@ -49,8 +51,11 @@ export const ConnectorsProvider = ({ children }: { children: React.ReactNode }) 
   const {
     services: {
       plugins: { triggersActionsUi },
+      analytics,
+      appParams: { history },
     },
   } = useKibana();
+  const pathname = history.location.pathname;
   const queryClient = useQueryClient();
 
   // Flyout state
@@ -141,8 +146,26 @@ export const ConnectorsProvider = ({ children }: { children: React.ReactNode }) 
           title={labels.connectors.deleteConnectorTitle(deleteConnectorTarget.name)}
           aria-labelledby={deleteConnectorTitleId}
           titleProps={{ id: deleteConnectorTitleId }}
-          onCancel={cancelDelete}
-          onConfirm={confirmDelete}
+          onCancel={() => {
+            reportAgentBuilderUiClick(analytics, {
+              ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS,
+              ebt_action: AGENT_BUILDER_UI_EBT.action.manageConnectors.DELETE_MODAL_CANCEL,
+              ebt_detail: AGENT_BUILDER_UI_EBT.entity.CONNECTOR,
+              element_kind: 'button',
+              location_pathname: pathname,
+            });
+            cancelDelete();
+          }}
+          onConfirm={() => {
+            reportAgentBuilderUiClick(analytics, {
+              ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS,
+              ebt_action: AGENT_BUILDER_UI_EBT.action.manageConnectors.DELETE_MODAL_CONFIRM,
+              ebt_detail: AGENT_BUILDER_UI_EBT.entity.CONNECTOR,
+              element_kind: 'button',
+              location_pathname: pathname,
+            });
+            confirmDelete();
+          }}
           isLoading={isDeletingConnector}
           cancelButtonText={labels.connectors.deleteConnectorCancelButton}
           confirmButtonText={labels.connectors.deleteConnectorConfirmButton}
@@ -157,8 +180,26 @@ export const ConnectorsProvider = ({ children }: { children: React.ReactNode }) 
           title={labels.connectors.bulkDeleteConnectorsTitle(bulkDeleteConnectorTargets.length)}
           aria-labelledby={bulkDeleteConnectorsTitleId}
           titleProps={{ id: bulkDeleteConnectorsTitleId }}
-          onCancel={cancelBulkDeleteConnectors}
-          onConfirm={confirmBulkDeleteConnectors}
+          onCancel={() => {
+            reportAgentBuilderUiClick(analytics, {
+              ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS,
+              ebt_action: AGENT_BUILDER_UI_EBT.action.manageConnectors.BULK_DELETE_MODAL_CANCEL,
+              ebt_detail: AGENT_BUILDER_UI_EBT.entity.CONNECTOR,
+              element_kind: 'button',
+              location_pathname: pathname,
+            });
+            cancelBulkDeleteConnectors();
+          }}
+          onConfirm={() => {
+            reportAgentBuilderUiClick(analytics, {
+              ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS,
+              ebt_action: AGENT_BUILDER_UI_EBT.action.manageConnectors.BULK_DELETE_MODAL_CONFIRM,
+              ebt_detail: AGENT_BUILDER_UI_EBT.entity.CONNECTOR,
+              element_kind: 'button',
+              location_pathname: pathname,
+            });
+            confirmBulkDeleteConnectors();
+          }}
           isLoading={isBulkDeletingConnectors}
           cancelButtonText={labels.connectors.deleteConnectorCancelButton}
           confirmButtonText={labels.connectors.bulkDeleteConnectorsConfirmButton(

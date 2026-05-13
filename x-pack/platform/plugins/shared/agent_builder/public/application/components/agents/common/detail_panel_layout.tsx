@@ -17,6 +17,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { labels } from '../../../utils/i18n';
+import { useKibana } from '../../../hooks/use_kibana';
+import { reportAgentBuilderUiClick } from '../../../report_agent_builder_ui_click';
 
 interface ConfirmRemoveConfig {
   title: string;
@@ -24,6 +26,12 @@ interface ConfirmRemoveConfig {
   confirmButtonText: string;
   cancelButtonText: string;
   onConfirm: () => void;
+  confirmModalUiClick?: {
+    ebtElement: string;
+    ebtActionConfirm: string;
+    ebtActionCancel: string;
+    ebtDetail?: string;
+  };
 }
 
 export interface DetailPanelLayoutProps {
@@ -51,6 +59,13 @@ export const DetailPanelLayout: React.FC<DetailPanelLayoutProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const {
+    services: {
+      analytics,
+      appParams: { history },
+    },
+  } = useKibana();
+  const pathname = history.location.pathname;
 
   const openConfirmRemove = () => setIsConfirmOpen(true);
 
@@ -147,8 +162,30 @@ export const DetailPanelLayout: React.FC<DetailPanelLayoutProps> = ({
         <EuiConfirmModal
           title={confirmRemove.title}
           aria-label={confirmRemove.title}
-          onCancel={() => setIsConfirmOpen(false)}
+          onCancel={() => {
+            const ebt = confirmRemove.confirmModalUiClick;
+            if (ebt) {
+              reportAgentBuilderUiClick(analytics, {
+                ebt_element: ebt.ebtElement,
+                ebt_action: ebt.ebtActionCancel,
+                ...(ebt.ebtDetail ? { ebt_detail: ebt.ebtDetail } : {}),
+                element_kind: 'button',
+                location_pathname: pathname,
+              });
+            }
+            setIsConfirmOpen(false);
+          }}
           onConfirm={() => {
+            const ebt = confirmRemove.confirmModalUiClick;
+            if (ebt) {
+              reportAgentBuilderUiClick(analytics, {
+                ebt_element: ebt.ebtElement,
+                ebt_action: ebt.ebtActionConfirm,
+                ...(ebt.ebtDetail ? { ebt_detail: ebt.ebtDetail } : {}),
+                element_kind: 'button',
+                location_pathname: pathname,
+              });
+            }
             setIsConfirmOpen(false);
             confirmRemove.onConfirm();
           }}

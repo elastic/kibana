@@ -22,6 +22,7 @@ import { useConnectorsActions } from '../../../context/connectors_provider';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useKibana } from '../../../hooks/use_kibana';
 import { labels } from '../../../utils/i18n';
+import { reportAgentBuilderUiClick } from '../../../report_agent_builder_ui_click';
 
 export interface ConnectorContextMenuProps {
   connector: ConnectorItem;
@@ -37,8 +38,11 @@ const DisconnectConfirmModal: React.FC<{
   const {
     services: {
       notifications: { toasts },
+      analytics,
+      appParams: { history },
     },
   } = useKibana();
+  const pathname = history.location.pathname;
   const { invalidateConnectors } = useConnectorsActions();
   const disconnectModalTitleId = useGeneratedHtmlId({ prefix: 'disconnectConnectorTitle' });
 
@@ -66,8 +70,26 @@ const DisconnectConfirmModal: React.FC<{
       aria-labelledby={disconnectModalTitleId}
       titleProps={{ id: disconnectModalTitleId }}
       title={labels.connectors.disconnectConfirmTitle(connector.name)}
-      onCancel={onCancel}
-      onConfirm={disconnect}
+      onCancel={() => {
+        reportAgentBuilderUiClick(analytics, {
+          ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS_TABLE,
+          ebt_action: AGENT_BUILDER_UI_EBT.action.manageConnectors.OAUTH_DISCONNECT_MODAL_CANCEL,
+          ebt_detail: AGENT_BUILDER_UI_EBT.entity.CONNECTOR,
+          element_kind: 'button',
+          location_pathname: pathname,
+        });
+        onCancel();
+      }}
+      onConfirm={() => {
+        reportAgentBuilderUiClick(analytics, {
+          ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS_TABLE,
+          ebt_action: AGENT_BUILDER_UI_EBT.action.manageConnectors.OAUTH_DISCONNECT_MODAL_CONFIRM,
+          ebt_detail: AGENT_BUILDER_UI_EBT.entity.CONNECTOR,
+          element_kind: 'button',
+          location_pathname: pathname,
+        });
+        disconnect();
+      }}
       cancelButtonText={labels.connectors.disconnectCancelButton}
       confirmButtonText={labels.connectors.disconnectConfirmButton}
       buttonColor="danger"

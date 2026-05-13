@@ -27,12 +27,21 @@ import { useDeleteSkill } from '../../hooks/skills/use_delete_skill';
 import { useSkillsService } from '../../hooks/skills/use_skills';
 import { useNavigation } from '../../hooks/use_navigation';
 import { useUiPrivileges } from '../../hooks/use_ui_privileges';
+import { useKibana } from '../../hooks/use_kibana';
+import { reportAgentBuilderUiClick } from '../../report_agent_builder_ui_click';
 import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
 import { SkillContextMenu } from './skills_table_context_menu';
 
 export const AgentBuilderSkillsTable = memo(() => {
   const { euiTheme } = useEuiTheme();
+  const {
+    services: {
+      analytics,
+      appParams: { history },
+    },
+  } = useKibana();
+  const pathname = history.location.pathname;
   const { skills, isLoading: isLoadingSkills, error: skillsError } = useSkillsService();
   const [tablePageIndex, setTablePageIndex] = useState(0);
   const [tablePageSize, setTablePageSize] = useState(10);
@@ -138,8 +147,26 @@ export const AgentBuilderSkillsTable = memo(() => {
           title={labels.skills.deleteSkillTitle(deleteSkillId)}
           aria-labelledby={deleteSkillTitleId}
           titleProps={{ id: deleteSkillTitleId }}
-          onCancel={cancelDelete}
-          onConfirm={confirmDelete}
+          onCancel={() => {
+            reportAgentBuilderUiClick(analytics, {
+              ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_SKILLS_TABLE,
+              ebt_action: AGENT_BUILDER_UI_EBT.action.manageSkills.DELETE_MODAL_CANCEL,
+              ebt_detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+              element_kind: 'button',
+              location_pathname: pathname,
+            });
+            cancelDelete();
+          }}
+          onConfirm={() => {
+            reportAgentBuilderUiClick(analytics, {
+              ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_SKILLS_TABLE,
+              ebt_action: AGENT_BUILDER_UI_EBT.action.manageSkills.DELETE_MODAL_CONFIRM,
+              ebt_detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+              element_kind: 'button',
+              location_pathname: pathname,
+            });
+            void confirmDelete();
+          }}
           cancelButtonText={labels.skills.deleteSkillCancelButton}
           confirmButtonText={labels.skills.deleteSkillConfirmButton}
           buttonColor="danger"
@@ -153,8 +180,26 @@ export const AgentBuilderSkillsTable = memo(() => {
           title={labels.skills.deleteSkillUsedByAgentsTitle(usedByAgents.skillId)}
           aria-labelledby={deleteSkillUsedByAgentsTitleId}
           titleProps={{ id: deleteSkillUsedByAgentsTitleId }}
-          onCancel={cancelForceDelete}
-          onConfirm={confirmForceDelete}
+          onCancel={() => {
+            reportAgentBuilderUiClick(analytics, {
+              ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_SKILLS_TABLE,
+              ebt_action: AGENT_BUILDER_UI_EBT.action.manageGlobal.USED_BY_WARNING_DISMISS,
+              ebt_detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+              element_kind: 'button',
+              location_pathname: pathname,
+            });
+            cancelForceDelete();
+          }}
+          onConfirm={() => {
+            reportAgentBuilderUiClick(analytics, {
+              ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_SKILLS_TABLE,
+              ebt_action: AGENT_BUILDER_UI_EBT.action.manageGlobal.USED_BY_WARNING_PROCEEDED,
+              ebt_detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+              element_kind: 'button',
+              location_pathname: pathname,
+            });
+            void confirmForceDelete();
+          }}
           isLoading={isDeleting}
           cancelButtonText={labels.skills.deleteSkillUsedByAgentsCancelButton}
           confirmButtonText={labels.skills.deleteSkillUsedByAgentsConfirmButton}

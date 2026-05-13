@@ -23,14 +23,23 @@ import React, { memo, useMemo, useState } from 'react';
 import type { PluginUsedByAgents } from '../../hooks/plugins/use_delete_plugin';
 import { useDeletePlugin } from '../../hooks/plugins/use_delete_plugin';
 import { usePluginsService } from '../../hooks/plugins/use_plugins';
+import { useKibana } from '../../hooks/use_kibana';
 import { useNavigation } from '../../hooks/use_navigation';
 import { useUiPrivileges } from '../../hooks/use_ui_privileges';
+import { reportAgentBuilderUiClick } from '../../report_agent_builder_ui_click';
 import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
 import { PluginContextMenu } from './plugins_table_context_menu';
 
 export const AgentBuilderPluginsTable = memo(() => {
   const { euiTheme } = useEuiTheme();
+  const {
+    services: {
+      analytics,
+      appParams: { history },
+    },
+  } = useKibana();
+  const pathname = history.location.pathname;
   const deleteModalTitleId = useGeneratedHtmlId();
   const deletePluginUsedByAgentsTitleId = useGeneratedHtmlId();
   const { plugins, isLoading: isLoadingPlugins, error: pluginsError } = usePluginsService();
@@ -121,8 +130,26 @@ export const AgentBuilderPluginsTable = memo(() => {
           aria-labelledby={deleteModalTitleId}
           title={labels.plugins.deletePluginTitle(deletePluginName)}
           titleProps={{ id: deleteModalTitleId }}
-          onCancel={cancelDelete}
-          onConfirm={confirmDelete}
+          onCancel={() => {
+            reportAgentBuilderUiClick(analytics, {
+              ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_PLUGINS_TABLE,
+              ebt_action: AGENT_BUILDER_UI_EBT.action.managePlugins.DELETE_MODAL_CANCEL,
+              ebt_detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+              element_kind: 'button',
+              location_pathname: pathname,
+            });
+            cancelDelete();
+          }}
+          onConfirm={() => {
+            reportAgentBuilderUiClick(analytics, {
+              ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_PLUGINS_TABLE,
+              ebt_action: AGENT_BUILDER_UI_EBT.action.managePlugins.DELETE_MODAL_CONFIRM,
+              ebt_detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+              element_kind: 'button',
+              location_pathname: pathname,
+            });
+            void confirmDelete();
+          }}
           cancelButtonText={labels.plugins.deletePluginCancelButton}
           confirmButtonText={labels.plugins.deletePluginConfirmButton}
           buttonColor="danger"
@@ -241,26 +268,56 @@ const PluginUsedByAgentsModal = ({
   isLoading: boolean;
   onCancel: () => void;
   onConfirm: () => void;
-}) => (
-  <EuiConfirmModal
-    title={labels.plugins.deletePluginUsedByAgentsTitle(usedByAgents.pluginName)}
-    aria-labelledby={titleId}
-    titleProps={{ id: titleId }}
-    onCancel={onCancel}
-    onConfirm={onConfirm}
-    isLoading={isLoading}
-    cancelButtonText={labels.plugins.deletePluginUsedByAgentsCancelButton}
-    confirmButtonText={labels.plugins.deletePluginUsedByAgentsConfirmButton}
-    buttonColor="danger"
-  >
-    <EuiText>
-      <p>{labels.plugins.deletePluginUsedByAgentsDescription}</p>
-      {usedByAgents.agents.length > 0 && (
-        <p>
-          <strong>{labels.plugins.deletePluginUsedByAgentsAgentListLabel}:</strong>{' '}
-          {labels.plugins.deletePluginUsedByAgentsAgentList(usedByAgents.agents.map((a) => a.name))}
-        </p>
-      )}
-    </EuiText>
-  </EuiConfirmModal>
-);
+}) => {
+  const {
+    services: {
+      analytics,
+      appParams: { history },
+    },
+  } = useKibana();
+  const pathname = history.location.pathname;
+
+  return (
+    <EuiConfirmModal
+      title={labels.plugins.deletePluginUsedByAgentsTitle(usedByAgents.pluginName)}
+      aria-labelledby={titleId}
+      titleProps={{ id: titleId }}
+      onCancel={() => {
+        reportAgentBuilderUiClick(analytics, {
+          ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_PLUGINS_TABLE,
+          ebt_action: AGENT_BUILDER_UI_EBT.action.manageGlobal.USED_BY_WARNING_DISMISS,
+          ebt_detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+          element_kind: 'button',
+          location_pathname: pathname,
+        });
+        onCancel();
+      }}
+      onConfirm={() => {
+        reportAgentBuilderUiClick(analytics, {
+          ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_PLUGINS_TABLE,
+          ebt_action: AGENT_BUILDER_UI_EBT.action.manageGlobal.USED_BY_WARNING_PROCEEDED,
+          ebt_detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+          element_kind: 'button',
+          location_pathname: pathname,
+        });
+        void onConfirm();
+      }}
+      isLoading={isLoading}
+      cancelButtonText={labels.plugins.deletePluginUsedByAgentsCancelButton}
+      confirmButtonText={labels.plugins.deletePluginUsedByAgentsConfirmButton}
+      buttonColor="danger"
+    >
+      <EuiText>
+        <p>{labels.plugins.deletePluginUsedByAgentsDescription}</p>
+        {usedByAgents.agents.length > 0 && (
+          <p>
+            <strong>{labels.plugins.deletePluginUsedByAgentsAgentListLabel}:</strong>{' '}
+            {labels.plugins.deletePluginUsedByAgentsAgentList(
+              usedByAgents.agents.map((a) => a.name)
+            )}
+          </p>
+        )}
+      </EuiText>
+    </EuiConfirmModal>
+  );
+};

@@ -75,6 +75,12 @@ export const ToolDetailPanel: React.FC<ToolDetailPanelProps> = ({
         confirmButtonText: labels.agentTools.removeToolConfirmButton,
         cancelButtonText: labels.agentTools.removeToolCancelButton,
         onConfirm: onRemove,
+        confirmModalUiClick: {
+          ebtElement: AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_TOOLS,
+          ebtActionConfirm: AGENT_BUILDER_UI_EBT.action.layer2Crud.PANEL_REMOVE_MODAL_CONFIRM,
+          ebtActionCancel: AGENT_BUILDER_UI_EBT.action.layer2Crud.PANEL_REMOVE_MODAL_CANCEL,
+          ebtDetail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+        },
       }}
     >
       <RenderMarkdownReadOnly

@@ -101,6 +101,12 @@ export const PluginDetailPanel: React.FC<PluginDetailPanelProps> = ({
           confirmButtonText: labels.agentPlugins.removePluginConfirmButton,
           cancelButtonText: labels.agentPlugins.removePluginCancelButton,
           onConfirm: onRemove,
+          confirmModalUiClick: {
+            ebtElement: AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_PLUGINS,
+            ebtActionConfirm: AGENT_BUILDER_UI_EBT.action.layer2Crud.PANEL_REMOVE_MODAL_CONFIRM,
+            ebtActionCancel: AGENT_BUILDER_UI_EBT.action.layer2Crud.PANEL_REMOVE_MODAL_CANCEL,
+            ebtDetail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+          },
         }}
         footer={plugin && <PluginIdFooter pluginId={plugin.id} />}
       >

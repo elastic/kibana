@@ -114,6 +114,7 @@ export const AGENT_BUILDER_UI_EBT = {
       ATTACHMENT_OPEN: 'conversation_attachment_open',
       ATTACHMENT_DOWNLOAD: 'conversation_attachment_download',
       EXTERNAL_LINK_OPEN: 'conversation_external_link_open',
+      EXTERNAL_LINK_CANCEL: 'conversation_external_link_cancel',
       ROUND_ERROR_RETRY: 'conversation_round_error_retry',
       ROUND_ERROR_DISMISS: 'conversation_round_error_dismiss',
       THINKING_STEP_TOGGLE: 'conversation_thinking_step_toggle',
@@ -139,12 +140,15 @@ export const AGENT_BUILDER_UI_EBT = {
       ENTITY_DETAIL_VIEW: 'entity_detail_view',
       ENTITY_EDIT_FROM_AGENT: 'entity_edit_from_agent',
       ENTITY_COPY_ID: 'entity_copy_id',
+      PANEL_REMOVE_MODAL_CONFIRM: 'layer2_panel_remove_modal_confirm',
+      PANEL_REMOVE_MODAL_CANCEL: 'layer2_panel_remove_modal_cancel',
     },
     manageGlobal: {
       MANAGE_ENTITY_LIST_VIEW: 'manage_entity_list_view',
       MANAGE_ENTITY_EDIT: 'manage_entity_edit',
       USED_BY_WARNING_SHOWN: 'used_by_warning_shown',
       USED_BY_WARNING_PROCEEDED: 'used_by_warning_proceeded',
+      USED_BY_WARNING_DISMISS: 'used_by_warning_dismiss',
       MANAGE_ENTITY_DELETE: 'manage_entity_delete',
     },
     inapp: {
@@ -205,6 +209,10 @@ export const AGENT_BUILDER_UI_EBT = {
       BULK_IMPORT_CLEAR_SELECTION: 'manage_tools_bulk_import_clear_selection',
       BULK_IMPORT_SELECTION_MENU_OPEN: 'manage_tools_bulk_import_selection_menu_open',
       VISUALIZATION_ACTION: 'manage_tools_visualization_action',
+      DELETE_MODAL_CONFIRM: 'manage_tools_delete_modal_confirm',
+      DELETE_MODAL_CANCEL: 'manage_tools_delete_modal_cancel',
+      BULK_DELETE_MODAL_CONFIRM: 'manage_tools_bulk_delete_modal_confirm',
+      BULK_DELETE_MODAL_CANCEL: 'manage_tools_bulk_delete_modal_cancel',
     },
     /** Agent overview, create/edit form, edit-details flyout */
     manageAgent: {
@@ -243,6 +251,8 @@ export const AGENT_BUILDER_UI_EBT = {
       FLYOUT_SAVE: 'manage_skills_flyout_save',
       FLYOUT_CANCEL: 'manage_skills_flyout_cancel',
       FORM_SAVE: 'manage_skills_form_save',
+      DELETE_MODAL_CONFIRM: 'manage_skills_delete_modal_confirm',
+      DELETE_MODAL_CANCEL: 'manage_skills_delete_modal_cancel',
     },
     /** Global plugins library */
     managePlugins: {
@@ -256,6 +266,8 @@ export const AGENT_BUILDER_UI_EBT = {
       DETAIL_BACK_TO_LIST: 'manage_plugins_detail_back_to_list',
       DETAIL_SKILL_NAV: 'manage_plugins_detail_skill_nav',
       DETAIL_SOURCE_LINK: 'manage_plugins_detail_source_link',
+      DELETE_MODAL_CONFIRM: 'manage_plugins_delete_modal_confirm',
+      DELETE_MODAL_CANCEL: 'manage_plugins_delete_modal_cancel',
     },
     /** Global connectors library (`/manage/connectors`) */
     manageConnectors: {
@@ -270,6 +282,12 @@ export const AGENT_BUILDER_UI_EBT = {
       TABLE_SELECT_ALL: 'manage_connectors_table_select_all',
       TABLE_CLEAR_SELECTION: 'manage_connectors_table_clear_selection',
       OAUTH_CONNECT_BADGE: 'manage_connectors_oauth_connect_badge',
+      DELETE_MODAL_CONFIRM: 'manage_connectors_delete_modal_confirm',
+      DELETE_MODAL_CANCEL: 'manage_connectors_delete_modal_cancel',
+      BULK_DELETE_MODAL_CONFIRM: 'manage_connectors_bulk_delete_modal_confirm',
+      BULK_DELETE_MODAL_CANCEL: 'manage_connectors_bulk_delete_modal_cancel',
+      OAUTH_DISCONNECT_MODAL_CONFIRM: 'manage_connectors_oauth_disconnect_modal_confirm',
+      OAUTH_DISCONNECT_MODAL_CANCEL: 'manage_connectors_oauth_disconnect_modal_cancel',
     },
   },
 

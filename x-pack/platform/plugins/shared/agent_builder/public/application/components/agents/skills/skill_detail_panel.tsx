@@ -89,6 +89,12 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
           confirmButtonText: labels.agentSkills.removeSkillConfirmButton,
           cancelButtonText: labels.agentSkills.removeSkillCancelButton,
           onConfirm: onRemove,
+          confirmModalUiClick: {
+            ebtElement: AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_SKILLS,
+            ebtActionConfirm: AGENT_BUILDER_UI_EBT.action.layer2Crud.PANEL_REMOVE_MODAL_CONFIRM,
+            ebtActionCancel: AGENT_BUILDER_UI_EBT.action.layer2Crud.PANEL_REMOVE_MODAL_CANCEL,
+            ebtDetail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+          },
         }}
       >
         <RenderMarkdownReadOnly
