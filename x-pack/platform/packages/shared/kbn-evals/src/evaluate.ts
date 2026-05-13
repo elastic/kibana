@@ -125,6 +125,10 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
   ],
   fetch: [
     async ({ kbnClient, log }, use) => {
+      // Add a HttpHandler as a fixture, so consumers can use
+      // modules that depend on it (like the inference client).
+      // workerRunId is set by executorClient after connector resolution so
+      // inference requests carry the per-model run ID in OTel baggage.
       const fetch = httpHandlerFromKbnClient({
         kbnClient,
         log,
