@@ -289,6 +289,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    describe('resource browser', () => {
+      it('returns focus to the editor when the data source picker is closed via Escape', async () => {
+        await discover.selectTextBaseLang();
+        await discover.waitUntilTabIsLoaded();
+
+        await monacoEditor.setCodeEditorValue('from logstash-*');
+
+        await retry.try(async () => {
+          const badge = await find.byCssSelector('.esqlSourcesBadge');
+          await badge.click();
+          await testSubjects.existOrFail('esqlDataSourceBrowser');
+        });
+
+        await browser.pressKeys(browser.keys.ESCAPE);
+
+        await retry.waitFor('data source picker to close', async () => {
+          return !(await testSubjects.exists('esqlDataSourceBrowser'));
+        });
+
+        const isEditorFocused = await browser.execute(() => {
+          const textarea = document.querySelector('[data-test-subj="ESQLEditor"] textarea');
+          return document.activeElement === textarea;
+        });
+        expect(isEditorFocused).to.be(true);
+      });
+    });
+
     describe('errors', () => {
       it('should show error messages for syntax errors in query', async function () {
         await discover.selectTextBaseLang();
