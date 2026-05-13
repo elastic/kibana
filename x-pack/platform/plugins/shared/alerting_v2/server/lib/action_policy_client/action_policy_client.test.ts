@@ -484,6 +484,7 @@ describe('ActionPolicyClient', () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'stale-policy',
         description: 'stale-policy description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'test-workflow' }],
         throttle: { strategy: 'on_status_change', interval: '5m' }, // stale pre-fix state
@@ -1118,6 +1119,7 @@ describe('ActionPolicyClient', () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'transition-policy',
         description: 'transition-policy description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'wf-1' }],
         groupingMode: 'per_episode',
@@ -1172,6 +1174,7 @@ describe('ActionPolicyClient', () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'keep-interval-policy',
         description: 'keep-interval-policy description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'wf-1' }],
         groupingMode: 'per_episode',
