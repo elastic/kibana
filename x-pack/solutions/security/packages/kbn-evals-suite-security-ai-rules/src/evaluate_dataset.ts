@@ -12,8 +12,9 @@ import type {
   Example,
   EvalsExecutorClient,
 } from '@kbn/evals';
-import { createEsqlEquivalenceEvaluator } from '@kbn/evals';
+import { createEsqlEquivalenceEvaluator, createSkillInvocationEvaluator } from '@kbn/evals';
 import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ReferenceRule } from '../datasets/sample_rules';
 import type { SecurityRuleGenerationClient } from './chat_client';
@@ -32,6 +33,12 @@ import {
 export interface RuleGenerationTaskOutput {
   generatedRule?: Partial<ReferenceRule>;
   error?: string;
+  /**
+   * OTel trace ID for this round. Required by trace-based evaluators
+   * (token usage, latency, tool calls, skill invocation) so they can
+   * correlate the row to a specific agent interaction.
+   */
+  traceId?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -444,12 +451,14 @@ export function createEvaluateDataset({
   executorClient,
   chatClient,
   inferenceClient,
+  traceEsClient,
   log,
 }: {
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
   chatClient: SecurityRuleGenerationClient;
   inferenceClient: BoundInferenceClient;
+  traceEsClient: EsClient;
   log: ToolingLog;
 }): ({ dataset }: { dataset: EvaluationDataset<RuleExample> }) => Promise<void> {
   const esqlEquivalenceEvaluator = createEsqlEquivalenceEvaluator({
@@ -486,6 +495,17 @@ export function createEvaluateDataset({
     // skip(skipNegativeCases(createRuleDescriptionEvaluator(evaluators))),
     // Rejection — scores 1 when model correctly refuses a negative case, N/A otherwise
     skip(createRejectionEvaluator()),
+    // Trace-based observability (zero per-example LLM cost — reads OTel spans).
+    // The `reportDisplayOptions` in evaluate.ts has already declared formatting for these.
+    ...Object.values(evaluators.traceBasedEvaluators),
+    // Skill invocation — verifies the agent loaded the detection-rule-edit SKILL.md,
+    // matching the explicit instruction on the rule attachment's getAgentDescription()
+    // (see x-pack/solutions/security/plugins/security_solution/server/agent_builder/attachments/rule.ts).
+    createSkillInvocationEvaluator({
+      traceEsClient,
+      log,
+      skillName: 'detection-rule-edit',
+    }),
   ];
 
   return async function evaluateDataset({
@@ -516,7 +536,7 @@ export function createEvaluateDataset({
                 // so dataset summaries don't misclassify correct behavior as an "agent error".
                 succeeded++;
                 log.info('[Task] Negative case: model refused to generate a rule (expected)');
-                return {};
+                return { traceId: taskResult.traceId };
               }
 
               const isMissingIndex =
@@ -531,7 +551,10 @@ export function createEvaluateDataset({
                 otherFailureReasons.push(truncate(taskResult.error ?? 'No rule returned'));
                 log.warning(`[Task] No rule generated. Error: ${taskResult.error}`);
               }
-              return { error: taskResult.error || 'No rule returned from agent' };
+              return {
+                error: taskResult.error || 'No rule returned from agent',
+                traceId: taskResult.traceId,
+              };
             }
 
             if (expected?.category === 'negative') {

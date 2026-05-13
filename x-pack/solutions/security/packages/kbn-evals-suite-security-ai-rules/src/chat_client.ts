@@ -30,6 +30,8 @@ interface RuleToolStep {
 
 interface ConverseResponse {
   steps?: RuleToolStep[];
+  // RoundCompleteEventData declares trace_id as `string | string[]`; coerce to string at the boundary.
+  trace_id?: string | string[];
 }
 
 interface SecurityRuleGenerationLog {
@@ -46,6 +48,7 @@ export class SecurityRuleGenerationClient {
   public async generateRule(prompt: string): Promise<{
     generatedRule?: Partial<ReferenceRule>;
     error?: string;
+    traceId?: string;
   }> {
     const payload = {
       agent_id: THREAT_HUNTING_AGENT_ID,
@@ -70,10 +73,14 @@ export class SecurityRuleGenerationClient {
       body: JSON.stringify(payload),
     })) as ConverseResponse;
     const extracted = extractRuleFromSyncResponse(syncResponse);
+    const traceId = Array.isArray(syncResponse.trace_id)
+      ? syncResponse.trace_id[0]
+      : syncResponse.trace_id;
 
     if (extracted.ruleData) {
       return {
         generatedRule: mapGeneratedRule(extracted.ruleData),
+        traceId,
       };
     }
 
@@ -84,6 +91,7 @@ export class SecurityRuleGenerationClient {
     );
     return {
       error: extracted.error || 'No rule returned from agent',
+      traceId,
     };
   }
 }
