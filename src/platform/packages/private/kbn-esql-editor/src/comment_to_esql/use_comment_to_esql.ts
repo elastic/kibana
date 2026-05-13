@@ -251,7 +251,7 @@ export const useCommentToEsql = ({
   const generateESQL = useCallback(
     async (
       nlInstruction: string,
-      isSurgical: boolean,
+      isCompletion: boolean,
       currentQuery: string,
       signal: AbortSignal
     ): Promise<GenerateResult | null> => {
@@ -262,7 +262,7 @@ export const useCommentToEsql = ({
             body: JSON.stringify({
               nlInstruction,
               currentQuery,
-              ...(isSurgical ? { isSurgical: true } : {}),
+              ...(isCompletion ? { isCompletion: true } : {}),
             }),
             signal,
           }
@@ -312,9 +312,9 @@ export const useCommentToEsql = ({
       .join('\n')
       .trim();
 
-    const isSurgical = nonCommentContent.length > 0;
+    const isCompletion = nonCommentContent.length > 0;
 
-    const queryForRoute = isSurgical
+    const queryForRoute = isCompletion
       ? markCommentInQuery(fullText, targetComment.lineNumber)
       : fullText;
 
@@ -340,7 +340,7 @@ export const useCommentToEsql = ({
     try {
       const result = await generateESQL(
         nlInstruction,
-        isSurgical,
+        isCompletion,
         queryForRoute,
         controller.signal
       );

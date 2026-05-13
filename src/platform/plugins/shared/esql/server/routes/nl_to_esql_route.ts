@@ -15,7 +15,7 @@ import type {
 } from '@kbn/core/server';
 import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { generateEsql, generateSurgicalEsql } from '@kbn/agent-builder-genai-utils';
+import { generateEsql, generateEsqlCompletion } from '@kbn/agent-builder-genai-utils';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
@@ -24,8 +24,8 @@ import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-i
 const MAX_NL_INSTRUCTION_LENGTH = 2000;
 
 /**
- * Wraps the editor's current buffer as additional context for {@link generateEsql} on the
- * non-surgical path: the user has typed something but is asking for a fresh query.
+ * Wraps the editor's current buffer as additional context for {@link generateEsql} when
+ * the request is not a completion: the user has typed something but is asking for a fresh query.
  */
 const buildNlToEsqlAdditionalContext = (currentQuery: string): string => {
   if (!currentQuery) return '';
@@ -100,7 +100,7 @@ export const registerNLtoESQLRoute = (
         body: schema.object({
           nlInstruction: schema.string({ maxLength: MAX_NL_INSTRUCTION_LENGTH }),
           currentQuery: schema.maybe(schema.string({ maxLength: 50000 })),
-          isSurgical: schema.maybe(schema.boolean()),
+          isCompletion: schema.maybe(schema.boolean()),
         }),
       },
       security: {
@@ -113,7 +113,7 @@ export const registerNLtoESQLRoute = (
     async (requestHandlerContext, request, response) => {
       const logger = context.logger.get();
       try {
-        const { nlInstruction, currentQuery, isSurgical } = request.body;
+        const { nlInstruction, currentQuery, isCompletion } = request.body;
         const core = await requestHandlerContext.core;
         const client = core.elasticsearch.client.asCurrentUser;
         const [, { inference }] = await getStartServices();
@@ -134,11 +134,11 @@ export const registerNLtoESQLRoute = (
 
         const model = await createScopedModel({ inference, request, connectorId });
         const trimmedCurrent = currentQuery?.trim();
-        const isSurgicalRequest = Boolean(isSurgical && trimmedCurrent);
+        const isCompletionRequest = Boolean(isCompletion && trimmedCurrent);
         const signal = getRequestAbortedSignal(request.events.aborted$);
 
-        if (isSurgicalRequest) {
-          const { content, replacesNext } = await generateSurgicalEsql({
+        if (isCompletionRequest) {
+          const { content, replacesNext } = await generateEsqlCompletion({
             model,
             esClient: client,
             logger,

@@ -37,11 +37,13 @@ Between **⌘+J** and the LLM response, an inline `Generating…` text shows at 
 
 Pressing **⌘+J** while a request is in flight or a review is pending discards the previous state — the in-flight request is aborted, decorations are cleared, the review widget is dismissed. The user can iterate freely.
 
-## Surgical vs non-surgical mode
+## Completion vs full-query generation
 
-### Non-surgical
+The route picks one of two LLM paths based on whether the editor already has ES|QL code. In both cases the comment stays in place and the generated code is inserted on a new line below it.
 
-When the editor contains **only** a comment (no existing ES|QL code), the entire editor content is replaced with the generated query. The LLM receives the comment as a free-form instruction and produces a complete ES|QL query from scratch.
+### Full-query generation
+
+When the editor contains **only** a comment (no existing ES|QL code), the LLM receives the comment as a free-form instruction and produces a complete ES|QL query from scratch.
 
 Example — editor contains:
 
@@ -49,11 +51,11 @@ Example — editor contains:
 // Show the top 10 destinations by flight count
 ```
 
-Result: the full generated query replaces the comment entirely.
+The full generated query is inserted below the comment.
 
-### Surgical
+### Completion
 
-When the editor already contains ES|QL code alongside the comment, the system operates in **surgical** mode:
+When the editor already contains ES|QL code alongside the comment, the system operates in **completion** mode:
 
 - Only the comment line is sent as the instruction; the full query is sent as context
 - The target comment is marked with `>>>` / `<<<` delimiters so the LLM knows which comment to act on (other comments are treated as documentation)

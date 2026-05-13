@@ -21,9 +21,9 @@ import {
   type ResolvedResourceWithSampling,
 } from '../utils/resources';
 
-const SURGICAL_FROM_PLACEHOLDER = 'FROM _surgical_dummy_';
+const COMPLETION_FROM_PLACEHOLDER = 'FROM _completion_dummy_';
 
-const SurgicalGenerationSchema = z
+const CompletionGenerationSchema = z
   .object({
     replacesNext: z
       .boolean()
@@ -36,7 +36,7 @@ const SurgicalGenerationSchema = z
         'Only the ES|QL pipe(s) that should replace the marked comment. Do not include the full query. Do not wrap in markdown fences.'
       ),
   })
-  .describe('Surgical ES|QL fragment to insert into the editor.');
+  .describe('ES|QL completion fragment to insert into the editor.');
 
 const RequestDocsSchema = z
   .object({
@@ -87,7 +87,7 @@ Request documentation for the commands and functions you will need to generate t
   ],
 ];
 
-const buildSurgicalMessages = ({
+const buildCompletionMessages = ({
   nlInstruction,
   currentQuery,
   fetchedDocs,
@@ -141,12 +141,12 @@ Generate the ES|QL pipe(s) that should replace the marked comment.`,
  * FROM so it parses as a full query, then strips the wrapper from the corrected output.
  * Falls back to the original fragment if anything goes wrong.
  */
-const correctSurgicalFragment = (rawFragment: string): string => {
+const correctCompletionFragment = (rawFragment: string): string => {
   const fragment = rawFragment.trim();
   if (!fragment) return fragment;
 
   const fragmentWithLeadingPipe = fragment.startsWith('|') ? fragment : `| ${fragment}`;
-  const wrapped = `${SURGICAL_FROM_PLACEHOLDER}\n${fragmentWithLeadingPipe}`;
+  const wrapped = `${COMPLETION_FROM_PLACEHOLDER}\n${fragmentWithLeadingPipe}`;
 
   try {
     const { output } = correctCommonEsqlMistakes(wrapped);
@@ -159,14 +159,14 @@ const correctSurgicalFragment = (rawFragment: string): string => {
   }
 };
 
-export interface GenerateSurgicalEsqlResponse {
+export interface GenerateEsqlCompletionResponse {
   /** Pipe fragment (one or more lines) to insert or replace. */
   content: string;
   /** When true, the editor should treat the line after the comment as replaced by `content`. */
   replacesNext: boolean;
 }
 
-export interface GenerateSurgicalEsqlParams {
+export interface GenerateEsqlCompletionParams {
   model: ScopedModel;
   esClient: ElasticsearchClient;
   logger?: Logger;
@@ -176,7 +176,7 @@ export interface GenerateSurgicalEsqlParams {
 }
 
 /**
- * Surgical ES|QL completion used by the editor's comment-to-ES|QL action.
+ * ES|QL completion used by the editor's comment-to-ES|QL action.
  *
  * Mirrors the pieces of {@link generateEsql} that matter for fragment generation:
  *  - keyword-targeted documentation (request_documentation step)
@@ -188,16 +188,16 @@ export interface GenerateSurgicalEsqlParams {
  *  - index discovery via indexExplorer (we already have the buffer's FROM)
  *  - validate/execute/retry loop (the output is a fragment, not a runnable query)
  */
-export const generateSurgicalEsql = async ({
+export const generateEsqlCompletion = async ({
   model,
   esClient,
   logger,
   nlInstruction,
   currentQuery,
   signal,
-}: GenerateSurgicalEsqlParams): Promise<GenerateSurgicalEsqlResponse> => {
+}: GenerateEsqlCompletionParams): Promise<GenerateEsqlCompletionResponse> => {
   return withActiveInferenceSpan(
-    'GenerateSurgicalEsql',
+    'GenerateEsqlCompletion',
     {
       attributes: {
         [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
@@ -214,7 +214,7 @@ export const generateSurgicalEsql = async ({
             samplingSize: 50,
           }).catch((e) => {
             logger?.debug(
-              `[generateSurgicalEsql] failed to resolve resource '${resourceName}': ${e?.message}`
+              `[generateEsqlCompletion] failed to resolve resource '${resourceName}': ${e?.message}`
             );
             return undefined;
           })
@@ -238,16 +238,16 @@ export const generateSurgicalEsql = async ({
 
       const fetchedDocs = docBase.getDocumentation([...commands, ...functions]);
 
-      const generateModel = model.chatModel.withStructuredOutput(SurgicalGenerationSchema, {
-        name: 'generate_surgical_esql',
+      const generateModel = model.chatModel.withStructuredOutput(CompletionGenerationSchema, {
+        name: 'generate_esql_completion',
       });
 
       const { replacesNext, code } = await generateModel.invoke(
-        buildSurgicalMessages({ nlInstruction, currentQuery, fetchedDocs, resource }),
+        buildCompletionMessages({ nlInstruction, currentQuery, fetchedDocs, resource }),
         { signal }
       );
 
-      const corrected = correctSurgicalFragment(code);
+      const corrected = correctCompletionFragment(code);
       return { content: corrected, replacesNext };
     }
   );
