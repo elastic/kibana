@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  EXAMPLE_MANAGED_WORKFLOW,
+  EXAMPLE_MANAGED_WORKFLOW_ID,
+} from './definitions/workflows_extensions_example';
 import type {
   ManagedWorkflowDefinition,
   ManagedWorkflowManagement,
   ManagedWorkflowTemplateValues,
 } from './types';
 import {
-  EXAMPLE_MANAGED_WORKFLOW,
-  EXAMPLE_MANAGED_WORKFLOW_ID,
   STREAMS_KI_CONTINUOUS_EXTRACTION_WORKFLOW,
   STREAMS_KI_CONTINUOUS_EXTRACTION_WORKFLOW_ID,
   STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW,
@@ -54,14 +56,9 @@ export type ManagedWorkflowTemplateValuesForId<TId extends ManagedWorkflowId> =
   ManagedWorkflowTemplateValuesById[TId];
 
 export const getManagedWorkflowDefinition = (id: string): ManagedWorkflowDefinition | undefined => {
-  const workflow = managedWorkflowDefinitions.find(
+  return managedWorkflowDefinitions.find(
     (definition): definition is ManagedWorkflowDefinitionEntry => definition.id === id
   );
-  if (!workflow) {
-    return undefined;
-  }
-
-  return workflow;
 };
 
 export const getManagedWorkflowDefinitions = (): ManagedWorkflowDefinition[] => {

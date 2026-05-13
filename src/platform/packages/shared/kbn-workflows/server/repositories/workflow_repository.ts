@@ -11,7 +11,9 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsWorkflow, WorkflowDetailDto } from '../..';
 import { GLOBAL_WORKFLOW_SPACE_ID, WORKFLOW_INDEX_NAME } from '../constants';
-import { buildWorkflowSpaceFilter } from '../lib/workflow_space_filter';
+import { applyManagedFilter, buildWorkflowSpaceFilter } from '../lib/workflow_space_filter';
+import type { ManagedFilter } from '../lib/workflow_space_filter';
+
 export interface WorkflowRepositoryOptions {
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -22,26 +24,10 @@ export type WorkflowRepositoryParams = Omit<WorkflowRepositoryOptions, 'indexNam
   indexName?: string;
 };
 
-export type ManagedFilter = 'all' | 'managed' | 'unmanaged';
-
 export interface WorkflowLookupOptions {
   includeGlobal?: boolean;
   managedFilter?: ManagedFilter;
 }
-
-const applyManagedFilter = (
-  managedFilter: ManagedFilter | undefined,
-  query: { must: estypes.QueryDslQueryContainer[]; must_not: estypes.QueryDslQueryContainer[] }
-): void => {
-  if (managedFilter === 'managed') {
-    query.must.push({ term: { managed: true } });
-    return;
-  }
-
-  if (managedFilter === 'unmanaged') {
-    query.must_not.push({ term: { managed: true } });
-  }
-};
 
 export class WorkflowRepository {
   private options: WorkflowRepositoryOptions;
@@ -93,11 +79,9 @@ export class WorkflowRepository {
       // Map index _source → EsWorkflow (read created_at / updated_at; EsWorkflow uses createdAt / lastUpdatedAt).
       const source = document._source as Record<string, unknown>;
       const managed = typeof source.managed === 'boolean' ? (source.managed as boolean) : undefined;
-      const originSystemWorkflowId =
-        typeof source.originSystemWorkflowId === 'string'
-          ? source.originSystemWorkflowId
-          : source.originSystemWorkflowId === null
-          ? null
+      const originManagedWorkflowId =
+        typeof source.originManagedWorkflowId === 'string'
+          ? source.originManagedWorkflowId
           : undefined;
       return {
         id: workflowId,
@@ -114,7 +98,7 @@ export class WorkflowRepository {
         deleted_at: source.deleted_at ? new Date(source.deleted_at as string) : null,
         yaml: source.yaml as string,
         ...(managed !== undefined ? { managed } : {}),
-        ...(originSystemWorkflowId !== undefined ? { originSystemWorkflowId } : {}),
+        ...(originManagedWorkflowId !== undefined ? { originManagedWorkflowId } : {}),
       };
     } catch (error) {
       if (error.statusCode === 404) {
@@ -258,14 +242,15 @@ export class WorkflowRepository {
     const MAX_PAGES = 50;
     const keepAlive = '1m';
     const sort: estypes.Sort = [{ updated_at: { order: 'desc' } }, '_shard_doc'];
+    const spaceFilter = buildWorkflowSpaceFilter(spaceId, { includeGlobal: true });
     const query = {
       bool: {
         must: [
-          { term: { spaceId } },
+          ...spaceFilter.must,
           { term: { enabled: true } },
           { term: { triggerTypes: triggerId } },
         ],
-        must_not: [{ exists: { field: 'deleted_at' } }],
+        must_not: spaceFilter.must_not,
       },
     };
     const _source = [
@@ -279,6 +264,9 @@ export class WorkflowRepository {
       'valid',
       'created_at',
       'updated_at',
+      'managed',
+      'managedBy',
+      'originManagedWorkflowId',
     ];
 
     const pitResponse = await this.options.esClient.openPointInTime({
@@ -346,6 +334,11 @@ export class WorkflowRepository {
         valid: source.valid as boolean,
         createdAt: source.created_at as string,
         lastUpdatedAt: source.updated_at as string,
+        ...(source.managed === true ? { managed: true } : {}),
+        ...(typeof source.managedBy === 'string' ? { managedBy: source.managedBy } : {}),
+        ...(typeof source.originManagedWorkflowId === 'string'
+          ? { originManagedWorkflowId: source.originManagedWorkflowId }
+          : {}),
       }));
     } finally {
       try {

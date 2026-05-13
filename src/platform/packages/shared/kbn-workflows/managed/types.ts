@@ -28,5 +28,6 @@ type ManagedWorkflowDefinitionSource<TValues extends object> =
 export type ManagedWorkflowDefinition<TValues extends object = ManagedWorkflowTemplateValues> = {
   id: string;
   pluginId: string;
+  version: number;
   management: ManagedWorkflowManagement;
 } & ManagedWorkflowDefinitionSource<TValues>;

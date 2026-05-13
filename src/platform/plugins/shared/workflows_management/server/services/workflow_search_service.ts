@@ -16,7 +16,7 @@ import type {
   WorkflowListDto,
   WorkflowStatsDto,
 } from '@kbn/workflows';
-import { buildWorkflowSpaceFilter } from '@kbn/workflows/server';
+import { applyManagedFilter, buildWorkflowSpaceFilter } from '@kbn/workflows/server';
 import type { WorkflowListItemDto } from '@kbn/workflows/types/v1';
 
 import type { WorkflowSearchDeps } from './types';
@@ -31,6 +31,17 @@ import {
 import type { GetWorkflowsParams } from '../api/workflows_management_api';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 import { workflowIndexName } from '../storage/workflow_storage';
+
+interface WorkflowAggBucket {
+  key: string | number | boolean;
+  key_as_string?: string;
+  doc_count: number;
+}
+
+type WorkflowAggsResponse = Record<
+  string,
+  estypes.AggregationsMultiBucketAggregateBase<WorkflowAggBucket>
+>;
 
 export class WorkflowSearchService {
   constructor(private readonly deps: WorkflowSearchDeps) {}
@@ -113,10 +124,11 @@ export class WorkflowSearchService {
     spaceId: string,
     options?: { includeExecutionHistory?: boolean }
   ): Promise<WorkflowListDto> {
-    const { size = 100, page = 1, enabled, createdBy, tags, query } = params;
+    const { size = 100, page = 1, enabled, createdBy, tags, query, managedFilter } = params;
     const from = (page - 1) * size;
 
     const { must, must_not } = buildWorkflowSpaceFilter(spaceId, { includeGlobal: true });
+    applyManagedFilter(managedFilter ?? 'unmanaged', { must, must_not });
 
     must.push(
       ...buildConditionalTermsFilters([
@@ -177,11 +189,13 @@ export class WorkflowSearchService {
     spaceId: string,
     options?: { includeExecutionStats?: boolean }
   ): Promise<WorkflowStatsDto> {
+    const statsFilter = buildWorkflowSpaceFilter(spaceId, { includeGlobal: true });
+    applyManagedFilter('unmanaged', statsFilter);
     const statsResponse = await this.deps.workflowStorage.getClient().search({
       size: 0,
       track_total_hits: true,
       query: {
-        bool: buildWorkflowSpaceFilter(spaceId, { includeGlobal: true }),
+        bool: statsFilter,
       },
       aggs: {
         enabled_count: {
@@ -209,8 +223,7 @@ export class WorkflowSearchService {
   }
 
   async getWorkflowAggs(fields: string[], spaceId: string): Promise<WorkflowAggsDto> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const aggs: Record<string, any> = {};
+    const aggs: Record<string, estypes.AggregationsAggregationContainer> = {};
 
     fields.forEach((field) => {
       aggs[field] = {
@@ -221,31 +234,44 @@ export class WorkflowSearchService {
       };
     });
 
-    const aggsResponse = await this.deps.workflowStorage.getClient().search({
-      size: 0,
-      track_total_hits: true,
-      query: {
-        bool: buildWorkflowSpaceFilter(spaceId, { includeGlobal: true }),
-      },
-      aggs,
-    });
+    try {
+      const aggsFilter = buildWorkflowSpaceFilter(spaceId, { includeGlobal: true });
+      applyManagedFilter('unmanaged', aggsFilter);
+      const aggsResponse = await this.deps.workflowStorage.getClient().search({
+        size: 0,
+        track_total_hits: true,
+        query: {
+          bool: aggsFilter,
+        },
+        aggs,
+      });
 
-    const result: WorkflowAggsDto = {};
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const responseAggs = aggsResponse.aggregations as any;
+      const result: WorkflowAggsDto = {};
+      const responseAggs = aggsResponse.aggregations ?? {};
 
-    fields.forEach((field) => {
-      if (responseAggs[field]) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        result[field] = responseAggs[field].buckets.map((bucket: any) => ({
-          label: bucket.key_as_string,
-          key: bucket.key,
-          doc_count: bucket.doc_count,
-        }));
+      fields.forEach((field) => {
+        const termsAggregation = (responseAggs as WorkflowAggsResponse)[field];
+        if (termsAggregation && Array.isArray(termsAggregation.buckets)) {
+          result[field] = termsAggregation.buckets.map((bucket) => {
+            // Prefer `key_as_string` so non-string ES keys (booleans, numbers, dates)
+            // round-trip back to the matching schema values used by the workflow filters.
+            const key = bucket.key_as_string ?? String(bucket.key);
+            return {
+              label: key,
+              key,
+              doc_count: bucket.doc_count,
+            };
+          });
+        }
+      });
+
+      return result;
+    } catch (error) {
+      if (isIndexNotFoundError(error)) {
+        return {};
       }
-    });
-
-    return result;
+      throw error;
+    }
   }
 
   private async getExecutionHistoryStats(spaceId: string) {

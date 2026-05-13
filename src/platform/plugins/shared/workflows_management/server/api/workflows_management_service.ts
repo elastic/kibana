@@ -165,6 +165,7 @@ export class WorkflowsService {
     this.managedWorkflowsService = new ManagedWorkflowsService({
       crudService: this.crudService,
       workflowsExecutionEngine: this.workflowsExecutionEngine,
+      logger: this.logger,
     });
   }
 
@@ -326,6 +327,14 @@ export class WorkflowsService {
     return this.executionQueryService.getWorkflowExecutions(params, spaceId);
   }
 
+  public async listWaitingForInputSteps(
+    spaceId: string,
+    pagination: { page?: number; perPage?: number } = {}
+  ): Promise<{ results: EsWorkflowStepExecution[]; total: number }> {
+    await this.ensureInitialized();
+    return this.executionQueryService.listWaitingForInputSteps(spaceId, pagination);
+  }
+
   public async getWorkflowExecutionHistory(
     executionId: string,
     spaceId: string
@@ -393,8 +402,8 @@ export class WorkflowsService {
 
   public async installManagedWorkflow(
     id: ManagedWorkflowId,
-    options: ManagedWorkflowOperationOptions & { isStartupReconcile?: boolean },
-    registeredPluginId?: string
+    options: ManagedWorkflowOperationOptions,
+    registeredPluginId: string
   ): Promise<void> {
     await this.ensureInitialized();
     return this.managedWorkflowsService.installManagedWorkflow(id, options, registeredPluginId);
@@ -403,7 +412,7 @@ export class WorkflowsService {
   public async uninstallManagedWorkflow(
     id: ManagedWorkflowId,
     options: ManagedWorkflowOperationOptions,
-    registeredPluginId?: string
+    registeredPluginId: string
   ): Promise<void> {
     await this.ensureInitialized();
     return this.managedWorkflowsService.uninstallManagedWorkflow(id, options, registeredPluginId);
@@ -413,7 +422,7 @@ export class WorkflowsService {
     id: ManagedWorkflowId,
     request: KibanaRequest,
     options: ExecuteManagedWorkflowOptions,
-    registeredPluginId?: string
+    registeredPluginId: string
   ): Promise<string> {
     await this.ensureInitialized();
     return this.managedWorkflowsService.executeManagedWorkflow(
@@ -424,21 +433,13 @@ export class WorkflowsService {
     );
   }
 
-  public async registerManagedWorkflowPlugin(
-    pluginId: string,
-    options?: { spaceId?: string }
-  ): Promise<void> {
+  public async pluginReady(pluginId: string): Promise<void> {
     await this.ensureInitialized();
-    return this.managedWorkflowsService.registerManagedWorkflowPlugin(pluginId, options);
+    return this.managedWorkflowsService.pluginReady(pluginId);
   }
 
-  public async reconcileManagedWorkflowOrphans(pluginIds: string[]): Promise<void> {
+  public async cleanupUnregisteredOrphans(registeredOwnerPluginIds: string[]): Promise<void> {
     await this.ensureInitialized();
-    return this.managedWorkflowsService.reconcileManagedWorkflowOrphans(pluginIds);
-  }
-
-  public async reconcileAutoManagedWorkflowUpdates(): Promise<void> {
-    await this.ensureInitialized();
-    return this.managedWorkflowsService.reconcileAutoManagedWorkflowUpdates();
+    return this.managedWorkflowsService.cleanupUnregisteredOrphans(registeredOwnerPluginIds);
   }
 }

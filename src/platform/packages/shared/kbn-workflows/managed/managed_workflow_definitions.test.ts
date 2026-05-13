@@ -10,8 +10,8 @@
 import { parse } from 'yaml';
 import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
+import { EXAMPLE_MANAGED_WORKFLOW_ID } from './definitions/workflows_extensions_example';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
-import { EXAMPLE_MANAGED_WORKFLOW_ID } from './workflows';
 import { WorkflowSchema } from '../spec/schema';
 
 type RegistryManagedWorkflowDefinition = (typeof managedWorkflowDefinitions)[number];
@@ -103,6 +103,15 @@ describe('managedWorkflowDefinitions', () => {
     expect(typeof definition.pluginId).toBe('string');
     expect(definition.pluginId.trim()).not.toHaveLength(0);
   });
+
+  it.each(managedDefinitionsById)(
+    '%s declares a version that is a positive integer',
+    (_id, definition) => {
+      expect(typeof definition.version).toBe('number');
+      expect(Number.isInteger(definition.version)).toBe(true);
+      expect(definition.version).toBeGreaterThanOrEqual(1);
+    }
+  );
 
   it.each(managedDefinitionsById)(
     '%s defines exactly one source field: yaml xor yamlTemplate',

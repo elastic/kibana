@@ -48,6 +48,15 @@ const configSchema = schema.object({
     ),
   }),
   maxResponseSize: schema.byteSize({ defaultValue: DEFAULT_MAX_STEP_SIZE }),
+  eviction: schema.object({
+    /**
+     * Minimum output payload size for a completed step to be eligible for eviction
+     * from in-memory state after it has been flushed to Elasticsearch.
+     * Payloads smaller than this threshold stay in memory to avoid ES round-trip latency.
+     * Set to "0b" to evict all completed step outputs, or a very large value to disable eviction.
+     */
+    minPayloadSize: schema.byteSize({ defaultValue: '10kb' }),
+  }),
   collectQueueMetrics: schema.boolean({
     defaultValue: false,
     meta: {

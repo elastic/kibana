@@ -94,7 +94,7 @@ export const prepareWorkflowDocument = (params: {
     managed: false,
     managedBy: null,
     definitionHash: null,
-    originSystemWorkflowId: null,
+    originManagedWorkflowId: null,
     lifecycle: null,
     valid: workflowToCreate.valid,
     deleted_at: null,

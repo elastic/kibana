@@ -94,6 +94,8 @@
     "@kbn/workflows-management-plugin",
     "@kbn/workflows-extensions",
     "@kbn/workflows",
-    "@kbn/agent-builder-plugin"
+    "@kbn/agent-builder-plugin",
+    "@kbn/data-streams",
+    "@kbn/es-mappings"
   ]
 }

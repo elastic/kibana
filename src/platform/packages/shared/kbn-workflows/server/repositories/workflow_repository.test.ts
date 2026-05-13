@@ -241,7 +241,7 @@ describe('WorkflowRepository.getWorkflow', () => {
               _source: {
                 ...baseSource,
                 managed: true,
-                originSystemWorkflowId: 'system-parent',
+                originManagedWorkflowId: 'system-parent',
                 created_at: '2024-01-02T03:04:05.000Z',
                 updated_at: '2024-06-07T08:09:10.000Z',
               },
@@ -259,7 +259,7 @@ describe('WorkflowRepository.getWorkflow', () => {
     expect(wf).not.toBeNull();
     expect(wf).toMatchObject({
       managed: true,
-      originSystemWorkflowId: 'system-parent',
+      originManagedWorkflowId: 'system-parent',
     });
   });
 

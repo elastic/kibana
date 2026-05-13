@@ -164,11 +164,11 @@ describe('WorkflowExecuteStepImpl', () => {
       });
     });
 
-    it('should not treat originSystemWorkflowId alone as a managed parent run', async () => {
+    it('should not treat originManagedWorkflowId alone as a managed parent run', async () => {
       const init = createMockInit();
       const repo = init.workflowRepository as jest.Mocked<WorkflowRepository>;
       repo.getWorkflow.mockResolvedValue(createMockWorkflow());
-      (init.stepExecutionRuntime as any).workflowExecution.originSystemWorkflowId =
+      (init.stepExecutionRuntime as any).workflowExecution.originManagedWorkflowId =
         'system-parent-workflow';
 
       const step = new WorkflowExecuteStepImpl(init);

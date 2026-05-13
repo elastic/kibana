@@ -28,6 +28,7 @@ import {
   getConnectorType as getWorkflowsConnectorType,
 } from './connectors/workflows';
 import { WorkflowsManagementFeatureConfig } from './features';
+import { createWorkflowsInboxProvider } from './inbox/workflows_inbox_provider';
 import type {
   WorkflowsRequestHandlerContext,
   WorkflowsServerPluginSetup,
@@ -96,6 +97,13 @@ export class WorkflowsPlugin
     const router = core.http.createRouter<WorkflowsRequestHandlerContext>();
     defineRoutes(router, api, this.logger, spaces, workflowsService);
 
+    if (plugins.inbox) {
+      this.logger.debug('Workflows Management: registering inbox provider');
+      plugins.inbox.registerActionProvider(
+        createWorkflowsInboxProvider({ api, logger: this.logger })
+      );
+    }
+
     return {
       management: api,
     };
@@ -116,24 +124,24 @@ export class WorkflowsPlugin
     }
 
     if (this.workflowsService) {
-      const managedWorkflowPluginIds = plugins.workflowsExtensions.getManagedWorkflowPluginIds();
-      void this.runManagedWorkflowsStartupReconciliation(managedWorkflowPluginIds);
+      // Managed workflow owners register through workflows_extensions because owner
+      // plugins cannot depend on workflows_management. Pass the setup-time owner
+      // snapshot into workflows_management for storage reconciliation.
+      const registeredOwnerPluginIds = plugins.workflowsExtensions.getManagedWorkflowPluginIds();
+      void this.runGlobalOrphanCleanup(registeredOwnerPluginIds);
     }
 
     this.logger.debug('Workflows Management: Started');
     return {};
   }
 
-  private async runManagedWorkflowsStartupReconciliation(pluginIds: string[]): Promise<void> {
+  private async runGlobalOrphanCleanup(registeredOwnerPluginIds: string[]): Promise<void> {
     try {
-      await this.workflowsService?.reconcileManagedWorkflowOrphans(pluginIds);
-      await this.workflowsService?.reconcileAutoManagedWorkflowUpdates();
+      await this.workflowsService?.cleanupUnregisteredOrphans(registeredOwnerPluginIds);
     } catch (error) {
       this.logger.warn(
-        'Workflows Management: Failed to complete managed workflows startup reconciliation',
-        {
-          error,
-        }
+        'Workflows Management: Failed to complete global orphan cleanup for unregistered workflows',
+        { error }
       );
     }
   }

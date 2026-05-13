@@ -37,9 +37,10 @@ const storageSettings = {
       triggerTypes: types.keyword({}), // We filter by trigger subscription (e.g. event-driven)
       managed: types.boolean({}),
       managedBy: types.keyword({}),
+      managedVersion: types.long({ index: false }),
       definitionHash: types.keyword({ index: false }),
       managedTemplateValues: types.object({ enabled: false }),
-      originSystemWorkflowId: types.keyword({}),
+      originManagedWorkflowId: types.keyword({}),
       lifecycle: types.keyword({}),
       updated_at: types.date({}), // We sort by this
       // Non-searchable fields (stored but not indexed)
@@ -67,9 +68,10 @@ export interface WorkflowProperties {
   spaceId: string;
   managed?: boolean;
   managedBy?: string | null;
+  managedVersion?: number | null;
   definitionHash?: string | null;
   managedTemplateValues?: Record<string, unknown> | null;
-  originSystemWorkflowId?: string | null;
+  originManagedWorkflowId?: string | null;
   lifecycle?: 'static' | 'dynamic' | null;
   deleted_at: Date | null;
   valid: boolean;

@@ -46,6 +46,14 @@ export interface RegisteredManagedWorkflowsLifecycleApi {
     id: TId,
     options: ManagedWorkflowOperationOptions<TId>
   ) => Promise<void>;
+  /**
+   * Signal that the plugin has finished installing all its static managed workflows.
+   * Triggers per-plugin reconciliation: removes persisted static workflows that were
+   * not installed during the startup window (between owner registration and this call).
+   *
+   * Static workflow installs after ready() will log a warning.
+   */
+  ready: () => Promise<void>;
 }
 
 export interface RegisteredManagedWorkflowsApi extends RegisteredManagedWorkflowsLifecycleApi {

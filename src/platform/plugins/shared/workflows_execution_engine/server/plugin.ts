@@ -1244,6 +1244,20 @@ export class WorkflowsExecutionEnginePlugin
         );
       }
 
+      // Freshness guard: a waitForInput step whose parent workflow already
+      // terminated (timeout, cancel, external failure) can leave the execution
+      // doc with `status: waiting_for_input` but `finishedAt` set — writing
+      // resumeInput and scheduling a resume task in that state is a no-op that
+      // silently swallows the analyst's response. Reject explicitly so the
+      // caller sees a 409 and the Inbox provider can surface a real error.
+      if (workflowExecution.finishedAt) {
+        throw new WorkflowExecutionInvalidStatusError(
+          executionId,
+          `${workflowExecution.status} (already finished at ${workflowExecution.finishedAt})`,
+          ExecutionStatus.WAITING_FOR_INPUT
+        );
+      }
+
       await workflowExecutionRepository.updateWorkflowExecution({
         id: executionId,
         context: { ...workflowExecution.context, resumeInput: input },
@@ -1361,18 +1375,25 @@ export class WorkflowsExecutionEnginePlugin
   }
 
   private buildManagedWorkflowExecutionMetadata(
-    workflow: Pick<WorkflowExecutionEngineModel, 'managed' | 'originSystemWorkflowId'>
-  ): Partial<Pick<EsWorkflowExecution, 'managed' | 'originSystemWorkflowId'>> {
+    workflow: Pick<
+      WorkflowExecutionEngineModel,
+      'managed' | 'managedBy' | 'originManagedWorkflowId'
+    >
+  ): Partial<Pick<EsWorkflowExecution, 'managed' | 'managedBy' | 'originManagedWorkflowId'>> {
     const managedMetadata: Partial<
-      Pick<EsWorkflowExecution, 'managed' | 'originSystemWorkflowId'>
+      Pick<EsWorkflowExecution, 'managed' | 'managedBy' | 'originManagedWorkflowId'>
     > = {};
 
     if (workflow.managed === true) {
       managedMetadata.managed = true;
     }
 
-    if (typeof workflow.originSystemWorkflowId === 'string') {
-      managedMetadata.originSystemWorkflowId = workflow.originSystemWorkflowId;
+    if (typeof workflow.managedBy === 'string') {
+      managedMetadata.managedBy = workflow.managedBy;
+    }
+
+    if (typeof workflow.originManagedWorkflowId === 'string') {
+      managedMetadata.originManagedWorkflowId = workflow.originManagedWorkflowId;
     }
 
     return managedMetadata;
