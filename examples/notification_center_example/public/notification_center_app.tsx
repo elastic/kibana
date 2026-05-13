@@ -22,6 +22,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { IUiSettingsClient } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { useObservable } from '@kbn/use-observable';
 import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
 import { SidebarHeader, SidebarBody } from '@kbn/core-chrome-sidebar-components';
@@ -63,8 +64,15 @@ function isRelativeTime(timestamp: number): boolean {
 
 function formatTime(timestamp: number, uiSettings: IUiSettingsClient): string {
   const diff = Date.now() - timestamp;
-  if (diff < ONE_MINUTE_MS) return 'Now';
-  if (diff < ONE_HOUR_MS) return `${Math.floor(diff / ONE_MINUTE_MS)} minutes ago`;
+  if (diff < ONE_MINUTE_MS)
+    return i18n.translate('notificationCenter.time.now', { defaultMessage: 'Now' });
+  if (diff < ONE_HOUR_MS) {
+    const minutes = Math.floor(diff / ONE_MINUTE_MS);
+    return i18n.translate('notificationCenter.time.minutesAgo', {
+      defaultMessage: '{minutes, plural, one {# minute ago} other {# minutes ago}}',
+      values: { minutes },
+    });
+  }
   return moment(timestamp).format(uiSettings.get('dateFormat:scaled'));
 }
 
