@@ -1161,12 +1161,7 @@ export const getSavedObjectTypes = (
           },
         },
         '23': {
-          changes: [
-            {
-              type: 'mappings_addition',
-              addedMappings: {},
-            },
-          ],
+          changes: [],
           schemas: {
             forwardCompatibility: PackagePolicySchemaV24.extends({}, { unknowns: 'ignore' }),
             create: PackagePolicySchemaV24.extends({}, { unknowns: 'ignore' }),
