@@ -88,6 +88,12 @@ interface GraphProps {
   fullMapHref?: string;
   /** When true, hides minimap, options panel, and navigation actions that don't apply in dashboard embeds. */
   isEmbedded?: boolean;
+  /** Override for the popover's Focus map button visibility. Defaults to `!isEmbedded`. */
+  showFocusMap?: boolean;
+  /** Focus button always navigates, even for the currently focused service. */
+  alwaysNavigateOnPopoverFocus?: boolean;
+  /** Strip `kuery` from popover-built URLs (env still flows through). */
+  clearKueryOnPopoverNavigation?: boolean;
   /**
    * When set to a service name that exists on the map, that node gets context highlight
    * (frame, fill, primary node ring). Blue edges/markers remain tied to explicit selection only.
@@ -108,6 +114,9 @@ function GraphInner({
   onToggleFullscreen,
   fullMapHref,
   isEmbedded = false,
+  showFocusMap,
+  alwaysNavigateOnPopoverFocus,
+  clearKueryOnPopoverNavigation,
   highlightedServiceName,
 }: GraphProps) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
@@ -641,6 +650,9 @@ function GraphInner({
           end={end}
           onClose={handlePopoverClose}
           isEmbedded={isEmbedded}
+          showFocusMap={showFocusMap}
+          alwaysNavigateOnFocus={alwaysNavigateOnPopoverFocus}
+          clearKueryOnNavigation={clearKueryOnPopoverNavigation}
         />
       </div>
     </ServiceMapSearchProvider>

@@ -21,9 +21,21 @@ jest.mock('../../../../hooks/use_apm_params', () => ({
   }),
 }));
 
+// Name must start with `mock*` so jest.mock factories can reference it (hoisting).
+const mockApmRouterLink = jest.fn((path: string, opts?: { query?: Record<string, unknown> }) => {
+  const params = new URLSearchParams();
+  Object.entries(opts?.query ?? {}).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      params.set(key, String(value));
+    }
+  });
+  const qs = params.toString();
+  return `/app/apm${path}${qs ? `?${qs}` : ''}`;
+});
+
 jest.mock('../../../../hooks/use_apm_router', () => ({
   useApmRouter: () => ({
-    link: jest.fn((path: string) => `/app/apm${path}`),
+    link: mockApmRouterLink,
   }),
 }));
 
@@ -101,6 +113,62 @@ describe('ServiceContents', () => {
     it('does not render when isEmbedded is true', () => {
       render(<ServiceContents {...defaultProps} isEmbedded={true} />);
       expect(screen.queryByTestId('apmServiceContentsFocusMapButton')).not.toBeInTheDocument();
+    });
+
+    it('renders when showFocusMap is true even if isEmbedded is true', () => {
+      render(<ServiceContents {...defaultProps} isEmbedded={true} showFocusMap={true} />);
+      expect(screen.getByTestId('apmServiceContentsFocusMapButton')).toBeInTheDocument();
+    });
+
+    it('does not render when showFocusMap is false even if isEmbedded is false', () => {
+      render(<ServiceContents {...defaultProps} isEmbedded={false} showFocusMap={false} />);
+      expect(screen.queryByTestId('apmServiceContentsFocusMapButton')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('navigation URL kuery handling', () => {
+    function getQueryFor(path: string): Record<string, unknown> | undefined {
+      const call = mockApmRouterLink.mock.calls.find(([p]) => p === path);
+      return call?.[1]?.query as Record<string, unknown> | undefined;
+    }
+
+    it('keeps the caller-provided kuery on both Service Details and Focus URLs by default', () => {
+      render(
+        <ServiceContents
+          {...defaultProps}
+          kuery='service.name:"opbeans-go" and transaction.name:"GET /api/products"'
+          isEmbedded
+          showFocusMap
+        />
+      );
+      expect(getQueryFor('/services/{serviceName}')).toMatchObject({
+        kuery: 'service.name:"opbeans-go" and transaction.name:"GET /api/products"',
+        environment: 'production',
+      });
+      expect(getQueryFor('/services/{serviceName}/service-map')).toMatchObject({
+        kuery: 'service.name:"opbeans-go" and transaction.name:"GET /api/products"',
+        environment: 'production',
+      });
+    });
+
+    it('clears kuery (and keeps environment) on both URLs when clearKueryOnNavigation is true', () => {
+      render(
+        <ServiceContents
+          {...defaultProps}
+          kuery='service.name:"opbeans-go" and transaction.name:"GET /api/products"'
+          isEmbedded
+          showFocusMap
+          clearKueryOnNavigation
+        />
+      );
+      expect(getQueryFor('/services/{serviceName}')).toMatchObject({
+        kuery: '',
+        environment: 'production',
+      });
+      expect(getQueryFor('/services/{serviceName}/service-map')).toMatchObject({
+        kuery: '',
+        environment: 'production',
+      });
     });
   });
 });

@@ -26,16 +26,20 @@ export function useServiceMapAlertsTabHref(serviceName: string) {
   );
 
   return useMemo(() => {
+    // Badges ignore `kuery` (alerts aggregate across all visible services), so the
+    // destination tab clears it too. Route schema requires `kuery: string`.
+    const queryWithoutKuery = { ...query, kuery: '' };
+
     const isMobileContext = String(routePath).includes('mobile-services');
     if (isMobileContext) {
       return apmRouter.link('/mobile-services/{serviceName}/alerts', {
         path: { serviceName },
-        query,
+        query: queryWithoutKuery,
       });
     }
     return apmRouter.link('/services/{serviceName}/alerts', {
       path: { serviceName },
-      query,
+      query: queryWithoutKuery,
     });
   }, [apmRouter, query, routePath, serviceName]);
 }
