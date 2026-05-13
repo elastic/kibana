@@ -29,6 +29,7 @@ import { useEventDetails } from '../../../../flyout/document_details/shared/hook
 import { FlyoutError } from '../../../shared/components/flyout_error';
 import { EventKind } from '../constants/event_kinds';
 import {
+  REASON_DETAILS_LEGACY_BODY_TEST_ID,
   REASON_DETAILS_POPOVER_TEST_ID,
   REASON_DETAILS_PREVIEW_BUTTON_TEST_ID,
   REASON_DETAILS_TEST_ID,
@@ -216,7 +217,9 @@ const AlertReasonPopoverPanel: FC<{ children: ReactNode }> = ({ children }) => (
       width: min(600px, 80vw);
     `}
   >
-    <EuiText size="xs">{children}</EuiText>
+    <EuiText size="xs" data-test-subj={REASON_DETAILS_LEGACY_BODY_TEST_ID}>
+      {children}
+    </EuiText>
   </EuiPanel>
 );
 

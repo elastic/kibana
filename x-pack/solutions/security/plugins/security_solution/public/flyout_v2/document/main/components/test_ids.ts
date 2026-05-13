@@ -43,6 +43,7 @@ export const REASON_TITLE_TEST_ID = `${REASON_TEST_ID}Title` as const;
 export const REASON_DETAILS_TEST_ID = `${REASON_TEST_ID}Details` as const;
 export const REASON_DETAILS_PREVIEW_BUTTON_TEST_ID = `${REASON_TEST_ID}PreviewButton` as const;
 export const REASON_DETAILS_POPOVER_TEST_ID = `${REASON_TEST_ID}Popover` as const;
+export const REASON_DETAILS_LEGACY_BODY_TEST_ID = `${PREFIX}AlertReasonBody` as const;
 
 const WORKFLOW_STATUS_TEST_ID = `${PREFIX}WorkflowStatus` as const;
 export const WORKFLOW_STATUS_TITLE_TEST_ID = `${WORKFLOW_STATUS_TEST_ID}Title` as const;
