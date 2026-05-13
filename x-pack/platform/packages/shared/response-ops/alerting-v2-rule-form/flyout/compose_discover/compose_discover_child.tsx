@@ -29,8 +29,7 @@ import {
   type EuiDataGridColumn,
   type EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
-import { CodeEditor } from '@kbn/code-editor';
-import { ESQL_LANG_ID } from '@kbn/code-editor';
+import { CodeEditor, ESQL_LANG_ID } from '@kbn/code-editor';
 import type { FormValues } from '../../form/types';
 import { useRuleFormServices } from '../../form/contexts/rule_form_context';
 import { useDataFields } from '../../form/hooks/use_data_fields';
