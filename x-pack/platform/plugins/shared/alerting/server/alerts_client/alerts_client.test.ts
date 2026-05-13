@@ -1915,6 +1915,110 @@ describe('Alerts Client', () => {
         });
       });
 
+      describe('getBuiltActiveAlertDataByInstanceId()', () => {
+        test('returns undefined before persistAlerts() has been called', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+
+          expect(alertsClient.getBuiltActiveAlertDataByInstanceId('1')).toBeUndefined();
+        });
+
+        test('returns built alert document by instance ID after persistAlerts()', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+          alertExecutorService.create('2').scheduleActions('default');
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          const doc1 = alertsClient.getBuiltActiveAlertDataByInstanceId('1');
+          const doc2 = alertsClient.getBuiltActiveAlertDataByInstanceId('2');
+
+          expect(doc1).toEqual(expect.objectContaining({ [ALERT_INSTANCE_ID]: '1' }));
+          expect(doc2).toEqual(expect.objectContaining({ [ALERT_INSTANCE_ID]: '2' }));
+        });
+
+        test('returns undefined for an instance ID not present in the built alerts', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          expect(alertsClient.getBuiltActiveAlertDataByInstanceId('unknown-id')).toBeUndefined();
+        });
+
+        test('includes recovered alert documents in the cache', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+          // Seed a tracked ongoing alert so it can recover this run
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            activeAlertsFromState: {
+              '1': { state: {}, meta: { uuid: 'uuid-1', flappingHistory: [], flapping: false, pendingRecoveredCount: 0, activeCount: 1 } },
+            },
+          });
+          // Do not schedule any actions → alert '1' recovers
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          // Recovered alert is still cached (buildAlerts returns active + recovered)
+          const doc = alertsClient.getBuiltActiveAlertDataByInstanceId('1');
+          expect(doc).toBeDefined();
+          expect(doc).toEqual(expect.objectContaining({ [ALERT_INSTANCE_ID]: '1' }));
+        });
+
+        test('cache is cleared and repopulated on each persistAlerts() call', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+          alertExecutorService.create('2').scheduleActions('default');
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+          expect(alertsClient.getBuiltActiveAlertDataByInstanceId('1')).toBeDefined();
+          expect(alertsClient.getBuiltActiveAlertDataByInstanceId('2')).toBeDefined();
+
+          // Simulate a second execution where the cache is reset
+          await alertsClient.persistAlerts();
+          // Cache still has both (same alerts were re-built)
+          expect(alertsClient.getBuiltActiveAlertDataByInstanceId('1')).toBeDefined();
+          expect(alertsClient.getBuiltActiveAlertDataByInstanceId('2')).toBeDefined();
+        });
+      });
+
       describe('updatePersistedAlerts', () => {
         test('should update the persistent alerts successfully', async () => {
           clusterClient.updateByQuery.mockResponseOnce({

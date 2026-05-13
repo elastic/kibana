@@ -47,7 +47,6 @@ export const evaluatePerAlertSnoozeConditions = (
     }
   }
 
-  console.log('evaluatePerAlertSnoozeConditions', { conditionExpiredInstances });
   return { conditionExpiredInstances };
 };
 
@@ -87,7 +86,6 @@ const evaluateSingleCondition = (
   snoozeSnapshot: RawRuleSnoozedInstance['snoozeSnapshot'],
   alertAsData: Record<string, unknown>
 ): boolean => {
-  console.log('evaluateSingleCondition', { condition, snoozeSnapshot, alertAsData });
   if (condition.type === 'field_change') {
     return evaluateFieldChange(condition.field, snoozeSnapshot, alertAsData);
   }
@@ -108,10 +106,5 @@ const evaluateFieldChange = (
   if (!snoozeSnapshot || !(fieldPath in snoozeSnapshot)) {
     return false;
   }
-  console.log('evaluateFieldChange', {
-    fieldPath,
-    snoozeSnapshot: snoozeSnapshot[fieldPath],
-    alertAsData: getAlertFieldValue(alertAsData, fieldPath),
-  });
   return getAlertFieldValue(alertAsData, fieldPath) !== snoozeSnapshot[fieldPath];
 };

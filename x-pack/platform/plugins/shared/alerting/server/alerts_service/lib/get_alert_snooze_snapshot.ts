@@ -56,8 +56,6 @@ export async function getAlertSnoozeSnapshot({
     if (!source) {
       return null;
     }
-    console.log('getAlertSnoozeSnapshot', { response: response.hits.hits[0], source, fields });
-
     return fields.reduce<Record<string, unknown>>((snapshot, field) => {
       // ES documents may store alert fields as flat dot-notation keys
       // (e.g. { 'kibana.alert.consecutive_matches': 1 }) or as nested objects.

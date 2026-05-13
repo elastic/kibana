@@ -435,7 +435,7 @@ export class AlertsClient<
       const instanceId = get(alert, ALERT_INSTANCE_ID) as string | undefined;
       if (instanceId) {
         this.builtAlertDataCache.set(instanceId, alert as Record<string, unknown>);
-        console.log('builtAlertDataCache', instanceId, alert);
+
       }
     }
 
