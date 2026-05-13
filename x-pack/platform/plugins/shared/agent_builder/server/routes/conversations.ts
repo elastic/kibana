@@ -132,7 +132,8 @@ export function registerConversationRoutes({
       },
       access: 'public',
       summary: 'Delete conversation by ID',
-      description: 'Delete a conversation by ID. This action cannot be undone. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).',
+      description:
+        'Delete a conversation by ID. This action cannot be undone. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).',
       options: {
         tags: ['conversation', 'oas-tag:agent builder'],
         availability: {

@@ -93,7 +93,8 @@ export function registerPluginsRoutes({ router, getInternalServices, logger }: R
       security: AGENT_BUILDER_READ_SECURITY,
       access: 'public',
       summary: 'Get a plugin by id',
-      description: 'Get a specific plugin by ID. To learn more about Agent Builder plugins, refer to the [plugins documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/plugins).',
+      description:
+        'Get a specific plugin by ID. To learn more about Agent Builder plugins, refer to the [plugins documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/plugins).',
       options: {
         tags: ['plugins', 'oas-tag:agent builder'],
         availability: {
@@ -132,7 +133,8 @@ export function registerPluginsRoutes({ router, getInternalServices, logger }: R
       security: AGENT_BUILDER_WRITE_SECURITY,
       access: 'public',
       summary: 'Delete a plugin',
-      description: 'Delete an installed plugin by ID. This action cannot be undone. To learn more about Agent Builder plugins, refer to the [plugins documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/plugins).',
+      description:
+        'Delete an installed plugin by ID. This action cannot be undone. To learn more about Agent Builder plugins, refer to the [plugins documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/plugins).',
       options: {
         tags: ['plugins', 'oas-tag:agent builder'],
         availability: {
