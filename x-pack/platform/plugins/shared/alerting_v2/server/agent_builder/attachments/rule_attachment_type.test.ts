@@ -210,10 +210,7 @@ describe('createRuleAttachmentType', () => {
       ...(origin ? { origin } : {}),
     });
 
-    const formatValue = async (
-      data: RuleAttachmentData,
-      origin?: string
-    ): Promise<string> => {
+    const formatValue = async (data: RuleAttachmentData, origin?: string): Promise<string> => {
       const formatted = await definition.format(buildAttachment(data, origin), {
         request: {} as KibanaRequest,
         spaceId: 'default',

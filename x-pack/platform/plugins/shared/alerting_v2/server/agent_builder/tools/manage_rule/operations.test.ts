@@ -257,19 +257,16 @@ describe('executeRuleOperations', () => {
       const ops: RuleOperation[] = [{ operation: 'validate' }];
 
       await expect(
-        executeRuleOperations(
-          { metadata: { name: 'Test' }, schedule: { every: '5m' } },
-          ops
-        )
+        executeRuleOperations({ metadata: { name: 'Test' }, schedule: { every: '5m' } }, ops)
       ).rejects.toThrow(RuleOperationValidationError);
     });
 
     it('throws when metadata is missing', async () => {
       const ops: RuleOperation[] = [{ operation: 'validate' }];
 
-      await expect(
-        executeRuleOperations({ kind: 'alert' }, ops)
-      ).rejects.toThrow('Rule is not ready to save');
+      await expect(executeRuleOperations({ kind: 'alert' }, ops)).rejects.toThrow(
+        'Rule is not ready to save'
+      );
     });
 
     it('includes Zod issue paths in the error message', async () => {
@@ -284,9 +281,7 @@ describe('executeRuleOperations', () => {
         { operation: 'validate' },
       ];
 
-      await expect(executeRuleOperations({}, ops)).rejects.toThrow(
-        RuleOperationValidationError
-      );
+      await expect(executeRuleOperations({}, ops)).rejects.toThrow(RuleOperationValidationError);
     });
   });
 

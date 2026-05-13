@@ -34,12 +34,7 @@ describe('WorkflowDestinationLink', () => {
 
   describe('when name is provided (WorkflowLink)', () => {
     it('renders the name as a link for persisted workflows', () => {
-      render(
-        <WorkflowDestinationLink
-          id="wf-1"
-          name="My Workflow"
-        />
-      );
+      render(<WorkflowDestinationLink id="wf-1" name="My Workflow" />);
 
       const link = screen.getByText('My Workflow');
       expect(link.closest('a')).toBeDefined();
@@ -47,13 +42,7 @@ describe('WorkflowDestinationLink', () => {
     });
 
     it('renders a Draft badge when isDraft is true', () => {
-      render(
-        <WorkflowDestinationLink
-          id="wf-1"
-          name="Draft Workflow"
-          isDraft={true}
-        />
-      );
+      render(<WorkflowDestinationLink id="wf-1" name="Draft Workflow" isDraft={true} />);
 
       expect(screen.getByText('Draft Workflow')).toBeDefined();
       expect(screen.getByText('Draft')).toBeDefined();
@@ -61,13 +50,7 @@ describe('WorkflowDestinationLink', () => {
     });
 
     it('does not render a Draft badge when isDraft is false', () => {
-      render(
-        <WorkflowDestinationLink
-          id="wf-1"
-          name="Saved Workflow"
-          isDraft={false}
-        />
-      );
+      render(<WorkflowDestinationLink id="wf-1" name="Saved Workflow" isDraft={false} />);
 
       expect(screen.getByText('Saved Workflow')).toBeDefined();
       expect(screen.queryByText('Draft')).toBeNull();
@@ -80,9 +63,7 @@ describe('WorkflowDestinationLink', () => {
         data: { id: 'wf-1', name: 'Fetched Workflow' },
       });
 
-      render(
-        <WorkflowDestinationLink id="wf-1" />
-      );
+      render(<WorkflowDestinationLink id="wf-1" />);
 
       expect(mockUseFetchWorkflow).toHaveBeenCalledWith('wf-1', true);
       expect(screen.getByText('Fetched Workflow')).toBeDefined();
@@ -91,9 +72,7 @@ describe('WorkflowDestinationLink', () => {
     it('falls back to the id when the fetch returns no data', () => {
       mockUseFetchWorkflow.mockReturnValue({ data: undefined });
 
-      render(
-        <WorkflowDestinationLink id="wf-1" />
-      );
+      render(<WorkflowDestinationLink id="wf-1" />);
 
       expect(screen.getByText('wf-1')).toBeDefined();
     });
@@ -101,12 +80,7 @@ describe('WorkflowDestinationLink', () => {
     it('passes isEnabled to useFetchWorkflow', () => {
       mockUseFetchWorkflow.mockReturnValue({ data: undefined });
 
-      render(
-        <WorkflowDestinationLink
-          id="wf-1"
-          isEnabled={false}
-        />
-      );
+      render(<WorkflowDestinationLink id="wf-1" isEnabled={false} />);
 
       expect(mockUseFetchWorkflow).toHaveBeenCalledWith('wf-1', false);
     });

@@ -339,9 +339,7 @@ describe('createRuleAttachmentDefinition', () => {
         const viewButton = buttons.find((b: { label: string }) => b.label === 'View in Rules');
         viewButton.handler();
 
-        expect(mockNavigateToUrl).toHaveBeenCalledWith(
-          expect.stringContaining('rule-123')
-        );
+        expect(mockNavigateToUrl).toHaveBeenCalledWith(expect.stringContaining('rule-123'));
       });
     });
   });

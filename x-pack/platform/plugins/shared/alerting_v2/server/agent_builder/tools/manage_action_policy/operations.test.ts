@@ -46,22 +46,16 @@ describe('executeActionPolicyOperations', () => {
     it('throws ActionPolicyOperationValidationError when name is empty', () => {
       const ops: ActionPolicyOperation[] = [{ operation: 'validate' }];
 
-      expect(() =>
-        executeActionPolicyOperations(
-          { ...validPolicy, name: '' },
-          ops
-        )
-      ).toThrow(ActionPolicyOperationValidationError);
+      expect(() => executeActionPolicyOperations({ ...validPolicy, name: '' }, ops)).toThrow(
+        ActionPolicyOperationValidationError
+      );
     });
 
     it('throws when destinations are missing', () => {
       const ops: ActionPolicyOperation[] = [{ operation: 'validate' }];
 
       expect(() =>
-        executeActionPolicyOperations(
-          { name: 'Test', description: 'desc', destinations: [] },
-          ops
-        )
+        executeActionPolicyOperations({ name: 'Test', description: 'desc', destinations: [] }, ops)
       ).toThrow('Action policy is not ready to save');
     });
 
@@ -69,10 +63,7 @@ describe('executeActionPolicyOperations', () => {
       const ops: ActionPolicyOperation[] = [{ operation: 'validate' }];
 
       expect(() =>
-        executeActionPolicyOperations(
-          { name: '', description: '', destinations: [] },
-          ops
-        )
+        executeActionPolicyOperations({ name: '', description: '', destinations: [] }, ops)
       ).toThrow(/destinations:/);
     });
 
@@ -158,9 +149,9 @@ describe('executeActionPolicyOperations', () => {
         { operation: 'set_throttle', strategy: 'time_interval', interval: '5m' },
       ];
 
-      expect(() =>
-        executeActionPolicyOperations({ groupingMode: 'per_episode' }, ops)
-      ).toThrow('not valid for grouping mode');
+      expect(() => executeActionPolicyOperations({ groupingMode: 'per_episode' }, ops)).toThrow(
+        'not valid for grouping mode'
+      );
     });
 
     it('throws when strategy requires interval but none provided', () => {

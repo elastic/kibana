@@ -11,9 +11,9 @@ import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachmen
 import { i18n } from '@kbn/i18n';
 import type { ActionPolicyAttachment } from './action_policy_attachment_definition';
 
-export const ActionPolicyInlineContent: React.FC<
-  AttachmentRenderProps<ActionPolicyAttachment>
-> = ({ attachment }) => {
+export const ActionPolicyInlineContent: React.FC<AttachmentRenderProps<ActionPolicyAttachment>> = ({
+  attachment,
+}) => {
   const { data, origin: savedObjectId } = attachment;
   const isProposed = !savedObjectId;
   const isEnabled = data.enabled ?? true;
@@ -55,8 +55,7 @@ export const ActionPolicyInlineContent: React.FC<
         <EuiFlexItem>
           <EuiText size="xs" color="subdued">
             {i18n.translate('xpack.alertingV2.actionPolicyAttachment.destinationCount', {
-              defaultMessage:
-                '{count, plural, one {# destination} other {# destinations}}',
+              defaultMessage: '{count, plural, one {# destination} other {# destinations}}',
               values: { count: destinationCount },
             })}
           </EuiText>

@@ -22,11 +22,7 @@ export const DestinationRow = ({ destination, name, isDraft }: Props) => {
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiBadge color="hollow" iconType="workflow">
-            <WorkflowDestinationLink
-              id={destination.id}
-              name={name}
-              isDraft={isDraft}
-            />
+            <WorkflowDestinationLink id={destination.id} name={name} isDraft={isDraft} />
           </EuiBadge>
         </EuiFlexItem>
       </EuiFlexGroup>

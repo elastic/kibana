@@ -143,8 +143,7 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
             agentBuilder.attachments.registerType(
               createActionPolicyAttachmentType({
                 logger,
-                getActionPolicyClient: (context) =>
-                  getScopedActionPolicyClient(context.request),
+                getActionPolicyClient: (context) => getScopedActionPolicyClient(context.request),
               }) as Parameters<typeof agentBuilder.attachments.registerType>[0]
             );
 

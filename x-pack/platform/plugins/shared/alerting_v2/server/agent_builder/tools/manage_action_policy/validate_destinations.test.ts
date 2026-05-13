@@ -19,7 +19,7 @@ const createMockAttachments = (
 ): AttachmentStateManager =>
   ({
     getActive: jest.fn().mockReturnValue(active),
-  }) as unknown as AttachmentStateManager;
+  } as unknown as AttachmentStateManager);
 
 const createMockWorkflowLookup = (
   workflows: Map<string, { id: string; name?: string }> = new Map()
@@ -43,15 +43,12 @@ describe('validateDestinations', () => {
       },
     ]);
 
-    const result = await validateDestinations(
-      [{ type: 'workflow', id: 'att-workflow-1' }],
-      {
-        attachments,
-        workflowLookup: createMockWorkflowLookup(),
-        connectorLookup: createMockConnectorLookup(),
-        spaceId: 'default',
-      }
-    );
+    const result = await validateDestinations([{ type: 'workflow', id: 'att-workflow-1' }], {
+      attachments,
+      workflowLookup: createMockWorkflowLookup(),
+      connectorLookup: createMockConnectorLookup(),
+      spaceId: 'default',
+    });
 
     expect(result).toBeInstanceOf(Map);
   });
@@ -65,15 +62,12 @@ describe('validateDestinations', () => {
       },
     ]);
 
-    const result = await validateDestinations(
-      [{ type: 'workflow', id: 'wf-saved-1' }],
-      {
-        attachments,
-        workflowLookup: createMockWorkflowLookup(),
-        connectorLookup: createMockConnectorLookup(),
-        spaceId: 'default',
-      }
-    );
+    const result = await validateDestinations([{ type: 'workflow', id: 'wf-saved-1' }], {
+      attachments,
+      workflowLookup: createMockWorkflowLookup(),
+      connectorLookup: createMockConnectorLookup(),
+      spaceId: 'default',
+    });
 
     expect(result).toBeInstanceOf(Map);
   });
@@ -83,15 +77,12 @@ describe('validateDestinations', () => {
       new Map([['persisted-wf-1', { id: 'persisted-wf-1' }]])
     );
 
-    const result = await validateDestinations(
-      [{ type: 'workflow', id: 'persisted-wf-1' }],
-      {
-        attachments: createMockAttachments(),
-        workflowLookup,
-        connectorLookup: createMockConnectorLookup(),
-        spaceId: 'default',
-      }
-    );
+    const result = await validateDestinations([{ type: 'workflow', id: 'persisted-wf-1' }], {
+      attachments: createMockAttachments(),
+      workflowLookup,
+      connectorLookup: createMockConnectorLookup(),
+      spaceId: 'default',
+    });
 
     expect(result).toBeInstanceOf(Map);
     expect(workflowLookup.getWorkflow).toHaveBeenCalledWith('persisted-wf-1', 'default');
@@ -103,53 +94,41 @@ describe('validateDestinations', () => {
     );
 
     await expect(
-      validateDestinations(
-        [{ type: 'workflow', id: 'conn-email-1' }],
-        {
-          attachments: createMockAttachments(),
-          workflowLookup: createMockWorkflowLookup(),
-          connectorLookup,
-          spaceId: 'default',
-        }
-      )
+      validateDestinations([{ type: 'workflow', id: 'conn-email-1' }], {
+        attachments: createMockAttachments(),
+        workflowLookup: createMockWorkflowLookup(),
+        connectorLookup,
+        spaceId: 'default',
+      })
     ).rejects.toThrow(ActionPolicyOperationValidationError);
 
     await expect(
-      validateDestinations(
-        [{ type: 'workflow', id: 'conn-email-1' }],
-        {
-          attachments: createMockAttachments(),
-          workflowLookup: createMockWorkflowLookup(),
-          connectorLookup,
-          spaceId: 'default',
-        }
-      )
+      validateDestinations([{ type: 'workflow', id: 'conn-email-1' }], {
+        attachments: createMockAttachments(),
+        workflowLookup: createMockWorkflowLookup(),
+        connectorLookup,
+        spaceId: 'default',
+      })
     ).rejects.toThrow(/is a connector \("SRE On-Call Alerts"\), not a workflow/);
   });
 
   it('throws a generic error when the destination ID is unknown', async () => {
     await expect(
-      validateDestinations(
-        [{ type: 'workflow', id: 'unknown-id-123' }],
-        {
-          attachments: createMockAttachments(),
-          workflowLookup: createMockWorkflowLookup(),
-          connectorLookup: createMockConnectorLookup(),
-          spaceId: 'default',
-        }
-      )
+      validateDestinations([{ type: 'workflow', id: 'unknown-id-123' }], {
+        attachments: createMockAttachments(),
+        workflowLookup: createMockWorkflowLookup(),
+        connectorLookup: createMockConnectorLookup(),
+        spaceId: 'default',
+      })
     ).rejects.toThrow(ActionPolicyOperationValidationError);
 
     await expect(
-      validateDestinations(
-        [{ type: 'workflow', id: 'unknown-id-123' }],
-        {
-          attachments: createMockAttachments(),
-          workflowLookup: createMockWorkflowLookup(),
-          connectorLookup: createMockConnectorLookup(),
-          spaceId: 'default',
-        }
-      )
+      validateDestinations([{ type: 'workflow', id: 'unknown-id-123' }], {
+        attachments: createMockAttachments(),
+        workflowLookup: createMockWorkflowLookup(),
+        connectorLookup: createMockConnectorLookup(),
+        spaceId: 'default',
+      })
     ).rejects.toThrow(/is not a valid workflow in this space or conversation/);
   });
 
@@ -164,30 +143,27 @@ describe('validateDestinations', () => {
     const workflowLookup = createMockWorkflowLookup();
     const connectorLookup = createMockConnectorLookup();
 
-    await validateDestinations(
-      [{ type: 'workflow', id: 'att-wf' }],
-      { attachments, workflowLookup, connectorLookup, spaceId: 'default' }
-    );
+    await validateDestinations([{ type: 'workflow', id: 'att-wf' }], {
+      attachments,
+      workflowLookup,
+      connectorLookup,
+      spaceId: 'default',
+    });
 
     expect(workflowLookup.getWorkflow).not.toHaveBeenCalled();
     expect(connectorLookup.findConnectorById).not.toHaveBeenCalled();
   });
 
   it('skips connector lookup when persisted workflow matches', async () => {
-    const workflowLookup = createMockWorkflowLookup(
-      new Map([['wf-1', { id: 'wf-1' }]])
-    );
+    const workflowLookup = createMockWorkflowLookup(new Map([['wf-1', { id: 'wf-1' }]]));
     const connectorLookup = createMockConnectorLookup();
 
-    await validateDestinations(
-      [{ type: 'workflow', id: 'wf-1' }],
-      {
-        attachments: createMockAttachments(),
-        workflowLookup,
-        connectorLookup,
-        spaceId: 'default',
-      }
-    );
+    await validateDestinations([{ type: 'workflow', id: 'wf-1' }], {
+      attachments: createMockAttachments(),
+      workflowLookup,
+      connectorLookup,
+      spaceId: 'default',
+    });
 
     expect(connectorLookup.findConnectorById).not.toHaveBeenCalled();
   });
@@ -227,15 +203,12 @@ describe('validateDestinations', () => {
     ]);
 
     await expect(
-      validateDestinations(
-        [{ type: 'workflow', id: 'some-connector-att' }],
-        {
-          attachments,
-          workflowLookup: createMockWorkflowLookup(),
-          connectorLookup: createMockConnectorLookup(),
-          spaceId: 'default',
-        }
-      )
+      validateDestinations([{ type: 'workflow', id: 'some-connector-att' }], {
+        attachments,
+        workflowLookup: createMockWorkflowLookup(),
+        connectorLookup: createMockConnectorLookup(),
+        spaceId: 'default',
+      })
     ).rejects.toThrow(/is not a valid workflow/);
   });
 
@@ -249,15 +222,12 @@ describe('validateDestinations', () => {
         },
       ]);
 
-      const result = await validateDestinations(
-        [{ type: 'workflow', id: 'att-wf-1' }],
-        {
-          attachments,
-          workflowLookup: createMockWorkflowLookup(),
-          connectorLookup: createMockConnectorLookup(),
-          spaceId: 'default',
-        }
-      );
+      const result = await validateDestinations([{ type: 'workflow', id: 'att-wf-1' }], {
+        attachments,
+        workflowLookup: createMockWorkflowLookup(),
+        connectorLookup: createMockConnectorLookup(),
+        spaceId: 'default',
+      });
 
       expect(result.get('att-wf-1')).toEqual({ name: 'Notify: High CPU', isDraft: true });
     });
@@ -273,15 +243,12 @@ describe('validateDestinations', () => {
         },
       ]);
 
-      const result = await validateDestinations(
-        [{ type: 'workflow', id: 'wf-persisted' }],
-        {
-          attachments,
-          workflowLookup: createMockWorkflowLookup(),
-          connectorLookup: createMockConnectorLookup(),
-          spaceId: 'default',
-        }
-      );
+      const result = await validateDestinations([{ type: 'workflow', id: 'wf-persisted' }], {
+        attachments,
+        workflowLookup: createMockWorkflowLookup(),
+        connectorLookup: createMockConnectorLookup(),
+        spaceId: 'default',
+      });
 
       expect(result.get('wf-persisted')).toEqual({ name: 'Alert Email', isDraft: true });
     });
@@ -291,15 +258,12 @@ describe('validateDestinations', () => {
         new Map([['persisted-wf', { id: 'persisted-wf', name: 'SRE Notifications' }]])
       );
 
-      const result = await validateDestinations(
-        [{ type: 'workflow', id: 'persisted-wf' }],
-        {
-          attachments: createMockAttachments(),
-          workflowLookup,
-          connectorLookup: createMockConnectorLookup(),
-          spaceId: 'default',
-        }
-      );
+      const result = await validateDestinations([{ type: 'workflow', id: 'persisted-wf' }], {
+        attachments: createMockAttachments(),
+        workflowLookup,
+        connectorLookup: createMockConnectorLookup(),
+        spaceId: 'default',
+      });
 
       expect(result.get('persisted-wf')).toEqual({ name: 'SRE Notifications', isDraft: false });
     });
@@ -313,15 +277,12 @@ describe('validateDestinations', () => {
         },
       ]);
 
-      const result = await validateDestinations(
-        [{ type: 'workflow', id: 'att-wf-1' }],
-        {
-          attachments,
-          workflowLookup: createMockWorkflowLookup(),
-          connectorLookup: createMockConnectorLookup(),
-          spaceId: 'default',
-        }
-      );
+      const result = await validateDestinations([{ type: 'workflow', id: 'att-wf-1' }], {
+        attachments,
+        workflowLookup: createMockWorkflowLookup(),
+        connectorLookup: createMockConnectorLookup(),
+        spaceId: 'default',
+      });
 
       expect(result.size).toBe(0);
     });

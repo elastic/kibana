@@ -38,15 +38,7 @@ export const WorkflowDestinationLink = ({
   return <FetchingWorkflowLink id={id} isEnabled={isEnabled} />;
 };
 
-const WorkflowLink = ({
-  id,
-  name,
-  isDraft,
-}: {
-  id: string;
-  name: string;
-  isDraft?: boolean;
-}) => {
+const WorkflowLink = ({ id, name, isDraft }: { id: string; name: string; isDraft?: boolean }) => {
   const application = useService(CoreStart('application'));
 
   if (isDraft) {
@@ -73,13 +65,7 @@ const WorkflowLink = ({
   );
 };
 
-const FetchingWorkflowLink = ({
-  id,
-  isEnabled,
-}: {
-  id: string;
-  isEnabled: boolean;
-}) => {
+const FetchingWorkflowLink = ({ id, isEnabled }: { id: string; isEnabled: boolean }) => {
   const { data: workflow } = useFetchWorkflow(id, isEnabled);
   return <WorkflowLink id={id} name={workflow?.name ?? id} />;
 };

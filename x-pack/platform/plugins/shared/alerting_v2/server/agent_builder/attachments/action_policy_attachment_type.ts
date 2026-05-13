@@ -27,15 +27,9 @@ const formatActionPolicyDescription = (
   attachmentId: string,
   data: ActionPolicyAttachmentData
 ): string => {
-  const status = data.id
-    ? data.enabled
-      ? 'enabled'
-      : 'disabled'
-    : 'proposed (not yet saved)';
+  const status = data.id ? (data.enabled ? 'enabled' : 'disabled') : 'proposed (not yet saved)';
   const destinations = data.destinations ?? [];
-  const workflowIds = destinations
-    .filter((d) => d.type === 'workflow')
-    .map((d) => d.id);
+  const workflowIds = destinations.filter((d) => d.type === 'workflow').map((d) => d.id);
   const destinationSummary =
     workflowIds.length > 0
       ? `${workflowIds.length} workflow(s): ${workflowIds.join(', ')}`
@@ -80,9 +74,7 @@ export const createActionPolicyAttachmentType = ({
       const policy = await client.getActionPolicy({ id: origin });
       return actionPolicyAttachmentDataSchema.parse(policy);
     } catch (error) {
-      logger.warn(
-        `Failed to resolve action policy attachment for origin "${origin}": ${error}`
-      );
+      logger.warn(`Failed to resolve action policy attachment for origin "${origin}": ${error}`);
       return undefined;
     }
   },
