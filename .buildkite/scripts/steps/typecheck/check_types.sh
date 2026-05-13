@@ -8,4 +8,8 @@ source .buildkite/scripts/common/util.sh
 
 echo --- Check Types
 
-node scripts/type_check --with-archive
+if [ -n "${WITH_ARCHIVE:-}" ]; then
+  node scripts/type_check --with-archive
+else
+  node scripts/type_check
+fi
