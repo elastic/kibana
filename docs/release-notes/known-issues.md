@@ -14,7 +14,7 @@ Applies to: {{stack}} 8.19.0–8.19.13, 9.0.x, 9.1.x, 9.2.0–9.2.7, 9.3.0–9.3
 
 **Details**
 
-A KQL operator precedence bug in Fleet's bulk action code causes the namespace filter to be ignored when a user-supplied kuery is also present. When issuing a bulk agent action (unenroll, reassign, upgrade, or rollback) with "Select everything on all pages" in the UI, or using the bulk actions API with a `kuery` parameter, agents in other {{kib}} spaces can be unintentionally affected.
+A KQL operator precedence issue in Fleet's bulk action code causes the namespace filter to be ignored when a user-supplied kuery is also present. When issuing a bulk agent action (unenroll, reassign, upgrade, or rollback) with "Select everything on all pages" in the UI, or using the bulk actions API with a `kuery` parameter, agents in other {{kib}} spaces can be unintentionally affected.
 
 **Workaround**
 
@@ -22,7 +22,7 @@ When performing bulk agent actions across all pages, select agents individually 
 
 **Resolved**
 
-This issue is resolved in {{stack}} 8.19.14, 9.2.8, and 9.3.3. Versions 9.0 and 9.1 are end of life — upgrade to {{stack}} 9.2.8+ or 9.3.3+.
+This issue is resolved in {{stack}} 8.19.14, 9.2.8, 9.3.3, 9.4.0. Versions 9.0 and 9.1 are end of life — upgrade to {{stack}} 9.2.8+ or 9.3.3+.
 
 ::::
 
