@@ -1,0 +1,69 @@
+{
+  "scenarios": [
+    {
+      "scenario_id": "mg_diet_001",
+      "title": "Diet preference drift",
+      "category": "preference_drift",
+      "default_scoring": "judge",
+      "events": [
+        { "type": "user_message", "content": "I'm vegan, so please remember that for any food suggestions." },
+        { "type": "assistant_message", "content": "Got it — vegan." },
+        { "type": "probe", "question": "Am I vegan?", "answer": "yes", "scoring": "exact" },
+        { "type": "session_break", "next_session_title": "Three weeks later" },
+        { "type": "user", "content": "Heads up — I started eating fish again last week, so I'm pescatarian now." },
+        { "type": "ai", "content": "Updated — pescatarian." },
+        {
+          "type": "probe",
+          "question": "Should I avoid recommending salmon?",
+          "answer": "no",
+          "scoring": "judge"
+        },
+        { "type": "probe", "question": "Am I still strict vegan?", "answer": "no", "scoring": "exact" }
+      ]
+    },
+    {
+      "scenario_id": "mg_address_001",
+      "title": "Address change with contradiction",
+      "category": "contradiction",
+      "events": [
+        { "user": "My address is 123 Old Street.", "assistant": "Saved." },
+        { "user": "Actually scratch that — I moved on May 1st. New address is 99 New Ave.", "assistant": "Updated to 99 New Ave." },
+        {
+          "type": "probe",
+          "question": "What is my current address?",
+          "answer": "99 New Ave",
+          "scoring": "exact"
+        },
+        { "type": "session_break" },
+        { "type": "user_message", "content": "By the way, what's my address?" },
+        {
+          "type": "probe",
+          "question": "What is my current address?",
+          "answer": "99 New Ave",
+          "scoring": "exact"
+        }
+      ]
+    },
+    {
+      "scenario_id": "mg_tool_001",
+      "title": "Tool grounding probe",
+      "category": "tool_grounding",
+      "events": [
+        { "type": "user_message", "content": "Sarah's birthday is May 4 every year." },
+        { "type": "assistant_message", "content": "Noted — Sarah's birthday is May 4." },
+        {
+          "type": "probe",
+          "question": "Schedule a reminder for Sarah's birthday this year (2026).",
+          "scoring": "tool_call",
+          "score_mode": "permissive",
+          "gold_calls": [
+            {
+              "tool_id": "add_event",
+              "params": { "title": "Sarah's birthday", "date": "2026-05-04" }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

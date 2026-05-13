@@ -1,0 +1,71 @@
+{
+  "tool_schemas": [
+    {
+      "name": "add_event",
+      "description": "Schedule an event on the user's calendar.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "date": { "type": "string", "description": "ISO date" }
+        },
+        "required": ["title", "date"]
+      }
+    },
+    {
+      "name": "lookup_contact",
+      "description": "Look up a contact by name.",
+      "parameters": {
+        "type": "object",
+        "properties": { "name": { "type": "string" } },
+        "required": ["name"]
+      }
+    },
+    {
+      "name": "set_reminder",
+      "description": "Create a reminder.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string" },
+          "when": { "type": "string" }
+        },
+        "required": ["subject", "when"]
+      }
+    }
+  ],
+  "samples": [
+    {
+      "sample_id": "m2a_cal_0001",
+      "category": "calendar",
+      "dialogue": [
+        { "role": "user", "content": "Sarah's birthday is May 4 every year." },
+        { "role": "assistant", "content": "Got it — Sarah's birthday is May 4." }
+      ],
+      "query": "Schedule a reminder for Sarah's birthday this year (2026).",
+      "gold_calls": [
+        { "tool_id": "add_event", "params": { "title": "Sarah's birthday", "date": "2026-05-04" } }
+      ]
+    },
+    {
+      "sample_id": "m2a_contact_0001",
+      "category": "contact",
+      "dialogue": [
+        { "role": "user", "content": "My VP's name is Tomás Romero." },
+        { "role": "assistant", "content": "Saved — VP: Tomás Romero." }
+      ],
+      "query": "What's my VP's email?",
+      "gold_calls": [{ "tool_id": "lookup_contact", "params": { "name": "Tomás Romero" } }]
+    },
+    {
+      "sample_id": "m2a_reminder_0001",
+      "category": "reminder",
+      "dialogue": [
+        { "role": "user", "content": "Remember I need to pay rent on the 1st of every month." },
+        { "role": "assistant", "content": "Noted." }
+      ],
+      "query": "Set me a reminder for next month's rent.",
+      "gold_calls": [{ "tool_id": "set_reminder", "params": { "subject": "rent", "when": "2026-06-01" } }]
+    }
+  ]
+}

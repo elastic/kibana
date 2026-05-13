@@ -1,0 +1,9 @@
+node_modules/
+dist/
+*.tsbuildinfo
+results/
+data/*.json
+# allow committing the tiny smoke-test fixtures that ship with each runner
+!data/*_sample.json
+.env
+.env.local

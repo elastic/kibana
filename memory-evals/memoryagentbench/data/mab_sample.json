@@ -1,0 +1,61 @@
+{
+  "AR": [
+    {
+      "sample_id": "mab_ar_0001",
+      "context_turns": [
+        { "role": "user", "content": "Hey, my favorite restaurant is Niko's Sushi on 5th Ave." },
+        { "role": "assistant", "content": "Got it — Niko's Sushi on 5th Ave." },
+        { "role": "user", "content": "By the way, I take my coffee black, no sugar." },
+        { "role": "assistant", "content": "Noted: black coffee, no sugar." }
+      ],
+      "qa": [
+        { "question": "What's my favorite restaurant?", "answer": "Niko's Sushi on 5th Ave" },
+        { "question": "How do I take my coffee?", "answer": "black, no sugar" }
+      ]
+    }
+  ],
+  "TTL": [
+    {
+      "sample_id": "mab_ttl_0001",
+      "context_turns": [
+        { "role": "user", "content": "When I say 'EOD' I mean 6pm PT, not midnight." },
+        { "role": "assistant", "content": "Understood — EOD = 6pm PT." }
+      ],
+      "qa": [
+        {
+          "question": "I need this report by EOD tomorrow. When does that mean?",
+          "answer": "6pm PT tomorrow"
+        }
+      ]
+    }
+  ],
+  "LRU": [
+    {
+      "sample_id": "mab_lru_0001",
+      "context_documents": [
+        "On May 1 2024 Alice met Bob at a conference in Berlin. Bob recommended a book called 'Deep Currents' by Carla Reyes.",
+        "On May 14 2024 Alice finished 'Deep Currents' and wrote her review on Goodreads, giving it 4 stars."
+      ],
+      "qa": [
+        {
+          "question": "Who recommended the book that Alice reviewed on Goodreads in May 2024?",
+          "answer": "Bob"
+        }
+      ]
+    }
+  ],
+  "CR": [
+    {
+      "sample_id": "mab_cr_0001",
+      "context_turns": [
+        { "role": "user", "content": "My address is 123 Old Street." },
+        { "role": "assistant", "content": "Saved." },
+        { "role": "user", "content": "Actually I moved last week — my new address is 99 New Ave." },
+        { "role": "assistant", "content": "Got it, updated to 99 New Ave." }
+      ],
+      "qa": [
+        { "question": "What is my current address?", "answer": "99 New Ave" }
+      ]
+    }
+  ]
+}
