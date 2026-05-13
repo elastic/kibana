@@ -33,11 +33,13 @@ export const registerGetDatasetsRoute = (router: IRouter, { logger }: PluginInit
           body: result,
         });
       } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        logger.get().error(`Failed to fetch ES|QL datasets: ${message}`, {
-          tags: ['esql', 'datasets'],
-          error: { stack_trace: error instanceof Error ? error.stack : undefined },
-        });
+        logger.get().debug(error);
+        // TODO: Add error logging back in when datasets are available in Tech preview
+        // const message = error instanceof Error ? error.message : String(error);
+        // logger.get().error(`Failed to fetch ES|QL datasets: ${message}`, {
+        //   tags: ['esql', 'datasets'],
+        //   error: { stack_trace: error instanceof Error ? error.stack : undefined },
+        // });
         return response.ok({
           body: { datasets: [] },
         });
