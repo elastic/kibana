@@ -13,7 +13,6 @@ import type {
   KibanaRequest,
   KibanaResponseFactory,
   Logger,
-  RequestHandler,
 } from '@kbn/core/server';
 import { getEarsEndpointsForProvider, resolveEarsUrl } from '../lib/ears';
 import type { ILicenseState } from '../lib';
@@ -56,6 +55,118 @@ const validateOAuthUrlsAreAllowed = (
 };
 
 /**
+ * Registers OAuth2 authorization start routes:
+ *
+ * - **POST** `/internal/actions/connector/{connectorId}/_start_oauth_flow` — JSON `{ authorizationUrl, state }` (internal).
+ * - **GET** `/api/actions/connector/{connectorId}/oauth/start` — **302** to the IdP (public).
+ *   Absolute link: `{server.publicBaseUrl}/api/actions/connector/{connectorId}/oauth/start`
+ *   with optional `?returnUrl=` (https, same origin as Kibana), e.g. for Slack:
+ *   `https://my.kibana.example/api/actions/connector/my-id/oauth/start?returnUrl=https://my.kibana.example/app/foo`
+ *
+ * Both require an authenticated Kibana user with `profile_uid` and the same OAuth privileges.
+ */
+export const oauthAuthorizeRoute = (
+  router: IRouter<ActionsRequestHandlerContext>,
+  licenseState: ILicenseState,
+  logger: Logger,
+  coreSetup: CoreSetup<ActionsPluginsStart>,
+  oauthRateLimiter: OAuthRateLimiter,
+  actionsConfigUtils: ActionsConfigurationUtilities
+) => {
+  router.post(
+    {
+      path: `${INTERNAL_BASE_ACTION_API_PATH}/connector/{connectorId}/_start_oauth_flow`,
+      security: {
+        authz: {
+          requiredPrivileges: [OAUTH_API_TAG],
+        },
+      },
+      validate: {
+        params: paramsSchema,
+        body: startOAuthFlowBodySchema,
+      },
+      options: {
+        access: 'internal',
+      },
+    },
+    router.handleLegacyErrors(
+      verifyAccessAndContext(licenseState, async function (context, req, res) {
+        const { connectorId } = req.params;
+
+        try {
+          const { authorizationUrl, state } = await startOAuthAuthorizationFlow({
+            connectorId,
+            returnUrl: req.body?.returnUrl,
+            context,
+            req,
+            coreSetup,
+            logger,
+            oauthRateLimiter,
+            actionsConfigUtils,
+          });
+
+          return res.ok({
+            body: {
+              authorizationUrl,
+              state,
+            },
+          });
+        } catch (err) {
+          return handleOAuthStartError(err, logger, res);
+        }
+      })
+    )
+  );
+
+  router.get(
+    {
+      path: `${BASE_ACTION_API_PATH}/connector/{connectorId}/oauth/start`,
+      security: {
+        authz: {
+          requiredPrivileges: [OAUTH_API_TAG],
+        },
+      },
+      validate: {
+        params: paramsSchema,
+        query: startOAuthFlowGetQuerySchema,
+      },
+      options: {
+        access: 'public',
+        summary: 'Start OAuth authorization (redirects to the identity provider)',
+        tags: ['oas-tag:connectors'],
+      },
+    },
+    router.handleLegacyErrors(
+      verifyAccessAndContext(licenseState, async function (context, req, res) {
+        const { connectorId } = req.params;
+
+        try {
+          const { authorizationUrl } = await startOAuthAuthorizationFlow({
+            connectorId,
+            returnUrl: req.query.returnUrl,
+            context,
+            req,
+            coreSetup,
+            logger,
+            oauthRateLimiter,
+            actionsConfigUtils,
+          });
+
+          return res.redirected({
+            body: '',
+            headers: {
+              location: authorizationUrl,
+            },
+          });
+        } catch (err) {
+          return handleOAuthStartError(err, logger, res);
+        }
+      })
+    )
+  );
+};
+
+/**
  * Shared OAuth start logic for POST /internal/.../_start_oauth_flow and
  * GET /api/actions/connector/{connectorId}/oauth/start.
  */
@@ -87,22 +198,19 @@ async function startOAuthAuthorizationFlow(params: {
   const core = await context.core;
   const currentUser = core.security.authc.getCurrentUser();
   if (!currentUser) {
-    const err = new Error(
-      'User should be authenticated to initiate OAuth authorization.'
-    ) as Error & {
-      statusCode: number;
-    };
-    err.statusCode = 401;
-    throw err;
+    throw Object.assign(
+      new Error('User should be authenticated to initiate OAuth authorization.'),
+      {
+        statusCode: 401,
+      }
+    );
   }
   const { profile_uid } = currentUser;
 
   if (!profile_uid) {
-    const err = new Error('Unable to retrieve Kibana user profile ID.') as Error & {
-      statusCode: number;
-    };
-    err.statusCode = 500;
-    throw err;
+    throw Object.assign(new Error('Unable to retrieve Kibana user profile ID.'), {
+      statusCode: 500,
+    });
   }
 
   oauthRateLimiter.log(profile_uid, 'authorize');
@@ -110,23 +218,21 @@ async function startOAuthAuthorizationFlow(params: {
     routeLogger.warn(
       `OAuth authorize rate limit exceeded for user: ${profile_uid}, connector: ${connectorId}`
     );
-    const err = new Error('Too many authorization attempts. Please try again later.') as Error & {
-      statusCode: number;
-    };
-    err.statusCode = 429;
-    throw err;
+    throw Object.assign(new Error('Too many authorization attempts. Please try again later.'), {
+      statusCode: 429,
+    });
   }
 
   const [coreStart, { encryptedSavedObjects, spaces }] = await coreSetup.getStartServices();
   const kibanaUrl = coreStart.http.basePath.publicBaseUrl;
   if (!kibanaUrl) {
-    const err = new Error(
-      'Kibana public URL not configured. Please set server.publicBaseUrl in kibana.yml'
-    ) as Error & { statusCode: number };
-    err.statusCode = 400;
-    throw err;
+    throw Object.assign(
+      new Error('Kibana public URL not configured. Please set server.publicBaseUrl in kibana.yml'),
+      { statusCode: 400 }
+    );
   }
 
+  // Get OAuth configuration (validates connector and retrieves decrypted config)
   const oauthService = new OAuthAuthorizationService({
     actionsClient: (await context.actions).getActionsClient(),
     encryptedSavedObjectsClient: encryptedSavedObjects.getClient({
@@ -147,32 +253,31 @@ async function startOAuthAuthorizationFlow(params: {
   } catch (allowedHostsErr) {
     const message =
       allowedHostsErr instanceof Error ? allowedHostsErr.message : String(allowedHostsErr);
-    const err = new Error(
-      message || 'OAuth URL is not allowed by xpack.actions.allowedHosts'
-    ) as Error & {
-      statusCode: number;
-    };
-    err.statusCode = 400;
-    throw err;
+    throw Object.assign(
+      new Error(message || 'OAuth URL is not allowed by xpack.actions.allowedHosts'),
+      { statusCode: 400 }
+    );
   }
 
   const redirectUri = OAuthAuthorizationService.getRedirectUri(kibanaUrl);
-
   let kibanaReturnUrl: string | undefined;
+
   if (returnUrl) {
     const returnUrlObj = new URL(returnUrl);
     const kibanaUrlObj = new URL(kibanaUrl);
 
     if (returnUrlObj.origin !== kibanaUrlObj.origin) {
-      const err = new Error(
-        `returnUrl must be same origin as Kibana. Expected: ${kibanaUrlObj.origin}, Got: ${returnUrlObj.origin}`
-      ) as Error & { statusCode: number };
-      err.statusCode = 400;
-      throw err;
+      throw Object.assign(
+        new Error(
+          `returnUrl must be same origin as Kibana. Expected: ${kibanaUrlObj.origin}, Got: ${returnUrlObj.origin}`
+        ),
+        { statusCode: 400 }
+      );
     }
     kibanaReturnUrl = returnUrl;
   }
 
+  // Create OAuth state with PKCE
   const oauthStateClient = new OAuthStateClient({
     encryptedSavedObjectsClient: encryptedSavedObjects.getClient({
       includedHiddenTypes: ['oauth_state'],
@@ -230,9 +335,11 @@ function handleOAuthStartError(
       ? (err as Error & { statusCode: number }).statusCode
       : 500;
 
-  logger.error('Failed to initiate OAuth authorization', {
-    error: err instanceof Error ? err : new Error(String(err)),
-  });
+  if (statusCode >= 500) {
+    logger.error('Failed to initiate OAuth authorization', {
+      error: err instanceof Error ? err : new Error(String(err)),
+    });
+  }
 
   if (statusCode === 401) {
     return res.unauthorized({
@@ -257,142 +364,3 @@ function handleOAuthStartError(
     },
   });
 }
-
-interface OAuthStartRouteParams {
-  connectorId: string;
-}
-interface OAuthStartPostBody {
-  returnUrl?: string;
-}
-interface OAuthStartGetQuery {
-  returnUrl?: string | string[];
-}
-
-function wrapOAuthAuthorizeRequestHandler(
-  router: IRouter<ActionsRequestHandlerContext>,
-  licenseState: ILicenseState,
-  handler: RequestHandler<
-    OAuthStartRouteParams,
-    OAuthStartGetQuery,
-    OAuthStartPostBody,
-    ActionsRequestHandlerContext
-  >
-) {
-  return router.handleLegacyErrors(verifyAccessAndContext(licenseState, handler));
-}
-
-/**
- * Registers OAuth2 authorization start routes:
- *
- * - **POST** `/internal/actions/connector/{connectorId}/_start_oauth_flow` — JSON `{ authorizationUrl, state }` (internal).
- * - **GET** `/api/actions/connector/{connectorId}/oauth/start` — **302** to the IdP (public).
- *   Absolute link: `{server.publicBaseUrl}/api/actions/connector/{connectorId}/oauth/start`
- *   with optional `?returnUrl=` (https, same origin as Kibana), e.g. for Slack:
- *   `https://my.kibana.example/api/actions/connector/my-id/oauth/start?returnUrl=https://my.kibana.example/app/foo`
- *
- * Both require an authenticated Kibana user with `profile_uid` and the same OAuth privileges.
- */
-export const oauthAuthorizeRoute = (
-  router: IRouter<ActionsRequestHandlerContext>,
-  licenseState: ILicenseState,
-  logger: Logger,
-  coreSetup: CoreSetup<ActionsPluginsStart>,
-  oauthRateLimiter: OAuthRateLimiter,
-  actionsConfigUtils: ActionsConfigurationUtilities
-) => {
-  router.post(
-    {
-      path: `${INTERNAL_BASE_ACTION_API_PATH}/connector/{connectorId}/_start_oauth_flow`,
-      security: {
-        authz: {
-          requiredPrivileges: [OAUTH_API_TAG],
-        },
-      },
-      validate: {
-        params: paramsSchema,
-        body: startOAuthFlowBodySchema,
-      },
-      options: {
-        access: 'internal',
-      },
-    },
-    wrapOAuthAuthorizeRequestHandler(router, licenseState, async function (context, req, res) {
-      const { connectorId } = req.params;
-
-      try {
-        const { authorizationUrl, state } = await startOAuthAuthorizationFlow({
-          connectorId,
-          returnUrl: req.body?.returnUrl,
-          context,
-          req,
-          coreSetup,
-          logger,
-          oauthRateLimiter,
-          actionsConfigUtils,
-        });
-
-        return res.ok({
-          body: {
-            authorizationUrl,
-            state,
-          },
-        });
-      } catch (err) {
-        return handleOAuthStartError(err, logger, res);
-      }
-    })
-  );
-
-  router.get(
-    {
-      path: `${BASE_ACTION_API_PATH}/connector/{connectorId}/oauth/start`,
-      security: {
-        authz: {
-          requiredPrivileges: [OAUTH_API_TAG],
-        },
-      },
-      validate: {
-        params: paramsSchema,
-        query: startOAuthFlowGetQuerySchema,
-      },
-      options: {
-        access: 'public',
-        summary: 'Start OAuth authorization (redirects to the identity provider)',
-        tags: ['oas-tag:connectors'],
-      },
-    },
-    wrapOAuthAuthorizeRequestHandler(router, licenseState, async function (context, req, res) {
-      const { connectorId } = req.params;
-
-      try {
-        const rawReturnUrl = req.query.returnUrl;
-        const returnUrlFromQuery =
-          typeof rawReturnUrl === 'string'
-            ? rawReturnUrl
-            : Array.isArray(rawReturnUrl)
-            ? rawReturnUrl[0]
-            : undefined;
-
-        const { authorizationUrl } = await startOAuthAuthorizationFlow({
-          connectorId,
-          returnUrl: returnUrlFromQuery,
-          context,
-          req,
-          coreSetup,
-          logger,
-          oauthRateLimiter,
-          actionsConfigUtils,
-        });
-
-        return res.redirected({
-          body: '',
-          headers: {
-            location: authorizationUrl,
-          },
-        });
-      } catch (err) {
-        return handleOAuthStartError(err, logger, res);
-      }
-    })
-  );
-};

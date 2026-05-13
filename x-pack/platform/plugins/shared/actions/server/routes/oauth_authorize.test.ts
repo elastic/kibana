@@ -134,26 +134,24 @@ describe('oauthAuthorizeRoute', () => {
       mockRateLimiter as never,
       configUtils
     );
-    return {
-      post: router.post.mock.calls[0]!,
-      get: router.get.mock.calls[0]!,
-    };
+    return router.post.mock.calls[0]!;
   };
 
   it('registers a POST route at the correct path', () => {
-    const [postConfig] = registerRoute().post;
+    const [postConfig] = registerRoute();
 
     expect(postConfig.path).toBe('/internal/actions/connector/{connectorId}/_start_oauth_flow');
   });
 
   it('registers a GET route for browser OAuth start redirect', () => {
-    const [getConfig] = registerRoute().get;
+    registerRoute();
+    const [getConfig] = router.get.mock.calls[0]!;
 
     expect(getConfig.path).toBe('/api/actions/connector/{connectorId}/oauth/start');
   });
 
   it('returns unauthorized when no current user', async () => {
-    const [, handler] = registerRoute().post;
+    const [, handler] = registerRoute();
     const context = createMockContext(null);
     const req = httpServerMock.createKibanaRequest({
       params: { connectorId: 'connector-1' },
@@ -171,7 +169,7 @@ describe('oauthAuthorizeRoute', () => {
   });
 
   it('returns error when profile UID is missing', async () => {
-    const [, handler] = registerRoute().post;
+    const [, handler] = registerRoute();
     const context = createMockContext({ username: 'testuser' });
     const req = httpServerMock.createKibanaRequest({
       params: { connectorId: 'connector-1' },
@@ -193,7 +191,7 @@ describe('oauthAuthorizeRoute', () => {
   it('returns 429 when rate limited', async () => {
     mockRateLimiter.isRateLimited.mockReturnValue(true);
 
-    const [, handler] = registerRoute().post;
+    const [, handler] = registerRoute();
     const context = createMockContext();
     const req = httpServerMock.createKibanaRequest({
       params: { connectorId: 'connector-1' },
@@ -218,7 +216,7 @@ describe('oauthAuthorizeRoute', () => {
     // Pass null and cast - passing undefined would trigger the default parameter value
     const coreSetup = createMockCoreSetup(null as unknown as undefined);
 
-    const [, handler] = registerRoute(coreSetup).post;
+    const [, handler] = registerRoute(coreSetup);
     const context = createMockContext();
     const req = httpServerMock.createKibanaRequest({
       params: { connectorId: 'connector-1' },
@@ -243,7 +241,7 @@ describe('oauthAuthorizeRoute', () => {
       clientId: 'client-id',
     });
 
-    const [, handler] = registerRoute().post;
+    const [, handler] = registerRoute();
     const context = createMockContext();
     const req = httpServerMock.createKibanaRequest({
       params: { connectorId: 'connector-1' },
@@ -273,7 +271,7 @@ describe('oauthAuthorizeRoute', () => {
       );
     });
 
-    const [, handler] = registerRoute().post;
+    const [, handler] = registerRoute();
     const context = createMockContext();
     const req = httpServerMock.createKibanaRequest({
       params: { connectorId: 'connector-1' },
@@ -309,7 +307,7 @@ describe('oauthAuthorizeRoute', () => {
         );
       });
 
-    const [, handler] = registerRoute().post;
+    const [, handler] = registerRoute();
     const context = createMockContext();
     const req = httpServerMock.createKibanaRequest({
       params: { connectorId: 'connector-1' },
@@ -356,7 +354,7 @@ describe('oauthAuthorizeRoute', () => {
       codeChallenge: 'code-challenge-value',
     });
 
-    const [, handler] = registerRoute().post;
+    const [, handler] = registerRoute();
     const context = createMockContext();
     const req = httpServerMock.createKibanaRequest({
       params: { connectorId: 'connector-1' },
@@ -412,7 +410,7 @@ describe('oauthAuthorizeRoute', () => {
       codeChallenge: 'ears-pkce-challenge',
     });
 
-    const [, handler] = registerRoute().post;
+    const [, handler] = registerRoute();
     const context = createMockContext();
     const req = httpServerMock.createKibanaRequest({
       params: { connectorId: 'connector-ears' },
@@ -462,7 +460,7 @@ describe('oauthAuthorizeRoute', () => {
       codeChallenge: 'ears-pkce-challenge',
     });
 
-    const [, handler] = registerRoute().post;
+    const [, handler] = registerRoute();
     const context = createMockContext();
     const req = httpServerMock.createKibanaRequest({
       params: { connectorId: 'connector-ears' },
@@ -500,7 +498,7 @@ describe('oauthAuthorizeRoute', () => {
       codeChallenge: 'challenge',
     });
 
-    const [, handler] = registerRoute().post;
+    const [, handler] = registerRoute();
     const context = createMockContext();
     const req = httpServerMock.createKibanaRequest({
       params: { connectorId: 'connector-1' },
@@ -522,7 +520,7 @@ describe('oauthAuthorizeRoute', () => {
       new Error('Connector does not use OAuth Authorization Code flow')
     );
 
-    const [, handler] = registerRoute().post;
+    const [, handler] = registerRoute();
     const context = createMockContext();
     const req = httpServerMock.createKibanaRequest({
       params: { connectorId: 'connector-1' },
@@ -547,7 +545,7 @@ describe('oauthAuthorizeRoute', () => {
     notFoundError.statusCode = 404;
     mockOAuthServiceInstance.getOAuthConfig.mockRejectedValue(notFoundError);
 
-    const [, handler] = registerRoute().post;
+    const [, handler] = registerRoute();
     const context = createMockContext();
     const req = httpServerMock.createKibanaRequest({
       params: { connectorId: 'connector-1' },
@@ -588,7 +586,8 @@ describe('oauthAuthorizeRoute', () => {
       codeChallenge: 'code-challenge-value',
     });
 
-    const [, getHandler] = registerRoute().get;
+    registerRoute();
+    const [, getHandler] = router.get.mock.calls[0]!;
     const context = createMockContext();
     const req = httpServerMock.createKibanaRequest({
       params: { connectorId: 'connector-1' },
