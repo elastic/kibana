@@ -40,6 +40,7 @@ import {
   createTraceBasedEvaluator,
   createTrajectoryEvaluator,
   tags,
+  withRetry,
 } from '@kbn/evals';
 import type {
   DefaultEvaluators,
@@ -51,7 +52,6 @@ import type {
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core-http-browser';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
-import pRetry from 'p-retry';
 import { validateRuleDataset } from './validate_rule_dataset';
 
 // ─── Chat client ──────────────────────────────────────────────────────────────
@@ -116,21 +116,29 @@ class DetectionEmulationChatClient {
     };
 
     try {
-      return await pRetry(callConverseApi, {
-        retries: 2,
-        minTimeout: 2000,
-        onFailedAttempt: (error) => {
-          if (error.retriesLeft === 0) {
-            this.log.error(
-              new Error(`converse: failed after ${error.attemptNumber} attempts`, { cause: error })
-            );
-          } else {
-            this.log.warning(
-              new Error(`converse: attempt ${error.attemptNumber} failed; retrying`, {
-                cause: error,
-              })
-            );
-          }
+      // N5: use the @kbn/evals `withRetry` helper instead of `p-retry` so
+      // the spec doesn't pull a third-party dep that isn't on the eval
+      // surface's allowlist (avoids a CI bootstrap surprise the first time
+      // the spec runs). Behaviour difference vs the previous code:
+      // `withRetry` is selective — it retries only on 429s, transient
+      // 5xx (502/503/504), and common network errors (ECONNRESET, etc.).
+      // p-retry retried on any error. The new behaviour is strictly
+      // better here: retrying a 400 schema-validation error or a 401 auth
+      // failure was always wrong; it just hid the symptom for two extra
+      // attempts before failing anyway.
+      //
+      // `maxAttempts: 3` mirrors the old `retries: 2` (initial + 2
+      // retries); `minDelayMs: 2000` mirrors the old `minTimeout`.
+      return await withRetry(callConverseApi, {
+        maxAttempts: 3,
+        minDelayMs: 2000,
+        label: 'converse',
+        onRetry: ({ attempt, maxAttempts, error }) => {
+          this.log.warning(
+            new Error(`converse: attempt ${attempt}/${maxAttempts} failed; retrying`, {
+              cause: error instanceof Error ? error : new Error(String(error)),
+            })
+          );
         },
       });
     } catch (error) {
