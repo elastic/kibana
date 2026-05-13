@@ -40,6 +40,7 @@ export interface ExpressionRenderHandlerParams {
   interactive?: boolean;
   hasCompatibleActions?: (event: ExpressionRendererEvent) => Promise<boolean>;
   getCompatibleCellValueActions?: (data: object[]) => Promise<unknown[]>;
+  panelHasConfiguredDrilldowns?: boolean;
   executionContext?: KibanaExecutionContext;
 }
 
@@ -70,6 +71,7 @@ export class ExpressionRenderHandler {
       interactive,
       hasCompatibleActions = async () => false,
       getCompatibleCellValueActions = async () => [],
+      panelHasConfiguredDrilldowns = false,
       executionContext,
     }: ExpressionRenderHandlerParams = {}
   ) {
@@ -123,6 +125,7 @@ export class ExpressionRenderHandler {
       },
       hasCompatibleActions,
       getCompatibleCellValueActions,
+      panelHasConfiguredDrilldowns,
     };
   }
 

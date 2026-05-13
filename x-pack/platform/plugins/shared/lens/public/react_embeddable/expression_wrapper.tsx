@@ -39,6 +39,7 @@ export interface ExpressionWrapperProps {
   syncCursor?: boolean;
   hasCompatibleActions?: ReactExpressionRendererProps['hasCompatibleActions'];
   getCompatibleCellValueActions?: ReactExpressionRendererProps['getCompatibleCellValueActions'];
+  panelHasConfiguredDrilldowns?: boolean;
   style?: React.CSSProperties;
   className?: string;
   addUserMessages: (messages: UserMessage[]) => void;
@@ -66,6 +67,7 @@ export function ExpressionWrapper({
   syncCursor,
   hasCompatibleActions,
   getCompatibleCellValueActions,
+  panelHasConfiguredDrilldowns,
   style,
   className,
   onRuntimeError,
@@ -114,6 +116,7 @@ export function ExpressionWrapper({
           onEvent={handleEvent}
           hasCompatibleActions={hasCompatibleActions}
           getCompatibleCellValueActions={getCompatibleCellValueActions}
+          panelHasConfiguredDrilldowns={panelHasConfiguredDrilldowns}
         />
       </div>
     </>

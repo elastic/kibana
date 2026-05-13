@@ -128,6 +128,7 @@ export function useExpressionRenderer(
     debouncedLoaderParams.syncColors,
     debouncedLoaderParams.syncTooltips,
     debouncedLoaderParams.syncCursor,
+    debouncedLoaderParams.panelHasConfiguredDrilldowns,
   ]);
 
   useEffect(() => {

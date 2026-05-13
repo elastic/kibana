@@ -426,6 +426,8 @@ export interface ExpressionWrapperProps {
   syncCursor?: boolean;
   hasCompatibleActions?: ReactExpressionRendererProps['hasCompatibleActions'];
   getCompatibleCellValueActions?: ReactExpressionRendererProps['getCompatibleCellValueActions'];
+  /** Set when the dashboard panel has configured drilldowns. */
+  panelHasConfiguredDrilldowns?: boolean;
   style?: React.CSSProperties;
   className?: string;
   addUserMessages: (messages: UserMessage[]) => void;

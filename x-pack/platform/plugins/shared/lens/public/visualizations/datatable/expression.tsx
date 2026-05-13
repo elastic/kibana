@@ -184,6 +184,7 @@ export const getDatatableRenderer = (dependencies: {
           theme={dependencies.core.theme}
           renderComplete={renderComplete}
           syncColors={config.syncColors}
+          panelHasConfiguredDrilldowns={handlers.panelHasConfiguredDrilldowns ?? false}
         />
       </KibanaRenderContextProvider>,
       domNode

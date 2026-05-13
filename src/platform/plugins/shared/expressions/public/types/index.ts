@@ -54,6 +54,7 @@ export interface IExpressionLoaderParams {
   syncTooltips?: boolean;
   hasCompatibleActions?: ExpressionRenderHandlerParams['hasCompatibleActions'];
   getCompatibleCellValueActions?: ExpressionRenderHandlerParams['getCompatibleCellValueActions'];
+  panelHasConfiguredDrilldowns?: boolean;
   executionContext?: KibanaExecutionContext;
   abortController?: AbortController;
   /**
