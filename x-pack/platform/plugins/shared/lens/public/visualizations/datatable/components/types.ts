@@ -33,6 +33,8 @@ export type DatatableRenderProps = DatatableProps & {
    */
   columnCellValueActions?: LensCellValueAction[][];
   columnFilterable?: boolean[];
+  /** When the dashboard panel has configured drilldowns. */
+  panelHasConfiguredDrilldowns?: boolean;
 };
 
 export interface DataContextType {

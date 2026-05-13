@@ -227,6 +227,7 @@ export async function getExpressionRendererParams(
       abortController,
       hasCompatibleActions: buildHasCompatibleActions(api, services),
       getCompatibleCellValueActions: buildGetCompatibleCellValueActions(api, services),
+      panelHasConfiguredDrilldowns: Boolean(state.drilldowns?.length),
       variables: getVariables(api, state),
       style: state.style,
       className: state.className,

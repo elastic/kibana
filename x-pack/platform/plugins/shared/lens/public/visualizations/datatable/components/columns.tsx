@@ -59,7 +59,8 @@ export const createGridColumns = (
   headerRowLines: number,
   columnCellValueActions: LensCellValueAction[][] | undefined,
   closeCellPopover?: Function,
-  columnFilterable?: boolean[]
+  columnFilterable?: boolean[],
+  panelHasConfiguredDrilldowns = false
 ) => {
   const columnsReverseLookup = buildColumnsMetaLookup(table);
 
@@ -93,7 +94,7 @@ export const createGridColumns = (
       const compatibleCellActions = columnCellValueActions?.[colIndex] ?? [];
 
       const queryTimeInteractionReason = isEsqlQueryTimeComputedColumn(table, field)
-        ? getQueryTimeComputedColumnFilterMessage()
+        ? getQueryTimeComputedColumnFilterMessage(panelHasConfiguredDrilldowns)
         : undefined;
 
       const shouldIncludeBuiltInFilters =

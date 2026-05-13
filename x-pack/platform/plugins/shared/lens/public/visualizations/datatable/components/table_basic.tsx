@@ -344,7 +344,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         headerRowLines,
         columnCellValueActions,
         dataGridRef.current?.closeCellPopover,
-        props.columnFilterable
+        props.columnFilterable,
+        props.panelHasConfiguredDrilldowns
       ),
     [
       bucketedColumns,
@@ -361,6 +362,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       headerRowLines,
       columnCellValueActions,
       props.columnFilterable,
+      props.panelHasConfiguredDrilldowns,
     ]
   );
 
@@ -606,9 +608,13 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   const renderCellPopover = useMemo(() => {
     return (popoverProps: EuiDataGridCellPopoverElementProps) => (
-      <DatatableCellPopover {...popoverProps} table={sortedTable} />
+      <DatatableCellPopover
+        {...popoverProps}
+        table={sortedTable}
+        panelHasConfiguredDrilldowns={props.panelHasConfiguredDrilldowns ?? false}
+      />
     );
-  }, [sortedTable]);
+  }, [sortedTable, props.panelHasConfiguredDrilldowns]);
 
   if (isEmpty) {
     return (

@@ -23,16 +23,13 @@ const datatableCellPopoverStyles = {
     `,
 };
 
-export const DatatableCellPopover = ({
-  table,
-  panelHasConfiguredDrilldowns = false,
-  ...props
-}: EuiDataGridCellPopoverElementProps & {
-  table: Datatable;
-  /** When true, copy matches the column context menu (drilldowns may still apply). */
-  panelHasConfiguredDrilldowns?: boolean;
-}) => {
-  const { DefaultCellPopover, cellActions, columnId } = props;
+export const DatatableCellPopover = (
+  props: EuiDataGridCellPopoverElementProps & {
+    table: Datatable;
+    panelHasConfiguredDrilldowns?: boolean;
+  }
+) => {
+  const { DefaultCellPopover, cellActions, columnId, table, panelHasConfiguredDrilldowns } = props;
   const styles = useMemoCss(datatableCellPopoverStyles);
 
   const showQueryTimeFilterNotice = isEsqlQueryTimeComputedColumn(table, columnId);
