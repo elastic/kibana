@@ -41,7 +41,7 @@ jest.mock('./flyout_provider', () => ({
   flyoutProviders: jest.fn(({ children }: { children: React.ReactNode }) => children),
 }));
 
-jest.mock('../../document', () => ({
+jest.mock('../../document/main', () => ({
   DocumentFlyout: () => <div data-test-subj="mockDocumentFlyout" />,
 }));
 
