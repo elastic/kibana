@@ -10,4 +10,9 @@
 export { asCodeIdSchema } from './id';
 export { asCodeMetaSchema, getMeta, type AsCodeMeta } from './meta';
 export { asCodeQuerySchema, type AsCodeQuery } from './query';
-export { asCodePaginationParamsSchema, asCodePaginationResponseMetaSchema } from './pagination';
+export {
+  asCodePaginationParamsSchema,
+  asCodePaginationResponseMetaSchema,
+  PAGINATION_DEFAULT_PER_PAGE,
+  PAGINATION_MAX_SIZE,
+} from './pagination';

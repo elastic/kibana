@@ -12,6 +12,7 @@ import {
   asCodeMetaSchema,
   asCodePaginationParamsSchema,
   asCodePaginationResponseMetaSchema,
+  PAGINATION_MAX_SIZE,
 } from '@kbn/as-code-shared-schemas';
 
 export const searchRequestQuerySchema = schema.object({
@@ -39,6 +40,8 @@ export const searchResponseBodySchema = schema.object({
       meta: asCodeMetaSchema,
     }),
     {
+      minSize: 0,
+      maxSize: PAGINATION_MAX_SIZE,
       meta: { description: 'List of markdown library items matching the query.' },
     }
   ),

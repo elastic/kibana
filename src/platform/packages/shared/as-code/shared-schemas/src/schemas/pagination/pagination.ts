@@ -9,6 +9,9 @@
 
 import { schema } from '@kbn/config-schema';
 
+export const PAGINATION_DEFAULT_PER_PAGE = 20;
+export const PAGINATION_MAX_SIZE = 1000;
+
 export const asCodePaginationParamsSchema = schema.object({
   page: schema.number({
     meta: {
@@ -21,9 +24,9 @@ export const asCodePaginationParamsSchema = schema.object({
     meta: {
       description: 'The number of results to return per page.',
     },
-    defaultValue: 20,
+    defaultValue: PAGINATION_DEFAULT_PER_PAGE,
     min: 1,
-    max: 1000,
+    max: PAGINATION_MAX_SIZE,
   }),
 });
 
@@ -40,9 +43,9 @@ export const asCodePaginationResponseMetaSchema = schema.object(
       meta: {
         description: 'The number of results to return per page.',
       },
-      defaultValue: 20,
+      defaultValue: PAGINATION_DEFAULT_PER_PAGE,
       min: 1,
-      max: 1000,
+      max: PAGINATION_MAX_SIZE,
     }),
     total: schema.number({
       meta: { description: 'The total number of results matching the query.' },

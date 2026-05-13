@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import {
   asCodePaginationParamsSchema,
   asCodePaginationResponseMetaSchema,
+  PAGINATION_MAX_SIZE,
 } from '@kbn/as-code-shared-schemas';
 import { lensResponseItemSchema } from './common';
 
@@ -43,7 +44,7 @@ export const lensSearchRequestQuerySchema = schema.object({
 
 export const lensSearchResponseBodySchema = schema.object(
   {
-    data: schema.arrayOf(lensResponseItemSchema, { maxSize: 1000 }),
+    data: schema.arrayOf(lensResponseItemSchema, { maxSize: PAGINATION_MAX_SIZE }),
     meta: asCodePaginationResponseMetaSchema,
   },
   { unknowns: 'forbid' }
