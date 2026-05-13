@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import { sortBy, uniqBy } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import type { MlAnomalyDetectors } from '@kbn/ml-plugin/server';
+import type { ServiceAnomaliesResponse } from '@kbn/apm-types';
 import { rangeQuery, termQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
@@ -24,13 +25,12 @@ import {
   ML_SERVICE_NAME_FIELD,
   ML_TRANSACTION_TYPE_FIELD,
 } from '../../lib/anomaly_detection/anomaly_search';
+export type { ServiceAnomaliesResponse } from '@kbn/apm-types';
 
 export const DEFAULT_ANOMALIES: ServiceAnomaliesResponse = {
   mlJobIds: [],
   serviceAnomalies: [],
 };
-
-export type ServiceAnomaliesResponse = Awaited<ReturnType<typeof getServiceAnomalies>>;
 export async function getServiceAnomalies({
   mlClient,
   environment,
@@ -47,7 +47,7 @@ export async function getServiceAnomalies({
   searchQuery?: string;
   /** When set, matches that service only via a `term` filter (avoids wildcard fan-out for short names). Ignores `searchQuery` for the service-name clause. */
   exactServiceName?: string;
-}) {
+}): Promise<ServiceAnomaliesResponse> {
   return withApmSpan('get_service_anomalies', async () => {
     if (!mlClient) {
       throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);

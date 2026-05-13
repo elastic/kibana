@@ -6,47 +6,34 @@
  */
 
 import Boom from '@hapi/boom';
-import * as t from 'io-ts';
-import { jsonRt } from '@kbn/io-ts-utils';
+import {
+  routeDefinitions,
+  type ServiceMapRouteResponse,
+  type ServiceMapServiceBadgesResponse,
+  type ServiceMapServiceDependencyInfoResponse,
+  type ServiceMapServiceNodeInfoResponse,
+} from '@kbn/apm-api-shared';
 import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
-import type { ServiceMapResponse } from '../../../common/service_map';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { invalidLicenseMessage } from '../../../common/service_map/utils';
 import { notifyFeatureUsage } from '../../feature';
-import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
-import { getMlClient } from '../../lib/helpers/get_ml_client';
-import { getServiceMap } from './get_service_map';
-import type { ServiceMapServiceDependencyInfoResponse } from './get_service_map_dependency_node_info';
-import { getServiceMapDependencyNodeInfo } from './get_service_map_dependency_node_info';
-import type { ServiceMapServiceNodeInfoResponse } from './get_service_map_service_node_info';
-import { getServiceMapServiceNodeInfo } from './get_service_map_service_node_info';
-import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { environmentRt, rangeRt, kueryRt } from '../default_api_types';
-import { getServiceGroup } from '../service_groups/get_service_group';
-import { offsetRt } from '../../../common/comparison_rt';
-import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getApmSloClient } from '../../lib/helpers/get_apm_slo_client';
-import {
-  getServiceMapServiceBadges,
-  type ServiceMapServiceBadgesResponse,
-} from './get_service_map_service_badges';
+import { getMlClient } from '../../lib/helpers/get_ml_client';
+import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
+import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
+import { getServiceGroup } from '../service_groups/get_service_group';
+import { getServiceMap } from './get_service_map';
+import { getServiceMapDependencyNodeInfo } from './get_service_map_dependency_node_info';
+import { getServiceMapServiceBadges } from './get_service_map_service_badges';
+import { getServiceMapServiceNodeInfo } from './get_service_map_service_node_info';
 
 const serviceMapRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/service-map',
-  params: t.type({
-    query: t.intersection([
-      t.partial({
-        serviceName: t.string,
-        serviceGroup: t.string,
-        kuery: kueryRt.props.kuery,
-      }),
-      environmentRt,
-      rangeRt,
-    ]),
-  }),
+  endpoint: routeDefinitions.serviceMap.serviceMap.endpoint,
+  params: routeDefinitions.serviceMap.serviceMap.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<ServiceMapResponse> => {
+  handler: async (resources): Promise<ServiceMapRouteResponse> => {
     const { config, context, params, logger } = resources;
     if (!config.serviceMapEnabled) {
       throw Boom.notFound();
@@ -109,13 +96,8 @@ const serviceMapRoute = createApmServerRoute({
 });
 
 const serviceMapServiceNodeRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/service-map/service/{serviceName}',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([environmentRt, rangeRt, offsetRt]),
-  }),
+  endpoint: routeDefinitions.serviceMap.serviceNode.endpoint,
+  params: routeDefinitions.serviceMap.serviceNode.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceMapServiceNodeInfoResponse> => {
     const { config, context, params } = resources;
@@ -155,20 +137,8 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
 });
 
 const serviceMapDependencyNodeRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/service-map/dependency',
-  params: t.type({
-    query: t.intersection([
-      t.type({
-        dependencies: t.union([t.string, t.array(t.string)]),
-      }),
-      t.partial({
-        sourceServiceName: t.string,
-      }),
-      environmentRt,
-      rangeRt,
-      offsetRt,
-    ]),
-  }),
+  endpoint: routeDefinitions.serviceMap.dependencyNode.endpoint,
+  params: routeDefinitions.serviceMap.dependencyNode.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceMapServiceDependencyInfoResponse> => {
     const { config, context, params } = resources;
@@ -199,17 +169,8 @@ const serviceMapDependencyNodeRoute = createApmServerRoute({
 });
 
 const serviceMapServiceBadgesRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/service-map/service_badges',
-  params: t.type({
-    query: t.intersection([
-      environmentRt,
-      rangeRt,
-      t.partial({
-        kuery: t.string,
-      }),
-    ]),
-    body: t.type({ serviceNames: jsonRt.pipe(t.array(t.string)) }),
-  }),
+  endpoint: routeDefinitions.serviceMap.serviceBadges.endpoint,
+  params: routeDefinitions.serviceMap.serviceBadges.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceMapServiceBadgesResponse> => {
     const { config, context, params } = resources;

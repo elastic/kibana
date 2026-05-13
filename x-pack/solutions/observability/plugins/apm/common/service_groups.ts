@@ -19,17 +19,7 @@ export const LABELS = 'labels'; // implies labels.* wildcard
 export const APM_SERVICE_GROUP_SAVED_OBJECT_TYPE = 'apm-service-group';
 export const MAX_NUMBER_OF_SERVICE_GROUPS = 500;
 
-export interface ServiceGroup {
-  groupName: string;
-  kuery: string;
-  description?: string;
-  color?: string;
-}
-
-export interface SavedServiceGroup extends ServiceGroup {
-  id: string;
-  updatedAt: number;
-}
+export type { ServiceGroup, SavedServiceGroup } from '@kbn/apm-types';
 
 export const SERVICE_GROUP_SUPPORTED_FIELDS = [
   AGENT_NAME,

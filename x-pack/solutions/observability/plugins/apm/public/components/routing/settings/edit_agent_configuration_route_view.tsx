@@ -21,7 +21,8 @@ export function EditAgentConfigurationRouteView() {
         params: { query: { name, environment } },
       });
     },
-    [name, environment]
+    [name, environment],
+    { useCallApmApiV2: true }
   );
 
   return <AgentConfigurationCreateEdit pageStep={pageStep} existingConfigResult={res} />;

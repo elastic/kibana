@@ -90,7 +90,8 @@ export function ServiceIcons({ start, end, serviceName, environment }: Props) {
         });
       }
     },
-    [serviceName, start, end]
+    [serviceName, start, end],
+    { useCallApmApiV2: true }
   );
 
   const { data: details, status: detailsFetchStatus } = useFetcher(
@@ -105,7 +106,8 @@ export function ServiceIcons({ start, end, serviceName, environment }: Props) {
         });
       }
     },
-    [selectedIconPopover, serviceName, start, end, environment]
+    [selectedIconPopover, serviceName, start, end, environment],
+    { useCallApmApiV2: true }
   );
 
   const isLoading = !icons && iconsFetchStatus === FETCH_STATUS.LOADING;

@@ -54,7 +54,8 @@ export function MobileTreemap({
         });
       }
     },
-    [environment, kuery, serviceName, start, end, selectedTreemap]
+    [environment, kuery, serviceName, start, end, selectedTreemap],
+    { useCallApmApiV2: true }
   );
 
   return (

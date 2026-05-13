@@ -69,7 +69,8 @@ export function SpanLinks({ spanLinksCount, traceId, spanId, processorEvent }: P
         },
       });
     },
-    [selectedLinkType, kuery, traceId, spanId, start, end, processorEvent]
+    [selectedLinkType, kuery, traceId, spanId, start, end, processorEvent],
+    { useCallApmApiV2: true }
   );
 
   const selectOptions: EuiSelectOption[] = useMemo(

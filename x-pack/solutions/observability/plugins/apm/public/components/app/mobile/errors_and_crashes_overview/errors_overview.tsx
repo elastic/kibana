@@ -10,13 +10,13 @@ import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useErrorGroupDistributionFetcher } from '../../../../hooks/use_error_group_distribution_fetcher';
 import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { HttpErrorRateChart } from '../charts/mobile_http_error_rate';
 import { ErrorDistribution } from '../errors_and_crashes_group_details/shared/distribution';
@@ -132,7 +132,8 @@ export function MobileErrorsOverview() {
       sortDirection,
       page,
       pageSize,
-    ]
+    ],
+    { useCallApmApiV2: true }
   );
   const { requestId, mobileErrorGroupMainStatistics, currentPageGroupIds } = errorGroupListData;
   const {
@@ -166,7 +167,7 @@ export function MobileErrorsOverview() {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [requestId],
-    { preservePreviousData: false }
+    { preservePreviousData: false, useCallApmApiV2: true }
   );
   const kueryForTreemap = getKueryWithMobileErrorFilter({
     kuery: kueryWithMobileFilters,

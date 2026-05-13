@@ -110,7 +110,8 @@ export function ServiceOverviewThroughputChart({
       transactionName,
       comparisonEnabled,
       preferred,
-    ]
+    ],
+    { useCallApmApiV2: true }
   );
 
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(ChartType.THROUGHPUT);

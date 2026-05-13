@@ -239,6 +239,8 @@
     "@kbn/anonymization-common": "link:x-pack/platform/packages/shared/ai-infra/anonymization-common",
     "@kbn/anonymization-plugin": "link:x-pack/platform/plugins/shared/anonymization",
     "@kbn/anonymization-ui": "link:x-pack/platform/packages/shared/ai-infra/anonymization-ui",
+    "@kbn/apm-agent-configuration": "link:src/platform/packages/shared/kbn-apm-agent-configuration",
+    "@kbn/apm-api-shared": "link:src/platform/packages/shared/kbn-apm-api-shared",
     "@kbn/apm-config-loader": "link:src/platform/packages/private/kbn-apm-config-loader",
     "@kbn/apm-data-access-plugin": "link:x-pack/solutions/observability/plugins/apm_data_access",
     "@kbn/apm-data-view": "link:src/platform/packages/shared/kbn-apm-data-view",

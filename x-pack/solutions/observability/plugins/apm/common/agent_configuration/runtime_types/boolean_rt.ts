@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-
-export const booleanRt = t.union([t.literal('true'), t.literal('false')]);
+export { booleanRt } from '@kbn/apm-agent-configuration';

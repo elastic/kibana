@@ -66,7 +66,8 @@ function useAgentExplorerFetcher({ start, end }: { start: string; end: string })
         },
       });
     },
-    [environment, serviceName, agentLanguage, kuery, start, end]
+    [environment, serviceName, agentLanguage, kuery, start, end],
+    { useCallApmApiV2: true }
   );
 }
 
@@ -77,7 +78,8 @@ function useLatestAgentVersionsFetcher(latestAgentVersionEnabled: boolean) {
         return callApmApi('GET /internal/apm/get_latest_agent_versions');
       }
     },
-    [latestAgentVersionEnabled]
+    [latestAgentVersionEnabled],
+    { useCallApmApiV2: true }
   );
 }
 

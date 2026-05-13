@@ -15,7 +15,7 @@ import {
 import type { APMServerRouteRepository } from '../../server';
 
 import type { APMClient, APMClientOptions } from '../services/rest/create_call_apm_api';
-import type { FetcherResult } from './use_fetcher';
+import type { FetcherResult, UseFetcherOptions } from './use_fetcher';
 import { FETCH_STATUS, useFetcher } from './use_fetcher';
 
 type APMProgressivelyLoadingServerRouteRepository = OmitByValue<
@@ -74,10 +74,24 @@ function clientWithProbability(regularCallApmApi: APMClient, probability: number
   };
 }
 
+// Temporary: useCallApmApiV2 overloads exist while migrating APIs.
+// Once all routes are migrated, remove the V1 overload.
 export function useProgressiveFetcher<TReturn>(
   callback: (callApmApi: APMProgressiveAPIClient) => Promise<TReturn> | undefined,
   dependencies: any[],
-  options?: Parameters<typeof useFetcher>[2]
+  options: UseFetcherOptions & { useCallApmApiV2: true }
+): FetcherResult<TReturn>;
+
+export function useProgressiveFetcher<TReturn>(
+  callback: (callApmApi: APMProgressiveAPIClient) => Promise<TReturn> | undefined,
+  dependencies: any[],
+  options?: UseFetcherOptions & { useCallApmApiV2?: false }
+): FetcherResult<TReturn>;
+
+export function useProgressiveFetcher<TReturn>(
+  callback: (callApmApi: APMProgressiveAPIClient) => Promise<TReturn> | undefined,
+  dependencies: any[],
+  options?: UseFetcherOptions & { useCallApmApiV2?: boolean }
 ): FetcherResult<TReturn> {
   const {
     services: { uiSettings },
@@ -89,26 +103,31 @@ export function useProgressiveFetcher<TReturn>(
 
   const sampledProbability = getProbabilityFromProgressiveLoadingQuality(progressiveLoadingQuality);
 
+  const fetcherOptions = options?.useCallApmApiV2
+    ? { ...options, useCallApmApiV2: true as const }
+    : options;
+
   const sampledFetch = useFetcher(
     (regularCallApmApi) => {
       if (progressiveLoadingQuality === ProgressiveLoadingQuality.off) {
         return;
       }
-      return callback(clientWithProbability(regularCallApmApi, sampledProbability));
+      return callback(clientWithProbability(regularCallApmApi as APMClient, sampledProbability));
     },
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     dependencies,
-    options
+    fetcherOptions as any
   );
 
   const unsampledFetch = useFetcher(
     (regularCallApmApi) => {
-      return callback(clientWithProbability(regularCallApmApi, 1));
+      return callback(clientWithProbability(regularCallApmApi as APMClient, 1));
     },
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    dependencies
+    dependencies,
+    fetcherOptions as any
   );
 
   const fetches = [unsampledFetch, sampledFetch];

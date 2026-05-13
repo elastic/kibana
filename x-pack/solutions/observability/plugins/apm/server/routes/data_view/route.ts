@@ -6,15 +6,15 @@
  */
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
-import type { CreateDataViewResponse } from './create_static_data_view';
+import type { CreateDataViewResponse } from '@kbn/apm-api-shared';
+import { routeDefinitions, type DataViewIndexPatternResponse } from '@kbn/apm-api-shared';
 import { createOrUpdateStaticDataView } from './create_static_data_view';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getApmDataViewIndexPattern } from './get_apm_data_view_index_pattern';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const staticDataViewRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/data_view/static',
+  endpoint: routeDefinitions.dataView.static.endpoint,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): CreateDataViewResponse => {
     const { context, plugins, request, logger } = resources;
@@ -50,11 +50,9 @@ const staticDataViewRoute = createApmServerRoute({
 });
 
 const dataViewTitleRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/data_view/index_pattern',
+  endpoint: routeDefinitions.dataView.indexPattern.endpoint,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async ({
-    getApmIndices,
-  }): Promise<{ apmDataViewIndexPattern: string; apmIndices: APMIndices }> => {
+  handler: async ({ getApmIndices }): Promise<DataViewIndexPatternResponse> => {
     const apmIndices = await getApmIndices();
     const apmDataViewIndexPattern = getApmDataViewIndexPattern(apmIndices);
 

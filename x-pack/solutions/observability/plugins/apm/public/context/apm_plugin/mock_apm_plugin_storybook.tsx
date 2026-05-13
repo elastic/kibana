@@ -18,6 +18,7 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Observable, of } from 'rxjs';
+import { mockCreateCallApmApiV2 } from '@kbn/apm-api-shared/src/mock_create_call_apm_api';
 import { apmRouter } from '../../components/routing/apm_route_config';
 import type { ITelemetryClient } from '../../services/telemetry/types';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
@@ -27,6 +28,7 @@ import { MockTimeRangeContextProvider } from '../time_range_metadata/mock_time_r
 import { ApmTimeRangeMetadataContextProvider } from '../time_range_metadata/time_range_metadata_context';
 import type { ApmPluginContextValue } from './apm_plugin_context';
 import { ApmPluginContext } from './apm_plugin_context';
+import { setApmInternalServices } from '../../plugin';
 
 const uiSettings: Record<string, unknown> = {
   [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: [
@@ -201,6 +203,8 @@ export function MockApmPluginStorybook({
 }) {
   const contextMock = merge({}, mockApmPluginContext, apmContext);
   createCallApmApi(contextMock.core);
+  const callApmApi = mockCreateCallApmApiV2(contextMock.core);
+  setApmInternalServices({ callApmApi });
   const KibanaReactContext = createKibanaReactContext(
     merge({}, contextMock.core, {
       telemetry: storybookTelemetry,

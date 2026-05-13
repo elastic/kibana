@@ -61,9 +61,13 @@ export function ApmMainTemplate({
   const addDataUrl = onboardingLocator?.useUrl({ category: 'application' }) ?? '';
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
 
-  const { data, status } = useFetcher((callApmApi) => {
-    return callApmApi('GET /internal/apm/has_data');
-  }, []);
+  const { data, status } = useFetcher(
+    (callApmApi) => {
+      return callApmApi('GET /internal/apm/has_data');
+    },
+    [],
+    { useCallApmApiV2: true }
+  );
 
   // create static data view on initial load
   useFetcher(
@@ -74,7 +78,8 @@ export function ApmMainTemplate({
         return callApmApi('POST /internal/apm/data_view/static');
       }
     },
-    [application?.capabilities.savedObjectsManagement.edit]
+    [application?.capabilities.savedObjectsManagement.edit],
+    { useCallApmApiV2: true }
   );
 
   const shouldBypassNoDataScreen = bypassNoDataScreenPaths.some((path) =>
@@ -87,7 +92,8 @@ export function ApmMainTemplate({
         return callApmApi('GET /internal/apm/fleet/has_apm_policies');
       }
     },
-    [shouldBypassNoDataScreen, data?.hasData]
+    [shouldBypassNoDataScreen, data?.hasData],
+    { useCallApmApiV2: true }
   );
 
   const isLoading =

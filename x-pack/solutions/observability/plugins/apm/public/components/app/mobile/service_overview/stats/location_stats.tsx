@@ -67,7 +67,8 @@ export function MobileLocationStats({
         },
       });
     },
-    [start, end, environment, kuery, serviceName, locationField, offset]
+    [start, end, environment, kuery, serviceName, locationField, offset],
+    { useCallApmApiV2: true }
   );
 
   const getIcon = useCallback(

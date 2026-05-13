@@ -48,7 +48,8 @@ export function InfraTabs() {
         });
       }
     },
-    [environment, kuery, agentName, serviceName, start, end]
+    [environment, kuery, agentName, serviceName, start, end],
+    { useCallApmApiV2: true }
   );
 
   const { containerIds, podNames, hostNames } = data;

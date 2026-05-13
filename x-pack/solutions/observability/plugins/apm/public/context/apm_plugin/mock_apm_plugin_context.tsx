@@ -25,11 +25,13 @@ import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { mockCreateCallApmApiV2 } from '@kbn/apm-api-shared/src/mock_create_call_apm_api';
 import type { ConfigSchema } from '../..';
 import { apmRouter } from '../../components/routing/apm_route_config';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
 import type { ApmPluginContextValue } from './apm_plugin_context';
 import { ApmPluginContext } from './apm_plugin_context';
+import { setApmInternalServices } from '../../plugin';
 
 const coreStart = coreMock.createStart({ basePath: '/basepath' });
 
@@ -278,6 +280,8 @@ export function MockApmPluginContextWrapper({
   if (contextValue.core) {
     createCallApmApi(contextValue.core);
   }
+  const callApmApi = mockCreateCallApmApiV2(contextValue.core);
+  setApmInternalServices({ callApmApi });
 
   performance.mark = jest.fn();
   performance.clearMeasures = jest.fn();

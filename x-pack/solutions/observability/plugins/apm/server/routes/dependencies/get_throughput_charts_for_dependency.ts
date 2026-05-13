@@ -6,6 +6,7 @@
  */
 
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import type { ThroughputChartsForDependencyResponse } from '@kbn/apm-api-shared';
 import { SPAN_DESTINATION_SERVICE_RESOURCE, SPAN_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
@@ -27,11 +28,6 @@ interface Options {
   kuery: string;
   searchServiceDestinationMetrics: boolean;
   offset?: string;
-}
-
-export interface ThroughputChartsForDependencyResponse {
-  currentTimeseries: Array<{ x: number; y: number | null }>;
-  comparisonTimeseries: Array<{ x: number; y: number | null }> | null;
 }
 
 async function getThroughputChartsForDependencyForTimeRange({

@@ -8,12 +8,12 @@
 import { EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { InstancesLatencyDistributionChart } from '../../../shared/charts/instances_latency_distribution_chart';
 import type { TableOptions } from '../service_overview_instances_table';
 import { ServiceOverviewInstancesTable } from '../service_overview_instances_table';
@@ -135,7 +135,8 @@ export function ServiceOverviewInstancesChartAndTable({
       // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
       comparisonEnabled,
       tableOptions.sort,
-    ]
+    ],
+    { useCallApmApiV2: true }
   );
 
   const { currentPeriodItems, previousPeriodItems, requestId, currentPeriodItemsCount } =
@@ -187,7 +188,7 @@ export function ServiceOverviewInstancesChartAndTable({
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [requestId],
-    { preservePreviousData: false }
+    { preservePreviousData: false, useCallApmApiV2: true }
   );
 
   return (

@@ -85,7 +85,8 @@ export function TimeRangeMetadataContextProvider({
         },
       });
     },
-    [start, end, kuery, useSpanName]
+    [start, end, kuery, useSpanName],
+    { useCallApmApiV2: true }
   );
 
   return (

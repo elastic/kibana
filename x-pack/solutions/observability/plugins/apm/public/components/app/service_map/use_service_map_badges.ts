@@ -93,7 +93,7 @@ export function useServiceMapBadges({
     // abort in-flight requests (see use_fetcher.tsx). Deps are listed in fetcherDeps' useMemo above.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     fetcherDeps,
-    { showToastOnError: false }
+    { showToastOnError: false, useCallApmApiV2: true }
   );
 
   return useMemo(() => {

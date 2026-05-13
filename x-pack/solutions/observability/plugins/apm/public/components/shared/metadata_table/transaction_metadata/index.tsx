@@ -38,7 +38,8 @@ export function TransactionMetadata({ transaction }: Props) {
         },
       });
     },
-    [transaction, transactionId]
+    [transaction, transactionId],
+    { useCallApmApiV2: true }
   );
 
   const sections = useMemo(

@@ -8,6 +8,7 @@
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { ServiceAgentResponse } from '@kbn/apm-api-shared';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   AGENT_NAME,
@@ -21,18 +22,8 @@ import {
   TELEMETRY_SDK_LANGUAGE,
 } from '../../../common/es_fields/apm';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import type { ServerlessType } from '../../../common/serverless';
 import { getServerlessTypeFromCloudData } from '../../../common/serverless';
 import { maybe } from '../../../common/utils/maybe';
-
-export interface ServiceAgentResponse {
-  agentName?: string;
-  runtimeName?: string;
-  runtimeVersion?: string;
-  telemetrySdkName?: string;
-  telemetrySdkLanguage?: string;
-  serverlessType?: ServerlessType;
-}
 
 export async function getServiceAgent({
   serviceName,

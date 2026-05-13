@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiCallOut, EuiDescriptionList, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { isNonLocalIndexName } from '@kbn/es-query';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ApmIntegrationPackageStatus } from './apm_integration_package_status';
 import { IndexTemplatesStatus } from './index_templates_status';
 import { FieldMappingStatus } from './indicies_status';

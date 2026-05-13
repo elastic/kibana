@@ -30,11 +30,7 @@ import { AnomalyDetectorType } from '../anomaly_detection/apm_ml_detectors';
 
 export const APM_SERVER_FEATURE_ID = 'apm';
 
-export enum AggregationType {
-  Avg = 'avg',
-  P95 = '95th',
-  P99 = '99th',
-}
+export { AggregationType } from '@kbn/apm-types';
 
 export interface ApmRuleParamsType {
   [ApmRuleType.TransactionDuration]: TransactionDurationRuleParams;

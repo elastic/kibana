@@ -23,13 +23,13 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 import { useDashboardFetcher } from '../../../../hooks/use_dashboards_fetcher';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { SERVICE_NAME } from '../../../../../common/es_fields/apm';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 import type { MergedServiceDashboard } from '..';
+import { getApmInternalServices } from '../../../../plugin';
 
 interface Props {
   onClose: () => void;
@@ -46,6 +46,7 @@ export function SaveDashboardModal({
   serviceDashboards,
   serviceName,
 }: Props) {
+  const { callApmApi } = getApmInternalServices();
   const modalTitleId = useGeneratedHtmlId();
 
   const {
@@ -147,6 +148,7 @@ export function SaveDashboardModal({
       serviceName,
       currentDashboard,
       history,
+      callApmApi,
     ]
   );
 

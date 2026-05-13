@@ -4,14 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export enum AnnotationType {
-  VERSION = 'version',
-}
-
-export interface Annotation {
-  type: AnnotationType;
-  id: string;
-  '@timestamp': number;
-  text: string;
-}
+export { AnnotationType, type Annotation } from '@kbn/apm-types';

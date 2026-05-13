@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import type { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
+import { type CreateAgentKeyResponse } from '@kbn/apm-api-shared';
 import Boom from '@hapi/boom';
 import type { ApmPluginRequestHandlerContext } from '../typings';
 import { ClusterPrivilegeType } from '../../../common/privilege_type';
 
 const resource = '*';
 const CLUSTER_PRIVILEGES = [ClusterPrivilegeType.MANAGE_OWN_API_KEY];
-
-export interface CreateAgentKeyResponse {
-  agentKey: SecurityCreateApiKeyResponse;
-}
 
 export async function createAgentKey({
   context,
@@ -26,7 +22,7 @@ export async function createAgentKey({
     name: string;
     privileges: string[];
   };
-}) {
+}): Promise<CreateAgentKeyResponse> {
   const { name, privileges } = requestBody;
   const application = {
     application: 'apm',
@@ -96,7 +92,5 @@ export async function createAgentKey({
 
   const agentKey = await coreContext.elasticsearch.client.asCurrentUser.security.createApiKey(body);
 
-  return {
-    agentKey,
-  };
+  return { agentKey };
 }

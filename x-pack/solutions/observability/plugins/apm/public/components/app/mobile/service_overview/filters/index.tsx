@@ -9,13 +9,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { MobileProperty } from '../../../../../../common/mobile_types';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
 import { useApmServiceContext } from '../../../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../../../hooks/use_breakpoints';
 import { useFetcher, FETCH_STATUS } from '../../../../../hooks/use_fetcher';
-import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { push } from '../../../../shared/links/url_helpers';
 
 type MobileFilter =
@@ -89,7 +89,8 @@ export function MobileFilters() {
         },
       });
     },
-    [start, end, environment, kuery, serviceName, transactionType]
+    [start, end, environment, kuery, serviceName, transactionType],
+    { useCallApmApiV2: true }
   );
 
   function toSelectOptions(items?: string[]) {

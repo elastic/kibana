@@ -8,19 +8,16 @@
 import { isEqual } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { getStaticDataViewId } from '@kbn/apm-data-view';
+import type { CreateDataViewResponse } from '@kbn/apm-api-shared';
 import { TRANSACTION_ID, TRANSACTION_DURATION } from '../../../common/es_fields/apm';
 import { hasHistoricalAgentData } from '../historical_data/has_historical_agent_data';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getApmDataViewIndexPattern } from './get_apm_data_view_index_pattern';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import type { APMRouteHandlerResources } from '../apm_routes/register_apm_server_routes';
-
-export type CreateDataViewResponse = Promise<
-  { created: boolean; dataView: DataView } | { created: boolean; reason?: string }
->;
 
 export async function createOrUpdateStaticDataView({
   dataViewService,
