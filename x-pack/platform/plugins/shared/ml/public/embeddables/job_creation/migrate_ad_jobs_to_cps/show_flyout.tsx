@@ -21,10 +21,14 @@ export async function showMigrateADJobsToCpsFlyout(
   data: DataPublicPluginStart,
   dashboardService: DashboardStart,
   cps?: CPSPluginStart,
+  initialJobIds?: string[],
+  allowScopeSelection?: boolean,
   onFlyoutClose?: () => void
 ): Promise<void> {
   const Comp: FC<FlyoutComponentProps> = ({ onClose }) => (
     <MigrateADJobsToCpsFlyout
+      initialJobIds={initialJobIds}
+      allowScopeSelection={allowScopeSelection}
       onClose={() => {
         onClose();
         onFlyoutClose?.();

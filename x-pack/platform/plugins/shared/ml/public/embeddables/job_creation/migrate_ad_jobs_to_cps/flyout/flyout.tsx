@@ -19,6 +19,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiFormRow,
   EuiIcon,
   EuiListGroup,
   EuiListGroupItem,
@@ -27,21 +28,31 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import type { ProjectRouting } from '@kbn/es-query';
+import { ProjectPicker, useFetchProjects } from '@kbn/cps-utils';
 
 import { useMlKibana, useNotifications } from '../../../../application/contexts/kibana';
 import { useJobsApiService } from '../../../../application/services/ml_api_service/jobs';
 
 interface Props {
   onClose: () => void;
+  initialJobIds?: string[];
+  allowScopeSelection?: boolean;
 }
 
 const DEFAULT_PROJECT_ROUTING = '_alias:_origin';
 
-export const MigrateADJobsToCpsFlyout: FC<Props> = ({ onClose }) => {
+export const MigrateADJobsToCpsFlyout: FC<Props> = ({
+  onClose,
+  initialJobIds,
+  allowScopeSelection,
+}) => {
   const { services } = useMlKibana();
   const { cps } = services;
   const { toasts } = useNotifications();
   const jobsApi = useJobsApiService();
+  const cpsManager = cps?.cpsManager;
+  const totalProjectCount = cpsManager?.getTotalProjectCount() ?? 0;
 
   const [loadError, setLoadError] = useState<Error | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,8 +62,30 @@ export const MigrateADJobsToCpsFlyout: FC<Props> = ({ onClose }) => {
     string,
     { success: boolean }
   > | null>(null);
+  const [selectedProjectRouting, setSelectedProjectRouting] =
+    useState<string>(DEFAULT_PROJECT_ROUTING);
+
+  const fetchProjects = useCallback(
+    (routing?: ProjectRouting) => {
+      return cpsManager?.fetchProjects(routing) ?? Promise.resolve(null);
+    },
+    [cpsManager]
+  );
+
+  const projects = useFetchProjects(fetchProjects, selectedProjectRouting);
+
+  const onProjectRoutingChange = useCallback((projectRouting: ProjectRouting) => {
+    setSelectedProjectRouting(projectRouting as string);
+  }, []);
 
   useEffect(() => {
+    if (initialJobIds) {
+      setJobIds(initialJobIds);
+      setLoading(false);
+      setLoadError(null);
+      return;
+    }
+
     let cancelled = false;
 
     (async () => {
@@ -67,7 +100,7 @@ export const MigrateADJobsToCpsFlyout: FC<Props> = ({ onClose }) => {
           return;
         }
         const response = await jobsApi.bulkUpdateProjectRouting({
-          projectRouting: DEFAULT_PROJECT_ROUTING,
+          projectRouting: selectedProjectRouting,
           simulate: true,
           auto: true,
         });
@@ -90,7 +123,7 @@ export const MigrateADJobsToCpsFlyout: FC<Props> = ({ onClose }) => {
     return () => {
       cancelled = true;
     };
-  }, [cps, jobsApi]);
+  }, [cps, jobsApi, initialJobIds, selectedProjectRouting]);
 
   const onMigrate = useCallback(async () => {
     if (jobIds.length === 0) {
@@ -99,7 +132,7 @@ export const MigrateADJobsToCpsFlyout: FC<Props> = ({ onClose }) => {
     setMigrating(true);
     try {
       const response = await jobsApi.bulkUpdateProjectRouting({
-        projectRouting: DEFAULT_PROJECT_ROUTING,
+        projectRouting: selectedProjectRouting,
         jobIds,
       });
       const next: Record<string, { success: boolean }> = {};
@@ -141,7 +174,7 @@ export const MigrateADJobsToCpsFlyout: FC<Props> = ({ onClose }) => {
     } finally {
       setMigrating(false);
     }
-  }, [jobIds, jobsApi, toasts]);
+  }, [jobIds, jobsApi, selectedProjectRouting, toasts]);
 
   const allMigrationsSucceeded = useMemo(
     () =>
@@ -197,7 +230,7 @@ export const MigrateADJobsToCpsFlyout: FC<Props> = ({ onClose }) => {
             />
           </p>
         </EuiText>
-        <EuiSpacer size="m" />
+
         <EuiListGroup maxWidth={true} data-test-subj="mlMigrateAdJobsToCpsJobList" gutterSize="s">
           {jobIds.map((id) => {
             const result = migrationResults?.[id];
@@ -230,6 +263,43 @@ export const MigrateADJobsToCpsFlyout: FC<Props> = ({ onClose }) => {
     );
   };
 
+  const scopePicker =
+    allowScopeSelection && totalProjectCount > 1 && projects ? (
+      <>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.ml.embeddables.migrateADJobsToCpsFlyout.projectRoutingLabel"
+              defaultMessage="Project routing"
+            />
+          }
+        >
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <ProjectPicker
+                projectRouting={selectedProjectRouting}
+                onProjectRoutingChange={onProjectRoutingChange}
+                projects={projects}
+                totalProjectCount={totalProjectCount}
+              />
+            </EuiFlexItem>
+            {selectedProjectRouting ? (
+              <EuiFlexItem grow={false}>
+                <EuiText
+                  size="s"
+                  color="subdued"
+                  data-test-subj="mlMigrateAdJobsToCpsProjectRoutingValue"
+                >
+                  {selectedProjectRouting}
+                </EuiText>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+        </EuiFormRow>
+        <EuiSpacer size="m" />
+      </>
+    ) : null;
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -243,7 +313,10 @@ export const MigrateADJobsToCpsFlyout: FC<Props> = ({ onClose }) => {
           </h3>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>{renderBody()}</EuiFlyoutBody>
+      <EuiFlyoutBody>
+        {scopePicker}
+        {renderBody()}
+      </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>

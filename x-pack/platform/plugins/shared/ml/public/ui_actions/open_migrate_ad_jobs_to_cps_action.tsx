@@ -34,8 +34,17 @@ export function migrateADJobsToCps(
             getStartServices(),
           ]);
 
-        const { onClose } = context;
-        await showMigrateADJobsToCpsFlyout(coreStart, share, data, dashboard, cps, onClose);
+        const { onClose, initialJobIds, allowScopeSelection } = context;
+        await showMigrateADJobsToCpsFlyout(
+          coreStart,
+          share,
+          data,
+          dashboard,
+          cps,
+          initialJobIds,
+          allowScopeSelection,
+          onClose
+        );
       } catch (e) {
         return Promise.reject(e);
       }

@@ -221,10 +221,13 @@ export const MultiJobActionsMenu: FC<MultiJobActionsMenuProps> = ({
     items.push(
       <EuiContextMenuItem
         key="migrate to cps"
-        icon="continue"
+        icon="crossProjectSearch"
         disabled={false}
         onClick={() => {
-          void uiActions.executeTriggerActions(MIGRATE_AD_JOBS_TO_CPS_TRIGGER, {});
+          void uiActions.executeTriggerActions(MIGRATE_AD_JOBS_TO_CPS_TRIGGER, {
+            initialJobIds: jobsToCPSMigrate.map((j) => j.id),
+            allowScopeSelection: true,
+          });
           closePopover();
         }}
         data-test-subj="mlADJobListMultiSelectMigrateToCpsActionButton"
@@ -251,7 +254,7 @@ export const MultiJobActionsMenu: FC<MultiJobActionsMenuProps> = ({
       >
         <FormattedMessage
           id="xpack.ml.jobsList.multiJobsActions.createAlertsLabel"
-          defaultMessage="Create alert rule!!!!"
+          defaultMessage="Create alert rule"
         />
       </EuiContextMenuItem>
     );

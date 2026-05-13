@@ -26,6 +26,8 @@ export interface MigrateADJobsToCpsContext {
    * Invoked after the migrate flyout is closed, when the trigger is executed with this in context.
    */
   onClose?: () => void;
+  initialJobIds?: string[];
+  allowScopeSelection?: boolean;
 }
 
 export const MIGRATE_AD_JOBS_TO_CPS_ACTION = 'migrateADJobsToCpsAction';
