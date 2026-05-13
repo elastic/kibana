@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { LicenseType } from '@kbn/licensing-types';
-import { isColumn, isFunctionExpression, isIdentifier, isParamLiteral } from '@elastic/esql';
+import {
+  isColumn,
+  isFunctionExpression,
+  isIdentifier,
+  isInlineCast,
+  isParamLiteral,
+} from '@elastic/esql';
 import type { ESQLAst, ESQLAstAllCommands, ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
 import type { PromQLFunction } from '@elastic/esql';
 import { errors, getFunctionDefinition } from '..';
@@ -27,7 +33,6 @@ import type {
 import { resolveArgumentTypes } from '../expressions';
 import { getMatchingSignatures, getMaxMinNumberOfParams } from '../signatures';
 import { ColumnValidator } from './column';
-import { removeInlineCasts } from './utils';
 
 export function validateFunction({
   fn,
@@ -132,6 +137,19 @@ class FunctionValidator {
     return this.hintKindAt(position) === 'aggregation';
   }
 
+  private paramNameAt(position: number): string | undefined {
+    if (!this.definition) {
+      return undefined;
+    }
+    for (const sig of this.definition.signatures) {
+      const name = sig.params[position]?.name;
+      if (name) {
+        return name;
+      }
+    }
+    return undefined;
+  }
+
   private validateAggregationArg(arg: ESQLAstItem, position: number): void {
     const isAggCall =
       isFunctionExpression(arg) &&
@@ -153,19 +171,6 @@ class FunctionValidator {
       child.validate();
       this.report(...child.messages);
     }
-  }
-
-  private paramNameAt(position: number): string | undefined {
-    if (!this.definition) {
-      return undefined;
-    }
-    for (const sig of this.definition.signatures) {
-      const name = sig.params[position]?.name;
-      if (name) {
-        return name;
-      }
-    }
-    return undefined;
   }
 
   /**
@@ -228,10 +233,10 @@ class FunctionValidator {
   /**
    * Validates the nested functions within the current function.
    *
-   * Positions marked `hint.kind === 'aggregation'` are handled by
-   * `validateAggregationArg` and reported inline (no short-circuit on the
-   * parent). All other positions use the legacy path where nested-agg / license
-   * errors collect in `nestedErrors` and short-circuit further parent validation.
+   * Positions marked `hint.kind === 'aggregation'` are handled
+   * by `validateAggregationArg` and reported inline.
+   * All other positions use the legacy path where nested-agg / license errors
+   * collect in `nestedErrors` and short-circuit further parent validation.
    */
   private validateNestedFunctions(): ESQLMessage[] {
     const nestedErrors: ESQLMessage[] = [];
@@ -251,8 +256,6 @@ class FunctionValidator {
         continue;
       }
 
-      // Default path: legacy nested-agg / license errors propagate via nestedErrors
-      // and short-circuit further parent validation.
       if (isFunctionExpression(arg)) {
         const validator = new FunctionValidator(
           arg,
@@ -322,6 +325,13 @@ class FunctionValidator {
     const arity = this.fn.args.length;
     return arity >= min && arity <= max;
   }
+}
+
+function removeInlineCasts(arg: ESQLAstItem): ESQLAstItem {
+  if (isInlineCast(arg)) {
+    return removeInlineCasts(arg.value);
+  }
+  return arg;
 }
 
 // ----------------------------------------------------------------------------
