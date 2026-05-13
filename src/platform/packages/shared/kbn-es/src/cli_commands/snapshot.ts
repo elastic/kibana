@@ -258,9 +258,9 @@ export const snapshot: Command = {
         }
 
         // Keep the process alive until the user sends SIGINT/SIGTERM (Ctrl+C).
-        await new Promise<void>((resolve) => {
+        await new Promise<void>((resolveShutdown) => {
           const shutdown = () => {
-            cluster.stop().finally(resolve);
+            cluster.stop().finally(resolveShutdown);
           };
           process.on('SIGINT', shutdown);
           process.on('SIGTERM', shutdown);
