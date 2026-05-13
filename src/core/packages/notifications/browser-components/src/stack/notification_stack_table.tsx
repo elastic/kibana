@@ -16,6 +16,7 @@ import { TypeCell } from './columns/type_cell';
 import { SpaceCell } from './columns/space_cell';
 import { ReceivedCell } from './columns/received_cell';
 import type { NotificationStackItem } from './types';
+import { PinnedIndicatorCell } from './columns/pinned_indicator_cell';
 
 const { Column, Action } = ContentListTable;
 
@@ -82,6 +83,16 @@ export const NotificationStackTable = ({
         minWidth="36px"
         maxWidth="36px"
         render={(item: ContentListItem) => <UnreadIndicatorCell item={item} />}
+      />
+      <Column
+        id="pinned"
+        name=""
+        width="36px"
+        minWidth="36px"
+        maxWidth="36px"
+        render={(item: ContentListItem) => (
+          <PinnedIndicatorCell item={item as NotificationStackItem} onTogglePin={onTogglePin} />
+        )}
       />
       <Column.Name showDescription />
       <Column
