@@ -112,15 +112,12 @@ export const registerGetTimeFieldRoute = (
       const service = new EsqlService({ client: core.elasticsearch.client.asCurrentUser });
       const { views } = await service.getViews().catch((viewsError) => {
         const message = viewsError instanceof Error ? viewsError.message : String(viewsError);
-        logger.get().error(
-          `Failed to fetch ES|QL views while resolving timefield: ${message}`,
-          {
-            tags: ['esql', 'timefield', 'views'],
-            error: {
-              stack_trace: viewsError instanceof Error ? viewsError.stack : undefined,
-            },
-          }
-        );
+        logger.get().error(`Failed to fetch ES|QL views while resolving timefield: ${message}`, {
+          tags: ['esql', 'timefield', 'views'],
+          error: {
+            stack_trace: viewsError instanceof Error ? viewsError.stack : undefined,
+          },
+        });
         return { views: [] };
       });
       const viewNames = new Set(views.map(({ name }) => name));
@@ -152,19 +149,19 @@ export const registerGetTimeFieldRoute = (
               return hasTimestampInFieldCapsResponse(fieldCapsResp);
             } catch (fieldCapsError) {
               const message =
-                fieldCapsError instanceof Error
-                  ? fieldCapsError.message
-                  : String(fieldCapsError);
-              logger.get().error(
-                `fieldCaps check failed for index "${index}" while resolving ES|QL timefield: ${message}`,
-                {
-                  tags: ['esql', 'timefield', 'fieldCaps'],
-                  error: {
-                    stack_trace:
-                      fieldCapsError instanceof Error ? fieldCapsError.stack : undefined,
-                  },
-                }
-              );
+                fieldCapsError instanceof Error ? fieldCapsError.message : String(fieldCapsError);
+              logger
+                .get()
+                .error(
+                  `fieldCaps check failed for index "${index}" while resolving ES|QL timefield: ${message}`,
+                  {
+                    tags: ['esql', 'timefield', 'fieldCaps'],
+                    error: {
+                      stack_trace:
+                        fieldCapsError instanceof Error ? fieldCapsError.stack : undefined,
+                    },
+                  }
+                );
               return false;
             }
           })
