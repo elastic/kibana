@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { IlmPhaseFilter } from '.';
@@ -72,7 +72,7 @@ describe('IlmPhaseFilter', () => {
   });
 
   describe('when hovering over search input', () => {
-    it('shows a tooltip with the ilm check description', () => {
+    it('shows a tooltip with the ilm check description', async () => {
       render(
         <TestExternalProviders>
           <TestDataQualityProviders>

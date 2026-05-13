@@ -184,7 +184,7 @@ function getAssignableDifference(inputPath, targetDir) {
 const absOverrides = overridesWithNoRestrictedImportRule.map((override) => ({
   ...override,
   files: override.files.map((fileOrGlob) => {
-    return path.resolve(ROOT_DIR, fileOrGlob);
+    return path.resolve('../../../../../', fileOrGlob);
   }),
 }));
 
@@ -207,5 +207,14 @@ const inScopeOverrides = absOverrides.map((override) => ({
 const finalOverrides = inScopeOverrides.filter((override) => override.files.length > 0);
 
 module.exports = {
-  overrides: finalOverrides,
+  overrides: [
+    ...finalOverrides,
+    // Files whose name contains "legacy" are exempt from the heavy-selector ban.
+    {
+      files: ['**/*legacy*'],
+      rules: {
+        'no-restricted-imports': 'off',
+      },
+    },
+  ],
 };

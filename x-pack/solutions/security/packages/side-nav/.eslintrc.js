@@ -188,5 +188,14 @@ const inScopeOverrides = absOverrides.map((override) => ({
 const finalOverrides = inScopeOverrides.filter((override) => override.files.length > 0);
 
 module.exports = {
-  overrides: finalOverrides,
+  overrides: [
+    ...finalOverrides,
+    // Files whose name contains "legacy" are exempt from the heavy-selector ban.
+    {
+      files: ['**/*legacy*'],
+      rules: {
+        'no-restricted-imports': 'off',
+      },
+    },
+  ],
 };

@@ -69,7 +69,7 @@
 // eslint-disable-next-line import/no-nodejs-modules
 const path = require('path');
 
-const minimatch = require('minimatch');
+const { minimatch } = require('minimatch');
 
 /** @type {Array.<RestrictedImportPath>} */
 const RESTRICTED_IMPORTS_PATHS = [
@@ -203,5 +203,14 @@ const inScopeOverrides = absOverrides.map((override) => ({
 const finalOverrides = inScopeOverrides.filter((override) => override.files.length > 0);
 
 module.exports = {
-  overrides: finalOverrides,
+  overrides: [
+    ...finalOverrides,
+    // Files whose name contains "legacy" are exempt from the heavy-selector ban.
+    {
+      files: ['**/*legacy*'],
+      rules: {
+        'no-restricted-imports': 'off',
+      },
+    },
+  ],
 };
