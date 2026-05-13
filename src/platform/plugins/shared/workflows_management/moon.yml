@@ -97,12 +97,13 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/kbn-client'
   - '@kbn/rule-data-utils'
-  - '@kbn/inbox-plugin'
-  - '@kbn/inbox-common'
+  - '@kbn/std'
   - '@kbn/core-saved-objects-common'
   - '@kbn/esql-types'
   - '@kbn/esql-language'
   - '@kbn/esql-utils'
+  - '@kbn/inbox-plugin'
+  - '@kbn/inbox-common'
 tags:
   - plugin
   - prod
