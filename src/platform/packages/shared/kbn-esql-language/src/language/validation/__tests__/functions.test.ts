@@ -1163,6 +1163,15 @@ describe('function validation', () => {
       );
     });
 
+    it('allows null as a result value in combination with other types, being null in the first position', async () => {
+      const { expectErrors } = await setup();
+
+      await expectErrors(
+        'FROM index | EVAL result = CONDITIONAL_MOCK(booleanField, null, booleanField, "text")',
+        []
+      );
+    });
+
     it('allows null as the elseValue in combination with other types', async () => {
       const { expectErrors } = await setup();
 
