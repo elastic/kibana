@@ -886,14 +886,14 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
           },
           {
             id: 'stats-error-rate-detection',
-            text: 'Should generate a STATS query detecting the sustained Kafka error rate in rest-fights and event-statistics. The STATS query should complement the match-type error detection queries.',
+            text: 'Should generate a STATS query detecting the sustained Kafka error rate in rest-fights. The STATS query should complement the match-type error detection queries.',
             score: 2,
           },
         ],
         expected_categories: ['error', 'operational'],
         expect_stats: true,
         expected_ground_truth:
-          'queries=[error detection for SmallRye Kafka write failures (SRMSG18206/SRMSG18212/TimeoutException) from rest-fights and event-statistics; STATS queries for sustained Kafka error rate and event-statistics throughput drop]',
+          'queries=[error detection for SmallRye Kafka write failures (SRMSG18206/SRMSG18212/TimeoutException) from rest-fights; STATS queries for sustained Kafka error rate and event-statistics throughput drop]',
       },
       metadata: {
         difficulty: 'medium',
