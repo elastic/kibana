@@ -133,10 +133,8 @@ describe('<AlertReason />', () => {
     });
   });
 
-  it('should pass the provided scope id to the full reason renderer', async () => {
-    const { findByTestId, getByTestId } = renderAlertReason({
-      scopeId: 'legacy-scope-id',
-    });
+  it('should pass the document flyout scope id to the full reason renderer', async () => {
+    const { findByTestId, getByTestId } = renderAlertReason();
 
     fireEvent.click(getByTestId(REASON_DETAILS_PREVIEW_BUTTON_TEST_ID));
 
@@ -148,7 +146,7 @@ describe('<AlertReason />', () => {
     });
     expect(mockRenderRow).toHaveBeenCalledWith({
       data: mockDataAsNestedObject,
-      scopeId: 'legacy-scope-id',
+      scopeId: 'document-details-flyout',
     });
     expect(await findByTestId('full-reason-renderer')).toBeInTheDocument();
   });

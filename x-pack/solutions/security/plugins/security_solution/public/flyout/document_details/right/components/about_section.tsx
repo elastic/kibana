@@ -106,7 +106,7 @@ export const AboutSection = memo(() => {
           onShowRuleSummary={openRulePreview}
           ruleSummaryDisabled={ruleSummaryDisabled}
         />
-        <AlertReason hit={hit} scopeId={scopeId} />
+        <AlertReason hit={hit} />
         <MitreAttack hit={hit} />
         <AlertStatus hit={hit} />
       </>

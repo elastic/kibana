@@ -45,13 +45,9 @@ export interface AlertReasonProps {
    * Alert/event document
    */
   hit: DataTableRecord;
-  /**
-   * Scope id used by row renderers. The old flyout passes its context scope id.
-   */
-  scopeId?: string;
 }
 
-export const AlertReason: FC<AlertReasonProps> = ({ hit, scopeId }) => {
+export const AlertReason: FC<AlertReasonProps> = ({ hit }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const isAlert = useMemo(
@@ -101,11 +97,11 @@ export const AlertReason: FC<AlertReasonProps> = ({ hit, scopeId }) => {
             }
           )}
         >
-          {isPopoverOpen ? <AlertReasonPopoverContent hit={hit} scopeId={scopeId} /> : null}
+          {isPopoverOpen ? <AlertReasonPopoverContent hit={hit} /> : null}
         </EuiPopover>
       </EuiFlexItem>
     );
-  }, [closePopover, hit, isPopoverOpen, reason, scopeId, togglePopover]);
+  }, [closePopover, hit, isPopoverOpen, reason, togglePopover]);
 
   const alertReasonText = reason ? (
     reason
@@ -161,13 +157,9 @@ export const AlertReason: FC<AlertReasonProps> = ({ hit, scopeId }) => {
 
 interface AlertReasonPopoverContentProps {
   hit: DataTableRecord;
-  scopeId?: string;
 }
 
-const AlertReasonPopoverContent: FC<AlertReasonPopoverContentProps> = ({
-  hit,
-  scopeId = SCOPE_ID,
-}) => {
+const AlertReasonPopoverContent: FC<AlertReasonPopoverContentProps> = ({ hit }) => {
   const { dataAsNestedObject, loading } = useEventDetails({
     eventId: hit.raw._id,
     indexName: hit.raw._index,
@@ -186,10 +178,10 @@ const AlertReasonPopoverContent: FC<AlertReasonPopoverContentProps> = ({
       renderer && dataAsNestedObject
         ? renderer.renderRow({
             data: dataAsNestedObject,
-            scopeId,
+            scopeId: SCOPE_ID,
           })
         : null,
-    [renderer, dataAsNestedObject, scopeId]
+    [renderer, dataAsNestedObject]
   );
 
   if (loading) {
