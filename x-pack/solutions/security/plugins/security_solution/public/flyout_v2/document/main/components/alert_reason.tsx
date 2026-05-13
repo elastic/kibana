@@ -217,9 +217,18 @@ const AlertReasonPopoverPanel: FC<{ children: ReactNode }> = ({ children }) => (
       width: min(600px, 80vw);
     `}
   >
-    <EuiText size="xs" data-test-subj={REASON_DETAILS_LEGACY_BODY_TEST_ID}>
-      {children}
-    </EuiText>
+    <div data-test-subj={REASON_DETAILS_LEGACY_BODY_TEST_ID}>
+      <EuiTitle size="xxxs">
+        <h6>
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.document.about.reason.alertReasonTitle"
+            defaultMessage="Alert reason"
+          />
+        </h6>
+      </EuiTitle>
+      <EuiSpacer size="xs" />
+      <EuiText size="xs">{children}</EuiText>
+    </div>
   </EuiPanel>
 );
 
