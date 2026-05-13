@@ -55,6 +55,8 @@ interface DashboardLayoutTweakpanePane {
       | { label: string; min: number; max: number; step: number }
       | { label: string; options: ReadonlyArray<{ text: string; value: string }> }
   ): TweakpaneBindingApi;
+  /** Re-read bound object values and update all control displays (needed after programmatic updates). */
+  refresh(): void;
   dispose(): void;
 }
 
@@ -138,6 +140,7 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
         setPanelPaddingVerticalPx(params.panelPaddingVerticalPx);
         setPanelPaddingHorizontalPx(params.panelPaddingHorizontalPx);
         setDashboardBackgroundToken(params.dashboardBackgroundToken);
+        pane.refresh();
       };
 
       const presetUi = { preset: DASHBOARD_LAYOUT_TWEAKPANE_CURRENT_STATE_PRESET_ID };
