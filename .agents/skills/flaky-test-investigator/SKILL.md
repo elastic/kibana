@@ -8,7 +8,7 @@ description: >-
 
 Investigate a flaky Scout, FTR, or Jest test failure and identify a fix if one is available.
 
-Start from any of these inputs:
+You should accept any of these inputs:
 
 - A link to the GitHub `failed-test` issue. Prefer the latest failure, but review all of them.
 - A test file path, plus the branch it failed on (defaults to `main`).
@@ -134,8 +134,11 @@ Common best-practice violations that cause flakiness:
 
 Scout and FTR tests should also follow the general best practices in `docs/extend/scout/best-practices.md`, the UI best practices in `docs/extend/scout/ui-best-practices.md`, and the API best practices in `docs/extend/scout/api-best-practices.md`.
 
-# Fixing pitfalls
+# Investigation pitfalls
 
-- **Increasing timeouts**: raising a timeout shouldn't be the first fix class that comes to mind. Treat it as a last resort and exhaust other options first.
-- **Making substantial changes to the test**: don't update assertions or weaken the test coverage just to make the test pass.
-- **Reduce coverage surface**: don't simply remove tags so that the test isn't run in certain environments (e.g., Cloud) or in certain project types (e.g., serverless Security project).
+Common bad instincts when fixing a flaky test. Each of these can make the symptom go away while leaving the underlying problem — or worse, hiding a real bug.
+
+- **Ignoring the bigger picture.** Don't fix in isolation. The flakiness may have been transient, may point to a broader environment issue, or may be a signal that the test should be rewritten or removed (see "Investigation: assess the test itself").
+- **Raising timeouts or retry counts.** Rarely the right fix. Treat it as a last resort and exhaust other options first.
+- **Weakening assertions.** Don't make assertions more lenient or narrow their scope just to make the test pass; that hides regressions instead of catching them.
+- **Reducing coverage surface.** Don't strip tags to skip the test in certain environments (e.g. Cloud) or project types (e.g. serverless Security) unless you have a real reason it shouldn't run there. "It's flaky here" is not a real reason.
