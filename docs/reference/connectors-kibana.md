@@ -180,7 +180,6 @@ The header starts with the underlying HTTP client name and version (for example,
 | {{ech}} | `elastic (deployment:<deployment_id>)` | `<deployment_id>` is the deployment ID. |
 | Elastic Cloud Serverless | `elastic (project:<project_id>)` | `<project_id>` is the serverless project ID. |
 
-{{kib}} uses `project:<project_id>` when Cloud metadata includes a serverless project ID; otherwise it uses `deployment:<deployment_id>` when a deployment ID is present. Hosted and serverless environments normally expose only one of these identifiers.
 
 ### Look up the deployment or project from an identifier
 
