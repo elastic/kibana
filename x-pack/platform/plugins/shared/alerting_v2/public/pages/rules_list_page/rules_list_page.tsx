@@ -13,6 +13,7 @@ import {
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiPageHeader,
   EuiSpacer,
   EuiSplitButton,
@@ -35,6 +36,7 @@ import { useCreateRule } from '../../hooks/use_create_rule';
 import { useUpdateRule } from '../../hooks/use_update_rule';
 import { useFetchRuleTags } from '../../hooks/use_fetch_rule_tags';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { paths } from '../../constants';
 
 import { RulesListTableContainer } from './rules_list_table_container';
 import type { RulesListTableSortField } from './rules_list_table';
@@ -42,7 +44,7 @@ import { ModeFilterPopover } from '../../components/rule/popovers/mode_filter_po
 import { StatusFilterPopover } from '../../components/rule/popovers/status_filter_popover';
 import { TagsFilterPopover } from '../../components/rule/popovers/tag_filter_popover';
 import { buildRulesListFilter } from './utils';
-import { paths } from '../../constants';
+import { RuleCreateOptionsPanel } from '../../components/rule_create_options/rule_create_options_panel';
 
 const DEFAULT_PER_PAGE = 20;
 export const SEARCH_DEBOUNCE_MS = 300;
@@ -138,77 +140,87 @@ export const RulesListPage = () => {
   };
 
   const availableTagOptions = allTags ?? [];
-
-  const hasActiveFilters = Boolean(filter);
+  const hasActiveFilters = Boolean(filter) || Boolean(searchInput.trim());
+  const isInitialLoad = isLoading && rulesData === undefined;
+  const hasRules = (rulesData?.total ?? 0) > 0;
+  const showEmptyState = !isInitialLoad && !isError && !hasRules && !hasActiveFilters;
 
   return (
     <div>
       <EuiPageHeader
         pageTitle={
-          <FormattedMessage
-            id="xpack.alertingV2.rulesList.pageTitle"
-            defaultMessage="Alerting V2 Rules"
-          />
+          <FormattedMessage id="xpack.alertingV2.rulesList.pageTitle" defaultMessage="Rules" />
         }
-        rightSideItems={[
-          <EuiSplitButton
-            key="create-rule-split"
-            color="primary"
-            size="m"
-            data-test-subj="createRuleSplitButton"
-          >
-            <EuiSplitButton.ActionPrimary
-              onClick={() => application.navigateToUrl(http.basePath.prepend(paths.ruleCreate))}
-              data-test-subj="createRuleButton"
-            >
-              <FormattedMessage
-                id="xpack.alertingV2.rulesList.createRuleButton"
-                defaultMessage="Create rule"
-              />
-            </EuiSplitButton.ActionPrimary>
-            <EuiSplitButton.ActionSecondary
-              iconType="arrowDown"
-              aria-label={i18n.translate('xpack.alertingV2.rulesList.createRuleMoreOptions', {
-                defaultMessage: 'More create options',
-              })}
-              onClick={toggleCreateMenu}
-              data-test-subj="createRulePopoverButton"
-              popoverProps={{
-                id: createMenuId,
-                isOpen: isCreateMenuOpen,
-                closePopover: closeCreateMenu,
-                anchorPosition: 'downRight',
-                panelPaddingSize: 'none',
-                children: (
-                  <EuiContextMenu
-                    initialPanelId={0}
-                    panels={[
-                      {
-                        id: 0,
-                        items: [
-                          {
-                            name: i18n.translate(
-                              'xpack.alertingV2.rulesList.createRuleFlyoutButton',
-                              { defaultMessage: 'Create with flyout' }
-                            ),
-                            icon: 'popout',
-                            onClick: () => {
-                              closeCreateMenu();
-                              setFlyoutOpen(true);
+        rightSideItems={
+          hasRules || hasActiveFilters
+            ? [
+                <EuiSplitButton
+                  key="create-rule-split"
+                  color="primary"
+                  size="m"
+                  data-test-subj="createRuleSplitButton"
+                >
+                  <EuiSplitButton.ActionPrimary
+                    href={http.basePath.prepend(paths.ruleCreateOptions)}
+                    data-test-subj="createRuleButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.alertingV2.rulesList.createRuleButton"
+                      defaultMessage="Create rule"
+                    />
+                  </EuiSplitButton.ActionPrimary>
+                  <EuiSplitButton.ActionSecondary
+                    iconType="arrowDown"
+                    aria-label={i18n.translate('xpack.alertingV2.rulesList.createRuleMoreOptions', {
+                      defaultMessage: 'More create options',
+                    })}
+                    onClick={toggleCreateMenu}
+                    data-test-subj="createRulePopoverButton"
+                    popoverProps={{
+                      id: createMenuId,
+                      isOpen: isCreateMenuOpen,
+                      closePopover: closeCreateMenu,
+                      anchorPosition: 'downRight',
+                      panelPaddingSize: 'none',
+                      children: (
+                        <EuiContextMenu
+                          initialPanelId={0}
+                          panels={[
+                            {
+                              id: 0,
+                              items: [
+                                {
+                                  name: i18n.translate(
+                                    'xpack.alertingV2.rulesList.createRuleFlyoutButton',
+                                    { defaultMessage: 'Create with flyout' }
+                                  ),
+                                  icon: 'popout',
+                                  onClick: () => {
+                                    closeCreateMenu();
+                                    setFlyoutOpen(true);
+                                  },
+                                  'data-test-subj': 'createRuleFlyoutButton',
+                                },
+                              ],
                             },
-                            'data-test-subj': 'createRuleFlyoutButton',
-                          },
-                        ],
-                      },
-                    ]}
+                          ]}
+                        />
+                      ),
+                    }}
                   />
-                ),
-              }}
-            />
-          </EuiSplitButton>,
-        ]}
+                </EuiSplitButton>,
+              ]
+            : []
+        }
       />
       <EuiSpacer size="m" />
+      {isInitialLoad ? (
+        <EuiFlexGroup justifyContent="center" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="l" data-test-subj="rulesListLoading" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : null}
       {isError ? (
         <>
           <EuiCallOut
@@ -227,7 +239,8 @@ export const RulesListPage = () => {
           <EuiSpacer />
         </>
       ) : null}
-      {!isError ? (
+      {showEmptyState ? <RuleCreateOptionsPanel /> : null}
+      {hasRules || hasActiveFilters ? (
         <>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem>
