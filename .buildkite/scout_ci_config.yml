@@ -57,6 +57,7 @@ plugins:
     - task_manager
     - transform
     - triggers_actions_ui
+    - upgradeAssistant
     - uptime
     - ux
     - workflows_extensions
