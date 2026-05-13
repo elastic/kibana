@@ -137,12 +137,8 @@ describe('applyConfigOverrides', () => {
         password: 'changeme',
       },
       plugins: { paths: [] },
-      server: { basePath: '/kbn' },
+      server: { basePath: '/kbn', publicBaseUrl: 'http://localhost:5601/kbn' },
       xpack: {
-        cloud: {
-          id: 'ftr_fake_cloud_id',
-          organization_id: 'org1234567890',
-        },
         security: {
           authc: {
             providers: {
@@ -166,12 +162,47 @@ describe('applyConfigOverrides', () => {
 
   it('omits the fixed base path in stateful dev mode when `--no-base-path` is passed', () => {
     const config = applyConfigOverrides({}, { dev: true, basePath: false }, {}, {});
-    expect(config.server).toBeUndefined();
+    expect(config.server).toEqual({ publicBaseUrl: 'http://localhost:5601' });
   });
 
-  it('keeps a user-provided server.basePath in stateful dev mode', () => {
+  it('omits the fixed base path in stateful dev mode when `--run-examples` is passed', () => {
+    const config = applyConfigOverrides({}, { dev: true, runExamples: true }, {}, {});
+    expect(config.server).toEqual({ publicBaseUrl: 'http://localhost:5601' });
+  });
+
+  it('keeps a user-provided server.basePath in stateful dev mode and derives publicBaseUrl from it', () => {
     const config = applyConfigOverrides({ server: { basePath: '/custom' } }, { dev: true }, {}, {});
-    expect(config.server).toEqual({ basePath: '/custom' });
+    expect(config.server).toEqual({
+      basePath: '/custom',
+      publicBaseUrl: 'http://localhost:5601/custom',
+    });
+  });
+
+  it('derives publicBaseUrl from a user-customized server.port in stateful dev mode', () => {
+    const config = applyConfigOverrides(
+      { server: { basePath: '/custom', port: 5701 } },
+      { dev: true },
+      {},
+      {}
+    );
+    expect(config.server).toEqual({
+      basePath: '/custom',
+      port: 5701,
+      publicBaseUrl: 'http://localhost:5701/custom',
+    });
+  });
+
+  it('respects a user-provided server.publicBaseUrl in stateful dev mode', () => {
+    const config = applyConfigOverrides(
+      { server: { publicBaseUrl: 'https://kibana.example.com/kbn' } },
+      { dev: true },
+      {},
+      {}
+    );
+    expect(config.server).toEqual({
+      basePath: '/kbn',
+      publicBaseUrl: 'https://kibana.example.com/kbn',
+    });
   });
 
   it('omits UIAM config if `--no-uiam` flag is passed in serverless dev mode', () => {
