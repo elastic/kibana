@@ -132,6 +132,10 @@ const VisLegendItemComponent = ({
 
   const renderDetails = () => (
     <EuiPopover
+      aria-label={i18n.translate('visTypeVislib.vislib.legend.toggleOptionsPopoverAriaLabel', {
+        defaultMessage: '{legendDataLabel}, legend options',
+        values: { legendDataLabel: item.label },
+      })}
       display="block"
       button={button}
       isOpen={selected}

@@ -20,29 +20,41 @@ const HTML_HIGHLIGHT_POST_TAG = '</mark>';
 const ES_HIGHLIGHT_PRE_TAG = '@kibana-highlighted-field@';
 const ES_HIGHLIGHT_POST_TAG = '@/kibana-highlighted-field@';
 
+const ARRAY_HIGHLIGHT_PRE_TAG = '<span class="ffArray__highlight">';
+
+const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// Matches complete known tag pairs. Groups 1-3 capture mark open/content/close;
+// group 0 is used as-is for array spans (content is only [ ] , — no HTML-special chars).
+const PRESERVED_TAGS_PATTERN = new RegExp(
+  `(${esc(HTML_HIGHLIGHT_PRE_TAG)})([\\s\\S]*?)(${esc(HTML_HIGHLIGHT_POST_TAG)})` +
+    `|${esc(ARRAY_HIGHLIGHT_PRE_TAG)}[^<]*${esc('</span>')}`,
+  'g'
+);
+
 /**
- * Escapes HTML in a string while preserving field-format highlight <mark> tags.
+ * Escapes HTML in a string while preserving field-format highlight <mark> tags
+ * and array-formatting <span class="ffArray__highlight"> tags.
  * Used for values already processed by formatFieldValue / getHighlightHtml (e.g. resource badges).
  */
 export function escapeAndPreserveHighlightTags(value: string): string {
-  if (!value.includes(HTML_HIGHLIGHT_PRE_TAG)) {
-    return escape(value);
+  const parts: string[] = [];
+  let lastIndex = 0;
+
+  for (const match of value.matchAll(PRESERVED_TAGS_PATTERN)) {
+    parts.push(escape(value.slice(lastIndex, match.index!)));
+    if (match[1]) {
+      // mark tag: preserve open/close, escape inner content
+      parts.push(match[1], escape(match[2]), match[3]);
+    } else {
+      // array span: preserve as-is
+      parts.push(match[0]);
+    }
+    lastIndex = match.index! + match[0].length;
   }
 
-  return value
-    .split(HTML_HIGHLIGHT_PRE_TAG)
-    .map((segment, index) => {
-      if (index === 0) return escape(segment);
-
-      const postTagIndex = segment.indexOf(HTML_HIGHLIGHT_POST_TAG);
-      if (postTagIndex === -1) return escape(segment);
-
-      const highlighted = segment.substring(0, postTagIndex);
-      const rest = segment.substring(postTagIndex + HTML_HIGHLIGHT_POST_TAG.length);
-
-      return HTML_HIGHLIGHT_PRE_TAG + escape(highlighted) + HTML_HIGHLIGHT_POST_TAG + escape(rest);
-    })
-    .join('');
+  parts.push(escape(value.slice(lastIndex)));
+  return parts.join('');
 }
 
 /**

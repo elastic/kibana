@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+source "$(dirname "$0")/common/util.sh"
+
 if [[ ! "${DISABLE_CI_STATS_SHIPPING:-}" ]]; then
   cmd=(
     "node" "scripts/ship_ci_stats"
@@ -22,5 +24,11 @@ echo "--- Upload Build Artifacts"
 version="$(jq -r '.version' package.json)"
 cd "$KIBANA_DIR/target"
 cp "kibana-$version-SNAPSHOT-linux-x86_64.tar.gz" kibana-default.tar.gz
+
+upload_tmp_artifact "$KIBANA_DIR/target/kibana-default.tar.gz" kibana-default.tar.gz "$BUILDKITE_BUILD_ID" &
+GCS_UPLOAD_PID=$!
+
 buildkite-agent artifact upload "./*.tar.gz;./*.zip;./*.deb;./*.rpm"
 cd -
+
+wait "$GCS_UPLOAD_PID"

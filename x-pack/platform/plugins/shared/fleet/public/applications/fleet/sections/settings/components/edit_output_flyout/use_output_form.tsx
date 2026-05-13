@@ -583,7 +583,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   // Write to streams input - defaults to false
   const writeToStreams = useSwitchInput(
     (output as any)?.write_to_logs_streams ?? false,
-    false // Not disabled for now
+    isDisabled('write_to_logs_streams')
   );
 
   const isLogstash = typeInput.value === outputType.Logstash;

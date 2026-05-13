@@ -17,6 +17,7 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLink,
   EuiPageBody,
   EuiSpacer,
@@ -98,6 +99,7 @@ export const MLOverviewCard = ({
           data-test-subj={buttonDataTestSubj}
           aria-label={buttonLabel}
         >
+          {iconType ? <EuiIcon aria-hidden={true} type={iconType} /> : null}
           {buttonLabel}
         </ButtonComponent>
       </EuiCard>
@@ -281,6 +283,7 @@ export const OverviewPage: FC = () => {
                           onClick={() => navigateToPath('/aiops/log_categorization_index_select')}
                           data-test-subj="mlOverviewCardLogPatternAnalysisButton"
                         >
+                          <EuiIcon aria-hidden={true} type="pattern" />
                           <FormattedMessage
                             id="xpack.ml.overview.logPatternAnalysis.startAnalysisButton"
                             defaultMessage="Start analysis"
@@ -342,6 +345,7 @@ export const OverviewPage: FC = () => {
                             }
                           )}
                         >
+                          <EuiIcon aria-hidden={true} type="chartChangePoint" />
                           <FormattedMessage
                             id="xpack.ml.overview.changePointDetection.startDetectionButton"
                             defaultMessage="Start detection"

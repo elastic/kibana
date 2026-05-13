@@ -79,6 +79,7 @@ export const HelpPopover = ({
 }) => {
   return (
     <EuiPopover
+      aria-label={title}
       anchorPosition={anchorPosition}
       button={button}
       closePopover={closePopover}
@@ -112,6 +113,7 @@ export const WrappingHelpPopover = ({
   return (
     <KibanaRenderContextProvider {...startServices}>
       <EuiWrappingPopover
+        aria-label={title}
         anchorPosition={anchorPosition}
         button={button}
         closePopover={closePopover}

@@ -13,7 +13,7 @@
 @babel/types@7.24.7
 @babel/types@7.26.8
 @base2/pretty-print-object@1.0.1
-@elastic/apm-rum-core@5.25.1
+@elastic/apm-rum-core@5.25.2
 @elastic/charts@71.1.2
 @elastic/eui-theme-borealis@5.2.0
 @elastic/eui-theme-common@7.2.0
@@ -367,7 +367,7 @@ postcss-modules-scope@3.2.0
 postcss-modules-values@4.0.0
 postcss-selector-parser@6.1.2
 postcss-value-parser@4.2.0
-postcss@8.5.8
+postcss@8.5.14
 prismjs@1.27.0
 process-nextick-args@2.0.1
 process@0.11.10
