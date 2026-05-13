@@ -14,13 +14,13 @@ import {
   HOST_ISOLATION_PANEL_TEST_ID as mockHostIsolationPanelTestId,
   HOST_ISOLATION_TITLE_TEST_ID,
 } from './test_ids';
-import { endpointAlertDataMock } from '../../../../common/mock/endpoint';
+import { endpointAlertDataMock } from '../../../../../common/mock/endpoint';
 
 jest.mock('./components/host_isolation_view', () => ({
   HostIsolationView: () => <div data-test-subj={mockHostIsolationPanelTestId} />,
 }));
 
-jest.mock('../../../shared/components/tools_flyout_header', () => ({
+jest.mock('../../../../shared/components/tools_flyout_header', () => ({
   ToolsFlyoutHeader: ({
     title,
     belowTitle,
@@ -35,13 +35,13 @@ jest.mock('../../../shared/components/tools_flyout_header', () => ({
   ),
 }));
 
-jest.mock('../../../../common/hooks/endpoint/use_alert_response_actions_support', () => ({
+jest.mock('../../../../../common/hooks/endpoint/use_alert_response_actions_support', () => ({
   useAlertResponseActionsSupport: () => ({
     details: { agentType: 'endpoint' },
   }),
 }));
 
-jest.mock('../../../../common/components/endpoint/agents/agent_type_integration', () => ({
+jest.mock('../../../../../common/components/endpoint/agents/agent_type_integration', () => ({
   AgentTypeIntegration: ({ agentType }: { agentType: string }) => (
     <div data-test-subj={mockHostIsolationIntegrationTestId}>{agentType}</div>
   ),

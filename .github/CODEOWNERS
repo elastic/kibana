@@ -3084,6 +3084,7 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/plugins/security_solution/public/common/hooks/endpoint/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/public/common/mock/endpoint @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/isolate_host/ @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/endpoint/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/common/endpoint/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/common/api/endpoint/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/server/endpoint/ @elastic/security-defend-workflows

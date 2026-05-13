@@ -34,7 +34,7 @@ import { useHostIsolationAction } from '../../../../common/components/endpoint/h
 import { flyoutProviders } from '../../../shared/components/flyout_provider';
 import { defaultToolsFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
-import { HostIsolation } from '../../tools/host_isolation';
+import { HostIsolation } from '../../tools/endpoint/host_isolation';
 import { useExploreActions } from '../hooks/use_explore_actions';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 

@@ -56,7 +56,7 @@ jest.mock('react-router-dom', () => ({
 jest.mock('../../../shared/components/flyout_provider', () => ({
   flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
-jest.mock('../../tools/host_isolation', () => ({
+jest.mock('../../tools/endpoint/host_isolation', () => ({
   HostIsolation: ({ isolateAction, onClose }: { isolateAction: string; onClose: () => void }) => (
     <button type="button" data-test-subj={`hostIsolationMock-${isolateAction}`} onClick={onClose}>
       {`isolation-mock-${isolateAction}`}

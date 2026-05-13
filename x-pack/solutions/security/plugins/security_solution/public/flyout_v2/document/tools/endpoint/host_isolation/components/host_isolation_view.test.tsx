@@ -10,7 +10,7 @@ import { render, fireEvent } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { HostIsolationView } from './host_isolation_view';
 import { HOST_ISOLATION_PANEL_TEST_ID } from '../test_ids';
-import { endpointAlertDataMock } from '../../../../../common/mock/endpoint';
+import { endpointAlertDataMock } from '../../../../../../common/mock/endpoint';
 
 const hit: DataTableRecord = {
   id: 'alert-1',
@@ -19,7 +19,7 @@ const hit: DataTableRecord = {
   isAnchor: false,
 } as DataTableRecord;
 
-jest.mock('../../../../../common/components/endpoint/host_isolation', () => ({
+jest.mock('../../../../../../common/components/endpoint/host_isolation', () => ({
   EndpointIsolateSuccess: ({ isolateAction }: { isolateAction: string }) => (
     <div data-test-subj="hostIsolateSuccessBanner">{`${isolateAction}-success`}</div>
   ),
@@ -41,7 +41,7 @@ jest.mock('../../../../../common/components/endpoint/host_isolation', () => ({
   ),
 }));
 
-jest.mock('../../../../../common/components/endpoint', () => ({
+jest.mock('../../../../../../common/components/endpoint', () => ({
   useWithCaseDetailsRefresh: () => undefined,
 }));
 

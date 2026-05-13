@@ -13,9 +13,9 @@ import { getFieldValue, HOST_NAME_FIELD } from '@kbn/discover-utils';
 import {
   EndpointIsolateSuccess,
   HostIsolationPanel,
-} from '../../../../../common/components/endpoint/host_isolation';
-import type { HostIsolationAction } from '../../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
-import { useWithCaseDetailsRefresh } from '../../../../../common/components/endpoint';
+} from '../../../../../../common/components/endpoint/host_isolation';
+import type { HostIsolationAction } from '../../../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
+import { useWithCaseDetailsRefresh } from '../../../../../../common/components/endpoint';
 import { HOST_ISOLATION_PANEL_TEST_ID } from '../test_ids';
 
 export interface HostIsolationViewProps {

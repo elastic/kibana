@@ -29,7 +29,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { flyoutProviders } from '../../../../flyout_v2/shared/components/flyout_provider';
 import { defaultToolsFlyoutProperties } from '../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../../../../flyout_v2/shared/constants/flyout_history';
-import { HostIsolation } from '../../../../flyout_v2/document/tools/host_isolation';
+import { HostIsolation } from '../../../../flyout_v2/document/tools/endpoint/host_isolation';
 import type { HostIsolationAction } from '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
 
 interface AlertSummaryData {

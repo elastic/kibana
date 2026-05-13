@@ -10,14 +10,14 @@ import React, { memo } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { AgentTypeIntegration } from '../../../../common/components/endpoint/agents/agent_type_integration';
-import { useAlertResponseActionsSupport } from '../../../../common/hooks/endpoint/use_alert_response_actions_support';
-import type { HostIsolationAction } from '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
+import { AgentTypeIntegration } from '../../../../../common/components/endpoint/agents/agent_type_integration';
+import { useAlertResponseActionsSupport } from '../../../../../common/hooks/endpoint/use_alert_response_actions_support';
+import type { HostIsolationAction } from '../../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
 import {
   ISOLATE_HOST,
   UNISOLATE_HOST,
-} from '../../../../common/components/endpoint/host_isolation/from_alerts/translations';
-import { ToolsFlyoutHeader } from '../../../shared/components/tools_flyout_header';
+} from '../../../../../common/components/endpoint/host_isolation/from_alerts/translations';
+import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
 import { HostIsolationView } from './components/host_isolation_view';
 import { HOST_ISOLATION_INTEGRATION_TEST_ID, HOST_ISOLATION_TITLE_TEST_ID } from './test_ids';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PREFIX } from '../../../../flyout/shared/test_ids';
+import { PREFIX } from '../../../../../flyout/shared/test_ids';
 
 const HOST_ISOLATION_TEST_ID = `${PREFIX}HostIsolation` as const;
 export const HOST_ISOLATION_TITLE_TEST_ID = `${HOST_ISOLATION_TEST_ID}Title` as const;
