@@ -16,6 +16,9 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-types';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
@@ -23,6 +26,15 @@ import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library'
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
 import { registerTools } from './agent_builder/tools/register_tools';
 import { registerSkills } from './agent_builder/skills/register_skills';
+import { registerRoutes as registerThreatIntelligenceRoutes } from './threat_intelligence/routes';
+import { installIndexTemplates as installThreatIntelligenceIndexTemplates } from './threat_intelligence/setup/index_templates';
+import { seedDefaultSources as seedThreatIntelligenceDefaultSources } from './threat_intelligence/setup/seed_default_sources';
+import { installBuiltinWorkflows as installThreatIntelligenceBuiltinWorkflows } from './threat_intelligence/workflows';
+import { registerDeprecatedThreatIntelligenceFeature } from './threat_intelligence/feature_deprecation';
+import {
+  registerIocIndicatorSyncTask,
+  scheduleIocIndicatorSyncTask,
+} from './threat_intelligence/tasks';
 import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_awareness_migration';
 import { SavedObjectsClientFactory } from './endpoint/services/saved_objects';
 import { registerEntityStoreDataViewRefreshTask } from './lib/entity_analytics/entity_store/tasks/data_view_refresh/data_view_refresh_task';
@@ -205,6 +217,17 @@ export class Plugin implements ISecuritySolutionPlugin {
   private trialCompanionMilestoneService: TrialCompanionMilestoneService;
   private usageCollection?: UsageCollectionSetup;
 
+  // Threat-intelligence private state (migrated from the standalone
+  // threat-intelligence plugin). Captured during start() so routes
+  // registered in setup() can resolve the current request's space / inference
+  // service at call-time without holding setup-boundary references. The
+  // optional `workflowsManagement` setup contract is captured in setup() so
+  // built-in workflow registration can be deferred to start() (the
+  // WorkflowsManagementApi gates every method behind its own initPromise).
+  private threatIntelligenceSpacesService: SpacesServiceStart | undefined;
+  private threatIntelligenceInference: InferenceServerStart | undefined;
+  private threatIntelligenceWorkflowsManagement: WorkflowsServerPluginSetup | undefined;
+
   private isServerless: boolean;
 
   constructor(context: PluginInitializerContext) {
@@ -287,6 +310,147 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
   }
 
+  /**
+   * Threat-intelligence server-side setup (migrated from the standalone
+   * threat-intelligence plugin).
+   *
+   * Wires HTTP routes, captures the optional `workflowsManagement` setup
+   * contract for later use in start(), and registers the IOC indicator-sync
+   * Task Manager task.
+   *
+   * Gating policy:
+   *  - Routes are gated on `threatIntelligenceSkillEnabled` so dark-flagged
+   *    deployments do not expose the internal endpoints. The interactive
+   *    `subscription-confirmation` attachment depends on
+   *    `SUBMIT_SUBSCRIPTION_API_PATH`, so toggling the flag off effectively
+   *    disables that attachment's form submission — acceptable for an
+   *    experimental feature.
+   *  - The IOC indicator-sync task is gated on the separate
+   *    `iocIndicatorSyncEnabled` flag (independent operator opt-in) AND the
+   *    optional `taskManager` dependency.
+   *  - Saved-object type, UI settings, and agent_builder attachment-type
+   *    registrations are NOT done here — they live unconditionally in
+   *    `initSavedObjects` / `initUiSettings` / `registerAttachments` so user
+   *    data and declarative type registrations survive flag toggles.
+   */
+  private setupThreatIntelligence(
+    plugins: SecuritySolutionPluginSetupDependencies,
+    core: SecuritySolutionPluginCoreSetupDependencies
+  ): void {
+    const experimentalFeatures = this.config.experimentalFeatures;
+
+    // Capture the workflows-management setup contract (optional plugin) so
+    // start() can install built-in workflows once the API's internal init
+    // promise has resolved.
+    this.threatIntelligenceWorkflowsManagement = plugins.workflowsManagement;
+
+    if (experimentalFeatures.threatIntelligenceSkillEnabled) {
+      const router = core.http.createRouter();
+      registerThreatIntelligenceRoutes({
+        router,
+        logger: this.logger.get('threatIntelligence'),
+        getSpacesService: () => this.threatIntelligenceSpacesService,
+        getInference: () => this.threatIntelligenceInference,
+      });
+      this.logger.info(
+        'Threat Intelligence routes registered (threatIntelligenceSkillEnabled is on)'
+      );
+    } else {
+      this.logger.debug(
+        'Threat Intelligence routes not registered. Enable via xpack.securitySolution.enableExperimental: ["threatIntelligenceSkillEnabled"]'
+      );
+    }
+
+    if (experimentalFeatures.iocIndicatorSyncEnabled) {
+      if (plugins.taskManager) {
+        registerIocIndicatorSyncTask({
+          taskManager: plugins.taskManager,
+          coreSetup: core,
+          logger: this.logger.get('threatIntelligence', 'iocIndicatorSync'),
+        });
+        this.logger.info(
+          'Threat Intelligence IOC indicator-sync task registered (iocIndicatorSyncEnabled is on)'
+        );
+      } else {
+        this.logger.warn(
+          'iocIndicatorSyncEnabled is set but the optional `taskManager` plugin is not available — skipping registration.'
+        );
+      }
+    }
+  }
+
+  /**
+   * Threat-intelligence server-side start (migrated from the standalone
+   * threat-intelligence plugin).
+   *
+   * Captures optional `spaces` and `inference` start contracts for the
+   * routes registered in setup(), then performs the best-effort start-time
+   * side effects: index template installation, default-source seeding, and
+   * built-in workflow registration. All of these are gated on
+   * `threatIntelligenceSkillEnabled` so the dark-flagged feature does not
+   * provision indices, write seed data, or pollute the Workflows UI.
+   *
+   * The IOC indicator-sync task is scheduled here (its type was registered
+   * in setup) when its independent `iocIndicatorSyncEnabled` flag is on and
+   * `taskManager` is available.
+   */
+  private startThreatIntelligence(
+    plugins: SecuritySolutionPluginStartDependencies,
+    core: SecuritySolutionPluginCoreStartDependencies
+  ): void {
+    const experimentalFeatures = this.config.experimentalFeatures;
+
+    // Always capture spaces / inference references so they're available to
+    // any threat-intelligence handler that already started (e.g. routes
+    // registered earlier in setup). Cheap, no side effects.
+    this.threatIntelligenceSpacesService = plugins.spaces?.spacesService;
+    this.threatIntelligenceInference = plugins.inference;
+
+    if (experimentalFeatures.threatIntelligenceSkillEnabled) {
+      const esClient = core.elasticsearch.client.asInternalUser;
+      const logger = this.logger.get('threatIntelligence');
+
+      // Index template installation + source seeding are best-effort. Seed
+      // runs only after templates succeed because the seeded indices depend
+      // on the templates having been put. Errors are logged but never thrown
+      // so the rest of security_solution start stays healthy.
+      installThreatIntelligenceIndexTemplates({ esClient, logger })
+        .then(async () => {
+          await seedThreatIntelligenceDefaultSources({ esClient, logger });
+        })
+        .catch((err) => {
+          logger.error(
+            `Failed to install threat-intelligence index templates / seed data: ${err.message}`
+          );
+        });
+
+      if (this.threatIntelligenceWorkflowsManagement) {
+        // Built-in workflows are upserted idempotently by stable id at every
+        // plugin start. See `./threat_intelligence/workflows/index.ts` for
+        // the rationale behind keeping `owner: 'threatIntelligence'`.
+        installThreatIntelligenceBuiltinWorkflows({
+          workflowsManagement: this.threatIntelligenceWorkflowsManagement,
+          logger,
+        }).catch((err) => {
+          logger.error(`Failed to install threat-intelligence built-in workflows: ${err.message}`);
+        });
+      } else {
+        logger.debug(
+          'workflowsManagement plugin not available — skipping built-in workflow registration'
+        );
+      }
+    }
+
+    if (experimentalFeatures.iocIndicatorSyncEnabled && plugins.taskManager) {
+      void scheduleIocIndicatorSyncTask({
+        taskManager: plugins.taskManager,
+        logger: this.logger.get('threatIntelligence', 'iocIndicatorSync'),
+      }).catch((err) => {
+        this.logger.error(`Failed to schedule IOC indicator sync task: ${err.message}`);
+      });
+    }
+  }
+
   public setup(
     core: SecuritySolutionPluginCoreSetupDependencies,
     plugins: SecuritySolutionPluginSetupDependencies
@@ -308,6 +472,14 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     initUiSettings(core.uiSettings, experimentalFeatures, config.enableUiSettingsValidations);
     productFeaturesService.setup(core, plugins);
+
+    // Register the deprecated standalone `threatIntelligence` Kibana feature
+    // AFTER `productFeaturesService.setup` so the replacement sub-feature on
+    // the Security Solution feature already exists when the features plugin
+    // validates `replacedBy`. This is what lets role assignments that still
+    // reference the standalone feature lazy-migrate to the new sub-feature on
+    // next save (see the `kibana-privilege-deprecation` skill).
+    registerDeprecatedThreatIntelligenceFeature({ features: plugins.features });
 
     events.forEach((eventConfig) => {
       core.analytics.registerEventType(eventConfig);
@@ -810,6 +982,11 @@ export class Plugin implements ISecuritySolutionPlugin {
       registerWorkflowSteps(plugins.workflowsExtensions, core);
     }
 
+    // Threat-intelligence server-side setup. Migrated from the standalone
+    // threat-intelligence plugin — see the method JSDoc for the gating
+    // policy and the reasoning behind it.
+    this.setupThreatIntelligence(plugins, core);
+
     setupAlertsCapabilitiesSwitcher({
       core,
       logger: this.logger,
@@ -1122,6 +1299,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     } else {
       this.logger.warn('Task Manager not available, health diagnostic task not started.');
     }
+
+    // Threat-intelligence server-side start. Captures optional spaces +
+    // inference contracts, installs index templates / seed data / built-in
+    // workflows, and schedules the IOC indicator-sync task.
+    this.startThreatIntelligence(plugins, core);
 
     return {};
   }

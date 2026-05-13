@@ -9,6 +9,8 @@ import type {
   AttachmentServiceStartContract,
   AgentBuilderPluginStart,
 } from '@kbn/agent-builder-browser';
+
+export { registerThreatIntelligenceAttachments } from './threat_intelligence';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';

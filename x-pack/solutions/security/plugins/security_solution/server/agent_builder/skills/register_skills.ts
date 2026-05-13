@@ -17,6 +17,7 @@ import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
 import { findSecurityMlJobsSkill } from './find_security_ml_jobs';
+import { threatIntelligenceSkill } from './threat_intelligence';
 
 interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
@@ -63,5 +64,13 @@ export const registerSkills = async ({
 
   if (experimentalFeatures.pciComplianceAgentBuilder) {
     agentBuilder.skills.register(pciComplianceSkill);
+  }
+
+  // Threat-intelligence Agent Builder skill (folded in from the standalone
+  // threat-intelligence plugin). Gated behind the
+  // `threatIntelligenceSkillEnabled` experimental flag so the feature ships
+  // dark until the rest of the merge is in.
+  if (experimentalFeatures.threatIntelligenceSkillEnabled) {
+    await agentBuilder.skills.register(threatIntelligenceSkill);
   }
 };

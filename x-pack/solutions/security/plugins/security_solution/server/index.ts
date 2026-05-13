@@ -55,6 +55,15 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     unused('ruleExecutionLog.underlyingClient', { level: 'warning' }),
     unused('prebuiltRulesFromFileSystem', { level: 'warning' }),
     unused('prebuiltRulesFromSavedObjects', { level: 'warning' }),
+    // Remap the now-removed standalone threat-intelligence plugin's
+    // experimental-flags config key into security_solution's namespace.
+    // The rename is warning-level so operators who still set the old key
+    // see guidance to migrate but Kibana still boots.
+    renameFromRoot(
+      'xpack.threatIntelligence.enableExperimental',
+      'xpack.securitySolution.enableExperimental',
+      { level: 'warning' }
+    ),
   ],
 };
 

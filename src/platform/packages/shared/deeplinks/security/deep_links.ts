@@ -84,9 +84,19 @@ export enum SecurityPageName {
   siemMigrationsManage = 'siem_migrations-manage',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
-   * All threat intelligence page names must match `TIPageId` in x-pack/solutions/security/plugins/threat_intelligence/public/common/navigation/types.ts
+   * All threat intelligence page names must match `TIPageId` in
+   * `x-pack/solutions/security/plugins/security_solution/public/threat_intelligence/types.ts`.
+   *
+   * `threatIntelligence` is the parent landing surface that historically
+   * pointed at the Indicators table and whose capability binding
+   * (`securitySolution.threat-intelligence`) still gates the whole area —
+   * preserve the string value to avoid invalidating saved navigation
+   * targets and role mappings. `threatIntelligenceHub` is the
+   * Intelligence Hub dashboard deep link added when the standalone
+   * threat-intelligence plugin was folded into `securitySolution`.
    */
   threatIntelligence = 'threat_intelligence',
+  threatIntelligenceHub = 'threat_intelligence-hub',
   timelines = 'timelines',
   timelinesTemplates = 'timelines-templates',
   trustedApps = 'trusted_apps',

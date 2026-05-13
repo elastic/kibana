@@ -82,6 +82,7 @@ import {
   registerEntityAnalyticsDashboardAttachment,
   registerEntityAttachment,
   registerRuleAttachment,
+  registerThreatIntelligenceAttachments,
 } from './agent_builder/attachment_types';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
@@ -326,6 +327,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         resolveSecurityCanvasContext: () =>
           this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
         searchSession: plugins.data.search.session,
+      });
+
+      // Threat-intelligence Agent Builder attachment renderers (migrated
+      // from the standalone threat-intelligence plugin). Registered
+      // unconditionally — when the `threatIntelligenceSkillEnabled`
+      // experimental flag is off, the server-side tools that emit these
+      // attachment types are not registered, so the renderers register
+      // against attachment types that simply never appear. Cheap and
+      // matches the pattern used by `registerEntityAttachment` etc.
+      registerThreatIntelligenceAttachments({
+        attachments: plugins.agentBuilder.attachments,
+        core,
       });
     }
 

@@ -245,6 +245,32 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 9.4
    */
   prebuiltRulesDeprecationUIEnabled: true,
+
+  /**
+   * Enables the source-agnostic Threat Intelligence Agent Builder skill
+   * (`threat-intelligence`) and its inline tools. Off by default; turn on with
+   * `xpack.securitySolution.enableExperimental: ["threatIntelligenceSkillEnabled"]`.
+   *
+   * Migrated from the standalone threat-intelligence plugin as part of the
+   * merge into security_solution. The legacy
+   * `xpack.threatIntelligence.enableExperimental` config key is remapped to
+   * `xpack.securitySolution.enableExperimental` via the config deprecation in
+   * `server/config.ts`.
+   */
+  threatIntelligenceSkillEnabled: false,
+
+  /**
+   * Schedules the IOC indicator-sync Task Manager job that mirrors
+   * `extracted.iocs` from `.kibana-threat-reports-*` into the
+   * `.kibana-threat-intel-indicators` companion index so Detection Engine
+   * Indicator Match rules can match them against alert/event data. Off by
+   * default — operators opt in explicitly. Once enabled, the detection-rule
+   * role must additionally be granted read on `.kibana-threat-intel-indicators`
+   * (the index lives under `.kibana-*`).
+   *
+   * Migrated from the standalone threat-intelligence plugin.
+   */
+  iocIndicatorSyncEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

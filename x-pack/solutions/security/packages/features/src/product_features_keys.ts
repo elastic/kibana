@@ -247,6 +247,17 @@ export enum SecuritySubFeatureId {
   fileOperations = 'fileOperationsSubFeature',
   executeAction = 'executeActionSubFeature',
   scanAction = 'scanActionSubFeature',
+  /**
+   * Threat-intelligence sub-feature on the Security Solution feature.
+   *
+   * Folded in from the standalone threat-intelligence plugin's
+   * `THREAT_INTELLIGENCE_FEATURE_ID` ("threatIntelligence") top-level
+   * Kibana feature. The standalone feature is preserved in deprecated form
+   * by `security_solution`'s server (see
+   * `server/threat_intelligence/feature_deprecation.ts`) so existing role
+   * bindings lazy-migrate to these sub-feature privileges on next save.
+   */
+  threatIntelligence = 'threatIntelligenceSubFeature',
 }
 
 /** Sub-features IDs for Cases */
