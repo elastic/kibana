@@ -21,10 +21,7 @@ import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { getRulesAppDetailsRoute, rulesAppRoute } from '@kbn/rule-data-utils';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { useCaseActions } from '@kbn/response-ops-alerts-table/hooks/use_case_actions';
-import {
-  ADD_TO_EXISTING_CASE,
-  ADD_TO_NEW_CASE,
-} from '@kbn/response-ops-alerts-table/translations';
+import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '@kbn/response-ops-alerts-table/translations';
 import { useKibana } from '../../utils/kibana_react';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { SLO_DETAIL_PATH } from '../../../common/locators/paths';
