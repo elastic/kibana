@@ -14,9 +14,10 @@ import type { MlApi } from '../../../services/ml_api_service';
 
 export function loadFullJob(mlApi: MlApi, jobId: string): Promise<CombinedJobWithStats>;
 export function loadJobForCloning(mlApi: MlApi, jobId: string): Promise<any>;
-export function isStartable(jobs: CombinedJobWithStats[]): boolean;
-export function isClosable(jobs: CombinedJobWithStats[]): boolean;
-export function isResettable(jobs: CombinedJobWithStats[]): boolean;
+export function isStartable(jobs: Array<CombinedJobWithStats | MlSummaryJob>): boolean;
+export function isStoppable(jobs: Array<CombinedJobWithStats | MlSummaryJob>): boolean;
+export function isClosable(jobs: Array<CombinedJobWithStats | MlSummaryJob>): boolean;
+export function isResettable(jobs: Array<CombinedJobWithStats | MlSummaryJob>): boolean;
 export function forceStartDatafeeds(
   toastNotifications: ToastsStart,
   mlApi: MlApi,
