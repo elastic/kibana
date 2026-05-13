@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/code-editor';
+import { i18n } from '@kbn/i18n';
 import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from '@kbn/esql-language';
 import {
   ESQLVariableType,
@@ -322,6 +323,22 @@ export const addEditorKeyBindings = (
   onPrettifyQuery: () => void,
   onGenerateFromComment?: () => void
 ): monaco.IDisposable[] => {
+  const shortcutsGroup = i18n.translate('esqlEditor.monaco.shortcutsGroup', {
+    defaultMessage: 'Query editor',
+  });
+
+  const buildHotkeysDiscoveryMeta = (
+    id: string,
+    options: { label: string; description?: string }
+  ) => ({
+    id,
+    label: options.label,
+    description: options.description,
+    featureId: 'esql:editor',
+    group: shortcutsGroup,
+    scope: 'context' as const,
+  });
+
   // Actions, not commands: `addCommand` keybindings are page-wide and fire while another editor on
   // the page has focus.
   const disposables = [
@@ -336,6 +353,14 @@ export const addEditorKeyBindings = (
         if (!editor.getValue().trim()) return;
         onQuerySubmit(QuerySource.MANUAL);
       },
+      hotkeysDiscovery: buildHotkeysDiscoveryMeta('esqlEditor:monaco.submitQuery', {
+        label: i18n.translate('esqlEditor.query.runKeyboardShortcutsLabel', {
+          defaultMessage: 'Run query',
+        }),
+        description: i18n.translate('esqlEditor.query.runKeyboardShortcutsDescription', {
+          defaultMessage: 'Execute the current query in the editor',
+        }),
+      })
     }),
     editor.addAction({
       id: 'esql.insertNewline',
@@ -354,6 +379,14 @@ export const addEditorKeyBindings = (
       // eslint-disable-next-line no-bitwise
       keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK],
       run: () => toggleVisor(),
+      hotkeysDiscovery: buildHotkeysDiscoveryMeta('esqlEditor:monaco.toggleQuickSearch', {
+        label: i18n.translate('esqlEditor.query.openVisorKeyboardShortcutsLabel', {
+          defaultMessage: 'Open quick search',
+        }),
+        description: i18n.translate('esqlEditor.query.openVisorKeyboardShortcutsDescription', {
+          defaultMessage: 'Open the natural language to ES|QL search panel',
+        }),
+      })
     }),
     editor.addAction({
       id: 'esql.prettifyQuery',
@@ -363,6 +396,14 @@ export const addEditorKeyBindings = (
       // eslint-disable-next-line no-bitwise
       keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI],
       run: () => onPrettifyQuery(),
+      hotkeysDiscovery: buildHotkeysDiscoveryMeta('esqlEditor:monaco.prettifyQuery', {
+        label: i18n.translate('esqlEditor.query.prettifyKeyboardShortcutsLabel', {
+          defaultMessage: 'Prettify query',
+        }),
+        description: i18n.translate('esqlEditor.query.prettifyKeyboardShortcutsDescription', {
+          defaultMessage: 'Prettify the current query in the editor',
+        }),
+      })
     }),
   ];
 

@@ -165,6 +165,7 @@ const ESQLEditorInternal = function ESQLEditor({
     usageCollection,
     kql,
     storage,
+    hotkeys,
   } = kibana.services;
 
   const favoritesClient = useMemo(
@@ -764,6 +765,7 @@ const ESQLEditorInternal = function ESQLEditor({
           >
             <div css={styles.editorContainer}>
               <CodeEditor
+                hotkeys={hotkeys}
                 htmlId={htmlId}
                 aria-label={i18n.translate('esqlEditor.ariaLabel', {
                   defaultMessage: 'ES|QL editor',
@@ -894,6 +896,23 @@ const ESQLEditorInternal = function ESQLEditor({
                     // eslint-disable-next-line no-bitwise
                     keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash],
                     run: onCommentLine,
+                    hotkeysDiscovery: {
+                      id: 'esqlEditor:monaco.toggleLineComment',
+                      label: i18n.translate('esqlEditor.query.commentKeyboardShortcutsLabel', {
+                        defaultMessage: 'Comment/uncomment line',
+                      }),
+                      description: i18n.translate(
+                        'esqlEditor.query.commentKeyboardShortcutsDescription',
+                        {
+                          defaultMessage: 'Comment/uncomment the current line in the editor',
+                        }
+                      ),
+                      featureId: 'esql:editor',
+                      group: i18n.translate('esqlEditor.monaco.shortcutsGroup', {
+                        defaultMessage: 'Query editor',
+                      }),
+                      scope: 'context',
+                    }
                   });
 
                   setMeasuredEditorWidth(editor.getLayoutInfo().width);

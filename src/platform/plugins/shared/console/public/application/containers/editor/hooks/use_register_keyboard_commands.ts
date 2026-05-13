@@ -11,6 +11,8 @@ import { useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
 
+import '@kbn/code-editor';
+
 interface RegisterKeyboardCommandsParams {
   /** The current Monaco editor instance. */
   editor: monaco.editor.IStandaloneCodeEditor;
@@ -32,6 +34,8 @@ const OPEN_DOCS_ACTION_ID = 'openDocs';
 const MOVE_UP_ACTION_ID = 'moveUp';
 const MOVE_DOWN_ACTION_ID = 'moveDown';
 const MOVE_TO_LINE_ACTION_ID = 'moveToLine';
+
+const CONSOLE_EDITOR_FEATURE_ID = 'console:editor';
 
 /**
  * Hook that returns a function for registering keyboard commands in the editor.
@@ -95,6 +99,14 @@ export const useKeyboardCommandsUtils = () => {
       // eslint-disable-next-line no-bitwise
       keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
       run: sendRequest,
+      hotkeysDiscovery: {
+        id: 'console:sendRequest',
+        label: i18n.translate('console.keyboardCommandActionLabel.sendRequest', {
+          defaultMessage: 'Send request',
+        }),
+        featureId: CONSOLE_EDITOR_FEATURE_ID,
+        scope: 'context',
+      },
     });
 
     autoIndentAction.current = editor.addAction({
@@ -105,6 +117,14 @@ export const useKeyboardCommandsUtils = () => {
       // eslint-disable-next-line no-bitwise
       keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI],
       run: autoIndent,
+      hotkeysDiscovery: {
+        id: 'console:autoIndent',
+        label: i18n.translate('console.keyboardCommandActionLabel.autoIndent', {
+          defaultMessage: 'Apply indentations',
+        }),
+        featureId: CONSOLE_EDITOR_FEATURE_ID,
+        scope: 'context',
+      },
     });
 
     openDocsAction.current = editor.addAction({
@@ -115,6 +135,14 @@ export const useKeyboardCommandsUtils = () => {
       // eslint-disable-next-line no-bitwise
       keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash],
       run: openDocs,
+      hotkeysDiscovery: {
+        id: 'console:openDocs',
+        label: i18n.translate('console.keyboardCommandActionLabel.openDocs', {
+          defaultMessage: 'Open documentation',
+        }),
+        featureId: CONSOLE_EDITOR_FEATURE_ID,
+        scope: 'context',
+      },
     });
 
     moveToPreviousAction.current = editor.addAction({
@@ -125,6 +153,14 @@ export const useKeyboardCommandsUtils = () => {
       // eslint-disable-next-line no-bitwise
       keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.UpArrow],
       run: moveToPreviousRequestEdge,
+      hotkeysDiscovery: {
+        id: 'console:moveToPreviousRequestEdge',
+        label: i18n.translate('console.keyboardCommandActionLabel.moveToPreviousRequestEdge', {
+          defaultMessage: 'Move to previous request start or end',
+        }),
+        featureId: CONSOLE_EDITOR_FEATURE_ID,
+        scope: 'context',
+      },
     });
 
     moveToNextAction.current = editor.addAction({
@@ -135,6 +171,14 @@ export const useKeyboardCommandsUtils = () => {
       // eslint-disable-next-line no-bitwise
       keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.DownArrow],
       run: moveToNextRequestEdge,
+      hotkeysDiscovery: {
+        id: 'console:moveToNextRequestEdge',
+        label: i18n.translate('console.keyboardCommandActionLabel.moveToNextRequestEdge', {
+          defaultMessage: 'Move to next request start or end',
+        }),
+        featureId: CONSOLE_EDITOR_FEATURE_ID,
+        scope: 'context',
+      },
     });
 
     moveToLineAction.current = editor.addAction({
@@ -149,6 +193,14 @@ export const useKeyboardCommandsUtils = () => {
         if (!isNaN(line)) {
           editor.setPosition({ lineNumber: line, column: 1 });
         }
+      },
+      hotkeysDiscovery: {
+        id: 'console:moveToLine',
+        label: i18n.translate('console.keyboardCommandActionLabel.moveToLine', {
+          defaultMessage: 'Move cursor to a line',
+        }),
+        featureId: CONSOLE_EDITOR_FEATURE_ID,
+        scope: 'context',
       },
     });
   };

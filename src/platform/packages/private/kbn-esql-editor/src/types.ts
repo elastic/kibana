@@ -121,6 +121,7 @@ export interface ESQLEditorDeps {
   usageCollection?: UsageCollectionStart;
   cps?: CPSPluginStart;
   esql?: EsqlPluginStartBase;
+  hotkeys?: CoreStart['hotkeys'];
 }
 
 export enum HistoryTabId {

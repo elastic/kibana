@@ -67,6 +67,7 @@ export const MonacoEditor = ({
 }: EditorProps) => {
   const context = useServicesContext();
   const {
+    hotkeys,
     services: {
       http,
       notifications,
@@ -280,6 +281,7 @@ export const MonacoEditor = ({
         accessibilityOverlayEnabled={settings.isAccessibilityOverlayEnabled}
         editorDidMount={editorDidMountCallback}
         editorWillUnmount={editorWillUnmountCallback}
+        hotkeys={hotkeys}
         links={true}
         options={{
           fontSize: settings.fontSize,
