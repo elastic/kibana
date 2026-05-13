@@ -86,6 +86,9 @@ export function registerSkillsRoutes({
             }),
           },
         },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/skills_list.yaml'),
+        },
       },
       wrapHandler(async (ctx, request, response) => {
         const { skills: skillService } = getInternalServices();
@@ -125,6 +128,9 @@ export function registerSkillsRoutes({
           request: {
             params: SKILL_ID_PARAMS_SCHEMA,
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/skills_get_by_id.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -195,6 +201,9 @@ export function registerSkillsRoutes({
               ),
             }),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/skills_create.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -270,6 +279,9 @@ export function registerSkillsRoutes({
               ),
             }),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/skills_update.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
