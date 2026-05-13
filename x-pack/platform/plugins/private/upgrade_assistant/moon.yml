@@ -60,10 +60,10 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
-    - public/**/*.json
-    - server/**/*.json
     - test/scout/**/*
     - test/scout_upgrade_assistant_integration/**/*
+    - public/**/*.json
+    - server/**/*.json
     - '!target/**/*'
   jest-config:
     - jest.config.js
