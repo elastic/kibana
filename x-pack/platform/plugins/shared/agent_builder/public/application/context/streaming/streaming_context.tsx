@@ -8,7 +8,7 @@
 /**
  * Lifted streaming state.
  *
- * `SendMessageProvider` is mounted ONCE above the routes/sidebar (in `mount.tsx` for the
+ * `StreamingProvider` is mounted ONCE above the routes/sidebar (in `mount.tsx` for the
  * routed app, in `embeddable_conversations_provider.tsx` for the embeddable). All streaming
  * state lives here so the sidebar can observe it.
  *
@@ -29,7 +29,7 @@ import { useResumeRoundMutation } from './use_resume_round_mutation';
 import type { ResumeRoundVars } from './use_resume_round_mutation';
 import type { ActiveStream, StreamRecord } from './types';
 
-export interface SendMessageContextValue {
+export interface StreamingContextValue {
   activeStreams: Map<string, ActiveStream>;
   byConversationId: Record<string, StreamRecord>;
   mutateSendMessage: (vars: SendMessageVars) => void;
@@ -40,11 +40,11 @@ export interface SendMessageContextValue {
   removeAllErrors: () => void;
 }
 
-const SendMessageContext = createContext<SendMessageContextValue | null>(null);
+const StreamingContext = createContext<StreamingContextValue | null>(null);
 
 const emptyRecord: StreamRecord = { errorSteps: [] };
 
-export const SendMessageProvider = ({ children }: { children: React.ReactNode }) => {
+export const StreamingProvider = ({ children }: { children: React.ReactNode }) => {
   const [activeStreams, setActiveStreams] = useState<Map<string, ActiveStream>>(() => new Map());
   const [byConversationId, setByConversationId] = useState<Record<string, StreamRecord>>({});
 
@@ -191,7 +191,7 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
     [setActiveStream, resumeMutate]
   );
 
-  const value = useMemo<SendMessageContextValue>(
+  const value = useMemo<StreamingContextValue>(
     () => ({
       activeStreams,
       byConversationId,
@@ -214,25 +214,19 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
     ]
   );
 
-  return <SendMessageContext.Provider value={value}>{children}</SendMessageContext.Provider>;
+  return <StreamingContext.Provider value={value}>{children}</StreamingContext.Provider>;
 };
 
-export const useSendMessageContext = () => {
-  const context = useContext(SendMessageContext);
+export const useStreamingContext = () => {
+  const context = useContext(StreamingContext);
   if (!context) {
-    throw new Error('useSendMessageContext must be used within a SendMessageProvider');
+    throw new Error('useStreamingContext must be used within a StreamingProvider');
   }
   return context;
 };
 
 export const useStreamRecord = (conversationId: string | undefined): StreamRecord => {
-  const { byConversationId } = useSendMessageContext();
+  const { byConversationId } = useStreamingContext();
   if (!conversationId) return emptyRecord;
   return byConversationId[conversationId] ?? emptyRecord;
 };
-
-// Re-exported so consumers can keep importing `useSendMessage` from this file. The actual
-// implementation lives in `./use_send_message` to avoid a circular import with
-// `use_conversation.ts` (the per-conversation scoped hook reads from `useConversation()`,
-// while `useConversation()` reads from `useSendMessageContext` here).
-export { useSendMessage } from './use_send_message';

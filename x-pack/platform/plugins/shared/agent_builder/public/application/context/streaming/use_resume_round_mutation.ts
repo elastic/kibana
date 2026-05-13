@@ -47,7 +47,7 @@ export const useResumeRoundMutation = ({
   const { services } = useKibana();
   const queryClient = useQueryClient();
   // One controller per in-flight conversation. Concurrent streams need independent cancel.
-  // `useResumeRoundMutation` is called exactly once — by the `SendMessageProvider`.
+  // `useResumeRoundMutation` is called exactly once — by the `StreamingProvider`.
   const controllersRef = useRef<Map<string, AbortController>>(new Map());
 
   const browserToolExecutor = useMemo(() => {

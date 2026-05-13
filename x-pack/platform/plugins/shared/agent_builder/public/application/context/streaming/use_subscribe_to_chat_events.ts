@@ -129,7 +129,7 @@ export const subscribeToChatEvents = ({
       const { tool_call_id: toolCallId, results } = event.data;
       conversationActions.setToolCallResult({ results, toolCallId });
     } else if (isRoundCompleteEvent(event)) {
-      // No-op. `isResponseLoading` is derived in `useSendMessage` from `activeStream`,
+      // No-op. `isResponseLoading` is derived in `useConversationStream` from `activeStream`,
       // and `activeStream` is cleared in the mutation's `finally` when the stream ends —
       // so we don't need an explicit signal here.
     } else if (isConversationCreatedEvent(event)) {

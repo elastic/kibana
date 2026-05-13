@@ -116,7 +116,7 @@ const withScreenContextAttachment = async ({
 };
 
 /**
- * Send and regenerate-round mutation. Lives in the lifted SendMessageProvider so streaming
+ * Send and regenerate-round mutation. Lives in the lifted StreamingProvider so streaming
  * state is visible to the whole app (sidebar included).
  *
  * Single-scope `mutationFn` (setup → try → catch → finally) — no `onMutate` / `onSettled`
@@ -136,7 +136,7 @@ export const useSendMessageMutation = ({
   const { services } = useKibana();
   const queryClient = useQueryClient();
   // One controller per in-flight conversation. Concurrent streams need independent cancel.
-  // `useSendMessageMutation` is called exactly once — by  the `SendMessageProvider`.
+  // `useSendMessageMutation` is called exactly once — by  the `StreamingProvider`.
   const controllersRef = useRef<Map<string, AbortController>>(new Map());
 
   const browserToolExecutor = useMemo(() => {

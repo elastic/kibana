@@ -7,21 +7,28 @@
 
 import { useCallback, useMemo } from 'react';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
-import { useConversationContext } from '../conversation/conversation_context';
-import { useConversationId } from '../conversation/use_conversation_id';
-import { useAgentId, useConversation } from '../../hooks/use_conversation';
-import { useConnectorSelection } from '../../hooks/chat/use_connector_selection';
-import { useSendMessageContext, useStreamRecord } from './send_message_context';
+import { useConversationContext } from '../context/conversation/conversation_context';
+import { useConversationId } from '../context/conversation/use_conversation_id';
+import { useAgentId, useConversation } from './use_conversation';
+import { useConnectorSelection } from './chat/use_connector_selection';
+import { useStreamingContext, useStreamRecord } from '../context/streaming/streaming_context';
 
 /**
- * Per-conversation scoped hook. Use INSIDE a conversation tree — it reads `conversationId`
- * and `agentId` from context. Components asking "am I streaming?" get an answer about
+ * Per-conversation scoped slice of the streaming state machine.
+ *
+ * Use INSIDE a conversation tree — it reads `conversationId` and `agentId` from context.
+ * Components asking "am I streaming?" / "what's my agent reasoning?" get an answer about
  * their own conversation, not the global app.
  *
- * Outside a conversation tree (e.g. the global sidebar), use `useSendMessageContext()`
- * directly.
+ * Outside a conversation tree (e.g. the global sidebar), read `useStreamingContext()`
+ * directly. This hook lives in `hooks/` rather than alongside the provider in
+ * `context/streaming/` because it composes `useConversation` (a sibling in `hooks/`),
+ * which itself reads from the streaming context — putting the hook here keeps the
+ * import graph linear (`streaming_context` ← `use_conversation` ← `use_conversation_stream`)
+ * and avoids the re-export-and-defer-cycle workaround the previous `useSendMessage`
+ * (in `context/streaming/`) required.
  */
-export const useSendMessage = () => {
+export const useConversationStream = () => {
   const conversationId = useConversationId();
   const agentId = useAgentId();
   const { conversation } = useConversation();
@@ -34,7 +41,7 @@ export const useSendMessage = () => {
     mutateResumeRound,
     cancelStream,
     removeError: removeErrorCtx,
-  } = useSendMessageContext();
+  } = useStreamingContext();
 
   const record = useStreamRecord(conversationId);
 
