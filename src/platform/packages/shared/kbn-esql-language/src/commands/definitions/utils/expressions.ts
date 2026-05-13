@@ -24,6 +24,7 @@ import { getMatchingSignatures } from './signatures';
 import { getColumnForASTNode } from './shared';
 import type { ESQLColumnData } from '../../registry/types';
 import { UnmappedFieldsStrategy } from '../../registry/types';
+import { inOperators } from '../all_operators';
 import { TIME_SYSTEM_PARAMS } from './literals';
 import { isMarkerNode } from './ast';
 import { getUnmappedFieldType } from './settings';
@@ -136,8 +137,11 @@ export function getExpressionType(
     }
 
     const rightArg = root.args[1];
+    // IN/NOT IN with a subquery still behaves as a boolean predicate. Returning
+    // boolean here lets WHERE treat the expression as complete and suggest
+    // continuations such as AND, OR, and pipe.
     if (
-      (fnDefinition.name === 'in' || fnDefinition.name === 'not in') &&
+      inOperators.some(({ name }) => name === fnDefinition.name) &&
       !Array.isArray(rightArg) &&
       isSubQuery(rightArg)
     ) {
