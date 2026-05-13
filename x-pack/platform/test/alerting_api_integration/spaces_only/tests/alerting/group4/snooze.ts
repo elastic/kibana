@@ -177,30 +177,38 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
       const snoozeWindowStartMs = Date.parse(rRule.dtstart);
       const snoozeWindowEndMs = snoozeWindowStartMs + snoozeDurationMs;
 
-      // wait for 4 triggered actions - in case some fired before snooze went into effect
       log.info('wait for snoozing to end');
-      const ruleEvents = await getRuleEvents(createdRule.id, 4);
-      let actionsBefore = 0;
-      let actionsDuring = 0;
-      let actionsAfter = 0;
+      await retry.try(async () => {
+        const ruleEvents = await getEventLog({
+          getService,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: createdRule.id,
+          provider: 'alerting',
+          actions: new Map([['execute-action', { gte: 4 }]]),
+        });
+        let actionsBefore = 0;
+        let actionsDuring = 0;
+        let actionsAfter = 0;
 
-      for (const event of ruleEvents) {
-        const timestamp = event?.['@timestamp'];
-        if (!timestamp) continue;
+        for (const event of ruleEvents) {
+          const timestamp = event?.['@timestamp'];
+          if (!timestamp) continue;
 
-        const time = new Date(timestamp).valueOf();
-        if (time < snoozeWindowStartMs) {
-          actionsBefore++;
-        } else if (time > snoozeWindowEndMs) {
-          actionsAfter++;
-        } else {
-          actionsDuring++;
+          const time = new Date(timestamp).valueOf();
+          if (time < snoozeWindowStartMs) {
+            actionsBefore++;
+          } else if (time >= snoozeWindowEndMs) {
+            actionsAfter++;
+          } else {
+            actionsDuring++;
+          }
         }
-      }
 
-      expect(actionsBefore).to.be.greaterThan(0, 'no actions triggered before snooze');
-      expect(actionsAfter).to.be.greaterThan(0, 'no actions triggered after snooze');
-      expect(actionsDuring).to.be(0);
+        expect(actionsBefore).to.be.greaterThan(0, 'no actions triggered before snooze');
+        expect(actionsAfter).to.be.greaterThan(0, 'no actions triggered after snooze');
+        expect(actionsDuring).to.be(0);
+      });
     });
 
     describe('prevent more than 5 schedules from being added to a rule', function () {
