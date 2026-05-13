@@ -8,19 +8,19 @@ import React, { Suspense, lazy } from 'react';
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { FILE_ATTACHMENT_TYPE } from '../../../../common/constants';
-import type {
-  AttachmentViewObject,
-  ExternalReferenceAttachmentType,
-  ExternalReferenceAttachmentViewProps,
-} from '../../../client/attachment_framework/types';
-
-import { AttachmentActionType } from '../../../client/attachment_framework/types';
-import * as i18n from './translations';
 import {
-  getFileFromReferenceMetadata,
-  isImage,
-  isValidFileExternalReferenceMetadata,
-} from './utils';
+  FileAttachmentPayloadSchema,
+  type FileAttachmentMetadata,
+} from '../../../../common/types/domain_zod/attachment/file/v2';
+import {
+  AttachmentActionType,
+  defineAttachment,
+  type UnifiedReferenceAttachmentViewProps,
+} from '../../../client/attachment_framework/types';
+import * as i18n from './translations';
+import { getFileFromReferenceMetadata, isImage, isValidFileMetadata } from './utils';
+
+type FileViewProps = UnifiedReferenceAttachmentViewProps<FileAttachmentMetadata>;
 
 const FileAttachmentEvent = lazy(() =>
   import('./file_attachment_event').then((module) => ({ default: module.FileAttachmentEvent }))
@@ -33,6 +33,9 @@ const FileDownloadButton = lazy(() =>
 );
 const FileThumbnail = lazy(() =>
   import('./file_thumbnail').then((module) => ({ default: module.FileThumbnail }))
+);
+const CaseViewFiles = lazy(() =>
+  import('./case_view_files').then((module) => ({ default: module.CaseViewFiles }))
 );
 
 function getFileDownloadButton(fileId: string) {
@@ -64,19 +67,19 @@ const getFileAttachmentActions = ({ caseId, fileId }: { caseId: string; fileId: 
   },
 ];
 
-const getFileAttachmentViewObject = (
-  props: ExternalReferenceAttachmentViewProps
-): AttachmentViewObject<ExternalReferenceAttachmentViewProps> => {
+const getFileAttachmentViewObject = (props: FileViewProps) => {
   const caseId = props.caseData.id;
-  const fileId = props.externalReferenceId;
+  // The framework view-prop type still allows `string | string[]`; the schema
+  // narrows it to `string` for `file`, but the broad output keeps the union.
+  const fileId = Array.isArray(props.attachmentId) ? props.attachmentId[0] : props.attachmentId;
 
-  if (!isValidFileExternalReferenceMetadata(props.externalReferenceMetadata)) {
+  if (!isValidFileMetadata(props.metadata)) {
     return {
       event: i18n.ADDED_UNKNOWN_FILE,
       timelineAvatar: 'document',
       getActions: () => [
         {
-          type: AttachmentActionType.CUSTOM,
+          type: AttachmentActionType.CUSTOM as const,
           render: () => getFileDeleteButton(caseId, fileId),
           isPrimary: false,
         },
@@ -87,7 +90,7 @@ const getFileAttachmentViewObject = (
 
   const file = getFileFromReferenceMetadata({
     fileId,
-    externalReferenceMetadata: props.externalReferenceMetadata,
+    metadata: props.metadata,
   });
 
   return {
@@ -103,10 +106,13 @@ const getFileAttachmentViewObject = (
   };
 };
 
-export const getFileType = (): ExternalReferenceAttachmentType => ({
-  id: FILE_ATTACHMENT_TYPE,
-  icon: 'document',
-  displayName: 'Files',
-  getAttachmentViewObject: getFileAttachmentViewObject,
-  getAttachmentRemovalObject: () => ({ event: i18n.REMOVED_FILE }),
-});
+export const getFileAttachmentType = () =>
+  defineAttachment({
+    id: FILE_ATTACHMENT_TYPE,
+    icon: 'document',
+    displayName: i18n.FILE_DISPLAY_NAME,
+    getAttachmentViewObject: getFileAttachmentViewObject,
+    getAttachmentRemovalObject: () => ({ event: i18n.REMOVED_FILE }),
+    getAttachmentTabViewObject: () => ({ children: CaseViewFiles }),
+    schema: FileAttachmentPayloadSchema,
+  });
