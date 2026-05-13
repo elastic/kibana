@@ -432,6 +432,90 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
+    'extracts severity from the ES|QL row onto breached events as a top-level field',
+    async ({ apiServices }) => {
+      /**
+       * Three breached groups exercise the three branches of the
+       * `severity` extraction:
+       *
+       * - `host-severity-supported` — the ES|QL value is one of the
+       *   supported severities (`critical`) and is copied onto the
+       *   event as a top-level field.
+       * - `host-severity-uppercase` — the ES|QL value is `HIGH`. The
+       *   executor lowercases the value before matching, so the
+       *   top-level field is `high` while the original casing is
+       *   preserved in `data.severity`.
+       * - `host-severity-unknown` — the ES|QL value (`SEV1`) is not
+       *   in the supported set, so no top-level severity is written.
+       *   The original value still shows up in `data.severity` because
+       *   the executor never mutates the row payload.
+       */
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-severity-supported',
+            severity: 'critical',
+            value: 1,
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-severity-uppercase',
+            severity: 'HIGH',
+            value: 1,
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-severity-unknown',
+            severity: 'SEV1',
+            value: 1,
+          },
+        ],
+      });
+
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'executor-severity-extraction' },
+          evaluation: {
+            query: {
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-severity-supported", "host-severity-uppercase", "host-severity-unknown") | KEEP host.name, severity, value`,
+            },
+          },
+        })
+      );
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 3, { status: 'breached' });
+
+      const breachEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'breached',
+      });
+
+      expect(breachEvents).toHaveLength(3);
+
+      const eventsByHost = groupEventsByHost(breachEvents);
+
+      expect(eventsByHost['host-severity-supported'].severity).toBe('critical');
+      expect(eventsByHost['host-severity-supported'].data).toMatchObject({
+        'host.name': 'host-severity-supported',
+        severity: 'critical',
+      });
+
+      expect(eventsByHost['host-severity-uppercase'].severity).toBe('high');
+      expect(eventsByHost['host-severity-uppercase'].data).toMatchObject({
+        'host.name': 'host-severity-uppercase',
+        severity: 'HIGH',
+      });
+
+      expect(eventsByHost['host-severity-unknown'].severity).toBeUndefined();
+      expect(eventsByHost['host-severity-unknown'].data).toMatchObject({
+        'host.name': 'host-severity-unknown',
+        severity: 'SEV1',
+      });
+    }
+  );
+
+  apiTest(
     'includes data within the lookback window even when older than schedule.every',
     async ({ apiServices }) => {
       // 30s in the past — within the 1m lookback but well outside the 5s schedule
