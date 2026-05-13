@@ -46,16 +46,6 @@ jest.mock('../../hooks/use_breadcrumbs', () => ({
   useBreadcrumbs: jest.fn(),
 }));
 
-jest.mock('./components/episode_overview_tab', () => ({
-  // helps with the slow render
-  EpisodeOverviewTab: () => <div data-test-subj="mockEpisodeOverviewTab" />,
-}));
-
-jest.mock('./components/episode_metadata_tab', () => ({
-  // helps with the slow render
-  EpisodeMetadataTab: () => <div data-test-subj="mockEpisodeMetadataTab" />,
-}));
-
 const mockUseParams = jest.mocked(useParams);
 const mockUseFetchEpisodeEventsQuery = jest.mocked(useFetchEpisodeEventsQuery);
 const mockUseFetchEpisodeActions = jest.mocked(useFetchEpisodeActions);
