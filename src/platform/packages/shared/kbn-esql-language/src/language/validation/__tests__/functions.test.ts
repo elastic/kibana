@@ -1154,7 +1154,7 @@ describe('function validation', () => {
       ]);
     });
 
-    it('allows null as a result value for any value type', async () => {
+    it('allows null as a result value in combination with other types', async () => {
       const { expectErrors } = await setup();
 
       await expectErrors(
@@ -1163,7 +1163,7 @@ describe('function validation', () => {
       );
     });
 
-    it('allows null as the elseValue for any value type', async () => {
+    it('allows null as the elseValue in combination with other types', async () => {
       const { expectErrors } = await setup();
 
       await expectErrors('FROM index | EVAL result = CONDITIONAL_MOCK(booleanField, 42, null)', []);
