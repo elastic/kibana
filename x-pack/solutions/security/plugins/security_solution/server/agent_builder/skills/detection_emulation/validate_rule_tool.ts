@@ -50,6 +50,10 @@ import {
   createDefaultRateLimiterConfig,
 } from '../../../lib/detection_emulation/execution/rate_limiter';
 import {
+  resolveAllowlistConfig,
+  resolveRateLimiterConfig,
+} from '../../../lib/detection_emulation/runtime_config_resolver';
+import {
   EmulationConcurrencyGate,
   createDefaultConcurrencyGateConfig,
 } from '../../../lib/detection_emulation/execution/concurrency_gate';
@@ -350,13 +354,34 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
           }
         }
 
+        // Per-request resolution of operator-tunable guardrails. Reads
+        // the four `securitySolution:detectionEmulation:*` Advanced
+        // Settings for the current space and falls back to `kibana.yml`
+        // defaults. Only resolved on `real_execution` because the
+        // allowlist + rate limiter are real-execution-only gates.
+        let effectiveAllowlist: Awaited<ReturnType<typeof resolveAllowlistConfig>> | undefined;
+        let effectiveRateLimiter: Awaited<ReturnType<typeof resolveRateLimiterConfig>> | undefined;
+        if (mode === 'real_execution') {
+          const soClient = coreStart.savedObjects.getScopedClient(request);
+          const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
+          [effectiveAllowlist, effectiveRateLimiter] = await Promise.all([
+            resolveAllowlistConfig({ uiSettingsClient, config, logger }),
+            resolveRateLimiterConfig({
+              uiSettingsClient,
+              config,
+              logger,
+              constructorConfig: rateLimiter.getConfig(),
+            }),
+          ]);
+        }
+
         // Step 3a (real_execution only): host allowlist. Mirrors the
         // run_emulation_command_tool.ts gate so the validateRule path
         // cannot bypass the allowlist that runEmulationCommand enforces.
         // Returns the *full* set of blocked endpoints so operators see
         // every host that needs remediation in one error response.
         if (mode === 'real_execution') {
-          const allowlistResult = allowlist.validate(endpointIds);
+          const allowlistResult = allowlist.validate(endpointIds, effectiveAllowlist);
           if (!allowlistResult.allowed) {
             logger.warn(
               `validate_rule tool blocked by allowlist for rule [${ruleId}]: ${allowlistResult.error}`
@@ -468,7 +493,13 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
         // so the LLM can suggest a different target set or a retry-after
         // window.
         if (mode === 'real_execution') {
-          const acquireResult = rateLimiter.acquire(spaceId, ruleId, 'validate-rule', endpointIds);
+          const acquireResult = rateLimiter.acquire(
+            spaceId,
+            ruleId,
+            'validate-rule',
+            endpointIds,
+            effectiveRateLimiter
+          );
           if (!acquireResult.allowed) {
             logger.warn(
               `validate_rule tool blocked by rate limiter for rule [${ruleId}]: ${acquireResult.error}`

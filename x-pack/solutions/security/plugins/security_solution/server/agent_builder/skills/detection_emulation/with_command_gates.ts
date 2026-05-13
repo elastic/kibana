@@ -32,6 +32,10 @@ import {
 } from '../../../lib/detection_emulation/feature_flag';
 import { createSavedObjectRuleBindingLookup } from '../../../lib/detection_emulation/rule_binding_lookup';
 import { emulationRuleBindingTypeName } from '../../../lib/detection_emulation/rule_binding';
+import {
+  resolveAllowlistConfig,
+  resolveRateLimiterConfig,
+} from '../../../lib/detection_emulation/runtime_config_resolver';
 import { resolveCurrentUsername } from './resolve_current_user';
 
 /**
@@ -201,8 +205,27 @@ export const withCommandGates = async (
       );
     }
 
+    // ── Per-request guardrail resolution ────────────────────────────────────
+    // Read the four `securitySolution:detectionEmulation:*` Advanced
+    // Settings for the current space and fall back to `kibana.yml`
+    // defaults. coreStart is also needed below for SO/cases lookups, so
+    // fetch it ONCE here and reuse — `getStartServices()` is async but
+    // memoized by core, so the cost amortises across the gate sequence.
+    const [coreStart] = await core.getStartServices();
+    const soClient = coreStart.savedObjects.getScopedClient(request);
+    const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
+    const [effectiveAllowlist, effectiveRateLimiter] = await Promise.all([
+      resolveAllowlistConfig({ uiSettingsClient, config, logger }),
+      resolveRateLimiterConfig({
+        uiSettingsClient,
+        config,
+        logger,
+        constructorConfig: rateLimiter.getConfig(),
+      }),
+    ]);
+
     // ── Gate 3: Host allowlist ──────────────────────────────────────────────
-    const allowlistResult = allowlist.validate(endpointIds);
+    const allowlistResult = allowlist.validate(endpointIds, effectiveAllowlist);
     if (!allowlistResult.allowed) {
       logger.warn(
         `Emulation command [${command}] for emulation [${emulationId}] blocked by allowlist: ${allowlistResult.error}`
@@ -228,7 +251,13 @@ export const withCommandGates = async (
     // saturated. Because the per-family tools always target a non-empty
     // endpointIds (it's required by their schema), per-host limiting
     // always engages here.
-    const acquireResult = rateLimiter.acquire(spaceId, emulationId, command, endpointIds);
+    const acquireResult = rateLimiter.acquire(
+      spaceId,
+      emulationId,
+      command,
+      endpointIds,
+      effectiveRateLimiter
+    );
     if (!acquireResult.allowed) {
       logger.warn(
         `Emulation command [${command}] for emulation [${emulationId}] blocked by rate limiter: ${acquireResult.error}`
@@ -260,7 +289,11 @@ export const withCommandGates = async (
     // dependencies do not register the cases plugin. We swallow lookup
     // failures because the cases client is optional for emulation
     // dispatch.
-    const [coreStart] = await core.getStartServices();
+    //
+    // `coreStart` was already resolved above for the per-request guardrail
+    // resolver — reuse it here. `getStartServices()` is async but core
+    // memoizes the promise so a second await would be cheap, but
+    // explicitly reusing the binding makes the dependency obvious.
     let casesClient;
     try {
       casesClient = await endpointService.getCasesClient(request);

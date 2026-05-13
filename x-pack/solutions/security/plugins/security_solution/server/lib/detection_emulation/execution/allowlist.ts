@@ -49,21 +49,40 @@ export class EmulationAllowlist {
   }
 
   /**
+   * Returns the constructor-bound config. Mostly useful for tests; the
+   * production runtime path uses `validate(..., effectiveConfig)` to
+   * pass a per-request override and never reads this directly.
+   */
+  getConfig(): EmulationAllowlistConfig {
+    return this.config;
+  }
+
+  /**
    * Validate that every `endpointId` is allowed by the configured
    * allowlist. Returns the full set of blocked endpoints (not just the
    * first) so the caller can surface them all in one error response.
+   *
+   * `effectiveConfig` lets the caller pass a per-request override
+   * resolved from Kibana Advanced Settings (`securitySolution:
+   * detectionEmulation:allowlistEndpointIds`). When supplied, it
+   * REPLACES the constructor-time config for this single check —
+   * operators can change the allowlist in the UI and the next request
+   * picks it up without a Kibana restart. When omitted, the
+   * constructor-time config (loaded from `kibana.yml`) is used.
    */
-  validate(endpointIds: string[]): AllowlistValidationResult {
-    if (this.config.allowAll) {
+  validate(
+    endpointIds: string[],
+    effectiveConfig?: EmulationAllowlistConfig
+  ): AllowlistValidationResult {
+    const cfg = effectiveConfig ?? this.config;
+    if (cfg.allowAll) {
       this.logger.debug(
         `Allowlist check passed: allowAll is enabled for ${endpointIds.length} endpoint(s)`
       );
       return { allowed: true, blockedEndpoints: [] };
     }
 
-    const blockedEndpoints = endpointIds.filter(
-      (endpointId) => !this.config.allowedHosts.has(endpointId)
-    );
+    const blockedEndpoints = endpointIds.filter((endpointId) => !cfg.allowedHosts.has(endpointId));
 
     if (blockedEndpoints.length > 0) {
       const error = `Emulation blocked: ${

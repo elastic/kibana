@@ -136,6 +136,22 @@ const createMockCore = (username: string | null = 'test-user') =>
           },
         },
         savedObjects: { getScopedClient: jest.fn() },
+        uiSettings: {
+          // The runtime config resolver reads four keys from a scoped
+          // uiSettings client. Returning the registered defaults
+          // (`[]` for the allowlist, `0` for numeric knobs) makes the
+          // resolver fall through to its "no override" branch and
+          // return `undefined`, so the call sites pass nothing to
+          // `validate()` / `acquire()` and the constructor binding
+          // wins — matching production behavior when an operator
+          // hasn't touched Advanced Settings.
+          asScopedToClient: jest.fn().mockReturnValue({
+            get: jest.fn(async (key: string) => {
+              if (key.includes('allowlist')) return [];
+              return 0;
+            }),
+          }),
+        },
       },
       {
         alerting: {

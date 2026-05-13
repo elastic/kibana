@@ -41,6 +41,7 @@ import {
 import { EmulationRunner } from '../../execution/runner';
 import { EmulationAllowlist, createAllowlistFromConfig } from '../../execution/allowlist';
 import { EmulationRateLimiter, createDefaultRateLimiterConfig } from '../../execution/rate_limiter';
+import { resolveAllowlistConfig, resolveRateLimiterConfig } from '../../runtime_config_resolver';
 import {
   EmulationConcurrencyGate,
   createDefaultConcurrencyGateConfig,
@@ -281,13 +282,39 @@ export const validateRuleRoute = (
             }
           }
 
+          // Per-request resolution of operator-tunable guardrails. Reads
+          // the four `securitySolution:detectionEmulation:*` Advanced
+          // Settings for the current space and falls back to `kibana.yml`
+          // defaults. Only resolved on `real_execution` because the
+          // allowlist + rate limiter are real-execution-only gates;
+          // `log_injection` is synthetic and not subject to either.
+          let effectiveAllowlist: Awaited<ReturnType<typeof resolveAllowlistConfig>> | undefined;
+          let effectiveRateLimiter:
+            | Awaited<ReturnType<typeof resolveRateLimiterConfig>>
+            | undefined;
+          if (mode === 'real_execution') {
+            [effectiveAllowlist, effectiveRateLimiter] = await Promise.all([
+              resolveAllowlistConfig({
+                uiSettingsClient: coreContext.uiSettings.client,
+                config,
+                logger,
+              }),
+              resolveRateLimiterConfig({
+                uiSettingsClient: coreContext.uiSettings.client,
+                config,
+                logger,
+                constructorConfig: rateLimiter.getConfig(),
+              }),
+            ]);
+          }
+
           // Step 3a (real_execution only): host allowlist. Mirrors the
           // run_command/route.ts gate so the validateRule REST path cannot
           // bypass the allowlist that runEmulationCommand enforces.
           // Returns the *full* set of blocked endpoints so operators see
           // every host that needs remediation in one error response.
           if (mode === 'real_execution') {
-            const allowlistResult = allowlist.validate(endpointIds);
+            const allowlistResult = allowlist.validate(endpointIds, effectiveAllowlist);
             if (!allowlistResult.allowed) {
               logger.warn(
                 `[validate_rule] blocked by allowlist for rule [${ruleId}]: ${allowlistResult.error}`
@@ -318,7 +345,8 @@ export const validateRuleRoute = (
               spaceId,
               ruleId,
               'validate-rule',
-              endpointIds
+              endpointIds,
+              effectiveRateLimiter
             );
             if (!acquireResult.allowed) {
               logger.warn(

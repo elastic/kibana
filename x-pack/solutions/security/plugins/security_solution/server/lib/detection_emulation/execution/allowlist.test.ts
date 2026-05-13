@@ -117,3 +117,60 @@ describe('createAllowlistFromConfig — operator-config translation', () => {
     expect(config.allowedHosts.size).toBe(0);
   });
 });
+
+describe('EmulationAllowlist.validate — per-call `effectiveConfig` override (Advanced Settings runtime tuning)', () => {
+  it('uses the override when supplied; ignores the constructor-time config for that call only', () => {
+    // Constructor-time: allow `kibana-endpoint`. Override at call time:
+    // allow `ui-endpoint`. The override wins, the constructor binding is
+    // unaffected for the next call.
+    const allowlist = new EmulationAllowlist(
+      createRestrictiveAllowlistConfig(['kibana-endpoint']),
+      makeLogger()
+    );
+
+    const overridden = allowlist.validate(['ui-endpoint'], {
+      allowAll: false,
+      allowedHosts: new Set(['ui-endpoint']),
+    });
+    expect(overridden.allowed).toBe(true);
+
+    // Without the override, the constructor binding still rejects `ui-endpoint`.
+    const fellBack = allowlist.validate(['ui-endpoint']);
+    expect(fellBack.allowed).toBe(false);
+    expect(fellBack.blockedEndpoints).toEqual(['ui-endpoint']);
+
+    // And still permits `kibana-endpoint` (constructor list intact).
+    expect(allowlist.validate(['kibana-endpoint']).allowed).toBe(true);
+  });
+
+  it('override does NOT silently merge with the constructor allowlist — the per-space intent wins outright', () => {
+    // If the resolver passes a per-space override, the constructor's
+    // kibana.yml allowlist must NOT be merged in. Merging would leak
+    // endpoint IDs from a deployment-wide list into a space whose
+    // operator deliberately scoped down. Locks the resolver's contract
+    // ("override REPLACES, never merges").
+    const allowlist = new EmulationAllowlist(
+      createRestrictiveAllowlistConfig(['kibana-endpoint']),
+      makeLogger()
+    );
+
+    const result = allowlist.validate(['kibana-endpoint', 'ui-endpoint'], {
+      allowAll: false,
+      allowedHosts: new Set(['ui-endpoint']),
+    });
+
+    expect(result.allowed).toBe(false);
+    expect(result.blockedEndpoints).toEqual(['kibana-endpoint']);
+  });
+
+  it('override `allowAll: true` is honoured (matches the constructor-time `allowAll` semantics)', () => {
+    const allowlist = new EmulationAllowlist(
+      createRestrictiveAllowlistConfig(['only-this']),
+      makeLogger()
+    );
+    expect(allowlist.validate(['anything-else']).allowed).toBe(false);
+    expect(
+      allowlist.validate(['anything-else'], { allowAll: true, allowedHosts: new Set() }).allowed
+    ).toBe(true);
+  });
+});

@@ -28,6 +28,7 @@ import {
 } from '../../feature_flag';
 import { EmulationAllowlist, createAllowlistFromConfig } from '../../execution/allowlist';
 import { EmulationRateLimiter, createDefaultRateLimiterConfig } from '../../execution/rate_limiter';
+import { resolveAllowlistConfig, resolveRateLimiterConfig } from '../../runtime_config_resolver';
 import {
   EmulationIdempotencyCache,
   buildIdempotencyKey,
@@ -222,10 +223,31 @@ export const runEmulationCommandRoute = (
             );
           }
 
+          // Per-request resolution of operator-tunable guardrails. Reads
+          // four `securitySolution:detectionEmulation:*` Advanced Settings
+          // for the current space and falls back to `kibana.yml` defaults
+          // (the singleton allowlist/rateLimiter constructed at route
+          // registration is the fallback baseline). Single resolver call
+          // shared by both the allowlist (Gate 3) and rate-limiter (Gate 4)
+          // checks below — same uiSettings client read, no duplicate work.
+          const [effectiveAllowlist, effectiveRateLimiter] = await Promise.all([
+            resolveAllowlistConfig({
+              uiSettingsClient: coreContext.uiSettings.client,
+              config,
+              logger,
+            }),
+            resolveRateLimiterConfig({
+              uiSettingsClient: coreContext.uiSettings.client,
+              config,
+              logger,
+              constructorConfig: rateLimiter.getConfig(),
+            }),
+          ]);
+
           // Gate 3: host allowlist. The allowlist returns the *full* list of blocked
           // endpoints (not just the first) so operators can see every host that needs
           // remediation in one shot.
-          const allowlistResult = allowlist.validate(endpointIds);
+          const allowlistResult = allowlist.validate(endpointIds, effectiveAllowlist);
           if (!allowlistResult.allowed) {
             logger.warn(
               `Emulation command [${command}] for emulation [${emulationId}] blocked by allowlist: ${allowlistResult.error}`
@@ -284,7 +306,13 @@ export const runEmulationCommandRoute = (
           // before any reservation is recorded, and the saturated host IDs are
           // surfaced in `blocked_endpoints` so the operator knows which hosts
           // need to drain before the command can be retried.
-          const acquireResult = rateLimiter.acquire(spaceId, emulationId, command, endpointIds);
+          const acquireResult = rateLimiter.acquire(
+            spaceId,
+            emulationId,
+            command,
+            endpointIds,
+            effectiveRateLimiter
+          );
           if (!acquireResult.allowed) {
             logger.warn(
               `Emulation command [${command}] for emulation [${emulationId}] blocked by rate limiter: ${acquireResult.error}`

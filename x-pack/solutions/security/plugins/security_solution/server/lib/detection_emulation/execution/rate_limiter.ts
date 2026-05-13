@@ -146,6 +146,16 @@ export class EmulationRateLimiter {
   }
 
   /**
+   * Returns the constructor-bound config. Used by the runtime config
+   * resolver as the final fallback layer (uiSettings > kibana.yml >
+   * constructor) so `acquire(..., effectiveConfig)` always sees a
+   * complete shape even when only one Advanced Setting is overridden.
+   */
+  getConfig(): EmulationRateLimiterConfig {
+    return this.config;
+  }
+
+  /**
    * Atomically reserve a slot in the per-space window for `spaceId`,
    * AND (when `endpointIds` is provided and per-host limiting is
    * configured) reserve a slot in the per-host window for each
@@ -164,32 +174,57 @@ export class EmulationRateLimiter {
     spaceId: string,
     emulationId: string,
     command: string,
-    endpointIds: string[] = []
+    endpointIds: string[] = [],
+    /**
+     * Optional per-call override of the rate limiter's configured caps
+     * and windows. Used by callers that resolve a per-space effective
+     * config (e.g. from Kibana Advanced Settings) at request time.
+     *
+     * Mutation semantics when the override differs from `this.config`:
+     *
+     * - `disabled: true` → call bypasses both buckets and returns
+     *   immediately (matches the `this.config.disabled` short-circuit).
+     * - `maxCommands` lower than `this.config.maxCommands` → existing
+     *   bucket entries are preserved; the new (lower) cap is enforced
+     *   on the current acquire. The bucket may be transiently over-cap
+     *   for entries inserted before the change; they slide out per the
+     *   override's `windowMs`.
+     * - `windowMs` shorter than `this.config.windowMs` → cleanup
+     *   evicts entries more aggressively. Some entries that the old
+     *   window would have kept are dropped early.
+     * - `perHost.capacity` / `perHost.windowMs` follow the same model.
+     *
+     * `release()` continues to use `this.config.disabled` (fixed at
+     * construction) — it must be a no-op iff the corresponding acquire
+     * was a no-op, and the caller carries the token across both calls.
+     */
+    effectiveConfig?: EmulationRateLimiterConfig
   ): RateLimitAcquireResult {
-    if (this.config.disabled) {
+    const cfg = effectiveConfig ?? this.config;
+    if (cfg.disabled) {
       this.logger.debug(`Rate limit acquire bypassed: rate limiting is disabled (${spaceId})`);
       return {
         allowed: true,
         currentCount: 0,
-        maxCommands: this.config.maxCommands,
+        maxCommands: cfg.maxCommands,
       };
     }
 
-    this.cleanupExpiredEntries(spaceId);
+    this.cleanupExpiredEntries(spaceId, cfg.windowMs);
 
     // ─── Per-space check ────────────────────────────────────────────────
     const spaceEntries = this.commandHistory.get(spaceId) ?? [];
-    if (spaceEntries.length >= this.config.maxCommands) {
+    if (spaceEntries.length >= cfg.maxCommands) {
       const oldestEntry = spaceEntries[0];
       const resetMs = oldestEntry
-        ? Math.max(0, this.config.windowMs - (Date.now() - oldestEntry.timestamp))
+        ? Math.max(0, cfg.windowMs - (Date.now() - oldestEntry.timestamp))
         : 0;
-      const error = `Rate limit exceeded for space ${spaceId}: ${spaceEntries.length}/${this.config.maxCommands} commands in the last ${this.config.windowMs}ms. Reset in ${resetMs}ms.`;
+      const error = `Rate limit exceeded for space ${spaceId}: ${spaceEntries.length}/${cfg.maxCommands} commands in the last ${cfg.windowMs}ms. Reset in ${resetMs}ms.`;
       this.logger.warn(error);
       return {
         allowed: false,
         currentCount: spaceEntries.length,
-        maxCommands: this.config.maxCommands,
+        maxCommands: cfg.maxCommands,
         resetMs,
         error,
       };
@@ -200,9 +235,9 @@ export class EmulationRateLimiter {
     // supplied endpoint IDs. validateRule's log_injection mode and the
     // pre-PROD-4 callers don't pass endpointIds — they get the
     // per-space-only behaviour they had before.
-    const perHost = this.config.perHost;
+    const perHost = cfg.perHost;
     if (perHost && endpointIds.length > 0) {
-      this.cleanupExpiredHostEntries(spaceId);
+      this.cleanupExpiredHostEntries(spaceId, perHost.windowMs);
       const hostBuckets = this.hostHistory.get(spaceId) ?? new Map<string, CommandEntry[]>();
       const blockedEndpoints: string[] = [];
       for (const endpointId of endpointIds) {
@@ -221,7 +256,7 @@ export class EmulationRateLimiter {
         return {
           allowed: false,
           currentCount: spaceEntries.length,
-          maxCommands: this.config.maxCommands,
+          maxCommands: cfg.maxCommands,
           blockedEndpoints,
           error,
         };
@@ -248,14 +283,14 @@ export class EmulationRateLimiter {
     }
 
     this.logger.debug(
-      `Rate limit acquired for space ${spaceId}: ${spaceEntries.length}/${this.config.maxCommands}${
+      `Rate limit acquired for space ${spaceId}: ${spaceEntries.length}/${cfg.maxCommands}${
         hostEntries.length > 0 ? ` and ${hostEntries.length} host bucket(s)` : ''
       }`
     );
     return {
       allowed: true,
       currentCount: spaceEntries.length,
-      maxCommands: this.config.maxCommands,
+      maxCommands: cfg.maxCommands,
       token: { spaceId, spaceEntry, hostEntries },
     };
   }
@@ -304,19 +339,23 @@ export class EmulationRateLimiter {
   /**
    * Test/debug helper: number of entries currently counted in the
    * per-space window for a space. Cleans up expired entries on read.
+   *
+   * `windowMsOverride` mirrors `acquire()`'s `effectiveConfig.windowMs`
+   * so tests can probe what the count would be under a per-space
+   * Advanced-Setting override without first calling `acquire()`.
    */
-  getCurrentCount(spaceId: string): number {
-    this.cleanupExpiredEntries(spaceId);
+  getCurrentCount(spaceId: string, windowMsOverride?: number): number {
+    this.cleanupExpiredEntries(spaceId, windowMsOverride);
     return this.commandHistory.get(spaceId)?.length ?? 0;
   }
 
   /**
    * Test/debug helper: number of entries currently counted in the
    * per-host bucket for `(spaceId, endpointId)`. Cleans up expired
-   * entries on read.
+   * entries on read. See `getCurrentCount` for the override semantics.
    */
-  getCurrentHostCount(spaceId: string, endpointId: string): number {
-    this.cleanupExpiredHostEntries(spaceId);
+  getCurrentHostCount(spaceId: string, endpointId: string, windowMsOverride?: number): number {
+    this.cleanupExpiredHostEntries(spaceId, windowMsOverride);
     return this.hostHistory.get(spaceId)?.get(endpointId)?.length ?? 0;
   }
 
@@ -324,13 +363,19 @@ export class EmulationRateLimiter {
    * Drop entries older than `windowMs` for a given space's per-space
    * bucket. Called on every `acquire()` and `getCurrentCount()` so the
    * window stays bounded without a separate timer.
+   *
+   * `windowMsOverride` mirrors the per-call override threaded through
+   * `acquire()` — when the operator shortens the window via Advanced
+   * Settings, cleanup must use the new (shorter) horizon so entries
+   * the operator considers "expired" actually drop out.
    */
-  private cleanupExpiredEntries(spaceId: string): void {
+  private cleanupExpiredEntries(spaceId: string, windowMsOverride?: number): void {
     const entries = this.commandHistory.get(spaceId);
     if (!entries || entries.length === 0) {
       return;
     }
-    const cutoffTime = Date.now() - this.config.windowMs;
+    const windowMs = windowMsOverride ?? this.config.windowMs;
+    const cutoffTime = Date.now() - windowMs;
     const validEntries = entries.filter((entry) => entry.timestamp > cutoffTime);
     if (validEntries.length === entries.length) {
       return;
@@ -346,13 +391,17 @@ export class EmulationRateLimiter {
    * Drop entries older than `perHost.windowMs` for every per-host
    * bucket under `spaceId`. Called on every per-host check so the
    * window stays bounded without a separate timer.
+   *
+   * See {@link cleanupExpiredEntries} for the `windowMsOverride`
+   * semantics; same model applies here.
    */
-  private cleanupExpiredHostEntries(spaceId: string): void {
+  private cleanupExpiredHostEntries(spaceId: string, windowMsOverride?: number): void {
     const perHost = this.config.perHost;
-    if (!perHost) return;
+    const effectiveWindowMs = windowMsOverride ?? perHost?.windowMs;
+    if (!effectiveWindowMs) return;
     const hostBuckets = this.hostHistory.get(spaceId);
     if (!hostBuckets || hostBuckets.size === 0) return;
-    const cutoffTime = Date.now() - perHost.windowMs;
+    const cutoffTime = Date.now() - effectiveWindowMs;
     for (const [endpointId, entries] of hostBuckets) {
       const validEntries = entries.filter((entry) => entry.timestamp > cutoffTime);
       if (validEntries.length !== entries.length) {
@@ -380,8 +429,13 @@ export class EmulationRateLimiter {
  * raising `MAX_ENDPOINT_FANOUT` (PROD-3) in lockstep, since the
  * realistic ceiling on a single emulation is fanout × per-host.
  *
- * TODO: thread this through Kibana config (xpack.securitySolution.detectionEmulation.*)
- * once the feature graduates from experimental.
+ * Operators tune both `perHost` and the per-space caps via:
+ * - `xpack.securitySolution.detectionEmulation.rateLimiter.*` in
+ *   `kibana.yml` (deployment-wide defaults), or
+ * - `securitySolution:detectionEmulation:rateLimiter*` in Advanced
+ *   Settings (per-space runtime overrides; resolved per-request via
+ *   `runtime_config_resolver.ts` and threaded through `acquire()`'s
+ *   `effectiveConfig` parameter).
  */
 export function createDefaultRateLimiterConfig(): EmulationRateLimiterConfig {
   return {

@@ -271,6 +271,24 @@ export const configSchema = schema.object({
           maxCommands: schema.number({ defaultValue: 100, min: 1 }),
           windowMs: schema.number({ defaultValue: 60 * 60 * 1000, min: 1_000 }),
           disabled: schema.boolean({ defaultValue: false }),
+          /**
+           * Per-host (PROD-4) bucket. When omitted, only the per-space
+           * bucket is enforced — preserves pre-PROD-4 behaviour.
+           *
+           * Defaults match `createDefaultRateLimiterConfig`: 3 commands per
+           * host per hour. The lower bound of what major EDR vendors document
+           * as their host-side response-action queue depth before backpressure
+           * kicks in. Raising it requires confirming the target vendor can
+           * absorb the additional load AND raising `MAX_ENDPOINT_FANOUT`
+           * (PROD-3) in lockstep, since the realistic ceiling on a single
+           * emulation is `fanout × per-host`.
+           */
+          perHost: schema.maybe(
+            schema.object({
+              capacity: schema.number({ defaultValue: 3, min: 1 }),
+              windowMs: schema.number({ defaultValue: 60 * 60 * 1000, min: 1_000 }),
+            })
+          ),
         })
       ),
       idempotencyCache: schema.maybe(
