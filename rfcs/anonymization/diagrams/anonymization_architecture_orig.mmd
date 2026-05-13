@@ -1,0 +1,56 @@
+flowchart TD
+    YOU["You in Kibana\n \nType message / alert context\nin Agent Builder, Observability AI,\nSecurity AI, attack discovery, …"]
+
+    EXTSYS["External Systems\n \nAPIs not owned by Elastic"]
+
+    subgraph CONSUMERS["Agent Builder (or any LLM consumer) — zero anonymization code"]
+        direction TB
+        AGENT["Agent / chat round\n \nAssembles prompt, runs tools,\ncalls inference.chatComplete\nPasses sessionId via metadata"]
+        TC["Tool calls\n \n• Elasticsearch (alerts, events, fields)\n• Trusted system / APIs\n• LLM calls (through Inference plugin)\n \nAll tool calls get unmasked values\nNo need to use before/afterToolCall hooks"]
+        AGENT -->|"Tool params"| TC
+        TC -->|"Tool call result\nraw output → state → next prompt"| AGENT
+    end
+
+    subgraph INF["Inference plugin — single anonymization integration site · stateless"]
+        direction TB
+        BEFORE["beforePromptSend hook\n \n1. Derives salt = HMAC(serverSecret, sessionId)\n2. Runs ai.pii on serialized prompt\n   (both system + messages)\n3. Replaces matches with HMAC tokens\n4. Writes to call-scoped token map\n5. fail-closed by default — no silent leaks"]
+        CTX["AnonymizationContext (call-scoped)\n \nsalt = HMAC(serverSecret, sessionId)\ntokenMap = Map<token, original>\nCreated at chatComplete entry\nDiscarded when call returns\nNo storage — no TTL — no cluster state"]
+        AFTER["afterCompletion hook\n \nRuns transform.pii_restore on response\nReplaces tokens with originals\nReads from call-scoped token map\nStreaming: token + structural-boundary aware"]
+        BEFORE -.->|"writes token map"| CTX
+        CTX -.->|"reads token map"| AFTER
+    end
+
+    WF["Workflow engine\n \ninvokeHook(triggerId, payload)\nResolves subscribers, runs sequentially\nchained: each workflow sees previous output\nai.pii / transform.pii_restore steps\nDefault workflow + admin custom rules"]
+
+    LLM["Large Language Model\n \nAnthropic, OpenAI, Bedrock, …\nSees only tokens — never real PII"]
+
+    BACK["Back to you\n \nResponse already deanonymized\nReal values everywhere"]
+
+    YOU         -->|"message may contain PII"| AGENT
+    AGENT       -->|"chatComplete(messages, sessionId)"| BEFORE
+    BEFORE      -->|"invokeHook\n'inference.beforePromptSend'"| WF
+    WF          -->|"anonymized messages"| BEFORE
+    BEFORE      -->|"LLM request\nAnonymized"| LLM
+    LLM         -->|"LLM Response\nStill anonymized"| AFTER
+    AFTER       -->|"invokeHook\n'inference.afterCompletion'"| WF
+    WF          -->|"deanonymized response"| AFTER
+    AFTER       -->|"LLM Response\nde-anonymized"| AGENT
+    AGENT       -->|"Deanonymized response\nreal values everywhere"| BACK
+    BACK        -.->|"reads response"| YOU
+    TC          -->|"Tool params\n(unmasked — could leak PII)"| EXTSYS
+    EXTSYS      -->|"Response\n(unmasked — could leak PII)"| TC
+
+    style YOU    fill:#fef3c7,stroke:#b45309,color:#000,font-size:14px
+    style AGENT  fill:#dbeafe,stroke:#1d4ed8,color:#000,font-size:14px
+    style TC     fill:#fed7aa,stroke:#c2410c,color:#000,font-size:14px
+    style BEFORE fill:#bbf7d0,stroke:#15803d,color:#000,font-size:14px
+    style CTX    fill:#d1fae5,stroke:#059669,color:#000,font-size:14px
+    style AFTER  fill:#bbf7d0,stroke:#15803d,color:#000,font-size:14px
+    style WF     fill:#e9d5ff,stroke:#7e22ce,color:#000,font-size:14px
+    style LLM    fill:#f97316,stroke:#c2410c,color:#fff,font-size:14px
+    style EXTSYS fill:#f97316,stroke:#c2410c,color:#fff,font-size:14px
+    style BACK   fill:#fef3c7,stroke:#b45309,color:#000,font-size:14px
+
+    linkStyle 14 stroke:#6b7280,stroke-dasharray:5 5
+    linkStyle 15 stroke:#dc2626,stroke-dasharray:5 5
+    linkStyle 16 stroke:#dc2626,stroke-dasharray:5 5

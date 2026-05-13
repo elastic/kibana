@@ -1,0 +1,67 @@
+flowchart TD
+    YOU["You in Kibana\n \nType message / alert context\nin Agent Builder UI"]
+
+    subgraph CONSUMERS["LLM Consumers — zero wiring changes required"]
+        direction LR
+        AB["Agent Builder\n(threads conversationId as anonymizationSessionId)"]
+        OAS["Observability AI\nAssistant"]
+        SECAI["Security AI /\nAttack Discovery"]
+        FUTURE["Any future\nconsumer"]
+    end
+
+    subgraph INF["Inference plugin — chatComplete boundary\n \nxpack.inference.anonymization.enabled: true"]
+        direction TB
+        CTX["AnonymizationContext created\n \nsalt = HMAC(serverSecret, sessionId)\ntokenMap = new Map()  ← call-scoped, GC'd on return"]
+        AROUND["invokeHook('inference.aroundCompletion')\n \npayload: { sessionId, system?, messages }\ncapabilities: { anonymizationContext, proceedFn }\n \npre-proceed: anonymize → call_site.proceed → post-proceed: restore"]
+        CONNECTOR["connector.chatComplete(anonymizedMessages)\n \n— called via call_site.proceed —\n— LLM sees only tokens —"]
+        TOOLRESTORE["restoreInValue(toolCalls)\n \ntool args restored from tokenMap\n— outside the hook, always runs —"]
+    end
+
+    subgraph WM["WorkflowsClient (workflowsManagement)\n \nqueries .kibana-workflows for enabled workflows in current space"]
+        direction TB
+        EXEC["executeWorkflowSync\n \ninline YAML execution — no Task Manager\nuses WorkflowTemplatingEngine\nstep definitions looked up from workflowsExtensions registry\nsuspends at call_site.proceed, resumes after proceedFn returns"]
+    end
+
+    subgraph IW["inference_workflows plugin — step definitions registered at setup()"]
+        direction TB
+        PIIDEF["ai.pii step\n \nreads AnonymizationContext via capabilities\nruns regex rules against input\ngenerates HMAC tokens → writes to tokenMap"]
+        RESTOREDEF["transform.pii_restore step\n \nreads AnonymizationContext via capabilities\nscans text for tokens, restores originals from tokenMap"]
+    end
+
+    LLM["Large Language Model\n \nAnthropic · OpenAI · Bedrock · Gemini\nSees only HMAC tokens — never raw PII"]
+
+    BACK["Response returned to caller\n \ntext: de-anonymized\ntoolCalls: args restored\ncaller sees real values"]
+
+    YOU -->|"message may contain PII"| AB
+    AB  -->|"chatComplete({ messages,\nmetadata.anonymization.sessionId: conversationId })"| CTX
+    OAS -->|"chatComplete(…)"| CTX
+    SECAI -->|"chatComplete(…)"| CTX
+    FUTURE -->|"chatComplete(…)"| CTX
+
+    CTX --> AROUND
+    AROUND <-->|"invoke / result"| EXEC
+    EXEC -->|"pre-proceed: runs step"| PIIDEF
+    PIIDEF -->|"{ anonymized system, messages }"| CONNECTOR
+    CONNECTOR --> LLM
+    LLM -->|"tokenized response (via proceedFn)"| EXEC
+    EXEC -->|"post-proceed: runs step"| RESTOREDEF
+    RESTOREDEF -->|"{ de-anonymized response }"| TOOLRESTORE
+    TOOLRESTORE -->|"real response + real tool args"| BACK
+    BACK -.->|"reads response"| YOU
+
+    style YOU         fill:#fef3c7,stroke:#b45309,color:#000,font-size:13px
+    style AB          fill:#dbeafe,stroke:#1d4ed8,color:#000,font-size:13px
+    style OAS         fill:#dbeafe,stroke:#1d4ed8,color:#000,font-size:13px
+    style SECAI       fill:#dbeafe,stroke:#1d4ed8,color:#000,font-size:13px
+    style FUTURE      fill:#dbeafe,stroke:#1d4ed8,color:#000,font-size:13px
+    style CTX         fill:#f5f3ff,stroke:#7e22ce,color:#374151,font-size:13px
+    style AROUND      fill:#bbf7d0,stroke:#15803d,color:#000,font-size:13px
+    style CONNECTOR   fill:#fde68a,stroke:#b45309,color:#000,font-size:13px
+    style TOOLRESTORE fill:#e0f2fe,stroke:#0284c7,color:#000,font-size:13px
+    style EXEC        fill:#e0e7ff,stroke:#4338ca,color:#000,font-size:13px
+    style PIIDEF      fill:#bbf7d0,stroke:#15803d,color:#000,font-size:13px
+    style RESTOREDEF  fill:#bbf7d0,stroke:#15803d,color:#000,font-size:13px
+    style LLM         fill:#f97316,stroke:#c2410c,color:#fff,font-size:13px
+    style BACK        fill:#fef3c7,stroke:#b45309,color:#000,font-size:13px
+
+    linkStyle 14 stroke:#6b7280,stroke-dasharray:5 5
