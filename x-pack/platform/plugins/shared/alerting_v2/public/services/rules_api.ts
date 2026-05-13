@@ -66,8 +66,8 @@ export class RulesApi {
     });
   }
 
-  public async getRule(id: string) {
-    return this.http.get<RuleResponse>(`${ALERTING_V2_RULE_API_PATH}/${id}`);
+  public async getRule(id: string, signal?: AbortSignal) {
+    return this.http.get<RuleResponse>(`${ALERTING_V2_RULE_API_PATH}/${id}`, { signal });
   }
 
   public async updateRule(id: string, payload: UpdateRuleData) {

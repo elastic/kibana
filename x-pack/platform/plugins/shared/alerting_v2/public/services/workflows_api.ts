@@ -16,9 +16,10 @@ const API_VERSION = '2023-10-31';
 export class WorkflowsApi {
   constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}
 
-  public async getWorkflow(id: string): Promise<WorkflowDetailDto> {
+  public async getWorkflow(id: string, signal?: AbortSignal): Promise<WorkflowDetailDto> {
     return this.http.get<WorkflowDetailDto>(`/api/workflows/workflow/${encodeURIComponent(id)}`, {
       version: API_VERSION,
+      signal,
     });
   }
 
