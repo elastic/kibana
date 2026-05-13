@@ -14,10 +14,10 @@ apiTest.describe(
   'DELETE /api/saved_objects_tagging/tags/{id}',
   { tag: tags.stateful.classic },
   () => {
-    let adminApiCredentials: RoleApiCredentials;
+    let privilegedApiCredentials: RoleApiCredentials;
 
     apiTest.beforeAll(async ({ requestAuth }) => {
-      adminApiCredentials = await requestAuth.getApiKey('admin');
+      privilegedApiCredentials = await requestAuth.getApiKeyForPrivilegedUser();
     });
 
     apiTest.beforeEach(async ({ kbnClient }) => {
@@ -32,7 +32,7 @@ apiTest.describe(
       const existingTag = await apiClient.get('api/saved_objects_tagging/tags/tag-1', {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...privilegedApiCredentials.apiKeyHeader,
         },
       });
       expect(existingTag).toHaveStatusCode(200);
@@ -40,7 +40,7 @@ apiTest.describe(
       const deleteResponse = await apiClient.delete('api/saved_objects_tagging/tags/tag-1', {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...privilegedApiCredentials.apiKeyHeader,
         },
       });
       expect(deleteResponse).toHaveStatusCode(200);
@@ -48,7 +48,7 @@ apiTest.describe(
       const deletedTag = await apiClient.get('api/saved_objects_tagging/tags/tag-1', {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...privilegedApiCredentials.apiKeyHeader,
         },
       });
       expect(deletedTag).toHaveStatusCode(404);
@@ -58,7 +58,7 @@ apiTest.describe(
       const existingTag = await apiClient.get('api/saved_objects_tagging/tags/tag-1', {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...privilegedApiCredentials.apiKeyHeader,
         },
       });
       expect(existingTag).toHaveStatusCode(200);
@@ -66,7 +66,7 @@ apiTest.describe(
       const deleteResponse = await apiClient.delete('api/saved_objects_tagging/tags/tag-1', {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...privilegedApiCredentials.apiKeyHeader,
         },
       });
       expect(deleteResponse).toHaveStatusCode(200);
@@ -74,7 +74,7 @@ apiTest.describe(
       const bulkResponse = await apiClient.post('api/saved_objects/_bulk_get', {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...privilegedApiCredentials.apiKeyHeader,
         },
         body: [
           { type: 'visualization', id: 'ref-to-tag-1' },

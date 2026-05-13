@@ -14,10 +14,10 @@ apiTest.describe(
   'POST /api/saved_objects_tagging/tags/create',
   { tag: tags.stateful.classic },
   () => {
-    let adminApiCredentials: RoleApiCredentials;
+    let privilegedApiCredentials: RoleApiCredentials;
 
     apiTest.beforeAll(async ({ requestAuth }) => {
-      adminApiCredentials = await requestAuth.getApiKey('admin');
+      privilegedApiCredentials = await requestAuth.getApiKeyForPrivilegedUser();
     });
 
     apiTest.beforeEach(async ({ kbnClient }) => {
@@ -32,7 +32,7 @@ apiTest.describe(
       const createResponse = await apiClient.post('api/saved_objects_tagging/tags/create', {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...privilegedApiCredentials.apiKeyHeader,
         },
         body: {
           name: 'my new tag',
@@ -57,7 +57,7 @@ apiTest.describe(
       const getResponse = await apiClient.get(`api/saved_objects_tagging/tags/${newTagId}`, {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...privilegedApiCredentials.apiKeyHeader,
         },
       });
 
@@ -75,7 +75,7 @@ apiTest.describe(
       const deleteResponse = await apiClient.delete(`api/saved_objects_tagging/tags/${newTagId}`, {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...privilegedApiCredentials.apiKeyHeader,
         },
       });
       expect(deleteResponse).toHaveStatusCode(200);
@@ -85,7 +85,7 @@ apiTest.describe(
       const response = await apiClient.post('api/saved_objects_tagging/tags/create', {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...privilegedApiCredentials.apiKeyHeader,
         },
         body: {
           name: 'a',
@@ -115,7 +115,7 @@ apiTest.describe(
       const response = await apiClient.post('api/saved_objects_tagging/tags/create', {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...privilegedApiCredentials.apiKeyHeader,
         },
         body: {
           name: existingName,

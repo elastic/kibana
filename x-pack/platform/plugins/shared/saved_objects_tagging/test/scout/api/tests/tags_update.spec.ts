@@ -14,10 +14,10 @@ apiTest.describe(
   'POST /api/saved_objects_tagging/tags/{id}',
   { tag: tags.stateful.classic },
   () => {
-    let adminApiCredentials: RoleApiCredentials;
+    let privilegedApiCredentials: RoleApiCredentials;
 
     apiTest.beforeAll(async ({ requestAuth }) => {
-      adminApiCredentials = await requestAuth.getApiKey('admin');
+      privilegedApiCredentials = await requestAuth.getApiKeyForPrivilegedUser();
     });
 
     apiTest.beforeEach(async ({ kbnClient }) => {
@@ -32,7 +32,7 @@ apiTest.describe(
       const updateResponse = await apiClient.post('api/saved_objects_tagging/tags/tag-1', {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...privilegedApiCredentials.apiKeyHeader,
         },
         body: {
           name: 'updated name',
@@ -55,7 +55,7 @@ apiTest.describe(
       const getResponse = await apiClient.get('api/saved_objects_tagging/tags/tag-1', {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...privilegedApiCredentials.apiKeyHeader,
         },
       });
 
@@ -76,7 +76,7 @@ apiTest.describe(
       const updateResponse = await apiClient.post('api/saved_objects_tagging/tags/tag-2', {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...privilegedApiCredentials.apiKeyHeader,
         },
         body: {
           name: existingName,
@@ -95,7 +95,7 @@ apiTest.describe(
       const getResponse = await apiClient.get('api/saved_objects_tagging/tags/tag-3', {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...privilegedApiCredentials.apiKeyHeader,
         },
       });
 
@@ -115,7 +115,7 @@ apiTest.describe(
       const response = await apiClient.post('api/saved_objects_tagging/tags/unknown-tag-id', {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...privilegedApiCredentials.apiKeyHeader,
         },
         body: {
           name: 'updated name',
@@ -136,7 +136,7 @@ apiTest.describe(
       const response = await apiClient.post('api/saved_objects_tagging/tags/tag-1', {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...privilegedApiCredentials.apiKeyHeader,
         },
         body: {
           name: 'a',

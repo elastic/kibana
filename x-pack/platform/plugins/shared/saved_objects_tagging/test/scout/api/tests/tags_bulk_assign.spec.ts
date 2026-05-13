@@ -14,10 +14,10 @@ apiTest.describe(
   'POST /api/saved_objects_tagging/assignments/update_by_tags',
   { tag: tags.stateful.classic },
   () => {
-    let adminApiCredentials: RoleApiCredentials;
+    let privilegedApiCredentials: RoleApiCredentials;
 
     apiTest.beforeAll(async ({ requestAuth }) => {
-      adminApiCredentials = await requestAuth.getApiKey('admin');
+      privilegedApiCredentials = await requestAuth.getApiKeyForPrivilegedUser();
     });
 
     apiTest.beforeEach(async ({ kbnClient }) => {
@@ -34,7 +34,7 @@ apiTest.describe(
         {
           headers: {
             ...COMMON_HEADERS,
-            ...adminApiCredentials.apiKeyHeader,
+            ...privilegedApiCredentials.apiKeyHeader,
           },
           body: {
             tags: ['tag-1', 'tag-2'],
@@ -48,7 +48,7 @@ apiTest.describe(
       const bulkResponse = await apiClient.post('api/saved_objects/_bulk_get', {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...privilegedApiCredentials.apiKeyHeader,
         },
         body: [
           { type: 'dashboard', id: 'ref-to-tag-1-and-tag-3' },
@@ -72,7 +72,7 @@ apiTest.describe(
         {
           headers: {
             ...COMMON_HEADERS,
-            ...adminApiCredentials.apiKeyHeader,
+            ...privilegedApiCredentials.apiKeyHeader,
           },
           body: {
             tags: ['tag-1', 'tag-2'],
@@ -92,7 +92,7 @@ apiTest.describe(
       const bulkResponse = await apiClient.post('api/saved_objects/_bulk_get', {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...privilegedApiCredentials.apiKeyHeader,
         },
         body: [{ type: 'visualization', id: 'ref-to-tag-1' }],
       });
@@ -112,7 +112,7 @@ apiTest.describe(
           {
             headers: {
               ...COMMON_HEADERS,
-              ...adminApiCredentials.apiKeyHeader,
+              ...privilegedApiCredentials.apiKeyHeader,
             },
             body: {
               tags: ['tag-1', 'tag-2'],
