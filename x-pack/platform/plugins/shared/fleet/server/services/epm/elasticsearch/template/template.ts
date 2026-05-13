@@ -95,13 +95,27 @@ interface DynamicMappingResult {
   matchingType: string;
 }
 
+interface WalkContext {
+  groupFieldName: string | undefined;
+  props: Properties;
+  hasNonDynamicTemplateMappings: boolean;
+  hasDynamicTemplateMappings: boolean;
+  subobjects: boolean | undefined;
+}
+
+type WalkResult = Omit<WalkContext, 'props'> & { properties: Properties };
+
 /**
  * Base class for all ES field types. Default implementations are no-ops so
  * subclasses only override the contexts that apply to them, preserving
  * current silent-skip behavior for unsupported combinations.
  */
 abstract class FieldType {
-  staticMapping(_field: Field, _builder: MappingsBuilder): Properties | undefined {
+  staticMapping(
+    _field: Field,
+    _builder: MappingsBuilder,
+    _context: WalkContext
+  ): Properties | undefined {
     return undefined;
   }
 
@@ -443,12 +457,12 @@ class ObjectType extends FieldType {
 }
 
 class NestedType extends FieldType {
-  staticMapping(field: Field, builder: MappingsBuilder): Properties {
+  staticMapping(field: Field, builder: MappingsBuilder, context: WalkContext): Properties {
     const props: Properties = { ...generateNestedProps(field), type: 'nested' };
     if (field.fields) {
       props.properties = builder.build(
         field.fields,
-        fieldPath(builder.groupFieldName, field.name)
+        fieldPath(context.groupFieldName, field.name)
       ).properties;
     }
     return props;
@@ -468,8 +482,12 @@ class GroupType extends FieldType {
    * has no static children, i.e. only dynamic template mappings).
    * Returns undefined when the group has no mappings to emit.
    */
-  mapGroup(field: Field, builder: MappingsBuilder): GroupMappingResult | undefined {
-    const mappings = builder.build(field.fields!, fieldPath(builder.groupFieldName, field.name));
+  mapGroup(
+    field: Field,
+    builder: MappingsBuilder,
+    context: WalkContext
+  ): GroupMappingResult | undefined {
+    const mappings = builder.build(field.fields!, fieldPath(context.groupFieldName, field.name));
 
     if (mappings.hasNonDynamicTemplateMappings) {
       const fieldProps: Properties = {
@@ -617,16 +635,8 @@ const getOtelBaseComponents = (type: string): string[] => {
   return [];
 };
 
-interface WalkResult {
-  properties: IndexTemplateMappings['properties'];
-  hasNonDynamicTemplateMappings: boolean;
-  hasDynamicTemplateMappings: boolean;
-  subobjects?: boolean;
-}
-
 class MappingsBuilder {
   readonly isIndexModeTimeSeries: boolean;
-  groupFieldName: string | undefined;
 
   private readonly dynamicTemplates: Array<Record<string, Properties>> = [];
   private readonly dynamicTemplateNames: Record<string, number> = {};
@@ -641,215 +651,214 @@ class MappingsBuilder {
    * groupFieldName scopes the dynamic template paths for nested/group fields.
    */
   build(fields: Field[], groupFieldName?: string): WalkResult {
-    const outerGroupFieldName = this.groupFieldName;
-    this.groupFieldName = groupFieldName;
-
-    let hasNonDynamicTemplateMappings = false;
-    let hasDynamicTemplateMappings = false;
-    let subobjects: boolean | undefined;
-    const props: Properties = {};
-
-    const addParentObjectAsStaticProperty = (field: Field) => {
-      // Don't add intermediate objects for wildcard names, as it will
-      // be added for its parent object.
-      if (field.name.includes('*')) return;
-      props[field.name] = {
-        type: 'object',
-        dynamic: true,
-        ...(field.subobjects !== undefined && { subobjects: field.subobjects }),
-      };
-      hasNonDynamicTemplateMappings = true;
-    };
-
-    const addDynamicMappingWithIntermediateObjects = (
-      path: string,
-      pathMatch: string,
-      matchingType: string,
-      dynProperties: Properties,
-      runtimeProperties?: Properties
-    ) => {
-      this.addDynamicTemplate(path, pathMatch, matchingType, dynProperties, runtimeProperties);
-      hasDynamicTemplateMappings = true;
-
-      // Add dynamic intermediate objects.
-      const parts = pathMatch.split('.');
-      for (let i = parts.length - 1; i > 0; i--) {
-        const name = parts.slice(0, i).join('.');
-        if (!name.includes('*')) continue;
-        this.addDynamicTemplate(name, name, 'object', { type: 'object', dynamic: true });
-      }
-    };
-
-    const addObjectAsDynamicMapping = (field: Field) => {
-      const path = fieldPath(this.groupFieldName, field.name);
-      const pMatch = dynamicPathMatch(path);
-      const objectType = field.object_type!;
-
-      if (objectType === 'group') {
-        if (!field.fields) return;
-        const subFields = field.fields.map((subField) => ({
-          ...subField,
-          type: 'object',
-          object_type: subField.object_type ?? subField.type,
-        }));
-        const mappings = this.build(subFields, fieldPath(this.groupFieldName, field.name));
-        if (mappings.hasDynamicTemplateMappings) hasDynamicTemplateMappings = true;
-        return;
-      }
-
-      const handler = fieldTypeRegistry[objectType];
-      const result = handler?.dynamicMapping({ ...field, type: objectType }, this);
-
-      if (!result) {
-        // Preserve original behavior: unsupported or unknown object_type always throws.
-        throw new PackageInvalidArchiveError(
-          `No dynamic mapping generated for field ${path} of type ${objectType}`
-        );
-      }
-
-      // When a wildcard field specifies the subobjects setting,
-      // the parent intermediate object should set the subobjects setting.
-      // For example, if a wildcard field `foo.*` has subobjects,
-      // we should set subobjects on the intermediate object `foo`.
-      if (field.subobjects !== undefined && path.includes('*')) {
-        subobjects = field.subobjects;
-      }
-
-      addDynamicMappingWithIntermediateObjects(
-        path,
-        pMatch,
-        result.matchingType,
-        result.properties
-      );
-
-      // Add the parent object as static property, needed for index templates not using `"dynamic": true`.
-      addParentObjectAsStaticProperty(field);
+    const context: WalkContext = {
+      groupFieldName,
+      props: {},
+      hasNonDynamicTemplateMappings: false,
+      hasDynamicTemplateMappings: false,
+      subobjects: undefined,
     };
 
     // TODO: this can happen when the fields property in fields.yml is present but empty.
     // Maybe validation should be moved to fields/field.ts.
     if (fields) {
-      fields.forEach((field) => {
-        // If type is not defined, assume keyword
-        const type = field.type || 'keyword';
-
-        if (field.runtime !== undefined) {
-          const path = fieldPath(this.groupFieldName, field.name);
-
-          if (type === 'object' && field.object_type) {
-            // Runtime field that is also a dynamic template (e.g. labels.* with runtime: true).
-            const pMatch = dynamicPathMatch(path);
-            const objectType = field.object_type;
-
-            const handler = fieldTypeRegistry[objectType];
-            const dynResult = handler?.dynamicMapping({ ...field, type: objectType }, this);
-            const runtimeProps = handler?.runtimeMapping({ ...field, type: objectType });
-
-            if (dynResult && runtimeProps) {
-              addDynamicMappingWithIntermediateObjects(
-                path,
-                pMatch,
-                dynResult.matchingType,
-                dynResult.properties,
-                runtimeProps
-              );
-              addParentObjectAsStaticProperty(field);
-            }
-            return;
-          }
-
-          const handler = fieldTypeRegistry[type];
-          const runtimeProps = handler?.runtimeMapping(field) ?? { type };
-          const runtimeFieldProps = {
-            ...getDefaultProperties(field),
-            ...runtimeProps,
-          };
-          if (typeof field.runtime === 'string') {
-            runtimeFieldProps.script = { source: field.runtime.trim() };
-          }
-          this.addRuntimeField(path, runtimeFieldProps);
-          return;
-        }
-
-        if (type === 'object' && field.object_type) {
-          addObjectAsDynamicMapping(field);
-          return;
-        }
-
-        const handler = fieldTypeRegistry[type];
-        let fieldProps: Properties;
-
-        if (type === 'group') {
-          const groupHandler = handler as GroupType;
-          const groupResult = groupHandler.mapGroup(field, this);
-          if (groupResult === undefined) return;
-
-          fieldProps = groupResult.fieldProps;
-
-          // Only propagate hasDynamicTemplateMappings upward when the group produced
-          // no static properties — matching original behavior.
-          if (groupResult.onlyDynamicTemplateMappings) hasDynamicTemplateMappings = true;
-
-          // A group that also has an object_type was merged with an object during deduplication.
-          // Generate the dynamic mapping for the object side too, and mark the group as dynamic.
-          if (field.object_type) {
-            addObjectAsDynamicMapping(field);
-            hasDynamicTemplateMappings = true;
-            fieldProps.type = 'object';
-            fieldProps.dynamic = true;
-          }
-        } else if (handler) {
-          const mapped = handler.staticMapping(field, this);
-          if (mapped === undefined) return;
-          fieldProps = mapped;
-        } else {
-          // Unknown type: pass through as-is (legacy behaviour).
-          fieldProps = { ...getDefaultProperties(field), type };
-        }
-
-        const fieldHasMetaProps = META_PROP_KEYS.some((key) => key in field);
-        if (fieldHasMetaProps && type !== 'group' && type !== 'group-nested') {
-          const meta: Properties = {};
-          if ('unit' in field) Reflect.set(meta, 'unit', field.unit);
-          fieldProps.meta = meta;
-        }
-
-        if ('metric_type' in field && this.isIndexModeTimeSeries) {
-          fieldProps.time_series_metric = field.metric_type;
-        }
-        if (field.dimension && this.isIndexModeTimeSeries) {
-          fieldProps.time_series_dimension = field.dimension;
-        }
-
-        if (field.subobjects !== undefined) {
-          fieldProps.subobjects = field.subobjects;
-        }
-
-        // Even if we don't add the property because it has a wildcard, notify
-        // the parent that there is some kind of property, so the intermediate object
-        // is still created.
-        // This is done for legacy packages that include ambiguous mappings with objects
-        // without object type. This is not allowed starting on Package Spec v3.
-        hasNonDynamicTemplateMappings = true;
-
-        // Avoid including maps with wildcards, they have generated dynamic mappings.
-        if (field.name.includes('*')) {
-          hasDynamicTemplateMappings = true;
-          return;
-        }
-
-        props[field.name] = fieldProps;
-      });
+      fields.forEach((field) => this.processField(context, field));
     }
 
-    this.groupFieldName = outerGroupFieldName;
+    const { props: properties, ...rest } = context;
+    return { properties, ...rest };
+  }
 
-    return {
-      properties: props,
-      hasNonDynamicTemplateMappings,
-      hasDynamicTemplateMappings,
-      subobjects,
+  private processField(context: WalkContext, field: Field) {
+    // If type is not defined, assume keyword
+    const type = field.type || 'keyword';
+
+    if (field.runtime !== undefined) {
+      const path = fieldPath(context.groupFieldName, field.name);
+
+      if (type === 'object' && field.object_type) {
+        // Runtime field that is also a dynamic template (e.g. labels.* with runtime: true).
+        const pMatch = dynamicPathMatch(path);
+        const objectType = field.object_type;
+
+        const handler = fieldTypeRegistry[objectType];
+        const dynResult = handler?.dynamicMapping({ ...field, type: objectType }, this);
+        const runtimeProps = handler?.runtimeMapping({ ...field, type: objectType });
+
+        if (dynResult && runtimeProps) {
+          this.addDynamicMappingWithIntermediateObjects(
+            context,
+            path,
+            pMatch,
+            dynResult.matchingType,
+            dynResult.properties,
+            runtimeProps
+          );
+          this.addParentObjectAsStaticProperty(context, field);
+        }
+        return;
+      }
+
+      const handler = fieldTypeRegistry[type];
+      const runtimeProps = handler?.runtimeMapping(field) ?? { type };
+      const runtimeFieldProps = {
+        ...getDefaultProperties(field),
+        ...runtimeProps,
+      };
+      if (typeof field.runtime === 'string') {
+        runtimeFieldProps.script = { source: field.runtime.trim() };
+      }
+      this.addRuntimeField(path, runtimeFieldProps);
+      return;
+    }
+
+    if (type === 'object' && field.object_type) {
+      this.addObjectAsDynamicMapping(context, field);
+      return;
+    }
+
+    const handler = fieldTypeRegistry[type];
+    let fieldProps: Properties;
+
+    if (type === 'group') {
+      const groupHandler = handler as GroupType;
+      const groupResult = groupHandler.mapGroup(field, this, context);
+      if (groupResult === undefined) return;
+
+      fieldProps = groupResult.fieldProps;
+
+      // Only propagate hasDynamicTemplateMappings upward when the group produced
+      // no static properties — matching original behavior.
+      if (groupResult.onlyDynamicTemplateMappings) context.hasDynamicTemplateMappings = true;
+
+      // A group that also has an object_type was merged with an object during deduplication.
+      // Generate the dynamic mapping for the object side too, and mark the group as dynamic.
+      if (field.object_type) {
+        this.addObjectAsDynamicMapping(context, field);
+        context.hasDynamicTemplateMappings = true;
+        fieldProps.type = 'object';
+        fieldProps.dynamic = true;
+      }
+    } else if (handler) {
+      const mapped = handler.staticMapping(field, this, context);
+      if (mapped === undefined) return;
+      fieldProps = mapped;
+    } else {
+      // Unknown type: pass through as-is (legacy behaviour).
+      fieldProps = { ...getDefaultProperties(field), type };
+    }
+
+    const fieldHasMetaProps = META_PROP_KEYS.some((key) => key in field);
+    if (fieldHasMetaProps && type !== 'group' && type !== 'group-nested') {
+      const meta: Properties = {};
+      if ('unit' in field) Reflect.set(meta, 'unit', field.unit);
+      fieldProps.meta = meta;
+    }
+
+    if ('metric_type' in field && this.isIndexModeTimeSeries) {
+      fieldProps.time_series_metric = field.metric_type;
+    }
+    if (field.dimension && this.isIndexModeTimeSeries) {
+      fieldProps.time_series_dimension = field.dimension;
+    }
+
+    if (field.subobjects !== undefined) {
+      fieldProps.subobjects = field.subobjects;
+    }
+
+    // Even if we don't add the property because it has a wildcard, notify
+    // the parent that there is some kind of property, so the intermediate object
+    // is still created.
+    // This is done for legacy packages that include ambiguous mappings with objects
+    // without object type. This is not allowed starting on Package Spec v3.
+    context.hasNonDynamicTemplateMappings = true;
+
+    // Avoid including maps with wildcards, they have generated dynamic mappings.
+    if (field.name.includes('*')) {
+      context.hasDynamicTemplateMappings = true;
+      return;
+    }
+
+    context.props[field.name] = fieldProps;
+  }
+
+  private addParentObjectAsStaticProperty(context: WalkContext, field: Field) {
+    // Don't add intermediate objects for wildcard names, as it will
+    // be added for its parent object.
+    if (field.name.includes('*')) return;
+    context.props[field.name] = {
+      type: 'object',
+      dynamic: true,
+      ...(field.subobjects !== undefined && { subobjects: field.subobjects }),
     };
+    context.hasNonDynamicTemplateMappings = true;
+  }
+
+  private addDynamicMappingWithIntermediateObjects(
+    context: WalkContext,
+    path: string,
+    pathMatch: string,
+    matchingType: string,
+    dynProperties: Properties,
+    runtimeProperties?: Properties
+  ) {
+    this.addDynamicTemplate(path, pathMatch, matchingType, dynProperties, runtimeProperties);
+    context.hasDynamicTemplateMappings = true;
+
+    // Add dynamic intermediate objects.
+    const parts = pathMatch.split('.');
+    for (let i = parts.length - 1; i > 0; i--) {
+      const name = parts.slice(0, i).join('.');
+      if (!name.includes('*')) continue;
+      this.addDynamicTemplate(name, name, 'object', { type: 'object', dynamic: true });
+    }
+  }
+
+  private addObjectAsDynamicMapping(context: WalkContext, field: Field) {
+    const path = fieldPath(context.groupFieldName, field.name);
+    const pMatch = dynamicPathMatch(path);
+    const objectType = field.object_type!;
+
+    if (objectType === 'group') {
+      if (!field.fields) return;
+      const subFields = field.fields.map((subField) => ({
+        ...subField,
+        type: 'object',
+        object_type: subField.object_type ?? subField.type,
+      }));
+      const mappings = this.build(subFields, fieldPath(context.groupFieldName, field.name));
+      if (mappings.hasDynamicTemplateMappings) context.hasDynamicTemplateMappings = true;
+      return;
+    }
+
+    const handler = fieldTypeRegistry[objectType];
+    const result = handler?.dynamicMapping({ ...field, type: objectType }, this);
+
+    if (!result) {
+      // Preserve original behavior: unsupported or unknown object_type always throws.
+      throw new PackageInvalidArchiveError(
+        `No dynamic mapping generated for field ${path} of type ${objectType}`
+      );
+    }
+
+    // When a wildcard field specifies the subobjects setting,
+    // the parent intermediate object should set the subobjects setting.
+    // For example, if a wildcard field `foo.*` has subobjects,
+    // we should set subobjects on the intermediate object `foo`.
+    if (field.subobjects !== undefined && path.includes('*')) {
+      context.subobjects = field.subobjects;
+    }
+
+    this.addDynamicMappingWithIntermediateObjects(
+      context,
+      path,
+      pMatch,
+      result.matchingType,
+      result.properties
+    );
+
+    // Add the parent object as static property, needed for index templates not using `"dynamic": true`.
+    this.addParentObjectAsStaticProperty(context, field);
   }
 
   private addDynamicTemplate(
