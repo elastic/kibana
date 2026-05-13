@@ -6,7 +6,11 @@
  */
 
 import Boom from '@hapi/boom';
-import type { ActionPolicyBulkAction, ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
+import type {
+  ActionPolicyBulkAction,
+  ActionPolicyResponse,
+  CreateActionPolicyData,
+} from '@kbn/alerting-v2-schemas';
 import {
   createActionPolicyDataSchema,
   updateActionPolicyDataSchema,
@@ -16,6 +20,7 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-p
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
+import type { z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { partition } from 'lodash';
 import {
@@ -78,21 +83,82 @@ export class ActionPolicyClient {
     private readonly namespace: string | undefined
   ) {}
 
-  public async createActionPolicy(params: CreateActionPolicyParams): Promise<ActionPolicyResponse> {
-    const parsed = createActionPolicyDataSchema.safeParse(params.data);
+  /**
+   * Validates a request body with a Zod schema and produces a uniform
+   * `Boom.badRequest` error message on failure. Centralised so every public
+   * method (create / update / upsert) reports validation issues identically.
+   */
+  private parseActionPolicyData<T>(
+    schema: z.ZodType<T>,
+    data: unknown,
+    context: 'create' | 'update' | 'upsert'
+  ): T {
+    const parsed = schema.safeParse(data);
     if (!parsed.success) {
       throw Boom.badRequest(
-        `Error validating create action policy data - ${stringifyZodError(parsed.error)}`
+        `Error validating ${context} action policy data - ${stringifyZodError(parsed.error)}`
       );
     }
+    return parsed.data;
+  }
+
+  /**
+   * Loads the existing action policy SO and translates `not found` into a
+   * `Boom.notFound` error with the canonical message used everywhere else.
+   * Other SO errors propagate so callers can map them as needed.
+   */
+  private async getExistingActionPolicy(
+    id: string
+  ): Promise<{ attrs: ActionPolicySavedObjectAttributes; version: string | undefined }> {
+    try {
+      const doc = await this.actionPolicySavedObjectService.get(id);
+      return { attrs: doc.attributes, version: doc.version };
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        throw Boom.notFound(`Action policy with id "${id}" not found`);
+      }
+      throw e;
+    }
+  }
+
+  /**
+   * Persists the next attributes for an existing action policy and translates
+   * SO `version conflict` errors into a `Boom.conflict` with the canonical
+   * "...has already been updated by another user" message. Callers that need
+   * to do additional bookkeeping on conflict (e.g. invalidating a freshly
+   * minted API key) should wrap this call in their own try/catch.
+   */
+  private async writeActionPolicyAttrs({
+    id,
+    attrs,
+    version,
+  }: {
+    id: string;
+    attrs: Partial<ActionPolicySavedObjectAttributes>;
+    version?: string;
+  }): Promise<{ id: string; version?: string }> {
+    try {
+      return await this.actionPolicySavedObjectService.update({ id, attrs, version });
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isConflictError(e)) {
+        throw Boom.conflict(
+          `Action policy with id "${id}" has already been updated by another user`
+        );
+      }
+      throw e;
+    }
+  }
+
+  public async createActionPolicy(params: CreateActionPolicyParams): Promise<ActionPolicyResponse> {
+    const parsed = this.parseActionPolicyData(createActionPolicyDataSchema, params.data, 'create');
 
     const userProfile = await this.getUserProfile();
     const now = new Date().toISOString();
 
-    const apiKeyAttrs = await this.apiKeyService.create(`Action Policy: ${params.data.name}`);
+    const apiKeyAttrs = await this.apiKeyService.create(`Action Policy: ${parsed.name}`);
 
     const attributes = buildCreateActionPolicyAttributes({
-      data: parsed.data,
+      data: parsed,
       auth: apiKeyAttrs,
       createdBy: userProfile.uid,
       createdByUsername: userProfile.username,
@@ -124,16 +190,21 @@ export class ActionPolicyClient {
   }
 
   public async getActionPolicy({ id }: { id: string }): Promise<ActionPolicyResponse> {
+    const { attrs, version } = await this.getExistingActionPolicy(id);
+    return transformActionPolicySoAttributesToApiResponse({
+      id,
+      version,
+      attributes: attrs,
+    });
+  }
+
+  public async actionPolicyExists({ id }: { id: string }): Promise<boolean> {
     try {
-      const doc = await this.actionPolicySavedObjectService.get(id);
-      return transformActionPolicySoAttributesToApiResponse({
-        id,
-        version: doc.version,
-        attributes: doc.attributes,
-      });
+      await this.getExistingActionPolicy(id);
+      return true;
     } catch (e) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw Boom.notFound(`Action policy with id "${id}" not found`);
+      if (Boom.isBoom(e) && e.output.statusCode === 404) {
+        return false;
       }
       throw e;
     }
@@ -162,35 +233,21 @@ export class ActionPolicyClient {
   }
 
   public async updateActionPolicy(params: UpdateActionPolicyParams): Promise<ActionPolicyResponse> {
-    const parsed = updateActionPolicyDataSchema.safeParse(params.data);
-    if (!parsed.success) {
-      throw Boom.badRequest(
-        `Error validating update action policy data - ${stringifyZodError(parsed.error)}`
-      );
-    }
+    const parsed = this.parseActionPolicyData(updateActionPolicyDataSchema, params.data, 'update');
 
     const userProfile = await this.getUserProfile();
     const now = new Date().toISOString();
 
-    let existingPolicy: ActionPolicySavedObjectAttributes;
-    try {
-      const doc = await this.actionPolicySavedObjectService.get(params.options.id);
-      existingPolicy = doc.attributes;
-    } catch (e) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw Boom.notFound(`Action policy with id "${params.options.id}" not found`);
-      }
-      throw e;
-    }
+    const { attrs: existingPolicy } = await this.getExistingActionPolicy(params.options.id);
 
     const oldAuth = await this.getDecryptedAuth(params.options.id);
 
-    const policyName = parsed.data.name ?? existingPolicy.name;
+    const policyName = parsed.name ?? existingPolicy.name;
     const apiKeyAttrs = await this.apiKeyService.create(`Action Policy: ${policyName}`);
 
     const nextAttrs = buildUpdateActionPolicyAttributes({
       existing: existingPolicy,
-      update: parsed.data,
+      update: parsed,
       auth: apiKeyAttrs,
       updatedBy: userProfile.uid,
       updatedByUsername: userProfile.username,
@@ -199,18 +256,13 @@ export class ActionPolicyClient {
 
     let updated: { id: string; version?: string };
     try {
-      updated = await this.actionPolicySavedObjectService.update({
+      updated = await this.writeActionPolicyAttrs({
         id: params.options.id,
         attrs: nextAttrs,
         version: params.options.version,
       });
     } catch (e) {
       this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false);
-      if (SavedObjectsErrorHelpers.isConflictError(e)) {
-        throw Boom.conflict(
-          `Action policy with id "${params.options.id}" has already been updated by another user`
-        );
-      }
       throw e;
     }
 
@@ -275,16 +327,7 @@ export class ActionPolicyClient {
   }
 
   public async updateActionPolicyApiKey({ id }: UpdateActionPolicyApiKeyParams): Promise<void> {
-    let existingPolicy: ActionPolicySavedObjectAttributes;
-    try {
-      const doc = await this.actionPolicySavedObjectService.get(id);
-      existingPolicy = doc.attributes;
-    } catch (e) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw Boom.notFound(`Action policy with id "${id}" not found`);
-      }
-      throw e;
-    }
+    const { attrs: existingPolicy } = await this.getExistingActionPolicy(id);
 
     const oldAuth = await this.getDecryptedAuth(id);
     const userProfile = await this.getUserProfile();
@@ -292,7 +335,7 @@ export class ActionPolicyClient {
     const apiKeyAttrs = await this.apiKeyService.create(`Action Policy: ${existingPolicy.name}`);
 
     try {
-      await this.actionPolicySavedObjectService.update({
+      await this.writeActionPolicyAttrs({
         id,
         attrs: {
           auth: apiKeyAttrs,
@@ -303,11 +346,6 @@ export class ActionPolicyClient {
       });
     } catch (e) {
       this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false);
-      if (SavedObjectsErrorHelpers.isConflictError(e)) {
-        throw Boom.conflict(
-          `Action policy with id "${id}" has already been updated by another user`
-        );
-      }
       throw e;
     }
 
@@ -437,7 +475,9 @@ export class ActionPolicyClient {
   }
 
   public async deleteActionPolicy({ id }: { id: string }): Promise<void> {
-    await this.getActionPolicy({ id });
+    if (!(await this.actionPolicyExists({ id }))) {
+      throw Boom.notFound(`Action policy with id "${id}" not found`);
+    }
     const auth = await this.getDecryptedAuth(id);
     await this.actionPolicySavedObjectService.delete({ id });
     this.markApiKeysForInvalidation(auth?.apiKey, auth?.createdByUser);
@@ -522,7 +562,7 @@ export class ActionPolicyClient {
     const now = new Date().toISOString();
 
     try {
-      await this.actionPolicySavedObjectService.update({
+      await this.writeActionPolicyAttrs({
         id,
         attrs: {
           ...stateUpdate,
@@ -535,11 +575,6 @@ export class ActionPolicyClient {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw Boom.notFound(`Action policy with id "${id}" not found`);
       }
-      if (SavedObjectsErrorHelpers.isConflictError(e)) {
-        throw Boom.conflict(
-          `Action policy with id "${id}" has already been updated by another user`
-        );
-      }
       throw e;
     }
 
@@ -548,5 +583,78 @@ export class ActionPolicyClient {
 
   private async getUserProfile() {
     return this.userService.getCurrentUserProfile();
+  }
+
+  public async upsertActionPolicy({
+    id,
+    data,
+  }: {
+    id: string;
+    data: CreateActionPolicyData;
+  }): Promise<{ policy: ActionPolicyResponse; created: boolean }> {
+    // Validate up front so a bad body never spends an API key allocation or
+    // even consults the SO store.
+    const parsed = this.parseActionPolicyData(createActionPolicyDataSchema, data, 'upsert');
+
+    const exists = await this.actionPolicyExists({ id });
+
+    if (!exists) {
+      const policy = await this.createActionPolicy({ data, options: { id } });
+      return { policy, created: true };
+    }
+
+    const userProfile = await this.getUserProfile();
+    const now = new Date().toISOString();
+
+    const { attrs: existingAttrs, version: existingVersion } = await this.getExistingActionPolicy(
+      id
+    );
+
+    // The API key is rotated on every replace; the old key is invalidated
+    // only after the SO write succeeds, so a failed replace doesn't leave
+    // the policy with a key that has already been invalidated.
+    const oldAuth = await this.getDecryptedAuth(id);
+    const apiKeyAttrs = await this.apiKeyService.create(`Action Policy: ${parsed.name}`);
+
+    // PUT replaces every field accepted by createActionPolicyDataSchema. Audit
+    // metadata (createdBy/createdAt) and operational state (enabled,
+    // snoozedUntil) are not part of the create schema and are preserved here.
+    const replacementAttrs: ActionPolicySavedObjectAttributes = {
+      ...buildCreateActionPolicyAttributes({
+        data: parsed,
+        auth: apiKeyAttrs,
+        createdBy: existingAttrs.createdBy,
+        createdByUsername: existingAttrs.createdByUsername,
+        createdAt: existingAttrs.createdAt,
+        updatedBy: userProfile.uid,
+        updatedByUsername: userProfile.username,
+        updatedAt: now,
+      }),
+      enabled: existingAttrs.enabled,
+      snoozedUntil: existingAttrs.snoozedUntil,
+    };
+
+    let updated: { id: string; version?: string };
+    try {
+      updated = await this.writeActionPolicyAttrs({
+        id,
+        attrs: replacementAttrs,
+        version: existingVersion,
+      });
+    } catch (e) {
+      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false);
+      throw e;
+    }
+
+    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser);
+
+    return {
+      policy: transformActionPolicySoAttributesToApiResponse({
+        id,
+        version: updated.version,
+        attributes: replacementAttrs,
+      }),
+      created: false,
+    };
   }
 }

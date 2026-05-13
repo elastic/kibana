@@ -115,6 +115,9 @@ export const AgentPolicyBaseSchema = {
           if (Object.keys(val).some((key) => key.match(/^inputs(\.)?/))) {
             return 'inputs overrides is not allowed';
           }
+          if (Object.keys(val).some((key) => key.match(/^output_permissions(\.)?/))) {
+            return 'output_permissions overrides is not allowed';
+          }
         },
         meta: {
           description:
@@ -318,7 +321,33 @@ export const AgentPolicySchemaV5 = AgentPolicySchemaV4.extends({
   is_verifier: schema.maybe(schema.boolean()),
 });
 
-export const NewAgentPolicySchema = AgentPolicySchemaV3.extends({
+export const AgentPolicySchemaV6 = AgentPolicySchemaV5.extends({
+  agentless: schema.maybe(
+    schema.object({
+      cloud_connectors: schema.maybe(
+        schema.object({
+          target_csp: schema.maybe(
+            schema.oneOf([schema.literal('aws'), schema.literal('azure'), schema.literal('gcp')])
+          ),
+          enabled: schema.boolean(),
+        })
+      ),
+      resources: schema.maybe(
+        schema.object({
+          requests: schema.maybe(
+            schema.object({
+              memory: schema.maybe(schema.string({ validate: validateMemory })),
+              cpu: schema.maybe(schema.string({ validate: validateCPU })),
+            })
+          ),
+        })
+      ),
+      cluster_id: schema.maybe(schema.string()),
+    })
+  ),
+});
+
+export const NewAgentPolicySchema = AgentPolicySchemaV6.extends({
   supports_agentless: schema.maybe(
     schema.oneOf([
       schema.literal(null),
@@ -335,7 +364,7 @@ export const NewAgentPolicySchema = AgentPolicySchemaV3.extends({
   force: schema.maybe(schema.boolean()),
 });
 
-export const AgentPolicySchema = AgentPolicySchemaV3.extends({
+export const AgentPolicySchema = AgentPolicySchemaV6.extends({
   id: schema.string(),
   is_managed: schema.maybe(schema.boolean()),
   status: schema.oneOf([
