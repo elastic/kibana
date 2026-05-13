@@ -35,9 +35,10 @@ const DEFAULT_FILTERS: ExecutionListFiltersQueryParams = {
 
 interface WorkflowExecutionListProps {
   workflowId: string | null;
+  onClose?: () => void;
 }
 
-export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps) {
+export function WorkflowExecutionList({ workflowId, onClose }: WorkflowExecutionListProps) {
   const { uiSettings, notifications } = useKibana().services;
   const api = useWorkflowsApi();
   const telemetry = useTelemetry();
@@ -154,6 +155,7 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
       canCancel={canCancelWorkflowExecution}
       isCancelInProgress={isCancelInProgress}
       onConfirmCancel={onConfirmCancel}
+      onClose={onClose}
     />
   );
 }

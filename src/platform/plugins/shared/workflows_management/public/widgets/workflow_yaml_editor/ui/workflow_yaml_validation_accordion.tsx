@@ -42,6 +42,7 @@ interface WorkflowYamlValidationAccordionProps {
   validationErrors: YamlValidationResult[] | null;
   onErrorClick?: (error: YamlValidationResult) => void;
   extraAction?: React.ReactNode;
+  onToggle?: (isOpen: boolean) => void;
 }
 
 function useGroupedErrors(allValidationErrors: YamlValidationResult[] | null) {
@@ -100,6 +101,7 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
   validationErrors,
   onErrorClick,
   extraAction,
+  onToggle,
 }: WorkflowYamlValidationAccordionProps) {
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
@@ -208,6 +210,7 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
     <EuiAccordion
       id={accordionId}
       data-test-subj="workflowYamlEditorValidationErrorsList"
+      onToggle={onToggle}
       buttonContent={
         <EuiFlexGroup alignItems="center" gutterSize="s" css={styles.buttonContent}>
           <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
@@ -295,7 +298,7 @@ const componentStyles = {
     css({
       padding: `0 ${euiTheme.size.m}`,
       borderTop: `1px solid ${euiTheme.colors.borderBasePlain}`,
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
 
       '& .euiAccordion__buttonContent': {
         width: '100%',

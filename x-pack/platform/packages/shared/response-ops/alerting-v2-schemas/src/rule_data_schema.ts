@@ -10,11 +10,17 @@ import {
   DEFAULT_ARTIFACT_VALUE_LIMIT,
   ARTIFACT_VALUE_LIMITS,
   MAX_ARTIFACT_VALUE_LIMIT,
-  MAX_TAG_LENGTH,
 } from '@kbn/alerting-v2-constants';
 import { validateEsqlQuery, validateMinDuration } from './validation';
-import { durationSchema } from './common';
-import { MAX_CONSECUTIVE_BREACHES, MIN_SCHEDULE_INTERVAL } from './constants';
+import { durationSchema, tagsSchema } from './common';
+import {
+  MAX_CONSECUTIVE_BREACHES,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_FIELD_NAME_LENGTH,
+  MAX_GROUPING_FIELDS,
+  MAX_NAME_LENGTH,
+  MIN_SCHEDULE_INTERVAL,
+} from './constants';
 
 /** Primitives */
 
@@ -43,16 +49,19 @@ export type RuleKind = z.infer<typeof ruleKindSchema>;
 
 export const metadataSchema = z
   .object({
-    name: z.string().min(1).max(256).describe('Rule name (must be unique within the space).'),
+    name: z
+      .string()
+      .min(1)
+      .max(MAX_NAME_LENGTH)
+      .describe('Rule name (must be unique within the space).'),
     description: z
       .string()
-      .max(1024)
+      .max(MAX_DESCRIPTION_LENGTH)
       .optional()
       .describe('Human-readable description of the rule.'),
     owner: z.string().max(256).optional().describe('Owner of the rule.'),
-    tags: z
-      .array(z.string().max(MAX_TAG_LENGTH))
-      .max(100)
+    tags: tagsSchema
+      .min(1)
       .optional()
       .describe('Tags for categorization, e.g. ["production", "infra"].'),
   })
@@ -161,8 +170,8 @@ export const stateTransitionSchema = z
 export const groupingSchema = z
   .object({
     fields: z
-      .array(z.string().max(256))
-      .max(16)
+      .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
+      .max(MAX_GROUPING_FIELDS)
       .describe(
         'Fields to group alerts by, e.g. ["host.name", "service.name"]. Should match ES|QL GROUP BY fields.'
       ),
@@ -228,7 +237,7 @@ const createRuleDataBaseSchema = z
     state_transition: stateTransitionSchema,
     grouping: groupingSchema.optional(),
     no_data: noDataSchema.optional(),
-    artifacts: z.array(artifactSchema).optional(),
+    artifacts: z.array(artifactSchema).max(100).optional(),
   })
   .strip();
 
@@ -279,7 +288,7 @@ export const updateRuleDataSchema = z
     state_transition: stateTransitionSchema.nullable(),
     grouping: groupingSchema.optional().nullable(),
     no_data: noDataSchema.optional().nullable(),
-    artifacts: z.array(artifactSchema).optional().nullable(),
+    artifacts: z.array(artifactSchema).max(100).optional().nullable(),
     enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
   })
   .strip();
@@ -304,6 +313,28 @@ export type RuleResponse = z.infer<typeof ruleResponseSchema>;
 /** Sort field for find rules API. */
 export const findRulesSortFieldSchema = z.enum(['kind', 'enabled', 'name']);
 export type FindRulesSortField = z.infer<typeof findRulesSortFieldSchema>;
+
+/** Query parameters for the find rules (list) API. */
+export const findRulesParamsSchema = z.object({
+  page: z.coerce.number().min(1).optional().describe('The page number to return.'),
+  perPage: z.coerce
+    .number()
+    .min(1)
+    .max(1000)
+    .optional()
+    .describe('The number of rules to return per page.'),
+  filter: z.string().optional().describe('The filter to apply to the rules.'),
+  sortField: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
+  sortOrder: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),
+  search: z
+    .string()
+    .trim()
+    .min(1)
+    .optional()
+    .describe('A text string to search across rule fields.'),
+});
+
+export type FindRulesParams = z.infer<typeof findRulesParamsSchema>;
 
 /** Paginated list response schema. */
 export const findRulesResponseSchema = z

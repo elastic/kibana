@@ -55,14 +55,13 @@ import { registerDeprecations } from './deprecations';
 import {
   APP_ID,
   APP_UI_ID,
-  CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
   DEFAULT_ALERTS_INDEX,
   DEFAULT_DETECTIONS_CLOSE_REASONS_KEY,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   SERVER_APP_ID,
   CASE_ATTACHMENT_INDICATOR_TYPE_ID,
 } from '../common/constants';
-import { getEventAttachmentType } from './cases/attachments/event';
+import { registerCaseAttachments } from './cases/attachments/register';
 import { DefaultClosingReasonSchema } from '../common/types';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
@@ -529,10 +528,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
     this.usageCollection = plugins.usageCollection;
-    plugins.cases.attachmentFramework.registerExternalReference({
-      id: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
-    });
-    plugins.cases.attachmentFramework.registerUnified(getEventAttachmentType());
+    registerCaseAttachments(plugins.cases.attachmentFramework);
 
     plugins.cases.registerCloseReasonValidator(APP_ID, async (closeReason, request) => {
       const [coreStart] = await core.getStartServices();

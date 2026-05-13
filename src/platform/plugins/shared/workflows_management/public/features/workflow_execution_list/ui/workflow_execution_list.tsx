@@ -9,6 +9,7 @@
 
 import type { EuiEmptyPromptProps, UseEuiTheme } from '@elastic/eui';
 import {
+  EuiButtonIcon,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,6 +21,7 @@ import {
 import { css } from '@emotion/react';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowExecutionListDto } from '@kbn/workflows';
 import { ExecutionListFilters } from './workflow_execution_list_filters';
@@ -41,6 +43,7 @@ export interface WorkflowExecutionListProps {
   canCancel: boolean;
   isCancelInProgress: boolean;
   onConfirmCancel: () => Promise<void>;
+  onClose?: () => void;
 }
 
 // TODO: use custom table? add pagination and search
@@ -61,6 +64,7 @@ export const WorkflowExecutionList = ({
   canCancel,
   isCancelInProgress,
   onConfirmCancel,
+  onClose,
 }: WorkflowExecutionListProps) => {
   const styles = useMemoCss(componentStyles);
   const scrollableContentRef = useRef<HTMLDivElement>(null);
@@ -205,12 +209,29 @@ export const WorkflowExecutionList = ({
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <ExecutionListFilters
-              filters={filters}
-              onFiltersChange={onFiltersChange}
-              availableExecutedByOptions={availableExecutedByOptions}
-              showExecutor={showExecutor}
-            />
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <ExecutionListFilters
+                  filters={filters}
+                  onFiltersChange={onFiltersChange}
+                  availableExecutedByOptions={availableExecutedByOptions}
+                  showExecutor={showExecutor}
+                />
+              </EuiFlexItem>
+              {onClose && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    iconType="cross"
+                    color="text"
+                    onClick={onClose}
+                    aria-label={i18n.translate('workflows.workflowExecutionList.close', {
+                      defaultMessage: 'Close execution history',
+                    })}
+                    data-test-subj="workflowExecutionListClose"
+                  />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </header>

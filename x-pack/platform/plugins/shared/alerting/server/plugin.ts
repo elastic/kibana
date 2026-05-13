@@ -578,6 +578,7 @@ export class AlertingPlugin {
           if (this.changeTrackingService) {
             const { scope } = this.config.ruleChangeTracking;
             if (scope.includes('all') || scope.includes(ruleType.solution)) {
+              ruleType.trackChanges = true;
               this.changeTrackingService.register(ruleType.solution);
             }
           }
@@ -659,7 +660,10 @@ export class AlertingPlugin {
       features: plugins.features,
     });
 
-    changeTrackingService?.initialize(core.elasticsearch.client.asInternalUser);
+    changeTrackingService?.initialize({
+      elasticsearchClient: core.elasticsearch.client.asInternalUser,
+      authService: core.security.authc,
+    });
 
     rulesClientFactory.initialize({
       ruleTypeRegistry: ruleTypeRegistry!,

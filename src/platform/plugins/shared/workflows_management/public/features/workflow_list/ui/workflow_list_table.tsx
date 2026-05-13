@@ -189,7 +189,10 @@ export const WorkflowListTable = ({
         }),
         width: '12%',
         render: (value: unknown, item: WorkflowListItemDto) => (
-          <WorkflowsStepTypesList steps={item.definition?.steps ?? []} />
+          <WorkflowsStepTypesList
+            steps={item.definition?.steps ?? []}
+            workflow={item.definition ?? undefined}
+          />
         ),
       },
       {

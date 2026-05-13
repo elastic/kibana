@@ -168,7 +168,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
               activeTab === 'executions' &&
               !selectedExecutionId &&
               canReadWorkflowExecution ? (
-                <WorkflowExecutionList workflowId={id} />
+                <WorkflowExecutionList workflowId={id} onClose={() => setUrlTab('workflow')} />
               ) : null
             }
             executionDetail={

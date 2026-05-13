@@ -47,6 +47,7 @@ export * from './common/step_types';
 export * from './definition';
 export * from './common/elasticsearch_request_builder';
 export * from './common/kibana_request_builder';
+export * from './graph-layout';
 export * from './server/constants';
 export * from './server/repositories/workflow_repository';
 

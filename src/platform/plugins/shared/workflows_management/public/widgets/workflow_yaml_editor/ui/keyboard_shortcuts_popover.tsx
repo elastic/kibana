@@ -86,14 +86,14 @@ export function KeyboardShortcutsPopover() {
       anchorPosition="upRight"
       panelPaddingSize="none"
       button={
-        <EuiToolTip content={label} delay="long" disableScreenReaderOutput>
+        <EuiToolTip content={label} disableScreenReaderOutput>
           <EuiButtonIcon
-            size="xs"
             iconType="keyboard"
+            size="s"
             data-test-subj="workflowYamlEditorKeyboardShortcutsButton"
             onClick={() => setIsOpen(!isOpen)}
             aria-label={label}
-            color="primary"
+            color="text"
           />
         </EuiToolTip>
       }

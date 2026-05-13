@@ -19,8 +19,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
 import { isTriggerType } from '@kbn/workflows';
+import { useWorkflowsMonacoTheme, WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
 import type { z } from '@kbn/zod/v4';
-import { ActionsMenuButton } from './actions_menu_button';
 import {
   useAlertTriggerDecorations,
   useConnectorTypeDecorations,
@@ -31,12 +31,8 @@ import {
   useWorkflowEventsOnDecorations,
   useWorkflowIdDecorations,
 } from './decorations';
-import { DocumentationLink } from './documentation_link';
-import type { ExtraAction } from './extra_actions_bar';
-import { ExtraActionsBar } from './extra_actions_bar';
 import { useAgentBuilderIntegration } from './hooks/use_agent_builder_integration';
 import { useWorkflowYamlCompletionProvider } from './hooks/use_workflow_yaml_completion_provider';
-import { KeyboardShortcutsPopover } from './keyboard_shortcuts_popover';
 import { StepActions } from './step_actions';
 import { WorkflowYamlValidationAccordion } from './workflow_yaml_validation_accordion';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
@@ -110,10 +106,6 @@ import {
   EXECUTION_YAML_SNAPSHOT_CLASS,
   useWorkflowEditorStyles,
 } from '../styles/use_workflow_editor_styles';
-import {
-  useWorkflowsMonacoTheme,
-  WORKFLOWS_MONACO_EDITOR_THEME,
-} from '../styles/use_workflows_monaco_theme';
 
 const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   minimap: { enabled: false },
@@ -130,6 +122,7 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   lineHeight: 23, // default ~21px + 2px
   renderWhitespace: 'none',
   roundedSelection: false,
+  guides: { indentation: true },
   wordWrap: 'on',
   wordWrapColumn: 80,
   wrappingIndent: 'indent',
@@ -164,12 +157,47 @@ export interface WorkflowYAMLEditorProps {
   highlightDiff?: boolean;
   onStepRun: (params: { stepId: string; actionType: string }) => void;
   editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>;
+  /**
+   * When true, the Monaco editor body and assist/agent toolbar are hidden via
+   * CSS but kept mounted so YAML validation continues to run and the
+   * validation accordion stays visible. Used by the graph view to share the
+   * validation bar with the YAML view.
+   */
+  hideEditorBody?: boolean;
+  /**
+   * Optional alternate body rendered in place of the Monaco editor when
+   * `hideEditorBody` is true. Lives in the same flex column as the validation
+   * accordion so the accordion stays pinned at the bottom.
+   */
+  bodyOverride?: React.ReactNode;
+  /**
+   * The parent (e.g. the floating bottom bar) assigns its trigger to this
+   * ref so it can open the Actions menu popover that lives inside the editor.
+   */
+  openActionsRef?: React.MutableRefObject<(() => void) | null>;
+  /**
+   * Fires whenever the YAML validation errors accordion is opened/closed.
+   * Parents can use this to nudge floating UI (e.g. a bottom bar) so it
+   * doesn't get covered by the expanded accordion.
+   */
+  onValidationOpenChange?: (isOpen: boolean) => void;
+  /**
+   * If provided, the actions menu palette exposes a "Toggle editor mode"
+   * command that calls this handler. Lets the parent switch between YAML
+   * and graph views from the keyboard-driven palette.
+   */
+  onToggleEditorMode?: () => void;
 }
 
 export const WorkflowYAMLEditor = ({
   highlightDiff = false,
   onStepRun,
   editorRef: parentEditorRef,
+  hideEditorBody = false,
+  bodyOverride,
+  openActionsRef,
+  onValidationOpenChange,
+  onToggleEditorMode,
 }: WorkflowYAMLEditorProps) => {
   const { notifications, http } = useKibana().services;
 
@@ -588,6 +616,15 @@ export const WorkflowYAMLEditor = ({
   const closeActionsPopover = useCallback(() => {
     setActionsPopoverOpen(false);
   }, []);
+
+  useEffect(() => {
+    if (openActionsRef) {
+      openActionsRef.current = openActionsPopover;
+      return () => {
+        openActionsRef.current = null;
+      };
+    }
+  }, [openActionsRef, openActionsPopover]);
   const onActionSelected = useCallback(
     (action: ActionOptionData) => {
       const model = editorRef.current?.getModel();
@@ -614,8 +651,8 @@ export const WorkflowYAMLEditor = ({
     [closeActionsPopover]
   );
 
-  const editorCommands: EditorCommand[] = useMemo(
-    () => [
+  const editorCommands: EditorCommand[] = useMemo(() => {
+    const cmds: EditorCommand[] = [
       {
         id: 'foldAll',
         label: i18n.translate('workflows.yamlEditor.commands.collapseAll', {
@@ -637,9 +674,18 @@ export const WorkflowYAMLEditor = ({
         }),
         iconType: 'search',
       },
-    ],
-    []
-  );
+    ];
+    if (onToggleEditorMode) {
+      cmds.push({
+        id: 'toggleEditorMode',
+        label: i18n.translate('workflows.yamlEditor.commands.toggleEditorMode', {
+          defaultMessage: 'Toggle editor mode',
+        }),
+        iconType: 'visGraph',
+      });
+    }
+    return cmds;
+  }, [onToggleEditorMode]);
 
   const jumpToStepEntries: JumpToStepEntry[] = useMemo(() => {
     if (!workflowLookup) return [];
@@ -652,6 +698,13 @@ export const WorkflowYAMLEditor = ({
 
   const handleCommandSelected = useCallback(
     (commandId: string) => {
+      // The toggle-editor-mode command works even when Monaco isn't focused
+      // (e.g. the palette was opened while the graph view is active).
+      if (commandId === 'toggleEditorMode') {
+        closeActionsPopover();
+        onToggleEditorMode?.();
+        return;
+      }
       const editor = editorRef.current;
       if (!editor) return;
       switch (commandId) {
@@ -668,7 +721,7 @@ export const WorkflowYAMLEditor = ({
       closeActionsPopover();
       editor.focus();
     },
-    [closeActionsPopover]
+    [closeActionsPopover, onToggleEditorMode]
   );
 
   const handleJumpToStep = useCallback(
@@ -730,34 +783,6 @@ export const WorkflowYAMLEditor = ({
     }
   }, [workflowJsonSchemaStrict, notifications]);
 
-  const extraActions = useMemo<ExtraAction[]>(
-    () => [
-      {
-        id: 'documentation',
-        content: <DocumentationLink />,
-        showInReadOnly: true,
-      },
-      {
-        id: 'actions-menu',
-        content: <ActionsMenuButton onClick={openActionsPopover} />,
-        showInReadOnly: false,
-      },
-      {
-        id: 'keyboard-shortcuts',
-        content: <KeyboardShortcutsPopover />,
-        showInReadOnly: true,
-      },
-    ],
-    [openActionsPopover]
-  );
-
-  // These were triggering rerendering of the actions containers on every scroll, because they were
-  // being re-created on every render. Memoizing them prevents unnecessary child re-renders.
-  const extraActionElement = useMemo(
-    () => <ExtraActionsBar actions={extraActions} isReadOnly={isExecutionYaml} />,
-    [extraActions, isExecutionYaml]
-  );
-
   const actionsMenuPanelProps = useMemo(() => {
     return {
       Button: <EuiButton iconType="plusCircle" css={styles.hiddenButtonCss} />,
@@ -797,7 +822,10 @@ export const WorkflowYAMLEditor = ({
         <StepActions onStepRun={onStepRun} />
       </div>
       {(isAgentBuilderAvailable || isDevelopment) && !isExecutionYaml ? (
-        <div css={styles.agentBuilderSectionCss}>
+        <div
+          css={styles.agentBuilderSectionCss}
+          style={hideEditorBody ? { display: 'none' } : undefined}
+        >
           <WorkflowYamlEditorAssistActions
             isAgentBuilderAvailable={isAgentBuilderAvailable}
             isDevelopment={isDevelopment}
@@ -809,30 +837,74 @@ export const WorkflowYAMLEditor = ({
           />
         </div>
       ) : null}
+      {/*
+       * Both the YAML editor and the alternate body (graph view) are layered
+       * inside a single relative container so we can cross-fade between
+       * them without remounting Monaco.
+       */}
       <div
-        css={styles.editorContainer}
-        className={classnames({ [EXECUTION_YAML_SNAPSHOT_CLASS]: isExecutionYaml })}
+        css={css({
+          flex: '1 1 0',
+          minHeight: 0,
+          position: 'relative',
+          overflow: 'hidden',
+        })}
       >
-        <YamlEditor
-          editorDidMount={handleEditorDidMount}
-          editorWillUnmount={handleEditorWillUnmount}
-          onChange={onChange}
-          onSyncStateChange={onSyncStateChange}
-          options={options}
-          schemas={schemas}
-          value={workflowYaml}
-          enableFindAction={true}
-          dataTestSubj="workflowYamlEditor"
-        />
+        <div
+          css={[
+            styles.editorContainer,
+            css({
+              position: 'absolute',
+              inset: 0,
+              opacity: hideEditorBody ? 0 : 1,
+              pointerEvents: hideEditorBody ? 'none' : 'auto',
+              transform: hideEditorBody ? 'scale(0.985)' : 'scale(1)',
+              transition: 'opacity 220ms ease, transform 220ms ease',
+            }),
+          ]}
+          className={classnames({ [EXECUTION_YAML_SNAPSHOT_CLASS]: isExecutionYaml })}
+          aria-hidden={hideEditorBody || undefined}
+        >
+          <YamlEditor
+            editorDidMount={handleEditorDidMount}
+            editorWillUnmount={handleEditorWillUnmount}
+            onChange={onChange}
+            onSyncStateChange={onSyncStateChange}
+            options={options}
+            schemas={schemas}
+            value={workflowYaml}
+            enableFindAction={true}
+            dataTestSubj="workflowYamlEditor"
+          />
+        </div>
+        {bodyOverride && (
+          <div
+            data-test-subj="workflowYamlEditorBodyPlaceholder"
+            css={css({
+              position: 'absolute',
+              inset: 0,
+              opacity: hideEditorBody ? 1 : 0,
+              pointerEvents: hideEditorBody ? 'auto' : 'none',
+              transform: hideEditorBody ? 'scale(1)' : 'scale(1.015)',
+              transition: 'opacity 220ms ease, transform 220ms ease',
+            })}
+            aria-hidden={!hideEditorBody || undefined}
+          >
+            {bodyOverride}
+          </div>
+        )}
       </div>
-      <div css={styles.validationErrorsContainer}>
+      <div
+        css={styles.validationErrorsContainer}
+        style={hideEditorBody ? { display: 'none' } : undefined}
+      >
         <WorkflowYamlValidationAccordion
           isMounted={isEditorMounted}
           isLoading={isLoadingValidation}
           error={errorValidating}
           validationErrors={validationErrors}
           onErrorClick={handleErrorClick}
-          extraAction={extraActionElement}
+          onToggle={onValidationOpenChange}
         />
       </div>
     </div>

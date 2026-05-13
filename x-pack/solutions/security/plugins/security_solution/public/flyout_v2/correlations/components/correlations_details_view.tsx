@@ -47,10 +47,9 @@ export interface CorrelationsDetailsViewProps {
    */
   onShowAttack?: (id: string, indexName: string) => void;
   /**
-   * Whether to hide the rule preview link in the correlations table.
-   * Defaults to true (hidden) for the new tools flyout which has no expandable flyout context.
+   * Whether to render rule links as PreviewLink (legacy expandable flyout) instead of ChildLink (new flyout system)
    */
-  hidePreviewLink?: boolean;
+  useLegacyExpandableFlyout: boolean;
 }
 
 /**
@@ -64,7 +63,7 @@ export const CorrelationsDetailsView = memo(
     isRulePreview,
     onShowAlert,
     onShowAttack,
-    hidePreviewLink = true,
+    useLegacyExpandableFlyout,
   }: CorrelationsDetailsViewProps) => {
     const eventId = hit.raw._id ?? '';
     const ecsData = useMemo<Ecs>(
@@ -123,7 +122,7 @@ export const CorrelationsDetailsView = memo(
                   scopeId={scopeId}
                   eventId={eventId}
                   onShowAlert={onShowAlert}
-                  hidePreviewLink={hidePreviewLink}
+                  useLegacyExpandableFlyout={useLegacyExpandableFlyout}
                 />
               </EuiFlexItem>
             )}
@@ -134,7 +133,7 @@ export const CorrelationsDetailsView = memo(
                   scopeId={scopeId}
                   eventId={eventId}
                   onShowAlert={onShowAlert}
-                  hidePreviewLink={hidePreviewLink}
+                  useLegacyExpandableFlyout={useLegacyExpandableFlyout}
                 />
               </EuiFlexItem>
             )}
@@ -144,7 +143,7 @@ export const CorrelationsDetailsView = memo(
                   scopeId={scopeId}
                   documentId={ancestryDocumentId}
                   onShowAlert={onShowAlert}
-                  hidePreviewLink={hidePreviewLink}
+                  useLegacyExpandableFlyout={useLegacyExpandableFlyout}
                 />
               </EuiFlexItem>
             )}

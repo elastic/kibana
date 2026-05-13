@@ -17,6 +17,10 @@ On a PR, the step:
 1. **Resolves a baseline commit**: It uses the PR merge-base commit (`GITHUB_PR_MERGE_BASE`). Because a snapshot may not exist for that exact SHA, the script walks the commit’s parent chain (up to a limit) until it finds a commit for which a snapshot exists in the cloud bucket (`findExistingSnapshotSha`).
 2. **Runs the check**: It calls `node scripts/check_saved_objects --baseline <resolved-sha> --algorithm both` (and `--fix` when auto-commit is enabled). The script fetches the baseline snapshot from the bucket, starts Kibana to build the current type registry, and runs validations comparing current state to that baseline.
 
+### Skipping the check
+
+Add the `ci:skip-so-check` label to a PR to bypass the "Check changes in Saved Objects" step entirely. Use this as an escape hatch for unrelated false positives (for example, `Joi` version bumps or no-op schema refactors that change snapshot hashes without changing the persisted shape). Do not use it to bypass real Saved Object type changes.
+
 ### Where snapshots come from
 
 Baseline snapshots are **stored in a GCP bucket** and served at:
