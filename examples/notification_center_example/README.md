@@ -29,8 +29,11 @@ built as a sidebar app.
 
 ### Run
 
+Use this command to run the dev server with the Notification Center Example app 
 ```bash
-yarn start --run-examples
+yarn start \                                                                                                                             ✘ INT
+  --plugin-path examples/developer_examples \
+  --plugin-path examples/notification_center_example
 ```
 
 Open **Notification Center Example** from the developer examples list.
