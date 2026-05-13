@@ -28,6 +28,10 @@ export interface ToolsFlyoutHeaderProps {
    */
   title: ReactNode;
   /**
+   * Optional test subject for the tool title.
+   */
+  titleDataTestSubj?: string;
+  /**
    * Optional cell action renderer passed to the child document flyout.
    */
   renderCellActions?: CellActionRenderer;
@@ -42,7 +46,13 @@ export interface ToolsFlyoutHeaderProps {
  * context (expand button, rule name, severity, timestamp) on the right.
  */
 export const ToolsFlyoutHeader: FC<ToolsFlyoutHeaderProps> = memo(
-  ({ hit, title, renderCellActions = noopCellActionRenderer, onAlertUpdated = noop }) => {
+  ({
+    hit,
+    title,
+    titleDataTestSubj,
+    renderCellActions = noopCellActionRenderer,
+    onAlertUpdated = noop,
+  }) => {
     return (
       <EuiFlexGroup
         justifyContent="spaceBetween"
@@ -53,7 +63,7 @@ export const ToolsFlyoutHeader: FC<ToolsFlyoutHeaderProps> = memo(
       >
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <h4>{title}</h4>
+            <h4 data-test-subj={titleDataTestSubj}>{title}</h4>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

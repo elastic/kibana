@@ -19,6 +19,7 @@ import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { documentFlyoutHistoryKey } from '../../flyout_v2/shared/constants/flyout_history';
 import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
+import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 
 const mockDocumentHeader = jest.fn((props: unknown) => {
   const { onShowNotes } = props as { onShowNotes?: () => void };
@@ -71,18 +72,22 @@ describe('AlertFlyoutHeader', () => {
     mockUseIsInSecurityApp.mockReturnValue(false);
   });
 
+  const startServicesMock = createStartServicesMock();
   const servicesMock = {
-    overlays: { openSystemFlyout: jest.fn() },
+    ...startServicesMock,
+    overlays: { ...startServicesMock.overlays, openSystemFlyout: jest.fn() },
     uiActions: {
+      ...startServicesMock.uiActions,
       getTriggerCompatibleActions: jest.fn().mockResolvedValue([]),
     },
     application: {
+      ...startServicesMock.application,
       capabilities: {
+        ...startServicesMock.application.capabilities,
         securitySolution: { show: true, crud: true },
       },
     },
-    upselling: {},
-  } as unknown as StartServices;
+  } as StartServices;
 
   it('wraps the header in KibanaContextProvider and ReactQueryClientProvider', async () => {
     const hit = {

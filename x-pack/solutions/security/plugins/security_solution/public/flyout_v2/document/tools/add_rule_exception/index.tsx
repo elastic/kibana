@@ -25,7 +25,7 @@ import { useRuleWithFallback } from '../../../../detection_engine/rule_managemen
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { EndpointExceptionsFlyout } from '../../../../management/pages/endpoint_exceptions/view/components/endpoint_exceptions_flyout';
 import { ToolsFlyoutHeader } from '../../../shared/components/tools_flyout_header';
-import { ADD_RULE_EXCEPTION_LOADING_TEST_ID } from './test_ids';
+import { ADD_RULE_EXCEPTION_LOADING_TEST_ID, ADD_RULE_EXCEPTION_TITLE_TEST_ID } from './test_ids';
 
 export interface AddRuleExceptionProps {
   /**
@@ -95,7 +95,11 @@ export const AddRuleException: React.FC<AddRuleExceptionProps> = memo(
             padding-block: ${euiTheme.size.s} !important;
           `}
         >
-          <ToolsFlyoutHeader hit={hit} title={title} />
+          <ToolsFlyoutHeader
+            hit={hit}
+            title={title}
+            titleDataTestSubj={ADD_RULE_EXCEPTION_TITLE_TEST_ID}
+          />
         </EuiFlyoutHeader>
         {isLoading ? (
           <EuiFlyoutBody data-test-subj={ADD_RULE_EXCEPTION_LOADING_TEST_ID}>

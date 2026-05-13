@@ -34,6 +34,11 @@ jest.mock(
   '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
 );
 jest.mock('../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions');
+jest.mock('../shared/components/take_action_button', () => ({
+  TakeActionButton: () => (
+    <button data-test-subj="securitySolutionFlyoutFooterDropdownButton" type="button" />
+  ),
+}));
 
 const mockedTelemetry = createTelemetryServiceMock();
 

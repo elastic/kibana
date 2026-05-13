@@ -12,7 +12,7 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { AddExceptionFlyoutProps } from '../../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 import type { EndpointExceptionsFlyoutProps } from '../../../../management/pages/endpoint_exceptions/view/components/endpoint_exceptions_flyout';
 import { AddRuleException } from '.';
-import { ADD_RULE_EXCEPTION_LOADING_TEST_ID } from './test_ids';
+import { ADD_RULE_EXCEPTION_LOADING_TEST_ID, ADD_RULE_EXCEPTION_TITLE_TEST_ID } from './test_ids';
 
 const mockUseRuleWithFallback = jest.fn();
 jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback', () => ({
@@ -40,12 +40,21 @@ const mockAddExceptionFlyoutContent = jest.fn<React.ReactElement, [AddExceptionF
   <div data-test-subj="addExceptionContent" />
 ));
 jest.mock('../../../../detection_engine/rule_exceptions/components/add_exception_flyout', () => ({
-  AddExceptionFlyoutContent: (props: AddExceptionFlyoutProps) =>
-    mockAddExceptionFlyoutContent(props),
+  AddExceptionFlyout: (props: AddExceptionFlyoutProps) => mockAddExceptionFlyoutContent(props),
 }));
 
 jest.mock('../../../shared/components/tools_flyout_header', () => ({
-  ToolsFlyoutHeader: () => <div data-test-subj="toolsFlyoutHeader" />,
+  ToolsFlyoutHeader: ({
+    title,
+    titleDataTestSubj,
+  }: {
+    title: React.ReactNode;
+    titleDataTestSubj?: string;
+  }) => (
+    <div data-test-subj="toolsFlyoutHeader">
+      <span data-test-subj={titleDataTestSubj}>{title}</span>
+    </div>
+  ),
 }));
 
 const onCancel = jest.fn();
@@ -99,6 +108,9 @@ describe('<AddRuleException />', () => {
     );
 
     expect(screen.queryByTestId(ADD_RULE_EXCEPTION_LOADING_TEST_ID)).not.toBeInTheDocument();
+    expect(screen.getByTestId(ADD_RULE_EXCEPTION_TITLE_TEST_ID)).toHaveTextContent(
+      'Add Endpoint Exception'
+    );
     expect(screen.getByTestId('endpointExceptionContent')).toBeInTheDocument();
     expect(mockUseRuleWithFallback).toHaveBeenCalledWith('rule-uuid');
 
