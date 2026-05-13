@@ -33,7 +33,7 @@ export const actionPolicyResponseSchema = z.object({
     .object({
       strategy: throttleStrategySchema.optional().describe('The throttle strategy.'),
       interval: durationSchema
-        .nullish()
+        .nullable()
         .describe(
           'The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.'
         ),

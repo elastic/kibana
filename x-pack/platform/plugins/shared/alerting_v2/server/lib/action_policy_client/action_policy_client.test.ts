@@ -377,6 +377,38 @@ describe('ActionPolicyClient', () => {
         output: { statusCode: 404 },
       });
     });
+
+    it('heals pre-fix documents: reads throttle.interval as null for intervalless strategy', async () => {
+      const existingAttributes: ActionPolicySavedObjectAttributes = {
+        name: 'stale-policy',
+        description: 'stale-policy description',
+        enabled: true,
+        destinations: [{ type: 'workflow', id: 'test-workflow' }],
+        throttle: { strategy: 'on_status_change', interval: '5m' }, // stale pre-fix state
+        auth: {
+          apiKey: 'encrypted-api-key',
+          owner: 'test-user',
+          createdByUser: false,
+        },
+        createdBy: 'elastic_profile_uid',
+        createdByUsername: 'elastic',
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedBy: 'elastic_profile_uid',
+        updatedByUsername: 'elastic',
+        updatedAt: '2025-01-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-get-stale',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: existingAttributes,
+        references: [],
+        version: 'WzEsMV0=',
+      });
+
+      const res = await client.getActionPolicy({ id: 'policy-id-get-stale' });
+
+      expect(res.throttle).toEqual({ strategy: 'on_status_change', interval: null });
+    });
   });
 
   describe('getActionPolicies', () => {
