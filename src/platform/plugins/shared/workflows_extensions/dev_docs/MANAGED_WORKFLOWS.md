@@ -17,7 +17,7 @@ This guide covers:
 
 | Concept | Meaning |
 |---|---|
-| **Definition** | Code-owned descriptor: `id`, `pluginId`, `yaml` or `yamlTemplate`, `management` policy. Lives in `@kbn/workflows/managed`. |
+| **Definition** | Code-owned descriptor: `id`, `pluginId`, `version`, `yaml` or `yamlTemplate`, `management` policy. Lives in `@kbn/workflows/managed`. |
 | **Owner plugin** | Plugin that owns a definition (`pluginId`). Drives reconciliation and orphan cleanup. |
 | **Installed document** | Persisted workflow in `.workflows-*` indices, identified by `workflowId` + `spaceId`. |
 | **Reserved namespace** | All managed definition ids start with `system-`. The platform rejects this prefix for user-defined workflows. |
@@ -289,6 +289,7 @@ export const MY_WORKFLOW_ID = 'system-my-workflow';
 export const MY_WORKFLOW: ManagedWorkflowDefinition = {
   id: MY_WORKFLOW_ID,
   pluginId: 'myPlugin',
+  version: 1,
   yaml: '...',
   management: { lifecycle: 'static', versionStrategy: 'auto', enablement: 'enforced' },
 };
@@ -332,6 +333,7 @@ export const HEALTH_CHECK_WORKFLOW_ID = 'system-workflows-management-health-chec
 export const HEALTH_CHECK_WORKFLOW: ManagedWorkflowDefinition = {
   id: HEALTH_CHECK_WORKFLOW_ID,
   pluginId: 'workflowsManagement',
+  version: 1,
   yaml: `name: Workflows Management Health Check
 enabled: true
 triggers:
@@ -372,6 +374,7 @@ export const MY_TEMPLATE_WORKFLOW_ID = 'system-my-template';
 export const MY_TEMPLATE_WORKFLOW = {
   id: MY_TEMPLATE_WORKFLOW_ID,
   pluginId: 'myPlugin',
+  version: 1,
   yamlTemplate: ({ entityId }) => `name: Monitor ${entityId}
 enabled: true
 triggers:
@@ -401,6 +404,14 @@ await managed.install(MY_TEMPLATE_WORKFLOW_ID, {
 **Why `satisfies` for templates?** `as const satisfies ManagedWorkflowDefinition<MyTemplateValues>` validates the object against the type while preserving the literal `id` and `yamlTemplate` signature for downstream type inference. This allows the platform to infer `TValues` at call sites — `values` is type-checked for this workflow id (`entityId` typo/wrong type fails at compile time).
 
 For `yaml`-based definitions (no template values), a direct annotation (`: ManagedWorkflowDefinition`) is sufficient since there is no `values` type to infer.
+
+### `version` — definition versioning
+
+Every managed definition declares a `version: number` (positive integer, starting at 1). Bump it whenever you ship a change to the definition's `yaml` or `yamlTemplate`.
+
+- **`version` is metadata, not a reconciliation trigger.** The `definitionHash` (SHA-256 of the YAML content) remains the source of truth for whether an update is needed. The `version` provides a human-readable label persisted as `managedVersion` on the workflow document.
+- Consumers (and future APIs) can compare the installed `managedVersion` on a document against the registry definition's `version` to answer "is this workflow up to date?" without inspecting hashes.
+- `version` is not auto-derived from the hash — it is an explicit declaration that the owner controls.
 
 ## 9) Executing managed workflows
 
@@ -461,7 +472,7 @@ Because there is a **single persisted document** for a global workflow, any edit
 
 ## 11) Rollout checklist
 
-1. Add the definition in `@kbn/workflows/managed` with the correct `pluginId` and a `system-` id; export the id as a const.
+1. Add the definition in `@kbn/workflows/managed` with the correct `pluginId`, a `system-` id, and `version: 1`; export the id as a const.
 2. Add the definition to `managedWorkflowDefinitions` in `managed/index.ts`, and re-export the id from the package barrel.
 3. Register the owner plugin id in `setup()`.
 4. Initialize the plugin-scoped client in `start()`.
@@ -471,4 +482,5 @@ Because there is a **single persisted document** for a global workflow, any edit
 8. For multiple instances, always pass `workflowIdSuffix` (or `workflowId`) — never rely on the definition id alone.
 9. Pick lifecycle policy intentionally (`static`/`dynamic`, `auto`/`on_adopt`, `enforced`/`restorable`).
 10. Use `yamlTemplate` only when install-time values are required.
-11. Execute via `managed.execute(request, ...)`; for dynamic instances, pass the deterministic `workflowId`.
+11. Bump `version` on the definition whenever you change the `yaml` or `yamlTemplate`.
+12. Execute via `managed.execute(request, ...)`; for dynamic instances, pass the deterministic `workflowId`.

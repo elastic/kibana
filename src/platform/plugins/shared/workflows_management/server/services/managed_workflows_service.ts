@@ -94,7 +94,7 @@ export class ManagedWorkflowsService {
     const orphanIdsBySpace = new Map<string, string[]>();
     for (const { id, source } of existingManagedDocs) {
       const owner = source.managedBy ?? undefined;
-      const definitionId = source.originSystemWorkflowId ?? undefined;
+      const definitionId = source.originManagedWorkflowId ?? undefined;
 
       const isHardOrphan =
         !owner ||
@@ -267,8 +267,9 @@ export class ManagedWorkflowsService {
         definition: existing.definition,
         yaml: existing.yaml,
         ...(existing.managed === true ? { managed: true } : {}),
-        ...(typeof existing.originSystemWorkflowId === 'string'
-          ? { originSystemWorkflowId: existing.originSystemWorkflowId }
+        ...(typeof existing.managedBy === 'string' ? { managedBy: existing.managedBy } : {}),
+        ...(typeof existing.originManagedWorkflowId === 'string'
+          ? { originManagedWorkflowId: existing.originManagedWorkflowId }
           : {}),
       },
       context,
@@ -304,7 +305,7 @@ export class ManagedWorkflowsService {
     const orphanIdsBySpace = new Map<string, string[]>();
     for (const { id: docId, source } of existingManagedDocs) {
       const owner = source.managedBy;
-      const definitionId = source.originSystemWorkflowId;
+      const definitionId = source.originManagedWorkflowId;
       const isPluginStaticDoc =
         owner === pluginId && !!definitionId && staticDefinitionIds.has(definitionId);
 
@@ -406,8 +407,9 @@ export class ManagedWorkflowsService {
       managedBy: definition.pluginId,
       definitionHash,
       managedTemplateValues: managedTemplateValues as Record<string, unknown> | null,
-      originSystemWorkflowId: definition.id,
+      originManagedWorkflowId: definition.id,
       lifecycle: definition.management.lifecycle,
+      managedVersion: definition.version,
       deleted_at: null,
       valid: workflowModel?.valid ?? false,
       created_at: createdAt ?? now,

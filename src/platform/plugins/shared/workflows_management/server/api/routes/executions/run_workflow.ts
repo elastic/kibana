@@ -95,8 +95,8 @@ export function registerRunWorkflowRoute(deps: RouteDependencies) {
             definition: workflow.definition,
             yaml: workflow.yaml,
             ...(workflow.managed === true ? { managed: true } : {}),
-            ...(typeof workflow.originSystemWorkflowId === 'string'
-              ? { originSystemWorkflowId: workflow.originSystemWorkflowId }
+            ...(typeof workflow.originManagedWorkflowId === 'string'
+              ? { originManagedWorkflowId: workflow.originManagedWorkflowId }
               : {}),
           };
           const workflowExecutionId = await api.runWorkflow(

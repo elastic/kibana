@@ -79,9 +79,9 @@ export class WorkflowRepository {
       // Map index _source → EsWorkflow (read created_at / updated_at; EsWorkflow uses createdAt / lastUpdatedAt).
       const source = document._source as Record<string, unknown>;
       const managed = typeof source.managed === 'boolean' ? (source.managed as boolean) : undefined;
-      const originSystemWorkflowId =
-        typeof source.originSystemWorkflowId === 'string'
-          ? source.originSystemWorkflowId
+      const originManagedWorkflowId =
+        typeof source.originManagedWorkflowId === 'string'
+          ? source.originManagedWorkflowId
           : undefined;
       return {
         id: workflowId,
@@ -98,7 +98,7 @@ export class WorkflowRepository {
         deleted_at: source.deleted_at ? new Date(source.deleted_at as string) : null,
         yaml: source.yaml as string,
         ...(managed !== undefined ? { managed } : {}),
-        ...(originSystemWorkflowId !== undefined ? { originSystemWorkflowId } : {}),
+        ...(originManagedWorkflowId !== undefined ? { originManagedWorkflowId } : {}),
       };
     } catch (error) {
       if (error.statusCode === 404) {

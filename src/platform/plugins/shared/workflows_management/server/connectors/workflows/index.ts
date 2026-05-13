@@ -106,8 +106,8 @@ function getWorkflowsConnectorTypeArgs(
         definition: workflow.definition,
         yaml: workflow.yaml,
         ...(workflow.managed === true ? { managed: true } : {}),
-        ...(typeof workflow.originSystemWorkflowId === 'string'
-          ? { originSystemWorkflowId: workflow.originSystemWorkflowId }
+        ...(typeof workflow.originManagedWorkflowId === 'string'
+          ? { originManagedWorkflowId: workflow.originManagedWorkflowId }
           : {}),
       };
 
@@ -139,8 +139,8 @@ function getWorkflowsConnectorTypeArgs(
         definition: workflow.definition,
         yaml: workflow.yaml,
         ...(workflow.managed === true ? { managed: true } : {}),
-        ...(typeof workflow.originSystemWorkflowId === 'string'
-          ? { originSystemWorkflowId: workflow.originSystemWorkflowId }
+        ...(typeof workflow.originManagedWorkflowId === 'string'
+          ? { originManagedWorkflowId: workflow.originManagedWorkflowId }
           : {}),
       };
 

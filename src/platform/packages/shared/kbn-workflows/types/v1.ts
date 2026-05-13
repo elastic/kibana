@@ -96,7 +96,8 @@ export interface EsWorkflowExecution {
   id: string;
   workflowId: string;
   managed?: boolean;
-  originSystemWorkflowId?: string | null;
+  managedBy?: string | null;
+  originManagedWorkflowId?: string | null;
   isTestRun: boolean;
   status: ExecutionStatus;
   context: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -258,7 +259,8 @@ export const EsWorkflowSchema = z.object({
   description: z.string().optional(),
   enabled: z.boolean(),
   managed: z.boolean().optional(),
-  originSystemWorkflowId: z.string().nullable().optional(),
+  managedBy: z.string().nullable().optional(),
+  originManagedWorkflowId: z.string().nullable().optional(),
   tags: z.array(z.string()),
   createdAt: z.date(),
   createdBy: z.string(),
@@ -364,7 +366,7 @@ export interface WorkflowDetailDto {
   managed?: boolean;
   managedBy?: string | null;
   definitionHash?: string | null;
-  originSystemWorkflowId?: string | null;
+  originManagedWorkflowId?: string | null;
   lifecycle?: 'static' | 'dynamic' | null;
   createdAt: string;
   createdBy: string;
@@ -403,7 +405,14 @@ export interface WorkflowListDto {
 export interface WorkflowExecutionEngineModel
   extends Pick<
     EsWorkflow,
-    'id' | 'name' | 'enabled' | 'definition' | 'yaml' | 'managed' | 'originSystemWorkflowId'
+    | 'id'
+    | 'name'
+    | 'enabled'
+    | 'definition'
+    | 'yaml'
+    | 'managed'
+    | 'managedBy'
+    | 'originManagedWorkflowId'
   > {
   isTestRun?: boolean;
   spaceId?: string;

@@ -29,7 +29,7 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     managed: {
       type: 'boolean',
     },
-    originSystemWorkflowId: {
+    originManagedWorkflowId: {
       type: 'keyword',
     },
     status: {

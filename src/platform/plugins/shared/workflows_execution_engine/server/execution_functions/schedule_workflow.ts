@@ -106,8 +106,9 @@ export async function checkAndSkipIfExistingScheduledExecution(
       spaceId,
       workflowId: workflow.id,
       ...(workflow.managed === true ? { managed: true } : {}),
-      ...(typeof workflow.originSystemWorkflowId === 'string'
-        ? { originSystemWorkflowId: workflow.originSystemWorkflowId }
+      ...(typeof workflow.managedBy === 'string' ? { managedBy: workflow.managedBy } : {}),
+      ...(typeof workflow.originManagedWorkflowId === 'string'
+        ? { originManagedWorkflowId: workflow.originManagedWorkflowId }
         : {}),
       isTestRun: workflow.isTestRun,
       workflowDefinition: workflow.definition,

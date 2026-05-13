@@ -105,6 +105,15 @@ describe('managedWorkflowDefinitions', () => {
   });
 
   it.each(managedDefinitionsById)(
+    '%s declares a version that is a positive integer',
+    (_id, definition) => {
+      expect(typeof definition.version).toBe('number');
+      expect(Number.isInteger(definition.version)).toBe(true);
+      expect(definition.version).toBeGreaterThanOrEqual(1);
+    }
+  );
+
+  it.each(managedDefinitionsById)(
     '%s defines exactly one source field: yaml xor yamlTemplate',
     (_id, definition) => {
       const hasYamlField = hasYaml(definition);

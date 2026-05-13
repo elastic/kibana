@@ -18,6 +18,7 @@ export interface ExampleManagedWorkflowTemplateValues {
 export const EXAMPLE_MANAGED_WORKFLOW = {
   id: EXAMPLE_MANAGED_WORKFLOW_ID,
   pluginId: 'workflowsExtensionsExample',
+  version: 1,
   yamlTemplate: ({ recipient }) => `name: Example Greeting - ${recipient}
 enabled: true
 triggers:
