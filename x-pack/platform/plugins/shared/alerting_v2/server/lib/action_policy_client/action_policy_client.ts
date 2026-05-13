@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import type {
   ActionPolicyBulkAction,
   ActionPolicyResponse,
-  CreateActionPolicyData,
+  CreateActionPolicyDataInput,
 } from '@kbn/alerting-v2-schemas';
 import {
   createActionPolicyDataSchema,
@@ -32,6 +32,8 @@ import { ActionPolicySavedObjectServiceScopedToken } from '../services/action_po
 import type { ActionPolicySavedObjectServiceContract } from '../services/action_policy_saved_object_service/types';
 import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
 import { ApiKeyService } from '../services/api_key_service/api_key_service';
+import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
+import { RulesSavedObjectServiceScopedToken } from '../services/rules_saved_object_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
 import { ActionPolicyNamespaceToken } from './tokens';
@@ -75,6 +77,8 @@ export class ActionPolicyClient {
   constructor(
     @inject(ActionPolicySavedObjectServiceScopedToken)
     private readonly actionPolicySavedObjectService: ActionPolicySavedObjectServiceContract,
+    @inject(RulesSavedObjectServiceScopedToken)
+    private readonly rulesSavedObjectService: RulesSavedObjectServiceContract,
     @inject(UserService) private readonly userService: UserServiceContract,
     @inject(ApiKeyService) private readonly apiKeyService: ApiKeyServiceContract,
     @inject(EncryptedSavedObjectsClientToken)
@@ -151,6 +155,10 @@ export class ActionPolicyClient {
 
   public async createActionPolicy(params: CreateActionPolicyParams): Promise<ActionPolicyResponse> {
     const parsed = this.parseActionPolicyData(createActionPolicyDataSchema, params.data, 'create');
+
+    if (parsed.type === 'single_rule' && parsed.ruleId) {
+      await this.assertRuleExists(parsed.ruleId);
+    }
 
     const userProfile = await this.getUserProfile();
     const now = new Date().toISOString();
@@ -422,6 +430,19 @@ export class ActionPolicyClient {
     return { processed, total: actions.length, errors };
   }
 
+  private async assertRuleExists(ruleId: string): Promise<void> {
+    try {
+      await this.rulesSavedObjectService.get(ruleId);
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        throw Boom.badRequest(
+          `Cannot create single_rule action policy: rule "${ruleId}" not found in this space.`
+        );
+      }
+      throw e;
+    }
+  }
+
   private buildFindFilter(params: FindActionPoliciesParams): KueryNode | undefined {
     const conditions: KueryNode[] = [];
     const attrPrefix = `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes`;
@@ -443,6 +464,14 @@ export class ActionPolicyClient {
       conditions.push(
         tagConditions.length === 1 ? tagConditions[0] : nodeBuilder.or(tagConditions)
       );
+    }
+
+    if (params.ruleId) {
+      conditions.push(nodeBuilder.is(`${attrPrefix}.ruleId`, params.ruleId));
+    }
+
+    if (params.type) {
+      conditions.push(nodeBuilder.is(`${attrPrefix}.type`, params.type));
     }
 
     if (conditions.length === 0) {
@@ -481,6 +510,24 @@ export class ActionPolicyClient {
     const auth = await this.getDecryptedAuth(id);
     await this.actionPolicySavedObjectService.delete({ id });
     this.markApiKeysForInvalidation(auth?.apiKey, auth?.createdByUser);
+  }
+
+  public async deleteActionPoliciesByFilter(
+    filter: Pick<FindActionPoliciesParams, 'ruleId' | 'type' | 'destinationType' | 'tags'>
+  ): Promise<BulkActionActionPoliciesResponse> {
+    const ids: string[] = [];
+    const PAGE_SIZE = 100;
+    for (let page = 1; ; page++) {
+      const result = await this.findActionPolicies({ ...filter, page, perPage: PAGE_SIZE });
+      ids.push(...result.items.map((p) => p.id));
+      if (page * PAGE_SIZE >= result.total) break;
+    }
+    if (ids.length === 0) {
+      return { processed: 0, total: 0, errors: [] };
+    }
+    return this.bulkActionActionPolicies({
+      actions: ids.map((id) => ({ id, action: 'delete' as const })),
+    });
   }
 
   private markApiKeysForInvalidation(apiKey?: string, createdByUser?: boolean): void {
@@ -590,7 +637,7 @@ export class ActionPolicyClient {
     data,
   }: {
     id: string;
-    data: CreateActionPolicyData;
+    data: CreateActionPolicyDataInput;
   }): Promise<{ policy: ActionPolicyResponse; created: boolean }> {
     // Validate up front so a bad body never spends an API key allocation or
     // even consults the SO store.
