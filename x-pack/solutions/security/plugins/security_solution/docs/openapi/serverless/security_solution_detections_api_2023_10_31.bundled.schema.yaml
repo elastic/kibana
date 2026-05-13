@@ -4018,12 +4018,16 @@ components:
         - in-progress
       type: string
     AlertSuppression:
-      description: Defines alert suppression configuration.
+      description: >
+        Defines alert suppression configuration. At least one of `group_by` or
+        `group_by_v2`
+
+        must be provided with at least one field when suppression is enabled
+        (enforced by
+
+        request validation, not by this object schema alone).
       type: object
       properties:
-        anyOf:
-          - group_by
-          - group_by_v2
         duration:
           $ref: '#/components/schemas/AlertSuppressionDuration'
         group_by:
