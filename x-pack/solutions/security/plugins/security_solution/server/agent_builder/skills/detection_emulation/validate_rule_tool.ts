@@ -12,7 +12,7 @@ import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import {
   RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
-  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL,
+  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
 } from '../../../../common/endpoint/service/response_actions/constants';
 import type { RunEmulationCommandInput } from '../../../../common/detection_emulation/schemas';
 import type { ConfigType } from '../../../config';
@@ -306,14 +306,19 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
 
         // Step 3: RBAC — real_execution dispatches `execute` response actions;
         // verify the caller holds the required endpoint privilege.
+        //
+        // We use `RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ` (yields
+        // `canWriteExecuteOperations`), NOT
+        // `RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL` (yields
+        // `writeExecuteOperations` — the Kibana feature-privilege string,
+        // which is *not* a property on `EndpointAuthz`). Mirrors the
+        // canonical lookup used by `validate_rule/route.ts` and
+        // `run_command/route.ts`.
         if (mode === 'real_execution') {
           const consoleCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP.execute;
-          const rbacMap = RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL as Record<
-            string,
-            string | undefined
-          >;
-          const requiredRbacFeature = rbacMap[consoleCommand];
-          if (requiredRbacFeature) {
+          const requiredAuthzKey =
+            RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ[consoleCommand];
+          if (requiredAuthzKey) {
             // Pass the request-scoped ES client so `getEndpointAuthz` can fall
             // back to ES `_security/_authenticate` for `roles` when the request
             // is a Task-Manager-dispatched `fakeRequest` (whose HTTP auth state
@@ -323,12 +328,10 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
               request,
               esClient.asCurrentUser
             );
-            const hasPrivilege = (endpointAuthz as unknown as Record<string, boolean | undefined>)[
-              requiredRbacFeature
-            ];
+            const hasPrivilege = endpointAuthz[requiredAuthzKey];
             if (!hasPrivilege) {
               logger.warn(
-                `validate_rule tool blocked: user lacks required RBAC privilege [${requiredRbacFeature}]`
+                `validate_rule tool blocked: user lacks required RBAC privilege [${requiredAuthzKey}]`
               );
               return {
                 results: [
@@ -336,9 +339,9 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
                     type: ToolResultType.error,
                     data: {
                       error_type: 'authorization_error',
-                      message: `Insufficient privileges: real_execution requires [${requiredRbacFeature}].`,
+                      message: `Insufficient privileges: real_execution requires [${requiredAuthzKey}].`,
                       status_code: 403,
-                      likely_cause: `User lacks required RBAC privilege [${requiredRbacFeature}].`,
+                      likely_cause: `User lacks required RBAC privilege [${requiredAuthzKey}].`,
                     },
                   },
                 ],

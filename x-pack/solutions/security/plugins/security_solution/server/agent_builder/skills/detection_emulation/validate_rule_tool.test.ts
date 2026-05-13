@@ -147,8 +147,15 @@ const createMockCore = (username: string | null = 'test-user') =>
 
 const createMockEndpointService = (canExecute = true) =>
   ({
+    // `EndpointAuthz` exposes booleans as `canXxx` (e.g.
+    // `canWriteExecuteOperations`), not the bare Kibana feature-privilege
+    // string. Earlier `writeExecuteOperations` here masked the gate-bug:
+    // both code and test agreed on the wrong key, so the test passed and
+    // production 403'd. See
+    // `RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ` in
+    // `common/endpoint/service/response_actions/constants.ts`.
     getEndpointAuthz: jest.fn().mockResolvedValue({
-      writeExecuteOperations: canExecute,
+      canWriteExecuteOperations: canExecute,
     }),
   } as unknown as EndpointAppContextService);
 
@@ -380,7 +387,7 @@ describe('createValidateRuleTool', () => {
 
   describe('HITL — gate ordering', () => {
     it('does not prompt when RBAC blocks (gate fires AFTER auth/RBAC, BEFORE rate limiter)', async () => {
-      // The user lacks writeExecuteOperations — RBAC must short-circuit
+      // The user lacks canWriteExecuteOperations — RBAC must short-circuit
       // before HITL so a forbidden caller doesn't see a prompt they can
       // never satisfy. Defends the gate-ordering invariant from regressing.
       const tool = createTool({ endpointService: createMockEndpointService(false) });

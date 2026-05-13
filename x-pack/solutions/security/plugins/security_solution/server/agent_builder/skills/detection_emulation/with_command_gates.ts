@@ -9,7 +9,7 @@ import type { Logger, ElasticsearchClient, KibanaRequest } from '@kbn/core/serve
 import { ToolResultType } from '@kbn/agent-builder-common';
 import {
   RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
-  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL,
+  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
 } from '../../../../common/endpoint/service/response_actions/constants';
 import type { RunEmulationCommandInput } from '../../../../common/detection_emulation/schemas';
 import type { ConfigType } from '../../../config';
@@ -164,40 +164,40 @@ export const withCommandGates = async (
     // ── Gate 2: Per-command RBAC ────────────────────────────────────────────
     // Missing entries in the RBAC map mean "no extra privilege required"
     // (e.g. `cancel` has no dedicated privilege today).
+    //
+    // Use `RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ` (yields
+    // `canXxx` properties on `EndpointAuthz`), NOT
+    // `RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL` (yields
+    // Kibana feature-privilege strings that are not EndpointAuthz keys).
+    // Mirrors `validate_rule/route.ts` and `run_command/route.ts`.
     const consoleCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
-    const rbacMap = RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL as Record<
-      string,
-      string | undefined
-    >;
-    const requiredRbacFeature = rbacMap[consoleCommand];
+    const requiredAuthzKey = RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ[consoleCommand];
 
-    if (requiredRbacFeature) {
+    if (requiredAuthzKey) {
       // Pass the request-scoped ES client so `getEndpointAuthz` can fall back
       // to ES `_security/_authenticate` for `roles` when the request is a
       // Task-Manager-dispatched `fakeRequest`. Same fakeRequest mitigation as
       // `resolve_current_user.ts`.
       const endpointAuthz = await endpointService.getEndpointAuthz(request, esClient.asCurrentUser);
-      const hasPrivilege = (endpointAuthz as unknown as Record<string, boolean | undefined>)[
-        requiredRbacFeature
-      ];
+      const hasPrivilege = endpointAuthz[requiredAuthzKey];
 
       if (!hasPrivilege) {
         logger.warn(
-          `Emulation command [${command}] for emulation [${emulationId}] blocked: user lacks required RBAC privilege [${requiredRbacFeature}]`
+          `Emulation command [${command}] for emulation [${emulationId}] blocked: user lacks required RBAC privilege [${requiredAuthzKey}]`
         );
         return errorResult({
           error_type: 'authorization_error',
-          message: `Insufficient privileges: command [${command}] requires [${requiredRbacFeature}]`,
+          message: `Insufficient privileges: command [${command}] requires [${requiredAuthzKey}]`,
           emulation_id: emulationId,
           agent_type: agentType,
           command,
           status_code: 403,
-          likely_cause: `User lacks required RBAC privilege [${requiredRbacFeature}]`,
+          likely_cause: `User lacks required RBAC privilege [${requiredAuthzKey}]`,
         });
       }
 
       logger.debug(
-        `RBAC check passed for command [${command}]: user has privilege [${requiredRbacFeature}]`
+        `RBAC check passed for command [${command}]: user has privilege [${requiredAuthzKey}]`
       );
     }
 
