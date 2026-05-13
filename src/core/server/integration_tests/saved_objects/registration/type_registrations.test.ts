@@ -174,6 +174,7 @@ const previouslyRegisteredTypes = [
   'synthetics-param',
   'synthetics-privates-locations',
   'synthetics-private-location',
+  'synthetics-settings-multi-space',
   'tag',
   'task',
   'telemetry',

@@ -1432,6 +1432,7 @@
   "synthetics-param": [],
   "synthetics-private-location": [],
   "synthetics-privates-locations": [],
+  "synthetics-settings-multi-space": [],
   "tag": [
     "color",
     "description",

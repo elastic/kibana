@@ -4765,6 +4765,10 @@
     "dynamic": false,
     "properties": {}
   },
+  "synthetics-settings-multi-space": {
+    "dynamic": false,
+    "properties": {}
+  },
   "tag": {
     "properties": {
       "color": {
