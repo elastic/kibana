@@ -15,6 +15,7 @@ exports[`PercentFormatEditor should render normally 1`] = `
           />
            
           <EuiIcon
+            aria-hidden={true}
             type="link"
           />
         </EuiLink>
