@@ -10,7 +10,7 @@
 // eslint-disable-next-line max-classes-per-file
 import './jest.mocks';
 
-import type { FunctionComponent } from 'react';
+import type { FunctionComponent, ReactNode } from 'react';
 import React from 'react';
 import { merge } from 'lodash';
 
@@ -86,10 +86,9 @@ class MockCustomFieldFormat extends FieldFormat {
   static id = 'upper';
   static title = 'UpperCaseString';
 
-  // we need to catch possible null values and block them before running the transformation
-  // like in the real formatter.
-  htmlConvert = (value: unknown) =>
-    `<span>${value == null ? NULL_LABEL : String(value).toUpperCase()}</span>`;
+  reactConvertSingle = (value: unknown): ReactNode => {
+    return <span>{value == null ? NULL_LABEL : String(value).toUpperCase()}</span>;
+  };
 }
 
 // The format options available in the dropdown select for our tests.

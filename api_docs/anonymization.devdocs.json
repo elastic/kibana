@@ -98,6 +98,7 @@
                 "lineNumber": 59,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "AnonymizationTarget",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -461,6 +462,7 @@
                 "lineNumber": 45,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "AnonymizationProfileInitializerContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -637,6 +639,7 @@
                 "lineNumber": 37,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "CreateAnonymizationProfileParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -942,6 +945,7 @@
               "lineNumber": 90,
               "columnNumber": 32,
               "deprecated": false,
+              "docsReferencedTypeName": "AnonymizationProfileInitializer",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -1056,6 +1060,7 @@
               "lineNumber": 103,
               "columnNumber": 32,
               "deprecated": false,
+              "docsReferencedTypeName": "AnonymizationProfileInitializer",
               "trackAdoption": false,
               "isRequired": true
             }

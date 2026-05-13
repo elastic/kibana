@@ -51,6 +51,7 @@
             "lineNumber": 32,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "Stats",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -102,6 +103,7 @@
             "lineNumber": 168,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "WebpackNormalModule",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -252,6 +254,7 @@
             "lineNumber": 12,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "Stats",
             "trackAdoption": false,
             "isRequired": true
           }

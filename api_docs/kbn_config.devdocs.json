@@ -313,7 +313,15 @@
         "tags": [],
         "label": "ConfigDeprecationContext",
         "description": [
-          "\nDeprecation context provided to {@link ConfigDeprecation | config deprecations}\n"
+          "\nDeprecation context provided to ",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.ConfigDeprecation",
+            "text": "config deprecations"
+          },
+          "\n"
         ],
         "path": "src/platform/packages/shared/kbn-config/src/deprecation/types.ts",
         "lineNumber": 73,
@@ -385,7 +393,23 @@
         "tags": [],
         "label": "ConfigDeprecationFactory",
         "description": [
-          "\nProvides helpers to generates the most commonly used {@link ConfigDeprecation}\nwhen invoking a {@link ConfigDeprecationProvider}.\n\nSee methods documentation for more detailed examples.\n"
+          "\nProvides helpers to generates the most commonly used ",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.ConfigDeprecation",
+            "text": "ConfigDeprecation"
+          },
+          "\nwhen invoking a ",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.ConfigDeprecationProvider",
+            "text": "ConfigDeprecationProvider"
+          },
+          ".\n\nSee methods documentation for more detailed examples.\n"
         ],
         "path": "src/platform/packages/shared/kbn-config/src/deprecation/types.ts",
         "lineNumber": 130,
@@ -468,6 +492,7 @@
                 "lineNumber": 163,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "FactoryConfigDeprecationDetails",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -549,6 +574,7 @@
                 "lineNumber": 184,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "FactoryConfigDeprecationDetails",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -630,6 +656,7 @@
                 "lineNumber": 221,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "FactoryConfigDeprecationDetails",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -711,6 +738,7 @@
                 "lineNumber": 261,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "FactoryConfigDeprecationDetails",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -775,6 +803,7 @@
                 "lineNumber": 295,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "FactoryConfigDeprecationDetails",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -839,6 +868,7 @@
                 "lineNumber": 331,
                 "columnNumber": 37,
                 "deprecated": false,
+                "docsReferencedTypeName": "FactoryConfigDeprecationDetails",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1180,7 +1210,15 @@
         "tags": [],
         "label": "AddConfigDeprecation",
         "description": [
-          "\nConfig deprecation hook used when invoking a {@link ConfigDeprecation}\n"
+          "\nConfig deprecation hook used when invoking a ",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.ConfigDeprecation",
+            "text": "ConfigDeprecation"
+          },
+          "\n"
         ],
         "signature": [
           "(details: ",
@@ -1220,6 +1258,7 @@
             "lineNumber": 18,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "DeprecatedConfigDetails",
             "trackAdoption": false
           }
         ],
@@ -1249,7 +1288,15 @@
         "tags": [],
         "label": "ConfigDeprecation",
         "description": [
-          "\nConfiguration deprecation returned from {@link ConfigDeprecationProvider} that handles a single deprecation from the configuration.\n"
+          "\nConfiguration deprecation returned from ",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.ConfigDeprecationProvider",
+            "text": "ConfigDeprecationProvider"
+          },
+          " that handles a single deprecation from the configuration.\n"
         ],
         "signature": [
           "(config: Readonly<{ [x: string]: any; }>, fromPath: string, addDeprecation: ",
@@ -1291,7 +1338,15 @@
             "tags": [],
             "label": "config",
             "description": [
-              "must not be mutated, return {@link ConfigDeprecationCommand } to change config shape."
+              "must not be mutated, return ",
+              {
+                "pluginId": "@kbn/config",
+                "scope": "server",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-server.ConfigDeprecationCommand",
+                "text": "ConfigDeprecationCommand"
+              },
+              " to change config shape."
             ],
             "signature": [
               "{ readonly [x: string]: any; }"
@@ -1300,6 +1355,7 @@
             "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RecursiveReadonly",
             "trackAdoption": false
           },
           {
@@ -1337,6 +1393,7 @@
             "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AddConfigDeprecation",
             "trackAdoption": false,
             "returnComment": [],
             "children": [
@@ -1360,6 +1417,7 @@
                 "lineNumber": 18,
                 "columnNumber": 37,
                 "deprecated": false,
+                "docsReferencedTypeName": "DeprecatedConfigDetails",
                 "trackAdoption": false
               }
             ]
@@ -1384,6 +1442,7 @@
             "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ConfigDeprecationContext",
             "trackAdoption": false
           }
         ],
@@ -1396,7 +1455,23 @@
         "tags": [],
         "label": "ConfigDeprecationProvider",
         "description": [
-          "\nA provider that should returns a list of {@link ConfigDeprecation}.\n\nSee {@link ConfigDeprecationFactory} for more usage examples.\n"
+          "\nA provider that should returns a list of ",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.ConfigDeprecation",
+            "text": "ConfigDeprecation"
+          },
+          ".\n\nSee ",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.ConfigDeprecationFactory",
+            "text": "ConfigDeprecationFactory"
+          },
+          " for more usage examples.\n"
         ],
         "signature": [
           "(factory: ",
@@ -1444,6 +1519,7 @@
             "lineNumber": 124,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "ConfigDeprecationFactory",
             "trackAdoption": false
           }
         ],
@@ -1497,6 +1573,7 @@
             "lineNumber": 18,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false
           }
         ],

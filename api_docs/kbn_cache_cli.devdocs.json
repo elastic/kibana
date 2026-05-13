@@ -53,6 +53,7 @@
             "lineNumber": 21,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "LocalDiskCacheOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -94,6 +95,7 @@
             "lineNumber": 21,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "TmpDirDiskCacheOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -150,6 +152,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Cache",
             "trackAdoption": false,
             "isRequired": true
           },

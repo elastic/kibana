@@ -17,7 +17,13 @@ const mockHttpGet = jest.fn();
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
 
 const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
@@ -88,5 +94,25 @@ describe('useStats', () => {
       size: '0 GB',
       hasNoDocuments: true,
     });
+  });
+
+  it('should return null data when API returns 403', async () => {
+    const error = { body: { message: 'Forbidden', statusCode: 403 } };
+    mockHttpGet.mockRejectedValue(error);
+
+    const { result } = renderHook(() => useStats(), { wrapper });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toBeNull();
+  });
+
+  it('should set isError for non-403 errors', async () => {
+    const error = { body: { message: 'Internal Server Error', statusCode: 500 } };
+    mockHttpGet.mockRejectedValue(error);
+
+    const { result } = renderHook(() => useStats(), { wrapper });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.data).toBeUndefined();
   });
 });

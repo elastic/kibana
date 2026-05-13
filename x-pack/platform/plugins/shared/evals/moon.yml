@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/storage-adapter'
   - '@kbn/es-errors'
   - '@kbn/evals-common'
+  - '@kbn/zod-helpers'
   - '@kbn/i18n'
   - '@kbn/react-query'
   - '@kbn/shared-ux-router'

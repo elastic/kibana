@@ -181,11 +181,13 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
           fullWidth
         >
           <EuiFieldText
+            data-test-subj="searchInferenceEndpointsAddEndpointModalFieldText"
             value={modelId}
             readOnly
             fullWidth
             prepend={
               <EuiButtonIcon
+                data-test-subj="searchInferenceEndpointsAddEndpointModalCopyModelIdButton"
                 iconType="copyClipboard"
                 size="xs"
                 color="text"
@@ -280,6 +282,7 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
             data-test-subj="addEndpointIdField"
             prepend={
               <EuiButtonIcon
+                data-test-subj="searchInferenceEndpointsAddEndpointModalCopyEndpointIdButton"
                 iconType="copyClipboard"
                 size="xs"
                 color="text"

@@ -72,6 +72,7 @@
             "lineNumber": 17,
             "columnNumber": 59,
             "deprecated": false,
+            "docsReferencedTypeName": "DatatableColumn",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -126,6 +127,7 @@
             "lineNumber": 14,
             "columnNumber": 74,
             "deprecated": false,
+            "docsReferencedTypeName": "Selector",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -280,6 +282,7 @@
             "lineNumber": 11,
             "columnNumber": 4,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": true
           }

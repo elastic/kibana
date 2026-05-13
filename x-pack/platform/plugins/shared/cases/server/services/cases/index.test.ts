@@ -18,6 +18,7 @@ import type { CaseAttributes, ExternalService, CaseConnector } from '../../../co
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import {
   CASE_EXTENDED_FIELDS,
+  CASE_EXTENDED_FIELDS_LABELS,
   CASE_SAVED_OBJECT,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
@@ -2315,7 +2316,8 @@ describe('CasesService', () => {
       'time_to_resolve',
       'time_to_investigate',
       'template',
-      CASE_EXTENDED_FIELDS
+      CASE_EXTENDED_FIELDS,
+      CASE_EXTENDED_FIELDS_LABELS
     );
 
     describe('getCaseIdsByAlertId', () => {
@@ -3545,6 +3547,63 @@ describe('CasesService', () => {
           unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0][0].attributes;
 
         expect((persistedAttributes as CaseAttributes).incremental_id).toBeUndefined();
+      });
+    });
+
+    describe('getCaseIdsByAttachmentSearch', () => {
+      const namespaces = ['default'];
+      const search = 'awesome case';
+
+      const mockEmptySearchResponse = () => {
+        // The SO mock doesn't include `search` by default, so wire it up here.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (unsecuredSavedObjectsClient as any).search = jest
+          .fn()
+          .mockResolvedValue({ hits: { hits: [] } });
+      };
+
+      it('uses match_phrase for cases-comments.comment so multi-word searches require an exact phrase', async () => {
+        mockEmptySearchResponse();
+
+        await service.getCaseIdsByAttachmentSearch(namespaces, search, ['cases-comments.comment']);
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const searchCall = (unsecuredSavedObjectsClient as any).search.mock.calls[0][0];
+        expect(searchCall.query.bool.should).toEqual([
+          { match_phrase: { 'cases-comments.comment': search } },
+        ]);
+      });
+
+      it('uses match (not match_phrase) for keyword identifier fields like alertId and eventId', async () => {
+        mockEmptySearchResponse();
+
+        await service.getCaseIdsByAttachmentSearch(namespaces, search, [
+          'cases-comments.alertId',
+          'cases-comments.eventId',
+        ]);
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const searchCall = (unsecuredSavedObjectsClient as any).search.mock.calls[0][0];
+        expect(searchCall.query.bool.should).toEqual([
+          { match: { 'cases-comments.alertId': search } },
+          { match: { 'cases-comments.eventId': search } },
+        ]);
+      });
+
+      it('mixes match_phrase for comment and match for keyword fields when both are searched', async () => {
+        mockEmptySearchResponse();
+
+        await service.getCaseIdsByAttachmentSearch(namespaces, search, [
+          'cases-comments.alertId',
+          'cases-comments.comment',
+        ]);
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const searchCall = (unsecuredSavedObjectsClient as any).search.mock.calls[0][0];
+        expect(searchCall.query.bool.should).toEqual([
+          { match: { 'cases-comments.alertId': search } },
+          { match_phrase: { 'cases-comments.comment': search } },
+        ]);
       });
     });
   });

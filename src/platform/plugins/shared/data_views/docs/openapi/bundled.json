@@ -97,6 +97,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/400_response"
+                },
+                "examples": {
+                  "getAllDataViewsBadRequest": {
+                    "$ref": "#/components/examples/error_400_response"
+                  }
                 }
               }
             }
@@ -149,6 +154,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/data_view_response_object"
+                },
+                "examples": {
+                  "createDataViewResponse": {
+                    "$ref": "#/components/examples/create_data_view_response"
+                  }
                 }
               }
             }
@@ -159,6 +169,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/400_response"
+                },
+                "examples": {
+                  "createDataViewBadRequest": {
+                    "$ref": "#/components/examples/error_400_response"
+                  }
                 }
               }
             }
@@ -211,6 +226,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/404_response"
+                },
+                "examples": {
+                  "getDataViewNotFound": {
+                    "$ref": "#/components/examples/error_404_response"
+                  }
                 }
               }
             }
@@ -252,6 +272,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/404_response"
+                },
+                "examples": {
+                  "deleteDataViewNotFound": {
+                    "$ref": "#/components/examples/error_404_response"
+                  }
                 }
               }
             }
@@ -305,6 +330,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/data_view_response_object"
+                },
+                "examples": {
+                  "updateDataViewResponse": {
+                    "$ref": "#/components/examples/get_data_view_response"
+                  }
                 }
               }
             }
@@ -315,6 +345,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/400_response"
+                },
+                "examples": {
+                  "updateDataViewBadRequest": {
+                    "$ref": "#/components/examples/error_400_response"
+                  }
                 }
               }
             }
@@ -384,6 +419,11 @@
                       "type": "boolean"
                     }
                   }
+                },
+                "examples": {
+                  "updateFieldsMetadataResponse": {
+                    "$ref": "#/components/examples/update_field_metadata_response"
+                  }
                 }
               }
             }
@@ -394,6 +434,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/400_response"
+                },
+                "examples": {
+                  "updateFieldsMetadataBadRequest": {
+                    "$ref": "#/components/examples/error_400_response"
+                  }
                 }
               }
             }
@@ -463,6 +508,11 @@
               "application/json": {
                 "schema": {
                   "type": "object"
+                },
+                "examples": {
+                  "createRuntimeFieldResponse": {
+                    "$ref": "#/components/examples/create_runtime_field_response"
+                  }
                 }
               }
             }
@@ -547,6 +597,11 @@
                       }
                     }
                   }
+                },
+                "examples": {
+                  "createUpdateRuntimeFieldResponse": {
+                    "$ref": "#/components/examples/create_runtime_field_response"
+                  }
                 }
               }
             }
@@ -557,6 +612,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/400_response"
+                },
+                "examples": {
+                  "createUpdateRuntimeFieldBadRequest": {
+                    "$ref": "#/components/examples/error_400_response"
+                  }
                 }
               }
             }
@@ -623,6 +683,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/404_response"
+                },
+                "examples": {
+                  "getRuntimeFieldNotFound": {
+                    "$ref": "#/components/examples/error_404_response"
+                  }
                 }
               }
             }
@@ -664,6 +729,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/404_response"
+                },
+                "examples": {
+                  "deleteRuntimeFieldNotFound": {
+                    "$ref": "#/components/examples/error_404_response"
+                  }
                 }
               }
             }
@@ -729,6 +799,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/400_response"
+                },
+                "examples": {
+                  "updateRuntimeFieldBadRequest": {
+                    "$ref": "#/components/examples/error_400_response"
+                  }
                 }
               }
             }
@@ -781,6 +856,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/400_response"
+                },
+                "examples": {
+                  "getDefaultDataViewBadRequest": {
+                    "$ref": "#/components/examples/error_400_response"
+                  }
                 }
               }
             }
@@ -851,6 +931,11 @@
                       "type": "boolean"
                     }
                   }
+                },
+                "examples": {
+                  "setDefaultDataViewResponse": {
+                    "$ref": "#/components/examples/set_default_data_view_response"
+                  }
                 }
               }
             }
@@ -861,6 +946,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/400_response"
+                },
+                "examples": {
+                  "setDefaultDataViewBadRequest": {
+                    "$ref": "#/components/examples/error_400_response"
+                  }
                 }
               }
             }
@@ -942,6 +1032,11 @@
                       }
                     }
                   }
+                },
+                "examples": {
+                  "swapDataViewResponse": {
+                    "$ref": "#/components/examples/swap_data_view_response"
+                  }
                 }
               }
             }
@@ -1012,6 +1107,11 @@
                       }
                     }
                   }
+                },
+                "examples": {
+                  "previewSwapDataViewResponse": {
+                    "$ref": "#/components/examples/preview_swap_data_view_response"
+                  }
                 }
               }
             }
@@ -1055,6 +1155,15 @@
           ]
         }
       },
+      "error_400_response": {
+        "summary": "A bad request response.",
+        "description": "The request was rejected because the payload or query parameters are missing required fields or contain invalid values.",
+        "value": {
+          "statusCode": 400,
+          "error": "Bad Request",
+          "message": "[request body.data_view.title]: expected value of type [string] but got [undefined]"
+        }
+      },
       "create_data_view_request": {
         "summary": "Create a data view with runtime fields.",
         "description": "Create a data view for logstash indices that includes a runtime field which extracts the shape name from a source field.",
@@ -1070,6 +1179,58 @@
                 }
               }
             }
+          }
+        }
+      },
+      "create_data_view_response": {
+        "summary": "The create data view API returns a JSON object that contains details about the new data view.",
+        "description": "The response includes the full data view specification, including auto-generated fields such as the unique identifier and version.",
+        "value": {
+          "data_view": {
+            "id": "b561acfb-0181-455e-84a3-ce8980b2272f",
+            "version": "WzQ5LDJd",
+            "title": "logstash-*",
+            "sourceFilters": [],
+            "fields": {
+              "runtime_shape_name": {
+                "count": 0,
+                "name": "runtime_shape_name",
+                "type": "string",
+                "esTypes": [
+                  "keyword"
+                ],
+                "scripted": false,
+                "searchable": true,
+                "aggregatable": true,
+                "readFromDocValues": false,
+                "format": {
+                  "id": "string"
+                },
+                "shortDotsEnable": false,
+                "runtimeField": {
+                  "type": "keyword",
+                  "script": {
+                    "source": "emit(doc['shape_name'].value)"
+                  }
+                }
+              }
+            },
+            "typeMeta": {},
+            "fieldFormats": {},
+            "runtimeFieldMap": {
+              "runtime_shape_name": {
+                "type": "keyword",
+                "script": {
+                  "source": "emit(doc['shape_name'].value)"
+                }
+              }
+            },
+            "fieldAttrs": {},
+            "allowNoIndex": false,
+            "name": "My Logstash data view",
+            "namespaces": [
+              "default"
+            ]
           }
         }
       },
@@ -2231,6 +2392,15 @@
           }
         }
       },
+      "error_404_response": {
+        "summary": "A not found response.",
+        "description": "The requested data view or runtime field was not found in the current Kibana space.",
+        "value": {
+          "statusCode": 404,
+          "error": "Not Found",
+          "message": "Saved object [index-pattern/caaad6d0-920c-11ed-b36a-874bd1548a00] not found"
+        }
+      },
       "update_data_view_request": {
         "summary": "Update some properties for a data view.",
         "description": "Update the title, time field, and other properties of an existing data view.",
@@ -2260,6 +2430,13 @@
           }
         }
       },
+      "update_field_metadata_response": {
+        "summary": "Field metadata was updated successfully.",
+        "description": "The acknowledged flag confirms that the field metadata changes were applied to the data view.",
+        "value": {
+          "acknowledged": true
+        }
+      },
       "create_runtime_field_request": {
         "summary": "Create a runtime field.",
         "description": "Create a long-type runtime field that emits a value derived from the foo source field.",
@@ -2271,6 +2448,18 @@
               "source": "emit(doc[\"foo\"].value)"
             }
           }
+        }
+      },
+      "create_runtime_field_response": {
+        "summary": "The API returns created runtime field object array and updated data view object.",
+        "description": "The response includes the newly created runtime field as an array and the full updated data view object.",
+        "value": {
+          "data_view": {
+            "...": null
+          },
+          "fields": [
+            "..."
+          ]
         }
       },
       "get_runtime_field_response": {
@@ -2918,6 +3107,13 @@
           "force": true
         }
       },
+      "set_default_data_view_response": {
+        "summary": "The default data view was set successfully.",
+        "description": "The acknowledged flag confirms that the default data view for the current Kibana space was updated.",
+        "value": {
+          "acknowledged": true
+        }
+      },
       "swap_data_view_request": {
         "summary": "Swap references from data view ID \"abcd-efg\" to \"xyz-123\" and remove the data view that is no longer referenced.",
         "description": "Swap all saved object references from one data view to another and delete the source data view afterward.",
@@ -2927,12 +3123,44 @@
           "delete": true
         }
       },
+      "swap_data_view_response": {
+        "summary": "The swap references API returns a list of the affected saved objects.",
+        "description": "The list of saved objects whose references were updated, along with the delete status of the source.",
+        "value": {
+          "result": [
+            {
+              "id": "123",
+              "type": "visualization"
+            }
+          ],
+          "deleteStatus": {
+            "remainingRefs": 0,
+            "deletePerformed": true
+          }
+        }
+      },
       "preview_swap_data_view_request": {
         "summary": "Preview swapping references from data view ID \"abcd-efg\" to \"xyz-123\".",
         "description": "Preview the saved objects that would be affected by swapping references from one data view to another.",
         "value": {
           "fromId": "abcd-efg",
           "toId": "xyz-123"
+        }
+      },
+      "preview_swap_data_view_response": {
+        "summary": "A preview of saved objects that would be affected by a data view swap.",
+        "description": "The result array lists every saved object that references the source data view. No saved objects are modified by the preview endpoint.",
+        "value": {
+          "result": [
+            {
+              "id": "8963ca30-bca7-11e8-aa00-0123456789ab",
+              "type": "visualization"
+            },
+            {
+              "id": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b",
+              "type": "dashboard"
+            }
+          ]
         }
       }
     },

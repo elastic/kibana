@@ -18,6 +18,7 @@ import {
   NODE_BORDER_WIDTH_SELECTED,
 } from '../../../../common/service_map/constants';
 import { NodeLabel } from './node_label';
+import { HighlightWrapper } from './highlight_wrapper';
 
 interface DiamondNodeProps {
   id: string;
@@ -127,7 +128,8 @@ export const DiamondNode = memo(
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 ${euiTheme.size.xxs} ${euiTheme.size.xxs} ${euiTheme.colors.lightShade};
+      box-shadow: 0 ${euiTheme.size.xxs} ${euiTheme.size.xxs}
+        ${euiTheme.colors.backgroundBaseSubdued};
       box-sizing: border-box;
       cursor: pointer;
       pointer-events: all;
@@ -160,39 +162,41 @@ export const DiamondNode = memo(
     `;
 
     return (
-      <EuiFlexGroup
-        direction="column"
-        alignItems="center"
-        gutterSize="s"
-        responsive={false}
-        data-test-subj={`serviceMapNode-${testSubjPrefix}-${id}`}
-      >
-        <EuiFlexItem grow={false} css={containerStyles}>
-          <Handle type="target" position={targetPosition ?? Position.Left} css={handleStyles} />
-          {badge}
-          <div
-            data-test-subj="serviceMapNodeDiamondHit"
-            css={diamondStyles}
-            role="button"
-            tabIndex={0}
-            aria-label={ariaLabel}
-            aria-pressed={selected}
-          >
-            <div css={iconContainerStyles}>
-              {iconUrl && (
-                <img
-                  src={iconUrl}
-                  alt={spanType || spanSubtype || iconAltFallback}
-                  css={iconStyles}
-                  aria-hidden="true"
-                />
-              )}
+      <HighlightWrapper nodeId={id}>
+        <EuiFlexGroup
+          direction="column"
+          alignItems="center"
+          gutterSize="s"
+          responsive={false}
+          data-test-subj={`serviceMapNode-${testSubjPrefix}-${id}`}
+        >
+          <EuiFlexItem grow={false} css={containerStyles}>
+            <Handle type="target" position={targetPosition ?? Position.Left} css={handleStyles} />
+            {badge}
+            <div
+              data-test-subj="serviceMapNodeDiamondHit"
+              css={diamondStyles}
+              role="button"
+              tabIndex={0}
+              aria-label={ariaLabel}
+              aria-pressed={selected}
+            >
+              <div css={iconContainerStyles}>
+                {iconUrl && (
+                  <img
+                    src={iconUrl}
+                    alt={spanType || spanSubtype || iconAltFallback}
+                    css={iconStyles}
+                    aria-hidden="true"
+                  />
+                )}
+              </div>
             </div>
-          </div>
-          <Handle type="source" position={sourcePosition ?? Position.Right} css={handleStyles} />
-        </EuiFlexItem>
-        <NodeLabel label={label} selected={selected} />
-      </EuiFlexGroup>
+            <Handle type="source" position={sourcePosition ?? Position.Right} css={handleStyles} />
+          </EuiFlexItem>
+          <NodeLabel label={label} selected={selected} />
+        </EuiFlexGroup>
+      </HighlightWrapper>
     );
   }
 );

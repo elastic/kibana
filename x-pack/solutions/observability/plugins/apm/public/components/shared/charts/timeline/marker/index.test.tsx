@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { Marker } from '.';
-import type { AgentMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
-import type { ErrorMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
 import { renderWithTheme } from '../../../../../utils/test_helpers';
+import type { ErrorMark } from './error_marker';
+import type { AgentMark } from './agent_marker';
 
 jest.mock('../../../../../hooks/use_apm_params', () => ({
   useAnyOfApmParams: jest.fn(() => ({

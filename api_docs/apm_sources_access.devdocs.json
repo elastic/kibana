@@ -109,6 +109,7 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "HttpStart",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -126,6 +127,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -150,6 +152,7 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SourcesApiOptions",
             "trackAdoption": false,
             "isRequired": false
           }

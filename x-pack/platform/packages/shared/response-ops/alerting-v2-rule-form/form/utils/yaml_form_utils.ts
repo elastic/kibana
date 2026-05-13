@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { dump, load } from 'js-yaml';
 import { validateEsqlQuery } from '@kbn/alerting-v2-schemas';
-import type { FormValues, StateTransition } from '../types';
+import type { FormValues, RecoveryPolicy, StateTransition } from '../types';
 import {
   deriveAlertDelayModeFromStateTransition,
   deriveRecoveryDelayModeFromStateTransition,
@@ -38,31 +38,86 @@ const parseArtifacts = (artifacts: unknown): FormValues['artifacts'] => {
   return parsedArtifacts.length ? parsedArtifacts : undefined;
 };
 
+interface YamlStateTransition {
+  pending_count?: number;
+  pending_timeframe?: string;
+  recovering_count?: number;
+  recovering_timeframe?: string;
+}
+
+interface YamlRecoveryPolicy {
+  type: string;
+  query?: { base: string };
+}
+
+interface YamlRuleObject {
+  kind: string;
+  metadata: { name: string; description?: string; owner?: string; tags?: string[] };
+  time_field: string;
+  schedule: { every: string; lookback: string };
+  evaluation: { query: { base: string } };
+  grouping?: { fields: string[] };
+  state_transition?: YamlStateTransition;
+  recovery_policy?: YamlRecoveryPolicy;
+  artifacts?: Array<{ id: string; type: string; value: string }>;
+}
+
+const serializeStateTransition = (st?: StateTransition): YamlStateTransition | undefined => {
+  if (!st) return undefined;
+  const out: YamlStateTransition = {};
+  if (st.pendingCount != null) out.pending_count = st.pendingCount;
+  if (st.pendingTimeframe != null) out.pending_timeframe = st.pendingTimeframe;
+  if (st.recoveringCount != null) out.recovering_count = st.recoveringCount;
+  if (st.recoveringTimeframe != null) out.recovering_timeframe = st.recoveringTimeframe;
+  return Object.keys(out).length ? out : undefined;
+};
+
+const serializeRecoveryPolicy = (rp?: RecoveryPolicy): YamlRecoveryPolicy | undefined => {
+  if (!rp) return undefined;
+  const out: YamlRecoveryPolicy = { type: rp.type };
+  if (rp.type === 'query' && rp.query?.base) {
+    out.query = { base: rp.query.base };
+  }
+  return out;
+};
+
 /**
- * Convert FormValues to YAML-compatible object (snake_case keys for API compatibility)
+ * Convert FormValues to YAML-compatible object (snake_case keys for API compatibility).
+ *
+ * Note: `metadata.enabled` is intentionally NOT serialized. The API's `metadataSchema`
+ * is strict and only accepts { name, description?, owner?, tags? }; `enabled` lives at
+ * the top level of the update/response schemas, never under metadata, and is not part
+ * of the create payload at all. The form keeps its own `metadata.enabled` for the
+ * Enabled toggle UI; that's stripped by the request mappers before the API call.
  */
-export const formValuesToYamlObject = (values: FormValues): Record<string, unknown> => ({
-  kind: values.kind,
-  metadata: {
-    name: values.metadata.name,
-    enabled: values.metadata.enabled,
-    ...(values.metadata.description && { description: values.metadata.description }),
-    ...(values.metadata.owner && { owner: values.metadata.owner }),
-    ...(values.metadata.tags?.length && { tags: values.metadata.tags }),
-  },
-  time_field: values.timeField,
-  schedule: {
-    every: values.schedule.every,
-    lookback: values.schedule.lookback,
-  },
-  evaluation: {
-    query: {
-      base: values.evaluation.query.base,
+export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
+  const st = serializeStateTransition(values.stateTransition);
+  const rp = serializeRecoveryPolicy(values.recoveryPolicy);
+
+  return {
+    kind: values.kind,
+    metadata: {
+      name: values.metadata.name,
+      ...(values.metadata.description && { description: values.metadata.description }),
+      ...(values.metadata.owner && { owner: values.metadata.owner }),
+      ...(values.metadata.tags?.length && { tags: values.metadata.tags }),
     },
-  },
-  ...(values.grouping?.fields?.length && { grouping: { fields: values.grouping.fields } }),
-  ...(values.artifacts?.length && { artifacts: values.artifacts }),
-});
+    time_field: values.timeField,
+    schedule: {
+      every: values.schedule.every,
+      lookback: values.schedule.lookback,
+    },
+    evaluation: {
+      query: {
+        base: values.evaluation.query.base,
+      },
+    },
+    ...(values.grouping?.fields?.length && { grouping: { fields: values.grouping.fields } }),
+    ...(st && { state_transition: st }),
+    ...(rp && { recovery_policy: rp }),
+    ...(values.artifacts?.length && { artifacts: values.artifacts }),
+  };
+};
 
 /**
  * Parse and validate YAML string to FormValues
@@ -115,6 +170,28 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
           typeof stateTransitionObj.recovering_timeframe === 'string'
             ? stateTransitionObj.recovering_timeframe
             : null,
+      }
+    : undefined;
+
+  const recoveryPolicyObj = obj.recovery_policy as Record<string, unknown> | undefined;
+  const recoveryPolicy: RecoveryPolicy | undefined = recoveryPolicyObj
+    ? {
+        type:
+          recoveryPolicyObj.type === 'query' || recoveryPolicyObj.type === 'no_breach'
+            ? recoveryPolicyObj.type
+            : 'no_breach',
+        ...(recoveryPolicyObj.type === 'query' &&
+        recoveryPolicyObj.query &&
+        typeof recoveryPolicyObj.query === 'object'
+          ? {
+              query: {
+                base:
+                  typeof (recoveryPolicyObj.query as Record<string, unknown>).base === 'string'
+                    ? ((recoveryPolicyObj.query as Record<string, unknown>).base as string)
+                    : undefined,
+              },
+            }
+          : {}),
       }
     : undefined;
 
@@ -183,6 +260,7 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
         ? { fields: grouping.fields as string[] }
         : undefined,
       artifacts,
+      recoveryPolicy: recoveryPolicy ?? { type: 'no_breach' },
       stateTransition,
       stateTransitionAlertDelayMode: deriveAlertDelayModeFromStateTransition(stateTransition),
       stateTransitionRecoveryDelayMode: deriveRecoveryDelayModeFromStateTransition(stateTransition),

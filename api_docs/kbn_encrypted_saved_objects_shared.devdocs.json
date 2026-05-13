@@ -102,6 +102,7 @@
                 "lineNumber": 22,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsBaseOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -148,6 +149,7 @@
                 "lineNumber": 46,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsCreatePointInTimeFinderOptions",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -168,6 +170,7 @@
                 "lineNumber": 47,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsCreatePointInTimeFinderDependencies",
                 "trackAdoption": false,
                 "isRequired": false
               }
