@@ -149,9 +149,7 @@ describe('useServiceMap()', () => {
     it('passes the raw response through to transform when off (default)', () => {
       // Regression guard for standalone callers — the existing cross-env trace
       // topology must keep working unless the caller opts in.
-      renderHook(() =>
-        useServiceMap({ ...defaultParams, environment: 'opbeans' })
-      );
+      renderHook(() => useServiceMap({ ...defaultParams, environment: 'opbeans' }));
       expect(mockedTransformToReactFlow).toHaveBeenCalledWith(apiResponse);
     });
 

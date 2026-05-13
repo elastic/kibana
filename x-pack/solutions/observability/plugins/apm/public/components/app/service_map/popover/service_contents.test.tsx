@@ -25,18 +25,16 @@ jest.mock('../../../../hooks/use_apm_params', () => ({
 // component built (path + query). Name MUST stay `mock*` because `jest.mock`
 // factories run before module-level code; only `mock`-prefixed identifiers are
 // allowed to be referenced from them.
-const mockApmRouterLink = jest.fn(
-  (path: string, opts?: { query?: Record<string, unknown> }) => {
-    const params = new URLSearchParams();
-    Object.entries(opts?.query ?? {}).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        params.set(key, String(value));
-      }
-    });
-    const qs = params.toString();
-    return `/app/apm${path}${qs ? `?${qs}` : ''}`;
-  }
-);
+const mockApmRouterLink = jest.fn((path: string, opts?: { query?: Record<string, unknown> }) => {
+  const params = new URLSearchParams();
+  Object.entries(opts?.query ?? {}).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      params.set(key, String(value));
+    }
+  });
+  const qs = params.toString();
+  return `/app/apm${path}${qs ? `?${qs}` : ''}`;
+});
 
 jest.mock('../../../../hooks/use_apm_router', () => ({
   useApmRouter: () => ({
