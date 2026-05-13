@@ -225,8 +225,7 @@ Expected one of:
     case 'expectedAggregationArgument':
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.expectedAggregationArgument', {
-          defaultMessage:
-            'Argument "{paramName}" of {parentName} must be an aggregation function.',
+          defaultMessage: 'Argument "{paramName}" of {parentName} must be an aggregation function.',
           values: {
             parentName: out.parentName.toUpperCase(),
             paramName: out.paramName,
