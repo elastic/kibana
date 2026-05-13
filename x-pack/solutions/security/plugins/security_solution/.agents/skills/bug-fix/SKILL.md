@@ -1,10 +1,8 @@
 ---
 name: bug-fix
 description: >
-  Step 2 of 2 for fixing a Kibana Security Solution bug. Implements a TDD fix for a
-  reproduced bug and opens a draft PR. Trigger after /bug-reproduce has confirmed
-  reproduction and the user has reviewed the report. Requires analysis.json and
-  reproduction-report.md to exist at the Kibana repo root.
+  Use after /bug-reproduce has confirmed reproduction and the user has reviewed the
+  report. Requires analysis.json and reproduction-report.md at the Kibana repo root.
 ---
 
 # Bug Fix
@@ -86,10 +84,10 @@ If you are about to create or edit a test file and cannot point to an explicit a
 message in the conversation, stop. Revert any edits made since presenting the plan and
 re-present it. No exceptions for bugs that seem obvious.
 
-For Scout tests, read before writing:
-1. `.agents/skills/scout-create-scaffold/SKILL.md`
-2. `.agents/skills/scout-best-practices-reviewer/SKILL.md`
-3. `x-pack/solutions/security/plugins/security_solution/.agents/skills/scout-best-practices-reviewer/SKILL.md`
+For Scout tests, use these skills before writing (REQUIRED):
+1. scout-create-scaffold
+2. scout-best-practices-reviewer
+3. Also read `x-pack/solutions/security/plugins/security_solution/.agents/skills/scout-best-practices-reviewer/SKILL.md` — Security Solution-specific Scout practices
 
 Run the test and expect it to fail:
 ```bash
@@ -150,7 +148,7 @@ Stop there. Re-read the user's next message — if they didn't explicitly say ye
 If confirmed:
 ```bash
 git checkout -b fix/<issue-number>
-git add -A
+git add -- <files listed in the Fix Plan>
 git commit -m "Fix #<number> — <short description>"
 git push -u origin HEAD
 gh pr create --draft --title "Fix #<number> — <short description>" --body "<Bug Fix Summary>"

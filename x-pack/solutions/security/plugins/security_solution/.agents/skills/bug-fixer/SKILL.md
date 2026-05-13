@@ -1,10 +1,9 @@
 ---
 name: bug-fixer
 description: >
-  Guide for the two-step Security Solution bug-fixing workflow. Trigger whenever the
-  user mentions a bug number or asks to fix, reproduce, investigate, or debug anything
-  in Kibana Security Solution — even just "look into #NNN", "something's broken with X",
-  or "can you fix this". Don't wait for magic words — any GitHub issue number in a
+  Use when the user mentions a bug number or asks to fix, reproduce, investigate, or
+  debug anything in Kibana Security Solution — even just "look into #NNN",
+  "something's broken with X", or "can you fix this". Any GitHub issue number in a
   Security Solution context triggers this skill.
   Stateful (ECH) only — decline serverless bugs before starting.
 ---

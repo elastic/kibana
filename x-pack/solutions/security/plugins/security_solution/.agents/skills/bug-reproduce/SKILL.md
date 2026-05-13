@@ -1,11 +1,8 @@
 ---
 name: bug-reproduce
 description: >
-  Step 1 of 2 for fixing a Kibana Security Solution bug. Investigates the ticket,
-  starts the environment, and reproduces the bug through the browser. Trigger when
-  the user mentions a bug number or asks to reproduce, investigate, or debug anything
-  in Security Solution. After this skill completes, run /bug-fix for Step 2.
-  Stateful (ECH) only — decline serverless bugs.
+  Use when the user mentions a bug number or asks to reproduce, investigate, or debug
+  anything in Kibana Security Solution. Stateful (ECH) only — decline serverless bugs.
 ---
 
 # Bug Reproduce
