@@ -9,8 +9,6 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { type Observable, of } from 'rxjs';
-import { map } from 'rxjs';
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
@@ -36,23 +34,15 @@ export class NotificationCenterExamplePlugin implements Plugin<void, void, Setup
       // Notification state lives on core.notifications.events, not in a sidebar store.
       restoreOnReload: false,
       loadComponent: async () => {
-        const [coreStart, startDeps] = await core.getStartServices();
+        const [coreStart, { spaces }] = await core.getStartServices();
         const { NotificationCenterApp } = await import('./notification_center_app');
         const events = coreStart.notifications.events;
-        const activeSpaceId$: Observable<string> | undefined = startDeps.spaces
-          ? startDeps.spaces.getActiveSpace$().pipe(map((s) => s.id))
-          : undefined;
-        const spacesEnabled = Boolean(startDeps.spaces);
 
         // Wrap the sidebar app's render so the hooks have a provider in scope.
         return function NotificationCenterAppWithProvider(props: SidebarComponentProps) {
           return (
-            <NotificationEventsProvider value={events}>
-              <NotificationCenterApp
-                {...props}
-                activeSpaceId$={activeSpaceId$ ?? of<string | undefined>(undefined)}
-                spacesEnabled={spacesEnabled}
-              />
+            <NotificationEventsProvider events={events} spaces={spaces}>
+              <NotificationCenterApp {...props} />
             </NotificationEventsProvider>
           );
         };
@@ -63,7 +53,7 @@ export class NotificationCenterExamplePlugin implements Plugin<void, void, Setup
       id: 'notificationCenterExample',
       title: 'Notification Center Example',
       async mount({ element }: AppMountParameters) {
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, { spaces }] = await core.getStartServices();
         const events = coreStart.notifications.events;
 
         // Idempotent: registering existing typeIds is a no-op in EventsService.
@@ -73,7 +63,7 @@ export class NotificationCenterExamplePlugin implements Plugin<void, void, Setup
 
         ReactDOM.render(
           coreStart.rendering.addContext(
-            <NotificationEventsProvider value={events}>
+            <NotificationEventsProvider events={events} spaces={spaces}>
               <App />
             </NotificationEventsProvider>
           ),
@@ -95,7 +85,7 @@ export class NotificationCenterExamplePlugin implements Plugin<void, void, Setup
     core.chrome.navControls.registerRight({
       order: 1000,
       content: (
-        <NotificationEventsProvider value={core.notifications.events}>
+        <NotificationEventsProvider events={core.notifications.events}>
           <HeaderNotificationButton />
         </NotificationEventsProvider>
       ),
