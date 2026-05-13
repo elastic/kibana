@@ -34,6 +34,7 @@ kibana_vars=(
     csp.frame_src
     csp.img_src
     csp.object_src
+    csp.form_action
     csp.frame_ancestors
     csp.report_uri
     csp.report_to
