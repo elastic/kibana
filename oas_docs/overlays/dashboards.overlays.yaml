@@ -405,7 +405,7 @@ actions:
                   },
                   "type": "markdown",
                   "config": {
-                    "content": "## Web logs overview
+                    "content": "## Web logs overview\n\n&nbsp;\n\nCreated with the [Dashboards API](https://www.elastic.co/docs/api/doc/kibana) using the Kibana sample web logs dataset (`kibana_sample_data_logs`). Contains:\n- This markdown panel\n- 2 metrics, showing request count and average response size\n- A line chart based on an ES|QL query\n\n&nbsp;\n\n&nbsp;\n\n[Learn more about dashboards](https://www.elastic.co/docs/explore-analyze/dashboards)"
                   }
                 },
                 {
@@ -510,7 +510,7 @@ actions:
                   },
                   "type": "markdown",
                   "config": {
-                    "content": "## Web logs overview
+                    "content": "## Web logs overview\n\n&nbsp;\n\nCreated with the [Dashboards API](https://www.elastic.co/docs/api/doc/kibana) using the Kibana sample web logs dataset (`kibana_sample_data_logs`). Contains:\n- This markdown panel\n- 2 metrics, showing request count and average response size\n- A line chart based on an ES|QL query\n\n&nbsp;\n\n&nbsp;\n\n[Learn more about dashboards](https://www.elastic.co/docs/explore-analyze/dashboards)"
                   }
                 },
                 {
@@ -1201,7 +1201,7 @@ actions:
                             w: 24
                             h: 15
                           config:
-                            content: "## Web logs overview
+                            content: "## Web logs overview\n\n&nbsp;\n\nCreated with the [Dashboards API](https://www.elastic.co/docs/api/doc/kibana) using the Kibana sample web logs dataset (`kibana_sample_data_logs`). Contains:\n- This markdown panel\n- 2 metrics, showing request count and average response size\n- A line chart based on an ES|QL query\n\n&nbsp;\n\n&nbsp;\n\n[Learn more about dashboards](https://www.elastic.co/docs/explore-analyze/dashboards)"
                           id: a1b2c3d4-0001-4000-8000-000000000001
                           type: markdown
                         - grid:
@@ -1620,7 +1620,7 @@ actions:
                   h: 15
                 type: markdown
                 config:
-                  content: "## Web logs overview
+                  content: "## Web logs overview\n\n&nbsp;\n\nCreated with the [Dashboards API](https://www.elastic.co/docs/api/doc/kibana) using the Kibana sample web logs dataset (`kibana_sample_data_logs`). Contains:\n- This markdown panel\n- 2 metrics, showing request count and average response size\n- A line chart based on an ES|QL query\n\n&nbsp;\n\n&nbsp;\n\n[Learn more about dashboards](https://www.elastic.co/docs/explore-analyze/dashboards)"
               - grid:
                   x: 24
                   y: 0
