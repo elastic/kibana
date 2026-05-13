@@ -284,6 +284,10 @@ export default function (program) {
       .option(
         '--no-uiam',
         'Prevents configuring Kibana with Universal Identity and Access Management (UIAM) support when running in serverless project mode.'
+      )
+      .option(
+        '--mem-profile',
+        'Adds memory profiling. Writes server process memory samples to kibana-memory-profile-<timestamp>.csv in cwd. Same as KBN_MEM_PROFILE=1.'
       );
   }
 
@@ -330,6 +334,13 @@ export default function (program) {
       serverless: isServerlessMode,
       uiam: isServerlessSamlSupported && opts.uiam !== false,
     };
+
+    // Memory profiling.
+    // Create a CSV file with memory profile that can be used for charting memory usage over time.
+    // Also adds additional output to the console including GC
+    if (opts.memProfile) {
+      process.env.KBN_MEM_PROFILE = '1';
+    }
 
     // In development mode, the main process uses the @kbn/dev-cli-mode
     // bootstrap script instead of core's. The DevCliMode instance
