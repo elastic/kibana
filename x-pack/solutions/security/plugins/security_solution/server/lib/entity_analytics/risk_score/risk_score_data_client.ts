@@ -94,12 +94,16 @@ export class RiskScoreDataClient {
    * Daily average normalized risk scores per entity (oldest → newest calendar buckets)
    * from the risk score time-series index. Suitable for trend / escalation analysis.
    *
-   * Filters on `risk.id_field === 'entity.id'` so only V2-shaped documents
-   * (written by the entity-store risk-score maintainer) participate. Legacy
-   * documents written by the pre-V2 scoring task have `risk.id_field` set to
+   * The risk-score time-series index nests the identity-side fields under
+   * `<entityType>.risk.*` (e.g. `host.risk.id_field`, `user.risk.id_value`),
+   * so this query parameterises every reference on `entityType`.
+   *
+   * Filters on `<entityType>.risk.id_field === 'entity.id'` so only V2-shaped
+   * documents (written by the entity-store risk-score maintainer) participate.
+   * Legacy documents written by the pre-V2 scoring task have `id_field` set to
    * `host.name` or `user.name`, and are excluded by this filter. That is the
-   * intended behaviour, since their `risk.id_value` carries a raw name rather
-   * than an EUID and would silently distort the trend.
+   * intended behaviour, since their `id_value` carries a raw name rather than
+   * an EUID and would silently distort the trend.
    *
    * The returned map is keyed by EUID (e.g. `"host:InnoDB"`).
    */
@@ -119,6 +123,9 @@ export class RiskScoreDataClient {
     const { esClient, namespace } = this.options;
     const index = getRiskScoreTimeSeriesIndex(namespace);
 
+    const idFieldPath = `${entityType}.risk.id_field`;
+    const idValuePath = `${entityType}.risk.id_value`;
+
     const response = await esClient.search({
       index,
       size: 0,
@@ -127,15 +134,15 @@ export class RiskScoreDataClient {
       query: {
         bool: {
           filter: [
-            { term: { 'risk.id_field': 'entity.id' } },
-            { terms: { 'risk.id_value': [...entityIds] } },
+            { term: { [idFieldPath]: 'entity.id' } },
+            { terms: { [idValuePath]: [...entityIds] } },
             { range: { '@timestamp': range } },
           ],
         },
       },
       aggs: {
         by_entity: {
-          terms: { field: 'risk.id_value', size: entityIds.length },
+          terms: { field: idValuePath, size: entityIds.length },
           aggs: {
             scores_over_time: {
               date_histogram: { field: '@timestamp', calendar_interval: 'day' },

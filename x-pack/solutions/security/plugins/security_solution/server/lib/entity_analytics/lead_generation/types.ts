@@ -36,7 +36,7 @@ export type ObservationSeverity = 'low' | 'medium' | 'high' | 'critical';
 
 /** A single signal produced by an {@link ObservationModule}. */
 export interface Observation {
-  /** Stable entity key: the Entity Store EUID (e.g. `"user:alice"`). See {@link entityToKey}. */
+  /** Stable entity key: the Entity Store EUID (e.g. `"user:alice"`) — i.e. `LeadEntity.id`. */
   readonly entityId: string;
   /** The module that produced this observation */
   readonly moduleId: string;

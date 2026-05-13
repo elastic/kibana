@@ -9,11 +9,10 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { getHistorySnapshotIndexPattern } from '@kbn/entity-store/server';
 import type { LeadEntity, Observation, ObservationModule, ObservationSeverity } from '../types';
 import {
-  PRIVILEGED_USER_WATCHLIST_ID,
-  entityToKey,
   errorMessage,
   makeObservation,
   extractIsPrivileged,
+  matchesPrivilegedWatchlist,
   entityTypeLabel,
 } from './utils';
 import type { EntityType as EntityTypeOpenAPI } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
@@ -54,7 +53,7 @@ export const createTemporalStateModule = ({
     const observations: Observation[] = [];
 
     for (const entity of entities) {
-      if (escalations.has(entityToKey(entity))) {
+      if (escalations.has(entity.id)) {
         observations.push(buildPrivilegeEscalationObservation(entity));
       }
     }
@@ -122,13 +121,8 @@ const fetchPrivilegeEscalations = async (
           const hit = bucket.oldest_snapshot.hits.hits[0];
           if (hit) {
             const entityField = hit._source?.entity as Record<string, unknown> | undefined;
-            const attrs = entityField?.attributes as { watchlists?: string[] } | undefined;
-            const watchlists = Array.isArray(attrs?.watchlists) ? attrs.watchlists : [];
-            const wasPrivileged = watchlists.some(
-              (w) => typeof w === 'string' && w.startsWith(PRIVILEGED_USER_WATCHLIST_ID)
-            );
-
-            if (!wasPrivileged) {
+            const attrs = entityField?.attributes as { watchlists?: unknown } | undefined;
+            if (!matchesPrivilegedWatchlist(attrs?.watchlists)) {
               escalated.add(bucket.key);
             }
           }

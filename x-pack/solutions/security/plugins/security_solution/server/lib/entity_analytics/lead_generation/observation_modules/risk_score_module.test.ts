@@ -222,8 +222,8 @@ describe('RiskScoreModule', () => {
 
     it('emits current-score observations and omits historical escalations when no historical buckets are returned', async () => {
       // Simulates the legacy-writer scenario where every doc was filtered out
-      // by `risk.id_field === "entity.id"`. The module should still produce
-      // its current-score observation and must not throw.
+      // by `<entityType>.risk.id_field === "entity.id"`. The module should still
+      // produce its current-score observation and must not throw.
       const entity = createEntityWithRisk('user', 'alice', 90, 'Critical');
       riskScoreDataClient.getDailyAverageRiskScoreNormSeries.mockResolvedValue(new Map());
 

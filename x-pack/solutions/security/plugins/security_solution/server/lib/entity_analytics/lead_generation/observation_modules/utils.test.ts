@@ -7,9 +7,9 @@
 
 import type { LeadEntity } from '../types';
 import {
-  entityToKey,
   errorMessage,
   extractIsPrivileged,
+  matchesPrivilegedWatchlist,
   PRIVILEGED_USER_WATCHLIST_ID,
 } from './utils';
 
@@ -21,16 +21,23 @@ const buildEntity = (overrides: Partial<LeadEntity> = {}): LeadEntity => ({
   ...overrides,
 });
 
-describe('entityToKey', () => {
-  it('returns the EUID, not the display name', () => {
-    const entity = buildEntity({ id: 'user:alice@hosta', name: 'Alice Adams' });
-    expect(entityToKey(entity)).toBe('user:alice@hosta');
+describe('matchesPrivilegedWatchlist', () => {
+  it('returns true when any entry starts with the privileged-user watchlist prefix', () => {
+    expect(matchesPrivilegedWatchlist([`${PRIVILEGED_USER_WATCHLIST_ID}-default`])).toBe(true);
   });
 
-  it('returns distinct keys for two entities sharing a name with different EUIDs', () => {
-    const a = buildEntity({ id: 'user:alice@hosta', name: 'alice' });
-    const b = buildEntity({ id: 'user:alice@hostb', name: 'alice' });
-    expect(entityToKey(a)).not.toBe(entityToKey(b));
+  it('returns false when no entry matches the prefix', () => {
+    expect(matchesPrivilegedWatchlist(['some-other-watchlist'])).toBe(false);
+  });
+
+  it('returns false when the input is not an array', () => {
+    expect(matchesPrivilegedWatchlist(undefined)).toBe(false);
+    expect(matchesPrivilegedWatchlist('a-string')).toBe(false);
+    expect(matchesPrivilegedWatchlist(null)).toBe(false);
+  });
+
+  it('ignores non-string array entries', () => {
+    expect(matchesPrivilegedWatchlist([42, { foo: 'bar' }])).toBe(false);
   });
 });
 

@@ -7,9 +7,6 @@
 
 import type { LeadEntity, Observation } from '../types';
 
-/** Returns a stable string key for a LeadEntity: its EUID (e.g. `"user:alice"`). */
-export const entityToKey = (entity: LeadEntity): string => entity.id;
-
 /**
  * Creates an Observation, automatically filling entityId and moduleId.
  * Every builder in every module uses this to avoid boilerplate.
@@ -18,7 +15,7 @@ export const makeObservation = (
   entity: LeadEntity,
   moduleId: string,
   fields: Omit<Observation, 'entityId' | 'moduleId'>
-): Observation => ({ entityId: entityToKey(entity), moduleId, ...fields });
+): Observation => ({ entityId: entity.id, moduleId, ...fields });
 
 /** Reads the nested `entity` field common to all Entity Store V2 record types. */
 export const getEntityField = (entity: LeadEntity): Record<string, unknown> | undefined =>
@@ -31,14 +28,23 @@ export const getEntityField = (entity: LeadEntity): Record<string, unknown> | un
  */
 export const PRIVILEGED_USER_WATCHLIST_ID = 'privileged-user-monitoring-watchlist-id';
 
-/** Returns true if the entity is on a privileged-user monitoring watchlist. */
-export const extractIsPrivileged = (entity: LeadEntity): boolean => {
-  const attrs = getEntityField(entity)?.attributes as { watchlists?: string[] } | undefined;
-  const watchlists = attrs?.watchlists;
+/**
+ * Returns true if `watchlists` contains an entry whose prefix matches the
+ * privileged-user watchlist ID. Centralises the rule so that any caller
+ * inspecting a raw `entity.attributes.watchlists` (current or historical
+ * snapshot) gets the same answer.
+ */
+export const matchesPrivilegedWatchlist = (watchlists: unknown): boolean => {
   if (!Array.isArray(watchlists)) return false;
   return watchlists.some(
     (w) => typeof w === 'string' && w.startsWith(PRIVILEGED_USER_WATCHLIST_ID)
   );
+};
+
+/** Returns true if the entity is on a privileged-user monitoring watchlist. */
+export const extractIsPrivileged = (entity: LeadEntity): boolean => {
+  const attrs = getEntityField(entity)?.attributes as { watchlists?: unknown } | undefined;
+  return matchesPrivilegedWatchlist(attrs?.watchlists);
 };
 
 /** Capitalises the entity type for use in human-readable descriptions (e.g. "host" → "Host"). */
