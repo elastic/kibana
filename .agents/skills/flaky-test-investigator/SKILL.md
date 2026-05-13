@@ -1,12 +1,24 @@
 ---
 name: flaky-test-investigator
 description: >-
-  Key pointers to investigate flaky test failures.
+  Investigate Scout, FTR and Jest flaky test failures.
 ---
 
 # Flaky Test Investigator
 
-This Investigate flaky test failures.
+Runs a flaky test investigation for Scout, FTR and Jest flaky test failures. Multiple ways to start the investigation:
+
+- Pass a link to the GitHub `failed-test` GitHub issue.
+- Pass the test file string, branch it failed on (default is `main`)
+- Pass a Buidkite build URL
+
+## Pre-requisites
+
+The more access you have the better:
+
+- GitHub API
+- Buildkite logs access
+- AppEx QA cluster
 
 ## Where did the test fail?
 
@@ -22,14 +34,12 @@ A test run can run on Elastic Cloud ("cloud pipeline") or the machine that invok
 
 ### Local pipelines
 
-- For example: `kibana-on-merge` and `kibana-pull-request`. Generally all non-Cloud pipelines are "local" pipelines.
+- For example: `kibana-on-merge`, `kibana-pull-request` and `kibana-flaky-test-suite-runner`. Generally all non-Cloud pipelines are "local" pipelines.
 - Test servers are started on the agent's local machine. No communication with the outside world, thus a relatively more stable environment.
 
 ### Kibana CI and Elastic Cloud pipelines differences
 
-A test passing on your local machine, in the Kibana CI, or in the flaky test runner does not guarantee it will pass on Cloud. These environments differ in important ways.
-
-Key differences include:
+A test passing on your local machine, in the Kibana CI, or in the flaky test runner does not guarantee it will pass on Cloud. Key environment differences:
 
 - Performance: Cloud has higher latency (especially MKI) and is more susceptible to transient errors, including network errors.
 - Configuration: Cloud projects and deployments are provisioned exactly as a customer would provision them. Server configuration cannot be overridden.
@@ -40,18 +50,48 @@ In all cases, test runs may be stopped unexpectendly because of agent loss.
 
 ### Recognize the pipeline the test failed on
 
-Use either the pipeline name or look at the test's "target": `local-stateful-classic` means the test ran locally (because it starts with `local-*`, on an Elastic Cloud pipeline otherwise as it starts with `cloud-*`).
+Use either the pipeline name or look at the test's "target": `local-stateful-classic` means the test ran locally (because it starts with `local-*`, on an Elastic Cloud pipeline otherwise as it starts with `cloud-*`, e.g., `cloud-serverless-security_complete`).
 
 ### Recognize environment failures
 
-TODO. Details coming soon.
+TODO.
 
-In GitHub `failed-test` issues: either check pipeline name or use the test's **target** (e.g. `local-stateful-classic`, `cloud-serverless-security_complete`) to understand in which environment the test has run (`local-*` or `cloud-*`).
+## How often is the test failing
 
-## How often did it fail?
+Answer these questions:
 
-Look at the ...
+- Is the test failing consistently?
+- Is the test failing on both local and Cloud pipelines?
+- When did the test first fail and when did the test last succeed?
+
+Cloud pipelines don't build from source: they use a Kibana commit that isn't aligned with `main` and could be some hours old. Look for `Build hash: <Kibana commit>` (example: `Build hash: 3927e36048a3a57f0657e06bc224736af8e322f8`):
+
+- Serverless Elastic Cloud projects: under `Project information`. The log group will start with `Create {security|observability|...} project`.
+- Stateful Elastic Cloud deployments: .under `Deployment information` The log group usually starts with `Create deployment`
+
+Ideally, you should query the AppEx QA cluster to understand. The following query will help:
+
+```
+
+```
+
+If access to the cluster isn't available: look at the comments on `failed` to understand which
 
 ## When did it start failing?
 
-Look at the commit.
+Look at the timestamp of the last successful test run and the first.
+
+For Cloud pipelines:
+
+Look at the commit in the BK logs. ...
+
+## Recognize the failure
+
+- Environment issue
+- Polluted test environment
+
+### Polluted test environment
+
+Explain what "lanes" distribution mode is...
+
+Some tests... look at the BK logs...
