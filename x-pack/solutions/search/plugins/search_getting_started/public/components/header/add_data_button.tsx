@@ -91,6 +91,9 @@ export const AddDataButton: React.FC = () => {
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.search.gettingStarted.addDataButton.popover.ariaLabel', {
+        defaultMessage: 'Add data options',
+      })}
       button={button}
       isOpen={isPopoverOpen}
       closePopover={closePopover}

@@ -126,6 +126,10 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
       <RedirectAppLinks coreStart={{ application }}>
         <EuiFlexItem grow={false}>
           <EuiPopover
+            aria-label={i18n.translate(
+              'xpack.enterpriseSearch.analytics.collectionsView.managePopover.ariaLabel',
+              { defaultMessage: 'Manage collection options' }
+            )}
             button={
               <EuiButton iconType="chevronSingleDown" iconSide="right" onClick={togglePopover}>
                 <FormattedMessage

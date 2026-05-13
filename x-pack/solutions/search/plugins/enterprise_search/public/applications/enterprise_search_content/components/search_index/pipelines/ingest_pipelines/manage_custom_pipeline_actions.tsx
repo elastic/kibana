@@ -36,6 +36,10 @@ export const ManageCustomPipelineActions: React.FC<ManageCustomPipelineProps> = 
   };
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.enterpriseSearch.content.indices.pipelines.ingestionPipeline.managePopover.ariaLabel',
+        { defaultMessage: 'Manage pipeline options' }
+      )}
       button={
         <EuiButtonEmpty
           buttonRef={buttonRef}
