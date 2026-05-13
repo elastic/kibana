@@ -13,6 +13,7 @@ import type {
   ResponseActionAgentType,
 } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { useGetEndpointDetails, useWithShowResponder } from '../../../../../management/hooks';
+import type { ResponderActionLogFlyoutProps } from '../../../../../management/hooks/use_with_show_responder';
 import { HostStatus } from '../../../../../../common/endpoint/types';
 import {
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
@@ -24,6 +25,7 @@ import {
 export interface UseWithResponderActionDataFromAlertProps {
   eventData: TimelineEventsDetailsItem[] | null;
   onClick?: () => void;
+  actionLogFlyoutProps?: ResponderActionLogFlyoutProps;
 }
 
 export interface ResponderActionData {
@@ -46,6 +48,7 @@ export interface ResponderActionData {
 export const useWithResponderActionDataFromAlert = ({
   eventData = [],
   onClick,
+  actionLogFlyoutProps,
 }: UseWithResponderActionDataFromAlertProps): ResponderActionData => {
   const {
     isSupported: hostSupportsResponseActions,
@@ -91,6 +94,7 @@ export const useWithResponderActionDataFromAlert = ({
         hostName,
         platform,
         capabilities: isEndpointHost ? endpointHostData.capabilities : [],
+        actionLogFlyoutProps,
       });
 
       if (onClick) {
@@ -106,6 +110,7 @@ export const useWithResponderActionDataFromAlert = ({
     platform,
     isEndpointHost,
     endpointHostData.capabilities,
+    actionLogFlyoutProps,
     onClick,
   ]);
 
@@ -208,6 +213,7 @@ export interface UseResponderActionDataProps {
   agentId: string;
   agentType: ResponseActionAgentType;
   onClick?: () => void;
+  actionLogFlyoutProps?: ResponderActionLogFlyoutProps;
 }
 
 /**
@@ -222,6 +228,7 @@ export const useResponderActionData = ({
   onClick,
   agentId,
   agentType,
+  actionLogFlyoutProps,
 }: UseResponderActionDataProps): ResponderActionData => {
   const isEndpointHost = agentType === 'endpoint';
 
@@ -241,6 +248,7 @@ export const useResponderActionData = ({
         hostName,
         platform,
         capabilities: isEndpointHost ? capabilities : [],
+        actionLogFlyoutProps,
       });
 
       if (onClick) {
@@ -256,6 +264,7 @@ export const useResponderActionData = ({
     platform,
     isEndpointHost,
     capabilities,
+    actionLogFlyoutProps,
     onClick,
   ]);
 

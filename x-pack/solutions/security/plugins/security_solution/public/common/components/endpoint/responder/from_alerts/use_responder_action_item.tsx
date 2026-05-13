@@ -10,17 +10,24 @@ import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUserPrivileges } from '../../../user_privileges';
 import type { AlertTableContextMenuItem } from '../../../../../detections/components/alerts_table/types';
+import type { ResponderActionLogFlyoutProps } from '../../../../../management/hooks/use_with_show_responder';
 import { useWithResponderActionDataFromAlert } from './use_responder_action_data';
+
+export interface UseResponderActionItemOptions {
+  actionLogFlyoutProps?: ResponderActionLogFlyoutProps;
+}
 
 export const useResponderActionItem = (
   eventDetailsData: TimelineEventsDetailsItem[] | null,
-  onClick: () => void
+  onClick: () => void,
+  options: UseResponderActionItemOptions = {}
 ): AlertTableContextMenuItem[] => {
   const { loading: isAuthzLoading, canAccessResponseConsole } =
     useUserPrivileges().endpointPrivileges;
   const { handleResponseActionsClick, isDisabled, tooltip } = useWithResponderActionDataFromAlert({
     onClick,
     eventData: eventDetailsData,
+    actionLogFlyoutProps: options.actionLogFlyoutProps,
   });
 
   return useMemo(() => {
