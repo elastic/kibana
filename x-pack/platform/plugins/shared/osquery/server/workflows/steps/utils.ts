@@ -5,24 +5,49 @@
  * 2.0.
  */
 
-import type { CoreStart, KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
+import { PLUGIN_ID } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { isOsqueryResponseActionAuthorized } from '../../lib/check_response_action_authz';
 import { getUserInfo } from '../../lib/get_user_info';
 
 export const getWorkflowRequest = (context: StepHandlerContext): KibanaRequest =>
   context.contextManager.getFakeRequest();
 
+// Uses API privilege tags (not UI capabilities) so the check works for Task Manager
+// fakeRequests, which don't carry UI-level capability resolution.
 export const requireOsqueryWriteAuthz = async (
-  coreStart: CoreStart,
+  osqueryContext: OsqueryAppContext,
   request: KibanaRequest,
   actionParams: { saved_query_id?: string; pack_id?: string }
 ): Promise<void> => {
-  const authorized = await isOsqueryResponseActionAuthorized(coreStart, request, actionParams);
+  const { authz } = osqueryContext.security;
 
-  if (!authorized) {
+  if (!authz.mode.useRbacForRequest(request)) {
+    return;
+  }
+
+  const checkPrivileges = authz.checkPrivilegesDynamicallyWithRequest(request);
+
+  const hasSavedQueryOrPack = !!(actionParams.saved_query_id || actionParams.pack_id);
+  const { privileges } = await checkPrivileges({
+    kibana: [
+      authz.actions.api.get(`${PLUGIN_ID}-writeLiveQueries`),
+      ...(hasSavedQueryOrPack ? [authz.actions.api.get(`${PLUGIN_ID}-runSavedQueries`)] : []),
+    ],
+  });
+
+  const hasWriteLiveQueries = privileges.kibana.some(
+    (p) => p.privilege === authz.actions.api.get(`${PLUGIN_ID}-writeLiveQueries`) && p.authorized
+  );
+  const hasRunSavedQueries =
+    hasSavedQueryOrPack &&
+    privileges.kibana.some(
+      (p) => p.privilege === authz.actions.api.get(`${PLUGIN_ID}-runSavedQueries`) && p.authorized
+    );
+
+  if (!hasWriteLiveQueries && !hasRunSavedQueries) {
     throw new ExecutionError({
       type: 'PermissionError',
       message: 'User is not authorized to run osquery live queries or saved queries.',
@@ -31,14 +56,21 @@ export const requireOsqueryWriteAuthz = async (
 };
 
 export const requireOsqueryReadAuthz = async (
-  coreStart: CoreStart,
+  osqueryContext: OsqueryAppContext,
   request: KibanaRequest
 ): Promise<void> => {
-  const resolved = await coreStart.capabilities.resolveCapabilities(request, {
-    capabilityPath: 'osquery.*',
+  const { authz } = osqueryContext.security;
+
+  if (!authz.mode.useRbacForRequest(request)) {
+    return;
+  }
+
+  const checkPrivileges = authz.checkPrivilegesDynamicallyWithRequest(request);
+  const { hasAllRequested } = await checkPrivileges({
+    kibana: [authz.actions.api.get(`${PLUGIN_ID}-readLiveQueries`)],
   });
 
-  if (!resolved.osquery?.readLiveQueries) {
+  if (!hasAllRequested) {
     throw new ExecutionError({
       type: 'PermissionError',
       message: 'User is not authorized to read osquery live query results.',

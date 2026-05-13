@@ -13,11 +13,7 @@ import {
 } from '../../../common/workflows/steps/run_pack_step';
 import type { createActionService } from '../../handlers/action/create_action_service';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import {
-  getWorkflowRequest,
-  getWorkflowUserMetadata,
-  requireOsqueryWriteAuthz,
-} from './utils';
+import { getWorkflowRequest, getWorkflowUserMetadata, requireOsqueryWriteAuthz } from './utils';
 
 export const getRunPackStepDefinition = (
   actionService: ReturnType<typeof createActionService>,
@@ -43,9 +39,8 @@ export const getRunPackStepDefinition = (
       }
 
       const fakeRequest = getWorkflowRequest(context);
-      const [coreStart] = await osqueryContext.getStartServices();
 
-      await requireOsqueryWriteAuthz(coreStart, fakeRequest, { pack_id: input.pack_id });
+      await requireOsqueryWriteAuthz(osqueryContext, fakeRequest, { pack_id: input.pack_id });
 
       const userMetadata = await getWorkflowUserMetadata(fakeRequest, osqueryContext);
 

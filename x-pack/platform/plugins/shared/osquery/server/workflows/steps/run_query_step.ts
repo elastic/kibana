@@ -13,11 +13,7 @@ import {
 } from '../../../common/workflows/steps/run_query_step';
 import type { createActionService } from '../../handlers/action/create_action_service';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import {
-  getWorkflowRequest,
-  getWorkflowUserMetadata,
-  requireOsqueryWriteAuthz,
-} from './utils';
+import { getWorkflowRequest, getWorkflowUserMetadata, requireOsqueryWriteAuthz } from './utils';
 
 export const getRunQueryStepDefinition = (
   actionService: ReturnType<typeof createActionService>,
@@ -43,9 +39,8 @@ export const getRunQueryStepDefinition = (
       }
 
       const fakeRequest = getWorkflowRequest(context);
-      const [coreStart] = await osqueryContext.getStartServices();
 
-      await requireOsqueryWriteAuthz(coreStart, fakeRequest, {
+      await requireOsqueryWriteAuthz(osqueryContext, fakeRequest, {
         saved_query_id: input.saved_query_id,
       });
 
@@ -67,10 +62,9 @@ export const getRunQueryStepDefinition = (
             saved_query_id: savedQuery.savedObjectId,
             query: savedQuery.query,
             ecs_mapping:
-              (input.ecs_mapping as Record<
-                string,
-                { field?: string; value?: string | string[] }
-              > | undefined) ?? savedQuery.ecsMapping,
+              (input.ecs_mapping as
+                | Record<string, { field?: string; value?: string | string[] }>
+                | undefined) ?? savedQuery.ecsMapping,
             timeout: input.timeout ?? savedQuery.timeout,
             agent_ids: input.agent_ids,
             agent_all: input.agent_all,

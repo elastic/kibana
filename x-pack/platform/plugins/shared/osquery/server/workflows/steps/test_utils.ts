@@ -109,6 +109,10 @@ export const createMockOsqueryContext = ({
   return {
     getStartServices: jest.fn().mockResolvedValue([coreStart, { security }]),
     security,
-    logFactory: { get: jest.fn().mockReturnValue({ debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() }) },
+    logFactory: {
+      get: jest
+        .fn()
+        .mockReturnValue({ debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() }),
+    },
   };
 };

@@ -25,9 +25,8 @@ export const getGetSavedQueryStepDefinition = (
       const input = context.input as GetSavedQueryStepInput;
 
       const fakeRequest = getWorkflowRequest(context);
-      const [coreStart] = await osqueryContext.getStartServices();
 
-      await requireOsqueryReadAuthz(coreStart, fakeRequest);
+      await requireOsqueryReadAuthz(osqueryContext, fakeRequest);
 
       const spaceId = context.contextManager.getContext().workflow.spaceId;
 

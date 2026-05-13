@@ -29,9 +29,8 @@ export const getGetResultsStepDefinition = (osqueryContext: OsqueryAppContext) =
       const input = context.input as GetResultsStepInput;
 
       const fakeRequest = getWorkflowRequest(context);
-      const [coreStart] = await osqueryContext.getStartServices();
 
-      await requireOsqueryReadAuthz(coreStart, fakeRequest);
+      await requireOsqueryReadAuthz(osqueryContext, fakeRequest);
 
       const esClient = context.contextManager.getScopedEsClient();
       const maxRows = input.max_rows ?? 1000;

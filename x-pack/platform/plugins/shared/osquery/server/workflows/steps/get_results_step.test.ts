@@ -20,9 +20,7 @@ const makeAgentCountResponse = (count: number) => ({
 const makeResultHits = (rows: Array<Record<string, unknown>>) => ({
   hits: {
     hits: rows.map((row, i) => ({
-      fields: Object.fromEntries(
-        Object.entries(row).map(([k, v]) => [`osquery.${k}`, [v]])
-      ),
+      fields: Object.fromEntries(Object.entries(row).map(([k, v]) => [`osquery.${k}`, [v]])),
       sort: [`2024-01-01`, `id${i}`],
     })),
   },
@@ -53,7 +51,12 @@ describe('osquery.getResults step', () => {
         .fn()
         .mockResolvedValueOnce(makeActionHit(['agent-1', 'agent-2']))
         .mockResolvedValueOnce(makeAgentCountResponse(2))
-        .mockResolvedValueOnce(makeResultHits([{ name: 'process1', pid: 123 }, { name: 'process2', pid: 456 }]));
+        .mockResolvedValueOnce(
+          makeResultHits([
+            { name: 'process1', pid: 123 },
+            { name: 'process2', pid: 456 },
+          ])
+        );
 
       const esCountMock = jest.fn().mockResolvedValue({ count: 2 });
 
@@ -67,7 +70,10 @@ describe('osquery.getResults step', () => {
       const result = await stepDef.handler(context);
 
       expect(result.output).toEqual({
-        rows: [{ name: 'process1', pid: 123 }, { name: 'process2', pid: 456 }],
+        rows: [
+          { name: 'process1', pid: 123 },
+          { name: 'process2', pid: 456 },
+        ],
         row_count: 2,
         responded_agents: 2,
         total_agents: 2,

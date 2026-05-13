@@ -202,18 +202,18 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'osquery.getResults',
-    handlerHash: 'TODO_REPLACE_WITH_ACTUAL_HASH',
+    handlerHash: '0671778eae91bcb032c116ea16fea54c02e45d52f70cd5a1faa13d03caa0a880',
   },
   {
     id: 'osquery.getSavedQuery',
-    handlerHash: 'TODO_REPLACE_WITH_ACTUAL_HASH',
+    handlerHash: '7117b16a4bba8df9f24c492cd9852cef3b84ee20bcfd56d247edd99cfb5be380',
   },
   {
     id: 'osquery.runPack',
-    handlerHash: 'TODO_REPLACE_WITH_ACTUAL_HASH',
+    handlerHash: '2b8596e72f7e971cb0d96c2c16005912ea12f188ae5a97bab40e9aa8971f7263',
   },
   {
     id: 'osquery.runQuery',
-    handlerHash: 'TODO_REPLACE_WITH_ACTUAL_HASH',
+    handlerHash: '36fce1793aac575b22e924b7fad4e9c0c40c8c7d4f85aeff89121dc9f531fe97',
   },
 ];
