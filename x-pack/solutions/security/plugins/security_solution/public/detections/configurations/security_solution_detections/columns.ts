@@ -137,11 +137,10 @@ const getBaseColumns = (
  * columns implements a subset of `EuiDataGrid`'s `EuiDataGridColumn` interface,
  * plus additional TGrid column properties
  */
-export const getColumns = (
-  license?: LicenseService
-): Array<
+export type AlertColumnHeaders = Array<
   Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> & ColumnHeaderOptions
-> => [
+>;
+export const getColumns = (license?: LicenseService): AlertColumnHeaders => [
   {
     columnHeaderType: defaultColumnHeaderType,
     id: '@timestamp',

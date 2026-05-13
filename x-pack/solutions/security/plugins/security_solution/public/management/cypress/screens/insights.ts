@@ -27,6 +27,12 @@ export const workflowInsightsSelectors = {
   clickScanButton: () => workflowInsightsSelectors.selectScanButton().click(),
   insightsResultExists: (index = 0) =>
     cy.getByTestSubj(`workflowInsightsResult-${index}`).should('exist'),
+  nInsightResultsExist: (n: number) => {
+    for (let i = 0; i < n; i++) {
+      cy.getByTestSubj(`workflowInsightsResult-${i}`).should('exist');
+    }
+    cy.getByTestSubj(`workflowInsightsResult-${n}`).should('not.exist');
+  },
   clickInsightsResultRemediationButton: (index = 0) =>
     cy.getByTestSubj(`workflowInsightsResult-${index}-remediation`).click(),
   insightsEmptyResultsCalloutDoesNotExist: () =>
@@ -39,4 +45,10 @@ export const workflowInsightsSelectors = {
     cy
       .getByTestSubj('globalToastList')
       .within(() => cy.getByTestSubj('euiToastBody').contains(content)),
+  connectorSelectorExists: () => {
+    cy.getByTestSubj('connector-selector').should('exist');
+  },
+  connectorSelectorDoesNotExist: () => {
+    cy.getByTestSubj('connector-selector').should('not.exist');
+  },
 };

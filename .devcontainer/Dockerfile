@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/base:ubuntu-22.04
+FROM mcr.microsoft.com/devcontainers/base:bookworm
 
 ARG KBN_DIR
 
@@ -68,9 +68,12 @@ RUN mkdir -p $NVM_DIR && \
 
 USER root
 
+# Install Chromium and chromedriver from Debian repos (native amd64 and arm64 support).
+RUN apt-get update && apt-get install -y --no-install-recommends chromium chromium-driver
+
 # Reload the env everytime a new shell is opened incase the .env file changed.
 RUN echo "source ${KBN_DIR}/.devcontainer/scripts/env.sh" >> ${HOME}/.bashrc && \
   echo "source ${KBN_DIR}/.devcontainer/scripts/env.sh" >> ${HOME}/.zshrc
 
 # This is for documentation. Ports are exposed via devcontainer.json
-EXPOSE 9200 5601 9229 9230 9231
+EXPOSE 9200 5601 9229 9230 9231 9001

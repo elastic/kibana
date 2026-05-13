@@ -9,6 +9,7 @@ import React from 'react';
 
 import { TestProviders } from '../../../../../common/mock';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
+import { CellActionsRenderer } from '../../../../../common/components/cell_actions/cell_actions_renderer';
 
 import { FileHash } from './file_hash';
 
@@ -22,10 +23,24 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+jest.mock('../../../../../common/components/cell_actions/cell_actions_renderer', () => {
+  return {
+    CellActionsRenderer: jest.fn(),
+  };
+});
+
+const MockedCellActionsRenderer = jest.fn(({ children }) => {
+  return <div data-test-subj="mock-cell-action-renderer">{children}</div>;
+});
+
 describe('FileHash', () => {
+  beforeEach(() => {
+    (CellActionsRenderer as unknown as jest.Mock).mockImplementation(MockedCellActionsRenderer);
+  });
   const mount = useMountAppended();
 
   const allProps = {
+    scopeId: 'some_scope',
     contextId: 'test',
     eventId: '1',
     fileHashSha256: undefined,
@@ -56,5 +71,19 @@ describe('FileHash', () => {
       </TestProviders>
     );
     expect(wrapper.text()).toEqual('');
+  });
+  test('should passing correct scopeId to cell actions', () => {
+    mount(
+      <TestProviders>
+        <FileHash {...allProps} />
+      </TestProviders>
+    );
+
+    expect(MockedCellActionsRenderer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        scopeId: 'some_scope',
+      }),
+      {}
+    );
   });
 });

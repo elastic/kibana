@@ -44,7 +44,7 @@ import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/publ
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { FieldFormatsSetup } from '@kbn/field-formats-plugin/public';
-import type { DashboardSetup, DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
@@ -52,9 +52,15 @@ import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
+import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
+import type { CPSPluginStart } from '@kbn/cps/public/types';
+import { ProjectRoutingAccess } from '@kbn/cps-utils/types';
 import type { MlSharedServices } from './application/services/get_shared_ml_services';
 import { getMlSharedServices } from './application/services/get_shared_ml_services';
-import { registerManagementSection } from './application/management';
+import { registerManagementSections } from './application/management';
 import type { MlLocatorParams } from './locator';
 import { MlLocatorDefinition, type MlLocator } from './locator';
 import { registerHomeFeature } from './register_home_feature';
@@ -73,8 +79,12 @@ import {
 } from '../common/constants/app';
 import type { ElasticModels } from './application/services/elastic_models_service';
 import type { MlApi } from './application/services/ml_api_service';
-import type { MlCapabilities } from '../common/types/capabilities';
 import { AnomalySwimLane } from './shared_components';
+import { MlManagementLocatorInternal } from './locator/ml_management_locator';
+import { TelemetryService } from './application/services/telemetry/telemetry_service';
+import type { ITelemetryClient } from './application/services/telemetry/types';
+import { registerEmbeddables } from './embeddables';
+import { registerMlUiActions } from './ui_actions';
 
 export interface MlStartDependencies {
   cases?: CasesPublicStart;
@@ -99,12 +109,16 @@ export interface MlStartDependencies {
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
+  telemetry: ITelemetryClient;
+  fieldsMetadata: FieldsMetadataPublicStart;
+  fileUpload: FileUploadPluginStart;
+  cps: CPSPluginStart;
 }
 
 export interface MlSetupDependencies {
   alerting?: AlertingSetup;
   cases?: CasesPublicSetup;
-  dashboard: DashboardSetup;
   embeddable: EmbeddableSetup;
   fieldFormats: FieldFormatsSetup;
   home?: HomePublicPluginSetup;
@@ -126,6 +140,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
   private locator: undefined | MlLocator;
 
+  private managementLocator: undefined | MlManagementLocatorInternal;
+
   private sharedMlServices: MlSharedServices | undefined;
 
   private isServerless: boolean = false;
@@ -137,25 +153,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   private experimentalFeatures: ExperimentalFeatures = {
     ruleFormV2: false,
   };
-  private nlpSettings: NLPSettings = {
-    modelDeployment: {
-      allowStaticAllocations: true,
-      vCPURange: {
-        low: {
-          min: 0,
-          max: 2,
-        },
-        medium: {
-          min: 1,
-          max: 16,
-        },
-        high: {
-          min: 1,
-          max: 32,
-        },
-      },
-    },
-  };
+  private nlpSettings: NLPSettings = {};
+
+  private telemetry = new TelemetryService();
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
@@ -167,8 +167,22 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   setup(
     core: MlCoreSetup,
     pluginsSetup: MlSetupDependencies
-  ): { locator?: LocatorPublic<MlLocatorParams>; elasticModels?: ElasticModels } {
+  ): {
+    locator?: LocatorPublic<MlLocatorParams>;
+    managementLocator?: MlManagementLocatorInternal;
+    elasticModels?: ElasticModels;
+  } {
     this.sharedMlServices = getMlSharedServices(core.http);
+    const deps = {
+      home: pluginsSetup.home,
+      licenseManagement: pluginsSetup.licenseManagement,
+      management: pluginsSetup.management,
+      usageCollection: pluginsSetup.usageCollection,
+    };
+
+    this.telemetry.setup({ analytics: core.analytics });
+
+    const telemetryClient = this.telemetry.start();
 
     core.application.register({
       id: PLUGIN_ID,
@@ -195,12 +209,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             dataVisualizer: pluginsStart.dataVisualizer,
             embeddable: { ...pluginsSetup.embeddable, ...pluginsStart.embeddable },
             fieldFormats: pluginsStart.fieldFormats,
-            home: pluginsSetup.home,
             kibanaVersion: this.initializerContext.env.packageInfo.version,
             lens: pluginsStart.lens,
-            licenseManagement: pluginsSetup.licenseManagement,
             licensing: pluginsStart.licensing,
-            management: pluginsSetup.management,
             maps: pluginsStart.maps,
             observabilityAIAssistant: pluginsStart.observabilityAIAssistant,
             presentationUtil: pluginsStart.presentationUtil,
@@ -211,8 +222,12 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             triggersActionsUi: pluginsStart.triggersActionsUi,
             uiActions: pluginsStart.uiActions,
             unifiedSearch: pluginsStart.unifiedSearch,
-            usageCollection: pluginsSetup.usageCollection,
-            spaces: pluginsStart.spaces,
+            telemetry: telemetryClient,
+            fieldsMetadata: pluginsStart.fieldsMetadata,
+            fileUpload: pluginsStart.fileUpload,
+            kql: pluginsStart.kql,
+            cps: pluginsStart.cps,
+            ...deps,
           },
           params,
           this.isServerless,
@@ -225,19 +240,13 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     if (pluginsSetup.share) {
       this.locator = pluginsSetup.share.url.locators.create(new MlLocatorDefinition());
+      this.managementLocator = new MlManagementLocatorInternal(pluginsSetup.share);
     }
 
-    if (pluginsSetup.management) {
-      registerManagementSection(
-        pluginsSetup.management,
-        core,
-        {
-          usageCollection: pluginsSetup.usageCollection,
-        },
-        this.isServerless,
-        this.enabledFeatures
-      ).enable();
+    if (this.enabledFeatures.ad) {
+      registerEmbeddables(pluginsSetup.embeddable, core, pluginsSetup.usageCollection);
     }
+    registerMlUiActions(pluginsSetup.uiActions, core);
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
     licensing
@@ -259,12 +268,22 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
               registerHomeFeature(pluginsSetup.home);
             }
 
-            const {
-              registerEmbeddables,
-              registerMlUiActions,
-              registerSearchLinks,
-              registerCasesAttachments,
-            } = await import('./register_helper');
+            if (pluginsSetup.management && fullLicense && mlCapabilities.canGetMlInfo) {
+              registerManagementSections(
+                pluginsSetup.management,
+                core,
+                { telemetry: telemetryClient, ...deps },
+                this.isServerless,
+                this.enabledFeatures,
+                this.nlpSettings,
+                this.experimentalFeatures,
+                mlCapabilities
+              );
+            }
+
+            const { registerSearchLinks, registerCasesAttachments } = await import(
+              './register_helper'
+            );
             registerSearchLinks(
               this.appUpdater$,
               fullLicense,
@@ -292,14 +311,24 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             }
 
             if (fullLicense && mlCapabilities.canGetMlInfo) {
-              registerMlUiActions(pluginsSetup.uiActions, core);
-
               if (this.enabledFeatures.ad) {
-                registerEmbeddables(pluginsSetup.embeddable, core);
-
                 if (pluginsSetup.cases) {
-                  registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
+                  registerCasesAttachments(
+                    pluginsSetup.cases,
+                    coreStart,
+                    pluginStart,
+                    pluginsSetup.usageCollection
+                  );
                 }
+
+                pluginStart.cps?.cpsManager?.registerAppAccess('ml', (location: string) =>
+                  location.includes('ml/aiops') ||
+                  location.includes('ml/jobs/new_job/datavisualizer') ||
+                  location.includes('ml/datavisualizer/esql') ||
+                  location.includes('ml/data_drift')
+                    ? ProjectRoutingAccess.EDITABLE
+                    : ProjectRoutingAccess.DISABLED
+                );
 
                 if (pluginsSetup.maps) {
                   // This module contains async imports itself, and it is conditionally loaded if maps is enabled. We'll save
@@ -326,6 +355,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     return {
       locator: this.locator,
+      managementLocator: this.managementLocator,
       elasticModels: this.sharedMlServices.elasticModels,
     };
   }
@@ -335,12 +365,14 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     deps: MlStartDependencies
   ): {
     locator?: LocatorPublic<MlLocatorParams>;
+    managementLocator?: MlManagementLocatorInternal;
     elasticModels?: ElasticModels;
     mlApi?: MlApi;
     components: { AnomalySwimLane: typeof AnomalySwimLane };
   } {
     return {
       locator: this.locator,
+      managementLocator: this.managementLocator,
       elasticModels: this.sharedMlServices?.elasticModels,
       mlApi: this.sharedMlServices?.mlApi,
       components: {

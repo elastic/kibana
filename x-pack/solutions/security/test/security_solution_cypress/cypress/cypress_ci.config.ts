@@ -1,0 +1,48 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { defineCypressConfig } from '@kbn/cypress-config';
+import { esArchiver } from './support/es_archiver';
+import { esClient } from './support/es_client';
+
+export default defineCypressConfig({
+  reporter: '../../../../../../node_modules/cypress-multi-reporters',
+  reporterOptions: {
+    configFile: './cypress/reporter_config.json',
+  },
+  chromeWebSecurity: false,
+  defaultCommandTimeout: 150000,
+  env: {
+    grepFilterSpecs: true,
+    grepOmitFiltered: true,
+    grepTags: '@ess --@skipInEss',
+  },
+  execTimeout: 150000,
+  pageLoadTimeout: 150000,
+  retries: {
+    runMode: 1,
+  },
+  screenshotsFolder: '../../../../../target/kibana-security-solution/cypress/screenshots',
+  trashAssetsBeforeRuns: false,
+  video: false,
+  videosFolder: '../../../../../target/kibana-security-solution/cypress/videos',
+  viewportHeight: 1200,
+  viewportWidth: 1920,
+  e2e: {
+    baseUrl: 'http://localhost:5601',
+    experimentalMemoryManagement: true,
+    experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
+    specPattern: './cypress/e2e/**/*.cy.ts',
+    setupNodeEvents(on, config) {
+      esArchiver(on, config);
+      esClient(on, config);
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('@cypress/grep/plugin').plugin(config);
+      return config;
+    },
+  },
+});

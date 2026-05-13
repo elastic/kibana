@@ -6,24 +6,32 @@
  */
 
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { LegacyAlertsClient } from '..';
-import { IAlertsClient } from '../types';
-import { AlertsService } from '../../alerts_service';
-import { UntypedNormalizedRuleType } from '../../rule_type_registry';
-import {
+import type { IAlertsClient } from '../types';
+import type { AlertsService } from '../../alerts_service';
+import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
+import type {
   AlertInstanceContext,
   AlertInstanceState,
-  DEFAULT_FLAPPING_SETTINGS,
   RuleAlertData,
   RuleTypeParams,
   SanitizedRule,
 } from '../../types';
-import { RuleTaskInstance, RuleTypeRunnerContext } from '../../task_runner/types';
+import { DEFAULT_FLAPPING_SETTINGS } from '../../types';
+import type { RuleTaskInstance, RuleTypeRunnerContext } from '../../task_runner/types';
 
 export type RuleData<Params extends RuleTypeParams> = Pick<
   SanitizedRule<Params>,
-  'id' | 'name' | 'tags' | 'consumer' | 'revision' | 'alertDelay' | 'params'
+  | 'id'
+  | 'name'
+  | 'tags'
+  | 'consumer'
+  | 'revision'
+  | 'alertDelay'
+  | 'params'
+  | 'muteAll'
+  | 'mutedInstanceIds'
 >;
 
 interface InitializeAlertsClientOpts<Params extends RuleTypeParams> {
@@ -102,6 +110,8 @@ export const initializeAlertsClient = async <
           spaceId: context.spaceId,
           tags: rule.tags,
           alertDelay: rule.alertDelay?.active ?? 0,
+          muteAll: rule.muteAll,
+          mutedInstanceIds: rule.mutedInstanceIds,
         },
       })) ?? null;
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ExecutorParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import type { ExecutorParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
-import { RenderParameterTemplates } from '@kbn/actions-plugin/server/types';
-import { SUB_ACTION } from '../../../common/openai/constants';
+import type { RenderParameterTemplates } from '@kbn/actions-plugin/server/types';
+import { SUB_ACTION } from '@kbn/connector-schemas/openai';
 
 export const renderParameterTemplates: RenderParameterTemplates<ExecutorParams> = (
   logger,

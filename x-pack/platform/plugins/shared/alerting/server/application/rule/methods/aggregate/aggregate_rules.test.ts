@@ -5,27 +5,29 @@
  * 2.0.
  */
 
-import { RulesClient, ConstructorOptions } from '../../../../rules_client';
+import type { ConstructorOptions } from '../../../../rules_client';
+import { RulesClient } from '../../../../rules_client';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
+  coreFeatureFlagsMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
+import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 
-import { RegistryRuleType } from '../../../../rule_type_registry';
+import type { RegistryRuleType } from '../../../../rule_type_registry';
 import { fromKueryExpression, nodeTypes, toKqlExpression } from '@kbn/es-query';
 import { RecoveredActionGroup } from '../../../../../common';
-import { DefaultRuleAggregationResult } from '../../../../routes/rule/apis/aggregate/types';
+import type { DefaultRuleAggregationResult } from '../../../../routes/rule/apis/aggregate/types';
 import { defaultRuleAggregationFactory } from '.';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
@@ -53,6 +55,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
+  cloneAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
@@ -68,6 +71,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   isSystemAction: jest.fn(),
+  featureFlags: coreFeatureFlagsMock.createStart(),
+  isServerless: false,
 };
 
 beforeEach(() => {
@@ -92,9 +97,9 @@ describe('aggregate()', () => {
         name: 'myType',
         category: 'test',
         producer: 'myApp',
+        solution: 'stack',
         enabledInLicense: true,
         hasAlertsMappings: false,
-        hasFieldsForAAD: false,
         validLegacyConsumers: [],
       },
     ],

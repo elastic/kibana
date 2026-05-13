@@ -20,12 +20,6 @@
       "data",
       "dataViews",
       "embeddable",
-      "expressionError",
-      "expressionImage",
-      "expressionMetric",
-      "expressionRepeatImage",
-      "expressionRevealImage",
-      "expressionShape",
       "expressions",
       "features",
       "inspector",
@@ -44,10 +38,9 @@
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
-      "lens",
       "maps",
-      "visualizations",
-      "fieldFormats"
+      "fieldFormats",
+      "savedSearch"
     ]
   }
 }

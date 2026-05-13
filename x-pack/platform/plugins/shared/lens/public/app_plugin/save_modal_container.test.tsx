@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { SaveProps } from './app';
+import type { SaveProps } from './app';
 import { type SaveVisualizationProps, runSaveLensVisualization } from './save_modal_container';
 import { defaultDoc, makeDefaultServices } from '../mocks';
 import { faker } from '@faker-js/faker';
 import { makeAttributeService } from '../mocks/services_mock';
-
-jest.mock('../persistence/saved_objects_utils/check_for_duplicate_title', () => ({
-  checkForDuplicateTitle: jest.fn(async () => false),
-}));
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 describe('runSaveLensVisualization', () => {
   // Need to call reset here as makeDefaultServices() reuses some mocks from core
@@ -34,7 +31,7 @@ describe('runSaveLensVisualization', () => {
       ...makeDefaultServices(),
       // start with both the initial input and lastKnownDoc synced
       lastKnownDoc: defaultDoc,
-      initialInput: { attributes: defaultDoc, savedObjectId: defaultDoc.savedObjectId },
+      initialInput: { attributes: defaultDoc, ref_id: defaultDoc.savedObjectId },
       redirectToOrigin,
       redirectTo,
       onAppLeave,
@@ -45,7 +42,6 @@ describe('runSaveLensVisualization', () => {
       newTitle: faker.lorem.word(),
       newDescription: faker.lorem.sentence(),
       newTags: [faker.lorem.word(), faker.lorem.word()],
-      isTitleDuplicateConfirmed: false,
       returnToOrigin: false,
       dashboardId: undefined,
       newCopyOnSave: false,
@@ -65,7 +61,7 @@ describe('runSaveLensVisualization', () => {
        * and in the modal the user chooses to add the chart into a specific dashboard. Make sure to pass the "dashboardId" prop as well to simulate this scenario.
        * This is used to test indirectly the redirectToDashboard call
        */
-      redirectToDashboardFn: props.stateTransfer.navigateToWithEmbeddablePackage,
+      redirectToDashboardFn: props.stateTransfer.navigateToWithEmbeddablePackages,
       /**
        * This function will be called before reloading the editor after saving a a new document/new copy of the document
        */
@@ -111,7 +107,7 @@ describe('runSaveLensVisualization', () => {
               initialInput: {
                 attributes: defaultByValueDoc,
                 title: 'blah',
-                timeRange: { from: 'now-7d', to: 'now' },
+                time_range: { from: 'now-7d', to: 'now' },
               },
             },
             { returnToOrigin: true }
@@ -124,7 +120,7 @@ describe('runSaveLensVisualization', () => {
             expect.objectContaining({
               state: expect.objectContaining({
                 title: 'blah',
-                timeRange: { from: 'now-7d', to: 'now' },
+                time_range: { from: 'now-7d', to: 'now' },
               }),
             })
           );
@@ -260,9 +256,12 @@ describe('runSaveLensVisualization', () => {
           'dashboards',
           // make sure the new savedObject id is removed from the new input
           expect.objectContaining({
-            state: expect.objectContaining({
-              input: expect.objectContaining({ savedObjectId: undefined }),
-            }),
+            state: expect.arrayContaining([
+              expect.objectContaining({
+                type: LENS_EMBEDDABLE_TYPE,
+                serializedState: expect.objectContaining({ ref_id: undefined }),
+              }),
+            ]),
           })
         );
         expect(saveToLibraryFn).not.toHaveBeenCalled();
@@ -287,9 +286,12 @@ describe('runSaveLensVisualization', () => {
           'dashboards',
           // make sure the new savedObject id is passed with the new input
           expect.objectContaining({
-            state: expect.objectContaining({
-              input: expect.objectContaining({ savedObjectId: '1234' }),
-            }),
+            state: expect.arrayContaining([
+              expect.objectContaining({
+                type: LENS_EMBEDDABLE_TYPE,
+                serializedState: expect.objectContaining({ ref_id: '1234' }),
+              }),
+            ]),
           })
         );
         expect(saveToLibraryFn).toHaveBeenCalled();

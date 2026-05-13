@@ -6,29 +6,19 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { KueryNode } from '@kbn/es-query';
-import {
+import type { KueryNode } from '@kbn/es-query';
+import type { ParamsModifier, ShouldIncrementRevision } from '../../../../../rules_client/common';
+import type {
   bulkEditRuleSnoozeScheduleSchema,
   bulkEditOperationsSchema,
   bulkEditOperationSchema,
 } from '../schemas';
-import { RuleParams, RuleDomain } from '../../../types';
-import { Rule } from '../../../../../../common';
+import type { RuleParams, RuleDomain } from '../../../types';
+import type { Rule } from '../../../../../../common';
 
 export type BulkEditRuleSnoozeSchedule = TypeOf<typeof bulkEditRuleSnoozeScheduleSchema>;
 export type BulkEditOperation = TypeOf<typeof bulkEditOperationSchema>;
 export type BulkEditOperations = TypeOf<typeof bulkEditOperationsSchema>;
-
-export type ParamsModifier<Params extends RuleParams> = (
-  rule: Rule<Params>
-) => Promise<ParamsModifierResult<Params>>;
-
-interface ParamsModifierResult<Params extends RuleParams> {
-  modifiedParams: Params;
-  isParamsUpdateSkipped: boolean;
-}
-
-export type ShouldIncrementRevision<Params extends RuleParams> = (params?: Params) => boolean;
 
 export type BulkEditFields = keyof Pick<
   RuleDomain,
@@ -37,6 +27,7 @@ export type BulkEditFields = keyof Pick<
 
 export interface BulkEditOptionsCommon<Params extends RuleParams> {
   operations: BulkEditOperation[];
+  ignoreInternalRuleTypes?: boolean;
   paramsModifier?: ParamsModifier<Params>;
   shouldIncrementRevision?: ShouldIncrementRevision<Params>;
 }

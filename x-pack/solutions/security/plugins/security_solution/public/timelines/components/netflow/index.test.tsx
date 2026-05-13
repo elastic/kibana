@@ -7,6 +7,8 @@
 
 import { get } from 'lodash/fp';
 import React from 'react';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 import { render, screen, within } from '@testing-library/react';
 import { asArrayIfExists } from '../../../common/lib/helpers';
 import { TestProviders } from '../../../common/mock/test_providers';
@@ -59,6 +61,25 @@ import {
   NETWORK_TRANSPORT_FIELD_NAME,
 } from '../../../explore/network/components/source_destination/field_names';
 import { getMockNetflowData } from '../../../common/mock/netflow';
+import { SecurityCellActions } from '../../../common/components/cell_actions';
+
+jest.mock('../../../common/components/cell_actions', () => {
+  return {
+    SecurityCellActions: jest.fn(),
+    CellActionsMode: {
+      HOVER_DOWN: 'hover-down',
+      HOVER_RIGHT: 'hover-right',
+      INLINE: 'inline',
+    },
+    SecurityCellActionsTrigger: {
+      DEFAULT: 'default',
+    },
+  };
+});
+
+const MockedSecurityCellActions = jest.fn(({ children }) => {
+  return <div data-test-subj="mock-security-cell-actions">{children}</div>;
+});
 
 jest.mock('../../../common/lib/kibana');
 
@@ -72,6 +93,7 @@ jest.mock('@elastic/eui', () => {
 
 const getNetflowInstance = () => (
   <Netflow
+    scopeId="some_scope"
     contextId="test"
     destinationBytes={asArrayIfExists(get(DESTINATION_BYTES_FIELD_NAME, getMockNetflowData()))}
     destinationGeoContinentName={asArrayIfExists(
@@ -134,6 +156,11 @@ const getNetflowInstance = () => (
 jest.mock('../../../common/components/links/link_props');
 
 describe('Netflow', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (SecurityCellActions as unknown as jest.Mock).mockImplementation(MockedSecurityCellActions);
+  });
+
   test('renders correctly against snapshot', () => {
     const { asFragment } = render(<TestProviders>{getNetflowInstance()}</TestProviders>);
     expect(asFragment()).toMatchSnapshot();
@@ -367,5 +394,18 @@ describe('Netflow', () => {
     render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(screen.getByText('first.last')).toBeInTheDocument();
+  });
+
+  test('should passing correct scopeId to cell actions', () => {
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
+
+    expect(MockedSecurityCellActions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metadata: expect.objectContaining({
+          scopeId: 'some_scope',
+        }),
+      }),
+      {}
+    );
   });
 });

@@ -1,0 +1,16 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node", "@testing-library/jest-dom"]
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/zod",
+    "@kbn/i18n-react",
+    "@kbn/connector-specs",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/i18n",
+  ]
+}

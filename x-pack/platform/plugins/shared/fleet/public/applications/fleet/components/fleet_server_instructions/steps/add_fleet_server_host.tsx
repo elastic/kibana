@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import type { EuiStepProps } from '@elastic/eui';
 import { EuiIconTip } from '@elastic/eui';
 import {
@@ -26,10 +26,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { FleetServerHost } from '../../../types';
 
-import { useStartServices, useLink } from '../../../hooks';
+import { useStartServices, useLink, useFleetStatus } from '../../../hooks';
 import type { FleetServerHostForm } from '../hooks';
 import { MultiRowInput } from '../../../sections/settings/components/multi_row_input';
 import { FleetServerHostSelect } from '../components';
+import { SSLFormSection } from '../../../sections/settings/components/fleet_server_hosts_flyout/ssl_form_section';
+import { ExperimentalFeaturesService } from '../../../services';
 
 export const getAddFleetServerHostStep = ({
   fleetServerHostForm,
@@ -70,6 +72,53 @@ export const AddFleetServerHostStepContent = ({
   const [submittedFleetServerHost, setSubmittedFleetServerHost] = useState<FleetServerHost>();
   const { notifications } = useStartServices();
   const { getHref } = useLink();
+  const { enableSSLSecrets } = ExperimentalFeaturesService.get();
+
+  const [isConvertedToSecret, setIsConvertedToSecret] = React.useState({
+    sslKey: false,
+    sslESKey: false,
+    sslAgentKey: false,
+  });
+
+  const fleetStatus = useFleetStatus();
+  const useOutputSecretsStorage = fleetStatus.isSecretsStorageEnabled ?? false;
+  const useSSLSecretsStorage = enableSSLSecrets
+    ? fleetStatus.isSSLSecretsStorageEnabled ?? false
+    : false;
+
+  useEffect(() => {
+    // populate the secret input with the value of the plain input in order to re-save the key with secret storage
+    if (useSSLSecretsStorage && enableSSLSecrets) {
+      if (inputs.sslKeyInput.value && !inputs.sslKeySecretInput.value) {
+        inputs.sslKeySecretInput.setValue(inputs.sslKeyInput.value);
+        inputs.sslKeyInput.clear();
+        setIsConvertedToSecret({ ...isConvertedToSecret, sslKey: true });
+      }
+      if (inputs.sslAgentKeyInput.value && !inputs.sslAgentKeySecretInput.value) {
+        inputs.sslAgentKeySecretInput.setValue(inputs.sslAgentKeyInput.value);
+        inputs.sslAgentKeyInput.clear();
+        setIsConvertedToSecret({ ...isConvertedToSecret, sslAgentKey: true });
+      }
+    }
+    if (useOutputSecretsStorage) {
+      if (inputs.sslESKeyInput.value && !inputs.sslESKeySecretInput.value) {
+        inputs.sslESKeySecretInput.setValue(inputs.sslESKeyInput.value);
+        inputs.sslESKeyInput.clear();
+        setIsConvertedToSecret({ ...isConvertedToSecret, sslESKey: true });
+      }
+    }
+  }, [
+    inputs.sslKeyInput,
+    inputs.sslKeySecretInput,
+    isConvertedToSecret,
+    inputs.sslESKeyInput,
+    inputs.sslESKeySecretInput,
+    inputs.sslAgentKeyInput,
+    inputs.sslAgentKeySecretInput,
+    useSSLSecretsStorage,
+    useOutputSecretsStorage,
+    enableSSLSecrets,
+  ]);
 
   const onSubmit = useCallback(async () => {
     try {
@@ -170,6 +219,14 @@ export const AddFleetServerHostStepContent = ({
               {error && <EuiFormErrorText>{error}</EuiFormErrorText>}
             </>
           </EuiFormRow>
+          <EuiSpacer size="m" />
+          <SSLFormSection
+            inputs={inputs}
+            useSSLSecretsStorage={enableSSLSecrets && useSSLSecretsStorage}
+            useOutputSecretsStorage={useOutputSecretsStorage}
+            isConvertedToSecret={isConvertedToSecret}
+          />
+          <EuiSpacer size="m" />
           {fleetServerHosts.length > 0 ? (
             <EuiFormRow fullWidth {...inputs.isDefaultInput.formRowProps}>
               <EuiSwitch
@@ -201,6 +258,7 @@ export const AddFleetServerHostStepContent = ({
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
+            announceOnMount
             iconType="check"
             color="success"
             title={

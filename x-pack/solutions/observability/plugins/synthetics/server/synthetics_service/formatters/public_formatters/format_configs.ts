@@ -6,17 +6,20 @@
  */
 
 import { isEmpty, isNil, omitBy } from 'lodash';
-import { Logger } from '@kbn/logging';
-import { replaceStringWithParams } from '../formatting_utils';
+import type { Logger } from '@kbn/logging';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
+import { periodToSeconds } from '../../../routes/overview_status/utils';
+
+import { formatMWs, replaceStringWithParams } from '../formatting_utils';
 import { PARAMS_KEYS_TO_SKIP } from '../common';
-import {
+import type {
   BrowserFields,
-  ConfigKey,
   HeartbeatConfig,
   MonitorFields,
   SyntheticsMonitor,
   TLSFields,
 } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 import { publicFormatters } from '.';
 
 const UI_KEYS_TO_SKIP = [
@@ -37,7 +40,8 @@ export const formatMonitorConfigFields = (
   configKeys: ConfigKey[],
   config: Partial<MonitorFields>,
   logger: Logger,
-  params: Record<string, string>
+  params: Record<string, string>,
+  mws: MaintenanceWindow[]
 ) => {
   const formattedMonitor = {} as Record<ConfigKey, any>;
 
@@ -76,6 +80,19 @@ export const formatMonitorConfigFields = (
     sslKeys.forEach((key) => (formattedMonitor[key] = null));
   }
 
+  if (config[ConfigKey.MAINTENANCE_WINDOWS]) {
+    const maintenanceWindows = config[ConfigKey.MAINTENANCE_WINDOWS];
+    formattedMonitor[ConfigKey.MAINTENANCE_WINDOWS] = formatMWs(
+      maintenanceWindows.map((window) => {
+        if (typeof window === 'string') {
+          return mws.find((m) => m.id === window);
+        }
+        return window;
+      }) as MaintenanceWindow[],
+      false
+    );
+  }
+
   return omitBy(formattedMonitor, isNil) as Partial<MonitorFields>;
 };
 
@@ -87,10 +104,19 @@ export interface ConfigData {
   testRunId?: string;
   params: Record<string, string>;
   spaceId: string;
+  kibanaUrl?: string;
 }
 
 export const formatHeartbeatRequest = (
-  { monitor, configId, heartbeatId, runOnce, testRunId, spaceId }: Omit<ConfigData, 'params'>,
+  {
+    monitor,
+    configId,
+    heartbeatId,
+    runOnce,
+    testRunId,
+    spaceId,
+    kibanaUrl,
+  }: Omit<ConfigData, 'params'>,
   params?: string
 ): HeartbeatConfig => {
   const projectId = (monitor as BrowserFields)[ConfigKey.PROJECT_ID];
@@ -98,7 +124,8 @@ export const formatHeartbeatRequest = (
   const heartbeatIdT = heartbeatId ?? monitor[ConfigKey.MONITOR_QUERY_ID];
 
   const paramsString = params ?? (monitor as BrowserFields)[ConfigKey.PARAMS];
-  const { labels } = monitor;
+  const { labels, spaces } = monitor;
+  const monSpaces = spaces ? Array.from(new Set([...(spaces ?? []), spaceId])) : spaceId;
 
   return {
     ...monitor,
@@ -109,10 +136,12 @@ export const formatHeartbeatRequest = (
       'monitor.project.id': projectId || undefined,
       run_once: runOnce,
       test_run_id: testRunId,
+      'monitor.interval': periodToSeconds(monitor[ConfigKey.SCHEDULE]),
       meta: {
-        space_id: spaceId,
+        space_id: monSpaces,
       },
       ...(isEmpty(labels) ? {} : { labels }),
+      ...(kibanaUrl ? { kibanaUrl } : {}),
     },
     fields_under_root: true,
     params: monitor.type === 'browser' ? paramsString : '',

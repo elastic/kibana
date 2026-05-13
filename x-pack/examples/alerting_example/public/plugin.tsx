@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
-import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import {
+import type { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
+import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { getAlertType as getAlwaysFiringAlertType } from './alert_types/always_firing';
 import { getAlertType as getPeopleInSpaceAlertType } from './alert_types/astros';
+import { getAlertType as getPatternAlertType } from './alert_types/pattern';
 import { registerNavigation } from './alert_types';
 
 export type Setup = void;
@@ -52,6 +53,7 @@ export class AlertingExamplePlugin implements Plugin<Setup, Start, AlertingExamp
 
     triggersActionsUi.ruleTypeRegistry.register(getAlwaysFiringAlertType());
     triggersActionsUi.ruleTypeRegistry.register(getPeopleInSpaceAlertType());
+    triggersActionsUi.ruleTypeRegistry.register(getPatternAlertType());
 
     registerNavigation(alerting);
 

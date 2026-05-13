@@ -8,8 +8,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import { ValidationBadValueError, ValidationSettingNotFoundError } from '../../ui_settings_errors';
 import type {
   InternalUiSettingsRequestHandlerContext,
@@ -55,6 +55,12 @@ export function registerInternalValidateRoute(router: InternalUiSettingsRouter) 
   router.post(
     {
       path: '/internal/kibana/settings/{key}/validate',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the UI Settings Client',
+        },
+      },
       validate: {
         params: schema.object({
           key: schema.string(),

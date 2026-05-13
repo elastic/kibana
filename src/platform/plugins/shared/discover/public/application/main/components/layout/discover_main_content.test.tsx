@@ -8,198 +8,228 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, of } from 'rxjs';
-import { EuiHorizontalRule } from '@elastic/eui';
-import { act } from 'react-dom/test-utils';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { DataView } from '@kbn/data-plugin/common';
-import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
-import {
-  DataDocuments$,
-  DataMain$,
-  DataTotalHits$,
-} from '../../state_management/discover_data_state_container';
+import { BehaviorSubject } from 'rxjs';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
+import { screen, waitFor } from '@testing-library/react';
+import { esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
-import { FetchStatus, SidebarToggleState } from '../../../types';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { SidebarToggleState } from '../../../types';
+import { FetchStatus } from '../../../types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { DiscoverMainContent, DiscoverMainContentProps } from './discover_main_content';
-import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
-import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { DiscoverDocuments } from './discover_documents';
-import { FieldStatisticsTab } from '../field_stats_table';
-import { PatternAnalysisTab } from '../pattern_analysis';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { PanelsToggle } from '../../../../components/panels_toggle';
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { createDataViewDataSource } from '../../../../../common/data_sources';
+import type { DiscoverMainContentProps } from './discover_main_content';
+import { DiscoverMainContent } from './discover_main_content';
+import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
+import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
+import { createDataSource } from '../../../../../common/data_sources';
+import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
+import type { DiscoverAppState } from '../../state_management/redux';
+import { internalStateActions } from '../../state_management/redux';
+import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
+import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 
-const mountComponent = async ({
+jest.mock('../../../../components/view_mode_toggle', () => ({
+  DocumentViewModeToggle: jest.fn(({ prepend }) => (
+    <div data-test-subj="documentViewModeToggleMock">{prepend}</div>
+  )),
+}));
+
+jest.mock('./discover_documents', () => ({
+  DiscoverDocuments: jest.fn(({ viewModeToggle }) => (
+    <div
+      data-test-subj="discoverDocumentsMock"
+      data-has-view-mode-toggle={String(Boolean(viewModeToggle))}
+    >
+      {viewModeToggle}
+    </div>
+  )),
+}));
+
+jest.mock('../field_stats_table', () => ({
+  FieldStatisticsTab: jest.fn(() => <div data-test-subj="fieldStatisticsTabMock" />),
+}));
+
+jest.mock('../pattern_analysis/pattern_analysis_tab', () => ({
+  PatternAnalysisTab: jest.fn(() => <div data-test-subj="patternAnalysisTabMock" />),
+}));
+
+jest.mock('../../../../components/panels_toggle', () => ({
+  PanelsToggle: jest.fn(({ omitChartButton, omitTableButton }) => (
+    <div
+      data-test-subj="panelsToggleMock"
+      data-omit-chart-button={String(omitChartButton)}
+      data-omit-table-button={String(omitTableButton)}
+    />
+  )),
+}));
+
+const dataView = dataViewWithTimefieldMock;
+
+const renderComponent = async ({
   hideChart = false,
   isEsqlMode = false,
   isChartAvailable,
   viewMode = VIEW_MODE.DOCUMENT_LEVEL,
-  storage,
 }: {
   hideChart?: boolean;
   isEsqlMode?: boolean;
   isChartAvailable?: boolean;
   viewMode?: VIEW_MODE;
-  storage?: Storage;
-  savedSearch?: SavedSearch;
 } = {}) => {
-  let services = createDiscoverServicesMock();
+  const { profilesManagerMock } = createContextAwarenessMocks({ shouldRegisterProviders: false });
+  const services = createDiscoverServicesMock();
 
-  (services.data.query.queryString.getDefaultQuery as jest.Mock).mockReturnValue({
-    language: 'kuery',
-    query: '',
+  services.profilesManager = profilesManagerMock;
+
+  const toolkit = getDiscoverInternalStateMock({
+    services,
+    persistedDataViews: [dataView],
   });
-  (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementation(
-    jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: 2 } } }))
+
+  await toolkit.initializeTabs();
+
+  const query: DiscoverAppState['query'] = isEsqlMode
+    ? { esql: 'from *' }
+    : { query: '', language: 'kuery' };
+
+  toolkit.internalState.dispatch(
+    internalStateActions.updateAppState({
+      tabId: toolkit.getCurrentTab().id,
+      appState: {
+        dataSource: createDataSource({ dataView, query }),
+        interval: 'auto',
+        hideChart,
+        columns: [],
+        query,
+      },
+    })
   );
 
-  if (storage) {
-    services = { ...services, storage };
-  }
-
-  const main$ = new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    foundDocuments: true,
-  }) as DataMain$;
-
-  const documents$ = new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    result: esHitsMock.map((esHit) => buildDataTableRecord(esHit, dataViewMock)),
-  }) as DataDocuments$;
-
-  const totalHits$ = new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    result: Number(esHitsMock.length),
-  }) as DataTotalHits$;
-
-  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-  const savedSearchData$ = {
-    main$,
-    documents$,
-    totalHits$,
-  };
-  stateContainer.dataState.data$ = savedSearchData$;
-  const dataView = stateContainer.savedSearchState
-    .getState()
-    .searchSource.getField('index') as DataView;
-  stateContainer.appState.update({
-    dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
-    interval: 'auto',
-    hideChart,
-    columns: [],
+  const { dataStateContainer } = await toolkit.initializeSingleTab({
+    tabId: toolkit.getCurrentTab().id,
   });
 
-  if (isEsqlMode) {
-    stateContainer.appState.update({ query: { esql: 'from * ' } });
-  }
+  dataStateContainer.data$.documents$.next({
+    fetchStatus: FetchStatus.COMPLETE,
+    result: esHitsMock.map((esHit) => buildDataTableRecord(esHit, dataView)),
+  });
+  dataStateContainer.data$.totalHits$.next({
+    fetchStatus: FetchStatus.COMPLETE,
+    result: Number(esHitsMock.length),
+  });
+  dataStateContainer.data$.main$.next({
+    fetchStatus: FetchStatus.COMPLETE,
+    foundDocuments: true,
+  });
 
   const props: DiscoverMainContentProps = {
     dataView,
-    stateContainer,
     onFieldEdited: jest.fn(),
     columns: [],
     viewMode,
     onAddFilter: jest.fn(),
+    sidebarToggleState$: new BehaviorSubject<SidebarToggleState>({
+      isCollapsed: false,
+      toggle: jest.fn(),
+    }),
     isChartAvailable,
-    panelsToggle: (
-      <PanelsToggle
-        stateContainer={stateContainer}
-        sidebarToggleState$={
-          new BehaviorSubject<SidebarToggleState>({
-            isCollapsed: true,
-            toggle: () => {},
-          })
-        }
-        isChartAvailable={undefined}
-        renderedFor="root"
-      />
-    ),
   };
 
-  const component = mountWithIntl(
-    <KibanaRenderContextProvider {...services.core}>
-      <KibanaContextProvider services={services}>
-        <DiscoverMainProvider value={stateContainer}>
-          <DiscoverMainContent {...props} />
-        </DiscoverMainProvider>
-      </KibanaContextProvider>
-    </KibanaRenderContextProvider>
+  renderWithKibanaRenderContext(
+    <DiscoverToolkitTestProvider toolkit={toolkit}>
+      <DiscoverMainContent {...props} />
+    </DiscoverToolkitTestProvider>
   );
 
-  await act(async () => {
-    component.update();
+  await waitFor(() => {
+    expect(screen.getByTestId('dscMainContent')).toBeVisible();
   });
-
-  return component;
 };
 
 describe('Discover main content component', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('DocumentViewModeToggle', () => {
     it('should show DocumentViewModeToggle when not in ES|QL mode', async () => {
-      const component = await mountComponent();
-      expect(component.find(DiscoverDocuments).prop('viewModeToggle')).toBeDefined();
+      await renderComponent();
+
+      expect(screen.getByTestId('discoverDocumentsMock')).toHaveAttribute(
+        'data-has-view-mode-toggle',
+        'true'
+      );
     });
 
     it('should include DocumentViewModeToggle when in ES|QL mode', async () => {
-      const component = await mountComponent({ isEsqlMode: true });
-      expect(component.find(DiscoverDocuments).prop('viewModeToggle')).toBeDefined();
+      await renderComponent({ isEsqlMode: true });
+
+      expect(screen.getByTestId('discoverDocumentsMock')).toHaveAttribute(
+        'data-has-view-mode-toggle',
+        'true'
+      );
     });
 
     it('should show DocumentViewModeToggle for Field Statistics', async () => {
-      const component = await mountComponent({ viewMode: VIEW_MODE.AGGREGATED_LEVEL });
-      expect(component.find(DocumentViewModeToggle).exists()).toBe(true);
+      await renderComponent({ viewMode: VIEW_MODE.AGGREGATED_LEVEL });
+
+      expect(screen.getByTestId('documentViewModeToggleMock')).toBeVisible();
     });
 
-    it('should include PanelsToggle when chart is available', async () => {
-      const component = await mountComponent({ isChartAvailable: true });
-      expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(true);
-      expect(component.find(PanelsToggle).prop('renderedFor')).toBe('tabs');
-      expect(component.find(EuiHorizontalRule).exists()).toBe(true);
+    it('should not include inline PanelsToggle when chart is available and visible', async () => {
+      await renderComponent({ isChartAvailable: true });
+
+      expect(screen.queryByTestId('panelsToggleMock')).not.toBeInTheDocument();
+      expect(screen.getByRole('separator')).toBeVisible();
     });
 
     it('should include PanelsToggle when chart is available and hidden', async () => {
-      const component = await mountComponent({ isChartAvailable: true, hideChart: true });
-      expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(true);
-      expect(component.find(PanelsToggle).prop('renderedFor')).toBe('tabs');
-      expect(component.find(EuiHorizontalRule).exists()).toBe(false);
+      await renderComponent({ isChartAvailable: true, hideChart: true });
+
+      expect(screen.getByTestId('panelsToggleMock')).toHaveAttribute(
+        'data-omit-chart-button',
+        'false'
+      );
+      expect(screen.queryByRole('separator')).not.toBeInTheDocument();
     });
 
     it('should include PanelsToggle when chart is not available', async () => {
-      const component = await mountComponent({ isChartAvailable: false });
-      expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(false);
-      expect(component.find(PanelsToggle).prop('renderedFor')).toBe('tabs');
-      expect(component.find(EuiHorizontalRule).exists()).toBe(false);
+      await renderComponent({ isChartAvailable: false });
+
+      expect(screen.getByTestId('panelsToggleMock')).toHaveAttribute(
+        'data-omit-chart-button',
+        'true'
+      );
+      expect(screen.getByTestId('panelsToggleMock')).toHaveAttribute(
+        'data-omit-table-button',
+        'true'
+      );
+      expect(screen.queryByRole('separator')).not.toBeInTheDocument();
     });
   });
 
   describe('Document view', () => {
     it('should show DiscoverDocuments when VIEW_MODE is DOCUMENT_LEVEL', async () => {
-      const component = await mountComponent();
-      expect(component.find(DiscoverDocuments).exists()).toBe(true);
-      expect(component.find(PatternAnalysisTab).exists()).toBe(false);
-      expect(component.find(FieldStatisticsTab).exists()).toBe(false);
+      await renderComponent();
+
+      expect(screen.getByTestId('discoverDocumentsMock')).toBeVisible();
+      expect(screen.queryByTestId('patternAnalysisTabMock')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('fieldStatisticsTabMock')).not.toBeInTheDocument();
     });
 
     it('should show FieldStatisticsTab when VIEW_MODE is AGGREGATED_LEVEL', async () => {
-      const component = await mountComponent({ viewMode: VIEW_MODE.AGGREGATED_LEVEL });
-      expect(component.find(DiscoverDocuments).exists()).toBe(false);
-      expect(component.find(PatternAnalysisTab).exists()).toBe(false);
-      expect(component.find(FieldStatisticsTab).exists()).toBe(true);
+      await renderComponent({ viewMode: VIEW_MODE.AGGREGATED_LEVEL });
+
+      expect(screen.queryByTestId('discoverDocumentsMock')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('patternAnalysisTabMock')).not.toBeInTheDocument();
+      expect(screen.getByTestId('fieldStatisticsTabMock')).toBeVisible();
     });
 
     it('should show PatternAnalysisTab when VIEW_MODE is PATTERN_LEVEL', async () => {
-      const component = await mountComponent({ viewMode: VIEW_MODE.PATTERN_LEVEL });
-      expect(component.find(DiscoverDocuments).exists()).toBe(false);
-      expect(component.find(PatternAnalysisTab).exists()).toBe(true);
-      expect(component.find(FieldStatisticsTab).exists()).toBe(false);
+      await renderComponent({ viewMode: VIEW_MODE.PATTERN_LEVEL });
+
+      expect(screen.queryByTestId('discoverDocumentsMock')).not.toBeInTheDocument();
+      expect(screen.getByTestId('patternAnalysisTabMock')).toBeVisible();
+      expect(screen.queryByTestId('fieldStatisticsTabMock')).not.toBeInTheDocument();
     });
   });
 });

@@ -10,12 +10,12 @@ import { i18n } from '@kbn/i18n';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { assertNever } from '@kbn/std';
 import { capitalize } from 'lodash';
-import { Observable, Subscription } from 'rxjs';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { Observable, Subscription } from 'rxjs';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { ILicense, LicenseType } from '@kbn/licensing-types';
 import { PLUGIN } from '../../common/constants/plugin';
 import { getRuleTypeFeatureUsageName } from './get_rule_type_feature_usage_name';
-import {
+import type {
   RuleType,
   RuleTypeParams,
   RuleTypeState,
@@ -148,8 +148,34 @@ export class LicenseState {
     }
   }
 
-  public ensureLicenseForMaintenanceWindow() {
+  public ensureLicenseForGapAutoFillScheduler() {
     if (!this.license || !this.license?.isAvailable) {
+      throw Boom.forbidden(
+        i18n.translate(
+          'xpack.alerting.serverSideErrors.gapAutoFillScheduler.unavailableLicenseErrorMessage',
+          {
+            defaultMessage:
+              'Gap auto fill scheduler is disabled because license information is not available at this time.',
+          }
+        )
+      );
+    }
+
+    if (!this.license.hasAtLeast('enterprise')) {
+      throw Boom.forbidden(
+        i18n.translate(
+          'xpack.alerting.serverSideErrors.gapAutoFillScheduler.invalidLicenseErrorMessage',
+          {
+            defaultMessage:
+              'Gap auto fill scheduler is disabled because it requires an enterprise license. Go to License Management to view upgrade options.',
+          }
+        )
+      );
+    }
+  }
+
+  public ensureLicenseForMaintenanceWindow() {
+    if (!this.license?.isAvailable) {
       throw Boom.forbidden(
         i18n.translate(
           'xpack.alerting.serverSideErrors.maintenanceWindow.unavailableLicenseErrorMessage',

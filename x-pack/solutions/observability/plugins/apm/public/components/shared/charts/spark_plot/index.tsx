@@ -23,6 +23,10 @@ import { i18n } from '@kbn/i18n';
 import type { Coordinate } from '../../../../../typings/timeseries';
 import { unit } from '../../../../utils/style';
 import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
+import {
+  APM_EDGE_DOTTED_LINE_STYLE,
+  splitCoordinateSeriesForEdgeDots,
+} from '../utils/split_line_series_for_edge_dots';
 
 function hasValidTimeseries(series?: Coordinate[] | null): series is Coordinate[] {
   return !!series?.some((point) => point.y !== null);
@@ -123,12 +127,22 @@ export function SparkPlotItem({
           justifyContent: 'center',
         }}
       >
-        <EuiLoadingChart mono />
+        <EuiLoadingChart />
       </div>
     );
   }
 
   if (hasValidTimeseries(series)) {
+    const {
+      main: mainSparkSeries,
+      leadingEdge,
+      trailingEdge,
+    } = splitCoordinateSeriesForEdgeDots(series);
+
+    const comparisonSplit = hasComparisonSeries
+      ? splitCoordinateSeriesForEdgeDots(comparisonSeries)
+      : null;
+
     return (
       <Chart size={chartSize}>
         <Settings
@@ -163,28 +177,86 @@ export function SparkPlotItem({
           </>
         ) : (
           <>
-            <LineSeries
-              id="Sparkline"
-              xScaleType={ScaleType.Time}
-              yScaleType={ScaleType.Linear}
-              xAccessor={'x'}
-              yAccessors={['y']}
-              data={series}
-              color={color}
-              curve={CurveType.CURVE_MONOTONE_X}
-            />
-            {hasComparisonSeries && (
-              <AreaSeries
-                id="comparisonSeries"
+            {leadingEdge ? (
+              <LineSeries
+                id="Sparkline_edge_leading"
+                // Defaults to multi layer time axis as of Elastic Charts v70
                 xScaleType={ScaleType.Time}
                 yScaleType={ScaleType.Linear}
                 xAccessor={'x'}
                 yAccessors={['y']}
-                data={comparisonSeries}
-                color={comparisonSeriesColor}
+                data={leadingEdge}
+                color={color}
                 curve={CurveType.CURVE_MONOTONE_X}
+                lineSeriesStyle={APM_EDGE_DOTTED_LINE_STYLE}
               />
-            )}
+            ) : null}
+            {trailingEdge ? (
+              <LineSeries
+                id="Sparkline_edge_trailing"
+                // Defaults to multi layer time axis as of Elastic Charts v70
+                xScaleType={ScaleType.Time}
+                yScaleType={ScaleType.Linear}
+                xAccessor={'x'}
+                yAccessors={['y']}
+                data={trailingEdge}
+                color={color}
+                curve={CurveType.CURVE_MONOTONE_X}
+                lineSeriesStyle={APM_EDGE_DOTTED_LINE_STYLE}
+              />
+            ) : null}
+            <LineSeries
+              id="Sparkline"
+              // Defaults to multi layer time axis as of Elastic Charts v70
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
+              xAccessor={'x'}
+              yAccessors={['y']}
+              data={mainSparkSeries}
+              color={color}
+              curve={CurveType.CURVE_MONOTONE_X}
+            />
+            {hasComparisonSeries && comparisonSplit ? (
+              <>
+                {comparisonSplit.leadingEdge ? (
+                  <LineSeries
+                    id="comparisonSeries_edge_leading"
+                    xScaleType={ScaleType.Time}
+                    yScaleType={ScaleType.Linear}
+                    xAccessor={'x'}
+                    yAccessors={['y']}
+                    data={comparisonSplit.leadingEdge}
+                    color={comparisonSeriesColor}
+                    curve={CurveType.CURVE_MONOTONE_X}
+                    lineSeriesStyle={APM_EDGE_DOTTED_LINE_STYLE}
+                  />
+                ) : null}
+                {comparisonSplit.trailingEdge ? (
+                  <LineSeries
+                    id="comparisonSeries_edge_trailing"
+                    xScaleType={ScaleType.Time}
+                    yScaleType={ScaleType.Linear}
+                    xAccessor={'x'}
+                    yAccessors={['y']}
+                    data={comparisonSplit.trailingEdge}
+                    color={comparisonSeriesColor}
+                    curve={CurveType.CURVE_MONOTONE_X}
+                    lineSeriesStyle={APM_EDGE_DOTTED_LINE_STYLE}
+                  />
+                ) : null}
+                <AreaSeries
+                  id="comparisonSeries"
+                  // Defaults to multi layer time axis as of Elastic Charts v70
+                  xScaleType={ScaleType.Time}
+                  yScaleType={ScaleType.Linear}
+                  xAccessor={'x'}
+                  yAccessors={['y']}
+                  data={comparisonSplit.main}
+                  color={comparisonSeriesColor}
+                  curve={CurveType.CURVE_MONOTONE_X}
+                />
+              </>
+            ) : null}
           </>
         )}
       </Chart>
@@ -200,7 +272,7 @@ export function SparkPlotItem({
         justifyContent: 'center',
       }}
     >
-      <EuiIcon type="visLine" color={euiTheme.colors.mediumShade} />
+      <EuiIcon type="chartLine" color={euiTheme.colors.mediumShade} aria-hidden={true} />
     </div>
   );
 }

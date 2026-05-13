@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { ControlType, Workspace, WorkspaceField } from '../../types';
+import type { ControlType, Workspace, WorkspaceField } from '../../types';
 
 interface ControlPanelToolBarProps {
   workspace: Workspace;
@@ -89,9 +89,9 @@ export const ControlPanelToolBar = ({
   return (
     <EuiFlexGroup gutterSize="xs" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={undoButtonMsg}>
+        <EuiToolTip content={undoButtonMsg} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType={'editorUndo'}
+            iconType={'undo'}
             size="xs"
             aria-label={undoButtonMsg}
             isDisabled={workspace.undoLog.length < 1}
@@ -101,9 +101,9 @@ export const ControlPanelToolBar = ({
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={redoButtonMsg}>
+        <EuiToolTip content={redoButtonMsg} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="editorRedo"
+            iconType="redo"
             size="xs"
             aria-label={redoButtonMsg}
             isDisabled={workspace.redoLog.length === 0}
@@ -113,7 +113,7 @@ export const ControlPanelToolBar = ({
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={expandButtonMsg}>
+        <EuiToolTip content={expandButtonMsg} disableScreenReaderOutput>
           <EuiButtonIcon
             iconType="plus"
             size="xs"
@@ -125,7 +125,7 @@ export const ControlPanelToolBar = ({
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={addLinksButtonMsg}>
+        <EuiToolTip content={addLinksButtonMsg} disableScreenReaderOutput>
           <EuiButtonIcon
             iconType="link"
             size="xs"
@@ -137,7 +137,7 @@ export const ControlPanelToolBar = ({
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={removeVerticesButtonMsg}>
+        <EuiToolTip content={removeVerticesButtonMsg} disableScreenReaderOutput>
           <EuiButtonIcon
             data-test-subj="graphRemoveSelection"
             iconType="trash"
@@ -150,9 +150,9 @@ export const ControlPanelToolBar = ({
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={blocklistButtonMsg}>
+        <EuiToolTip content={blocklistButtonMsg} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="eyeClosed"
+            iconType="eyeSlash"
             size="xs"
             aria-label={blocklistButtonMsg}
             isDisabled={workspace.selectedNodes.length === 0}
@@ -162,7 +162,7 @@ export const ControlPanelToolBar = ({
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={customStyleButtonMsg}>
+        <EuiToolTip content={customStyleButtonMsg} disableScreenReaderOutput>
           <EuiButtonIcon
             iconType="brush"
             size="xs"
@@ -174,9 +174,9 @@ export const ControlPanelToolBar = ({
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={drillDownButtonMsg}>
+        <EuiToolTip content={drillDownButtonMsg} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="iInCircle"
+            iconType="info"
             size="xs"
             aria-label={drillDownButtonMsg}
             isDisabled={haveNodes}
@@ -187,10 +187,10 @@ export const ControlPanelToolBar = ({
 
       {(workspace.nodes.length === 0 || workspace.force === null) && (
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={runLayoutButtonMsg}>
+          <EuiToolTip content={runLayoutButtonMsg} disableScreenReaderOutput>
             <EuiButtonIcon
               data-test-subj="graphResumeLayout"
-              iconType="playFilled"
+              iconType="play"
               size="xs"
               aria-label={runLayoutButtonMsg}
               isDisabled={workspace.nodes.length === 0}
@@ -202,7 +202,7 @@ export const ControlPanelToolBar = ({
 
       {workspace.force !== null && workspace.nodes.length > 0 && (
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={pauseLayoutButtonMsg}>
+          <EuiToolTip content={pauseLayoutButtonMsg} disableScreenReaderOutput>
             <EuiButtonIcon
               data-test-subj="graphPauseLayout"
               iconType="pause"

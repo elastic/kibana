@@ -6,10 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import moment, { Moment } from 'moment';
+import type { Moment } from 'moment';
+import moment from 'moment';
 
 import { ISO_WEEKDAYS } from '@kbn/alerting-plugin/common';
-import { RecurrenceSchedule, RRuleFrequency } from '../../../../../../types';
+import type { RecurrenceSchedule } from '../../../../../../types';
+import { RRuleFrequency } from '../../../../../../types';
 import { i18nMonthDayDate } from '../../../../../lib/i18n_month_day_date';
 import { ISO_WEEKDAYS_TO_RRULE, RRULE_WEEKDAYS_TO_ISO_WEEKDAYS } from './constants';
 import { i18nFreqSummary, i18nNthWeekdayShort } from './translations';
@@ -109,7 +111,11 @@ export const recurrenceSummary = ({
       ? i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.bymonthSummary', {
           defaultMessage: 'on {date}',
           values: {
-            date: i18nMonthDayDate(moment().month(bymonth[0]).date(bymonthday[0])),
+            date: i18nMonthDayDate(
+              moment()
+                .month(bymonth[0] - 1)
+                .date(bymonthday[0])
+            ),
           },
         })
       : null;
@@ -179,7 +185,7 @@ export const buildCustomRecurrenceSchedulerState = ({
       : [];
 
   const bymonthday = useByMonthDay ? [startDate.date()] : [];
-  const bymonth = startDate && frequency === RRuleFrequency.YEARLY ? [startDate.month()] : [];
+  const bymonth = startDate && frequency === RRuleFrequency.YEARLY ? [startDate.month() + 1] : [];
   return {
     freq: frequency,
     interval,

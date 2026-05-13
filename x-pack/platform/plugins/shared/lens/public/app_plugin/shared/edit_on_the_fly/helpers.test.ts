@@ -5,9 +5,10 @@
  * 2.0.
  */
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { getESQLResults } from '@kbn/esql-utils';
+import { getESQLResults, formatESQLColumns, getESQLAdHocDataview } from '@kbn/esql-utils';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { LensPluginStartDependencies } from '../../../plugin';
-import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
 import {
   mockVisualizationMap,
@@ -16,74 +17,94 @@ import {
   mockAllSuggestions,
 } from '../../../mocks';
 import { suggestionsApi } from '../../../lens_suggestions_api';
-import { getSuggestions, injectESQLQueryIntoLensLayers } from './helpers';
+import { buildDisplayRowsFromEsqlValues, getGridAttrs, getSuggestions } from './helpers';
 
 const mockSuggestionApi = suggestionsApi as jest.Mock;
 const mockFetchData = getESQLResults as jest.Mock;
+const mockformatESQLColumns = formatESQLColumns as jest.Mock;
+const mockGetESQLAdHocDataview = getESQLAdHocDataview as jest.Mock;
 
 jest.mock('../../../lens_suggestions_api', () => ({
   suggestionsApi: jest.fn(() => mockAllSuggestions),
 }));
 
+const queryResponseColumns = [
+  {
+    name: '@timestamp',
+    id: '@timestamp',
+    meta: {
+      type: 'date',
+    },
+  },
+  {
+    name: 'bytes',
+    id: 'bytes',
+    meta: {
+      type: 'number',
+    },
+  },
+  {
+    name: 'memory',
+    id: 'memory',
+    meta: {
+      type: 'number',
+    },
+  },
+];
+
 jest.mock('@kbn/esql-utils', () => {
   return {
     getESQLResults: jest.fn().mockResolvedValue({
       response: {
-        columns: [
-          {
-            name: '@timestamp',
-            id: '@timestamp',
-            meta: {
-              type: 'date',
-            },
-          },
-          {
-            name: 'bytes',
-            id: 'bytes',
-            meta: {
-              type: 'number',
-            },
-          },
-          {
-            name: 'memory',
-            id: 'memory',
-            meta: {
-              type: 'number',
-            },
-          },
-        ],
+        columns: queryResponseColumns,
         values: [],
       },
     }),
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
     getESQLAdHocDataview: jest.fn().mockResolvedValue({}),
-    formatESQLColumns: jest.fn().mockReturnValue([
-      {
-        name: '@timestamp',
-        id: '@timestamp',
-        meta: {
-          type: 'date',
-        },
-      },
-      {
-        name: 'bytes',
-        id: 'bytes',
-        meta: {
-          type: 'number',
-        },
-      },
-      {
-        name: 'memory',
-        id: 'memory',
-        meta: {
-          type: 'number',
-        },
-      },
-    ]),
+    formatESQLColumns: jest.fn().mockReturnValue(queryResponseColumns),
   };
 });
 
 describe('Lens inline editing helpers', () => {
+  describe('buildDisplayRowsFromEsqlValues', () => {
+    it('returns values unchanged when value and display columns match in order', () => {
+      const valueColumns = [
+        { name: 'a', type: 'double' },
+        { name: 'b', type: 'integer' },
+      ];
+      const values = [
+        [1, 2],
+        [3, 4],
+      ];
+
+      expect(
+        buildDisplayRowsFromEsqlValues({
+          displayColumns: valueColumns,
+          valueColumns,
+          values,
+        })
+      ).toEqual(values);
+    });
+
+    it('maps row cells by column name when all_columns is a superset of columns', () => {
+      const displayColumns = [
+        { name: 'count', type: 'double' },
+        { name: 'max_value', type: 'integer' },
+      ];
+      const valueColumns = [{ name: 'max_value', type: 'integer' }];
+      const values = [[500]];
+
+      expect(
+        buildDisplayRowsFromEsqlValues({
+          displayColumns,
+          valueColumns,
+          values,
+        })
+      ).toEqual([[null, 500]]);
+    });
+  });
+
   describe('getSuggestions', () => {
     const query = {
       esql: 'from index1 | limit 10 | stats average = avg(bytes)',
@@ -91,7 +112,13 @@ describe('Lens inline editing helpers', () => {
     const mockStartDependencies =
       createMockStartDependencies() as unknown as LensPluginStartDependencies;
     const dataViews = dataViewPluginMocks.createStartContract();
+    const httpMock = coreMock.createStart().http;
     dataViews.create.mockResolvedValue(mockDataViewWithTimefield);
+    mockStartDependencies.data.dataViews = dataViews;
+    const uiSettingsMock = {
+      get: jest.fn(),
+    } as unknown as IUiSettingsClient;
+
     const dataviewSpecArr = [
       {
         id: 'd2588ae7-9ea0-4439-9f5b-f808754a3b97',
@@ -113,7 +140,9 @@ describe('Lens inline editing helpers', () => {
     it('returns the suggestions attributes correctly', async () => {
       const suggestionsAttributes = await getSuggestions(
         query,
-        startDependencies,
+        startDependencies.data,
+        httpMock,
+        uiSettingsMock,
         mockDatasourceMap(),
         mockVisualizationMap(),
         dataviewSpecArr,
@@ -125,11 +154,28 @@ describe('Lens inline editing helpers', () => {
       );
     });
 
+    it('does not populate the title from the suggestion', async () => {
+      const suggestionsAttributes = await getSuggestions(
+        query,
+        startDependencies.data,
+        httpMock,
+        uiSettingsMock,
+        mockDatasourceMap(),
+        mockVisualizationMap(),
+        dataviewSpecArr,
+        jest.fn()
+      );
+      expect(mockAllSuggestions[0].title).not.toBe('');
+      expect(suggestionsAttributes?.title).toBe('');
+    });
+
     it('returns undefined if no suggestions are computed', async () => {
       mockSuggestionApi.mockResolvedValueOnce([]);
       const suggestionsAttributes = await getSuggestions(
         query,
-        startDependencies,
+        startDependencies.data,
+        httpMock,
+        uiSettingsMock,
         mockDatasourceMap(),
         mockVisualizationMap(),
         dataviewSpecArr,
@@ -145,7 +191,9 @@ describe('Lens inline editing helpers', () => {
       const setErrorsSpy = jest.fn();
       const suggestionsAttributes = await getSuggestions(
         query,
-        startDependencies,
+        startDependencies.data,
+        httpMock,
+        uiSettingsMock,
         mockDatasourceMap(),
         mockVisualizationMap(),
         dataviewSpecArr,
@@ -156,73 +204,194 @@ describe('Lens inline editing helpers', () => {
     });
   });
 
-  describe('injectESQLQueryIntoLensLayers', () => {
+  describe('getGridAttrs', () => {
     const query = {
       esql: 'from index1 | limit 10 | stats average = avg(bytes)',
     };
+    const mockStartDependencies =
+      createMockStartDependencies() as unknown as LensPluginStartDependencies;
+    const dataViews = dataViewPluginMocks.createStartContract();
+    dataViews.create.mockResolvedValue(mockDataViewWithTimefield);
+    mockStartDependencies.data.dataViews = dataViews;
+    const dataviewSpecArr = [
+      {
+        id: 'd2588ae7-9ea0-4439-9f5b-f808754a3b97',
+        title: 'index1',
+        timeFieldName: '@timestamp',
+        sourceFilters: [],
+        fieldFormats: {},
+        runtimeFieldMap: {},
+        fieldAttrs: {},
+        allowNoIndex: false,
+        name: 'index1',
+      },
+    ];
+    const startDependencies = {
+      ...mockStartDependencies,
+      dataViews,
+      http: coreMock.createStart().http,
+    };
 
-    it('should inject the query correctly for ES|QL charts', async () => {
-      const lensAttributes = {
-        title: 'test',
-        visualizationType: 'testVis',
-        state: {
-          datasourceStates: {
-            textBased: { layers: { layer1: { query: { esql: 'from index1 | limit 10' } } } },
-          },
-          visualization: { preferredSeriesType: 'line' },
-        },
-        filters: [],
-        query: {
-          esql: 'from index1 | limit 10',
-        },
-        references: [],
-      } as unknown as TypedLensSerializedState['attributes'];
+    const uiSettingsMock = {
+      get: jest.fn(),
+    } as unknown as IUiSettingsClient;
 
-      const expectedLensAttributes = {
-        ...lensAttributes,
-        state: {
-          ...lensAttributes.state,
-          datasourceStates: {
-            ...lensAttributes.state.datasourceStates,
-            textBased: {
-              ...lensAttributes.state.datasourceStates.textBased,
-              layers: {
-                layer1: {
-                  query: { esql: 'from index1 | limit 10 | stats average = avg(bytes)' },
-                },
-              },
-            },
+    it('returns the columns if the array is not empty in the response', async () => {
+      mockFetchData.mockImplementation(() => {
+        return {
+          response: {
+            columns: queryResponseColumns,
+            values: [],
           },
-        },
-      };
-      const newAttributes = injectESQLQueryIntoLensLayers(lensAttributes, query);
-      expect(newAttributes).toStrictEqual(expectedLensAttributes);
+        };
+      });
+      const gridAttributes = await getGridAttrs(
+        query,
+        dataviewSpecArr,
+        startDependencies.data,
+        startDependencies.http,
+        uiSettingsMock
+      );
+      expect(gridAttributes.columns).toStrictEqual(queryResponseColumns);
     });
 
-    it('should return the Lens attributes as they are for unknown datasourceId', async () => {
-      const attributes = {
-        visualizationType: 'lnsXY',
-        state: {
-          visualization: { preferredSeriesType: 'line' },
-          datasourceStates: { unknownId: { layers: {} } },
+    it('returns all_columns if the columns array is empty in the response and all_columns exist', async () => {
+      const emptyColumns = [
+        {
+          name: 'bytes',
+          id: 'bytes',
+          meta: {
+            type: 'number',
+          },
         },
-      } as unknown as TypedLensSerializedState['attributes'];
-      expect(injectESQLQueryIntoLensLayers(attributes, { esql: 'from foo' })).toStrictEqual(
-        attributes
+      ];
+      mockFetchData.mockImplementation(() => {
+        return {
+          response: {
+            columns: [],
+            values: [],
+            all_columns: emptyColumns,
+          },
+        };
+      });
+      mockformatESQLColumns.mockImplementation(() => emptyColumns);
+      const gridAttributes = await getGridAttrs(
+        query,
+        dataviewSpecArr,
+        startDependencies.data,
+        startDependencies.http,
+        uiSettingsMock
+      );
+      expect(gridAttributes.columns).toStrictEqual(emptyColumns);
+    });
+
+    it('passes all_columns to formatESQLColumns and expands values by name when columns is a subset', async () => {
+      const allColumnsRaw = [
+        { name: 'count', type: 'double' },
+        { name: 'max_value', type: 'integer' },
+      ];
+      const subsetColumns = [{ name: 'max_value', type: 'integer' }];
+      const formattedColumns = [
+        { name: 'count', id: 'count', meta: { type: 'number', esType: 'double' } },
+        { name: 'max_value', id: 'max_value', meta: { type: 'number', esType: 'integer' } },
+      ];
+
+      mockFetchData.mockImplementation(() => ({
+        response: {
+          all_columns: allColumnsRaw,
+          columns: subsetColumns,
+          values: [[500]],
+        },
+      }));
+      mockformatESQLColumns.mockReturnValueOnce(formattedColumns);
+
+      const gridAttributes = await getGridAttrs(
+        query,
+        dataviewSpecArr,
+        startDependencies.data,
+        startDependencies.http,
+        uiSettingsMock
+      );
+
+      expect(mockformatESQLColumns).toHaveBeenCalledWith(allColumnsRaw);
+      expect(gridAttributes.rows).toEqual([[null, 500]]);
+      expect(gridAttributes.columns).toStrictEqual(formattedColumns);
+    });
+
+    it('falls back to getESQLAdHocDataview when spec has no timeFieldName', async () => {
+      dataViews.create.mockClear();
+      mockFetchData.mockImplementation(() => ({
+        response: { columns: queryResponseColumns, values: [] },
+      }));
+      mockGetESQLAdHocDataview.mockResolvedValue({
+        timeFieldName: '@timestamp',
+      });
+
+      const specWithoutTimeField = [
+        {
+          id: 'spec-id-123',
+          title: 'index1',
+          sourceFilters: [],
+          fieldFormats: {},
+          runtimeFieldMap: {},
+          fieldAttrs: {},
+          allowNoIndex: false,
+          name: 'index1',
+        },
+      ];
+
+      await getGridAttrs(
+        query,
+        specWithoutTimeField,
+        startDependencies.data,
+        startDependencies.http,
+        uiSettingsMock
+      );
+
+      expect(mockGetESQLAdHocDataview).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: query.esql,
+          options: { skipFetchFields: true, id: 'spec-id-123' },
+        })
+      );
+      expect(dataViews.create).not.toHaveBeenCalled();
+    });
+
+    it('falls back to getESQLAdHocDataview with id undefined when no spec matches', async () => {
+      mockFetchData.mockImplementation(() => ({
+        response: { columns: queryResponseColumns, values: [] },
+      }));
+      mockGetESQLAdHocDataview.mockResolvedValue({
+        timeFieldName: '@timestamp',
+      });
+
+      await getGridAttrs(query, [], startDependencies.data, startDependencies.http, uiSettingsMock);
+
+      expect(mockGetESQLAdHocDataview).toHaveBeenCalledWith(
+        expect.objectContaining({
+          options: { skipFetchFields: true, id: undefined },
+        })
       );
     });
 
-    it('should return the Lens attributes as they are for form based charts', async () => {
-      const attributes = {
-        visualizationType: 'lnsXY',
-        state: {
-          visualization: { preferredSeriesType: 'line' },
-          datasourceStates: { formBased: { layers: {} } },
-        },
-      } as TypedLensSerializedState['attributes'];
-      expect(injectESQLQueryIntoLensLayers(attributes, { esql: 'from foo' })).toStrictEqual(
-        attributes
+    it('uses dataViews.create when spec has timeFieldName', async () => {
+      mockFetchData.mockImplementation(() => ({
+        response: { columns: queryResponseColumns, values: [] },
+      }));
+      mockGetESQLAdHocDataview.mockClear();
+
+      await getGridAttrs(
+        query,
+        dataviewSpecArr,
+        startDependencies.data,
+        startDependencies.http,
+        uiSettingsMock
       );
+
+      expect(dataViews.create).toHaveBeenCalledWith(
+        expect.objectContaining({ timeFieldName: '@timestamp' })
+      );
+      expect(mockGetESQLAdHocDataview).not.toHaveBeenCalled();
     });
   });
 });

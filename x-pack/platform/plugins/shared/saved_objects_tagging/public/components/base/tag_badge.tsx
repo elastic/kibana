@@ -28,13 +28,11 @@ export const TagBadge: <T extends TagAttributes>(props: TagBadgeProps<T>) => Rea
           onClick!(tag);
         },
         onClickAriaLabel: i18n.translate('xpack.savedObjectsTagging.tagList.tagBadge.buttonLabel', {
-          defaultMessage: '{tagName} tag button.',
+          defaultMessage: '{tagName} tag',
           values: {
             tagName: tag.name,
           },
         }),
-        iconOnClick: () => undefined,
-        iconOnClickAriaLabel: '',
       }
     : {};
 

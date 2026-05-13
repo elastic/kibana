@@ -54,4 +54,27 @@ export const i18nTexts = {
       defaultMessage:
         'Unable to close the scroll context used for search. Check the Kibana server logs.',
     }),
+  csvMaxRowsWarning: ({
+    isServerless,
+    maxRows,
+    expected,
+  }: {
+    isServerless: boolean;
+    maxRows: number;
+    expected: number;
+  }) =>
+    i18n.translate('generateCsv.maxRowCount', {
+      defaultMessage:
+        'Your export would have generated {expected} total rows, but was limited to the maximum recommended row limit of {maxRows}.{kibanaConfigMessage}',
+      values: {
+        maxRows,
+        expected,
+        kibanaConfigMessage: isServerless
+          ? ''
+          : i18n.translate('generateCsv.maxRowCountKibanaConfig', {
+              defaultMessage:
+                ' This limit can be configured in kibana.yml, but increasing it may impact performance.',
+            }),
+      },
+    }),
 };

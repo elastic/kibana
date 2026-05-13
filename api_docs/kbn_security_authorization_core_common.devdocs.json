@@ -17,182 +17,7 @@
     "objects": []
   },
   "common": {
-    "classes": [
-      {
-        "parentPluginId": "@kbn/security-authorization-core-common",
-        "id": "def-common.ApiPrivileges",
-        "type": "Class",
-        "tags": [],
-        "label": "ApiPrivileges",
-        "description": [],
-        "path": "x-pack/platform/packages/private/security/authorization_core_common/src/privileges/api_privileges.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/security-authorization-core-common",
-            "id": "def-common.ApiPrivileges.manage",
-            "type": "Function",
-            "tags": [],
-            "label": "manage",
-            "description": [],
-            "signature": [
-              "(subject: string) => string"
-            ],
-            "path": "x-pack/platform/packages/private/security/authorization_core_common/src/privileges/api_privileges.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/security-authorization-core-common",
-                "id": "def-common.ApiPrivileges.manage.$1",
-                "type": "string",
-                "tags": [],
-                "label": "subject",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/platform/packages/private/security/authorization_core_common/src/privileges/api_privileges.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/security-authorization-core-common",
-            "id": "def-common.ApiPrivileges.read",
-            "type": "Function",
-            "tags": [],
-            "label": "read",
-            "description": [],
-            "signature": [
-              "(subject: string) => string"
-            ],
-            "path": "x-pack/platform/packages/private/security/authorization_core_common/src/privileges/api_privileges.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/security-authorization-core-common",
-                "id": "def-common.ApiPrivileges.read.$1",
-                "type": "string",
-                "tags": [],
-                "label": "subject",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/platform/packages/private/security/authorization_core_common/src/privileges/api_privileges.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/security-authorization-core-common",
-            "id": "def-common.ApiPrivileges.create",
-            "type": "Function",
-            "tags": [],
-            "label": "create",
-            "description": [],
-            "signature": [
-              "(subject: string) => string"
-            ],
-            "path": "x-pack/platform/packages/private/security/authorization_core_common/src/privileges/api_privileges.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/security-authorization-core-common",
-                "id": "def-common.ApiPrivileges.create.$1",
-                "type": "string",
-                "tags": [],
-                "label": "subject",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/platform/packages/private/security/authorization_core_common/src/privileges/api_privileges.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/security-authorization-core-common",
-            "id": "def-common.ApiPrivileges.update",
-            "type": "Function",
-            "tags": [],
-            "label": "update",
-            "description": [],
-            "signature": [
-              "(subject: string) => string"
-            ],
-            "path": "x-pack/platform/packages/private/security/authorization_core_common/src/privileges/api_privileges.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/security-authorization-core-common",
-                "id": "def-common.ApiPrivileges.update.$1",
-                "type": "string",
-                "tags": [],
-                "label": "subject",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/platform/packages/private/security/authorization_core_common/src/privileges/api_privileges.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/security-authorization-core-common",
-            "id": "def-common.ApiPrivileges.delete",
-            "type": "Function",
-            "tags": [],
-            "label": "delete",
-            "description": [],
-            "signature": [
-              "(subject: string) => string"
-            ],
-            "path": "x-pack/platform/packages/private/security/authorization_core_common/src/privileges/api_privileges.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/security-authorization-core-common",
-                "id": "def-common.ApiPrivileges.delete.$1",
-                "type": "string",
-                "tags": [],
-                "label": "subject",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/platform/packages/private/security/authorization_core_common/src/privileges/api_privileges.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/security-authorization-core-common",
@@ -207,6 +32,8 @@
           "(privilegeId: string) => string"
         ],
         "path": "x-pack/platform/packages/private/security/authorization_core_common/src/privileges/minimal_privileges.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -217,12 +44,14 @@
             "tags": [],
             "label": "privilegeId",
             "description": [
-              "The privilege ID to get the minimal privilege ID for. Only `all` and `read`\nprivileges have \"minimal\" equivalents."
+              "The privilege ID to get the minimal privilege ID for. Only `all` and `read`"
             ],
             "signature": [
               "string"
             ],
             "path": "x-pack/platform/packages/private/security/authorization_core_common/src/privileges/minimal_privileges.ts",
+            "lineNumber": 39,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -244,6 +73,8 @@
           "(privilegeId: string) => boolean"
         ],
         "path": "x-pack/platform/packages/private/security/authorization_core_common/src/privileges/minimal_privileges.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -260,6 +91,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/private/security/authorization_core_common/src/privileges/minimal_privileges.ts",
+            "lineNumber": 30,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

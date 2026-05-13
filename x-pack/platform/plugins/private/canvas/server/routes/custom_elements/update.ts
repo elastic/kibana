@@ -7,10 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 import { omit } from 'lodash';
-import { RouteInitializerDeps } from '..';
+import type { RouteInitializerDeps } from '..';
 import { CUSTOM_ELEMENT_TYPE, API_ROUTE_CUSTOM_ELEMENT } from '../../../common/lib/constants';
 import { CustomElementUpdateSchema } from './custom_element_schema';
-import { CustomElementAttributes } from './custom_element_attributes';
+import type { CustomElementAttributes } from './custom_element_attributes';
 import { okResponse } from '../ok_response';
 import { catchErrorHandler } from '../catch_error_handler';
 
@@ -26,17 +26,17 @@ export function initializeUpdateCustomElementRoute(deps: RouteInitializerDeps) {
         },
       },
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because authorization is provided by saved objects client.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because authorization is provided by saved objects client.',
-          },
-        },
         validate: {
           request: {
             params: schema.object({

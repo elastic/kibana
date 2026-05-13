@@ -9,11 +9,11 @@
 
 import { schema, ValidationError } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { InternalUiSettingsRouter } from '../../internal_types';
 import { CannotOverrideError } from '../../ui_settings_errors';
-import { InternalUiSettingsRequestHandlerContext } from '../../internal_types';
+import type { InternalUiSettingsRequestHandlerContext } from '../../internal_types';
 
 const validate = {
   body: schema.object({
@@ -55,7 +55,16 @@ export function registerInternalSetManyRoute(router: InternalUiSettingsRouter) {
   };
 
   router.post(
-    { path: '/internal/kibana/settings', validate, options: { access: 'internal' } },
+    {
+      path: '/internal/kibana/settings',
+      validate,
+      options: { access: 'internal' },
+      security: {
+        authz: {
+          requiredPrivileges: ['manage_advanced_settings'],
+        },
+      },
+    },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.client;
       return await setManyFromRequest(uiSettingsClient, context, request, response);
@@ -63,7 +72,16 @@ export function registerInternalSetManyRoute(router: InternalUiSettingsRouter) {
   );
 
   router.post(
-    { path: '/internal/kibana/global_settings', validate, options: { access: 'internal' } },
+    {
+      path: '/internal/kibana/global_settings',
+      validate,
+      options: { access: 'internal' },
+      security: {
+        authz: {
+          requiredPrivileges: ['manage_advanced_settings'],
+        },
+      },
+    },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.globalClient;
       return await setManyFromRequest(uiSettingsClient, context, request, response);

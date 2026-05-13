@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import {
-  ChatConnection,
+import type {
   GeminiContent,
+  GeminiRequest,
   GoogleAbstractedClient,
   GoogleAIBaseLLMInput,
   GoogleLLMResponse,
 } from '@langchain/google-common';
-import { ActionsClient } from '@kbn/actions-plugin/server';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { EnhancedGenerateContentResponse } from '@google/generative-ai';
-import { AsyncCaller } from '@langchain/core/utils/async_caller';
+import { ChatConnection } from '@langchain/google-common';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { EnhancedGenerateContentResponse } from '@google/generative-ai';
+import type { AsyncCaller } from '@langchain/core/utils/async_caller';
 import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import { convertResponseBadFinishReasonToErrorMsg } from '../../utils/gemini';
 
@@ -46,7 +47,7 @@ export class ActionsClientChatConnection<Auth> extends ChatConnection<Auth> {
     this.temperature = fields.temperature ?? 0;
     const nativeFormatData = this.formatData.bind(this);
     this.formatData = async (data, options) => {
-      const result = await nativeFormatData(data, options);
+      const result = (await nativeFormatData(data, options)) as GeminiRequest;
       if (result?.contents != null && result?.contents.length) {
         // ensure there are not 2 messages in a row from the same role,
         // if there are combine them

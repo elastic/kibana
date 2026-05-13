@@ -8,12 +8,8 @@
 import { get } from 'lodash/fp';
 import numeral from '@elastic/numeral';
 import React from 'react';
-import type { DataViewBase } from '@kbn/es-query';
-import {
-  SecurityCellActions,
-  CellActionsMode,
-  SecurityCellActionsTrigger,
-} from '../../../../common/components/cell_actions';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { SecurityCellActions, CellActionsMode } from '../../../../common/components/cell_actions';
 import { CountryFlagAndName } from '../source_destination/country_flag';
 import type {
   NetworkTopCountriesEdges,
@@ -45,7 +41,6 @@ export type NetworkTopCountriesColumnsNetworkDetails = [
 ];
 
 export const getNetworkTopCountriesColumns = (
-  indexPattern: DataViewBase,
   flowTarget: FlowTargetSourceDest,
   type: networkModel.NetworkType,
   tableId: string
@@ -63,7 +58,7 @@ export const getNetworkTopCountriesColumns = (
             mode={CellActionsMode.HOVER_DOWN}
             visibleCellActions={5}
             showActionTooltips
-            triggerId={SecurityCellActionsTrigger.DEFAULT}
+            triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
             data={{
               value: geo,
               field: geoAttr,
@@ -149,12 +144,11 @@ export const getNetworkTopCountriesColumns = (
 ];
 
 export const getCountriesColumnsCurated = (
-  indexPattern: DataViewBase,
   flowTarget: FlowTargetSourceDest,
   type: networkModel.NetworkType,
   tableId: string
 ): NetworkTopCountriesColumns | NetworkTopCountriesColumnsNetworkDetails => {
-  const columns = getNetworkTopCountriesColumns(indexPattern, flowTarget, type, tableId);
+  const columns = getNetworkTopCountriesColumns(flowTarget, type, tableId);
 
   // Columns to exclude from host details pages
   if (type === networkModel.NetworkType.details) {

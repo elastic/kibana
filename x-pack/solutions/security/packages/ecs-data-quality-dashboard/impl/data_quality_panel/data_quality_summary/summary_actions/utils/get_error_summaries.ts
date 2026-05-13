@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import sortBy from 'lodash/fp/sortBy';
-import { DataQualityCheckResult, ErrorSummary, PatternRollup } from '../../../types';
+import { sortBy } from 'lodash/fp';
+import type { DataQualityCheckResult, ErrorSummary, PatternRollup } from '../../../types';
 
 export const getErrorSummary = ({
   error,

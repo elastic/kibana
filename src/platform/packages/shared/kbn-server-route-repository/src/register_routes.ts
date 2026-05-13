@@ -14,19 +14,19 @@ import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server
 import { isKibanaResponse } from '@kbn/core-http-server';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
-import {
+import type {
   DefaultRouteCreateOptions,
   RouteParamsRT,
   ServerRoute,
   ZodParamsObject,
-  parseEndpoint,
 } from '@kbn/server-route-repository-utils';
-import { ServerSentEvent } from '@kbn/sse-utils';
+import { parseEndpoint } from '@kbn/server-route-repository-utils';
+import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
-import { isZod } from '@kbn/zod';
+import { isZod } from '@kbn/zod/v4';
 import { merge, omit } from 'lodash';
-import { Observable, isObservable } from 'rxjs';
-import { assertAllParsableSchemas } from '@kbn/zod-helpers';
+import type { Observable } from 'rxjs';
+import { isObservable } from 'rxjs';
 import { makeZodValidationObject } from './make_zod_validation_object';
 import { validateAndDecodeParams } from './validate_and_decode_params';
 import { noParamsValidationObject, passThroughValidationObject } from './validation_objects';
@@ -64,25 +64,6 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
 
     const { method, pathname, version } = parseEndpoint(endpoint);
 
-    if (runDevModeChecks && isZod(params)) {
-      const dangerousSchemas = assertAllParsableSchemas(params);
-      if (dangerousSchemas.size > 0) {
-        for (const { key, schema } of dangerousSchemas) {
-          const typeName = schema._def.typeName;
-
-          if (typeName === 'ZodEffects') {
-            logger.warn(
-              `Warning for ${endpoint}: schema ${typeName} at ${key} has transforming effects and could lead to unexpected behaviour`
-            );
-          } else {
-            logger.warn(
-              `Warning for ${endpoint}: schema ${typeName} at ${key} is not inspectable and could lead to runtime exceptions, convert it to a supported schema`
-            );
-          }
-        }
-      }
-    }
-
     const wrappedHandler = async (
       context: RequestHandlerContext,
       request: KibanaRequest,
@@ -118,6 +99,12 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
         }
 
         if (isKibanaResponse(result)) {
+          if (result.status >= 500) {
+            logger.error(() => `HTTP ${result.status}: ${JSON.stringify(result.payload)}`);
+          } else if (result.status >= 400) {
+            logger.debug(() => `HTTP ${result.status}: ${JSON.stringify(result.payload)}`);
+          }
+
           return result;
         } else if (isObservable(result)) {
           const controller = new AbortController();
@@ -135,8 +122,6 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
           return response.ok({ body });
         }
       } catch (error) {
-        logger.error(error);
-
         const opts = {
           statusCode: 500,
           body: {
@@ -144,6 +129,12 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
             attributes: {
               data: {},
             },
+          } as {
+            message: string | undefined;
+            attributes: {
+              data: unknown;
+              caused_by?: Array<{ message: string | undefined }>;
+            };
           },
         };
 
@@ -154,6 +145,18 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
         if (isBoom(error)) {
           opts.statusCode = error.output.statusCode;
           opts.body.attributes.data = error?.data;
+        }
+
+        if (error instanceof AggregateError) {
+          opts.body.attributes.caused_by = error.errors.map((innerError) => {
+            return { message: innerError.message };
+          });
+        }
+
+        if (opts.statusCode >= 500) {
+          logger.error(() => error);
+        } else {
+          logger.debug(() => error);
         }
 
         return response.custom(opts);
@@ -191,12 +194,14 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
       router.versioned[method]({
         path: pathname,
         access,
-        // @ts-expect-error we are essentially calling multiple methods at the same type so TS gets confused
+        summary: options.summary,
+        description: options.description,
         options: omit(options, 'access', 'description', 'summary', 'deprecated', 'discontinued'),
         security,
       }).addVersion(
         {
           version,
+          options,
           validate: {
             request: validationObject,
           },

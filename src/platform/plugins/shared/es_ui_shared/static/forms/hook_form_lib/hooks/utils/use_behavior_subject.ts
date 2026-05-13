@@ -8,7 +8,8 @@
  */
 
 import { useCallback, useRef, useMemo } from 'react';
-import { BehaviorSubject, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 /**
  * Utility to create an observable with a handler to update its value.
@@ -68,6 +69,10 @@ import { BehaviorSubject, Observable } from 'rxjs';
       <>
     );
   }
+ */
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
  */
 export const useBehaviorSubject = <T = any>(initialState: T) => {
   const subjectRef = useRef<BehaviorSubject<T>>();

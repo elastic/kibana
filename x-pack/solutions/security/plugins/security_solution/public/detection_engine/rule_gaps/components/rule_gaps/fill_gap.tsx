@@ -11,7 +11,8 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useFillGapMutation } from '../../api/hooks/use_fill_gap';
 import * as i18n from './translations';
 import type { Gap } from '../../types';
-
+import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry';
+import { useKibana } from '../../../../common/lib/kibana';
 export const FillGap = ({
   isRuleEnabled,
   ruleId,
@@ -22,8 +23,21 @@ export const FillGap = ({
   gap: Gap;
 }) => {
   const { addSuccess, addError } = useAppToasts();
+  const { telemetry } = useKibana().services;
+  const isGapFillAvailable = gap.status !== gapStatus.FILLED && gap.unfilled_intervals.length !== 0;
+
+  const hasRemainingGaps =
+    isGapFillAvailable && (gap.in_progress_intervals.length > 0 || gap.filled_intervals.length > 0);
   const fillGapMutation = useFillGapMutation({
     onSuccess: () => {
+      telemetry.reportEvent(
+        hasRemainingGaps
+          ? ManualRuleRunEventTypes.FillRemainingGap
+          : ManualRuleRunEventTypes.FillGap,
+        {
+          rangeInMs: gap.total_gap_duration_ms,
+        }
+      );
       addSuccess(i18n.GAP_FILL_REQUEST_SUCCESS_MESSAGE, {
         toastMessage: i18n.GAP_FILL_REQUEST_SUCCESS_MESSAGE_TOOLTIP,
       });
@@ -36,14 +50,13 @@ export const FillGap = ({
     },
   });
 
-  if (gap.status === gapStatus.FILLED || gap.unfilled_intervals.length === 0) {
+  if (!isGapFillAvailable) {
     return null;
   }
 
-  const title =
-    gap.in_progress_intervals.length > 0 || gap.filled_intervals.length > 0
-      ? i18n.GAPS_TABLE_FILL_REMAINING_GAP_BUTTON_LABEL
-      : i18n.GAPS_TABLE_FILL_GAP_BUTTON_LABEL;
+  const title = hasRemainingGaps
+    ? i18n.GAPS_TABLE_FILL_REMAINING_GAP_BUTTON_LABEL
+    : i18n.GAPS_TABLE_FILL_GAP_BUTTON_LABEL;
 
   return (
     <>

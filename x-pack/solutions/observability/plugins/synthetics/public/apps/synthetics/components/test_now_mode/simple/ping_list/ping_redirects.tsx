@@ -8,8 +8,9 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { EuiListGroup, EuiListGroupItemProps, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import { Ping } from '../../../../../../../common/runtime_types';
+import type { EuiListGroupItemProps } from '@elastic/eui';
+import { EuiListGroup, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import type { Ping } from '../../../../../../../common/runtime_types';
 
 const ListGroup = styled(EuiListGroup)`
   &&& {
@@ -38,7 +39,7 @@ export const PingRedirects: React.FC<Props> = ({ monitorStatus, showTitle }) => 
       target: '_blank',
       extraAction: {
         color: 'text',
-        iconType: 'popout',
+        iconType: 'external',
         iconSize: 's',
         alwaysShow: true,
         'aria-label': i18n.translate('xpack.synthetics.monitorList.redirects.openWindow', {
@@ -57,7 +58,7 @@ export const PingRedirects: React.FC<Props> = ({ monitorStatus, showTitle }) => 
       target: '_blank',
       extraAction: {
         color: 'text',
-        iconType: 'popout',
+        iconType: 'external',
         iconSize: 's',
         'aria-label': i18n.translate('xpack.synthetics.monitorList.redirects.openWindow', {
           defaultMessage: 'Link will open in new window.',

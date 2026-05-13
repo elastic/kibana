@@ -30,17 +30,17 @@ export function registerRoute(routeDependencies: RouteDependencies) {
     .post({
       path: addInternalBasePath('delete_transforms'),
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because permissions will be checked by elasticsearch',
+        },
+      },
     })
     .addVersion<undefined, undefined, DeleteTransformsRequestSchema>(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch',
-          },
-        },
         validate: {
           request: {
             body: deleteTransformsRequestSchema,

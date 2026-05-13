@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { get } from 'lodash';
 import {
   EuiFlexGroup,
@@ -22,7 +23,7 @@ import {
 import { TextField, SelectField, SuperSelectField } from '../../../components';
 import { fieldValidators } from '../../../helpers';
 import { useFormData } from '../../hooks';
-import { FormConfig } from '../../types';
+import type { FormConfig } from '../../types';
 import { UseField } from '../use_field';
 import { UseArray } from '../use_array';
 import { FormWrapper } from './form_utils';
@@ -202,7 +203,7 @@ const ProcessorsConfigurator: FC<{ ruleType: string }> = ({ ruleType }) => {
                   {items.length > 1 && (
                     <EuiFlexItem grow={false}>
                       <EuiButtonIcon
-                        iconType="minusInCircle"
+                        iconType="minusCircle"
                         onClick={() => removeItem(id)}
                         aria-label="Remove processor"
                       />
@@ -462,7 +463,7 @@ const ProcessorsConfigurator: FC<{ ruleType: string }> = ({ ruleType }) => {
                   {items.length > 1 && (
                     <EuiFlexItem grow={false}>
                       <EuiButtonIcon
-                        iconType="minusInCircle"
+                        iconType="minusCircle"
                         onClick={() => removeItem(id)}
                         aria-label="Remove processor"
                       />

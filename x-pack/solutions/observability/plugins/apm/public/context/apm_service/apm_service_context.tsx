@@ -20,23 +20,20 @@ import { replace } from '../../components/shared/links/url_helpers';
 import { FETCH_STATUS } from '../../hooks/use_fetcher';
 import type { ServerlessType } from '../../../common/serverless';
 import { usePreferredDataSourceAndBucketSize } from '../../hooks/use_preferred_data_source_and_bucket_size';
-import {
-  type ServiceEntitySummary,
-  useServiceEntitySummaryFetcher,
-} from './use_service_entity_summary_fetcher';
 
 export interface APMServiceContextValue {
   serviceName: string;
   agentName?: string;
+  telemetrySdkName?: string;
+  telemetrySdkLanguage?: string;
   serverlessType?: ServerlessType;
   transactionType?: string;
   transactionTypeStatus: FETCH_STATUS;
   transactionTypes: string[];
   runtimeName?: string;
+  runtimeVersion?: string;
   fallbackToTransactions: boolean;
   serviceAgentStatus: FETCH_STATUS;
-  serviceEntitySummary?: ServiceEntitySummary;
-  serviceEntitySummaryStatus: FETCH_STATUS;
 }
 
 export const APMServiceContext = createContext<APMServiceContextValue>({
@@ -45,16 +42,14 @@ export const APMServiceContext = createContext<APMServiceContextValue>({
   transactionTypes: [],
   fallbackToTransactions: false,
   serviceAgentStatus: FETCH_STATUS.NOT_INITIATED,
-  serviceEntitySummaryStatus: FETCH_STATUS.NOT_INITIATED,
 });
 
 export function ApmServiceContextProvider({ children }: { children: ReactNode }) {
   const history = useHistory();
-
   const {
     path: { serviceName },
     query,
-    query: { kuery, rangeFrom, rangeTo, environment },
+    query: { kuery, rangeFrom, rangeTo },
   } = useAnyOfApmParams('/services/{serviceName}', '/mobile-services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -62,7 +57,10 @@ export function ApmServiceContextProvider({ children }: { children: ReactNode })
   const {
     agentName,
     runtimeName,
+    runtimeVersion,
     serverlessType,
+    telemetrySdkName,
+    telemetrySdkLanguage,
     status: serviceAgentStatus,
   } = useServiceAgentFetcher({
     serviceName,
@@ -86,11 +84,6 @@ export function ApmServiceContextProvider({ children }: { children: ReactNode })
     rollupInterval: preferred?.source.rollupInterval,
   });
 
-  const { serviceEntitySummary, serviceEntitySummaryStatus } = useServiceEntitySummaryFetcher({
-    serviceName,
-    environment,
-  });
-
   const currentTransactionType = getOrRedirectToTransactionType({
     transactionType: query.transactionType,
     transactionTypes,
@@ -108,14 +101,15 @@ export function ApmServiceContextProvider({ children }: { children: ReactNode })
         serviceName,
         agentName,
         serverlessType,
+        telemetrySdkName,
+        telemetrySdkLanguage,
         transactionType: currentTransactionType,
         transactionTypeStatus,
         transactionTypes,
         runtimeName,
+        runtimeVersion,
         fallbackToTransactions,
         serviceAgentStatus,
-        serviceEntitySummary,
-        serviceEntitySummaryStatus,
       }}
       children={children}
     />

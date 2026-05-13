@@ -9,9 +9,10 @@ import React, { useState } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
-import { KibanaSavedObjectType } from '@kbn/fleet-plugin/public';
-import { MonitoringStartServices } from '../../../types';
+import { EuiCallOut, EuiConfirmModal, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import type { KibanaSavedObjectType } from '@kbn/fleet-plugin/public';
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import type { MonitoringStartServices } from '../../../types';
 
 const INGEST_PIPELINE_DASHBOARD_ID = 'elasticsearch-metrics-ingest-pipelines';
 
@@ -35,7 +36,7 @@ export const ingestPipelineTabOnClick = async (services: MonitoringStartServices
     response.data.items.some((item) => item.id === INGEST_PIPELINE_DASHBOARD_ID);
 
   const navigateToDashboard = () =>
-    services.dashboard!.locator!.navigate({
+    services.share.url.locators.get(DASHBOARD_APP_LOCATOR)?.navigate({
       dashboardId: INGEST_PIPELINE_DASHBOARD_ID,
     });
 
@@ -79,14 +80,17 @@ export const IngestPipelineModal = ({
 }) => {
   const [installing, setInstalling] = useState(false);
   const [error, setError] = useState<string>();
+  const modalTitleId = useGeneratedHtmlId();
 
   if (!canInstallPackages) {
     return (
       <EuiConfirmModal
+        aria-labelledby={modalTitleId}
         title={i18n.translate(
           'xpack.monitoring.esNavigation.ingestPipelineModal.noPermissionToInstallPackage.packageRequiredTitle',
           { defaultMessage: 'Elasticsearch integration is required' }
         )}
+        titleProps={{ id: modalTitleId }}
         confirmButtonText={i18n.translate(
           'xpack.monitoring.esNavigation.ingestPipelineModal.noPermissionToInstallPackage.confirmButtonText',
           { defaultMessage: 'OK' }
@@ -106,12 +110,14 @@ export const IngestPipelineModal = ({
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={i18n.translate(
         'xpack.monitoring.esNavigation.ingestPipelineModal.installPromptTitle',
         {
           defaultMessage: 'Install Elasticsearch integration?',
         }
       )}
+      titleProps={{ id: modalTitleId }}
       confirmButtonText={i18n.translate(
         'xpack.monitoring.esNavigation.ingestPipelineModal.installButtonText',
         { defaultMessage: 'Install' }
@@ -137,6 +143,7 @@ export const IngestPipelineModal = ({
       {error && (
         <>
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.monitoring.esNavigation.ingestPipelineModal.errorCalloutText"

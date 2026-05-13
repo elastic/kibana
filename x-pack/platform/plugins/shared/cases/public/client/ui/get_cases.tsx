@@ -16,6 +16,7 @@ export type GetCasesProps = Omit<
   GetCasesPropsInternal,
   | 'externalReferenceAttachmentTypeRegistry'
   | 'persistableStateAttachmentTypeRegistry'
+  | 'unifiedAttachmentTypeRegistry'
   | 'getFilesClient'
 >;
 
@@ -24,6 +25,7 @@ const CasesRoutesLazy: React.FC<CasesProps> = lazy(() => import('../../component
 export const getCasesLazy = ({
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
+  unifiedAttachmentTypeRegistry,
   getFilesClient,
   owner,
   permissions,
@@ -43,6 +45,7 @@ export const getCasesLazy = ({
     value={{
       externalReferenceAttachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry,
       getFilesClient,
       owner,
       permissions,

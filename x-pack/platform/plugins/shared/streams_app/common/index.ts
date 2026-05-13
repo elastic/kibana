@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { StreamDefinition } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
+export type { StreamsAppLocationParams } from '@kbn/streams-plugin/common';
 
 interface EntityBase {
   type: string;
@@ -13,7 +13,7 @@ interface EntityBase {
   properties: Record<string, unknown>;
 }
 
-export type StreamEntity = EntityBase & { type: 'stream'; properties: StreamDefinition };
+export type StreamEntity = EntityBase & { type: 'stream'; properties: Streams.all.Definition };
 
 export type Entity = StreamEntity;
 

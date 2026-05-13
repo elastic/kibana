@@ -14,6 +14,7 @@ const createRiskEngineDataClientMock = () =>
     getConfiguration: jest.fn(),
     getStatus: jest.fn(),
     init: jest.fn(),
+    scheduleNow: jest.fn(),
     tearDown: jest.fn(),
   } as unknown as jest.Mocked<RiskEngineDataClient>);
 

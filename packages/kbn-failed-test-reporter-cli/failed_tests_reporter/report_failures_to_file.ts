@@ -12,14 +12,14 @@ import Fs from 'fs';
 import { createHash } from 'crypto';
 
 import globby from 'globby';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { escape } from 'he';
 import { FtrScreenshotFilename } from '@kbn/ftr-screenshot-filename';
 import { JourneyScreenshots } from '@kbn/journeys';
 
-import { BuildkiteMetadata } from './buildkite_metadata';
-import { TestFailure } from './get_failures';
+import type { BuildkiteMetadata } from './buildkite_metadata';
+import type { TestFailure } from './get_failures';
 
 interface JourneyMeta {
   journeyName: string;
@@ -80,8 +80,8 @@ function findAllScreenshots(log: ToolingLog) {
     return globby
       .sync(
         [
-          'test/functional/**/screenshots/failure/*.png',
-          'x-pack/test/functional/**/screenshots/failure/*.png',
+          'src/platform/test/functional/**/screenshots/failure/*.png',
+          'x-pack/platform/test/functional/**/screenshots/failure/*.png',
         ],
         {
           cwd: REPO_ROOT,
@@ -127,7 +127,7 @@ export async function reportFailuresToFile(
   // Jest could, in theory, fail 1000s of tests and write 1000s of failures
   // So let's just write files for the first 20
   for (const failure of failures.slice(0, 20)) {
-    const hash = createHash('md5').update(failure.name).digest('hex'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+    const hash = createHash('sha256').update(failure.name).digest('hex');
     const filenameBase = `${
       process.env.BUILDKITE_JOB_ID ? process.env.BUILDKITE_JOB_ID + '_' : ''
     }${hash}`;

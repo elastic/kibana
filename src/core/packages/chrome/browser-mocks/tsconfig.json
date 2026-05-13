@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -12,10 +12,11 @@
     "**/*.tsx",
   ],
   "kbn_references": [
-    "@kbn/utility-types",
     "@kbn/utility-types-jest",
     "@kbn/core-chrome-browser",
-    "@kbn/core-chrome-browser-internal"
+    "@kbn/core-chrome-browser-internal-types",
+    "@kbn/lazy-object",
+    "@kbn/core-chrome-sidebar-mocks"
   ],
   "exclude": [
     "target/**/*",

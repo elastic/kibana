@@ -9,24 +9,14 @@ import type { ContentManagementServicesDefinition as ServicesDefinition } from '
 import {
   savedObjectSchema,
   objectTypeToGetResultSchema,
-  createOptionsSchemas,
   createResultSchema,
+  referencesSchema,
 } from '@kbn/content-management-utils';
+import { mapAttributesSchema } from './map_attributes_schema/map_attributes_schema';
 
-const mapAttributesSchema = schema.object(
-  {
-    title: schema.string(),
-    description: schema.maybe(schema.nullable(schema.string())),
-    mapStateJSON: schema.maybe(schema.string()),
-    layerListJSON: schema.maybe(schema.string()),
-    uiStateJSON: schema.maybe(schema.string()),
-  },
-  { unknowns: 'forbid' }
-);
+export const mapSavedObjectSchema = savedObjectSchema(mapAttributesSchema);
 
-const mapSavedObjectSchema = savedObjectSchema(mapAttributesSchema);
-
-const searchOptionsSchema = schema.maybe(
+export const searchOptionsSchema = schema.maybe(
   schema.object(
     {
       onlyTitle: schema.maybe(schema.boolean()),
@@ -35,9 +25,30 @@ const searchOptionsSchema = schema.maybe(
   )
 );
 
-const createOptionsSchema = schema.object({
-  references: schema.maybe(createOptionsSchemas.references),
-});
+export const mapsSearchOptionsSchema = schema.maybe(
+  schema.object(
+    {
+      onlyTitle: schema.maybe(schema.boolean()),
+    },
+    { unknowns: 'forbid' }
+  )
+);
+
+export const mapsCreateOptionsSchema = schema.maybe(
+  schema.object({
+    references: schema.maybe(referencesSchema),
+  })
+);
+
+export const mapsUpdateOptionsSchema = schema.maybe(
+  schema.object({
+    references: schema.maybe(referencesSchema),
+  })
+);
+
+export const mapsGetResultSchema = objectTypeToGetResultSchema(mapSavedObjectSchema);
+
+export const mapsCreateResultSchema = createResultSchema(mapSavedObjectSchema);
 
 // Content management service definition.
 // We need it for BWC support between different versions of the content
@@ -52,7 +63,7 @@ export const serviceDefinition: ServicesDefinition = {
   create: {
     in: {
       options: {
-        schema: createOptionsSchema,
+        schema: mapsCreateOptionsSchema,
       },
       data: {
         schema: mapAttributesSchema,
@@ -60,14 +71,14 @@ export const serviceDefinition: ServicesDefinition = {
     },
     out: {
       result: {
-        schema: createResultSchema(mapSavedObjectSchema),
+        schema: mapsCreateResultSchema,
       },
     },
   },
   update: {
     in: {
       options: {
-        schema: createOptionsSchema, // same as create
+        schema: mapsUpdateOptionsSchema,
       },
       data: {
         schema: mapAttributesSchema,

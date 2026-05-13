@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { TimeSeriesResult } from '@kbn/triggers-actions-ui-plugin/common';
-import { IndexThresholdRuleParams } from './types';
+import type { HttpSetup } from '@kbn/core/public';
+import type { TimeSeriesResult } from '@kbn/triggers-actions-ui-plugin/common';
+import type { IndexThresholdRuleParams } from './types';
 
 const INDEX_THRESHOLD_DATA_API_ROOT = '/internal/triggers_actions_ui/data';
 
@@ -19,12 +19,15 @@ export interface GetThresholdRuleVisualizationDataParams {
     interval: string;
   };
   http: HttpSetup;
+  /** Cross-project search scope (serverless); forwarded as `project_routing` on the request body. */
+  projectRouting?: string;
 }
 
 export async function getThresholdRuleVisualizationData({
   model,
   visualizeOptions,
   http,
+  projectRouting,
 }: GetThresholdRuleVisualizationDataParams): Promise<TimeSeriesResult> {
   const timeSeriesQueryParams = {
     index: model.index,
@@ -40,6 +43,7 @@ export async function getThresholdRuleVisualizationData({
     dateStart: new Date(visualizeOptions.rangeFrom).toISOString(),
     dateEnd: new Date(visualizeOptions.rangeTo).toISOString(),
     interval: visualizeOptions.interval,
+    ...(projectRouting ? { project_routing: projectRouting } : {}),
   };
 
   return await http.post<TimeSeriesResult>(`${INDEX_THRESHOLD_DATA_API_ROOT}/_time_series_query`, {

@@ -30,7 +30,7 @@ import type {
 
 import { appContextService } from './app_context';
 
-import { listFleetServerHostsForProxyId, updateFleetServerHost } from './fleet_server_host';
+import { fleetServerHostService } from './fleet_server_host';
 import { outputService } from './output';
 import { downloadSourceService } from './download_source';
 
@@ -114,10 +114,7 @@ export async function deleteFleetProxy(
   if (fleetProxy.is_preconfigured && !options?.fromPreconfiguration) {
     throw new FleetProxyUnauthorizedError(`Cannot delete ${id} preconfigured proxy`);
   }
-  const { outputs, fleetServerHosts, downloadSources } = await getFleetProxyRelatedSavedObjects(
-    soClient,
-    id
-  );
+  const { outputs, fleetServerHosts, downloadSources } = await getFleetProxyRelatedSavedObjects(id);
 
   if (
     // download sources cannot be preconfigured
@@ -206,7 +203,7 @@ async function updateRelatedSavedObject(
   await pMap(
     fleetServerHosts,
     (fleetServerHost) =>
-      updateFleetServerHost(soClient, fleetServerHost.id, {
+      fleetServerHostService.update(soClient, esClient, fleetServerHost.id, {
         ...omit(fleetServerHost, 'id'),
         proxy_id: null,
       }),
@@ -224,22 +221,19 @@ async function updateRelatedSavedObject(
   );
 
   await pMap(downloadSources, (downloadSource) =>
-    downloadSourceService.update(soClient, downloadSource.id, {
+    downloadSourceService.update(soClient, esClient, downloadSource.id, {
       ...omit(downloadSource, 'id'),
       proxy_id: null,
     })
   );
 }
 
-export async function getFleetProxyRelatedSavedObjects(
-  soClient: SavedObjectsClientContract,
-  proxyId: string
-) {
+export async function getFleetProxyRelatedSavedObjects(proxyId: string) {
   const [{ items: fleetServerHosts }, { items: outputs }, { items: downloadSources }] =
     await Promise.all([
-      listFleetServerHostsForProxyId(soClient, proxyId),
-      outputService.listAllForProxyId(soClient, proxyId),
-      downloadSourceService.listAllForProxyId(soClient, proxyId),
+      fleetServerHostService.listAllForProxyId(proxyId),
+      outputService.listAllForProxyId(proxyId),
+      downloadSourceService.listAllForProxyId(proxyId),
     ]);
 
   return {

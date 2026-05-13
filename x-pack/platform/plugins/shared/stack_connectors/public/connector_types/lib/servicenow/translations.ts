@@ -413,6 +413,14 @@ export const EVENT_ACTION_LABEL = i18n.translate(
   }
 );
 
+export const ADDITIONAL_FIELDS_HELP_SERVICENOW_TEXT = i18n.translate(
+  'xpack.stackConnectors.components.servicenow.additionalFieldsHelpTooltipText',
+  {
+    defaultMessage:
+      'Additional fields in JSON format as defined in the Elastic ServiceNow application',
+  }
+);
+
 export const ADDITIONAL_INFO = i18n.translate(
   'xpack.stackConnectors.components.serviceNowITOM.additionalInfoLabel',
   {
@@ -427,46 +435,9 @@ export const ADDITIONAL_INFO_HELP = i18n.translate(
   }
 );
 
-export const ADDITIONAL_INFO_HELP_TEXT = i18n.translate(
-  'xpack.stackConnectors.components.serviceNowITOM.additionalInfoHelpTooltipText',
-  {
-    defaultMessage:
-      'The rule automatically generates information about each event. You can change or add more custom fields in JSON format.',
-  }
-);
-
 export const ADDITIONAL_INFO_JSON_ERROR = i18n.translate(
   'xpack.stackConnectors.components.serviceNowITOM.additionalInfoError',
   {
     defaultMessage: 'The additional info field does not have a valid JSON format.',
-  }
-);
-
-export const ADDITIONAL_FIELDS = i18n.translate(
-  'xpack.stackConnectors.components.servicenow.additionalFieldsTooltip',
-  {
-    defaultMessage: 'Additional fields',
-  }
-);
-
-export const ADDITIONAL_FIELDS_HELP = i18n.translate(
-  'xpack.stackConnectors.components.servicenow.additionalFieldsHelpTooltip',
-  {
-    defaultMessage: 'Additional fields help',
-  }
-);
-
-export const ADDITIONAL_FIELDS_HELP_TEXT = i18n.translate(
-  'xpack.stackConnectors.components.servicenow.additionalFieldsHelpTooltipText',
-  {
-    defaultMessage:
-      'Additional fields in JSON format as defined in the Elastic ServiceNow application',
-  }
-);
-
-export const ADDITIONAL_FIELDS_JSON_ERROR = i18n.translate(
-  'xpack.stackConnectors.components.servicenow.additionalFieldsError',
-  {
-    defaultMessage: 'No valid JSON.',
   }
 );

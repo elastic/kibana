@@ -13,16 +13,14 @@ import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled';
-import { RuleNotifyWhen, SanitizedRule } from '../../../../../common';
+import type { SanitizedRule } from '../../../../../common';
+import { RuleNotifyWhen } from '../../../../../common';
 
 const rulesClient = rulesClientMock.create();
+
 jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
-
-beforeEach(() => {
-  jest.resetAllMocks();
-});
 
 describe('updateRuleRoute', () => {
   const mockedRule = {
@@ -147,6 +145,11 @@ describe('updateRuleRoute', () => {
     alert_delay: mockedRule.alertDelay,
   };
 
+  beforeEach(() => {
+    jest.resetAllMocks();
+    rulesClient.get = jest.fn().mockResolvedValue(mockedRule);
+  });
+
   it('updates a rule with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
@@ -215,7 +218,6 @@ describe('updateRuleRoute', () => {
             "throttle": "10m",
           },
           "id": "1",
-          "isFlappingEnabled": true,
         },
       ]
     `);
@@ -325,5 +327,38 @@ describe('updateRuleRoute', () => {
     await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Group is not defined in action 2"`
     );
+  });
+
+  describe('internally managed rule types', () => {
+    it('returns 400 if the rule type is internally managed', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+      rulesClient.get = jest
+        .fn()
+        .mockResolvedValue({ ...mockedRule, alertTypeId: 'test.internal-rule-type' });
+
+      updateRuleRoute(router, licenseState);
+
+      const [_, handler] = router.put.mock.calls[0];
+
+      const [context, req, res] = mockHandlerArguments(
+        {
+          rulesClient,
+          // @ts-expect-error: not all args are required for this test
+          listTypes: new Map([
+            ['test.internal-rule-type', { id: 'test.internal-rule-type', internallyManaged: true }],
+          ]),
+        },
+        {
+          params: { id: 'test.internal-rule-type' },
+          body: { ...updateRequest, rule_type_id: 'test.internal-rule-type' },
+        },
+        ['ok']
+      );
+
+      await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot update rule of type \\"test.internal-rule-type\\" because it is internally managed."`
+      );
+    });
   });
 });

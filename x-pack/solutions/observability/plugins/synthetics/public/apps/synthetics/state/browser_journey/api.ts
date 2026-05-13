@@ -6,17 +6,14 @@
  */
 
 import { apiService } from '../../../../utils/api_service';
-import {
-  FailedStepsApiResponse,
-  FailedStepsApiResponseType,
+import type {
   ScreenshotBlockDoc,
   ScreenshotImageBlob,
   ScreenshotRefImageData,
   SyntheticsJourneyApiResponse,
-  SyntheticsJourneyApiResponseType,
   Ping,
-  PingType,
 } from '../../../../../common/runtime_types';
+import { SyntheticsJourneyApiResponseType, PingType } from '../../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 export interface FetchJourneyStepsParams {
@@ -40,18 +37,6 @@ export async function fetchBrowserJourney(
     SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', params.checkGroup),
     undefined,
     SyntheticsJourneyApiResponseType
-  );
-}
-
-export async function fetchJourneysFailedSteps({
-  checkGroups,
-}: {
-  checkGroups: string[];
-}): Promise<FailedStepsApiResponse> {
-  return apiService.get(
-    SYNTHETICS_API_URLS.JOURNEY_FAILED_STEPS,
-    { checkGroups },
-    FailedStepsApiResponseType
   );
 }
 

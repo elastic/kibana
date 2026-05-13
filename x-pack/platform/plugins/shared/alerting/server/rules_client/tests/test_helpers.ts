@@ -37,7 +37,7 @@ export const defaultRule = {
     consumer: 'fakeConsumer',
     alertTypeId: 'fakeType',
     schedule: { interval: '5m' },
-    actions: [] as unknown,
+    actions: [],
   },
   references: [],
   version: '1',
@@ -56,13 +56,15 @@ export const defaultRuleForBulkDelete = {
     consumer: 'fakeConsumer',
     alertTypeId: 'fakeType',
     schedule: { interval: '5m' },
-    actions: [] as unknown,
+    actions: [],
     executionStatus: {
-      lastExecutionDate: new Date('2019-02-12T21:01:22.000Z'),
-      status: 'pending',
+      lastExecutionDate: '2019-02-12T21:01:22.000Z',
+      status: 'pending' as const,
+      error: null,
+      warning: null,
     },
-    createdAt: new Date('2019-02-12T21:01:22.000Z'),
-    updatedAt: new Date('2019-02-12T21:01:22.000Z'),
+    createdAt: '2019-02-12T21:01:22.000Z',
+    updatedAt: '2019-02-12T21:01:22.000Z',
   },
   references: [],
   version: '1',
@@ -81,22 +83,8 @@ export const siemRule1 = {
   id: 'siem-id1',
 };
 
-export const siemRuleForBulkOps1 = {
-  ...defaultRuleForBulkDelete,
-  attributes: {
-    ...defaultRuleForBulkDelete.attributes,
-    consumer: AlertConsumers.SIEM,
-  },
-  id: 'siem-id1',
-};
-
 export const siemRule2 = {
   ...siemRule1,
-  id: 'siem-id2',
-};
-
-export const siemRuleForBulkOps2 = {
-  ...siemRuleForBulkOps1,
   id: 'siem-id2',
 };
 
@@ -108,11 +96,13 @@ export const enabledRule1 = {
     scheduledTaskId: 'id1',
     apiKey: Buffer.from('123:abc').toString('base64'),
     executionStatus: {
-      lastExecutionDate: new Date('2019-02-12T21:01:22.000Z'),
-      status: 'pending',
+      lastExecutionDate: '2019-02-12T21:01:22.000Z',
+      status: 'pending' as const,
+      error: null,
+      warning: null,
     },
-    createdAt: new Date('2019-02-12T21:01:22.000Z'),
-    updatedAt: new Date('2019-02-12T21:01:22.000Z'),
+    createdAt: '2019-02-12T21:01:22.000Z',
+    updatedAt: '2019-02-12T21:01:22.000Z',
   },
 };
 
@@ -125,11 +115,13 @@ export const enabledRule2 = {
     scheduledTaskId: 'id2',
     apiKey: Buffer.from('321:abc').toString('base64'),
     executionStatus: {
-      lastExecutionDate: new Date('2019-02-12T21:01:22.000Z'),
-      status: 'pending',
+      lastExecutionDate: '2019-02-12T21:01:22.000Z',
+      status: 'pending' as const,
+      error: null,
+      warning: null,
     },
-    createdAt: new Date('2019-02-12T21:01:22.000Z'),
-    updatedAt: new Date('2019-02-12T21:01:22.000Z'),
+    createdAt: '2019-02-12T21:01:22.000Z',
+    updatedAt: '2019-02-12T21:01:22.000Z',
   },
 };
 
@@ -194,6 +186,16 @@ export const enabledRuleForBulkOpsWithActions1 = {
   ],
 };
 
+export const enabledRuleForBulkOpsWithActions1WithUiam = {
+  ...enabledRuleForBulkOpsWithActions1,
+  id: 'uiam-1',
+  attributes: {
+    ...enabledRuleForBulkOpsWithActions1.attributes,
+    apiKey: Buffer.from('978:xyz').toString('base64'),
+    uiamApiKey: Buffer.from('123:essu_abc').toString('base64'),
+  },
+};
+
 export const enabledRuleForBulkOpsWithActions2 = {
   ...defaultRuleForBulkDelete,
   id: 'id2',
@@ -222,6 +224,16 @@ export const enabledRuleForBulkOpsWithActions2 = {
       type: 'action',
     },
   ],
+};
+
+export const enabledRuleForBulkOpsWithActions2WithUiam = {
+  ...enabledRuleForBulkOpsWithActions2,
+  id: 'uiam-2',
+  attributes: {
+    ...enabledRuleForBulkOpsWithActions2.attributes,
+    uiamApiKey: Buffer.from('123:essu_abc').toString('base64'),
+    apiKey: Buffer.from('576:xyz').toString('base64'),
+  },
 };
 
 export const disabledRuleForBulkOpsWithActions1 = {
@@ -302,8 +314,10 @@ export const disabledRule1 = {
     scheduledTaskId: 'id1',
     apiKey: Buffer.from('123:abc').toString('base64'),
     executionStatus: {
-      lastExecutionDate: new Date('2019-02-12T21:01:22.000Z'),
-      status: 'pending',
+      lastExecutionDate: '2019-02-12T21:01:22.000Z',
+      status: 'pending' as const,
+      error: null,
+      warning: null,
     },
   },
 };
@@ -317,8 +331,10 @@ export const disabledRule2 = {
     scheduledTaskId: 'id2',
     apiKey: Buffer.from('321:abc').toString('base64'),
     executionStatus: {
-      lastExecutionDate: new Date('2019-02-12T21:01:22.000Z'),
-      status: 'pending',
+      lastExecutionDate: '2019-02-12T21:01:22.000Z',
+      status: 'pending' as const,
+      error: null,
+      warning: null,
     },
   },
 };
@@ -329,6 +345,7 @@ export const disabledRuleWithAction1 = {
     ...disabledRule1.attributes,
     actions: [
       {
+        uuid: 'test-uuid-1',
         group: 'default',
         actionTypeId: '1',
         actionRef: '1',
@@ -346,6 +363,7 @@ export const disabledRuleWithAction2 = {
     ...disabledRule2.attributes,
     actions: [
       {
+        uuid: 'test-uuid-2',
         group: 'default',
         actionTypeId: '1',
         actionRef: '1',
@@ -455,6 +473,10 @@ export const returnedRule2 = {
 export const returnedRuleForBulkOps1 = {
   actions: [],
   alertTypeId: 'fakeType',
+  artifacts: {
+    dashboards: [],
+    investigation_guide: { blob: '' },
+  },
   consumer: 'fakeConsumer',
   enabled: true,
   id: 'id1',
@@ -481,6 +503,10 @@ export const returnedRuleForBulkOps1 = {
 export const returnedRuleForBulkOps2 = {
   actions: [],
   alertTypeId: 'fakeType',
+  artifacts: {
+    dashboards: [],
+    investigation_guide: { blob: '' },
+  },
   consumer: 'fakeConsumer',
   enabled: true,
   id: 'id2',
@@ -508,6 +534,10 @@ export const returnedRuleForBulkOps3 = {
   actions: [],
   alertTypeId: 'fakeType',
   apiKeyCreatedByUser: true,
+  artifacts: {
+    dashboards: [],
+    investigation_guide: { blob: '' },
+  },
   consumer: 'fakeConsumer',
   enabled: true,
   id: 'id3',

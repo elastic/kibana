@@ -112,7 +112,7 @@ export function InsightBase({
                         data-test-subj="observabilityAiAssistantInsightBaseButtonIcon"
                         disabled={actions?.length === 0}
                         display="empty"
-                        iconType="boxesHorizontal"
+                        iconType="boxesVertical"
                         size="s"
                         onClick={handleClickActions}
                       />

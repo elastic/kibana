@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EnrichedDeprecationInfo } from '../../../common/types';
+import type { EnrichedDeprecationInfo } from '../../../common/types';
 
 export const DEPRECATION_TYPE_MAP: Record<EnrichedDeprecationInfo['type'], string> = {
   cluster_settings: i18n.translate(

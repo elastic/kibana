@@ -9,12 +9,12 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { zipObject } from 'lodash';
+import type { UnifiedDataTableRenderCustomToolbarProps } from '@kbn/unified-data-table';
 import {
   UnifiedDataTable,
   DataLoadingState,
   type SortOrder,
   renderCustomToolbar,
-  UnifiedDataTableRenderCustomToolbarProps,
 } from '@kbn/unified-data-table';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiText, EuiIcon } from '@elastic/eui';
@@ -76,6 +76,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       <RowViewer
         dataView={props.dataView}
         notifications={props.core.notifications}
+        chrome={props.core.chrome}
         hit={hit}
         hits={displayedRows}
         columns={displayedColumns}
@@ -91,7 +92,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         setExpandedDoc={setExpandedDoc}
       />
     ),
-    [activeColumns, props.core.notifications, props.dataView, props.flyoutType]
+    [activeColumns, props.core.notifications, props.core.chrome, props.dataView, props.flyoutType]
   );
 
   const columnsMeta = useMemo(() => {
@@ -171,6 +172,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
                 type="discoverApp"
                 size="s"
                 color="primary"
+                aria-hidden={true}
                 css={css`
                   margin-right: 4px;
                 `}

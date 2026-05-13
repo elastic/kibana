@@ -1,12 +1,12 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
+      "@kbn/ambient-ui-types",
       "jest",
       "node",
       "react",
-      "@emotion/react/types/css-prop",
       "@testing-library/jest-dom",
       "@testing-library/react"
     ]
@@ -15,7 +15,8 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/core",
-    "@kbn/deeplinks-security"
+    "@kbn/deeplinks-security",
+    "@kbn/core-chrome-browser"
   ],
   "exclude": ["target/**/*"]
 }

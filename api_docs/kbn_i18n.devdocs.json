@@ -18,8 +18,235 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/i18n",
+        "id": "def-common.getAvailableLocales",
+        "type": "Function",
+        "tags": [],
+        "label": "getAvailableLocales",
+        "description": [
+          "\nReturns the list of locales the current Kibana instance offers in the\nlanguage picker. Returns an empty array if `setAvailableLocales` has not\nbeen called or if the deployment has disabled the picker."
+        ],
+        "signature": [
+          "() => readonly ",
+          {
+            "pluginId": "@kbn/i18n",
+            "scope": "common",
+            "docId": "kibKbnI18nPluginApi",
+            "section": "def-common.AvailableLocale",
+            "text": "AvailableLocale"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-i18n/src/locales.ts",
+        "lineNumber": 93,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/i18n",
+        "id": "def-common.getLocaleLabel",
+        "type": "Function",
+        "tags": [],
+        "label": "getLocaleLabel",
+        "description": [
+          "\nReturns the friendly label for a locale id, using `Intl.DisplayNames`\nin the **endonym** pattern: each locale is rendered in its own\nlanguage (`fr-FR` → `\"français\"`, `ja-JP` → `\"日本語\"`). This means a\nuser stuck in a language they cannot read still sees their preferred\nlanguage listed in a script they recognise.\n\nRegion is dropped before lookup so the label is the bare language\nname, following each language's own orthographic conventions (French\ndoes not capitalise language names; English and German do).\n\nFalls back to the locale id when `Intl.DisplayNames` is unavailable\n(e.g., minimal-ICU Node builds) or cannot resolve the locale."
+        ],
+        "signature": [
+          "(id: string) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-i18n/src/locales.ts",
+        "lineNumber": 44,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/i18n",
+            "id": "def-common.getLocaleLabel.$1",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-i18n/src/locales.ts",
+            "lineNumber": 44,
+            "columnNumber": 32,
+            "deprecated": false,
+            "docsReferencedTypeName": "SupportedLocaleId",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/i18n",
+        "id": "def-common.setAvailableLocales",
+        "type": "Function",
+        "tags": [],
+        "label": "setAvailableLocales",
+        "description": [
+          "\nSets the list of locales the current Kibana instance offers in the\nlanguage picker. Called once during browser bootstrap with the values\nthe server derived from `i18n.locales`. An empty list means the picker\nUI is disabled for this deployment."
+        ],
+        "signature": [
+          "(locales: readonly ",
+          {
+            "pluginId": "@kbn/i18n",
+            "scope": "common",
+            "docId": "kibKbnI18nPluginApi",
+            "section": "def-common.AvailableLocale",
+            "text": "AvailableLocale"
+          },
+          "[]) => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-i18n/src/locales.ts",
+        "lineNumber": 84,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/i18n",
+            "id": "def-common.setAvailableLocales.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "locales",
+            "description": [],
+            "signature": [
+              "readonly ",
+              {
+                "pluginId": "@kbn/i18n",
+                "scope": "common",
+                "docId": "kibKbnI18nPluginApi",
+                "section": "def-common.AvailableLocale",
+                "text": "AvailableLocale"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-i18n/src/locales.ts",
+            "lineNumber": 84,
+            "columnNumber": 37,
+            "deprecated": false,
+            "docsReferencedTypeName": "ReadonlyArray",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/i18n",
+        "id": "def-common.toCanonicalLocaleId",
+        "type": "Function",
+        "tags": [],
+        "label": "toCanonicalLocaleId",
+        "description": [
+          "\nReturns the canonical-casing locale id matching the given locale string\nagainst the supplied list (or the bundled known-locale list when no\nlist is provided), or `\"en\"` if no match is found. The i18n engine\nlowercases locales internally (so `fr-FR` becomes `fr-fr`), but UI\noptions and persistence expect canonical casing (`fr-FR`)."
+        ],
+        "signature": [
+          "(locale: string, availableLocales?: readonly { id: string; }[]) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-i18n/src/locales.ts",
+        "lineNumber": 60,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/i18n",
+            "id": "def-common.toCanonicalLocaleId.$1",
+            "type": "string",
+            "tags": [],
+            "label": "locale",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-i18n/src/locales.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/i18n",
+            "id": "def-common.toCanonicalLocaleId.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "availableLocales",
+            "description": [],
+            "signature": [
+              "readonly { id: string; }[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-i18n/src/locales.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "ReadonlyArray",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/i18n",
+        "id": "def-common.AvailableLocale",
+        "type": "Interface",
+        "tags": [],
+        "label": "AvailableLocale",
+        "description": [
+          "\nA locale that the running Kibana instance offers in the language picker."
+        ],
+        "path": "src/platform/packages/shared/kbn-i18n/src/locales.ts",
+        "lineNumber": 68,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/i18n",
+            "id": "def-common.AvailableLocale.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-i18n/src/locales.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/i18n",
+            "id": "def-common.AvailableLocale.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-i18n/src/locales.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/i18n",
         "id": "def-common.TranslateArguments",
@@ -28,6 +255,8 @@
         "label": "TranslateArguments",
         "description": [],
         "path": "src/platform/packages/shared/kbn-i18n/src/core/i18n.ts",
+        "lineNumber": 109,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,6 +275,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/src/core/i18n.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -62,6 +293,8 @@
               "string | object | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/src/core/i18n.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -82,6 +315,8 @@
               "<string, string>> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/src/core/i18n.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -98,6 +333,26 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/src/core/i18n.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/i18n",
+            "id": "def-common.TranslateArguments.formatters",
+            "type": "Object",
+            "tags": [],
+            "label": "formatters",
+            "description": [
+              "\nCustom formatters to override the default intl formatters"
+            ],
+            "signature": [
+              "MessageFormatters | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-i18n/src/core/i18n.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -129,6 +384,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-i18n/src/translation.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -142,6 +399,8 @@
               "\nDefault locale to fall back to when the translation is not found for the message id.\nHardcoded to `en` for Kibana."
             ],
             "path": "src/platform/packages/shared/kbn-i18n/src/translation.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -158,6 +417,8 @@
               "CustomFormats"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/src/translation.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -172,6 +433,8 @@
         "label": "TranslationInput",
         "description": [],
         "path": "src/platform/packages/shared/kbn-i18n/src/translation.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -190,6 +453,8 @@
               "[]>"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/src/translation.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -203,6 +468,8 @@
               "\nLocale of the translated messages."
             ],
             "path": "src/platform/packages/shared/kbn-i18n/src/translation.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -220,6 +487,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/src/translation.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -240,6 +509,27 @@
           "CustomFormats"
         ],
         "path": "src/platform/packages/shared/kbn-i18n/src/core/formats.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/i18n",
+        "id": "def-common.SupportedLocaleId",
+        "type": "Type",
+        "tags": [],
+        "label": "SupportedLocaleId",
+        "description": [
+          "\nA supported locale code (e.g., `\"en\"`, `\"fr-FR\"`). Widened to `string` so\ndeployments can configure additional locales via `kibana.yml` (`i18n.locales`)\n— for instance, plugins shipping their own translation files."
+        ],
+        "signature": [
+          "string"
+        ],
+        "path": "src/platform/packages/shared/kbn-i18n/src/locales.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -254,6 +544,8 @@
         "label": "i18n",
         "description": [],
         "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+        "lineNumber": 30,
+        "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -275,6 +567,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -291,6 +585,8 @@
               "() => string"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -304,7 +600,7 @@
             "label": "translate",
             "description": [],
             "signature": [
-              "(id: string, { values, description, defaultMessage, ignoreTag }: ",
+              "(id: string, { values, description, defaultMessage, ignoreTag, formatters }: ",
               {
                 "pluginId": "@kbn/i18n",
                 "scope": "common",
@@ -315,6 +611,8 @@
               ") => string"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -327,6 +625,8 @@
                 "label": "id",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-i18n/src/core/i18n.ts",
+                "lineNumber": 146,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -335,7 +635,7 @@
                 "id": "def-common.i18n.translate.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "__1",
+                "label": "{ values = {}, description, defaultMessage, ignoreTag, formatters }",
                 "description": [],
                 "signature": [
                   {
@@ -347,6 +647,60 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-i18n/src/core/i18n.ts",
+                "lineNumber": 147,
+                "columnNumber": 3,
+                "deprecated": false,
+                "docsReferencedTypeName": "TranslateArguments",
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/i18n",
+            "id": "def-common.i18n.formatList",
+            "type": "Function",
+            "tags": [],
+            "label": "formatList",
+            "description": [],
+            "signature": [
+              "(type: \"unit\" | \"conjunction\" | \"disjunction\", value: string[]) => string"
+            ],
+            "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/i18n",
+                "id": "def-common.i18n.formatList.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"unit\" | \"conjunction\" | \"disjunction\""
+                ],
+                "path": "src/platform/packages/shared/kbn-i18n/src/core/i18n.ts",
+                "lineNumber": 179,
+                "columnNumber": 28,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/i18n",
+                "id": "def-common.i18n.formatList.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-i18n/src/core/i18n.ts",
+                "lineNumber": 179,
+                "columnNumber": 74,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -371,6 +725,8 @@
               " | undefined) => void"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -393,7 +749,10 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-i18n/src/core/i18n.ts",
+                "lineNumber": 191,
+                "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "TranslationInput",
                 "trackAdoption": false
               }
             ]
@@ -409,6 +768,8 @@
               "(translationsUrl: string) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -421,6 +782,8 @@
                 "label": "translationsUrl",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-i18n/src/core/i18n.ts",
+                "lineNumber": 204,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -449,6 +812,8 @@
               ") => void"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -474,6 +839,8 @@
                   "FormatError"
                 ],
                 "path": "node_modules/@formatjs/intl/src/types.d.ts",
+                "lineNumber": 25,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -490,6 +857,8 @@
               "() => boolean"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -506,6 +875,8 @@
         "label": "i18nLoader",
         "description": [],
         "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+        "lineNumber": 41,
+        "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -520,6 +891,8 @@
               "(translationFilePath: string) => void"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -532,6 +905,8 @@
                 "label": "translationFilePath",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-i18n/src/loader.ts",
+                "lineNumber": 77,
+                "columnNumber": 41,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -548,6 +923,8 @@
               "(arrayOfPaths?: string[]) => void"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -563,6 +940,8 @@
                   "string[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-i18n/src/loader.ts",
+                "lineNumber": 96,
+                "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -587,6 +966,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -599,6 +980,8 @@
                 "label": "locale",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-i18n/src/loader.ts",
+                "lineNumber": 113,
+                "columnNumber": 47,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -623,6 +1006,8 @@
               "; }>"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -647,6 +1032,8 @@
               "; }>"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -662,6 +1049,8 @@
                   "string[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-i18n/src/loader.ts",
+                "lineNumber": 161,
+                "columnNumber": 51,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -678,12 +1067,33 @@
               "() => string[]"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
             "children": []
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/i18n",
+        "id": "def-common.SUPPORTED_LOCALE_IDS",
+        "type": "Object",
+        "tags": [],
+        "label": "SUPPORTED_LOCALE_IDS",
+        "description": [
+          "\nDefault list of locale ids Kibana ships translations for. Used as the\ndefault value of `i18n.locales` in the config schema and as a fallback\nwhen there is no runtime configuration available (e.g., test fixtures,\nStorybook). It is **not** an authoritative runtime allow-list — admins\ncan curate or extend the list via `kibana.yml`."
+        ],
+        "signature": [
+          "readonly string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-i18n/src/locales.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]

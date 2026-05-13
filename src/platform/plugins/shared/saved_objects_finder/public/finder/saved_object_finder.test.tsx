@@ -16,15 +16,8 @@ jest.spyOn(lodash, 'debounce').mockImplementation((fn: any) => {
   fn.cancel = jest.fn();
   return fn;
 });
-import {
-  EuiInMemoryTable,
-  EuiLink,
-  EuiSearchBarProps,
-  EuiText,
-  EuiButton,
-  Query,
-} from '@elastic/eui';
-import { IconType } from '@elastic/eui';
+import type { EuiSearchBarProps, IconType } from '@elastic/eui';
+import { EuiInMemoryTable, EuiLink, EuiText, EuiButton, Query } from '@elastic/eui';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 import * as sinon from 'sinon';
@@ -34,7 +27,7 @@ import {
 } from './saved_object_finder';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { findTestSubject } from '@kbn/test-jest-helpers';
-import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 
 describe('SavedObjectsFinder', () => {
@@ -259,6 +252,27 @@ describe('SavedObjectsFinder', () => {
           .filter((item: any) => item.attributes.description)
           .map((item: any) => item.attributes.description)
       ).toEqual([doc.attributes.description, doc2.attributes.description]);
+    });
+
+    it('render extra items if provided', async () => {
+      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ hits: [doc3] })
+      );
+      const wrapper = shallow(
+        <SavedObjectFinder
+          {...baseProps}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
+          savedObjectMetaData={[metaDataConfig[1]]}
+          extraItems={{ metaData: searchMetaData, get: jest.fn().mockResolvedValue([doc, doc2]) }}
+        />
+      );
+      wrapper.instance().componentDidMount!();
+      await nextTick();
+      const items: any[] = wrapper.find(EuiInMemoryTable).prop('items');
+      expect(items).toHaveLength(3);
+      expect(items[0].attributes.title).toBe(doc3.attributes.title);
+      expect(items[1].attributes.title).toBe(doc.attributes.title);
+      expect(items[2].attributes.title).toBe(doc2.attributes.title);
     });
   });
 
@@ -516,7 +530,7 @@ describe('SavedObjectsFinder', () => {
           {
             type: 'vis',
             name: 'Vis',
-            getIconForSavedObject: () => 'visLine',
+            getIconForSavedObject: () => 'chartLine',
           },
         ]}
       />
@@ -714,6 +728,41 @@ describe('SavedObjectsFinder', () => {
         },
       });
     });
+
+    it('should apply types filter to extra items, if provided', async () => {
+      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ hits: [doc3] })
+      );
+      const wrapper = shallow(
+        <SavedObjectFinder
+          {...baseProps}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
+          showFilter={true}
+          savedObjectMetaData={[metaDataConfig[1]]}
+          extraItems={{ metaData: searchMetaData, get: jest.fn().mockResolvedValue([doc, doc2]) }}
+        />
+      );
+      wrapper.instance().componentDidMount!();
+      await nextTick();
+
+      const table = wrapper.find<EuiInMemoryTable<any>>(EuiInMemoryTable);
+      const search = table.prop('search') as EuiSearchBarProps;
+      search.onChange?.({ query: Query.parse('type:(vis)'), queryText: '', error: null });
+      expect(contentClient.mSearch).toBeCalled();
+      await nextTick();
+      let items: any[] = wrapper.find(EuiInMemoryTable).prop('items');
+      expect(items).toHaveLength(1);
+      expect(items[0].attributes.title).toBe(doc3.attributes.title);
+
+      (contentClient.mSearch as any as jest.SpyInstance).mockReset();
+      search.onChange?.({ query: Query.parse('type:(search)'), queryText: '', error: null });
+      expect(contentClient.mSearch).not.toBeCalled();
+      await nextTick();
+      items = wrapper.find(EuiInMemoryTable).prop('items');
+      expect(items).toHaveLength(2);
+      expect(items[0].attributes.title).toBe(doc.attributes.title);
+      expect(items[1].attributes.title).toBe(doc2.attributes.title);
+    });
   });
 
   it('should display no items message if there are no items', async () => {
@@ -734,7 +783,7 @@ describe('SavedObjectsFinder', () => {
     wrapper.instance().componentDidMount!();
     await nextTick();
 
-    expect(wrapper.find(EuiInMemoryTable).prop('message')).toEqual(noItemsMessage);
+    expect(wrapper.find(EuiInMemoryTable).prop('noItemsMessage')).toEqual(noItemsMessage);
   });
 
   describe('pagination', () => {
@@ -970,7 +1019,7 @@ describe('SavedObjectsFinder', () => {
           {
             type: 'vis',
             name: 'Vis',
-            getIconForSavedObject: () => 'visLine',
+            getIconForSavedObject: () => 'chartLine',
           },
         ]}
       >
@@ -1079,5 +1128,20 @@ describe('SavedObjectsFinder', () => {
     assertTooltip(doc.attributes.title, false);
     assertTooltip(doc2.attributes.title, false);
     assertTooltip(doc3.attributes.title, true);
+  });
+  it('should focus the search input on render', async () => {
+    (contentClient.mSearch as any as jest.SpyInstance).mockResolvedValue({ hits: [doc] });
+
+    render(
+      <SavedObjectFinder
+        {...baseProps}
+        services={{ uiSettings, contentClient, savedObjectsTagging }}
+        savedObjectMetaData={searchMetaData}
+      />
+    );
+
+    // 2. Grab the input directly and assert focus in one step
+    const input = await screen.findByTestId('savedObjectFinderSearchInput');
+    expect(input).toHaveFocus();
   });
 });

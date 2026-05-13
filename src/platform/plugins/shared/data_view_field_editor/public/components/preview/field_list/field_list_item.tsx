@@ -7,8 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
-import classnames from 'classnames';
+import React, {
+  useState,
+  useMemo,
+  isValidElement,
+  Children,
+  type ReactNode,
+  type ReactElement,
+} from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -18,20 +24,50 @@ import {
   EuiButtonEmpty,
   EuiBadge,
   EuiTextColor,
-  useEuiTheme,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 import { useFieldPreviewContext } from '../field_preview_context';
 import { IsUpdatingIndicator } from '../is_updating_indicator';
 import { ImagePreviewModal } from '../image_preview_modal';
 import type { DocumentField } from './field_list';
-import { PreviewState } from '../types';
+import type { PreviewState } from '../types';
 import { useStateSelector } from '../../../state_utils';
+import { ITEM_HEIGHT } from './constants';
+
+/**
+ * Recursively checks if a ReactNode tree contains an img element.
+ */
+const containsImgElement = (node: ReactNode): boolean => {
+  if (Array.isArray(node)) {
+    return node.some(containsImgElement);
+  }
+
+  if (!isValidElement(node)) {
+    return false;
+  }
+
+  const element = node as ReactElement;
+  if (element.type === 'img') {
+    return true;
+  }
+
+  const { children } = element.props;
+  if (children) {
+    return Children.toArray(children).some(containsImgElement);
+  }
+
+  return false;
+};
 
 export interface PreviewListItemProps {
   field: DocumentField;
-  toggleIsPinned?: (name: string) => void;
+  toggleIsPinned?: (
+    name: string,
+    keyboardEvent: { isKeyboardEvent: boolean; buttonId: string }
+  ) => void;
   hasScriptError?: boolean;
   /** Indicates whether the field list item comes from the Painless script */
   isFromScript?: boolean;
@@ -45,23 +81,26 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
   hasScriptError,
   isFromScript = false,
 }) => {
-  const { euiTheme } = useEuiTheme();
+  const styles = useMemoCss(componentStyles);
+
+  const pinButtonId = `fieldPreview.pinFieldButtonLabel.${key}`;
+
   const { controller } = useFieldPreviewContext();
   const isLoadingPreview = useStateSelector(controller.state$, isLoadingPreviewSelector);
 
   const [isPreviewImageModalVisible, setIsPreviewImageModalVisible] = useState(false);
 
-  const classes = classnames('indexPatternFieldEditor__previewFieldList__item', {
-    'indexPatternFieldEditor__previewFieldList__item--highlighted': isFromScript,
-    'indexPatternFieldEditor__previewFieldList__item--pinned': isPinned,
-  });
+  const [isPinHovered, setIsPinHovered] = useState(false);
+  const [isPinFocused, setIsPinFocused] = useState(false);
 
-  const doesContainImage = formattedValue?.includes('<img');
+  const showPinIcon = isPinHovered || isPinFocused || isPinned;
+
+  const doesContainImage = useMemo(() => containsImgElement(formattedValue), [formattedValue]);
 
   const renderName = () => {
     if (isFromScript && !Boolean(key)) {
       return (
-        <span className="indexPatternFieldEditor__previewFieldList--ligthWeight">
+        <span css={styles.lightWeight}>
           <EuiTextColor color="subdued">
             {i18n.translate('indexPatternFieldEditor.fieldPreview.fieldNameNotSetLabel', {
               defaultMessage: 'Field name not set',
@@ -83,7 +122,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
   const renderValue = () => {
     if (isFromScript && isLoadingPreview) {
       return (
-        <span className="indexPatternFieldEditor__previewFieldList--ligthWeight">
+        <span css={styles.lightWeight}>
           <IsUpdatingIndicator />
         </span>
       );
@@ -103,7 +142,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
 
     if (isFromScript && value === undefined) {
       return (
-        <span className="indexPatternFieldEditor__previewFieldList--ligthWeight">
+        <span css={styles.lightWeight}>
           <EuiTextColor color="subdued">
             {i18n.translate('indexPatternFieldEditor.fieldPreview.valueNotSetLabel', {
               defaultMessage: 'Value not set',
@@ -128,64 +167,42 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
     }
 
     if (formattedValue !== undefined) {
-      return withTooltip(
-        <span
-          className="indexPatternFieldEditor__previewFieldList__item__value__wrapper"
-          // We  can dangerously set HTML here because this content is guaranteed to have been run through a valid field formatter first.
-          dangerouslySetInnerHTML={{ __html: formattedValue! }} // eslint-disable-line react/no-danger
-        />
-      );
+      return withTooltip(<span css={styles.keyAndValueWrapper}>{formattedValue}</span>);
     }
 
-    return withTooltip(
-      <span className="indexPatternFieldEditor__previewFieldList__item__value__wrapper">
-        {JSON.stringify(value)}
-      </span>
-    );
+    return withTooltip(<span css={styles.keyAndValueWrapper}>{JSON.stringify(value)}</span>);
   };
 
   return (
     <>
       <EuiFlexGroup
-        className={classes}
-        // highlights the field using token, TODO: migrate whole SCSS file to emotions
-        css={
-          isFromScript
-            ? css`
-                background-color: ${euiTheme.colors.backgroundBasePrimary};
-                font-weight: ${euiTheme.font.weight.bold};
-              `
-            : undefined
-        }
+        css={[styles.listItem, isFromScript ? styles.highlightedRow : undefined]}
         gutterSize="none"
         data-test-subj="listItem"
+        onMouseEnter={() => setIsPinHovered(true)}
+        onMouseLeave={() => setIsPinHovered(false)}
       >
-        <EuiFlexItem className="indexPatternFieldEditor__previewFieldList__item__key">
-          <div
-            className="indexPatternFieldEditor__previewFieldList__item__key__wrapper"
-            data-test-subj="key"
-          >
+        <EuiFlexItem css={styles.keyAndValue}>
+          <div css={styles.keyAndValueWrapper} data-test-subj="key">
             {renderName()}
           </div>
         </EuiFlexItem>
-        <EuiFlexItem
-          className="indexPatternFieldEditor__previewFieldList__item__value"
-          data-test-subj="value"
-        >
+        <EuiFlexItem css={styles.keyAndValue} data-test-subj="value">
           {renderValue()}
         </EuiFlexItem>
 
-        <EuiFlexItem
-          className="indexPatternFieldEditor__previewFieldList__item__actions"
-          grow={false}
-        >
+        <EuiFlexItem css={styles.actions} grow={false}>
           {toggleIsPinned && (
             <EuiButtonIcon
-              onClick={() => {
-                toggleIsPinned(key);
+              onClick={(e: { detail: number }) => {
+                const isKeyboardEvent = e.detail === 0; // Mouse = non-zero, Keyboard = 0
+                toggleIsPinned(key, { isKeyboardEvent, buttonId: pinButtonId });
               }}
+              id={pinButtonId}
+              onFocus={() => setIsPinFocused(true)}
+              onBlur={() => setIsPinFocused(false)}
               color="text"
-              iconType="pinFilled"
+              iconType={showPinIcon ? 'pinFill' : 'empty'}
               data-test-subj="pinFieldButton"
               aria-label={i18n.translate(
                 'indexPatternFieldEditor.fieldPreview.pinFieldButtonLabel',
@@ -193,17 +210,53 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
                   defaultMessage: 'Pin field',
                 }
               )}
-              className="indexPatternFieldEditor__previewFieldList__item__actionsBtn"
             />
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
       {isPreviewImageModalVisible && (
         <ImagePreviewModal
-          imgHTML={formattedValue!}
+          imgElement={formattedValue}
           closeModal={() => setIsPreviewImageModalVisible(false)}
         />
       )}
     </>
   );
+};
+
+const componentStyles = {
+  listItem: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      borderBottom: euiTheme.border.thin,
+      height: ITEM_HEIGHT,
+      alignItems: 'center',
+      overflow: 'hidden',
+    }),
+  highlightedRow: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      backgroundColor: euiTheme.colors.backgroundBasePrimary,
+      fontWeight: euiTheme.font.weight.bold,
+    }),
+  lightWeight: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      fontWeight: euiTheme.font.weight.regular,
+    }),
+  keyAndValueWrapper: css({
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    display: 'block',
+    width: '100%',
+  }),
+  keyAndValue: css({
+    overflow: 'hidden',
+
+    '& .euiToolTipAnchor': {
+      width: '100%', // We need the tooltip <span /> to be 100% to display the text ellipsis of the field value
+    },
+  }),
+  actions: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flexBasis: `${euiTheme.size.l} !important`,
+    }),
 };

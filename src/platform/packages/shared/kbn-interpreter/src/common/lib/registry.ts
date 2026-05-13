@@ -11,7 +11,6 @@ import { clone } from 'lodash';
 
 export class Registry<ItemSpec, Item> {
   private readonly _prop: string;
-  // eslint-disable-next-line @typescript-eslint/ban-types
   private _indexed: Object;
 
   constructor(prop = 'name') {

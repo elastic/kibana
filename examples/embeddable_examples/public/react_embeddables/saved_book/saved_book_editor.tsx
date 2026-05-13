@@ -22,101 +22,70 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { OverlayRef } from '@kbn/core-mount-utils-browser';
-import { i18n } from '@kbn/i18n';
-import { tracksOverlays } from '@kbn/presentation-containers';
-import { apiHasUniqueId, useBatchedOptionalPublishingSubjects } from '@kbn/presentation-publishing';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import React, { useState } from 'react';
-import { serializeBookAttributes } from './book_state';
-import { BookApi, BookAttributesManager } from './types';
-import { saveBookAttributes } from './saved_book_library';
+import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
+import { i18n } from '@kbn/i18n';
+import type { BookState } from '../../../server';
+import type { BookApi } from './types';
+import { saveBook } from './library_utils';
 
-export const openSavedBookEditor = ({
-  attributesManager,
+export const getSavedBookEditor = ({
+  stateManager,
   isCreate,
-  core,
-  parent,
   api,
+  closeFlyout,
+  onSubmit,
 }: {
-  attributesManager: BookAttributesManager;
+  stateManager: StateManager<BookState>;
   isCreate: boolean;
-  core: CoreStart;
-  parent?: unknown;
   api?: BookApi;
-}): Promise<{ savedBookId?: string }> => {
-  return new Promise((resolve) => {
-    const closeOverlay = (overlayRef: OverlayRef) => {
-      if (tracksOverlays(parent)) parent.clearOverlays();
-      overlayRef.close();
-    };
+  closeFlyout: () => void;
+  onSubmit: (result: { savedObjectId?: string }) => void;
+}) => {
+  const initialState = stateManager.getLatestState();
+  return (
+    <SavedBookEditor
+      api={api}
+      isCreate={isCreate}
+      stateManager={stateManager}
+      onCancel={() => {
+        // set the state back to the initial state and reject
+        stateManager.reinitializeState(initialState);
+        closeFlyout();
+      }}
+      onSubmit={async (addToLibrary: boolean) => {
+        const savedObjectId = addToLibrary
+          ? await saveBook(api?.getSavedObjectId(), stateManager.getLatestState())
+          : undefined;
 
-    const initialState = serializeBookAttributes(attributesManager);
-    const overlay = core.overlays.openFlyout(
-      toMountPoint(
-        <SavedBookEditor
-          api={api}
-          isCreate={isCreate}
-          attributesManager={attributesManager}
-          onCancel={() => {
-            // set the state back to the initial state and reject
-            attributesManager.authorName.next(initialState.authorName);
-            attributesManager.bookSynopsis.next(initialState.bookSynopsis);
-            attributesManager.bookTitle.next(initialState.bookTitle);
-            attributesManager.numberOfPages.next(initialState.numberOfPages);
-            closeOverlay(overlay);
-          }}
-          onSubmit={async (addToLibrary: boolean) => {
-            const savedBookId = addToLibrary
-              ? await saveBookAttributes(
-                  api?.getSavedBookId(),
-                  serializeBookAttributes(attributesManager)
-                )
-              : undefined;
-
-            closeOverlay(overlay);
-            resolve({ savedBookId });
-          }}
-        />,
-        core
-      ),
-      {
-        type: isCreate ? 'overlay' : 'push',
-        size: 'm',
-        onClose: () => closeOverlay(overlay),
-      }
-    );
-
-    const overlayOptions = !isCreate && apiHasUniqueId(api) ? { focusedPanelId: api.uuid } : {};
-    /**
-     * if our parent needs to know about the overlay, notify it. This allows the parent to close the overlay
-     * when navigating away, or change certain behaviors based on the overlay being open.
-     */
-    if (tracksOverlays(parent)) parent.openOverlay(overlay, overlayOptions);
-  });
+        closeFlyout();
+        onSubmit({ savedObjectId });
+      }}
+    />
+  );
 };
 
 export const SavedBookEditor = ({
-  attributesManager,
+  stateManager,
   isCreate,
   onSubmit,
   onCancel,
   api,
 }: {
-  attributesManager: BookAttributesManager;
+  stateManager: StateManager<BookState>;
   isCreate: boolean;
   onSubmit: (addToLibrary: boolean) => Promise<void>;
   onCancel: () => void;
   api?: BookApi;
 }) => {
-  const [authorName, synopsis, bookTitle, numberOfPages] = useBatchedOptionalPublishingSubjects(
-    attributesManager.authorName,
-    attributesManager.bookSynopsis,
-    attributesManager.bookTitle,
-    attributesManager.numberOfPages
+  const [authorName, synopsis, bookTitle, numberOfPages] = useBatchedPublishingSubjects(
+    stateManager.api.authorName$,
+    stateManager.api.bookSynopsis$,
+    stateManager.api.bookTitle$,
+    stateManager.api.numberOfPages$
   );
-  const [addToLibrary, setAddToLibrary] = useState(Boolean(api?.getSavedBookId()));
+  const [addToLibrary, setAddToLibrary] = useState(Boolean(api?.getSavedObjectId()));
   const [saving, setSaving] = useState(false);
 
   return (
@@ -143,7 +112,7 @@ export const SavedBookEditor = ({
           <EuiFieldText
             disabled={saving}
             value={authorName ?? ''}
-            onChange={(e) => attributesManager.authorName.next(e.target.value)}
+            onChange={(e) => stateManager.api.setAuthorName(e.target.value)}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -154,7 +123,7 @@ export const SavedBookEditor = ({
           <EuiFieldText
             disabled={saving}
             value={bookTitle ?? ''}
-            onChange={(e) => attributesManager.bookTitle.next(e.target.value)}
+            onChange={(e) => stateManager.api.setBookTitle(e.target.value)}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -165,7 +134,7 @@ export const SavedBookEditor = ({
           <EuiFieldNumber
             disabled={saving}
             value={numberOfPages ?? ''}
-            onChange={(e) => attributesManager.numberOfPages.next(+e.target.value)}
+            onChange={(e) => stateManager.api.setNumberOfPages(+e.target.value)}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -176,7 +145,7 @@ export const SavedBookEditor = ({
           <EuiTextArea
             disabled={saving}
             value={synopsis ?? ''}
-            onChange={(e) => attributesManager.bookSynopsis.next(e.target.value)}
+            onChange={(e) => stateManager.api.setBookSynopsis(e.target.value)}
           />
         </EuiFormRow>
       </EuiFlyoutBody>

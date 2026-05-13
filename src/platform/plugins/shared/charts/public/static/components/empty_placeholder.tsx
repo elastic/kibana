@@ -8,7 +8,8 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
+import { EuiIcon, EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 
@@ -44,7 +45,7 @@ export const EmptyPlaceholder = ({
   return (
     <div className={className} css={style}>
       <EuiText data-test-subj={dataTestSubj} textAlign="center" color="subdued" size="xs">
-        <EuiIcon type={icon} color={iconColor} size="l" />
+        <EuiIcon type={icon} color={iconColor} size="l" aria-hidden={true} />
         <EuiSpacer size="s" />
         <p>{message}</p>
       </EuiText>

@@ -7,29 +7,71 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { scoutFixtures, scoutParallelFixtures } from './fixtures';
+// Needed for Scout tests dependent on .peggy grammar files (`@kbn/tinymath`)
+import './peggy_setup';
 
-// Scout core fixtures: worker & test scope
-export const test = scoutFixtures;
-
-// Scout core 'space aware' fixtures: worker & test scope
-export const spaceTest = scoutParallelFixtures;
-
+// Config and utilities
 export { createPlaywrightConfig } from './config';
 export { createLazyPageObject } from './page_objects/utils';
-export { expect } from './expect';
 
+// Matchers
+export { expect } from './matchers/ui';
+
+// Types for Playwright options
 export type { ScoutPlaywrightOptions, ScoutTestOptions } from './types';
+
+// Fixtures and Page Objects (can be extended with solution-specific logic)
+export type {
+  BrowserAuthFixture,
+  ScoutPage,
+  PageObjects, // can be extended with solution specific Page Objects
+} from './fixtures/scope/test';
+export { browserAuthFixture } from './fixtures/scope/test';
+
+// Test and worker fixtures (can be extended with solution specific fixtures)
 export type {
   ScoutTestFixtures,
   ScoutWorkerFixtures,
   ScoutParallelTestFixtures,
   ScoutParallelWorkerFixtures,
-  ScoutPage,
-  PageObjects,
-} from './fixtures';
+} from './test/ui';
 
-// use to tag tests
+// Worker primitives (for optional packages such as @kbn/scout-synthtrace)
+export { coreWorkerFixtures, esArchiverFixture } from './fixtures/scope/worker';
+export type { EsArchiverFixture } from './fixtures/scope/worker';
+
+// API services (can be extended with solution specific API services)
+export { apiServicesFixture } from './fixtures/scope/worker/apis';
+export type { ApiServicesFixture } from './fixtures/scope/worker/apis';
+
+// Other worker types
+export type {
+  LinkedProjectFixture,
+  SamlAuth,
+  RequestAuthFixture,
+  SpaceSolutionView,
+  ApiClientFixture,
+  ApiClientOptions,
+  ApiClientResponse,
+} from './fixtures/scope/worker';
+
+// Tagging utility
 export { tags } from './tags';
 
-export { ingestTestDataHook, ingestSynthtraceDataHook } from './global_hooks';
+// Test entrypoints
+export { test, spaceTest, lighthouseTest, globalSetupHook, globalTeardownHook } from './test/ui';
+export { apiTest } from './test/api';
+
+// Test helpers for EUI components
+export * from './eui_components';
+
+// Test helpers for Kibana components
+export * from './ui_components';
+
+// Page-object wrappers and helpers for shared Kibana surfaces.
+export {
+  ContentListWrapper,
+  buildContentListSearch,
+  buildContentListUrlRegex,
+} from './page_objects';
+export type { ContentListUrlState } from './page_objects';

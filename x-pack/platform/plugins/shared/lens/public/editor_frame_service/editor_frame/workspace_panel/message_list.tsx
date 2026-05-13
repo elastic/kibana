@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import './workspace_panel_wrapper.scss';
-import './message_list.scss';
-
 import React, { useState } from 'react';
 import {
   EuiPopover,
@@ -17,10 +14,12 @@ import {
   EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css, SerializedStyles } from '@emotion/react';
-import { UserMessage } from '../../../types';
+import type { SerializedStyles } from '@emotion/react';
+import { css } from '@emotion/react';
+import type { UserMessage } from '@kbn/lens-common';
 
 export const MessageList = ({
   messages,
@@ -71,6 +70,7 @@ export const MessageList = ({
 
   return (
     <EuiPopover
+      aria-label={buttonLabel}
       panelPaddingSize="none"
       button={
         <EuiToolTip content={buttonLabel}>
@@ -78,21 +78,21 @@ export const MessageList = ({
             minWidth={0}
             color={errorCount ? 'danger' : 'warning'}
             onClick={onButtonClick}
-            className="lnsWorkspaceWarning__button"
             data-test-subj="lens-message-list-trigger"
             title={buttonLabel}
             css={customButtonStyles}
           >
             {errorCount > 0 && (
               <>
-                <EuiIcon type="error" />
+                <EuiIcon type="error" aria-hidden={true} />
                 {errorCount}
               </>
             )}
             {warningCount > 0 && (
               <>
                 <EuiIcon
-                  type="alert"
+                  type="warning"
+                  aria-hidden={true}
                   css={css`
                     margin-left: 4px;
                   `}
@@ -106,11 +106,11 @@ export const MessageList = ({
       isOpen={isPopoverOpen}
       closePopover={closePopover}
     >
-      <ul className="lnsWorkspaceWarningList">
+      <ul css={workspaceWarningListStyles.self} className="eui-yScroll">
         {messages.map(({ hidePopoverIcon = false, ...message }, index) => (
           <li
             key={index}
-            className="lnsWorkspaceWarningList__item"
+            css={workspaceWarningListStyles.item}
             data-test-subj={`lens-message-list-${message.severity}`}
           >
             {typeof message.longMessage === 'function' ? (
@@ -119,18 +119,18 @@ export const MessageList = ({
               <EuiFlexGroup
                 gutterSize="s"
                 responsive={false}
-                className="lnsWorkspaceWarningList__textItem"
+                css={workspaceWarningListStyles.textItem}
               >
                 {!hidePopoverIcon && (
                   <EuiFlexItem grow={false}>
                     {message.severity === 'error' ? (
-                      <EuiIcon type="error" color="danger" />
+                      <EuiIcon type="error" color="danger" aria-hidden={true} />
                     ) : (
-                      <EuiIcon type="alert" color="warning" />
+                      <EuiIcon type="warning" color="warning" aria-hidden={true} />
                     )}
                   </EuiFlexItem>
                 )}
-                <EuiFlexItem grow={1} className="lnsWorkspaceWarningList__description">
+                <EuiFlexItem grow={1} css={workspaceWarningListStyles.description}>
                   <EuiText size="s">{message.longMessage}</EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -140,4 +140,23 @@ export const MessageList = ({
       </ul>
     </EuiPopover>
   );
+};
+
+const workspaceWarningListStyles = {
+  self: css`
+    max-height: 320px;
+    width: 256px;
+  `,
+  item: ({ euiTheme }: UseEuiTheme) => `
+    & + & {
+      border-top: 1px solid ${euiTheme.colors.lightShade};
+    }
+  `,
+  textItem: ({ euiTheme }: UseEuiTheme) => `
+     padding: ${euiTheme.size.base}
+  `,
+  description: css`
+    overflow-wrap: break-word;
+    min-width: 0;
+  `,
 };

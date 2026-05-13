@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DocViewer } from './doc_viewer';
+export { DocViewer, type DocViewerProps, type DocViewerApi } from './doc_viewer';
+export type { DocViewerRestorableState } from '../../types';

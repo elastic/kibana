@@ -54,7 +54,7 @@ export const TagsFilter: React.FunctionComponent<Props> = ({
       zIndex={Number(euiTheme.levels.header) - 1}
       button={
         <EuiFilterButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           onClick={() => setIsTagsFilterOpen(!isTagsFilterOpen)}
           isSelected={isTagsFilterOpen}
           hasActiveFilters={selectedTags.length > 0}
@@ -71,7 +71,8 @@ export const TagsFilter: React.FunctionComponent<Props> = ({
       panelPaddingSize="none"
     >
       <EuiSelectable
-        options={options as any}
+        options={options}
+        searchable
         onChange={(newOptions: EuiSelectableOption[]) => {
           newOptions.forEach((option, index) => {
             if (option.checked !== options[index].checked) {
@@ -95,7 +96,12 @@ export const TagsFilter: React.FunctionComponent<Props> = ({
           },
         }}
       >
-        {(list) => list}
+        {(list, search) => (
+          <>
+            {search}
+            {list}
+          </>
+        )}
       </EuiSelectable>
       <EuiHorizontalRule margin="none" />
       <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">

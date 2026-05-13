@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import * as z from '@kbn/zod';
+import * as z from '@kbn/zod/v4';
 
-import type { RuleSnooze } from '@kbn/alerting-plugin/common';
+import type { RuleSnooze, GapFillStatus } from '@kbn/alerting-plugin/common';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import type { RuleSnoozeSettings } from '@kbn/triggers-actions-ui-plugin/public/types';
-import type { WarningSchema } from '../../../../common/api/detection_engine';
+import type {
+  RuleCustomizationStatus,
+  WarningSchema,
+} from '../../../../common/api/detection_engine';
 import type { RuleExecutionStatus } from '../../../../common/api/detection_engine/rule_monitoring';
 
 import { SortOrder } from '../../../../common/api/detection_engine';
@@ -22,10 +25,14 @@ import type {
 } from '../../../../common/api/detection_engine/model/rule_schema';
 import type {
   CoverageOverviewFilter,
+  SearchRulesAggregations,
+  SearchRulesField,
+  SearchRulesResponse,
+  SearchRulesSearchAfterItem,
+  GranularRulesSearch,
   PatchRuleRequestBody,
 } from '../../../../common/api/detection_engine/rule_management';
 import { FindRulesSortField } from '../../../../common/api/detection_engine/rule_management';
-import type { GapRangeValue } from '../../rule_gaps/constants';
 export interface CreateRulesProps {
   rule: RuleCreateProps;
   signal?: AbortSignal;
@@ -63,11 +70,8 @@ export interface FetchRulesProps {
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
   filterOptions?: FilterOptions;
   sortingOptions?: SortingOptions;
-  gapsRange?: {
-    start: string;
-    end: string;
-  };
   signal?: AbortSignal;
+  schedulerId?: string;
 }
 
 // Rule snooze settings map keyed by rule SO's id (not ruleId) and valued by rule snooze settings
@@ -103,9 +107,9 @@ export interface FilterOptions {
   excludeRuleTypes?: Type[];
   enabled?: boolean; // undefined is to display all the rules
   ruleExecutionStatus?: RuleExecutionStatus; // undefined means "all"
-  ruleSource?: RuleCustomizationEnum[]; // undefined is to display all the rules
-  showRulesWithGaps?: boolean;
-  gapSearchRange?: GapRangeValue;
+  ruleSource?: RuleCustomizationStatus[]; // undefined is to display all the rules
+  gapFillStatuses?: GapFillStatus[];
+  includeRuleTypes?: Type[];
 }
 
 export interface FetchRulesResponse {
@@ -113,7 +117,26 @@ export interface FetchRulesResponse {
   perPage: number;
   total: number;
   data: RuleResponse[];
+  warnings?: WarningSchema[];
 }
+
+export interface FetchSearchRulesProps {
+  pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
+  fields?: SearchRulesField[];
+  filter?: string;
+  search?: GranularRulesSearch;
+  sort_field?: z.infer<typeof FindRulesSortField>;
+  sort_order?: z.infer<typeof SortOrder>;
+  aggregations?: SearchRulesAggregations;
+  search_after?: SearchRulesSearchAfterItem[];
+  gap_fill_statuses?: GapFillStatus[];
+  gaps_range_start?: string;
+  gaps_range_end?: string;
+  gap_auto_fill_scheduler_id?: string;
+  signal?: AbortSignal;
+}
+
+export type FetchSearchRulesResponse = SearchRulesResponse;
 
 export interface FetchRuleProps {
   id: string;
@@ -208,9 +231,4 @@ export interface FindRulesReferencedByExceptionsListProp {
 export interface FindRulesReferencedByExceptionsProps {
   lists: FindRulesReferencedByExceptionsListProp[];
   signal?: AbortSignal;
-}
-
-export enum RuleCustomizationEnum {
-  customized = 'CUSTOMIZED',
-  not_customized = 'NOT_CUSTOMIZED',
 }

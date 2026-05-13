@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 export async function getTimeFieldRange(
@@ -14,7 +14,8 @@ export async function getTimeFieldRange(
   index: string[] | string,
   timeFieldName: string,
   query: QueryDslQueryContainer,
-  runtimeMappings?: estypes.MappingRuntimeFields
+  runtimeMappings?: estypes.MappingRuntimeFields,
+  projectRouting?: string
 ): Promise<{
   success: boolean;
   start: { epoch: number; string: string };
@@ -39,6 +40,7 @@ export async function getTimeFieldRange(
       },
     },
     ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+    ...(projectRouting ? { project_routing: projectRouting } : {}),
   });
 
   if (aggregations && aggregations.earliest && aggregations.latest) {

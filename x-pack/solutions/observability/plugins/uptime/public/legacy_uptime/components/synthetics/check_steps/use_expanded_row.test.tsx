@@ -13,7 +13,7 @@ import { createMemoryHistory } from 'history';
 import { EuiButtonIcon } from '@elastic/eui';
 import { getExpandedStepCallback, useExpandedRow } from './use_expanded_row';
 import { render } from '../../../lib/helper/rtl_helpers';
-import { JourneyStep } from '../../../../../common/runtime_types';
+import type { JourneyStep } from '../../../../../common/runtime_types';
 import { SYNTHETIC_CHECK_STEPS_ROUTE } from '../../../../../common/constants';
 import { COLLAPSE_LABEL, EXPAND_LABEL } from '../translations';
 import { act } from 'react-dom/test-utils';
@@ -104,7 +104,7 @@ describe('useExpandedROw', () => {
             data-test-subj={TEST_ID + index}
             onClick={() => toggleExpand({ journeyStep })}
             aria-label={expandedRows[journeyStep._id] ? COLLAPSE_LABEL : EXPAND_LABEL}
-            iconType={expandedRows[journeyStep._id] ? 'arrowUp' : 'arrowDown'}
+            iconType={expandedRows[journeyStep._id] ? 'chevronSingleUp' : 'chevronSingleDown'}
           />
         ))}
       </Route>

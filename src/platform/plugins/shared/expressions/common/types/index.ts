@@ -10,4 +10,4 @@
 export type { TypeToString, KnownTypeToString, TypeString, UnmappedTypeStrings } from './common';
 
 export * from './style';
-export * from './registry';
+export type * from './registry';

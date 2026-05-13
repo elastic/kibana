@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import type {
   DataView,
@@ -14,7 +15,7 @@ import type {
   DataViewField,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
-import { NotificationsStart } from '@kbn/core/public';
+import type { NotificationsStart } from '@kbn/core/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -22,15 +23,15 @@ import { BehaviorSubject } from 'rxjs';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { renderToString } from 'react-dom/server';
 import React from 'react';
-import debounce from 'lodash/debounce';
-import { PreviewState, FetchDocError } from './types';
-import { BehaviorObservable } from '../../state_utils';
-import { EsDocument, ScriptErrorCodes, Params, FieldPreview } from './types';
+import { debounce } from 'lodash';
+import type { PreviewState, FetchDocError } from './types';
+import type { BehaviorObservable } from '../../state_utils';
+import type { EsDocument, ScriptErrorCodes, Params, FieldPreview } from './types';
 import type { FieldFormatsStart, RuntimeType } from '../../shared_imports';
 import { valueTypeToSelectedType } from './field_preview_context';
-import { Field } from '../../types';
+import type { Field } from '../../types';
 import { pluginName } from '../../constants';
-import { InternalFieldType } from '../../types';
+import type { InternalFieldType } from '../../types';
 
 export const defaultValueFormatter = (value: unknown) => {
   const content = typeof value === 'object' ? JSON.stringify(value) : String(value) ?? '-';
@@ -46,7 +47,7 @@ interface PreviewControllerArgs {
   deps: PreviewControllerDependencies;
 }
 
-interface PreviewControllerDependencies {
+export interface PreviewControllerDependencies {
   search: ISearchStart;
   fieldFormats: FieldFormatsStart;
   usageCollection: UsageCollectionStart;
@@ -372,7 +373,7 @@ export class PreviewController {
   setCustomDocIdToLoad = (customDocIdToLoad: string | null) => {
     this.updateState({
       customDocIdToLoad,
-      customId: customDocIdToLoad || undefined,
+      customId: customDocIdToLoad ?? undefined,
       isPreviewAvailable: this.getIsPreviewAvailable({ customDocIdToLoad }),
     });
     // load document if id is present
@@ -491,11 +492,11 @@ export class PreviewController {
     value: unknown;
     format: Params['format'];
     type: Params['type'];
-  }) => {
+  }): ReactNode => {
     if (format?.id) {
       const formatter = this.deps.fieldFormats.getInstance(format.id, format.params);
       if (formatter) {
-        return formatter.getConverterFor('html')(value) ?? JSON.stringify(value);
+        return formatter.reactConvert(value) ?? JSON.stringify(value);
       }
     }
 
@@ -503,7 +504,7 @@ export class PreviewController {
       const fieldType = castEsToKbnFieldTypeName(type);
       const defaultFormatterForType = this.deps.fieldFormats.getDefaultInstance(fieldType);
       if (defaultFormatterForType) {
-        return defaultFormatterForType.getConverterFor('html')(value) ?? JSON.stringify(value);
+        return defaultFormatterForType.reactConvert(value) ?? JSON.stringify(value);
       }
     }
 

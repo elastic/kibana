@@ -34,9 +34,9 @@ const link3: LinkItem = { id: link3Id, title: 'link 3', path: '/link3' };
 const link4: LinkItem = { id: link4Id, title: 'link 4', path: '/link4' };
 const link5: LinkItem = { id: link5Id, title: 'link 5', path: '/link5' };
 
-const ancestorsLinks = [link1, link2, link3];
+const parentsLinks = [link1, link2, link3];
 const trailingLinks = [link4, link5];
-const allLinks = [...ancestorsLinks, ...trailingLinks];
+const allLinks = [...parentsLinks, ...trailingLinks];
 
 const mockSecuritySolutionUrl: GetSecuritySolutionUrl = jest.fn(
   ({ deepLinkId }: { deepLinkId: SecurityPageName }) =>
@@ -56,10 +56,10 @@ jest.mock('../../../utils/route/use_route_spy', () => ({
   useRouteSpy: () => mockUseRouteSpy(),
 }));
 
-const mockGetAncestorLinks = jest.fn((_id: unknown): LinkInfo[] => ancestorsLinks);
-jest.mock('../../../links', () => ({
-  ...jest.requireActual('../../../links'),
-  getAncestorLinksInfo: (id: unknown) => mockGetAncestorLinks(id),
+const mockGetParentLinks = jest.fn((_id: unknown): LinkInfo[] => parentsLinks);
+jest.mock('../../../links/links_hooks', () => ({
+  ...jest.requireActual('../../../links/links_hooks'),
+  useParentLinks: (id: unknown) => mockGetParentLinks(id),
 }));
 
 const mockGetTrailingBreadcrumbs = jest.fn((): ChromeBreadcrumb[] =>
@@ -70,7 +70,7 @@ jest.mock('./trailing_breadcrumbs', () => ({
 }));
 
 const landingBreadcrumb = {
-  href: 'get_started',
+  href: 'launchpad',
   text: 'Security',
   onClick: expect.any(Function),
 };
@@ -82,21 +82,19 @@ describe('useBreadcrumbsNav', () => {
 
   it('should process breadcrumbs with current pageName', () => {
     renderHook(useBreadcrumbsNav);
-    expect(mockGetAncestorLinks).toHaveBeenCalledWith(link1Id);
+    expect(mockGetParentLinks).toHaveBeenCalledWith(link1Id);
     expect(mockGetTrailingBreadcrumbs).toHaveBeenCalledWith();
   });
 
   it('should not process breadcrumbs with empty pageName', () => {
     mockUseRouteSpy.mockReturnValueOnce([{ pageName: '' }]);
     renderHook(useBreadcrumbsNav);
-    expect(mockGetAncestorLinks).not.toHaveBeenCalled();
     expect(mockGetTrailingBreadcrumbs).not.toHaveBeenCalledWith();
   });
 
   it('should not process breadcrumbs with cases pageName', () => {
     mockUseRouteSpy.mockReturnValueOnce([{ pageName: SecurityPageName.case }]);
     renderHook(useBreadcrumbsNav);
-    expect(mockGetAncestorLinks).not.toHaveBeenCalled();
     expect(mockGetTrailingBreadcrumbs).not.toHaveBeenCalledWith();
   });
 
@@ -158,5 +156,16 @@ describe('useBreadcrumbsNav', () => {
     expect(event.preventDefault).toHaveBeenCalled();
     expect(mockDispatch).toHaveBeenCalled();
     expect(reportEventMock).toHaveBeenCalled();
+  });
+
+  it('should use SecurityPageName.launchpad', () => {
+    renderHook(useBreadcrumbsNav);
+
+    const calls = (mockSecuritySolutionUrl as jest.Mock).mock.calls;
+    const launchpadBreadcrumbCall = calls.find(
+      (call) => call[0].deepLinkId === SecurityPageName.launchpad
+    );
+
+    expect(launchpadBreadcrumbCall).toBeDefined();
   });
 });

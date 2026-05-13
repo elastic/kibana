@@ -77,7 +77,7 @@ const cmd = [
   `${REPO_ROOT}/scripts/${ftrScript}`,
   ...(grep ? [`--grep "${grep}"`] : []),
   ...(updateSnapshots ? [`--updateSnapshots`] : []),
-  `--config ${REPO_ROOT}/x-pack/test/profiling_api_integration/${license}/config.ts`,
+  `--config ${REPO_ROOT}/x-pack/solutions/observability/test/api_integration/profiling/${license}/config.ts`,
 ].join(' ');
 
 console.log(`Running: "${cmd}"`);

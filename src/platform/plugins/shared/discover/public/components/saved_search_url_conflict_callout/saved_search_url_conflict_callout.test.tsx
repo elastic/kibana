@@ -10,11 +10,12 @@
 import React from 'react';
 import type { History } from 'history';
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 import { SavedSearchURLConflictCallout } from './saved_search_url_conflict_callout';
 
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 
 describe('SavedSearchURLConflictCallout', () => {
   let spaces: ReturnType<typeof spacesPluginMock.createStartContract>;
@@ -31,31 +32,47 @@ describe('SavedSearchURLConflictCallout', () => {
   });
 
   test("should render URLConflictCallout in case of id's conflicts", () => {
-    const savedSearch = {
+    const discoverSession = {
       id: 'id',
+      title: 'Shared session',
       sharingSavedObjectProps: {
         outcome: 'conflict',
         aliasTargetId: 'aliasTargetId',
       },
-    } as SavedSearch;
+    } as DiscoverSession;
 
-    const component = mountWithIntl(
-      <SavedSearchURLConflictCallout spaces={spaces} savedSearch={savedSearch} history={history} />
+    renderWithI18n(
+      <SavedSearchURLConflictCallout
+        spaces={spaces}
+        discoverSession={discoverSession}
+        history={history}
+      />
     );
 
-    expect(component.children()).toMatchInlineSnapshot(`"callout"`);
+    expect(spaces.ui.components.getLegacyUrlConflict).toHaveBeenCalledWith({
+      currentObjectId: 'id',
+      objectNoun: "'Shared session' Discover session",
+      otherObjectId: 'aliasTargetId',
+      otherObjectPath: '#/view/aliasTargetId?_g=foo',
+    });
+    expect(screen.getByText('callout')).toBeVisible();
   });
 
   test('should not render URLConflictCallout in case of no conflicts', () => {
-    const savedSearch = {
+    const discoverSession = {
       id: 'id',
       sharingSavedObjectProps: {},
-    } as SavedSearch;
+    } as DiscoverSession;
 
-    const component = mountWithIntl(
-      <SavedSearchURLConflictCallout spaces={spaces} savedSearch={savedSearch} history={history} />
+    renderWithI18n(
+      <SavedSearchURLConflictCallout
+        spaces={spaces}
+        discoverSession={discoverSession}
+        history={history}
+      />
     );
 
-    expect(component.children()).toMatchInlineSnapshot(`null`);
+    expect(spaces.ui.components.getLegacyUrlConflict).not.toHaveBeenCalled();
+    expect(screen.queryByText('callout')).not.toBeInTheDocument();
   });
 });

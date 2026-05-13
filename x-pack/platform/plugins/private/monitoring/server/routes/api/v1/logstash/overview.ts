@@ -13,7 +13,7 @@ import { getClusterStatus } from '../../../../lib/logstash/get_cluster_status';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors';
 import { metricSet } from './metric_set_overview';
-import { MonitoringCore } from '../../../../types';
+import type { MonitoringCore } from '../../../../types';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getLogstashDataset } from '../../../../../common/get_index_patterns';
 
@@ -24,6 +24,12 @@ export function logstashOverviewRoute(server: MonitoringCore) {
   server.route({
     method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/logstash',
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'This route delegates authorization to the scoped ES cluster client',
+      },
+    },
     validate: {
       params: validateParams,
       body: validateBody,

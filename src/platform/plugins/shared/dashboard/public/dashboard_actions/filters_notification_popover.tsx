@@ -22,20 +22,22 @@ import {
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
-import { AggregateQuery, getAggregateQueryMode, isOfQueryType } from '@kbn/es-query';
-import { ACTION_EDIT_PANEL } from '@kbn/presentation-panel-plugin/public';
+import type { AggregateQuery } from '@kbn/es-query';
+import { getAggregateQueryMode, isOfQueryType } from '@kbn/es-query';
+import { ACTION_EDIT_PANEL } from '@kbn/embeddable-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
-  EmbeddableApiContext,
   apiCanLockHoverActions,
   getViewModeSubject,
-  useBatchedOptionalPublishingSubjects,
+  useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { ActionExecutionMeta } from '@kbn/ui-actions-plugin/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { type ActionExecutionMeta, triggers } from '@kbn/ui-actions-plugin/public';
+import { BehaviorSubject } from 'rxjs';
 import { uiActionsService } from '../services/kibana_services';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
-import { FiltersNotificationActionApi } from './filters_notification_action';
+import type { FiltersNotificationActionApi } from './filters_notification_action';
 
 export function FiltersNotificationPopover({ api }: { api: FiltersNotificationActionApi }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -45,18 +47,26 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
   const displayName = dashboardFilterNotificationActionStrings.getDisplayName();
   const canEditUnifiedSearch = api.canEditUnifiedSearch?.() ?? true;
 
+  const closePopover = useCallback(() => {
+    setIsPopoverOpen(false);
+    if (apiCanLockHoverActions(api)) {
+      api.lockHoverActions(false);
+    }
+  }, [api]);
+
   const executeEditAction = useCallback(async () => {
     try {
       const action = await uiActionsService.getAction(ACTION_EDIT_PANEL);
       action.execute({
         embeddable: api,
-        trigger: { id: CONTEXT_MENU_TRIGGER },
+        trigger: triggers[ON_OPEN_PANEL_MENU],
       } as EmbeddableApiContext & ActionExecutionMeta);
+      closePopover();
     } catch (error) {
       // eslint-disable-next-line no-console
       console.warn('Unable to execute edit action, Error: ', error.message);
     }
-  }, [api]);
+  }, [api, closePopover]);
 
   const { queryString, queryLanguage } = useMemo(() => {
     const query = api.query$?.value;
@@ -77,9 +87,9 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
     }
   }, [api, setDisableEditButton]);
 
-  const [dataViews, parentViewMode] = useBatchedOptionalPublishingSubjects(
-    api.parentApi?.dataViews$,
-    getViewModeSubject(api ?? undefined)
+  const [dataViews, parentViewMode] = useBatchedPublishingSubjects(
+    api.parentApi?.dataViews$ ?? new BehaviorSubject(undefined),
+    getViewModeSubject(api) ?? new BehaviorSubject(undefined)
   );
 
   const showEditButton = !disableEditbutton && parentViewMode === 'edit' && canEditUnifiedSearch;
@@ -101,13 +111,9 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
         />
       }
       isOpen={isPopoverOpen}
-      closePopover={() => {
-        setIsPopoverOpen(false);
-        if (apiCanLockHoverActions(api)) {
-          api.lockHoverActions(false);
-        }
-      }}
+      closePopover={closePopover}
       anchorPosition="upCenter"
+      aria-label={displayName}
     >
       <EuiForm
         component="div"

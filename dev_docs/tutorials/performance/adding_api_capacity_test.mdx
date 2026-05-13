@@ -8,6 +8,7 @@ tags: ['kibana', 'onboarding', 'setup', 'performance', 'development', 'telemetry
 ---
 
 ## Overview
+
 It is important to test individual API endpoint for the baseline performance, scalability, or breaking point. If an API doesn’t meet performance requirements, it is a bottleneck.
 This capacity tests track how response time changes while we slowly increase number of concurrent requests per second.
 While using similar load model, we are able to identify how many requests per second each endpoint can hold with response time staying below critical threshold.
@@ -15,6 +16,7 @@ While using similar load model, we are able to identify how many requests per se
 Capacity API test defines 3 response time thresholds (default ones: 3000, 6000, 12000) in ms. Test results report rps (requests per second) for each threshold.
 
 Test results are reported using EBT in the following format:
+
 ```json
 {
   "_index": "backing-kibana-server-scalability-metrics-000003",
@@ -37,7 +39,9 @@ Test results are reported using EBT in the following format:
 ```
 
 ### Adding a new test
-Create a new json file in `x-pack/test/scalability/apis` with required properties:
+
+Create a new json file in `x-pack/platform/test/scalability/apis` with required properties:
+
 - **journeyName** is a test name, e.g. `GET /internal/security/session`
 - **scalabilitySetup** is used to set load model
 - **testData** is used to populate Elasticsearch and Kibana wth test data
@@ -47,13 +51,15 @@ Create a new json file in `x-pack/test/scalability/apis` with required propertie
 Warmup phase simulates 10 concurrent requests during 30s period and is important to get consistent results in test phase.
 Test phase simulates increasing concurrent requests from `minUsersCount` to `maxUsersCount` within `duration` time.
 Both `maxUsersCount` and `duration` in test phase should be adjusted for individual endpoint:
-  - `maxUsersCount` should be reasonable and enough to reach endpoint limits
-  - `duration` should be long enough to ramp up requests with low pace (1-2 requests per second)
+
+- `maxUsersCount` should be reasonable and enough to reach endpoint limits
+- `duration` should be long enough to ramp up requests with low pace (1-2 requests per second)
 
 Example:
+
 ```json
 {
-  "journeyName": "GET /internal/security/session", 
+  "journeyName": "GET /internal/security/session",
   "scalabilitySetup": {
     "warmup": [
       {
@@ -99,6 +105,7 @@ Example:
 ```
 
 Override default response time thresholds by adding to `scalabilitySetup`:
+
 ```json
   "responseTimeThreshold": {
     "threshold1": 1000,
@@ -108,14 +115,16 @@ Override default response time thresholds by adding to `scalabilitySetup`:
 ```
 
 ### Running api capacity journey locally
+
 Clone [kibana-load-testing](https://github.com/elastic/kibana-load-testing) repo.
 
 Use the Node script from kibana root directory:
-  `node scripts/run_scalability_cli.js --journey-path x-pack/test/scalability/apis/$YOUR_JOURNEY_NAME.ts`
+`node scripts/run_scalability_cli.js --journey-path x-pack/platform/test/scalability/apis/$YOUR_JOURNEY_NAME.ts`
 
 Use `--kibana-install-dir` flag to test build
 
 ### Benchmarking performance on CI
+
 In order to keep track on performance metrics stability, api capacity tests are run on main branch with a scheduled interval.
 Bare metal machine is used to produce results as stable and reproducible as possible.
 
@@ -128,6 +137,7 @@ RAM: 128 GB
 SSD: 1.92 TB Data center Gen4 NVMe
 
 #### Track performance results
+
 APM metrics are reported to [kibana-stats](https://kibana-stats.elastic.dev/) cluster.
 You can filter transactions using labels, e.g. `labels.journeyName : "GET /internal/security/session"`
 

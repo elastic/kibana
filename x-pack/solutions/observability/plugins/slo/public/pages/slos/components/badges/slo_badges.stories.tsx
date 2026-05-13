@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 
 import { EuiFlexGroup } from '@elastic/eui';
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
 import { buildForecastedSlo } from '../../../../data/slo/slo';
-import { SloBadges as Component, SloBadgesProps } from './slo_badges';
+import type { SloBadgesProps } from './slo_badges';
+import { SloBadges as Component } from './slo_badges';
 
 export default {
   component: Component,
@@ -19,7 +20,7 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: SloBadgesProps) => (
+const Template: StoryFn<typeof Component> = (props: SloBadgesProps) => (
   <EuiFlexGroup>
     <Component {...props} />
   </EuiFlexGroup>
@@ -30,5 +31,7 @@ const defaultProps = {
   rules: [],
 };
 
-export const SloBadges = Template.bind({});
-SloBadges.args = defaultProps;
+export const SloBadges = {
+  render: Template,
+  args: defaultProps,
+};

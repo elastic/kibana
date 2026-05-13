@@ -61,7 +61,6 @@ describe('created_by column', () => {
   const requiredProps: TableListViewTableProps = {
     entityName: 'test',
     entityNamePlural: 'tests',
-    listingLimit: 500,
     initialFilter: '',
     initialPageSize: 20,
     findItems: jest.fn().mockResolvedValue({ total: 0, hits }),
@@ -113,7 +112,7 @@ describe('created_by column', () => {
     render(<TableListView {...requiredProps} />);
 
     // wait until first render
-    expect(await screen.findByTestId('itemsInMemTable')).toBeVisible();
+    expect(await screen.findByTestId('listingTable-isLoaded')).toBeVisible();
 
     expect(() => screen.getByTestId(/tableHeaderCell_createdBy/)).toThrow();
   });
@@ -131,7 +130,7 @@ describe('created_by column', () => {
     );
 
     // wait until first render
-    expect(await screen.findByTestId('itemsInMemTable')).toBeVisible();
+    expect(await screen.findByTestId('listingTable-isLoaded')).toBeVisible();
 
     expect(() => screen.getByTestId(/tableHeaderCell_createdBy/)).toThrow();
   });
@@ -139,8 +138,8 @@ describe('created_by column', () => {
   test('should render created by column when createdBy is in data', async () => {
     render(<TableListView {...requiredProps} createdByEnabled={true} />);
 
-    // wait until first render
-    expect(await screen.findByTestId('itemsInMemTable')).toBeVisible();
+    // wait until loading is complete
+    expect(await screen.findByTestId('table-is-ready')).toBeInTheDocument();
 
     expect(screen.getByTestId(/tableHeaderCell_createdBy/)).toBeVisible();
 

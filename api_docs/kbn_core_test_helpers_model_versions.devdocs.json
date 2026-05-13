@@ -26,13 +26,23 @@
         "tags": [],
         "label": "createModelVersionTestBed",
         "description": [
-          "\nCreate a {@link ModelVersionTestBed} that can be used for model version integration testing.\n"
+          "\nCreate a ",
+          {
+            "pluginId": "@kbn/core-test-helpers-model-versions",
+            "scope": "common",
+            "docId": "kibKbnCoreTestHelpersModelVersionsPluginApi",
+            "section": "def-common.ModelVersionTestBed",
+            "text": "ModelVersionTestBed"
+          },
+          " that can be used for model version integration testing.\n"
         ],
         "signature": [
           "() => ",
           "ModelVersionTestBed"
         ],
         "path": "src/core/test-helpers/model-versions/src/test_bed/test_bed.ts",
+        "lineNumber": 65,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -46,7 +56,15 @@
         "tags": [],
         "label": "createModelVersionTestMigrator",
         "description": [
-          "\nCreate a {@link ModelVersionTestMigrator | test migrator} that can be used\nto test model version changes between versions.\n"
+          "\nCreate a ",
+          {
+            "pluginId": "@kbn/core-test-helpers-model-versions",
+            "scope": "common",
+            "docId": "kibKbnCoreTestHelpersModelVersionsPluginApi",
+            "section": "def-common.ModelVersionTestMigrator",
+            "text": "test migrator"
+          },
+          " that can be used\nto test model version changes between versions.\n"
         ],
         "signature": [
           "({ type, }: { type: ",
@@ -55,6 +73,8 @@
           "ModelVersionTestMigrator"
         ],
         "path": "src/core/test-helpers/model-versions/src/model_version_tester.ts",
+        "lineNumber": 77,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -66,6 +86,8 @@
             "label": "{\n  type,\n}",
             "description": [],
             "path": "src/core/test-helpers/model-versions/src/model_version_tester.ts",
+            "lineNumber": 79,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -81,6 +103,8 @@
                   "<any>"
                 ],
                 "path": "src/core/test-helpers/model-versions/src/model_version_tester.ts",
+                "lineNumber": 80,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -102,6 +126,8 @@
           "\nA testbed that can be used for model version integration tests.\n"
         ],
         "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -118,6 +144,8 @@
               "() => Promise<void>"
             ],
             "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -136,6 +164,8 @@
               "() => Promise<void>"
             ],
             "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -161,6 +191,8 @@
               ">"
             ],
             "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -175,7 +207,10 @@
                   "ModelVersionTestkitOptions"
                 ],
                 "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+                "lineNumber": 39,
+                "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "ModelVersionTestkitOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -195,6 +230,8 @@
           "\nTestkit composed of various services that can be used to run the\nmodel version integration tests.\n\nMostly composed of the two `repositoryBefore` and `repositoryAfter` repositories\nthat can be used to interact with different versions of the SO types.\n"
         ],
         "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+        "lineNumber": 99,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -211,6 +248,8 @@
               "default"
             ],
             "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -227,6 +266,8 @@
               "ISavedObjectsRepository"
             ],
             "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -243,6 +284,8 @@
               "ISavedObjectsRepository"
             ],
             "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -259,6 +302,8 @@
               "() => Promise<void>"
             ],
             "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -274,9 +319,21 @@
         "tags": [],
         "label": "ModelVersionTestkitOptions",
         "description": [
-          "\nOptions used to create a {@link ModelVersionTestKit} via {@link ModelVersionTestBed#prepareTestKit}\n"
+          "\nOptions used to create a ",
+          {
+            "pluginId": "@kbn/core-test-helpers-model-versions",
+            "scope": "common",
+            "docId": "kibKbnCoreTestHelpersModelVersionsPluginApi",
+            "section": "def-common.ModelVersionTestKit",
+            "text": "ModelVersionTestKit"
+          },
+          " via ",
+          "ModelVersionTestBed#prepareTestKit",
+          "\n"
         ],
         "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -287,13 +344,23 @@
             "tags": [],
             "label": "savedObjectDefinitions",
             "description": [
-              "\nThe {@link SavedObjectTestkitDefinition | definitions} for the SO type(s) to test"
+              "\nThe ",
+              {
+                "pluginId": "@kbn/core-test-helpers-model-versions",
+                "scope": "common",
+                "docId": "kibKbnCoreTestHelpersModelVersionsPluginApi",
+                "section": "def-common.SavedObjectTestkitDefinition",
+                "text": "definitions"
+              },
+              " for the SO type(s) to test"
             ],
             "signature": [
               "SavedObjectTestkitDefinition",
               "[]"
             ],
             "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -307,6 +374,8 @@
               "\nThe path of the file to write logs to.\nNecessary because the testkit doesn't know the test's location\n"
             ],
             "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -324,6 +393,8 @@
               "<unknown>[] | undefined"
             ],
             "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -340,6 +411,8 @@
               "Record<string, any> | undefined"
             ],
             "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -356,6 +429,8 @@
               "string | undefined"
             ],
             "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -372,6 +447,8 @@
               "string | undefined"
             ],
             "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -388,6 +465,8 @@
               "string | undefined"
             ],
             "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -404,6 +483,8 @@
           "\nTest utility allowing to test model version changes between versions."
         ],
         "path": "src/core/test-helpers/model-versions/src/model_version_tester.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -424,6 +505,8 @@
               "<Out>"
             ],
             "path": "src/core/test-helpers/model-versions/src/model_version_tester.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -438,7 +521,10 @@
                   "ModelVersionTestMigrateOptions<In>"
                 ],
                 "path": "src/core/test-helpers/model-versions/src/model_version_tester.ts",
+                "lineNumber": 53,
+                "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ModelVersionTestMigrateOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -458,6 +544,8 @@
           "\nRepresents the info necessary to prepare a given type for the sandbox.\nContains both the actual SO type definition, and the versions\nthat should be used at 'before' and 'after' model versions.\n"
         ],
         "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+        "lineNumber": 128,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -475,6 +563,8 @@
               "<any>"
             ],
             "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -488,6 +578,8 @@
               "\nThe model version to be used for the 'before' repository."
             ],
             "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 140,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -501,6 +593,8 @@
               "\nThe model version to be used for the 'after' repository."
             ],
             "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 144,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

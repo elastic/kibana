@@ -122,7 +122,7 @@ describe('buildRiskScoreQuery search strategy', () => {
   test('should search alerts on the alerts index pattern', async () => {
     await riskScore.parse(mockOptions, mockSearchStrategyResponse, mockDeps);
 
-    expect(searchMock.mock.calls[0][0].index).toEqual(`${ALERT_INDEX_PATTERN}${TEST_SPACE_ID}`);
+    expect(searchMock.mock.calls[0][0].index).toEqual(`${ALERT_INDEX_PATTERN}-${TEST_SPACE_ID}`);
   });
 
   test('should enhance data with alerts count', async () => {

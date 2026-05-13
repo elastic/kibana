@@ -12,6 +12,7 @@ import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, pagePathGetters } from '../../../../
 const EXCLUDED_PACKAGES = [
   'apm',
   'cloud_security_posture',
+  'cloud_asset_inventory',
   'cloud_defend',
   'dga',
   'fleet_server',
@@ -28,7 +29,9 @@ interface GetInstallPkgRouteOptionsParams {
   pkgkey: string;
   isCloud: boolean;
   isFirstTimeAgentUser: boolean;
-  isGuidedOnboardingActive: boolean;
+  isAgentlessIntegration?: boolean;
+  isAgentlessByDefault?: boolean;
+  prerelease?: boolean;
 }
 
 export type InstallPkgRouteOptions = [
@@ -49,15 +52,21 @@ export const getInstallPkgRouteOptions = ({
   pkgkey,
   isFirstTimeAgentUser,
   isCloud,
-  isGuidedOnboardingActive,
+  isAgentlessIntegration,
+  isAgentlessByDefault,
+  prerelease,
 }: GetInstallPkgRouteOptionsParams): InstallPkgRouteOptions => {
   const integrationOpts: { integration?: string } = integration ? { integration } : {};
   const packageExemptFromStepsLayout = isPackageExemptFromStepsLayout(pkgkey);
+  // Multi-page layout leads with "Install Elastic Agent" — not applicable when
+  // agentless is the effective default for this integration (agentless-only or
+  // agentless marked as default).
   const useMultiPageLayout =
-    isCloud && (isFirstTimeAgentUser || isGuidedOnboardingActive) && !packageExemptFromStepsLayout;
+    isCloud && isFirstTimeAgentUser && !packageExemptFromStepsLayout && !isAgentlessByDefault;
   const path = pagePathGetters.add_integration_to_policy({
     pkgkey,
     useMultiPageLayout,
+    prerelease: prerelease ?? false,
     ...integrationOpts,
     ...(agentPolicyId ? { agentPolicyId } : {}),
   })[1];
@@ -97,7 +106,7 @@ export const getInstallPkgRouteOptions = ({
   }
 
   const state: CreatePackagePolicyRouteState = {
-    onSaveNavigateTo: redirectToPath,
+    onSaveNavigateTo: !isAgentlessIntegration ? redirectToPath : undefined,
     onSaveQueryParams,
     onCancelNavigateTo: [
       INTEGRATIONS_PLUGIN_ID,

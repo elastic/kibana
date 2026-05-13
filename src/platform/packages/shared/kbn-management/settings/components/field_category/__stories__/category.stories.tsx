@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { ComponentMeta } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
 import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
@@ -17,7 +17,8 @@ import { categorizeFields } from '@kbn/management-settings-utilities';
 import { FieldRow } from '@kbn/management-settings-components-field-row';
 
 import { FieldCategory as Component, type FieldCategoryProps as ComponentProps } from '../category';
-import { Params, useCategoryStory } from './use_category_story';
+import type { Params } from './use_category_story';
+import { useCategoryStory } from './use_category_story';
 import { FieldCategoryProvider } from '../services';
 
 const settings = getSettingsMock();
@@ -51,14 +52,17 @@ export default {
       },
     },
   },
-} as ComponentMeta<typeof Component>;
+} as Meta<typeof Component>;
 
 type FieldCategoryParams = Pick<ComponentProps, 'category'> & Params;
 
-export const Category = ({ isFiltered, category, isSavingEnabled }: FieldCategoryParams) => {
-  const { onClearQuery, onFieldChange, unsavedChanges } = useCategoryStory({
+const CategoryComponent = ({ isFiltered, category, isSavingEnabled }: FieldCategoryParams) => {
+  const onClearQuery = () => {};
+
+  const { onFieldChange, unsavedChanges } = useCategoryStory({
     isFiltered,
     isSavingEnabled,
+    onClearQuery,
   });
 
   const { count, fields } = categorizeFields(definitions)[category];
@@ -88,4 +92,8 @@ export const Category = ({ isFiltered, category, isSavingEnabled }: FieldCategor
       </Component>
     </FieldCategoryProvider>
   );
+};
+
+export const Category: StoryObj<FieldCategoryParams> = {
+  render: (params) => <CategoryComponent {...params} />,
 };

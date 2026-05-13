@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { StartServicesAccessor, IRouter, Logger } from '@kbn/core/server';
+import type { StartServicesAccessor, IRouter, Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { KQL_TELEMETRY_ROUTE_LATEST_VERSION } from '../../common/constants';
 
@@ -20,16 +20,16 @@ export function registerKqlTelemetryRoute(
     .post({
       path: '/internal/kql_opt_in_stats',
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
     })
     .addVersion(
       {
         version: KQL_TELEMETRY_ROUTE_LATEST_VERSION,
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
-          },
-        },
         validate: {
           request: {
             body: schema.object({

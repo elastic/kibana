@@ -16,7 +16,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { FC, useMemo, useReducer } from 'react';
+import type { FC } from 'react';
+import React, { useMemo, useReducer } from 'react';
 import { useDataQualityContext } from '../../../../../data_quality_context';
 import { useHistoricalResultsContext } from '../../contexts/historical_results_context';
 import {
@@ -24,7 +25,7 @@ import {
   DEFAULT_HISTORICAL_RESULTS_START_DATE,
 } from '../constants';
 import { fetchHistoricalResultsQueryReducer } from './reducers/fetch_historical_results_query_reducer';
-import { FetchHistoricalResultsQueryState } from '../types';
+import type { FetchHistoricalResultsQueryState } from '../types';
 import { LoadingEmptyPrompt } from '../../loading_empty_prompt';
 import { ErrorEmptyPrompt } from '../../error_empty_prompt';
 import {
@@ -126,6 +127,8 @@ export const HistoricalResultsComponent: FC<Props> = ({ indexName }) => {
             aria-label={FILTER_RESULTS_BY_OUTCOME}
           >
             <EuiFilterButton
+              isToggle
+              isSelected={isShowAll}
               hasActiveFilters={isShowAll}
               role="radio"
               data-test-subj="historicalResultsOutcomeFilterAll"
@@ -135,6 +138,8 @@ export const HistoricalResultsComponent: FC<Props> = ({ indexName }) => {
               {ALL}
             </EuiFilterButton>
             <EuiFilterButton
+              isToggle
+              isSelected={isShowPass}
               hasActiveFilters={isShowPass}
               role="radio"
               data-test-subj="historicalResultsOutcomeFilterPass"
@@ -144,6 +149,8 @@ export const HistoricalResultsComponent: FC<Props> = ({ indexName }) => {
               {PASS}
             </EuiFilterButton>
             <EuiFilterButton
+              isToggle
+              isSelected={isShowFail}
               hasActiveFilters={isShowFail}
               role="radio"
               data-test-subj="historicalResultsOutcomeFilterFail"

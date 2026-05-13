@@ -7,6 +7,7 @@
 
 import React, { memo, useState, useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 
 import type { AgentPolicy } from '../../../types';
@@ -18,13 +19,16 @@ import {
 } from '../../../components';
 import { FLEET_SERVER_PACKAGE } from '../../../constants';
 
-import { ExperimentalFeaturesService, policyHasFleetServer } from '../../../services';
+import { policyHasFleetServer } from '../../../services';
 
 import { AgentUpgradeAgentModal } from '../../agents/components';
 
 import { ManageAutoUpgradeAgentsModal } from '../../agents/components/manage_auto_upgrade_agents_modal';
 
-import { AgentPolicyYamlFlyout } from './agent_policy_yaml_flyout';
+import { useCanEnableAutomaticAgentUpgrades } from '../../../../../hooks/use_can_enable_auto_upgrades';
+
+import { AgentPolicyYamlFlyout } from '../../../components';
+
 import { AgentPolicyCopyProvider } from './agent_policy_copy_provider';
 import { AgentPolicyDeleteProvider } from './agent_policy_delete_provider';
 
@@ -54,7 +58,7 @@ export const AgentPolicyActionMenu = memo<{
     const [isManageAutoUpgradeAgentsModalOpen, setIsManageAutoUpgradeAgentsModalOpen] =
       useState<boolean>(false);
     const refreshAgentPolicy = useAgentPolicyRefresh();
-    const { enableAutomaticAgentUpgrades } = ExperimentalFeaturesService.get();
+    const canEnableAutomaticAgentUpgrades = useCanEnableAutomaticAgentUpgrades();
 
     const isFleetServerPolicy = useMemo(
       () =>
@@ -85,6 +89,13 @@ export const AgentPolicyActionMenu = memo<{
       }
     }, [onCancelEnrollment, setIsEnrollmentFlyoutOpen]);
 
+    const actionsAriaLabel = fullButton
+      ? undefined
+      : i18n.translate('xpack.fleet.agentPolicyActionMenu.actionsAriaLabel', {
+          defaultMessage: 'Actions for {policyName}',
+          values: { policyName: agentPolicy.name },
+        });
+
     return (
       <AgentPolicyCopyProvider>
         {(copyAgentPolicyPrompt) => {
@@ -104,10 +115,21 @@ export const AgentPolicyActionMenu = memo<{
             </EuiContextMenuItem>
           );
 
+          const isAuthorizedForAutoUpgradeAgents =
+            authz.fleet.allAgentPolicies && authz.fleet.allAgents;
           const manageAutoUpgradeAgentsItem = (
             <EuiContextMenuItem
+              data-test-subj="agentPolicyActionMenuManageAutoUpgradeAgentsButton"
               icon="gear"
-              disabled={!authz.fleet.allAgentPolicies}
+              disabled={!isAuthorizedForAutoUpgradeAgents}
+              toolTipContent={
+                !isAuthorizedForAutoUpgradeAgents && (
+                  <FormattedMessage
+                    id="xpack.fleet.agentPolicyActionMenu.manageAutoUpgradeAgentsDisabledTooltip"
+                    defaultMessage="Agent policies, and Agents 'All' privileges are required to auto-upgrade agents."
+                  />
+                )
+              }
               onClick={() => {
                 setIsContextMenuOpen(false);
                 setIsManageAutoUpgradeAgentsModalOpen(!isManageAutoUpgradeAgentsModalOpen);
@@ -183,14 +205,27 @@ export const AgentPolicyActionMenu = memo<{
           );
 
           const managedMenuItems = [viewPolicyItem];
+          const agentBasedActionsDisabledTooltipText = isFleetServerPolicy ? (
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyActionMenu.addFleetServerDisabledTooltip"
+              defaultMessage="Fleet settings, Agent policies, and Agents 'All' privileges are required to add a Fleet Server."
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyActionMenu.enrollAgentDisabledTooltip"
+              defaultMessage="Agents 'All' privilege is required to enroll agents."
+            />
+          );
+
+          const isAuthorizedForAgentAction =
+            (isFleetServerPolicy && authz.fleet.addFleetServers) ||
+            (!isFleetServerPolicy && authz.fleet.addAgents);
           const agentBasedMenuItems = [
             <EuiContextMenuItem
-              icon="plusInCircle"
-              disabled={
-                (isFleetServerPolicy && !authz.fleet.addFleetServers) ||
-                (!isFleetServerPolicy && !authz.fleet.addAgents)
-              }
+              icon="plusCircle"
+              disabled={!isAuthorizedForAgentAction}
               data-test-subj="agentPolicyActionMenuAddAgentButton"
+              toolTipContent={!isAuthorizedForAgentAction && agentBasedActionsDisabledTooltipText}
               onClick={() => {
                 setIsContextMenuOpen(false);
                 setIsEnrollmentFlyoutOpen(true);
@@ -210,7 +245,7 @@ export const AgentPolicyActionMenu = memo<{
               )}
             </EuiContextMenuItem>,
             viewPolicyItem,
-            ...(enableAutomaticAgentUpgrades ? [manageAutoUpgradeAgentsItem] : []),
+            ...(canEnableAutomaticAgentUpgrades ? [manageAutoUpgradeAgentsItem] : []),
             copyPolicyItem,
             deletePolicyItem,
           ];
@@ -256,7 +291,7 @@ export const AgentPolicyActionMenu = memo<{
           ) {
             menuItems.push(
               <EuiContextMenuItem
-                icon="minusInCircle"
+                icon="minusCircle"
                 onClick={() => {
                   setIsContextMenuOpen(false);
                   setIsUninstallCommandFlyoutOpen(true);
@@ -323,11 +358,12 @@ export const AgentPolicyActionMenu = memo<{
               <ContextMenuActions
                 isOpen={isContextMenuOpen}
                 onChange={onContextMenuChange}
+                aria-label={actionsAriaLabel}
                 button={
                   fullButton
                     ? {
                         props: {
-                          iconType: 'arrowDown',
+                          iconType: 'chevronSingleDown',
                           iconSide: 'right',
                         },
                         children: (

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'node:path';
 import { type Observable, combineLatest, ReplaySubject, firstValueFrom, startWith } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import type { PackageInfo } from '@kbn/config';
@@ -82,15 +83,27 @@ export const registerStatusRoute = ({
   router.get(
     {
       path: '/api/status',
+      security: {
+        authc: {
+          enabled: 'optional',
+          reason:
+            'Status endpoint must be accessible by unauthenticated system users such as k8s readiness probes',
+        },
+        authz: {
+          enabled: false,
+          reason: 'Status route should be accessible without authorization.',
+        },
+      },
       options: {
-        authRequired: 'optional',
         // The `api` tag ensures that unauthenticated calls receive a 401 rather than a 302 redirect to login page.
         // The `security:acceptJWT` tag allows route to be accessed with JWT credentials. It points to
         // ROUTE_TAG_ACCEPT_JWT from '@kbn/security-plugin/server' that cannot be imported here directly.
         tags: ['api', 'security:acceptJWT', 'oas-tag:system'],
         access: 'public', // needs to be public to allow access from "system" users like k8s readiness probes.
         summary: `Get Kibana's current status`,
+        description: `Returns Kibana's overall operational status and a per-service breakdown for Elasticsearch, Saved Objects, and registered plugins. The endpoint is intended for liveness and readiness checks (for example, by Kubernetes probes) and for operators monitoring a Kibana deployment. Unauthenticated callers receive a redacted response that exposes only the overall status level.`,
         excludeFromRateLimiter: true,
+        oasOperationObject: () => path.resolve(__dirname, './status.examples.yaml'),
       },
       validate: {
         request: {

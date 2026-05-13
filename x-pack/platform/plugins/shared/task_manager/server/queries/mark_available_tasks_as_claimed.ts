@@ -5,15 +5,16 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import { TaskTypeDictionary } from '../task_type_dictionary';
-import { TaskStatus, TaskPriority, ConcreteTaskInstance } from '../task';
-import {
+import type { TaskTypeDictionary } from '../task_type_dictionary';
+import type { ConcreteTaskInstance } from '../task';
+import { TaskStatus, TaskPriority } from '../task';
+import type {
   ScriptBasedSortClause,
   ScriptClause,
-  mustBeAllOf,
   MustCondition,
   MustNotCondition,
 } from './query_clauses';
+import { mustBeAllOf } from './query_clauses';
 
 export function tasksOfType(taskTypes: string[]): estypes.QueryDslQueryContainer {
   return {
@@ -166,6 +167,7 @@ export function claimSort(
   definitions: TaskTypeDictionary,
   tasks: ConcreteTaskInstance[]
 ): ConcreteTaskInstance[] {
+  // get the task definition priority
   const priorityMap: Record<string, TaskPriority> = {};
   tasks.forEach((task) => {
     const taskType = task.taskType;
@@ -176,9 +178,9 @@ export function claimSort(
   return tasks.slice().sort(compare);
 
   function compare(a: ConcreteTaskInstance, b: ConcreteTaskInstance) {
-    // sort by priority, descending
-    const priorityA = priorityMap[a.taskType] ?? TaskPriority.Normal;
-    const priorityB = priorityMap[b.taskType] ?? TaskPriority.Normal;
+    // sort by priority, descending — task instance priority overrides task definition priority, and defaults to Normal
+    const priorityA = a.priority ?? priorityMap[a.taskType] ?? TaskPriority.Normal;
+    const priorityB = b.priority ?? priorityMap[b.taskType] ?? TaskPriority.Normal;
 
     if (priorityA > priorityB) return -1;
     if (priorityA < priorityB) return 1;

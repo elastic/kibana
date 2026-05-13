@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { ComponentMeta, Story } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
 import { Subscription } from 'rxjs';
@@ -16,7 +16,7 @@ import {
   getGlobalSettingsMock,
   getSettingsMock,
 } from '@kbn/management-settings-utilities/mocks/settings.mock';
-import { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { getSettingsCapabilitiesMock } from '@kbn/management-settings-utilities/mocks/capabilities.mock';
 import { SettingsApplication as Component } from '../application';
 import { SettingsApplicationProvider } from '../services';
@@ -29,7 +29,7 @@ export default {
       default: 'ghost',
     },
   },
-} as ComponentMeta<typeof Component>;
+} as Meta<typeof Component>;
 
 /**
  * Props for a {@link SettinggApplication} Storybook story.
@@ -64,17 +64,18 @@ const getSettingsApplicationStory = ({ hasGlobalSettings }: StoryProps) => (
       });
       return { successfulValidation: true, valid: true };
     }}
+    subscribeToActiveSpace={() => new Subscription()}
   >
     <Component />
   </SettingsApplicationProvider>
 );
 
-export const SettingsApplicationWithGlobalSettings: Story = () =>
+export const SettingsApplicationWithGlobalSettings: StoryFn = () =>
   getSettingsApplicationStory({
     hasGlobalSettings: true,
   });
 
-export const SettingsApplicationWithoutGlobal: Story = () =>
+export const SettingsApplicationWithoutGlobal: StoryFn = () =>
   getSettingsApplicationStory({
     hasGlobalSettings: false,
   });

@@ -17,8 +17,15 @@ export function registerCapabilitiesRoutes(router: IRouter, resolver: Capabiliti
   router.post(
     {
       path: '/api/core/capabilities',
-      options: {
-        authRequired: 'optional',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the Capabilities Resolver',
+        },
+        authc: {
+          enabled: 'optional',
+          reason: 'This route can be accessed by both authenticated and unauthenticated users',
+        },
       },
       validate: {
         query: schema.object({
@@ -29,10 +36,13 @@ export function registerCapabilitiesRoutes(router: IRouter, resolver: Capabiliti
             schema.string({
               validate: (appName) => {
                 if (!applicationIdRegexp.test(appName)) {
-                  return 'Invalid application id';
+                  return `Invalid application id: ${
+                    appName.length > 20 ? `${appName.substring(0, 20)}...` : appName
+                  }`;
                 }
               },
-            })
+            }),
+            { maxSize: 500 }
           ),
         }),
       },

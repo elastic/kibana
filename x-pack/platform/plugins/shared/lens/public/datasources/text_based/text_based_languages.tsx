@@ -5,24 +5,23 @@
  * 2.0.
  */
 
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+
 import React from 'react';
 
-import { CoreStart } from '@kbn/core/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { AggregateQuery, isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
-import type { SavedObjectReference } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import type { AggregateQuery } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { Reference } from '@kbn/content-management-utils';
 import type { ExpressionsStart, DatatableColumn } from '@kbn/expressions-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import memoizeOne from 'memoize-one';
-import { isEqual } from 'lodash';
-import { TextBasedDataPanel } from './components/datapanel';
-import { TextBasedDimensionEditor } from './components/dimension_editor';
-import { TextBasedDimensionTrigger } from './components/dimension_trigger';
-import { toExpression } from './to_expression';
-import {
+import { flatten, isEqual } from 'lodash';
+import type {
   DatasourceDimensionEditorProps,
-  DatasourceDataPanelProps,
   DatasourceLayerPanelProps,
   PublicAPIProps,
   DataType,
@@ -31,15 +30,18 @@ import {
   DataSourceInfo,
   UserMessage,
   OperationMetadata,
-} from '../../types';
-import { generateId } from '../../id_generator';
-import type {
   TextBasedPrivateState,
   TextBasedPersistedState,
   TextBasedLayerColumn,
   TextBasedField,
-} from './types';
-import type { Datasource, DatasourceSuggestion } from '../../types';
+  Datasource,
+  DatasourceSuggestion,
+} from '@kbn/lens-common';
+import { TextBasedDimensionEditor } from './components/dimension_editor';
+import { TextBasedDimensionTrigger } from './components/dimension_trigger';
+import { LayerSettingsPanel } from './layer_settings';
+import { toExpression } from './to_expression';
+import { generateId } from '../../id_generator';
 import { getUniqueLabelGenerator, nonNullable } from '../../utils';
 import { onDrop, getDropProps } from './dnd';
 import { removeColumn } from './remove_column';
@@ -221,7 +223,7 @@ export function getTextBasedDatasource({
     const context = state.initialContext;
     // on text based mode we offer suggestions for the query and not for a specific field
     if (fieldName) return [];
-    if (context && 'dataViewSpec' in context && context.dataViewSpec.title && context.query) {
+    if (context && 'dataViewSpec' in context && context.dataViewSpec.id && context.query) {
       const newLayerId = generateId();
       const textBasedQueryColumns = context.textBasedColumns?.slice(0, MAX_NUM_OF_COLUMNS) ?? [];
       // Number fields are assigned automatically as metrics (!isBucketed). There are cases where the query
@@ -235,7 +237,7 @@ export function getTextBasedDatasource({
         );
         return {
           columnId: c.variable ?? c.id,
-          fieldName: c.variable ? `?${c.variable}` : c.id,
+          fieldName: c.variable ? `??${c.variable}` : c.id,
           variable: c.variable,
           label: c.name,
           customLabel: c.id !== c.name,
@@ -259,7 +261,7 @@ export function getTextBasedDatasource({
               indexPatternRefs: [
                 {
                   id: context.dataViewSpec.id,
-                  title: context.dataViewSpec.title,
+                  title: context.dataViewSpec.title ?? '',
                   timeField: context.dataViewSpec.timeFieldName,
                 },
               ],
@@ -306,7 +308,7 @@ export function getTextBasedDatasource({
     return [];
   };
   const TextBasedDatasource: Datasource<TextBasedPrivateState, TextBasedPersistedState> = {
-    id: 'textBased',
+    id: LENS_DATASOURCE_ID.TEXT_BASED,
 
     checkIntegrity: () => {
       return [];
@@ -333,7 +335,7 @@ export function getTextBasedDatasource({
     },
     initialize(
       state?: TextBasedPersistedState,
-      savedObjectReferences?,
+      references?,
       context?,
       indexPatternRefs?,
       indexPatterns?
@@ -347,9 +349,29 @@ export function getTextBasedDatasource({
         };
       });
 
-      const initState = state || { layers: {} };
+      const initState = state ?? { layers: {} };
+      const hydratedLayers: typeof initState.layers = {};
+
+      // Validate the layers without a timeField configured at runtime.
+      // The ad-hoc DataView specs are regenerated at initialization (with time field
+      // detection via HTTP), but the persisted layer state may not have a timeField (if comes from the API)
+      // This ensures each layer picks up the correct timeFieldName so that
+      // time-based filtering works correctly for ES|QL visualizations.
+      for (const [layerId, layer] of Object.entries(initState.layers)) {
+        if (layer.timeField || !indexPatterns) {
+          hydratedLayers[layerId] = layer;
+          continue;
+        }
+
+        const matchedIndexPattern = layer.index ? indexPatterns[layer.index] : undefined;
+        hydratedLayers[layerId] = matchedIndexPattern?.timeFieldName
+          ? { ...layer, timeField: matchedIndexPattern.timeFieldName }
+          : layer;
+      }
+
       return {
         ...initState,
+        layers: hydratedLayers,
         indexPatternRefs: refs,
         initialContext: context,
       };
@@ -369,17 +391,17 @@ export function getTextBasedDatasource({
     },
 
     getPersistableState({ layers }: TextBasedPrivateState) {
-      const savedObjectReferences: SavedObjectReference[] = [];
+      const references: Reference[] = [];
       Object.entries(layers).forEach(([layerId, { index, ...persistableLayer }]) => {
         if (index) {
-          savedObjectReferences.push({
+          references.push({
             type: 'index-pattern',
             id: index,
             name: getLayerReferenceName(layerId),
           });
         }
       });
-      return { state: { layers }, savedObjectReferences };
+      return { state: { layers }, references };
     },
     insertLayer(state: TextBasedPrivateState, newLayerId: string) {
       const layer = Object.values(state?.layers)?.[0];
@@ -443,15 +465,10 @@ export function getTextBasedDatasource({
     getLayers(state: TextBasedPrivateState) {
       return state && state.layers ? Object.keys(state?.layers) : [];
     },
-    isTimeBased: (state, indexPatterns) => {
+    isTimeBased: (state) => {
       if (!state) return false;
       const { layers } = state;
-      return (
-        Boolean(layers) &&
-        Object.values(layers).some((layer) => {
-          return layer.index && Boolean(indexPatterns[layer.index]?.timeFieldName);
-        })
-      );
+      return Boolean(layers) && Object.values(layers).some((layer) => Boolean(layer.timeField));
     },
     getUsedDataView: (state: TextBasedPrivateState, layerId?: string) => {
       if (!layerId || !state.layers[layerId].index) {
@@ -472,18 +489,7 @@ export function getTextBasedDatasource({
       );
     },
 
-    DataPanelComponent(props: DatasourceDataPanelProps<TextBasedPrivateState>) {
-      const layerFields = TextBasedDatasource?.getSelectedFields?.(props.state);
-      return (
-        <TextBasedDataPanel
-          data={data}
-          dataViews={dataViews}
-          expressions={expressions}
-          layerFields={layerFields}
-          {...props}
-        />
-      );
-    },
+    DataPanelComponent: () => null,
 
     DimensionTriggerComponent: (props: DatasourceDimensionTriggerProps<TextBasedPrivateState>) => {
       const columnLabelMap = TextBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
@@ -497,13 +503,15 @@ export function getTextBasedDatasource({
     },
 
     getRenderEventCounters(state: TextBasedPrivateState): string[] {
-      const context = state?.initialContext;
-      if (context && 'query' in context && context.query && isOfAggregateQueryType(context.query)) {
-        const language = getAggregateQueryMode(context.query);
-        // it will eventually log render_lens_esql_chart
-        return [`${language}_chart`];
-      }
-      return [];
+      const counters = flatten(
+        Object.values(state?.layers ?? {}).map((layer) => {
+          if (isOfAggregateQueryType(layer.query)) {
+            return ['esql_chart'];
+          }
+          return [];
+        })
+      );
+      return counters;
     },
 
     DimensionEditorComponent: (props: DatasourceDimensionEditorProps<TextBasedPrivateState>) => {
@@ -513,6 +521,8 @@ export function getTextBasedDatasource({
     LayerPanelComponent: (props: DatasourceLayerPanelProps<TextBasedPrivateState>) => {
       return null;
     },
+
+    LayerSettingsComponent: LayerSettingsPanel,
 
     uniqueLabels(state: TextBasedPrivateState) {
       const layers = state.layers;
@@ -524,7 +534,9 @@ export function getTextBasedDatasource({
           return;
         }
         Object.values(layer.columns).forEach((column) => {
-          columnLabelMap[column.columnId] = uniqueLabelGenerator(column.fieldName);
+          columnLabelMap[column.columnId] = uniqueLabelGenerator(
+            column.customLabel ? column.label ?? column.fieldName : column.fieldName
+          );
         });
       });
 
@@ -534,15 +546,17 @@ export function getTextBasedDatasource({
     onDrop,
     getPublicAPI({ state, layerId, indexPatterns }: PublicAPIProps<TextBasedPrivateState>) {
       return {
-        datasourceId: 'textBased',
+        datasourceId: LENS_DATASOURCE_ID.TEXT_BASED,
 
         getTableSpec: () => {
-          return (
-            state.layers[layerId]?.columns.map((column) => ({
-              columnId: column.columnId,
-              fields: [column.fieldName],
-            })) || []
-          );
+          const layerColumns = state.layers[layerId]?.columns ?? [];
+          // Column ordering: non-metric columns (rows) before metric columns
+          const nonMetric = layerColumns.filter((col) => !(col.inMetricDimension ?? false));
+          const metric = layerColumns.filter((col) => col.inMetricDimension ?? false);
+          return [...nonMetric, ...metric].map((column) => ({
+            columnId: column.columnId,
+            fields: [column.fieldName],
+          }));
         },
         getOperationForColumnId: (columnId: string) => {
           const layer = state.layers[layerId];
@@ -650,27 +664,44 @@ export function getTextBasedDatasource({
           keptLayerIds: [id],
         };
       });
-      return [];
     },
     getDatasourceSuggestionsForVisualizeField: getSuggestionsForVisualizeField,
     getDatasourceSuggestionsFromCurrentState: getSuggestionsForState,
     getDatasourceSuggestionsForVisualizeCharts: getSuggestionsForState,
     isEqual: (
       persistableState1: TextBasedPersistedState,
-      references1: SavedObjectReference[],
+      references1: Reference[],
       persistableState2: TextBasedPersistedState,
-      references2: SavedObjectReference[]
-    ) => isEqual(persistableState1, persistableState2),
+      references2: Reference[]
+    ) =>
+      // undefined is not equal to missing
+      isEqual(
+        {
+          initialContext: undefined,
+          ...persistableState1,
+        },
+        {
+          initialContext: undefined,
+          ...persistableState2,
+        }
+      ),
     getDatasourceInfo: async (state, references, dataViewsService) => {
+      if (!dataViewsService) {
+        return [];
+      }
       const indexPatterns: DataView[] = [];
-      for (const { index } of Object.values(state.layers)) {
-        if (index) {
-          const dataView = await dataViewsService?.get(index);
-          if (dataView) {
-            indexPatterns.push(dataView);
-          }
+
+      for (const { query } of Object.values(state.layers)) {
+        if (query) {
+          const esqlAdhocDataview = await getESQLAdHocDataview({
+            dataViewsService,
+            query: query.esql,
+            options: { skipFetchFields: true },
+          });
+          indexPatterns.push(esqlAdhocDataview);
         }
       }
+
       return Object.entries(state.layers).reduce<DataSourceInfo[]>((acc, [key, layer]) => {
         const columns = Object.entries(layer.columns).map(([colId, col]) => {
           return {

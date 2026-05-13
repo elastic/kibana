@@ -7,7 +7,7 @@
 
 import { addTypeToTermJoin } from './add_type_to_termjoin';
 import { SOURCE_TYPES } from '../constants';
-import { LayerDescriptor } from '../descriptor_types';
+import type { LayerDescriptor } from '../descriptor_types';
 
 describe('addTypeToTermJoin', () => {
   test('Should handle missing type attribute', () => {

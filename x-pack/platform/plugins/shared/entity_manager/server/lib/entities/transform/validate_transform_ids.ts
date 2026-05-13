@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityDefinition } from '@kbn/entities-schema';
+import type { EntityDefinition } from '@kbn/entities-schema';
 import { EntityDefinitionIdInvalid } from '../errors/entity_definition_id_invalid';
 import { generateLatestTransformId } from '../helpers/generate_component_id';
 

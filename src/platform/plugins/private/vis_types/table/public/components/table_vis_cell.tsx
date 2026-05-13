@@ -8,10 +8,10 @@
  */
 
 import React from 'react';
-import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 
-import { DatatableRow } from '@kbn/expressions-plugin/common';
-import { FormattedColumns } from '../types';
+import type { DatatableRow } from '@kbn/expressions-plugin/common';
+import type { FormattedColumns } from '../types';
 
 export const createTableVisCell =
   (rows: DatatableRow[], formattedColumns: FormattedColumns, autoFitRowToContent?: boolean) =>
@@ -19,19 +19,15 @@ export const createTableVisCell =
     // incoming data might change and put the current page out of bounds - check whether row actually exists
     const rowValue = rows[rowIndex]?.[columnId];
     const column = formattedColumns[columnId];
-    const content = column?.formatter.convert(rowValue, 'html');
+    const content = column?.formatter.reactConvert(rowValue);
 
     const cellContent = (
       <div
-        /*
-         * Justification for dangerouslySetInnerHTML:
-         * The Data table visualization can "enrich" cell contents by applying a field formatter,
-         * which we want to do if possible.
-         */
-        dangerouslySetInnerHTML={{ __html: content }} // eslint-disable-line react/no-danger
         data-test-subj="tbvChartCellContent"
-        className={autoFitRowToContent ? '' : 'tbvChartCellContent'}
-      />
+        className={autoFitRowToContent ? '' : 'tbvChartCellContent eui-textTruncate'}
+      >
+        {content}
+      </div>
     );
 
     return cellContent;

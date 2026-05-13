@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginStartContract as TriggersActionsUiStartContract } from '@kbn/triggers-actions-ui-plugin/server';
+import type { PluginStartContract as TriggersActionsUiStartContract } from '@kbn/triggers-actions-ui-plugin/server';
 export type {
   RuleType,
   RuleParamsAndRefs,
@@ -13,8 +13,8 @@ export type {
   RuleTypeParams,
   AlertingServerSetup,
 } from '@kbn/alerting-plugin/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { AlertingServerSetup } from '@kbn/alerting-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 
 // this plugin's dependendencies
 export interface StackAlertsDeps {

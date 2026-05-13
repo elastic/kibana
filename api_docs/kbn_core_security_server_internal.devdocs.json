@@ -23,6 +23,8 @@
           "SecurityRequestHandlerContext"
         ],
         "path": "src/core/packages/security/server-internal/src/security_route_handler_context.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,6 +40,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/security/server-internal/src/security_route_handler_context.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -53,6 +57,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/security/server-internal/src/security_route_handler_context.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -67,6 +73,8 @@
               "any"
             ],
             "path": "src/core/packages/security/server-internal/src/security_route_handler_context.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -81,7 +89,10 @@
                   "SecurityServiceStart"
                 ],
                 "path": "src/core/packages/security/server-internal/src/security_route_handler_context.ts",
+                "lineNumber": 22,
+                "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "InternalSecurityServiceStart",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -97,7 +108,10 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "src/core/packages/security/server-internal/src/security_route_handler_context.ts",
+                "lineNumber": 23,
+                "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -115,6 +129,8 @@
               "AuthcRequestHandlerContext"
             ],
             "path": "src/core/packages/security/server-internal/src/security_route_handler_context.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -129,6 +145,8 @@
               "AuditRequestHandlerContext"
             ],
             "path": "src/core/packages/security/server-internal/src/security_route_handler_context.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -147,12 +165,14 @@
           " implements ",
           "CoreService",
           "<",
-          "SecurityServiceSetup",
+          "InternalSecurityServiceSetup",
           ", ",
           "SecurityServiceStart",
           ">"
         ],
         "path": "src/core/packages/security/server-internal/src/security_service.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -167,6 +187,8 @@
               "any"
             ],
             "path": "src/core/packages/security/server-internal/src/security_service.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -181,7 +203,10 @@
                   "CoreContext"
                 ],
                 "path": "src/core/packages/security/server-internal/src/security_service.ts",
+                "lineNumber": 38,
+                "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -197,9 +222,11 @@
             "description": [],
             "signature": [
               "() => ",
-              "SecurityServiceSetup"
+              "InternalSecurityServiceSetup"
             ],
             "path": "src/core/packages/security/server-internal/src/security_service.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -217,6 +244,8 @@
               "SecurityServiceStart"
             ],
             "path": "src/core/packages/security/server-internal/src/security_service.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -233,6 +262,8 @@
               "() => void"
             ],
             "path": "src/core/packages/security/server-internal/src/security_service.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -243,24 +274,57 @@
       }
     ],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [
+    "interfaces": [
       {
         "parentPluginId": "@kbn/core-security-server-internal",
         "id": "def-server.InternalSecurityServiceSetup",
-        "type": "Type",
+        "type": "Interface",
         "tags": [],
         "label": "InternalSecurityServiceSetup",
         "description": [],
         "signature": [
+          "InternalSecurityServiceSetup",
+          " extends ",
           "SecurityServiceSetup"
         ],
         "path": "src/core/packages/security/server-internal/src/internal_contracts.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server-internal",
+            "id": "def-server.InternalSecurityServiceSetup.uiam",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "uiam",
+            "description": [
+              "\nThe ",
+              {
+                "pluginId": "@kbn/core-security-server-internal",
+                "scope": "server",
+                "docId": "kibKbnCoreSecurityServerInternalPluginApi",
+                "section": "def-server.CoreUiamService",
+                "text": "UIAM service"
+              }
+            ],
+            "signature": [
+              "CoreUiamService",
+              " | null"
+            ],
+            "path": "src/core/packages/security/server-internal/src/internal_contracts.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
-      },
+      }
+    ],
+    "enums": [],
+    "misc": [
       {
         "parentPluginId": "@kbn/core-security-server-internal",
         "id": "def-server.InternalSecurityServiceStart",
@@ -272,6 +336,8 @@
           "SecurityServiceStart"
         ],
         "path": "src/core/packages/security/server-internal/src/internal_contracts.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

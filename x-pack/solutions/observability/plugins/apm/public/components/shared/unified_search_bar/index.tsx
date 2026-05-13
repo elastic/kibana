@@ -13,6 +13,7 @@ import {
   toElasticsearchQuery,
 } from '@kbn/es-query';
 import { useHistory, useLocation } from 'react-router-dom';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import deepEqual from 'fast-deep-equal';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import qs from 'query-string';
@@ -141,7 +142,8 @@ export function UnifiedSearchBar({
 
   const { kuery, serviceName, environment, groupId, refreshPausedFromUrl, refreshIntervalFromUrl } =
     useSearchBarParams(value);
-  const timePickerTimeDefaults = core.uiSettings.get<TimePickerTimeDefaults>(
+  const { onPageRefreshStart } = usePerformanceContext();
+  const timePickerTimeDefaults = core?.uiSettings?.get<TimePickerTimeDefaults>(
     UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
   );
   const urlTimeRange = useUrlTimeRange(timePickerTimeDefaults);
@@ -204,6 +206,7 @@ export function UnifiedSearchBar({
   const onRefresh = () => {
     clearCache();
     incrementTimeRangeId();
+    onPageRefreshStart();
   };
 
   const onRefreshChange = ({ isPaused, refreshInterval }: Partial<OnRefreshChangeProps>) => {
@@ -266,26 +269,31 @@ export function UnifiedSearchBar({
   };
 
   return (
-    <SearchBar
-      appName={i18n.translate('xpack.apm.appName', {
-        defaultMessage: 'APM',
-      })}
-      iconType="search"
-      placeholder={searchbarPlaceholder}
-      useDefaultBehaviors={true}
-      indexPatterns={dataView ? [dataView] : undefined}
-      showQueryInput={showQueryInput}
-      showQueryMenu={false}
-      showFilterBar={false}
-      showDatePicker={showDatePicker}
-      showSubmitButton={showSubmitButton}
-      displayStyle="inPage"
-      onQuerySubmit={handleSubmit}
-      onRefresh={onRefresh}
-      onRefreshChange={onRefreshChange}
-      isClearable={isClearable}
-      dataTestSubj="apmUnifiedSearchBar"
-      filtersForSuggestions={filtersForSearchBarSuggestions}
-    />
+    // Don't remove nor change the attribute
+    // It's used to identify the unified search bar in the DOM (for the size to be correct)
+    // See use_secondary_filters_width_style.ts for more details
+    <div data-apm-unified-search-root={true}>
+      <SearchBar
+        appName={i18n.translate('xpack.apm.appName', {
+          defaultMessage: 'APM',
+        })}
+        iconType="magnify"
+        placeholder={searchbarPlaceholder}
+        useDefaultBehaviors={true}
+        indexPatterns={dataView ? [dataView] : undefined}
+        showQueryInput={showQueryInput}
+        showQueryMenu={false}
+        showFilterBar={false}
+        showDatePicker={showDatePicker}
+        showSubmitButton={showSubmitButton}
+        displayStyle="inPage"
+        onQuerySubmit={handleSubmit}
+        onRefresh={onRefresh}
+        onRefreshChange={onRefreshChange}
+        isClearable={isClearable}
+        dataTestSubj="apmUnifiedSearchBar"
+        filtersForSuggestions={filtersForSearchBarSuggestions}
+      />
+    </div>
   );
 }

@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { ComponentMeta } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 import { LIGHT_THEME } from '@elastic/charts';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { Props, Threshold as Component } from './threshold';
+import type { Props } from './threshold';
+import { Threshold as Component } from './threshold';
 
 export default {
   component: Component,
@@ -26,7 +27,7 @@ export default {
       </div>
     ),
   ],
-} as ComponentMeta<typeof Component>;
+} as Meta<typeof Component>;
 
 const defaultProps: Props = {
   chartProps: { baseTheme: LIGHT_THEME },

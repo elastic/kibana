@@ -19,15 +19,19 @@ import { mobileServiceDetailRoute } from './mobile_service_detail';
 import { settingsRoute } from './settings';
 import { onboarding } from './onboarding';
 import { tutorialRedirectRoute } from './onboarding/redirect';
-import { ApmMainTemplate } from './templates/apm_main_template';
+import { ServiceGroupTemplate } from './templates/service_group_template';
 import { ServiceGroupsList } from '../app/service_groups';
 import { offsetRt } from '../../../common/comparison_rt';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { environmentRt } from '../../../common/environment_rt';
 import { diagnosticsRoute } from '../app/diagnostics';
 import { TransactionDetailsByNameLink } from '../app/transaction_details_link';
-import { EntityLink } from '../app/entities/entity_link';
 
 const ServiceGroupsTitle = i18n.translate('xpack.apm.views.serviceGroups.title', {
-  defaultMessage: 'Services',
+  defaultMessage: 'Service groups',
+});
+const ServiceInventoryTitle = i18n.translate('xpack.apm.views.serviceInventory.title', {
+  defaultMessage: 'Service inventory',
 });
 
 /**
@@ -35,18 +39,6 @@ const ServiceGroupsTitle = i18n.translate('xpack.apm.views.serviceGroups.title',
  * creates the routes.
  */
 const apmRoutes = {
-  '/link-to/entity/{serviceName}': {
-    element: <EntityLink />,
-    params: t.type({
-      path: t.type({
-        serviceName: t.string,
-      }),
-      query: t.partial({
-        rangeFrom: t.string,
-        rangeTo: t.string,
-      }),
-    }),
-  },
   '/link-to/transaction': {
     element: <TransactionDetailsByNameLink />,
     params: t.type({
@@ -88,6 +80,7 @@ const apmRoutes = {
         query: t.partial({
           rangeFrom: t.string,
           rangeTo: t.string,
+          waterfallItemId: t.string,
         }),
       }),
     ]),
@@ -108,27 +101,32 @@ const apmRoutes = {
       // this route fails on navigation unless it's defined before home
       '/service-groups': {
         element: (
-          <Breadcrumb title={ServiceGroupsTitle} href={'/service-groups'} omitOnServerless>
-            <ApmMainTemplate
+          <Breadcrumb
+            title={ServiceGroupsTitle}
+            href={'/service-groups'}
+            parentTitle={ServiceInventoryTitle}
+            parentHref={'/services'}
+            omitOnServerless
+          >
+            <ServiceGroupTemplate
               pageTitle={ServiceGroupsTitle}
-              environmentFilter={false}
-              showServiceGroupSaveButton={false}
-              showServiceGroupsNav
-              showEnablementCallout
-              selectedNavButton="serviceGroups"
+              pagePath="/service-groups"
+              serviceGroupContextTab="service-groups"
             >
               <ServiceGroupsList />
-            </ApmMainTemplate>
+            </ServiceGroupTemplate>
           </Breadcrumb>
         ),
         params: t.type({
           query: t.intersection([
+            environmentRt,
             t.type({
               rangeFrom: t.string,
               rangeTo: t.string,
+              kuery: t.string,
               comparisonEnabled: toBooleanRt,
             }),
-            t.partial({
+            t.type({
               serviceGroup: t.string,
             }),
             t.partial({
@@ -138,6 +136,13 @@ const apmRoutes = {
             offsetRt,
           ]),
         }),
+        defaults: {
+          query: {
+            environment: ENVIRONMENT_ALL.value,
+            kuery: '',
+            serviceGroup: '',
+          },
+        },
       },
       ...tutorialRedirectRoute,
       ...onboarding,

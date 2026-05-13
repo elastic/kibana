@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
-import { AlertInstanceContext, AlertInstanceState } from '../types';
-import { Alert, PublicAlert } from './alert';
+import type { AlertInstanceContext, AlertInstanceState } from '../types';
+import type { PublicAlert } from './alert';
+import { Alert } from './alert';
 import { processAlerts } from '../lib';
-import { DISABLE_FLAPPING_SETTINGS } from '../../common/rules_settings';
+import { ALLOWED_MAX_ALERTS, getMaxAlertLimit } from '../../common';
 
 export interface AlertFactory<
   State extends AlertInstanceState,
@@ -53,7 +54,7 @@ export interface CreateAlertFactoryOpts<
 > {
   alerts: Record<string, Alert<State, Context>>;
   logger: Logger;
-  maxAlerts: number;
+  configuredMaxAlerts: number;
   autoRecoverAlerts: boolean;
   canSetRecoveryContext?: boolean;
 }
@@ -65,7 +66,7 @@ export function createAlertFactory<
 >({
   alerts,
   logger,
-  maxAlerts,
+  configuredMaxAlerts,
   autoRecoverAlerts,
   canSetRecoveryContext = false,
 }: CreateAlertFactoryOpts<State, Context>): AlertFactory<State, Context, ActionGroupIds> {
@@ -84,6 +85,8 @@ export function createAlertFactory<
   // Whether rule type has reported back if alert limit was reached
   let hasReportedLimitReached = false;
 
+  const maxAlerts = getMaxAlertLimit(configuredMaxAlerts);
+
   let isDone = false;
   return {
     create: (id: string): PublicAlert<State, Context, ActionGroupIds> => {
@@ -93,6 +96,11 @@ export function createAlertFactory<
 
       if (numAlertsCreated++ >= maxAlerts) {
         hasReachedAlertLimit = true;
+        if (configuredMaxAlerts > ALLOWED_MAX_ALERTS) {
+          logger.warn(
+            `The configured maximum alert limit exceeds the allowed threshold. Only ${ALLOWED_MAX_ALERTS} alerts are being returned. Please consider adjusting xpack.alerting.rules.run.alerts.max.`
+          );
+        }
         throw new Error(`Rule reported more than ${maxAlerts} alerts.`);
       }
 
@@ -142,23 +150,17 @@ export function createAlertFactory<
             return [];
           }
 
-          const { currentRecoveredAlerts } = processAlerts<
-            State,
-            Context,
-            ActionGroupIds,
-            ActionGroupIds
-          >({
-            alerts,
-            existingAlerts: originalAlerts,
-            previouslyRecoveredAlerts: {},
-            hasReachedAlertLimit,
-            alertLimit: maxAlerts,
-            autoRecoverAlerts,
-            // flappingSettings.enabled is false, as we only want to use this function to get the recovered alerts
-            flappingSettings: DISABLE_FLAPPING_SETTINGS,
-          });
-          return Object.keys(currentRecoveredAlerts ?? {}).map(
-            (alertId: string) => currentRecoveredAlerts[alertId]
+          const { recoveredAlerts } = processAlerts<State, Context, ActionGroupIds, ActionGroupIds>(
+            {
+              alerts,
+              existingAlerts: originalAlerts,
+              hasReachedAlertLimit,
+              alertLimit: maxAlerts,
+              autoRecoverAlerts,
+            }
+          );
+          return Object.keys(recoveredAlerts ?? {}).map(
+            (alertId: string) => recoveredAlerts[alertId]
           );
         },
       };

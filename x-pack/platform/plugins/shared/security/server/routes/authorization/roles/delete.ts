@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { AuthzDisabled } from '@kbn/core-security-server';
 
 import type { RouteDefinitionParams } from '../..';
 import { API_VERSIONS } from '../../../../common/constants';
@@ -18,22 +19,25 @@ export function defineDeleteRolesRoutes({ router }: RouteDefinitionParams) {
       path: '/api/security/role/{name}',
       access: 'public',
       summary: `Delete a role`,
+      description: 'Delete a Kibana role by its name.',
       options: {
         tags: ['oas-tag:roles'],
+      },
+      security: {
+        authz: AuthzDisabled.delegateToESClient,
       },
     })
     .addVersion(
       {
         version: API_VERSIONS.roles.public.v1,
-        security: {
-          authz: {
-            enabled: false,
-            reason: `This route delegates authorization to Core's scoped ES cluster client`,
-          },
-        },
         validate: {
           request: {
-            params: schema.object({ name: schema.string({ minLength: 1 }) }),
+            params: schema.object({
+              name: schema.string({
+                minLength: 1,
+                meta: { description: 'The role name.' },
+              }),
+            }),
           },
           response: {
             204: {

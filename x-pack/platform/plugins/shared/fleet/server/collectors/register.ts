@@ -28,12 +28,19 @@ import type { AgentsPerOutputType } from './agents_per_output';
 import { getAgentsPerOutput } from './agents_per_output';
 import type { IntegrationsDetails } from './integrations_collector';
 import { getIntegrationsDetails } from './integrations_collector';
+import { getModifiedILMs } from './modified_ilms';
+import {
+  getVersionSpecificPoliciesUsage,
+  type AgentOnVersionSpecificPolicy,
+} from './version_specific_policies_collector';
+import { getAgentUpgradeRollbacks } from './agent_upgrade_rollbacks';
 
 export interface Usage {
   agents_enabled: boolean;
   agents: AgentUsage;
   packages: PackageUsage[];
   fleet_server: FleetServerUsage;
+  agentless_agents: AgentUsage;
 }
 
 export interface FleetUsage extends Usage, AgentData {
@@ -43,12 +50,17 @@ export interface FleetUsage extends Usage, AgentData {
     output_types: string[];
     count_with_global_data_tags: number;
     count_with_non_default_space: number;
+    count_with_agent_version_conditions: number;
   };
   agent_logs_panics_last_hour: AgentPanicLogsData['agent_logs_panics_last_hour'];
   agent_logs_top_errors?: string[];
   fleet_server_logs_top_errors?: string[];
   agents_per_output_type: AgentsPerOutputType[];
   integrations_details: IntegrationsDetails[];
+  modified_ilms: string[];
+  packages_with_agent_version_conditions: string[];
+  agents_on_version_specific_policies_per_version: AgentOnVersionSpecificPolicy[];
+  agent_upgrade_rollbacks: number;
 }
 
 export const fetchFleetUsage = async (
@@ -61,6 +73,12 @@ export const fetchFleetUsage = async (
     return;
   }
 
+  const {
+    agent_policies_count,
+    packages_with_agent_version_conditions,
+    agents_on_version_specific_policies_per_version,
+  } = await getVersionSpecificPoliciesUsage(soClient, esClient);
+
   const usage = {
     agents_enabled: getIsAgentsEnabled(config),
     agents: await getAgentUsage(soClient, esClient),
@@ -68,25 +86,34 @@ export const fetchFleetUsage = async (
     packages: await getPackageUsage(soClient),
     ...(await getAgentData(esClient, soClient, abortController)),
     fleet_server_config: await getFleetServerConfig(soClient),
-    agent_policies: await getAgentPoliciesUsage(soClient),
+    agent_policies: {
+      ...(await getAgentPoliciesUsage(soClient)),
+      count_with_agent_version_conditions: agent_policies_count,
+    },
     ...(await getPanicLogsLastHour(esClient)),
     ...(await getAgentLogsTopErrors(esClient)),
     agents_per_output_type: await getAgentsPerOutput(soClient, esClient),
     license_issued_to: (await esClient.license.get()).license.issued_to,
     deployment_id: appContextService.getCloud()?.deploymentId,
     integrations_details: await getIntegrationsDetails(soClient),
+    agentless_agents: await getAgentUsage(soClient, esClient, true),
+    modified_ilms: await getModifiedILMs(),
+    agents_on_version_specific_policies_per_version,
+    packages_with_agent_version_conditions,
+    ...(await getAgentUpgradeRollbacks(esClient)),
   };
   return usage;
 };
 
 // used by kibana daily collector
-const fetchUsage = async (core: CoreSetup, config: FleetConfigType) => {
+const fetchUsage = async (core: CoreSetup, config: FleetConfigType): Promise<Usage> => {
   const [soClient, esClient] = await getInternalClients(core);
   const usage = {
     agents_enabled: getIsAgentsEnabled(config),
     agents: await getAgentUsage(soClient, esClient),
     fleet_server: await getFleetServerUsage(soClient, esClient),
     packages: await getPackageUsage(soClient),
+    agentless_agents: await getAgentUsage(soClient, esClient, true),
   };
   return usage;
 };
@@ -234,6 +261,57 @@ export function registerFleetUsageCollector(
           name: { type: 'keyword' },
           version: { type: 'keyword' },
           enabled: { type: 'boolean' },
+          agent_based: { type: 'boolean' },
+        },
+      },
+      agentless_agents: {
+        total_enrolled: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of enrolled agents, in any state',
+          },
+        },
+        healthy: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of enrolled agents in a healthy state',
+          },
+        },
+        unhealthy: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of enrolled agents in an unhealthy state',
+          },
+        },
+        updating: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of enrolled agents in an updating state',
+          },
+        },
+        offline: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of enrolled agents currently offline',
+          },
+        },
+        inactive: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of of enrolled agents currently inactive',
+          },
+        },
+        unenrolled: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of agents currently unenrolled',
+          },
+        },
+        total_all_statuses: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of agents in any state, both enrolled and inactive',
+          },
         },
       },
     },

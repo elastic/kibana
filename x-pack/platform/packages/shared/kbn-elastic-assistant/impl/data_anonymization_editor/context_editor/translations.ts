@@ -88,6 +88,12 @@ export const SELECT_ALL_FIELDS = (totalFields: number) =>
     defaultMessage: 'Select all {totalFields} fields',
   });
 
+export const UNSELECT_ALL_FIELDS = (totalFields: number) =>
+  i18n.translate('xpack.elasticAssistant.dataAnonymizationEditor.contextEditor.unselectAllFields', {
+    defaultMessage: 'Unselect all {totalFields} fields',
+    values: { totalFields },
+  });
+
 export const SELECTED_FIELDS = (selected: number) =>
   i18n.translate('xpack.elasticAssistant.dataAnonymizationEditor.contextEditor.selectedFields', {
     values: { selected },
@@ -118,5 +124,12 @@ export const YES = i18n.translate(
   'xpack.elasticAssistant.assistant.dataAnonymizationEditor.contextEditor.yesButtonLabel',
   {
     defaultMessage: 'Yes',
+  }
+);
+
+export const ANONYMIZATION_FIELDS_TABLE_CAPTION = i18n.translate(
+  'xpack.elasticAssistant.assistant.dataAnonymizationEditor.contextEditor.anonymizationFieldsTableCaption',
+  {
+    defaultMessage: 'Anonymization fields',
   }
 );

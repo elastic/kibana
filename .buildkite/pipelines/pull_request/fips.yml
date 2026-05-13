@@ -1,17 +1,13 @@
 steps:
   - command: .buildkite/scripts/steps/fips/build.sh
     label: 'Build FIPS Image'
+    key: build_fips_image
     agents:
       machineType: n2-standard-2
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
     timeout_in_minutes: 60
     soft_fail: true
     retry:

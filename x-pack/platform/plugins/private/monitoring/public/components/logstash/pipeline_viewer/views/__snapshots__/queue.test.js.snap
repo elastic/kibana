@@ -3,14 +3,14 @@
 exports[`Queue component renders default elements 1`] = `
 <div>
   <StatementListHeading
-    iconType="logstashQueue"
+    iconType="queue"
     title="Queue"
   />
   <EuiSpacer
     size="s"
   />
   <EuiText
-    css={[Function]}
+    css="unknown styles"
   >
     <MemoizedFormattedMessage
       defaultMessage="Queue metrics not available"

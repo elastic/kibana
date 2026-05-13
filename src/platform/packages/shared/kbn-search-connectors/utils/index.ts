@@ -11,3 +11,6 @@ export * from './filtering_rule_helpers';
 export * from './is_category_entry';
 export * from './page_to_pagination';
 export * from './sync_status_to_text';
+export { toAlphanumeric } from './to_alphanumeric';
+export { isNotNullish } from './is_not_nullish';
+export { isResourceNotFoundException, isStatusTransitionException } from './identify_exceptions';

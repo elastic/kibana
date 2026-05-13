@@ -5,34 +5,54 @@
  * 2.0.
  */
 
-import './field_item.scss';
-
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useState, useMemo, lazy, Suspense } from 'react';
 import { EuiText, EuiButton, EuiPopoverFooter } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { Filter, Query } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import { DataViewField, type DataView } from '@kbn/data-views-plugin/common';
 import {
-  AddFieldFilterHandler,
+  type AddFieldFilterHandler,
   FieldStats,
   FieldPopover,
   FieldPopoverHeader,
   FieldPopoverFooter,
-  FieldItemButton,
   type GetCustomFieldType,
+  type FieldItemButtonProps,
+  type FieldListItem,
+  type GenericFieldItemButtonType,
 } from '@kbn/unified-field-list';
 import { Draggable } from '@kbn/dom-drag-drop';
 import { generateFilters, getEsQueryConfig } from '@kbn/data-plugin/public';
 import { type DatatableColumn } from '@kbn/expressions-plugin/common';
-import { DatasourceDataPanelProps } from '../../types';
-import type { IndexPattern, IndexPatternField } from '../../types';
-import type { LensAppServices } from '../../app_plugin/types';
+import type {
+  DatasourceDataPanelProps,
+  IndexPattern,
+  IndexPatternField,
+  LensAppServices,
+} from '@kbn/lens-common';
 import { APP_ID, DOCUMENT_FIELD_NAME } from '../../../common/constants';
 import { combineQueryAndFilters } from '../../app_plugin/show_underlying_data';
 import { getFieldItemActions } from './get_field_item_actions';
 
 type LensFieldListItem = IndexPatternField | DatatableColumn | DataViewField;
+
+const LazyFieldItemButton = lazy(
+  () =>
+    import('@kbn/unified-field-list').then((module) => ({
+      default: module.FieldItemButton,
+    }))
+  // unfortunately this force cast is necessary as the lazy load would remove the generic type information
+) as GenericFieldItemButtonType;
+
+// Async load the FieldItemButton component to avoid bundle size increase when inline editing
+const WrappedFieldItemButton = <T extends FieldListItem = LensFieldListItem>(
+  props: FieldItemButtonProps<T>
+) => (
+  <Suspense fallback={<></>}>
+    <LazyFieldItemButton<T> {...props} />
+  </Suspense>
+);
 
 function isTextBasedColumnField(field: LensFieldListItem): field is DatatableColumn {
   return !('type' in field) && Boolean(field?.meta.type);
@@ -113,6 +133,13 @@ export function InnerFieldItem(props: FieldItemProps) {
   const closePopover = useCallback(() => {
     setOpen(false);
   }, [setOpen]);
+
+  const adaptedGetCustomFieldType = useMemo(() => {
+    if (isTextBasedColumnField(field) && getCustomFieldType) {
+      return () => getCustomFieldType(field);
+    }
+    return undefined;
+  }, [field, getCustomFieldType]);
 
   const addFilterAndClose: AddFieldFilterHandler | undefined = useMemo(
     () =>
@@ -246,11 +273,15 @@ export function InnerFieldItem(props: FieldItemProps) {
   }, [dataViewField, filters, hideDetails, indexPattern, query, services]);
 
   return (
-    <li>
+    <li data-attr-field={field.name}>
       <FieldPopover
         isOpen={infoIsOpen}
         closePopover={closePopover}
         panelClassName="lnsFieldItem__fieldPanel"
+        panelStyle={{
+          minWidth: '260px',
+          maxWidth: '300px',
+        }}
         initialFocus=".lnsFieldItem__fieldPanel"
         data-test-subj="lnsFieldListPanelField"
         panelProps={{
@@ -267,13 +298,13 @@ export function InnerFieldItem(props: FieldItemProps) {
             dragClassName="unifiedFieldListItemButton__dragging"
           >
             {isTextBasedColumnField(field) ? (
-              <FieldItemButton<DatatableColumn>
+              <WrappedFieldItemButton<DatatableColumn>
                 field={field}
                 getCustomFieldType={getCustomFieldType}
                 {...commonFieldItemButtonProps}
               />
             ) : (
-              <FieldItemButton field={field} {...commonFieldItemButtonProps} />
+              <WrappedFieldItemButton field={field} {...commonFieldItemButtonProps} />
             )}
           </Draggable>
         }
@@ -283,6 +314,7 @@ export function InnerFieldItem(props: FieldItemProps) {
               field={dataViewField}
               closePopover={closePopover}
               buttonAddFieldToWorkspaceProps={buttonAddFieldToWorkspaceProps}
+              getCustomFieldType={adaptedGetCustomFieldType}
               onAddFieldToWorkspace={onAddFieldToWorkspace}
               onAddFilter={addFilterAndClose}
               onEditField={editFieldAndClose}

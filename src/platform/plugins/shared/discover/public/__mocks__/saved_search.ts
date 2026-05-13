@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewWithTimefieldMock } from './data_view_with_timefield';
@@ -18,7 +18,10 @@ export const createSavedSearchMock = () =>
   ({
     id: 'the-saved-search-id',
     title: 'A saved search',
-    searchSource: createSearchSourceMock({ index: dataViewMock }),
+    searchSource: createSearchSourceMock({
+      index: dataViewMock,
+      query: { query: '', language: 'kuery' },
+    }),
     columns: ['default_column'],
     sort: [],
   } as unknown as SavedSearch);
@@ -27,7 +30,10 @@ export const savedSearchMock = createSavedSearchMock();
 
 export const savedSearchMockWithTimeField = {
   id: 'the-saved-search-id-with-timefield',
-  searchSource: createSearchSourceMock({ index: dataViewWithTimefieldMock }),
+  searchSource: createSearchSourceMock({
+    index: dataViewWithTimefieldMock,
+    query: { query: '', language: 'kuery' },
+  }),
 } as unknown as SavedSearch;
 
 export const savedSearchMockWithTimeFieldNew = {

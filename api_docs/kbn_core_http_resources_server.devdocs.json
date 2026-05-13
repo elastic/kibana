@@ -22,6 +22,8 @@
           "\nHttpResources service is responsible for serving static & dynamic assets for Kibana application via HTTP.\nProvides API allowing plug-ins to respond with:\n- a pre-configured HTML page bootstrapping Kibana client app\n- custom HTML page\n- custom JS script file."
         ],
         "path": "src/core/packages/http/resources-server/src/types.ts",
+        "lineNumber": 95,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,6 +48,8 @@
               "<P, Q, B, Context>) => void"
             ],
             "path": "src/core/packages/http/resources-server/src/types.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -61,7 +65,10 @@
                   "<P, Q, B, \"get\">"
                 ],
                 "path": "src/core/packages/http/resources-server/src/types.ts",
+                "lineNumber": 106,
+                "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "RouteConfig",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -77,7 +84,10 @@
                   "<P, Q, B, Context>"
                 ],
                 "path": "src/core/packages/http/resources-server/src/types.ts",
+                "lineNumber": 107,
+                "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpResourcesRequestHandler",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -97,6 +107,8 @@
           "\nAllows to configure HTTP response parameters"
         ],
         "path": "src/core/packages/http/resources-server/src/types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -114,6 +126,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/http/resources-server/src/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -127,9 +141,19 @@
         "tags": [],
         "label": "HttpResourcesServiceToolkit",
         "description": [
-          "\nExtended set of {@link KibanaResponseFactory} helpers used to respond with HTML or JS resource."
+          "\nExtended set of ",
+          {
+            "pluginId": "@kbn/core-http-resources-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpResourcesServerPluginApi",
+            "section": "def-server.KibanaResponseFactory",
+            "text": "KibanaResponseFactory"
+          },
+          " helpers used to respond with HTML or JS resource."
         ],
         "path": "src/core/packages/http/resources-server/src/types.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -150,6 +174,8 @@
               "<any>>"
             ],
             "path": "src/core/packages/http/resources-server/src/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -165,7 +191,10 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/http/resources-server/src/types.ts",
+                "lineNumber": 50,
+                "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpResourcesRenderOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -189,6 +218,8 @@
               "<any>>"
             ],
             "path": "src/core/packages/http/resources-server/src/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -204,7 +235,10 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/http/resources-server/src/types.ts",
+                "lineNumber": 57,
+                "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpResourcesRenderOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -228,6 +262,8 @@
               "<any>"
             ],
             "path": "src/core/packages/http/resources-server/src/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -242,7 +278,10 @@
                   "HttpResourcesResponseOptions"
                 ],
                 "path": "src/core/packages/http/resources-server/src/types.ts",
+                "lineNumber": 59,
+                "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpResourcesResponseOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -266,6 +305,8 @@
               "<any>"
             ],
             "path": "src/core/packages/http/resources-server/src/types.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -280,7 +321,10 @@
                   "HttpResourcesResponseOptions"
                 ],
                 "path": "src/core/packages/http/resources-server/src/types.ts",
+                "lineNumber": 61,
+                "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpResourcesResponseOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -304,6 +348,8 @@
               "<any>"
             ],
             "path": "src/core/packages/http/resources-server/src/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -318,7 +364,10 @@
                   "HttpResourcesResponseOptions"
                 ],
                 "path": "src/core/packages/http/resources-server/src/types.ts",
+                "lineNumber": 63,
+                "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpResourcesResponseOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -338,7 +387,23 @@
         "tags": [],
         "label": "HttpResourcesRequestHandler",
         "description": [
-          "\nExtended version of {@link RequestHandler} having access to {@link HttpResourcesServiceToolkit}\nto respond with HTML or JS resources."
+          "\nExtended version of ",
+          {
+            "pluginId": "@kbn/core-http-resources-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpResourcesServerPluginApi",
+            "section": "def-server.RequestHandler",
+            "text": "RequestHandler"
+          },
+          " having access to ",
+          {
+            "pluginId": "@kbn/core-http-resources-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpResourcesServerPluginApi",
+            "section": "def-server.HttpResourcesServiceToolkit",
+            "text": "HttpResourcesServiceToolkit"
+          },
+          "\nto respond with HTML or JS resources."
         ],
         "signature": [
           "(context: Context, request: ",
@@ -352,7 +417,7 @@
           " & ",
           "KibanaErrorResponseFactory",
           " & { file<T extends string | Record<string, any> | Error | Buffer | ",
-          "Stream",
+          "stream",
           " | { message: string | Error; attributes?: ",
           "ResponseErrorAttributes",
           " | undefined; } | undefined>(options: ",
@@ -360,7 +425,7 @@
           "<T>): ",
           "IKibanaResponse",
           "<any>; custom<T extends string | Record<string, any> | Error | Buffer | ",
-          "Stream",
+          "stream",
           " | { message: string | Error; attributes?: ",
           "ResponseErrorAttributes",
           " | undefined; } | undefined>(options: ",
@@ -376,6 +441,8 @@
           "<any>>"
         ],
         "path": "src/core/packages/http/resources-server/src/types.ts",
+        "lineNumber": 66,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -387,13 +454,23 @@
             "tags": [],
             "label": "context",
             "description": [
-              "{@link RequestHandlerContext } - the core context exposed for this request."
+              {
+                "pluginId": "@kbn/core-http-resources-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
+                "section": "def-server.RequestHandlerContext",
+                "text": "RequestHandlerContext"
+              },
+              " - the core context exposed for this request."
             ],
             "signature": [
               "Context"
             ],
             "path": "src/core/packages/http/server/src/router/request_handler.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Context",
             "trackAdoption": false
           },
           {
@@ -403,14 +480,24 @@
             "tags": [],
             "label": "request",
             "description": [
-              "{@link KibanaRequest } - object containing information about requested resource,\nsuch as path, method, headers, parameters, query, body, etc."
+              {
+                "pluginId": "@kbn/core-http-resources-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              " - object containing information about requested resource,\nsuch as path, method, headers, parameters, query, body, etc."
             ],
             "signature": [
               "KibanaRequest",
               "<P, Q, B, Method>"
             ],
             "path": "src/core/packages/http/server/src/router/request_handler.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false
           },
           {
@@ -420,13 +507,23 @@
             "tags": [],
             "label": "response",
             "description": [
-              "{@link KibanaResponseFactory } {@libk HttpResourcesServiceToolkit} - a set of helper functions used to respond to a request."
+              {
+                "pluginId": "@kbn/core-http-resources-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
+                "section": "def-server.KibanaResponseFactory",
+                "text": "KibanaResponseFactory"
+              },
+              " {@libk HttpResourcesServiceToolkit} - a set of helper functions used to respond to a request."
             ],
             "signature": [
               "ResponseFactory"
             ],
             "path": "src/core/packages/http/server/src/router/request_handler.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ResponseFactory",
             "trackAdoption": false
           }
         ],
@@ -446,6 +543,8 @@
           "<any>"
         ],
         "path": "src/core/packages/http/resources-server/src/types.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

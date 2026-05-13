@@ -7,14 +7,14 @@
 
 import { schema } from '@kbn/config-schema';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
 
-import { hasArtifactOwnerSpaceId } from '../../../../common/endpoint/service/artifacts/utils';
+import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
 import type { ExceptionItemLikeOptions } from '../types';
 
 import { BaseValidator } from './base_validator';
@@ -29,7 +29,7 @@ const EventFilterDataSchema = schema.object(
         },
         { unknowns: 'ignore' }
       ),
-      { minSize: 1 }
+      { minSize: 1, maxSize: 250 }
     ),
   },
   {
@@ -39,7 +39,7 @@ const EventFilterDataSchema = schema.object(
 
 export class EventFilterValidator extends BaseValidator {
   static isEventFilter(item: { listId: string }): boolean {
-    return item.listId === ENDPOINT_EVENT_FILTERS_LIST_ID;
+    return item.listId === ENDPOINT_ARTIFACT_LISTS.eventFilters.id;
   }
 
   protected async validateHasWritePrivilege(): Promise<void> {
@@ -48,6 +48,21 @@ export class EventFilterValidator extends BaseValidator {
 
   protected async validateHasReadPrivilege(): Promise<void> {
     return super.validateHasPrivilege('canReadEventFilters');
+  }
+
+  async validatePreImport(items: PromiseFromStreams): Promise<void> {
+    await this.validateHasWritePrivilege();
+
+    await this.validatePreImportItems(items, async (item) => {
+      // import specific validations
+      await this.validateImportOwnerSpaceIds(item); // instead of validateCreateOwnerSpaceIds
+      await this.validateCanImportGlobalArtifacts(item); // instead of validateCanCreateGlobalArtifacts
+      await this.removeInvalidPolicyIds(item); // instead of validateByPolicyItem
+
+      // usual validators from pre-create
+      await this.validateEventFilterData(item);
+      await this.validateCanCreateByPolicyArtifacts(item);
+    });
   }
 
   async validatePreCreateItem(item: CreateExceptionListItemOptions) {
@@ -60,7 +75,8 @@ export class EventFilterValidator extends BaseValidator {
       await this.validateByPolicyItem(item);
     }
 
-    await this.setOwnerSpaceId(item);
+    await this.validateCreateOwnerSpaceIds(item);
+    await this.validateCanCreateGlobalArtifacts(item);
 
     return item;
   }
@@ -85,11 +101,9 @@ export class EventFilterValidator extends BaseValidator {
       }
     }
 
-    await this.validateByPolicyItem(updatedItem);
-
-    if (!hasArtifactOwnerSpaceId(_updatedItem)) {
-      await this.setOwnerSpaceId(_updatedItem);
-    }
+    await this.validateByPolicyItem(updatedItem, currentItem);
+    await this.validateUpdateOwnerSpaceIds(_updatedItem, currentItem);
+    await this.validateCanUpdateItemInActiveSpace(_updatedItem, currentItem);
 
     return _updatedItem;
   }
@@ -104,16 +118,18 @@ export class EventFilterValidator extends BaseValidator {
     }
   }
 
-  async validatePreGetOneItem(): Promise<void> {
+  async validatePreGetOneItem(currentItem: ExceptionListItemSchema): Promise<void> {
     await this.validateHasReadPrivilege();
+    await this.validateCanReadItemInActiveSpace(currentItem);
   }
 
   async validatePreSummary(): Promise<void> {
     await this.validateHasReadPrivilege();
   }
 
-  async validatePreDeleteItem(): Promise<void> {
+  async validatePreDeleteItem(currentItem: ExceptionListItemSchema): Promise<void> {
     await this.validateHasWritePrivilege();
+    await this.validateCanDeleteItemInActiveSpace(currentItem);
   }
 
   async validatePreExport(): Promise<void> {
@@ -126,11 +142,5 @@ export class EventFilterValidator extends BaseValidator {
 
   async validatePreMultiListFind(): Promise<void> {
     await this.validateHasReadPrivilege();
-  }
-
-  async validatePreImport(): Promise<void> {
-    throw new EndpointArtifactExceptionValidationError(
-      'Import is not supported for Endpoint artifact exceptions'
-    );
   }
 }

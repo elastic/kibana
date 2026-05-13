@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
+import { EuiIconTip, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import type { ReactElement, VFC } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { FlyoutHeader } from '../../../../shared/components/flyout_header';
@@ -16,6 +17,7 @@ export type LeftPanelTabsType = Array<{
   'data-test-subj': string;
   name: ReactElement;
   content: React.ReactElement;
+  isTechnicalPreview?: boolean;
 }>;
 
 export enum EntityDetailsLeftPanelTab {
@@ -23,6 +25,9 @@ export enum EntityDetailsLeftPanelTab {
   OKTA = 'okta_document',
   ENTRA = 'entra_document',
   CSP_INSIGHTS = 'csp_insights',
+  FIELDS_TABLE = 'fields_table',
+  GRAPH_VIEW = 'graph_view',
+  RESOLUTION_GROUP = 'resolution_group',
 }
 
 export enum CspInsightLeftPanelSubTab {
@@ -31,10 +36,34 @@ export enum CspInsightLeftPanelSubTab {
   ALERTS = 'alertsTabId',
 }
 
+export enum RiskScoreLeftPanelSubTab {
+  ENTITY = 'entity',
+  RESOLUTION = 'resolution',
+}
+
 export interface EntityDetailsPath {
   tab: EntityDetailsLeftPanelTab;
-  subTab?: CspInsightLeftPanelSubTab;
+  subTab?: CspInsightLeftPanelSubTab | RiskScoreLeftPanelSubTab;
 }
+
+const TechnicalPreviewBadge = () => (
+  <EuiIconTip
+    aria-label="Technical Preview"
+    type={'beaker'}
+    title={
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.left.visualize.graphVisualizationButton.technicalPreviewLabel"
+        defaultMessage="Technical Preview"
+      />
+    }
+    content={
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.left.visualize.graphVisualizationButton.technicalPreviewTooltip"
+        defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
+      />
+    }
+  />
+);
 
 export interface PanelHeaderProps {
   /**
@@ -65,6 +94,7 @@ export const LeftPanelHeader: VFC<PanelHeaderProps> = memo(
         isSelected={tab.id === selectedTabId}
         key={index}
         data-test-subj={tab['data-test-subj']}
+        append={tab.isTechnicalPreview && <TechnicalPreviewBadge />}
       >
         {tab.name}
       </EuiTab>

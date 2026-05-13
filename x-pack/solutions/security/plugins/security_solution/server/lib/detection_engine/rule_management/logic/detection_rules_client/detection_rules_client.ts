@@ -10,15 +10,17 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
-import type { ILicense } from '@kbn/licensing-plugin/server';
+import type { ILicense } from '@kbn/licensing-types';
+import type { DetectionRulesAuthz } from '../../../../../../common/detection_engine/rule_management/authz';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
-import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import type { ProductFeaturesService } from '../../../../product_features_service';
 import { createPrebuiltRuleAssetsClient } from '../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import type { RuleImportErrorObject } from '../import/errors';
 import type {
+  BulkDeleteRulesArgs,
+  BulkDeleteRulesReturn,
   CreateCustomRuleArgs,
   CreatePrebuiltRuleArgs,
   DeleteRuleArgs,
@@ -26,25 +28,27 @@ import type {
   ImportRuleArgs,
   ImportRulesArgs,
   PatchRuleArgs,
+  RevertPrebuiltRuleArgs,
   UpdateRuleArgs,
   UpgradePrebuiltRuleArgs,
 } from './detection_rules_client_interface';
 import { createRule } from './methods/create_rule';
+import { bulkDeleteRules } from './methods/bulk_delete_rules';
 import { deleteRule } from './methods/delete_rule';
 import { importRule } from './methods/import_rule';
 import { importRules } from './methods/import_rules';
 import { patchRule } from './methods/patch_rule';
 import { updateRule } from './methods/update_rule';
 import { upgradePrebuiltRule } from './methods/upgrade_prebuilt_rule';
+import { revertPrebuiltRule } from './methods/revert_prebuilt_rule';
 import { MINIMUM_RULE_CUSTOMIZATION_LICENSE } from '../../../../../../common/constants';
-import type { ExperimentalFeatures } from '../../../../../../common';
 
 interface DetectionRulesClientParams {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
   savedObjectsClient: SavedObjectsClientContract;
   mlAuthz: MlAuthz;
-  experimentalFeatures: ExperimentalFeatures;
+  rulesAuthz: DetectionRulesAuthz;
   productFeaturesService: ProductFeaturesService;
   license: ILicense;
 }
@@ -53,8 +57,8 @@ export const createDetectionRulesClient = ({
   actionsClient,
   rulesClient,
   mlAuthz,
+  rulesAuthz,
   savedObjectsClient,
-  experimentalFeatures,
   productFeaturesService,
   license,
 }: DetectionRulesClientParams): IDetectionRulesClient => {
@@ -63,9 +67,7 @@ export const createDetectionRulesClient = ({
   return {
     getRuleCustomizationStatus() {
       /**
-       * The prebuilt rules customization feature is gated by two things:
-       * 1. The feature flag `prebuiltRulesCustomizationEnabled` in the config.
-       * 2. The license level.
+       * The prebuilt rules customization feature is gated by the license level.
        *
        * The license level is verified against the minimum required level for
        * the feature (Enterprise). However, since Serverless always operates at
@@ -74,20 +76,11 @@ export const createDetectionRulesClient = ({
        * unavailable features are disabled.
        */
       const isRulesCustomizationEnabled =
-        experimentalFeatures.prebuiltRulesCustomizationEnabled &&
         license.hasAtLeast(MINIMUM_RULE_CUSTOMIZATION_LICENSE) &&
         productFeaturesService.isEnabled(ProductFeatureKey.prebuiltRuleCustomization);
 
-      let customizationDisabledReason;
-      if (!isRulesCustomizationEnabled) {
-        customizationDisabledReason = !experimentalFeatures.prebuiltRulesCustomizationEnabled
-          ? PrebuiltRulesCustomizationDisabledReason.FeatureFlag
-          : PrebuiltRulesCustomizationDisabledReason.License;
-      }
-
       return {
         isRulesCustomizationEnabled,
-        customizationDisabledReason,
       };
     },
     async createCustomRule(args: CreateCustomRuleArgs): Promise<RuleResponse> {
@@ -129,8 +122,8 @@ export const createDetectionRulesClient = ({
           rulesClient,
           prebuiltRuleAssetClient,
           mlAuthz,
+          rulesAuthz,
           ruleUpdate,
-          ruleCustomizationStatus: this.getRuleCustomizationStatus(),
         });
       });
     },
@@ -142,8 +135,8 @@ export const createDetectionRulesClient = ({
           rulesClient,
           prebuiltRuleAssetClient,
           mlAuthz,
+          rulesAuthz,
           rulePatch,
-          ruleCustomizationStatus: this.getRuleCustomizationStatus(),
         });
       });
     },
@@ -151,6 +144,12 @@ export const createDetectionRulesClient = ({
     async deleteRule({ ruleId }: DeleteRuleArgs): Promise<void> {
       return withSecuritySpan('DetectionRulesClient.deleteRule', async () => {
         return deleteRule({ rulesClient, ruleId });
+      });
+    },
+
+    async bulkDeleteRules({ ruleIds }: BulkDeleteRulesArgs): Promise<BulkDeleteRulesReturn> {
+      return withSecuritySpan('DetectionRulesClient.bulkDeleteRules', async () => {
+        return bulkDeleteRules({ rulesClient, ruleIds });
       });
     },
 
@@ -162,7 +161,22 @@ export const createDetectionRulesClient = ({
           ruleAsset,
           mlAuthz,
           prebuiltRuleAssetClient,
-          ruleCustomizationStatus: this.getRuleCustomizationStatus(),
+        });
+      });
+    },
+
+    async revertPrebuiltRule({
+      ruleAsset,
+      existingRule,
+    }: RevertPrebuiltRuleArgs): Promise<RuleResponse> {
+      return withSecuritySpan('DetectionRulesClient.revertPrebuiltRule', async () => {
+        return revertPrebuiltRule({
+          actionsClient,
+          rulesClient,
+          ruleAsset,
+          mlAuthz,
+          prebuiltRuleAssetClient,
+          existingRule,
         });
       });
     },
@@ -175,7 +189,6 @@ export const createDetectionRulesClient = ({
           importRulePayload: args,
           mlAuthz,
           prebuiltRuleAssetClient,
-          ruleCustomizationStatus: this.getRuleCustomizationStatus(),
         });
       });
     },

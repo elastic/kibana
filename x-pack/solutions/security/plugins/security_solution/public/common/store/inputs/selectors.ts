@@ -11,7 +11,7 @@ import type { Filter, Query } from '@kbn/es-query';
 import type { InputsState } from './reducer';
 import type { State } from '../types';
 
-import type { InputsModel, InputsRange, GlobalQuery } from './model';
+import type { GlobalQuery, InputsModel, InputsRange } from './model';
 
 const defaultQuery = {
   id: 'kql',
@@ -20,6 +20,7 @@ const defaultQuery = {
   loading: false,
   refetch: null,
   selectedInspectIndex: 0,
+  searchSessionId: undefined,
 };
 
 const selectInputs = (state: State): InputsModel => state.inputs;
@@ -27,18 +28,10 @@ const selectInputs = (state: State): InputsModel => state.inputs;
 const selectGlobal = (state: State): InputsRange => state.inputs.global;
 
 const selectTimeline = (state: State): InputsRange => state.inputs.timeline;
-
-// TODO: remove undefined when socTrendsEnabled feature flag removed
-const selectSocTrends = (state: State): InputsState['socTrends'] | undefined =>
-  state.inputs.socTrends;
+const selectValueReport = (state: State): InputsState['valueReport'] => state.inputs.valueReport;
 
 const selectGlobalQuery = (state: State, id: string): GlobalQuery =>
   state.inputs.global.queries.find((q) => q.id === id) || defaultQuery;
-
-const selectTimelineQuery = (state: State, id: string): GlobalQuery =>
-  state.inputs.timeline.queries.find((q) => q.id === id) ||
-  state.inputs.global.queries.find((q) => q.id === id) ||
-  defaultQuery;
 
 export const inputsSelector = () => createSelector(selectInputs, (inputs) => inputs);
 
@@ -47,10 +40,9 @@ export const timelineTimeRangeSelector = createSelector(
   (timeline) => timeline.timerange
 );
 
-// TODO: remove ? when socTrendsEnabled feature flag removed
-export const socTrendsTimeRangeSelector = createSelector(
-  selectSocTrends,
-  (socTrends) => socTrends?.timerange
+export const valueReportTimeRangeSelector = createSelector(
+  selectValueReport,
+  (valueReport) => valueReport.timerange
 );
 
 export const globalFullScreenSelector = createSelector(selectGlobal, (global) => global.fullScreen);
@@ -66,8 +58,19 @@ export const globalQuery = () => createSelector(selectGlobal, (global) => global
 
 export const globalQueryByIdSelector = () => createSelector(selectGlobalQuery, (query) => query);
 
-export const timelineQueryByIdSelector = () =>
-  createSelector(selectTimelineQuery, (query) => query);
+export const timelineQueryByIdSelector = createSelector(
+  [selectInputs, (_state: State, id: string) => id],
+  (inputs, id) =>
+    inputs.timeline.queries.find((q) => q.id === id) ||
+    inputs.global.queries.find((q) => q.id === id) ||
+    defaultQuery
+);
+
+export const timelineQueryByIdSelectorFactory = () =>
+  createSelector(timelineQueryByIdSelector, (query) => query);
+
+export const timelineQueriesFactory = () =>
+  createSelector(selectTimeline, (timeline) => timeline.queries);
 
 export const globalSelector = () => createSelector(selectGlobal, (global) => global);
 

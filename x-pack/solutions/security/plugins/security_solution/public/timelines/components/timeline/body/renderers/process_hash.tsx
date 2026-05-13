@@ -5,44 +5,53 @@
  * 2.0.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
-import styled from 'styled-components';
 
 import { DraggableBadge } from '../../../../../common/components/draggables';
 
 import { isNillEmptyOrNotFinite, TokensFlexItem } from './helpers';
 
-const HashFlexGroup = styled(EuiFlexGroup)`
-  margin: ${({ theme }) => theme.eui.euiSizeXS};
-`;
-
 interface Props {
   contextId: string;
   eventId: string;
   processHashSha256: string | null | undefined;
+  scopeId: string;
 }
 
-export const ProcessHash = React.memo<Props>(({ contextId, eventId, processHashSha256 }) => {
-  if (isNillEmptyOrNotFinite(processHashSha256)) {
-    return null;
-  }
+export const ProcessHash = React.memo<Props>(
+  ({ contextId, eventId, processHashSha256, scopeId }) => {
+    const { euiTheme } = useEuiTheme();
 
-  return (
-    <HashFlexGroup alignItems="center" direction="column" gutterSize="none">
-      <TokensFlexItem grow={false} component="div">
-        <DraggableBadge
-          contextId={contextId}
-          eventId={eventId}
-          field="process.hash.sha256"
-          iconType="number"
-          value={processHashSha256}
-          fieldType="keyword"
-          isAggregatable={true}
-        />
-      </TokensFlexItem>
-    </HashFlexGroup>
-  );
-});
+    if (isNillEmptyOrNotFinite(processHashSha256)) {
+      return null;
+    }
+
+    return (
+      <EuiFlexGroup
+        alignItems="center"
+        direction="column"
+        gutterSize="none"
+        css={css`
+          margin: ${euiTheme.size.xs};
+        `}
+      >
+        <TokensFlexItem grow={false} component="div">
+          <DraggableBadge
+            scopeId={scopeId}
+            contextId={contextId}
+            eventId={eventId}
+            field="process.hash.sha256"
+            iconType="number"
+            value={processHashSha256}
+            fieldType="keyword"
+            isAggregatable={true}
+          />
+        </TokensFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
 
 ProcessHash.displayName = 'ProcessHash';

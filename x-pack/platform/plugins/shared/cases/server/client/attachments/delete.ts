@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 
+import { isLegacyAttachmentRequest } from '../../../common/utils/attachments';
 import type { AlertAttachmentPayload } from '../../../common/types/domain';
 import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
 import { decodeOrThrow } from '../../common/runtime_types';
@@ -16,8 +17,8 @@ import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
 import type { DeleteAllArgs, DeleteArgs } from './types';
-import type { AttachmentRequest } from '../../../common/types/api';
-import { AttachmentRequestRt } from '../../../common/types/api';
+import type { AttachmentRequestV2 } from '../../../common/types/api';
+import { AttachmentRequestRtV2 } from '../../../common/types/api';
 
 /**
  * Delete all comments for a case.
@@ -36,6 +37,7 @@ export async function deleteAll(
   try {
     const comments = await caseService.getAllCaseComments({
       id: caseID,
+      mode: 'legacy',
     });
 
     if (comments.total <= 0) {
@@ -51,8 +53,15 @@ export async function deleteAll(
     });
 
     await attachmentService.bulkDelete({
-      attachmentIds: comments.saved_objects.map((so) => so.id),
-      refresh: false,
+      savedObjectIds: comments.saved_objects.map((so) => so.id),
+      refresh: true,
+    });
+
+    await updateCaseAttachmentStats({
+      caseService: clientArgs.services.caseService,
+      attachmentService: clientArgs.services.attachmentService,
+      caseId: caseID,
+      user,
     });
 
     await userActionService.creator.bulkCreateAttachmentDeletion({
@@ -81,7 +90,7 @@ export async function deleteAll(
  * Deletes an attachment
  */
 export async function deleteComment(
-  { caseID, attachmentID }: DeleteArgs,
+  { caseID, savedObjectId }: DeleteArgs,
   clientArgs: CasesClientArgs
 ) {
   const {
@@ -93,11 +102,12 @@ export async function deleteComment(
 
   try {
     const attachment = await attachmentService.getter.get({
-      attachmentId: attachmentID,
+      savedObjectId,
+      mode: 'legacy',
     });
 
     if (attachment == null) {
-      throw Boom.notFound(`This comment ${attachmentID} does not exist anymore.`);
+      throw Boom.notFound(`This comment ${savedObjectId} does not exist anymore.`);
     }
 
     await authorization.ensureAuthorized({
@@ -110,25 +120,32 @@ export async function deleteComment(
 
     const caseRef = attachment.references.find((c) => c.type === type);
     if (caseRef == null || (caseRef != null && caseRef.id !== id)) {
-      throw Boom.notFound(`This comment ${attachmentID} does not exist in ${id}.`);
+      throw Boom.notFound(`This comment ${savedObjectId} does not exist in ${id}.`);
     }
 
     await attachmentService.bulkDelete({
-      attachmentIds: [attachmentID],
-      refresh: false,
+      savedObjectIds: [savedObjectId],
+      refresh: true,
+    });
+
+    await updateCaseAttachmentStats({
+      caseService: clientArgs.services.caseService,
+      attachmentService: clientArgs.services.attachmentService,
+      caseId: caseID,
+      user,
     });
 
     // we only want to store the fields related to the original request of the attachment, not fields like
     // created_at etc. So we'll use the decode to strip off the other fields. This is necessary because we don't know
     // what type of attachment this is. Depending on the type it could have various fields.
-    const attachmentRequestAttributes = decodeOrThrow(AttachmentRequestRt)(attachment.attributes);
+    const attachmentRequestAttributes = decodeOrThrow(AttachmentRequestRtV2)(attachment.attributes);
 
     await userActionService.creator.createUserAction({
       userAction: {
         type: UserActionTypes.comment,
         action: UserActionActions.delete,
         caseId: id,
-        attachmentId: attachmentID,
+        savedObjectId,
         payload: { attachment: attachmentRequestAttributes },
         user,
         owner: attachment.attributes.owner,
@@ -138,7 +155,7 @@ export async function deleteComment(
     await handleAlerts({ alertsService, attachments: [attachment.attributes], caseId: id });
   } catch (error) {
     throw createCaseError({
-      message: `Failed to delete comment: ${caseID} comment id: ${attachmentID}: ${error}`,
+      message: `Failed to delete comment: ${caseID} comment id: ${savedObjectId}: ${error}`,
       error,
       logger,
     });
@@ -147,13 +164,14 @@ export async function deleteComment(
 
 interface HandleAlertsArgs {
   alertsService: CasesClientArgs['services']['alertsService'];
-  attachments: AttachmentRequest[];
+  attachments: AttachmentRequestV2[];
   caseId: string;
 }
 
 const handleAlerts = async ({ alertsService, attachments, caseId }: HandleAlertsArgs) => {
-  const alertAttachments = attachments.filter((attachment): attachment is AlertAttachmentPayload =>
-    isCommentRequestTypeAlert(attachment)
+  const alertAttachments = attachments.filter(
+    (attachment): attachment is AlertAttachmentPayload =>
+      isLegacyAttachmentRequest(attachment) && isCommentRequestTypeAlert(attachment)
   );
 
   if (alertAttachments.length === 0) {
@@ -162,4 +180,45 @@ const handleAlerts = async ({ alertsService, attachments, caseId }: HandleAlerts
 
   const alerts = getAlertInfoFromComments(alertAttachments);
   await alertsService.removeCaseIdFromAlerts({ alerts, caseId });
+};
+
+interface UpdateCaseAttachmentStats {
+  caseService: CasesClientArgs['services']['caseService'];
+  attachmentService: CasesClientArgs['services']['attachmentService'];
+  caseId: string;
+  user: CasesClientArgs['user'];
+}
+
+const updateCaseAttachmentStats = async ({
+  caseService,
+  attachmentService,
+  caseId,
+  user,
+}: UpdateCaseAttachmentStats) => {
+  const originalCase = await caseService.getCase({
+    id: caseId,
+  });
+
+  const date = new Date().toISOString();
+
+  const attachmentStats = await attachmentService.getter.getCaseAttatchmentStats({
+    caseIds: [caseId],
+  });
+
+  const totalComments = attachmentStats.get(caseId)?.userComments ?? 0;
+  const totalAlerts = attachmentStats.get(caseId)?.alerts ?? 0;
+  const totalEvents = attachmentStats.get(caseId)?.events ?? 0;
+
+  await caseService.patchCase({
+    originalCase,
+    caseId,
+    updatedAttributes: {
+      updated_at: date,
+      updated_by: user,
+      total_comments: totalComments,
+      total_alerts: totalAlerts,
+      total_events: totalEvents,
+    },
+    refresh: false,
+  });
 };

@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
-import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { DataViewsService } from '../../../../common';
+import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { DataViewsService } from '../../../../common';
 import { handleErrors } from '../util/handle_errors';
 import { serializedFieldFormatSchema } from '../../../schemas';
 import { MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH } from '../../../../common/constants';
 import { dataViewSpecSchema } from '../../schema';
-import { DataViewSpecRestResponse } from '../../route_types';
+import type { DataViewSpecRestResponse } from '../../route_types';
 import type {
   DataViewsServerPluginStartDependencies,
   DataViewsServerPluginStart,
@@ -27,8 +27,10 @@ import {
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
   INITIAL_REST_VERSION,
+  UPDATE_DATA_VIEW_FIELDS_SUMMARY,
   UPDATE_DATA_VIEW_FIELDS_DESCRIPTION,
 } from '../../../constants';
+import { toApiSpec } from '../util/to_api_spec';
 
 interface UpdateFieldsArgs {
   dataViewsService: DataViewsService;
@@ -104,6 +106,7 @@ const fieldUpdateSchema = schema.object({
       schema.string({
         minLength: 1,
         maxLength: 1_000,
+        meta: { description: 'A custom display label for the field. Set to `null` to remove.' },
       })
     )
   ),
@@ -112,14 +115,26 @@ const fieldUpdateSchema = schema.object({
       schema.string({
         minLength: 1,
         maxLength: MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH,
+        meta: { description: 'A custom description for the field. Set to `null` to remove.' },
       })
     )
   ),
-  count: schema.maybe(schema.nullable(schema.number())),
+  count: schema.maybe(
+    schema.nullable(
+      schema.number({
+        meta: { description: 'A popularity count for the field. Set to `null` to remove.' },
+      })
+    )
+  ),
   format: schema.maybe(schema.nullable(serializedFieldFormatSchema)),
 });
 
-const updateFieldsActionRouteFactory = (path: string, serviceKey: string, description?: string) => {
+const updateFieldsActionRouteFactory = (
+  path: string,
+  serviceKey: string,
+  summary?: string,
+  description?: string
+) => {
   return (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -128,90 +143,107 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string, descri
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.post({ path, access: 'public', description }).addVersion(
-      {
-        version: INITIAL_REST_VERSION,
+    router.versioned
+      .post({
+        path,
+        access: 'public',
+        summary,
+        description,
         security: {
           authz: {
             requiredPrivileges: ['indexPatterns:manage'],
           },
         },
-        validate: {
-          request: {
-            params: schema.object(
-              {
-                id: schema.string({
-                  minLength: 1,
-                  maxLength: 1_000,
-                }),
-              },
-              { unknowns: 'allow' }
-            ),
-            body: schema.object({
-              fields: schema.recordOf(
-                schema.string({
-                  minLength: 1,
-                  maxLength: 1_000,
-                }),
-                fieldUpdateSchema
+      })
+      .addVersion(
+        {
+          version: INITIAL_REST_VERSION,
+          validate: {
+            request: {
+              params: schema.object(
+                {
+                  id: schema.string({
+                    minLength: 1,
+                    maxLength: 1_000,
+                    meta: { description: 'The unique identifier of the data view.' },
+                  }),
+                },
+                { unknowns: 'allow' }
               ),
-            }),
-          },
-          response: {
-            200: {
-              body: () =>
-                schema.object({
-                  [serviceKey]: dataViewSpecSchema,
-                }),
+              body: schema.object({
+                fields: schema.recordOf(
+                  schema.string({
+                    minLength: 1,
+                    maxLength: 1_000,
+                  }),
+                  fieldUpdateSchema,
+                  {
+                    meta: {
+                      description:
+                        'A map of field names to their updated metadata. Each entry can set a custom label, custom description, popularity count, or field format.',
+                    },
+                  }
+                ),
+              }),
+            },
+            response: {
+              200: {
+                body: () =>
+                  schema.object({
+                    [serviceKey]: dataViewSpecSchema,
+                  }),
+              },
             },
           },
         },
-      },
-      router.handleLegacyErrors(
-        handleErrors(async (ctx, req, res) => {
-          const core = await ctx.core;
-          const savedObjectsClient = core.savedObjects.client;
-          const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-          const [, , { dataViewsServiceFactory }] = await getStartServices();
-          const dataViewsService = await dataViewsServiceFactory(
-            savedObjectsClient,
-            elasticsearchClient,
-            req
-          );
-          const id = req.params.id;
-          const { fields } = req.body;
+        router.handleLegacyErrors(
+          handleErrors(async (ctx, req, res) => {
+            const core = await ctx.core;
+            const savedObjectsClient = core.savedObjects.client;
+            const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
+            const [, , { dataViewsServiceFactory }] = await getStartServices();
+            const dataViewsService = await dataViewsServiceFactory(
+              savedObjectsClient,
+              elasticsearchClient,
+              req
+            );
+            const id = req.params.id;
+            const { fields } = req.body;
 
-          const dataView = await updateFields({
-            dataViewsService,
-            usageCollection,
-            id,
-            fields,
-            counterName: `${req.route.method} ${path}`,
-          });
+            const dataView = await updateFields({
+              dataViewsService,
+              usageCollection,
+              id,
+              fields,
+              counterName: `${req.route.method} ${path}`,
+            });
 
-          const body: Record<string, DataViewSpecRestResponse> = {
-            [serviceKey]: await dataView.toSpec({ fieldParams: { fieldName: ['*'] } }),
-          };
+            const body: Record<string, DataViewSpecRestResponse> = {
+              [serviceKey]: toApiSpec(await dataView.toSpec({ fieldParams: { fieldName: ['*'] } })),
+            };
 
-          return res.ok({
-            headers: {
-              'content-type': 'application/json',
-            },
-            body,
-          });
-        })
-      )
-    );
+            return res.ok({
+              headers: {
+                'content-type': 'application/json',
+              },
+              body,
+            });
+          })
+        )
+      );
   };
 };
 
-export const registerUpdateFieldsRouteLegacy = updateFieldsActionRouteFactory(
+export const registerUpdateFieldsRoute = updateFieldsActionRouteFactory(
   `${SPECIFIC_DATA_VIEW_PATH}/fields`,
   SERVICE_KEY,
+  UPDATE_DATA_VIEW_FIELDS_SUMMARY,
   UPDATE_DATA_VIEW_FIELDS_DESCRIPTION
 );
 
-export const registerUpdateFieldsRoute = updateFieldsActionRouteFactory(
+export const registerUpdateFieldsRouteLegacy = updateFieldsActionRouteFactory(
   `${SPECIFIC_DATA_VIEW_PATH_LEGACY}/fields`,
-  SERVICE_KEY_LEGACY
+  SERVICE_KEY_LEGACY,
+  UPDATE_DATA_VIEW_FIELDS_SUMMARY,
+  'Deprecated in 8.0.0. Use the data_views/data_view/{id}/fields endpoint instead.'
 );

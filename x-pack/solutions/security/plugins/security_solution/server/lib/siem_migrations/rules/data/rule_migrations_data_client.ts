@@ -6,39 +6,56 @@
  */
 
 import type { AuthenticatedUser, IScopedClusterClient, Logger } from '@kbn/core/server';
+import type {
+  RuleMigration,
+  RuleMigrationRule,
+} from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { RuleMigrationsDataIntegrationsClient } from './rule_migrations_data_integrations_client';
 import { RuleMigrationsDataPrebuiltRulesClient } from './rule_migrations_data_prebuilt_rules_client';
-import { RuleMigrationsDataResourcesClient } from './rule_migrations_data_resources_client';
 import { RuleMigrationsDataRulesClient } from './rule_migrations_data_rules_client';
-import { RuleMigrationsDataLookupsClient } from './rule_migrations_data_lookups_client';
-import type { SiemRuleMigrationsClientDependencies } from '../types';
-import type { AdapterId } from './rule_migrations_data_service';
+import { SiemMigrationsDataLookupsClient } from '../../common/data/siem_migrations_data_lookups_client';
+import type { RuleMigrationIndexNameProviders } from '../types';
+import type { SiemMigrationsClientDependencies } from '../../common/types';
+import { RuleMigrationsDataMigrationClient } from './rule_migrations_data_migration_client';
+import { SiemMigrationsDataClient } from '../../common/data/siem_migrations_data_client';
+import { SiemMigrationsDataResourcesClient } from '../../common/data/siem_migrations_data_resources_client';
 
-export type IndexNameProvider = () => Promise<string>;
-export type IndexNameProviders = Record<AdapterId, IndexNameProvider>;
-
-export class RuleMigrationsDataClient {
-  public readonly rules: RuleMigrationsDataRulesClient;
-  public readonly resources: RuleMigrationsDataResourcesClient;
+export class RuleMigrationsDataClient extends SiemMigrationsDataClient<
+  RuleMigration,
+  RuleMigrationRule
+> {
+  public readonly migrations: RuleMigrationsDataMigrationClient;
+  public readonly items: RuleMigrationsDataRulesClient;
+  public readonly resources: SiemMigrationsDataResourcesClient;
   public readonly integrations: RuleMigrationsDataIntegrationsClient;
   public readonly prebuiltRules: RuleMigrationsDataPrebuiltRulesClient;
-  public readonly lookups: RuleMigrationsDataLookupsClient;
+  public readonly lookups: SiemMigrationsDataLookupsClient;
 
   constructor(
-    indexNameProviders: IndexNameProviders,
+    indexNameProviders: RuleMigrationIndexNameProviders,
     currentUser: AuthenticatedUser,
     esScopedClient: IScopedClusterClient,
     logger: Logger,
-    dependencies: SiemRuleMigrationsClientDependencies
+    spaceId: string,
+    dependencies: SiemMigrationsClientDependencies
   ) {
-    this.rules = new RuleMigrationsDataRulesClient(
+    super(esScopedClient, logger);
+
+    this.migrations = new RuleMigrationsDataMigrationClient(
+      indexNameProviders.migrations,
+      currentUser,
+      esScopedClient,
+      logger,
+      dependencies
+    );
+    this.items = new RuleMigrationsDataRulesClient(
       indexNameProviders.rules,
       currentUser,
       esScopedClient,
       logger,
       dependencies
     );
-    this.resources = new RuleMigrationsDataResourcesClient(
+    this.resources = new SiemMigrationsDataResourcesClient(
       indexNameProviders.resources,
       currentUser,
       esScopedClient,
@@ -59,6 +76,11 @@ export class RuleMigrationsDataClient {
       logger,
       dependencies
     );
-    this.lookups = new RuleMigrationsDataLookupsClient(currentUser, esScopedClient, logger);
+    this.lookups = new SiemMigrationsDataLookupsClient(
+      currentUser,
+      esScopedClient,
+      logger,
+      spaceId
+    );
   }
 }

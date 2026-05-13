@@ -5,59 +5,99 @@
  * 2.0.
  */
 
-import {
-  SampleDocument,
-  conditionSchema,
-  conditionToQueryDsl,
-  getFields,
-} from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
-import { ResyncStreamsResponse } from '../../../lib/streams/client';
-import { checkAccess } from '../../../lib/streams/stream_crud';
+import { z } from '@kbn/zod/v4';
+import { conditionSchema, isNeverCondition } from '@kbn/streamlang';
+import { routingStatus } from '@kbn/streams-schema';
+import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import type { ResyncStreamsResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
-import { DefinitionNotFoundError } from '../../../lib/streams/errors/definition_not_found_error';
+import { forkStreamRequest } from '../../../oas_examples';
 
 export const forkStreamsRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{name}/_fork',
+  endpoint: 'POST /api/streams/{name}/_fork 2023-10-31',
   options: {
-    access: 'internal',
+    access: 'public',
+    description: 'Forks a wired stream and creates a child stream',
+    summary: 'Fork a stream',
+    availability: {
+      since: '9.1.0',
+      stability: 'experimental',
+    },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              forkStream: { value: forkStreamRequest },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'The stream was forked successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the parent stream to fork from.'),
     }),
-    body: z.object({ stream: z.object({ name: z.string() }), if: conditionSchema }),
+    body: z.object({
+      stream: z.object({ name: z.string() }),
+      where: conditionSchema,
+      status: routingStatus.optional(),
+      draft: z.boolean().optional(),
+    }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<{ acknowledged: true }> => {
     const { streamsClient } = await getScopedClients({
       request,
     });
 
+    const conditionStatus = params.body.status
+      ? params.body.status
+      : isNeverCondition(params.body.where)
+      ? 'disabled'
+      : 'enabled';
+
     return await streamsClient.forkStream({
       parent: params.path.name,
-      if: params.body.if,
+      where: params.body.where,
       name: params.body.stream.name,
+      status: conditionStatus,
+      draft: params.body.draft,
     });
   },
 });
 
 export const resyncStreamsRoute = createServerRoute({
-  endpoint: 'POST /api/streams/_resync',
+  endpoint: 'POST /api/streams/_resync 2023-10-31',
   options: {
-    access: 'internal',
+    access: 'public',
+    description: 'Resyncs all streams, making sure that Elasticsearch assets are up to date',
+    summary: 'Resync streams',
+    availability: {
+      since: '9.1.0',
+      stability: 'experimental',
+    },
+    oasOperationObject: () => ({
+      responses: {
+        200: {
+          description: 'Streams were resynced successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({}),
@@ -75,97 +115,54 @@ export const getStreamsStatusRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: ['streams_read'],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  handler: async ({ request, getScopedClients }): Promise<{ enabled: boolean }> => {
+  handler: async ({
+    request,
+    getScopedClients,
+  }): Promise<{
+    logs: boolean | 'conflict';
+    'logs.otel': boolean | 'conflict';
+    'logs.ecs': boolean | 'conflict';
+    can_manage: boolean;
+  }> => {
     const { streamsClient } = await getScopedClients({ request });
 
+    const privileges = await streamsClient.getPrivileges('logs,logs.*');
+    const streamStatus = await streamsClient.checkStreamStatus();
+
     return {
-      enabled: await streamsClient.isStreamsEnabled(),
+      ...streamStatus,
+      can_manage: privileges.manage,
     };
   },
 });
 
-export const sampleStreamRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{name}/_sample',
+export const getClassicStreamsStatusRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/_classic_status',
   options: {
     access: 'internal',
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    path: z.object({ name: z.string() }),
-    body: z.object({
-      if: z.optional(conditionSchema),
-      start: z.optional(z.number()),
-      end: z.optional(z.number()),
-      size: z.optional(z.number()),
-    }),
-  }),
-  handler: async ({ params, request, getScopedClients }) => {
-    const { scopedClusterClient } = await getScopedClients({ request });
+  handler: async ({ request, getScopedClients }): Promise<{ can_manage: boolean }> => {
+    const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
 
-    const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
-
-    if (!read) {
-      throw new DefinitionNotFoundError(`Stream definition for ${params.path.name} not found`);
+    if (!isSecurityEnabled) {
+      return { can_manage: true };
     }
 
-    const { if: condition, start, end, size } = params.body;
-    const searchBody = {
-      query: {
-        bool: {
-          must: [
-            condition ? conditionToQueryDsl(condition) : { match_all: {} },
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis',
-                },
-              },
-            },
-          ],
-        },
-      },
-      // Conditions could be using fields which are not indexed or they could use it with other types than they are eventually mapped as.
-      // Because of this we can't rely on mapped fields to draw a sample, instead we need to use runtime fields to simulate what happens during
-      // ingest in the painless condition checks.
-      // This is less efficient than it could be - in some cases, these fields _are_ indexed with the right type and we could use them directly.
-      // This can be optimized in the future.
-      runtime_mappings: condition
-        ? Object.fromEntries(
-            getFields(condition).map((field) => [
-              field.name,
-              { type: field.type === 'string' ? ('keyword' as const) : ('double' as const) },
-            ])
-          )
-        : undefined,
-      sort: [
-        {
-          '@timestamp': {
-            order: 'desc' as const,
-          },
-        },
-      ],
-      terminate_after: size,
-      track_total_hits: false,
-      size,
-    };
-    const results = await scopedClusterClient.asCurrentUser.search({
-      index: params.path.name,
-      allow_no_indices: true,
-      ...searchBody,
+    const REQUIRED_MANAGE_PRIVILEGES = ['manage_index_templates'];
+
+    const privileges = await scopedClusterClient.asCurrentUser.security.hasPrivileges({
+      cluster: REQUIRED_MANAGE_PRIVILEGES,
     });
 
-    return { documents: results.hits.hits.map((hit) => hit._source) as SampleDocument[] };
+    return { can_manage: privileges.cluster.manage_index_templates === true };
   },
 });
 
@@ -173,5 +170,5 @@ export const managementRoutes = {
   ...forkStreamsRoute,
   ...resyncStreamsRoute,
   ...getStreamsStatusRoute,
-  ...sampleStreamRoute,
+  ...getClassicStreamsStatusRoute,
 };

@@ -8,8 +8,8 @@
  */
 
 import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
-  UseEuiTheme,
   logicalCSS,
   logicalTextAlignCSS,
   mathWithUnits,
@@ -53,7 +53,6 @@ export const vegaVisTooltipStyles = (euiThemeContext: UseEuiTheme) => {
             'max-width',
             mathWithUnits(euiTheme.size.base, (x) => x * 10)
           )}
-          color: ${euiTheme.colors.lightShade};
           ${logicalTextAlignCSS('right')}
           ${logicalCSS('padding-right', euiTheme.size.xs)}
         }

@@ -5,101 +5,36 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
-import { ObservabilityAlertSearchBar } from '@kbn/observability-plugin/public';
-import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
+import React from 'react';
 import { EuiPanel, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import type { BoolQuery } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import {
   APM_ALERTING_CONSUMERS,
   APM_ALERTING_RULE_TYPE_IDS,
 } from '../../../../common/alerting/config/apm_alerting_feature_ids';
 import type { ApmPluginStartDeps } from '../../../plugin';
-import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
-import { SERVICE_NAME } from '../../../../common/es_fields/apm';
-import { getEnvironmentKuery } from '../../../../common/environment_filter_values';
-import { push } from '../../shared/links/url_helpers';
+import { useAlertsSearchBarContext } from './alerts_search_bar_context';
+
+export { AlertsSearchBarContextProvider } from './alerts_search_bar_context';
+export { AlertsHeaderSearchBar } from './alerts_header_search_bar';
 
 export const ALERT_STATUS_ALL = 'all';
 
 export function AlertsOverview() {
-  const history = useHistory();
-  const {
-    path: { serviceName },
-    query: { environment, rangeFrom, rangeTo, kuery, alertStatus },
-  } = useAnyOfApmParams('/services/{serviceName}/alerts', '/mobile-services/{serviceName}/alerts');
   const { services } = useKibana<ApmPluginStartDeps>();
-  const [alertStatusFilter, setAlertStatusFilter] = useState<AlertStatus>(ALERT_STATUS_ALL);
-  const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
-
-  useEffect(() => {
-    if (alertStatus) {
-      setAlertStatusFilter(alertStatus as AlertStatus);
-    }
-  }, [alertStatus]);
-
   const {
-    triggersActionsUi: { getAlertsSearchBar: AlertsSearchBar },
-    notifications,
-    data: {
-      query: {
-        timefilter: { timefilter: timeFilterService },
-      },
-    },
-    uiSettings,
-  } = services;
+    core: { http, notifications },
+  } = useApmPluginContext();
 
-  const useToasts = () => notifications!.toasts;
+  const { data, fieldFormats, application, licensing, cases, settings } = services;
 
-  const apmQueries = useMemo(() => {
-    const environmentKuery = getEnvironmentKuery(environment);
-    let query = `${SERVICE_NAME}:${serviceName}`;
-
-    if (environmentKuery) {
-      query += ` AND ${environmentKuery}`;
-    }
-    return [
-      {
-        query,
-        language: 'kuery',
-      },
-    ];
-  }, [serviceName, environment]);
-
-  const onKueryChange = useCallback(
-    (value: any) => push(history, { query: { kuery: value } }),
-    [history]
-  );
+  const { esQuery } = useAlertsSearchBarContext();
 
   return (
     <EuiPanel borderRadius="none" hasShadow={false}>
       <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ObservabilityAlertSearchBar
-              appName={'apmApp'}
-              kuery={kuery}
-              onRangeFromChange={(value) => push(history, { query: { rangeFrom: value } })}
-              onRangeToChange={(value) => push(history, { query: { rangeTo: value } })}
-              onKueryChange={onKueryChange}
-              defaultSearchQueries={apmQueries}
-              onStatusChange={setAlertStatusFilter}
-              onEsQueryChange={setEsQuery}
-              rangeTo={rangeTo}
-              rangeFrom={rangeFrom}
-              status={alertStatusFilter}
-              services={{
-                timeFilterService,
-                AlertsSearchBar,
-                useToasts,
-                uiSettings,
-              }}
-            />
-          </EuiFlexItem>
-        </EuiFlexItem>
         <EuiFlexItem>
           {esQuery && (
             <ObservabilityAlertsTable
@@ -107,6 +42,16 @@ export function AlertsOverview() {
               ruleTypeIds={APM_ALERTING_RULE_TYPE_IDS}
               consumers={APM_ALERTING_CONSUMERS}
               query={esQuery}
+              services={{
+                data,
+                http,
+                notifications,
+                fieldFormats,
+                application,
+                licensing,
+                cases,
+                settings,
+              }}
             />
           )}
         </EuiFlexItem>

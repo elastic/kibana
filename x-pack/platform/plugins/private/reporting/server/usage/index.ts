@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LicenseType } from '@kbn/licensing-plugin/server';
+import type { LicenseType } from '@kbn/licensing-types';
 
 export interface FeaturesAvailability {
   isAvailable: () => boolean;
@@ -18,3 +18,4 @@ export type GetLicense = () => Promise<FeaturesAvailability>;
 export { EventTracker } from './event_tracker';
 export { registerReportingEventTypes } from './register_event_types';
 export { registerReportingUsageCollector } from './reporting_usage_collector';
+export { initializeReportingTelemetryTask, scheduleReportingTelemetry } from './task';

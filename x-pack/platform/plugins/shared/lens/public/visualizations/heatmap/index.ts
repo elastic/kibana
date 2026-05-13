@@ -7,7 +7,7 @@
 
 import type { CoreSetup } from '@kbn/core/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import type { EditorFrameSetup } from '../../types';
+import type { EditorFrameSetup } from '@kbn/lens-common';
 
 export interface HeatmapVisualizationPluginSetupPlugins {
   editorFrame: EditorFrameSetup;
@@ -17,10 +17,12 @@ export interface HeatmapVisualizationPluginSetupPlugins {
 export class HeatmapVisualization {
   setup(core: CoreSetup, { editorFrame, charts }: HeatmapVisualizationPluginSetupPlugins) {
     editorFrame.registerVisualization(async () => {
-      const { getHeatmapVisualization } = await import('../../async_services');
-      const palettes = await charts.palettes.getPalettes();
+      const [{ getHeatmapVisualization }, paletteService] = await Promise.all([
+        import('../../async_services'),
+        charts.palettes.getPalettes(),
+      ]);
 
-      return getHeatmapVisualization({ paletteService: palettes, theme: core.theme });
+      return getHeatmapVisualization({ paletteService, theme: core.theme });
     });
   }
 }

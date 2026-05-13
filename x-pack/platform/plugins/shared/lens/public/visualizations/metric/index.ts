@@ -7,7 +7,7 @@
 
 import type { CoreSetup } from '@kbn/core/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import type { EditorFrameSetup } from '../../types';
+import type { EditorFrameSetup } from '@kbn/lens-common';
 
 export interface MetricVisualizationPluginSetupPlugins {
   editorFrame: EditorFrameSetup;
@@ -17,10 +17,12 @@ export interface MetricVisualizationPluginSetupPlugins {
 export class MetricVisualization {
   setup(core: CoreSetup, { editorFrame, charts }: MetricVisualizationPluginSetupPlugins) {
     editorFrame.registerVisualization(async () => {
-      const { getMetricVisualization } = await import('../../async_services');
-      const palettes = await charts.palettes.getPalettes();
+      const [{ getMetricVisualization }, paletteService] = await Promise.all([
+        import('../../async_services'),
+        charts.palettes.getPalettes(),
+      ]);
 
-      return getMetricVisualization({ paletteService: palettes, theme: core.theme });
+      return getMetricVisualization({ paletteService, theme: core.theme });
     });
   }
 }

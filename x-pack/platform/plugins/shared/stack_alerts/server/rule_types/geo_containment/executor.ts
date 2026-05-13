@@ -6,7 +6,8 @@
  */
 
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
-import { RuleExecutorOptions } from '../../types';
+import type { StackAlertType } from '../types';
+import type { RuleExecutorOptions } from '../../types';
 import {
   canSkipBoundariesFetch,
   executeEsQuery,
@@ -22,7 +23,8 @@ import type {
   GeoContainmentRuleState,
 } from './types';
 
-import { ActionGroupId, GEO_CONTAINMENT_ID } from './constants';
+import type { ActionGroupId } from './constants';
+import { GEO_CONTAINMENT_ID } from './constants';
 
 export async function executor({
   previousStartedAt,
@@ -37,7 +39,8 @@ export async function executor({
   GeoContainmentRuleState,
   GeoContainmentAlertInstanceState,
   GeoContainmentAlertInstanceContext,
-  typeof ActionGroupId
+  typeof ActionGroupId,
+  StackAlertType
 >): Promise<{ state: GeoContainmentRuleState }> {
   const boundariesRequestMeta = {
     geoField: params.geoField,

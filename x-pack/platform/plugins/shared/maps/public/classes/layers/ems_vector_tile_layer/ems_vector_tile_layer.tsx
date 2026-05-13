@@ -11,6 +11,7 @@ import { type blendMode, type EmsSpriteSheet, TMSService } from '@elastic/ems-cl
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
+import type { Writable } from '@kbn/utility-types';
 import { RGBAImage } from './image_utils';
 import { AbstractLayer, type LayerIcon } from '../layer';
 import {
@@ -19,12 +20,13 @@ import {
   SOURCE_DATA_REQUEST_ID,
   LAYER_TYPE,
 } from '../../../../common/constants';
-import { EMSVectorTileLayerDescriptor } from '../../../../common/descriptor_types';
-import { DataRequest } from '../../util/data_request';
+import type { EMSVectorTileLayerDescriptor } from '../../../../common/descriptor_types';
+import type { DataRequest } from '../../util/data_request';
 import { isRetina } from '../../../util';
-import { DataRequestContext } from '../../../actions';
-import { EMSTMSSource } from '../../sources/ems_tms_source';
+import type { DataRequestContext } from '../../../actions';
+import type { EMSTMSSource } from '../../sources/ems_tms_source';
 import { EMSVectorTileStyle } from '../../styles/ems/ems_vector_tile_style';
+import type { SpriteMeta } from '../../sources/ems_tms_source/ems_tms_source';
 
 interface SourceRequestMeta {
   tileLayerId: string;
@@ -33,21 +35,19 @@ interface SourceRequestMeta {
 interface SourceRequestData {
   spriteSheetImageData?: ImageData;
   vectorStyleSheet?: StyleSpecification;
-  spriteMeta?: {
-    png: string;
-    json: EmsSpriteSheet;
-  };
+  spriteMeta?: SpriteMeta;
 }
 
 export class EmsVectorTileLayer extends AbstractLayer {
   private readonly _style: EMSVectorTileStyle;
+  protected readonly _descriptor: EMSVectorTileLayerDescriptor;
 
   static createDescriptor(
     options: Partial<EMSVectorTileLayerDescriptor>
   ): EMSVectorTileLayerDescriptor {
     const emsVectorTileLayerDescriptor = super.createDescriptor(
       options
-    ) as EMSVectorTileLayerDescriptor;
+    ) as Writable<EMSVectorTileLayerDescriptor>;
     emsVectorTileLayerDescriptor.type = LAYER_TYPE.EMS_VECTOR_TILE;
     emsVectorTileLayerDescriptor.alpha = _.get(options, 'alpha', 1);
     emsVectorTileLayerDescriptor.locale = _.get(options, 'locale', AUTOSELECT_EMS_LOCALE);
@@ -63,6 +63,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
     layerDescriptor: EMSVectorTileLayerDescriptor;
   }) {
     super({ source, layerDescriptor });
+    this._descriptor = layerDescriptor;
     if (!layerDescriptor.style) {
       const defaultStyle = EMSVectorTileStyle.createDescriptor();
       this._style = new EMSVectorTileStyle(defaultStyle);
@@ -493,7 +494,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
 
   getLayerIcon(): LayerIcon {
     return {
-      icon: <EuiIcon size="m" type="grid" />,
+      icon: <EuiIcon size="m" type="grid" aria-hidden={true} />,
       tooltipContent: i18n.translate('xpack.maps.emsVectorTileLayer.layerDescription', {
         defaultMessage: `Reference map provided by Elastic Maps Service (EMS).`,
       }),

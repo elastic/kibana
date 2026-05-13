@@ -14,130 +14,242 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-import { NonEmptyString } from '../common_attributes.gen';
+import {
+  BulkActionBase,
+  NonEmptyString,
+  NonEmptyTimestamp,
+  BulkCrudActionSummary,
+} from '../common_attributes.gen';
 
+/**
+ * Reason why the anonymization field was not modified.
+ */
+export const AnonymizationFieldsBulkActionSkipReason = lazySchema(() =>
+  z.literal('ANONYMIZATION_FIELD_NOT_MODIFIED')
+);
 export type AnonymizationFieldsBulkActionSkipReason = z.infer<
   typeof AnonymizationFieldsBulkActionSkipReason
 >;
-export const AnonymizationFieldsBulkActionSkipReason = z.literal(
-  'ANONYMIZATION_FIELD_NOT_MODIFIED'
-);
 
+export const AnonymizationFieldsBulkActionSkipResult = lazySchema(() =>
+  z.object({
+    /**
+     * The ID of the anonymization field that was not modified.
+     */
+    id: z.string(),
+    /**
+     * Name of the anonymization field that was not modified.
+     */
+    name: z.string().optional(),
+    /**
+     * Reason why the anonymization field was not modified.
+     */
+    skip_reason: AnonymizationFieldsBulkActionSkipReason,
+  })
+);
 export type AnonymizationFieldsBulkActionSkipResult = z.infer<
   typeof AnonymizationFieldsBulkActionSkipResult
 >;
-export const AnonymizationFieldsBulkActionSkipResult = z.object({
-  id: z.string(),
-  name: z.string().optional(),
-  skip_reason: AnonymizationFieldsBulkActionSkipReason,
-});
 
+export const AnonymizationFieldDetailsInError = lazySchema(() =>
+  z.object({
+    /**
+     * The ID of the anonymization field.
+     */
+    id: z.string(),
+    /**
+     * Name of the anonymization field.
+     */
+    name: z.string().optional(),
+  })
+);
 export type AnonymizationFieldDetailsInError = z.infer<typeof AnonymizationFieldDetailsInError>;
-export const AnonymizationFieldDetailsInError = z.object({
-  id: z.string(),
-  name: z.string().optional(),
-});
 
+export const NormalizedAnonymizationFieldError = lazySchema(() =>
+  z.object({
+    /**
+     * Error message.
+     */
+    message: z.string(),
+    /**
+     * Status code of the response.
+     */
+    status_code: z.number().int(),
+    /**
+     * Error code indicating the type of failure.
+     */
+    err_code: z.string().optional(),
+    /**
+     * Array of anonymization fields that caused the error.
+     */
+    anonymization_fields: z.array(AnonymizationFieldDetailsInError),
+  })
+);
 export type NormalizedAnonymizationFieldError = z.infer<typeof NormalizedAnonymizationFieldError>;
-export const NormalizedAnonymizationFieldError = z.object({
-  message: z.string(),
-  status_code: z.number().int(),
-  err_code: z.string().optional(),
-  anonymization_fields: z.array(AnonymizationFieldDetailsInError),
-});
 
+export const AnonymizationFieldResponse = lazySchema(() =>
+  z.object({
+    /**
+     * The ID of the anonymization field.
+     */
+    id: NonEmptyString,
+    /**
+     * Timestamp when the anonymization field was initially created.
+     */
+    timestamp: NonEmptyTimestamp.optional(),
+    /**
+     * Name of the anonymization field.
+     */
+    field: z.string(),
+    /**
+     * Whether this field is allowed to be sent to the model.
+     */
+    allowed: z.boolean().optional(),
+    /**
+     * Whether this field should be anonymized.
+     */
+    anonymized: z.boolean().optional(),
+    /**
+     * Timestamp of the last update.
+     */
+    updatedAt: z.string().optional(),
+    /**
+     * Username of the person who last updated the field.
+     */
+    updatedBy: z.string().optional(),
+    /**
+     * Timestamp of when the anonymization field was created.
+     */
+    createdAt: z.string().optional(),
+    /**
+     * Username of the person who created the anonymization field.
+     */
+    createdBy: z.string().optional(),
+    /**
+     * Kibana space in which this anonymization field exists.
+     */
+    namespace: z.string().optional(),
+  })
+);
 export type AnonymizationFieldResponse = z.infer<typeof AnonymizationFieldResponse>;
-export const AnonymizationFieldResponse = z.object({
-  id: NonEmptyString,
-  timestamp: NonEmptyString.optional(),
-  field: z.string(),
-  allowed: z.boolean().optional(),
-  anonymized: z.boolean().optional(),
-  updatedAt: z.string().optional(),
-  updatedBy: z.string().optional(),
-  createdAt: z.string().optional(),
-  createdBy: z.string().optional(),
-  /**
-   * Kibana space
-   */
-  namespace: z.string().optional(),
-});
 
+export const AnonymizationFieldsBulkCrudActionResults = lazySchema(() =>
+  z.object({
+    /**
+     * List of anonymization fields successfully updated.
+     */
+    updated: z.array(AnonymizationFieldResponse),
+    /**
+     * List of anonymization fields successfully created.
+     */
+    created: z.array(AnonymizationFieldResponse),
+    deleted: z.array(z.string()),
+    /**
+     * List of anonymization fields that were skipped during the operation.
+     */
+    skipped: z.array(AnonymizationFieldsBulkActionSkipResult),
+  })
+);
 export type AnonymizationFieldsBulkCrudActionResults = z.infer<
   typeof AnonymizationFieldsBulkCrudActionResults
 >;
-export const AnonymizationFieldsBulkCrudActionResults = z.object({
-  updated: z.array(AnonymizationFieldResponse),
-  created: z.array(AnonymizationFieldResponse),
-  deleted: z.array(z.string()),
-  skipped: z.array(AnonymizationFieldsBulkActionSkipResult),
-});
 
-export type BulkCrudActionSummary = z.infer<typeof BulkCrudActionSummary>;
-export const BulkCrudActionSummary = z.object({
-  failed: z.number().int(),
-  skipped: z.number().int(),
-  succeeded: z.number().int(),
-  total: z.number().int(),
-});
-
+export const AnonymizationFieldsBulkCrudActionResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Indicates if the bulk action was successful.
+     */
+    success: z.boolean().optional(),
+    /**
+     * HTTP status code returned.
+     */
+    status_code: z.number().int().optional(),
+    /**
+     * Message providing information about the bulk action result.
+     */
+    message: z.string().optional(),
+    /**
+     * Total number of anonymization fields processed.
+     */
+    anonymization_fields_count: z.number().int().optional(),
+    attributes: z.object({
+      results: AnonymizationFieldsBulkCrudActionResults,
+      summary: BulkCrudActionSummary,
+      /**
+       * List of errors that occurred during the bulk operation.
+       */
+      errors: z.array(NormalizedAnonymizationFieldError).optional(),
+    }),
+  })
+);
 export type AnonymizationFieldsBulkCrudActionResponse = z.infer<
   typeof AnonymizationFieldsBulkCrudActionResponse
 >;
-export const AnonymizationFieldsBulkCrudActionResponse = z.object({
-  success: z.boolean().optional(),
-  status_code: z.number().int().optional(),
-  message: z.string().optional(),
-  anonymization_fields_count: z.number().int().optional(),
-  attributes: z.object({
-    results: AnonymizationFieldsBulkCrudActionResults,
-    summary: BulkCrudActionSummary,
-    errors: z.array(NormalizedAnonymizationFieldError).optional(),
-  }),
-});
 
-export type BulkActionBase = z.infer<typeof BulkActionBase>;
-export const BulkActionBase = z.object({
-  /**
-   * Query to filter anonymization fields
-   */
-  query: z.string().optional(),
-  /**
-   * Array of anonymization fields IDs
-   */
-  ids: z.array(z.string()).min(1).optional(),
-});
-
+export const AnonymizationFieldCreateProps = lazySchema(() =>
+  z.object({
+    /**
+     * Name of the anonymization field to create.
+     */
+    field: z.string(),
+    /**
+     * Whether this field is allowed to be sent to the model.
+     */
+    allowed: z.boolean().optional(),
+    /**
+     * Whether this field should be anonymized.
+     */
+    anonymized: z.boolean().optional(),
+  })
+);
 export type AnonymizationFieldCreateProps = z.infer<typeof AnonymizationFieldCreateProps>;
-export const AnonymizationFieldCreateProps = z.object({
-  field: z.string(),
-  allowed: z.boolean().optional(),
-  anonymized: z.boolean().optional(),
-});
 
+export const AnonymizationFieldUpdateProps = lazySchema(() =>
+  z.object({
+    /**
+     * The ID of the anonymization field to update.
+     */
+    id: z.string(),
+    /**
+     * Whether this field is allowed to be sent to the model.
+     */
+    allowed: z.boolean().optional(),
+    /**
+     * Whether this field should be anonymized.
+     */
+    anonymized: z.boolean().optional(),
+  })
+);
 export type AnonymizationFieldUpdateProps = z.infer<typeof AnonymizationFieldUpdateProps>;
-export const AnonymizationFieldUpdateProps = z.object({
-  id: z.string(),
-  allowed: z.boolean().optional(),
-  anonymized: z.boolean().optional(),
-});
 
+export const PerformAnonymizationFieldsBulkActionRequestBody = lazySchema(() =>
+  z.object({
+    /**
+     * Object containing the query to filter anonymization fields and/or an array of anonymization field IDs to delete.
+     */
+    delete: BulkActionBase.optional(),
+    /**
+     * Array of anonymization fields to create.
+     */
+    create: z.array(AnonymizationFieldCreateProps).optional(),
+    /**
+     * Array of anonymization fields to update.
+     */
+    update: z.array(AnonymizationFieldUpdateProps).optional(),
+  })
+);
 export type PerformAnonymizationFieldsBulkActionRequestBody = z.infer<
   typeof PerformAnonymizationFieldsBulkActionRequestBody
 >;
-export const PerformAnonymizationFieldsBulkActionRequestBody = z.object({
-  delete: BulkActionBase.optional(),
-  create: z.array(AnonymizationFieldCreateProps).optional(),
-  update: z.array(AnonymizationFieldUpdateProps).optional(),
-});
 export type PerformAnonymizationFieldsBulkActionRequestBodyInput = z.input<
   typeof PerformAnonymizationFieldsBulkActionRequestBody
 >;
 
+export const PerformAnonymizationFieldsBulkActionResponse = lazySchema(
+  () => AnonymizationFieldsBulkCrudActionResponse
+);
 export type PerformAnonymizationFieldsBulkActionResponse = z.infer<
   typeof PerformAnonymizationFieldsBulkActionResponse
 >;
-export const PerformAnonymizationFieldsBulkActionResponse =
-  AnonymizationFieldsBulkCrudActionResponse;

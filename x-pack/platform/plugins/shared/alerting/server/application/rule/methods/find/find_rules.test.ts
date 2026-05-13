@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
+import type { ConstructorOptions } from '../../../../rules_client/rules_client';
+import { RulesClient } from '../../../../rules_client/rules_client';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
+  coreFeatureFlagsMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
@@ -18,12 +20,12 @@ import { alertingAuthorizationMock } from '../../../../authorization/alerting_au
 import { nodeTypes, fromKueryExpression, toKqlExpression } from '@kbn/es-query';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
+import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { RecoveredActionGroup } from '../../../../../common';
-import { RegistryRuleType } from '../../../../rule_type_registry';
+import type { RegistryRuleType } from '../../../../rule_type_registry';
 import { schema } from '@kbn/config-schema';
 import {
   enabledRule1,
@@ -64,6 +66,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   minimumScheduleInterval: { value: '1m', enforce: false },
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
+  cloneAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
   internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -78,6 +81,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   isSystemAction: jest.fn().mockImplementation((id) => id === 'system_action-id'),
+  featureFlags: coreFeatureFlagsMock.createStart(),
+  isServerless: false,
 };
 
 beforeEach(() => {
@@ -106,9 +111,9 @@ describe('find()', () => {
         name: 'myType',
         category: 'test',
         producer: 'myApp',
+        solution: 'stack',
         enabledInLicense: true,
         hasAlertsMappings: false,
-        hasFieldsForAAD: false,
         validLegacyConsumers: [],
       },
     ],
@@ -199,6 +204,12 @@ describe('find()', () => {
               },
             ],
             "alertTypeId": "myType",
+            "artifacts": Object {
+              "dashboards": Array [],
+              "investigation_guide": Object {
+                "blob": "",
+              },
+            },
             "createdAt": 2019-02-12T21:01:22.479Z,
             "executionStatus": Object {
               "lastExecutionDate": 2019-02-12T21:01:22.000Z,
@@ -314,6 +325,12 @@ describe('find()', () => {
               },
             ],
             "alertTypeId": "myType",
+            "artifacts": Object {
+              "dashboards": Array [],
+              "investigation_guide": Object {
+                "blob": "",
+              },
+            },
             "createdAt": 2019-02-12T21:01:22.479Z,
             "executionStatus": Object {
               "lastExecutionDate": 2019-02-12T21:01:22.000Z,
@@ -419,6 +436,12 @@ describe('find()', () => {
               },
             ],
             "alertTypeId": "myType",
+            "artifacts": Object {
+              "dashboards": Array [],
+              "investigation_guide": Object {
+                "blob": "",
+              },
+            },
             "createdAt": 2019-02-12T21:01:22.479Z,
             "executionStatus": Object {
               "lastExecutionDate": 2019-02-12T21:01:22.000Z,
@@ -526,9 +549,9 @@ describe('find()', () => {
           name: 'myType',
           category: 'test',
           producer: 'myApp',
+          solution: 'stack',
           enabledInLicense: true,
           hasAlertsMappings: false,
-          hasFieldsForAAD: false,
           validLegacyConsumers: [],
         },
       ],
@@ -545,9 +568,9 @@ describe('find()', () => {
           name: 'myType',
           category: 'test',
           producer: 'myApp',
+          solution: 'stack',
           enabledInLicense: true,
           hasAlertsMappings: false,
-          hasFieldsForAAD: false,
           validLegacyConsumers: [],
         },
       ],
@@ -567,6 +590,7 @@ describe('find()', () => {
       },
       category: 'test',
       producer: 'myApp',
+      solution: 'stack',
       validate: {
         params: schema.any(),
       },
@@ -585,6 +609,7 @@ describe('find()', () => {
       },
       category: 'test',
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: injectReferencesFn,
@@ -705,6 +730,12 @@ describe('find()', () => {
               },
             ],
             "alertTypeId": "myType",
+            "artifacts": Object {
+              "dashboards": Array [],
+              "investigation_guide": Object {
+                "blob": "",
+              },
+            },
             "createdAt": 2019-02-12T21:01:22.479Z,
             "executionStatus": Object {
               "lastExecutionDate": 2019-02-12T21:01:22.000Z,
@@ -735,6 +766,12 @@ describe('find()', () => {
               },
             ],
             "alertTypeId": "123",
+            "artifacts": Object {
+              "dashboards": Array [],
+              "investigation_guide": Object {
+                "blob": "",
+              },
+            },
             "createdAt": 2019-02-12T21:01:22.479Z,
             "executionStatus": Object {
               "lastExecutionDate": 2019-02-12T21:01:22.000Z,
@@ -785,9 +822,9 @@ describe('find()', () => {
           name: 'myType',
           category: 'test',
           producer: 'myApp',
+          solution: 'stack',
           enabledInLicense: true,
           hasAlertsMappings: false,
-          hasFieldsForAAD: false,
           validLegacyConsumers: [],
         },
       ],
@@ -804,9 +841,9 @@ describe('find()', () => {
           name: 'myType',
           category: 'test',
           producer: 'myApp',
+          solution: 'stack',
           enabledInLicense: true,
           hasAlertsMappings: false,
-          hasFieldsForAAD: false,
           validLegacyConsumers: [],
         },
       ],
@@ -826,6 +863,7 @@ describe('find()', () => {
       },
       category: 'test',
       producer: 'myApp',
+      solution: 'stack',
       validate: {
         params: schema.any(),
       },
@@ -845,6 +883,7 @@ describe('find()', () => {
       },
       category: 'test',
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: injectReferencesFn,
@@ -1008,6 +1047,12 @@ describe('find()', () => {
           "data": Array [
             Object {
               "actions": Array [],
+              "artifacts": Object {
+                "dashboards": Array [],
+                "investigation_guide": Object {
+                  "blob": "",
+                },
+              },
               "id": "1",
               "notifyWhen": undefined,
               "params": undefined,
@@ -1140,8 +1185,169 @@ describe('find()', () => {
     });
   });
 
+  describe('searchAfter and aggregations', () => {
+    const sampleSavedObjectHit = {
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        name: 'fakeRuleName',
+        alertTypeId: 'myType',
+        schedule: { interval: '10s' },
+        params: {
+          bar: true,
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        executionStatus: {
+          status: 'pending',
+          lastExecutionDate: new Date('2019-02-12T21:01:22.479Z'),
+        },
+        notifyWhen: 'onActiveAlert',
+        actions: [
+          {
+            actionTypeId: 'test-action-id',
+            group: 'default',
+            actionRef: 'action_0',
+            params: {
+              foo: true,
+            },
+            uuid: 100,
+          },
+        ],
+      },
+      score: 1,
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    };
+
+    test('forwards searchAfter and aggs to the saved objects client', async () => {
+      unsecuredSavedObjectsClient.find.mockReset();
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [sampleSavedObjectHit],
+      });
+
+      const searchAfter = [123, 'rule-cursor'];
+      const aggs = {
+        facet_tags: { terms: { field: 'alert.attributes.tags', size: 10 } },
+      };
+
+      const rulesClient = new RulesClient(rulesClientParams);
+      await rulesClient.find({
+        options: {
+          searchAfter,
+          aggs,
+        },
+      });
+
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: RULE_SAVED_OBJECT_TYPE,
+          searchAfter,
+          aggs,
+        })
+      );
+    });
+
+    test('sets searchAfter from the last saved object sort values', async () => {
+      unsecuredSavedObjectsClient.find.mockReset();
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 2,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          { ...sampleSavedObjectHit, sort: ['first-page-cursor'] },
+          {
+            ...sampleSavedObjectHit,
+            id: '2',
+            sort: [1672531200000, 'id-2'],
+          },
+        ],
+      });
+
+      const rulesClient = new RulesClient(rulesClientParams);
+      const result = await rulesClient.find({ options: {} });
+
+      expect(result.searchAfter).toEqual([1672531200000, 'id-2']);
+    });
+
+    test('omits searchAfter when saved_objects is empty', async () => {
+      unsecuredSavedObjectsClient.find.mockReset();
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 0,
+        per_page: 10,
+        page: 1,
+        saved_objects: [],
+      });
+
+      const rulesClient = new RulesClient(rulesClientParams);
+      const result = await rulesClient.find({ options: {} });
+
+      expect(result.data).toEqual([]);
+      expect(result).not.toHaveProperty('searchAfter');
+    });
+
+    test('omits searchAfter when the last hit has no sort property', async () => {
+      unsecuredSavedObjectsClient.find.mockReset();
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [sampleSavedObjectHit],
+      });
+
+      const rulesClient = new RulesClient(rulesClientParams);
+      const result = await rulesClient.find({ options: {} });
+
+      expect(result).not.toHaveProperty('searchAfter');
+    });
+
+    test('passes aggregations through when returned by the saved objects client', async () => {
+      unsecuredSavedObjectsClient.find.mockReset();
+      const aggregations = {
+        facet_tags: {
+          buckets: [{ key: 'env', doc_count: 3 }],
+        },
+      };
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        aggregations,
+        saved_objects: [sampleSavedObjectHit],
+      });
+
+      const rulesClient = new RulesClient(rulesClientParams);
+      const result = await rulesClient.find({ options: {} });
+
+      expect(result.aggregations).toEqual(aggregations);
+    });
+
+    test('omits aggregations when the saved objects client returns none', async () => {
+      unsecuredSavedObjectsClient.find.mockReset();
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [sampleSavedObjectHit],
+      });
+
+      const rulesClient = new RulesClient(rulesClientParams);
+      const result = await rulesClient.find({ options: {} });
+
+      expect(result).not.toHaveProperty('aggregations');
+    });
+  });
+
   describe('legacy actions migration for SIEM', () => {
-    test('should call migrateLegacyActions', async () => {
+    test('should call formatLegacyActions', async () => {
       const rulesClient = new RulesClient(rulesClientParams);
 
       (formatLegacyActions as jest.Mock).mockResolvedValueOnce([
@@ -1172,6 +1378,123 @@ describe('find()', () => {
       );
       expect(result.data[2]).toEqual(expect.objectContaining({ id: siemRule1.id, migrated: true }));
       expect(result.data[3]).toEqual(expect.objectContaining({ id: siemRule2.id, migrated: true }));
+    });
+  });
+
+  describe('artifacts', () => {
+    test('finds rules with artifacts', async () => {
+      unsecuredSavedObjectsClient.find.mockReset();
+
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: '1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {
+              name: 'fakeRuleName',
+              alertTypeId: 'myType',
+              schedule: { interval: '10s' },
+              params: {
+                bar: true,
+              },
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              executionStatus: {
+                status: 'pending',
+                lastExecutionDate: new Date('2019-02-12T21:01:22.479Z'),
+              },
+              notifyWhen: 'onActiveAlert',
+              actions: [
+                {
+                  actionTypeId: 'test-action-id',
+                  group: 'default',
+                  actionRef: 'action_0',
+                  params: {
+                    foo: true,
+                  },
+                  uuid: 100,
+                },
+              ],
+              artifacts: {
+                dashboards: [
+                  {
+                    refId: 'dashboard_0',
+                  },
+                ],
+              },
+            },
+            score: 1,
+            references: [
+              {
+                name: 'action_0',
+                type: 'action',
+                id: '1',
+              },
+              {
+                name: 'dashboard_0',
+                type: 'dashboard',
+                id: 'dashboard-1',
+              },
+            ],
+          },
+        ],
+      });
+
+      const rulesClient = new RulesClient(rulesClientParams);
+      const result = await rulesClient.find({ options: {} });
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "data": Array [
+            Object {
+              "actions": Array [
+                Object {
+                  "actionTypeId": "test-action-id",
+                  "group": "default",
+                  "id": "1",
+                  "params": Object {
+                    "foo": true,
+                  },
+                  "uuid": 100,
+                },
+              ],
+              "alertTypeId": "myType",
+              "artifacts": Object {
+                "dashboards": Array [
+                  Object {
+                    "id": "dashboard-1",
+                  },
+                ],
+                "investigation_guide": Object {
+                  "blob": "",
+                },
+              },
+              "createdAt": 2019-02-12T21:01:22.479Z,
+              "executionStatus": Object {
+                "lastExecutionDate": 2019-02-12T21:01:22.000Z,
+                "status": "pending",
+              },
+              "id": "1",
+              "name": "fakeRuleName",
+              "notifyWhen": "onActiveAlert",
+              "params": Object {
+                "bar": true,
+              },
+              "schedule": Object {
+                "interval": "10s",
+              },
+              "snoozeSchedule": Array [],
+              "systemActions": Array [],
+              "updatedAt": 2019-02-12T21:01:22.479Z,
+            },
+          ],
+          "page": 1,
+          "perPage": 10,
+          "total": 1,
+        }
+      `);
     });
   });
 });

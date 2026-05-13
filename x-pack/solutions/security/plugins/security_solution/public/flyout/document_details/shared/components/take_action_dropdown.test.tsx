@@ -7,8 +7,10 @@
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
+import { set } from '@kbn/safer-lodash-set';
 import { waitFor } from '@testing-library/react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { SearchHit } from '../../../../../common/search_strategy';
 import type { TakeActionDropdownProps } from './take_action_dropdown';
 import { TakeActionDropdown } from './take_action_dropdown';
 import { mockAlertDetailsData } from '../../../../common/components/event_details/mocks';
@@ -22,28 +24,52 @@ import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { getUserPrivilegesMockDefaultValue } from '../../../../common/components/user_privileges/__mocks__';
+import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 import { allCasesPermissions } from '../../../../cases_test_utils';
 import {
   ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
   ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
 } from '../../../../common/components/toolbar/bulk_actions/translations';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
+import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 
 jest.mock('../../../../common/components/endpoint/host_isolation');
 jest.mock('../../../../common/components/endpoint/responder');
 jest.mock('../../../../common/components/user_privileges');
+jest.mock('../../../../exceptions/hooks/use_endpoint_exceptions_capability');
+
+const mockUseRunAlertWorkflowPanel = jest.fn().mockReturnValue({
+  runWorkflowMenuItem: [],
+  runAlertWorkflowPanel: [],
+});
+jest.mock(
+  '../../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel',
+  () => ({
+    useRunAlertWorkflowPanel: (...args: unknown[]) => mockUseRunAlertWorkflowPanel(...args),
+  })
+);
+
+const mockUseRunDocumentWorkflowPanel = jest.fn().mockReturnValue({
+  runWorkflowMenuItem: [],
+  runDocumentWorkflowPanel: [],
+});
+jest.mock(
+  '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel',
+  () => ({
+    useRunDocumentWorkflowPanel: (...args: unknown[]) => mockUseRunDocumentWorkflowPanel(...args),
+  })
+);
 
 jest.mock('../../../../detections/components/user_info', () => ({
-  useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
+  useUserData: jest.fn().mockReturnValue([{ hasIndexWrite: true }]),
 }));
 
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/components/guided_onboarding_tour/tour_step');
 
 jest.mock(
   '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
   () => ({
-    useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),
+    useAlertsPrivileges: jest.fn().mockReturnValue({ hasAlertsUpdate: true }),
   })
 );
 jest.mock('../../../../cases/components/use_insert_timeline');
@@ -88,6 +114,7 @@ describe('take action dropdown', () => {
       refetchFlyoutData: jest.fn(),
       scopeId: TimelineId.active,
       onOsqueryClick: jest.fn(),
+      searchHit: { _index: 'test-index', _id: 'test-id' } as SearchHit,
     };
 
     mockStartServicesMock = createStartServicesMock();
@@ -102,13 +129,17 @@ describe('take action dropdown', () => {
             helpers: {
               canUseCases: jest.fn().mockReturnValue(allCasesPermissions()),
               getRuleIdFromEvent: () => null,
+              getObservablesFromEcs: jest.fn().mockReturnValue([]),
             },
           },
           osquery: {
             isOsqueryAvailable: jest.fn().mockReturnValue(true),
           },
           application: {
-            capabilities: { siemV2: { crud_alerts: true, read_alerts: true }, osquery: true },
+            capabilities: {
+              [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
+              osquery: true,
+            },
           },
         },
       };
@@ -117,7 +148,7 @@ describe('take action dropdown', () => {
     (useHttp as jest.Mock).mockReturnValue(mockStartServicesMock.http);
   });
 
-  afterEach(() => {
+  beforeEach(() => {
     (useUserPrivileges as jest.Mock).mockReturnValue(getUserPrivilegesMockDefaultValue());
   });
 
@@ -150,7 +181,12 @@ describe('take action dropdown', () => {
       (useUserPrivileges as jest.Mock).mockReturnValue({
         ...getUserPrivilegesMockDefaultValue(),
         timelinePrivileges: { read: true },
+        rulesPrivileges: {
+          rules: { read: true, edit: true },
+          exceptions: { read: true, edit: true },
+        },
       });
+
       wrapper = mount(
         <TestProviders>
           <TakeActionDropdown {...defaultProps} />
@@ -185,9 +221,9 @@ describe('take action dropdown', () => {
 
     test('should render "mark as close"', async () => {
       await waitFor(() => {
-        expect(wrapper.find('[data-test-subj="close-alert-status"]').first().text()).toEqual(
-          'Mark as closed'
-        );
+        expect(
+          wrapper.find('[data-test-subj="alert-close-context-menu-item"]').first().text()
+        ).toEqual('Mark as closed');
       });
     });
 
@@ -213,11 +249,11 @@ describe('take action dropdown', () => {
         );
       });
     });
-    test('should render "Investigate in timeline"', async () => {
+    test('should render "Investigate in Timeline"', async () => {
       await waitFor(() => {
         expect(
           wrapper.find('[data-test-subj="investigate-in-timeline-action-item"]').first().text()
-        ).toEqual('Investigate in timeline');
+        ).toEqual('Investigate in Timeline');
       });
     });
     test('should render "Run Osquery"', async () => {
@@ -251,7 +287,7 @@ describe('take action dropdown', () => {
   });
 
   describe('privileges', () => {
-    test('should not render "Investigate in timeline" when the user does not have timeline privileges', async () => {
+    test('should not render "Investigate in Timeline" when the user does not have timeline privileges', async () => {
       (useUserPrivileges as jest.Mock).mockReturnValue({
         ...getUserPrivilegesMockDefaultValue(),
         timelinePrivileges: { read: false },
@@ -370,6 +406,78 @@ describe('take action dropdown', () => {
       expect(wrapper.exists('[data-test-subj="endpointResponseActions-action-item"]')).toBe(true);
     });
 
+    describe('"Add Endpoint exception" button', () => {
+      const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as jest.Mock;
+
+      beforeEach(() => {
+        (useUserPrivileges as jest.Mock).mockReturnValue(
+          getUserPrivilegesMockDefaultValue({
+            rulesPrivileges: {
+              ...getUserPrivilegesMockDefaultValue().rulesPrivileges,
+              rules: { read: true, edit: true },
+              exceptions: { read: true, edit: true },
+            },
+          })
+        );
+      });
+
+      test('should enable the "Add Endpoint exception" button if provided endpoint alert and has right privileges', async () => {
+        set(defaultProps.dataAsNestedObject, 'kibana.alert.original_event.kind', ['alert']);
+        set(defaultProps.dataAsNestedObject, 'kibana.alert.original_event.module', ['endpoint']);
+        mockUseEndpointExceptionsCapability.mockReturnValue(true);
+
+        render();
+
+        await waitFor(() => {
+          expect(
+            wrapper.find('[data-test-subj="add-endpoint-exception-menu-item"]').last().getDOMNode()
+          ).toBeEnabled();
+        });
+      });
+
+      test('should disable the "Add Endpoint exception" button if user has no endpoint exception write privilege', async () => {
+        set(defaultProps.dataAsNestedObject, 'kibana.alert.original_event.kind', ['alert']);
+        set(defaultProps.dataAsNestedObject, 'kibana.alert.original_event.module', ['endpoint']);
+        mockUseEndpointExceptionsCapability.mockReturnValue(false);
+
+        render();
+
+        await waitFor(() => {
+          expect(
+            wrapper.find('[data-test-subj="add-endpoint-exception-menu-item"]').last().getDOMNode()
+          ).toBeDisabled();
+        });
+      });
+
+      test('should disable the "Add Endpoint exception" button if event kind is not alert', async () => {
+        set(defaultProps.dataAsNestedObject, 'kibana.alert.original_event.kind', ['event']);
+        set(defaultProps.dataAsNestedObject, 'kibana.alert.original_event.module', ['endpoint']);
+        mockUseEndpointExceptionsCapability.mockReturnValue(true);
+
+        render();
+
+        await waitFor(() => {
+          expect(
+            wrapper.find('[data-test-subj="add-endpoint-exception-menu-item"]').last().getDOMNode()
+          ).toBeDisabled();
+        });
+      });
+
+      test('should disable the "Add Endpoint exception" button if module is not endpoint', async () => {
+        set(defaultProps.dataAsNestedObject, 'kibana.alert.original_event.kind', ['alert']);
+        set(defaultProps.dataAsNestedObject, 'kibana.alert.original_event.module', ['filebeat']);
+        mockUseEndpointExceptionsCapability.mockReturnValue(true);
+
+        render();
+
+        await waitFor(() => {
+          expect(
+            wrapper.find('[data-test-subj="add-endpoint-exception-menu-item"]').last().getDOMNode()
+          ).toBeDisabled();
+        });
+      });
+    });
+
     describe('should correctly enable/disable the "Add Endpoint event filter" button', () => {
       beforeEach(() => {
         setTypeOnEcsDataWithAgentType();
@@ -407,6 +515,123 @@ describe('take action dropdown', () => {
         await waitFor(() => {
           expect(wrapper.exists('[data-test-subj="add-event-filter-menu-item"]')).toBeFalsy();
         });
+      });
+    });
+  });
+
+  describe('searchHit prop', () => {
+    it('should pass searchHit._source fields to the document workflow panel', () => {
+      const searchHit = {
+        _id: 'alert-123',
+        _index: 'alerts-index',
+        _source: { 'host.name': 'my-host', 'agent.type': 'endpoint' },
+      };
+
+      mount(
+        <TestProviders>
+          <TakeActionDropdown {...defaultProps} searchHit={searchHit} />
+        </TestProviders>
+      );
+
+      expect(mockUseRunDocumentWorkflowPanel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          documents: [
+            expect.objectContaining({
+              _id: defaultProps.dataAsNestedObject._id,
+              'host.name': 'my-host',
+              'agent.type': 'endpoint',
+            }),
+          ],
+        })
+      );
+    });
+
+    it('should pass empty source fields when searchHit is undefined', () => {
+      mount(
+        <TestProviders>
+          <TakeActionDropdown {...defaultProps} />
+        </TestProviders>
+      );
+
+      expect(mockUseRunDocumentWorkflowPanel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          documents: [
+            expect.objectContaining({
+              _id: defaultProps.dataAsNestedObject._id,
+            }),
+          ],
+        })
+      );
+    });
+  });
+
+  describe('remote document', () => {
+    let remoteProps: TakeActionDropdownProps;
+
+    beforeEach(() => {
+      // Timeline read privilege is required so investigateInTimelineActionItems is non-empty,
+      // which allows the dropdown to render for remote documents (only that item is shown).
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        ...getUserPrivilegesMockDefaultValue(),
+        timelinePrivileges: { read: true },
+      });
+
+      remoteProps = {
+        ...defaultProps,
+        dataAsNestedObject: {
+          ...getDetectionAlertMock(),
+          _index: 'remote-cluster:.alerts-security.alerts-default',
+        },
+        searchHit: {
+          _id: 'test-id',
+          _index: 'remote-cluster:.alerts-security.alerts-default',
+        } as SearchHit,
+      };
+    });
+
+    it('should render only "Investigate in timeline" for a remote alert', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <TakeActionDropdown {...remoteProps} />
+        </TestProviders>
+      );
+      wrapper
+        .find(`button[data-test-subj="${FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID}"]`)
+        .simulate('click');
+
+      await waitFor(() => {
+        expect(
+          wrapper.find('[data-test-subj="investigate-in-timeline-action-item"]').exists()
+        ).toBeTruthy();
+        expect(wrapper.find('[data-test-subj="add-to-existing-case-action"]').exists()).toBeFalsy();
+        expect(wrapper.find('[data-test-subj="acknowledged-alert-status"]').exists()).toBeFalsy();
+        expect(
+          wrapper.find('[data-test-subj="alert-tags-context-menu-item"]').exists()
+        ).toBeFalsy();
+        expect(
+          wrapper.find('[data-test-subj="alert-assignees-context-menu-item"]').exists()
+        ).toBeFalsy();
+      });
+    });
+
+    it('should render the full menu for a local alert', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <TakeActionDropdown {...defaultProps} />
+        </TestProviders>
+      );
+      wrapper
+        .find(`button[data-test-subj="${FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID}"]`)
+        .simulate('click');
+
+      await waitFor(() => {
+        expect(
+          wrapper.find('[data-test-subj="investigate-in-timeline-action-item"]').exists()
+        ).toBeTruthy();
+        expect(
+          wrapper.find('[data-test-subj="add-to-existing-case-action"]').exists()
+        ).toBeTruthy();
+        expect(wrapper.find('[data-test-subj="acknowledged-alert-status"]').exists()).toBeTruthy();
       });
     });
   });

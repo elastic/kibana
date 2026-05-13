@@ -15,7 +15,6 @@ import type { SavedObjectsType, SavedObject } from '@kbn/core-saved-objects-serv
 import {
   modelVersionToVirtualVersion,
   SavedObjectTypeRegistry,
-  globalSwitchToModelVersionAt,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { DocumentMigrator } from '@kbn/core-saved-objects-migration-server-internal';
 
@@ -81,10 +80,7 @@ export const createModelVersionTestMigrator = ({
   type: SavedObjectsType;
 }): ModelVersionTestMigrator => {
   const typeRegistry = new SavedObjectTypeRegistry();
-  typeRegistry.registerType({
-    switchToModelVersionAt: globalSwitchToModelVersionAt,
-    ...type,
-  });
+  typeRegistry.registerType(type);
 
   const logger = loggerMock.create();
 

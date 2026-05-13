@@ -23,9 +23,6 @@ exports[`DocumentsPanel renders 1`] = `
                 }
               />
             }
-            delay="regular"
-            display="inlineBlock"
-            position="top"
           >
             <React.Fragment>
               Upserted
@@ -33,7 +30,7 @@ exports[`DocumentsPanel renders 1`] = `
                 className="eui-alignTop"
                 color="subdued"
                 size="s"
-                type="questionInCircle"
+                type="question"
               />
             </React.Fragment>
           </EuiToolTip>,
@@ -54,9 +51,6 @@ exports[`DocumentsPanel renders 1`] = `
                 }
               />
             }
-            delay="regular"
-            display="inlineBlock"
-            position="top"
           >
             <React.Fragment>
               Deleted
@@ -64,7 +58,7 @@ exports[`DocumentsPanel renders 1`] = `
                 className="eui-alignTop"
                 color="subdued"
                 size="s"
-                type="questionInCircle"
+                type="question"
               />
             </React.Fragment>
           </EuiToolTip>,
@@ -85,9 +79,6 @@ exports[`DocumentsPanel renders 1`] = `
                 }
               />
             }
-            delay="regular"
-            display="inlineBlock"
-            position="top"
           >
             <React.Fragment>
               Volume
@@ -95,7 +86,7 @@ exports[`DocumentsPanel renders 1`] = `
                 className="eui-alignTop"
                 color="subdued"
                 size="s"
-                type="questionInCircle"
+                type="question"
               />
             </React.Fragment>
           </EuiToolTip>,
@@ -119,6 +110,7 @@ exports[`DocumentsPanel renders 1`] = `
         token="euiBasicTable.noItemsMessage"
       />
     }
+    tableCaption="Sync job document statistics"
     tableLayout="fixed"
   />
 </FlyoutPanel>

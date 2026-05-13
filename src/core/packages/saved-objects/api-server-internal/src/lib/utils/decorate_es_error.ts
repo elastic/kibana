@@ -9,6 +9,7 @@
 
 import { get } from 'lodash';
 import { errors as esErrors } from '@elastic/elasticsearch';
+import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 import { isSupportedEsServer } from '@kbn/core-elasticsearch-server-internal';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
@@ -38,7 +39,10 @@ export function decorateEsError(error: EsErrors) {
     throw new Error('Expected an instance of Error');
   }
 
-  const { reason } = get(error, 'body.error', { reason: undefined }) as { reason?: string };
+  const { reason: esErrorReason } = get(error, 'body.error', {
+    reason: undefined,
+  }) as ErrorCause;
+  const reason = esErrorReason || undefined;
   if (
     error instanceof ConnectionError ||
     error instanceof NoLivingConnectionsError ||

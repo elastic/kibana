@@ -34,10 +34,8 @@ import type {
 import { ArtifactConfirmModal } from '../../../../components/artifact_list_page/components/artifact_confirm_modal';
 import { EventFiltersForm } from './form';
 
-import { getInitialExceptionFromEvent } from '../utils';
+import { getInitialExceptionFromEvent, osTypeBasedOnAgentType } from '../utils';
 import { useHttp, useKibana, useToasts } from '../../../../../common/lib/kibana';
-import { useGetEndpointSpecificPolicies } from '../../../../services/policies/hooks';
-import { getLoadPoliciesError } from '../../../../common/translations';
 
 import { EventFiltersApiClient } from '../../service/api_client';
 import { getCreationSuccessMessage, getCreationErrorMessage } from '../translations';
@@ -63,14 +61,6 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
       data: { search },
     } = useKibana().services;
 
-    // load the list of policies>
-    const policiesRequest = useGetEndpointSpecificPolicies({
-      perPage: 1000,
-      onError: (error) => {
-        toasts.addWarning(getLoadPoliciesError(error));
-      },
-    });
-
     const [exception, setException] = useState<ArtifactFormComponentProps['item']>(
       getInitialExceptionFromEvent(data)
     );
@@ -81,14 +71,10 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
 
     const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
 
-    const policiesIsLoading = useMemo<boolean>(
-      () => policiesRequest.isLoading || policiesRequest.isRefetching,
-      [policiesRequest]
-    );
-
     useEffect(() => {
       const enrichEvent = async () => {
         if (!data || !data._index) return;
+
         const searchResponse = await lastValueFrom(
           search.search({
             params: {
@@ -103,16 +89,23 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
             },
           })
         );
-        setEnrichedData({
+        const enriched = {
           ...data,
           host: {
             ...data.host,
             os: {
               ...(data?.host?.os || {}),
-              name: [searchResponse.rawResponse.hits.hits[0]._source.host.os.name],
+              name: [searchResponse.rawResponse.hits.hits[0]._source.host.os.type],
             },
           },
-        });
+        };
+        setEnrichedData(enriched);
+
+        // Update the exception with the correct OS from enriched data
+        setException((prevException) => ({
+          ...prevException,
+          os_types: osTypeBasedOnAgentType(enriched) as Array<'windows' | 'linux' | 'macos'>,
+        }));
       };
 
       if (data) {
@@ -126,9 +119,9 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
     }, []);
 
     const handleOnClose = useCallback(() => {
-      if (policiesIsLoading || isSubmittingData) return;
+      if (isSubmittingData) return;
       onClose();
-    }, [isSubmittingData, policiesIsLoading, onClose]);
+    }, [isSubmittingData, onClose]);
 
     const submitEventFilter = useCallback(() => {
       return submitData(exception, {
@@ -155,11 +148,8 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
         <EuiButton
           data-test-subj="add-exception-confirm-button"
           fill
-          disabled={
-            !isFormValid || isSubmittingData || (!!data && !enrichedData) || policiesIsLoading
-          }
+          disabled={!isFormValid || isSubmittingData || (!!data && !enrichedData)}
           onClick={handleOnSubmit}
-          isLoading={policiesIsLoading}
         >
           {data ? (
             <FormattedMessage
@@ -174,7 +164,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
           )}
         </EuiButton>
       ),
-      [data, enrichedData, handleOnSubmit, isFormValid, isSubmittingData, policiesIsLoading]
+      [data, enrichedData, handleOnSubmit, isFormValid, isSubmittingData]
     );
 
     // update flyout state with form state
@@ -242,14 +232,12 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
 
         <EuiFlyoutBody>
           <EventFiltersForm
-            allowSelectOs={!data}
+            allowSelectOs
             error={undefined}
             disabled={false}
             item={exception}
             mode="create"
             onChange={onChange}
-            policies={policiesRequest?.data?.items ?? []}
-            policiesIsLoading={policiesIsLoading}
           />
         </EuiFlyoutBody>
 

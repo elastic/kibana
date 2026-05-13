@@ -34,6 +34,8 @@
           ") => void"
         ],
         "path": "x-pack/solutions/search/packages/kbn-search-api-keys-server/src/routes/routes.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -51,7 +53,10 @@
               ">"
             ],
             "path": "x-pack/solutions/search/packages/kbn-search-api-keys-server/src/routes/routes.ts",
+            "lineNumber": 19,
+            "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "IRouter",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -72,7 +77,10 @@
               }
             ],
             "path": "x-pack/solutions/search/packages/kbn-search-api-keys-server/src/routes/routes.ts",
+            "lineNumber": 19,
+            "columnNumber": 62,
             "deprecated": false,
+            "docsReferencedTypeName": "Logger",
             "trackAdoption": false,
             "isRequired": true
           }

@@ -13,6 +13,7 @@ set -e
 # Uses a defaults if no argument is specified
 LIST_ID=${1:-ips.txt}
 
+echo $LIST_ID
 # Example to export
 # ./export_list_items.sh > /tmp/ips.txt
 

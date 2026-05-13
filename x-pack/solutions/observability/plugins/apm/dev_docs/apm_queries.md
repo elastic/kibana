@@ -447,7 +447,7 @@ These metrics measure the count and total duration of requests from one service 
 
 ![image](https://user-images.githubusercontent.com/209966/135990117-170070da-2fc5-4014-a597-0dda0970854c.png)
 
-Used in: [Dependencies (latency)](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm/server/lib/backends/get_latency_charts_for_backend.ts#L68-L79), [Dependencies (throughput)](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm/server/lib/backends/get_throughput_charts_for_backend.ts#L67-L74) and [Service Map](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm/server/lib/service_map/get_service_map_backend_node_info.ts#L57-L67)
+Used in: [Dependencies (latency)](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm/server/lib/backends/get_latency_charts_for_backend.ts#L68-L79), [Dependencies (throughput)](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm/server/lib/backends/get_throughput_charts_for_backend.ts#L67-L74) and [Service map](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm/server/lib/service_map/get_service_map_backend_node_info.ts#L57-L67)
 
 Noteworthy fields: `span.destination.service.*`
 

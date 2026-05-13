@@ -205,12 +205,13 @@ export const ConnectorSyncRules: React.FC = () => {
                 </EuiCodeBlock>
                 <EuiFlexItem>
                   <EuiCallOut
+                    announceOnMount
                     title={i18n.translate(
                       'xpack.enterpriseSearch.content.index.connector.syncRules.advancedRulesCalloutTitle',
                       { defaultMessage: 'Configuration' }
                     )}
                     color="warning"
-                    iconType="iInCircle"
+                    iconType="info"
                   >
                     <EuiText size="s">
                       <p>

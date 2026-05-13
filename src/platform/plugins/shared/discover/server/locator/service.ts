@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart, KibanaRequest } from '@kbn/core/server';
-import { DiscoverServerPluginLocatorService, DiscoverServerPluginStartDeps } from '..';
+import type { CoreStart, KibanaRequest } from '@kbn/core/server';
+import type { DiscoverServerPluginLocatorService, DiscoverServerPluginStartDeps } from '..';
 import { columnsFromLocatorFactory } from './columns_from_locator';
 import { searchSourceFromLocatorFactory } from './searchsource_from_locator';
 import { titleFromLocatorFactory } from './title_from_locator';
 import { queryFromLocatorFactory } from './query_from_locator';
 import { filtersFromLocatorFactory } from './filters_from_locator';
+import { timeFieldNameFromLocatorFactory } from './time_field_name_from_locator';
 
 export const getScopedClient = (
   core: CoreStart,
@@ -32,6 +33,7 @@ export const getScopedClient = (
         titleFromLocator: titleFromLocatorFactory(services),
         queryFromLocator: queryFromLocatorFactory(services),
         filtersFromLocator: filtersFromLocatorFactory(services),
+        timeFieldNameFromLocator: timeFieldNameFromLocatorFactory(services),
       };
     },
   };

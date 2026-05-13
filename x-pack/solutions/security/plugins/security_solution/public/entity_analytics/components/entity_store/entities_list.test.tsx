@@ -34,8 +34,10 @@ const responseData: ListEntitiesResponse = {
       '@timestamp': '2021-08-02T14:00:00.000Z',
       user: { name: `Entity Name ${index}` },
       entity: {
+        id: `Entity Name ${index}`,
         name: `Entity Name ${index}`,
         source: 'test-index',
+        type: 'user',
       },
     }),
     10
@@ -126,7 +128,7 @@ describe('EntitiesList', () => {
 
     await waitFor(() => {
       const firstPageButton = screen.getByTestId('pagination-button-0');
-      expect(firstPageButton).toHaveAttribute('aria-current', 'true');
+      expect(firstPageButton).toHaveAttribute('aria-current', 'page');
     });
   });
 

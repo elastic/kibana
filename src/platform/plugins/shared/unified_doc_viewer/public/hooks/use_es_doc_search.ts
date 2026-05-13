@@ -33,9 +33,9 @@ export interface EsDocSearchProps {
    */
   dataView: DataView;
   /**
-   * Records fetched from text based query
+   * Record fetched from ES|QL query
    */
-  textBasedHits?: DataTableRecord[];
+  esqlHit?: DataTableRecord;
   /**
    * An optional callback that will be called before fetching the doc
    */
@@ -45,6 +45,10 @@ export interface EsDocSearchProps {
    * @param record
    */
   onProcessRecord?: (record: DataTableRecord) => DataTableRecord;
+  /**
+   * Skip fetching when data is already available (e.g. from cache)
+   */
+  skip?: boolean;
 }
 
 /**
@@ -54,11 +58,14 @@ export function useEsDocSearch({
   id,
   index,
   dataView,
-  textBasedHits,
+  esqlHit,
   onBeforeFetch,
   onProcessRecord,
+  skip = false,
 }: EsDocSearchProps): [ElasticRequestState, DataTableRecord | null, () => void] {
-  const [status, setStatus] = useState(ElasticRequestState.Loading);
+  const [status, setStatus] = useState(
+    skip ? ElasticRequestState.Found : ElasticRequestState.Loading
+  );
   const [hit, setHit] = useState<DataTableRecord | null>(null);
   const { data, analytics } = getUnifiedDocViewerServices();
 
@@ -111,16 +118,16 @@ export function useEsDocSearch({
   }, [analytics, data.search, dataView, id, index, onBeforeFetch, onProcessRecord]);
 
   useEffect(() => {
-    if (textBasedHits) {
-      const selectedHit = textBasedHits?.find((r) => r.id === id);
-      if (selectedHit) {
-        setStatus(ElasticRequestState.Found);
-        setHit(selectedHit);
-      }
+    if (skip) {
+      return;
+    }
+    if (esqlHit) {
+      setStatus(ElasticRequestState.Found);
+      setHit(esqlHit);
     } else {
       requestData();
     }
-  }, [id, requestData, textBasedHits]);
+  }, [id, requestData, esqlHit, skip]);
 
   return [status, hit, requestData];
 }

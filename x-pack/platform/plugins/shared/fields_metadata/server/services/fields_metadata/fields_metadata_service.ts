@@ -6,18 +6,26 @@
  */
 
 import { EcsFlat as ecsFields } from '@elastic/ecs';
-import { CoreStart, Logger } from '@kbn/core/server';
+import { semconvFlat as otelFields } from '@kbn/otel-semantic-conventions';
+import type { CoreStart, Logger } from '@kbn/core/server';
 import { FieldsMetadataClient } from './fields_metadata_client';
 import { EcsFieldsRepository } from './repositories/ecs_fields_repository';
 import { IntegrationFieldsRepository } from './repositories/integration_fields_repository';
 import { MetadataFieldsRepository } from './repositories/metadata_fields_repository';
-import { IntegrationFieldsExtractor, IntegrationListExtractor } from './repositories/types';
-import { FieldsMetadataServiceSetup, FieldsMetadataServiceStart } from './types';
+import { OtelFieldsRepository } from './repositories/otel_fields_repository';
+import type {
+  IntegrationFieldsExtractor,
+  IntegrationListExtractor,
+  StreamsFieldsExtractor,
+} from './repositories/types';
+import type { FieldsMetadataServiceSetup, FieldsMetadataServiceStart } from './types';
 import { MetadataFields as metadataFields } from '../../../common/metadata_fields';
+import { StreamsFieldsRepository } from './repositories/streams_fields_repository';
 
 export class FieldsMetadataService {
   private integrationFieldsExtractor: IntegrationFieldsExtractor = () => Promise.resolve({});
   private integrationListExtractor: IntegrationListExtractor = () => Promise.resolve([]);
+  private streamsFieldsExtractor: StreamsFieldsExtractor = () => Promise.resolve({});
 
   constructor(private readonly logger: Logger) {}
 
@@ -29,11 +37,15 @@ export class FieldsMetadataService {
       registerIntegrationListExtractor: (extractor: IntegrationListExtractor) => {
         this.integrationListExtractor = extractor;
       },
+      registerStreamsFieldsExtractor: (extractor: StreamsFieldsExtractor) => {
+        this.streamsFieldsExtractor = extractor;
+      },
     };
   }
 
   public start(core: CoreStart): FieldsMetadataServiceStart {
-    const { logger, integrationFieldsExtractor, integrationListExtractor } = this;
+    const { logger, integrationFieldsExtractor, integrationListExtractor, streamsFieldsExtractor } =
+      this;
 
     const ecsFieldsRepository = EcsFieldsRepository.create({ ecsFields });
     const metadataFieldsRepository = MetadataFieldsRepository.create({ metadataFields });
@@ -41,11 +53,17 @@ export class FieldsMetadataService {
       integrationFieldsExtractor,
       integrationListExtractor,
     });
+    const otelFieldsRepository = OtelFieldsRepository.create({ otelFields });
 
     return {
       getClient: async (request) => {
         const { fleet, fleetv2 } = await core.capabilities.resolveCapabilities(request, {
           capabilityPath: '*',
+        });
+
+        const esClient = core.elasticsearch.client.asScoped(request).asCurrentUser;
+        const streamsFieldsRepository = StreamsFieldsRepository.create({
+          streamsFieldsExtractor: (params) => streamsFieldsExtractor({ ...params, esClient }),
         });
 
         return FieldsMetadataClient.create({
@@ -54,6 +72,8 @@ export class FieldsMetadataService {
           ecsFieldsRepository,
           metadataFieldsRepository,
           integrationFieldsRepository,
+          otelFieldsRepository,
+          streamsFieldsRepository,
         });
       },
     };

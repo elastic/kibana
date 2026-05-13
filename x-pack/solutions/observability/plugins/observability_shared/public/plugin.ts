@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type {
   BrowserUrlService,
   SharePluginSetup,
   SharePluginStart,
 } from '@kbn/share-plugin/public';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { BehaviorSubject } from 'rxjs';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
 import { registerProfilingComponent } from './components/profiling/helpers/component_registry';
-export { updateGlobalNavigation } from './services/update_global_navigation';
+import { updateGlobalNavigation } from './services/update_global_navigation';
 import {
   AssetDetailsFlyoutLocatorDefinition,
   AssetDetailsLocatorDefinition,
@@ -31,7 +30,6 @@ import {
   TopNFunctionsLocatorDefinition,
   ServiceOverviewLocatorDefinition,
   TransactionDetailsByNameLocatorDefinition,
-  ServiceEntityLocatorDefinition,
   TransactionDetailsByTraceIdLocatorDefinition,
   type AssetDetailsFlyoutLocator,
   type AssetDetailsLocator,
@@ -43,26 +41,20 @@ import {
   type ServiceOverviewLocator,
   type TransactionDetailsByNameLocator,
   type MetricsExplorerLocator,
-  type ServiceEntityLocator,
   type TransactionDetailsByTraceIdLocator,
-  type EntitiesInventoryLocator,
-  EntitiesInventoryLocatorDefinition,
 } from '../common';
-import { updateGlobalNavigation } from './services/update_global_navigation';
-import {
-  DependencyOverviewLocator,
-  DependencyOverviewLocatorDefinition,
-} from '../common/locators/apm/dependency_overview_locator';
+import type { DependencyOverviewLocator } from '../common/locators/apm/dependency_overview_locator';
+import { DependencyOverviewLocatorDefinition } from '../common/locators/apm/dependency_overview_locator';
+
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
 }
 
 export interface ObservabilitySharedStart {
   spaces?: SpacesPluginStart;
-  cases: CasesPublicStart;
-  guidedOnboarding?: GuidedOnboardingPluginStart;
   embeddable: EmbeddableStart;
   share: SharePluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export type ObservabilitySharedPluginSetup = ReturnType<ObservabilitySharedPlugin['setup']>;
@@ -87,9 +79,7 @@ interface ObservabilitySharedLocators {
     dependencyOverview: DependencyOverviewLocator;
     transactionDetailsByName: TransactionDetailsByNameLocator;
     transactionDetailsByTraceId: TransactionDetailsByTraceIdLocator;
-    serviceEntity: ServiceEntityLocator;
   };
-  entitiesInventory: EntitiesInventoryLocator;
 }
 
 export class ObservabilitySharedPlugin implements Plugin {
@@ -124,7 +114,6 @@ export class ObservabilitySharedPlugin implements Plugin {
       getUrlForApp: application.getUrlForApp,
       navigateToApp: application.navigateToApp,
       navigationSections$: this.navigationRegistry.sections$,
-      guidedOnboardingApi: plugins.guidedOnboarding?.guidedOnboardingApi,
       getPageTemplateServices: () => ({ coreStart: core }),
       isSidebarEnabled$: this.isSidebarEnabled$,
     });
@@ -166,9 +155,7 @@ export class ObservabilitySharedPlugin implements Plugin {
         transactionDetailsByTraceId: urlService.locators.create(
           new TransactionDetailsByTraceIdLocatorDefinition()
         ),
-        serviceEntity: urlService.locators.create(new ServiceEntityLocatorDefinition()),
       },
-      entitiesInventory: urlService.locators.create(new EntitiesInventoryLocatorDefinition()),
     };
   }
 }

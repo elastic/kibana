@@ -16,10 +16,12 @@ export type { TutorialsRegistrySetup, TutorialsRegistryStart } from './tutorials
 
 export type {
   InstructionSetSchema,
-  ParamsSchema,
   InstructionsSchema,
   DashboardSchema,
   ArtifactsSchema,
+  StatusCheckSchema,
+  InstructionVariant,
+  Instruction,
   TutorialSchema,
   TutorialProvider,
   TutorialContext,
@@ -27,7 +29,7 @@ export type {
   ScopedTutorialContextFactory,
 } from './tutorials';
 
-export { EmbeddableTypes, SampleDataRegistry } from './sample_data';
+export { SampleDataRegistry } from './sample_data';
 
 export type {
   AppLinkData,

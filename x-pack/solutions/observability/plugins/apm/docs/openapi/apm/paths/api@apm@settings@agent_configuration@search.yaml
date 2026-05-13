@@ -1,7 +1,10 @@
 post:
   summary: Lookup single agent configuration
-  description: |
-    This endpoint allows to search for single agent configuration and update 'applied_by_agent' field.
+  deprecated: true
+  description: >
+    DEPRECATED: This endpoint is intended for internal use by APM agents to fetch their configuration and mark it as applied.
+    Do not use for new integrations.
+    It searches for a single agent configuration matching the given service, and optionally updates the `applied_by_agent` field when the provided `etag` matches the current configuration.
   operationId: searchSingleConfiguration
   tags:
     - APM agent configuration
@@ -14,6 +17,9 @@ post:
       application/json:
         schema:
           $ref: '../components/schemas/search_agent_configuration_object.yaml'
+        examples:
+          searchSingleConfigurationRequest1:
+            $ref: '../components/examples/agent_configuration_intake_object_search_request1.yaml'
   responses:
     '200':
       description: Successful response
@@ -21,21 +27,33 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/search_agent_configuration_response.yaml'
+          examples:
+            searchSingleConfigurationResponse1:
+              $ref: '../components/examples/agent_configuration_intake_object_search_200_response1.yaml'
     '400':
       description: Bad Request response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+          examples:
+            badRequestResponse:
+              $ref: '../components/examples/error_400_response.yaml'
     '401':
       description: Unauthorized response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/401_response.yaml'
+          examples:
+            unauthorizedResponse:
+              $ref: '../components/examples/error_401_response.yaml'
     '404':
       description: Not found response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/404_response.yaml'
+          examples:
+            notFoundResponse:
+              $ref: '../components/examples/error_404_response.yaml'

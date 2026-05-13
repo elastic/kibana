@@ -15,8 +15,17 @@ const assistantTelemetry = {
   reportAssistantInvoked,
   reportAssistantMessageSent: () => {},
   reportAssistantQuickPrompt: () => {},
+  reportAssistantStarterPrompt: () => {},
   reportAssistantSettingToggled: () => {},
 };
+// workaround because of JSDOM not supporting :focus-visible
+// https://github.com/jsdom/jsdom/issues/3426
+const matchesOriginal = HTMLElement.prototype.matches;
+HTMLElement.prototype.matches = function (query: string) {
+  if (query === ':focus-visible') return false;
+  return matchesOriginal.call(this, query);
+};
+
 describe('AssistantOverlay', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -57,7 +66,6 @@ describe('AssistantOverlay', () => {
     expect(reportAssistantInvoked).toHaveBeenCalledTimes(1);
     expect(reportAssistantInvoked).toHaveBeenCalledWith({
       invokedBy: 'shortcut',
-      conversationId: 'Welcome',
     });
     fireEvent.keyDown(document, { key: ';', ctrlKey: true });
     expect(reportAssistantInvoked).toHaveBeenCalledTimes(1);
@@ -84,5 +92,27 @@ describe('AssistantOverlay', () => {
     fireEvent.keyDown(document, { key: 'a', ctrlKey: true });
     const flyout = queryByTestId('ai-assistant-flyout');
     expect(flyout).not.toBeInTheDocument();
+  });
+
+  it('opens modal and reports telemetry when assistant param is present in URL', () => {
+    // Simulate URL with ?assistant=test-id
+    const originalLocation = window.location;
+    // @ts-ignore
+    delete window.location;
+    // @ts-ignore
+    window.location = { search: '?assistant=test-id' };
+
+    const { getByTestId } = render(
+      <TestProviders providerContext={{ assistantTelemetry }}>
+        <AssistantOverlay />
+      </TestProviders>
+    );
+    const flyout = getByTestId('ai-assistant-flyout');
+    expect(flyout).toBeInTheDocument();
+    expect(reportAssistantInvoked).toHaveBeenCalledWith({ invokedBy: 'url' });
+
+    // Restore original location
+    // @ts-expect-error upgrade typescript v5.9.3
+    window.location = originalLocation;
   });
 });

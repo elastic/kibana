@@ -10,45 +10,53 @@
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
 import { isPromise } from '@kbn/std';
-import { ObservableLike, UnwrapObservable } from '@kbn/utility-types';
+import type { ObservableLike, UnwrapObservable } from '@kbn/utility-types';
 import { keys, last as lastOf, mapValues, reduce, zipObject } from 'lodash';
+import type { Subscription } from 'rxjs';
 import {
+  catchError,
   combineLatest,
   defer,
+  finalize,
   from,
   identity,
   isObservable,
   last,
+  map,
+  Observable,
   of,
+  pluck,
+  ReplaySubject,
+  shareReplay,
+  switchMap,
   takeWhile,
+  tap,
   throwError,
   timer,
-  Observable,
-  ReplaySubject,
-  Subscription,
 } from 'rxjs';
-import { catchError, finalize, map, pluck, shareReplay, switchMap, tap } from 'rxjs';
-import { now, AbortError, calculateObjectHash } from '@kbn/kibana-utils-plugin/common';
-import { Adapters } from '@kbn/inspector-plugin/common';
-import { Executor } from '../executor';
-import { createExecutionContainer, ExecutionContainer } from './container';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { AbortError, calculateObjectHash, now } from '@kbn/kibana-utils-plugin/common';
+import type { Adapters } from '@kbn/inspector-plugin/common';
+import type { Executor } from '../executor';
+import type { ExecutionContainer } from './container';
+import { createExecutionContainer } from './container';
 import { createError } from '../util';
-import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
-import {
+import type { ExpressionValueError } from '../expression_types/specs/error';
+import { isExpressionValueError } from '../expression_types/specs/error';
+import type {
   ExpressionAstArgument,
   ExpressionAstExpression,
   ExpressionAstFunction,
-  parse,
-  formatExpression,
-  parseExpression,
   ExpressionAstNode,
 } from '../ast';
-import { ExecutionContext, DefaultInspectorAdapters } from './types';
-import { getType, Datatable } from '../expression_types';
+import { formatExpression, parse, parseExpression } from '../ast';
+import type { DefaultInspectorAdapters, ExecutionContext } from './types';
+import type { Datatable } from '../expression_types';
+import { getType } from '../expression_types';
 import type { ExpressionFunction, ExpressionFunctionParameter } from '../expression_functions';
 import { getByAlias } from '../util/get_by_alias';
 import { ExecutionContract } from './execution_contract';
-import { ExpressionExecutionParams } from '../service';
+import type { ExpressionExecutionParams } from '../service';
 import { createDefaultInspectorAdapters } from '../util/create_default_inspector_adapters';
 
 type UnwrapReturnType<Function extends (...args: any[]) => unknown> =
@@ -59,6 +67,7 @@ type UnwrapReturnType<Function extends (...args: any[]) => unknown> =
 export interface FunctionCacheItem {
   value: unknown;
   time: number;
+  sideEffectFn?: () => void;
 }
 /**
  * The result returned after an expression function execution.
@@ -125,7 +134,7 @@ function throttle<T>(timeout: number) {
 
       const emit = () => {
         if (hasValue) {
-          subscriber.next(latest);
+          subscriber.next(latest!);
           hasValue = false;
           latest = undefined;
         }
@@ -169,8 +178,11 @@ function throttle<T>(timeout: number) {
 function takeUntilAborted<T>(signal: AbortSignal) {
   return (source: Observable<T>) =>
     new Observable<T>((subscriber) => {
-      const throwAbortError = () => {
-        subscriber.error(new AbortError());
+      const throwAbortError = (e?: Event) => {
+        // If the execution was aborted due to end user cancellation, we still want to let
+        // the execution complete and handle the partial results
+        if ((e?.target as AbortSignal)?.reason !== AbortReason.CANCELED)
+          subscriber.error(new AbortError());
       };
 
       subscriber.add(source.subscribe(subscriber));
@@ -239,7 +251,7 @@ export class Execution<
   /**
    * Keeping track of any child executions
    * Needed to cancel child executions in case parent execution is canceled
-   * @private
+   * @internal
    */
   private readonly childExecutions: Execution[] = [];
   private cacheTimeout: number = 30000;
@@ -316,7 +328,9 @@ export class Execution<
       ),
       catchError((error) => {
         if (this.abortController.signal.aborted) {
-          this.childExecutions.forEach((childExecution) => childExecution.cancel());
+          this.childExecutions.forEach((childExecution) =>
+            childExecution.cancel(this.abortController.signal.reason)
+          );
 
           return of({ result: createAbortErrorValue(), partial: false });
         }
@@ -337,8 +351,8 @@ export class Execution<
   /**
    * Stop execution of expression.
    */
-  cancel() {
-    this.abortController.abort();
+  cancel(reason?: AbortReason) {
+    this.abortController.abort(reason);
   }
 
   /**
@@ -475,21 +489,19 @@ export class Execution<
       .pipe(
         map((currentInput) => this.cast(currentInput, fn.inputTypes)),
         switchMap((normalizedInput) => {
-          if (fn.allowCache && this.context.allowCache) {
-            hash = calculateObjectHash([
-              fn.name,
-              normalizedInput,
-              args,
-              this.context.getSearchContext(),
-            ]);
+          const {
+            hash: fnHash,
+            value: cachedValue,
+            valid: cacheValid,
+          } = this.#canUseCachedResult(fn, normalizedInput, args);
+          hash = fnHash;
+          if (cacheValid) {
+            cachedValue.sideEffectFn?.();
+            return of(cachedValue.value);
           }
-          if (hash && this.functionCache.has(hash)) {
-            const cached = this.functionCache.get(hash);
-            if (cached && Date.now() - cached.time < this.cacheTimeout) {
-              return of(cached.value);
-            }
-          }
-          return of(fn.fn(normalizedInput, args, this.context));
+          const output = fn.fn(normalizedInput, args, this.context);
+
+          return of(output);
         }),
         switchMap((fnResult) => {
           return (
@@ -524,10 +536,16 @@ export class Execution<
         }),
         finalize(() => {
           if (completionFlag && hash) {
+            const sideEffectResult = this.#getSideEffectFn(fn, args);
             while (this.functionCache.size >= maxCacheSize) {
+              // @ts-expect-error upgrade typescript v5.9.3
               this.functionCache.delete(this.functionCache.keys().next().value);
             }
-            this.functionCache.set(hash, { value: lastValue, time: Date.now() });
+            this.functionCache.set(hash, {
+              value: lastValue,
+              time: Date.now(),
+              sideEffectFn: sideEffectResult,
+            });
           }
         })
       )
@@ -713,5 +731,42 @@ export class Execution<
       default:
         return throwError(new Error(`Unknown AST object: ${JSON.stringify(ast)}`));
     }
+  }
+
+  #canUseCachedResult<Fn extends ExpressionFunction>(
+    fn: Fn,
+    input: unknown,
+    args: Record<string, unknown>
+  ):
+    | { hash: string; value: FunctionCacheItem; valid: boolean }
+    | { hash: string | undefined; value: undefined; valid: false } {
+    if (!fn.allowCache || !this.context.allowCache) {
+      return { hash: undefined, value: undefined, valid: false };
+    }
+    const hash = calculateObjectHash([fn.name, input, args, this.context.getSearchContext()]);
+
+    const cached = this.functionCache.get(hash);
+    if (hash && cached) {
+      return {
+        hash,
+        value: cached,
+        valid: Boolean(cached && Date.now() - cached.time < this.cacheTimeout),
+      };
+    }
+    return {
+      hash,
+      value: undefined,
+      valid: false,
+    };
+  }
+
+  #getSideEffectFn<Fn extends ExpressionFunction>(
+    fn: Fn,
+    args: Record<string, unknown>
+  ): undefined | (() => void) {
+    if (!fn.allowCache || typeof fn.allowCache === 'boolean') {
+      return undefined;
+    }
+    return fn.allowCache.withSideEffects?.(args, this.context);
   }
 }

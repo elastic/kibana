@@ -14,23 +14,30 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-import { SuccessResponse, BaseActionSchema } from '../../../model/schema/common.gen';
+import {
+  ResponseActionCreateSuccessResponse,
+  BaseActionSchema,
+} from '../../../model/schema/common.gen';
 
-export type UploadRouteRequestBody = z.infer<typeof UploadRouteRequestBody>;
-export const UploadRouteRequestBody = BaseActionSchema.merge(
-  z.object({
-    parameters: z.object({
-      overwrite: z.boolean().optional().default(false),
-    }),
-    file: z.string(),
-  })
+export const UploadRouteRequestBody = lazySchema(() =>
+  BaseActionSchema.merge(
+    z.object({
+      parameters: z.object({
+        /**
+         * Overwrite the file on the host if it already exists.
+         */
+        overwrite: z.boolean().optional().default(false),
+      }),
+      /**
+       * The binary content of the file.
+       */
+      file: z.string(),
+    })
+  )
 );
+export type UploadRouteRequestBody = z.infer<typeof UploadRouteRequestBody>;
 
-export type EndpointUploadActionRequestBody = z.infer<typeof EndpointUploadActionRequestBody>;
-export const EndpointUploadActionRequestBody = UploadRouteRequestBody;
-export type EndpointUploadActionRequestBodyInput = z.input<typeof EndpointUploadActionRequestBody>;
-
+export const EndpointUploadActionResponse = lazySchema(() => ResponseActionCreateSuccessResponse);
 export type EndpointUploadActionResponse = z.infer<typeof EndpointUploadActionResponse>;
-export const EndpointUploadActionResponse = SuccessResponse;

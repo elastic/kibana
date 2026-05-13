@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { ML_PAGES } from '../../../../locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { NavigateToPath } from '../../../contexts/kibana';
 import type { MlRoute } from '../../router';
 import { createPath, PageLoader } from '../../router';
@@ -28,7 +28,7 @@ export const logCategorizationRouteFactory = (
   id: 'log_categorization',
   path: createPath(ML_PAGES.AIOPS_LOG_CATEGORIZATION),
   title: i18n.translate('xpack.ml.aiops.logCategorization.docTitle', {
-    defaultMessage: 'Log Pattern Analysis',
+    defaultMessage: 'Log pattern analysis',
   }),
   render: () => <PageWrapper />,
   breadcrumbs: [
@@ -36,7 +36,7 @@ export const logCategorizationRouteFactory = (
     getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB_LOG_PATTERN_ANALYSIS', navigateToPath, basePath),
     {
       text: i18n.translate('xpack.ml.aiops.logCategorization.docTitle', {
-        defaultMessage: 'Log Pattern Analysis',
+        defaultMessage: 'Log pattern analysis',
       }),
     },
   ],

@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 
-import {
+import type {
   rawRuleExecutionStatusSchema,
   rawRuleActionSchema,
   rawRuleAlertsFilterSchema,
   rawRuleLastRunSchema,
 } from './v3';
 
-import { rawRuleMonitoringSchema, rawRuleSchema } from './v4';
+import type { rawRuleMonitoringSchema } from './v11';
+import type { rawRuleSchema, rawRuleSnoozedInstanceSchema } from './v12';
 
 type Mutable<T> = { -readonly [P in keyof T]: T[P] extends object ? Mutable<T[P]> : T[P] };
 
@@ -22,4 +23,5 @@ export type RawRuleExecutionStatus = Mutable<TypeOf<typeof rawRuleExecutionStatu
 export type RawRuleAlertsFilter = Mutable<TypeOf<typeof rawRuleAlertsFilterSchema>>;
 export type RawRuleLastRun = Mutable<TypeOf<typeof rawRuleLastRunSchema>>;
 export type RawRuleMonitoring = Mutable<TypeOf<typeof rawRuleMonitoringSchema>>;
+export type RawRuleSnoozedInstance = Mutable<TypeOf<typeof rawRuleSnoozedInstanceSchema>>;
 export type RawRule = Mutable<TypeOf<typeof rawRuleSchema>>;

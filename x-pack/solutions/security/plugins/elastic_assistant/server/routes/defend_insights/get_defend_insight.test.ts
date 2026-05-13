@@ -8,20 +8,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
-import type { DefendInsightsDataClient } from '../../ai_assistant_data_clients/defend_insights';
-
-import { transformESSearchToDefendInsights } from '../../ai_assistant_data_clients/defend_insights/helpers';
+import type { DefendInsightsDataClient } from '../../lib/defend_insights/persistence';
+import { transformESSearchToDefendInsights } from '../../lib/defend_insights/persistence/helpers';
 import { getDefendInsightsSearchEsMock } from '../../__mocks__/defend_insights_schema.mock';
 import { getDefendInsightRequest } from '../../__mocks__/request';
-import {
-  ElasticAssistantRequestHandlerContextMock,
-  requestContextMock,
-} from '../../__mocks__/request_context';
+import type { ElasticAssistantRequestHandlerContextMock } from '../../__mocks__/request_context';
+import { requestContextMock } from '../../__mocks__/request_context';
 import { serverMock } from '../../__mocks__/server';
-import { isDefendInsightsEnabled, updateDefendInsightLastViewedAt } from './helpers';
+import { updateDefendInsightLastViewedAt } from './helpers';
 import { getDefendInsightRoute } from './get_defend_insight';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
@@ -47,12 +43,13 @@ describe('getDefendInsightRoute', () => {
   function getDefaultDataClient(): DefendInsightsDataClient {
     return {
       findDefendInsightByConnectorId: jest.fn(),
+      findDefendInsightsByParams: jest.fn().mockResolvedValue([mockCurrentInsight]),
       updateDefendInsight: jest.fn(),
       createDefendInsight: jest.fn(),
       getDefendInsight: jest.fn(),
+      updateDefendInsights: jest.fn(),
     } as unknown as DefendInsightsDataClient;
   }
-
   beforeEach(() => {
     const tools = requestContextMock.createTools();
     context = tools.context;
@@ -63,11 +60,12 @@ describe('getDefendInsightRoute', () => {
     mockDataClient = getDefaultDataClient();
     mockCurrentInsight = transformESSearchToDefendInsights(getDefendInsightsSearchEsMock())[0];
 
-    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser);
+    context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
     context.elasticAssistant.getDefendInsightsDataClient.mockResolvedValue(mockDataClient);
     getDefendInsightRoute(server.router);
-    (updateDefendInsightLastViewedAt as jest.Mock).mockResolvedValue(mockCurrentInsight);
-    (isDefendInsightsEnabled as jest.Mock).mockReturnValue(true);
+    (updateDefendInsightLastViewedAt as jest.Mock).mockImplementation(
+      async ({ defendInsights }) => defendInsights?.[0]
+    );
   });
 
   afterEach(() => {
@@ -80,12 +78,15 @@ describe('getDefendInsightRoute', () => {
     tools.context.licensing.license = insufficientLicense;
     jest.spyOn(insufficientLicense, 'hasAtLeast').mockReturnValue(false);
 
-    await expect(
-      server.inject(
-        getDefendInsightRequest('insight-id1'),
-        requestContextMock.convertContext(tools.context)
-      )
-    ).rejects.toThrowError('Encountered unexpected call to response.forbidden');
+    const response = await server.inject(
+      getDefendInsightRequest('insight-id1'),
+      requestContextMock.convertContext(tools.context)
+    );
+    expect(response.status).toEqual(403);
+    expect(response.body).toEqual({
+      message:
+        'Your license does not support Automatic Troubleshooting. Please upgrade your license.',
+    });
   });
 
   it('should handle successful request', async () => {
@@ -99,17 +100,8 @@ describe('getDefendInsightRoute', () => {
     });
   });
 
-  it('should 404 if feature flag disabled', async () => {
-    (isDefendInsightsEnabled as jest.Mock).mockReturnValueOnce(false);
-    const response = await server.inject(
-      getDefendInsightRequest('insight-id1'),
-      requestContextMock.convertContext(context)
-    );
-    expect(response.status).toEqual(404);
-  });
-
   it('should handle missing authenticated user', async () => {
-    context.elasticAssistant.getCurrentUser.mockReturnValueOnce(null);
+    context.elasticAssistant.getCurrentUser.mockResolvedValueOnce(null);
     const response = await server.inject(
       getDefendInsightRequest('insight-id1'),
       requestContextMock.convertContext(context)
@@ -159,6 +151,83 @@ describe('getDefendInsightRoute', () => {
         success: false,
       },
       status_code: 500,
+    });
+  });
+
+  it('should call findDefendInsightsByParams with correct id and user', async () => {
+    const request = getDefendInsightRequest('insight-id1');
+
+    await server.inject(request, requestContextMock.convertContext(context));
+
+    expect(mockDataClient.findDefendInsightsByParams).toHaveBeenCalledWith({
+      params: { ids: ['insight-id1'] },
+      authenticatedUser: mockUser,
+    });
+  });
+
+  it('should call updateDefendInsightLastViewedAt with defendInsights and user', async () => {
+    await server.inject(
+      getDefendInsightRequest('insight-id1'),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(updateDefendInsightLastViewedAt).toHaveBeenCalledWith({
+      dataClient: mockDataClient,
+      defendInsights: [mockCurrentInsight],
+      authenticatedUser: mockUser,
+    });
+  });
+
+  describe('runExternalCallbacks', () => {
+    it('should call runExternalCallbacks if defendInsight is returned', async () => {
+      const runExternalCallbacks = jest.requireMock('./helpers').runExternalCallbacks as jest.Mock;
+      runExternalCallbacks.mockResolvedValue(undefined);
+
+      const response = await server.inject(
+        getDefendInsightRequest('insight-id1'),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+      expect(runExternalCallbacks).toHaveBeenCalledWith(
+        expect.any(String), // CallbackIds.DefendInsightsPostFetch
+        expect.anything(), // request
+        mockCurrentInsight.endpointIds
+      );
+    });
+
+    it('should handle error thrown by runExternalCallbacks', async () => {
+      const runExternalCallbacks = jest.requireMock('./helpers').runExternalCallbacks as jest.Mock;
+      runExternalCallbacks.mockRejectedValueOnce(new Error('External callback failed'));
+
+      const response = await server.inject(
+        getDefendInsightRequest('insight-id1'),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        message: {
+          error: 'External callback failed',
+          success: false,
+        },
+        status_code: 500,
+      });
+    });
+
+    it('should still call runExternalCallbacks even if updateDefendInsightLastViewedAt returns null', async () => {
+      const runExternalCallbacks = jest.requireMock('./helpers').runExternalCallbacks as jest.Mock;
+
+      (updateDefendInsightLastViewedAt as jest.Mock).mockResolvedValueOnce(null);
+
+      const response = await server.inject(
+        getDefendInsightRequest('insight-id1'),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({ data: null });
+      expect(runExternalCallbacks).toHaveBeenCalled();
     });
   });
 });

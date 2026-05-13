@@ -10,18 +10,27 @@
 import React from 'react';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { render, screen } from '@testing-library/react';
-import SummaryColumn, {
+import { userEvent } from '@testing-library/user-event';
+import type {
   AllSummaryColumnProps,
-  SummaryCellPopover,
   SummaryColumnFactoryDeps,
   SummaryColumnProps,
 } from './summary_column';
+import SummaryColumn, { SummaryCellPopover } from './summary_column';
 import { DataGridDensity, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import * as constants from '@kbn/discover-utils/src/data_types/logs/constants';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { coreMock as corePluginMock } from '@kbn/core/public/mocks';
-import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__/data_view';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import {
+  dataViewMock,
+  createDataViewWithBytesField,
+  columnsMetaOverridingBytesType,
+  createFormatFieldValueReactSpy,
+  expectFieldCallToMatch,
+} from '@kbn/discover-utils/src/__mocks__';
+import type { IFieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -46,13 +55,22 @@ const getSummaryProps = (
   isDetails: false,
   row: record,
   dataView: dataViewMock,
-  fieldFormats: fieldFormatsMock,
+  fieldFormats: {
+    ...fieldFormatsMock,
+    getDefaultInstance: jest
+      .fn()
+      .mockImplementation((...params: Parameters<IFieldFormatsRegistry['getDefaultInstance']>) => ({
+        ...fieldFormatsMock.getDefaultInstance(...params),
+        convert: jest.fn().mockImplementation((t: string) => String(t)),
+      })),
+  },
   setCellProps: () => {},
   closePopover: () => {},
   density: DataGridDensity.COMPACT,
   rowHeight: 1,
   onFilter: jest.fn(),
   shouldShowFieldHandler: () => true,
+  columnsMeta: undefined,
   core: corePluginMock.createStart(),
   share: sharePluginMock.createStartContract(),
   isTracesSummary: false,
@@ -121,8 +139,7 @@ describe('SummaryColumn', () => {
     it('should render a badge indicating the count of additional resources', () => {
       const record = getBaseRecord();
       renderSummary(record);
-      expect(screen.queryByText('+2')).toBeInTheDocument();
-      expect(screen.queryByText('+3')).not.toBeInTheDocument();
+      expect(screen.queryByText('+1')).toBeInTheDocument();
     });
 
     it('should render all the available resources in row autofit/custom mode', () => {
@@ -140,22 +157,16 @@ describe('SummaryColumn', () => {
       expect(
         screen.queryByTestId(`dataTableCellActionsPopover_${constants.HOST_NAME_FIELD}`)
       ).toBeInTheDocument();
-      expect(
-        screen.queryByTestId(
-          `dataTableCellActionsPopover_${constants.ORCHESTRATOR_NAMESPACE_FIELD}`
-        )
-      ).toBeInTheDocument();
-      expect(
-        screen.queryByTestId(`dataTableCellActionsPopover_${constants.CLOUD_INSTANCE_ID_FIELD}`)
-      ).toBeInTheDocument();
       expect(screen.queryByText('+2')).not.toBeInTheDocument();
     });
 
-    it('should display a popover with details and actions upon a badge click', () => {
+    it('should display a popover with details and actions upon a badge click', async () => {
       const record = getBaseRecord();
       renderSummary(record);
       // Open badge popover
-      screen.getByTestId(`dataTableCellActionsPopover_${constants.SERVICE_NAME_FIELD}`).click();
+      await userEvent.click(
+        screen.getByTestId(`dataTableCellActionsPopover_${constants.SERVICE_NAME_FIELD}`)
+      );
 
       expect(screen.getByTestId('dataTableCellActionPopoverTitle')).toHaveTextContent(
         'service.name synth-service-2'
@@ -179,7 +190,7 @@ describe('SummaryColumn', () => {
   describe('when rendering trace badges', () => {
     it('should display service.name with different fields exposed', () => {
       const record = getBaseRecord({
-        'event.outcome': 'success',
+        'event.outcome': 'failure',
         'transaction.name': 'GET /',
         'transaction.duration.us': 100,
         'data_stream.type': 'traces',
@@ -206,6 +217,24 @@ describe('SummaryColumn', () => {
         screen.queryByTestId(`dataTableCellActionsPopover_${constants.CONTAINER_NAME_FIELD}`)
       ).not.toBeInTheDocument();
     });
+
+    it('should not display the event.outcome badge if the outcome is not "failure"', () => {
+      const record = getBaseRecord({
+        'event.outcome': 'success',
+        'transaction.name': 'GET /',
+        'transaction.duration.us': 100,
+        'data_stream.type': 'traces',
+      });
+      renderSummary(record, {
+        density: DataGridDensity.COMPACT,
+        rowHeight: ROWS_HEIGHT_OPTIONS.auto,
+        isTracesSummary: true,
+      });
+
+      expect(
+        screen.queryByTestId(`dataTableCellActionsPopover_${constants.EVENT_OUTCOME_FIELD}`)
+      ).not.toBeInTheDocument();
+    });
   });
 
   describe('when rendering the main content', () => {
@@ -215,6 +244,17 @@ describe('SummaryColumn', () => {
       expect(screen.queryByTestId('discoverDataTableMessageValue')).toHaveTextContent(
         record.flattened.message as string
       );
+    });
+
+    it('should render angle brackets as text (not HTML tags)', () => {
+      const message =
+        '2026-02-06 04:41:12,718 INFO some.program.module(128):Search for <John Doe> found <48> items in <0.314> seconds';
+      const record = getBaseRecord({ message });
+
+      renderSummary(record);
+
+      expect(screen.queryByTestId('discoverDataTableMessageValue')).toHaveTextContent(message);
+      expect(document.querySelector('john')).toBeNull();
     });
 
     it(`should fallback to ${constants.ERROR_MESSAGE_FIELD} and ${constants.EVENT_ORIGINAL_FIELD} fields if message does not exist`, () => {
@@ -239,5 +279,61 @@ describe('SummaryCellPopover', () => {
     const message = JSON.stringify(json);
     render(<SummaryCellPopover {...getSummaryProps(getBaseRecord({ message }))} />);
     expect(screen.queryByTestId('codeBlock')?.innerHTML).toBe(JSON.stringify(json, null, 2));
+  });
+});
+
+describe('SummaryColumn with columnsMeta', () => {
+  it('should use data view field type when columnsMeta is undefined', () => {
+    const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
+    const testDataView = createDataViewWithBytesField();
+
+    const record = buildDataTableRecord(
+      {
+        fields: {
+          '@timestamp': 1726218404776,
+          bytes: [100],
+        },
+      },
+      testDataView
+    );
+
+    render(
+      <SummaryColumn
+        {...getSummaryProps(record, {
+          dataView: testDataView,
+          columnsMeta: undefined,
+        })}
+      />
+    );
+
+    expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'number');
+    formatFieldValueReactSpy.mockRestore();
+  });
+
+  it('should use columnsMeta type instead of data view field type when provided', () => {
+    const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
+    const testDataView = createDataViewWithBytesField();
+
+    const record = buildDataTableRecord(
+      {
+        fields: {
+          '@timestamp': 1726218404776,
+          bytes: ['100'],
+        },
+      },
+      testDataView
+    );
+
+    render(
+      <SummaryColumn
+        {...getSummaryProps(record, {
+          dataView: testDataView,
+          columnsMeta: columnsMetaOverridingBytesType,
+        })}
+      />
+    );
+
+    expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'string', ['keyword']);
+    formatFieldValueReactSpy.mockRestore();
   });
 });

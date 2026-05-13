@@ -7,13 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiSwitch, EuiText } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { AggFunctionsMapping } from '@kbn/data-plugin/public';
+import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { CARDINALITY_ID, CARDINALITY_NAME } from '@kbn/lens-formula-docs';
-import { OperationDefinition, ParamEditorProps } from '.';
-import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
+import type { CardinalityIndexPatternColumn } from '@kbn/lens-common';
+import { esql } from '@elastic/esql';
+import type { OperationDefinition, ParamEditorProps } from '.';
 
 import {
   getFormatFromPreviousColumn,
@@ -57,14 +58,6 @@ function ofName(name: string, timeShift: string | undefined, reducedTimeRange: s
     undefined,
     reducedTimeRange
   );
-}
-
-export interface CardinalityIndexPatternColumn extends FieldBasedIndexPatternColumn {
-  operationType: typeof CARDINALITY_ID;
-  params?: {
-    emptyAsNull?: boolean;
-    format?: ValueFormatConfig;
-  };
 }
 
 export const cardinalityOperation: OperationDefinition<
@@ -125,7 +118,6 @@ export const cardinalityOperation: OperationDefinition<
       label: ofName(field.displayName, previousColumn?.timeShift, previousColumn?.reducedTimeRange),
       dataType: 'number',
       operationType: CARDINALITY_ID,
-      scale: SCALE,
       sourceField: field.name,
       isBucketed: IS_BUCKETED,
       filter: getFilter(previousColumn, columnParams),
@@ -146,7 +138,8 @@ export const cardinalityOperation: OperationDefinition<
     columnId,
     currentColumn,
     paramEditorUpdater,
-  }: ParamEditorProps<CardinalityIndexPatternColumn>) => {
+    euiTheme,
+  }: ParamEditorProps<CardinalityIndexPatternColumn> & { euiTheme: EuiThemeComputed }) => {
     return [
       {
         dataTestSubj: 'hide-zero-values',
@@ -161,7 +154,7 @@ export const cardinalityOperation: OperationDefinition<
             }
             labelProps={{
               style: {
-                fontWeight: euiThemeVars.euiFontWeightMedium,
+                fontWeight: euiTheme.font.weight.medium,
               },
             }}
             checked={Boolean(currentColumn.params?.emptyAsNull)}
@@ -181,9 +174,11 @@ export const cardinalityOperation: OperationDefinition<
       },
     ];
   },
-  toESQL: (column, columnId) => {
+  toESQL: (column) => {
     if (column.params?.emptyAsNull || column.timeShift) return;
-    return `COUNT_DISTINCT(${column.sourceField})`;
+    return {
+      template: `COUNT_DISTINCT(${esql.col(column.sourceField)})`,
+    };
   },
   toEsAggsFn: (column, columnId) => {
     return buildExpressionFunction<AggFunctionsMapping['aggCardinality']>('aggCardinality', {

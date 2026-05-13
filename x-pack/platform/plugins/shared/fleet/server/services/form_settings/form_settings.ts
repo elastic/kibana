@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { parse } from 'yaml';
+import { i18n } from '@kbn/i18n';
 import { type Props, schema } from '@kbn/config-schema';
-import { stringifyZodError } from '@kbn/zod-helpers';
+import { stringifyZodError } from '@kbn/zod-helpers/v4';
 
 import type { SettingsConfig, SettingsSection } from '../../../common/settings/types';
-import { AGENT_POLICY_ADVANCED_SETTINGS } from '../../../common/settings';
+import { getAgentPolicyAdvancedSettings } from '../../../common/settings';
 import type { AgentPolicy } from '../../types';
 
 export function getSettingsAPISchema(settingSection: SettingsSection) {
@@ -29,6 +31,19 @@ export function _getSettingsAPISchema(settings: SettingsConfig[]): Props {
         schema.literal(null),
         schema.any({
           validate: (val: any) => {
+            if (setting.type === 'yaml') {
+              try {
+                parse(val);
+              } catch {
+                return i18n.translate(
+                  'xpack.fleet.settings.agentPolicyAdvanced.yamlValidationMessage',
+                  {
+                    defaultMessage: 'Must be a valid YAML string',
+                  }
+                );
+              }
+              return;
+            }
             const res = setting.schema.safeParse(val);
             if (!res.success) {
               return stringifyZodError(res.error);
@@ -69,16 +84,28 @@ export function _getSettingsValuesForAgentPolicy(
     }
 
     const val = agentPolicy.advanced_settings?.[setting.api_field.name];
-    if (val !== undefined) {
-      settingsValues[setting.name] = val;
+    if (val !== undefined && val !== '') {
+      settingsValues[setting.name] = convertValue(val, setting.type);
     }
   });
   return settingsValues;
 }
 
+function convertValue(val: any, type?: string) {
+  if (type === 'yaml') {
+    const valJs = parse(val);
+    if (valJs.agent?.internal) {
+      return valJs.agent.internal;
+    } else {
+      return valJs;
+    }
+  }
+  return val;
+}
+
 export function getSettings(settingSection: SettingsSection) {
   if (settingSection === 'AGENT_POLICY_ADVANCED_SETTINGS') {
-    return AGENT_POLICY_ADVANCED_SETTINGS;
+    return getAgentPolicyAdvancedSettings();
   }
 
   throw new Error(`Invalid settings section ${settingSection}`);

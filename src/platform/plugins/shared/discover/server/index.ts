@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KibanaRequest, PluginInitializerContext } from '@kbn/core/server';
-import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
-import {
+import type { KibanaRequest, PluginInitializerContext } from '@kbn/core/server';
+import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import type {
   ColumnsFromLocatorFn,
   SearchSourceFromLocatorFn,
   TitleFromLocatorFn,
   QueryFromLocatorFn,
   FiltersFromLocatorFn,
+  TimeFieldNameFromLocatorFn,
 } from './locator';
 
 export interface DiscoverServerPluginStartDeps {
@@ -27,6 +28,7 @@ export interface LocatorServiceScopedClient {
   titleFromLocator: TitleFromLocatorFn;
   queryFromLocator: QueryFromLocatorFn;
   filtersFromLocator: FiltersFromLocatorFn;
+  timeFieldNameFromLocator: TimeFieldNameFromLocatorFn;
 }
 
 export interface DiscoverServerPluginLocatorService {
@@ -38,6 +40,17 @@ export interface DiscoverServerPluginStart {
 }
 
 export { config } from './config';
+export type {
+  DiscoverSessionClassicTab,
+  DiscoverSessionEsqlTab,
+  DiscoverSessionTab,
+  DiscoverSessionPanelOverrides,
+  DiscoverSessionEmbeddableByValueProps,
+  DiscoverSessionEmbeddableByReferenceProps,
+  DiscoverSessionEmbeddableByValueState,
+  DiscoverSessionEmbeddableByReferenceState,
+  DiscoverSessionEmbeddableState,
+} from './embeddable';
 
 export const plugin = async (context: PluginInitializerContext) => {
   const { DiscoverServerPlugin } = await import('./plugin');

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 
-import { createListIndex, ApiParams } from '@kbn/securitysolution-list-api';
+import type { ApiParams } from '@kbn/securitysolution-list-api';
+import { createListIndex } from '@kbn/securitysolution-list-api';
 import { withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 
 import { READ_INDEX_QUERY_KEY } from '../constants';

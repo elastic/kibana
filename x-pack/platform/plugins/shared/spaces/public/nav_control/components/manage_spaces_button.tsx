@@ -5,51 +5,48 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
-import type { CSSProperties } from 'react';
-import React, { Component } from 'react';
+import { EuiButtonEmpty } from '@elastic/eui';
+import React from 'react';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
   isDisabled?: boolean;
-  className?: string;
-  size?: 's' | 'm';
-  style?: CSSProperties;
   onClick?: () => void;
   capabilities: Capabilities;
   navigateToApp: ApplicationStart['navigateToApp'];
 }
 
-export class ManageSpacesButton extends Component<Props, {}> {
-  public render() {
-    if (!this.props.capabilities.spaces.manage) {
-      return null;
+export const ManageSpacesButton: React.FC<Props> = ({
+  isDisabled,
+  onClick,
+  capabilities,
+  navigateToApp,
+}) => {
+  const navigateToManageSpaces = () => {
+    if (onClick) {
+      onClick();
     }
 
-    return (
-      <EuiButton
-        size={this.props.size || 's'}
-        className={this.props.className}
-        isDisabled={this.props.isDisabled}
-        onClick={this.navigateToManageSpaces}
-        style={this.props.style}
-        data-test-subj="manageSpaces"
-      >
-        <FormattedMessage
-          id="xpack.spaces.manageSpacesButton.manageSpacesButtonLabel"
-          defaultMessage="Manage spaces"
-        />
-      </EuiButton>
-    );
+    navigateToApp('management', { path: 'kibana/spaces' });
+  };
+
+  if (!capabilities.spaces.manage) {
+    return null;
   }
 
-  private navigateToManageSpaces = () => {
-    if (this.props.onClick) {
-      this.props.onClick();
-    }
-
-    this.props.navigateToApp('management', { path: 'kibana/spaces' });
-  };
-}
+  return (
+    <EuiButtonEmpty
+      size={'s'}
+      isDisabled={isDisabled}
+      onClick={navigateToManageSpaces}
+      data-test-subj="manageSpaces"
+    >
+      <FormattedMessage
+        id="xpack.spaces.manageSpacesButton.manageSpacesButtonLabel"
+        defaultMessage="Manage"
+      />
+    </EuiButtonEmpty>
+  );
+};

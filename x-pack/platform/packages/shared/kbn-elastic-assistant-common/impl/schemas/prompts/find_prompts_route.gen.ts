@@ -14,47 +14,71 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
-import { ArrayFromString } from '@kbn/zod-helpers';
+import { z, lazySchema } from '@kbn/zod/v4';
+import { ArrayFromString } from '@kbn/zod-helpers/v4';
 
 import { SortOrder } from '../common_attributes.gen';
 import { PromptResponse } from './bulk_crud_prompts_route.gen';
 
+/**
+ * Field by which to sort the prompts.
+ */
+export const FindPromptsSortField = lazySchema(() =>
+  z.enum(['created_at', 'is_default', 'name', 'updated_at'])
+);
 export type FindPromptsSortField = z.infer<typeof FindPromptsSortField>;
-export const FindPromptsSortField = z.enum(['created_at', 'is_default', 'name', 'updated_at']);
 export type FindPromptsSortFieldEnum = typeof FindPromptsSortField.enum;
 export const FindPromptsSortFieldEnum = FindPromptsSortField.enum;
 
+export const FindPromptsRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * List of specific fields to include in each returned prompt.
+     */
+    fields: ArrayFromString(z.string()).optional(),
+    /**
+     * Search query string to filter prompts by matching fields.
+     */
+    filter: z.string().optional(),
+    /**
+     * Field to sort prompts by.
+     */
+    sort_field: FindPromptsSortField.optional(),
+    /**
+     * Sort order, either asc or desc.
+     */
+    sort_order: SortOrder.optional(),
+    /**
+     * Page number for pagination.
+     */
+    page: z.coerce.number().int().min(1).optional().default(1),
+    /**
+     * Number of prompts per page.
+     */
+    per_page: z.coerce.number().int().min(0).optional().default(20),
+  })
+);
 export type FindPromptsRequestQuery = z.infer<typeof FindPromptsRequestQuery>;
-export const FindPromptsRequestQuery = z.object({
-  fields: ArrayFromString(z.string()).optional(),
-  /**
-   * Search query
-   */
-  filter: z.string().optional(),
-  /**
-   * Field to sort by
-   */
-  sort_field: FindPromptsSortField.optional(),
-  /**
-   * Sort order
-   */
-  sort_order: SortOrder.optional(),
-  /**
-   * Page number
-   */
-  page: z.coerce.number().int().min(1).optional().default(1),
-  /**
-   * Prompts per page
-   */
-  per_page: z.coerce.number().int().min(0).optional().default(20),
-});
 export type FindPromptsRequestQueryInput = z.input<typeof FindPromptsRequestQuery>;
 
+export const FindPromptsResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Current page number.
+     */
+    page: z.number().int(),
+    /**
+     * Number of prompts per page.
+     */
+    perPage: z.number().int(),
+    /**
+     * Total number of prompts matching the query.
+     */
+    total: z.number().int(),
+    /**
+     * The list of prompts returned based on the search query, sorting, and pagination.
+     */
+    data: z.array(PromptResponse),
+  })
+);
 export type FindPromptsResponse = z.infer<typeof FindPromptsResponse>;
-export const FindPromptsResponse = z.object({
-  page: z.number().int(),
-  perPage: z.number().int(),
-  total: z.number().int(),
-  data: z.array(PromptResponse),
-});

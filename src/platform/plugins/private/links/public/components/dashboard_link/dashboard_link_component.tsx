@@ -10,25 +10,23 @@
 import classNames from 'classnames';
 import React, { useMemo } from 'react';
 
-import { EuiListGroupItem, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiListGroupItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
-import { Query, isFilterPinned } from '@kbn/es-query';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
+import type { Query } from '@kbn/es-query';
+import { isFilterPinned } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import {
-  DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
-  DashboardDrilldownOptions,
-} from '@kbn/presentation-util-plugin/public';
+import type { DashboardNavigationOptions } from '@kbn/dashboard-navigation-options-schema';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
 
-import {
-  DASHBOARD_LINK_TYPE,
-  LINKS_VERTICAL_LAYOUT,
-  LinksLayoutType,
-} from '../../../common/content_management';
+import type { LinksLayoutType } from '../../../common/content_management';
+import { DASHBOARD_LINK_TYPE, LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { trackUiMetric } from '../../services/kibana_services';
-import { LinksParentApi, ResolvedLink } from '../../types';
+import type { LinksParentApi, ResolvedLink } from '../../types';
 import { DashboardLinkStrings } from './dashboard_link_strings';
+import type { DashboardLink } from '../../../server';
 
 export interface DashboardLinkProps {
   link: ResolvedLink;
@@ -92,22 +90,22 @@ export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLin
     if (!link.destination || link.destination === parentDashboardId) return;
 
     const linkOptions = {
-      ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
+      ...DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
       ...link.options,
-    } as DashboardDrilldownOptions;
+    } as DashboardNavigationOptions;
 
     const params: DashboardLocatorParams = {
       dashboardId: link.destination,
     };
-    if (linkOptions.useCurrentFilters && query) {
+    if (linkOptions.use_filters && query) {
       params.query = query as Query;
     }
 
-    if (linkOptions.useCurrentDateRange && timeRange) {
-      params.timeRange = timeRange;
+    if (linkOptions.use_time_range && timeRange) {
+      params.time_range = timeRange;
     }
 
-    params.filters = linkOptions.useCurrentFilters ? filters : filters?.filter(isFilterPinned);
+    params.filters = linkOptions.use_filters ? filters : filters?.filter(isFilterPinned);
 
     const locator = parentApi.locator;
     if (!locator) return;
@@ -129,7 +127,7 @@ export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLin
 
         /** Otherwise, prevent the default behaviour and handle click depending on `openInNewTab` option */
         event.preventDefault();
-        if (linkOptions.openInNewTab) {
+        if (linkOptions.open_in_new_tab) {
           window.open(href, '_blank');
         } else {
           await locator.navigate(params);
@@ -147,6 +145,7 @@ export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLin
   ]);
 
   const id = `dashboardLink--${link.id}`;
+  const testId = `dashboardLink--${link.title}`;
 
   return (
     <EuiListGroupItem
@@ -161,8 +160,7 @@ export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLin
         content: tooltipMessage,
         position: layout === LINKS_VERTICAL_LAYOUT ? 'right' : 'bottom',
         repositionOnScroll: true,
-        delay: 'long',
-        'data-test-subj': `${id}--tooltip`,
+        'data-test-subj': `${testId}--tooltip`,
       }}
       iconType={link.error ? 'warning' : undefined}
       iconProps={{ className: 'dashboardLinkIcon' }}
@@ -173,8 +171,8 @@ export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLin
         'dashboardLinkError--noLabel': !link.label,
       })}
       label={linkLabel}
-      external={link.options?.openInNewTab}
-      data-test-subj={link.error ? `${id}--error` : `${id}`}
+      external={(link.options as DashboardLink['options'])?.open_in_new_tab}
+      data-test-subj={link.error ? `${testId}--error` : `${testId}`}
       aria-current={link.destination === parentDashboardId}
     />
   );
@@ -192,13 +190,16 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     },
 
     // vertical layout - current dashboard link styles
-    '.verticalLayoutWrapper &.linkCurrent::before': {
-      // add left border for current dashboard
-      content: "''",
-      position: 'absolute',
-      height: '75%',
-      width: `calc(.5 * ${euiTheme.size.xs})`,
-      backgroundColor: euiTheme.colors.primary,
+    '.verticalLayoutWrapper &.linkCurrent': {
+      paddingLeft: euiTheme.size.s,
+      '&::before': {
+        // add left border for current dashboard
+        content: "''",
+        position: 'absolute',
+        height: '75%',
+        width: `calc(.5 * ${euiTheme.size.xs})`,
+        backgroundColor: euiTheme.colors.primary,
+      },
     },
 
     // horizontal layout - current dashboard link styles

@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SearchSource, TimeRange } from '@kbn/data-plugin/common';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { AggregateQuery, Filter, Query } from '@kbn/es-query';
-import { SavedSearch } from '@kbn/saved-search-plugin/common';
+import type { SearchSource, TimeRange } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { getSavedSearch } from '@kbn/saved-search-plugin/server';
-import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
-import { LocatorServicesDeps } from '.';
-import { DiscoverAppLocatorParams } from '../../common';
-import { getSortForSearchSource } from '../../common/utils/sorting';
+import { SORT_DEFAULT_ORDER_SETTING, getSortForSearchSource } from '@kbn/discover-utils';
+import type { LocatorServicesDeps } from '.';
+import type { DiscoverAppLocatorParams } from '../../common';
 import { getColumns } from './columns_from_locator';
 
 // Shortcut for return type of searchSource.getField('filter');

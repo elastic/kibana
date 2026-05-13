@@ -6,13 +6,14 @@
  */
 
 import type { outputType } from '../../constants';
-import type { ValueOf } from '..';
+import type { BaseSSLSecrets, ValueOf } from '..';
 import type { kafkaAuthType, kafkaCompressionType, kafkaSaslMechanism } from '../../constants';
 import type { kafkaPartitionType } from '../../constants';
 import type { kafkaTopicWhenType } from '../../constants';
 import type { kafkaAcknowledgeReliabilityLevel } from '../../constants';
 import type { kafkaVerificationModes } from '../../constants';
 import type { kafkaConnectionType } from '../../constants';
+import type { SOSecret } from '..';
 
 export type OutputType = typeof outputType;
 export type KafkaCompressionType = typeof kafkaCompressionType;
@@ -23,12 +24,6 @@ export type KafkaPartitionType = typeof kafkaPartitionType;
 export type KafkaTopicWhenType = typeof kafkaTopicWhenType;
 export type KafkaAcknowledgeReliabilityLevel = typeof kafkaAcknowledgeReliabilityLevel;
 export type KafkaVerificationMode = typeof kafkaVerificationModes;
-export type OutputSecret =
-  | string
-  | {
-      id: string;
-      hash?: string;
-    };
 
 export type OutputPreset = 'custom' | 'balanced' | 'throughput' | 'scale' | 'latency';
 
@@ -52,31 +47,25 @@ interface NewBaseOutput {
   proxy_id?: string | null;
   shipper?: ShipperOutput | null;
   allow_edit?: string[];
-  secrets?: {
-    ssl?: {
-      key?: OutputSecret;
-    };
-  };
+  secrets?: BaseSSLSecrets;
   preset?: OutputPreset;
+  write_to_logs_streams?: boolean | null;
 }
 
 export interface NewElasticsearchOutput extends NewBaseOutput {
   type: OutputType['Elasticsearch'];
+  otel_exporter_config_yaml?: string | null;
+  otel_disable_beatsauth?: boolean | null;
 }
 
 export interface NewRemoteElasticsearchOutput extends NewBaseOutput {
   type: OutputType['RemoteElasticsearch'];
   service_token?: string | null;
-  secrets?: {
-    service_token?: OutputSecret;
-    kibana_api_key?: OutputSecret;
-    ssl?: {
-      key?: OutputSecret;
-    };
-  };
+  secrets?: RemoteESOutputSecrets;
   sync_integrations?: boolean;
   kibana_url?: string | null;
   kibana_api_key?: string | null;
+  sync_uninstalled_integrations?: boolean;
 }
 
 export interface NewLogstashOutput extends NewBaseOutput {
@@ -113,7 +102,7 @@ export interface KafkaOutput extends NewBaseOutput {
   version?: string;
   key?: string;
   compression?: ValueOf<KafkaCompressionType>;
-  compression_level?: number;
+  compression_level?: number | null;
   auth_type?: ValueOf<KafkaAuthType>;
   connection_type?: ValueOf<KafkaConnectionTypeType>;
   username?: string | null;
@@ -140,10 +129,12 @@ export interface KafkaOutput extends NewBaseOutput {
   timeout?: number;
   broker_timeout?: number;
   required_acks?: ValueOf<KafkaAcknowledgeReliabilityLevel>;
-  secrets?: {
-    password?: OutputSecret;
-    ssl?: {
-      key?: OutputSecret;
-    };
-  };
+  secrets?: KafkaOutputSecrets;
+}
+
+interface KafkaOutputSecrets extends BaseSSLSecrets {
+  password?: SOSecret;
+}
+interface RemoteESOutputSecrets extends BaseSSLSecrets {
+  service_token?: SOSecret;
 }

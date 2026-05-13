@@ -7,22 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
-import type {
-  Alert,
-  EsQuerySnapshot,
-  LegacyField,
-  RuleRegistrySearchRequest,
-  RuleRegistrySearchResponse,
-} from '@kbn/alerting-types';
-import { set } from '@kbn/safer-lodash-set';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type {
   MappingRuntimeFields,
   QueryDslFieldAndFormat,
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  Alert,
+  EsQuerySnapshot,
+  RuleRegistrySearchRequest,
+  RuleRegistrySearchResponse,
+} from '@kbn/alerting-types';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ProjectRouting } from '@kbn/es-query';
+import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
 
 export interface SearchAlertsParams {
   // Dependencies
@@ -47,7 +46,7 @@ export interface SearchAlertsParams {
   /**
    * ES query to perform on the affected alert indices
    */
-  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
+  query: Partial<Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>>;
   /**
    * The alert document fields to include in the response
    */
@@ -68,14 +67,29 @@ export interface SearchAlertsParams {
    * The page size to fetch
    */
   pageSize: number;
+  /**
+   * Force using the default context, otherwise use the AlertQueryContext
+   */
+  skipAlertsQueryContext?: boolean;
+  /**
+   * The minimum score to apply to the query
+   */
+  minScore?: number;
+  /**
+   * Whether to track the score of the query
+   */
+  trackScores?: boolean;
+  /**
+   * CPS project routing override for the underlying search request
+   */
+  projectRouting?: ProjectRouting;
 }
 
 export interface SearchAlertsResult {
   alerts: Alert[];
-  oldAlertsData: LegacyField[][];
-  ecsAlertsData: unknown[];
   total: number;
   querySnapshot?: EsQuerySnapshot;
+  error?: Error;
 }
 
 /**
@@ -92,6 +106,9 @@ export const searchAlerts = ({
   runtimeMappings,
   pageIndex,
   pageSize,
+  minScore,
+  trackScores,
+  projectRouting,
 }: SearchAlertsParams): Promise<SearchAlertsResult> =>
   lastValueFrom(
     data.search
@@ -104,10 +121,13 @@ export const searchAlerts = ({
           pagination: { pageIndex, pageSize },
           sort,
           runtimeMappings,
+          minScore,
+          trackScores,
         },
         {
           strategy: 'privateRuleRegistryAlertsSearchStrategy',
           abortSignal: signal,
+          projectRouting,
         }
       )
       .pipe(
@@ -118,26 +138,24 @@ export const searchAlerts = ({
           const { rawResponse } = response;
           const total = parseTotalHits(rawResponse);
           const alerts = parseAlerts(rawResponse);
-          const { oldAlertsData, ecsAlertsData } = transformToLegacyFormat(alerts);
+          const alertsError = parseFailure(rawResponse);
 
           return {
             alerts,
-            oldAlertsData,
-            ecsAlertsData,
             total,
             querySnapshot: {
               request: response?.inspect?.dsl ?? [],
+              // @ts-expect-error upgrade typescript v5.9.3
               response: [JSON.stringify(rawResponse)] ?? [],
             },
+            error: alertsError,
           };
         }),
         catchError((error) => {
-          data.search.showError(error);
           return of({
             alerts: [],
-            oldAlertsData: [],
-            ecsAlertsData: [],
             total: 0,
+            error,
           });
         })
       )
@@ -167,6 +185,7 @@ const parseAlerts = (rawResponse: RuleRegistrySearchResponse['rawResponse']) =>
       acc.push({
         ...hit.fields,
         _id: hit._id,
+        _score: hit._score,
         _index: hit._index,
       } as Alert);
     }
@@ -174,29 +193,13 @@ const parseAlerts = (rawResponse: RuleRegistrySearchResponse['rawResponse']) =>
   }, []);
 
 /**
- * Transforms the alerts to legacy formats (will be removed)
- * @deprecated Will be removed in v8.16.0
+ * Extract failures from the raw response
  */
-const transformToLegacyFormat = (alerts: Alert[]) =>
-  alerts.reduce<{
-    oldAlertsData: LegacyField[][];
-    ecsAlertsData: unknown[];
-  }>(
-    (acc, alert) => {
-      const itemOldData = Object.entries(alert).reduce<Array<{ field: string; value: string[] }>>(
-        (oldData, [key, value]) => {
-          oldData.push({ field: key, value: value as string[] });
-          return oldData;
-        },
-        []
-      );
-      const ecsData = Object.entries(alert).reduce((ecs, [key, value]) => {
-        set(ecs, key, value ?? []);
-        return ecs;
-      }, {});
-      acc.oldAlertsData.push(itemOldData);
-      acc.ecsAlertsData.push(ecsData);
-      return acc;
-    },
-    { oldAlertsData: [], ecsAlertsData: [] }
-  );
+const parseFailure = (
+  rawResponse: RuleRegistrySearchResponse['rawResponse']
+): Error | undefined => {
+  const failures = rawResponse._shards.failures ?? [];
+  return failures.length && failures[0].reason.reason
+    ? new Error(failures[0].reason.reason)
+    : undefined;
+};

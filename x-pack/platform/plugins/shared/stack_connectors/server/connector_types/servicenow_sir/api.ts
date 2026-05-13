@@ -6,16 +6,16 @@
  */
 
 import { isEmpty, isString } from 'lodash';
+import type { ExecutorSubActionPushParamsSIR } from '@kbn/connector-schemas/servicenow_sir';
 import { api as commonApi } from '../lib/servicenow/api';
-import {
-  ExecutorSubActionPushParamsSIR,
+import type {
   ExternalServiceAPI,
   ExternalServiceSIR,
-  ObservableTypes,
   PushToServiceApiHandlerArgs,
   PushToServiceApiParamsSIR,
   PushToServiceResponse,
 } from '../lib/servicenow/types';
+import { ObservableTypes } from '../lib/servicenow/types';
 
 const SPLIT_REGEX = /[ ,|\r\n\t]+/;
 

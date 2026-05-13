@@ -18,6 +18,7 @@ export interface Props {
   showAddToNewCaseAction?: boolean;
   showCopyToClipboardAction?: boolean;
   showChatAction?: boolean;
+  checkedAt?: number;
 }
 
 const ActionsComponent: React.FC<Props> = ({
@@ -26,6 +27,7 @@ const ActionsComponent: React.FC<Props> = ({
   showChatAction,
   markdownComment,
   indexName,
+  checkedAt,
 }) => {
   if (!showAddToNewCaseAction && !showCopyToClipboardAction && !showChatAction) {
     return null;
@@ -48,7 +50,11 @@ const ActionsComponent: React.FC<Props> = ({
 
       {showChatAction && indexName && (
         <EuiFlexItem grow={false}>
-          <ChatAction indexName={indexName} markdownComment={markdownComment} />
+          <ChatAction
+            checkedAt={checkedAt}
+            indexName={indexName}
+            markdownComment={markdownComment}
+          />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

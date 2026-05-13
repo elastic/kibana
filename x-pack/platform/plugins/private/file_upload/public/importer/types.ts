@@ -11,32 +11,11 @@ import type {
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import type { ImportFailure, IngestPipeline, ImportDoc, ImportResponse } from '../../common/types';
-
-export interface ImportConfig {
-  settings: IndicesIndexSettings;
-  mappings: MappingTypeMapping;
-  pipeline: IngestPipeline;
-}
-
-export interface ImportResults {
-  success: boolean;
-  failures?: ImportFailure[];
-  docCount?: number;
-  error?: any;
-}
-
-export interface CreateDocsResponse<T extends ImportDoc> {
-  success: boolean;
-  remainder: number;
-  docs: T[];
-  error?: any;
-}
-
-export interface ImportFactoryOptions {
-  excludeLinesPattern?: string;
-  multilineStartPattern?: string;
-}
+import type {
+  IngestPipeline,
+  InitializeImportResponse,
+  ImportResults,
+} from '@kbn/file-upload-common';
 
 export interface IImporter {
   read(data: ArrayBuffer): { success: boolean };
@@ -44,23 +23,25 @@ export interface IImporter {
     index: string,
     settings: IndicesIndexSettings,
     mappings: MappingTypeMapping,
-    pipeline: IngestPipeline | undefined,
-    createPipelines?: IngestPipeline[]
-  ): Promise<ImportResponse>;
+    pipeline: Array<IngestPipeline | undefined>,
+    existingIndex?: boolean,
+    signal?: AbortSignal
+  ): Promise<InitializeImportResponse>;
   initializeWithoutCreate(
     index: string,
     mappings: MappingTypeMapping,
-    pipeline: IngestPipeline | undefined
+    pipelines: IngestPipeline[],
+    signal?: AbortSignal
   ): void;
   import(
-    id: string,
     index: string,
-    pipelineId: string | undefined,
-    setImportProgress: (progress: number) => void
+    ingestPipelineId: string | undefined,
+    setImportProgress: (progress: number) => void,
+    signal?: AbortSignal
   ): Promise<ImportResults>;
   initialized(): boolean;
   getIndex(): string | undefined;
   getTimeField(): string | undefined;
   previewIndexTimeRange(): Promise<{ start: number | null; end: number | null }>;
-  deletePipelines(pipelineIds: string[]): Promise<IngestDeletePipelineResponse[]>;
+  deletePipelines(signal?: AbortSignal): Promise<IngestDeletePipelineResponse[]>;
 }

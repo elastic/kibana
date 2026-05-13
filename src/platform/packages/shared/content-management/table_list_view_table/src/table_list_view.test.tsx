@@ -8,10 +8,12 @@
  */
 
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
+import type { TestBed } from '@kbn/test-jest-helpers';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 import React, { useEffect } from 'react';
 import queryString from 'query-string';
-import moment, { Moment } from 'moment';
+import type { Moment } from 'moment';
+import moment from 'moment';
 import { act } from 'react-dom/test-utils';
 import type { ReactWrapper } from 'enzyme';
 import type { LocationDescriptor, History } from 'history';
@@ -22,7 +24,7 @@ import { getTagList, localStorageMock } from './mocks';
 import { TableListViewTable, type TableListViewTableProps } from './table_list_view_table';
 import { getActions } from './table_list_view.test.helpers';
 import type { Services } from './services';
-import { CustomSortingOptions } from './components/table_sort_select';
+import type { CustomSortingOptions } from './components/table_sort_select';
 
 const mockUseEffect = useEffect;
 
@@ -59,7 +61,6 @@ describe('TableListView', () => {
   const requiredProps: TableListViewTableProps = {
     entityName: 'test',
     entityNamePlural: 'tests',
-    listingLimit: 500,
     initialFilter: '',
     initialPageSize: 20,
     findItems: jest.fn().mockResolvedValue({ total: 0, hits: [] }),
@@ -178,7 +179,7 @@ describe('TableListView', () => {
       component.update();
 
       expect(exists('custom-empty-prompt')).toBe(false);
-      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      const { tableCellsValues } = table.getMetaData('listingTable-isLoaded');
       const [row] = tableCellsValues;
       expect(row[1]).toBe('Item 1'); // Note: row[0] is the checkbox
 
@@ -229,7 +230,7 @@ describe('TableListView', () => {
       const { component, table } = testBed!;
       component.update();
 
-      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      const { tableCellsValues } = table.getMetaData('listingTable-isLoaded');
 
       expect(tableCellsValues).toEqual([
         ['Item 2Item 2 description', yesterdayToString], // Comes first as it is the latest updated
@@ -266,7 +267,7 @@ describe('TableListView', () => {
       const { component, table } = testBed!;
       component.update();
 
-      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      const { tableCellsValues } = table.getMetaData('listingTable-isLoaded');
 
       expect(tableCellsValues).toEqual([
         // Renders the datetime with this format: "July 28, 2022"
@@ -291,7 +292,7 @@ describe('TableListView', () => {
       const { component, table } = testBed!;
       component.update();
 
-      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      const { tableCellsValues } = table.getMetaData('listingTable-isLoaded');
 
       expect(tableCellsValues).toEqual([
         ['Item 1Item 1 description'], // Sorted by title
@@ -321,7 +322,7 @@ describe('TableListView', () => {
       const { component, table } = testBed!;
       component.update();
 
-      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      const { tableCellsValues } = table.getMetaData('listingTable-isLoaded');
 
       expect(tableCellsValues).toEqual([
         ['Item 2Item 2 description', yesterdayToString],
@@ -365,7 +366,7 @@ describe('TableListView', () => {
       const { component, table } = testBed!;
       component.update();
 
-      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      const { tableCellsValues } = table.getMetaData('listingTable-isLoaded');
       expect(tableCellsValues.length).toBe(requiredProps.initialPageSize);
 
       const [[firstRowTitle]] = tableCellsValues;
@@ -388,21 +389,21 @@ describe('TableListView', () => {
       const { component, table, find } = testBed!;
       component.update();
 
-      let { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      let { tableCellsValues } = table.getMetaData('listingTable-isLoaded');
       expect(tableCellsValues.length).toBe(requiredProps.initialPageSize);
 
       // Changing the "Rows per page" also sends the "sort" column information and thus updates the sorting.
       // We test that the "sort by" column has not changed before and after changing the number of rows
-      expect(find('tableSortSelectBtn').at(0).text()).toBe('Recently updated');
+      expect(find('tableSortSelectBtn').at(0).text()).toBe('Recent-Old');
 
       // Open the "Rows per page" drop down
       find('tablePaginationPopoverButton').simulate('click');
       find('tablePagination-10-rows').simulate('click');
 
-      ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
+      ({ tableCellsValues } = table.getMetaData('listingTable-isLoaded'));
       expect(tableCellsValues.length).toBe(10);
 
-      expect(find('tableSortSelectBtn').at(0).text()).toBe('Recently updated'); // Still the same
+      expect(find('tableSortSelectBtn').at(0).text()).toBe('Recent-Old'); // Still the same
     });
 
     test('should navigate to page 2', async () => {
@@ -427,7 +428,7 @@ describe('TableListView', () => {
       });
       component.update();
 
-      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      const { tableCellsValues } = table.getMetaData('listingTable-isLoaded');
       expect(tableCellsValues.length).toBe(totalItems - initialPageSize);
 
       const [[firstRowTitle]] = tableCellsValues;
@@ -454,7 +455,7 @@ describe('TableListView', () => {
         const { component, table, find } = testBed!;
         component.update();
 
-        const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+        const { tableCellsValues } = table.getMetaData('listingTable-isLoaded');
         expect(tableCellsValues.length).toBe(20); // 20 by default
 
         let storageValue = localStorage.getItem(`tablePersist:${tableId}`);
@@ -480,7 +481,7 @@ describe('TableListView', () => {
 
         const { component, table } = testBed!;
         component.update();
-        const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+        const { tableCellsValues } = table.getMetaData('listingTable-isLoaded');
         expect(tableCellsValues.length).toBe(10); // 10 items this time
       }
     });
@@ -530,7 +531,7 @@ describe('TableListView', () => {
       const { component, table } = testBed!;
       component.update();
 
-      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      const { tableCellsValues } = table.getMetaData('listingTable-isLoaded');
 
       expect(tableCellsValues).toEqual([
         ['a-foo', yesterdayToString],
@@ -559,10 +560,10 @@ describe('TableListView', () => {
 
       expect(filterOptions.length).toBe(4);
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
-        'Name A-Z ',
-        'Name Z-A ',
-        'Recently updated. Checked option. ',
-        'Least recently updated ',
+        'A-Z ',
+        'Z-A ',
+        'Recent-Old. Checked option. ',
+        'Old-Recent ',
       ]);
     });
 
@@ -579,7 +580,7 @@ describe('TableListView', () => {
       const { openSortSelect } = getActions(testBed!);
       component.update();
 
-      let { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      let { tableCellsValues } = table.getMetaData('listingTable-isLoaded');
 
       expect(tableCellsValues).toEqual([
         ['a-foo', yesterdayToString],
@@ -592,16 +593,16 @@ describe('TableListView', () => {
       component.update();
       const filterOptions = find('sortSelect').find('li');
 
-      // Check that the second option is 'Name Z-A'
-      expect(filterOptions.at(1).text()).toBe('Name Z-A ');
+      // Check that the second option is 'Z-A'
+      expect(filterOptions.at(1).text()).toBe('Z-A ');
 
-      // Click 'Name Z-A'
+      // Click 'Z-A'
       act(() => {
         filterOptions.at(1).simulate('click');
       });
       component.update();
 
-      ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
+      ({ tableCellsValues } = table.getMetaData('listingTable-isLoaded'));
 
       expect(tableCellsValues).toEqual([
         ['z-foo', twoDaysAgoToString],
@@ -621,7 +622,7 @@ describe('TableListView', () => {
 
       ({ component, table, find } = testBed!);
       component.update();
-      ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
+      ({ tableCellsValues } = table.getMetaData('listingTable-isLoaded'));
 
       expect(tableCellsValues).toEqual([
         ['z-foo', twoDaysAgoToString],
@@ -664,10 +665,10 @@ describe('TableListView', () => {
       component.update();
       let filterOptions = find('sortSelect').find('li');
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
-        'Name A-Z ',
-        'Name Z-A ',
-        'Recently updated. Checked option. ', // checked
-        'Least recently updated ',
+        'A-Z ',
+        'Z-A ',
+        'Recent-Old. Checked option. ', // checked
+        'Old-Recent ',
       ]);
 
       const nameColumnHeaderButton = getTableColumnSortButton(testBed!, 'Name');
@@ -679,7 +680,7 @@ describe('TableListView', () => {
         nameColumnHeaderButton.simulate('click');
       });
       component.update();
-      let { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      let { tableCellsValues } = table.getMetaData('listingTable-isLoaded');
 
       expect(tableCellsValues).toEqual([
         ['a-foo', yesterdayToString],
@@ -690,7 +691,7 @@ describe('TableListView', () => {
         nameColumnHeaderButton.simulate('click');
       });
       component.update();
-      ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
+      ({ tableCellsValues } = table.getMetaData('listingTable-isLoaded'));
 
       expect(tableCellsValues).toEqual([
         ['z-foo', twoDaysAgoToString],
@@ -704,10 +705,10 @@ describe('TableListView', () => {
       filterOptions = find('sortSelect').find('li');
 
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
-        'Name A-Z ',
-        'Name Z-A. Checked option. ', // now this option is checked
-        'Recently updated ',
-        'Least recently updated ',
+        'A-Z ',
+        'Z-A. Checked option. ', // now this option is checked
+        'Recent-Old ',
+        'Old-Recent ',
       ]);
     });
   });
@@ -777,7 +778,7 @@ describe('TableListView', () => {
       const { openSortSelect } = getActions(testBed!);
       component.update();
 
-      let { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      let { tableCellsValues } = table.getMetaData('listingTable-isLoaded');
 
       expect(tableCellsValues).toEqual([
         ['Item 1', 'Lens', yesterdayToString],
@@ -799,7 +800,7 @@ describe('TableListView', () => {
       });
       component.update();
 
-      ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
+      ({ tableCellsValues } = table.getMetaData('listingTable-isLoaded'));
 
       expect(tableCellsValues).toEqual([
         ['Item 2', 'Vega', twoDaysAgoToString],
@@ -819,7 +820,7 @@ describe('TableListView', () => {
 
       ({ component, table, find } = testBed!);
       component.update();
-      ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
+      ({ tableCellsValues } = table.getMetaData('listingTable-isLoaded'));
 
       expect(tableCellsValues).toEqual([
         ['Item 2', 'Vega', twoDaysAgoToString],
@@ -864,12 +865,12 @@ describe('TableListView', () => {
 
       expect(filterOptions.length).toBe(6);
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
-        'Name A-Z ',
-        'Name Z-A ',
+        'A-Z ',
+        'Z-A ',
         'Type A-Z ',
         'Type Z-A ',
-        'Recently updated. Checked option. ',
-        'Least recently updated ',
+        'Recent-Old. Checked option. ',
+        'Old-Recent ',
       ]);
 
       const typeColumnHeaderButton = getCustomTableColumnSortButton(testBed!, 'Type');
@@ -883,7 +884,7 @@ describe('TableListView', () => {
       });
       component.update();
 
-      let { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      let { tableCellsValues } = table.getMetaData('listingTable-isLoaded');
 
       expect(tableCellsValues).toEqual([
         ['Item 1', 'Lens', yesterdayToString],
@@ -894,7 +895,7 @@ describe('TableListView', () => {
         typeColumnHeaderButton.simulate('click');
       });
       component.update();
-      ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
+      ({ tableCellsValues } = table.getMetaData('listingTable-isLoaded'));
 
       expect(tableCellsValues).toEqual([
         ['Item 2', 'Vega', twoDaysAgoToString],
@@ -909,12 +910,12 @@ describe('TableListView', () => {
       filterOptions = find('sortSelect').find('li');
 
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
-        'Name A-Z ',
-        'Name Z-A ',
+        'A-Z ',
+        'Z-A ',
         'Type A-Z ',
         'Type Z-A. Checked option. ',
-        'Recently updated ',
-        'Least recently updated ',
+        'Recent-Old ',
+        'Old-Recent ',
       ]);
     });
   });
@@ -966,7 +967,7 @@ describe('TableListView', () => {
       const { component, table } = testBed!;
       component.update();
 
-      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      const { tableCellsValues } = table.getMetaData('listingTable-isLoaded');
 
       expect(tableCellsValues).toEqual([
         ['z-foo', twoDaysAgoToString],
@@ -996,10 +997,10 @@ describe('TableListView', () => {
       expect(filterOptions.length).toBe(5);
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
         'Recently viewed. Checked option.Additional information ',
-        'Name A-Z ',
-        'Name Z-A ',
-        'Recently updated ',
-        'Least recently updated ',
+        'A-Z ',
+        'Z-A ',
+        'Recent-Old ',
+        'Old-Recent ',
       ]);
     });
   });
@@ -1049,7 +1050,7 @@ describe('TableListView', () => {
       const { component, table } = testBed!;
       component.update();
 
-      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      const { tableCellsValues } = table.getMetaData('listingTable-isLoaded');
       expect(tableCellsValues[0][2]).toBe('View Item 1 details');
       expect(tableCellsValues[1][2]).toBe('View Item 2 details');
     });
@@ -1146,7 +1147,7 @@ describe('TableListView', () => {
       const getLastCallArgsFromFindItems = () =>
         findItems.mock.calls[findItems.mock.calls.length - 1];
 
-      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      const { tableCellsValues } = table.getMetaData('listingTable-isLoaded');
       // "tag-1" and "tag-2" are rendered in the column
       expect(tableCellsValues[0][0]).toBe('Item 1Item 1 descriptiontag-1tag-2');
 
@@ -1389,7 +1390,7 @@ describe('TableListView', () => {
       expect(getSearchBoxValue!()).toBe(expected);
       expect(searchTerm).toBe(expected);
 
-      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      const { tableCellsValues } = table.getMetaData('listingTable-isLoaded');
       expect(tableCellsValues).toMatchInlineSnapshot(`
         Array [
           Array [
@@ -1424,7 +1425,7 @@ describe('TableListView', () => {
       expect(getSearchBoxValue!()).toBe(expected);
       expect(searchTerm).toBe(expected);
 
-      expect(table.getMetaData('itemsInMemTable').tableCellsValues).toMatchInlineSnapshot(`
+      expect(table.getMetaData('listingTable-isLoaded').tableCellsValues).toMatchInlineSnapshot(`
         Array [
           Array [
             "Item from search",
@@ -1447,7 +1448,7 @@ describe('TableListView', () => {
 
       await updateSearchText!('unknown items');
 
-      expect(table.getMetaData('itemsInMemTable').tableCellsValues).toMatchInlineSnapshot(`
+      expect(table.getMetaData('listingTable-isLoaded').tableCellsValues).toMatchInlineSnapshot(`
         Array [
           Array [
             "No Foos matched your search.",
@@ -1461,7 +1462,7 @@ describe('TableListView', () => {
       component.update();
 
       // We should get back the initial 2 items (Item 1 and Item 2)
-      expect(table.getMetaData('itemsInMemTable').tableCellsValues).toMatchInlineSnapshot(`
+      expect(table.getMetaData('listingTable-isLoaded').tableCellsValues).toMatchInlineSnapshot(`
         Array [
           Array [
             "Item 1",
@@ -1712,7 +1713,7 @@ describe('TableListView', () => {
       const { component, table } = testBed!;
       component.update();
 
-      let { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      let { tableCellsValues } = table.getMetaData('listingTable-isLoaded');
 
       expect(tableCellsValues).toEqual([
         ['Item 2tag-2', twoDaysAgoToString],
@@ -1729,7 +1730,7 @@ describe('TableListView', () => {
       });
       component.update();
 
-      ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
+      ({ tableCellsValues } = table.getMetaData('listingTable-isLoaded'));
 
       expect(tableCellsValues).toEqual([
         ['Item 2tag-2', twoDaysAgoToString],
@@ -1758,7 +1759,7 @@ describe('TableListView', () => {
         component.update();
       };
 
-      let { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      let { tableCellsValues } = table.getMetaData('listingTable-isLoaded');
 
       // Initial state
       expect(router?.history.location?.search).toBe('');
@@ -1771,16 +1772,16 @@ describe('TableListView', () => {
       openSortSelect();
       const filterOptions = find('sortSelect').find('li');
 
-      // Check that the second option is 'Name Z-A'
-      expect(filterOptions.at(1).text()).toBe('Name Z-A ');
+      // Check that the second option is 'Z-A'
+      expect(filterOptions.at(1).text()).toBe('Z-A ');
 
-      // Click 'Name Z-A'
+      // Click 'Z-A'
       act(() => {
         filterOptions.at(1).simulate('click');
       });
       component.update();
 
-      ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
+      ({ tableCellsValues } = table.getMetaData('listingTable-isLoaded'));
 
       // Updated state
       expect(tableCellsValues).toEqual([
@@ -1837,7 +1838,7 @@ describe('TableListView', () => {
       const { selectRow, clickDeleteSelectedItemsButton, clickConfirmModalButton } =
         getActions(testBed);
 
-      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      const { tableCellsValues } = table.getMetaData('listingTable-isLoaded');
 
       expect(tableCellsValues).toEqual([
         ['', 'Item 2Item 2 description', yesterdayToString], // First empty col is the "checkbox"
@@ -1896,7 +1897,6 @@ describe('TableList', () => {
     entityName: 'test',
     entityNamePlural: 'tests',
     initialPageSize: 20,
-    listingLimit: 500,
     findItems: jest.fn().mockResolvedValue({ total: 0, hits: [] }),
     onFetchSuccess: jest.fn(),
     tableCaption: 'test title',
@@ -1962,7 +1962,7 @@ describe('TableList', () => {
 
     expect(findItems).toHaveBeenCalledTimes(1);
 
-    const metadata = table.getMetaData('itemsInMemTable');
+    const metadata = table.getMetaData('listingTable-isLoaded');
 
     expect(metadata.tableCellsValues[0][0]).toBe('Updated title');
   });

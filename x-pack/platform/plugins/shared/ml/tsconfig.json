@@ -1,7 +1,7 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "common/**/*",
@@ -9,20 +9,16 @@
     "server/**/*",
     "scripts/**/*",
     "__mocks__/**/*",
+    "test/scout/**/*",
     "../../../../../typings/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "common/**/*.json",
     "public/**/*.json",
     "server/**/*.json"
   ],
-  "exclude": [
-    "target/**/*",
-  ],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
-    {
-      "path": "../../../../../src/setup_node_env/tsconfig.json"
-    },
     // add references to other TypeScript projects the plugin depends on
     "@kbn/actions-plugin",
     "@kbn/aiops-change-point-detection",
@@ -62,7 +58,6 @@
     "@kbn/home-plugin",
     "@kbn/i18n-react",
     "@kbn/i18n",
-    "@kbn/inference_integration_flyout",
     "@kbn/inspector-plugin",
     "@kbn/json-schemas",
     "@kbn/kibana-react-plugin",
@@ -74,6 +69,7 @@
     "@kbn/maps-plugin",
     "@kbn/ml-agg-utils",
     "@kbn/ml-anomaly-utils",
+    "@kbn/ml-server-schemas",
     "@kbn/ml-category-validator",
     "@kbn/ml-creation-wizard-utils",
     "@kbn/ml-data-frame-analytics-utils",
@@ -83,7 +79,6 @@
     "@kbn/ml-date-utils",
     "@kbn/ml-error-utils",
     "@kbn/ml-field-stats-flyout",
-    "@kbn/ml-in-memory-table",
     "@kbn/ml-is-defined",
     "@kbn/ml-is-populated-object",
     "@kbn/ml-local-storage",
@@ -102,8 +97,6 @@
     "@kbn/ml-validators",
     "@kbn/monaco",
     "@kbn/observability-ai-assistant-plugin",
-    "@kbn/presentation-containers",
-    "@kbn/presentation-panel-plugin",
     "@kbn/presentation-publishing",
     "@kbn/presentation-util-plugin",
     "@kbn/react-kibana-context-render",
@@ -139,6 +132,24 @@
     "@kbn/core-security-server",
     "@kbn/charts-theme",
     "@kbn/response-ops-rule-params",
+    "@kbn/response-ops-rule-form",
     "@kbn/unsaved-changes-prompt",
+    "@kbn/fields-metadata-plugin",
+    "@kbn/core-analytics-browser",
+    "@kbn/deeplinks-analytics",
+    "@kbn/core-saved-objects-server",
+    "@kbn/presentation-util",
+    "@kbn/licensing-types",
+    "@kbn/ml-common-types",
+    "@kbn/file-upload-plugin",
+    "@kbn/file-upload",
+    "@kbn/file-upload-common",
+    "@kbn/kql",
+    "@kbn/as-code-filters-transforms",
+    "@kbn/cps",
+    "@kbn/cps-utils",
+    "@kbn/lens-common",
+    "@kbn/scout",
+    "@kbn/core-http-common",
   ]
 }

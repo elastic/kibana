@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiTableActionsColumnType } from '@elastic/eui';
+import type { EuiTableActionsColumnType } from '@elastic/eui';
 import { useCallback } from 'react';
 import * as i18n from './translations';
 
@@ -16,7 +16,7 @@ interface Props<T> {
   onEdit?: (rowItem: T) => void;
 }
 
-export const useInlineActions = <T extends { isDefault?: boolean | undefined }>() => {
+export const useInlineActions = <T extends {}>() => {
   const getInlineActions = useCallback(
     ({
       isEditEnabled = () => false,

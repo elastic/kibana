@@ -1,0 +1,114 @@
+{
+  "id": "wciExternalServer",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "wciExternalServer",
+      "id": "def-public.WCIExternalServerPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "WCIExternalServerPluginSetup",
+      "description": [],
+      "path": "x-pack/solutions/chat/plugins/wci-external-server/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "wciExternalServer",
+      "id": "def-public.WCIExternalServerPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "WCIExternalServerPluginStart",
+      "description": [],
+      "path": "x-pack/solutions/chat/plugins/wci-external-server/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "wciExternalServer",
+      "id": "def-server.WCIExternalServerPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "WCIExternalServerPluginSetup",
+      "description": [],
+      "path": "x-pack/solutions/chat/plugins/wci-external-server/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "wciExternalServer",
+      "id": "def-server.WCIExternalServerPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "WCIExternalServerPluginStart",
+      "description": [],
+      "path": "x-pack/solutions/chat/plugins/wci-external-server/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "wciExternalServer",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"wciExternalServer\""
+        ],
+        "path": "x-pack/solutions/chat/plugins/wci-external-server/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "wciExternalServer",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"wciExternalServer\""
+        ],
+        "path": "x-pack/solutions/chat/plugins/wci-external-server/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

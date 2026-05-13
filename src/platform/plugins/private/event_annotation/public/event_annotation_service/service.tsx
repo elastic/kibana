@@ -9,15 +9,16 @@
 
 import React from 'react';
 import { partition } from 'lodash';
+import { Subject } from 'rxjs';
 import { queryToAst } from '@kbn/data-plugin/common';
-import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
-import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
+import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import type { CoreStart } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { type EventAnnotationServiceType } from '@kbn/event-annotation-components';
 import {
-  defaultAnnotationColor,
-  defaultAnnotationRangeColor,
+  getPersistedAnnotationColor,
   isRangeAnnotationConfig,
   isQueryAnnotationConfig,
   defaultAnnotationLabel,
@@ -51,6 +52,7 @@ export function getEventAnnotationService(
   contentManagement: ContentManagementPublicStart
 ): EventAnnotationServiceType {
   const client = contentManagement.client;
+  const annotationGroupUpdated$ = new Subject<string>();
 
   const mapSavedObjectToGroupConfig = (
     savedObject: EventAnnotationGroupSavedObject
@@ -171,7 +173,7 @@ export function getEventAnnotationService(
   const extractDataViewInformation = (group: EventAnnotationGroupConfig) => {
     let { dataViewSpec = null } = group;
 
-    let references: SavedObjectReference[];
+    let references: Reference[];
 
     if (dataViewSpec) {
       if (!dataViewSpec.id)
@@ -200,10 +202,14 @@ export function getEventAnnotationService(
     group: EventAnnotationGroupConfig
   ): {
     attributes: EventAnnotationGroupSavedObjectAttributes;
-    references: SavedObjectReference[];
+    references: Reference[];
   } => {
     const { references, dataViewSpec } = extractDataViewInformation(group);
     const { title, description, tags, ignoreGlobalFilters, annotations } = group;
+    const persistedAnnotations = annotations.map((annotation) => ({
+      ...annotation,
+      color: getPersistedAnnotationColor(annotation.color),
+    }));
 
     references.push(
       ...tags.map((tag) => ({
@@ -218,7 +224,7 @@ export function getEventAnnotationService(
         title,
         description,
         ignoreGlobalFilters,
-        annotations,
+        annotations: persistedAnnotations,
         dataViewSpec,
       },
       references,
@@ -261,6 +267,8 @@ export function getEventAnnotationService(
         references,
       },
     });
+
+    annotationGroupUpdated$.next(annotationGroupId);
   };
 
   const checkHasAnnotationGroups = async (): Promise<boolean> => {
@@ -278,6 +286,7 @@ export function getEventAnnotationService(
   };
 
   return {
+    annotationGroupUpdated$: annotationGroupUpdated$.asObservable(),
     loadAnnotationGroup,
     groupExistsWithTitle,
     updateAnnotationGroup,
@@ -311,6 +320,7 @@ export function getEventAnnotationService(
                 function: 'indexPatternLoad',
                 arguments: {
                   id: [indexPatternId],
+                  includeFields: [false],
                 },
               },
             ],
@@ -375,7 +385,7 @@ const annotationsToExpression = (annotations: EventAnnotationConfig[]) => {
               time: [time],
               endTime: [endTime],
               label: [label || defaultAnnotationLabel],
-              color: [color || defaultAnnotationRangeColor],
+              color: [getPersistedAnnotationColor(color)],
               outside: [Boolean(outside)],
               isHidden: [Boolean(annotation.isHidden)],
             },
@@ -394,7 +404,7 @@ const annotationsToExpression = (annotations: EventAnnotationConfig[]) => {
               id: [id],
               time: [key.timestamp],
               label: [label || defaultAnnotationLabel],
-              color: [color || defaultAnnotationColor],
+              color: [getPersistedAnnotationColor(color)],
               lineWidth: [lineWidth || 1],
               lineStyle: [lineStyle || 'solid'],
               icon: hasIcon(icon) ? [icon] : ['triangle'],
@@ -431,7 +441,7 @@ const annotationsToExpression = (annotations: EventAnnotationConfig[]) => {
             id: [id],
             timeField: timeField ? [timeField] : [],
             label: [label || defaultAnnotationLabel],
-            color: [color || defaultAnnotationColor],
+            color: [getPersistedAnnotationColor(color)],
             lineWidth: [lineWidth || 1],
             lineStyle: [lineStyle || 'solid'],
             icon: hasIcon(icon) ? [icon] : ['triangle'],

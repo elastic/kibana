@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { CoreStart, OverlayRef } from '@kbn/core/public';
+import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FieldEditorLoader } from './components/field_editor_loader';
@@ -16,14 +16,14 @@ import { euiFlyoutClassname } from './constants';
 import type { ApiService } from './lib/api';
 import type {
   DataPublicPluginStart,
-  UsageCollectionStart,
-  RuntimeType,
+  DataView,
+  DataViewField,
   DataViewsPublicPluginStart,
   FieldFormatsStart,
-  DataViewField,
+  RuntimeType,
+  UsageCollectionStart,
 } from './shared_imports';
-import { DataView, DataViewLazy } from './shared_imports';
-import { createKibanaReactContext } from './shared_imports';
+import { createKibanaReactContext, DataViewLazy } from './shared_imports';
 import type { CloseEditor, Field, InternalFieldType, PluginStart } from './types';
 
 /**
@@ -130,10 +130,17 @@ export const getFieldEditorOpener =
         };
       };
 
-      const dataViewLazy =
-        dataViewLazyOrNot instanceof DataViewLazy
-          ? dataViewLazyOrNot
-          : await dataViews.toDataViewLazy(dataViewLazyOrNot);
+      let dataViewLazy: DataViewLazy;
+
+      if (dataViewLazyOrNot instanceof DataViewLazy) {
+        dataViewLazy = dataViewLazyOrNot;
+      } else {
+        if (dataViewLazyOrNot.id) {
+          // force cache reset to have the latest field attributes
+          dataViews.clearDataViewLazyCache(dataViewLazyOrNot.id);
+        }
+        dataViewLazy = await dataViews.toDataViewLazy(dataViewLazyOrNot);
+      }
 
       const dataViewField = fieldNameToEdit
         ? (await dataViewLazy.getFieldByName(fieldNameToEdit, true)) ||
@@ -234,11 +241,6 @@ export const getFieldEditorOpener =
             if (canClose) {
               flyout.close();
             }
-          },
-          maskProps: {
-            className: 'indexPatternFieldEditorMaskOverlay',
-            // // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
-            style: 'z-index: 1003', // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
           },
         }
       );

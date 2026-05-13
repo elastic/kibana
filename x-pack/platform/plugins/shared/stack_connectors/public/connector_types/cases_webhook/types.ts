@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type {
   CasesWebhookPublicConfigurationType,
   CasesWebhookSecretConfigurationType,
   ExecutorSubActionPushParams,
-} from '../../../server/connector_types/cases_webhook/types';
+} from '@kbn/connector-schemas/cases_webhook';
 
 export interface CasesWebhookActionParams {
   subAction: string;

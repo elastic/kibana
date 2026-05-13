@@ -8,10 +8,12 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { DataType, TermsParams } from '@kbn/visualizations-plugin/common';
+import type { TermsParams } from '@kbn/visualizations-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
+import type { DataType } from '@kbn/lens-common';
+import { isColumnMetricWithSourceField } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { excludeMetaFromColumn, getFormat, isColumnWithMeta } from './column';
-import { Column, TermsColumn, TermsSeries } from './types';
+import type { Column, TermsColumn, TermsSeries } from './types';
 
 interface OrderByWithAgg {
   orderAgg?: TermsParams['orderAgg'];
@@ -45,7 +47,7 @@ const getOrderByWithAgg = (series: TermsSeries, columns: Column[]): OrderByWithA
     return false;
   });
 
-  if (!orderAgg) {
+  if (!orderAgg || !isColumnMetricWithSourceField(orderAgg)) {
     return null;
   }
 

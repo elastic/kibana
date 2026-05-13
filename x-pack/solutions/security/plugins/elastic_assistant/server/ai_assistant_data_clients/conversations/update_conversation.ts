@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
-import {
+import { v4 as uuidv4 } from 'uuid';
+import type { AuthenticatedUser, Logger } from '@kbn/core/server';
+import type {
   ConversationResponse,
   Reader,
   ConversationUpdateProps,
   Provider,
   MessageRole,
-  ConversationSummary,
   UUID,
   ContentReferences,
 } from '@kbn/elastic-assistant-common';
-import { getConversation } from './get_conversation';
 import { getUpdateScript } from './helpers';
-import { EsReplacementSchema } from './types';
+import type { EsConversationSchema, EsReplacementSchema } from './types';
+import type { DocumentsDataWriter } from '../../lib/data_stream/documents_data_writer';
+import { transformESToConversations } from './transforms';
 
 export interface UpdateConversationSchema {
   id: UUID;
@@ -26,7 +27,9 @@ export interface UpdateConversationSchema {
   title?: string;
   messages?: Array<{
     '@timestamp': string;
+    id: string;
     content: string;
+    refusal?: string;
     reader?: Reader;
     role: MessageRole;
     is_error?: boolean;
@@ -45,64 +48,46 @@ export interface UpdateConversationSchema {
     provider?: Provider;
     model?: string;
   };
-  summary?: ConversationSummary;
   exclude_from_last_conversation_storage?: boolean;
   replacements?: EsReplacementSchema[];
   updated_at?: string;
 }
 
 export interface UpdateConversationParams {
-  esClient: ElasticsearchClient;
+  conversationUpdateProps: ConversationUpdateProps;
+  dataWriter: DocumentsDataWriter;
   logger: Logger;
   user?: AuthenticatedUser;
-  conversationIndex: string;
-  conversationUpdateProps: ConversationUpdateProps;
-  isPatch?: boolean;
 }
 
 export const updateConversation = async ({
-  esClient,
-  logger,
-  conversationIndex,
   conversationUpdateProps,
-  isPatch,
+  dataWriter,
+  logger,
   user,
 }: UpdateConversationParams): Promise<ConversationResponse | null> => {
   const updatedAt = new Date().toISOString();
   const params = transformToUpdateScheme(updatedAt, conversationUpdateProps);
 
-  try {
-    const response = await esClient.updateByQuery({
-      conflicts: 'proceed',
-      index: conversationIndex,
-      query: {
-        ids: {
-          values: [params.id],
-        },
-      },
-      refresh: true,
-      script: getUpdateScript({ conversation: params, isPatch }).script,
-    });
+  const { errors, docs_updated: docsUpdated } = await dataWriter.bulk({
+    documentsToUpdate: [params],
+    getUpdateScript: (document: UpdateConversationSchema) =>
+      getUpdateScript({ conversation: document }),
+    authenticatedUser: user,
+  });
 
-    if (response.failures && response.failures.length > 0) {
-      logger.warn(
-        `Error updating conversation: ${response.failures.map((f) => f.id)} by ID: ${params.id}`
-      );
-      return null;
-    }
-
-    const updatedConversation = await getConversation({
-      esClient,
-      conversationIndex,
-      id: params.id,
-      logger,
-      user,
-    });
-    return updatedConversation;
-  } catch (err) {
-    logger.warn(`Error updating conversation: ${err} by ID: ${params.id}`);
-    throw err;
+  if (errors && errors.length > 0) {
+    logger.warn(
+      `Error updating conversation: ${errors.map((err) => err.message)} by ID: ${params.id}`
+    );
+    return null;
   }
+
+  const updatedConversation = transformESToConversations(
+    docsUpdated as EsConversationSchema[]
+  )?.[0];
+
+  return updatedConversation;
 };
 
 export const transformToUpdateScheme = (
@@ -114,12 +99,14 @@ export const transformToUpdateScheme = (
     messages,
     replacements,
     id,
+    users,
   }: ConversationUpdateProps
 ): UpdateConversationSchema => {
   return {
     id,
     updated_at: updatedAt,
-    title,
+    ...(title ? { title } : {}),
+    ...(users ? { users } : {}),
     ...(apiConfig
       ? {
           api_config: {
@@ -131,36 +118,54 @@ export const transformToUpdateScheme = (
           },
         }
       : {}),
-    exclude_from_last_conversation_storage: excludeFromLastConversationStorage,
-    replacements: replacements
-      ? Object.keys(replacements).map((key) => ({
-          uuid: key,
-          value: replacements[key],
-        }))
-      : undefined,
-    messages: messages?.map((message) => ({
-      '@timestamp': message.timestamp,
-      content: message.content,
-      is_error: message.isError,
-      reader: message.reader,
-      role: message.role,
-      ...(message.metadata
-        ? {
-            metadata: {
-              ...(message.metadata.contentReferences
-                ? { content_references: message.metadata.contentReferences }
-                : {}),
-            },
-          }
-        : {}),
-      ...(message.traceData
-        ? {
-            trace_data: {
-              trace_id: message.traceData.traceId,
-              transaction_id: message.traceData.transactionId,
-            },
-          }
-        : {}),
-    })),
+    ...(excludeFromLastConversationStorage != null
+      ? {
+          exclude_from_last_conversation_storage: excludeFromLastConversationStorage,
+        }
+      : {}),
+    ...(replacements
+      ? {
+          replacements: Object.keys(replacements).map((key) => ({
+            uuid: key,
+            value: replacements[key],
+          })),
+        }
+      : {}),
+    ...(messages
+      ? {
+          messages: messages.map((message) => ({
+            '@timestamp': message.timestamp,
+            id: message.id ?? uuidv4(),
+            content: message.content,
+            ...(message.refusal ? { refusal: message.refusal } : {}),
+            is_error: message.isError,
+            reader: message.reader,
+            role: message.role,
+            ...(message.metadata
+              ? {
+                  metadata: {
+                    ...(message.metadata.contentReferences
+                      ? { content_references: message.metadata.contentReferences }
+                      : {}),
+                    ...(message.metadata.interruptValue
+                      ? { interrupt_value: message.metadata.interruptValue }
+                      : {}),
+                    ...(message.metadata.interruptResumeValue
+                      ? { interrupt_resume_value: message.metadata.interruptResumeValue }
+                      : {}),
+                  },
+                }
+              : {}),
+            ...(message.traceData
+              ? {
+                  trace_data: {
+                    trace_id: message.traceData.traceId,
+                    transaction_id: message.traceData.transactionId,
+                  },
+                }
+              : {}),
+          })),
+        }
+      : {}),
   };
 };

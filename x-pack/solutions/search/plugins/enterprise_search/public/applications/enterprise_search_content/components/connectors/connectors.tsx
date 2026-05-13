@@ -77,6 +77,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
     <>
       <DeleteConnectorModal isCrawler={isCrawler} />
       <EnterpriseSearchContentPageTemplate
+        data-test-subj="searchConnectorsPage"
         pageChrome={!isCrawler ? connectorsBreadcrumbs : crawlersBreadcrumbs}
         pageViewTelemetry={!isCrawler ? 'Connectors' : 'Web Crawlers'}
         isLoading={isLoading}
@@ -126,7 +127,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
                       data-telemetry-id="entSearchContent-connectors-newConnectorButton"
                       key="newConnector"
                       color="primary"
-                      iconType="plusInCircle"
+                      iconType="plusCircle"
                       fill
                       onClick={() => {
                         KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_PATH);

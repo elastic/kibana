@@ -8,11 +8,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { VisGroups, VisTypeDefinition } from '@kbn/visualizations-plugin/public';
+import type { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import { getControlsTab, OptionsTabLazy } from './components/editor';
-import { InputControlVisDependencies } from './plugin';
+import type { InputControlVisDependencies } from './plugin';
 import { toExpressionAst } from './to_ast';
-import { InputControlVisParams } from './types';
+import type { InputControlVisParams } from './types';
 
 export const INPUT_CONTROL_VIS_TYPE = 'input_control_vis';
 
@@ -27,8 +27,7 @@ export function createInputControlVisTypeDefinition(
     title: i18n.translate('inputControl.register.controlsTitle', {
       defaultMessage: 'Input controls',
     }),
-    icon: 'controlsHorizontal',
-    group: VisGroups.TOOLS,
+    icon: 'controls',
     description: i18n.translate('inputControl.register.controlsDescription', {
       defaultMessage: 'Input controls are deprecated and will be removed in a future version.',
     }),

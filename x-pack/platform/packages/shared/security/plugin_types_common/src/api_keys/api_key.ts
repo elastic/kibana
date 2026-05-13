@@ -96,6 +96,11 @@ interface SuccessQueryApiKeyResult extends BaseQueryApiKeyResult {
   count: number;
   total: number;
   queryError: never;
+  /**
+   * The search_after cursor for the next page of results.
+   * Use this value in the next request to get the following page.
+   */
+  searchAfter?: estypes.SortResults;
 }
 
 interface ErrorQueryApiKeyResult extends BaseQueryApiKeyResult {

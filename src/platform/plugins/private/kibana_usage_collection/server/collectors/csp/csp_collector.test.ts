@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CspConfig, ICspConfig } from '@kbn/core/server';
+import type { ICspConfig } from '@kbn/core/server';
+import { CspConfig } from '@kbn/core/server';
 import { createCspCollector } from './csp_collector';
 import { httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
@@ -25,6 +26,7 @@ describe('csp collector', () => {
   function updateCsp(config: Partial<ICspConfig>) {
     httpMock.csp = new CspConfig({
       ...CspConfig.DEFAULT,
+      form_action: [],
       style_src: [],
       worker_src: [],
       script_src: [],
@@ -33,6 +35,8 @@ describe('csp collector', () => {
       font_src: [],
       frame_src: [],
       img_src: [],
+      object_src: [],
+      form_action: [],
       frame_ancestors: [],
       report_uri: [],
       report_to: [],

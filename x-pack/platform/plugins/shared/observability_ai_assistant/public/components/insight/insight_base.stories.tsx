@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
 
-import { FindActionResult } from '@kbn/actions-plugin/server';
+import type { InferenceConnector } from '@kbn/inference-common';
+import { InferenceConnectorType } from '@kbn/inference-common';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { InsightBase as Component, InsightBaseProps } from './insight_base';
+import type { InsightBaseProps } from './insight_base';
+import { InsightBase as Component } from './insight_base';
 import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator';
 import { MessagePanel } from '../message_panel/message_panel';
 import { MessageText } from '../message_panel/message_text';
@@ -25,10 +26,6 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: InsightBaseProps) => (
-  <Component {...props} />
-);
-
 const defaultProps: InsightBaseProps = {
   title: 'What is the root cause of performance degradation in my service?',
   actions: [
@@ -40,13 +37,32 @@ const defaultProps: InsightBaseProps = {
     <ActionsMenu
       connectors={{
         connectors: [
-          { id: 'gpt-4', name: 'GPT-4' },
-          { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo' },
-        ] as FindActionResult[],
+          {
+            connectorId: 'gpt-4',
+            name: 'GPT-4',
+            type: InferenceConnectorType.OpenAI,
+            config: {},
+            capabilities: {},
+            isInferenceEndpoint: false,
+            isPreconfigured: false,
+          },
+          {
+            connectorId: 'gpt-3.5-turbo',
+            name: 'GPT-3.5 Turbo',
+            type: InferenceConnectorType.OpenAI,
+            config: {},
+            capabilities: {},
+            isInferenceEndpoint: false,
+            isPreconfigured: false,
+          },
+        ] as InferenceConnector[],
         selectedConnector: 'gpt-4',
         loading: false,
         selectConnector: () => {},
         reloadConnectors: () => {},
+        getConnector: () => undefined,
+        isConnectorSelectionRestricted: false,
+        defaultConnector: undefined,
       }}
       onEditPrompt={() => {}}
     />
@@ -91,5 +107,6 @@ Morbi non faucibus massa. Aliquam sed augue in eros ornare luctus sit amet cursu
   isOpen: false,
 };
 
-export const Insight = Template.bind({});
-Insight.args = defaultProps;
+export const Insight = {
+  args: defaultProps,
+};

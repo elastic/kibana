@@ -11,6 +11,7 @@ import type { MemoryRouterProps } from 'react-router';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import {
+  buildCasesPermissions,
   noCasesSettingsPermission,
   noCreateCasesPermissions,
   readCasesPermissions,
@@ -20,6 +21,7 @@ import { CasesRoutes } from './routes';
 import type { CasesPermissions } from '../../../common';
 import { useGetCase } from '../../containers/use_get_case';
 import { defaultGetCase } from '../case_view/mocks';
+import { KibanaServices } from '../../common/lib/kibana';
 
 jest.mock('../../containers/use_get_case');
 
@@ -37,6 +39,16 @@ jest.mock('../configure_cases', () => ({
 
 jest.mock('../case_view/case_view_page', () => ({
   CaseViewPage: () => <div>{'Case View Page'}</div>,
+}));
+
+jest.mock('../templates_v2/pages/create_template/page', () => ({
+  __esModule: true,
+  default: () => <div>{'Create template'}</div>,
+}));
+
+jest.mock('../templates_v2/pages/edit_template/page', () => ({
+  __esModule: true,
+  default: () => <div>{'Edit template'}</div>,
 }));
 
 const useGetCaseMock = useGetCase as jest.Mock;
@@ -116,6 +128,50 @@ describe('Cases routes', () => {
     it('shows the no privileges page if the user does not have settings privileges', async () => {
       renderWithRouter(['/cases/configure'], noCasesSettingsPermission());
       expect(await screen.findByText('Privileges required')).toBeInTheDocument();
+    });
+  });
+
+  describe('Templates routes', () => {
+    let getConfigSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      getConfigSpy = jest
+        .spyOn(KibanaServices, 'getConfig')
+        .mockReturnValue({ templates: { enabled: true } } as ReturnType<
+          typeof KibanaServices.getConfig
+        >);
+    });
+
+    afterEach(() => {
+      getConfigSpy.mockRestore();
+    });
+
+    it('navigates to the create template page', async () => {
+      renderWithRouter(['/cases/configure/templates/create']);
+      expect(await screen.findByText('Create template')).toBeInTheDocument();
+    });
+
+    it('navigates to the edit template page', async () => {
+      renderWithRouter(['/cases/configure/templates/some-id/edit']);
+      expect(await screen.findByText('Edit template')).toBeInTheDocument();
+    });
+
+    it('shows the no privileges page on the create template route when user lacks manageTemplates permission', async () => {
+      renderWithRouter(
+        ['/cases/configure/templates/create'],
+        buildCasesPermissions({ manageTemplates: false })
+      );
+      expect(await screen.findByText('Privileges required')).toBeInTheDocument();
+      expect(screen.queryByText('Create template')).not.toBeInTheDocument();
+    });
+
+    it('shows the no privileges page on the edit template route when user lacks manageTemplates permission', async () => {
+      renderWithRouter(
+        ['/cases/configure/templates/some-id/edit'],
+        buildCasesPermissions({ manageTemplates: false })
+      );
+      expect(await screen.findByText('Privileges required')).toBeInTheDocument();
+      expect(screen.queryByText('Edit template')).not.toBeInTheDocument();
     });
   });
 });

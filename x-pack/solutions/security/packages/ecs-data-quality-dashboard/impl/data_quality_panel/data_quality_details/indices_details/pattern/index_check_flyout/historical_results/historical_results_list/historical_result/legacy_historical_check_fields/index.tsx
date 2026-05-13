@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, memo, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { memo, useMemo } from 'react';
 import { EuiButtonGroup, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 
 import { INCOMPATIBLE_FIELDS, SAME_FAMILY } from '../../../../../../../../translations';
 import { Actions } from '../../../../../../../../actions';
-import { LegacyHistoricalResult } from '../../../../../../../../types';
+import type { LegacyHistoricalResult } from '../../../../../../../../types';
 import { IncompatibleCallout } from '../../../../incompatible_callout';
 import { CheckSuccessEmptyPrompt } from '../../../../check_success_empty_prompt';
 import { INCOMPATIBLE_TAB_ID, SAME_FAMILY_TAB_ID } from '../../../../constants';
@@ -20,17 +21,21 @@ import { historicalResultsCheckFieldsButtonGroupCss } from '../styles';
 import { NOT_INCLUDED_IN_HISTORICAL_RESULTS } from './translations';
 
 interface Props {
+  checkedAt: number;
   indexName: string;
   historicalResult: LegacyHistoricalResult;
 }
 
-const LegacyHistoricalCheckFieldsComponent: FC<Props> = ({ indexName, historicalResult }) => {
+const LegacyHistoricalCheckFieldsComponent: FC<Props> = ({
+  checkedAt,
+  indexName,
+  historicalResult,
+}) => {
   const { markdownComments, incompatibleFieldCount, ecsVersion, sameFamilyFieldCount } =
     historicalResult;
 
   const markdownComment = useMemo(() => markdownComments.join('\n'), [markdownComments]);
   const tablesComment = useMemo(() => markdownComments.slice(4).join('\n'), [markdownComments]);
-
   const tabs = useMemo(
     () => [
       {
@@ -57,6 +62,7 @@ const LegacyHistoricalCheckFieldsComponent: FC<Props> = ({ indexName, historical
                   showChatAction
                   showAddToNewCaseAction
                   showCopyToClipboardAction
+                  checkedAt={checkedAt}
                 />
               </>
             ) : (
@@ -75,6 +81,7 @@ const LegacyHistoricalCheckFieldsComponent: FC<Props> = ({ indexName, historical
       },
     ],
     [
+      checkedAt,
       ecsVersion,
       incompatibleFieldCount,
       indexName,

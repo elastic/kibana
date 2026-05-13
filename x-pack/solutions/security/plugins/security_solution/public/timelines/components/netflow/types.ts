@@ -7,6 +7,7 @@
 
 export interface NetflowProps {
   contextId: string;
+  scopeId: string;
   destinationBytes?: string[] | null;
   destinationGeoContinentName?: string[] | null;
   destinationGeoCountryName?: string[] | null;

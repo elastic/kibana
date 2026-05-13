@@ -5,19 +5,23 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { NewChat } from '@kbn/elastic-assistant';
-
-import { AssistantIcon } from '@kbn/ai-assistant-icon';
-import { css } from '@emotion/react';
+import { AiButton } from '@kbn/shared-ux-ai-components';
+import {
+  SecurityAgentBuilderAttachments,
+  SECURITY_RULE_ATTACHMENT_ID,
+} from '../../../../../common/constants';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../common/lib/telemetry';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
-import * as i18nAssistant from '../../../../detections/pages/detection_engine/translations';
-import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
+import type { DefineStepRule } from '../../../common/types';
 import type { FormHook, ValidationError } from '../../../../shared_imports';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
+import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
+import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
 
 import * as i18n from './translations';
 
@@ -91,8 +95,33 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
     },
     [getFields, setFieldValue]
   );
+  const chatTitle = useMemo(() => {
+    const queryField = getFields().queryBar;
+    const { query } = (queryField.value as DefineStepRule['queryBar']).query;
+    return `${i18n.DETECTION_RULES_CREATE_FORM_CONVERSATION_ID} - ${query ?? 'query'}`;
+  }, [getFields]);
 
-  if (!hasAssistantPrivilege) {
+  const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
+  const attachmentData = useMemo(() => {
+    const queryField = getFields().queryBar;
+    const { query } = (queryField.value as DefineStepRule['queryBar']).query;
+    return {
+      attachmentId: SECURITY_RULE_ATTACHMENT_ID,
+      attachmentType: SecurityAgentBuilderAttachments.rule,
+      attachmentData: {
+        text: JSON.stringify({ query: query ?? '', queryLanguage: language }),
+        attachmentLabel: languageName,
+      },
+      attachmentPrompt: i18n.ASK_ASSISTANT_USER_PROMPT(languageName),
+    };
+  }, [getFields, language, languageName]);
+
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment(attachmentData);
+
+  if (
+    (isAgentChatExperienceEnabled && !hasAgentBuilderPrivilege) ||
+    (!isAgentChatExperienceEnabled && !hasAssistantPrivilege)
+  ) {
     return null;
   }
 
@@ -104,11 +133,20 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
         id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.askAssistantHelpText"
         defaultMessage="{AiAssistantNewChatLink} to help resolve this error."
         values={{
-          AiAssistantNewChatLink: (
+          AiAssistantNewChatLink: isAgentChatExperienceEnabled ? (
+            <NewAgentBuilderAttachment
+              onClick={openAgentBuilderFlyout}
+              size="xs"
+              telemetry={{
+                pathway: 'rule_query_error',
+                attachments: ['rule'],
+              }}
+            />
+          ) : (
             <NewChat
               asLink={true}
               category="detection-rules"
-              conversationId={i18nAssistant.DETECTION_RULES_CREATE_FORM_CONVERSATION_ID}
+              conversationTitle={chatTitle}
               description={i18n.ASK_ASSISTANT_DESCRIPTION}
               getPromptContext={getPromptContext}
               suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT(languageName)}
@@ -118,13 +156,14 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
               isAssistantEnabled={isAssistantEnabled}
               onExportCodeBlock={handleOnExportCodeBlock}
             >
-              <AssistantIcon
-                size="s"
-                css={css`
-                  vertical-align: inherit;
-                `}
-              />{' '}
-              {i18n.ASK_ASSISTANT_ERROR_BUTTON}
+              <AiButton
+                iconType="aiAssistantLogo"
+                size="xs"
+                variant="empty"
+                onClick={onShowOverlay}
+              >
+                {i18n.ASK_ASSISTANT_ERROR_BUTTON}
+              </AiButton>
             </NewChat>
           ),
         }}

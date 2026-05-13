@@ -13,6 +13,7 @@ import { isSpaceAwarenessEnabled as _isSpaceAwarenessEnabled } from '../spaces/h
 
 import { AgentNotFoundError } from '../..';
 
+import { SO_SEARCH_LIMIT } from '../../../common/constants';
 import { AGENTS_INDEX } from '../../constants';
 import { createAppContextStartContractMock } from '../../mocks';
 import type { Agent } from '../../types';
@@ -29,6 +30,8 @@ import {
   updateAgent,
   _joinFilters,
   getByIds,
+  getAgentsById,
+  fetchAllAgentsByKuery,
 } from './crud';
 
 jest.mock('../audit_logging');
@@ -44,6 +47,9 @@ jest.mock('./versions', () => {
   };
 });
 jest.mock('../spaces/helpers');
+jest.mock('timers/promises', () => ({
+  setTimeout: jest.fn().mockResolvedValue(undefined),
+}));
 
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 const isSpaceAwarenessEnabledMock = _isSpaceAwarenessEnabled as jest.Mock;
@@ -77,9 +83,11 @@ describe('Agents CRUD test', () => {
     ids: string[],
     total: number,
     status: AgentStatus,
-    generateSource: (id: string) => Partial<Agent> = () => ({})
+    generateSource: (id: string) => Partial<Agent> = () => ({}),
+    pitId?: string
   ) {
     return {
+      ...(pitId ? { pit_id: pitId } : {}),
       hits: {
         total,
         hits: ids.map((id: string) => ({
@@ -171,6 +179,38 @@ describe('Agents CRUD test', () => {
   });
 
   describe('getAgentsByKuery', () => {
+    it('should roll forward PIT id from search responses', async () => {
+      searchMock.mockResolvedValueOnce(getEsResponse(['1'], 1, 'online', () => ({}), 'pit-2'));
+
+      const firstRes = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
+        showInactive: false,
+        pitId: 'pit-1',
+      });
+
+      expect(searchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pit: expect.objectContaining({ id: 'pit-1' }),
+        })
+      );
+      expect(firstRes.pit).toBe('pit-2');
+
+      searchMock.mockResolvedValueOnce(getEsResponse(['2'], 1, 'online', () => ({}), 'pit-3'));
+
+      const secondRes = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
+        showInactive: false,
+        pitId: firstRes.pit,
+      });
+
+      expect(searchMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          pit: expect.objectContaining({ id: 'pit-2' }),
+        })
+      );
+      expect(secondRes.pit).toBe('pit-3');
+    });
+
     it('should return upgradeable on first page', async () => {
       searchMock
         .mockImplementationOnce(() =>
@@ -180,6 +220,7 @@ describe('Agents CRUD test', () => {
           Promise.resolve(getEsResponse(['1', '2', '3', '4', '5', 'up', '7'], 7, 'inactive'))
         );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showUpgradeable: true,
         showInactive: false,
         page: 1,
@@ -211,6 +252,7 @@ describe('Agents CRUD test', () => {
           Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5', 'up2', '7'], 7, 'inactive'))
         );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showUpgradeable: true,
         showInactive: false,
         page: 1,
@@ -249,6 +291,7 @@ describe('Agents CRUD test', () => {
           )
         );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showUpgradeable: true,
         showInactive: false,
         page: 2,
@@ -276,6 +319,7 @@ describe('Agents CRUD test', () => {
         Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5'], 10001, 'inactive'))
       );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showUpgradeable: true,
         showInactive: false,
         page: 1,
@@ -306,6 +350,7 @@ describe('Agents CRUD test', () => {
         Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5'], 100, 'updating'))
       );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showUpgradeable: true,
         showInactive: false,
         getStatusSummary: true,
@@ -343,6 +388,7 @@ describe('Agents CRUD test', () => {
         Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5'], 10001, 'updating'))
       );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showUpgradeable: true,
         showInactive: false,
         getStatusSummary: true,
@@ -376,6 +422,7 @@ describe('Agents CRUD test', () => {
         Promise.resolve(getEsResponse(['6', '7'], 7, 'inactive'))
       );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showUpgradeable: false,
         showInactive: false,
         page: 2,
@@ -410,6 +457,7 @@ describe('Agents CRUD test', () => {
         Promise.resolve(getEsResponse(['1', '2'], 2, 'inactive'))
       );
       await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showInactive: false,
       });
 
@@ -424,6 +472,7 @@ describe('Agents CRUD test', () => {
         Promise.resolve(getEsResponse(['1', '2'], 2, 'inactive'))
       );
       await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showInactive: false,
         sortField: 'policy_id',
       });
@@ -436,6 +485,7 @@ describe('Agents CRUD test', () => {
       });
       it('should add inactive and unenrolled filter', async () => {
         await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
           showInactive: false,
           kuery: '',
         });
@@ -447,6 +497,7 @@ describe('Agents CRUD test', () => {
 
       it('should add unenrolled filter', async () => {
         await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
           showInactive: true,
           kuery: '',
         });
@@ -458,6 +509,7 @@ describe('Agents CRUD test', () => {
 
       it('should not add unenrolled filter', async () => {
         await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
           showInactive: true,
           kuery: 'status:unenrolled',
         });
@@ -469,6 +521,7 @@ describe('Agents CRUD test', () => {
 
       it('should add inactive filter', async () => {
         await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
           showInactive: false,
           kuery: 'status:*',
         });
@@ -480,6 +533,7 @@ describe('Agents CRUD test', () => {
 
       it('should not add inactive filter', async () => {
         await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
           showInactive: true,
           kuery: 'status:*',
         });
@@ -487,6 +541,92 @@ describe('Agents CRUD test', () => {
         expect(searchMock.mock.calls.at(-1)[0].query).toEqual(
           toElasticsearchQuery(_joinFilters(['status:*'])!)
         );
+      });
+    });
+
+    describe('retry functionality', () => {
+      beforeEach(() => {
+        searchMock.mockReset();
+      });
+
+      it('should retry on transient es errors', async () => {
+        const errorWithShardException = new Error('no_shard_available_action_exception: null');
+
+        searchMock
+          .mockRejectedValueOnce(errorWithShardException)
+          .mockResolvedValueOnce(getEsResponse(['1', '2'], 2, 'online'));
+
+        const result = await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
+          showInactive: false,
+        });
+
+        expect(searchMock).toHaveBeenCalledTimes(2);
+
+        expect(result).toEqual({
+          agents: [
+            {
+              access_api_key: undefined,
+              id: '1',
+              packages: [],
+              policy_revision: undefined,
+              status: 'online',
+            },
+            {
+              access_api_key: undefined,
+              id: '2',
+              packages: [],
+              policy_revision: undefined,
+              status: 'online',
+            },
+          ],
+          page: 1,
+          perPage: 20,
+          total: 2,
+        });
+      });
+
+      it('should not retry on non-transient errors', async () => {
+        const nonTransientError = new Error('Oh no!');
+
+        searchMock.mockRejectedValueOnce(nonTransientError);
+
+        await expect(
+          getAgentsByKuery(esClientMock, soClientMock, {
+            showAgentless: true,
+            showInactive: false,
+          })
+        ).rejects.toThrow('Oh no!');
+
+        expect(searchMock).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('kuery replace attributes', () => {
+      beforeEach(() => {
+        searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse([], 0, 'online')));
+      });
+
+      it('should replace .attributes in kuery', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showInactive: true,
+          kuery: 'agent.attributes.agent.id:agent1',
+        });
+
+        const query = searchMock.mock.calls.at(-1)[0].query;
+        expect(query.bool.filter[0].bool.should[0].match).toEqual({ 'agent.agent.id': 'agent1' });
+      });
+
+      it('should not replace identifying_attributes in kuery', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showInactive: true,
+          kuery: 'agent.identifying_attributes.agent.id:agent1',
+        });
+
+        const query = searchMock.mock.calls.at(-1)[0].query;
+        expect(query.bool.filter[0].bool.should[0].match).toEqual({
+          'agent.identifying_attributes.agent.id': 'agent1',
+        });
       });
     });
   });
@@ -503,6 +643,18 @@ describe('Agents CRUD test', () => {
         message: 'User updated agent [id=test-agent-id]',
       });
     });
+
+    it('should use retry_on_conflict', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      esClient.update.mockResolvedValueOnce({} as any);
+
+      await updateAgent(esClient, 'test-agent-id', { tags: ['new-tag'] });
+
+      expect(esClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({ retry_on_conflict: 5 })
+      );
+    });
   });
 
   describe('openPointInTime', () => {
@@ -510,10 +662,10 @@ describe('Agents CRUD test', () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       esClient.openPointInTime.mockResolvedValueOnce({ id: 'test-pit' } as any);
 
-      await openPointInTime(esClient, AGENTS_INDEX);
+      await openPointInTime(esClient);
 
       expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
-        message: `User opened point in time query [index=${AGENTS_INDEX}] [pitId=test-pit]`,
+        message: `User opened point in time query [index=${AGENTS_INDEX}] [keepAlive=10m] [pitId=test-pit]`,
       });
     });
   });
@@ -528,6 +680,47 @@ describe('Agents CRUD test', () => {
       expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
         message: `User closing point in time query [pitId=test-pit]`,
       });
+    });
+  });
+
+  describe('getAgentsById()', () => {
+    beforeEach(() => {
+      (soClientMock.getCurrentNamespace as jest.Mock).mockReturnValue('foo');
+    });
+
+    it('chunks requests so each search stays within max_result_window (10k)', async () => {
+      const overflow = 400;
+      const firstBatch = Array.from({ length: SO_SEARCH_LIMIT }, (_, i) => `agent-${i}`);
+      const secondBatch = Array.from(
+        { length: overflow },
+        (_, i) => `agent-${SO_SEARCH_LIMIT + i}`
+      );
+      const agentIds = [...firstBatch, ...secondBatch];
+
+      searchMock
+        .mockResolvedValueOnce(
+          getEsResponse(firstBatch, firstBatch.length, 'online', (id) => ({
+            id,
+            namespaces: ['foo'],
+          }))
+        )
+        .mockResolvedValueOnce(
+          getEsResponse(secondBatch, secondBatch.length, 'online', (id) => ({
+            id,
+            namespaces: ['foo'],
+          }))
+        );
+
+      const result = await getAgentsById(esClientMock, soClientMock, agentIds);
+
+      expect(searchMock).toHaveBeenCalledTimes(2);
+      expect(searchMock.mock.calls[0][0].size).toBe(SO_SEARCH_LIMIT);
+      expect(searchMock.mock.calls[1][0].size).toBe(overflow);
+      expect(result).toHaveLength(agentIds.length);
+      expect(result[0]).toEqual(expect.objectContaining({ id: 'agent-0' }));
+      expect(result[SO_SEARCH_LIMIT]).toEqual(
+        expect.objectContaining({ id: `agent-${SO_SEARCH_LIMIT}` })
+      );
     });
   });
 
@@ -572,6 +765,44 @@ describe('Agents CRUD test', () => {
       await expect(getByIds(esClientMock, soClientMock, ['1', '2'])).rejects.toThrow(
         AgentNotFoundError
       );
+    });
+  });
+
+  describe('fetchAllAgentsByKuery', () => {
+    const createEsSearchResultMock = (ids: string[]) => {
+      const mock = getEsResponse(ids, ids.length, 'online');
+      return {
+        ...mock,
+        hits: {
+          ...mock.hits,
+          hits: mock.hits.hits.map((item) => ({ ...item, sort: ['enrolled_at'] })),
+        },
+      };
+    };
+
+    it('should return an iterator', async () => {
+      expect(await fetchAllAgentsByKuery(esClientMock, soClientMock, {})).toEqual({
+        [Symbol.asyncIterator]: expect.any(Function),
+      });
+    });
+
+    it('should provide agents on every iteration', async () => {
+      const agentIds = [
+        ['1', '2', '3'],
+        ['4', '5', '6'],
+      ];
+      searchMock
+        .mockResolvedValueOnce(createEsSearchResultMock(agentIds[0]))
+        .mockResolvedValueOnce(createEsSearchResultMock(agentIds[1]))
+        .mockResolvedValueOnce(createEsSearchResultMock([]));
+
+      let testCounter = 0;
+      for await (const agents of await fetchAllAgentsByKuery(esClientMock, soClientMock, {})) {
+        expect(agents.map((agent) => agent.id)).toEqual(agentIds[testCounter]);
+        testCounter++;
+      }
+
+      expect(searchMock).toHaveBeenCalledTimes(3);
     });
   });
 });

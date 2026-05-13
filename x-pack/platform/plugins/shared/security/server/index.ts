@@ -20,7 +20,6 @@ import type { PluginSetupDependencies, SecurityPluginSetup } from './plugin';
 
 // These exports are part of public Security plugin contract, any change in signature of exported
 // functions or removal of exports should be considered as a breaking change.
-export { HTTPAuthorizationHeader } from './authentication';
 export type { CasesSupportedOperations } from './authorization';
 export type { SecurityPluginSetup, SecurityPluginStart };
 export type { AuthenticatedUser } from '../common';
@@ -34,10 +33,12 @@ export type {
   AuditRequest,
   AuditLogger,
   AuditServiceSetup,
-  APIKeys,
+  NativeAPIKeysType,
   AuthenticationServiceStart,
   InvalidateAPIKeyResult,
   GrantAPIKeyResult,
+  CloneAPIKeyParams,
+  CloneAPIKeyResult,
   ValidateAPIKeyParams,
   CreateAPIKeyResult,
   InvalidateAPIKeysParams,
@@ -89,6 +90,7 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
     showNavLinks: true,
     ui: true,
     roleManagementEnabled: true,
+    uiam: { enabled: true },
   },
 };
 export const plugin: PluginInitializer<

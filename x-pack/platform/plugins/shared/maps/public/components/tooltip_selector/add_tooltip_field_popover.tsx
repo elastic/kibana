@@ -8,13 +8,13 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import React, { Component, Fragment } from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiButtonEmpty,
   EuiSelectable,
-  EuiSelectableOption,
   EuiButton,
   EuiSpacer,
   EuiTextAlign,
@@ -137,7 +137,7 @@ export class AddTooltipFieldPopover extends Component<Props, State> {
       <EuiButtonEmpty
         onClick={this._togglePopover}
         size="xs"
-        iconType="plusInCircleFilled"
+        iconType="plusCircle"
         isDisabled={!this.props.fields}
       >
         <FormattedMessage id="xpack.maps.tooltipSelector.togglePopoverLabel" defaultMessage="Add" />
@@ -200,6 +200,9 @@ export class AddTooltipFieldPopover extends Component<Props, State> {
         closePopover={this._closePopover}
         panelPaddingSize="none"
         ownFocus
+        aria-label={i18n.translate('xpack.maps.tooltipSelector.addTooltipFieldPopoverAriaLabel', {
+          defaultMessage: 'Add tooltip field',
+        })}
       >
         {this._renderContent()}
       </EuiPopover>

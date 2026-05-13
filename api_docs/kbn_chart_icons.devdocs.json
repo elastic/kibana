@@ -32,6 +32,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/drop_illustration.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -48,7 +50,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/drop_illustration.tsx",
+            "lineNumber": 15,
+            "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -69,6 +74,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/axis_bottom.tsx",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -85,7 +92,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/axis_bottom.tsx",
+            "lineNumber": 14,
+            "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -106,6 +116,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/axis_left.tsx",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -122,7 +134,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/axis_left.tsx",
+            "lineNumber": 14,
+            "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -143,6 +158,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/axis_right.tsx",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -159,7 +176,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/axis_right.tsx",
+            "lineNumber": 14,
+            "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -180,6 +200,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/axis_top.tsx",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -196,7 +218,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/axis_top.tsx",
+            "lineNumber": 14,
+            "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -217,6 +242,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/legend.tsx",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -233,7 +260,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/legend.tsx",
+            "lineNumber": 14,
+            "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -254,6 +284,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/globe_illustration.tsx",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -270,7 +302,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/globe_illustration.tsx",
+            "lineNumber": 13,
+            "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -291,6 +326,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_area.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -307,7 +344,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_area.tsx",
+            "lineNumber": 15,
+            "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -328,6 +368,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_area_percentage.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -344,7 +386,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_area_percentage.tsx",
+            "lineNumber": 15,
+            "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -365,6 +410,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_area_stacked.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -381,7 +428,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_area_stacked.tsx",
+            "lineNumber": 15,
+            "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -402,6 +452,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -418,7 +470,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar.tsx",
+            "lineNumber": 15,
+            "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -439,6 +494,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar_annotations.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -455,7 +512,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar_annotations.tsx",
+            "lineNumber": 15,
+            "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -476,6 +536,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar_horizontal.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -492,7 +554,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar_horizontal.tsx",
+            "lineNumber": 15,
+            "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -513,6 +578,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar_horizontal_percentage.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -529,7 +596,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar_horizontal_percentage.tsx",
+            "lineNumber": 15,
+            "columnNumber": 50,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -550,6 +620,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar_horizontal_stacked.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -566,7 +638,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar_horizontal_stacked.tsx",
+            "lineNumber": 15,
+            "columnNumber": 47,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -587,6 +662,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar_percentage.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -603,7 +680,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar_percentage.tsx",
+            "lineNumber": 15,
+            "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -624,6 +704,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar_reference_line.tsx",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -640,7 +722,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar_reference_line.tsx",
+            "lineNumber": 14,
+            "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -661,6 +746,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar_stacked.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -677,7 +764,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar_stacked.tsx",
+            "lineNumber": 15,
+            "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -698,6 +788,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_datatable.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -714,7 +806,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_datatable.tsx",
+            "lineNumber": 15,
+            "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -735,6 +830,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_donut.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -751,7 +848,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_donut.tsx",
+            "lineNumber": 15,
+            "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -772,6 +872,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -788,7 +890,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge.tsx",
+            "lineNumber": 15,
+            "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -809,6 +914,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge_arc.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -825,7 +932,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge_arc.tsx",
+            "lineNumber": 15,
+            "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -846,6 +956,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge_simple_icons.tsx",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -862,7 +974,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge_simple_icons.tsx",
+            "lineNumber": 32,
+            "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -883,6 +998,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge_circle.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -899,7 +1016,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge_circle.tsx",
+            "lineNumber": 15,
+            "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -920,6 +1040,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge_simple_icons.tsx",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -936,7 +1058,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge_simple_icons.tsx",
+            "lineNumber": 26,
+            "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -957,6 +1082,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge_semi_circle.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -973,7 +1100,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge_semi_circle.tsx",
+            "lineNumber": 15,
+            "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -994,6 +1124,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge_simple_icons.tsx",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1010,7 +1142,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge_simple_icons.tsx",
+            "lineNumber": 20,
+            "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1031,6 +1166,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_heatmap.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1047,7 +1184,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_heatmap.tsx",
+            "lineNumber": 15,
+            "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1068,6 +1208,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_horizontal_bullet.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1084,7 +1226,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_horizontal_bullet.tsx",
+            "lineNumber": 15,
+            "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1105,6 +1250,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_line.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1121,7 +1268,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_line.tsx",
+            "lineNumber": 15,
+            "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1142,6 +1292,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge_simple_icons.tsx",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1158,7 +1310,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge_simple_icons.tsx",
+            "lineNumber": 14,
+            "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1179,6 +1334,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_metric.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1195,7 +1352,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_metric.tsx",
+            "lineNumber": 15,
+            "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1216,6 +1376,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_mixed_xy.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1232,7 +1394,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_mixed_xy.tsx",
+            "lineNumber": 15,
+            "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1253,6 +1418,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_mosaic.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1269,7 +1436,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_mosaic.tsx",
+            "lineNumber": 15,
+            "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1290,6 +1460,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_pie.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1306,7 +1478,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_pie.tsx",
+            "lineNumber": 15,
+            "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1327,6 +1502,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_tagcloud.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1343,7 +1520,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_tagcloud.tsx",
+            "lineNumber": 15,
+            "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1364,6 +1544,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_treemap.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1380,7 +1562,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_treemap.tsx",
+            "lineNumber": 15,
+            "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1401,6 +1586,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_vertical_bullet.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1417,7 +1604,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_vertical_bullet.tsx",
+            "lineNumber": 15,
+            "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1438,6 +1628,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_waffle.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1454,7 +1646,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_waffle.tsx",
+            "lineNumber": 15,
+            "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1475,6 +1670,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/annotation_icons/circle.tsx",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1491,7 +1688,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/annotation_icons/circle.tsx",
+            "lineNumber": 14,
+            "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1512,6 +1712,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/donut_hole_icons.tsx",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1528,7 +1730,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/donut_hole_icons.tsx",
+            "lineNumber": 21,
+            "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1549,6 +1754,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/donut_hole_icons.tsx",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1565,7 +1772,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/donut_hole_icons.tsx",
+            "lineNumber": 14,
+            "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1586,6 +1796,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/donut_hole_icons.tsx",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1602,7 +1814,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/donut_hole_icons.tsx",
+            "lineNumber": 28,
+            "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1623,6 +1838,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/region_map.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1639,7 +1856,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/region_map.tsx",
+            "lineNumber": 15,
+            "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1660,6 +1880,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/annotation_icons/triangle.tsx",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1676,7 +1898,10 @@
               ", \"type\">"
             ],
             "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/annotation_icons/triangle.tsx",
+            "lineNumber": 14,
+            "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "Omit",
             "trackAdoption": false,
             "isRequired": true
           }

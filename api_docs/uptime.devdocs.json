@@ -35,6 +35,8 @@
           "string[]"
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
+        "lineNumber": 67,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

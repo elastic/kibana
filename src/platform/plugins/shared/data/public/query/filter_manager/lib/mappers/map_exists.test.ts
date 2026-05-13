@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildExistsFilter, buildEmptyFilter, DataViewFieldBase } from '@kbn/es-query';
+import type { DataViewFieldBase } from '@kbn/es-query';
+import { buildExistsFilter, buildEmptyFilter } from '@kbn/es-query';
 import { mapExists } from './map_exists';
 import { mapQueryString } from './map_query_string';
 import type { DataView } from '@kbn/data-views-plugin/common';

@@ -18,7 +18,7 @@ import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { useSecuritySolutionContext } from '../../application/security_solution_context';
 import { useCspBenchmarkIntegrationsV2 } from '../benchmarks/use_csp_benchmark_integrations';
 import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
-import { getBenchmarkCisName } from '../../../common/utils/helpers';
+import { getBenchmarkCisName, getBenchmarkApplicableTo } from '../../../common/utils/helpers';
 
 export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
   const benchmarksInfo = useCspBenchmarkIntegrationsV2();
@@ -31,9 +31,9 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
         bottomBorder
         pageTitle={
           <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem style={{ width: 'fit-content' }}>
+            <EuiFlexItem css={{ width: 'fit-content' }}>
               <Link to={generatePath(cloudPosturePages.benchmarks.path)}>
-                <EuiButtonEmpty iconType="arrowLeft" contentProps={{ style: { padding: 0 } }}>
+                <EuiButtonEmpty iconType="chevronSingleLeft">
                   <FormattedMessage
                     id="xpack.csp.rules.rulesPageHeader.benchmarkRulesButtonLabel"
                     defaultMessage="Benchmarks"
@@ -43,8 +43,12 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem grow={false} style={{ marginBottom: 6 }}>
-                  <CISBenchmarkIcon type={params.benchmarkId} size={'l'} />
+                <EuiFlexItem grow={false} css={{ marginBottom: 6 }}>
+                  <CISBenchmarkIcon
+                    type={params.benchmarkId}
+                    name={getBenchmarkApplicableTo(params.benchmarkId)}
+                    size={'l'}
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <CloudPosturePageTitle

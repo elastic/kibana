@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -16,7 +16,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
-    "@kbn/embeddable-plugin",
     "@kbn/lens-plugin",
     "@kbn/developer-examples-plugin",
     "@kbn/data-views-plugin",
@@ -24,5 +23,7 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
+    "@kbn/lens-common",
+    "@kbn/i18n",
   ]
 }

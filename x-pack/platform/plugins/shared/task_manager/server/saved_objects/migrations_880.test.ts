@@ -6,7 +6,7 @@
  */
 
 import { omit, cloneDeep } from 'lodash';
-import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { migrationMocks } from '@kbn/core/server/mocks';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import type {
@@ -17,7 +17,8 @@ import type {
 } from '@kbn/alerting-state-types';
 
 import { getMigrations } from './migrations';
-import { SerializedConcreteTaskInstance, TaskStatus } from '../task';
+import type { SerializedConcreteTaskInstance } from '../task';
+import { TaskStatus } from '../task';
 
 type RawAlertInstances = Record<string, RawAlertInstance>;
 

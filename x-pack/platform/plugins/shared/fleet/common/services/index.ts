@@ -13,7 +13,15 @@ export {
   packageToPackagePolicy,
   getStreamsForInputType,
   getRegistryStreamWithDataStreamForInputType,
+  varsReducer,
+  getInputEffectiveName,
+  buildInputKey,
 } from './package_to_package_policy';
+export type {
+  DocumentationPageInput,
+  DocumentationPageInputStream,
+} from './documentation_page_inputs';
+export { getDocumentationPageInputs } from './documentation_page_inputs';
 export { fullAgentPolicyToYaml } from './full_agent_policy_to_yaml';
 export { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from './limited_package';
 export {
@@ -29,11 +37,29 @@ export {
   MINIMUM_DIAGNOSTICS_AGENT_VERSION,
 } from './is_agent_request_diagnostics_supported';
 export {
+  isAgentMigrationSupported,
+  MINIMUM_MIGRATE_AGENT_VERSION,
+  isAgentEligibleForMigration,
+} from './agent_migration_helpers';
+export {
+  isAgentPrivilegeLevelChangeSupported,
+  MINIMUM_PRIVILEGE_LEVEL_CHANGE_AGENT_VERSION,
+  isAgentEligibleForPrivilegeLevelChange,
+} from './agent_privilege_level_change_helpers';
+export {
+  addUseAPMVarIfNotPresent,
+  DATA_STREAM_USE_APM_VAR,
+  shouldIncludeUseAPMVar,
   isInputOnlyPolicyTemplate,
   isIntegrationPolicyTemplate,
   getNormalizedInputs,
   getNormalizedDataStreams,
   filterPolicyTemplatesTiles,
+  hasMultipleEnabledPolicyTemplates,
+  getPolicyTemplateInputDefinition,
+  registryInputAllowsDynamicSignalTypes,
+  packagePolicyInputAllowsUndefinedDataStreamType,
+  hasDynamicSignalTypes,
 } from './policy_template';
 export { doesPackageHaveIntegrations } from './packages_with_integrations';
 export type {
@@ -93,3 +119,29 @@ export {
 } from './check_fleet_server_versions';
 
 export { removeSOAttributes, getSortConfig, checkTargetVersionsValidity } from './agent_utils';
+
+export { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from './cloud_connector_helpers';
+
+// Generic var_group helpers
+export type { VarGroupSelection } from './var_group_helpers';
+export {
+  getSelectedOption,
+  getVisibleVarsForOption,
+  getVarsControlledByVarGroups,
+  shouldShowVar,
+  isVarRequiredByVarGroup,
+  isVarInSelectedVarGroupOption,
+} from './var_group_helpers';
+
+// Cloud Connector accessor module
+export * from './cloud_connectors';
+
+export { validateSslCertPath } from './ssl_validators';
+
+export type { YamlModule } from './yaml_utils';
+export { createYamlKeysSorter, toYaml } from './yaml_utils';
+export {
+  packageInfoHasOtelInputs,
+  packagePolicyHasOtelInputs,
+  OTEL_INPUTS_MINIMUM_VERSION,
+} from './otelcol_helpers';

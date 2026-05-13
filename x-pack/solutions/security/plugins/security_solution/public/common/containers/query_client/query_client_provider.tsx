@@ -7,7 +7,7 @@
 
 import type { PropsWithChildren } from 'react';
 import React, { memo, useMemo } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 type QueryClientOptionsProp = ConstructorParameters<typeof QueryClient>[0];
 
@@ -25,7 +25,11 @@ export class SecuritySolutionQueryClient extends QueryClient {
           refetchOnWindowFocus: false,
           refetchOnMount: true,
           keepPreviousData: true,
-          ...(options?.defaultOptions?.queries ?? {}),
+          ...(options?.defaultOptions?.queries ?? { networkMode: 'always' }),
+        },
+        mutations: {
+          networkMode: 'always',
+          ...(options?.defaultOptions?.mutations ?? { networkMode: 'always' }),
         },
       },
     };

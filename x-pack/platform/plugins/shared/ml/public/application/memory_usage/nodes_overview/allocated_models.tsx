@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiInMemoryTable,
   EuiToolTip,
   useEuiTheme,
@@ -22,7 +23,7 @@ import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type {
   AllocatedModel,
   NodeDeploymentStatsResponse,
-} from '../../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { useEnabledFeatures } from '../../contexts/ml';
 
@@ -67,7 +68,9 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
 
         return (
           <EuiToolTip content={reason ? reason : ''}>
-            <EuiBadge color={isFailed ? 'danger' : 'hollow'}>{routingState}</EuiBadge>
+            <EuiBadge tabIndex={0} color={isFailed ? 'danger' : 'hollow'}>
+              {routingState}
+            </EuiBadge>
           </EuiToolTip>
         );
       },
@@ -124,11 +127,17 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
                 })
           }
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.allocationHeader', {
               defaultMessage: 'Allocation',
             })}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            <EuiIcon
+              aria-hidden={true}
+              size="s"
+              color="subdued"
+              type="question"
+              className="eui-alignTop"
+            />
           </span>
         </EuiToolTip>
       ),
@@ -145,16 +154,17 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
         let adaptiveAllocations = null;
         if (v.adaptive_allocations?.enabled) {
           adaptiveAllocations = (
-            <EuiToolTip
+            <EuiIconTip
               content={i18n.translate(
                 'xpack.ml.trainedModels.nodesList.modelsList.adaptiveAllocationsTooltip',
                 {
                   defaultMessage: 'Adaptive allocations enabled',
                 }
               )}
-            >
-              <EuiIcon size="l" color="warning" type="scale" />
-            </EuiToolTip>
+              size="l"
+              color="warning"
+              type="scale"
+            />
           );
         }
         return (
@@ -178,14 +188,20 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
             }
           )}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate(
               'xpack.ml.trainedModels.nodesList.modelsList.throughputLastMinuteHeader',
               {
                 defaultMessage: 'Throughput',
               }
             )}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            <EuiIcon
+              aria-hidden={true}
+              size="s"
+              color="subdued"
+              type="question"
+              className="eui-alignTop"
+            />
           </span>
         </EuiToolTip>
       ),
@@ -211,7 +227,7 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
             />
           }
         >
-          <EuiFlexGroup gutterSize={'xs'}>
+          <EuiFlexGroup tabIndex={0} gutterSize={'xs'}>
             <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
               <span css={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 <FormattedMessage
@@ -221,7 +237,13 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
               </span>
             </EuiFlexItem>
             <EuiFlexItem grow={false} css={{ minWidth: euiTheme.euiTheme.size.m }}>
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+              <EuiIcon
+                aria-hidden={true}
+                size="s"
+                color="subdued"
+                type="question"
+                className="eui-alignTop"
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiToolTip>
@@ -304,6 +326,12 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
       })}
       onTableChange={() => {}}
       data-test-subj={'mlNodesAllocatedModels'}
+      tableCaption={i18n.translate(
+        'xpack.ml.trainedModels.nodesList.modelsList.allocatedModelsTableCaption',
+        {
+          defaultMessage: 'Allocated machine learning models',
+        }
+      )}
     />
   );
 };

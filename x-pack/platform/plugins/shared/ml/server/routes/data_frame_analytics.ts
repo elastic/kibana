@@ -17,6 +17,7 @@ import { dataViewCreateQuerySchema } from '@kbn/ml-data-view-utils/schemas/api_c
 import { createDataViewFn } from '@kbn/ml-data-view-utils/actions/create';
 import { deleteDataViewFn } from '@kbn/ml-data-view-utils/actions/delete';
 
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
@@ -40,7 +41,6 @@ import type { ExtendAnalyticsMapArgs } from '../models/data_frame_analytics/type
 import { AnalyticsManager } from '../models/data_frame_analytics/analytics_manager';
 import { validateAnalyticsJob } from '../models/data_frame_analytics/validation';
 import { fieldServiceProvider } from '../models/job_service/new_job_caps/field_service';
-import { getAuthorizationHeader } from '../lib/request_authorization';
 import type { MlClient } from '../lib/ml_client';
 
 function getExtendedMap(
@@ -291,14 +291,11 @@ export function dataFrameAnalyticsRoutes(
           };
 
           try {
-            const resp = await mlClient.putDataFrameAnalytics(
-              {
-                id: analyticsId,
-                // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
-                body: request.body,
-              },
-              getAuthorizationHeader(request)
-            );
+            const resp = await mlClient.putDataFrameAnalytics({
+              id: analyticsId,
+              // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
+              body: request.body,
+            });
 
             if (resp.id && resp.create_time) {
               fullResponse.dataFrameAnalyticsJobsCreated.push({ id: analyticsId });
@@ -356,13 +353,10 @@ export function dataFrameAnalyticsRoutes(
       },
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
-          const body = await mlClient.evaluateDataFrame(
-            {
-              // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
-              body: request.body,
-            },
-            getAuthorizationHeader(request)
-          );
+          const body = await mlClient.evaluateDataFrame({
+            // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
+            body: request.body,
+          });
           return response.ok({
             body,
           });
@@ -396,13 +390,7 @@ export function dataFrameAnalyticsRoutes(
       },
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
-          const body = await mlClient.explainDataFrameAnalytics(
-            {
-              // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584 (_meta)
-              body: request.body,
-            },
-            getAuthorizationHeader(request)
-          );
+          const body = await mlClient.explainDataFrameAnalytics(request.body);
           return response.ok({
             body,
           });
@@ -470,10 +458,38 @@ export function dataFrameAnalyticsRoutes(
                 // If user does have privilege to delete the index, then delete the index
                 if (userCanDeleteDestIndex) {
                   try {
-                    await client.asCurrentUser.indices.delete({
-                      index: destinationIndex,
-                    });
-                    destIndexDeleted.success = true;
+                    // It's possible that the destination index has been reindexed with a new name
+                    // so if it's an alias first, then delete the real index
+                    let destinationIndexToDelete = destinationIndex;
+                    const alias = await client.asCurrentUser.indices.getAlias(
+                      {
+                        index: destinationIndex,
+                      },
+                      {
+                        ignore: [404],
+                      }
+                    );
+                    if (alias) {
+                      const reindexedDestName = Object.keys(alias)[0];
+                      if (reindexedDestName && isPopulatedObject(alias, [reindexedDestName])) {
+                        const keys = Object.keys(alias[reindexedDestName]?.aliases);
+                        if (keys[0] === destinationIndex) {
+                          destinationIndexToDelete = reindexedDestName;
+                        }
+                      }
+                    }
+
+                    const deleted = await client.asCurrentUser.indices.delete(
+                      {
+                        index: destinationIndexToDelete,
+                      },
+                      {
+                        ignore: [404],
+                      }
+                    );
+                    if (deleted?.acknowledged) {
+                      destIndexDeleted.success = true;
+                    }
                   } catch ({ body }) {
                     destIndexDeleted.error = body;
                   }
@@ -616,14 +632,10 @@ export function dataFrameAnalyticsRoutes(
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
           const { analyticsId } = request.params;
-          const body = await mlClient.updateDataFrameAnalytics(
-            {
-              id: analyticsId,
-              // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584 (_meta)
-              body: request.body,
-            },
-            getAuthorizationHeader(request)
-          );
+          const body = await mlClient.updateDataFrameAnalytics({
+            id: analyticsId,
+            ...request.body,
+          });
           return response.ok({
             body,
           });

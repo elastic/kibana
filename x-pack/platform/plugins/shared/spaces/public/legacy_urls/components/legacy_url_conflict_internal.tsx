@@ -65,7 +65,7 @@ export const LegacyUrlConflictInternal = (props: InternalProps & LegacyUrlConfli
   return (
     <EuiCallOut
       color="warning"
-      iconType="help"
+      iconType="question"
       title={
         <FormattedMessage
           id="xpack.spaces.legacyUrlConflict.calloutTitle"
@@ -94,7 +94,6 @@ export const LegacyUrlConflictInternal = (props: InternalProps & LegacyUrlConfli
         <EuiFlexItem grow={false}>
           <EuiToolTip
             position="bottom"
-            delay="long"
             content={i18n.translate('xpack.spaces.legacyURLConflict.toolTipText', {
               defaultMessage:
                 'This {objectNoun} has [id={currentObjectId}]. The other {objectNoun} has [id={otherObjectId}].',

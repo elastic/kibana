@@ -8,6 +8,7 @@
 import { useCallback, useMemo, useEffect, useRef } from 'react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 
+import { splitPkgKey } from '../../../../../../../common/services';
 import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID } from '../../../../constants';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 import { useStartServices, useLink, useIntraAppState } from '../../../../hooks';
@@ -48,7 +49,11 @@ export const useCancelAddPackagePolicy = (params: UseCancelParams) => {
     if (routeState && routeState.onCancelUrl) {
       return routeState.onCancelUrl;
     }
-    return from === 'policy' && agentPolicyId
+    if (from === 'installed-integrations' || from === 'copy-from-installed-integrations') {
+      return `${getHref('integrations_installed', {})}?viewPolicies=${splitPkgKey(pkgkey).pkgName}`;
+    }
+
+    return (from === 'policy' || from === 'copy-from-fleet-policy-list') && agentPolicyId
       ? getHref('policy_details', {
           policyId: agentPolicyId,
         })
@@ -86,38 +91,56 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
         return;
       }
       const hasNoAgentPolicies = policy.policy_ids.length === 0;
-      const packagePolicyPath =
-        hasNoAgentPolicies || policy.supports_agentless
-          ? getPath('integration_details_policies', {
-              pkgkey: pkgKeyFromPackageInfo(policy.package!),
-            })
-          : getPath('policy_details', {
-              policyId: policy.policy_ids[0], // TODO navigates to first policy
-            });
-      const [onSaveNavigateTo, onSaveQueryParams]: [
-        Parameters<ApplicationStart['navigateToApp']>,
-        CreatePackagePolicyRouteState['onSaveQueryParams']
-      ] = routeState?.onSaveNavigateTo
-        ? [routeState.onSaveNavigateTo, routeState?.onSaveQueryParams]
-        : [
-            [
-              hasNoAgentPolicies || policy.supports_agentless ? INTEGRATIONS_PLUGIN_ID : PLUGIN_ID,
-              {
-                path: packagePolicyPath,
-              },
-            ],
+      let onSaveNavigateTo: Parameters<ApplicationStart['navigateToApp']>;
+      let onSaveQueryParams: CreatePackagePolicyRouteState['onSaveQueryParams'];
+
+      if (routeState?.onSaveNavigateTo) {
+        onSaveNavigateTo = routeState.onSaveNavigateTo;
+        onSaveQueryParams = routeState?.onSaveQueryParams;
+      } else {
+        // If agentless or no agent policies, navigate to the integration's policies table
+        if ((policy.supports_agentless || hasNoAgentPolicies) && !queryParamsPolicyId) {
+          onSaveNavigateTo = [
+            INTEGRATIONS_PLUGIN_ID,
             {
-              showAddAgentHelp: true,
-              openEnrollmentFlyout: true,
+              path: getPath('integration_details_policies', {
+                pkgkey: pkgKeyFromPackageInfo(policy.package!),
+              }),
             },
           ];
+
+          if (policy.supports_agentless) {
+            onSaveQueryParams = {
+              openEnrollmentFlyout: { policyIdAsValue: true },
+            };
+          } else {
+            onSaveQueryParams = routeState?.onSaveQueryParams;
+          }
+        }
+        // Otherwise, navigate to the policy's first agent policy details page
+        // or the overridden policy id from query param instead
+        // TODO: handle case where package policy belongs to multiple agent policies
+        else {
+          onSaveNavigateTo = [
+            PLUGIN_ID,
+            {
+              path: getPath('policy_details', {
+                policyId: queryParamsPolicyId || policy.policy_ids[0],
+              }),
+            },
+          ];
+
+          onSaveQueryParams = {
+            showAddAgentHelp: true,
+            openEnrollmentFlyout: true,
+          };
+        }
+      }
 
       const [appId, options] = onSaveNavigateTo;
       if (options?.path) {
         const pathWithQueryString = appendOnSaveQueryParamsToPath({
-          // In cases where we want to navigate back to a new/existing policy, we need to override the initial `path`
-          // value and navigate to the actual agent policy instead
-          path: queryParamsPolicyId ? packagePolicyPath : options.path,
+          path: options.path,
           policy,
           mappingOptions: onSaveQueryParams,
           paramsToApply,

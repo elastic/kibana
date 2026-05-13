@@ -8,16 +8,16 @@
 import React, { memo, useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiSelectableProps, EuiSelectableOption } from '@elastic/eui';
 import {
   EuiSelectable,
   EuiFilterButton,
   EuiFilterGroup,
   EuiPopover,
-  EuiSelectableProps,
-  EuiSelectableOption,
   EuiSpacer,
 } from '@elastic/eui';
-import { useLoadTagsQuery } from '../../../hooks/use_load_tags_query';
+import { useGetRuleTagsQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query';
+import { useKibana } from '../../../../common';
 
 export interface RuleTagFilterProps {
   selectedTags: string[];
@@ -68,10 +68,12 @@ const OptionWrapper = memo(
 
 const RuleTagFilterPopoverButton = memo(
   ({
+    isSelected,
     selectedTags,
     onClosePopover,
     buttonDataTestSubj,
   }: {
+    isSelected: boolean;
     selectedTags: string[];
     onClosePopover: () => void;
     buttonDataTestSubj?: string;
@@ -79,7 +81,8 @@ const RuleTagFilterPopoverButton = memo(
     return (
       <EuiFilterButton
         data-test-subj={buttonDataTestSubj}
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
+        isSelected={isSelected}
         hasActiveFilters={selectedTags.length > 0}
         numActiveFilters={selectedTags.length}
         numFilters={selectedTags.length}
@@ -166,6 +169,12 @@ export const RuleTagFilter = memo((props: RuleTagFilterProps) => {
     onChange = () => {},
   } = props;
 
+  const {
+    services: {
+      http,
+      notifications: { toasts },
+    },
+  } = useKibana();
   const observerRef = useRef<IntersectionObserver>();
   const [searchText, setSearchText] = useState<string>('');
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
@@ -175,7 +184,9 @@ export const RuleTagFilter = memo((props: RuleTagFilterProps) => {
     isLoading,
     hasNextPage,
     fetchNextPage,
-  } = useLoadTagsQuery({
+  } = useGetRuleTagsQuery({
+    http,
+    toasts,
     enabled: canLoadRules,
     refresh,
     search: searchText,
@@ -271,8 +282,13 @@ export const RuleTagFilter = memo((props: RuleTagFilterProps) => {
         data-test-subj={dataTestSubj}
         isOpen={isPopoverOpen}
         closePopover={onClosePopover}
+        aria-label={i18n.translate(
+          'xpack.triggersActionsUI.sections.rulesList.ruleTagFilterPopoverAriaLabel',
+          { defaultMessage: 'Filter by tags' }
+        )}
         button={
           <RuleTagFilterPopoverButton
+            isSelected={isPopoverOpen}
             selectedTags={selectedTags}
             onClosePopover={onClosePopover}
             buttonDataTestSubj={buttonDataTestSubj}

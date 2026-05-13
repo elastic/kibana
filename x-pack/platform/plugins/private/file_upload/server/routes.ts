@@ -6,14 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IScopedClusterClient } from '@kbn/core/server';
-import type { CoreSetup, Logger } from '@kbn/core/server';
-import type {
-  IndicesIndexSettings,
-  MappingTypeMapping,
-} from '@elastic/elasticsearch/lib/api/types';
-import { MAX_FILE_SIZE_BYTES, MAX_TIKA_FILE_SIZE_BYTES } from '../common/constants';
-import type { IngestPipelineWrapper, InputData } from '../common/types';
+import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import {
+  MAX_FILE_UPLOAD_SIZE_BYTES,
+  MAX_TIKA_FILE_SIZE_BYTES,
+} from '@kbn/file-upload-common/src/constants';
+import { omit } from 'lodash';
+import type { IngestPipelineWrapper } from '@kbn/file-upload-common';
 import { wrapError } from './error_wrapper';
 import { importDataProvider } from './import_data';
 import { getTimeFieldRange } from './get_time_field_range';
@@ -22,27 +21,21 @@ import { analyzeFile } from './analyze_file';
 import { updateTelemetry } from './telemetry';
 import {
   importFileBodySchema,
-  importFileQuerySchema,
   analyzeFileQuerySchema,
   runtimeMappingsSchema,
+  initializeImportFileBodySchema,
 } from './schemas';
 import type { StartDeps } from './types';
 import { checkFileUploadPrivileges } from './check_privileges';
 import { previewIndexTimeRange } from './preview_index_time_range';
 import { previewTikaContents } from './preview_tika_contents';
 
-function importData(
-  client: IScopedClusterClient,
-  id: string | undefined,
-  index: string,
-  settings: IndicesIndexSettings,
-  mappings: MappingTypeMapping,
-  ingestPipeline: IngestPipelineWrapper,
-  createPipelines: IngestPipelineWrapper[],
-  data: InputData
-) {
-  const { importData: importDataFunc } = importDataProvider(client);
-  return importDataFunc(id, index, settings, mappings, ingestPipeline, createPipelines, data);
+function getRequestAbortedSignal(request: KibanaRequest): AbortSignal {
+  const controller = new AbortController();
+  request.events.aborted$.subscribe(() => {
+    controller.abort();
+  });
+  return controller.signal;
 }
 
 /**
@@ -55,17 +48,17 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     .get({
       path: '/internal/file_upload/has_import_permission',
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because permissions will be checked by elasticsearch',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch',
-          },
-        },
         validate: {
           request: {
             query: schema.object({
@@ -118,7 +111,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       options: {
         body: {
           accepts: ['text/*', 'application/json'],
-          maxBytes: MAX_FILE_SIZE_BYTES,
+          maxBytes: MAX_FILE_UPLOAD_SIZE_BYTES,
         },
       },
     })
@@ -135,7 +128,74 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       async (context, request, response) => {
         try {
           const esClient = (await context.core).elasticsearch.client;
-          const result = await analyzeFile(esClient, request.body, request.query);
+          const { includePreview } = request.query;
+          const result = await analyzeFile(
+            esClient,
+            logger,
+            request.body,
+            omit(request.query, 'includePreview'),
+            includePreview === true,
+            getRequestAbortedSignal(request)
+          );
+          return response.ok({ body: result });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      }
+    );
+
+  /**
+   * @apiGroup FileDataVisualizer
+   *
+   * @api {post} /internal/file_upload/initialize_import Initialize import file process
+   * @apiName InitializeImportFile
+   * @apiDescription Creates an index and ingest pipelines for importing file data.
+   *
+   * @apiSchema (body) initializeImportFileBodySchema
+   */
+  router.versioned
+    .post({
+      path: '/internal/file_upload/initialize_import',
+      access: 'internal',
+      options: {
+        body: {
+          accepts: ['application/json'],
+          maxBytes: MAX_FILE_UPLOAD_SIZE_BYTES,
+        },
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because permissions will be checked by elasticsearch',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: initializeImportFileBodySchema,
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const { index, settings, mappings, ingestPipelines, existingIndex } = request.body;
+          const esClient = (await context.core).elasticsearch.client;
+
+          await updateTelemetry();
+
+          const { initializeImport } = importDataProvider(esClient);
+          const result = await initializeImport(
+            index,
+            settings,
+            mappings,
+            ingestPipelines,
+            existingIndex
+          );
+
           return response.ok({ body: result });
         } catch (e) {
           return response.customError(wrapError(e));
@@ -150,7 +210,6 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
    * @apiName ImportFile
    * @apiDescription Imports file data into elasticsearch index.
    *
-   * @apiSchema (query) importFileQuerySchema
    * @apiSchema (body) importFileBodySchema
    */
   router.versioned
@@ -160,24 +219,51 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       options: {
         body: {
           accepts: ['application/json'],
-          maxBytes: MAX_FILE_SIZE_BYTES,
+          maxBytes: MAX_FILE_UPLOAD_SIZE_BYTES,
+        },
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because permissions will be checked by elasticsearch',
         },
       },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch',
-          },
-        },
+
         validate: {
           request: {
-            query: importFileQuerySchema,
-            body: importFileBodySchema,
+            query: schema.object({
+              id: schema.maybe(schema.string()),
+            }),
+            body: schema.object({
+              index: schema.string(),
+              data: schema.arrayOf(schema.any(), { maxSize: 50000 }),
+              settings: schema.maybe(schema.any()),
+              /** Mappings */
+              mappings: schema.any(),
+              /** Ingest pipeline definition */
+              ingestPipeline: schema.maybe(
+                schema.object({
+                  id: schema.maybe(schema.string()),
+                  pipeline: schema.maybe(schema.any()),
+                })
+              ),
+              createPipelines: schema.maybe(
+                schema.arrayOf(
+                  schema.maybe(
+                    schema.object({
+                      id: schema.maybe(schema.string()),
+                      pipeline: schema.maybe(schema.any()),
+                    })
+                  ),
+                  { maxSize: 50000 }
+                )
+              ),
+            }),
           },
         },
       },
@@ -187,24 +273,67 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
           const { index, data, settings, mappings, ingestPipeline, createPipelines } = request.body;
           const esClient = (await context.core).elasticsearch.client;
 
-          // `id` being `undefined` tells us that this is a new import due to create a new index.
-          // follow-up import calls to just add additional data will include the `id` of the created
-          // index, we'll ignore those and don't increment the counter.
+          const { initializeImport, importData } = importDataProvider(esClient);
+
           if (id === undefined) {
-            await updateTelemetry();
+            const pipelines = [
+              ...(ingestPipeline ? [ingestPipeline] : []),
+              ...(createPipelines ?? []),
+            ] as IngestPipelineWrapper[];
+
+            const result = await initializeImport(index, settings, mappings, pipelines);
+            // format the response to match v1 response
+            const body = {
+              id: 'tempId',
+              index: result.index,
+              pipelineId: result.pipelineIds[0],
+              success: result.success,
+            };
+            return response.ok({ body });
           }
 
           const result = await importData(
-            esClient,
-            id,
             index,
-            settings,
-            mappings,
-            // @ts-expect-error
-            ingestPipeline,
-            createPipelines,
-            data
+            ingestPipeline?.id ?? '',
+            data,
+            getRequestAbortedSignal(request)
           );
+
+          return response.ok({ body: result });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      }
+    )
+    .addVersion(
+      {
+        version: '2',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because permissions will be checked by elasticsearch',
+          },
+        },
+        validate: {
+          request: {
+            body: importFileBodySchema,
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const { index, data, ingestPipelineId } = request.body;
+          const esClient = (await context.core).elasticsearch.client;
+
+          const { importData } = importDataProvider(esClient);
+          const result = await importData(
+            index,
+            ingestPipelineId,
+            data,
+            getRequestAbortedSignal(request)
+          );
+
           return response.ok({ body: result });
         } catch (e) {
           return response.customError(wrapError(e));
@@ -222,17 +351,17 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     .post({
       path: '/internal/file_upload/index_exists',
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because permissions will be checked by elasticsearch',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch',
-          },
-        },
         validate: {
           request: {
             body: schema.object({ index: schema.string() }),
@@ -279,26 +408,31 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
           request: {
             body: schema.object({
               /** Index or indexes for which to return the time range. */
-              index: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
+              index: schema.oneOf([
+                schema.string(),
+                schema.arrayOf(schema.string(), { maxSize: 10000 }),
+              ]),
               /** Name of the time field in the index. */
               timeFieldName: schema.string(),
               /** Query to match documents in the index(es). */
               query: schema.maybe(schema.any()),
               runtimeMappings: schema.maybe(runtimeMappingsSchema),
+              projectRouting: schema.maybe(schema.string()),
             }),
           },
         },
       },
       async (context, request, response) => {
         try {
-          const { index, timeFieldName, query, runtimeMappings } = request.body;
+          const { index, timeFieldName, query, runtimeMappings, projectRouting } = request.body;
           const esClient = (await context.core).elasticsearch.client;
           const resp = await getTimeFieldRange(
             esClient,
             index,
             timeFieldName,
             query,
-            runtimeMappings
+            runtimeMappings,
+            projectRouting
           );
 
           return response.ok({
@@ -333,7 +467,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
         validate: {
           request: {
             body: schema.object({
-              docs: schema.arrayOf(schema.any()),
+              docs: schema.arrayOf(schema.any(), { maxSize: 10000 }),
               pipeline: schema.any(),
               timeField: schema.string(),
             }),
@@ -441,6 +575,49 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
 
           return response.ok({
             body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      }
+    );
+
+  /**
+   * @apiGroup FileDataVisualizer
+   *
+   * @api {post} /internal/file_upload/index_searchable Check if an index is searchable
+   * @apiName CheckIndexSearchable
+   * @apiDescription Check if an index is searchable
+   */
+  router.versioned
+    .post({
+      path: '/internal/file_upload/index_searchable',
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['fileUpload:analyzeFile'],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: schema.object({ index: schema.string(), expectedCount: schema.number() }),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const { index, expectedCount } = request.body;
+          const esClient = (await context.core).elasticsearch.client;
+
+          const { count } = await esClient.asCurrentUser.count({ index });
+          const isSearchable = count >= expectedCount;
+
+          return response.ok({
+            body: { isSearchable, count },
           });
         } catch (e) {
           return response.customError(wrapError(e));

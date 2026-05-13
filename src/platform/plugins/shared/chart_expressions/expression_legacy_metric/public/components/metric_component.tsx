@@ -13,18 +13,16 @@ import {
   getColumnByAccessor,
   getAccessor,
   getFormatByAccessor,
-} from '@kbn/visualizations-plugin/common/utils';
-import { Datatable } from '@kbn/expressions-plugin/public';
-import { CustomPaletteState } from '@kbn/charts-plugin/public';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
+} from '@kbn/chart-expressions-common';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import type { CustomPaletteState } from '@kbn/charts-plugin/public';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import { getFormatService, getPaletteService } from '../services';
-import { VisParams, MetricOptions } from '../../common/types';
+import type { VisParams, MetricOptions } from '../../common/types';
 import { MetricVisValue } from './metric_value';
-import { formatValue, shouldApplyColor } from '../utils';
+import { formatValueAsText, formatValueAsReactNode, shouldApplyColor } from '../utils';
 import { needsLightText } from '../utils/palette';
 import { withAutoScale } from './with_auto_scale';
-
-import './metric.scss';
 
 export interface MetricVisComponentProps {
   visParams: Pick<VisParams, 'metric' | 'dimensions'>;
@@ -78,9 +76,9 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
             value = (value - min) / (max - min);
           }
 
-          const formattedValue = formatValue(value, formatter, 'html');
+          const formattedValue = formatValueAsReactNode(value, formatter);
           if (bucketColumnId) {
-            const bucketValue = formatValue(row[bucketColumnId], bucketFormatter);
+            const bucketValue = formatValueAsText(row[bucketColumnId], bucketFormatter);
             title = `${bucketValue} - ${title}`;
           }
 

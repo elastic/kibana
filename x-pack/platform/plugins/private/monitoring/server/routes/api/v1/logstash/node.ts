@@ -11,13 +11,10 @@ import {
 } from '../../../../../common/http_api/logstash';
 import { getNodeInfo } from '../../../../lib/logstash/get_node_info';
 import { handleError } from '../../../../lib/errors';
-import {
-  getMetrics,
-  isNamedMetricDescriptor,
-  NamedMetricDescriptor,
-} from '../../../../lib/details/get_metrics';
+import type { NamedMetricDescriptor } from '../../../../lib/details/get_metrics';
+import { getMetrics, isNamedMetricDescriptor } from '../../../../lib/details/get_metrics';
 import { metricSets } from './metric_set_node';
-import { MonitoringCore } from '../../../../types';
+import type { MonitoringCore } from '../../../../types';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getLogstashDataset } from '../../../../../common/get_index_patterns';
 
@@ -30,6 +27,12 @@ export function logstashNodeRoute(server: MonitoringCore) {
   server.route({
     method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/logstash/node/{logstashUuid}',
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'This route delegates authorization to the scoped ES cluster client',
+      },
+    },
     validate: {
       params: validateParams,
       body: validateBody,

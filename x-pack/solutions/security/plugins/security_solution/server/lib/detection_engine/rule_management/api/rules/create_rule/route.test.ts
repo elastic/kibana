@@ -26,12 +26,19 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { HttpAuthzError } from '../../../../../machine_learning/validation';
 import { getRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
+import type {
+  MockClients,
+  SecuritySolutionRequestHandlerContextMock,
+} from '../../../../routes/__mocks__/request_context';
+import { createMockEndpointAppContextService } from '../../../../../../endpoint/mocks';
 
 describe('Create rule route', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  let clients: MockClients;
+  let context: SecuritySolutionRequestHandlerContextMock;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
@@ -42,7 +49,16 @@ describe('Create rule route', () => {
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
+    context.securitySolution.getEndpointService.mockReturnValue(
+      createMockEndpointAppContextService()
+    );
+
     createRuleRoute(server.router);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('status codes', () => {
@@ -227,7 +243,7 @@ describe('Create rule route', () => {
       const response = await server.inject(request, requestContextMock.convertContext(context));
       expect(response.status).toEqual(403);
       expect(response.body.message).toEqual(
-        'User is not authorized to change isolate response actions'
+        'User is not authorized to create/update isolate response action'
       );
     });
     test('pass when provided with process action', async () => {
@@ -257,7 +273,7 @@ describe('Create rule route', () => {
       });
       const result = await server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        `response_actions.0.action_type_id: Invalid literal value, expected \".osquery\", response_actions.0.params.command: Invalid literal value, expected \"isolate\", response_actions.0.params.command: Invalid enum value. Expected 'kill-process' | 'suspend-process', received 'execute', response_actions.0.params.config: Required`
+        'command: Invalid input: expected "isolate", command: Invalid option: expected one of "kill-process"|"suspend-process", config: Invalid input: expected object, received undefined, command: Invalid input: expected "runscript"'
       );
     });
     test('fails when provided with payload missing data', async () => {
@@ -273,7 +289,7 @@ describe('Create rule route', () => {
       });
       const result = await server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        `response_actions.0.action_type_id: Invalid literal value, expected \".osquery\", response_actions.0.params.command: Invalid literal value, expected \"isolate\", response_actions.0.params.config.field: Required`
+        'command: Invalid input: expected "isolate", config.field: Invalid input: expected string, received undefined, command: Invalid input: expected "runscript"'
       );
     });
   });

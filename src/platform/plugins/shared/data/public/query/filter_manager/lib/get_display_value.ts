@@ -8,17 +8,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { Filter, DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import {
-  Filter,
   isPhraseFilter,
   isPhrasesFilter,
   isRangeFilter,
   isScriptedPhraseFilter,
   isScriptedRangeFilter,
   getFilterField,
-  DataViewBase,
-  DataViewFieldBase,
 } from '@kbn/es-query';
 import { getPhraseDisplayValue } from './mappers/map_phrase';
 import { getPhrasesDisplayValue } from './mappers/map_phrases';
@@ -72,5 +70,5 @@ export function getDisplayValueFromFilter(filter: Filter, indexPatterns: DataVie
     return getPhrasesDisplayValue(filter, valueFormatter);
   } else if (isRangeFilter(filter) || isScriptedRangeFilter(filter)) {
     return getRangeDisplayValue(filter, valueFormatter);
-  } else return filter.meta.value ?? '';
+  } else return String(filter.meta.value ?? '');
 }

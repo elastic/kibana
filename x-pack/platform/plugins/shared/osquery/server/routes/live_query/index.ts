@@ -12,13 +12,24 @@ import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getLiveQueryDetailsRoute } from './get_live_query_details_route';
 import { getLiveQueryResultsRoute } from './get_live_query_results_route';
 import { findLiveQueryRoute } from './find_live_query_route';
+import { getHistoryUsersRoute } from './get_history_users_route';
+import { getHistoryTagsRoute } from './get_history_tags_route';
+import { updateActionTagsRoute } from './update_action_tags_route';
+import { exportLiveQueryResultsRoute } from './export_live_query_results_route';
 
 export const initLiveQueryRoutes = (
   router: IRouter<DataRequestHandlerContext>,
   context: OsqueryAppContext
 ) => {
-  findLiveQueryRoute(router);
+  findLiveQueryRoute(router, context);
   createLiveQueryRoute(router, context);
-  getLiveQueryDetailsRoute(router);
-  getLiveQueryResultsRoute(router);
+  getLiveQueryDetailsRoute(router, context);
+  getLiveQueryResultsRoute(router, context);
+  if (context.experimentalFeatures.exportResults) {
+    exportLiveQueryResultsRoute(router, context);
+  }
+
+  getHistoryUsersRoute(router, context);
+  getHistoryTagsRoute(router, context);
+  updateActionTagsRoute(router, context);
 };

@@ -8,7 +8,8 @@
  */
 
 import { validRouteSecurity } from './security_route_config_validator';
-import { ReservedPrivilegesSet } from '@kbn/core-http-server';
+import { ReservedPrivilegesSet, type RouteSecurity } from '@kbn/core-http-server';
+import type { DeepPartial } from '@kbn/utility-types';
 
 describe('RouteSecurity validation', () => {
   it('should pass validation for valid route security with authz enabled and valid required privileges', () => {
@@ -19,6 +20,7 @@ describe('RouteSecurity validation', () => {
         },
         authc: {
           enabled: 'optional',
+          reason: 'some reason',
         },
       })
     ).not.toThrow();
@@ -161,6 +163,40 @@ describe('RouteSecurity validation', () => {
     );
   });
 
+  it('should fail validation when authc is minimal but reason is missing', () => {
+    const routeSecurity = {
+      authz: {
+        requiredPrivileges: ['read'],
+      },
+      authc: {
+        enabled: 'minimal',
+      },
+    };
+
+    expect(() =>
+      validRouteSecurity(routeSecurity as DeepPartial<RouteSecurity>)
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[authc.reason]: expected value of type [string] but got [undefined]"`
+    );
+  });
+
+  it('should fail validation when authc is optional but reason is missing', () => {
+    const routeSecurity = {
+      authz: {
+        requiredPrivileges: ['read'],
+      },
+      authc: {
+        enabled: 'optional',
+      },
+    };
+
+    expect(() =>
+      validRouteSecurity(routeSecurity as DeepPartial<RouteSecurity>)
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[authc.reason]: expected value of type [string] but got [undefined]"`
+    );
+  });
+
   it('should fail validation when authc is disabled but reason is missing', () => {
     const routeSecurity = {
       authz: {
@@ -176,21 +212,18 @@ describe('RouteSecurity validation', () => {
     );
   });
 
-  it('should fail validation when authc is provided in multiple configs', () => {
-    const routeSecurity = {
-      authz: {
-        requiredPrivileges: ['read'],
-      },
-      authc: {
-        enabled: false,
-      },
-    };
-
+  it('should pass validation when authc is minimal', () => {
     expect(() =>
-      validRouteSecurity(routeSecurity, { authRequired: false })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"Cannot specify both security.authc and options.authRequired"`
-    );
+      validRouteSecurity({
+        authz: {
+          requiredPrivileges: ['read'],
+        },
+        authc: {
+          enabled: 'minimal',
+          reason: 'some reason',
+        },
+      })
+    ).not.toThrow();
   });
 
   it('should pass validation when authc is optional', () => {
@@ -201,6 +234,7 @@ describe('RouteSecurity validation', () => {
         },
         authc: {
           enabled: 'optional',
+          reason: 'some reason',
         },
       })
     ).not.toThrow();
@@ -224,6 +258,40 @@ describe('RouteSecurity validation', () => {
     const routeSecurity = {
       authz: {
         requiredPrivileges: [ReservedPrivilegesSet.operator, ReservedPrivilegesSet.superuser],
+      },
+    };
+
+    expect(() => validRouteSecurity(routeSecurity)).not.toThrow();
+  });
+
+  it('should pass validation with anyOf defined', () => {
+    const routeSecurity = {
+      authz: {
+        requiredPrivileges: [
+          {
+            allRequired: [
+              { anyOf: ['privilege1', 'privilege2'] },
+              { anyOf: ['privilege3', 'privilege4'] },
+            ],
+          },
+        ],
+      },
+    };
+
+    expect(() => validRouteSecurity(routeSecurity)).not.toThrow();
+  });
+
+  it('should pass validation with allOf defined', () => {
+    const routeSecurity = {
+      authz: {
+        requiredPrivileges: [
+          {
+            anyRequired: [
+              { allOf: ['privilege1', 'privilege2'] },
+              { allOf: ['privilege3', 'privilege4'] },
+            ],
+          },
+        ],
       },
     };
 
@@ -363,6 +431,76 @@ describe('RouteSecurity validation', () => {
       })
     ).toThrowErrorMatchingInlineSnapshot(
       `"[authz.requiredPrivileges]: Operator privilege requires at least one additional non-operator privilege to be defined"`
+    );
+  });
+
+  it('should fail validation when anyOf does not satisfy minSize', () => {
+    const invalidRouteSecurity = {
+      authz: {
+        requiredPrivileges: [{ allRequired: [{ anyOf: ['privilege1'] }] }],
+      },
+    };
+
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.requiredPrivileges.0]: types that failed validation:
+      - [authz.requiredPrivileges.0.0.allRequired.0]: types that failed validation:
+       - [authz.requiredPrivileges.0.allRequired.0.0]: expected value of type [string] but got [Object]
+       - [authz.requiredPrivileges.0.allRequired.0.1.anyOf]: array size is [1], but cannot be smaller than [2]
+      - [authz.requiredPrivileges.0.1]: expected value of type [string] but got [Object]"
+    `);
+  });
+
+  it('should fail validation when allOf does not satisfy minSize', () => {
+    const invalidRouteSecurity = {
+      authz: {
+        requiredPrivileges: [{ anyRequired: [{ allOf: ['privilege1'] }, 'privilege2'] }],
+      },
+    };
+
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.requiredPrivileges.0]: types that failed validation:
+      - [authz.requiredPrivileges.0.0.anyRequired.0]: types that failed validation:
+       - [authz.requiredPrivileges.0.anyRequired.0.0]: expected value of type [string] but got [Object]
+       - [authz.requiredPrivileges.0.anyRequired.0.1.allOf]: array size is [1], but cannot be smaller than [2]
+      - [authz.requiredPrivileges.0.1]: expected value of type [string] but got [Object]"
+    `);
+  });
+
+  it('should fail validation when anyOf has duplicated privileges', () => {
+    const invalidRouteSecurity = {
+      authz: {
+        requiredPrivileges: [
+          {
+            allRequired: [
+              { anyOf: ['privilege1', 'privilege2'] },
+              { anyOf: ['privilege3', 'privilege1'] },
+            ],
+          },
+        ],
+      },
+    };
+
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.requiredPrivileges]: allRequired privileges must contain unique values"`
+    );
+  });
+
+  it('should fail validation when allOf has duplicated privileges', () => {
+    const invalidRouteSecurity = {
+      authz: {
+        requiredPrivileges: [
+          {
+            anyRequired: [
+              { allOf: ['privilege1', 'privilege2'] },
+              { allOf: ['privilege3', 'privilege1'] },
+            ],
+          },
+        ],
+      },
+    };
+
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.requiredPrivileges]: anyRequired privileges must contain unique values"`
     );
   });
 });

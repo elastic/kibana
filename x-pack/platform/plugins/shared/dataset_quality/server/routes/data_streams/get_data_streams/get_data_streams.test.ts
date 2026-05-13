@@ -12,9 +12,18 @@ import { getDataStreams } from '.';
 
 const mockGetMockMatchingDataStreams = jest.fn().mockImplementation(() => MATCHING_DATA_STREAMS);
 const mockGetDatasetPrivileges = jest.fn().mockImplementation(() => ({
-  canRead: true,
-  canMonitor: true,
-  canViewIntegrations: true,
+  datasetsPrivilages: {
+    'logs-*-*': {
+      canRead: true,
+      canMonitor: true,
+      canReadFailureStore: true,
+    },
+    'metrics-*-*': {
+      canRead: true,
+      canMonitor: true,
+      canReadFailureStore: true,
+    },
+  },
 }));
 const mockGetMockDataStreamPrivileges = jest.fn().mockImplementation(() => DATA_STREAMS_PRIVILEGES);
 
@@ -42,13 +51,15 @@ describe('getDataStreams', () => {
       esClient: esClientMock,
       types: ['logs', 'metrics'],
       uncategorisedOnly: true,
+      isSecurityEnabled: true,
     });
     expect(dataStreamService.getMatchingDataStreams).toHaveBeenCalledWith(
       expect.anything(),
       'logs-*-*,metrics-*-*'
     );
 
-    expect(result.datasetUserPrivileges.canMonitor).toBe(true);
+    expect(result.datasetUserPrivileges.datasetsPrivilages['logs-*-*'].canMonitor).toBe(true);
+    expect(result.datasetUserPrivileges.datasetsPrivilages['metrics-*-*'].canMonitor).toBe(true);
   });
 
   it('Passes datasetQuery parameter to the DataStreamService', async () => {
@@ -57,13 +68,14 @@ describe('getDataStreams', () => {
       esClient: esClientMock,
       datasetQuery: 'logs-nginx-*',
       uncategorisedOnly: true,
+      isSecurityEnabled: true,
     });
     expect(dataStreamService.getMatchingDataStreams).toHaveBeenCalledWith(
       expect.anything(),
       'logs-nginx-*'
     );
 
-    expect(result.datasetUserPrivileges.canMonitor).toBe(true);
+    expect(result.datasetUserPrivileges.datasetsPrivilages['logs-*-*'].canMonitor).toBe(true);
   });
 
   describe('uncategorized only option', () => {
@@ -73,6 +85,7 @@ describe('getDataStreams', () => {
         esClient: esClientMock,
         types: ['logs'],
         uncategorisedOnly: true,
+        isSecurityEnabled: true,
       });
       expect(results.dataStreams.length).toBe(1);
     });
@@ -82,6 +95,7 @@ describe('getDataStreams', () => {
         esClient: esClientMock,
         types: ['logs'],
         uncategorisedOnly: false,
+        isSecurityEnabled: true,
       });
       expect(results.dataStreams.length).toBe(5);
     });

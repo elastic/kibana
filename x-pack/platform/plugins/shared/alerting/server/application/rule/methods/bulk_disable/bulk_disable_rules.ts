@@ -4,15 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KueryNode, nodeBuilder } from '@kbn/es-query';
-import { SavedObjectsBulkUpdateObject, SavedObjectsBulkCreateObject } from '@kbn/core/server';
+import type { KueryNode } from '@kbn/es-query';
+import { nodeBuilder } from '@kbn/es-query';
+import type { SavedObjectsBulkUpdateObject, SavedObjectsBulkCreateObject } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
 import pMap from 'p-map';
-import { Logger } from '@kbn/core/server';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import type { RawRule, SanitizedRule, RawRuleAction } from '../../../../types';
+import type { RawRule, SanitizedRule } from '../../../../types';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
@@ -25,7 +27,8 @@ import {
   checkAuthorizationAndGetTotal,
   untrackRuleAlerts,
   updateMeta,
-  migrateLegacyActions,
+  bulkMigrateLegacyActions,
+  migrateLegacyLastRunOutcomeMsg,
 } from '../../../../rules_client/lib';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import type {
@@ -38,6 +41,7 @@ import { ruleDomainSchema } from '../../schemas';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import type { RuleParams, RuleDomain } from '../../types';
 import { bulkDisableRulesSo } from '../../../../data/rule';
+import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
 
 export const bulkDisableRules = async <Params extends RuleParams>(
   context: RulesClientContext,
@@ -72,7 +76,11 @@ export const bulkDisableRules = async <Params extends RuleParams>(
         action: 'DISABLE',
         logger: context.logger,
         bulkOperation: (filterKueryNode: KueryNode | null) =>
-          bulkDisableRulesWithOCC(context, { filter: filterKueryNode, untrack }),
+          bulkDisableRulesWithOCC(context, {
+            filter: filterKueryNode,
+            untrack,
+            totalNumOfRules: total,
+          }),
         filter: kueryNodeFilterWithAuth,
       })
   );
@@ -126,10 +134,12 @@ const bulkDisableRulesWithOCC = async (
   context: RulesClientContext,
   {
     filter,
-    untrack = false,
+    untrack,
+    totalNumOfRules,
   }: {
     filter: KueryNode | null;
     untrack: boolean;
+    totalNumOfRules: number;
   }
 ) => {
   const rulesFinder = await withSpan(
@@ -155,6 +165,7 @@ const bulkDisableRulesWithOCC = async (
     { name: 'Get rules, collect them and their attributes', type: 'rules' },
     async () => {
       for await (const response of rulesFinder.find()) {
+        await bulkMigrateLegacyActions({ context, rules: response.saved_objects });
         await pMap(response.saved_objects, async (rule) => {
           const ruleName = rule.attributes.name;
 
@@ -167,26 +178,10 @@ const bulkDisableRulesWithOCC = async (
               ruleNameToRuleIdMapping[rule.id] = ruleName;
             }
 
-            // migrate legacy actions only for SIEM rules
-            // TODO (http-versioning) Remove RawRuleAction and RawRule casts
-            const migratedActions = await migrateLegacyActions(context, {
-              ruleId: rule.id,
-              actions: rule.attributes.actions as RawRuleAction[],
-              references: rule.references,
-              attributes: rule.attributes as RawRule,
-            });
-
             // TODO (http-versioning) Remove casts when updateMeta has been converted
             const castedAttributes = rule.attributes as RawRule;
             const updatedAttributes = updateMeta(context, {
               ...castedAttributes,
-              ...(migratedActions.hasLegacyActions
-                ? {
-                    actions: migratedActions.resultedActions,
-                    throttle: undefined,
-                    notifyWhen: undefined,
-                  }
-                : {}),
               enabled: false,
               scheduledTaskId:
                 rule.attributes.scheduledTaskId === rule.id
@@ -194,6 +189,9 @@ const bulkDisableRulesWithOCC = async (
                   : null,
               updatedBy: username,
               updatedAt: new Date().toISOString(),
+              ...(castedAttributes.lastRun
+                ? { lastRun: migrateLegacyLastRunOutcomeMsg(castedAttributes.lastRun) }
+                : {}),
             });
 
             rulesToDisable.push({
@@ -202,9 +200,6 @@ const bulkDisableRulesWithOCC = async (
               attributes: {
                 ...updatedAttributes,
               } as RawRule,
-              ...(migratedActions.hasLegacyActions
-                ? { references: migratedActions.resultedReferences }
-                : {}),
             });
 
             context.auditLogger?.log(
@@ -243,7 +238,7 @@ const bulkDisableRulesWithOCC = async (
   // TODO (http-versioning): for whatever reasoning we are using SavedObjectsBulkUpdateObject
   // everywhere when it should be SavedObjectsBulkCreateObject. We need to fix it in
   // bulk_disable, bulk_enable, etc. to fix this cast
-
+  const bulkDisableTimestamp = Date.now();
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkCreate', type: 'rules' },
     () =>
@@ -253,6 +248,16 @@ const bulkDisableRulesWithOCC = async (
         savedObjectsBulkCreateOptions: { overwrite: true },
       })
   );
+
+  await logBulkRuleChanges({
+    ruleSOs: result.saved_objects,
+    rulesClientContext: context,
+    changesContext: {
+      action: RuleChangeTrackingAction.ruleDisable,
+      timestamp: bulkDisableTimestamp,
+      metadata: { bulkCount: totalNumOfRules },
+    },
+  });
 
   const taskIdsToDisable: string[] = [];
   const taskIdsToDelete: string[] = [];

@@ -5,15 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { uniq } from 'lodash';
 import { useAIAssistantAppService } from '../hooks/use_ai_assistant_app_service';
@@ -26,7 +18,13 @@ const starterPromptClassName = css`
 `;
 
 const starterPromptInnerClassName = css`
-  text-align: center !important;
+  text-align: left !important;
+`;
+
+const starterPromptTextClassName = css`
+  margin: 0;
+  white-space: normal;
+  word-break: break-word;
 `;
 
 export function StarterPrompts({ onSelectPrompt }: { onSelectPrompt: (prompt: string) => void }) {
@@ -48,23 +46,26 @@ export function StarterPrompts({ onSelectPrompt }: { onSelectPrompt: (prompt: st
   );
 
   return (
-    <EuiFlexGroup direction="row" gutterSize="m" wrap>
-      {starterPrompts.map(({ prompt, title, icon }) => (
+    <EuiFlexGroup direction="row" gutterSize="xs" wrap>
+      {starterPrompts.map(({ prompt, icon }) => (
         <EuiFlexItem key={prompt} className={starterPromptClassName}>
           <EuiPanel
-            paddingSize="m"
+            paddingSize="s"
             hasShadow={false}
             hasBorder
             onClick={() => onSelectPrompt(prompt)}
             className={starterPromptInnerClassName}
           >
-            <EuiSpacer size="s" />
-            <EuiIcon type={icon} size="xl" />
-            <EuiSpacer size="s" />
-            <EuiTitle size="xs">
-              <h2>{title}</h2>
-            </EuiTitle>
-            <EuiText size="s">{prompt}</EuiText>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type={icon} size="m" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="s">
+                  <p className={starterPromptTextClassName}>{prompt}</p>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>
       ))}

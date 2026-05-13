@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf, Type } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { RuleTypeSolution } from '@kbn/alerting-types';
 import { validateDurationSchema, parseDuration } from './lib';
 import { DEFAULT_CACHE_INTERVAL_MS } from './rules_settings';
+import { DEFAULT_GAP_AUTO_FILL_SCHEDULER_TIMEOUT } from './application/gaps/types/scheduler';
 
 export const DEFAULT_MAX_ALERTS = 1000;
+
 const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 const ruleTypeSchema = schema.object({
   id: schema.string(),
@@ -58,7 +62,17 @@ const rulesSchema = schema.object({
     }),
     ruleTypeOverrides: schema.maybe(schema.arrayOf(ruleTypeSchema)),
   }),
+  apiKeyType: schema.oneOf([schema.literal('es'), schema.literal('uiam')], {
+    defaultValue: 'es',
+  }),
 });
+
+const ruleChangeTrackingSolutions: Type<RuleTypeSolution | 'all'> = schema.oneOf([
+  schema.literal('security'),
+  schema.literal('observability'),
+  schema.literal('stack'),
+  schema.literal('all'),
+]);
 
 export const configSchema = schema.object({
   healthCheck: schema.object({
@@ -70,11 +84,33 @@ export const configSchema = schema.object({
   }),
   maxEphemeralActionsPerAlert: schema.maybe(schema.number()),
   enableFrameworkAlerts: schema.boolean({ defaultValue: true }),
+  ruleChangeTracking: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    scope: schema.arrayOf(ruleChangeTrackingSolutions, { defaultValue: ['security'] }),
+  }),
   cancelAlertsOnRuleTimeout: schema.boolean({ defaultValue: true }),
   rules: rulesSchema,
   rulesSettings: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
     cacheInterval: schema.number({ defaultValue: DEFAULT_CACHE_INTERVAL_MS }),
   }),
+  gapAutoFillScheduler: schema.maybe(
+    schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+      timeout: schema.maybe(
+        schema.string({
+          validate: validateDurationSchema,
+          defaultValue: DEFAULT_GAP_AUTO_FILL_SCHEDULER_TIMEOUT,
+        })
+      ),
+    })
+  ),
+  disabledRuleTypes: schema.maybe(
+    schema.arrayOf(schema.string({ minLength: 1 }), { defaultValue: [] })
+  ),
+  enabledRuleTypes: schema.maybe(
+    schema.arrayOf(schema.string({ minLength: 1 }), { defaultValue: [] })
+  ),
 });
 
 export type AlertingConfig = TypeOf<typeof configSchema>;

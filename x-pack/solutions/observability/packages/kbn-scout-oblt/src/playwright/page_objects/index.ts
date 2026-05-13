@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import { PageObjects, ScoutPage, createLazyPageObject } from '@kbn/scout';
+import type { PageObjects, ScoutPage } from '@kbn/scout';
+import { createLazyPageObject } from '@kbn/scout';
 import { OnboardingHomePage } from './onboarding_home';
 import { CustomLogsPage } from './custom_logs';
+import { ObservabilityNavigation } from './observability_navigation';
+
+export {
+  OBSERVABILITY_PRIMARY_NAV_LOAD_TIMEOUT_MS,
+  OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+} from './observability_navigation';
 
 export interface ObltPageObjects extends PageObjects {
   onboardingHome: OnboardingHomePage;
   customLogs: CustomLogsPage;
+  observabilityNavigation: ObservabilityNavigation;
 }
 
 export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): ObltPageObjects {
@@ -19,5 +27,6 @@ export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): Ob
     ...pageObjects,
     onboardingHome: createLazyPageObject(OnboardingHomePage, page),
     customLogs: createLazyPageObject(CustomLogsPage, page),
+    observabilityNavigation: createLazyPageObject(ObservabilityNavigation, page),
   };
 }

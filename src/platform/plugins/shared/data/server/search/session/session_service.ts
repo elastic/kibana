@@ -9,7 +9,7 @@
 
 import { notFound } from '@hapi/boom';
 import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
-import {
+import type {
   CoreSetup,
   CoreStart,
   KibanaRequest,
@@ -23,25 +23,34 @@ import type { AuthenticatedUser } from '@kbn/core/server';
 import { defer } from '@kbn/kibana-utils-plugin/common';
 import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/search-types';
 import { debounce } from 'lodash';
-import {
-  ENHANCED_ES_SEARCH_STRATEGY,
-  SEARCH_SESSION_TYPE,
+import { i18n } from '@kbn/i18n';
+import type {
   SearchSessionRequestInfo,
   SearchSessionSavedObjectAttributes,
   SearchSessionsFindResponse,
+  SearchSessionStatusesResponse,
   SearchSessionStatusResponse,
 } from '../../../common';
-import { ISearchSessionService, NoSearchIdInSessionError } from '../..';
-import { createRequestHash } from './utils';
-import { ConfigSchema, SearchSessionsConfigSchema } from '../../config';
-import { getSessionStatus } from './get_session_status';
+import { ENHANCED_ES_SEARCH_STRATEGY, SEARCH_SESSION_TYPE, SearchStatus } from '../../../common';
+import type { ISearchSessionService } from '../..';
+import { NoSearchIdInSessionError } from '../..';
+import { strategyToString } from '../../../common';
+import type { ConfigSchema, SearchSessionsConfigSchema } from '../../config';
+import { getSessionStatus } from './status/get_session_status';
+import { updateSessionStatus } from './status/update_session_status';
+import type { SessionStatus } from './types';
+import {
+  registerSearchSessionEBTManagerAnalytics,
+  SearchSessionEBTManager,
+  type ISearchSessionEBTManager,
+} from './ebt_manager';
 
 export interface SearchSessionDependencies {
   savedObjectsClient: SavedObjectsClientContract;
 }
 
 export interface SearchSessionStatusDependencies extends SearchSessionDependencies {
-  internalElasticsearchClient: ElasticsearchClient;
+  asCurrentUserElasticsearchClient: ElasticsearchClient;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -63,11 +72,13 @@ interface TrackIdQueueEntry {
 
   searchInfo: SearchSessionRequestInfo;
   requestHash: string;
+  skipRealmCheck: boolean;
 }
 
 export class SearchSessionService implements ISearchSessionService {
   private sessionConfig: SearchSessionsConfigSchema;
   private setupCompleted = false;
+  private searchSessionEBTManager?: ISearchSessionEBTManager;
 
   constructor(
     private readonly logger: Logger,
@@ -79,6 +90,11 @@ export class SearchSessionService implements ISearchSessionService {
 
   public setup(core: CoreSetup, deps: SetupDependencies) {
     this.setupCompleted = true;
+    registerSearchSessionEBTManagerAnalytics(core);
+    this.searchSessionEBTManager = new SearchSessionEBTManager(
+      core.analytics.reportEvent,
+      this.logger
+    );
   }
 
   public start(core: CoreStart, deps: StartDependencies) {
@@ -148,20 +164,22 @@ export class SearchSessionService implements ISearchSessionService {
   public get = async (
     { savedObjectsClient }: SearchSessionDependencies,
     user: AuthenticatedUser | null,
-    sessionId: string
+    sessionId: string,
+    skipRealmCheck: boolean = false
   ) => {
     this.logger.debug(`get | ${sessionId}`);
     const session = await savedObjectsClient.get<SearchSessionSavedObjectAttributes>(
       SEARCH_SESSION_TYPE,
       sessionId
     );
-    this.throwOnUserConflict(user, session);
+
+    this.throwOnUserConflict(user, session, skipRealmCheck);
 
     return session;
   };
 
   public find = async (
-    { savedObjectsClient, internalElasticsearchClient }: SearchSessionStatusDependencies,
+    { savedObjectsClient, asCurrentUserElasticsearchClient }: SearchSessionStatusDependencies,
     user: AuthenticatedUser | null,
     options: Omit<SavedObjectsFindOptions, 'type'>
   ): Promise<SearchSessionsFindResponse> => {
@@ -190,25 +208,20 @@ export class SearchSessionService implements ISearchSessionService {
 
     const sessionStatuses = await Promise.all(
       findResponse.saved_objects.map(async (so) => {
-        const sessionStatus = await getSessionStatus(
-          { internalClient: internalElasticsearchClient },
+        const status = await getSessionStatus(
+          {
+            esClient: asCurrentUserElasticsearchClient,
+          },
           so.attributes,
-          this.sessionConfig
+          { preferCachedStatus: true }
         );
-
-        return sessionStatus;
+        return { ...status, id: so.id };
       })
     );
 
     return {
       ...findResponse,
-      statuses: sessionStatuses.reduce<Record<string, SearchSessionStatusResponse>>(
-        (res, { status, errors }, index) => {
-          res[findResponse.saved_objects[index].id] = { status, errors };
-          return res;
-        },
-        {}
-      ),
+      statuses: this.mapSessionStatusesToResponse(sessionStatuses),
     };
   };
 
@@ -216,11 +229,12 @@ export class SearchSessionService implements ISearchSessionService {
     deps: SearchSessionDependencies,
     user: AuthenticatedUser | null,
     sessionId: string,
-    attributes: Partial<SearchSessionSavedObjectAttributes>
+    attributes: Partial<SearchSessionSavedObjectAttributes>,
+    skipRealmCheck: boolean = false
   ) => {
     this.logger.debug(`SearchSessionService: update | ${sessionId}`);
     if (!this.sessionConfig.enabled) throw new Error('Search sessions are disabled');
-    await this.get(deps, user, sessionId); // Verify correct user
+    await this.get(deps, user, sessionId, skipRealmCheck); // Verify correct user
     return deps.savedObjectsClient.update<SearchSessionSavedObjectAttributes>(
       SEARCH_SESSION_TYPE,
       sessionId,
@@ -266,7 +280,7 @@ export class SearchSessionService implements ISearchSessionService {
   /**
    * Used to batch requests that add searches into the session saved object
    * Requests are grouped and executed per sessionId
-   * @private
+   * @internal
    */
   private readonly trackIdBatchQueueMap = new Map<
     string /* sessionId */,
@@ -282,15 +296,18 @@ export class SearchSessionService implements ISearchSessionService {
   public trackId = async (
     deps: SearchSessionDependencies,
     user: AuthenticatedUser | null,
-    searchRequest: IKibanaSearchRequest,
     searchId: string,
-    options: ISearchOptions
+    options: ISearchOptions,
+    skipRealmCheck: boolean = false
   ) => {
-    const { sessionId, strategy = ENHANCED_ES_SEARCH_STRATEGY } = options;
+    const { sessionId, strategy = ENHANCED_ES_SEARCH_STRATEGY, requestHash } = options;
     if (!this.sessionConfig.enabled || !sessionId || !searchId) return;
-    if (!searchRequest.params) return;
-
-    const requestHash = createRequestHash(searchRequest.params);
+    if (!requestHash) {
+      this.logger.error(
+        `SearchSessionService: trackId | Missing requestHash | sessionId: "${sessionId}" | searchId:"${searchId}"`
+      );
+      return;
+    }
 
     this.logger.debug(
       `SearchSessionService: trackId | sessionId: "${sessionId}" | searchId:"${searchId}" | requestHash: "${requestHash}"`
@@ -298,7 +315,7 @@ export class SearchSessionService implements ISearchSessionService {
 
     const searchInfo: SearchSessionRequestInfo = {
       id: searchId,
-      strategy,
+      strategy: strategyToString(strategy),
     };
 
     if (!this.trackIdBatchQueueMap.has(sessionId)) {
@@ -316,7 +333,13 @@ export class SearchSessionService implements ISearchSessionService {
               },
               {}
             );
-            this.update(queue[0].deps, queue[0].user, sessionId, { idMapping: batchedIdMapping })
+            this.update(
+              queue[0].deps,
+              queue[0].user,
+              sessionId,
+              { idMapping: batchedIdMapping },
+              queue[0].skipRealmCheck
+            )
               .then(() => {
                 queue.forEach((q) => q.resolve());
               })
@@ -340,6 +363,7 @@ export class SearchSessionService implements ISearchSessionService {
       resolve: deferred.resolve,
       reject: deferred.reject,
       user,
+      skipRealmCheck,
     });
 
     scheduleProcessQueue();
@@ -370,13 +394,64 @@ export class SearchSessionService implements ISearchSessionService {
     const session = await this.get(deps, user, sessionId);
 
     const sessionStatus = await getSessionStatus(
-      { internalClient: deps.internalElasticsearchClient },
+      {
+        esClient: deps.asCurrentUserElasticsearchClient,
+      },
       session.attributes,
-      this.sessionConfig
+      { preferCachedStatus: true }
     );
 
-    return { status: sessionStatus.status, errors: sessionStatus.errors };
+    return this.mapSessionStatusToResponse(sessionStatus);
   }
+
+  public async updateStatuses(
+    deps: SearchSessionStatusDependencies,
+    user: AuthenticatedUser | null,
+    sessionIds: string[]
+  ): Promise<SearchSessionStatusesResponse> {
+    this.logger.debug(`SearchSessionService: updateStatus | ${sessionIds}`);
+    const sessions = await this.bulkGet(deps, user, sessionIds);
+
+    const sessionStatuses = await Promise.all(
+      sessions.map(async (so) => {
+        const status = await updateSessionStatus(
+          {
+            esClient: deps.asCurrentUserElasticsearchClient,
+            savedObjectsClient: deps.savedObjectsClient,
+            searchSessionEBTManager: this.searchSessionEBTManager,
+          },
+          so
+        );
+        return { ...status, id: so.id };
+      })
+    );
+
+    const sessionsData: SearchSessionStatusesResponse['sessions'] = {};
+    sessions.forEach((session) => {
+      sessionsData[session.id] = {
+        name: session.attributes.name,
+        restoreState: session.attributes.restoreState,
+        locatorId: session.attributes.locatorId,
+        appId: session.attributes.appId,
+      };
+    });
+
+    return { statuses: this.mapSessionStatusesToResponse(sessionStatuses), sessions: sessionsData };
+  }
+
+  private bulkGet = async (
+    { savedObjectsClient }: SearchSessionDependencies,
+    user: AuthenticatedUser | null,
+    sessionIds: string[]
+  ) => {
+    this.logger.debug(`bulkGet | ${sessionIds}`);
+    const sessions = await savedObjectsClient.bulkGet<SearchSessionSavedObjectAttributes>(
+      sessionIds.map((id) => ({ id, type: SEARCH_SESSION_TYPE }))
+    );
+    const filteredSessions = sessions.saved_objects.filter((session) => !session.error);
+    filteredSessions.forEach((session) => this.throwOnUserConflict(user, session));
+    return filteredSessions;
+  };
 
   /**
    * Look up an existing search ID that matches the given request in the given session so that the
@@ -387,20 +462,22 @@ export class SearchSessionService implements ISearchSessionService {
     deps: SearchSessionDependencies,
     user: AuthenticatedUser | null,
     searchRequest: IKibanaSearchRequest,
-    { sessionId, isStored, isRestore }: ISearchOptions
+    { sessionId, isStored, isRestore, requestHash }: ISearchOptions,
+    skipRealmCheck: boolean = false
   ) => {
     if (!this.sessionConfig.enabled) {
-      throw new Error('Search sessions are disabled');
+      throw new Error('Background search is disabled');
     } else if (!sessionId) {
       throw new Error('Session ID is required');
     } else if (!isStored) {
-      throw new Error('Cannot get search ID from a session that is not stored');
+      throw new Error('Cannot get search ID from a search that is not stored');
     } else if (!isRestore) {
-      throw new Error('Get search ID is only supported when restoring a session');
+      throw new Error('Get search ID is only supported when restoring a background search');
+    } else if (!requestHash) {
+      throw new Error('Request hash is required to get search ID from session');
     }
 
-    const session = await this.get(deps, user, sessionId);
-    const requestHash = createRequestHash(searchRequest.params);
+    const session = await this.get(deps, user, sessionId, skipRealmCheck);
     if (!Object.hasOwn(session.attributes.idMapping, requestHash)) {
       this.logger.debug(`SearchSessionService: getId | ${sessionId} | ${requestHash} not found`);
       this.logger.error(
@@ -422,8 +499,12 @@ export class SearchSessionService implements ISearchSessionService {
         includedHiddenTypes: [SEARCH_SESSION_TYPE],
       });
 
-      const internalElasticsearchClient = elasticsearch.client.asScoped(request).asInternalUser;
-      const deps = { savedObjectsClient, internalElasticsearchClient };
+      const asCurrentUserElasticsearchClient = elasticsearch.client.asScoped(request).asCurrentUser;
+
+      const deps = {
+        savedObjectsClient,
+        asCurrentUserElasticsearchClient,
+      };
       return {
         getId: this.getId.bind(this, deps, user),
         trackId: this.trackId.bind(this, deps, user),
@@ -436,6 +517,7 @@ export class SearchSessionService implements ISearchSessionService {
         cancel: this.cancel.bind(this, deps, user),
         delete: this.delete.bind(this, deps, user),
         status: this.status.bind(this, deps, user),
+        updateStatuses: this.updateStatuses.bind(this, deps, user),
         getConfig: () => this.config.search.sessions,
       };
     };
@@ -443,18 +525,76 @@ export class SearchSessionService implements ISearchSessionService {
 
   private throwOnUserConflict = (
     user: AuthenticatedUser | null,
-    session?: SavedObject<SearchSessionSavedObjectAttributes>
+    session?: SavedObject<SearchSessionSavedObjectAttributes>,
+    skipRealmCheck: boolean = false
   ) => {
     if (user === null || !session) return;
+
+    if (skipRealmCheck) {
+      this.logger.debug(
+        `Skipping realm check for user ${user.username} when accessing search session ${session.attributes.sessionId}.`
+      );
+    }
+
+    let matchesUser = true;
+
+    if (user.username !== session.attributes.username) {
+      matchesUser = false;
+    }
+
     if (
-      user.authentication_realm.type !== session.attributes.realmType ||
-      user.authentication_realm.name !== session.attributes.realmName ||
-      user.username !== session.attributes.username
+      !skipRealmCheck &&
+      (user.authentication_realm.type !== session.attributes.realmType ||
+        user.authentication_realm.name !== session.attributes.realmName)
     ) {
+      matchesUser = false;
+    }
+
+    if (!matchesUser) {
       this.logger.debug(
         `User ${user.username} has no access to search session ${session.attributes.sessionId}`
       );
       throw notFound();
     }
   };
+
+  private mapSessionStatusesToResponse(
+    sessionStatuses: Array<SessionStatus & { id: string }>
+  ): SearchSessionStatusesResponse['statuses'] {
+    const statuses: Record<string, SearchSessionStatusResponse> = {};
+
+    sessionStatuses.forEach((sessionStatus) => {
+      statuses[sessionStatus.id] = this.mapSessionStatusToResponse(sessionStatus);
+    });
+
+    return statuses;
+  }
+
+  private mapSessionStatusToResponse(sessionStatus: SessionStatus): SearchSessionStatusResponse {
+    const erroresSearches = sessionStatus.searchStatuses?.filter(
+      (search) => search.status === SearchStatus.ERROR && search.error
+    );
+
+    return {
+      status: sessionStatus.status,
+      errors: erroresSearches?.map((search) => this.mapSearchError(search.id, search.error!)) || [],
+    };
+  }
+
+  private mapSearchError(searchId: string, error: NonNullable<SearchSessionRequestInfo['error']>) {
+    if (error.message)
+      return i18n.translate('data.search.statusThrow', {
+        defaultMessage: `Search status for search with id {searchId} threw an error {message} (statusCode: {errorCode})`,
+        values: {
+          message: error.message,
+          errorCode: error.code,
+          searchId,
+        },
+      });
+
+    return i18n.translate('data.search.statusError', {
+      defaultMessage: `Search {searchId} completed with a {errorCode} status`,
+      values: { searchId, errorCode: error.code },
+    });
+  }
 }

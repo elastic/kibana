@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlyoutHeader,
@@ -23,16 +23,23 @@ import {
   EuiIcon,
   EuiTextColor,
 } from '@elastic/eui';
-import SemVer from 'semver/classes/semver';
+import type SemVer from 'semver/classes/semver';
 
 import { useFormIsModified } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { documentationService } from '../../../../../../services/documentation';
-import { Form, FormHook, FormDataProvider } from '../../../../shared_imports';
+import type { FormHook } from '../../../../shared_imports';
+import { Form, FormDataProvider } from '../../../../shared_imports';
 import { TYPE_DEFINITION } from '../../../../constants';
-import { Field, NormalizedField, NormalizedFields, MainType, SubType } from '../../../../types';
+import type {
+  Field,
+  NormalizedField,
+  NormalizedFields,
+  MainType,
+  SubType,
+} from '../../../../types';
 import { CodeBlock } from '../../../code_block';
 import { getParametersFormForType } from '../field_types';
-import { UpdateFieldFunc } from './use_update_field';
+import type { UpdateFieldFunc } from './use_update_field';
 import { EditFieldHeaderForm } from './edit_field_header_form';
 
 const limitStringLength = (text: string, limit = 18): string => {
@@ -59,11 +66,16 @@ const FormWrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) => 
 
 export const EditField = React.memo(
   ({ form, field, allFields, exitEdit, updateField, kibanaVersion }: Props) => {
+    const formBodyRef = useRef<HTMLDivElement>(null);
     const submitForm = async () => {
       const { isValid, data } = await form.submit();
 
       if (isValid) {
         updateField({ ...field, source: data });
+      } else {
+        const firstInvalidField =
+          formBodyRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]');
+        firstInvalidField?.focus();
       }
     };
 
@@ -120,7 +132,7 @@ export const EditField = React.memo(
                       flush="right"
                       href={linkDocumentation}
                       target="_blank"
-                      iconType="help"
+                      iconType="question"
                       data-test-subj="documentationLink"
                     >
                       {i18n.translate('xpack.idxMgmt.mappingsEditor.editField.typeDocumentation', {
@@ -145,43 +157,46 @@ export const EditField = React.memo(
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
-          <EditFieldHeaderForm
-            defaultValue={field.source}
-            isRootLevelField={field.parentId === undefined}
-            isMultiField={isMultiField}
-          />
+          <div ref={formBodyRef}>
+            <EditFieldHeaderForm
+              defaultValue={field.source}
+              isRootLevelField={field.parentId === undefined}
+              isMultiField={isMultiField}
+            />
 
-          <FormDataProvider pathsToWatch={['type', 'subType']}>
-            {({ type, subType }) => {
-              const ParametersForm = getParametersFormForType(
-                type?.[0]?.value,
-                subType?.[0]?.value
-              );
+            <FormDataProvider pathsToWatch={['type', 'subType']}>
+              {({ type, subType }) => {
+                const ParametersForm = getParametersFormForType(
+                  type?.[0]?.value,
+                  subType?.[0]?.value
+                );
 
-              if (!ParametersForm) {
-                return null;
-              }
+                if (!ParametersForm) {
+                  return null;
+                }
 
-              return (
-                <ParametersForm
-                  // As the component "ParametersForm" does not change when switching type, and all the props
-                  // also remain the same (===), adding a key give us *a new instance* each time we change the type or subType.
-                  // This will trigger an unmount of all the previous form fields and then mount the new ones.
-                  key={subType ?? type}
-                  field={field}
-                  allFields={allFields}
-                  isMultiField={isMultiField}
-                  kibanaVersion={kibanaVersion}
-                />
-              );
-            }}
-          </FormDataProvider>
+                return (
+                  <ParametersForm
+                    // As the component "ParametersForm" does not change when switching type, and all the props
+                    // also remain the same (===), adding a key give us *a new instance* each time we change the type or subType.
+                    // This will trigger an unmount of all the previous form fields and then mount the new ones.
+                    key={subType ?? type}
+                    field={field}
+                    allFields={allFields}
+                    isMultiField={isMultiField}
+                    kibanaVersion={kibanaVersion}
+                  />
+                );
+              }}
+            </FormDataProvider>
+          </div>
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter>
           {form.isSubmitted && !form.isValid && (
             <>
               <EuiCallOut
+                announceOnMount
                 title={i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.editFieldFlyout.validationErrorTitle',
                   {
@@ -212,7 +227,7 @@ export const EditField = React.memo(
                         )}
                         position="top"
                       >
-                        <span>
+                        <span tabIndex={0}>
                           <EuiTextColor color="subdued">
                             {i18n.translate(
                               'xpack.idxMgmt.mappingsEditor.editFieldFlyout.formCompletionGuide',
@@ -221,7 +236,7 @@ export const EditField = React.memo(
                               }
                             )}
                           </EuiTextColor>
-                          <EuiIcon type="questionInCircle" />
+                          <EuiIcon type="question" aria-hidden={true} />
                         </span>
                       </EuiToolTip>
                     </p>

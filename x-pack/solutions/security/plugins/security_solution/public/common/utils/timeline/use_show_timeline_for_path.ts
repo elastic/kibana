@@ -7,41 +7,47 @@
 
 import { useCallback, useMemo } from 'react';
 import { matchPath } from 'react-router-dom';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
 
-import { getLinksWithHiddenTimeline } from '../../links';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
-import { useSourcererDataView } from '../../../sourcerer/containers';
+import { ARTIFACT_MANAGEMENT_TAB_ROUTING_PATHS } from '../../../management/common/constants';
+import type { NormalizedLink } from '../../links';
+import { useNormalizedAppLinks } from '../../links/links_hooks';
 import { useKibana } from '../../lib/kibana';
 import { hasAccessToSecuritySolution } from '../../../helpers_access';
 
-const isTimelinePathVisible = (currentPath: string): boolean => {
-  const groupLinksWithHiddenTimelinePaths = getLinksWithHiddenTimeline().map((l) => l.path);
-  const hiddenTimelineRoutes = groupLinksWithHiddenTimelinePaths;
-  return !hiddenTimelineRoutes.find((route) => matchPath(currentPath, route));
+const useHiddenTimelineRoutes = () => {
+  const normalizedLinks = useNormalizedAppLinks();
+  const hiddenTimelineRoutes = useMemo(
+    () =>
+      Object.values(normalizedLinks).reduce((acc: string[], link: NormalizedLink) => {
+        if (link.hideTimeline) {
+          if (link.id === SecurityPageName.artifacts) {
+            acc.push(...ARTIFACT_MANAGEMENT_TAB_ROUTING_PATHS);
+          } else {
+            acc.push(link.path);
+          }
+        }
+        return acc;
+      }, []),
+    [normalizedLinks]
+  );
+  return hiddenTimelineRoutes;
 };
 
 export const useShowTimelineForGivenPath = () => {
-  const { indicesExist, dataViewId } = useSourcererDataView(SourcererScopeName.timeline);
-  const {
-    services: {
-      application: { capabilities },
-    },
-  } = useKibana();
+  const { capabilities } = useKibana().services.application;
   const userHasSecuritySolutionVisible = hasAccessToSecuritySolution(capabilities);
 
-  const isTimelineAllowed = useMemo(
-    () => userHasSecuritySolutionVisible && (indicesExist || dataViewId === null),
-    [indicesExist, dataViewId, userHasSecuritySolutionVisible]
-  );
+  const hiddenTimelineRoutes = useHiddenTimelineRoutes();
 
   const getIsTimelineVisible = useCallback(
     (pathname: string) => {
-      if (!isTimelineAllowed) {
+      if (!userHasSecuritySolutionVisible) {
         return false;
       }
-      return isTimelinePathVisible(pathname);
+      return !hiddenTimelineRoutes.some((route) => matchPath(pathname, route));
     },
-    [isTimelineAllowed]
+    [userHasSecuritySolutionVisible, hiddenTimelineRoutes]
   );
 
   return getIsTimelineVisible;

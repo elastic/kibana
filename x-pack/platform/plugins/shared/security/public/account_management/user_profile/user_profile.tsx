@@ -20,12 +20,11 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiIcon,
-  EuiKeyPadMenu,
-  EuiKeyPadMenuItem,
+  EuiIconTip,
   EuiPopover,
+  EuiSelect,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -36,22 +35,31 @@ import React, { useRef, useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
 import type { CoreStart, IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
+import { getAvailableLocales, i18n, toCanonicalLocaleId } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
+  betaBadgeStyle,
+  ContrastKeyPadMenu,
   FormChangesProvider,
   FormField,
   FormLabel,
   FormRow,
   OptionalText,
+  ThemeKeyPadMenu,
   useFormChanges,
   useFormChangesContext,
 } from '@kbn/security-form-components';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import type { DarkModeValue, UserProfileData } from '@kbn/user-profile-components';
+import type {
+  ContrastModeValue,
+  DarkModeValue,
+  LocaleValue,
+  UserProfileData,
+} from '@kbn/user-profile-components';
 import { UserAvatar, useUpdateUserProfile } from '@kbn/user-profile-components';
 
+import { usePrimeUserLocale } from './use_prime_user_locale';
 import { createImageHandler, getRandomColor, VALID_HEX_COLOR } from './utils';
 import type { AuthenticatedUser } from '../../../common';
 import { IMAGE_FILE_TYPES } from '../../../common/constants';
@@ -73,9 +81,12 @@ const formRowCSS = css`
 `;
 
 const pageHeaderCSS = css`
-  max-width: 1248px;
-  margin: auto;
   border-bottom: none;
+
+  .euiPageHeaderContent {
+    max-width: 1248px;
+    margin: auto;
+  }
 `;
 
 export interface UserProfileProps {
@@ -91,6 +102,10 @@ export interface UserSettingsEditorProps {
   formik: ReturnType<typeof useUserProfileForm>;
   isThemeOverridden: boolean;
   isOverriddenThemeDarkMode: boolean;
+}
+
+export interface UserLocaleEditorProps {
+  formik: ReturnType<typeof useUserProfileForm>;
 }
 
 export interface UserRoleProps {
@@ -110,6 +125,8 @@ export interface UserProfileFormValues {
     };
     userSettings: {
       darkMode: DarkModeValue;
+      contrastMode: ContrastModeValue;
+      locale: LocaleValue;
     };
   };
   avatarType: 'initials' | 'image';
@@ -189,113 +206,21 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
     return null;
   }
 
-  let idSelected = formik.values.data.userSettings.darkMode;
+  let colorModeIdSelected = formik.values.data.userSettings.darkMode;
 
   if (isThemeOverridden) {
     if (isOverriddenThemeDarkMode) {
-      idSelected = 'dark';
+      colorModeIdSelected = 'dark';
     } else {
-      idSelected = 'light';
+      colorModeIdSelected = 'light';
     }
   }
 
-  interface ThemeKeyPadItem {
-    id: string;
-    label: string;
-    icon: string;
-  }
-
-  const themeItem = ({ id, label, icon }: ThemeKeyPadItem) => {
-    return (
-      <EuiKeyPadMenuItem
-        name={id}
-        label={label}
-        data-test-subj={`themeKeyPadItem${id}`}
-        checkable="single"
-        isSelected={idSelected === id}
-        isDisabled={isThemeOverridden}
-        onChange={() => formik.setFieldValue('data.userSettings.darkMode', id)}
-      >
-        <EuiIcon type={icon} size="l" />
-      </EuiKeyPadMenuItem>
-    );
-  };
-
-  const themeMenu = (themeOverridden: boolean) => {
-    const themeKeyPadMenu = (
-      <EuiKeyPadMenu
-        aria-label={i18n.translate(
-          'xpack.security.accountManagement.userProfile.userSettings.themeGroupDescription',
-          {
-            defaultMessage: 'Elastic theme',
-          }
-        )}
-        data-test-subj="themeMenu"
-        checkable={{
-          legend: (
-            <FormLabel for="data.userSettings.darkMode">
-              <FormattedMessage
-                id="xpack.security.accountManagement.userProfile.userSettings.theme"
-                defaultMessage="Mode"
-              />
-            </FormLabel>
-          ),
-        }}
-        css={css`
-          inline-size: 420px; // Allow for 4 items to fit in a row instead of the default 3
-        `}
-      >
-        {themeItem({
-          id: 'system',
-          label: i18n.translate('xpack.security.accountManagement.userProfile.systemModeButton', {
-            defaultMessage: 'System',
-          }),
-          icon: 'desktop',
-        })}
-        {themeItem({
-          id: 'light',
-          label: i18n.translate('xpack.security.accountManagement.userProfile.lightModeButton', {
-            defaultMessage: 'Light',
-          }),
-          icon: 'sun',
-        })}
-        {themeItem({
-          id: 'dark',
-          label: i18n.translate('xpack.security.accountManagement.userProfile.darkModeButton', {
-            defaultMessage: 'Dark',
-          }),
-          icon: 'moon',
-        })}
-        {themeItem({
-          id: 'space_default',
-          label: i18n.translate('xpack.security.accountManagement.userProfile.defaultModeButton', {
-            defaultMessage: 'Space default',
-          }),
-          icon: 'spaces',
-        })}
-      </EuiKeyPadMenu>
-    );
-    return themeOverridden ? (
-      <EuiToolTip
-        data-test-subj="themeOverrideTooltip"
-        content={
-          <FormattedMessage
-            id="xpack.security.accountManagement.userProfile.overriddenMessage"
-            defaultMessage="This setting is overridden by the Kibana server and can not be changed."
-          />
-        }
-      >
-        {themeKeyPadMenu}
-      </EuiToolTip>
-    ) : (
-      themeKeyPadMenu
-    );
-  };
-
-  const deprecatedWarning = idSelected === 'space_default' && (
+  const deprecatedWarning = colorModeIdSelected === 'space_default' && (
     <>
       <EuiSpacer size="s" />
       <EuiCallOut
+        announceOnMount
         title={i18n.translate(
           'xpack.security.accountManagement.userProfile.deprecatedSpaceDefaultTitle',
           {
@@ -326,7 +251,7 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
         <h2>
           <FormattedMessage
             id="xpack.security.accountManagement.userProfile.userSettingsTitle"
-            defaultMessage="Theme"
+            defaultMessage="Appearance"
           />
         </h2>
       }
@@ -339,9 +264,93 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
     >
       <FormRow name="data.userSettings.darkMode" fullWidth>
         <>
-          {themeMenu(isThemeOverridden)}
+          <ThemeKeyPadMenu
+            name="data.userSettings.darkMode"
+            isDisabled={isThemeOverridden}
+            isThemeOverridden={isThemeOverridden}
+          />
           {deprecatedWarning}
         </>
+      </FormRow>
+
+      <FormRow name="data.userSettings.contrastMode" fullWidth>
+        <ContrastKeyPadMenu name="data.userSettings.contrastMode" />
+      </FormRow>
+    </EuiDescribedFormGroup>
+  );
+};
+
+export const UserLocaleEditor: FunctionComponent<UserLocaleEditorProps> = ({ formik }) => {
+  if (!formik.values.data) {
+    return null;
+  }
+
+  const availableLocales = getAvailableLocales();
+  if (availableLocales.length === 0) {
+    return null;
+  }
+
+  const localeOptions = availableLocales.map(({ id, label }) => ({ value: id, text: label }));
+
+  return (
+    <EuiDescribedFormGroup
+      fullWidth
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.security.accountManagement.userProfile.localeGroupTitle"
+            defaultMessage="Language"
+          />
+        </h2>
+      }
+      description={
+        <FormattedMessage
+          id="xpack.security.accountManagement.userProfile.localeGroupDescription"
+          defaultMessage="Select your preferred language for displaying dates, times, and other locale-specific data."
+        />
+      }
+    >
+      <FormRow
+        name="data.userSettings.locale"
+        label={
+          <FormLabel for="data.userSettings.locale">
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={true}>
+                <FormattedMessage
+                  id="xpack.security.accountManagement.userProfile.localeLabel"
+                  defaultMessage="Display language"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <div css={betaBadgeStyle}>
+                  <EuiIconTip
+                    aria-label={i18n.translate(
+                      'xpack.security.accountManagement.userProfile.localeBetaBadge',
+                      { defaultMessage: 'beta' }
+                    )}
+                    content={i18n.translate(
+                      'xpack.security.accountManagement.userProfile.localeBetaBadge.tooltip',
+                      {
+                        defaultMessage: 'The display language setting is currently a beta feature.',
+                      }
+                    )}
+                    type="beta"
+                    position="bottom"
+                  />
+                </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </FormLabel>
+        }
+        fullWidth
+      >
+        <FormField
+          as={EuiSelect}
+          name="data.userSettings.locale"
+          options={localeOptions}
+          data-test-subj="localeSelect"
+          fullWidth
+        />
       </FormRow>
     </EuiDescribedFormGroup>
   );
@@ -508,7 +517,7 @@ function UserAvatarEditor({
         </FormRow>
       ) : (
         <EuiFlexGroup responsive={false}>
-          <EuiFlexItem grow={false} style={{ width: 64 }}>
+          <EuiFlexItem grow={false} css={{ width: 64 }}>
             <FormRow
               label={
                 <FormLabel for="data.avatar.initials">
@@ -556,7 +565,7 @@ function UserAvatarEditor({
                     onClick={() => formik.setFieldValue('data.avatar.color', getRandomColor())}
                     size="xs"
                     flush="right"
-                    style={{ height: euiTheme.base }}
+                    css={{ height: euiTheme.base }}
                   >
                     <FormattedMessage
                       id="xpack.security.accountManagement.userProfile.randomizeButton"
@@ -686,11 +695,17 @@ const UserRoles: FunctionComponent<UserRoleProps> = ({ user }) => {
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         data-test-subj="userRolesPopover"
+        aria-label={i18n.translate(
+          'xpack.security.accountManagement.userProfile.moreRolesPopoverAriaLabel',
+          {
+            defaultMessage: 'More roles',
+          }
+        )}
       >
         <EuiBadgeGroup
           gutterSize="xs"
           data-test-subj="remainingRoles"
-          style={{
+          css={{
             maxWidth: '200px',
           }}
         >
@@ -724,6 +739,10 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
   const formChanges = useFormChanges();
   const titleId = useGeneratedHtmlId();
   const [showChangePasswordForm, setShowChangePasswordForm] = useState(false);
+
+  // Silently primes the user's profile locale to match the server-configured locale
+  // if they have no saved preference, ensuring the form shows a concrete value.
+  usePrimeUserLocale();
 
   const isCloudUser = user.elastic_cloud_user;
 
@@ -831,6 +850,8 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                       isOverriddenThemeDarkMode={isOverriddenThemeDarkMode}
                     />
                   )}
+                  {/* Cloud users change language via the Language modal in the user menu */}
+                  {isCloudUser ? null : <UserLocaleEditor formik={formik} />}
                 </Form>
               </KibanaPageTemplate.Section>
               {formChanges.count > 0 ? (
@@ -872,6 +893,10 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
           },
           userSettings: {
             darkMode: data.userSettings?.darkMode || 'space_default',
+            contrastMode: data.userSettings?.contrastMode || 'system',
+            locale:
+              data.userSettings?.locale ||
+              toCanonicalLocaleId(i18n.getLocale(), getAvailableLocales()),
           },
         }
       : undefined,
@@ -924,7 +949,11 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
       resetInitialValues(values);
 
       let isRefreshRequired = false;
-      if (initialValues.data?.userSettings.darkMode !== values.data?.userSettings.darkMode) {
+      if (
+        initialValues.data?.userSettings.darkMode !== values.data?.userSettings.darkMode ||
+        initialValues.data?.userSettings.contrastMode !== values.data?.userSettings.contrastMode ||
+        initialValues.data?.userSettings.locale !== values.data?.userSettings.locale
+      ) {
         isRefreshRequired = true;
       }
       showSuccessNotification({ isRefreshRequired });
@@ -976,11 +1005,11 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
   const { count } = useFormChangesContext();
 
   return (
-    <EuiFlexGroup alignItems="center" style={{ width: '100%' }} responsive={false}>
+    <EuiFlexGroup alignItems="center" css={{ width: '100%' }} responsive={false}>
       <EuiFlexItem>
         <EuiFlexGroup responsive={false} gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="dot" color="success" />
+            <EuiIcon type="dot" color="success" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <FormattedMessage

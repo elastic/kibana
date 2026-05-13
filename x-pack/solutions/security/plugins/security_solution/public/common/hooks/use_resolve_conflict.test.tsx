@@ -33,8 +33,7 @@ describe('useResolveConflict', () => {
     // Mock rison format in actual url
     (useLocation as jest.Mock).mockReturnValue({
       pathname: 'my/cool/path',
-      search:
-        'timeline=(activeTab:query,graphEventId:%27%27,id:%2704e8ffb0-2c2a-11ec-949c-39005af91f70%27,isOpen:!t)',
+      search: 'timeline=(activeTab:query,id:%2704e8ffb0-2c2a-11ec-949c-39005af91f70%27,isOpen:!t)',
     });
     (useKibana as jest.Mock).mockReturnValue({
       services: {
@@ -58,7 +57,6 @@ describe('useResolveConflict', () => {
       (useDeepEqualSelector as jest.Mock).mockImplementation(() => ({
         savedObjectId: 'current-saved-object-id',
         activeTab: 'some-tab',
-        graphEventId: 'current-graph-event-id',
         show: false,
       }));
       const { result } = renderHook(() => useResolveConflict());
@@ -75,7 +73,6 @@ describe('useResolveConflict', () => {
         },
         savedObjectId: 'current-saved-object-id',
         activeTab: 'some-tab',
-        graphEventId: 'current-graph-event-id',
         show: false,
       }));
       const { result } = renderHook(() => useResolveConflict());
@@ -114,7 +111,7 @@ describe('useResolveConflict', () => {
         currentObjectId: '04e8ffb0-2c2a-11ec-949c-39005af91f70',
         otherObjectId: 'new-id',
         otherObjectPath:
-          'my/cool/path?timeline=%28activeTab%3Aquery%2CgraphEventId%3A%27%27%2Cid%3Anew-id%2CisOpen%3A%21t%29',
+          'my/cool/path?timeline=%28activeTab%3Aquery%2Cid%3Anew-id%2CisOpen%3A%21t%29',
       });
       expect(result.current).toMatchInlineSnapshot(`
         <React.Fragment>
@@ -137,7 +134,6 @@ describe('useResolveConflict', () => {
           },
           savedObjectId: 'current-saved-object-id',
           activeTab: 'some-tab',
-          graphEventId: 'current-graph-event-id',
           show: false,
         }));
         mockGetLegacyUrlConflict.mockImplementation(() => mockTextContent);
@@ -148,7 +144,7 @@ describe('useResolveConflict', () => {
           currentObjectId: 'current-saved-object-id',
           otherObjectId: 'new-id',
           otherObjectPath:
-            'my/cool/path?foo=bar&timeline=%28activeTab%3Asome-tab%2CgraphEventId%3Acurrent-graph-event-id%2Cid%3Anew-id%2CisOpen%3A%21f%29',
+            'my/cool/path?foo=bar&timeline=%28activeTab%3Asome-tab%2Cid%3Anew-id%2CisOpen%3A%21f%29',
         });
         expect(result.current).toMatchInlineSnapshot(`
           <React.Fragment>

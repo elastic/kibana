@@ -8,31 +8,23 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PainlessLang, PainlessContext } from '@kbn/monaco';
+import type { PainlessContext } from '@kbn/monaco';
+import { PainlessLang } from '@kbn/monaco';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiFormRow,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiLink,
   EuiCallOut,
   EuiCode,
 } from '@elastic/eui';
 
-import {
-  useForm,
-  useFormData,
-  Form,
-  FormHook,
-  UseField,
-  TextField,
-  CodeEditor,
-  ValidationFunc,
-  FieldConfig,
-} from '../../shared_imports';
-import { RuntimeField, RuntimeType } from '../../types';
+import type { FormHook, ValidationFunc, FieldConfig } from '../../shared_imports';
+import { useForm, useFormData, Form, UseField, TextField, CodeEditor } from '../../shared_imports';
+import type { RuntimeField, RuntimeType } from '../../types';
 import { RUNTIME_FIELD_OPTIONS } from '../../constants';
 import { schema } from './schema';
 
@@ -235,6 +227,7 @@ const RuntimeFieldFormComp = ({
         <>
           <EuiSpacer />
           <EuiCallOut
+            announceOnMount={false}
             title={i18n.translate('xpack.runtimeFields.form.fieldShadowingCalloutTitle', {
               defaultMessage: 'Field shadowing',
             })}

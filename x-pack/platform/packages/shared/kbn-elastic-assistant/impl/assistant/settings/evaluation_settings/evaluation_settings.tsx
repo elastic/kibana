@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiComboBoxOptionOption, EuiComboBoxSingleSelectionShape } from '@elastic/eui';
 import {
   EuiAccordion,
   euiPaletteComplementary,
@@ -16,8 +17,6 @@ import {
   EuiSpacer,
   EuiComboBox,
   EuiButton,
-  EuiComboBoxOptionOption,
-  EuiComboBoxSingleSelectionShape,
   EuiTextColor,
   EuiFieldText,
   EuiFieldNumber,
@@ -34,10 +33,11 @@ import type {
 } from '@kbn/elastic-assistant-common';
 import { isEmpty } from 'lodash/fp';
 
+import moment from 'moment';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../../assistant_context';
 import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '../../../assistant_context/constants';
-import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
 import { getActionTypeTitle, getGenAiConfig } from '../../../connectorland/helpers';
 import { PRECONFIGURED_CONNECTOR } from '../../../connectorland/translations';
 import { usePerformEvaluation } from '../../api/evaluate/use_perform_evaluation';
@@ -49,13 +49,20 @@ const AS_PLAIN_TEXT: EuiComboBoxSingleSelectionShape = { asPlainText: true };
  * Evaluation Settings -- development-only feature for evaluating models
  */
 export const EvaluationSettings: React.FC = React.memo(() => {
-  const { actionTypeRegistry, http, setTraceOptions, toasts, traceOptions } = useAssistantContext();
-  const { data: connectors } = useLoadConnectors({ http, inferenceEnabled: true });
+  const { actionTypeRegistry, http, setTraceOptions, toasts, traceOptions, settings } =
+    useAssistantContext();
+  const { data: connectors } = useLoadConnectors({
+    http,
+    featureId: 'elastic_assistant',
+    settings,
+  });
   const { mutate: performEvaluation, isLoading: isPerformingEvaluation } = usePerformEvaluation({
     http,
     toasts,
   });
-  const { data: evalData } = useEvaluationData({ http });
+  const { data: evalData } = useEvaluationData({
+    http,
+  });
   const defaultGraphs = useMemo(() => (evalData as GetEvaluateResponse)?.graphs ?? [], [evalData]);
   const datasets = useMemo(() => (evalData as GetEvaluateResponse)?.datasets ?? [], [evalData]);
 
@@ -210,6 +217,9 @@ export const EvaluationSettings: React.FC = React.memo(() => {
       langSmithProject,
       runName,
       size: Number(size),
+      screenContext: {
+        timeZone: moment.tz.guess(),
+      },
     };
     performEvaluation(evalParams);
   }, [
@@ -391,6 +401,7 @@ export const EvaluationSettings: React.FC = React.memo(() => {
             onCreateOption={onGraphOptionsCreate}
             options={graphOptions}
             selectedOptions={selectedGraphOptions}
+            singleSelection // Remove once post_evaluate support running multiple graphs
             onChange={onGraphOptionsChange}
           />
         </EuiFormRow>

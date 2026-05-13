@@ -5,20 +5,11 @@
  * 2.0.
  */
 
-import {
-  MonitorFields,
-  ServiceLocationErrors,
-  SyntheticsMonitor,
-  SyntheticsMonitorSchedule,
-} from '../runtime_types';
+import type { ServiceLocationErrors } from '../runtime_types';
 
 export interface TestNowResponse {
-  schedule: SyntheticsMonitorSchedule;
-  locations: MonitorFields['locations'];
   errors?: ServiceLocationErrors;
   testRunId: string;
-  configId: string;
-  monitor: SyntheticsMonitor;
 }
 
 export interface AgentPolicyInfo {
@@ -28,4 +19,12 @@ export interface AgentPolicyInfo {
   status: string;
   description?: string;
   namespace?: string;
+  spaceIds?: string[];
+}
+
+export interface PackagePolicyLink {
+  locationId: string;
+  locationLabel: string;
+  agentPolicyId: string;
+  packagePolicyId: string;
 }

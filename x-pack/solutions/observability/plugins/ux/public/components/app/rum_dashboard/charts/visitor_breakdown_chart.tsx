@@ -7,8 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import {
+import type {
   CountIndexPatternColumn,
   PersistedIndexPatternLayer,
   TermsIndexPatternColumn,
@@ -16,7 +15,7 @@ import {
 } from '@kbn/lens-plugin/public';
 import { EuiText } from '@elastic/eui';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
 import { PROCESSOR_EVENT, TRANSACTION_TYPE } from '../../../../../common/elasticsearch_fieldnames';
@@ -97,7 +96,7 @@ export function VisitorBreakdownChart({
         from: start ?? '',
         to: end ?? '',
       }}
-      viewMode={ViewMode.VIEW}
+      viewMode={'view'}
       onFilter={filterHandler}
     />
   );

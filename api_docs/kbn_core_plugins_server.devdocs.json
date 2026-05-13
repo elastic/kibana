@@ -26,6 +26,8 @@
           "<TSetup, TStart, TPluginsSetup, TPluginsStart>"
         ],
         "path": "src/core/packages/plugins/server/src/types.ts",
+        "lineNumber": 286,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,6 +44,8 @@
               "<TPluginsStart, TStart>, plugins: TPluginsSetup) => TSetup"
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 297,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -57,7 +61,10 @@
                   "<TPluginsStart, TStart>"
                 ],
                 "path": "src/core/packages/plugins/server/src/types.ts",
+                "lineNumber": 297,
+                "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreSetup",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -72,7 +79,10 @@
                   "TPluginsSetup"
                 ],
                 "path": "src/core/packages/plugins/server/src/types.ts",
+                "lineNumber": 297,
+                "columnNumber": 49,
                 "deprecated": false,
+                "docsReferencedTypeName": "TPluginsSetup",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -92,6 +102,8 @@
               ", plugins: TPluginsStart) => TStart"
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 299,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -106,7 +118,10 @@
                   "CoreStart"
                 ],
                 "path": "src/core/packages/plugins/server/src/types.ts",
+                "lineNumber": 299,
+                "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreStart",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -121,7 +136,10 @@
                   "TPluginsStart"
                 ],
                 "path": "src/core/packages/plugins/server/src/types.ts",
+                "lineNumber": 299,
+                "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "TPluginsStart",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -147,6 +165,8 @@
               "<void>) | undefined"
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 301,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -169,6 +189,8 @@
           "<T>"
         ],
         "path": "src/core/packages/plugins/server/src/types.ts",
+        "lineNumber": 70,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -179,7 +201,15 @@
             "tags": [],
             "label": "deprecations",
             "description": [
-              "\nProvider for the {@link ConfigDeprecation} to apply to the plugin configuration."
+              "\nProvider for the ",
+              {
+                "pluginId": "@kbn/core-plugins-server",
+                "scope": "server",
+                "docId": "kibKbnCorePluginsServerPluginApi",
+                "section": "def-server.ConfigDeprecation",
+                "text": "ConfigDeprecation"
+              },
+              " to apply to the plugin configuration."
             ],
             "signature": [
               {
@@ -192,6 +222,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -209,6 +241,8 @@
               "<T> | undefined"
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -226,6 +260,8 @@
               "<T> | undefined"
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -236,7 +272,14 @@
             "tags": [],
             "label": "schema",
             "description": [
-              "\nSchema to use to validate the plugin configuration.\n\n{@link PluginConfigSchema}"
+              "\nSchema to use to validate the plugin configuration.\n\n",
+              {
+                "pluginId": "@kbn/core-plugins-server",
+                "scope": "server",
+                "docId": "kibKbnCorePluginsServerPluginApi",
+                "section": "def-server.PluginConfigSchema",
+                "text": "PluginConfigSchema"
+              }
             ],
             "signature": [
               {
@@ -249,6 +292,8 @@
               "<T>"
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -259,13 +304,22 @@
             "tags": [],
             "label": "exposeToUsage",
             "description": [
-              "\nExpose non-default configs to usage collection to be sent via telemetry.\nset a config to `true` to report the actual changed config value.\nset a config to `false` to report the changed config value as [redacted].\n\nAll changed configs except booleans and numbers will be reported\nas [redacted] unless otherwise specified.\n\n{@link MakeUsageFromSchema}"
+              "\nExpose non-default configs to usage collection to be sent via telemetry.\nset a config to `true` to report the actual changed config value.\nset a config to `false` to report the changed config value as [redacted].\n\nAll changed configs except booleans and numbers will be reported\nas [redacted] unless otherwise specified.\n\n",
+              {
+                "pluginId": "@kbn/core-plugins-server",
+                "scope": "server",
+                "docId": "kibKbnCorePluginsServerPluginApi",
+                "section": "def-server.MakeUsageFromSchema",
+                "text": "MakeUsageFromSchema"
+              }
             ],
             "signature": [
               "MakeUsageFromSchema",
               "<T> | undefined"
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 119,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -286,6 +340,8 @@
           "<ConfigSchema>"
         ],
         "path": "src/core/packages/plugins/server/src/types.ts",
+        "lineNumber": 316,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -300,6 +356,8 @@
               "symbol"
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 322,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -327,9 +385,11 @@
                 "section": "def-server.PackageInfo",
                 "text": "PackageInfo"
               },
-              ">; instanceUuid: string; configs: readonly string[]; }"
+              ">; instanceUuid: string; configs: readonly string[]; airgapped: boolean; }"
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 323,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -346,6 +406,8 @@
               "NodeInfo"
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 330,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -356,7 +418,15 @@
             "tags": [],
             "label": "logger",
             "description": [
-              "\n{@link LoggerFactory | logger factory} instance already bound to the plugin's logging context\n"
+              "\n",
+              {
+                "pluginId": "@kbn/core-plugins-server",
+                "scope": "server",
+                "docId": "kibKbnCorePluginsServerPluginApi",
+                "section": "def-server.LoggerFactory",
+                "text": "logger factory"
+              },
+              " instance already bound to the plugin's logging context\n"
             ],
             "signature": [
               {
@@ -368,6 +438,8 @@
               }
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 353,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -383,7 +455,7 @@
             "signature": [
               "{ legacy: { globalConfig$: ",
               "Observable",
-              "<Readonly<{ elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+              "<Readonly<{ elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",
@@ -409,7 +481,7 @@
               },
               ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: ",
               "ByteSizeValueUnit",
-              " | undefined) => string; }>; }>; }>>; get: () => Readonly<{ elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+              " | undefined) => string; }>; }>; }>>; get: () => Readonly<{ elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",
@@ -440,6 +512,8 @@
               "<T>; get: <T = ConfigSchema>() => T; }"
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 372,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -456,6 +530,8 @@
           "\nDescribes the set of required and optional properties plugin can define in its\nmandatory JSON manifest file.\n"
         ],
         "path": "src/core/packages/plugins/server/src/types.ts",
+        "lineNumber": 152,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -469,6 +545,8 @@
               "\nIdentifier of the plugin. Must be a string in camelCase. Part of a plugin public contract.\nOther plugins leverage it to access plugin API, navigate to the plugin, etc."
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 163,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -482,6 +560,8 @@
               "\nVersion of the plugin."
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 169,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -495,6 +575,8 @@
               "\nThe version of Kibana the plugin is compatible with, defaults to \"version\"."
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 174,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -511,6 +593,8 @@
               "PluginType"
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 179,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -521,12 +605,22 @@
             "tags": [],
             "label": "configPath",
             "description": [
-              "\nRoot {@link ConfigPath | configuration path} used by the plugin, defaults\nto \"id\" in snake_case format.\n"
+              "\nRoot ",
+              {
+                "pluginId": "@kbn/core-plugins-server",
+                "scope": "server",
+                "docId": "kibKbnCorePluginsServerPluginApi",
+                "section": "def-server.ConfigPath",
+                "text": "configuration path"
+              },
+              " used by the plugin, defaults\nto \"id\" in snake_case format.\n"
             ],
             "signature": [
               "string | string[]"
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 184,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -543,6 +637,8 @@
               "readonly string[]"
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 194,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -559,6 +655,8 @@
               "readonly string[]"
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 200,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -575,6 +673,8 @@
               "readonly string[]"
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 212,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -591,6 +691,8 @@
               "readonly string[]"
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 219,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -604,6 +706,8 @@
               "\nSpecifies whether plugin includes some client/browser specific functionality\nthat should be included into client bundle via `public/ui_plugin.js` file."
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 225,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -617,6 +721,8 @@
               "\nSpecifies whether plugin includes some server-side specific functionality."
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 231,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -635,6 +741,8 @@
               "string[] | undefined"
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 236,
+            "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
             "references": [
@@ -677,6 +785,8 @@
               "readonly string[] | undefined"
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 244,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -691,6 +801,8 @@
               "{ readonly name: string; readonly githubTeam?: string | undefined; }"
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 250,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -707,6 +819,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 262,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -723,6 +837,8 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 268,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -743,6 +859,8 @@
           "<TSetup, TPluginsSetup>"
         ],
         "path": "src/core/packages/plugins/server/src/types.ts",
+        "lineNumber": 275,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -759,6 +877,8 @@
               ", plugins: TPluginsSetup) => TSetup"
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 281,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -773,7 +893,10 @@
                   "CorePreboot"
                 ],
                 "path": "src/core/packages/plugins/server/src/types.ts",
+                "lineNumber": 281,
+                "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "CorePreboot",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -788,7 +911,10 @@
                   "TPluginsSetup"
                 ],
                 "path": "src/core/packages/plugins/server/src/types.ts",
+                "lineNumber": 281,
+                "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "TPluginsSetup",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -806,6 +932,8 @@
               "(() => void) | undefined"
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 283,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -832,6 +960,8 @@
           "<T[Key]> : boolean) | undefined; }"
         ],
         "path": "src/core/packages/plugins/server/src/types.ts",
+        "lineNumber": 53,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -851,6 +981,8 @@
           "<T[Key]> : boolean) | undefined; }"
         ],
         "path": "src/core/packages/plugins/server/src/types.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -870,6 +1002,8 @@
           "<T[Key]> : boolean) | undefined; }"
         ],
         "path": "src/core/packages/plugins/server/src/types.ts",
+        "lineNumber": 132,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -894,6 +1028,8 @@
           "<T>"
         ],
         "path": "src/core/packages/plugins/server/src/types.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -917,6 +1053,8 @@
           "<TSetup, TPluginsSetup>>"
         ],
         "path": "src/core/packages/plugins/server/src/types.ts",
+        "lineNumber": 448,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -933,7 +1071,10 @@
               "<unknown>"
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
+            "lineNumber": 460,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PluginInitializerContext",
             "trackAdoption": false
           }
         ],
@@ -947,7 +1088,7 @@
         "label": "SharedGlobalConfig",
         "description": [],
         "signature": [
-          "{ readonly elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; readonly path: Readonly<{ readonly data: string; }>; readonly savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+          "{ readonly elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; readonly path: Readonly<{ readonly data: string; }>; readonly savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -976,6 +1117,8 @@
           " | undefined) => string; }>; }>; }"
         ],
         "path": "src/core/packages/plugins/server/src/types.ts",
+        "lineNumber": 304,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -990,6 +1133,8 @@
         "label": "SharedGlobalConfigKeys",
         "description": [],
         "path": "src/core/packages/plugins/server/src/shared_global_config.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1003,9 +1148,11 @@
               "// We can add more if really needed"
             ],
             "signature": [
-              "readonly [\"shardTimeout\", \"requestTimeout\", \"pingTimeout\"]"
+              "readonly [\"shardTimeout\", \"requestTimeout\"]"
             ],
             "path": "src/core/packages/plugins/server/src/shared_global_config.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1020,6 +1167,8 @@
               "readonly [\"data\"]"
             ],
             "path": "src/core/packages/plugins/server/src/shared_global_config.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1034,6 +1183,8 @@
               "readonly [\"maxImportPayloadBytes\"]"
             ],
             "path": "src/core/packages/plugins/server/src/shared_global_config.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

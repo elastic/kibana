@@ -6,38 +6,37 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ChatForm, ChatFormFields, PlaygroundPageMode } from '../../types';
+import type { PlaygroundForm } from '../../types';
+import { PlaygroundFormFields, PlaygroundPageMode } from '../../types';
 import { ViewCodeFlyout } from './view_code_flyout';
 
 export const ViewCodeAction: React.FC<{ selectedPageMode: PlaygroundPageMode }> = ({
   selectedPageMode = PlaygroundPageMode.chat,
 }) => {
-  const { watch } = useFormContext<ChatForm>();
+  const { watch } = useFormContext<PlaygroundForm>();
   const [showFlyout, setShowFlyout] = useState(false);
-  const selectedIndices = watch(ChatFormFields.indices);
+  const selectedIndices = watch(PlaygroundFormFields.indices);
 
   return (
     <>
       {showFlyout && (
         <ViewCodeFlyout selectedPageMode={selectedPageMode} onClose={() => setShowFlyout(false)} />
       )}
-      <EuiButton
-        iconType="editorCodeBlock"
-        color="primary"
-        fill
+      <EuiButtonEmpty
+        iconType="export"
         onClick={() => setShowFlyout(true)}
         disabled={!selectedIndices || selectedIndices?.length === 0}
         data-test-subj="viewCodeActionButton"
         size="s"
       >
         <FormattedMessage
-          id="xpack.searchPlayground.viewCode.actionButtonLabel"
-          defaultMessage="View code"
+          id="xpack.searchPlayground.export.actionButtonLabel"
+          defaultMessage="Export"
         />
-      </EuiButton>
+      </EuiButtonEmpty>
     </>
   );
 };

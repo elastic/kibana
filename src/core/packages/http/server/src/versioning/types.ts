@@ -34,9 +34,16 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
   RouteConfig<unknown, unknown, unknown, Method>,
   'validate' | 'options'
 > & {
-  options?: Omit<
+  options?: Pick<
     RouteConfigOptions<Method>,
-    'access' | 'description' | 'summary' | 'deprecated' | 'discontinued'
+    | 'xsrfRequired'
+    | 'tags'
+    | 'body'
+    | 'timeout'
+    | 'excludeFromOAS'
+    | 'excludeFromRateLimiter'
+    | 'httpResource'
+    | 'availability'
   >;
   /** See {@link RouteConfigOptions<RouteMethod>['access']} */
   access: Exclude<RouteConfigOptions<Method>['access'], undefined>;
@@ -342,6 +349,11 @@ export interface AddVersionOpts<P, Q, B> {
 
   options?: {
     deprecated?: RouteDeprecationInfo;
+    /**
+     * @public
+     * {@inheritdoc RouteConfigOptions['oasOperationObject']}
+     */
+    oasOperationObject?: RouteConfigOptions<RouteMethod>['oasOperationObject'];
   };
 }
 

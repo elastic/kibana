@@ -8,19 +8,16 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { Vis } from '../../types';
+import type { Vis } from '../../types';
 import type {
   VisualizeInput,
   VisualizeEmbeddable,
-  VisualizeByValueInput,
-  VisualizeByReferenceInput,
-  VisualizeSavedObjectAttributes,
   VisualizeEmbeddableDeps,
 } from './visualize_embeddable';
 import { getHttp, getTimeFilter, getCapabilities } from '../../services';
 import { urlFor } from '../..';
 import { createVisualizeEmbeddableAsync } from './visualize_embeddable_async';
-import { AttributeService } from './attribute_service';
+import type { AttributeService } from './attribute_service';
 import { ErrorEmbeddable } from './error_embeddable';
 
 /** @deprecated
@@ -32,11 +29,7 @@ export const createVisEmbeddableFromObject =
   async (
     vis: Vis,
     input: Partial<VisualizeInput> & { id: string },
-    attributeService?: AttributeService<
-      VisualizeSavedObjectAttributes,
-      VisualizeByValueInput,
-      VisualizeByReferenceInput
-    >
+    attributeService?: AttributeService
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable> => {
     try {
       const visId = vis.id as string;

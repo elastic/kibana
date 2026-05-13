@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IUiSettingsClient, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import type { IUiSettingsClient, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
-import { ISearchStartSearchSource, SearchSource } from '@kbn/data-plugin/common';
+import type { ISearchStartSearchSource, SearchSource } from '@kbn/data-plugin/common';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
-import { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
-import { LocatorServicesDeps as Services } from '.';
-import { DiscoverAppLocatorParams } from '../../common';
+import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
+import type { DiscoverSessionTabAttributes } from '@kbn/saved-search-plugin/server';
+import type { LocatorServicesDeps as Services } from '.';
+import type { DiscoverAppLocatorParams } from '../../common';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
 import { searchSourceFromLocatorFactory } from './searchsource_from_locator';
 
@@ -37,6 +38,20 @@ const defaultSavedSearch: SavedObject<SavedSearchAttributes> = {
       searchSourceJSON:
         '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"testIndexRefName"}',
     },
+    tabs: [
+      {
+        id: 'tab-1',
+        label: 'Tab 1',
+        attributes: {
+          columns: ['response', 'url', 'clientip', 'machine.os', 'tags'],
+          sort: [['test', '134']],
+          kibanaSavedObjectMeta: {
+            searchSourceJSON:
+              '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"testIndexRefName"}',
+          },
+        },
+      },
+    ],
   } as unknown as SavedSearchAttributes,
 };
 
@@ -172,7 +187,26 @@ test('with locator params containing a timeRange', async () => {
 });
 
 test('with saved search containing ["_source"]', async () => {
-  mockSavedSearch.attributes.columns = ['_source'];
+  mockSavedSearch = {
+    ...defaultSavedSearch,
+    attributes: {
+      ...defaultSavedSearch.attributes,
+      tabs: [
+        {
+          id: 'tab-1',
+          label: 'Tab 1',
+          attributes: {
+            columns: ['_source'],
+            sort: [['test', '134']],
+            kibanaSavedObjectMeta: {
+              searchSourceJSON:
+                '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"testIndexRefName"}',
+            },
+          } as DiscoverSessionTabAttributes,
+        },
+      ],
+    },
+  };
 
   const provider = searchSourceFromLocatorFactory(mockServices);
   const searchSource = await provider(mockPayload[0].params);

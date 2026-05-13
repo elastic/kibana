@@ -8,11 +8,17 @@
 import { AttachmentType } from '../../domain/attachment/v1';
 import { UserActionTypes } from '../../domain/user_action/action/v1';
 import {
+  type CaseUserActionStatsResponse,
   CaseUserActionStatsResponseRt,
   CaseUserActionStatsRt,
   UserActionFindRequestRt,
   UserActionFindResponseRt,
 } from './v1';
+import {
+  CaseUserActionStatsSchema,
+  UserActionFindRequestSchema,
+  UserActionFindResponseSchema,
+} from '../../api_zod/user_action/v1';
 
 describe('User actions APIs', () => {
   describe('Find API', () => {
@@ -48,6 +54,18 @@ describe('User actions APIs', () => {
             perPage: 10,
           },
         });
+      });
+
+      it('zod: has expected attributes in request', () => {
+        const result = UserActionFindRequestSchema.safeParse(defaultRequest);
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual({ ...defaultRequest, page: 1, perPage: 10 });
+      });
+
+      it('zod: strips unknown fields', () => {
+        const result = UserActionFindRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual({ ...defaultRequest, page: 1, perPage: 10 });
       });
     });
 
@@ -110,15 +128,32 @@ describe('User actions APIs', () => {
           right: defaultRequest,
         });
       });
+
+      it('zod: has expected attributes in request', () => {
+        const result = UserActionFindResponseSchema.safeParse(defaultRequest);
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual(defaultRequest);
+      });
+
+      it('zod: strips unknown fields', () => {
+        const result = UserActionFindResponseSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual(defaultRequest);
+      });
     });
   });
 
   describe('User actions stats API', () => {
     describe('CaseUserActionStatsResponseRt', () => {
-      const defaultRequest = {
+      const defaultRequest: CaseUserActionStatsResponse = {
         total: 15,
+        total_deletions: 0,
         total_comments: 10,
+        total_comment_deletions: 0,
+        total_comment_creations: 0,
+        total_hidden_comment_updates: 0,
         total_other_actions: 5,
+        total_other_action_deletions: 0,
       };
 
       it('has expected attributes in request', () => {
@@ -141,10 +176,15 @@ describe('User actions APIs', () => {
     });
 
     describe('CaseUserActionStatsRt', () => {
-      const defaultRequest = {
+      const defaultRequest: CaseUserActionStatsResponse = {
         total: 100,
+        total_deletions: 0,
         total_comments: 60,
+        total_comment_deletions: 0,
+        total_comment_creations: 0,
+        total_hidden_comment_updates: 0,
         total_other_actions: 40,
+        total_other_action_deletions: 0,
       };
 
       it('has expected attributes in request', () => {
@@ -163,6 +203,18 @@ describe('User actions APIs', () => {
           _tag: 'Right',
           right: defaultRequest,
         });
+      });
+
+      it('zod: has expected attributes in request', () => {
+        const result = CaseUserActionStatsSchema.safeParse(defaultRequest);
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual(defaultRequest);
+      });
+
+      it('zod: strips unknown fields', () => {
+        const result = CaseUserActionStatsSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual(defaultRequest);
       });
     });
   });

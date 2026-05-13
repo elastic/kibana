@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiButtonIcon,
   EuiTitle,
   EuiFlexItem,
@@ -15,8 +15,9 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { MouseEvent, useState } from 'react';
-import { JourneyStep } from '../../../../../common/runtime_types';
+import type { MouseEvent } from 'react';
+import React, { useState } from 'react';
+import type { JourneyStep } from '../../../../../common/runtime_types';
 import { STATUS_LABEL } from '../../monitor/ping_list/translations';
 import { COLLAPSE_LABEL, EXPAND_LABEL, STEP_NAME_LABEL } from '../translations';
 import { StatusBadge } from '../status_badge';
@@ -169,7 +170,8 @@ export const StepsList = ({
             data-test-subj="observabilitySolutionColumnsButton"
             href={`${basePath}/app/uptime/journey/${item.monitor.check_group}/step/${item.synthetics?.step?.index}`}
             target="_blank"
-            iconType="visArea"
+            iconType="chartArea"
+            aria-label={VIEW_PERFORMANCE}
           />
         ) : (
           <StepDetailLink
@@ -190,7 +192,7 @@ export const StepsList = ({
             data-test-subj="uptimeStepListExpandBtn"
             onClick={() => toggleExpand({ journeyStep })}
             aria-label={expandedRows[journeyStep._id] ? COLLAPSE_LABEL : EXPAND_LABEL}
-            iconType={expandedRows[journeyStep._id] ? 'arrowUp' : 'arrowDown'}
+            iconType={expandedRows[journeyStep._id] ? 'chevronSingleUp' : 'chevronSingleDown'}
           />
         );
       },
@@ -234,6 +236,9 @@ export const StepsList = ({
       <EuiBasicTable
         compressed={compactView}
         loading={loading}
+        tableCaption={i18n.translate('xpack.uptime.synthetics.stepsList.tableCaption', {
+          defaultMessage: 'Journey step details',
+        })}
         columns={columns}
         error={error?.message}
         items={steps}

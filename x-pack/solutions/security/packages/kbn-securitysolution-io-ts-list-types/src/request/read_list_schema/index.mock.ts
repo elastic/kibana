@@ -7,7 +7,7 @@
 
 import { LIST_ID } from '../../constants/index.mock';
 
-import { ReadListSchema } from '.';
+import type { ReadListSchema } from '.';
 
 export const getReadListSchemaMock = (): ReadListSchema => ({
   id: LIST_ID,

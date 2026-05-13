@@ -17,15 +17,14 @@ exports[`DefaultEditorAgg component should init with the default set of props 1`
     <React.Fragment>
       <EuiToolTip
         content="Enable   aggregation"
-        delay="regular"
-        display="inlineBlock"
+        disableScreenReaderOutput={true}
         position="bottom"
       >
         <EuiButtonIcon
           aria-label="Enable   aggregation"
           color="text"
           data-test-subj="toggleDisableAggregationBtn enable"
-          iconType="eyeClosed"
+          iconType="eyeSlash"
           onClick={[Function]}
         />
       </EuiToolTip>

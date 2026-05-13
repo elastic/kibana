@@ -8,16 +8,19 @@
 import Boom from '@hapi/boom';
 import { getConnectorSo } from '../../../../data/connector';
 import { connectorSchema } from '../../schemas';
-import { Connector } from '../../types';
+import type { Connector } from '../../types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { isConnectorDeprecated } from '../../lib';
-import { GetParams } from './types';
+import type { GetParams } from './types';
+import { connectorFromInMemoryConnector } from '../../lib/connector_from_in_memory_connector';
+import { getAuthMode } from '../../lib/get_auth_mode';
 
 export async function get({
   context,
   id,
   throwIfSystemAction = true,
 }: GetParams): Promise<Connector> {
+  const { actionTypeRegistry } = context;
   try {
     await context.authorization.ensureAuthorized({ operation: 'get' });
   } catch (error) {
@@ -58,23 +61,17 @@ export async function get({
       })
     );
 
-    connector = {
+    connector = connectorFromInMemoryConnector({
       id,
-      actionTypeId: foundInMemoryConnector.actionTypeId,
-      name: foundInMemoryConnector.name,
-      isPreconfigured: foundInMemoryConnector.isPreconfigured,
-      isSystemAction: foundInMemoryConnector.isSystemAction,
-      isDeprecated: isConnectorDeprecated(foundInMemoryConnector),
-    };
-
-    if (foundInMemoryConnector.exposeConfig) {
-      connector.config = foundInMemoryConnector.config;
-    }
+      inMemoryConnector: foundInMemoryConnector,
+      actionTypeRegistry,
+    });
   } else {
     const result = await getConnectorSo({
       unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
       id,
     });
+    const authMode = getAuthMode(result.attributes.authMode as Connector['authMode'] | undefined);
 
     context.auditLogger?.log(
       connectorAuditEvent({
@@ -92,6 +89,8 @@ export async function get({
       isPreconfigured: false,
       isSystemAction: false,
       isDeprecated: isConnectorDeprecated(result.attributes),
+      isConnectorTypeDeprecated: actionTypeRegistry.isDeprecated(result.attributes.actionTypeId),
+      authMode,
     };
   }
 

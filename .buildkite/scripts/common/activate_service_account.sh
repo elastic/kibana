@@ -13,7 +13,9 @@ if [[ -z "$CALL_ARGUMENT" ]]; then
   exit 1
 elif [[ "$CALL_ARGUMENT" == "--unset-impersonation" ]]; then
   echo "Unsetting impersonation"
-  gcloud config unset auth/impersonate_service_account
+  if [[ -x "$(command -v gcloud)" ]]; then
+    gcloud config unset auth/impersonate_service_account
+  fi
   exit 0
 elif [[ "$CALL_ARGUMENT" == "--logout-gcloud" ]]; then
   echo "Logging out of gcloud"
@@ -74,6 +76,18 @@ if [[ -z "$EMAIL" ]]; then
       EMAIL="kibana-ci-access-perf-stats@$GCLOUD_EMAIL_POSTFIX"
       ;;
     "ci-artifacts.kibana.dev")
+      EMAIL="kibana-ci-access-artifacts@$GCLOUD_EMAIL_POSTFIX"
+      ;;
+    "ci-typescript-archives")
+      EMAIL="kibana-ci-access-ts-archives@$GCLOUD_EMAIL_POSTFIX"
+      ;;
+    "kibana-ai-assistant-kb-artifacts-dev" | "kibana-ai-assistant-kb-artifacts")
+      EMAIL="kibana-ci-access-ai-buckets@$GCLOUD_EMAIL_POSTFIX"
+      ;;
+    "kibana-ci-access-chromium-blds")
+      EMAIL="kibana-ci-access-chromium-blds@$GCLOUD_EMAIL_POSTFIX"
+      ;;
+    "kibana-ci-artifacts-"*)
       EMAIL="kibana-ci-access-artifacts@$GCLOUD_EMAIL_POSTFIX"
       ;;
     *)

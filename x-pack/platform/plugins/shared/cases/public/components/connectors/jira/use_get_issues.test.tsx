@@ -11,8 +11,7 @@ import { useKibana, useToasts } from '../../../common/lib/kibana';
 import { connector as actionConnector } from '../mock';
 import { useGetIssues } from './use_get_issues';
 import * as api from './api';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
+import { TestProviders } from '../../../common/mock';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('./api');
@@ -21,10 +20,8 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('useGetIssues', () => {
   const { http } = useKibanaMock().services;
-  let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
@@ -37,17 +34,18 @@ describe('useGetIssues', () => {
           actionConnector,
           query: 'Task',
         }),
-      { wrapper: appMockRender.AppWrapper }
+      { wrapper: TestProviders }
     );
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
-      expect(spy).toHaveBeenCalledWith({
-        http,
-        signal: expect.anything(),
-        connectorId: actionConnector.id,
-        title: 'Task',
-      });
+    });
+
+    expect(spy).toHaveBeenCalledWith({
+      http,
+      signal: expect.anything(),
+      connectorId: actionConnector.id,
+      title: 'Task',
     });
   });
 
@@ -60,7 +58,7 @@ describe('useGetIssues', () => {
           actionConnector,
           query: 'Task',
         }),
-      { wrapper: appMockRender.AppWrapper }
+      { wrapper: TestProviders }
     );
 
     expect(spy).not.toHaveBeenCalledWith();
@@ -82,13 +80,14 @@ describe('useGetIssues', () => {
           actionConnector,
           query: 'Task',
         }),
-      { wrapper: appMockRender.AppWrapper }
+      { wrapper: TestProviders }
     );
 
     await waitFor(() => {
       expect(result.current.isError).toBe(true);
-      expect(addError).toHaveBeenCalled();
     });
+
+    expect(addError).toHaveBeenCalled();
   });
 
   it('calls addError when the getIssues api returns successfully but contains an error', async () => {
@@ -109,12 +108,13 @@ describe('useGetIssues', () => {
           actionConnector,
           query: 'Task',
         }),
-      { wrapper: appMockRender.AppWrapper }
+      { wrapper: TestProviders }
     );
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
-      expect(addError).toHaveBeenCalled();
     });
+
+    expect(addError).toHaveBeenCalled();
   });
 });

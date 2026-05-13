@@ -7,13 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiDataGridColumn,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiListGroupItemProps,
-} from '@elastic/eui';
+import type { EuiDataGridColumn, EuiListGroupItemProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -113,7 +108,7 @@ export const useComparisonColumns = ({
         docIndex === 0 ? (
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiIcon type="pinFilled" />
+              <EuiIcon type="pinFill" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>{columnTitle}</EuiFlexItem>
           </EuiFlexGroup>

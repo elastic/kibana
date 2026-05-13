@@ -5,30 +5,14 @@
  * 2.0.
  */
 
-import type { dump } from 'js-yaml';
-
 import type { FullAgentConfigMap } from '../types/models/agent_cm';
+
+import type { YamlModule } from './yaml_utils';
+import { createYamlKeysSorter, toYaml } from './yaml_utils';
 
 const CM_KEYS_ORDER = ['apiVersion', 'kind', 'metadata', 'data'];
 
-export const fullAgentConfigMapToYaml = (
-  policy: FullAgentConfigMap,
-  toYaml: typeof dump
-): string => {
-  return toYaml(policy, {
-    skipInvalid: true,
-    sortKeys: (keyA: string, keyB: string) => {
-      const indexA = CM_KEYS_ORDER.indexOf(keyA);
-      const indexB = CM_KEYS_ORDER.indexOf(keyB);
-      if (indexA >= 0 && indexB < 0) {
-        return -1;
-      }
-
-      if (indexA < 0 && indexB >= 0) {
-        return 1;
-      }
-
-      return indexA - indexB;
-    },
-  });
+export const fullAgentConfigMapToYaml = (policy: FullAgentConfigMap, yaml: YamlModule): string => {
+  const sortCmKeys = createYamlKeysSorter(CM_KEYS_ORDER, yaml);
+  return toYaml(policy, { sortMapEntries: sortCmKeys, strict: false, schema: 'yaml-1.1' }, yaml);
 };

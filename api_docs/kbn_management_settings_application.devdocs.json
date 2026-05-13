@@ -22,6 +22,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/application/index.tsx",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,7 +44,10 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/application/index.tsx",
+            "lineNumber": 23,
+            "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "SettingsApplicationKibanaDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -57,12 +62,22 @@
         "tags": [],
         "label": "SettingsApplication",
         "description": [
-          "\nComponent for displaying the {@link SettingsApplication} component."
+          "\nComponent for displaying the ",
+          {
+            "pluginId": "@kbn/management-settings-application",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsApplicationPluginApi",
+            "section": "def-public.SettingsApplication",
+            "text": "SettingsApplication"
+          },
+          " component."
         ],
         "signature": [
           "() => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/application/application.tsx",
+        "lineNumber": 59,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -90,6 +105,8 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/application/services.tsx",
+        "lineNumber": 135,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -112,6 +129,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/application/services.tsx",
+            "lineNumber": 137,
+            "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -141,6 +160,8 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/application/services.tsx",
+        "lineNumber": 82,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -163,6 +184,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/application/services.tsx",
+            "lineNumber": 82,
+            "columnNumber": 97,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -202,6 +225,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/application/services.tsx",
+        "lineNumber": 75,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -235,6 +260,8 @@
           "Services"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/application/services.tsx",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

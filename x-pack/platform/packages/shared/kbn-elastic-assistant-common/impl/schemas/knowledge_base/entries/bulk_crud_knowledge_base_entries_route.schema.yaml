@@ -6,10 +6,19 @@ paths:
   /api/security_ai_assistant/knowledge_base/entries/_bulk_action:
     post:
       x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/api/security_ai_assistant/knowledge_base/entries/_bulk_action' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{"create":[{"name":"Runbook","type":"document","kbResource":"user","source":"manual","text":"Steps to triage an alert."}]}'
       x-labels: [ess, serverless]
       operationId: PerformKnowledgeBaseEntryBulkAction
       summary: Applies a bulk action to multiple Knowledge Base Entries
-      description: The bulk action is applied to all Knowledge Base Entries that match the filter or to the list of Knowledge Base Entries by their IDs
+      description: The bulk action is applied to all Knowledge Base Entries that match the filter or to the list of Knowledge Base Entries by their IDs.
       tags:
         - Knowledge Base Entries Bulk API
       requestBody:
@@ -24,10 +33,50 @@ paths:
                   type: array
                   items:
                     $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryCreateProps'
+                  description: List of Knowledge Base Entries to create.
+                  example: [
+                    {
+                      "name": "New Entry",
+                      "type": "document",
+                      "kbResource": "user",
+                      "source": "manual",
+                      "text": "This is the content of the new entry."
+                    }
+                  ]
                 update:
                   type: array
                   items:
                     $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryUpdateProps'
+                  description: List of Knowledge Base Entries to update.
+                  example: [
+                    {
+                      "id": "123",
+                      "name": "Updated Entry",
+                      "type": "document",
+                      "kbResource": "user",
+                      "source": "manual",
+                      "text": "Updated content."
+                    }
+                  ]
+            examples:
+              PerformKnowledgeBaseEntryBulkActionRequest:
+                value:
+                  create:
+                    - name: "New Entry"
+                      type: "document"
+                      kbResource: "user"
+                      source: "manual"
+                      text: "This is the content of the new entry."
+                  update:
+                    - id: "123"
+                      name: "Updated Entry"
+                      type: "document"
+                      kbResource: "user"
+                      source: "manual"
+                      text: "Updated content."
+                  delete:
+                    ids:
+                      - "789"
       responses:
         200:
           description: Successful bulk operation request
@@ -35,12 +84,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseEntryBulkCrudActionResponse'
+              examples:
+                PerformKnowledgeBaseEntryBulkActionResponse200Example:
+                  value:
+                    success: true
+                    statusCode: 200
+                    message: "Bulk action completed successfully."
+                    knowledgeBaseEntriesCount: 3
+                    attributes:
+                      results:
+                        updated:
+                          - id: "123"
+                            name: "Updated Entry"
+                            type: "document"
+                            kbResource: "user"
+                            source: "manual"
+                            text: "Updated content."
+                            createdAt: "2024-01-14T09:00:00.000Z"
+                            createdBy: "user@example.com"
+                            updatedAt: "2024-01-15T10:00:00.000Z"
+                            updatedBy: "user@example.com"
+                            namespace: "default"
+                            global: false
+                        created:
+                          - id: "456"
+                            name: "New Entry"
+                            type: "document"
+                            kbResource: "user"
+                            source: "manual"
+                            text: "This is the content of the new entry."
+                            createdAt: "2024-01-15T10:00:00.000Z"
+                            createdBy: "user@example.com"
+                            updatedAt: "2024-01-15T10:00:00.000Z"
+                            updatedBy: "user@example.com"
+                            namespace: "default"
+                            global: false
+                        deleted:
+                          - "789"
+                        skipped: []
+                      summary:
+                        failed: 0
+                        skipped: 0
+                        succeeded: 3
+                        total: 3
         400:
-          description: Generic Error
+          description: Bad Request response.
           content:
             application/json:
               schema:
                 $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryErrorSchema'
+              examples:
+                PerformKnowledgeBaseEntryBulkActionResponse400Example:
+                  value:
+                    statusCode: 400
+                    error: "Bad Request"
+                    message: "Invalid request body."
 
 components:
   schemas:
@@ -48,14 +146,19 @@ components:
       type: string
       enum:
         - KNOWLEDGE_BASE_ENTRY_NOT_MODIFIED
+      description: Reason why a Knowledge Base Entry was skipped during the bulk action.
 
     KnowledgeBaseEntryBulkActionSkipResult:
       type: object
       properties:
         id:
           type: string
+          description: ID of the skipped Knowledge Base Entry.
+          example: "123"
         name:
           type: string
+          description: Name of the skipped Knowledge Base Entry.
+          example: "Skipped Entry"
         skip_reason:
           $ref: '#/components/schemas/KnowledgeBaseEntryBulkActionSkipReason'
       required:
@@ -67,8 +170,12 @@ components:
       properties:
         id:
           type: string
+          description: ID of the Knowledge Base Entry that encountered an error.
+          example: "456"
         name:
           type: string
+          description: Name of the Knowledge Base Entry that encountered an error.
+          example: "Error Entry"
       required:
         - id
 
@@ -77,14 +184,21 @@ components:
       properties:
         message:
           type: string
+          description: Error message describing the issue.
+          example: "Failed to update entry."
         statusCode:
           type: integer
+          description: HTTP status code associated with the error.
+          example: 400
         err_code:
           type: string
+          description: Specific error code for the issue.
+          example: "UPDATE_FAILED"
         knowledgeBaseEntries:
           type: array
           items:
             $ref: '#/components/schemas/KnowledgeBaseEntryDetailsInError'
+          description: List of Knowledge Base Entries that encountered the error.
       required:
         - message
         - statusCode
@@ -97,18 +211,50 @@ components:
           type: array
           items:
             $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryResponse'
+          description: List of Knowledge Base Entries that were successfully updated.
+          example: [
+            {
+              "id": "123",
+              "name": "Updated Entry",
+              "type": "document",
+              "kbResource": "user",
+              "source": "manual",
+              "text": "Updated content."
+            }
+          ]
         created:
           type: array
           items:
             $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryResponse'
+          description: List of Knowledge Base Entries that were successfully created.
+          example: [
+            {
+              "id": "456",
+              "name": "New Entry",
+              "type": "document",
+              "kbResource": "user",
+              "source": "manual",
+              "text": "This is the content of the new entry."
+            }
+          ]
         deleted:
           type: array
           items:
             type: string
+          description: List of IDs of Knowledge Base Entries that were successfully deleted.
+          example: ["789"]
         skipped:
           type: array
           items:
             $ref: '#/components/schemas/KnowledgeBaseEntryBulkActionSkipResult'
+          description: List of Knowledge Base Entries that were skipped during the bulk action.
+          example: [
+            {
+              "id": "123",
+              "name": "Skipped Entry",
+              "skip_reason": "KNOWLEDGE_BASE_ENTRY_NOT_MODIFIED"
+            }
+          ]
       required:
         - updated
         - created
@@ -120,12 +266,20 @@ components:
       properties:
         failed:
           type: integer
+          description: Number of Knowledge Base Entries that failed during the bulk action.
+          example: 2
         skipped:
           type: integer
+          description: Number of Knowledge Base Entries that were skipped during the bulk action.
+          example: 1
         succeeded:
           type: integer
+          description: Number of Knowledge Base Entries that were successfully processed during the bulk action.
+          example: 5
         total:
           type: integer
+          description: Total number of Knowledge Base Entries involved in the bulk action.
+          example: 8
       required:
         - failed
         - skipped
@@ -137,12 +291,20 @@ components:
       properties:
         success:
           type: boolean
+          description: Indicates whether the bulk action was successful.
+          example: true
         statusCode:
           type: integer
+          description: HTTP status code of the response.
+          example: 200
         message:
           type: string
+          description: Message describing the result of the bulk action.
+          example: "Bulk action completed successfully."
         knowledgeBaseEntriesCount:
           type: integer
+          description: Total number of Knowledge Base Entries processed.
+          example: 8
         attributes:
           type: object
           properties:
@@ -154,12 +316,25 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/NormalizedKnowledgeBaseEntryError'
+              description: List of errors encountered during the bulk action.
+              example: [
+                {
+                  "message": "Failed to update entry.",
+                  "statusCode": 400,
+                  "err_code": "UPDATE_FAILED",
+                  "knowledgeBaseEntries": [
+                    {
+                      "id": "456",
+                      "name": "Error Entry"
+                    }
+                  ]
+                }
+              ]
           required:
             - results
             - summary
       required:
         - attributes
-
 
     KnowledgeBaseEntryBulkActionBase:
       x-inline: true
@@ -167,10 +342,12 @@ components:
       properties:
         query:
           type: string
-          description: Query to filter Knowledge Base Entries
+          description: Query to filter Knowledge Base Entries.
+          example: "status:active AND category:technology"
         ids:
           type: array
-          description: Array of Knowledge base Entry IDs
+          description: Array of Knowledge Base Entry IDs.
           minItems: 1
           items:
             type: string
+          example: ["123", "456", "789"]

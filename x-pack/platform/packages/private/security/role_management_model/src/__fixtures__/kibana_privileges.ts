@@ -11,7 +11,7 @@ import {
   featurePrivilegeIterator,
   subFeaturePrivilegeIterator,
 } from '@kbn/features-plugin/server/feature_privilege_iterator';
-import type { LicenseType } from '@kbn/licensing-plugin/server';
+import type { LicenseType } from '@kbn/licensing-types';
 import { Actions, privilegesFactory } from '@kbn/security-authorization-core';
 import type { SecurityLicenseFeatures } from '@kbn/security-plugin-types-common';
 

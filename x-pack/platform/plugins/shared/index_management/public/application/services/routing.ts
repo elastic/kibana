@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import { ApplicationStart } from '@kbn/core/public';
-import { HttpSetup } from '@kbn/core/public';
 import { Section } from '../../../common/constants';
 import type { IndexDetailsTabId } from '../../../common/constants';
-import { ExtensionsService } from '../../services/extensions_service';
-import { IndexDetailsSection } from '../../../common/constants';
 
 export const getTemplateListLink = () => `/templates`;
 
@@ -37,6 +33,8 @@ export const getTemplateCloneLink = (name: string, isLegacy?: boolean) => {
   }
   return encodeURI(url);
 };
+
+export const getTemplateCreateLink = () => `/create_template`;
 
 export const getIndexListUri = (filter?: string, includeHiddenIndices?: boolean) => {
   let url = `/${Section.Indices}`;
@@ -87,26 +85,22 @@ export const getComponentTemplateDetailLink = (name: string) => {
   return `/component_templates/${encodeURIComponent(name)}`;
 };
 
-export const navigateToIndexDetailsPage = (
-  indexName: string,
-  indicesListURLParams: string,
-  extensionsService: ExtensionsService,
-  application: ApplicationStart,
-  http: HttpSetup,
-  tabId?: IndexDetailsSection
-) => {
-  if (!extensionsService.indexDetailsPageRoute) {
-    application.navigateToUrl(
-      http.basePath.prepend(
-        `/app/management/data/index_management${getIndexDetailsLink(
-          indexName,
-          indicesListURLParams,
-          tabId
-        )}`
-      )
-    );
-  } else {
-    const route = extensionsService.indexDetailsPageRoute.renderRoute(indexName, tabId);
-    application.navigateToUrl(http.basePath.prepend(route));
+export const getComponentTemplateListLink = (filter?: string) => {
+  let url = '/component_templates';
+  if (filter) {
+    url = `${url}?filter=${encodeURIComponent(filter)}`;
   }
+  return url;
+};
+
+export const getComponentTemplateEditLink = (name: string) => {
+  return `/edit_component_template/${encodeURIComponent(name)}`;
+};
+
+export const getComponentTemplateCloneLink = (name: string) => {
+  return `/create_component_template/${encodeURIComponent(name)}`;
+};
+
+export const getComponentTemplateCreateLink = (name: string) => {
+  return `/create_component_template?name=${encodeURIComponent(name)}`;
 };

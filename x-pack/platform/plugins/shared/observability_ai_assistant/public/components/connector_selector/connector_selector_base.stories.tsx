@@ -5,13 +5,14 @@
  * 2.0.
  */
 import React from 'react';
-import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
-import { FindActionResult } from '@kbn/actions-plugin/server';
-import { ComponentProps } from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
+import type { InferenceConnector } from '@kbn/inference-common';
+import { InferenceConnectorType } from '@kbn/inference-common';
+import type { ComponentProps } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { ConnectorSelectorBase as Component } from './connector_selector_base';
 
-const meta: ComponentMeta<typeof Component> = {
+const meta: Meta<typeof Component> = {
   component: Component,
   title: 'app/Molecules/ConnectorSelectorBase',
 };
@@ -26,26 +27,42 @@ const render = (props: ComponentProps<typeof Component>) => {
   );
 };
 
-export const Loaded: ComponentStoryObj<typeof Component> = {
+export const Loaded: StoryObj<typeof Component> = {
   args: {
     loading: false,
     selectedConnector: 'gpt-4',
     connectors: [
-      { id: 'gpt-4', name: 'OpenAI GPT-4' },
-      { id: 'gpt-3.5-turbo', name: 'OpenAI GPT-3.5 Turbo' },
-    ] as FindActionResult[],
+      {
+        connectorId: 'gpt-4',
+        name: 'OpenAI GPT-4',
+        type: InferenceConnectorType.OpenAI,
+        config: {},
+        capabilities: {},
+        isInferenceEndpoint: false,
+        isPreconfigured: false,
+      },
+      {
+        connectorId: 'gpt-3.5-turbo',
+        name: 'OpenAI GPT-3.5 Turbo',
+        type: InferenceConnectorType.OpenAI,
+        config: {},
+        capabilities: {},
+        isInferenceEndpoint: false,
+        isPreconfigured: false,
+      },
+    ] as InferenceConnector[],
   },
   render,
 };
 
-export const Loading: ComponentStoryObj<typeof Component> = {
+export const Loading: StoryObj<typeof Component> = {
   args: {
     loading: true,
   },
   render,
 };
 
-export const Empty: ComponentStoryObj<typeof Component> = {
+export const Empty: StoryObj<typeof Component> = {
   args: {
     loading: false,
     connectors: [],
@@ -53,7 +70,7 @@ export const Empty: ComponentStoryObj<typeof Component> = {
   render,
 };
 
-export const FailedToLoad: ComponentStoryObj<typeof Component> = {
+export const FailedToLoad: StoryObj<typeof Component> = {
   args: {
     loading: false,
     error: new Error('Failed to load connectors'),

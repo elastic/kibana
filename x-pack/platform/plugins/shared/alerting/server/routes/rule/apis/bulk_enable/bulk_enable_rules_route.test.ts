@@ -8,14 +8,14 @@
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { bulkEnableRulesRoute } from './bulk_enable_rules_route';
-import { BulkEnableRulesResult } from '../../../../application/rule/methods/bulk_enable';
+import type { BulkEnableRulesResult } from '../../../../application/rule/methods/bulk_enable';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled';
 import { verifyApiAccess } from '../../../../lib/license_api_access';
-import { RuleAction, RuleSystemAction } from '../../../../types';
-import { Rule, RuleParams } from '../../../../application/rule/types';
+import type { RuleAction, RuleSystemAction } from '../../../../types';
+import type { Rule, RuleParams } from '../../../../application/rule/types';
 
 const rulesClient = rulesClientMock.create();
 

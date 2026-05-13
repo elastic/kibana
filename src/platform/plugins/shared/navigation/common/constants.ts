@@ -9,9 +9,16 @@
 
 export const DEFAULT_ROUTE_UI_SETTING_ID = 'defaultRoute';
 
+export const AGENT_BUILDER_NAV_AT_TOP_FLAG = 'navigation.agentBuilderAtTop';
+
 export const DEFAULT_ROUTES = {
   classic: '/app/home',
-  es: '/app/elasticsearch/overview',
-  oblt: '/app/observabilityOnboarding',
+  es: '/app/elasticsearch/home',
+  search: '/app/elasticsearch/home',
+  // O11y aliases
+  oblt: '/app/observability/landing',
+  observability: '/app/observability/landing',
   security: '/app/security/get_started',
+  workplaceai: '/app/workplace_ai',
+  vectordb: '/app/vectordb',
 };

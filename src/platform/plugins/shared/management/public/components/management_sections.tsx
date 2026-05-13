@@ -34,6 +34,14 @@ const insightsAndAlertingTip = i18n.translate('management.sections.insightsAndAl
   defaultMessage: 'Manage how to detect changes in your data',
 });
 
+const machineLearningTitle = i18n.translate('management.sections.machineLearningTitle', {
+  defaultMessage: 'Machine Learning',
+});
+
+const machineLearningTip = i18n.translate('management.sections.machineLearningTip', {
+  defaultMessage: 'Manage your Machine Learning jobs and trained models',
+});
+
 const sectionTitle = i18n.translate('management.sections.section.title', {
   defaultMessage: 'Security',
 });
@@ -50,12 +58,20 @@ const kibanaTip = i18n.translate('management.sections.kibanaTip', {
   defaultMessage: 'Customize Kibana and manage saved objects',
 });
 
+const aiTitle = i18n.translate('management.sections.aiTitle', {
+  defaultMessage: 'AI',
+});
+
 const stackTitle = i18n.translate('management.sections.stackTitle', {
   defaultMessage: 'Stack',
 });
 
 const stackTip = i18n.translate('management.sections.stackTip', {
   defaultMessage: 'Manage your license and upgrade the Stack',
+});
+
+const clusterPerformanceTitle = i18n.translate('management.sections.clusterPerformanceTitle', {
+  defaultMessage: 'Cluster performance',
 });
 
 export const IngestSection = {
@@ -79,6 +95,34 @@ export const InsightsAndAlertingSection = {
   order: 2,
 };
 
+export const ClusterPerformanceSection = {
+  id: ManagementSectionId.ClusterPerformance,
+  title: clusterPerformanceTitle,
+  order: 2.5,
+};
+
+export const MachineLearningSection = {
+  id: ManagementSectionId.MachineLearning,
+  title: machineLearningTitle,
+  tip: machineLearningTip,
+  order: 4,
+};
+
+const modelManagementTitle = i18n.translate('management.sections.modelManagementTitle', {
+  defaultMessage: 'Model Management',
+});
+
+const modelManagementTip = i18n.translate('management.sections.modelManagementTip', {
+  defaultMessage: 'Manage your inference models and endpoints',
+});
+
+export const ModelManagementSection = {
+  id: ManagementSectionId.ModelManagement,
+  title: modelManagementTitle,
+  tip: modelManagementTip,
+  order: 5,
+};
+
 export const SecuritySection = {
   id: 'security',
   title: sectionTitle,
@@ -90,21 +134,31 @@ export const KibanaSection = {
   id: ManagementSectionId.Kibana,
   title: kibanaTitle,
   tip: kibanaTip,
-  order: 4,
+  order: 6,
+};
+
+export const AISection = {
+  id: ManagementSectionId.AI,
+  title: aiTitle,
+  order: 7,
 };
 
 export const StackSection = {
   id: ManagementSectionId.Stack,
   title: stackTitle,
   tip: stackTip,
-  order: 4,
+  order: 8,
 };
 
 export const managementSections = [
   IngestSection,
   DataSection,
   InsightsAndAlertingSection,
+  MachineLearningSection,
+  ModelManagementSection,
   SecuritySection,
   KibanaSection,
+  AISection,
   StackSection,
+  ClusterPerformanceSection,
 ];

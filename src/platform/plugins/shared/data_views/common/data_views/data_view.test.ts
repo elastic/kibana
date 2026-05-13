@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
-import { RuntimeField, RuntimePrimitiveTypes, FieldSpec, DataViewSpec } from '../types';
+import type { RuntimeField, RuntimePrimitiveTypes, FieldSpec, DataViewSpec } from '../types';
 import { stubLogstashFields } from '../field.stub';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import { last, map } from 'lodash';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
-import { DataViewField } from '../fields';
+import type { DataViewField } from '../fields';
 import { DataView } from './data_view';
 
 class MockFieldFormatter {}
@@ -396,6 +396,22 @@ describe('IndexPattern', () => {
       indexPattern.removeRuntimeField(newField);
     });
 
+    test('add and remove a popularity score from a runtime field', () => {
+      const newField = 'new_field_test';
+      indexPattern.addRuntimeField(newField, {
+        ...runtimeWithAttrs,
+        popularity: 10,
+      });
+      expect(indexPattern.getFieldByName(newField)?.count).toEqual(10);
+      indexPattern.setFieldCount(newField, 20);
+      expect(indexPattern.getFieldByName(newField)?.count).toEqual(20);
+      indexPattern.setFieldCount(newField, null);
+      expect(indexPattern.getFieldByName(newField)?.count).toEqual(0);
+      indexPattern.setFieldCount(newField, undefined);
+      expect(indexPattern.getFieldByName(newField)?.count).toEqual(0);
+      indexPattern.removeRuntimeField(newField);
+    });
+
     test('add and remove composite runtime field as new fields', () => {
       const fieldCount = indexPattern.fields.length;
       indexPattern.addRuntimeField('new_field', runtimeCompositeWithAttrs);
@@ -504,6 +520,19 @@ describe('IndexPattern', () => {
       const dataView1 = create('test1', spec);
       const dataView2 = create('test2', spec);
       expect(dataView1.sourceFilters).not.toBe(dataView2.sourceFilters);
+    });
+
+    test('getting spec without fields does not modify fieldAttrs', () => {
+      const fieldAttrs = { bytes: { count: 5, customLabel: 'test_bytes' }, agent: { count: 1 } };
+      const dataView = new DataView({
+        fieldFormats: fieldFormatsMock,
+        spec: {
+          fieldAttrs,
+        },
+      });
+      const spec = dataView.toSpec(false);
+      expect(spec.fieldAttrs).toEqual({ bytes: { customLabel: fieldAttrs.bytes.customLabel } });
+      expect(JSON.parse(dataView.getAsSavedObjectBody().fieldAttrs!)).toEqual(fieldAttrs);
     });
   });
 

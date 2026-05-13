@@ -26,12 +26,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { formatSynonymsSetName } from '../../utils/synonyms_utils';
 import { usePutSynonymsSet } from '../../hooks/use_put_synonyms_set';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 interface CreateSynonymsSetModalProps {
   onClose: () => void;
 }
 export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps) => {
-  const titleId = useGeneratedHtmlId({ prefix: 'createSynonymsSetModalTitle' });
+  const modalTitleId = useGeneratedHtmlId({ prefix: 'createSynonymsSetModalTitle' });
   const formId = useGeneratedHtmlId({ prefix: 'createSynonymsSetModalForm' });
   const overwriteId = useGeneratedHtmlId({ prefix: 'createSynonymsSetModalOverwrite' });
 
@@ -47,10 +49,11 @@ export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps)
       setConflictError(true);
     }
   );
+  const usageTracker = useUsageTracker();
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal aria-labelledby={modalTitleId} onClose={onClose}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={titleId}>
+        <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
             id="xpack.searchSynonyms.createSynonymsSetModal.title"
             defaultMessage="Name your synonyms set"
@@ -64,6 +67,7 @@ export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps)
           component="form"
           onSubmit={(e) => {
             e.preventDefault();
+            usageTracker?.click(AnalyticsEvents.new_set_created);
             createSynonymsSet({ synonymsSetId: name, forceWrite });
           }}
         >

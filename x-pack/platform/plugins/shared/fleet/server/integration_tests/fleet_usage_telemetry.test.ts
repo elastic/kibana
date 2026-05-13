@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import path from 'path';
+
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   type TestElasticsearchUtils,
@@ -15,6 +16,8 @@ import {
 } from '@kbn/core-test-helpers-kbn-server';
 
 import { fetchFleetUsage } from '../collectors/register';
+import { getAgentPolicySavedObjectType } from '../services/agent_policy';
+import { getPackagePolicySavedObjectType } from '../services/package_policy';
 
 import { waitForFleetSetup } from './helpers';
 
@@ -24,6 +27,9 @@ describe('fleet usage telemetry', () => {
   let core: any;
   let esServer: TestElasticsearchUtils;
   let kbnServer: TestKibanaUtils;
+  let agentPolicyType: string;
+  let packagePolicyType: string;
+
   const registryUrl = 'http://localhost';
 
   const startServers = async () => {
@@ -112,7 +118,8 @@ describe('fleet usage telemetry', () => {
 
   beforeAll(async () => {
     await startServers();
-
+    agentPolicyType = await getAgentPolicySavedObjectType();
+    packagePolicyType = await getPackagePolicySavedObjectType();
     const esClient = kbnServer.coreStart.elasticsearch.client.asInternalUser;
     await esClient.bulk({
       index: '.fleet-agents',
@@ -276,6 +283,41 @@ describe('fleet usage telemetry', () => {
       refresh: 'wait_for',
     });
 
+    await esClient.bulk({
+      index: '.fleet-actions',
+      body: [
+        // Rollback action within 1h — should be counted
+        { create: { _id: 'rollback1' } },
+        {
+          type: 'UPGRADE',
+          '@timestamp': new Date().toISOString(),
+          data: { rollback: true, version: '8.11.0' },
+        },
+        // Another rollback within 1h — should be counted
+        { create: { _id: 'rollback2' } },
+        {
+          type: 'UPGRADE',
+          '@timestamp': new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30m ago
+          data: { rollback: true, version: '8.10.0' },
+        },
+        // Non-rollback UPGRADE within 1h — should NOT be counted
+        { create: { _id: 'upgrade-no-rollback' } },
+        {
+          type: 'UPGRADE',
+          '@timestamp': new Date().toISOString(),
+          data: { rollback: false, version: '8.12.0' },
+        },
+        // Rollback outside 1h window — should NOT be counted
+        { create: { _id: 'rollback-old' } },
+        {
+          type: 'UPGRADE',
+          '@timestamp': new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2h ago
+          data: { rollback: true, version: '8.9.0' },
+        },
+      ],
+      refresh: 'wait_for',
+    });
+
     await esClient.create({
       index: 'logs-elastic_agent-default',
       id: 'panic1',
@@ -341,8 +383,8 @@ describe('fleet usage telemetry', () => {
       refresh: 'wait_for',
     });
 
-    const soClient = kbnServer.coreStart.savedObjects.createInternalRepository();
-    await soClient.create('ingest-package-policies', {
+    const soClient = kbnServer.coreStart.savedObjects.getUnsafeInternalClient();
+    await soClient.create(packagePolicyType, {
       name: 'fleet_server-1',
       namespace: 'default',
       package: {
@@ -367,9 +409,10 @@ describe('fleet usage telemetry', () => {
           },
         },
       ],
+      latest_revision: true,
     });
 
-    await soClient.create('ingest-package-policies', {
+    await soClient.create(packagePolicyType, {
       name: 'nginx-1',
       namespace: 'default',
       package: {
@@ -381,8 +424,10 @@ describe('fleet usage telemetry', () => {
       policy_id: 'policy2',
       policy_ids: ['policy2', 'policy3'],
       inputs: [],
+      latest_revision: true,
     });
 
+    const output2Id = uuidv4();
     await soClient.create(
       'ingest-outputs',
       {
@@ -395,8 +440,9 @@ describe('fleet usage telemetry', () => {
         ca_trusted_fingerprint: '',
         proxy_id: null,
       },
-      { id: 'output2' }
+      { id: output2Id }
     );
+    const output3Id = uuidv4();
     await soClient.create(
       'ingest-outputs',
       {
@@ -409,8 +455,9 @@ describe('fleet usage telemetry', () => {
         ca_trusted_fingerprint: '',
         proxy_id: null,
       },
-      { id: 'output3' }
+      { id: output3Id }
     );
+    const output4Id = uuidv4();
     await soClient.create(
       'ingest-outputs',
       {
@@ -424,11 +471,11 @@ describe('fleet usage telemetry', () => {
         proxy_id: null,
         preset: 'balanced',
       },
-      { id: 'output4' }
+      { id: output4Id }
     );
 
     await soClient.create(
-      'ingest-agent-policies',
+      agentPolicyType,
       {
         namespace: 'default',
         monitoring_enabled: ['logs', 'metrics'],
@@ -440,8 +487,8 @@ describe('fleet usage telemetry', () => {
         revision: 2,
         updated_by: 'system',
         schema_version: '1.0.0',
-        data_output_id: 'output2',
-        monitoring_output_id: 'output3',
+        data_output_id: output2Id,
+        monitoring_output_id: output3Id,
         global_data_tags: [
           { name: 'test', value: 'test1' },
           { name: 'test2', value: 'test2' },
@@ -450,7 +497,7 @@ describe('fleet usage telemetry', () => {
       { id: 'policy2' }
     );
     await soClient.create(
-      'ingest-agent-policies',
+      agentPolicyType,
       {
         namespace: 'default',
         monitoring_enabled: ['logs', 'metrics'],
@@ -462,8 +509,8 @@ describe('fleet usage telemetry', () => {
         revision: 2,
         updated_by: 'system',
         schema_version: '1.0.0',
-        data_output_id: 'output4',
-        monitoring_output_id: 'output4',
+        data_output_id: output4Id,
+        monitoring_output_id: output4Id,
         global_data_tags: [
           { name: 'test', value: 'test1' },
           { name: 'test2', value: 'test2' },
@@ -591,6 +638,7 @@ describe('fleet usage telemetry', () => {
           count_with_global_data_tags: 2,
           count_with_non_default_space: 0,
           avg_number_global_data_tags_per_policy: 2,
+          count_with_agent_version_conditions: 0,
         },
         agent_logs_panics_last_hour: [
           {
@@ -602,12 +650,13 @@ describe('fleet usage telemetry', () => {
             message: 'stderr panic some other panic',
           },
         ],
-        agent_logs_top_errors: [
+        agent_logs_top_errors: expect.arrayContaining([
+          'this should not be included in metrics',
           'stderr panic some other panic',
           'stderr panic close of closed channel',
-          'this should not be included in metrics',
-        ],
+        ]),
         fleet_server_logs_top_errors: ['failed to unenroll offline agents'],
+        agent_upgrade_rollbacks: 2,
         integrations_details: [
           {
             total_integration_policies: 2,

@@ -26,6 +26,7 @@ import {
   EuiHorizontalRule,
   EuiSuperSelect,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -33,10 +34,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { timeFormatter } from '@kbn/ml-date-utils';
 import { parseInterval } from '@kbn/ml-parse-interval';
 
-import type {
-  ModelSnapshot,
-  CombinedJobWithStats,
-} from '../../../../../common/types/anomaly_detection_jobs';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { ModelSnapshot } from '@kbn/ml-common-types/anomaly_detection_jobs/model_snapshot';
 import { useMlApi, useNotifications } from '../../../contexts/kibana';
 import { chartLoaderProvider } from './chart_loader';
 import { mlResultsServiceProvider } from '../../../services/results_service';
@@ -63,6 +62,9 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
   closeFlyout,
   refresh,
 }) => {
+  const flyoutTitleId = useGeneratedHtmlId();
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const mlApi = useMlApi();
   const { toasts } = useNotifications();
   const { loadAnomalyDataForJob, loadEventRateForJob } = useMemo(
@@ -173,10 +175,10 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
 
   return (
     <>
-      <EuiFlyout onClose={closeFlyout} hideCloseButton size="m">
+      <EuiFlyout onClose={closeFlyout} hideCloseButton size="m" aria-labelledby={flyoutTitleId}>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
-            <h5>
+            <h5 id={flyoutTitleId}>
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.title"
                 defaultMessage="Revert to model snapshot {ssId}"
@@ -379,9 +381,11 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
       </EuiFlyout>
       {revertModalVisible && (
         <EuiConfirmModal
+          aria-labelledby={confirmModalTitleId}
           title={i18n.translate('xpack.ml.newJob.wizard.revertModelSnapshotFlyout.deleteTitle', {
             defaultMessage: 'Apply snapshot revert',
           })}
+          titleProps={{ id: confirmModalTitleId }}
           onCancel={hideRevertModal}
           onConfirm={applyRevert}
           cancelButtonText={i18n.translate(

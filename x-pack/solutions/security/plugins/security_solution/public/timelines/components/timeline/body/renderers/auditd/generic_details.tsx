@@ -35,6 +35,7 @@ interface Props {
   workingDirectory: string | null | undefined;
   args: string[] | null | undefined;
   session: string | null | undefined;
+  scopeId: string;
 }
 
 export const AuditdGenericLine = React.memo<Props>(
@@ -54,9 +55,11 @@ export const AuditdGenericLine = React.memo<Props>(
     result,
     session,
     text,
+    scopeId,
   }) => (
     <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none" wrap={true}>
       <SessionUserHostWorkingDir
+        scopeId={scopeId}
         eventId={id}
         contextId={contextId}
         hostName={hostName}
@@ -73,6 +76,7 @@ export const AuditdGenericLine = React.memo<Props>(
       )}
       <TokensFlexItem grow={false} component="span">
         <ProcessDraggable
+          scopeId={scopeId}
           contextId={contextId}
           endgamePid={undefined}
           endgameProcessName={undefined}
@@ -82,7 +86,13 @@ export const AuditdGenericLine = React.memo<Props>(
           processExecutable={processExecutable}
         />
       </TokensFlexItem>
-      <Args eventId={id} args={args} contextId={contextId} processTitle={processTitle} />
+      <Args
+        scopeId={scopeId}
+        eventId={id}
+        args={args}
+        contextId={contextId}
+        processTitle={processTitle}
+      />
       {result != null && (
         <TokensFlexItem grow={false} component="span">
           {i18n.WITH_RESULT}
@@ -90,6 +100,7 @@ export const AuditdGenericLine = React.memo<Props>(
       )}
       <TokensFlexItem grow={false} component="span">
         <DraggableBadge
+          scopeId={scopeId}
           contextId={contextId}
           eventId={id}
           field="auditd.result"
@@ -132,6 +143,7 @@ export const AuditdGenericDetails = React.memo<GenericDetailsProps>(
         <Details>
           <AuditdGenericLine
             id={id}
+            scopeId={timelineId}
             contextId={contextId}
             text={text}
             hostName={hostName}

@@ -9,33 +9,21 @@
 
 import React, { useContext } from 'react';
 
-import { PublishingSubject } from '@kbn/presentation-publishing';
+import type { OptionsListDisplaySettings } from '@kbn/controls-schemas';
 
-import type {
-  OptionsListDisplaySettings,
-  OptionsListSelection,
-} from '../../../../common/options_list';
-import type { ControlStateManager } from '../../types';
-import type { OptionsListComponentApi, OptionsListComponentState } from './types';
+import type { OptionsListComponentApi } from '../../types';
+import type { OptionsListCustomStrings } from './types';
 
-export type ContextStateManager = ControlStateManager<
-  Omit<OptionsListComponentState, 'exclude' | 'existsSelected' | 'selectedOptions'>
-> & {
-  selectedOptions: PublishingSubject<OptionsListSelection[] | undefined>;
-  existsSelected: PublishingSubject<boolean | undefined>;
-  exclude: PublishingSubject<boolean | undefined>;
-};
+interface Context {
+  componentApi: OptionsListComponentApi;
+  displaySettings: OptionsListDisplaySettings;
+  // Optional custom strings to override default labels
+  customStrings?: OptionsListCustomStrings;
+}
 
-export const OptionsListControlContext = React.createContext<
-  | {
-      api: OptionsListComponentApi;
-      stateManager: ContextStateManager;
-      displaySettings: OptionsListDisplaySettings;
-    }
-  | undefined
->(undefined);
+export const OptionsListControlContext = React.createContext<Context | undefined>(undefined);
 
-export const useOptionsListContext = () => {
+export const useOptionsListContext = (): Context => {
   const optionsListContext = useContext(OptionsListControlContext);
   if (!optionsListContext)
     throw new Error(

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { filter, map } from 'lodash';
+import { filter, map, mapValues } from 'lodash';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import type { IRouter } from '@kbn/core/server';
+import { type IRouter, SavedObjectsErrorHelpers } from '@kbn/core/server';
+
+import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import type { ReadPacksRequestParamsSchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
@@ -19,8 +21,10 @@ import { convertSOQueriesToPack } from './utils';
 import { convertShardsToObject } from '../utils';
 import type { ReadPackResponseData } from './types';
 import { readPacksRequestParamsSchema } from '../../../common/api';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { readPackResponseSchema } from './response_schemas';
 
-export const readPackRoute = (router: IRouter) => {
+export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
     .get({
       access: 'public',
@@ -41,20 +45,43 @@ export const readPackRoute = (router: IRouter) => {
               ReadPacksRequestParamsSchema
             >(readPacksRequestParamsSchema),
           },
+          response: {
+            200: {
+              body: () => readPackResponseSchema,
+            },
+          },
         },
       },
       async (context, request, response) => {
-        const coreContext = await context.core;
-        const savedObjectsClient = coreContext.savedObjects.client;
+        const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+          osqueryContext,
+          request
+        );
 
-        const { attributes, references, id, ...rest } =
-          await savedObjectsClient.get<PackSavedObject>(packSavedObjectType, request.params.id);
+        let packSO;
+        try {
+          packSO = await spaceScopedClient.get<PackSavedObject>(
+            packSavedObjectType,
+            request.params.id
+          );
+        } catch (err) {
+          if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+            return response.notFound({
+              body: { message: `Pack ${request.params.id} not found` },
+            });
+          }
+
+          throw err;
+        }
+
+        const { attributes, references, id, ...rest } = packSO;
 
         const policyIds = map(
           filter(references, ['type', LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]),
           'id'
         );
-        const osqueryPackAssetReference = !!filter(references, ['type', 'osquery-pack-asset']);
+        const osqueryPackAssetReference = !!filter(references, ['type', 'osquery-pack-asset'])
+          .length;
 
         const data: ReadPackResponseData = {
           type: rest.type,
@@ -68,10 +95,15 @@ export const readPackRoute = (router: IRouter) => {
           enabled: attributes.enabled,
           created_at: attributes.created_at,
           created_by: attributes.created_by,
+          created_by_profile_uid: attributes.created_by_profile_uid,
           updated_at: attributes.updated_at,
           updated_by: attributes.updated_by,
+          updated_by_profile_uid: attributes.updated_by_profile_uid,
           saved_object_id: id,
-          queries: convertSOQueriesToPack(attributes.queries),
+          queries: mapValues(
+            convertSOQueriesToPack(attributes.queries),
+            ({ schedule_id: _s, start_date: _d, ...restQuery }) => restQuery
+          ),
           shards: convertShardsToObject(attributes.shards),
           policy_ids: policyIds,
           read_only: attributes.version !== undefined && osqueryPackAssetReference,

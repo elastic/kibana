@@ -10,28 +10,30 @@
 import { schema } from '@kbn/config-schema';
 import type { Version } from '@kbn/object-versioning';
 import { versionSchema } from './constants';
-import { GetResult, getResultSchema } from './get';
+import type { GetResult } from './get';
+import { getResultSchema } from './get';
 
 import type { ProcedureSchemas } from './types';
 
-export const bulkGetSchemas: ProcedureSchemas = {
+export const bulkGetSchemas = {
   in: schema.object(
     {
       contentTypeId: schema.string(),
       version: versionSchema,
-      ids: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+      ids: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1, maxSize: 100 }),
       options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     },
     { unknowns: 'forbid' }
   ),
   out: schema.object(
     {
+      // codeql[js/kibana/unbounded-array-in-schema] output schema — server controls the response size
       hits: schema.arrayOf(getResultSchema),
       meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     },
     { unknowns: 'forbid' }
   ),
-};
+} satisfies ProcedureSchemas;
 
 export interface BulkGetIn<T extends string = string, Options extends void | object = object> {
   contentTypeId: T;

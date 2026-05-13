@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import { FieldOption, NORMALIZED_FIELD_TYPES } from '@kbn/triggers-actions-ui-plugin/public/common';
+import type { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
+import { NORMALIZED_FIELD_TYPES } from '@kbn/triggers-actions-ui-plugin/public/common';
 import type { estypes } from '@elastic/elasticsearch';
-import { EsQueryRuleParams, SearchType } from './types';
+import type { EsQueryRuleParams, SearchType } from './types';
 
 export const isSearchSourceRule = (
   ruleParams: EsQueryRuleParams
@@ -21,31 +21,6 @@ export const isEsqlQueryRule = (
   ruleParams: EsQueryRuleParams
 ): ruleParams is EsQueryRuleParams<SearchType.esqlQuery> => {
   return ruleParams.searchType === 'esqlQuery';
-};
-
-export const convertFieldSpecToFieldOption = (fieldSpec: FieldSpec[]): FieldOption[] => {
-  return (fieldSpec ?? [])
-    .filter((spec: FieldSpec) => spec.isMapped || spec.runtimeField)
-    .map((spec: FieldSpec) => {
-      const converted = {
-        name: spec.name,
-        searchable: spec.searchable,
-        aggregatable: spec.aggregatable,
-        type: spec.type,
-        normalizedType: spec.type,
-      };
-
-      if (spec.type === 'string') {
-        const esType = spec.esTypes && spec.esTypes.length > 0 ? spec.esTypes[0] : spec.type;
-        converted.type = esType;
-        converted.normalizedType = esType;
-      } else if (spec.type === 'number') {
-        const esType = spec.esTypes && spec.esTypes.length > 0 ? spec.esTypes[0] : spec.type;
-        converted.type = esType;
-      }
-
-      return converted;
-    });
 };
 
 export const convertRawRuntimeFieldtoFieldOption = (

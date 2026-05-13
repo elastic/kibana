@@ -11,11 +11,12 @@ import React from 'react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test-jest-helpers';
 
 import { ColorFormatEditor } from './color';
-import { FieldFormat, DEFAULT_CONVERTER_COLOR } from '@kbn/field-formats-plugin/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { DEFAULT_CONVERTER_COLOR } from '@kbn/field-formats-plugin/common';
 
 const fieldType = 'string';
 const format = {
-  getConverterFor: jest.fn(),
+  reactConvert: jest.fn(),
 };
 const formatParams = {
   colors: [{ ...DEFAULT_CONVERTER_COLOR }],

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { OpenAPIV3 } from 'openapi-types';
+import type { DeepPartial } from '@kbn/utility-types';
 import type { RouteValidator } from './route_validator';
 
 /**
@@ -200,6 +202,9 @@ interface DeprecateApiDeprecationType {
   type: 'deprecate';
 }
 
+export type AllRequiredCondition = Array<Privilege | { anyOf: Privilege[] }>;
+export type AnyRequiredCondition = Array<Privilege | { allOf: Privilege[] }>;
+
 /**
  * A set of privileges that can be used to define complex authorization requirements.
  *
@@ -207,14 +212,14 @@ interface DeprecateApiDeprecationType {
  * - `allRequired`: An array of privileges where all listed privileges must be satisfied to meet the authorization requirement.
  */
 export interface PrivilegeSet {
-  anyRequired?: Privilege[];
-  allRequired?: Privilege[];
+  anyRequired?: AnyRequiredCondition;
+  allRequired?: AllRequiredCondition;
 }
 
 /**
  * An array representing a combination of simple privileges or complex privilege sets.
  */
-type Privileges = Array<Privilege | PrivilegeSet>;
+export type Privileges = Array<Privilege | PrivilegeSet>;
 
 /**
  * Describes the authorization requirements when authorization is enabled.
@@ -237,12 +242,28 @@ export interface AuthzDisabled {
 }
 
 /**
- * Describes the authentication status when authentication is enabled.
- *
- * - `enabled`: A boolean or string indicating the authentication status. Can be `true` (authentication required) or `'optional'` (authentication is optional).
+ * Describes the authentication status when authentication is enabled (default).
  */
 export interface AuthcEnabled {
-  enabled: true | 'optional';
+  enabled: true;
+}
+
+/**
+ * Describes the authentication status when authentication is switched to a minimal mode (only existence of credentials
+ * is checked). Requires an explicit reason explaining why full authentication can be deferred to Elasticsearch.
+ */
+export interface AuthcMinimal {
+  enabled: 'minimal';
+  reason: string;
+}
+
+/**
+ * Describes the authentication status when authentication is optional. Requires an explicit reason explaining why
+ * authentication is optional.
+ */
+export interface AuthcOptional {
+  enabled: 'optional';
+  reason: string;
 }
 
 /**
@@ -257,9 +278,10 @@ export interface AuthcDisabled {
 }
 
 /**
- * Represents the authentication status for a route. It can either be enabled (`AuthcEnabled`) or disabled (`AuthcDisabled`).
+ * Represents the authentication status for a route. It can either be enabled (`AuthcEnabled`), minimal (`AuthcMinimal`),
+ * optional (`AuthcOptional`), or disabled (`AuthcDisabled`).
  */
-export type RouteAuthc = AuthcEnabled | AuthcDisabled;
+export type RouteAuthc = AuthcEnabled | AuthcMinimal | AuthcOptional | AuthcDisabled;
 
 /**
  * Represents the authorization status for a route. It can either be enabled (`AuthzEnabled`) or disabled (`AuthzDisabled`).
@@ -287,19 +309,6 @@ export enum ReservedPrivilegesSet {
  * @public
  */
 export interface RouteConfigOptions<Method extends RouteMethod> {
-  /**
-   * Defines authentication mode for a route:
-   * - true. A user has to have valid credentials to access a resource
-   * - false. A user can access a resource without any credentials.
-   * - 'optional'. A user can access a resource, and will be authenticated if provided credentials are valid.
-   *               Can be useful when we grant access to a resource but want to identify a user if possible.
-   *
-   * Defaults to `true` if an auth mechanism is registered.
-   *
-   * @deprecated Use `security.authc.enabled` instead
-   */
-  authRequired?: boolean | 'optional';
-
   /**
    * Defines xsrf protection requirements for a route:
    * - true. Requires an incoming POST/PUT/DELETE request to contain `kbn-xsrf` header.
@@ -386,6 +395,37 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * @public
    */
   deprecated?: RouteDeprecationInfo;
+
+  /**
+   * Filepath to a YAML file or a partial {@link OpenAPIV3.OperationObject} to
+   * be merged with the code generated for this endpoint.
+   *
+   * @note Always instantiate the objects lazily to avoid unnecessarily loading
+   *       objects into memory.
+   *
+   * @example
+   * As a path to a OAS file
+   * () => path.join(__dirname, 'my_examples.yaml')
+   *
+   * @example
+   * As an object
+   * () => ({
+   *      requestBody: {
+   *        content: {
+   *          200: {
+   *            examples: {
+   *              fooExample: {
+   *                value: { coolType: true } as { coolType: true },
+   *              },
+   *            },
+   *          },
+   *        },
+   *      },
+   *  })
+   */
+  oasOperationObject?: () =>
+    | string
+    | DeepPartial<Pick<OpenAPIV3.OperationObject, 'requestBody' | 'responses'>>;
 
   /**
    * Whether this route should be treated as "invisible" and excluded from router
@@ -524,7 +564,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
   /**
    * Defines the security requirements for a route, including authorization and authentication.
    */
-  security?: RouteSecurity;
+  security: RouteSecurity;
 
   /**
    * Additional route options {@link RouteConfigOptions}.

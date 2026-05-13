@@ -7,22 +7,59 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ScoutPage } from '..';
+import type { ScoutPage } from '..';
+import type { ScoutLogger } from '../../common';
+import type { ScoutTestConfig } from '../../types';
+import { CollapsibleNav } from './collapsible_nav';
 import { DashboardApp } from './dashboard_app';
+import { DashboardLinks } from './dashboard_links';
 import { DatePicker } from './date_picker';
 import { DiscoverApp } from './discover_app';
-import { FilterBar } from './fiter_bar';
+import { FilterBar } from './filter_bar';
 import { MapsPage } from './maps_page';
 import { RenderablePage } from './renderable_page';
+import { Toasts } from './toasts';
 import { createLazyPageObject } from './utils';
+import { Inspector } from './inspector';
+import { LensApp } from './lens_app';
+import { ListingTable } from './listing_table';
+import { LoginPage } from './login_page';
+import { OverlaysPage } from './overlays';
+import { VisualizeApp } from './visualize_app';
+import {
+  ContentListWrapper,
+  buildContentListSearch,
+  buildContentListUrlRegex,
+} from './content_list';
+import type { ContentListUrlState } from './content_list';
+import type { KibanaUrl } from '../../common/services/kibana_url';
+
+export { ContentListWrapper, buildContentListSearch, buildContentListUrlRegex };
+export type { ContentListUrlState };
+
+export interface PageObjectsFixtures {
+  page: ScoutPage;
+  config: ScoutTestConfig;
+  log: ScoutLogger;
+  kbnUrl: KibanaUrl;
+}
 
 export interface PageObjects {
   datePicker: DatePicker;
   discover: DiscoverApp;
   dashboard: DashboardApp;
+  dashboardLinks: DashboardLinks;
   filterBar: FilterBar;
+  listingTable: ListingTable;
   maps: MapsPage;
   renderable: RenderablePage;
+  collapsibleNav: CollapsibleNav;
+  toasts: Toasts;
+  inspector: Inspector;
+  lens: LensApp;
+  login: LoginPage;
+  overlays: OverlaysPage;
+  visualize: VisualizeApp;
 }
 
 /**
@@ -31,14 +68,22 @@ export interface PageObjects {
  * @param page - `ScoutPage` instance used for initializing page objects.
  * @returns An object containing lazy-loaded core page objects.
  */
-export function createCorePageObjects(page: ScoutPage): PageObjects {
+export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObjects {
   return {
-    datePicker: createLazyPageObject(DatePicker, page),
-    dashboard: createLazyPageObject(DashboardApp, page),
-    discover: createLazyPageObject(DiscoverApp, page),
-    filterBar: createLazyPageObject(FilterBar, page),
-    maps: createLazyPageObject(MapsPage, page),
-    renderable: createLazyPageObject(RenderablePage, page),
-    // Add new page objects here
+    datePicker: createLazyPageObject(DatePicker, fixtures.page),
+    dashboard: createLazyPageObject(DashboardApp, fixtures.page),
+    dashboardLinks: createLazyPageObject(DashboardLinks, fixtures.page),
+    discover: createLazyPageObject(DiscoverApp, fixtures.page),
+    filterBar: createLazyPageObject(FilterBar, fixtures.page),
+    listingTable: createLazyPageObject(ListingTable, fixtures.page),
+    maps: createLazyPageObject(MapsPage, fixtures.page),
+    renderable: createLazyPageObject(RenderablePage, fixtures.page),
+    collapsibleNav: createLazyPageObject(CollapsibleNav, fixtures.page, fixtures.config),
+    toasts: createLazyPageObject(Toasts, fixtures.page),
+    inspector: createLazyPageObject(Inspector, fixtures.page),
+    lens: createLazyPageObject(LensApp, fixtures.page),
+    login: createLazyPageObject(LoginPage, fixtures.page, fixtures.kbnUrl),
+    overlays: createLazyPageObject(OverlaysPage, fixtures.page),
+    visualize: createLazyPageObject(VisualizeApp, fixtures.page),
   };
 }

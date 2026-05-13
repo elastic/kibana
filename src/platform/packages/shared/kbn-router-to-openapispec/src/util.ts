@@ -17,8 +17,9 @@ import {
   type RouterRoute,
   type RouteValidatorConfig,
 } from '@kbn/core-http-server';
-import { CustomOperationObject, KnownParameters } from './type';
+import type { CustomOperationObject, KnownParameters } from './type';
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
+import type { Env } from './generate_oas';
 
 const tagPrefix = 'oas-tag:';
 const extractTag = (tag: string) => {
@@ -183,16 +184,39 @@ export const getXsrfHeaderForMethod = (
 
 export const setXState = (
   availability: RouteConfigOptions<RouteMethod>['availability'],
-  operation: CustomOperationObject
+  operation: CustomOperationObject,
+  env: Env
 ): void => {
-  if (availability) {
-    if (availability.stability === 'experimental') {
-      operation['x-state'] = 'Technical Preview';
-    }
-    if (availability.stability === 'beta') {
-      operation['x-state'] = 'Beta';
-    }
+  const state = getXState(availability, env);
+  if (state !== undefined) {
+    operation['x-state'] = state;
   }
+};
+
+export const getXState = (
+  availability:
+    | {
+        stability?: 'experimental' | 'beta' | 'stable';
+        since?: string;
+      }
+    | undefined,
+  env: Env
+): string | undefined => {
+  if (!availability) return undefined;
+
+  let state = '';
+  if (availability.stability === 'stable') {
+    state = 'Generally available';
+  } else if (availability.stability === 'experimental') {
+    state = 'Technical Preview';
+  } else if (availability.stability === 'beta') {
+    state = 'Beta';
+  }
+  if (!env.serverless && availability.since) {
+    state = state ? `${state}; added in ${availability.since}` : `Added in ${availability.since}`;
+  }
+
+  return state;
 };
 
 export type GetOpId = (input: { path: string; method: string }) => string;

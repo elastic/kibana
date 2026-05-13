@@ -6,12 +6,9 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ClientPluginsStart } from '../../../plugin';
-import {
-  BrowserFields,
-  ConfigKey,
-  EncryptedSyntheticsMonitor,
-} from '../../../../common/runtime_types';
+import type { ClientPluginsStart } from '../../../plugin';
+import type { BrowserFields, EncryptedSyntheticsMonitor } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 
 export function useFleetPermissions() {
   const { fleet } = useKibana<ClientPluginsStart>().services;

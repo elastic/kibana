@@ -10,11 +10,10 @@ import { render, screen, fireEvent } from '@testing-library/react';
 
 import { mockSystemPrompt } from '../../../mock/system_prompt';
 import { SystemPrompt } from '.';
-import { Conversation } from '../../../..';
-import { DEFAULT_CONVERSATION_TITLE } from '../../use_conversation/translations';
+import type { Conversation } from '../../../..';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { WELCOME_CONVERSATION } from '../../use_conversation/sample_conversations';
-import { PromptResponse } from '@kbn/elastic-assistant-common';
+import type { PromptResponse } from '@kbn/elastic-assistant-common';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
 
@@ -28,7 +27,7 @@ const BASE_CONVERSATION: Conversation = {
 };
 
 const mockConversations = {
-  [DEFAULT_CONVERSATION_TITLE]: BASE_CONVERSATION,
+  default: BASE_CONVERSATION,
 };
 
 const mockSystemPrompts: PromptResponse[] = [mockSystemPrompt];

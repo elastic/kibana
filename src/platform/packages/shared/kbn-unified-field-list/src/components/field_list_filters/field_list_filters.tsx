@@ -24,6 +24,8 @@ export interface FieldListFiltersProps<T extends FieldListItem> {
   getCustomFieldType?: FieldTypeFilterProps<T>['getCustomFieldType'];
   onSupportedFieldFilter?: FieldTypeFilterProps<T>['onSupportedFieldFilter'];
   onChangeFieldTypes: FieldTypeFilterProps<T>['onChange'];
+  onFieldNameSearchFocus?: () => void;
+  onFieldNameSearchBlur?: () => void;
   compressed?: FieldNameSearchProps['compressed'];
   nameFilter: FieldNameSearchProps['nameFilter'];
   screenReaderDescriptionId?: FieldNameSearchProps['screenReaderDescriptionId'];
@@ -59,6 +61,8 @@ function InnerFieldListFilters<T extends FieldListItem = DataViewField>({
   nameFilter,
   screenReaderDescriptionId,
   onChangeNameFilter,
+  onFieldNameSearchBlur,
+  onFieldNameSearchFocus,
 }: FieldListFiltersProps<T>) {
   return (
     <FieldNameSearch
@@ -80,6 +84,8 @@ function InnerFieldListFilters<T extends FieldListItem = DataViewField>({
       nameFilter={nameFilter}
       screenReaderDescriptionId={screenReaderDescriptionId}
       onChange={onChangeNameFilter}
+      onFocus={onFieldNameSearchFocus}
+      onBlur={onFieldNameSearchBlur}
     />
   );
 }

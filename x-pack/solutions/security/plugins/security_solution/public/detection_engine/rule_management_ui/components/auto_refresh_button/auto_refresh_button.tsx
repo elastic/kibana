@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from '../../../common/translations';
 
 export interface AutoRefreshButtonProps {
   isRefreshOn: boolean;
@@ -67,7 +67,7 @@ const AutoRefreshButtonComponent = ({
         <EuiButtonEmpty
           data-test-subj="autoRefreshButton"
           color={'text'}
-          iconType={'timeRefresh'}
+          iconType={'refreshTime'}
           onClick={togglePopover}
           disabled={isDisabled}
           css={css`

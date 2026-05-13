@@ -13,6 +13,7 @@
     "server": true,
     "requiredPlugins": [
       "charts",
+      "contentManagement",
       "data",
       "dataViews",
       "discoverShared",
@@ -30,11 +31,10 @@
       "expressions",
       "unifiedDocViewer",
       "unifiedSearch",
-      "unifiedHistogram",
-      "contentManagement",
-      "discoverShared"
+      "contentManagement"
     ],
     "optionalPlugins": [
+      "agentBuilder",
       "dataVisualizer",
       "home",
       "share",
@@ -49,13 +49,17 @@
       "aiops",
       "fieldsMetadata",
       "logsDataAccess",
-      "embeddableEnhanced"
+      "apmSourcesAccess",
+      "fileUpload",
+      "cps",
+      "alertingVTwo"
     ],
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
       "unifiedSearch",
-      "savedObjects"
+      "presentationUtil",
+      "esql"
     ],
     "extraPublicDirs": [
       "common"

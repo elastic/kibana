@@ -48,6 +48,7 @@ export const HeaderAgentInfo = memo<HeaderAgentInfoProps>(
                       size="s"
                       data-test-subj={testId('hostName')}
                       className="eui-textTruncate"
+                      tabIndex={0}
                     >
                       <h6 className="eui-textTruncate">{hostName}</h6>
                     </EuiText>

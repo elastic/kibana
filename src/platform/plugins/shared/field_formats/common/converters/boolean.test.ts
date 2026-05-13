@@ -8,6 +8,8 @@
  */
 
 import { BoolFormat } from './boolean';
+import { TEXT_CONTEXT_TYPE } from '../content_types';
+import { expectReactElementWithNull, expectReactElementAsArray } from '../test_utils';
 
 describe('Boolean Format', () => {
   let boolean: BoolFormat;
@@ -55,13 +57,38 @@ describe('Boolean Format', () => {
     },
   ].forEach((data) => {
     test(`convert ${data.input} to boolean`, () => {
-      expect(boolean.convert(data.input)).toBe(data.expected);
+      expect(boolean.convert(data.input, TEXT_CONTEXT_TYPE)).toBe(data.expected);
+      expect(boolean.reactConvert(data.input)).toBe(data.expected);
     });
   });
 
   test('does not convert non-boolean values, instead returning original value', () => {
     const s = 'non-boolean value!!';
 
-    expect(boolean.convert(s)).toBe(s);
+    expect(boolean.convert(s, TEXT_CONTEXT_TYPE)).toBe(s);
+    expect(boolean.reactConvert(s)).toBe(s);
+  });
+
+  test('handles a missing value', () => {
+    expect(boolean.convert(null, TEXT_CONTEXT_TYPE)).toBe('(null)');
+    expect(boolean.convert(undefined, TEXT_CONTEXT_TYPE)).toBe('(null)');
+    expectReactElementWithNull(boolean.reactConvert(null));
+    expectReactElementWithNull(boolean.reactConvert(undefined));
+  });
+
+  test('reactConvert returns raw string for unhighlighted content (React escapes at render)', () => {
+    expect(boolean.reactConvert('<script>alert("test")</script>')).toBe(
+      '<script>alert("test")</script>'
+    );
+  });
+
+  test('wraps a multi-value array with bracket notation', () => {
+    expect(boolean.convert([true, false], TEXT_CONTEXT_TYPE)).toBe('["true","false"]');
+    expectReactElementAsArray(boolean.reactConvert([true, false]), ['true', 'false']);
+  });
+
+  test('returns the single element without brackets for a one-element array', () => {
+    expect(boolean.convert([true], TEXT_CONTEXT_TYPE)).toBe('["true"]');
+    expect(boolean.reactConvert([true])).toBe('true');
   });
 });

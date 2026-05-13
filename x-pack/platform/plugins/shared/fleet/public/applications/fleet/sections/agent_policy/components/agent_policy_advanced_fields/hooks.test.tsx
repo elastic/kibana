@@ -527,11 +527,6 @@ describe('useOutputOptions', () => {
           "inputDisplay": "Default",
           "value": "default-output",
         },
-        Object {
-          "disabled": true,
-          "inputDisplay": "Internal",
-          "value": "internal-output",
-        },
       ]
     `);
     expect(result.current.monitoringOutputOptions).toMatchInlineSnapshot(`
@@ -545,11 +540,6 @@ describe('useOutputOptions', () => {
           "disabled": false,
           "inputDisplay": "Default",
           "value": "default-output",
-        },
-        Object {
-          "disabled": true,
-          "inputDisplay": "Internal",
-          "value": "internal-output",
         },
       ]
     `);
@@ -682,9 +672,8 @@ describe('useFleetServerHostsOptions', () => {
           "value": "@@##DEFAULT_SELECT##@@",
         },
         Object {
-          "disabled": true,
-          "inputDisplay": "Internal",
-          "value": "internal-output",
+          "inputDisplay": "Default",
+          "value": "default-host",
         },
       ]
     `);

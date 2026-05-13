@@ -5,22 +5,18 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { errors } from '@elastic/elasticsearch';
-import {
+import type {
   QueryDslQueryContainer,
   SearchHit,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { AuthenticatedUser } from '@kbn/core-security-common';
-import {
-  contentReferenceBlock,
-  ContentReferencesStore,
-  esqlQueryReference,
-  IndexEntry,
-} from '@kbn/elastic-assistant-common';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
+import type { ContentReferencesStore, IndexEntry } from '@kbn/elastic-assistant-common';
+import { contentReferenceBlock, esqlQueryReference } from '@kbn/elastic-assistant-common';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isString } from 'lodash';
 
 export const isModelAlreadyExistsError = (error: Error) => {
@@ -153,7 +149,7 @@ export const getStructuredToolForIndexEntry = ({
 }: {
   indexEntry: IndexEntry;
   esClient: ElasticsearchClient;
-  contentReferencesStore: ContentReferencesStore | undefined;
+  contentReferencesStore: ContentReferencesStore;
   logger: Logger;
 }): DynamicStructuredTool => {
   const inputSchema = indexEntry.inputSchema?.reduce((prev, input) => {
@@ -187,7 +183,7 @@ export const getStructuredToolForIndexEntry = ({
       // Generate filters for inputSchema fields
       const filter =
         indexEntry.inputSchema?.reduce(
-          // @ts-expect-error Possible to override types with dynamic input schema?
+          // @ts-expect-error upgrade typescript v5.9.3
           (prev, i) => [...prev, { term: { [`${i.fieldName}`]: input?.[i.fieldName] } }],
           [] as Array<{ term: { [key: string]: string } }>
         ) ?? [];
@@ -199,9 +195,8 @@ export const getStructuredToolForIndexEntry = ({
           bool: {
             must: [
               {
-                semantic: {
-                  field: indexEntry.field,
-                  query: input.query,
+                match: {
+                  [indexEntry.field]: input.query,
                 },
               },
             ],
@@ -211,7 +206,6 @@ export const getStructuredToolForIndexEntry = ({
         highlight: {
           fields: {
             [indexEntry.field]: {
-              type: 'semantic',
               number_of_fragments: 2,
               order: 'score',
             },
@@ -223,8 +217,7 @@ export const getStructuredToolForIndexEntry = ({
         const result = await esClient.search(params);
 
         const kbDocs = result.hits.hits.map((hit) => {
-          const reference =
-            contentReferencesStore && contentReferencesStore.add((p) => createReference(p.id, hit));
+          const reference = contentReferencesStore.add((p) => createReference(p.id, hit));
 
           if (indexEntry.outputFields && indexEntry.outputFields.length > 0) {
             return indexEntry.outputFields.reduce(
@@ -232,13 +225,13 @@ export const getStructuredToolForIndexEntry = ({
                 // @ts-expect-error
                 return { ...prev, [field]: hit._source[field] };
               },
-              reference ? { citation: contentReferenceBlock(reference) } : {}
+              { citation: contentReferenceBlock(reference) }
             );
           }
 
           return {
             text: hit.highlight?.[indexEntry.field].join('\n --- \n'),
-            ...(reference ? { citation: contentReferenceBlock(reference) } : {}),
+            citation: contentReferenceBlock(reference),
           };
         });
 

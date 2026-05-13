@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ActionType } from '@kbn/actions-types';
-import { ActionConnector } from '../common/types';
-import './check_action_type_enabled.scss';
+import type { ActionType } from '@kbn/actions-types';
+import type { ActionConnector } from '../common/types';
+
 import { configurationCheckResult, getLicenseCheckResult } from './get_license_check_result';
 
 export interface IsEnabledResult {

@@ -8,9 +8,12 @@
 import React, { useState } from 'react';
 import { EuiFormRow, EuiTextArea, EuiCallOut, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectSaveModal, OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { OnSaveProps, SaveResult } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectSaveModalWithSaveResult } from '@kbn/saved-objects-plugin/public';
+import type { ContentClient } from '@kbn/content-management-plugin/public';
 
-import { GraphSavePolicy } from '../types/config';
+import type { GraphSavePolicy } from '../types/config';
+import { hasLibraryItemWithTitle } from '../helpers/saved_objects_utils';
 
 export interface OnSaveGraphProps extends OnSaveProps {
   newDescription: string;
@@ -18,16 +21,20 @@ export interface OnSaveGraphProps extends OnSaveProps {
 }
 
 export function SaveModal({
+  contentClient,
   onSave,
   onClose,
+  lastSavedTitle,
   title,
   description,
   showCopyOnSave,
   savePolicy,
   hasData,
 }: {
-  onSave: (props: OnSaveGraphProps) => void;
+  contentClient: ContentClient;
+  onSave: (props: OnSaveGraphProps) => Promise<SaveResult>;
   onClose: () => void;
+  lastSavedTitle: string;
   title: string;
   description: string;
   showCopyOnSave: boolean;
@@ -37,9 +44,13 @@ export function SaveModal({
   const [newDescription, setDescription] = useState(description);
   const [dataConsent, setDataConsent] = useState(false);
   return (
-    <SavedObjectSaveModal
-      onSave={(props) => {
-        onSave({ ...props, newDescription, dataConsent });
+    <SavedObjectSaveModalWithSaveResult
+      lastSavedTitle={lastSavedTitle}
+      hasLibraryItemWithTitle={async (titleToCheck: string) =>
+        hasLibraryItemWithTitle(titleToCheck, contentClient)
+      }
+      onSave={async (props) => {
+        return onSave({ ...props, newDescription, dataConsent });
       }}
       onClose={onClose}
       title={title}
@@ -90,7 +101,7 @@ export function SaveModal({
           {savePolicy === 'config' && hasData && (
             <>
               <EuiSpacer />
-              <EuiCallOut data-test-subj="graphNoDataSavedMsg">
+              <EuiCallOut announceOnMount data-test-subj="graphNoDataSavedMsg">
                 <p>
                   {i18n.translate('xpack.graph.topNavMenu.save.saveConfigurationOnlyText', {
                     defaultMessage:

@@ -5,46 +5,48 @@
  * 2.0.
  */
 
-import '../index.scss';
 import { i18n } from '@kbn/i18n';
-import SemVer from 'semver/classes/semver';
-import { CoreSetup, CoreStart, ScopedHistory } from '@kbn/core/public';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { CloudSetup } from '@kbn/cloud-plugin/public';
+import type SemVer from 'semver/classes/semver';
+import type { CoreSetup, CoreStart, ScopedHistory } from '@kbn/core/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { ReindexService, ReindexServicePublicStart } from '@kbn/reindex-service-plugin/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { IndexManagementAppMountParams } from '@kbn/index-management-shared-types';
 import { UIM_APP_NAME } from '../../common/constants';
 import { PLUGIN } from '../../common/constants/plugin';
-import { AppDependencies } from './app_context';
+import type { AppDependencies } from './app_context';
 import { breadcrumbService } from './services/breadcrumbs';
 import { documentationService } from './services/documentation';
 import { UiMetricService } from './services';
 
 import { renderApp } from '.';
-import { setUiMetricService } from './services/api';
-import { notificationService } from './services/notification';
+import { setReindexService, setUiMetricService } from './services/api';
+import { NotificationService } from './services/notification';
 import { httpService } from './services/http';
-import { ExtensionsService } from '../services/extensions_service';
-import { StartDependencies } from '../types';
+import type { ExtensionsService } from '../services/extensions_service';
+import type { StartDependencies } from '../types';
 
 function initSetup({
   usageCollection,
+  reindexService,
   core,
 }: {
   core: CoreStart;
   usageCollection: UsageCollectionSetup;
+  reindexService: ReindexService;
 }) {
   const { http, notifications } = core;
 
   httpService.setup(http);
-  notificationService.setup(notifications);
+  const notificationService = new NotificationService(notifications.toasts);
 
   const uiMetricService = new UiMetricService(UIM_APP_NAME);
-
   setUiMetricService(uiMetricService);
-
   uiMetricService.setup(usageCollection);
 
-  return { uiMetricService };
+  setReindexService(reindexService);
+
+  return { uiMetricService, notificationService };
 }
 
 export function getIndexManagementDependencies({
@@ -58,7 +60,9 @@ export function getIndexManagementDependencies({
   cloud,
   startDependencies,
   uiMetricService,
+  notificationService,
   canUseSyntheticSource,
+  reindexService,
 }: {
   core: CoreStart;
   usageCollection: UsageCollectionSetup;
@@ -70,7 +74,9 @@ export function getIndexManagementDependencies({
   cloud?: CloudSetup;
   startDependencies: StartDependencies;
   uiMetricService: UiMetricService;
+  notificationService: NotificationService;
   canUseSyntheticSource: boolean;
+  reindexService: ReindexServicePublicStart;
 }): AppDependencies {
   const { docLinks, application, uiSettings, settings } = core;
   const { url } = startDependencies.share;
@@ -87,9 +93,12 @@ export function getIndexManagementDependencies({
       isFleetEnabled,
       share: startDependencies.share,
       cloud,
+      cloudConnect: startDependencies.cloudConnect,
       console: startDependencies.console,
       ml: startDependencies.ml,
+      streams: startDependencies.streams,
       licensing: startDependencies.licensing,
+      reindexService,
     },
     services: {
       httpService,
@@ -126,16 +135,18 @@ export async function mountManagementSection({
   config,
   cloud,
   canUseSyntheticSource,
+  reindexService,
 }: {
   coreSetup: CoreSetup<StartDependencies>;
   usageCollection: UsageCollectionSetup;
-  params: ManagementAppMountParams;
+  params: IndexManagementAppMountParams;
   extensionsService: ExtensionsService;
   isFleetEnabled: boolean;
   kibanaVersion: SemVer;
   config: AppDependencies['config'];
   cloud?: CloudSetup;
   canUseSyntheticSource: boolean;
+  reindexService: ReindexServicePublicStart;
 }) {
   const { element, setBreadcrumbs, history } = params;
   const [core, startDependencies] = await coreSetup.getStartServices();
@@ -148,9 +159,10 @@ export async function mountManagementSection({
   breadcrumbService.setup(setBreadcrumbs);
   documentationService.setup(docLinks);
 
-  const { uiMetricService } = initSetup({
+  const { uiMetricService, notificationService } = initSetup({
     usageCollection,
     core,
+    reindexService: reindexService?.reindexService,
   });
   const appDependencies = getIndexManagementDependencies({
     cloud,
@@ -164,6 +176,8 @@ export async function mountManagementSection({
     uiMetricService,
     usageCollection,
     canUseSyntheticSource,
+    reindexService,
+    notificationService,
   });
 
   const unmountAppCallback = renderApp(element, { core, dependencies: appDependencies });

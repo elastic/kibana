@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { SavedObjectsClient, ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { AGENTS_INDEX } from '../../common';
+import { AGENTS_INDEX, LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../common';
 import * as AgentService from '../services/agents';
-import { appContextService } from '../services';
+import { agentPolicyService, appContextService } from '../services';
 import { getAgentStatusForAgentPolicy } from '../services/agents';
 
 export interface AgentStatus {
@@ -27,8 +27,9 @@ export interface AgentUsage extends AgentStatus {
 }
 
 export const getAgentUsage = async (
-  soClient?: SavedObjectsClient,
-  esClient?: ElasticsearchClient
+  soClient?: SavedObjectsClientContract,
+  esClient?: ElasticsearchClient,
+  onlyAgentless?: boolean
 ): Promise<AgentUsage> => {
   // TODO: unsure if this case is possible at all.
   if (!soClient || !esClient) {
@@ -44,8 +45,26 @@ export const getAgentUsage = async (
     };
   }
 
+  let agentPolicyIds;
+  if (onlyAgentless) {
+    const agentPolicies = await agentPolicyService.list(soClient, {
+      perPage: 1000, // avoiding pagination
+      withPackagePolicies: true,
+      kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.supports_agentless:true`,
+    });
+
+    agentPolicyIds = agentPolicies.items.map((agentPolicy) => agentPolicy.id);
+  }
+
   const { total, inactive, online, error, offline, updating, unenrolled } =
-    await AgentService.getAgentStatusForAgentPolicy(esClient, soClient);
+    await AgentService.getAgentStatusForAgentPolicy(
+      esClient,
+      soClient,
+      undefined,
+      undefined,
+      undefined,
+      agentPolicyIds
+    );
   return {
     total_enrolled: total,
     healthy: online,
@@ -101,7 +120,7 @@ const DEFAULT_AGENT_DATA = {
 
 export const getAgentData = async (
   esClient: ElasticsearchClient,
-  soClient: SavedObjectsClient,
+  soClient: SavedObjectsClientContract,
   abortController: AbortController
 ): Promise<AgentData> => {
   try {

@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import './toggle_all_features.scss';
-
-import { EuiContextMenuItem, EuiContextMenuPanel, EuiLink, EuiPopover } from '@elastic/eui';
+import {
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiLink,
+  EuiPopover,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -42,20 +47,31 @@ const options: ToggleOption[] = [
   },
 ];
 
+const ToggleButton = ({ onClick }: { onClick: () => void }) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiLink
+      onClick={onClick}
+      css={css`
+        margin-left: ${euiTheme.size.s};
+      `}
+    >
+      <FormattedMessage
+        id="xpack.spaces.management.toggleAllFeaturesLink"
+        defaultMessage="(change all)"
+      />
+    </EuiLink>
+  );
+};
+
 export class ToggleAllFeatures extends Component<Props, State> {
   public state = {
     isPopoverOpen: false,
   };
 
   public render() {
-    const button = (
-      <EuiLink onClick={this.onButtonClick} className={'spcToggleAllFeatures__changeAllLink'}>
-        <FormattedMessage
-          id="xpack.spaces.management.toggleAllFeaturesLink"
-          defaultMessage="(change all)"
-        />
-      </EuiLink>
-    );
+    const button = <ToggleButton onClick={this.onButtonClick} />;
 
     const items = options.map((item) => {
       return (
@@ -80,6 +96,9 @@ export class ToggleAllFeatures extends Component<Props, State> {
         closePopover={this.closePopover}
         panelPaddingSize="none"
         anchorPosition="downLeft"
+        aria-label={i18n.translate('xpack.spaces.management.toggleAllFeatures.popoverAriaLabel', {
+          defaultMessage: 'Change feature visibility',
+        })}
       >
         <EuiContextMenuPanel items={items} />
       </EuiPopover>

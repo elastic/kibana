@@ -8,7 +8,7 @@
  */
 
 import { getDataViewAppState } from './get_switch_data_view_app_state';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 const emptyDefaultColumns: string[] = [];
 
@@ -144,6 +144,5 @@ describe('Discover getDataViewAppState', () => {
     expect(result.columns).toEqual([]);
     expect(result.sort).toEqual([['timefield2', 'desc']]);
   });
-
   // TODO: add tests
 });

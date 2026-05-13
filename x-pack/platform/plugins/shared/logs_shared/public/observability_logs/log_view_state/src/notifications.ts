@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { LogViewReference, LogViewStatus, ResolvedLogView } from '../../../../common/log_views';
-import { createNotificationChannel } from '../../xstate_helpers';
-import { LogViewContext, LogViewEvent } from './types';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { createNotificationChannel } from '@kbn/xstate-utils';
+import type {
+  LogViewReference,
+  LogViewStatus,
+  ResolvedLogView,
+} from '../../../../common/log_views';
+import type { LogViewContext, LogViewEvent } from './types';
 
 export type LogViewNotificationEvent =
   | {
@@ -16,7 +21,7 @@ export type LogViewNotificationEvent =
     }
   | {
       type: 'LOADING_LOG_VIEW_SUCCEEDED';
-      resolvedLogView: ResolvedLogView;
+      resolvedLogView: ResolvedLogView<DataView>;
       status: LogViewStatus;
     }
   | {
@@ -28,14 +33,14 @@ export const createLogViewNotificationChannel = () =>
   createNotificationChannel<LogViewContext, LogViewEvent, LogViewNotificationEvent>();
 
 export const logViewNotificationEventSelectors = {
-  loadingLogViewStarted: (context: LogViewContext) =>
+  loadingLogViewStarted: ({ context }: { context: LogViewContext; event: LogViewEvent }) =>
     'logViewReference' in context
       ? ({
           type: 'LOADING_LOG_VIEW_STARTED',
           logViewReference: context.logViewReference,
         } as LogViewNotificationEvent)
       : undefined,
-  loadingLogViewSucceeded: (context: LogViewContext) =>
+  loadingLogViewSucceeded: ({ context }: { context: LogViewContext; event: LogViewEvent }) =>
     'resolvedLogView' in context && 'status' in context
       ? ({
           type: 'LOADING_LOG_VIEW_SUCCEEDED',
@@ -43,7 +48,7 @@ export const logViewNotificationEventSelectors = {
           status: context.status,
         } as LogViewNotificationEvent)
       : undefined,
-  loadingLogViewFailed: (context: LogViewContext) =>
+  loadingLogViewFailed: ({ context }: { context: LogViewContext; event: LogViewEvent }) =>
     'error' in context
       ? ({
           type: 'LOADING_LOG_VIEW_FAILED',

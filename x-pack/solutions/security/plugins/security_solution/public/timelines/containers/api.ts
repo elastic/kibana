@@ -18,6 +18,7 @@ import type {
   GetDraftTimelinesResponse,
   GetTimelinesRequestQuery,
   SavedTimeline,
+  ImportTimelinesResponse,
 } from '../../../common/api/timeline';
 import {
   ImportTimelineResult,
@@ -48,7 +49,6 @@ import { parseOrThrowErrorFactory } from '../../../common/timelines/zod_errors';
 import type {
   ExportDocumentsProps,
   ImportDataProps,
-  ImportDataResponse,
 } from '../../detection_engine/rule_management/logic';
 
 interface RequestPostTimeline {
@@ -129,7 +129,6 @@ const patchTimeline = async ({
     if (timeline.savedSearchId && savedSearch) {
       const { savedSearch: savedSearchService } = KibanaServices.get();
       await savedSearchService.save(savedSearch, {
-        onTitleDuplicate: () => ({}),
         copyOnSave: false,
       });
     }
@@ -172,7 +171,6 @@ export const copyTimeline = async ({
       // delete the id and change the title to make sure we can copy the saved search
       delete savedSearchCopy.id;
       newSavedSearchId = await savedSearchService.save(savedSearchCopy, {
-        onTitleDuplicate: () => ({}),
         copyOnSave: false,
       });
     }
@@ -264,11 +262,11 @@ export const persistTimeline = async ({
 export const importTimelines = async ({
   fileToImport,
   signal,
-}: ImportDataProps): Promise<ImportDataResponse> => {
+}: ImportDataProps): Promise<ImportTimelineResult> => {
   const formData = new FormData();
   formData.append('file', fileToImport);
 
-  return KibanaServices.get().http.fetch<ImportDataResponse>(`${TIMELINE_IMPORT_URL}`, {
+  return KibanaServices.get().http.fetch<ImportTimelinesResponse>(`${TIMELINE_IMPORT_URL}`, {
     method: 'POST',
     headers: { 'Content-Type': undefined },
     body: formData,

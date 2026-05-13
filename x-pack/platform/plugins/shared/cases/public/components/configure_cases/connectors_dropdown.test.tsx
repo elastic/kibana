@@ -15,6 +15,7 @@ import type { Props } from './connectors_dropdown';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import { TestProviders } from '../../common/mock';
 import { connectors } from './__mock__';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 describe('ConnectorsDropdown', () => {
   let wrapper: ReactWrapper;
@@ -52,25 +53,15 @@ describe('ConnectorsDropdown', () => {
               grow={false}
             >
               <EuiIcon
-                css={
-                  Object {
-                    "map": undefined,
-                    "name": "atofe7",
-                    "next": undefined,
-                    "styles": "
-                  margin-right: 13px;
-                  margin-bottom: 0 !important;
-                ",
-                    "toString": [Function],
-                  }
-                }
+                aria-hidden={true}
+                css="unknown styles"
                 size="m"
-                type="minusInCircle"
+                type="minusCircle"
               />
             </EuiFlexItem>
             <EuiFlexItem>
               <span
-                data-test-subj="dropdown-connector-no-connector"
+                data-test-subj="dropdown-connector-no-connector-label"
               >
                 No connector selected
               </span>
@@ -89,18 +80,8 @@ describe('ConnectorsDropdown', () => {
               grow={false}
             >
               <EuiIcon
-                css={
-                  Object {
-                    "map": undefined,
-                    "name": "13a1e3t",
-                    "next": undefined,
-                    "styles": "
-                            margin-right: 12px;
-                            margin-bottom: 0 !important;
-                          ",
-                    "toString": [Function],
-                  }
-                }
+                aria-hidden={true}
+                css="unknown styles"
                 size="m"
                 type="logoSecurity"
               />
@@ -126,18 +107,8 @@ describe('ConnectorsDropdown', () => {
               grow={false}
             >
               <EuiIcon
-                css={
-                  Object {
-                    "map": undefined,
-                    "name": "13a1e3t",
-                    "next": undefined,
-                    "styles": "
-                            margin-right: 12px;
-                            margin-bottom: 0 !important;
-                          ",
-                    "toString": [Function],
-                  }
-                }
+                aria-hidden={true}
+                css="unknown styles"
                 size="m"
                 type="logoSecurity"
               />
@@ -163,18 +134,8 @@ describe('ConnectorsDropdown', () => {
               grow={false}
             >
               <EuiIcon
-                css={
-                  Object {
-                    "map": undefined,
-                    "name": "13a1e3t",
-                    "next": undefined,
-                    "styles": "
-                            margin-right: 12px;
-                            margin-bottom: 0 !important;
-                          ",
-                    "toString": [Function],
-                  }
-                }
+                aria-hidden={true}
+                css="unknown styles"
                 size="m"
                 type="logoSecurity"
               />
@@ -200,18 +161,8 @@ describe('ConnectorsDropdown', () => {
               grow={false}
             >
               <EuiIcon
-                css={
-                  Object {
-                    "map": undefined,
-                    "name": "13a1e3t",
-                    "next": undefined,
-                    "styles": "
-                            margin-right: 12px;
-                            margin-bottom: 0 !important;
-                          ",
-                    "toString": [Function],
-                  }
-                }
+                aria-hidden={true}
+                css="unknown styles"
                 size="m"
                 type="logoSecurity"
               />
@@ -237,18 +188,8 @@ describe('ConnectorsDropdown', () => {
               grow={false}
             >
               <EuiIcon
-                css={
-                  Object {
-                    "map": undefined,
-                    "name": "13a1e3t",
-                    "next": undefined,
-                    "styles": "
-                            margin-right: 12px;
-                            margin-bottom: 0 !important;
-                          ",
-                    "toString": [Function],
-                  }
-                }
+                aria-hidden={true}
+                css="unknown styles"
                 size="m"
                 type="logoSecurity"
               />
@@ -268,18 +209,7 @@ describe('ConnectorsDropdown', () => {
                 aria-label="This connector is deprecated. Update it, or create a new one."
                 color="warning"
                 content="This connector is deprecated. Update it, or create a new one."
-                css={
-                  Object {
-                    "map": undefined,
-                    "name": "pxiz1g",
-                    "next": undefined,
-                    "styles": "
-                              margin-left: 8px
-                              margin-bottom: 0 !important;
-                            ",
-                    "toString": [Function],
-                  }
-                }
+                css="unknown styles"
                 size="m"
                 type="warning"
               />
@@ -331,15 +261,11 @@ describe('ConnectorsDropdown', () => {
         <ConnectorsDropdown
           {...props}
           connectors={[
-            {
+            createMockActionConnector({
               id: 'none',
               actionTypeId: '.none',
               name: 'None',
-              config: {},
-              isPreconfigured: false,
-              isDeprecated: false,
-              isSystemAction: false,
-            },
+            }),
           ]}
         />,
         {

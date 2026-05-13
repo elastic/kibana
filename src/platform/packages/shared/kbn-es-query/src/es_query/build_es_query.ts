@@ -8,13 +8,13 @@
  */
 
 import { groupBy, has, isEqual } from 'lodash';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { buildQueryFromKuery } from './from_kuery';
 import { buildQueryFromFilters } from './from_filters';
 import { buildQueryFromLucene } from './from_lucene';
-import { Filter, Query, AggregateQuery } from '../filters';
+import type { Filter, Query, AggregateQuery } from '../filters';
 import { isOfQueryType } from './es_aggregate_query';
-import { BoolQuery, DataViewBase } from './types';
+import type { BoolQuery, DataViewBase } from './types';
 import type { KueryQueryOptions } from '../kuery';
 import type { EsQueryFiltersConfig } from './from_filters';
 
@@ -42,6 +42,7 @@ function removeMatchAll<T>(filters: T[]) {
  * @param config - an objects with query:allowLeadingWildcards and query:queryString:options UI
  * settings in form of { allowLeadingWildcards, queryStringOptions }
  * config contains dateformat:tz
+ * @throws throws an exception if it receives malformed input from queries (such as user queries)
  *
  * @public
  */

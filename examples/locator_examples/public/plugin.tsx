@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
-import { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
-import { HelloLocator, HelloLocatorDefinition } from './locator';
+import type { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
+import type { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
+import type { HelloLocator } from './locator';
+import { HelloLocatorDefinition } from './locator';
 
 interface SetupDeps {
   share: SharePluginSetup;

@@ -48,7 +48,7 @@ const PackageListGridWrapper = ({
   excludePackageIdList = [],
 }: WrapperProps) => {
   const { filteredCards: integrationCards, isLoading } = useAvailablePackages({
-    prereleaseIntegrationsEnabled: false,
+    prereleaseIntegrationsEnabled: true,
   });
   const rewriteUrl = useCardUrlRewrite({ category: flowCategory, search: searchQuery });
 
@@ -77,7 +77,9 @@ const PackageListGridWrapper = ({
         }}
         query={searchQuery}
       />
-      {searchQuery !== '' && <PackageList list={list} searchTerm={searchQuery} />}
+      {searchQuery !== '' && (
+        <PackageList list={list} searchTerm={searchQuery} showCardLabels={false} />
+      )}
     </div>
   );
 };

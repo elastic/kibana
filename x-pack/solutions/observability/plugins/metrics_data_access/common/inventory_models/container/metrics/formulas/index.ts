@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { MetricConfigMap } from '../../../shared/metrics/types';
 import { dockerContainerCpuUsage, k8sContainerCpuUsage } from './cpu';
 import { dockerContainerDiskIORead, dockerContainerDiskIOWrite } from './disk';
 import { dockerContainerMemoryUsage, k8sContainerMemoryUsage } from './memory';
@@ -19,6 +20,6 @@ export const formulas = {
   dockerContainerDiskIOWrite,
   k8sContainerCpuUsage,
   k8sContainerMemoryUsage,
-} as const;
+} satisfies MetricConfigMap;
 
 export type ContainerFormulas = typeof formulas;

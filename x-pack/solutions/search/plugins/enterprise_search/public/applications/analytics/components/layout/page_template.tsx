@@ -11,13 +11,16 @@ import { useValues } from 'kea';
 
 import useObservable from 'react-use/lib/useObservable';
 
+import { EuiSpacer } from '@elastic/eui';
 import type { EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
 
 import { SEARCH_PRODUCT_NAME } from '../../../../../common/constants';
+import { DeprecationCallout } from '../../../shared/deprecation_callout/deprecation_callout';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { SetAnalyticsChrome } from '../../../shared/kibana_chrome';
-import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
+import type { PageTemplateProps } from '../../../shared/layout';
+import { EnterpriseSearchPageTemplateWrapper } from '../../../shared/layout';
 import { useEnterpriseSearchAnalyticsNav } from '../../../shared/layout/nav';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 import {
@@ -94,6 +97,8 @@ export const EnterpriseSearchAnalyticsPageTemplate: React.FC<
       {pageViewTelemetry && (
         <SendEnterpriseSearchTelemetry action="viewed" metric={pageViewTelemetry} />
       )}
+      <DeprecationCallout />
+      <EuiSpacer />
       {children}
     </EnterpriseSearchPageTemplateWrapper>
   );

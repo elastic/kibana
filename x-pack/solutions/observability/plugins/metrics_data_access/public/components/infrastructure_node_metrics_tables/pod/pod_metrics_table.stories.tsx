@@ -8,7 +8,7 @@
 import { EuiCard } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { Meta, Story } from '@storybook/react/types-6-0';
+import type { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../test_utils/use_global_storybook_theme';
 import type { PodMetricsTableProps } from './pod_metrics_table';
@@ -17,12 +17,18 @@ import type { PodNodeMetricsRow } from './use_pod_metrics_table';
 
 const mockServices = {
   application: {
+    currentAppId$: {
+      subscribe: (callback: (appId: string) => void) => {
+        callback('mock-app-id');
+        return { unsubscribe: () => {} };
+      },
+    },
     getUrlForApp: (app: string, { path }: { path: string }) => `your-kibana/app/${app}/${path}`,
   },
 };
 
 export default {
-  title: 'infra/Node Metrics Tables/Pod',
+  title: 'metrics_data_access/Node Metrics Tables/Pod',
   decorators: [
     (wrappedStory) => <EuiCard title="Pod metrics">{wrappedStory()}</EuiCard>,
     (wrappedStory) => (
@@ -62,90 +68,139 @@ const loadedPods: PodNodeMetricsRow[] = [
     id: '358d96e3-026f-4440-a487-f6c2301884c0',
     name: 'gke-edge-oblt-pool-1-9a60016d-lgg1',
     averageCpuUsagePercent: 99,
-    averageMemoryUsageMegabytes: 34,
+    averageMemoryUsagePercent: 34,
+    memoryUnit: '%',
   },
   {
     id: '358d96e3-026f-4440-a487-f6c2301884c1',
     name: 'gke-edge-oblt-pool-1-9a60016d-lgg2',
     averageCpuUsagePercent: 72,
-    averageMemoryUsageMegabytes: 68,
+    averageMemoryUsagePercent: 68,
+    memoryUnit: '%',
   },
   {
     id: '358d96e3-026f-4440-a487-f6c2301884c0',
     name: 'gke-edge-oblt-pool-1-9a60016d-lgg3',
     averageCpuUsagePercent: 54,
-    averageMemoryUsageMegabytes: 132,
+    averageMemoryUsagePercent: 132,
+    memoryUnit: '%',
   },
   {
     id: '358d96e3-026f-4440-a487-f6c2301884c0',
     name: 'gke-edge-oblt-pool-1-9a60016d-lgg4',
     averageCpuUsagePercent: 34,
-    averageMemoryUsageMegabytes: 264,
+    averageMemoryUsagePercent: 264,
+    memoryUnit: '%',
   },
   {
     id: '358d96e3-026f-4440-a487-f6c2301884c0',
     name: 'gke-edge-oblt-pool-1-9a60016d-lgg5',
     averageCpuUsagePercent: 13,
-    averageMemoryUsageMegabytes: 512,
+    averageMemoryUsagePercent: 512,
+    memoryUnit: '%',
   },
 ];
 
-const Template: Story<PodMetricsTableProps> = (args) => {
+const Template: StoryFn<PodMetricsTableProps> = (args) => {
   return <PodMetricsTable {...args} />;
 };
 
-export const Basic = Template.bind({});
-Basic.args = {
-  data: {
-    state: 'data',
-    currentPageIndex: 1,
-    pageCount: 10,
-    rows: loadedPods,
+export const Basic = {
+  render: Template,
+
+  args: {
+    data: {
+      state: 'data',
+      currentPageIndex: 1,
+      pageCount: 1,
+      rows: loadedPods,
+    },
   },
 };
 
-export const Loading = Template.bind({});
-Loading.args = {
-  isLoading: true,
-};
+export const Loading = {
+  render: Template,
 
-export const Reloading = Template.bind({});
-Reloading.args = {
-  data: {
-    state: 'data',
-    currentPageIndex: 1,
-    pageCount: 10,
-    rows: loadedPods,
-  },
-  isLoading: true,
-};
-
-export const MissingIndices = Template.bind({});
-MissingIndices.args = {
-  data: {
-    state: 'no-indices',
+  args: {
+    isLoading: true,
   },
 };
 
-export const EmptyIndices = Template.bind({});
-EmptyIndices.args = {
-  data: {
-    state: 'empty-indices',
+export const Reloading = {
+  render: Template,
+
+  args: {
+    data: {
+      state: 'data',
+      currentPageIndex: 1,
+      pageCount: 10,
+      rows: loadedPods,
+    },
+    isLoading: true,
   },
 };
 
-export const FailedToLoadSource = Template.bind({});
-FailedToLoadSource.args = {
-  data: {
-    state: 'error',
-    errors: [new Error('Failed to load source configuration')],
+export const MissingIndices = {
+  render: Template,
+
+  args: {
+    data: {
+      state: 'no-indices',
+    },
   },
 };
 
-export const FailedToLoadMetrics = Template.bind({});
-FailedToLoadMetrics.args = {
-  data: {
-    state: 'error',
-    errors: [new Error('Failed to load metrics')],
+export const EmptyIndices = {
+  render: Template,
+
+  args: {
+    data: {
+      state: 'empty-indices',
+    },
+  },
+};
+
+export const FailedToLoadSource = {
+  render: Template,
+
+  args: {
+    data: {
+      state: 'error',
+      errors: [new Error('Failed to load source configuration')],
+    },
+  },
+};
+
+export const FailedToLoadMetrics = {
+  render: Template,
+
+  args: {
+    data: {
+      state: 'error',
+      errors: [new Error('Failed to load metrics')],
+    },
+  },
+};
+
+export const BasicWithSemconv = {
+  render: Template,
+
+  args: {
+    data: {
+      state: 'data',
+      currentPageIndex: 1,
+      pageCount: 10,
+      rows: loadedPods,
+    },
+    isOtel: true,
+  },
+};
+
+export const LoadingWithSemconv = {
+  render: Template,
+
+  args: {
+    isLoading: true,
+    isOtel: true,
   },
 };

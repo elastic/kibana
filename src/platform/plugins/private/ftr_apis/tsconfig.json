@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "isolatedModules": true
@@ -15,5 +15,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
+    "@kbn/task-manager-plugin",
+    "@kbn/response-ops-scheduling-types"
   ]
 }

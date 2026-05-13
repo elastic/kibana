@@ -8,26 +8,24 @@
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { basicCase, connectorsMock } from '../../containers/mock';
 import { ConnectorsForm } from './connectors_form';
 import type { CaseConnectors } from '../../containers/types';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
-import { choices, resilientIncidentTypes, resilientSeverity } from '../connectors/mock';
+import { choices } from '../connectors/mock';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
-import { useGetSeverity } from '../connectors/resilient/use_get_severity';
+import { useGetFields } from '../connectors/resilient/use_get_fields';
+import { renderWithTestingProviders } from '../../common/mock';
+import { useGetFieldsResponse } from '../connectors/resilient/mocks';
 
+jest.mock('../../common/lib/kibana');
 jest.mock('../connectors/servicenow/use_get_choices');
-jest.mock('../connectors/resilient/use_get_incident_types');
-jest.mock('../connectors/resilient/use_get_severity');
+jest.mock('../connectors/resilient/use_get_fields');
 
 const useGetChoicesMock = useGetChoices as jest.Mock;
-const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
-const useGetSeverityMock = useGetSeverity as jest.Mock;
+const useGetFieldsMock = useGetFields as jest.Mock;
 
 describe('ConnectorsForm ', () => {
   const caseConnectors = getCaseConnectorsMockResponse();
@@ -65,22 +63,14 @@ describe('ConnectorsForm ', () => {
     onCancel,
   };
 
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
     jest.clearAllMocks();
     useGetChoicesMock.mockReturnValue({ isLoading: false, data: { data: choices } });
-    useGetIncidentTypesMock.mockReturnValue({
-      isLoading: false,
-      data: { data: resilientIncidentTypes },
-    });
-    useGetSeverityMock.mockReturnValue({ isLoading: false, data: { data: resilientSeverity } });
-
-    appMockRender = createAppMockRenderer();
+    useGetFieldsMock.mockReturnValue(useGetFieldsResponse);
   });
 
   it('renders correctly', async () => {
-    appMockRender.render(<ConnectorsForm {...props} />);
+    renderWithTestingProviders(<ConnectorsForm {...props} />);
 
     expect(screen.getByTestId('caseConnectors')).toBeInTheDocument();
     expect(screen.getByTestId('edit-connector-fields-form-flex-item')).toBeInTheDocument();
@@ -89,13 +79,13 @@ describe('ConnectorsForm ', () => {
   });
 
   it('sets the selected connector correctly', async () => {
-    appMockRender.render(<ConnectorsForm {...props} />);
+    renderWithTestingProviders(<ConnectorsForm {...props} />);
 
     expect(screen.getByText('My SN connector')).toBeInTheDocument();
   });
 
   it('sets the fields for the selected connector correctly', async () => {
-    appMockRender.render(<ConnectorsForm {...props} />);
+    renderWithTestingProviders(<ConnectorsForm {...props} />);
 
     expect(screen.getByTestId('connector-fields-sn-itsm')).toBeInTheDocument();
 
@@ -113,7 +103,7 @@ describe('ConnectorsForm ', () => {
   });
 
   it('changes to a new corrector correctly', async () => {
-    appMockRender.render(<ConnectorsForm {...props} />);
+    renderWithTestingProviders(<ConnectorsForm {...props} />);
 
     await waitFor(() => {
       expect(screen.getByText('My SN connector')).toBeInTheDocument();
@@ -125,8 +115,9 @@ describe('ConnectorsForm ', () => {
 
     await waitFor(() => {
       expect(screen.queryByTestId('connector-fields-sn-itsm')).not.toBeInTheDocument();
-      expect(screen.getByTestId('connector-fields-resilient')).toBeInTheDocument();
     });
+
+    expect(screen.getByTestId('connector-fields-resilient')).toBeInTheDocument();
 
     const incidentTypeComboBox = screen.getByTestId('incidentTypeComboBox');
     const severitySelect = screen.getByTestId('severitySelect');
@@ -136,7 +127,7 @@ describe('ConnectorsForm ', () => {
   });
 
   it('submits correctly', async () => {
-    appMockRender.render(<ConnectorsForm {...props} />);
+    renderWithTestingProviders(<ConnectorsForm {...props} />);
 
     await waitFor(() => {
       expect(screen.getByTestId('connector-fields-sn-itsm')).toBeInTheDocument();
@@ -167,7 +158,7 @@ describe('ConnectorsForm ', () => {
   });
 
   it('changes to a new corrector correctly and its fields correctly', async () => {
-    appMockRender.render(<ConnectorsForm {...props} />);
+    renderWithTestingProviders(<ConnectorsForm {...props} />);
 
     await waitFor(() => {
       expect(screen.getByText('My SN connector')).toBeInTheDocument();
@@ -179,8 +170,9 @@ describe('ConnectorsForm ', () => {
 
     await waitFor(() => {
       expect(screen.queryByTestId('connector-fields-sn-itsm')).not.toBeInTheDocument();
-      expect(screen.getByTestId('connector-fields-resilient')).toBeInTheDocument();
     });
+
+    expect(screen.getByTestId('connector-fields-resilient')).toBeInTheDocument();
 
     const severitySelect = screen.getByTestId('severitySelect');
     await userEvent.selectOptions(severitySelect, ['4']);
@@ -193,13 +185,13 @@ describe('ConnectorsForm ', () => {
         name: 'My Resilient connector',
         type: '.resilient',
         // severity changed from 5 to 4
-        fields: { incidentTypes: null, severityCode: '4' },
+        fields: { incidentTypes: null, severityCode: '4', additionalFields: null },
       });
     });
   });
 
   it('disables the save button if the fields have not been changed', async () => {
-    appMockRender.render(<ConnectorsForm {...props} />);
+    renderWithTestingProviders(<ConnectorsForm {...props} />);
 
     await waitFor(() => {
       expect(screen.getByText('My SN connector')).toBeInTheDocument();
@@ -222,7 +214,7 @@ describe('ConnectorsForm ', () => {
 
     const caseData = { ...basicCase, connector: caseConnectorsWithNullFields['servicenow-1'] };
 
-    appMockRender.render(
+    renderWithTestingProviders(
       <ConnectorsForm
         {...props}
         caseConnectors={caseConnectorsWithNullFields}
@@ -236,7 +228,7 @@ describe('ConnectorsForm ', () => {
   });
 
   it('calls onCancel when clicking the cancel button', async () => {
-    appMockRender.render(<ConnectorsForm {...props} />);
+    renderWithTestingProviders(<ConnectorsForm {...props} />);
 
     await waitFor(() => {
       expect(screen.getByText('My SN connector')).toBeInTheDocument();
@@ -247,7 +239,7 @@ describe('ConnectorsForm ', () => {
   });
 
   it('disables the submit button correctly if the initial connector is the none', async () => {
-    appMockRender.render(<ConnectorsForm {...props} caseData={basicCase} />);
+    renderWithTestingProviders(<ConnectorsForm {...props} caseData={basicCase} />);
 
     await waitFor(() => {
       expect(screen.getByText('No connector selected')).toBeInTheDocument();
@@ -257,7 +249,7 @@ describe('ConnectorsForm ', () => {
   });
 
   it('can select the none connector', async () => {
-    appMockRender.render(<ConnectorsForm {...props} />);
+    renderWithTestingProviders(<ConnectorsForm {...props} />);
 
     await waitFor(() => {
       expect(screen.getByText('My SN connector')).toBeInTheDocument();
@@ -280,7 +272,7 @@ describe('ConnectorsForm ', () => {
   });
 
   it('changes to a new corrector does not disables the submit button with no changes in the fields', async () => {
-    appMockRender.render(<ConnectorsForm {...props} />);
+    renderWithTestingProviders(<ConnectorsForm {...props} />);
 
     await waitFor(() => {
       expect(screen.getByText('My SN connector')).toBeInTheDocument();
@@ -292,14 +284,15 @@ describe('ConnectorsForm ', () => {
 
     await waitFor(() => {
       expect(screen.queryByTestId('connector-fields-sn-itsm')).not.toBeInTheDocument();
-      expect(screen.getByTestId('connector-fields-resilient')).toBeInTheDocument();
     });
+
+    expect(screen.getByTestId('connector-fields-resilient')).toBeInTheDocument();
 
     expect(screen.getByTestId('edit-connectors-submit')).not.toBeDisabled();
   });
 
   it('does not disables the submit button if the connector is deleted', async () => {
-    appMockRender.render(<ConnectorsForm {...props} supportedActionConnectors={[]} />);
+    renderWithTestingProviders(<ConnectorsForm {...props} supportedActionConnectors={[]} />);
 
     expect(screen.getByTestId('edit-connectors-submit')).not.toBeDisabled();
   });
@@ -313,7 +306,9 @@ describe('ConnectorsForm ', () => {
       },
     } as CaseConnectors;
 
-    appMockRender.render(<ConnectorsForm {...props} caseConnectors={caseConnectorsOptional} />);
+    renderWithTestingProviders(
+      <ConnectorsForm {...props} caseConnectors={caseConnectorsOptional} />
+    );
 
     await waitFor(() => {
       expect(screen.getByText('My SN connector')).toBeInTheDocument();
@@ -325,8 +320,9 @@ describe('ConnectorsForm ', () => {
 
     await waitFor(() => {
       expect(screen.queryByTestId('connector-fields-sn-itsm')).not.toBeInTheDocument();
-      expect(screen.getByTestId('connector-fields-resilient')).toBeInTheDocument();
     });
+
+    expect(screen.getByTestId('connector-fields-resilient')).toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId('edit-connectors-submit'));
 
@@ -335,6 +331,7 @@ describe('ConnectorsForm ', () => {
         fields: {
           incidentTypes: null,
           severityCode: null,
+          additionalFields: null,
         },
         id: 'resilient-2',
         name: 'My Resilient connector',
@@ -357,7 +354,7 @@ describe('ConnectorsForm ', () => {
       { ...connectorsMock[0], id: 'servicenow-2', name: 'My SN connector 2' },
     ];
 
-    appMockRender.render(
+    renderWithTestingProviders(
       <ConnectorsForm
         {...props}
         caseConnectors={caseConnectorsOptional}

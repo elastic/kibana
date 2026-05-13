@@ -18,10 +18,10 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { IKbnPalette, KbnPalettes } from '@kbn/palettes';
+import type { IKbnPalette, KbnPalettes } from '@kbn/palettes';
 import { ColorPicker } from './color_picker';
 import { getAssignmentColor } from '../../color/color_handling';
-import { ColorMapping } from '../../config';
+import type { ColorMapping } from '../../config';
 import { removeGradientColorStep } from '../../state/color_mapping';
 
 import { selectColorPickerVisibility } from '../../state/selectors';
@@ -30,7 +30,7 @@ import { getValidColor } from '../../color/color_math';
 
 interface ColorPickerSwatchProps {
   colorMode: ColorMapping.Config['colorMode'];
-  assignmentColor: ColorMapping.Config['assignments'][number]['color'];
+  assignmentColor: ColorMapping.Assignment['color'];
   index: number;
   total: number;
   palette: IKbnPalette;
@@ -71,11 +71,19 @@ export const ColorSwatch = ({
   const euiTheme = useEuiTheme();
   return assignmentColor.type !== 'gradient' ? (
     <EuiPopover
+      aria-label={i18n.translate('coloring.colorMapping.colorPicker.popoverAriaLabel', {
+        defaultMessage: 'Color picker',
+      })}
       panelPaddingSize="none"
       isOpen={colorPickerVisible}
       repositionOnScroll={true}
       closePopover={() => dispatch(hideColorPickerVisibility())}
       anchorPosition="upLeft"
+      css={css`
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      `}
       button={
         swatchShape === 'round' ? (
           <button
@@ -97,7 +105,7 @@ export const ColorSwatch = ({
               border-radius: 50%;
               top: 8px;
               border: 3px solid ${euiTheme.euiTheme.colors.emptyShade};
-              ${euiShadowSmall(euiTheme)};
+              ${euiShadowSmall(euiTheme, { border: 'none' })};
               backgroundcolor: ${colorHex};
               cursor: pointer;
             `}
@@ -163,8 +171,11 @@ export const ColorSwatch = ({
   ) : (
     <EuiColorPickerSwatch
       color={colorHex}
-      aria-label={i18n.translate('coloring.colorMapping.colorPicker.newColorAriaLabel', {
-        defaultMessage: 'Select a new color',
+      aria-label={i18n.translate('coloring.colorMapping.colorSwatch.gradientAriaLabel', {
+        defaultMessage: 'Computed gradient color',
+      })}
+      title={i18n.translate('coloring.colorMapping.colorSwatch.gradientAriaLabel', {
+        defaultMessage: 'Computed gradient color',
       })}
       disabled
       style={{

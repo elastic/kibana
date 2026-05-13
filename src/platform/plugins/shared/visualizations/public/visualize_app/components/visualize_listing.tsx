@@ -7,16 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './visualize_listing.scss';
-
-import React, {
-  useCallback,
-  useRef,
-  useMemo,
-  useEffect,
-  MouseEvent,
-  MutableRefObject,
-} from 'react';
+import type { MouseEvent, MutableRefObject } from 'react';
+import React, { useCallback, useRef, useMemo, useEffect } from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,65 +17,55 @@ import useMount from 'react-use/lib/useMount';
 
 import { useLocation, useParams } from 'react-router-dom';
 
-import type { SavedObjectReference } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
 import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import {
   TabbedTableListView,
   type TableListTab,
 } from '@kbn/content-management-tabbed-table-list-view';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
-import { TableListViewProps } from '@kbn/content-management-table-list-view';
+import type { TableListViewProps } from '@kbn/content-management-table-list-view';
 import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import {
+  SAVED_OBJECTS_LIMIT_SETTING,
+  SAVED_OBJECTS_PER_PAGE_SETTING,
+  VisualizeConstants,
+} from '@kbn/visualizations-common';
+import {
+  getNoItemsMessage,
+  getCustomColumn,
+  getCustomSortingOptions,
+  getVisualizationListingTableStyles,
+} from '@kbn/visualization-listing-components';
 import { findListItems } from '../../utils/saved_visualize_utils';
-import { updateBasicSoAttributes } from '../../utils/saved_objects_utils/update_basic_attributes';
-import { checkForDuplicateTitle } from '../../utils/saved_objects_utils/check_for_duplicate_title';
+import {
+  deleteListItems,
+  updateBasicSoAttributes,
+} from '../../utils/saved_objects_utils/update_basic_attributes';
 import { showNewVisModal } from '../../wizard';
 import { getTypes } from '../../services';
-import { SAVED_OBJECTS_LIMIT_SETTING, SAVED_OBJECTS_PER_PAGE_SETTING } from '../..';
-import type { VisualizationListItem } from '../..';
 import type { VisualizeServices } from '../types';
-import { VisualizeConstants } from '../../../common/constants';
-import { getNoItemsMessage, getCustomColumn, getCustomSortingOptions } from '../utils';
-import { getVisualizeListItemLink } from '../utils/get_visualize_list_item_link';
-import type { VisualizationStage } from '../../vis_types/vis_type_alias_registry';
+import { getVisualizeListItemLinkFn } from '../utils/get_visualize_list_item_link';
+import {
+  toTableListViewSavedObject,
+  type VisualizeUserContent,
+} from '../../utils/to_table_list_view_saved_object';
+import { hasLibraryItemWithTitle } from '../../utils/saved_objects_utils';
 
-type VisualizeUserContent = VisualizationListItem &
-  UserContentCommonSchema & {
-    type: string;
-    attributes: {
-      id: string;
-      title: string;
-      description?: string;
-      readOnly: boolean;
-      error?: string;
-    };
-  };
+const visualizeLibraryPageTitle = i18n.translate('visualizations.listingPageTitle', {
+  defaultMessage: 'Visualize library',
+});
 
-const toTableListViewSavedObject = (savedObject: Record<string, unknown>): VisualizeUserContent => {
-  return {
-    id: savedObject.id as string,
-    updatedAt: savedObject.updatedAt as string,
-    managed: savedObject.managed as boolean,
-    references: savedObject.references as Array<{ id: string; type: string; name: string }>,
-    type: savedObject.savedObjectType as string,
-    icon: savedObject.icon as string,
-    stage: savedObject.stage as VisualizationStage,
-    savedObjectType: savedObject.savedObjectType as string,
-    typeTitle: savedObject.typeTitle as string,
-    title: (savedObject.title as string) ?? '',
-    error: (savedObject.error as string) ?? '',
-    editor: savedObject.editor as any,
-    attributes: {
-      id: savedObject.id as string,
-      title: (savedObject.title as string) ?? '',
-      description: savedObject.description as string,
-      readOnly: savedObject.readOnly as boolean,
-      error: savedObject.error as string,
-    },
-  };
+const visualizeListingStyles = {
+  table: getVisualizationListingTableStyles,
+  calloutLink: css`
+    text-decoration: underline;
+  `,
 };
+
 type CustomTableViewProps = Pick<
   TableListViewProps<VisualizeUserContent>,
   | 'createItem'
@@ -103,11 +85,12 @@ const useTableListViewProps = (
     services: {
       application,
       history,
-      savedObjects,
       savedObjectsTagging,
+      stateTransferService,
       toastNotifications,
       visualizeCapabilities,
       contentManagement,
+      http,
       ...startServices
     },
   } = useKibana<VisualizeServices>();
@@ -115,11 +98,21 @@ const useTableListViewProps = (
   const visualizedUserContent = useRef<VisualizeUserContent[]>();
 
   const createNewVis = useCallback(() => {
-    closeNewVisModal.current = showNewVisModal();
-  }, [closeNewVisModal]);
+    closeNewVisModal.current = showNewVisModal({
+      originatingApp: VisualizeConstants.APP_ID,
+      breadcrumbs: [
+        {
+          text: visualizeLibraryPageTitle,
+          href: application.getUrlForApp(VisualizeConstants.APP_ID, {
+            path: `#${VisualizeConstants.LANDING_PAGE_PATH}`,
+          }),
+        },
+      ],
+    });
+  }, [closeNewVisModal, application]);
 
   const editItem = useCallback(
-    async ({ attributes: { id }, editor }: VisualizeUserContent) => {
+    async ({ attributes: { id }, editor = { editUrl: '' } }: VisualizeUserContent) => {
       if (!('editApp' in editor || 'editUrl' in editor)) {
         await editor.onEdit(id);
         return;
@@ -127,13 +120,16 @@ const useTableListViewProps = (
 
       const { editApp, editUrl } = editor;
       if (editApp) {
-        application.navigateToApp(editApp, { path: editUrl });
+        await stateTransferService.navigateToEditor(editApp, {
+          path: editUrl,
+          state: { originatingApp: VisualizeConstants.APP_ID },
+        });
         return;
       }
       // for visualizations the edit and view URLs are the same
       history.push(editUrl);
     },
-    [application, history]
+    [history, stateTransferService]
   );
 
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);
@@ -145,8 +141,8 @@ const useTableListViewProps = (
         references,
         referencesToExclude,
       }: {
-        references?: SavedObjectReference[];
-        referencesToExclude?: SavedObjectReference[];
+        references?: Reference[];
+        referencesToExclude?: Reference[];
       } = {}
     ) => {
       return findListItems(
@@ -186,12 +182,13 @@ const useTableListViewProps = (
             savedObjectsTagging,
             typesService: getTypes(),
             contentManagement,
+            http,
             ...startServices,
           }
         );
       }
     },
-    [savedObjectsTagging, contentManagement, startServices]
+    [savedObjectsTagging, contentManagement, http, startServices]
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
@@ -200,47 +197,45 @@ const useTableListViewProps = (
         {
           type: 'warning',
           async fn(value, id) {
-            if (id) {
-              const content = visualizedUserContent.current?.find((c) => c.id === id);
-              if (content) {
-                try {
-                  await checkForDuplicateTitle(
-                    {
-                      id,
-                      title: value,
-                      lastSavedTitle: content.title,
-                      getEsType: () => content.type,
-                    },
-                    false,
-                    false,
-                    () => {},
-                    startServices
-                  );
-                } catch (e) {
-                  return i18n.translate(
-                    'visualizations.visualizeListingDeleteErrorTitle.duplicateWarning',
-                    {
-                      defaultMessage: 'Saving "{value}" creates a duplicate title.',
-                      values: {
-                        value,
-                      },
-                    }
-                  );
-                }
-              }
+            if (!id) return;
+
+            const content = visualizedUserContent.current?.find((c) => c.id === id);
+            if (!content) return;
+
+            if (value.toLowerCase() === content.title.toLowerCase()) {
+              return;
             }
+
+            let hasDuplicateTitle = false;
+            try {
+              hasDuplicateTitle = await hasLibraryItemWithTitle(value);
+            } catch (e) {
+              // ignore error checking for duplicate title
+            }
+            return hasDuplicateTitle
+              ? i18n.translate('visualizations.visualizeListingDeleteErrorTitle.duplicateWarning', {
+                  defaultMessage: 'Saving "{value}" creates a duplicate title.',
+                  values: {
+                    value,
+                  },
+                })
+              : undefined;
           },
         },
       ],
     }),
-    [startServices]
+    []
   );
 
   const deleteItems = useCallback(
-    async (selectedItems: object[]) => {
-      await Promise.all(
-        selectedItems.map((item: any) => savedObjects.client.delete(item.savedObjectType, item.id))
-      ).catch((error) => {
+    async (items: object[]) => {
+      await deleteListItems(items, {
+        savedObjectsTagging,
+        typesService: getTypes(),
+        contentManagement,
+        http,
+        ...startServices,
+      }).catch((error) => {
         toastNotifications.addError(error, {
           title: i18n.translate('visualizations.visualizeListingDeleteErrorTitle', {
             defaultMessage: 'Error deleting visualization',
@@ -248,7 +243,7 @@ const useTableListViewProps = (
         });
       });
     },
-    [savedObjects.client, toastNotifications]
+    [contentManagement, http, savedObjectsTagging, startServices, toastNotifications]
   );
 
   const props: CustomTableViewProps = {
@@ -285,6 +280,7 @@ const useTableListViewProps = (
 };
 
 export const VisualizeListing = () => {
+  const styles = useMemoCss(visualizeListingStyles);
   const {
     services: {
       application,
@@ -332,27 +328,24 @@ export const VisualizeListing = () => {
     } else {
       chrome.setBreadcrumbs([
         {
-          text: i18n.translate('visualizations.visualizeListingBreadcrumbsTitle', {
-            defaultMessage: 'Visualize Library',
-          }),
+          text: visualizeLibraryPageTitle,
         },
       ]);
     }
 
-    chrome.docTitle.change(
-      i18n.translate('visualizations.listingPageTitle', { defaultMessage: 'Visualize Library' })
-    );
+    chrome.docTitle.change(visualizeLibraryPageTitle);
   });
   useUnmount(() => closeNewVisModal.current());
+
+  const getVisualizeListItemLink = useMemo(
+    () => getVisualizeListItemLinkFn(application, kbnUrlStateStorage),
+    [application, kbnUrlStateStorage]
+  );
 
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
   const tableViewProps = useTableListViewProps(closeNewVisModal, listingLimit);
-
-  const visualizeLibraryTitle = i18n.translate('visualizations.listing.table.listTitle', {
-    defaultMessage: 'Visualize Library',
-  });
 
   const visualizeTab: TableListTab<VisualizeUserContent> = useMemo(() => {
     const calloutMessage = (
@@ -364,6 +357,7 @@ export const VisualizeListing = () => {
           dashboardApp: (
             <EuiLink
               className="visListingCallout__link"
+              css={styles.calloutLink}
               onClick={(event: MouseEvent) => {
                 event.preventDefault();
                 application.navigateToUrl(application.getUrlForApp('dashboards'));
@@ -386,54 +380,48 @@ export const VisualizeListing = () => {
         <>
           {dashboardCapabilities.createNew && (
             <>
-              <EuiCallOut size="s" title={calloutMessage} iconType="iInCircle" />
+              <EuiCallOut announceOnMount size="s" title={calloutMessage} iconType="info" />
               <EuiSpacer size="m" />
             </>
           )}
-          <TableListViewTable<VisualizeUserContent>
-            id="vis"
-            // we allow users to create visualizations even if they can't save them
-            // for data exploration purposes
-            customTableColumn={getCustomColumn()}
-            customSortingOptions={getCustomSortingOptions()}
-            listingLimit={listingLimit}
-            initialPageSize={initialPageSize}
-            initialFilter={''}
-            entityName={i18n.translate('visualizations.listing.table.entityName', {
-              defaultMessage: 'visualization',
-            })}
-            entityNamePlural={i18n.translate('visualizations.listing.table.entityNamePlural', {
-              defaultMessage: 'visualizations',
-            })}
-            getOnClickTitle={(item) =>
-              item.attributes.readOnly ? undefined : () => tableViewProps.editItem?.(item)
-            }
-            getDetailViewLink={({ editor, attributes: { error, readOnly } }) =>
-              readOnly || (editor && 'onEdit' in editor)
-                ? undefined
-                : getVisualizeListItemLink(
-                    application,
-                    kbnUrlStateStorage,
-                    editor.editApp,
-                    editor.editUrl,
-                    error
-                  )
-            }
-            tableCaption={visualizeLibraryTitle}
-            {...tableViewProps}
-            {...propsFromParent}
-          />
+          <div css={styles.table}>
+            <TableListViewTable<VisualizeUserContent>
+              id="vis"
+              // we allow users to create visualizations even if they can't save them
+              // for data exploration purposes
+              customTableColumn={getCustomColumn()}
+              customSortingOptions={getCustomSortingOptions()}
+              initialPageSize={initialPageSize}
+              initialFilter={''}
+              entityName={i18n.translate('visualizations.listing.table.entityName', {
+                defaultMessage: 'visualization',
+              })}
+              entityNamePlural={i18n.translate('visualizations.listing.table.entityNamePlural', {
+                defaultMessage: 'visualizations',
+              })}
+              getOnClickTitle={(item) =>
+                item.attributes.readOnly || item.error
+                  ? undefined
+                  : () => tableViewProps.editItem?.(item)
+              }
+              getDetailViewLink={getVisualizeListItemLink}
+              tableCaption={visualizeLibraryPageTitle}
+              {...tableViewProps}
+              onFetchSuccess={propsFromParent.onFetchSuccess}
+              setPageDataTestSubject={propsFromParent.setPageDataTestSubject}
+            />
+          </div>
         </>
       ),
     };
   }, [
+    styles.calloutLink,
+    styles.table,
     application,
     dashboardCapabilities.createNew,
     initialPageSize,
-    kbnUrlStateStorage,
-    listingLimit,
     tableViewProps,
-    visualizeLibraryTitle,
+    getVisualizeListItemLink,
   ]);
 
   const tabs = useMemo(
@@ -446,7 +434,7 @@ export const VisualizeListing = () => {
   return (
     <TabbedTableListView
       headingId="visualizeListingHeading"
-      title={visualizeLibraryTitle}
+      title={visualizeLibraryPageTitle}
       tabs={tabs}
       activeTabId={activeTab}
       changeActiveTab={(id) => {

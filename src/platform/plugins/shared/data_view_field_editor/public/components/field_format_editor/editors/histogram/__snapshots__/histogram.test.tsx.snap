@@ -39,6 +39,7 @@ exports[`HistogramFormatEditor should render normally 1`] = `
           />
            
           <EuiIcon
+            aria-hidden={true}
             type="link"
           />
         </EuiLink>
@@ -54,7 +55,6 @@ exports[`HistogramFormatEditor should render normally 1`] = `
     />
   </EuiFormRow>
   <FormatEditorSamples
-    sampleType="text"
     samples={Array []}
   />
 </Fragment>

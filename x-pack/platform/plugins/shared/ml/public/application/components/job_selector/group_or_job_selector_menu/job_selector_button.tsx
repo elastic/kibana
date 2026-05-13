@@ -8,9 +8,19 @@
 import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { EuiButton, EuiContextMenu, EuiPopover, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiContextMenu,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPopover,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useUrlState } from '@kbn/ml-url-state';
-import { ML_PAGES, type MlPages } from '../../../../../common/constants/locator';
+import { ML_PAGES, type MlPages } from '@kbn/ml-common-types/locator_ml_pages';
 import { useJobInfoFlyouts } from '../../../jobs/components/job_details_flyout';
 import { useMlKibana } from '../../../contexts/kibana';
 import { getOptionsForJobSelectorMenuItems } from './get_options_for_job_selector_menu';
@@ -43,15 +53,13 @@ export const AnomalyDetectionInfoButton: FC<Props> = ({
     prefix: 'adJobInfoContextMenu',
     suffix: jobId,
   });
-  const onButtonClick = () => {
-    setPopover(!isPopoverOpen);
-  };
+  const onButtonClick = () => setPopover((prev) => !prev);
   const closePopover = () => {
     setPopover(false);
   };
 
   const { setActiveFlyout, setActiveJobId } = useJobInfoFlyouts();
-  const panels = useMemo(
+  const panels = useMemo<EuiContextMenuPanelDescriptor[]>(
     () => {
       return [
         {
@@ -71,7 +79,7 @@ export const AnomalyDetectionInfoButton: FC<Props> = ({
             share,
           }),
         },
-      ] as EuiContextMenuPanelDescriptor[];
+      ];
     },
     // globalState is an object with references change on every render, so we are stringifying it here
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -90,20 +98,30 @@ export const AnomalyDetectionInfoButton: FC<Props> = ({
   );
 
   const button = (
-    <EuiButton
-      data-test-subj="mlJobSelectionBadge"
-      iconType="boxesVertical"
-      iconSide="right"
-      onClick={onButtonClick}
-      size="s"
-      color="text"
-    >
-      {jobId}
+    <EuiButton data-test-subj="mlJobSelectionBadge" onClick={onButtonClick} size="s" color="text">
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="spaceBetween"
+        gutterSize="s"
+        responsive={false}
+      >
+        <EuiFlexItem grow={true}>
+          <EuiText textAlign="center" size="s">
+            {jobId}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="boxesVertical" aria-hidden={true} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiButton>
   );
   return (
     <EuiPopover
       id={popoverId}
+      aria-label={i18n.translate('xpack.ml.jobSelectorButton.popoverAriaLabel', {
+        defaultMessage: 'Job selector',
+      })}
       button={button}
       isOpen={isPopoverOpen}
       closePopover={closePopover}

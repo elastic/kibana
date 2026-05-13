@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { API_BASE_PATH } from '../../common/constants';
-import { RouteDependencies } from '../types';
+import type { RouteDependencies } from '../types';
 
 export const register = ({ router, getLicenseStatus, log }: RouteDependencies) => {
   router.post(

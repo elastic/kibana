@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
+import { ESQLVariableType } from '@kbn/esql-types';
 import { EsqlVariablesService } from './variables_service';
 
 describe('EsqlVariablesService', () => {
@@ -16,17 +16,17 @@ describe('EsqlVariablesService', () => {
     esqlVariablesService = new EsqlVariablesService();
   });
 
-  describe('enableSuggestions', () => {
+  describe('enableCreateControlSuggestion', () => {
     it('should enable suggestions', () => {
-      esqlVariablesService.enableSuggestions();
-      expect(esqlVariablesService.areSuggestionsEnabled).toBe(true);
+      esqlVariablesService.enableCreateControlSuggestion();
+      expect(esqlVariablesService.isCreateControlSuggestionEnabled).toBe(true);
     });
   });
 
-  describe('disableSuggestions', () => {
+  describe('disableCreateControlSuggestion', () => {
     it('should disable suggestions', () => {
-      esqlVariablesService.disableSuggestions();
-      expect(esqlVariablesService.areSuggestionsEnabled).toBe(false);
+      esqlVariablesService.disableCreateControlSuggestion();
+      expect(esqlVariablesService.isCreateControlSuggestionEnabled).toBe(false);
     });
   });
 

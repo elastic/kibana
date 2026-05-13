@@ -13,17 +13,17 @@ export const getFleetManagedIndexTemplatesRoute = (router: IRouter) => {
     .get({
       path: SECRUTIY_INTEGRATIONS_FLEET_MANAGED_INDEX_TEMPLATES_URL,
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route delegates authorization of the current user to the Elasticsearch index template API.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route delegates authorization of the current user to the Elasticsearch index template API.',
-          },
-        },
         validate: {},
       },
       async (context, _request, response) => {

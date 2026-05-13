@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FeatureCollection } from 'geojson';
-import { HttpStart } from '@kbn/core/public';
-import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { IImporter, ImportFactoryOptions } from '../importer';
+import type React from 'react';
+import type { FeatureCollection } from 'geojson';
+import type { HttpStart, AnalyticsServiceStart } from '@kbn/core/public';
+import type { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import type { ImportFactoryOptions } from '@kbn/file-upload-common';
+import type { IImporter } from '../importer';
 import { getHttp } from '../kibana_services';
-import { IndexNameFormProps } from '..';
+import type { IndexNameFormProps } from '..';
 
 export interface FileUploadGeoResults {
   indexPatternId: string;
@@ -20,7 +21,7 @@ export interface FileUploadGeoResults {
   docCount: number;
 }
 
-export interface FileUploadComponentProps {
+export interface GeoUploadWizardProps {
   isIndexingTriggered: boolean;
   onFileSelect: (geojsonFile: FeatureCollection, name: string, previewCoverage: number) => void;
   onFileClear: () => void;
@@ -28,12 +29,14 @@ export interface FileUploadComponentProps {
   disableImportBtn: () => void;
   onUploadComplete: (results: FileUploadGeoResults) => void;
   onUploadError: () => void;
+  analytics: AnalyticsServiceStart;
+  location: string;
 }
 
 let loadModulesPromise: Promise<LazyLoadedFileUploadModules>;
 
 export interface LazyLoadedFileUploadModules {
-  GeoUploadWizard: React.ComponentType<FileUploadComponentProps>;
+  GeoUploadWizard: React.ComponentType<GeoUploadWizardProps>;
   IndexNameForm: React.ComponentType<IndexNameFormProps>;
   importerFactory: (format: string, options: ImportFactoryOptions) => IImporter;
   getHttp: () => HttpStart;

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { FieldFormatsRegistry } from './field_formats_registry';
 
 /** @public */
@@ -45,7 +45,7 @@ export {
   DURATION_OUTPUT_FORMATS,
 } from './constants/duration_formats';
 export { FIELD_FORMAT_IDS } from './types';
-export { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from './content_types';
+export { TEXT_CONTEXT_TYPE } from './content_types';
 
 export type {
   FieldFormatsGetConfigFn,
@@ -61,8 +61,9 @@ export type {
   FieldFormatMetaParams,
   FieldFormatConvert,
   FieldFormatConvertFunction,
-  HtmlContextTypeConvert,
-  HtmlContextTypeOptions,
+  ReactContextTypeConvert,
+  ReactContextTypeSingleConvert,
+  ReactContextTypeOptions,
   TextContextTypeConvert,
   TextContextTypeOptions,
 } from './types';

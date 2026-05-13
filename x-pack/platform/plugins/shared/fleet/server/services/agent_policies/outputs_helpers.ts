@@ -29,14 +29,13 @@ export async function getDataOutputForAgentPolicy(
   soClient: SavedObjectsClientContract,
   agentPolicy: Partial<AgentPolicySOAttributes>
 ) {
-  const dataOutputId =
-    agentPolicy.data_output_id || (await outputService.getDefaultDataOutputId(soClient));
+  const dataOutputId = agentPolicy.data_output_id || (await outputService.getDefaultDataOutputId());
 
   if (!dataOutputId) {
     throw new OutputNotFoundError('No default data output found.');
   }
 
-  return outputService.get(soClient, dataOutputId);
+  return outputService.get(dataOutputId);
 }
 
 /**
@@ -54,6 +53,7 @@ export async function validateOutputForPolicy(
   allowedOutputTypeForPolicy: string[] = Object.values(outputType)
 ) {
   if (
+    Object.keys(existingData).length !== 0 &&
     newData.data_output_id === existingData.data_output_id &&
     newData.monitoring_output_id === existingData.monitoring_output_id
   ) {
@@ -66,7 +66,15 @@ export async function validateOutputForPolicy(
     allowedOutputTypeForPolicy.length !== Object.values(outputType).length;
 
   if (isOutputTypeRestricted) {
-    const dataOutput = await getDataOutputForAgentPolicy(soClient, data);
+    const dataOutput = await getDataOutputForAgentPolicy(soClient, data).catch((err) => {
+      if (err instanceof OutputNotFoundError) {
+        return;
+      }
+      throw err;
+    });
+    if (!dataOutput) {
+      return;
+    }
     if (!allowedOutputTypeForPolicy.includes(dataOutput.type)) {
       throw new OutputInvalidError(
         `Output of type "${dataOutput.type}" is not usable with policy "${data.name}".`
@@ -116,7 +124,15 @@ export async function validateAgentPolicyOutputForIntegration(
     allowedOutputTypeForPolicy.length !== Object.values(outputType).length;
 
   if (isOutputTypeRestricted) {
-    const dataOutput = await getDataOutputForAgentPolicy(soClient, agentPolicy);
+    const dataOutput = await getDataOutputForAgentPolicy(soClient, agentPolicy).catch((err) => {
+      if (err instanceof OutputNotFoundError) {
+        return;
+      }
+      throw err;
+    });
+    if (!dataOutput) {
+      return;
+    }
     if (!allowedOutputTypeForPolicy.includes(dataOutput.type)) {
       if (isNewPackagePolicy) {
         throw new OutputInvalidError(

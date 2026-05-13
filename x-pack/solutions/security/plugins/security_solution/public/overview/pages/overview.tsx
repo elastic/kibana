@@ -8,11 +8,11 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiShowFor,
   EuiScreenReaderOnly,
+  EuiShowFor,
+  EuiSpacer,
 } from '@elastic/eui';
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { OVERVIEW } from '../../app/translations';
 import { InputsModelId } from '../../common/store/inputs/constants';
@@ -39,6 +39,14 @@ import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
+import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { PageLoader } from '../../common/components/page_loader';
+import {
+  filterAlertsFromIndexPatterns,
+  getAlertsIndexPatterns,
+} from '../../common/components/visualization_actions/utils';
 
 const OverviewComponent = () => {
   const getGlobalFiltersQuerySelector = useMemo(
@@ -50,7 +58,40 @@ const OverviewComponent = () => {
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const { from, deleteQuery, setQuery, to } = useGlobalTime();
-  const { indicesExist, sourcererDataView, selectedPatterns } = useSourcererDataView();
+  const {
+    indicesExist: oldIndicesExist,
+    sourcererDataView: oldSourcererDataViewSpec,
+    selectedPatterns: oldSelectedPatterns,
+  } = useSourcererDataView();
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const { dataView: experimentalDataView, status } = useDataView();
+  const experimentalSelectedPatterns = useSelectedPatterns();
+
+  const indicesExist = newDataViewPickerEnabled
+    ? !!experimentalDataView.matchedIndices?.length
+    : oldIndicesExist;
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
+
+  // Keep-list: patterns from the data view with alert-backing indices stripped
+  // out. Used by `EventCounts` to scope the Host/Network REST queries to event
+  // documents only. Remote event indices are preserved unchanged so that
+  // Cross-Project Search continues to work through the data view.
+  const eventIndexPatterns = useMemo(
+    () => filterAlertsFromIndexPatterns(selectedPatterns),
+    [selectedPatterns]
+  );
+
+  // Drop-list: only the alert-backing patterns from the data view. Passed to
+  // the Events histogram as `excludedPatterns` so the chart emits a negated
+  // `_index` filter (CPS-safe — does not allowlist the full scope).
+  const alertIndexPatterns = useMemo(
+    () => getAlertsIndexPatterns(selectedPatterns),
+    [selectedPatterns]
+  );
 
   const endpointMetadataIndex = useMemo<string[]>(() => {
     return [ENDPOINT_METADATA_INDEX];
@@ -70,8 +111,12 @@ const OverviewComponent = () => {
   const {
     endpointPrivileges: { canAccessFleet },
   } = useUserPrivileges();
-  const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
+  const { hasAlertsRead } = useAlertsPrivileges();
   const { tiDataSources: allTiDataSources, isInitiallyLoaded: isTiLoaded } = useAllTiDataSources();
+
+  if (newDataViewPickerEnabled && status === 'pristine') {
+    return <PageLoader />;
+  }
 
   return (
     <>
@@ -82,7 +127,11 @@ const OverviewComponent = () => {
       {indicesExist ? (
         <>
           <FiltersGlobal>
-            <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
+            <SiemSearchBar
+              dataView={experimentalDataView}
+              id={InputsModelId.global}
+              sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
+            />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper>
@@ -101,7 +150,7 @@ const OverviewComponent = () => {
 
               <EuiFlexItem grow={3}>
                 <EuiFlexGroup direction="column" responsive={false} gutterSize="none">
-                  {hasIndexRead && hasKibanaREAD && (
+                  {hasAlertsRead && (
                     <EuiFlexItem grow={false}>
                       <SignalsByCategory filters={filters} />
                       <EuiSpacer size="l" />
@@ -113,10 +162,11 @@ const OverviewComponent = () => {
                       deleteQuery={deleteQuery}
                       filters={filters}
                       from={from}
-                      dataViewSpec={sourcererDataView}
+                      dataViewSpec={oldSourcererDataViewSpec}
+                      dataView={experimentalDataView}
+                      excludedPatterns={alertIndexPatterns}
                       query={query}
                       queryType="overview"
-                      setQuery={setQuery}
                       to={to}
                     />
                   </EuiFlexItem>
@@ -125,8 +175,9 @@ const OverviewComponent = () => {
                     <EventCounts
                       filters={filters}
                       from={from}
-                      indexNames={selectedPatterns}
-                      dataViewSpec={sourcererDataView}
+                      indexNames={eventIndexPatterns}
+                      dataViewSpec={oldSourcererDataViewSpec}
+                      dataView={experimentalDataView}
                       query={query}
                       setQuery={setQuery}
                       to={to}

@@ -8,11 +8,12 @@
  */
 
 import React from 'react';
-import { ComponentMeta } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
 import type { SampleDataSet } from '@kbn/home-sample-data-types';
-import { Params, getStoryArgTypes, getStoryServices, mockDataSet } from './mocks';
+import type { Params } from './mocks';
+import { getStoryArgTypes, getStoryServices, mockDataSet } from './mocks';
 import { SampleDataCardProvider } from './services';
 import { SampleDataCard } from './sample_data_card';
 
@@ -28,23 +29,25 @@ export default {
     },
   },
   decorators: [(Story) => <div style={{ width: '433px', padding: '25px' }}>{Story()}</div>],
-} as ComponentMeta<typeof SampleDataCard>;
+} as Meta<typeof SampleDataCard>;
 
 const argTypes = getStoryArgTypes();
 
-export const Card = (params: Params) => {
-  const { includeAppLinks, ...rest } = params;
-  const sampleDataSet: SampleDataSet = {
-    ...mockDataSet,
-    ...rest,
-    appLinks: includeAppLinks ? mockDataSet.appLinks : [],
-  };
+export const Card = {
+  render: (params: Params) => {
+    const { includeAppLinks, ...rest } = params;
+    const sampleDataSet: SampleDataSet = {
+      ...mockDataSet,
+      ...rest,
+      appLinks: includeAppLinks ? mockDataSet.appLinks : [],
+    };
 
-  return (
-    <SampleDataCardProvider {...getStoryServices(params)}>
-      <SampleDataCard sampleDataSet={sampleDataSet} onStatusChange={action('onStatusChange')} />
-    </SampleDataCardProvider>
-  );
+    return (
+      <SampleDataCardProvider {...getStoryServices(params)}>
+        <SampleDataCard sampleDataSet={sampleDataSet} onStatusChange={action('onStatusChange')} />
+      </SampleDataCardProvider>
+    );
+  },
+
+  argTypes,
 };
-
-Card.argTypes = argTypes;

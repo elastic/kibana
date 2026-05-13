@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IRouter, RequestHandlerContext } from '@kbn/core/server';
+import type { IRouter, RequestHandlerContext } from '@kbn/core/server';
 import type { VersionedRoute } from '@kbn/core-http-server';
 import { schema } from '@kbn/config-schema';
 import { getDataViews, hasUserDataView } from '../../has_user_data_view';
@@ -41,16 +41,16 @@ export const registerHasDataViewsRoute = (router: IRouter): void => {
     .get({
       path: '/internal/data_views/has_data_views',
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Authorization provided by saved objects client',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'Authorization provided by saved objects client',
-          },
-        },
         validate: {
           response: {
             200: {

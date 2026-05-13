@@ -6,19 +6,28 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
+import type { Filter } from '@kbn/es-query';
 import { timefilterServiceMock } from '@kbn/data-plugin/public/query/timefilter/timefilter_service.mock';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
-import { ObservabilityAlertSearchBarProps, Services } from './types';
-import { ObservabilityAlertSearchBar } from './alert_search_bar';
+import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
+import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
-import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../../../common/constants';
+import { ObservabilityAlertSearchBar } from './alert_search_bar';
+import type { ObservabilityAlertSearchBarProps, Services } from './types';
 
 const getAlertsSearchBarMock = jest.fn();
 const ALERT_SEARCH_BAR_DATA_TEST_SUBJ = 'alerts-search-bar';
+const ALERT_UUID = '413a9631-1a29-4344-a8b4-9a1dc23421ee';
 
 describe('ObservabilityAlertSearchBar', () => {
+  const { http, data, dataViews, notifications, spaces } = kibanaStartMock.startContract().services;
+  spaces.getActiveSpace = jest
+    .fn()
+    .mockImplementation(() =>
+      Promise.resolve({ id: 'space-id', name: 'space-name', disabledFeatures: [] })
+    );
   const renderComponent = (
     props: Partial<ObservabilityAlertSearchBarProps> = {},
     services: Partial<Services> = {}
@@ -27,12 +36,15 @@ describe('ObservabilityAlertSearchBar', () => {
       appName: 'testAppName',
       kuery: '',
       filters: [],
+      filterControls: [],
       onRangeFromChange: jest.fn(),
       onRangeToChange: jest.fn(),
       onKueryChange: jest.fn(),
       onStatusChange: jest.fn(),
       onEsQueryChange: jest.fn(),
       onFiltersChange: jest.fn(),
+      onControlConfigsChange: jest.fn(),
+      onFilterControlsChange: jest.fn(),
       setSavedQuery: jest.fn(),
       rangeTo: 'now',
       rangeFrom: 'now-15m',
@@ -44,6 +56,11 @@ describe('ObservabilityAlertSearchBar', () => {
           <div data-test-subj={ALERT_SEARCH_BAR_DATA_TEST_SUBJ} />
         ),
         useToasts: jest.fn(),
+        http,
+        data,
+        dataViews,
+        notifications,
+        spaces,
         ...services,
       },
       ...props,
@@ -78,92 +95,106 @@ describe('ObservabilityAlertSearchBar', () => {
     );
   });
 
-  it('should filter active alerts', async () => {
+  it('should include defaultFilters in es query', async () => {
     const mockedOnEsQueryChange = jest.fn();
     const mockedFrom = '2022-11-15T09:38:13.604Z';
     const mockedTo = '2022-11-15T09:53:13.604Z';
-
-    renderComponent({
-      onEsQueryChange: mockedOnEsQueryChange,
-      rangeFrom: mockedFrom,
-      rangeTo: mockedTo,
-      status: 'active',
-    });
-
-    expect(mockedOnEsQueryChange).toHaveBeenCalledWith({
-      bool: {
-        filter: [
-          {
-            bool: {
-              minimum_should_match: 1,
-              should: [{ match_phrase: { 'kibana.alert.status': 'active' } }],
-            },
-          },
-          {
-            range: {
-              'kibana.alert.time_range': expect.objectContaining({
-                format: 'strict_date_optional_time',
-                gte: mockedFrom,
-                lte: mockedTo,
-              }),
-            },
-          },
-        ],
-        must: [],
-        must_not: [],
-        should: [],
-      },
-    });
-  });
-
-  it('should include defaultSearchQueries in es query', async () => {
-    const mockedOnEsQueryChange = jest.fn();
-    const mockedFrom = '2022-11-15T09:38:13.604Z';
-    const mockedTo = '2022-11-15T09:53:13.604Z';
-    const defaultSearchQueries = [
+    const defaultFilters: Filter[] = [
       {
-        query: 'kibana.alert.rule.uuid: 413a9631-1a29-4344-a8b4-9a1dc23421ee',
-        language: 'kuery',
+        query: {
+          match_phrase: {
+            'kibana.alert.rule.uuid': ALERT_UUID,
+          },
+        },
+        meta: {},
       },
     ];
 
-    renderComponent({
-      onEsQueryChange: mockedOnEsQueryChange,
-      rangeFrom: mockedFrom,
-      rangeTo: mockedTo,
-      defaultSearchQueries,
-      status: 'all',
+    await act(async () => {
+      renderComponent({
+        onEsQueryChange: mockedOnEsQueryChange,
+        rangeFrom: mockedFrom,
+        rangeTo: mockedTo,
+        defaultFilters,
+        status: 'all',
+      });
     });
 
-    const esQueryChangeParams = {
-      bool: {
-        filter: [
-          {
-            bool: {
-              minimum_should_match: 1,
-              should: [
-                { match: { 'kibana.alert.rule.uuid': '413a9631-1a29-4344-a8b4-9a1dc23421ee' } },
-              ],
-            },
+    await waitFor(() => {
+      expect(mockedOnEsQueryChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          bool: expect.objectContaining({
+            filter: expect.arrayContaining([
+              {
+                range: {
+                  'kibana.alert.time_range': expect.objectContaining({
+                    format: 'strict_date_optional_time',
+                    gte: mockedFrom,
+                    lte: mockedTo,
+                  }),
+                },
+              },
+              {
+                match_phrase: {
+                  'kibana.alert.rule.uuid': ALERT_UUID,
+                },
+              },
+            ]),
+          }),
+        })
+      );
+    });
+  });
+
+  it('should include filterControls in es query', async () => {
+    const mockedOnEsQueryChange = jest.fn();
+    const mockedFrom = '2022-11-15T09:38:13.604Z';
+    const mockedTo = '2022-11-15T09:53:13.604Z';
+    const filterControls: Filter[] = [
+      {
+        query: {
+          match_phrase: {
+            'kibana.alert.rule.uuid': ALERT_UUID,
           },
-          {
-            range: {
-              'kibana.alert.time_range': expect.objectContaining({
-                format: 'strict_date_optional_time',
-                gte: mockedFrom,
-                lte: mockedTo,
-              }),
-            },
-          },
-        ],
-        must: [],
-        must_not: [],
-        should: [],
+        },
+        meta: {},
       },
-    };
-    expect(mockedOnEsQueryChange).toHaveBeenCalledTimes(2);
-    expect(mockedOnEsQueryChange).toHaveBeenNthCalledWith(1, esQueryChangeParams);
-    expect(mockedOnEsQueryChange).toHaveBeenNthCalledWith(2, esQueryChangeParams);
+    ];
+
+    await act(async () => {
+      renderComponent({
+        onEsQueryChange: mockedOnEsQueryChange,
+        rangeFrom: mockedFrom,
+        rangeTo: mockedTo,
+        filterControls,
+        status: 'all',
+      });
+    });
+
+    await waitFor(() => {
+      expect(mockedOnEsQueryChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          bool: expect.objectContaining({
+            filter: expect.arrayContaining([
+              {
+                range: {
+                  'kibana.alert.time_range': expect.objectContaining({
+                    format: 'strict_date_optional_time',
+                    gte: mockedFrom,
+                    lte: mockedTo,
+                  }),
+                },
+              },
+              {
+                match_phrase: {
+                  'kibana.alert.rule.uuid': ALERT_UUID,
+                },
+              },
+            ]),
+          }),
+        })
+      );
+    });
   });
 
   it('should include filters in es query', async () => {
@@ -210,6 +241,37 @@ describe('ObservabilityAlertSearchBar', () => {
         must_not: [],
         should: [],
       },
+    });
+  });
+
+  it('should include space filter in es query when spaceId is available', async () => {
+    const mockedOnEsQueryChange = jest.fn();
+    const mockedFrom = '2022-11-15T09:38:13.604Z';
+    const mockedTo = '2022-11-15T09:53:13.604Z';
+
+    await act(async () => {
+      renderComponent({
+        onEsQueryChange: mockedOnEsQueryChange,
+        rangeFrom: mockedFrom,
+        rangeTo: mockedTo,
+        status: 'all',
+      });
+    });
+
+    await waitFor(() => {
+      expect(mockedOnEsQueryChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          bool: expect.objectContaining({
+            filter: expect.arrayContaining([
+              {
+                match_phrase: {
+                  'kibana.space_ids': 'space-id',
+                },
+              },
+            ]),
+          }),
+        })
+      );
     });
   });
 

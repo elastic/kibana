@@ -5,28 +5,38 @@
  * 2.0.
  */
 
-import { IngestStreamDefinition } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
+import { conditionToPainless } from '@kbn/streamlang';
 import { ASSET_VERSION } from '../../../../common/constants';
-import { conditionToPainless } from '../helpers/condition_to_painless';
 import { getReroutePipelineName } from './name';
 
 interface GenerateReroutePipelineParams {
-  definition: IngestStreamDefinition;
+  definition: Streams.WiredStream.Definition;
+  excludeDestinations?: Set<string>;
 }
 
-export function generateReroutePipeline({ definition }: GenerateReroutePipelineParams) {
+export function generateReroutePipeline({
+  definition,
+  excludeDestinations,
+}: GenerateReroutePipelineParams) {
   return {
     id: getReroutePipelineName(definition.name),
-    processors: definition.ingest.routing.map((child) => {
-      return {
-        reroute: {
-          destination: child.destination,
-          if: conditionToPainless(child.if),
-        },
-      };
-    }),
+    processors: definition.ingest.wired.routing
+      .filter(
+        (child) =>
+          child.status !== 'disabled' &&
+          (!excludeDestinations || !excludeDestinations.has(child.destination))
+      )
+      .map((child) => {
+        return {
+          reroute: {
+            destination: child.destination,
+            if: conditionToPainless(child.where),
+          },
+        };
+      }),
     _meta: {
-      description: `Reoute pipeline for the ${definition.name} stream`,
+      description: `Reroute pipeline for the ${definition.name} stream`,
       managed: true,
     },
     version: ASSET_VERSION,

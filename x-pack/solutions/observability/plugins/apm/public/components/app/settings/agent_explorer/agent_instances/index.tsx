@@ -21,18 +21,24 @@ import { useApmParams } from '../../../../../hooks/use_apm_params';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { useProgressiveFetcher } from '../../../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
-import { ResponsiveFlyout } from '../../../transaction_details/waterfall_with_summary/waterfall_container/waterfall/responsive_flyout';
 import type { AgentExplorerItem } from '../agent_list';
 import { AgentContextualInformation } from './agent_contextual_information';
 import { AgentInstancesDetails } from './agent_instances_details';
+import { ResponsiveFlyout } from '../../../../shared/responsive_flyout';
 
-function useAgentInstancesFetcher({ serviceName }: { serviceName: string }) {
-  const {
-    query: { environment, kuery },
-  } = useApmParams('/settings/agent-explorer');
-
-  const { start, end } = useTimeRange({ rangeFrom: 'now-24h', rangeTo: 'now' });
-
+function useAgentInstancesFetcher({
+  serviceName,
+  environment,
+  kuery,
+  start,
+  end,
+}: {
+  serviceName: string;
+  environment: string;
+  kuery: string;
+  start: string;
+  end: string;
+}) {
   return useProgressiveFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/services/{serviceName}/agent_instances', {
@@ -66,9 +72,18 @@ export function AgentInstances({
   latestVersionsFailed,
   onClose,
 }: Props) {
-  const { query } = useApmParams('/settings/agent-explorer');
+  const {
+    query,
+    query: { environment, kuery },
+  } = useApmParams('/settings/agent-explorer');
+
+  const { start, end } = useTimeRange({ rangeFrom: 'now-24h', rangeTo: 'now' });
 
   const instances = useAgentInstancesFetcher({
+    environment,
+    kuery,
+    start,
+    end,
     serviceName: agent.serviceName,
   });
 
@@ -105,7 +120,10 @@ export function AgentInstances({
           <EuiSpacer size="m" />
           <AgentInstancesDetails
             serviceName={agent.serviceName}
+            environment={environment}
             agentName={agent.agentName}
+            start={start}
+            end={end}
             agentDocsPageUrl={agent.agentDocsPageUrl}
             isLoading={isLoading}
             items={instances.data?.items ?? []}

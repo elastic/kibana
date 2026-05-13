@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo, FC } from 'react';
+import type { FC } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
+import { css } from '@emotion/react';
+import type { EuiContextMenuPanelItemDescriptor, UseEuiTheme } from '@elastic/eui';
 import {
   EuiPopover,
   EuiFlexItem,
   EuiFlexGroup,
   EuiContextMenu,
-  EuiContextMenuPanelItemDescriptor,
   EuiText,
   EuiLink,
   EuiIcon,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TagBulkAction } from '../types';
-
-import './_action_bar.scss';
+import { i18n } from '@kbn/i18n';
+import type { TagBulkAction } from '../types';
 
 export interface ActionBarProps {
   actions: TagBulkAction[];
@@ -70,7 +71,7 @@ export const ActionBar: FC<ActionBarProps> = ({
   }, [actions, onActionSelected, closePopover]);
 
   return (
-    <div className="tagMgt__actionBar">
+    <div css={styles}>
       <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
@@ -93,6 +94,10 @@ export const ActionBar: FC<ActionBarProps> = ({
                 isOpen={isPopoverOpened}
                 closePopover={closePopover}
                 panelPaddingSize="none"
+                aria-label={i18n.translate(
+                  'xpack.savedObjectsTagging.management.actionBar.actionsAriaLabel',
+                  { defaultMessage: 'Actions' }
+                )}
                 button={
                   <EuiText size="xs">
                     <EuiLink onClick={togglePopover} data-test-subj="actionBar-contextMenuButton">
@@ -103,7 +108,12 @@ export const ActionBar: FC<ActionBarProps> = ({
                           count: selectedCount,
                         }}
                       />
-                      <EuiIcon className="tagMgt__actionBarIcon" type="arrowDown" size="s" />
+                      <EuiIcon
+                        className="tagMgt__actionBarIcon"
+                        type="chevronSingleDown"
+                        size="s"
+                        aria-hidden={true}
+                      />
                     </EuiLink>
                   </EuiText>
                 }
@@ -121,3 +131,16 @@ export const ActionBar: FC<ActionBarProps> = ({
     </div>
   );
 };
+
+const styles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    borderBottom: euiTheme.border.thin,
+    paddingBotton: euiTheme.size.s,
+    '.tagMgt__actionBarIcon': {
+      marginLeft: euiTheme.size.xs,
+    },
+    '.tagMgt__actionBarDivider': {
+      height: euiTheme.size.base,
+      borderRight: euiTheme.border.thin,
+    },
+  });

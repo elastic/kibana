@@ -11,6 +11,7 @@ import type { Filter } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { InspectQuery, Refetch, RefetchKql } from './model';
 import type { InputsModelId } from './constants';
+import type { VisualizationTablesWithMeta } from '../../components/visualization_actions/types';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/inputs');
 
@@ -56,6 +57,7 @@ export const setQuery = actionCreator<{
   refetch: Refetch | RefetchKql;
   inspect: InspectQuery | null;
   searchSessionId?: string;
+  tables?: VisualizationTablesWithMeta;
 }>('SET_QUERY');
 
 export const deleteOneQuery = actionCreator<{
@@ -74,8 +76,6 @@ export const setInspectionParameter = actionCreator<{
 export const deleteAllQuery = actionCreator<{ id: InputsModelId }>('DELETE_ALL_QUERY');
 
 export const toggleTimelineLinkTo = actionCreator('TOGGLE_TIMELINE_LINK_TO');
-
-export const toggleSocTrendsLinkTo = actionCreator('TOGGLE_SOC_TRENDS_LINK_TO');
 
 export const removeLinkTo = actionCreator<InputsModelId[]>('REMOVE_LINK_TO');
 export const addLinkTo = actionCreator<InputsModelId[]>('ADD_LINK_TO');

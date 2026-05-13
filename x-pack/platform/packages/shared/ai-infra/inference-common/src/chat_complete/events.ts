@@ -6,7 +6,9 @@
  */
 
 import type { InferenceTaskEventBase } from '../inference_task';
-import type { ToolCallsOf, ToolOptions } from './tools';
+import type { AnonymizationResponseMetadata, DeanonymizedMessageData } from './anonymization';
+import type { ToolOptions } from './tools';
+import type { ToolCallOfToolOptions } from './tools_of';
 
 /**
  * List possible values of {@link ChatCompletionEvent} types.
@@ -22,17 +24,35 @@ export enum ChatCompletionEventType {
  * the whole text content and potential tool calls of the response.
  */
 export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions = ToolOptions> =
-  InferenceTaskEventBase<ChatCompletionEventType.ChatCompletionMessage> & {
-    /**
-     * The text content of the LLM response.
-     */
-    content: string;
-    /**
-     * The eventual tool calls performed by the LLM.
-     */
-    toolCalls: ToolCallsOf<TToolOptions>['toolCalls'];
-  };
-
+  InferenceTaskEventBase<
+    ChatCompletionEventType.ChatCompletionMessage,
+    {
+      /**
+       * The text content of the LLM response.
+       */
+      content: string;
+      /**
+       * Optional refusal reason returned by the model when content is filtered.
+       */
+      refusal?: string;
+      /**
+       * Optional deanonymized input messages metadata
+       */
+      deanonymized_input?: DeanonymizedMessageData[];
+      /**
+       * Optional deanonymized output metadata
+       */
+      deanonymized_output?: DeanonymizedMessageData;
+      /**
+       * Optional metadata attached by inference runtime.
+       */
+      metadata?: AnonymizationResponseMetadata;
+      /**
+       * Tool calls from the LLM
+       */
+      toolCalls: ToolCallOfToolOptions<TToolOptions>[];
+    }
+  >;
 /**
  * Represent a partial tool call present in a chunk event.
  *
@@ -64,17 +84,35 @@ export interface ChatCompletionChunkToolCall {
  * Chunk event, containing a fragment of the total content,
  * and potentially chunks of tool calls.
  */
-export type ChatCompletionChunkEvent =
-  InferenceTaskEventBase<ChatCompletionEventType.ChatCompletionChunk> & {
+export type ChatCompletionChunkEvent = InferenceTaskEventBase<
+  ChatCompletionEventType.ChatCompletionChunk,
+  {
     /**
      * The content chunk
      */
     content: string;
     /**
+     * Optional refusal reason chunk.
+     */
+    refusal?: string;
+    /**
      * The tool call chunks
      */
     tool_calls: ChatCompletionChunkToolCall[];
-  };
+    /**
+     * Optional deanonymized input messages metadata
+     */
+    deanonymized_input?: DeanonymizedMessageData[];
+    /**
+     * Optional deanonymized output metadata
+     */
+    deanonymized_output?: DeanonymizedMessageData;
+    /**
+     * Optional metadata attached by inference runtime.
+     */
+    metadata?: AnonymizationResponseMetadata;
+  }
+>;
 
 /**
  * Token count structure for the chatComplete API.
@@ -89,22 +127,33 @@ export interface ChatCompletionTokenCount {
    */
   completion: number;
   /**
-   * Total token count
+   * Thinking token count, if available
+   */
+  thinking?: number;
+  /**
+   * Total token count (prompt + completion + thinking)
    */
   total: number;
+  /**
+   * Cached prompt tokens
+   */
+  cached?: number;
 }
 
 /**
  * Token count event, send only once, usually (but not necessarily)
  * before the message event
  */
-export type ChatCompletionTokenCountEvent =
-  InferenceTaskEventBase<ChatCompletionEventType.ChatCompletionTokenCount> & {
+export type ChatCompletionTokenCountEvent = InferenceTaskEventBase<
+  ChatCompletionEventType.ChatCompletionTokenCount,
+  {
     /**
      * The token count structure
      */
     tokens: ChatCompletionTokenCount;
-  };
+    model?: string;
+  }
+>;
 
 /**
  * Events emitted from the {@link ChatCompleteResponse} observable

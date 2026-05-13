@@ -19,8 +19,8 @@ import type { IDetectionRulesClient } from './detection_rules_client_interface';
 import { getRuleByRuleId } from './methods/get_rule_by_rule_id';
 import { getValidatedRuleToImportMock } from '../../../../../../common/api/detection_engine/rule_management/mocks';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
-import type { ExperimentalFeatures } from '../../../../../../common';
 import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
+import { getMockRulesAuthz } from '../../__mocks__/authz';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
@@ -32,7 +32,8 @@ describe('DetectionRulesClient.importRule', () => {
   let detectionRulesClient: IDetectionRulesClient;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
-  let actionsClient: jest.Mocked<ActionsClient>;
+  const rulesAuthz = getMockRulesAuthz();
+  const actionsClient: jest.Mocked<ActionsClient> = {} as unknown as jest.Mocked<ActionsClient>;
 
   const allowMissingConnectorSecrets = true;
   const ruleToImport = {
@@ -53,9 +54,9 @@ describe('DetectionRulesClient.importRule', () => {
       actionsClient,
       rulesClient,
       mlAuthz,
+      rulesAuthz,
       savedObjectsClient,
       license: licenseMock.createLicenseMock(),
-      experimentalFeatures: { prebuiltRulesCustomizationEnabled: true } as ExperimentalFeatures,
       productFeaturesService: createProductFeaturesServiceMock(),
     });
   });
@@ -246,6 +247,8 @@ describe('DetectionRulesClient.importRule', () => {
           rule_source: {
             type: 'external' as const,
             is_customized: true,
+            customized_fields: [{ field_name: 'name' }],
+            has_base_version: true,
           },
         },
         allowMissingConnectorSecrets,
@@ -259,6 +262,8 @@ describe('DetectionRulesClient.importRule', () => {
               ruleSource: {
                 isCustomized: true,
                 type: 'external',
+                customizedFields: [{ fieldName: 'name' }],
+                hasBaseVersion: true,
               },
             }),
           }),
@@ -278,7 +283,7 @@ describe('DetectionRulesClient.importRule', () => {
         error: {
           ruleId: ruleToImport.rule_id,
           type: 'conflict',
-          message: `rule_id: "${ruleToImport.rule_id}" already exists`,
+          message: 'Rule with this rule_id already exists',
         },
       });
     });
@@ -370,6 +375,8 @@ describe('DetectionRulesClient.importRule', () => {
           rule_source: {
             type: 'external' as const,
             is_customized: true,
+            customized_fields: [{ field_name: 'name' }],
+            has_base_version: true,
           },
         },
         allowMissingConnectorSecrets,
@@ -383,6 +390,8 @@ describe('DetectionRulesClient.importRule', () => {
               ruleSource: {
                 isCustomized: true,
                 type: 'external',
+                customizedFields: [{ fieldName: 'name' }],
+                hasBaseVersion: true,
               },
             }),
           }),

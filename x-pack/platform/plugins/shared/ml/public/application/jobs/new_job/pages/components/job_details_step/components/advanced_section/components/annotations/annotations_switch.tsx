@@ -27,6 +27,9 @@ export const AnnotationsSwitch: FC = () => {
   }, [annotationsEnabled]);
 
   useEffect(() => {
+    if (jobCreator.modelChangeAnnotations !== annotationsEnabled) {
+      setAnnotationsEnabled(jobCreator.modelChangeAnnotations);
+    }
     setShowCallout(jobCreator.modelPlot && !annotationsEnabled);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated, annotationsEnabled]);
@@ -53,6 +56,7 @@ export const AnnotationsSwitch: FC = () => {
       </Description>
       {showCallOut && (
         <EuiCallOut
+          announceOnMount
           data-test-subj="mlJobWizardAlsoEnableAnnotationsRecommendationCallout"
           title={
             <FormattedMessage
@@ -61,7 +65,7 @@ export const AnnotationsSwitch: FC = () => {
             />
           }
           color="primary"
-          iconType="help"
+          iconType="question"
         />
       )}
     </>

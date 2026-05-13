@@ -27,10 +27,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { isEqual, omit } from 'lodash';
 import useMount from 'react-use/lib/useMount';
-import { DocLinksStart } from '@kbn/core/public';
+import type { DocLinksStart } from '@kbn/core/public';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { AggParamEditorProps } from '../agg_param_props';
+import type { AggParamEditorProps } from '../agg_param_props';
 
 const FROM_PLACEHOLDER = '\u2212\u221E';
 const TO_PLACEHOLDER = '+\u221E';
@@ -160,7 +160,7 @@ function DateRangesParamEditor({
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="sortRight" color="subdued" />
+                  <EuiIcon type="sortRight" color="subdued" aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFieldText
@@ -208,7 +208,7 @@ function DateRangesParamEditor({
         <EuiSpacer size="s" />
         <EuiFlexItem>
           <EuiButtonEmpty
-            iconType="plusInCircleFilled"
+            iconType="plusCircle"
             onClick={onAddRange}
             size="xs"
             data-test-subj="visEditorAddDateRange"

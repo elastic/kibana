@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
-import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
@@ -37,14 +38,26 @@ export const registerGetRoute = (
       path: '/{type}/{id}',
       options: {
         summary: `Get a saved object`,
+        description: `WARNING: This API is deprecated. This is a legacy Saved Objects API and may be removed in a future version of Kibana.
+
+Retrieves a single Kibana saved object by type and ID.
+
+For transferring or backing up saved objects, prefer the export API (\`POST /api/saved_objects/_export\`).`,
         tags: ['oas-tag:saved objects'],
         access,
         deprecated: deprecationInfo,
+        oasOperationObject: () => path.resolve(__dirname, './get.examples.yaml'),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the Saved Objects Client',
+        },
       },
       validate: {
         params: schema.object({
-          type: schema.string(),
-          id: schema.string(),
+          type: schema.string({ meta: { description: 'The saved object type.' } }),
+          id: schema.string({ meta: { description: 'The saved object identifier.' } }),
         }),
       },
     },

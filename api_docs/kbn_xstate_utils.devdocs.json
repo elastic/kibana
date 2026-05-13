@@ -11,9 +11,13 @@
         "label": "createConsoleInspector",
         "description": [],
         "signature": [
-          "() => (inspectionEvent: InspectionEvent) => void"
+          "() => (inspectionEvent: ",
+          "InspectionEvent",
+          ") => void"
         ],
         "path": "src/platform/packages/shared/kbn-xstate-utils/src/console_inspector.ts",
+        "lineNumber": 56,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -41,6 +45,8 @@
           "<TContext, TEvent, TSentEvent>"
         ],
         "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
+        "lineNumber": 38,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -55,6 +61,8 @@
               "boolean"
             ],
             "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -74,9 +82,49 @@
           "() => boolean | object"
         ],
         "path": "src/platform/packages/shared/kbn-xstate-utils/src/dev_tools.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/xstate-utils",
+        "id": "def-public.getPlaceholderFor",
+        "type": "Function",
+        "tags": [],
+        "label": "getPlaceholderFor",
+        "description": [],
+        "signature": [
+          "<ImplementationFactory>(_implementationFactory: ImplementationFactory) => ExtractReturnType<ImplementationFactory>"
+        ],
+        "path": "src/platform/packages/shared/kbn-xstate-utils/src/get_placeholder_for.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/xstate-utils",
+            "id": "def-public.getPlaceholderFor.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "_implementationFactory",
+            "description": [],
+            "signature": [
+              "ImplementationFactory"
+            ],
+            "path": "src/platform/packages/shared/kbn-xstate-utils/src/get_placeholder_for.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "ImplementationFactory",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -91,58 +139,11 @@
           "() => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-xstate-utils/src/dev_tools.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/xstate-utils",
-        "id": "def-public.sendIfDefined",
-        "type": "Function",
-        "tags": [],
-        "label": "sendIfDefined",
-        "description": [],
-        "signature": [
-          "<TSentEvent extends ",
-          "EventObject",
-          " = ",
-          "AnyEventObject",
-          ">(target: string | ",
-          "ActorRef",
-          "<TSentEvent, any>) => <TContext, TEvent extends ",
-          "EventObject",
-          ">(eventExpr: ",
-          "Expr",
-          "<TContext, TEvent, TSentEvent | null | undefined>, options?: ",
-          "SendActionOptions",
-          "<TContext, TEvent> | undefined) => ",
-          "PureAction",
-          "<TContext, TEvent, TEvent>"
-        ],
-        "path": "src/platform/packages/shared/kbn-xstate-utils/src/actions.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/xstate-utils",
-            "id": "def-public.sendIfDefined.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "target",
-            "description": [],
-            "signature": [
-              "string | ",
-              "ActorRef",
-              "<TSentEvent, any>"
-            ],
-            "path": "src/platform/packages/shared/kbn-xstate-utils/src/actions.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -166,6 +167,8 @@
           "<TContext, TEvent, TSentEvent>"
         ],
         "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -182,6 +185,8 @@
               "<TSentEvent>"
             ],
             "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -195,15 +200,11 @@
             "label": "notify",
             "description": [],
             "signature": [
-              "(eventExpr: ",
-              "Expr",
-              "<TContext, TEvent, TSentEvent | undefined>) => (context: TContext, event: TEvent, meta: ",
-              "ActionMeta",
-              "<TContext, TEvent, ",
-              "BaseActionObject",
-              ">) => void"
+              "(eventExpr: ExpressionFunction<TContext, TEvent, TSentEvent | undefined>) => NotificationAction<TContext, TEvent>"
             ],
             "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -215,11 +216,13 @@
                 "label": "eventExpr",
                 "description": [],
                 "signature": [
-                  "Expr",
-                  "<TContext, TEvent, TSentEvent | undefined>"
+                  "ExpressionFunction<TContext, TEvent, TSentEvent | undefined>"
                 ],
                 "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
+                "lineNumber": 34,
+                "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExpressionFunction",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -231,74 +234,7 @@
       }
     ],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "@kbn/xstate-utils",
-        "id": "def-public.MatchedState",
-        "type": "Type",
-        "tags": [],
-        "label": "MatchedState",
-        "description": [],
-        "signature": [
-          "TState extends ",
-          "State",
-          "<any, infer TEvent extends ",
-          "EventObject",
-          ", infer TStateSchema extends ",
-          "StateSchema",
-          "<any>, infer TTypestate extends ",
-          "Typestate",
-          "<any>, infer TResolvedTypesMeta> ? ",
-          "State",
-          "<(TTypestate extends any ? { value: TStateValue; context: any; } extends TTypestate ? TTypestate : never : never)[\"context\"], TEvent, TStateSchema, TTypestate, TResolvedTypesMeta> & { value: TStateValue; } : never"
-        ],
-        "path": "src/platform/packages/shared/kbn-xstate-utils/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/xstate-utils",
-        "id": "def-public.MatchedStateFromActor",
-        "type": "Type",
-        "tags": [],
-        "label": "MatchedStateFromActor",
-        "description": [],
-        "signature": [
-          "EmittedFrom",
-          "<TActorRef> extends ",
-          "State",
-          "<any, infer TEvent extends ",
-          "EventObject",
-          ", infer TStateSchema extends ",
-          "StateSchema",
-          "<any>, infer TTypestate extends ",
-          "Typestate",
-          "<any>, infer TResolvedTypesMeta> ? ",
-          "State",
-          "<(TTypestate extends any ? { value: TStateValue; context: any; } extends TTypestate ? TTypestate : never : never)[\"context\"], TEvent, TStateSchema, TTypestate, TResolvedTypesMeta> & { value: TStateValue; } : never"
-        ],
-        "path": "src/platform/packages/shared/kbn-xstate-utils/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/xstate-utils",
-        "id": "def-public.OmitDeprecatedState",
-        "type": "Type",
-        "tags": [],
-        "label": "OmitDeprecatedState",
-        "description": [],
-        "signature": [
-          "{ [P in Exclude<keyof T, \"state\">]: T[P]; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-xstate-utils/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": []
   },
   "server": {

@@ -6,15 +6,18 @@
  */
 
 import React from 'react';
+import { ALERTS_UI_DETECTIONS_PRIVILEGE } from '@kbn/security-solution-features/constants';
 import type { OnboardingCardConfig } from '../../../../types';
 import { OnboardingCardId } from '../../../../constants';
 import { ALERTS_CARD_TITLE } from './translations';
-import { getCardIcon } from '../common/card_icon';
+import alertsIcon from '../../../../../common/icons/alerts/icon.svg';
+import alertsDarkIcon from '../../../../../common/icons/alerts/icon_dark.svg';
 
 export const alertsCardConfig: OnboardingCardConfig = {
   id: OnboardingCardId.alerts,
   title: ALERTS_CARD_TITLE,
-  icon: () => getCardIcon(OnboardingCardId.alerts),
+  icon: alertsIcon,
+  iconDark: alertsDarkIcon,
   Component: React.lazy(
     () =>
       import(
@@ -22,4 +25,5 @@ export const alertsCardConfig: OnboardingCardConfig = {
         './alerts_card'
       )
   ),
+  capabilitiesRequired: [ALERTS_UI_DETECTIONS_PRIVILEGE],
 };

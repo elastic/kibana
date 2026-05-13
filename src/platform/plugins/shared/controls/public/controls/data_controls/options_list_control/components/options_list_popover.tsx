@@ -8,48 +8,64 @@
  */
 
 import React, { useState } from 'react';
+import { BehaviorSubject } from 'rxjs';
 
+import { css } from '@emotion/react';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
+
+import { isDSLOptionsListApi } from '../../../utils';
 import { useOptionsListContext } from '../options_list_context_provider';
+import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
 import { OptionsListPopoverFooter } from './options_list_popover_footer';
 import { OptionsListPopoverInvalidSelections } from './options_list_popover_invalid_selections';
 import { OptionsListPopoverSuggestions } from './options_list_popover_suggestions';
 
-export const OptionsListPopover = () => {
-  const { api, displaySettings } = useOptionsListContext();
+const optionsListPopoverStyles = {
+  wrapper: css({
+    width: '100%',
+    height: '100%',
+  }),
+};
 
-  const [field, availableOptions, invalidSelections, loading] = useBatchedPublishingSubjects(
-    api.field$,
-    api.availableOptions$,
-    api.invalidSelections$,
-    api.dataLoading$
+export const OptionsListPopover = ({
+  disableMultiValueEmptySelection = false,
+}: {
+  disableMultiValueEmptySelection?: boolean;
+}) => {
+  const { componentApi, displaySettings } = useOptionsListContext();
+
+  const [loading, availableOptions, invalidSelections, field] = useBatchedPublishingSubjects(
+    componentApi.dataLoading$,
+    componentApi.availableOptions$,
+    componentApi.invalidSelections$,
+    isDSLOptionsListApi(componentApi) ? componentApi.field$ : new BehaviorSubject(undefined)
   );
   const [showOnlySelected, setShowOnlySelected] = useState(false);
 
   return (
     <div
-      id={`control-popover-${api.uuid}`}
+      id={`control-popover-${componentApi.uuid}`}
       className={'optionsList__popover'}
       data-test-subj={`optionsList-control-popover`}
     >
-      {field?.type !== 'boolean' && !displaySettings.hideActionBar && (
+      {field?.type !== 'boolean' && !displaySettings.hide_action_bar && (
         <OptionsListPopoverActionBar
           showOnlySelected={showOnlySelected}
           setShowOnlySelected={setShowOnlySelected}
+          disableMultiValueEmptySelection={disableMultiValueEmptySelection}
         />
       )}
       <div
         data-test-subj={`optionsList-control-available-options`}
         data-option-count={loading ? 0 : Object.keys(availableOptions ?? {}).length}
-        css={{ width: '100%', height: '100%' }}
+        css={optionsListPopoverStyles.wrapper}
       >
         <OptionsListPopoverSuggestions showOnlySelected={showOnlySelected} />
         {!showOnlySelected && invalidSelections && invalidSelections.size !== 0 && (
           <OptionsListPopoverInvalidSelections />
         )}
       </div>
-      {!displaySettings.hideExclude && <OptionsListPopoverFooter />}
+      {!displaySettings.hide_exclude && <OptionsListPopoverFooter />}
     </div>
   );
 };

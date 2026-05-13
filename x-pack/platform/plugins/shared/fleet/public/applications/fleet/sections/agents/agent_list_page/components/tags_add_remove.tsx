@@ -40,7 +40,7 @@ interface Props {
   allTags: string[];
   selectedTags: string[];
   button: HTMLElement;
-  onTagsUpdated: () => void;
+  onTagsUpdated: (tagsToAdd: string[]) => void;
   onClosePopover: () => void;
 }
 
@@ -93,7 +93,7 @@ export const TagsAddRemove: React.FC<Props> = ({
     isRenameOrDelete = false
   ) => {
     if (hasCompleted) {
-      return onTagsUpdated();
+      return onTagsUpdated(tagsToAdd);
     }
     const selected = labels.filter((tag) => tag.checked === 'on').map((tag) => tag.label);
     const newSelectedTags = difference(selected, tagsToRemove).concat(tagsToAdd);
@@ -115,7 +115,7 @@ export const TagsAddRemove: React.FC<Props> = ({
       updateTagsHook.updateTags(
         agentId,
         newSelectedTags,
-        () => onTagsUpdated(),
+        () => onTagsUpdated(tagsToAdd),
         successMessage,
         errorMessage
       );
@@ -185,7 +185,7 @@ export const TagsAddRemove: React.FC<Props> = ({
     >
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="plus" />
+          <EuiIcon type="plus" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem>
           <FormattedMessage
@@ -207,6 +207,7 @@ export const TagsAddRemove: React.FC<Props> = ({
         button={button!}
         closePopover={closePopover}
         anchorPosition="leftUp"
+        hasArrow={true}
       >
         <EuiSelectable
           // workaround for auto-scroll to first element after clearing search

@@ -14,6 +14,10 @@ export const ENTITY_STORE_INTERNAL_PRIVILEGES_URL = `${ENTITY_STORE_URL}/privile
 export const ENTITIES_URL = `${ENTITY_STORE_URL}/entities` as const;
 export const LIST_ENTITIES_URL = `${ENTITIES_URL}/list` as const;
 
+export const ENTITY_RESOLUTION_CSV_UPLOAD_URL =
+  `${ENTITY_STORE_URL}/resolution/upload_csv` as const;
+export const RESOLUTION_CSV_MAX_SIZE_BYTES = 1024 * 1024; // 1MB
+
 export const ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES = [
   'manage_index_templates',
   'manage_transform',
@@ -21,5 +25,10 @@ export const ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES = [
   'manage_enrich',
 ];
 
+// Privileges required for the transform to run
+export const ENTITY_STORE_SOURCE_REQUIRED_ES_INDEX_PRIVILEGES = ['read', 'view_index_metadata'];
+
 // The index pattern for the entity store has to support '.entities.v1.latest.noop' index
-export const ENTITY_STORE_INDEX_PATTERN = '.entities.v1.latest.*';
+export const ENTITY_STORE_INDEX_PATTERN = '.entities.*';
+export const ENTITY_STORE_HISTORY_INDEX_PATTERN = '.entities.*history*';
+export const ENTITY_STORE_UPDATES_INDEX_PATTERN = '.entities.v1.updates.*';

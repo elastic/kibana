@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import classNames from 'classnames';
 import React from 'react';
-import { WorkspaceNode } from '../../types';
+import { useEuiFontSize, type UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import type { WorkspaceNode } from '../../types';
 import { getIconOffset, IconRenderer } from '../icon_renderer';
 
 interface SelectedNodeItemProps {
@@ -33,16 +35,39 @@ export const SelectedNodeItem = ({
   onSelectedFieldClick,
   onDeselectNode,
 }: SelectedNodeItemProps) => {
-  const fieldClasses = classNames('gphSelectionList__field', {
-    ['gphSelectionList__field--selected']: isHighlighted,
-  });
   const offset = fixIconOffset(node);
+  const xsFontSize = useEuiFontSize('xs', { unit: 'px' }).fontSize;
 
   return (
-    <button aria-hidden="true" className={fieldClasses} onClick={() => onSelectedFieldClick(node)}>
-      <svg width="24" height="24">
+    <button
+      className="gphSelectionList__field"
+      aria-label={i18n.translate('xpack.graph.sidebar.selections.selectedNodeItemButtonLabel', {
+        defaultMessage: 'Select {nodeLabel}',
+        values: { nodeLabel: node.label },
+      })}
+      onClick={() => onSelectedFieldClick(node)}
+      css={({ euiTheme }: UseEuiTheme) => css`
+        line-height: ${euiTheme.font.lineHeightMultiplier};
+        margin: ${euiTheme.size.xs} 0;
+        cursor: pointer;
+        width: 100%;
+        display: block;
+        text-align: left;
+
+        > * {
+          vertical-align: middle;
+        }
+
+        ${isHighlighted ? `background: ${euiTheme.colors.lightShade}` : ''}
+      `}
+    >
+      <svg width="24" height="24" aria-hidden="true">
         <circle
-          className="gphNode__circle"
+          css={({ euiTheme }: UseEuiTheme) =>
+            css`
+              fill: ${euiTheme.colors.mediumShade};
+            `
+          }
           r="10"
           cx="12"
           cy="12"
@@ -53,7 +78,9 @@ export const SelectedNodeItem = ({
         <IconRenderer
           color={node.color}
           icon={node.icon}
-          className="gphSelectionList__icon"
+          css={css`
+            font-size: ${xsFontSize};
+          `}
           x={offset.x}
           y={offset.y}
         />

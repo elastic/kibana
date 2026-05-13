@@ -8,12 +8,12 @@
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import { createAppContextStartContractMock } from '../../../mocks';
-import type { PackagePolicyInput } from '../../../../common/types';
+import type { PackagePolicyAssetsMap, PackagePolicyInput } from '../../../../common/types';
 import { appContextService } from '../..';
 
 import { getTemplateInputs, templatePackagePolicyToFullInputStreams } from './get_template_inputs';
 import REDIS_1_18_0_PACKAGE_INFO from './__fixtures__/redis_1_18_0_package_info.json';
-import { getPackageAssetsMap, getPackageInfo } from './get';
+import { getAgentTemplateAssetsMap, getPackageInfo } from './get';
 import { REDIS_ASSETS_MAP } from './__fixtures__/redis_1_18_0_streams_template';
 import { LOGS_2_3_0_ASSETS_MAP, LOGS_2_3_0_PACKAGE_INFO } from './__fixtures__/logs_2_3_0';
 import { DOCKER_2_11_0_PACKAGE_INFO, DOCKER_2_11_0_ASSETS_MAP } from './__fixtures__/docker_2_11_0';
@@ -221,6 +221,34 @@ describe('Fleet - templatePackagePolicyToFullInputStreams', () => {
     ]);
   });
 
+  it('uses getInputEffectiveName for template input id when name differs from type', async () => {
+    expect(
+      await templatePackagePolicyToFullInputStreams([
+        {
+          ...mockInput2,
+          name: 'custom-metrics',
+          type: 'test-metrics',
+        },
+      ])
+    ).toEqual([
+      {
+        id: 'some-template-custom-metrics',
+        type: 'test-metrics',
+        streams: [
+          {
+            data_stream: {
+              dataset: 'foo',
+              type: 'metrics',
+            },
+            fooKey: 'fooValue1',
+            fooKey2: ['fooValue2'],
+            id: 'test-metrics-foo',
+          },
+        ],
+      },
+    ]);
+  });
+
   it('returns agent inputs without disabled streams', async () => {
     expect(
       await templatePackagePolicyToFullInputStreams([
@@ -324,19 +352,19 @@ describe('Fleet - templatePackagePolicyToFullInputStreams', () => {
 describe('Fleet - getTemplateInputs', () => {
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
-    jest.mocked(getPackageAssetsMap).mockImplementation(async ({ packageInfo }) => {
+    jest.mocked(getAgentTemplateAssetsMap).mockImplementation(async ({ packageInfo }) => {
       if (packageInfo.name === 'redis' && packageInfo.version === '1.18.0') {
-        return REDIS_ASSETS_MAP;
+        return REDIS_ASSETS_MAP as PackagePolicyAssetsMap;
       }
 
       if (packageInfo.name === 'log') {
-        return LOGS_2_3_0_ASSETS_MAP;
+        return LOGS_2_3_0_ASSETS_MAP as PackagePolicyAssetsMap;
       }
       if (packageInfo.name === 'docker') {
-        return DOCKER_2_11_0_ASSETS_MAP;
+        return DOCKER_2_11_0_ASSETS_MAP as PackagePolicyAssetsMap;
       }
 
-      return new Map();
+      return new Map() as PackagePolicyAssetsMap;
     });
     jest.mocked(getPackageInfo).mockImplementation(async ({ pkgName, pkgVersion }) => {
       const pkgInfo = packageInfoCache.get(`${pkgName}-${pkgVersion}`);
@@ -369,5 +397,100 @@ describe('Fleet - getTemplateInputs', () => {
     const template = await getTemplateInputs(soMock, 'log', '2.3.0', 'yml');
 
     expect(template).toMatchSnapshot();
+  });
+
+  it('should filter inputs when provided a filtering condition', async () => {
+    const soMock = savedObjectsClientMock.create();
+    soMock.get.mockResolvedValue({ attributes: {} } as any);
+    const template = await getTemplateInputs(
+      soMock,
+      'redis',
+      '1.18.0',
+      'json',
+      (input) => input.type !== 'redis/metrics'
+    );
+
+    expect(template).toMatchSnapshot();
+  });
+
+  it('should inject wired streams routing processor for log streams when enabled', async () => {
+    const soMock = savedObjectsClientMock.create();
+    soMock.get.mockResolvedValue({ attributes: {} } as any);
+    const template = await getTemplateInputs(
+      soMock,
+      'redis',
+      '1.18.0',
+      'json',
+      undefined,
+      undefined,
+      undefined,
+      true // injectWiredStreamsRouting
+    );
+
+    const logInput = template.inputs.find((input) => input.type === 'logfile');
+    expect(logInput).toBeDefined();
+    if (logInput && logInput.streams) {
+      for (const stream of logInput.streams as Array<{
+        data_stream?: { type?: string };
+        processors?: Array<{ add_fields?: { target: string; fields: { raw_index: string } } }>;
+      }>) {
+        if (stream.data_stream?.type === 'logs') {
+          expect(stream.processors).toBeDefined();
+          expect(stream.processors![0]).toEqual({
+            add_fields: {
+              target: '@metadata',
+              fields: { raw_index: 'logs.ecs' },
+            },
+          });
+        }
+      }
+    }
+  });
+
+  it('should NOT inject wired streams routing processor when disabled', async () => {
+    const soMock = savedObjectsClientMock.create();
+    soMock.get.mockResolvedValue({ attributes: {} } as any);
+    const templateWithRouting = await getTemplateInputs(
+      soMock,
+      'redis',
+      '1.18.0',
+      'json',
+      undefined,
+      undefined,
+      undefined,
+      true
+    );
+    const templateWithoutRouting = await getTemplateInputs(
+      soMock,
+      'redis',
+      '1.18.0',
+      'json',
+      undefined,
+      undefined,
+      undefined,
+      false
+    );
+
+    // With routing should have the processor
+    const logInputWithRouting = templateWithRouting.inputs.find(
+      (input) => input.type === 'logfile'
+    );
+    const logInputWithoutRouting = templateWithoutRouting.inputs.find(
+      (input) => input.type === 'logfile'
+    );
+
+    if (logInputWithRouting?.streams && logInputWithoutRouting?.streams) {
+      const streamWithRouting = (
+        logInputWithRouting.streams as Array<{ processors?: unknown[] }>
+      )[0];
+      const streamWithoutRouting = (
+        logInputWithoutRouting.streams as Array<{ processors?: unknown[] }>
+      )[0];
+
+      const routingProcessorCount = streamWithRouting.processors?.length ?? 0;
+      const noRoutingProcessorCount = streamWithoutRouting.processors?.length ?? 0;
+
+      expect(routingProcessorCount).toBe(noRoutingProcessorCount + 1);
+    }
   });
 });

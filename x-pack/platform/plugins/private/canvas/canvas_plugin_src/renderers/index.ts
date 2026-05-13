@@ -15,23 +15,12 @@ import {
   renderFunctionFactories as filterFactories,
 } from './filters';
 
-import {
-  renderFunctions as externalFunctions,
-  renderFunctionFactories as externalFactories,
-} from './external';
-
 import { renderFunctions as coreFunctions, renderFunctionFactories as coreFactories } from './core';
 
-export const renderFunctions = [
-  ...coreFunctions,
-  ...filterFunctions,
-  ...embeddableFunctions,
-  ...externalFunctions,
-];
+export const renderFunctions = [...coreFunctions, ...filterFunctions, ...embeddableFunctions];
 
 export const renderFunctionFactories = [
   ...coreFactories,
   ...embeddableFactories,
   ...filterFactories,
-  ...externalFactories,
 ];

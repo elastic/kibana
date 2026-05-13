@@ -24,8 +24,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import type { SyncSavedObjectResponse, SyncResult } from '@kbn/ml-common-types/saved_objects';
 import { useMlApi } from '../../contexts/kibana';
-import type { SyncSavedObjectResponse, SyncResult } from '../../../../common/types/saved_objects';
 import { SyncList } from './sync_list';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { SyncToAllSpacesWarning } from './sync_to_all_spaces_warning';
@@ -104,7 +104,14 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
 
   return (
     <>
-      <EuiFlyout maxWidth={600} onClose={onClose} data-test-subj="mlJobMgmtSyncFlyout">
+      <EuiFlyout
+        maxWidth={600}
+        onClose={onClose}
+        data-test-subj="mlJobMgmtSyncFlyout"
+        aria-label={i18n.translate('xpack.ml.management.syncSavedObjectsFlyout.flyoutAriaLabel', {
+          defaultMessage: 'Synchronize saved objects',
+        })}
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
@@ -120,7 +127,7 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
             <EuiText size="s">
               <FormattedMessage
                 id="xpack.ml.management.syncSavedObjectsFlyout.description"
-                defaultMessage="Synchronize the saved objects if they are out of sync with the machine learning jobs in Elasticsearch."
+                defaultMessage="Synchronize the saved objects if they are out of sync with the machine learning jobs or trained models in Elasticsearch."
               />
             </EuiText>
           </EuiCallOut>

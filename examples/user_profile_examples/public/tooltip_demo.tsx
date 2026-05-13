@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { UserAvatarTip, UserToolTip } from '@kbn/user-profile-components';
 import type { UserProfile, UserProfileAvatarData } from '@kbn/user-profile-components';
 import { EuiCommentList, EuiComment, useEuiTheme } from '@elastic/eui';
@@ -40,12 +41,7 @@ export const ToolTipDemo: FunctionComponent = () => {
             <UserAvatarTip user={userProfile.user} avatar={userProfile.data.avatar} />
           }
           username={
-            <UserToolTip
-              position="top"
-              delay="regular"
-              user={userProfile.user}
-              avatar={userProfile.data.avatar}
-            >
+            <UserToolTip position="top" user={userProfile.user} avatar={userProfile.data.avatar}>
               <strong>{userProfile.user.full_name}</strong>
             </UserToolTip>
           }

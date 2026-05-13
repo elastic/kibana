@@ -5,10 +5,12 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { EuiButtonIcon, EuiContextMenu, EuiPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
+import { EuiButtonIcon, EuiContextMenu, EuiPanel, EuiPopover, EuiButtonEmpty } from '@elastic/eui';
+import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import { ConnectorSelectorBase } from '../connector_selector/connector_selector_base';
+import { useKibana } from '../../hooks/use_kibana';
+import { navigateToModelManagementApp } from '../../utils/navigate_to_connectors';
 
 export function ActionsMenu({
   connectors,
@@ -17,6 +19,7 @@ export function ActionsMenu({
   connectors: UseGenAIConnectorsResult;
   onEditPrompt: () => void;
 }) {
+  const { application } = useKibana().services;
   const [isPopoverOpen, setPopover] = useState(false);
 
   const onButtonClick = () => {
@@ -39,7 +42,11 @@ export function ActionsMenu({
                 defaultMessage: 'Connector',
               })}{' '}
               <strong>
-                {connectors.connectors?.find(({ id }) => id === connectors.selectedConnector)?.name}
+                {
+                  connectors.connectors?.find(
+                    ({ connectorId }) => connectorId === connectors.selectedConnector
+                  )?.name
+                }
               </strong>
             </div>
           ),
@@ -50,7 +57,7 @@ export function ActionsMenu({
           name: i18n.translate('xpack.observabilityAiAssistant.insight.actions.editPrompt', {
             defaultMessage: 'Edit prompt',
           }),
-          icon: 'documentEdit',
+          icon: 'pencil',
           onClick: () => {
             onEditPrompt();
             closePopover();
@@ -60,12 +67,21 @@ export function ActionsMenu({
     },
     {
       id: 1,
-      title: i18n.translate('xpack.observabilityAiAssistant.insight.actions.connector', {
-        defaultMessage: 'Connector',
+      title: i18n.translate('xpack.observabilityAiAssistant.insight.actions.model', {
+        defaultMessage: 'Model',
       }),
       content: (
         <EuiPanel>
           <ConnectorSelectorBase {...connectors} />
+          <EuiButtonEmpty
+            flush="left"
+            size="xs"
+            onClick={() => navigateToModelManagementApp(application!)}
+          >
+            {i18n.translate('xpack.observabilityAiAssistant.insight.actions.model.manageModels', {
+              defaultMessage: 'Manage models',
+            })}
+          </EuiButtonEmpty>
         </EuiPanel>
       ),
     },
@@ -77,7 +93,7 @@ export function ActionsMenu({
         defaultMessage: 'Open insight actions',
       })}
       data-test-subj="observabilityAiAssistantInsightActionsButtonIcon"
-      iconType="boxesHorizontal"
+      iconType="boxesVertical"
       onClick={onButtonClick}
     />
   );

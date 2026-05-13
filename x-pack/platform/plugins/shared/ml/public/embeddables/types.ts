@@ -6,11 +6,18 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { RefreshInterval } from '@kbn/data-plugin/common';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { EmbeddableInput } from '@kbn/embeddable-plugin/common';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
+import type {
+  AnomalyChartsEmbeddableOverridableState,
+  AnomalyChartsEmbeddableState,
+  SeverityThreshold,
+} from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
+import type {
+  SingleMetricViewerEmbeddableState,
+  SingleMetricViewerEmbeddableUserInput,
+} from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
 import type {
   EmbeddableApiContext,
   HasEditCapabilities,
@@ -21,13 +28,11 @@ import type {
   PublishesTimeRange,
   PublishesWritableTitle,
   PublishesDataViews,
-  SerializedTitles,
 } from '@kbn/presentation-publishing';
 import { type BehaviorSubject } from 'rxjs';
-import type { JobId } from '../../common/types/anomaly_detection_jobs';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { MlDependencies } from '../application/app';
 import type { MlCapabilitiesService } from '../application/capabilities/check_capabilities';
-import type { SwimlaneType } from '../application/explorer/explorer_constants';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
 import type { AnomalyDetectorService } from '../application/services/anomaly_detector_service';
 import type { AnomalyExplorerChartsService } from '../application/services/anomaly_explorer_charts_service';
@@ -38,16 +43,14 @@ import type { MlResultsService } from '../application/services/results_service';
 import type { MlTimeSeriesSearchService } from '../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
 import type { TimeSeriesExplorerService } from '../application/util/time_series_explorer_service';
 import type { ToastNotificationService } from '../application/services/toast_notification_service';
+import type { MlPublicUsageCollection } from '../application/services/usage_collection';
 import type {
   AnomalyExplorerChartsEmbeddableType,
   AnomalySwimLaneEmbeddableType,
   MlEmbeddableTypes,
 } from './constants';
 
-export type {
-  AnomalySwimLaneEmbeddableState,
-  AnomalySwimLaneEmbeddableApi,
-} from './anomaly_swimlane/types';
+export type { AnomalySwimLaneEmbeddableApi } from './anomaly_swimlane/types';
 
 /**
  * Common API for all ML embeddables
@@ -57,26 +60,6 @@ export interface MlEmbeddableBaseApi<StateType extends object = object>
     PublishesTimeRange {}
 
 export type MlEntity = Record<string, MlEntityField['fieldValue']>;
-
-/** Manual input by the user */
-export interface AnomalySwimlaneEmbeddableUserInput {
-  jobIds: JobId[];
-  panelTitle?: string;
-  swimlaneType: SwimlaneType;
-  viewBy?: string;
-}
-
-export interface AnomalySwimlaneEmbeddableCustomInput
-  extends Omit<AnomalySwimlaneEmbeddableUserInput, 'panelTitle'> {
-  id?: string;
-  perPage?: number;
-
-  // Embeddable inputs which are not included in the default interface
-  filters?: Filter[];
-  query?: Query;
-  refreshConfig?: RefreshInterval;
-  timeRange: TimeRange | undefined;
-}
 
 export interface AnomalySwimlaneServices {
   anomalyDetectorService: AnomalyDetectorService;
@@ -103,28 +86,13 @@ export interface SwimLaneDrilldownContext extends EditSwimlanePanelContext {
   data?: AppStateSelectedCells;
 }
 
-/**
- * Anomaly Explorer Charts
- */
-
-export interface AnomalyChartsEmbeddableRuntimeState {
-  jobIds: JobId[];
-  maxSeriesToPlot: number;
-  // Embeddable inputs which are not included in the default interface
-  severityThreshold?: number;
-  selectedEntities?: MlEntityField[];
-}
-export interface AnomalyChartsEmbeddableOverridableState
-  extends AnomalyChartsEmbeddableRuntimeState {
-  timeRange?: TimeRange;
-}
 export interface AnomalyChartsComponentApi {
   jobIds$: PublishingSubject<JobId[]>;
   maxSeriesToPlot$: PublishingSubject<number>;
-  severityThreshold$: PublishingSubject<number>;
+  severityThreshold$: PublishingSubject<SeverityThreshold[]>;
   selectedEntities$: PublishingSubject<MlEntityField[] | undefined>;
   updateUserInput: (input: AnomalyChartsEmbeddableOverridableState) => void;
-  updateSeverityThreshold: (v?: number) => void;
+  updateSeverityThreshold: (v?: SeverityThreshold[]) => void;
   updateSelectedEntities: (entities?: MlEntityField[] | undefined) => void;
 }
 export interface AnomalyChartsDataLoadingApi {
@@ -132,13 +100,6 @@ export interface AnomalyChartsDataLoadingApi {
   onLoading: (v: boolean) => void;
   onError: (error?: Error) => void;
 }
-
-/**
- * Persisted state for the Anomaly Charts Embeddable.
- */
-export interface AnomalyChartsEmbeddableState
-  extends SerializedTitles,
-    AnomalyChartsEmbeddableOverridableState {}
 
 export type AnomalyChartsApi = AnomalyChartsComponentApi & AnomalyChartsDataLoadingApi;
 
@@ -153,10 +114,10 @@ export interface AnomalyChartsFieldSelectionApi {
   entityFields: PublishingSubject<MlEntityField[] | undefined>;
 }
 
-export interface AnomalyChartsAttachmentState extends AnomalyChartsEmbeddableState {
+export type AnomalyChartsAttachmentState = AnomalyChartsEmbeddableState & {
   query?: Query;
   filters?: Filter[];
-}
+};
 
 export interface AnomalyChartsAttachmentApi extends AnomalyChartsApi {
   parentApi: {
@@ -167,41 +128,8 @@ export interface AnomalyChartsAttachmentApi extends AnomalyChartsApi {
 }
 
 /**
- * Persisted state for the Anomaly Charts Embeddable.
- */
-export interface AnomalyChartsEmbeddableState
-  extends SerializedTitles,
-    AnomalyChartsEmbeddableOverridableState {}
-
-/** Manual input by the user */
-export interface SingleMetricViewerEmbeddableUserInput {
-  forecastId?: string;
-  functionDescription?: string;
-  jobIds: JobId[];
-  selectedDetectorIndex: number;
-  selectedEntities?: MlEntity;
-  panelTitle?: string;
-}
-
-export interface SingleMetricViewerEmbeddableCustomInput
-  extends Omit<SingleMetricViewerEmbeddableUserInput, 'panelTitle'> {
-  id?: string;
-  filters?: Filter[];
-  query?: Query;
-  refreshConfig?: RefreshInterval;
-  timeRange: TimeRange | undefined;
-}
-
-export type SingleMetricViewerEmbeddableInput = EmbeddableInput &
-  SingleMetricViewerEmbeddableCustomInput;
-
-/**
  * Persisted state for the Single Metric Embeddable.
  */
-export interface SingleMetricViewerEmbeddableState
-  extends SerializedTitles,
-    SingleMetricViewerEmbeddableCustomInput {}
-
 export type SingleMetricViewerEmbeddableApi =
   MlEmbeddableBaseApi<SingleMetricViewerEmbeddableState> &
     PublishesWritableTitle &
@@ -237,6 +165,7 @@ export interface AnomalyChartsServices {
   mlFieldFormatService: MlFieldFormatService;
   mlResultsService: MlResultsService;
   mlApi: MlApi;
+  mlUsageCollection: MlPublicUsageCollection;
 }
 
 export interface SingleMetricViewerServices {
@@ -246,6 +175,7 @@ export interface SingleMetricViewerServices {
   mlCapabilities: MlCapabilitiesService;
   mlFieldFormatService: MlFieldFormatService;
   mlResultsService: MlResultsService;
+  mlUsageCollection: MlPublicUsageCollection;
   mlTimeSeriesSearchService?: MlTimeSeriesSearchService;
   mlTimeSeriesExplorerService?: TimeSeriesExplorerService;
   toastNotificationService?: ToastNotificationService;

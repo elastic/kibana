@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { ValuesType } from 'utility-types';
-import { merge } from 'lodash';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { merge } from 'lodash';
+import { calculateThroughputWithRange } from '@kbn/apm-data-access-plugin/server/utils';
+import type { ValuesType } from 'utility-types';
 import { joinByKey } from '../../../../common/utils/join_by_key';
-import { getStats } from './get_stats';
-import { getDestinationMap } from './get_destination_map';
-import { calculateThroughputWithRange } from '../../helpers/calculate_throughput';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import type { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
 import type { RandomSampler } from '../../helpers/get_random_sampler';
+import { getDestinationMap } from './get_destination_map';
+import { getConnectionStatsItems } from './get_connection_stats_items';
 
 export function getConnectionStats({
   apmEventClient,
@@ -25,6 +25,7 @@ export function getConnectionStats({
   collapseBy,
   offset,
   randomSampler,
+  withTimeseries = true,
 }: {
   apmEventClient: APMEventClient;
   start: number;
@@ -34,16 +35,18 @@ export function getConnectionStats({
   collapseBy: 'upstream' | 'downstream';
   offset?: string;
   randomSampler: RandomSampler;
+  withTimeseries?: boolean;
 }) {
   return withApmSpan('get_connection_stats_and_map', async () => {
     const [allMetrics, { nodesBydependencyName: destinationMap, sampled }] = await Promise.all([
-      getStats({
+      getConnectionStatsItems({
         apmEventClient,
         start,
         end,
         filter,
         numBuckets,
         offset,
+        withTimeseries,
       }),
       getDestinationMap({
         apmEventClient,
@@ -80,23 +83,29 @@ export function getConnectionStats({
         (prev, current) => {
           return {
             value: {
-              count: prev.value.count + current.value.count,
+              latency_count: prev.value.latency_count + current.value.latency_count,
               latency_sum: prev.value.latency_sum + current.value.latency_sum,
               error_count: prev.value.error_count + current.value.error_count,
+              success_count: prev.value.success_count + current.value.success_count,
             },
-            timeseries: joinByKey([...prev.timeseries, ...current.timeseries], 'x', (a, b) => ({
-              x: a.x,
-              count: a.count + b.count,
-              latency_sum: a.latency_sum + b.latency_sum,
-              error_count: a.error_count + b.error_count,
-            })),
+            timeseries:
+              prev.timeseries && current.timeseries
+                ? joinByKey([...prev.timeseries, ...current.timeseries], 'x', (a, b) => ({
+                    x: a.x,
+                    latency_count: a.latency_count + b.latency_count,
+                    latency_sum: a.latency_sum + b.latency_sum,
+                    error_count: a.error_count + b.error_count,
+                    success_count: a.success_count + b.success_count,
+                  }))
+                : undefined,
           };
         },
         {
           value: {
-            count: 0,
+            latency_count: 0,
             latency_sum: 0,
             error_count: 0,
+            success_count: 0,
           },
           timeseries: [],
         }
@@ -105,50 +114,54 @@ export function getConnectionStats({
       const destStats = {
         latency: {
           value:
-            mergedStats.value.count > 0
-              ? mergedStats.value.latency_sum / mergedStats.value.count
+            mergedStats.value.latency_count > 0
+              ? mergedStats.value.latency_sum / mergedStats.value.latency_count
               : null,
-          timeseries: mergedStats.timeseries.map((point) => ({
+          timeseries: mergedStats.timeseries?.map((point) => ({
             x: point.x,
-            y: point.count > 0 ? point.latency_sum / point.count : null,
+            y: point.latency_count > 0 ? point.latency_sum / point.latency_count : null,
           })),
         },
         totalTime: {
           value: mergedStats.value.latency_sum,
-          timeseries: mergedStats.timeseries.map((point) => ({
+          timeseries: mergedStats.timeseries?.map((point) => ({
             x: point.x,
             y: point.latency_sum,
           })),
         },
         throughput: {
           value:
-            mergedStats.value.count > 0
+            mergedStats.value.latency_count > 0
               ? calculateThroughputWithRange({
                   start,
                   end,
-                  value: mergedStats.value.count,
+                  value: mergedStats.value.latency_count,
                 })
               : null,
-          timeseries: mergedStats.timeseries.map((point) => ({
+          timeseries: mergedStats.timeseries?.map((point) => ({
             x: point.x,
             y:
-              point.count > 0
+              point.latency_count > 0
                 ? calculateThroughputWithRange({
                     start,
                     end,
-                    value: point.count,
+                    value: point.latency_count,
                   })
                 : null,
           })),
         },
         errorRate: {
           value:
-            mergedStats.value.count > 0
-              ? (mergedStats.value.error_count ?? 0) / mergedStats.value.count
+            mergedStats.value.error_count + mergedStats.value.success_count > 0
+              ? (mergedStats.value.error_count ?? 0) /
+                (mergedStats.value.error_count + mergedStats.value.success_count)
               : null,
-          timeseries: mergedStats.timeseries.map((point) => ({
+          timeseries: mergedStats.timeseries?.map((point) => ({
             x: point.x,
-            y: point.count > 0 ? (point.error_count ?? 0) / point.count : null,
+            y:
+              mergedStats.value.error_count + mergedStats.value.success_count > 0
+                ? (point.error_count ?? 0) / (point.error_count + point.success_count)
+                : null,
           })),
         },
       };

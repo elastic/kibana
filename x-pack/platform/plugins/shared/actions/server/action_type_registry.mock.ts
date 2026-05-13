@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionTypeRegistryContract } from './types';
+import type { ActionTypeRegistryContract } from './types';
 
 const createActionTypeRegistryMock = () => {
   const mocked: jest.Mocked<ActionTypeRegistryContract> = {
@@ -21,6 +21,7 @@ const createActionTypeRegistryMock = () => {
     getUtils: jest.fn(),
     getActionKibanaPrivileges: jest.fn(),
     hasSubFeature: jest.fn(),
+    isDeprecated: jest.fn(),
   };
   return mocked;
 };

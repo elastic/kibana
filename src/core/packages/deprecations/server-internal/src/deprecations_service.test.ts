@@ -20,7 +20,8 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import type { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
-import { DeprecationsService, DeprecationsSetupDeps } from './deprecations_service';
+import type { DeprecationsSetupDeps } from './deprecations_service';
+import { DeprecationsService } from './deprecations_service';
 import { firstValueFrom } from 'rxjs';
 
 describe('DeprecationsService', () => {
@@ -58,7 +59,17 @@ describe('DeprecationsService', () => {
       // registers get route '/'
       expect(router.get).toHaveBeenCalledTimes(1);
       expect(router.get).toHaveBeenCalledWith(
-        { options: { access: 'public' }, path: '/', validate: false },
+        {
+          options: { access: 'public' },
+          path: '/',
+          validate: false,
+          security: {
+            authz: {
+              enabled: false,
+              reason: expect.any(String),
+            },
+          },
+        },
         expect.any(Function)
       );
     });

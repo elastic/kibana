@@ -10,6 +10,7 @@
 import { of } from 'rxjs';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import { serviceContractMock } from './service_contract.mock';
+import { lazyObject } from '@kbn/lazy-object';
 
 const mockCustomBranding: CustomBranding = {
   logo: 'img.jpg',
@@ -20,17 +21,17 @@ const createCustomBrandingMock = (): CustomBranding => {
 };
 
 const createSetupContractMock = () => {
-  return {
+  return lazyObject({
     customBranding$: of(createCustomBrandingMock()),
     hasCustomBranding$: of(false),
-  };
+  });
 };
 
 const createStartContractMock = () => {
-  return {
+  return lazyObject({
     customBranding$: of(createCustomBrandingMock()),
     hasCustomBranding$: of(false),
-  };
+  });
 };
 
 const createMock = () => {

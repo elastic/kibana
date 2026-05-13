@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   ActionRefIdsAgg,
   InMemoryAggRes,
   ConnectorAggRes,
@@ -39,6 +39,7 @@ export function getActions(aggregation: ActionRefIdsAgg[] = []) {
   for (const a of aggregation) {
     const connectorId = a.key[0];
     const actionRef = a.key[1];
+    if (actionRef.startsWith('dashboard')) continue;
     actions.connectorIds[connectorId] = actionRef;
     actions.total++;
   }

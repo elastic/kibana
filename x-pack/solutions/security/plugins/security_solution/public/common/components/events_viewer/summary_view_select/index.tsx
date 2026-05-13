@@ -61,13 +61,13 @@ const SummaryViewSelectorComponent = ({ viewSelected, onViewChange }: SummaryVie
   const button = useMemo(
     () => (
       <EuiButtonEmpty
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         iconSide="right"
         iconSize="s"
         onClick={onButtonClick}
         size="xs"
         flush="both"
-        style={{ fontWeight: 'normal' }}
+        css={{ fontWeight: 'normal' }}
       >
         {viewSelected === 'gridView' ? gridView : eventRenderedView}
       </EuiButtonEmpty>

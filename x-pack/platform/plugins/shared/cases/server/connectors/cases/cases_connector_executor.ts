@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import stringify from 'json-stable-stringify';
 import pMap from 'p-map';
 import { get, partition, pick } from 'lodash';
 import dateMath from '@kbn/datemath';
 import { CaseStatuses } from '@kbn/cases-components';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { Logger } from '@kbn/core/server';
-import { getFlattenedObject } from '@kbn/std';
+import { getFlattenedObject, stableStringify } from '@kbn/std';
 import type {
   CustomFieldsConfiguration,
   TemplatesConfiguration,
@@ -22,16 +21,20 @@ import {
   MAX_LENGTH_PER_TAG,
   MAX_TAGS_PER_CASE,
   MAX_TITLE_LENGTH,
+  MAX_RULE_NAME_LENGTH,
+  MAX_SUFFIX_LENGTH,
 } from '../../../common/constants';
-import type { BulkCreateCasesRequest } from '../../../common/types/api';
+import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import type { AttachmentRequestV2, BulkCreateCasesRequest } from '../../../common/types/api';
 import type { Case } from '../../../common';
 import { ConnectorTypes, AttachmentType } from '../../../common';
-import {
-  INITIAL_ORACLE_RECORD_COUNTER,
-  MAX_CONCURRENT_ES_REQUEST,
-  MAX_OPEN_CASES,
-} from './constants';
-import type { BulkCreateOracleRecordRequest, CasesConnectorRunParams, OracleRecord } from './types';
+import { INITIAL_ORACLE_RECORD_COUNTER, MAX_CONCURRENT_ES_REQUEST } from './constants';
+import type {
+  BulkCreateOracleRecordRequest,
+  CasesConnectorRunParams,
+  CasesGroupedAlerts,
+  OracleRecord,
+} from './types';
 import type { CasesOracleService } from './cases_oracle_service';
 import {
   convertValueToString,
@@ -56,14 +59,10 @@ interface CasesConnectorExecutorParams {
   casesService: CasesService;
   casesClient: CasesClient;
   spaceId: string;
+  isCasesAttachmentsEnabled?: boolean;
 }
 
-interface GroupedAlerts {
-  alerts: CasesConnectorRunParams['alerts'];
-  grouping: Record<string, unknown>;
-}
-
-type GroupedAlertsWithOracleKey = GroupedAlerts & { oracleKey: string };
+type GroupedAlertsWithOracleKey = CasesGroupedAlerts & { oracleKey: string };
 type GroupedAlertsWithOracleRecords = GroupedAlertsWithOracleKey & { oracleRecord: OracleRecord };
 type GroupedAlertsWithCaseId = GroupedAlertsWithOracleRecords & { caseId: string };
 type GroupedAlertsWithCases = GroupedAlertsWithCaseId & { theCase: Case };
@@ -74,6 +73,7 @@ export class CasesConnectorExecutor {
   private readonly casesService: CasesService;
   private readonly casesClient: CasesClient;
   private readonly spaceId: string;
+  private readonly isCasesAttachmentsEnabled: boolean;
 
   constructor({
     logger,
@@ -81,18 +81,20 @@ export class CasesConnectorExecutor {
     casesService,
     casesClient,
     spaceId,
+    isCasesAttachmentsEnabled = false,
   }: CasesConnectorExecutorParams) {
     this.logger = logger;
     this.casesOracleService = casesOracleService;
     this.casesService = casesService;
     this.casesClient = casesClient;
     this.spaceId = spaceId;
+    this.isCasesAttachmentsEnabled = isCasesAttachmentsEnabled;
   }
 
   public async execute(params: CasesConnectorRunParams) {
-    const { alerts, groupingBy } = params;
+    const { alerts, groupedAlerts: casesGroupedAlerts, groupingBy } = params;
 
-    const groupedAlerts = this.groupAlerts({ params, alerts, groupingBy });
+    const groupedAlerts = casesGroupedAlerts ?? this.groupAlerts({ params, alerts, groupingBy });
     const groupedAlertsWithCircuitBreakers = this.applyCircuitBreakers(params, groupedAlerts);
 
     if (groupedAlertsWithCircuitBreakers.length === 0) {
@@ -163,10 +165,49 @@ export class CasesConnectorExecutor {
     );
 
     /**
-     * Now that all cases are fetched or created per grouping, we attach the alerts
-     * to the corresponding cases.
+     * Now that all cases are fetched or created per grouping, we attach
+     * comments (if available) and alerts to the corresponding cases.
      */
-    await this.attachAlertsToCases(groupedAlertsWithClosedCasesHandled, params);
+    await this.attachCommentAndAlertsToCases(groupedAlertsWithClosedCasesHandled, params);
+
+    /**
+     * Now that all cases have been updated, we can push updates to external connectors
+     */
+    if (params.autoPushCase) {
+      await this.pushCaseUpdates(groupedAlertsWithClosedCasesHandled, params);
+    }
+  }
+
+  private async pushCaseUpdates(
+    groupedAlertsWithCases: Map<string, GroupedAlertsWithCases>,
+    params: CasesConnectorRunParams
+  ) {
+    return pMap(
+      Array.from(groupedAlertsWithCases.values()),
+      /**
+       * attachments.bulkCreate throws an error on errors
+       */
+      async (groupedAlertsWithCase) => {
+        const { theCase } = groupedAlertsWithCase;
+        if (theCase.connector && params.autoPushCase) {
+          return this.casesClient.cases
+            .push({
+              caseId: theCase.id,
+              connectorId: theCase.connector.id,
+              pushType: 'automatic',
+            })
+            .catch((error) => {
+              this.logger.debug(
+                `[CasesConnector][CasesConnectorExecutor][pushCaseUpdates] Failed to auto-push case (id: ${theCase.id}): ${error}`
+              );
+            });
+        }
+        return Promise.resolve();
+      },
+      {
+        concurrency: MAX_CONCURRENT_ES_REQUEST,
+      }
+    );
   }
 
   private groupAlerts({
@@ -175,7 +216,7 @@ export class CasesConnectorExecutor {
     groupingBy,
   }: Pick<CasesConnectorRunParams, 'alerts' | 'groupingBy'> & {
     params: CasesConnectorRunParams;
-  }): GroupedAlerts[] {
+  }): CasesGroupedAlerts[] {
     if (this.logger.isLevelEnabled('debug')) {
       this.logger.debug(
         `[CasesConnector][CasesConnectorExecutor][groupAlerts] Grouping ${alerts.length} alerts`,
@@ -187,7 +228,7 @@ export class CasesConnectorExecutor {
     }
 
     const uniqueGroupingByFields = Array.from(new Set<string>(groupingBy));
-    const groupingMap = new Map<string, GroupedAlerts>();
+    const groupingMap = new Map<string, CasesGroupedAlerts>();
 
     /**
      * We are interested in alerts that have a value for any
@@ -207,7 +248,7 @@ export class CasesConnectorExecutor {
 
     for (const alert of alertsWithAllGroupingFields) {
       const alertWithOnlyTheGroupingFields = pick(alert, uniqueGroupingByFields);
-      const groupingKey = stringify(alertWithOnlyTheGroupingFields);
+      const groupingKey = stableStringify(alertWithOnlyTheGroupingFields);
 
       if (this.logger.isLevelEnabled('debug')) {
         this.logger.debug(
@@ -226,7 +267,7 @@ export class CasesConnectorExecutor {
     if (noGroupedAlerts.length > 0) {
       const noGroupedGrouping = this.generateNoGroupAlertGrouping(params.groupingBy);
 
-      groupingMap.set(stringify(noGroupedGrouping), {
+      groupingMap.set(stableStringify(noGroupedGrouping), {
         alerts: noGroupedAlerts,
         grouping: noGroupedGrouping,
       });
@@ -247,13 +288,12 @@ export class CasesConnectorExecutor {
 
   private applyCircuitBreakers(
     params: CasesConnectorRunParams,
-    groupedAlerts: GroupedAlerts[]
-  ): GroupedAlerts[] {
-    if (groupedAlerts.length > params.maximumCasesToOpen || groupedAlerts.length > MAX_OPEN_CASES) {
-      const maxCasesCircuitBreaker = Math.min(params.maximumCasesToOpen, MAX_OPEN_CASES);
-
+    groupedAlerts: CasesGroupedAlerts[]
+  ): CasesGroupedAlerts[] {
+    const groupSize = groupedAlerts.length;
+    if (groupSize > params.maximumCasesToOpen) {
       this.logger.warn(
-        `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more than the maximum number of allowed cases ${maxCasesCircuitBreaker}. Falling back to one case.`,
+        `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more (${groupSize}) than the maximum number of allowed cases (${params.maximumCasesToOpen}). Falling back to one case.`,
         this.getLogMetadata(params)
       );
 
@@ -263,7 +303,7 @@ export class CasesConnectorExecutor {
     return groupedAlerts;
   }
 
-  private removeGrouping(groupedAlerts: GroupedAlerts[]): GroupedAlerts[] {
+  private removeGrouping(groupedAlerts: CasesGroupedAlerts[]): CasesGroupedAlerts[] {
     const allAlerts = groupedAlerts.map(({ alerts }) => alerts).flat();
 
     return [{ alerts: allAlerts, grouping: {} }];
@@ -271,7 +311,7 @@ export class CasesConnectorExecutor {
 
   private generateOracleKeys(
     params: CasesConnectorRunParams,
-    groupedAlerts: GroupedAlerts[]
+    groupedAlerts: CasesGroupedAlerts[]
   ): Map<string, GroupedAlertsWithOracleKey> {
     if (this.logger.isLevelEnabled('debug')) {
       this.logger.debug(
@@ -284,7 +324,7 @@ export class CasesConnectorExecutor {
 
     const oracleMap = new Map<string, GroupedAlertsWithOracleKey>();
 
-    for (const { grouping, alerts } of groupedAlerts) {
+    for (const { grouping, alerts, comments, title } of groupedAlerts) {
       const getRecordIdParams = {
         ruleId: rule.id,
         grouping,
@@ -304,7 +344,7 @@ export class CasesConnectorExecutor {
         );
       }
 
-      oracleMap.set(oracleKey, { oracleKey, grouping, alerts });
+      oracleMap.set(oracleKey, { oracleKey, grouping, alerts, comments, title });
     }
 
     if (this.logger.isLevelEnabled('debug')) {
@@ -614,6 +654,8 @@ export class CasesConnectorExecutor {
         caseId,
         alerts: entry.alerts,
         grouping: entry.grouping,
+        comments: entry.comments,
+        title: entry.title,
         oracleKey: recordId,
         oracleRecord: entry.oracleRecord,
       });
@@ -754,7 +796,7 @@ export class CasesConnectorExecutor {
     customFieldsConfigurations?: CustomFieldsConfiguration,
     templatesConfigurations?: TemplatesConfiguration
   ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
-    const { grouping, caseId, oracleRecord } = groupingData;
+    const { grouping, caseId, oracleRecord, title } = groupingData;
     const flattenGrouping = getFlattenedObject(grouping);
 
     const selectedTemplate = templatesConfigurations?.find(
@@ -784,6 +826,7 @@ export class CasesConnectorExecutor {
         caseFieldsFromTemplate?.description ?? this.getCaseDescription(params, flattenGrouping),
       tags: this.getCaseTags(params, flattenGrouping, caseFieldsFromTemplate?.tags),
       title:
+        title ??
         caseFieldsFromTemplate?.title ??
         this.getCasesTitle(params, flattenGrouping, oracleRecord.counter),
       connector: caseFieldsFromTemplate?.connector ?? {
@@ -795,7 +838,10 @@ export class CasesConnectorExecutor {
       /**
        * TODO: Turn on for Security solution
        */
-      settings: caseFieldsFromTemplate?.settings ?? { syncAlerts: false },
+      settings: caseFieldsFromTemplate?.settings ?? {
+        syncAlerts: false,
+        extractObservables: false,
+      },
       ...(caseFieldsFromTemplate?.assignees
         ? { assignees: caseFieldsFromTemplate?.assignees }
         : {}),
@@ -808,7 +854,7 @@ export class CasesConnectorExecutor {
 
   private getCasesTitle(
     params: CasesConnectorRunParams,
-    grouping: GroupedAlerts['grouping'],
+    grouping: CasesGroupedAlerts['grouping'],
     oracleCounter: number
   ) {
     const totalDots = 3;
@@ -819,26 +865,49 @@ export class CasesConnectorExecutor {
       })
       .join(' & ');
 
-    const suffix = `${
-      groupingDescription.length > 0 ? ` - ${GROUPED_BY_TITLE(groupingDescription)}` : ''
-    }${
-      oracleCounter > INITIAL_ORACLE_RECORD_COUNTER ? ` (${oracleCounter})` : ''
-    } (${AUTO_CREATED_TITLE})`;
+    const oracleCounterString =
+      oracleCounter > INITIAL_ORACLE_RECORD_COUNTER ? ` (${oracleCounter})` : '';
 
-    const ruleNameTrimmed = params.rule.name.slice(
-      0,
-      MAX_TITLE_LENGTH - suffix.length - totalDots - 1
-    );
+    const staticSuffixStart = groupingDescription.length > 0 ? ` - ${GROUPED_BY_TITLE('')}` : '';
+
+    const staticSuffixEnd = `${oracleCounterString} (${AUTO_CREATED_TITLE})`;
+
+    const ruleName = params.rule.name;
+
+    const ruleNameTrimmed =
+      ruleName.length > MAX_RULE_NAME_LENGTH
+        ? ruleName.slice(0, MAX_RULE_NAME_LENGTH - totalDots)
+        : ruleName;
 
     const ruleNameTrimmedWithDots =
-      params.rule.name.length > ruleNameTrimmed.length
+      ruleName.length > ruleNameTrimmed.length
         ? `${ruleNameTrimmed}${'.'.repeat(totalDots)}`
         : ruleNameTrimmed;
+
+    const maxSuffixLength =
+      ruleNameTrimmedWithDots.length < MAX_RULE_NAME_LENGTH
+        ? MAX_TITLE_LENGTH - ruleNameTrimmedWithDots.length
+        : MAX_SUFFIX_LENGTH;
+
+    const maxGroupingDescriptionLength =
+      maxSuffixLength - (staticSuffixStart.length + staticSuffixEnd.length);
+
+    const groupingDescriptionTrimmed =
+      groupingDescription.length > maxGroupingDescriptionLength
+        ? `${groupingDescription.slice(0, maxGroupingDescriptionLength - totalDots)}${'.'.repeat(
+            totalDots
+          )}`
+        : groupingDescription;
+
+    const suffix = `${staticSuffixStart}${groupingDescriptionTrimmed}${staticSuffixEnd}`;
 
     return `${ruleNameTrimmedWithDots}${suffix}`;
   }
 
-  private getCaseDescription(params: CasesConnectorRunParams, grouping: GroupedAlerts['grouping']) {
+  private getCaseDescription(
+    params: CasesConnectorRunParams,
+    grouping: CasesGroupedAlerts['grouping']
+  ) {
     const ruleName = params.rule.ruleUrl
       ? `['${params.rule.name}'](${params.rule.ruleUrl})`
       : params.rule.name;
@@ -860,7 +929,7 @@ export class CasesConnectorExecutor {
 
   private getCaseTags(
     params: CasesConnectorRunParams,
-    grouping: GroupedAlerts['grouping'],
+    grouping: CasesGroupedAlerts['grouping'],
     templateCaseTags?: string[]
   ) {
     const ruleTags = Array.isArray(params.rule.tags) ? params.rule.tags : [];
@@ -876,7 +945,7 @@ export class CasesConnectorExecutor {
       .map((tag) => tag.slice(0, MAX_LENGTH_PER_TAG));
   }
 
-  private getGroupingAsTags(grouping: GroupedAlerts['grouping']): string[] {
+  private getGroupingAsTags(grouping: CasesGroupedAlerts['grouping']): string[] {
     return Object.entries(grouping)
       .map(([key, value]) => [key, `${key}:${convertValueToString(value)}`])
       .flat();
@@ -1074,7 +1143,7 @@ export class CasesConnectorExecutor {
     return casesMapWithNewCases;
   }
 
-  private async attachAlertsToCases(
+  private async attachCommentAndAlertsToCases(
     groupedAlertsWithCases: Map<string, GroupedAlertsWithCases>,
     params: CasesConnectorRunParams
   ): Promise<void> {
@@ -1083,7 +1152,7 @@ export class CasesConnectorExecutor {
       this.getLogMetadata(params, { tags: ['case-connector:attachAlertsToCases'] })
     );
 
-    const { rule } = params;
+    const { internallyManagedAlerts, rule } = params;
 
     const [casesUnderAlertLimit, casesOverAlertLimit] = partition(
       Array.from(groupedAlertsWithCases.values()),
@@ -1113,23 +1182,42 @@ export class CasesConnectorExecutor {
     );
 
     const bulkCreateAlertsRequest: BulkCreateAlertsReq[] = casesUnderAlertLimit.map(
-      ({ theCase, alerts }) => ({
-        caseId: theCase.id,
-        attachments: [
-          {
-            type: AttachmentType.alert,
-            rule: { id: rule.id, name: rule.name },
-            /**
-             * Map traverses the array in ascending order.
-             * The order is guaranteed to be the same for
-             * both calls by the ECMA-262 spec.
-             */
-            alertId: alerts.map((alert) => alert._id),
-            index: alerts.map((alert) => alert._index),
-            owner: theCase.owner,
-          },
-        ],
-      })
+      ({ theCase, alerts, comments }) => {
+        const extraComments: AttachmentRequestV2[] =
+          comments?.map((comment) =>
+            this.isCasesAttachmentsEnabled
+              ? {
+                  type: COMMENT_ATTACHMENT_TYPE,
+                  data: { content: comment },
+                  owner: theCase.owner,
+                }
+              : {
+                  type: AttachmentType.user,
+                  comment,
+                  owner: theCase.owner,
+                }
+          ) ?? [];
+        return {
+          caseId: theCase.id,
+          attachments: [
+            ...extraComments,
+            {
+              type: AttachmentType.alert,
+              rule: internallyManagedAlerts
+                ? { id: null, name: null }
+                : { id: rule.id, name: rule.name },
+              /**
+               * Map traverses the array in ascending order.
+               * The order is guaranteed to be the same for
+               * both calls by the ECMA-262 spec.
+               */
+              alertId: alerts.map((alert) => alert._id),
+              index: alerts.map((alert) => alert._index),
+              owner: theCase.owner,
+            },
+          ],
+        };
+      }
     );
 
     await pMap(

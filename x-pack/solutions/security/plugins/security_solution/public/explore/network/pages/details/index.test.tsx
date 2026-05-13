@@ -4,16 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { render, screen, within } from '@testing-library/react';
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
 import { useParams } from 'react-router-dom';
 
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { TestProviders } from '../../../../common/mock';
-import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { NetworkDetails } from '.';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import {
+  defaultImplementation,
+  withIndices,
+} from '../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('../../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn().mockReturnValue({
@@ -79,7 +83,7 @@ jest.mock('../../../../common/lib/kibana', () => {
   return {
     ...original,
     useNavigation: () => ({
-      getAppUrl: jest.fn,
+      getAppUrl: jest.fn(),
     }),
     useKibana: () => ({
       services: {
@@ -122,7 +126,6 @@ const getMockHistory = (ip: string) => ({
 });
 
 describe('Network Details', () => {
-  const mount = useMountAppended();
   beforeAll(() => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       indicesExist: false,
@@ -154,17 +157,19 @@ describe('Network Details', () => {
       detailName: ip,
       flowTarget: FlowTargetSourceDest.source,
     });
-    const wrapper = mount(
+    render(
       <TestProviders>
         <Router history={getMockHistory(ip)}>
           <NetworkDetails />
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="network-details-page"]').exists()).toBe(true);
+    expect(screen.getByTestId('network-details-page')).toBeInTheDocument();
   });
 
   test('it renders ipv6 headline', async () => {
+    jest.mocked(useDataView).mockReturnValue(withIndices(['test-index']));
+
     const ip = 'fe80--24ce-f7ff-fede-a571';
     (useSourcererDataView as jest.Mock).mockReturnValue({
       indicesExist: true,
@@ -175,7 +180,7 @@ describe('Network Details', () => {
       detailName: ip,
       flowTarget: FlowTargetSourceDest.source,
     });
-    const wrapper = mount(
+    render(
       <TestProviders>
         <Router history={getMockHistory(ip)}>
           <NetworkDetails />
@@ -183,13 +188,13 @@ describe('Network Details', () => {
       </TestProviders>
     );
     expect(
-      wrapper
-        .find('[data-test-subj="network-details-headline"] h1[data-test-subj="header-page-title"]')
-        .text()
+      within(screen.getByTestId('header-page')).getByTestId('header-page-title').textContent
     ).toEqual('fe80::24ce:f7ff:fede:a571');
   });
 
   test('it renders landing page component when no indices exist', () => {
+    jest.mocked(useDataView).mockReturnValue(defaultImplementation());
+
     const ip = '123.456.78.90';
     (useSourcererDataView as jest.Mock).mockReturnValue({
       indicesExist: false,
@@ -200,13 +205,14 @@ describe('Network Details', () => {
       detailName: ip,
       flowTarget: FlowTargetSourceDest.source,
     });
-    const wrapper = mount(
+
+    render(
       <TestProviders>
         <Router history={getMockHistory(ip)}>
           <NetworkDetails />
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="empty-prompt"]').exists()).toBe(true);
+    expect(screen.getByTestId('empty-prompt')).toBeInTheDocument();
   });
 });

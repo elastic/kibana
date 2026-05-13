@@ -11,6 +11,7 @@ import { TestProviders } from '../../../../../../common/mock';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import { RegistryEventDetailsLine } from './registry_event_details_line';
 import { MODIFIED_REGISTRY_KEY } from '../system/translations';
+import { CellActionsRenderer } from '../../../../../../common/components/cell_actions/cell_actions_renderer';
 
 jest.mock('../../../../../../common/lib/kibana');
 
@@ -22,10 +23,24 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+jest.mock('../../../../../../common/components/cell_actions/cell_actions_renderer', () => {
+  return {
+    CellActionsRenderer: jest.fn(),
+  };
+});
+
+const MockedCellActionsRenderer = jest.fn(({ children }) => {
+  return <div data-test-subj="mock-cell-action-renderer">{children}</div>;
+});
+
 describe('DnsRequestEventDetailsLine', () => {
+  beforeEach(() => {
+    (CellActionsRenderer as unknown as jest.Mock).mockImplementation(MockedCellActionsRenderer);
+  });
   const mount = useMountAppended();
 
   const allProps = {
+    scopeId: 'some_scope',
     contextId: 'test',
     hostName: '[hostName]',
     id: '1',
@@ -130,6 +145,21 @@ describe('DnsRequestEventDetailsLine', () => {
     );
     expect(wrapper.text()).toEqual(
       '\\[userDomain][hostName]modified registry key[registryKey]with new value[registryPath]via[processName](123)'
+    );
+  });
+
+  test('should passing correct scopeId to cell actions', () => {
+    mount(
+      <TestProviders>
+        <RegistryEventDetailsLine {...allProps} userName={undefined} />
+      </TestProviders>
+    );
+
+    expect(MockedCellActionsRenderer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        scopeId: 'some_scope',
+      }),
+      {}
     );
   });
 });

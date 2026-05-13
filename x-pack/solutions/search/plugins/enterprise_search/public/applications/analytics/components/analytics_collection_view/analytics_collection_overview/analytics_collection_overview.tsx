@@ -9,11 +9,11 @@ import React, { useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { AnalyticsCollection } from '../../../../../../common/types/analytics';
+import type { AnalyticsCollection } from '../../../../../../common/types/analytics';
 import { FilterBy, getFormulaByFilter } from '../../../utils/get_formula_by_filter';
 
 import { EnterpriseSearchAnalyticsPageTemplate } from '../../layout/page_template';
@@ -84,9 +84,26 @@ export const AnalyticsCollectionOverview: React.FC<AnalyticsCollectionOverviewPr
       pageViewTelemetry={`View Analytics Collection - Overview`}
       pageHeader={{
         bottomBorder: false,
-        pageTitle: i18n.translate('xpack.enterpriseSearch.analytics.collectionsView.title', {
-          defaultMessage: 'Overview',
-        }),
+        pageTitle: (
+          <EuiFlexGroup responsive={false} alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiTitle>
+                <h1>
+                  {i18n.translate('xpack.enterpriseSearch.analytics.collectionsView.title', {
+                    defaultMessage: 'Overview',
+                  })}
+                </h1>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="warning">
+                {i18n.translate('xpack.enterpriseSearch.analytics.collections.deprecatedBadge', {
+                  defaultMessage: 'Deprecated',
+                })}
+              </EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
         rightSideItems: [<AnalyticsCollectionToolbar />],
       }}
     >

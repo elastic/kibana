@@ -30,7 +30,8 @@ import {
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { useHistory } from 'react-router-dom';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { isExpectedBoundsComparison } from '../time_comparison/get_comparison_options';
@@ -43,6 +44,7 @@ import {
   getChartAnomalyTimeseries,
 } from './helper/get_chart_anomaly_timeseries';
 import { isTimeseriesEmpty, onBrushEnd } from './helper/helper';
+import { expandApmTimeseriesWithEdgeDottedLines } from './utils/split_line_series_for_edge_dots';
 import type { TimeseriesChartWithContextProps } from './timeseries_chart_with_context';
 
 const END_ZONE_LABEL = i18n.translate('xpack.apm.timeseries.endzone', {
@@ -77,7 +79,8 @@ export function TimeseriesChart({
 }: TimeseriesChartProps) {
   const history = useHistory();
   const { chartRef, updatePointerEvent } = useChartPointerEventContext();
-  const { euiTheme, colorMode } = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
+  const isDarkMode = useKibanaIsDarkMode();
   const chartThemes = useChartThemes();
   const anomalyChartTimeseries = getChartAnomalyTimeseries({
     anomalyTimeseries,
@@ -86,8 +89,12 @@ export function TimeseriesChart({
   });
   const isEmpty = isTimeseriesEmpty(timeseries);
   const isComparingExpectedBounds = comparisonEnabled && isExpectedBoundsComparison(offset);
+  const timeseriesWithEdgeDots = useMemo(
+    () => expandApmTimeseriesWithEdgeDottedLines(timeseries),
+    [timeseries]
+  );
   const allSeries = [
-    ...timeseries,
+    ...timeseriesWithEdgeDots,
     ...(isComparingExpectedBounds ? anomalyChartTimeseries?.boundaries ?? [] : []),
     ...(anomalyChartTimeseries?.scores ?? []),
   ]
@@ -117,7 +124,6 @@ export function TimeseriesChart({
       }
     : undefined;
 
-  const isDarkMode = colorMode === 'DARK';
   const endZoneColor = isDarkMode ? euiTheme.colors.lightShade : euiTheme.colors.darkShade;
   const endZoneRectAnnotationStyle: Partial<RectAnnotationStyle> = {
     stroke: endZoneColor,
@@ -152,10 +158,10 @@ export function TimeseriesChart({
                     alignItems="center"
                     responsive={false}
                     gutterSize="xs"
-                    style={{ fontWeight: 'normal' }}
+                    css={{ fontWeight: 'normal' }}
                   >
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="iInCircle" />
+                      <EuiIcon type="info" aria-hidden={true} />
                     </EuiFlexItem>
                     <EuiFlexItem>{END_ZONE_LABEL}</EuiFlexItem>
                   </EuiFlexGroup>
@@ -228,9 +234,10 @@ export function TimeseriesChart({
           return (
             <Series
               timeZone={timeZone}
-              key={serie.title}
+              key={serie.id ?? `${serie.title}-${index}`}
               id={serie.id || serie.title}
               groupId={serie.groupId}
+              // Defaults to multi layer time axis as of Elastic Charts v70
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor="x"

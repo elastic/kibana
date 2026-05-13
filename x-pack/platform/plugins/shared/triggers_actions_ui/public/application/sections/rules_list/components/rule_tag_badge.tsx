@@ -64,8 +64,6 @@ export const RuleTagBadge = <T extends RuleTagBadgeOptions>(props: RuleTagBadgeP
         tabIndex={-1}
         onClick={onClick}
         onClickAriaLabel="Tags"
-        iconOnClick={onClick}
-        iconOnClickAriaLabel="Tags"
       >
         {tags.length}
       </EuiBadge>
@@ -90,7 +88,12 @@ export const RuleTagBadge = <T extends RuleTagBadgeOptions>(props: RuleTagBadgeP
   if (tagsOutPopover) {
     return (
       // Put 0 to fix negative left margin value.
-      <EuiFlexGroup data-test-subj="tagsOutPopover" style={{ marginLeft: 0 }} wrap={true}>
+      <EuiFlexGroup
+        data-test-subj="tagsOutPopover"
+        gutterSize="s"
+        style={{ marginLeft: 0 }}
+        wrap={true}
+      >
         {tagBadges}
       </EuiFlexGroup>
     );
@@ -102,6 +105,7 @@ export const RuleTagBadge = <T extends RuleTagBadgeOptions>(props: RuleTagBadgeP
       anchorPosition="upCenter"
       isOpen={isOpen} // The props exists as it's required in props types
       closePopover={onClose}
+      aria-label={tagTitle}
     >
       <EuiPopoverTitle data-test-subj={titleDataTestSubj}>{tagTitle}</EuiPopoverTitle>
       <div style={containerStyle}>{tagBadges}</div>

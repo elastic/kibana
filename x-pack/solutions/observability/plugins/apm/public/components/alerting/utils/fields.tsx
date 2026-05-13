@@ -221,7 +221,7 @@ export function IsAboveField({
   onChange: (value: number) => void;
   step?: number;
 }) {
-  const [thresholdPopoverOpen, serThresholdPopoverOpen] = useState(false);
+  const [thresholdPopoverOpen, setThresholdPopoverOpen] = useState(false);
   const [isAboveValue, setIsAboveValue] = useState(String(value));
 
   return (
@@ -230,7 +230,7 @@ export function IsAboveField({
       anchorPosition={'downLeft'}
       ownFocus
       closePopover={() => {
-        serThresholdPopoverOpen(false);
+        setThresholdPopoverOpen(false);
       }}
       button={
         <EuiExpression
@@ -241,8 +241,9 @@ export function IsAboveField({
           isInvalid={!isNumeric(isAboveValue)}
           isActive={thresholdPopoverOpen}
           onClick={() => {
-            serThresholdPopoverOpen(true);
+            setThresholdPopoverOpen(true);
           }}
+          data-test-subj="apmIsAboveExpression"
         />
       }
     >

@@ -6,9 +6,9 @@
  */
 
 import { failure } from 'io-ts/lib/PathReporter';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { map, fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/pipeable';
+import { map, fold } from 'fp-ts/Either';
+import { identity } from 'fp-ts/function';
 
 import type { SavedObjectsFindOptions } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
@@ -49,11 +49,14 @@ export const deleteAllPinnedEventsOnTimeline = async (
     hasReference: { type: timelineSavedObjectType, id: timelineId },
   };
   const pinnedEventToBeDeleted = await getAllSavedPinnedEvents(request, options);
-  await Promise.all(
-    pinnedEventToBeDeleted.map((pinnedEvent) =>
-      savedObjectsClient.delete(pinnedEventSavedObjectType, pinnedEvent.pinnedEventId)
-    )
-  );
+  const pinnedEventObjects = pinnedEventToBeDeleted.map((pinnedEvent) => ({
+    id: pinnedEvent.pinnedEventId,
+    type: pinnedEventSavedObjectType,
+  }));
+
+  if (pinnedEventObjects.length > 0) {
+    await savedObjectsClient.bulkDelete(pinnedEventObjects);
+  }
 };
 
 export const PINNED_EVENTS_PER_PAGE = 10000; // overrides the saved object client's FIND_DEFAULT_PER_PAGE (20)

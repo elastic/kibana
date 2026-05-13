@@ -17,22 +17,40 @@ export class OnboardingService {
   private isAgentlessAvailableSubject$: BehaviorSubject<IsAgentlessAvailable>;
   public isAgentlessAvailable$: Observable<IsAgentlessAvailable>;
 
+  private projectUrlSubject$: BehaviorSubject<string | undefined>;
+  public projectUrl$: Observable<string | undefined>;
+
+  private deploymentUrlSubject$: BehaviorSubject<string | undefined>;
+  public deploymentUrl$: Observable<string | undefined>;
+
   constructor() {
     this.usersUrlSubject$ = new BehaviorSubject<UserUrl>(undefined);
     this.usersUrl$ = this.usersUrlSubject$.asObservable();
 
     this.isAgentlessAvailableSubject$ = new BehaviorSubject<IsAgentlessAvailable>(undefined);
     this.isAgentlessAvailable$ = this.isAgentlessAvailableSubject$.asObservable();
+
+    this.projectUrlSubject$ = new BehaviorSubject<string | undefined>(undefined);
+    this.projectUrl$ = this.projectUrlSubject$.asObservable();
+
+    this.deploymentUrlSubject$ = new BehaviorSubject<string | undefined>(undefined);
+    this.deploymentUrl$ = this.deploymentUrlSubject$.asObservable();
   }
 
   public setSettings({
     userUrl,
     isAgentlessAvailable,
+    projectUrl,
+    deploymentUrl,
   }: {
     userUrl: UserUrl;
     isAgentlessAvailable: boolean;
+    projectUrl?: string;
+    deploymentUrl?: string;
   }) {
     this.usersUrlSubject$.next(userUrl);
     this.isAgentlessAvailableSubject$.next(isAgentlessAvailable);
+    this.projectUrlSubject$.next(projectUrl);
+    this.deploymentUrlSubject$.next(deploymentUrl);
   }
 }

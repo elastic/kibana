@@ -77,7 +77,7 @@ const ACTION_DEFINITION: Record<
   [VisualizationContextMenuActions.openInLens]: {
     id: VisualizationContextMenuActions.openInLens,
     getDisplayName: () => OPEN_IN_LENS,
-    getIconType: () => 'visArea',
+    getIconType: () => 'chartArea',
     type: 'actionButton',
     order: 0,
   },
@@ -104,6 +104,7 @@ export const useActions = ({
   const { services } = useKibana();
   const {
     lens: { navigateToPrefilledEditor, canUseEditor },
+    topValuesPopover,
   } = services;
 
   const onOpenInLens = useCallback(() => {
@@ -113,7 +114,7 @@ export const useActions = ({
     navigateToPrefilledEditor(
       {
         id: '',
-        timeRange,
+        time_range: timeRange,
         attributes,
       },
       {
@@ -145,15 +146,16 @@ export const useActions = ({
           execute: async () => {
             inspectActionProps.handleInspectClick();
           },
-          disabled: inspectActionProps.isInspectButtonDisabled,
+          isDisabled: () => inspectActionProps.isInspectButtonDisabled,
           isCompatible: async () => withActions.includes(VisualizationContextMenuActions.inspect),
         }),
         createAction({
           ...ACTION_DEFINITION[VisualizationContextMenuActions.addToNewCase],
           execute: async () => {
             onAddToNewCaseClicked();
+            topValuesPopover.closePopover();
           },
-          disabled: isAddToNewCaseDisabled,
+          isDisabled: () => isAddToNewCaseDisabled,
           isCompatible: async () =>
             withActions.includes(VisualizationContextMenuActions.addToNewCase),
         }),
@@ -162,7 +164,7 @@ export const useActions = ({
           execute: async () => {
             onAddToExistingCaseClicked();
           },
-          disabled: isAddToExistingCaseDisabled,
+          isDisabled: () => isAddToExistingCaseDisabled,
           isCompatible: async () =>
             withActions.includes(VisualizationContextMenuActions.addToExistingCase),
           order: 2,
@@ -172,7 +174,7 @@ export const useActions = ({
           execute: async () => {
             openSaveVisualizationFlyout();
           },
-          disabled: disableVisualizations,
+          isDisabled: () => disableVisualizations,
           isCompatible: async () =>
             withActions.includes(VisualizationContextMenuActions.saveToLibrary),
           order: 1,
@@ -206,6 +208,7 @@ export const useActions = ({
       onOpenInLens,
       openSaveVisualizationFlyout,
       withActions,
+      topValuesPopover,
     ]
   );
 

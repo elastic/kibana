@@ -34,9 +34,6 @@ exports[`Table should render normally 1`] = `
       Array [
         <EuiToolTip
           data-test-subj="deleteSOToolTip"
-          delay="regular"
-          display="inlineBlock"
-          position="top"
         >
           <EuiButton
             color="danger"
@@ -52,11 +49,12 @@ exports[`Table should render normally 1`] = `
           </EuiButton>
         </EuiToolTip>,
         <EuiPopover
-          anchorPosition="downCenter"
+          anchorPosition="downLeft"
+          aria-label="Export options"
           button={
             <EuiButton
               iconSide="right"
-              iconType="arrowDown"
+              iconType="chevronSingleDown"
               isDisabled={false}
               onClick={[Function]}
             >
@@ -68,7 +66,7 @@ exports[`Table should render normally 1`] = `
           }
           closePopover={[Function]}
           display="inline-block"
-          hasArrow={true}
+          hasArrow={false}
           isOpen={false}
           ownFocus={true}
           panelPaddingSize="m"
@@ -97,7 +95,7 @@ exports[`Table should render normally 1`] = `
           <EuiFormRow>
             <EuiButton
               fill={true}
-              iconType="exportAction"
+              iconType="upload"
               onClick={[Function]}
             >
               <Memo(MemoizedFormattedMessage)
@@ -156,7 +154,7 @@ exports[`Table should render normally 1`] = `
               Object {
                 "data-test-subj": "savedObjectsTableAction-relationships",
                 "description": "View the relationships this saved object has to other saved objects",
-                "icon": "kqlSelector",
+                "icon": "querySelector",
                 "name": "Relationships",
                 "onClick": [Function],
                 "type": "icon",
@@ -222,6 +220,7 @@ exports[`Table should render normally 1`] = `
           },
         }
       }
+      tableCaption="Saved objects list"
       tableLayout="fixed"
     />
   </div>

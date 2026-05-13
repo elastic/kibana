@@ -8,6 +8,7 @@
  */
 
 import React, { useState } from 'react';
+import type { EuiDataGridControlColumn } from '@elastic/eui';
 import {
   EuiCheckbox,
   EuiButtonIcon,
@@ -16,9 +17,8 @@ import {
   EuiFlexItem,
   EuiPopoverTitle,
   EuiSpacer,
-  EuiDataGridControlColumn,
 } from '@elastic/eui';
-import { RowControlColumn } from '@kbn/discover-utils';
+import type { RowControlColumn } from '@kbn/discover-utils';
 
 const SelectionHeaderCell = () => {
   return (
@@ -71,7 +71,7 @@ const TestTrailingColumn = () => {
       button={
         <EuiButtonIcon
           aria-label="show actions"
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           color="text"
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
         />
@@ -119,11 +119,10 @@ export const testLeadingControlColumn: EuiDataGridControlColumn = {
   width: 100,
 };
 
-export const mockRowAdditionalLeadingControls = ['visBarVerticalStacked', 'heart', 'inspect'].map(
-  (iconType, index): RowControlColumn => ({
-    id: `exampleControl_${iconType}`,
-    headerAriaLabel: `Example Row Control ${iconType}`,
-    renderControl: (Control, rowProps) => {
+export const mockRowAdditionalLeadingControls = ['chartBarVerticalStack', 'heart', 'inspect'].map(
+  (iconType): RowControlColumn => ({
+    id: `exampleRowControl-${iconType}`,
+    render: (Control, rowProps) => {
       return (
         <Control
           data-test-subj={`exampleRowControl-${iconType}`}

@@ -25,47 +25,49 @@ export default {
 const mock = new TabbedModalStorybookMock();
 const argTypes = mock.getArgumentTypes();
 
-export const TrivialExample = (params: TabbedModalStorybookParams) => {
-  return (
-    <TabbedModal
-      {...params}
-      modalTitle="Trivial Example"
-      tabs={[
-        {
-          id: 'hello',
-          name: 'Hello',
-          content: () => {
-            return (
-              <Fragment>
-                <EuiSpacer size="m" />
-                <EuiText>
-                  <p>Click the button to send a message into the void</p>
-                </EuiText>
-              </Fragment>
-            );
-          },
-          initialState: {
-            message: 'Hello World!!',
-          },
-          modalActionBtn: {
-            id: 'wave',
-            label: 'Say Hi 👋🏾',
-            dataTestSubj: 'wave',
-            handler: ({ state }) => {
-              alert(state.message);
+export const TrivialExample = {
+  render: (params: TabbedModalStorybookParams) => {
+    return (
+      <TabbedModal
+        {...params}
+        modalTitle="Trivial Example"
+        tabs={[
+          {
+            id: 'hello',
+            name: 'Hello',
+            content: () => {
+              return (
+                <Fragment>
+                  <EuiSpacer size="m" />
+                  <EuiText>
+                    <p>Click the button to send a message into the void</p>
+                  </EuiText>
+                </Fragment>
+              );
+            },
+            initialState: {
+              message: 'Hello World!!',
+            },
+            modalActionBtn: {
+              id: 'wave',
+              label: 'Say Hi 👋🏾',
+              dataTestSubj: 'wave',
+              handler: ({ state }) => {
+                alert(state.message);
+              },
             },
           },
-        },
-      ]}
-      defaultSelectedTabId="hello"
-      onClose={() => {}}
-    />
-  );
+        ]}
+        defaultSelectedTabId="hello"
+        onClose={() => {}}
+      />
+    );
+  },
+
+  argTypes,
 };
 
-TrivialExample.argTypes = argTypes;
-
-export const NonTrivialExample = (params: TabbedModalStorybookParams) => {
+const NonTrivialExampleComponent = (params: TabbedModalStorybookParams) => {
   const checkboxGroupItemId1 = useGeneratedHtmlId({
     prefix: 'checkboxGroupItem',
     suffix: 'first',
@@ -177,4 +179,8 @@ export const NonTrivialExample = (params: TabbedModalStorybookParams) => {
   );
 };
 
-NonTrivialExample.argTypes = argTypes;
+export const NonTrivialExample = {
+  render: (params: TabbedModalStorybookParams) => <NonTrivialExampleComponent {...params} />,
+
+  argTypes,
+};

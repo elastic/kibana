@@ -16,6 +16,8 @@ export const RULES_PATH = '/alerts/rules' as const;
 export const RULES_LOGS_PATH = '/alerts/rules/logs' as const;
 export const RULE_DETAIL_PATH = '/alerts/rules/:ruleId' as const;
 export const CREATE_RULE_PATH = '/alerts/rules/create/:ruleTypeId' as const;
+export const CREATE_RULE_FROM_TEMPLATE_PATH = '/alerts/rules/create/template/:templateId' as const;
+export const EDIT_RULE_PATH = '/alerts/rules/edit/:id' as const;
 export const CASES_PATH = '/cases' as const;
 export const ANNOTATIONS_PATH = '/annotations' as const;
 export const SETTINGS_PATH = '/slos/settings' as const;
@@ -29,22 +31,27 @@ export const OLD_SLO_EDIT_PATH = '/slos/edit/:sloId' as const;
 
 export const SLO_DETAIL_PATH = '/:sloId' as const;
 
+const RULES_APP_BASE_PATH = '/app/rules';
+
 export const paths = {
   observability: {
     alerts: `${OBSERVABILITY_BASE_PATH}${ALERTS_PATH}`,
     annotations: `${OBSERVABILITY_BASE_PATH}${ANNOTATIONS_PATH}`,
     alertDetails: (alertId: string) =>
       `${OBSERVABILITY_BASE_PATH}${ALERTS_PATH}/${encodeURIComponent(alertId)}`,
-    rules: `${OBSERVABILITY_BASE_PATH}${RULES_PATH}`,
-    ruleDetails: (ruleId: string) =>
-      `${OBSERVABILITY_BASE_PATH}${RULES_PATH}/${encodeURIComponent(ruleId)}`,
+    rules: RULES_APP_BASE_PATH,
+    ruleDetails: (ruleId: string) => `${RULES_APP_BASE_PATH}/rule/${encodeURIComponent(ruleId)}`,
     createRule: (ruleTypeId: string) =>
-      `${OBSERVABILITY_BASE_PATH}${RULES_PATH}/create/${encodeURIComponent(ruleTypeId)}`,
+      `${RULES_APP_BASE_PATH}/create/${encodeURIComponent(ruleTypeId)}`,
+    createRuleFromTemplate: (templateId: string) =>
+      `${RULES_APP_BASE_PATH}/create/template/${encodeURIComponent(templateId)}`,
+    editRule: (id: string) => `${RULES_APP_BASE_PATH}/edit/${encodeURIComponent(id)}`,
   },
 };
 
 export const relativePaths = {
   observability: {
     ruleDetails: (ruleId: string) => `${RULES_PATH}/${encodeURIComponent(ruleId)}`,
+    editRule: (id: string) => `${RULES_PATH}/edit/${encodeURIComponent(id)}`,
   },
 };

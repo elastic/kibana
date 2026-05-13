@@ -7,13 +7,14 @@
 
 import React, { useState } from 'react';
 import { FieldValueSelection } from '@kbn/observability-shared-plugin/public';
+import { isLogicalAndField } from '../../../../../../../common/constants';
+import type { SyntheticsMonitorFilterItem } from '../../../../utils/filters/filter_fields';
 import {
   getSyntheticsFilterDisplayValues,
-  SyntheticsMonitorFilterItem,
   valueToLabelWithEmptyCount,
 } from '../../../../utils/filters/filter_fields';
 import { useGetUrlParams } from '../../../../hooks';
-import { useMonitorFiltersState } from './use_filters';
+import type { useMonitorFiltersState } from './use_filters';
 
 export const FilterButton = ({
   filter,
@@ -37,6 +38,8 @@ export const FilterButton = ({
     []
   ).map(({ label: selectedValueLabel }) => selectedValueLabel);
 
+  const showLogicalConditionSwitch = isLogicalAndField(field);
+
   return (
     <FieldValueSelection
       selectedValue={selectedValueLabels}
@@ -48,10 +51,14 @@ export const FilterButton = ({
           : values
       }
       setQuery={setQuery}
-      onChange={(selectedValues) => handleFilterChange(field, selectedValues)}
+      onChange={(selectedValues, _, isLogicalAND) =>
+        handleFilterChange(field, selectedValues, isLogicalAND)
+      }
       allowExclusions={false}
       loading={loading}
       asFilterButton={true}
+      showLogicalConditionSwitch={showLogicalConditionSwitch}
+      useLogicalAND={showLogicalConditionSwitch && urlParams.useLogicalAndFor?.includes(field)}
     />
   );
 };

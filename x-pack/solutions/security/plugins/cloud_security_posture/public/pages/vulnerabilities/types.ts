@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { VectorScoreBase } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
+import type { VectorScoreBase } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
 
 export type Vendor = 'NVD' | 'Red Hat' | 'GHSA';
 
@@ -19,3 +19,5 @@ export interface Vector {
   vector: string;
   score: number | undefined;
 }
+
+export type AddFieldFilterHandler = (field: string, value: unknown, type: '+' | '-') => void;

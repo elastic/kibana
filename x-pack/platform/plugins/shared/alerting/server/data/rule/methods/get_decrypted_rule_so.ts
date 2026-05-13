@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core/server';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { SavedObjectsGetOptions } from '@kbn/core-saved-objects-api-server';
-import { RawRule } from '../../../types';
+import type { SavedObject } from '@kbn/core/server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SavedObjectsGetOptions } from '@kbn/core-saved-objects-api-server';
+import type { RawRule } from '../../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 
 export interface GetDecryptedRuleSoParams {

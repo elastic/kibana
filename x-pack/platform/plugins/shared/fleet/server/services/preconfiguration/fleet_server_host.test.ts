@@ -8,12 +8,9 @@ import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/serv
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import { appContextService } from '../app_context';
-import {
-  getDefaultFleetServerHost,
-  createFleetServerHost,
-  bulkGetFleetServerHosts,
-  updateFleetServerHost,
-} from '../fleet_server_host';
+import { fleetServerHostService } from '../fleet_server_host';
+
+import type { FleetServerHost } from '../../../common/types';
 
 import {
   createCloudFleetServerHostIfNeeded,
@@ -21,8 +18,7 @@ import {
   getPreconfiguredFleetServerHostFromConfig,
   createOrUpdatePreconfiguredFleetServerHosts,
 } from './fleet_server_host';
-
-import type { FleetServerHost } from '../../../common/types';
+import { hashSecret } from './outputs';
 
 jest.mock('../fleet_server_host');
 jest.mock('../app_context');
@@ -33,20 +29,16 @@ mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 
-const mockedGetDefaultFleetServerHost = getDefaultFleetServerHost as jest.MockedFunction<
-  typeof getDefaultFleetServerHost
->;
-const mockedCreateFleetServerHost = createFleetServerHost as jest.MockedFunction<
-  typeof createFleetServerHost
->;
-const mockedUpdateFleetServerHost = updateFleetServerHost as jest.MockedFunction<
-  typeof updateFleetServerHost
->;
-const mockedBulkGetFleetServerHosts = bulkGetFleetServerHosts as jest.MockedFunction<
-  typeof bulkGetFleetServerHosts
+const mockedFleetServerHostService = fleetServerHostService as jest.Mocked<
+  typeof fleetServerHostService
 >;
 
 describe('getPreconfiguredFleetServerHostFromConfig', () => {
+  afterEach(() => {
+    mockedAppContextService.getCloud.mockReset();
+    mockedAppContextService.getConfig.mockReset();
+  });
+
   it('should work with preconfigured fleetServerHosts', () => {
     const config = {
       fleetServerHosts: [
@@ -55,6 +47,124 @@ describe('getPreconfiguredFleetServerHostFromConfig', () => {
           name: 'TEST',
           is_default: true,
           host_urls: ['http://test.fr'],
+        },
+      ],
+    };
+
+    const res = getPreconfiguredFleetServerHostFromConfig(config);
+
+    expect(res).toEqual(config.fleetServerHosts);
+  });
+
+  it('should include ECH agentless Fleet Server host when agentless is enabled in cloud', () => {
+    mockedAppContextService.getCloud.mockReturnValue({
+      isCloudEnabled: true,
+      isServerlessEnabled: false,
+      deploymentId: 'test-deployment',
+      cloudHost: 'test.co',
+    } as any);
+    mockedAppContextService.getConfig.mockReturnValue({
+      agentless: { enabled: true },
+    } as any);
+
+    const config = {
+      fleetServerHosts: [
+        {
+          id: 'fleet-123',
+          name: 'TEST',
+          is_default: true,
+          host_urls: ['http://test.fr'],
+        },
+      ],
+    };
+
+    const res = getPreconfiguredFleetServerHostFromConfig(config);
+
+    expect(res).toHaveLength(2);
+    expect(res).toEqual([
+      {
+        id: 'fleet-123',
+        name: 'TEST',
+        is_default: true,
+        host_urls: ['http://test.fr'],
+      },
+      {
+        id: 'internal-agentless-fleet-server',
+        name: 'Internal Fleet Server for agentless',
+        host_urls: ['https://test-deployment.fleet.test.co'],
+        is_default: false,
+        is_preconfigured: true,
+      },
+    ]);
+  });
+
+  it('should not include ECH agentless Fleet Server host when agentless is disabled', () => {
+    mockedAppContextService.getCloud.mockReturnValue({
+      isCloudEnabled: true,
+      isServerlessEnabled: false,
+    } as any);
+    mockedAppContextService.getConfig.mockReturnValue({
+      agentless: { enabled: false },
+    } as any);
+
+    const config = {
+      fleetServerHosts: [
+        {
+          id: 'fleet-123',
+          name: 'TEST',
+          is_default: true,
+          host_urls: ['http://test.fr'],
+        },
+      ],
+    };
+
+    const res = getPreconfiguredFleetServerHostFromConfig(config);
+
+    expect(res).toHaveLength(1);
+    expect(res).toEqual(config.fleetServerHosts);
+  });
+
+  it('should not include ECH agentless Fleet Server host in serverless environment', () => {
+    mockedAppContextService.getCloud.mockReturnValue({
+      isCloudEnabled: true,
+      isServerlessEnabled: true,
+    } as any);
+    mockedAppContextService.getConfig.mockReturnValue({
+      agentless: { enabled: true },
+    } as any);
+
+    const config = {
+      fleetServerHosts: [
+        {
+          id: 'fleet-123',
+          name: 'TEST',
+          is_default: true,
+          host_urls: ['http://test.fr'],
+        },
+      ],
+    };
+
+    const res = getPreconfiguredFleetServerHostFromConfig(config);
+
+    expect(res).toHaveLength(1);
+    expect(res).toEqual(config.fleetServerHosts);
+  });
+
+  it('should work with preconfigured fleetServerHosts that have SSL options', () => {
+    const config = {
+      fleetServerHosts: [
+        {
+          id: 'id1',
+          name: 'fleet server 1',
+          host_urls: [],
+          is_default: false,
+          is_preconfigured: false,
+          ssl: {
+            certificate_authorities: ['cert authorities'],
+            es_certificate_authorities: ['es cert authorities'],
+            certificate: 'path/to/cert',
+            es_certificate: 'path/to/EScert',
+          },
         },
       ],
     };
@@ -164,6 +274,7 @@ describe('getCloudFleetServersHosts', () => {
       serverless: {
         projectId: undefined,
       },
+      isInTrial: () => false,
     });
 
     expect(getCloudFleetServersHosts()).toBeUndefined();
@@ -182,6 +293,7 @@ describe('getCloudFleetServersHosts', () => {
       serverless: {
         projectId: undefined,
       },
+      isInTrial: () => false,
     });
 
     expect(getCloudFleetServersHosts()).toMatchInlineSnapshot(`
@@ -205,6 +317,7 @@ describe('getCloudFleetServersHosts', () => {
       serverless: {
         projectId: undefined,
       },
+      isInTrial: () => false,
     });
 
     expect(getCloudFleetServersHosts()).toMatchInlineSnapshot(`
@@ -215,44 +328,25 @@ describe('getCloudFleetServersHosts', () => {
   });
 });
 
-describe('createCloudFleetServerHostIfNeeded', () => {
+describe('createCloudFleetServerHostsIfNeeded', () => {
   afterEach(() => {
-    mockedCreateFleetServerHost.mockReset();
+    mockedFleetServerHostService.create.mockReset();
     mockedAppContextService.getCloud.mockReset();
+    mockedAppContextService.getConfig.mockReset();
   });
   it('should do nothing if there is no cloud fleet server hosts', async () => {
     const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-    await createCloudFleetServerHostIfNeeded(soClient);
+    await createCloudFleetServerHostIfNeeded(soClient, esClient);
 
-    expect(mockedCreateFleetServerHost).not.toBeCalled();
+    expect(mockedFleetServerHostService.create).not.toBeCalled();
   });
 
-  it('should do nothing if there is already an host configured', async () => {
+  it('should create only default fleet server host if agentless already exists', async () => {
     const soClient = savedObjectsClientMock.create();
-    mockedAppContextService.getCloud.mockReturnValue({
-      cloudId:
-        'dXMtZWFzdC0xLmF3cy5mb3VuZC5pbyRjZWM2ZjI2MWE3NGJmMjRjZTMzYmI4ODExYjg0Mjk0ZiRjNmMyY2E2ZDA0MjI0OWFmMGNjN2Q3YTllOTYyNTc0Mw==',
-      isCloudEnabled: true,
-      deploymentId: 'deployment-id-1',
-      apm: {},
-      onboarding: {},
-      isServerlessEnabled: false,
-      serverless: {
-        projectId: undefined,
-      },
-    });
-    mockedGetDefaultFleetServerHost.mockResolvedValue({
-      id: 'test',
-    } as any);
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-    await createCloudFleetServerHostIfNeeded(soClient);
-
-    expect(mockedCreateFleetServerHost).not.toBeCalled();
-  });
-
-  it('should create a new fleet server hosts if there is no host configured', async () => {
-    const soClient = savedObjectsClientMock.create();
     mockedAppContextService.getCloud.mockReturnValue({
       cloudId:
         'dXMtZWFzdC0xLmF3cy5mb3VuZC5pbyRjZWM2ZjI2MWE3NGJmMjRjZTMzYmI4ODExYjg0Mjk0ZiRjNmMyY2E2ZDA0MjI0OWFmMGNjN2Q3YTllOTYyNTc0Mw==',
@@ -265,30 +359,221 @@ describe('createCloudFleetServerHostIfNeeded', () => {
       serverless: {
         projectId: undefined,
       },
+      isInTrial: () => false,
     });
-    mockedGetDefaultFleetServerHost.mockResolvedValue(null);
+    mockedAppContextService.getConfig.mockReturnValue({
+      agentless: { enabled: true },
+    } as any);
+    // Default doesn't exist but agentless does
+    mockedFleetServerHostService.getDefaultFleetServerHost = jest
+      .fn()
+      .mockResolvedValue(null as any);
+    mockedFleetServerHostService.get.mockResolvedValue({
+      id: 'existing-agentless',
+    } as any);
+
+    await createCloudFleetServerHostIfNeeded(soClient, esClient);
+
+    expect(mockedFleetServerHostService.create).toBeCalledTimes(1);
+
+    // Verify only default Fleet Server host creation
+    expect(mockedFleetServerHostService.create).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({
+        name: 'Default',
+        host_urls: ['https://deployment-id-1.fleet.us-east-1.aws.found.io'],
+        is_default: true,
+        is_preconfigured: false,
+      }),
+      { id: 'fleet-default-fleet-server-host', overwrite: true, fromPreconfiguration: true }
+    );
+  });
+
+  it('should create only default fleet server host if agentless is disabled', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    mockedAppContextService.getCloud.mockReturnValue({
+      cloudId:
+        'dXMtZWFzdC0xLmF3cy5mb3VuZC5pbyRjZWM2ZjI2MWE3NGJmMjRjZTMzYmI4ODExYjg0Mjk0ZiRjNmMyY2E2ZDA0MjI0OWFmMGNjN2Q3YTllOTYyNTc0Mw==',
+      isCloudEnabled: true,
+      deploymentId: 'deployment-id-1',
+      cloudHost: 'us-east-1.aws.found.io',
+      apm: {},
+      onboarding: {},
+      isServerlessEnabled: false,
+      serverless: {
+        projectId: undefined,
+      },
+      isInTrial: () => false,
+    });
+    mockedAppContextService.getConfig.mockReturnValue({
+      agentless: { enabled: false },
+    } as any);
+    // Mock both getDefaultFleetServerHost and get calls to return null
+    mockedFleetServerHostService.getDefaultFleetServerHost = jest
+      .fn()
+      .mockResolvedValue(null as any);
+    mockedFleetServerHostService.get.mockResolvedValue(null as any);
     soClient.create.mockResolvedValue({
       id: 'test-id',
       attributes: {},
     } as any);
 
-    await createCloudFleetServerHostIfNeeded(soClient);
+    await createCloudFleetServerHostIfNeeded(soClient, esClient);
 
-    expect(mockedCreateFleetServerHost).toBeCalledTimes(1);
-    expect(mockedCreateFleetServerHost).toBeCalledWith(
+    expect(mockedFleetServerHostService.create).toBeCalledTimes(1);
+
+    // Verify only default Fleet Server host creation
+    expect(mockedFleetServerHostService.create).toHaveBeenCalledWith(
+      expect.anything(),
       expect.anything(),
       expect.objectContaining({
+        name: 'Default',
         host_urls: ['https://deployment-id-1.fleet.us-east-1.aws.found.io'],
         is_default: true,
+        is_preconfigured: false,
       }),
       { id: 'fleet-default-fleet-server-host', overwrite: true, fromPreconfiguration: true }
     );
   });
+
+  it('should not create agentless fleet server host if default already exists (ECH agentless is now handled via preconfiguration)', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    mockedAppContextService.getCloud.mockReturnValue({
+      cloudId:
+        'dXMtZWFzdC0xLmF3cy5mb3VuZC5pbyRjZWM2ZjI2MWE3NGJmMjRjZTMzYmI4ODExYjg0Mjk0ZiRjNmMyY2E2ZDA0MjI0OWFmMGNjN2Q3YTllOTYyNTc0Mw==',
+      isCloudEnabled: true,
+      deploymentId: 'deployment-id-1',
+      cloudHost: 'us-east-1.aws.found.io',
+      apm: {},
+      onboarding: {},
+      isServerlessEnabled: false,
+      serverless: {
+        projectId: undefined,
+      },
+      isInTrial: () => false,
+    });
+    mockedAppContextService.getConfig.mockReturnValue({
+      agentless: { enabled: true },
+    } as any);
+    // Default exists but agentless doesn't
+    mockedFleetServerHostService.getDefaultFleetServerHost = jest
+      .fn()
+      .mockResolvedValue({ id: 'existing-default' } as any);
+    mockedFleetServerHostService.get.mockResolvedValue(null as any);
+
+    await createCloudFleetServerHostIfNeeded(soClient, esClient);
+
+    // Should not create any Fleet Server hosts since default exists and ECH agentless is now handled via preconfiguration
+    expect(mockedFleetServerHostService.create).toBeCalledTimes(0);
+  });
+
+  it('should not create any fleet server hosts if both already exist', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    mockedAppContextService.getCloud.mockReturnValue({
+      cloudId:
+        'dXMtZWFzdC0xLmF3cy5mb3VuZC5pbyRjZWM2ZjI2MWE3NGJmMjRjZTMzYmI4ODExYjg0Mjk0ZiRjNmMyY2E2ZDA0MjI0OWFmMGNjN2Q3YTllOTYyNTc0Mw==',
+      isCloudEnabled: true,
+      deploymentId: 'deployment-id-1',
+      cloudHost: 'us-east-1.aws.found.io',
+      apm: {},
+      onboarding: {},
+      isServerlessEnabled: false,
+      serverless: {
+        projectId: undefined,
+      },
+      isInTrial: () => false,
+    });
+    mockedAppContextService.getConfig.mockReturnValue({
+      agentless: { enabled: true },
+    } as any);
+    // Both exist
+    mockedFleetServerHostService.getDefaultFleetServerHost = jest
+      .fn()
+      .mockResolvedValue({ id: 'existing-default' } as any);
+    mockedFleetServerHostService.get.mockResolvedValue({ id: 'existing-agentless' } as any);
+
+    await createCloudFleetServerHostIfNeeded(soClient, esClient);
+
+    expect(mockedFleetServerHostService.create).not.toBeCalled();
+  });
+
+  it('should not create agentless fleet server host if default already exists but agentless is disabled', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    mockedAppContextService.getCloud.mockReturnValue({
+      cloudId:
+        'dXMtZWFzdC0xLmF3cy5mb3VuZC5pbyRjZWM2ZjI2MWE3NGJmMjRjZTMzYmI4ODExYjg0Mjk0ZiRjNmMyY2E2ZDA0MjI0OWFmMGNjN2Q3YTllOTYyNTc0Mw==',
+      isCloudEnabled: true,
+      deploymentId: 'deployment-id-1',
+      cloudHost: 'us-east-1.aws.found.io',
+      apm: {},
+      onboarding: {},
+      isServerlessEnabled: false,
+      serverless: {
+        projectId: undefined,
+      },
+      isInTrial: () => false,
+    });
+    mockedAppContextService.getConfig.mockReturnValue({
+      agentless: { enabled: false },
+    } as any);
+    // Default exists but agentless doesn't and agentless is disabled
+    mockedFleetServerHostService.getDefaultFleetServerHost = jest
+      .fn()
+      .mockResolvedValue({ id: 'existing-default' } as any);
+    mockedFleetServerHostService.get.mockResolvedValue(null as any);
+
+    await createCloudFleetServerHostIfNeeded(soClient, esClient);
+
+    expect(mockedFleetServerHostService.create).not.toBeCalled();
+  });
+
+  it('should not create agentless fleet server host in serverless environment', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    mockedAppContextService.getCloud.mockReturnValue({
+      cloudId:
+        'dXMtZWFzdC0xLmF3cy5mb3VuZC5pbyRjZWM2ZjI2MWE3NGJmMjRjZTMzYmI4ODExYjg0Mjk0ZiRjNmMyY2E2ZDA0MjI0OWFmMGNjN2Q3YTllOTYyNTc0Mw==',
+      isCloudEnabled: true,
+      deploymentId: 'deployment-id-1',
+      cloudHost: 'us-east-1.aws.found.io',
+      apm: {},
+      onboarding: {},
+      isServerlessEnabled: true,
+      serverless: {
+        projectId: 'project-123',
+      },
+      isInTrial: () => false,
+    });
+    mockedAppContextService.getConfig.mockReturnValue({
+      agentless: { enabled: true },
+    } as any);
+    // Default exists but we're in serverless
+    mockedFleetServerHostService.getDefaultFleetServerHost = jest
+      .fn()
+      .mockResolvedValue({ id: 'existing-default' } as any);
+    mockedFleetServerHostService.get.mockResolvedValue(null as any);
+
+    await createCloudFleetServerHostIfNeeded(soClient, esClient);
+
+    expect(mockedFleetServerHostService.create).not.toBeCalled();
+  });
 });
 
 describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
-  beforeEach(() => {
-    mockedBulkGetFleetServerHosts.mockResolvedValue([
+  let secretHash: string;
+  beforeEach(async () => {
+    secretHash = await hashSecret('secretKey');
+    mockedFleetServerHostService.bulkGet.mockResolvedValue([
       {
         id: 'fleet-123',
         name: 'TEST',
@@ -301,11 +586,90 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
         is_default: false,
         is_internal: false,
         host_urls: ['http://test-internal.fr'],
+        is_preconfigured: true,
+      },
+      {
+        id: 'fleet-with-secrets',
+        name: 'TEST_SECRETS',
+        is_default: false,
+        is_internal: false,
+        host_urls: ['http://test-internal.fr'],
+        is_preconfigured: true,
+        secrets: {
+          ssl: {
+            key: { id: 'test123', hash: secretHash },
+          },
+        },
       },
     ] as FleetServerHost[]);
   });
   afterEach(() => {
-    mockedBulkGetFleetServerHosts.mockReset();
+    mockedFleetServerHostService.bulkGet.mockReset();
+    jest.resetAllMocks();
+  });
+
+  it('should create a preconfigured fleet server host that does not exist', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
+      {
+        id: 'new-fleet-server-host',
+        name: 'TEST_1',
+        is_default: false,
+        is_internal: false,
+        host_urls: ['http://test-internal.fr'],
+        is_preconfigured: true,
+      },
+    ]);
+    expect(mockedFleetServerHostService.create).toBeCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({
+        name: 'TEST_1',
+      }),
+      expect.anything()
+    );
+    expect(mockedFleetServerHostService.update).not.toBeCalled();
+  });
+
+  it('should create a preconfigured fleet server host with secrets that does not exist', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
+      {
+        id: 'new-fleet-server-host',
+        name: 'TEST_1',
+        is_default: false,
+        is_internal: false,
+        host_urls: ['http://test-internal.fr'],
+        is_preconfigured: true,
+        secrets: {
+          ssl: {
+            key: 'unsecureKey1',
+            es_key: 'unsecureKey2',
+            agent_key: 'unsecureKey3',
+          },
+        },
+      },
+    ]);
+    expect(mockedFleetServerHostService.create).toBeCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({
+        name: 'TEST_1',
+        secrets: {
+          ssl: {
+            key: 'unsecureKey1',
+            es_key: 'unsecureKey2',
+            agent_key: 'unsecureKey3',
+          },
+        },
+      }),
+      expect.anything()
+    );
+    expect(mockedFleetServerHostService.update).not.toBeCalled();
   });
 
   it('should update preconfigured fleet server hosts if is_internal flag changes', async () => {
@@ -319,11 +683,230 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
         is_default: false,
         is_internal: true,
         host_urls: ['http://test-internal.fr'],
-        is_preconfigured: false,
+        is_preconfigured: true,
       },
     ]);
 
-    expect(mockedCreateFleetServerHost).not.toBeCalled();
-    expect(mockedUpdateFleetServerHost).toBeCalled();
+    expect(mockedFleetServerHostService.create).not.toBeCalled();
+    expect(mockedFleetServerHostService.update).toBeCalledWith(
+      expect.anything(),
+      expect.anything(),
+      'fleet-internal',
+      expect.objectContaining({
+        is_internal: true,
+      }),
+      { fromPreconfiguration: true, secretHashes: {} }
+    );
+  });
+
+  it('should update preconfigured fleet server hosts if host_urls change', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
+      {
+        id: 'fleet-internal',
+        name: 'TEST_INTERNAL',
+        is_default: false,
+        is_internal: false,
+        host_urls: ['http://test-internal.fr', 'http://test.fr'],
+        is_preconfigured: true,
+      },
+    ]);
+
+    expect(mockedFleetServerHostService.create).not.toBeCalled();
+    expect(mockedFleetServerHostService.update).toBeCalledWith(
+      expect.anything(),
+      expect.anything(),
+      'fleet-internal',
+      expect.objectContaining({
+        host_urls: ['http://test-internal.fr', 'http://test.fr'],
+      }),
+      { fromPreconfiguration: true, secretHashes: {} }
+    );
+  });
+
+  it('should update preconfigured fleet server hosts if proxy_id change', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
+      {
+        id: 'fleet-internal',
+        name: 'TEST_INTERNAL',
+        is_default: false,
+        is_internal: false,
+        host_urls: ['http://test-internal.fr'],
+        is_preconfigured: true,
+        proxy_id: 'proxy-test',
+      },
+    ]);
+
+    expect(mockedFleetServerHostService.create).not.toBeCalled();
+    expect(mockedFleetServerHostService.update).toBeCalledWith(
+      expect.anything(),
+      expect.anything(),
+      'fleet-internal',
+      expect.objectContaining({
+        proxy_id: 'proxy-test',
+      }),
+      { fromPreconfiguration: true, secretHashes: {} }
+    );
+  });
+
+  it('should update preconfigured fleet server hosts if preconfigured host exists and changed to have ssl', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
+      {
+        id: 'fleet-internal',
+        name: 'TEST_INTERNAL',
+        is_default: false,
+        is_internal: false,
+        host_urls: ['http://test-internal.fr'],
+        is_preconfigured: true,
+        ssl: {
+          key: 'unsecureKey1',
+          es_key: 'unsecureKey2',
+          agent_key: 'unsecureKey3',
+        },
+      },
+    ]);
+
+    expect(mockedFleetServerHostService.create).not.toBeCalled();
+    expect(mockedFleetServerHostService.update).toBeCalledWith(
+      expect.anything(),
+      expect.anything(),
+      'fleet-internal',
+      expect.objectContaining({
+        ssl: {
+          key: 'unsecureKey1',
+          es_key: 'unsecureKey2',
+          agent_key: 'unsecureKey3',
+        },
+      }),
+      expect.anything()
+    );
+  });
+
+  it('should update preconfigured fleet server hosts if preconfigured host exists and changed to have secrets', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
+      {
+        id: 'fleet-internal',
+        name: 'TEST_INTERNAL',
+        is_default: false,
+        is_internal: false,
+        host_urls: ['http://test-internal.fr'],
+        is_preconfigured: true,
+        secrets: {
+          ssl: {
+            key: 'unsecureKey1',
+            es_key: 'unsecureKey2',
+            agent_key: 'unsecureKey3',
+          },
+        },
+      },
+    ]);
+
+    expect(mockedFleetServerHostService.create).not.toBeCalled();
+    expect(mockedFleetServerHostService.update).toBeCalledWith(
+      expect.anything(),
+      expect.anything(),
+      'fleet-internal',
+      expect.objectContaining({
+        secrets: {
+          ssl: {
+            key: 'unsecureKey1',
+            es_key: 'unsecureKey2',
+            agent_key: 'unsecureKey3',
+          },
+        },
+      }),
+      expect.anything()
+    );
+  });
+  it('should update preconfigured fleet server hosts if preconfigured host with secrets exists and changes', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
+      {
+        id: 'fleet-with-secrets',
+        name: 'TEST_SECRETS',
+        is_default: false,
+        is_internal: false,
+        host_urls: ['http://test-internal.fr'],
+        is_preconfigured: true,
+        secrets: {
+          ssl: {
+            key: 'secretKey',
+            es_key: 'secretKey2',
+            agent_key: 'secretKey3',
+          },
+        },
+      },
+    ]);
+
+    expect(mockedFleetServerHostService.create).not.toBeCalled();
+    expect(mockedFleetServerHostService.update).toBeCalledWith(
+      expect.anything(),
+      expect.anything(),
+      'fleet-with-secrets',
+      expect.objectContaining({
+        secrets: {
+          ssl: {
+            key: 'secretKey',
+            es_key: 'secretKey2',
+            agent_key: 'secretKey3',
+          },
+        },
+      }),
+      expect.anything()
+    );
+  });
+
+  it('should not update preconfigured fleet server hosts if no fields changed', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
+      {
+        id: 'fleet-internal',
+        name: 'TEST_INTERNAL',
+        is_default: false,
+        is_internal: false,
+        host_urls: ['http://test-internal.fr'],
+        is_preconfigured: true,
+      },
+    ]);
+    expect(mockedFleetServerHostService.create).not.toBeCalled();
+    expect(mockedFleetServerHostService.update).not.toBeCalled();
+  });
+
+  it('should not update preconfigured fleet server hosts with secrets if no fields changed', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
+      {
+        id: 'fleet-with-secrets',
+        name: 'TEST_SECRETS',
+        is_default: false,
+        is_internal: false,
+        host_urls: ['http://test-internal.fr'],
+        is_preconfigured: true,
+        secrets: {
+          ssl: {
+            key: 'secretKey',
+          },
+        },
+      },
+    ]);
+    expect(mockedFleetServerHostService.create).not.toBeCalled();
+    expect(mockedFleetServerHostService.update).not.toBeCalled();
   });
 });

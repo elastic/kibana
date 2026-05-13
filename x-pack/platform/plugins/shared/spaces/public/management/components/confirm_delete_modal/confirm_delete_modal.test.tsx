@@ -30,6 +30,7 @@ describe('ConfirmDeleteModal', () => {
       )
     ).toMatchInlineSnapshot(`
       <EuiConfirmModal
+        aria-labelledby="generated-id"
         buttonColor="danger"
         cancelButtonText="Cancel"
         confirmButtonText="Delete space and all contents"
@@ -37,6 +38,11 @@ describe('ConfirmDeleteModal', () => {
         onCancel={[MockFunction]}
         onConfirm={[Function]}
         title="Delete space 'My Space'?"
+        titleProps={
+          Object {
+            "id": "generated-id",
+          }
+        }
       >
         <EuiText>
           <p>

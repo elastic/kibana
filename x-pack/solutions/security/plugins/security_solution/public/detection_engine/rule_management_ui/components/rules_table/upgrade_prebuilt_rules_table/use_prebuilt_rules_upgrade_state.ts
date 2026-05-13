@@ -15,7 +15,7 @@ import type {
 } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import { FieldUpgradeStateEnum } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import {
-  type FieldsDiff,
+  type ThreeWayFieldsDiff,
   type DiffableAllFields,
   type RuleUpgradeInfoForReview,
   ThreeWayDiffConflict,
@@ -134,12 +134,19 @@ export function usePrebuiltRulesUpgradeState(
           fieldState === FieldUpgradeStateEnum.SolvableConflict ||
           fieldState === FieldUpgradeStateEnum.NonSolvableConflict
       );
+      const hasNonSolvableFieldConflicts = Object.values(fieldsUpgradeState).some(
+        ({ state: fieldState }) => fieldState === FieldUpgradeStateEnum.NonSolvableConflict
+      );
 
       state[ruleUpgradeInfo.rule_id] = {
         ...ruleUpgradeInfo,
+        conflict: getWorstConflictLevelAmongFields(ruleUpgradeInfo.diff.fields),
         fieldsUpgradeState,
         hasUnresolvedConflicts: isRulesCustomizationEnabled
           ? hasRuleTypeChange || hasFieldConflicts
+          : false,
+        hasNonSolvableUnresolvedConflicts: isRulesCustomizationEnabled
+          ? hasRuleTypeChange || hasNonSolvableFieldConflicts
           : false,
       };
     }
@@ -158,7 +165,7 @@ const NON_UPGRADEABLE_DIFFABLE_FIELDS_SET: Readonly<Set<string>> = new Set(
 );
 
 function calcFieldsState(
-  fieldsDiff: FieldsDiff<Record<string, unknown>>,
+  fieldsDiff: ThreeWayFieldsDiff<Record<string, unknown>>,
   ruleResolvedConflicts: RuleResolvedConflicts
 ): FieldsUpgradeState {
   const fieldsState: FieldsUpgradeState = {};
@@ -205,4 +212,23 @@ function calcFieldsState(
   }
 
   return fieldsState;
+}
+
+function getWorstConflictLevelAmongFields(
+  fieldsDiff: ThreeWayFieldsDiff<Record<string, unknown>>
+): ThreeWayDiffConflict {
+  let mostSevereFieldConflict = ThreeWayDiffConflict.NONE;
+
+  for (const { conflict } of Object.values<{ conflict: ThreeWayDiffConflict }>(fieldsDiff)) {
+    if (conflict === ThreeWayDiffConflict.NON_SOLVABLE) {
+      // return early as there is no higher severity
+      return ThreeWayDiffConflict.NON_SOLVABLE;
+    }
+
+    if (conflict === ThreeWayDiffConflict.SOLVABLE) {
+      mostSevereFieldConflict = ThreeWayDiffConflict.SOLVABLE;
+    }
+  }
+
+  return mostSevereFieldConflict;
 }

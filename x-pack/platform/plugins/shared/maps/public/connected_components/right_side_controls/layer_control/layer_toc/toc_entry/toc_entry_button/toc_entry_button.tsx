@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { Component, Fragment, ReactNode } from 'react';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { ReactNode } from 'react';
+import React, { Component, Fragment } from 'react';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { EuiButtonEmpty, EuiIcon, EuiToolTip, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { type ILayer, INCOMPLETE_RESULTS_WARNING } from '../../../../../../classes/layers/layer';
-import { IVectorSource } from '../../../../../../classes/sources/vector_source';
+import type { IVectorSource } from '../../../../../../classes/sources/vector_source';
 import { isLayerGroup } from '../../../../../../classes/layers/layer_group';
 
 interface Footnote {
@@ -78,6 +79,7 @@ export class TOCEntryButton extends Component<Props, State> {
           type="error"
           color="danger"
           data-test-subj={`layerTocErrorIcon${this.props.escapedDisplayName}`}
+          aria-hidden={true}
         />
       );
       return isLayerGroup(this.props.layer)
@@ -97,7 +99,7 @@ export class TOCEntryButton extends Component<Props, State> {
 
     if (!this.props.layer.isVisible()) {
       return {
-        icon: <EuiIcon size="m" type="eyeClosed" />,
+        icon: <EuiIcon size="m" type="eyeSlash" aria-hidden={true} />,
         tooltipContent: i18n.translate('xpack.maps.layer.layerHiddenTooltip', {
           defaultMessage: `Layer is hidden.`,
         }),
@@ -109,7 +111,7 @@ export class TOCEntryButton extends Component<Props, State> {
       const minZoom = this.props.layer.getMinZoom();
       const maxZoom = this.props.layer.getMaxZoom();
       return {
-        icon: <EuiIcon size="m" type="expand" />,
+        icon: <EuiIcon size="m" type="maximize" aria-hidden={true} />,
         tooltipContent: i18n.translate('xpack.maps.layer.zoomFeedbackTooltip', {
           defaultMessage: `Layer is visible between zoom levels {minZoom} and {maxZoom}.`,
           values: { minZoom, maxZoom },
@@ -134,6 +136,7 @@ export class TOCEntryButton extends Component<Props, State> {
         type="warning"
         color="warning"
         data-test-subj={`layerTocWarningIcon${this.props.escapedDisplayName}`}
+        aria-hidden={true}
       />
     ) : (
       layerIcon
@@ -151,7 +154,7 @@ export class TOCEntryButton extends Component<Props, State> {
     const footnotes = [];
     if (this.props.isUsingSearch && this.props.layer.getQueryableIndexPatternIds().length) {
       footnotes.push({
-        icon: <EuiIcon color="subdued" type="filter" size="s" />,
+        icon: <EuiIcon color="subdued" type="filter" size="s" aria-hidden={true} />,
         message: i18n.translate('xpack.maps.layer.isUsingSearchMsg', {
           defaultMessage: 'Results narrowed by global search',
         }),
@@ -159,7 +162,7 @@ export class TOCEntryButton extends Component<Props, State> {
     }
     if (this.state.isFilteredByGlobalTime) {
       footnotes.push({
-        icon: <EuiIcon color="subdued" type="clock" size="s" />,
+        icon: <EuiIcon color="subdued" type="clock" size="s" aria-hidden={true} />,
         message: i18n.translate('xpack.maps.layer.isUsingTimeFilter', {
           defaultMessage: 'Results narrowed by global time',
         }),
@@ -171,7 +174,7 @@ export class TOCEntryButton extends Component<Props, State> {
       (source as IVectorSource).isFilterByMapBounds()
     ) {
       footnotes.push({
-        icon: <EuiIcon color="subdued" type="stop" size="s" />,
+        icon: <EuiIcon color="subdued" type="stop" size="s" aria-hidden={true} />,
         message: i18n.translate('xpack.maps.layer.isUsingBoundsFilter', {
           defaultMessage: 'Results narrowed by visible map area',
         }),

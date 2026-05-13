@@ -5,19 +5,11 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
-import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import React from 'react';
-import {
-  generateManageOrgMembersNavCard,
-  manageOrgMembersNavCardName,
-  SideNavComponent,
-} from './navigation';
-import {
+import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { from, map } from 'rxjs';
+import { generateManageOrgMembersNavCard, manageOrgMembersNavCardName } from './navigation';
+import type {
   ServerlessPluginSetup,
   ServerlessPluginSetupDependencies,
   ServerlessPluginStart,
@@ -46,71 +38,54 @@ export class ServerlessPlugin
     core: CoreStart,
     dependencies: ServerlessPluginStartDependencies
   ): ServerlessPluginStart {
-    core.chrome.setChromeStyle('project');
+    const { chrome } = core;
 
-    // Casting the "chrome.projects" service to an "internal" type: this is intentional to obscure the property from Typescript.
-    const { project } = core.chrome as InternalChromeStart;
+    // Casting the "chrome.project" service to an "internal" type: this is intentional to obscure the property from Typescript.
+    const { project } = chrome as InternalChromeStart;
     const { cloud } = dependencies;
 
+    chrome.setChromeStyle('project');
+
     if (cloud.serverless.projectName) {
-      project.setProjectName(cloud.serverless.projectName);
+      project.setKibanaName(cloud.serverless.projectName);
     }
-    project.setCloudUrls(cloud);
 
-    const activeNavigationNodes$ = project.getActiveNavigationNodes$();
-    const navigationTreeUi$ = project.getNavigationTreeUi$();
+    project.setCloudUrls(cloud.getUrls()); // Ensure the project has the non-privileged URLs immediately
 
-    core.chrome.navControls.registerRight({
-      order: 1,
-      mount: toMountPoint(
-        <KibanaRenderContextProvider {...core}>
-          <EuiButton
-            href="https://ela.st/serverless-feedback"
-            size={'s'}
-            color={'warning'}
-            iconType={'popout'}
-            iconSide={'right'}
-            target={'_blank'}
-          >
-            {i18n.translate('xpack.serverless.header.giveFeedbackBtn.label', {
-              defaultMessage: 'Give feedback',
-            })}
-          </EuiButton>
-        </KibanaRenderContextProvider>,
-        { ...core }
-      ),
+    // Wraps a single Promise — emits once when privileged URLs resolve, then completes.
+    // Privileged URL visibility (e.g., Members link gated on manage_security) is evaluated
+    // once at plugin start and not re-evaluated for the lifetime of the page.
+    const privilegedUrls$ = from(cloud.getPrivilegedUrls());
+
+    privilegedUrls$.subscribe((privilegedUrls) => {
+      if (Object.keys(privilegedUrls).length === 0) return;
+
+      project.setCloudUrls({ ...privilegedUrls, ...cloud.getUrls() }); // Merge the privileged URLs once available
     });
 
     return {
-      setSideNavComponentDeprecated: (sideNavigationComponent) =>
-        project.setSideNavComponent(sideNavigationComponent),
-      initNavigation: (id, navigationTree$, { panelContentProvider, dataTestSubj } = {}) => {
+      initNavigation: (id, navigationTree$) => {
         project.initNavigation(id, navigationTree$);
-        project.setSideNavComponent(() => (
-          <SideNavComponent
-            navProps={{
-              navigationTree$: navigationTreeUi$,
-              dataTestSubj,
-              panelContentProvider,
-            }}
-            deps={{
-              core,
-              activeNodes$: activeNavigationNodes$,
-            }}
-          />
-        ));
       },
       setBreadcrumbs: (breadcrumbs, params) => project.setBreadcrumbs(breadcrumbs, params),
-      setProjectHome: (homeHref: string) => project.setHome(homeHref),
-      getNavigationCards: (roleManagementEnabled, extendCardNavDefinitions) => {
-        if (!roleManagementEnabled) return extendCardNavDefinitions;
+      getNavigationCards$: (roleManagementEnabled, extendCardNavDefinitions) => {
+        return privilegedUrls$.pipe(
+          map((privilegedUrls) => {
+            if (!roleManagementEnabled) return extendCardNavDefinitions;
 
-        const manageOrgMembersNavCard = generateManageOrgMembersNavCard(cloud.usersAndRolesUrl);
-        if (extendCardNavDefinitions) {
-          extendCardNavDefinitions[manageOrgMembersNavCardName] = manageOrgMembersNavCard;
-          return extendCardNavDefinitions;
-        }
-        return { [manageOrgMembersNavCardName]: manageOrgMembersNavCard };
+            const { usersAndRolesUrl } = privilegedUrls;
+            if (!usersAndRolesUrl) return extendCardNavDefinitions;
+
+            const manageOrgMembersNavCard = generateManageOrgMembersNavCard(usersAndRolesUrl);
+            if (extendCardNavDefinitions) {
+              return {
+                ...extendCardNavDefinitions,
+                [manageOrgMembersNavCardName]: manageOrgMembersNavCard,
+              };
+            }
+            return { [manageOrgMembersNavCardName]: manageOrgMembersNavCard };
+          })
+        );
       },
     };
   }

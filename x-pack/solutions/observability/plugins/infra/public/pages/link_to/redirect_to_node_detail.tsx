@@ -12,7 +12,7 @@ import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import {
   ASSET_DETAILS_LOCATOR_ID,
   type AssetDetailsLocatorParams,
-  SupportedAssetTypes,
+  SupportedEntityTypes,
 } from '@kbn/observability-shared-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { type AssetDetailsUrlState } from '../../components/asset_details/types';
@@ -60,7 +60,7 @@ const getNodeDetailSearch = (queryParams: URLSearchParams) => {
 };
 
 export const getSearchParams = (nodeType: InventoryItemType, queryParams: URLSearchParams) =>
-  Object.values(SupportedAssetTypes).includes(nodeType as SupportedAssetTypes)
+  Object.values(SupportedEntityTypes).includes(nodeType as SupportedEntityTypes)
     ? getAssetDetailsQueryParams(queryParams)
     : getNodeDetailSearch(queryParams);
 
@@ -80,8 +80,8 @@ export const RedirectToNodeDetail = () => {
 
     baseLocator?.navigate({
       ...search,
-      assetType: nodeType,
-      assetId: nodeId,
+      entityType: nodeType,
+      entityId: nodeId,
       state: location.state as SerializableRecord,
     });
   }, [baseLocator, location.search, location.state, nodeId, nodeType]);

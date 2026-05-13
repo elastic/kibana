@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { EntityDefinition } from '@kbn/entities-schema';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { EntityDefinition } from '@kbn/entities-schema';
 import { generateLatestIngestPipelineId } from './helpers/generate_component_id';
 import { retryTransientEsErrors } from './helpers/retry';
 import { generateLatestProcessors } from './ingest_pipeline/generate_latest_processors';
@@ -34,7 +34,8 @@ export async function createAndInstallIngestPipelines(
     return [{ type: 'ingest_pipeline', id: latestId }];
   } catch (e) {
     logger.error(
-      `Cannot create entity latest ingest pipelines for [${definition.id}] entity definition`
+      `Cannot create entity latest ingest pipelines for [${definition.id}] entity definition`,
+      { error: e }
     );
     throw e;
   }

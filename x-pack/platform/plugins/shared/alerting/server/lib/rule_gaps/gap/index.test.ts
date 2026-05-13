@@ -7,7 +7,7 @@
 
 import { Gap } from '.'; // Adjust this import path as needed
 import { gapStatus } from '../../../../common/constants'; // Adjust as needed
-import { Interval, StringInterval } from '../types'; // Adjust as needed
+import type { Interval, StringInterval } from '../../../application/gaps/types/intervals'; // Adjust as needed
 
 // Helper function to create Interval objects from ISO strings
 function toInterval(gte: string, lte: string): Interval {
@@ -25,7 +25,7 @@ describe('Gap Class Tests', () => {
   };
 
   it('initializes with no filled or in-progress intervals', () => {
-    const gap = new Gap({ range: baseRange });
+    const gap = new Gap({ ruleId: 'some-rule-id', range: baseRange });
     expect(gap.status).toBe(gapStatus.UNFILLED);
     expect(gap.filledIntervals).toHaveLength(0);
     expect(gap.inProgressIntervals).toHaveLength(0);
@@ -37,7 +37,7 @@ describe('Gap Class Tests', () => {
   });
 
   it('initializes fully filled gap', () => {
-    const gap = new Gap({ range: baseRange, filledIntervals: [baseRange] });
+    const gap = new Gap({ ruleId: 'some-rule-id', range: baseRange, filledIntervals: [baseRange] });
     expect(gap.filledIntervals).toHaveLength(1);
     expect(gap.filledGapDurationMs).toBe(HOUR_MS);
     expect(gap.unfilledGapDurationMs).toBe(0);
@@ -50,7 +50,11 @@ describe('Gap Class Tests', () => {
       gte: '2024-01-01T00:15:00.000Z',
       lte: '2024-01-01T00:30:00.000Z',
     };
-    const gap = new Gap({ range: baseRange, filledIntervals: [partialFill] });
+    const gap = new Gap({
+      ruleId: 'some-rule-id',
+      range: baseRange,
+      filledIntervals: [partialFill],
+    });
     const filledDuration = (30 - 15) * 60 * 1000; // 15 min
 
     expect(gap.filledGapDurationMs).toBe(filledDuration);
@@ -64,7 +68,11 @@ describe('Gap Class Tests', () => {
       gte: '2024-01-01T00:40:00.000Z',
       lte: '2024-01-01T00:50:00.000Z',
     };
-    const gap = new Gap({ range: baseRange, inProgressIntervals: [inProgress] });
+    const gap = new Gap({
+      ruleId: 'some-rule-id',
+      range: baseRange,
+      inProgressIntervals: [inProgress],
+    });
 
     const inProgressDuration = (50 - 40) * 60 * 1000; // 10 min
     expect(gap.inProgressGapDurationMs).toBe(inProgressDuration);
@@ -78,7 +86,7 @@ describe('Gap Class Tests', () => {
       gte: new Date('2023-12-31T23:50:00.000Z'),
       lte: new Date('2024-01-01T01:10:00.000Z'),
     };
-    const gap = new Gap({ range: baseRange });
+    const gap = new Gap({ ruleId: 'some-rule-id', range: baseRange });
     gap.fillGap(extendedInterval);
     // Extended interval should effectively fill only the baseRange
     expect(gap.filledGapDurationMs).toBe(HOUR_MS);
@@ -86,7 +94,7 @@ describe('Gap Class Tests', () => {
   });
 
   it('filling the gap after initialization updates the state', () => {
-    const gap = new Gap({ range: baseRange });
+    const gap = new Gap({ ruleId: 'some-rule-id', range: baseRange });
     const oneMinute = toInterval('2024-01-01T00:00:00.000Z', '2024-01-01T00:01:00.000Z');
 
     gap.fillGap(oneMinute);
@@ -100,7 +108,7 @@ describe('Gap Class Tests', () => {
       gte: '2024-01-01T00:00:00.000Z',
       lte: '2024-01-01T00:10:00.000Z',
     };
-    const gap = new Gap({ range: baseRange, filledIntervals: [filled] });
+    const gap = new Gap({ ruleId: 'some-rule-id', range: baseRange, filledIntervals: [filled] });
     const filledDuration = 10 * 60 * 1000;
 
     // Add in-progress that overlaps from 00:05 - 00:15
@@ -115,7 +123,7 @@ describe('Gap Class Tests', () => {
   });
 
   it('subsequent fill operations remove portions of in-progress intervals', () => {
-    const gap = new Gap({ range: baseRange });
+    const gap = new Gap({ ruleId: 'some-rule-id', range: baseRange });
     // Add in-progress for 00:20 - 00:30
     gap.addInProgress(toInterval('2024-01-01T00:20:00.000Z', '2024-01-01T00:30:00.000Z'));
     expect(gap.inProgressGapDurationMs).toBe(10 * 60 * 1000);
@@ -129,7 +137,7 @@ describe('Gap Class Tests', () => {
   });
 
   it('filling entire gap in multiple steps leads to FILLED status', () => {
-    const gap = new Gap({ range: baseRange });
+    const gap = new Gap({ ruleId: 'some-rule-id', range: baseRange });
 
     // Fill first half
     gap.fillGap(toInterval('2024-01-01T00:00:00.000Z', '2024-01-01T00:30:00.000Z'));
@@ -151,6 +159,7 @@ describe('Gap Class Tests', () => {
       lte: '2024-01-01T00:30:00.000Z',
     };
     const gap = new Gap({
+      ruleId: 'some-rule-id',
       range: baseRange,
       filledIntervals: [filled],
       inProgressIntervals: [inProgress],
@@ -170,7 +179,7 @@ describe('Gap Class Tests', () => {
       gte: '2024-01-01T00:10:00.000Z',
       lte: '2024-01-01T00:20:00.000Z',
     };
-    const gap = new Gap({ range: baseRange, filledIntervals: [filled] });
+    const gap = new Gap({ ruleId: 'some-rule-id', range: baseRange, filledIntervals: [filled] });
 
     const esObject = gap.toObject();
     expect(esObject.range).toEqual(baseRange);
@@ -183,7 +192,7 @@ describe('Gap Class Tests', () => {
   });
 
   it('returns correct ES object via toObject() after filling', () => {
-    const gap = new Gap({ range: baseRange });
+    const gap = new Gap({ ruleId: 'some-rule-id', range: baseRange });
 
     gap.addInProgress({
       gte: new Date('2024-01-01T00:10:00.000Z'),
@@ -212,7 +221,75 @@ describe('Gap Class Tests', () => {
       _seq_no: 1,
       _primary_term: 1,
     };
-    const gap = new Gap({ range: baseRange, internalFields });
+    const gap = new Gap({ ruleId: 'some-rule-id', range: baseRange, internalFields });
     expect(gap.internalFields).toEqual(internalFields);
+  });
+
+  describe('incrementFailedAutoFillAttempts', () => {
+    it('should initialize failedAutoFillAttempts to 0 when not provided', () => {
+      const gap = new Gap({ ruleId: 'some-rule-id', range: baseRange });
+      expect(gap.failedAutoFillAttempts).toBe(0);
+    });
+
+    it('should use provided failedAutoFillAttempts value during initialization', () => {
+      const gap = new Gap({
+        ruleId: 'some-rule-id',
+        range: baseRange,
+        failedAutoFillAttempts: 5,
+      });
+      expect(gap.failedAutoFillAttempts).toBe(5);
+    });
+
+    it('should increment failedAutoFillAttempts from not provided during initialization to 1', () => {
+      const gap = new Gap({ ruleId: 'some-rule-id', range: baseRange });
+
+      gap.incrementFailedAutoFillAttempts();
+      expect(gap.failedAutoFillAttempts).toBe(1);
+    });
+
+    it('should increment failedAutoFillAttempts multiple times', () => {
+      const gap = new Gap({ ruleId: 'some-rule-id', range: baseRange });
+
+      gap.incrementFailedAutoFillAttempts();
+      expect(gap.failedAutoFillAttempts).toBe(1);
+
+      gap.incrementFailedAutoFillAttempts();
+      expect(gap.failedAutoFillAttempts).toBe(2);
+
+      gap.incrementFailedAutoFillAttempts();
+      expect(gap.failedAutoFillAttempts).toBe(3);
+    });
+
+    it('should increment failedAutoFillAttempts when initialized with non-zero value', () => {
+      const gap = new Gap({
+        ruleId: 'some-rule-id',
+        range: baseRange,
+        failedAutoFillAttempts: 10,
+      });
+      expect(gap.failedAutoFillAttempts).toBe(10);
+
+      gap.incrementFailedAutoFillAttempts();
+      expect(gap.failedAutoFillAttempts).toBe(11);
+    });
+
+    it('should include failedAutoFillAttempts in toObject() output', () => {
+      const gap = new Gap({ ruleId: 'some-rule-id', range: baseRange });
+
+      gap.incrementFailedAutoFillAttempts();
+
+      const esObject = gap.toObject();
+      expect(esObject.failed_auto_fill_attempts).toBe(1);
+    });
+
+    it('should persist failedAutoFillAttempts value in toObject() when initialized', () => {
+      const gap = new Gap({
+        ruleId: 'some-rule-id',
+        range: baseRange,
+        failedAutoFillAttempts: 7,
+      });
+
+      const esObject = gap.toObject();
+      expect(esObject.failed_auto_fill_attempts).toBe(7);
+    });
   });
 });

@@ -9,54 +9,59 @@
 
 import { BehaviorSubject, Subject } from 'rxjs';
 
-import { DataViewField } from '@kbn/data-views-plugin/common';
-
-import { PublishingSubject } from '@kbn/presentation-publishing';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE, OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import type {
   OptionsListDisplaySettings,
-  OptionsListSearchTechnique,
-  OptionsListSelection,
   OptionsListSortingType,
-  OptionsListSuggestions,
-} from '../../../../common/options_list';
-import { MIN_OPTIONS_LIST_REQUEST_SIZE } from '../options_list_control/constants';
+  OptionsListSelection,
+} from '@kbn/controls-schemas';
 
-export const getOptionsListMocks = () => {
-  const selectedOptions$ = new BehaviorSubject<OptionsListSelection[] | undefined>(undefined);
-  const exclude$ = new BehaviorSubject<boolean | undefined>(undefined);
-  const existsSelected$ = new BehaviorSubject<boolean | undefined>(undefined);
+import { initializeLabelManager } from '../../control_labels';
+import { initializeEditorStateManager } from '../options_list_control/editor_state_manager';
+import { initializeSelectionsManager } from '../options_list_control/selections_manager';
+import { initializeTemporayStateManager } from '../options_list_control/temporay_state_manager';
+import type { DSLOptionsListComponentApi } from '../options_list_control/types';
+
+export const getOptionsListContextMock = () => {
+  const editorStateManager = initializeEditorStateManager(DEFAULT_DSL_OPTIONS_LIST_STATE);
+  const selectionsManager = initializeSelectionsManager(DEFAULT_DSL_OPTIONS_LIST_STATE);
+  const temporaryStateManager = initializeTemporayStateManager<OptionsListSelection>();
+
+  const fieldName$ = new BehaviorSubject<string>('field');
+  const labelManager = initializeLabelManager(
+    { title: 'Test', fieldName: 'field' },
+    { fieldName$ },
+    'fieldName'
+  );
+  const field$ = new BehaviorSubject<DataViewField | undefined>({
+    type: 'string',
+  } as DataViewField);
+  const sort$ = new BehaviorSubject<OptionsListSortingType>(DEFAULT_DSL_OPTIONS_LIST_STATE.sort);
   return {
-    api: {
+    componentApi: {
+      type: OPTIONS_LIST_CONTROL,
+      ...editorStateManager.api,
+      ...selectionsManager.api,
+      ...temporaryStateManager.api,
+      ...labelManager.api,
       uuid: 'testControl',
-      field$: new BehaviorSubject<DataViewField | undefined>({ type: 'string' } as DataViewField),
-      availableOptions$: new BehaviorSubject<OptionsListSuggestions | undefined>(undefined),
-      invalidSelections$: new BehaviorSubject<Set<OptionsListSelection>>(new Set([])),
-      totalCardinality$: new BehaviorSubject<number>(0),
-      dataLoading$: new BehaviorSubject<boolean>(false),
-      parentApi: {
-        allowExpensiveQueries$: new BehaviorSubject<boolean>(true),
+      field$,
+      fieldName$,
+      sort$,
+      setSort: (next: OptionsListSortingType) => {
+        sort$.next(next);
       },
+      parentApi: {},
       fieldFormatter: new BehaviorSubject((value: string | number) => String(value)),
       makeSelection: jest.fn(),
-      setExclude: (next: boolean | undefined) => exclude$.next(next),
       loadMoreSubject: new Subject<void>(),
-    },
-    stateManager: {
-      searchString: new BehaviorSubject<string>(''),
-      searchStringValid: new BehaviorSubject<boolean>(true),
-      fieldName: new BehaviorSubject<string>('field'),
-      exclude: exclude$ as PublishingSubject<boolean | undefined>,
-      existsSelected: existsSelected$ as PublishingSubject<boolean | undefined>,
-      sort: new BehaviorSubject<OptionsListSortingType | undefined>(undefined),
-      selectedOptions: selectedOptions$ as PublishingSubject<OptionsListSelection[] | undefined>,
-      searchTechnique: new BehaviorSubject<OptionsListSearchTechnique | undefined>(undefined),
-      requestSize: new BehaviorSubject<number>(MIN_OPTIONS_LIST_REQUEST_SIZE),
-    },
+    } as unknown as Required<DSLOptionsListComponentApi>,
     displaySettings: {} as OptionsListDisplaySettings,
-    // setSelectedOptions and setExistsSelected are not exposed via API because
-    // they are not used by components
-    // they are needed in tests however so expose them as top level keys
-    setSelectedOptions: (next: OptionsListSelection[] | undefined) => selectedOptions$.next(next),
-    setExistsSelected: (next: boolean | undefined) => existsSelected$.next(next),
+    testOnlyMethods: {
+      setField: (next: DataViewField | undefined) => {
+        field$.next(next);
+      },
+    },
   };
 };

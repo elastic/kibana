@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
-import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { DataViewsService } from '../../../common';
+import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import type { DataViewsService } from '../../../common';
 import { handleErrors } from './util/handle_errors';
 import { dataViewSpecSchema } from '../schema';
-import { DataViewSpecRestResponse } from '../route_types';
+import type { DataViewSpecRestResponse } from '../route_types';
 import type {
   DataViewsServerPluginStartDependencies,
   DataViewsServerPluginStart,
@@ -24,8 +24,10 @@ import {
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
   INITIAL_REST_VERSION,
+  GET_DATA_VIEW_SUMMARY,
   GET_DATA_VIEW_DESCRIPTION,
 } from '../../constants';
+import { toApiSpec } from './util/to_api_spec';
 
 interface GetDataViewArgs {
   dataViewsService: DataViewsService;
@@ -45,7 +47,7 @@ export const getDataView = async ({
 };
 
 const getDataViewRouteFactory =
-  (path: string, serviceKey: string, description?: string) =>
+  (path: string, serviceKey: string, summary?: string, description?: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -54,82 +56,93 @@ const getDataViewRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.get({ path, access: 'public', description }).addVersion(
-      {
-        version: INITIAL_REST_VERSION,
+    router.versioned
+      .get({
+        path,
+        access: 'public',
+        summary,
+        description,
         security: {
           authz: {
             enabled: false,
             reason: 'Authorization provided by saved objects client',
           },
         },
-        validate: {
-          request: {
-            params: schema.object(
-              {
-                id: schema.string({
-                  minLength: 1,
-                  maxLength: 1_000,
-                }),
+      })
+      .addVersion(
+        {
+          version: INITIAL_REST_VERSION,
+          validate: {
+            request: {
+              params: schema.object(
+                {
+                  id: schema.string({
+                    minLength: 1,
+                    maxLength: 1_000,
+                    meta: { description: 'The unique identifier of the data view to retrieve.' },
+                  }),
+                },
+                { unknowns: 'allow' }
+              ),
+            },
+            response: {
+              200: {
+                body: () =>
+                  schema.object({
+                    [serviceKey]: dataViewSpecSchema,
+                  }),
               },
-              { unknowns: 'allow' }
-            ),
-          },
-          response: {
-            200: {
-              body: () =>
-                schema.object({
-                  [serviceKey]: dataViewSpecSchema,
-                }),
             },
           },
         },
-      },
-      router.handleLegacyErrors(
-        handleErrors(async (ctx, req, res) => {
-          const core = await ctx.core;
-          const savedObjectsClient = core.savedObjects.client;
-          const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-          const [, , { dataViewsServiceFactory }] = await getStartServices();
-          const dataViewsService = await dataViewsServiceFactory(
-            savedObjectsClient,
-            elasticsearchClient,
-            req
-          );
-          const id = req.params.id;
+        router.handleLegacyErrors(
+          handleErrors(async (ctx, req, res) => {
+            const core = await ctx.core;
+            const savedObjectsClient = core.savedObjects.client;
+            const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
+            const [, , { dataViewsServiceFactory }] = await getStartServices();
+            const dataViewsService = await dataViewsServiceFactory(
+              savedObjectsClient,
+              elasticsearchClient,
+              req
+            );
+            const id = req.params.id;
 
-          const dataView = await getDataView({
-            dataViewsService,
-            usageCollection,
-            counterName: `${req.route.method} ${path}`,
-            id,
-          });
+            const dataView = await getDataView({
+              dataViewsService,
+              usageCollection,
+              counterName: `${req.route.method} ${path}`,
+              id,
+            });
 
-          const responseBody: Record<string, DataViewSpecRestResponse> = {
-            [serviceKey]: {
-              ...(await dataView.toSpec({ fieldParams: { fieldName: ['*'] } })),
-              namespaces: dataView.namespaces,
-            },
-          };
+            const responseBody: Record<string, DataViewSpecRestResponse> = {
+              [serviceKey]: {
+                ...toApiSpec(await dataView.toSpec({ fieldParams: { fieldName: ['*'] } })),
+                namespaces: dataView.namespaces,
+              },
+            };
 
-          return res.ok({
-            headers: {
-              'content-type': 'application/json',
-            },
-            body: responseBody,
-          });
-        })
-      )
-    );
+            return res.ok({
+              headers: {
+                'content-type': 'application/json',
+              },
+              body: responseBody,
+            });
+          })
+        )
+      );
   };
 
 export const registerGetDataViewRoute = getDataViewRouteFactory(
   SPECIFIC_DATA_VIEW_PATH,
   SERVICE_KEY,
+  GET_DATA_VIEW_SUMMARY,
   GET_DATA_VIEW_DESCRIPTION
 );
 
 export const registerGetDataViewRouteLegacy = getDataViewRouteFactory(
   SPECIFIC_DATA_VIEW_PATH_LEGACY,
-  SERVICE_KEY_LEGACY
+  SERVICE_KEY_LEGACY,
+  GET_DATA_VIEW_SUMMARY,
+  'Deprecated in 8.0.0. Use the data_views/data_view/{id} endpoint instead.'
 );

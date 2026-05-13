@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
-import { EuiBreadcrumb } from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import { useEffect } from 'react';
+import type { EuiBreadcrumb } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
-import { Index } from '../../../../../../common';
-import { IndexDetailsTab, IndexDetailsTabId } from '../../../../../../common/constants';
+import type { Index } from '../../../../../../common';
+import { type IndexDetailsTab, type IndexDetailsTabId } from '../../../../../../common/constants';
 import { useAppContext } from '../../../../app_context';
-import { DetailsPageOverview } from './details_page_overview';
 
 interface Props {
   tabs: IndexDetailsTab[];
@@ -19,19 +20,18 @@ interface Props {
   index: Index;
 }
 export const DetailsPageTab: FunctionComponent<Props> = ({ tabs, tab, index }) => {
-  const selectedTab = tabs.find((tabConfig) => tabConfig.id === tab);
+  const effectiveTab = tabs[0]; // Set the overview tab as the fallback/default tab
+  const selectedTab = tabs.find((tabConfig) => tabConfig.id === tab) ?? effectiveTab;
   const {
     core: { getUrlForApp },
   } = useAppContext();
+
+  const { euiTheme } = useEuiTheme();
 
   useEffect(() => {
     const breadcrumb: EuiBreadcrumb = selectedTab?.breadcrumb ?? { text: selectedTab?.name };
     breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indexDetails, breadcrumb);
   }, [selectedTab]);
 
-  return selectedTab ? (
-    selectedTab.renderTabContent({ index, getUrlForApp })
-  ) : (
-    <DetailsPageOverview indexDetails={index} />
-  );
+  return selectedTab.renderTabContent({ index, getUrlForApp, euiTheme });
 };

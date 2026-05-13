@@ -8,13 +8,11 @@
 import type { EuiPageHeaderProps } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { enableAgentExplorerView } from '@kbn/observability-plugin/public';
 import React from 'react';
 import type { Environment } from '../../../../common/environment_rt';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useDefaultEnvironment } from '../../../hooks/use_default_environment';
-import { BetaBadge } from '../../shared/beta_badge';
 import type { ApmRouter } from '../apm_route_config';
 import { ApmMainTemplate } from './apm_main_template';
 import { useApmFeatureFlag } from '../../../hooks/use_apm_feature_flag';
@@ -61,7 +59,6 @@ export function SettingsTemplate({ children, selectedTab }: Props) {
 
   return (
     <ApmMainTemplate
-      environmentFilter={false}
       pageHeader={{
         tabs,
         pageTitle: i18n.translate('xpack.apm.settings.title', {
@@ -92,8 +89,6 @@ function getTabs({
   indicesAvailable: boolean;
 }) {
   const canReadMlJobs = !!core.application.capabilities.ml?.canGetJobs;
-
-  const agentExplorerEnabled = core.uiSettings.get<boolean>(enableAgentExplorerView, true);
 
   const tabs: Tab[] = [
     {
@@ -127,8 +122,6 @@ function getTabs({
           serviceName: '',
         },
       }),
-      append: <BetaBadge icon="beta" />,
-      hidden: !agentExplorerEnabled,
     },
     {
       key: 'agent-keys',

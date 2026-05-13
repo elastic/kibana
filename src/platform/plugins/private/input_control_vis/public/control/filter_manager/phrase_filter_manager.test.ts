@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import expect from '@kbn/expect';
 
-import { FilterManager as QueryFilterManager, DataViewsContract } from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { FilterManager as QueryFilterManager } from '@kbn/data-plugin/public';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { PhraseFilterManager } from './phrase_filter_manager';
 
 describe('PhraseFilterManager', function () {

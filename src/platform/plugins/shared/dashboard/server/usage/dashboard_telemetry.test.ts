@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedDashboardPanel } from '../dashboard_saved_object';
-import { getEmptyDashboardData, collectPanelsByType } from './dashboard_telemetry';
-import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import type { SavedDashboardPanel } from '../dashboard_saved_object';
+import {
+  getEmptyDashboardData,
+  collectPanelsByType,
+  collectSectionsAndAccessControl,
+} from './dashboard_telemetry';
+import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
+import type { DashboardHit } from './types';
 
 const visualizationType1ByValue = {
   embeddableConfig: {
@@ -185,5 +190,41 @@ describe('dashboard telemetry', () => {
     expect(collectorData.panels.by_type.visualization.total).toBe(3);
     expect(collectorData.panels.by_type.visualization.by_value).toBe(2);
     expect(collectorData.panels.by_type.visualization.by_reference).toBe(1);
+  });
+
+  describe('collectDashboardInfo', () => {
+    const savedDashboard = {
+      attributes: {
+        title: 'Write Restricted Dashboard',
+        description: '',
+        kibanaSavedObjectMeta: {},
+        panelsJSON: '[]',
+        optionsJSON: '{}',
+      },
+      references: [],
+    } as DashboardHit;
+
+    it('should collect access mode from dashboard with accessControl', () => {
+      const accessControlledDashboard = {
+        ...savedDashboard,
+        accessControl: {
+          owner: 'tom_bombadil',
+          accessMode: 'write_restricted',
+        },
+      } as DashboardHit;
+      const collectorData = getEmptyDashboardData();
+      collectSectionsAndAccessControl(accessControlledDashboard, collectorData);
+
+      expect(collectorData.access_mode).toEqual({
+        write_restricted: { total: 1 },
+      });
+    });
+
+    it('should skip access mode collection for dashboard without accessControl', () => {
+      const collectorData = getEmptyDashboardData();
+      collectSectionsAndAccessControl(savedDashboard, collectorData);
+
+      expect(collectorData.access_mode).toEqual({});
+    });
   });
 });

@@ -10,7 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { ALERT_EVENTS_FIELDS } from '@kbn/alerts-as-data-utils';
 import { ruleRegistrySearchStrategyProvider } from './search_strategy';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
-import { SearchStrategyDependencies } from '@kbn/data-plugin/server';
+import type { SearchStrategyDependencies } from '@kbn/data-plugin/server';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
@@ -292,6 +292,9 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
 
     expect(data.search.searchAsInternalUser.search).toHaveBeenCalled();
     expect(searchStrategySearch).not.toHaveBeenCalled();
+    expect((data.search.searchAsInternalUser.search as jest.Mock).mock.calls[0][1]).toEqual(
+      options
+    );
   });
 
   it('should use scoped user when requesting siem alerts as RBAC is not applied', async () => {
@@ -314,6 +317,36 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
 
     expect(data.search.searchAsInternalUser.search as jest.Mock).not.toHaveBeenCalled();
     expect(searchStrategySearch).toHaveBeenCalled();
+    expect(searchStrategySearch.mock.calls[0][1]).toEqual(options);
+  });
+
+  it('forwards provided project routing for siem requests', async () => {
+    const request: RuleRegistrySearchRequest = {
+      ruleTypeIds: ['siem.esqlRule'],
+    };
+    const options = {
+      projectRouting: '_alias:*',
+    };
+    const deps = {
+      request: {},
+    };
+
+    getAuthorizedRuleTypesMock.mockResolvedValue([]);
+    getAlertIndicesAliasMock.mockReturnValue(['security-siem']);
+
+    const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
+
+    await lastValueFrom(
+      strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
+    );
+
+    expect(searchStrategySearch).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({
+        projectRouting: '_alias:*',
+      }),
+      deps
+    );
   });
 
   it('should support pagination', async () => {
@@ -666,6 +699,15 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
                 ],
               },
             },
+            Object {
+              "bool": Object {
+                "must_not": Object {
+                  "term": Object {
+                    "kibana.alert.status": "delayed",
+                  },
+                },
+              },
+            },
           ],
         },
       }
@@ -711,9 +753,155 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
                 ],
               },
             },
+            Object {
+              "bool": Object {
+                "must_not": Object {
+                  "term": Object {
+                    "kibana.alert.status": "delayed",
+                  },
+                },
+              },
+            },
           ],
         },
       }
     `);
+  });
+
+  it('passes the min_score if minScore is provided', async () => {
+    const minScore = 0.5;
+    const request: RuleRegistrySearchRequest = {
+      ruleTypeIds: ['siem.esqlRule'],
+      minScore,
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+    getAuthorizedRuleTypesMock.mockResolvedValue([]);
+    getAlertIndicesAliasMock.mockReturnValue(['security-siem']);
+
+    const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
+
+    await lastValueFrom(
+      strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
+    );
+
+    const arg0 = searchStrategySearch.mock.calls[0][0];
+    expect(arg0.params.body.fields.length).toEqual(
+      // +2 because of fields.push({ field: 'kibana.alert.*', include_unmapped: false }); and
+      // fields.push({ field: 'signal.*', include_unmapped: false });
+      ALERT_EVENTS_FIELDS.length + 2
+    );
+
+    expect.arrayContaining([
+      expect.objectContaining({
+        x: 2,
+        y: 3,
+      }),
+    ]);
+
+    expect(arg0).toEqual(
+      expect.objectContaining({
+        id: undefined,
+        params: expect.objectContaining({
+          allow_no_indices: true,
+          body: expect.objectContaining({
+            _source: false,
+            fields: expect.arrayContaining([
+              expect.objectContaining({
+                field: '@timestamp',
+                include_unmapped: true,
+              }),
+            ]),
+            from: 0,
+            min_score: minScore,
+            size: 1000,
+            sort: [],
+          }),
+          ignore_unavailable: true,
+          index: ['security-siem'],
+        }),
+      })
+    );
+  });
+
+  it('passes track_scores if trackScores is provided', async () => {
+    const request: RuleRegistrySearchRequest = {
+      ruleTypeIds: ['siem.esqlRule'],
+      trackScores: true,
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+    getAuthorizedRuleTypesMock.mockResolvedValue([]);
+    getAlertIndicesAliasMock.mockReturnValue(['security-siem']);
+
+    const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
+
+    await lastValueFrom(
+      strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
+    );
+
+    const arg0 = searchStrategySearch.mock.calls[0][0];
+
+    expect(arg0).toEqual(
+      expect.objectContaining({
+        id: undefined,
+        params: expect.objectContaining({
+          allow_no_indices: true,
+          body: expect.objectContaining({
+            _source: false,
+            fields: expect.arrayContaining([
+              expect.objectContaining({
+                field: '@timestamp',
+                include_unmapped: true,
+              }),
+            ]),
+            from: 0,
+            size: 1000,
+            sort: [],
+            track_scores: true,
+          }),
+          ignore_unavailable: true,
+          index: ['security-siem'],
+        }),
+      })
+    );
+  });
+
+  it('removes internally managed rule types', async () => {
+    const request: RuleRegistrySearchRequest = {
+      ruleTypeIds: ['.es-query', '.internally-managed', '.not-internally-managed'],
+      trackScores: true,
+    };
+
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    getAuthorizedRuleTypesMock.mockResolvedValue([]);
+    getAlertIndicesAliasMock.mockReturnValue(['security-siem']);
+    alerting.listTypes.mockReturnValue(
+      // @ts-expect-error: rule type properties are not needed for the test
+      new Map([
+        ['.es-query', {}],
+        ['.internally-managed', { internallyManaged: true }],
+        ['.not-internally-managed', { internallyManaged: false }],
+      ])
+    );
+
+    const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
+
+    await lastValueFrom(
+      strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
+    );
+
+    expect(authorizationMock.getAllAuthorizedRuleTypesFindOperation).toHaveBeenCalledWith({
+      authorizationEntity: 'alert',
+      ruleTypeIds: ['.es-query', '.not-internally-managed'],
+    });
   });
 });

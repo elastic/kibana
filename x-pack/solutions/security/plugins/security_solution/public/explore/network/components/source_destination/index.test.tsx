@@ -45,6 +45,25 @@ import {
   NETWORK_PROTOCOL_FIELD_NAME,
   NETWORK_TRANSPORT_FIELD_NAME,
 } from './field_names';
+import { SecurityCellActions } from '../../../../common/components/cell_actions';
+
+jest.mock('../../../../common/components/cell_actions', () => {
+  return {
+    SecurityCellActions: jest.fn(),
+    CellActionsMode: {
+      HOVER_DOWN: 'hover-down',
+      HOVER_RIGHT: 'hover-right',
+      INLINE: 'inline',
+    },
+    SecurityCellActionsTrigger: {
+      DEFAULT: 'default',
+    },
+  };
+});
+
+const MockedSecurityCellActions = jest.fn(({ children }) => {
+  return <div data-test-subj="mock-security-cell-actions">{children}</div>;
+});
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -58,6 +77,7 @@ jest.mock('@elastic/eui', () => {
 
 const getSourceDestinationInstance = () => (
   <SourceDestination
+    scopeId="some_scope"
     contextId="test"
     destinationBytes={asArrayIfExists(get(DESTINATION_BYTES_FIELD_NAME, getMockNetflowData()))}
     destinationGeoContinentName={asArrayIfExists(
@@ -118,6 +138,10 @@ jest.mock('react-router-dom', () => {
 });
 
 describe('SourceDestination', () => {
+  beforeEach(() => {
+    (SecurityCellActions as unknown as jest.Mock).mockImplementation(MockedSecurityCellActions);
+  });
+
   test('renders correctly against snapshot', () => {
     const { asFragment } = render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
     expect(asFragment).toMatchSnapshot();
@@ -316,5 +340,18 @@ describe('SourceDestination', () => {
     render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(screen.getByText('tcp')).toBeInTheDocument();
+  });
+
+  test('should passing correct scopeId to cell actions', () => {
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+
+    expect(MockedSecurityCellActions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metadata: expect.objectContaining({
+          scopeId: 'some_scope',
+        }),
+      }),
+      {}
+    );
   });
 });

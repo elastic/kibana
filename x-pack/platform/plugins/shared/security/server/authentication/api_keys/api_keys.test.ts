@@ -19,6 +19,7 @@ import { APIKeys } from './api_keys';
 import type { SecurityLicense } from '../../../common';
 import { ALL_SPACES_ID } from '../../../common/constants';
 import { licenseMock } from '../../../common/licensing/index.mock';
+import { uiamServiceMock } from '../../uiam/uiam_service.mock';
 
 const encodeToBase64 = (str: string) => Buffer.from(str).toString('base64');
 
@@ -426,6 +427,38 @@ describe('API Keys', () => {
       expect(mockClusterClient.asInternalUser.security.grantApiKey).not.toHaveBeenCalled();
     });
 
+    it('throws an error when request does not contain authorization header', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      await expect(
+        apiKeys.grantAsInternalUser(httpServerMock.createKibanaRequest(), {
+          name: 'test_api_key',
+          role_descriptors: {},
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unable to grant an API Key, request does not contain an authorization header"`
+      );
+      expect(mockClusterClient.asInternalUser.security.grantApiKey).not.toHaveBeenCalled();
+    });
+
+    it('throws an error when grantApiKey fails', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      const error = new Error('Elasticsearch error');
+      mockClusterClient.asInternalUser.security.grantApiKey.mockRejectedValue(error);
+
+      await expect(
+        apiKeys.grantAsInternalUser(
+          httpServerMock.createKibanaRequest({
+            headers: { authorization: `Bearer foo-access-token` },
+          }),
+          {
+            name: 'test_api_key',
+            role_descriptors: roleDescriptors,
+          }
+        )
+      ).rejects.toThrowError('Elasticsearch error');
+      expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledTimes(1);
+    });
+
     it('throws an error when kibana privilege validation fails', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
       mockValidateKibanaPrivileges
@@ -483,16 +516,14 @@ describe('API Keys', () => {
       });
       expect(mockValidateKibanaPrivileges).not.toHaveBeenCalled(); // this is only called if kibana_role_descriptors is defined
       expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
-        body: {
-          api_key: {
-            name: 'test_api_key',
-            role_descriptors: { foo: true },
-            expiration: '1d',
-          },
-          grant_type: 'password',
-          username: 'foo',
-          password: 'bar',
+        api_key: {
+          name: 'test_api_key',
+          role_descriptors: { foo: true },
+          expiration: '1d',
         },
+        grant_type: 'password',
+        username: 'foo',
+        password: 'bar',
       });
     });
 
@@ -522,15 +553,13 @@ describe('API Keys', () => {
       });
       expect(mockValidateKibanaPrivileges).not.toHaveBeenCalled(); // this is only called if kibana_role_descriptors is defined
       expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
-        body: {
-          api_key: {
-            name: 'test_api_key',
-            role_descriptors: roleDescriptors,
-            expiration: '1d',
-          },
-          grant_type: 'access_token',
-          access_token: 'foo-access-token',
+        api_key: {
+          name: 'test_api_key',
+          role_descriptors: roleDescriptors,
+          expiration: '1d',
         },
+        grant_type: 'access_token',
+        access_token: 'foo-access-token',
       });
     });
 
@@ -563,18 +592,16 @@ describe('API Keys', () => {
       });
       expect(mockValidateKibanaPrivileges).not.toHaveBeenCalled(); // this is only called if kibana_role_descriptors is defined
       expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
-        body: {
-          api_key: {
-            name: 'test_api_key',
-            role_descriptors: { foo: true },
-            expiration: '1d',
-          },
-          grant_type: 'access_token',
-          access_token: 'foo-access-token',
-          client_authentication: {
-            scheme: 'SharedSecret',
-            value: 'secret',
-          },
+        api_key: {
+          name: 'test_api_key',
+          role_descriptors: { foo: true },
+          expiration: '1d',
+        },
+        grant_type: 'access_token',
+        access_token: 'foo-access-token',
+        client_authentication: {
+          scheme: 'SharedSecret',
+          value: 'secret',
         },
       });
     });
@@ -599,6 +626,274 @@ describe('API Keys', () => {
       );
       expect(mockValidateKibanaPrivileges).not.toHaveBeenCalled();
       expect(mockClusterClient.asInternalUser.security.grantApiKey).not.toHaveBeenCalled();
+    });
+
+    describe('with UIAM', () => {
+      it('uses UIAM client authentication when credentials are UIAM credentials', async () => {
+        const mockUiam = uiamServiceMock.create();
+        mockUiam.getClientAuthentication.mockReturnValue({
+          scheme: 'SharedSecret',
+          value: 'uiam-shared-secret',
+        });
+        const apiKeysWithUiam = new APIKeys({
+          clusterClient: mockClusterClient,
+          logger,
+          license: mockLicense,
+          applicationName: 'kibana-.kibana',
+          kibanaFeatures: [],
+          uiam: mockUiam,
+        });
+
+        mockClusterClient.asInternalUser.security.grantApiKey.mockResponseOnce({
+          id: '123',
+          name: 'key-name',
+          api_key: 'abc123',
+          encoded: 'utf8',
+        });
+
+        const result = await apiKeysWithUiam.grantAsInternalUser(
+          httpServerMock.createKibanaRequest({
+            headers: {
+              authorization: `Bearer essu_uiam_access_token`,
+            },
+          }),
+          {
+            name: 'test_api_key',
+            role_descriptors: roleDescriptors,
+            expiration: '1d',
+          }
+        );
+
+        expect(result).toEqual({
+          api_key: 'abc123',
+          id: '123',
+          name: 'key-name',
+          encoded: 'utf8',
+        });
+        expect(mockUiam.getClientAuthentication).toHaveBeenCalled();
+        expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
+          api_key: {
+            name: 'test_api_key',
+            role_descriptors: roleDescriptors,
+            expiration: '1d',
+          },
+          grant_type: 'access_token',
+          access_token: 'essu_uiam_access_token',
+          client_authentication: {
+            scheme: 'SharedSecret',
+            value: 'uiam-shared-secret',
+          },
+        });
+      });
+
+      it('ignores es-client-authentication header when credentials are UIAM credentials', async () => {
+        const mockUiam = uiamServiceMock.create();
+        mockUiam.getClientAuthentication.mockReturnValue({
+          scheme: 'SharedSecret',
+          value: 'uiam-shared-secret',
+        });
+        const apiKeysWithUiam = new APIKeys({
+          clusterClient: mockClusterClient,
+          logger,
+          license: mockLicense,
+          applicationName: 'kibana-.kibana',
+          kibanaFeatures: [],
+          uiam: mockUiam,
+        });
+
+        mockClusterClient.asInternalUser.security.grantApiKey.mockResponseOnce({
+          id: '123',
+          name: 'key-name',
+          api_key: 'abc123',
+          encoded: 'utf8',
+        });
+
+        await apiKeysWithUiam.grantAsInternalUser(
+          httpServerMock.createKibanaRequest({
+            headers: {
+              authorization: `Bearer essu_uiam_access_token`,
+              'es-client-authentication': 'SharedSecret should-be-ignored',
+            },
+          }),
+          {
+            name: 'test_api_key',
+            role_descriptors: roleDescriptors,
+            expiration: '1d',
+          }
+        );
+
+        // Should use UIAM client authentication, not the es-client-authentication header
+        expect(mockUiam.getClientAuthentication).toHaveBeenCalled();
+        expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
+          api_key: {
+            name: 'test_api_key',
+            role_descriptors: roleDescriptors,
+            expiration: '1d',
+          },
+          grant_type: 'access_token',
+          access_token: 'essu_uiam_access_token',
+          client_authentication: {
+            scheme: 'SharedSecret',
+            value: 'uiam-shared-secret',
+          },
+        });
+      });
+
+      it('uses es-client-authentication header when UIAM is configured but credentials are not UIAM credentials', async () => {
+        const mockUiam = uiamServiceMock.create();
+        const apiKeysWithUiam = new APIKeys({
+          clusterClient: mockClusterClient,
+          logger,
+          license: mockLicense,
+          applicationName: 'kibana-.kibana',
+          kibanaFeatures: [],
+          uiam: mockUiam,
+        });
+
+        mockClusterClient.asInternalUser.security.grantApiKey.mockResponseOnce({
+          id: '123',
+          name: 'key-name',
+          api_key: 'abc123',
+          encoded: 'utf8',
+        });
+
+        await apiKeysWithUiam.grantAsInternalUser(
+          httpServerMock.createKibanaRequest({
+            headers: {
+              authorization: `Bearer regular_access_token`,
+              'es-client-authentication': 'SharedSecret header-secret',
+            },
+          }),
+          {
+            name: 'test_api_key',
+            role_descriptors: roleDescriptors,
+            expiration: '1d',
+          }
+        );
+
+        // Should NOT use UIAM client authentication since credentials are not UIAM credentials
+        expect(mockUiam.getClientAuthentication).not.toHaveBeenCalled();
+        expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
+          api_key: {
+            name: 'test_api_key',
+            role_descriptors: roleDescriptors,
+            expiration: '1d',
+          },
+          grant_type: 'access_token',
+          access_token: 'regular_access_token',
+          client_authentication: {
+            scheme: 'SharedSecret',
+            value: 'header-secret',
+          },
+        });
+      });
+    });
+  });
+
+  describe('cloneAsInternalUser()', () => {
+    it('returns null when security feature is disabled', async () => {
+      mockLicense.isEnabled.mockReturnValue(false);
+      const result = await apiKeys.cloneAsInternalUser(httpServerMock.createKibanaRequest(), {
+        name: 'cloned-key',
+      });
+      expect(result).toBeNull();
+    });
+
+    it('throws when request has no authorization header', async () => {
+      await expect(
+        apiKeys.cloneAsInternalUser(httpServerMock.createKibanaRequest(), {
+          name: 'cloned-key',
+        })
+      ).rejects.toThrow('request does not contain an authorization header');
+    });
+
+    it('throws when authorization scheme is not ApiKey', async () => {
+      await expect(
+        apiKeys.cloneAsInternalUser(
+          httpServerMock.createKibanaRequest({
+            headers: { authorization: `Bearer some-token` },
+          }),
+          { name: 'cloned-key' }
+        )
+      ).rejects.toThrow('expected ApiKey authorization scheme');
+    });
+
+    it('calls ES clone endpoint with correct parameters', async () => {
+      const apiKeyCredentials = encodeToBase64('key-id:key-secret');
+      mockClusterClient.asInternalUser.transport.request.mockResolvedValueOnce({
+        id: 'cloned-id',
+        name: 'cloned-key',
+        api_key: 'cloned-secret',
+        encoded: encodeToBase64('cloned-id:cloned-secret'),
+      });
+
+      const result = await apiKeys.cloneAsInternalUser(
+        httpServerMock.createKibanaRequest({
+          headers: { authorization: `ApiKey ${apiKeyCredentials}` },
+        }),
+        { name: 'cloned-key', metadata: { managed: true } }
+      );
+
+      expect(mockClusterClient.asInternalUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/_security/api_key/clone',
+        body: {
+          api_key: apiKeyCredentials,
+          name: 'cloned-key',
+          expiration: null,
+          metadata: { managed: true },
+        },
+      });
+
+      expect(result).toEqual({
+        id: 'cloned-id',
+        name: 'cloned-key',
+        api_key: 'cloned-secret',
+        encoded: encodeToBase64('cloned-id:cloned-secret'),
+      });
+    });
+
+    it('calls ES clone endpoint without metadata when not provided', async () => {
+      const apiKeyCredentials = encodeToBase64('key-id:key-secret');
+      mockClusterClient.asInternalUser.transport.request.mockResolvedValueOnce({
+        id: 'cloned-id',
+        name: 'cloned-key',
+        api_key: 'cloned-secret',
+        encoded: encodeToBase64('cloned-id:cloned-secret'),
+      });
+
+      await apiKeys.cloneAsInternalUser(
+        httpServerMock.createKibanaRequest({
+          headers: { authorization: `ApiKey ${apiKeyCredentials}` },
+        }),
+        { name: 'cloned-key' }
+      );
+
+      expect(mockClusterClient.asInternalUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/_security/api_key/clone',
+        body: {
+          api_key: apiKeyCredentials,
+          name: 'cloned-key',
+          expiration: null,
+        },
+      });
+    });
+
+    it('throws when ES clone endpoint fails', async () => {
+      const apiKeyCredentials = encodeToBase64('key-id:key-secret');
+      mockClusterClient.asInternalUser.transport.request.mockRejectedValueOnce(
+        new Error('Clone not supported')
+      );
+
+      await expect(
+        apiKeys.cloneAsInternalUser(
+          httpServerMock.createKibanaRequest({
+            headers: { authorization: `ApiKey ${apiKeyCredentials}` },
+          }),
+          { name: 'cloned-key' }
+        )
+      ).rejects.toThrow('Clone not supported');
     });
   });
 
@@ -857,29 +1152,27 @@ describe('API Keys', () => {
         name: 'key-name',
       });
       expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
-        body: {
-          api_key: {
-            name: 'key-name',
-            role_descriptors: {
-              synthetics_writer: {
-                applications: [
-                  {
-                    application: 'kibana-.kibana',
-                    privileges: ['feature_uptime.all'],
-                    resources: ['*'],
-                  },
-                ],
-                cluster: ['manage'],
-                indices: [],
-                run_as: [],
-              },
+        api_key: {
+          name: 'key-name',
+          role_descriptors: {
+            synthetics_writer: {
+              applications: [
+                {
+                  application: 'kibana-.kibana',
+                  privileges: ['feature_uptime.all'],
+                  resources: ['*'],
+                },
+              ],
+              cluster: ['manage'],
+              indices: [],
+              run_as: [],
             },
-            expiration: '1d',
           },
-          grant_type: 'password',
-          password: 'bar',
-          username: 'foo',
+          expiration: '1d',
         },
+        grant_type: 'password',
+        password: 'bar',
+        username: 'foo',
       });
     });
 

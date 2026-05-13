@@ -8,9 +8,9 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
-import { InternalUiSettingsRequestHandlerContext } from '../internal_types';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
+import type { InternalUiSettingsRequestHandlerContext } from '../internal_types';
 import type { InternalUiSettingsRouter } from '../internal_types';
 
 export function registerGetRoute(router: InternalUiSettingsRouter) {
@@ -38,14 +38,32 @@ export function registerGetRoute(router: InternalUiSettingsRouter) {
     }
   };
   router.get(
-    { path: '/api/kibana/settings', validate: false },
+    {
+      path: '/api/kibana/settings',
+      validate: false,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the UI Settings Client',
+        },
+      },
+    },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.client;
       return await getFromRequest(uiSettingsClient, context, request, response);
     }
   );
   router.get(
-    { path: '/api/kibana/global_settings', validate: false },
+    {
+      path: '/api/kibana/global_settings',
+      validate: false,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the UI Settings Client',
+        },
+      },
+    },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.globalClient;
       return await getFromRequest(uiSettingsClient, context, request, response);

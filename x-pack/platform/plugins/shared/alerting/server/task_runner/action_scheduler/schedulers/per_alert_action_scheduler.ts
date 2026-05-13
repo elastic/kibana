@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { AlertInstanceState, AlertInstanceContext } from '@kbn/alerting-state-types';
-import { RuleAction, RuleNotifyWhen, RuleTypeParams } from '@kbn/alerting-types';
+import type { AlertInstanceState, AlertInstanceContext } from '@kbn/alerting-state-types';
+import type { RuleAction, RuleTypeParams } from '@kbn/alerting-types';
+import { RuleNotifyWhen } from '@kbn/alerting-types';
 import { compact } from 'lodash';
-import { RuleTypeState, RuleAlertData, parseDuration } from '../../../../common';
-import { GetSummarizedAlertsParams } from '../../../alerts_client/types';
-import { AlertHit } from '../../../types';
-import { Alert } from '../../../alert';
+import type { RuleTypeState, RuleAlertData } from '../../../../common';
+import { parseDuration } from '../../../../common';
+import type { GetSummarizedAlertsParams } from '../../../alerts_client/types';
+import type { AlertHit } from '../../../types';
+import type { Alert } from '../../../alert';
 import {
   buildRuleUrl,
   formatActionToEnqueue,
@@ -22,7 +24,7 @@ import {
   logNumberOfFilteredAlerts,
   shouldScheduleAction,
 } from '../lib';
-import {
+import type {
   ActionSchedulerOptions,
   ActionsToSchedule,
   AddSummarizedAlertsOpts,
@@ -32,13 +34,15 @@ import {
   IsExecutableActiveAlertOpts,
   IsExecutableAlertOpts,
 } from '../types';
-import { TransformActionParamsOptions, transformActionParams } from '../../transform_action_params';
+import type { TransformActionParamsOptions } from '../../transform_action_params';
+import { transformActionParams } from '../../transform_action_params';
 import { injectActionParams } from '../../inject_action_params';
 
 enum Reasons {
   MUTED = 'muted',
   THROTTLED = 'throttled',
   ACTION_GROUP_NOT_CHANGED = 'actionGroupHasNotChanged',
+  DELAYED = 'delayed',
 }
 
 export class PerAlertActionScheduler<
@@ -100,8 +104,8 @@ export class PerAlertActionScheduler<
   }
 
   public async getActionsToSchedule({
-    activeCurrentAlerts,
-    recoveredCurrentAlerts,
+    activeAlerts,
+    recoveredAlerts,
   }: GetActionsToScheduleOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>): Promise<
     ActionsToSchedule[]
   > {
@@ -111,8 +115,8 @@ export class PerAlertActionScheduler<
     }> = [];
     const results: ActionsToSchedule[] = [];
 
-    const activeCurrentAlertsArray = Object.values(activeCurrentAlerts || {});
-    const recoveredCurrentAlertsArray = Object.values(recoveredCurrentAlerts || {});
+    const activeAlertsArray = Object.values(activeAlerts || {});
+    const recoveredAlertsArray = Object.values(recoveredAlerts || {});
 
     for (const action of this.actions) {
       let summarizedAlerts = null;
@@ -140,13 +144,15 @@ export class PerAlertActionScheduler<
 
         logNumberOfFilteredAlerts({
           logger: this.context.logger,
-          numberOfAlerts: activeCurrentAlertsArray.length + recoveredCurrentAlertsArray.length,
+          numberOfAlerts: activeAlertsArray.length + recoveredAlertsArray.length,
           numberOfSummarizedAlerts: summarizedAlerts.all.count,
           action,
         });
       }
 
-      for (const alert of activeCurrentAlertsArray) {
+      for (const alert of activeAlertsArray) {
+        const allActionUuids = this.actions.map((a) => a.uuid!);
+        alert.clearThrottlingLastScheduledActions(allActionUuids);
         if (
           this.isExecutableAlert({ alert, action, summarizedAlerts }) &&
           this.isExecutableActiveAlert({ alert, action })
@@ -157,7 +163,7 @@ export class PerAlertActionScheduler<
       }
 
       if (this.isRecoveredAction(action.group)) {
-        for (const alert of recoveredCurrentAlertsArray) {
+        for (const alert of recoveredAlertsArray) {
           if (this.isExecutableAlert({ alert, action, summarizedAlerts })) {
             this.addSummarizedAlerts({ alert, summarizedAlerts });
             executables.push({ action, alert });
@@ -180,7 +186,6 @@ export class PerAlertActionScheduler<
 
     for (const { action, alert } of executables) {
       const { actionTypeId } = action;
-
       if (
         !shouldScheduleAction({
           action,
@@ -193,7 +198,6 @@ export class PerAlertActionScheduler<
       ) {
         continue;
       }
-
       this.context.ruleRunMetricsStore.incrementNumberOfTriggeredActions();
       this.context.ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(
         actionTypeId
@@ -220,6 +224,7 @@ export class PerAlertActionScheduler<
         actionParams: action.params,
         flapping: alert.getFlapping(),
         ruleUrl: ruleUrl?.absoluteUrl,
+        consecutiveMatches: alert.getActiveCount(),
       };
 
       if (alert.isAlertAsData()) {
@@ -284,6 +289,7 @@ export class PerAlertActionScheduler<
     return (
       !this.hasActiveMaintenanceWindow({ alert, action }) &&
       !this.isAlertMuted(alert) &&
+      !this.isAlertDelayed(alert) &&
       !this.hasPendingCountButNotNotifyOnChange({ alert, action }) &&
       !alert.isFilteredOut(summarizedAlerts)
     );
@@ -374,6 +380,25 @@ export class PerAlertActionScheduler<
     return false;
   }
 
+  private isAlertDelayed(
+    alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>
+  ) {
+    if (alert.isDelayed()) {
+      const alertId = alert.getId();
+      if (
+        !this.skippedAlerts[alertId] ||
+        (this.skippedAlerts[alertId] && this.skippedAlerts[alertId].reason !== Reasons.DELAYED)
+      ) {
+        this.context.logger.debug(
+          `skipping scheduling of actions for '${alertId}' in rule ${this.context.ruleLabel}: alert is delayed`
+        );
+      }
+      this.skippedAlerts[alertId] = { reason: Reasons.DELAYED };
+      return true;
+    }
+    return false;
+  }
+
   private isValidActionGroup(actionGroup: ActionGroupIds | RecoveryActionGroupId) {
     if (!this.ruleTypeActionGroups!.has(actionGroup)) {
       this.context.logger.error(
@@ -391,7 +416,7 @@ export class PerAlertActionScheduler<
     const alertMaintenanceWindowIds = alert.getMaintenanceWindowIds();
     if (alertMaintenanceWindowIds.length !== 0) {
       this.context.logger.debug(
-        `no scheduling of summary actions "${action.id}" for rule "${
+        `no scheduling of actions "${action.id}" for alert "${alert.getId()}" from rule "${
           this.context.rule.id
         }": has active maintenance windows ${alertMaintenanceWindowIds.join(', ')}.`
       );

@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
@@ -26,7 +27,7 @@ import {
 import { ListPage, MapPage } from './routes';
 import { APP_ID } from '../common/constants';
 import { registerLayerWizards } from './classes/layers/wizards/load_layer_wizards';
-import { MapSerializedState } from './react_embeddable/types';
+import type { MapEmbeddableState } from '../common';
 
 function setAppChrome() {
   if (!getMapsCapabilities().save) {
@@ -37,7 +38,7 @@ function setAppChrome() {
       tooltip: i18n.translate('xpack.maps.badge.readOnly.tooltip', {
         defaultMessage: 'Unable to save maps',
       }),
-      iconType: 'glasses',
+      iconType: 'readOnly',
     });
   }
 
@@ -49,11 +50,6 @@ function setAppChrome() {
       {
         linkType: 'documentation',
         href: `${mapUrl}`,
-      },
-      {
-        linkType: 'github',
-        title: '[Maps]',
-        labels: ['Team:Geo'],
       },
     ],
   });
@@ -77,28 +73,29 @@ export async function renderApp(
   setAppChrome();
 
   function renderMapApp(routeProps: RouteComponentProps<{ savedMapId?: string }>) {
-    const { embeddableId, originatingApp, valueInput, originatingPath } =
+    const { embeddableId, originatingApp, valueInput, originatingPath, breadcrumbs } =
       stateTransfer.getIncomingEditorState(APP_ID) || {};
 
-    let mapSerializedState: MapSerializedState | undefined;
+    let mapEmbeddableState: MapEmbeddableState | undefined;
     if (routeProps.match.params.savedMapId) {
-      mapSerializedState = {
+      mapEmbeddableState = {
         savedObjectId: routeProps.match.params.savedMapId,
       };
     } else if (valueInput) {
-      mapSerializedState = valueInput as MapSerializedState;
+      mapEmbeddableState = valueInput as MapEmbeddableState;
     }
 
     return (
       <ExitFullScreenButtonKibanaProvider coreStart={getCore()}>
         <MapPage
-          mapSerializedState={mapSerializedState}
+          mapEmbeddableState={mapEmbeddableState}
           embeddableId={embeddableId}
           onAppLeave={onAppLeave}
           setHeaderActionMenu={setHeaderActionMenu}
           stateTransfer={stateTransfer}
           originatingApp={originatingApp}
           originatingPath={originatingPath}
+          breadcrumbs={breadcrumbs}
           history={history}
           key={routeProps.match.params.savedMapId ? routeProps.match.params.savedMapId : 'new'}
         />

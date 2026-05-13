@@ -9,7 +9,8 @@
 
 import React from 'react';
 
-import { MarkdownStorybookMock, MarkdownStorybookParams } from '@kbn/shared-ux-markdown-mocks';
+import type { MarkdownStorybookParams } from '@kbn/shared-ux-markdown-mocks';
+import { MarkdownStorybookMock } from '@kbn/shared-ux-markdown-mocks';
 
 import { EuiFlexItem } from '@elastic/eui';
 import mdx from './README.mdx';
@@ -28,15 +29,17 @@ export default {
 const mock = new MarkdownStorybookMock();
 const argTypes = mock.getArgumentTypes();
 
-export const MarkdownStoryComponent = (params: MarkdownStorybookParams) => {
-  return (
-    // The markdown component is wrapped in the EuiFlexItem with width set to 50%
-    // Height can be set for the markdown component
-    <EuiFlexItem style={{ width: '400px' }}>
-      {/* readOnly is set to false because the Markdown component editor will error if set to true without markdown content or children  */}
-      <Markdown {...params} readOnly={false} />
-    </EuiFlexItem>
-  );
-};
+export const MarkdownStoryComponent = {
+  render: (params: MarkdownStorybookParams) => {
+    return (
+      // The markdown component is wrapped in the EuiFlexItem with width set to 50%
+      // Height can be set for the markdown component
+      <EuiFlexItem style={{ width: '400px' }}>
+        {/* readOnly is set to false because the Markdown component editor will error if set to true without markdown content or children  */}
+        <Markdown {...params} readOnly={false} />
+      </EuiFlexItem>
+    );
+  },
 
-MarkdownStoryComponent.argTypes = argTypes;
+  argTypes,
+};

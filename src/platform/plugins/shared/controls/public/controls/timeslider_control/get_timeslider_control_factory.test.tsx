@@ -8,26 +8,38 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
 
+import { EuiThemeProvider } from '@elastic/eui';
+import { DEFAULT_TIME_SLIDER_STATE } from '@kbn/controls-constants';
+import { timeSliderControlSchema, type TimeSliderControlState } from '@kbn/controls-schemas';
 import dateMath from '@kbn/datemath';
-import { TimeRange } from '@kbn/es-query';
-import { StateComparators } from '@kbn/presentation-publishing';
-import { fireEvent, render } from '@testing-library/react';
+import type { TimeRange } from '@kbn/es-query';
+import { fireEvent, render as rtlRender } from '@testing-library/react';
 
 import { dataService } from '../../services/kibana_services';
-import { getMockedControlGroupApi } from '../mocks/control_mocks';
-import { ControlApiRegistration } from '../types';
+import { getMockedFinalizeApi } from '../mocks/control_mocks';
 import { getTimesliderControlFactory } from './get_timeslider_control_factory';
-import { TimesliderControlApi, TimesliderControlState } from './types';
+import type { TimeSliderControlApi } from './types';
 
-describe('TimesliderControlApi', () => {
+const render = (ui: React.ReactElement) => {
+  return rtlRender(ui, { wrapper: EuiThemeProvider });
+};
+
+describe('TimeSliderControlApi', () => {
   const uuid = 'myControl1';
 
   const dashboardApi = {
     timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
+    lastSavedStateForChild$: jest.fn(),
+    getLastSavedStateForChild: jest.fn(),
   };
-  const controlGroupApi = getMockedControlGroupApi(dashboardApi);
+  const factory = getTimesliderControlFactory();
+  const finalizeApi = getMockedFinalizeApi<TimeSliderControlState, TimeSliderControlApi>(
+    uuid,
+    factory,
+    dashboardApi
+  );
 
   dataService.query.timefilter.timefilter.calculateBounds = (timeRange: TimeRange) => {
     const now = new Date();
@@ -36,24 +48,6 @@ describe('TimesliderControlApi', () => {
       max: dateMath.parse(timeRange.to, { roundUp: true, forceNow: now }),
     };
   };
-  const factory = getTimesliderControlFactory();
-  let comparators: StateComparators<TimesliderControlState> | undefined;
-  function buildApiMock(
-    api: ControlApiRegistration<TimesliderControlApi>,
-    nextComparators: StateComparators<TimesliderControlState>
-  ) {
-    comparators = nextComparators;
-    return {
-      ...api,
-      uuid,
-      parentApi: controlGroupApi,
-      unsavedChanges$: new BehaviorSubject<Partial<TimesliderControlState> | undefined>(undefined),
-      resetUnsavedChanges: () => {
-        return true;
-      },
-      type: factory.type,
-    };
-  }
 
   beforeEach(() => {
     dashboardApi.timeRange$.next({
@@ -62,36 +56,57 @@ describe('TimesliderControlApi', () => {
     });
   });
 
-  test('Should set timeslice to undefined when state does not provide percentage of timeRange', async () => {
-    const { api } = await factory.buildControl({}, buildApiMock, uuid, controlGroupApi);
-    expect(api.timeslice$.value).toBe(undefined);
+  test('Should set timeslice to the entire range when provided the default state', async () => {
+    const { api } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: jest.fn(),
+      initialState: DEFAULT_TIME_SLIDER_STATE,
+      finalizeApi,
+      uuid,
+      parentApi: dashboardApi,
+    });
+    expect(api.appliedTimeslice$.value).toBeDefined();
+    expect(new Date(api.appliedTimeslice$.value![0]).toISOString()).toEqual(
+      '2024-06-09T00:00:00.000Z'
+    );
+    expect(new Date(api.appliedTimeslice$.value![1]).toISOString()).toEqual(
+      '2024-06-10T00:00:00.000Z'
+    );
   });
 
   test('Should set timeslice to values within time range when state provides percentage of timeRange', async () => {
-    const { api } = await factory.buildControl(
-      {
-        timesliceStartAsPercentageOfTimeRange: 0.25,
-        timesliceEndAsPercentageOfTimeRange: 0.5,
+    const { api } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: jest.fn(),
+      initialState: {
+        ...DEFAULT_TIME_SLIDER_STATE,
+        start_percentage_of_time_range: 0.25,
+        end_percentage_of_time_range: 0.5,
       },
-      buildApiMock,
+      finalizeApi,
       uuid,
-      controlGroupApi
-    );
+      parentApi: dashboardApi,
+    });
 
-    expect(new Date(api.timeslice$.value![0]).toISOString()).toEqual('2024-06-09T06:00:00.000Z');
-    expect(new Date(api.timeslice$.value![1]).toISOString()).toEqual('2024-06-09T12:00:00.000Z');
+    expect(api.appliedTimeslice$.value).toBeDefined();
+    expect(new Date(api.appliedTimeslice$.value![0]).toISOString()).toEqual(
+      '2024-06-09T06:00:00.000Z'
+    );
+    expect(new Date(api.appliedTimeslice$.value![1]).toISOString()).toEqual(
+      '2024-06-09T12:00:00.000Z'
+    );
   });
 
   test('Should update timeslice when time range changes', async () => {
-    const { api } = await factory.buildControl(
-      {
-        timesliceStartAsPercentageOfTimeRange: 0.25,
-        timesliceEndAsPercentageOfTimeRange: 0.5,
+    const { api } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: jest.fn(),
+      initialState: {
+        ...DEFAULT_TIME_SLIDER_STATE,
+        start_percentage_of_time_range: 0.25,
+        end_percentage_of_time_range: 0.5,
       },
-      buildApiMock,
+      finalizeApi,
       uuid,
-      controlGroupApi
-    );
+      parentApi: dashboardApi,
+    });
 
     // change time range to single hour
     dashboardApi.timeRange$.next({
@@ -102,20 +117,26 @@ describe('TimesliderControlApi', () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     // update time slice to same percentage in new hour interval
-    expect(new Date(api.timeslice$.value![0]).toISOString()).toEqual('2024-06-08T00:15:00.000Z');
-    expect(new Date(api.timeslice$.value![1]).toISOString()).toEqual('2024-06-08T00:30:00.000Z');
+    expect(new Date(api.appliedTimeslice$.value![0]).toISOString()).toEqual(
+      '2024-06-08T00:15:00.000Z'
+    );
+    expect(new Date(api.appliedTimeslice$.value![1]).toISOString()).toEqual(
+      '2024-06-08T00:30:00.000Z'
+    );
   });
 
   test('Clicking previous button should advance timeslice backward', async () => {
-    const { api } = await factory.buildControl(
-      {
-        timesliceStartAsPercentageOfTimeRange: 0.25,
-        timesliceEndAsPercentageOfTimeRange: 0.5,
+    const { api } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: jest.fn(),
+      initialState: {
+        ...DEFAULT_TIME_SLIDER_STATE,
+        start_percentage_of_time_range: 0.25,
+        end_percentage_of_time_range: 0.5,
       },
-      buildApiMock,
+      finalizeApi,
       uuid,
-      controlGroupApi
-    );
+      parentApi: dashboardApi,
+    });
     if (!api.CustomPrependComponent) {
       throw new Error('API does not return CustomPrependComponent');
     }
@@ -124,20 +145,26 @@ describe('TimesliderControlApi', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    expect(new Date(api.timeslice$.value![0]).toISOString()).toEqual('2024-06-09T00:00:00.000Z');
-    expect(new Date(api.timeslice$.value![1]).toISOString()).toEqual('2024-06-09T06:00:00.000Z');
+    expect(new Date(api.appliedTimeslice$.value![0]).toISOString()).toEqual(
+      '2024-06-09T00:00:00.000Z'
+    );
+    expect(new Date(api.appliedTimeslice$.value![1]).toISOString()).toEqual(
+      '2024-06-09T06:00:00.000Z'
+    );
   });
 
   test('Clicking previous button should wrap when time range start is reached', async () => {
-    const { api } = await factory.buildControl(
-      {
-        timesliceStartAsPercentageOfTimeRange: 0.25,
-        timesliceEndAsPercentageOfTimeRange: 0.5,
+    const { api } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: jest.fn(),
+      initialState: {
+        ...DEFAULT_TIME_SLIDER_STATE,
+        start_percentage_of_time_range: 0.25,
+        end_percentage_of_time_range: 0.5,
       },
-      buildApiMock,
+      finalizeApi,
       uuid,
-      controlGroupApi
-    );
+      parentApi: dashboardApi,
+    });
     if (!api.CustomPrependComponent) {
       throw new Error('API does not return CustomPrependComponent');
     }
@@ -147,20 +174,26 @@ describe('TimesliderControlApi', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    expect(new Date(api.timeslice$.value![0]).toISOString()).toEqual('2024-06-09T18:00:00.000Z');
-    expect(new Date(api.timeslice$.value![1]).toISOString()).toEqual('2024-06-10T00:00:00.000Z');
+    expect(new Date(api.appliedTimeslice$.value![0]).toISOString()).toEqual(
+      '2024-06-09T18:00:00.000Z'
+    );
+    expect(new Date(api.appliedTimeslice$.value![1]).toISOString()).toEqual(
+      '2024-06-10T00:00:00.000Z'
+    );
   });
 
   test('Clicking next button should advance timeslice forward', async () => {
-    const { api } = await factory.buildControl(
-      {
-        timesliceStartAsPercentageOfTimeRange: 0.25,
-        timesliceEndAsPercentageOfTimeRange: 0.5,
+    const { api } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: jest.fn(),
+      initialState: {
+        ...DEFAULT_TIME_SLIDER_STATE,
+        start_percentage_of_time_range: 0.25,
+        end_percentage_of_time_range: 0.5,
       },
-      buildApiMock,
+      finalizeApi,
       uuid,
-      controlGroupApi
-    );
+      parentApi: dashboardApi,
+    });
     if (!api.CustomPrependComponent) {
       throw new Error('API does not return CustomPrependComponent');
     }
@@ -169,20 +202,26 @@ describe('TimesliderControlApi', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    expect(new Date(api.timeslice$.value![0]).toISOString()).toEqual('2024-06-09T12:00:00.000Z');
-    expect(new Date(api.timeslice$.value![1]).toISOString()).toEqual('2024-06-09T18:00:00.000Z');
+    expect(new Date(api.appliedTimeslice$.value![0]).toISOString()).toEqual(
+      '2024-06-09T12:00:00.000Z'
+    );
+    expect(new Date(api.appliedTimeslice$.value![1]).toISOString()).toEqual(
+      '2024-06-09T18:00:00.000Z'
+    );
   });
 
   test('Clicking next button should wrap when time range end is reached', async () => {
-    const { api } = await factory.buildControl(
-      {
-        timesliceStartAsPercentageOfTimeRange: 0.25,
-        timesliceEndAsPercentageOfTimeRange: 0.5,
+    const { api } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: jest.fn(),
+      initialState: {
+        ...DEFAULT_TIME_SLIDER_STATE,
+        start_percentage_of_time_range: 0.25,
+        end_percentage_of_time_range: 0.5,
       },
-      buildApiMock,
+      finalizeApi,
       uuid,
-      controlGroupApi
-    );
+      parentApi: dashboardApi,
+    });
     if (!api.CustomPrependComponent) {
       throw new Error('API does not return CustomPrependComponent');
     }
@@ -193,35 +232,89 @@ describe('TimesliderControlApi', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    expect(new Date(api.timeslice$.value![0]).toISOString()).toEqual('2024-06-09T00:00:00.000Z');
-    expect(new Date(api.timeslice$.value![1]).toISOString()).toEqual('2024-06-09T06:00:00.000Z');
+    expect(new Date(api.appliedTimeslice$.value![0]).toISOString()).toEqual(
+      '2024-06-09T00:00:00.000Z'
+    );
+    expect(new Date(api.appliedTimeslice$.value![1]).toISOString()).toEqual(
+      '2024-06-09T06:00:00.000Z'
+    );
   });
 
-  test('Resetting state with comparators should reset timeslice', async () => {
-    const { api } = await factory.buildControl(
-      {
-        timesliceStartAsPercentageOfTimeRange: 0.25,
-        timesliceEndAsPercentageOfTimeRange: 0.5,
-      },
-      buildApiMock,
+  test('Resetting state should reset timeslice', async () => {
+    const controlState = {
+      ...DEFAULT_TIME_SLIDER_STATE,
+      start_percentage_of_time_range: 0.25,
+      end_percentage_of_time_range: 0.5,
+    };
+    dashboardApi.getLastSavedStateForChild.mockReturnValueOnce(controlState);
+    const { api } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: jest.fn(),
+      initialState: controlState,
+      finalizeApi,
       uuid,
-      controlGroupApi
-    );
+      parentApi: dashboardApi,
+    });
     if (!api.CustomPrependComponent) {
       throw new Error('API does not return CustomPrependComponent');
     }
 
+    // advance time by clicking next
     const { findByTestId } = render(<api.CustomPrependComponent />);
     fireEvent.click(await findByTestId('timeSlider-nextTimeWindow'));
     await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(new Date(api.timeslice$.value![0]).toISOString()).toEqual('2024-06-09T12:00:00.000Z');
-    expect(new Date(api.timeslice$.value![1]).toISOString()).toEqual('2024-06-09T18:00:00.000Z');
-
-    comparators!.timesliceStartAsPercentageOfTimeRange[1](0.25);
-    comparators!.timesliceEndAsPercentageOfTimeRange[1](0.5);
+    // ensure time advanced
+    expect(new Date(api.appliedTimeslice$.value![0]).toISOString()).toEqual(
+      '2024-06-09T12:00:00.000Z'
+    );
+    expect(new Date(api.appliedTimeslice$.value![1]).toISOString()).toEqual(
+      '2024-06-09T18:00:00.000Z'
+    );
+    await api.applySerializedState(controlState);
 
     await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(new Date(api.timeslice$.value![0]).toISOString()).toEqual('2024-06-09T06:00:00.000Z');
-    expect(new Date(api.timeslice$.value![1]).toISOString()).toEqual('2024-06-09T12:00:00.000Z');
+    expect(new Date(api.appliedTimeslice$.value![0]).toISOString()).toEqual(
+      '2024-06-09T06:00:00.000Z'
+    );
+    expect(new Date(api.appliedTimeslice$.value![1]).toISOString()).toEqual(
+      '2024-06-09T12:00:00.000Z'
+    );
+  });
+
+  describe('unsaved changes', () => {
+    test('should have unsaved changes when there are changes', async () => {
+      const lastSavedState = timeSliderControlSchema.validate({});
+      const initialState = {
+        ...lastSavedState,
+        is_anchored: true,
+      };
+      const embeddable = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState,
+        finalizeApi,
+        uuid,
+        parentApi: {
+          lastSavedStateForChild$: () => of(lastSavedState),
+          getLastSavedStateForChild: lastSavedState,
+        },
+      });
+      const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
+      expect(hasUnsavedChanges).toBe(true);
+    });
+
+    test('should not have unsaved changes when there are no changes', async () => {
+      const initialState = timeSliderControlSchema.validate({});
+      const embeddable = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState,
+        finalizeApi,
+        uuid,
+        parentApi: {
+          lastSavedStateForChild$: () => of(initialState),
+          getLastSavedStateForChild: initialState,
+        },
+      });
+      const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
+      expect(hasUnsavedChanges).toBe(false);
+    });
   });
 });

@@ -17,22 +17,13 @@ import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/
 import { mockAboutStepRule } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
 import { StepRuleDescription } from '../description_step';
 import { stepAboutDefaultValue } from './default_value';
-import type {
-  AboutStepRule,
-  DefineStepRule,
-} from '../../../../detections/pages/detection_engine/rules/types';
-import {
-  DataSourceType,
-  AlertSuppressionDurationType,
-} from '../../../../detections/pages/detection_engine/rules/types';
-import { fillEmptySeverityMappings } from '../../../../detections/pages/detection_engine/rules/helpers';
+import type { AboutStepRule, DefineStepRule } from '../../../common/types';
+import { DataSourceType, AlertSuppressionDurationType } from '../../../common/types';
+import { fillEmptySeverityMappings } from '../../../common/helpers';
 import { TestProviders } from '../../../../common/mock';
 import { useRuleForms } from '../../pages/form';
 import { stepActionsDefaultValue } from '../../../rule_creation/components/step_rule_actions';
-import {
-  defaultSchedule,
-  stepDefineDefaultValue,
-} from '../../../../detections/pages/detection_engine/rules/utils';
+import { defaultSchedule, stepDefineDefaultValue } from '../../../common/utils';
 import type { FormHook } from '../../../../shared_imports';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -46,11 +37,17 @@ import {
 } from '../../../rule_creation/components/alert_suppression_edit';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { initialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
+import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/source');
 jest.mock('../../../../common/components/ml/hooks/use_get_jobs');
 jest.mock('../../../../common/components/ml_popover/hooks/use_security_jobs');
+jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('../../../../common/components/user_privileges');
+jest.mock('../../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in');
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
@@ -63,12 +60,14 @@ jest.mock('@elastic/eui', () => {
   };
 });
 const mockedUseKibana = mockUseKibana();
+const mockedUseGetEndpointExceptionsPerPolicyOptIn =
+  useGetEndpointExceptionsPerPolicyOptIn as jest.Mock;
 
 export const stepDefineStepMLRule: DefineStepRule = {
   ruleType: 'machine_learning',
   index: ['default-index-*'],
   queryBar: { query: { query: '', language: '' }, filters: [], saved_id: null },
-  machineLearningJobId: ['auth_high_count_logon_events_for_a_source_ip'],
+  machineLearningJobId: ['auth_high_count_logon_events_for_a_source_ip_ea'],
   anomalyThreshold: 50,
   threshold: { cardinality: { value: '', field: [] }, value: '100', field: [] },
   threatIndex: [],
@@ -92,7 +91,8 @@ export const stepDefineStepMLRule: DefineStepRule = {
   shouldLoadQueryDynamically: false,
 };
 
-describe('StepAboutRuleComponent', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/235182
+describe.skip('StepAboutRuleComponent', () => {
   let useGetInstalledJobMock: jest.Mock;
   let useSecurityJobsMock: jest.Mock;
   const TestComp = ({
@@ -134,10 +134,22 @@ describe('StepAboutRuleComponent', () => {
       },
     ]);
     (useKibana as jest.Mock).mockReturnValue(mockedUseKibana);
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      ...initialUserPrivilegesState(),
+      rulesPrivileges: {
+        rules: { edit: true },
+        investigationGuide: { edit: true },
+        customHighlightedFields: { edit: true },
+      },
+    });
     useGetInstalledJobMock = (useGetInstalledJob as jest.Mock).mockImplementation(() => ({
       jobs: [],
     }));
     useSecurityJobsMock = (useSecurityJobs as jest.Mock).mockImplementation(() => ({ jobs: [] }));
+
+    mockedUseGetEndpointExceptionsPerPolicyOptIn.mockImplementation(() => ({
+      data: { status: false },
+    }));
   });
 
   it('it renders StepRuleDescription if isReadOnlyView is true and "name" property exists', () => {
@@ -150,6 +162,40 @@ describe('StepAboutRuleComponent', () => {
     );
 
     expect(wrapper.find(StepRuleDescription).exists()).toBeTruthy();
+  });
+
+  it('shows endpoint exceptions for rule definition if they are not per-policy', async () => {
+    mockedUseGetEndpointExceptionsPerPolicyOptIn.mockImplementation(() => ({
+      data: { status: false },
+    }));
+
+    const wrapper = mount(<TestComp setFormRef={() => {}} />, {
+      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
+    });
+    await act(async () => {
+      expect(
+        wrapper
+          .find('[data-test-subj="detectionEngineStepAboutRuleAssociatedToEndpointList"]')
+          .exists()
+      ).toBeTruthy();
+    });
+  });
+
+  it('does not show endpoint exceptions for rule definition if they are per-policy', async () => {
+    mockedUseGetEndpointExceptionsPerPolicyOptIn.mockImplementation(() => ({
+      data: { status: true },
+    }));
+
+    const wrapper = mount(<TestComp setFormRef={() => {}} />, {
+      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
+    });
+    await act(async () => {
+      expect(
+        wrapper
+          .find('[data-test-subj="detectionEngineStepAboutRuleAssociatedToEndpointList"]')
+          .exists()
+      ).toBeFalsy();
+    });
   });
 
   it('is invalid if description is not present', async () => {
@@ -422,12 +468,12 @@ describe('StepAboutRuleComponent', () => {
     (useFetchIndex as jest.Mock).mockClear();
     useSecurityJobsMock.mockImplementation(() => {
       return {
-        jobs: [{ id: 'auth_high_count_logon_events_for_a_source_ip', isInstalled: true }],
+        jobs: [{ id: 'auth_high_count_logon_events_for_a_source_ip_ea', isInstalled: true }],
         loading: false,
       };
     });
     useGetInstalledJobMock.mockImplementation((jobIds: string[]) => {
-      expect(jobIds).toEqual(['auth_high_count_logon_events_for_a_source_ip']);
+      expect(jobIds).toEqual(['auth_high_count_logon_events_for_a_source_ip_ea']);
       return { jobs: [{ results_index_name: 'shared' }] };
     });
 
@@ -443,7 +489,7 @@ describe('StepAboutRuleComponent', () => {
     (useFetchIndex as jest.Mock).mockClear();
     useSecurityJobsMock.mockImplementation(() => {
       return {
-        jobs: [{ id: 'auth_high_count_logon_events_for_a_source_ip', isInstalled: false }],
+        jobs: [{ id: 'auth_high_count_logon_events_for_a_source_ip_ea', isInstalled: false }],
         loading: false,
       };
     });

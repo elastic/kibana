@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useEffect, useMemo } from 'react';
+import React, { useCallback, useState, useEffect, useMemo, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { load } from 'js-yaml';
-
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
 
 import { useConfirmForceInstall } from '../../../../../../../integrations/hooks';
@@ -19,7 +18,12 @@ import { isVerificationError } from '../../../../../../../../services';
 import type { MultiPageStepLayoutProps } from '../../types';
 import type { PackagePolicyFormState } from '../../../types';
 import type { NewPackagePolicy } from '../../../../../../types';
-import { sendCreatePackagePolicy, useStartServices, useUIExtension } from '../../../../../../hooks';
+import {
+  sendCreatePackagePolicy,
+  useFleetStatus,
+  useStartServices,
+  useUIExtension,
+} from '../../../../../../hooks';
 import type { RequestError } from '../../../../../../hooks';
 import { Error, ExtensionWrapper } from '../../../../../../components';
 import { sendGeneratePackagePolicy } from '../../hooks';
@@ -29,6 +33,8 @@ import { validatePackagePolicy, validationHasErrors } from '../../../services';
 import { NotObscuredByBottomBar } from '..';
 import { StepConfigurePackagePolicy, StepDefinePackagePolicy } from '../../../components';
 import { prepareInputPackagePolicyDataset } from '../../../services/prepare_input_pkg_policy_dataset';
+import { ensurePackageKibanaAssetsInstalled } from '../../../../../../services/ensure_kibana_assets_installed';
+import { useYaml } from '../../../../../../../../services';
 
 const ExpandableAdvancedSettings: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
@@ -42,7 +48,7 @@ const ExpandableAdvancedSettings: React.FC<{ children?: React.ReactNode }> = ({ 
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="s"
-                iconType={isShowingAdvanced ? 'arrowUp' : 'arrowDown'}
+                iconType={isShowingAdvanced ? 'chevronSingleUp' : 'chevronSingleDown'}
                 iconSide="right"
                 onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
                 flush="left"
@@ -83,6 +89,8 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
   const { onNext, onBack, isManaged, setIsManaged, packageInfo, integrationInfo, agentPolicy } =
     props;
 
+  const { spaceId } = useFleetStatus();
+  const yaml = useYaml();
   const [basePolicyError, setBasePolicyError] = useState<RequestError>();
 
   const { notifications } = useStartServices();
@@ -99,13 +107,16 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
     inputs: [],
   });
 
+  const yamlValidationRan = useRef(false);
+
   // Update package policy validation
   const updatePackagePolicyValidation = useCallback(
     (newPackagePolicy?: NewPackagePolicy) => {
+      if (!yaml) return undefined;
       const newValidationResult = validatePackagePolicy(
         { ...packagePolicy, ...newPackagePolicy },
         packageInfo,
-        load
+        yaml.parse
       );
       setValidationResults(newValidationResult);
       // eslint-disable-next-line no-console
@@ -113,7 +124,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
 
       return newValidationResult;
     },
-    [packageInfo, packagePolicy]
+    [packageInfo, packagePolicy, yaml]
   );
   // Update package policy method
   const updatePackagePolicy = useCallback(
@@ -127,36 +138,66 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
       // eslint-disable-next-line no-console
       console.debug('Package policy updated', newPackagePolicy);
       const newValidationResults = updatePackagePolicyValidation(newPackagePolicy);
-      const hasPackage = newPackagePolicy.package;
-      const hasValidationErrors = newValidationResults
-        ? validationHasErrors(newValidationResults)
-        : false;
-      if (hasPackage && !hasValidationErrors) {
-        setFormState('VALID');
-      } else {
-        setFormState('INVALID');
+      if (newValidationResults !== undefined) {
+        const hasPackage = newPackagePolicy.package;
+        const hasValidationErrors = validationHasErrors(newValidationResults);
+        if (hasPackage && !hasValidationErrors) {
+          setFormState('VALID');
+        } else {
+          setFormState('INVALID');
+        }
       }
     },
     [packagePolicy, updatePackagePolicyValidation]
   );
 
+  // Once yaml loads, run validation against the current package policy so formState
+  // reflects actual validity rather than the initial optimistic 'VALID' default.
+  useEffect(() => {
+    if (yaml && !yamlValidationRan.current) {
+      yamlValidationRan.current = true;
+      const newValidationResults = validatePackagePolicy(packagePolicy, packageInfo, yaml.parse);
+      setValidationResults(newValidationResults);
+      const hasPackage = packagePolicy.package;
+      const hasValidationErrors = validationHasErrors(newValidationResults);
+      if (hasPackage && !hasValidationErrors) {
+        setFormState('VALID');
+      } else {
+        setFormState('INVALID');
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [yaml]);
+
   // Save package policy
-  const savePackagePolicy = async ({
-    newPackagePolicy,
-    force,
-  }: {
-    newPackagePolicy: NewPackagePolicy;
-    force?: boolean;
-  }) => {
-    setFormState('LOADING');
-    const { policy, forceCreateNeeded } = await prepareInputPackagePolicyDataset(newPackagePolicy);
-    const result = await sendCreatePackagePolicy({
-      ...policy,
-      force: forceCreateNeeded || force,
-    });
-    setFormState('SUBMITTED');
-    return result;
-  };
+  const savePackagePolicy = useCallback(
+    async ({
+      newPackagePolicy,
+      force,
+    }: {
+      newPackagePolicy: NewPackagePolicy;
+      force?: boolean;
+    }) => {
+      setFormState('LOADING');
+      const { policy, forceCreateNeeded } = await prepareInputPackagePolicyDataset(
+        newPackagePolicy
+      );
+      const result = await sendCreatePackagePolicy({
+        ...policy,
+        force: forceCreateNeeded || force,
+      });
+      setFormState('SUBMITTED');
+      if (!result.error && result.data?.item.package)
+        await ensurePackageKibanaAssetsInstalled({
+          currentSpaceId: spaceId ?? DEFAULT_SPACE_ID,
+          pkgName: result.data.item.package.name,
+          pkgVersion: result.data.item.package.version,
+          toasts: notifications.toasts,
+        });
+      return result;
+    },
+    [notifications.toasts, spaceId]
+  );
 
   const onSubmit = useCallback(
     async ({ force = false }: { force?: boolean } = {}) => {
@@ -190,6 +231,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
     },
     [
       validationResults,
+      savePackagePolicy,
       formState,
       packagePolicy,
       notifications.toasts,
@@ -252,6 +294,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
                 validationResults={validationResults}
                 submitAttempted={formState === 'INVALID'}
                 noAdvancedToggle={true}
+                agentPolicies={agentPolicy ? [agentPolicy] : undefined}
               />
             </ExpandableAdvancedSettings>
           )}
@@ -265,6 +308,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
     packagePolicy,
     updatePackagePolicy,
     validationResults,
+    agentPolicy,
   ]);
 
   if (!agentPolicy) {

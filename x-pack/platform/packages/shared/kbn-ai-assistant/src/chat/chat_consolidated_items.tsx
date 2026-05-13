@@ -49,6 +49,7 @@ const noPanelStyle = css`
 
 export function ChatConsolidatedItems({
   consolidatedItem,
+  isConversationOwnedByCurrentUser,
   onActionClick,
   onEditSubmit,
   onFeedback,
@@ -57,6 +58,7 @@ export function ChatConsolidatedItems({
   onStopGenerating,
 }: {
   consolidatedItem: ChatTimelineItem[];
+  isConversationOwnedByCurrentUser: ChatTimelineProps['isConversationOwnedByCurrentUser'];
   onActionClick: ChatTimelineProps['onActionClick'];
   onEditSubmit: ChatTimelineProps['onEdit'];
   onFeedback: ChatTimelineProps['onFeedback'];
@@ -109,7 +111,7 @@ export function ChatConsolidatedItems({
             })}
             color="text"
             data-test-subj="observabilityAiAssistantChatCollapsedItemsButton"
-            iconType={expanded ? 'arrowUp' : 'arrowDown'}
+            iconType={expanded ? 'chevronSingleUp' : 'chevronSingleDown'}
             onClick={handleToggleExpand}
           />
         }
@@ -134,6 +136,7 @@ export function ChatConsolidatedItems({
               }}
               onSendTelemetry={onSendTelemetry}
               onStopGeneratingClick={onStopGenerating}
+              isConversationOwnedByCurrentUser={isConversationOwnedByCurrentUser}
             />
           ))
         : null}

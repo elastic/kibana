@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ServiceHealthStatus } from '../../../../common/service_health_status';
 import type { getServiceTransactionStats } from './get_service_transaction_stats';
 import { mergeServiceStats } from './merge_service_stats';
 
@@ -40,23 +39,23 @@ describe('mergeServiceStats', () => {
             throughput: 4,
           }),
         ],
-        servicesWithoutTransactions: [
+        anomalyScores: [
           {
-            environments: ['production'],
             serviceName: 'opbeans-java',
-            agentName: 'java',
-          },
-        ],
-        healthStatuses: [
-          {
-            healthStatus: ServiceHealthStatus.healthy,
-            serviceName: 'opbeans-java',
+            anomalyScore: 75,
           },
         ],
         alertCounts: [
           {
             alertsCount: 1,
             serviceName: 'opbeans-java',
+          },
+        ],
+        sloStats: [
+          {
+            serviceName: 'opbeans-java',
+            sloStatus: 'violated',
+            sloCount: 1,
           },
         ],
       })
@@ -73,18 +72,22 @@ describe('mergeServiceStats', () => {
       {
         agentName: 'java',
         environments: ['production'],
-        healthStatus: ServiceHealthStatus.healthy,
+        anomalyScore: 75,
         serviceName: 'opbeans-java',
         latency: 1,
         throughput: 2,
         transactionErrorRate: 3,
         transactionType: 'request',
         alertsCount: 1,
+        sloStatus: 'violated',
+        sloCount: 1,
       },
     ]);
   });
 
-  it('shows services that only have metric documents', () => {
+  it('excludes alerts from services not found in APM data', () => {
+    // Services with only alert data (no APM service stats) should NOT appear
+    // This prevents phantom services (e.g., wildcard "*" from SLO alerts) from showing
     expect(
       mergeServiceStats({
         serviceStats: [
@@ -93,23 +96,28 @@ describe('mergeServiceStats', () => {
             environments: ['staging'],
           }),
         ],
-        servicesWithoutTransactions: [
+        anomalyScores: [
           {
-            environments: ['production'],
-            serviceName: 'opbeans-java',
-            agentName: 'java',
-          },
-        ],
-        healthStatuses: [
-          {
-            healthStatus: ServiceHealthStatus.healthy,
-            serviceName: 'opbeans-java',
+            serviceName: 'opbeans-java', // Not in serviceStats - will be excluded
+            anomalyScore: 80,
           },
         ],
         alertCounts: [
           {
             alertsCount: 2,
-            serviceName: 'opbeans-java',
+            serviceName: 'opbeans-java', // Not in serviceStats - will be excluded
+          },
+        ],
+        sloStats: [
+          {
+            serviceName: 'opbeans-java-2',
+            sloStatus: 'degrading',
+            sloCount: 1,
+          },
+          {
+            serviceName: 'unknown-service',
+            sloStatus: 'violated',
+            sloCount: 5,
           },
         ],
       })
@@ -122,13 +130,8 @@ describe('mergeServiceStats', () => {
         throughput: 2,
         transactionErrorRate: 3,
         transactionType: 'request',
-      },
-      {
-        agentName: 'java',
-        environments: ['production'],
-        healthStatus: ServiceHealthStatus.healthy,
-        serviceName: 'opbeans-java',
-        alertsCount: 2,
+        sloStatus: 'degrading',
+        sloCount: 1,
       },
     ]);
   });
@@ -142,17 +145,23 @@ describe('mergeServiceStats', () => {
             environments: ['staging'],
           }),
         ],
-        servicesWithoutTransactions: [],
-        healthStatuses: [
+        anomalyScores: [
           {
-            healthStatus: ServiceHealthStatus.healthy,
             serviceName: 'opbeans-java',
+            anomalyScore: 75,
           },
         ],
         alertCounts: [
           {
             alertsCount: 3,
             serviceName: 'opbeans-java-2',
+          },
+        ],
+        sloStats: [
+          {
+            serviceName: 'opbeans-java-2',
+            sloStatus: 'violated',
+            sloCount: 2,
           },
         ],
       })
@@ -166,38 +175,8 @@ describe('mergeServiceStats', () => {
         transactionErrorRate: 3,
         transactionType: 'request',
         alertsCount: 3,
-      },
-    ]);
-  });
-
-  it('concatenates environments from metric/transaction data', () => {
-    expect(
-      mergeServiceStats({
-        serviceStats: [
-          stat({
-            serviceName: 'opbeans-java',
-            environments: ['staging'],
-          }),
-        ],
-        servicesWithoutTransactions: [
-          {
-            environments: ['production'],
-            serviceName: 'opbeans-java',
-            agentName: 'java',
-          },
-        ],
-        healthStatuses: [],
-        alertCounts: [],
-      })
-    ).toEqual([
-      {
-        agentName: 'java',
-        environments: ['staging', 'production'],
-        serviceName: 'opbeans-java',
-        latency: 1,
-        throughput: 2,
-        transactionErrorRate: 3,
-        transactionType: 'request',
+        sloStatus: 'violated',
+        sloCount: 2,
       },
     ]);
   });

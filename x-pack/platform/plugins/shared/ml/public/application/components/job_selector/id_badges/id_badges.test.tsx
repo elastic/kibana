@@ -9,7 +9,8 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import type { IdBadgesProps } from './id_badges';
 import { IdBadges } from './id_badges';
-import type { MlSummaryJob } from '../../../../../common/types/anomaly_detection_jobs';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 
 jest.mock('../../../contexts/kibana', () => ({
   useMlKibana: () => ({
@@ -21,7 +22,7 @@ jest.mock('../../../contexts/kibana', () => ({
 }));
 
 const props: IdBadgesProps = {
-  page: 'jobs',
+  page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
   limit: 2,
   selectedGroups: [
     {

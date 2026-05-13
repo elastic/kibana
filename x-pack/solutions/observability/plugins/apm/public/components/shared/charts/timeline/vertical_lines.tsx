@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import type { Mark } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks';
 import type { PlotValues } from './plot_utils';
+import type { Mark } from './marker';
 
 interface VerticalLinesProps {
   marks?: Mark[];
@@ -43,12 +43,14 @@ export function VerticalLines({ topTraceDuration, plotValues, marks = [] }: Vert
         position: 'absolute',
         top: 0,
         left: 0,
+        pointerEvents: 'none',
       }}
+      data-test-subj="vertical-lines"
     >
       <g transform={`translate(0 ${margins.top})`}>
-        {tickPositions.map((position) => (
+        {tickPositions.map((position, index) => (
           <line
-            key={`tick-${position}`}
+            key={`tick-${position}-${index}`}
             x1={position}
             x2={position}
             y1={0}
@@ -56,9 +58,9 @@ export function VerticalLines({ topTraceDuration, plotValues, marks = [] }: Vert
             stroke={euiTheme.colors.lightestShade}
           />
         ))}
-        {markPositions.map((position) => (
+        {markPositions.map((position, index) => (
           <line
-            key={`mark-${position}`}
+            key={`mark-${position}-${index}`}
             x1={position}
             x2={position}
             y1={0}

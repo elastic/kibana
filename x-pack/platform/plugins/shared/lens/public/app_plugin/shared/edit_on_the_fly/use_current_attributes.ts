@@ -4,33 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect, useState } from 'react';
-import { isEqual } from 'lodash';
-import type { TypedLensSerializedState } from '../../../react_embeddable/types';
+import { useMemo } from 'react';
+import type { TypedLensSerializedState } from '@kbn/lens-common';
+import { createEmptyLensState } from '../../../react_embeddable/helper';
 import { useLensSelector } from '../../../state_management';
 import { extractReferencesFromState } from '../../../utils';
-import type { DatasourceMap, VisualizationMap } from '../../../types';
+import { useEditorFrameService } from '../../../editor_frame_service/editor_frame_service_context';
 
 export const useCurrentAttributes = ({
   textBasedMode,
   initialAttributes,
-  datasourceMap,
-  visualizationMap,
 }: {
-  initialAttributes: TypedLensSerializedState['attributes'];
-  datasourceMap: DatasourceMap;
-  visualizationMap: VisualizationMap;
-  textBasedMode?: string;
+  initialAttributes?: TypedLensSerializedState['attributes'];
+  textBasedMode?: boolean;
 }) => {
-  const { datasourceStates, visualization } = useLensSelector((state) => state.lens);
+  const { visualizationMap, datasourceMap } = useEditorFrameService();
+
+  const { datasourceStates, visualization, activeDatasourceId } = useLensSelector(
+    (state) => state.lens
+  );
+
   // use the latest activeId, but fallback to attributes
-  const activeVisualization =
-    visualizationMap[visualization.activeId ?? initialAttributes.visualizationType];
+  const visualizationType = visualization.activeId ?? initialAttributes?.visualizationType;
+  const activeVisualization = visualizationType ? visualizationMap[visualizationType] : undefined;
 
-  const [currentAttributes, setCurrentAttributes] =
-    useState<TypedLensSerializedState['attributes']>(initialAttributes);
-
-  useEffect(() => {
+  const currentAttributes = useMemo(() => {
+    if (!activeVisualization) {
+      return initialAttributes;
+    }
     const dsStates = Object.fromEntries(
       Object.entries(datasourceStates).map(([id, ds]) => {
         const dsState = ds.state;
@@ -41,6 +42,7 @@ export const useCurrentAttributes = ({
     const references =
       !textBasedMode && visualization.state
         ? extractReferencesFromState({
+            activeDatasourceId,
             activeDatasources: Object.keys(datasourceStates).reduce(
               (acc, id) => ({
                 ...acc,
@@ -53,27 +55,25 @@ export const useCurrentAttributes = ({
             activeVisualization,
           })
         : [];
+    const attributes = initialAttributes ?? createEmptyLensState().attributes;
     const attrs: TypedLensSerializedState['attributes'] = {
-      ...initialAttributes,
+      ...attributes,
       state: {
-        ...initialAttributes.state,
+        ...attributes.state,
         visualization: visualization.state,
         datasourceStates: dsStates,
       },
       references,
-      visualizationType: visualization.activeId ?? initialAttributes.visualizationType,
+      visualizationType: activeVisualization.id,
     };
-    if (!isEqual(attrs, currentAttributes)) {
-      setCurrentAttributes(attrs);
-    }
+    return attrs;
   }, [
+    activeDatasourceId,
     activeVisualization,
-    initialAttributes,
     datasourceMap,
     datasourceStates,
-    currentAttributes,
+    initialAttributes,
     textBasedMode,
-    visualization.activeId,
     visualization.state,
   ]);
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PublicLastRunSetters } from '../types';
+import type { PublicLastRunSetters } from '../types';
 
 export interface RuleResultServiceResults {
   errors: LastRunError[];
@@ -21,7 +21,7 @@ interface LastRunError {
 export class RuleResultService {
   private errors: LastRunError[] = [];
   private warnings: string[] = [];
-  private outcomeMessage: string = '';
+  private outcomeMessage = '';
 
   public getLastRunErrors(): LastRunError[] {
     return this.errors;
@@ -51,7 +51,7 @@ export class RuleResultService {
     };
   }
 
-  private addLastRunError(message: string, userError: boolean = false) {
+  private addLastRunError(message: string, userError = false) {
     this.errors.push({ message, userError });
   }
 

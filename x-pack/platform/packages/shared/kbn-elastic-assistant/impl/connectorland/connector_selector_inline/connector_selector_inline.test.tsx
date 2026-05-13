@@ -11,8 +11,9 @@ import { fireEvent, render } from '@testing-library/react';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { mockConnectors } from '../../mock/connectors';
 import { ConnectorSelectorInline } from './connector_selector_inline';
-import { Conversation } from '../../..';
-import { useLoadConnectors } from '../use_load_connectors';
+import type { Conversation } from '../../..';
+import { useLoadConnectors } from '@kbn/inference-connectors';
+import { MOCK_CURRENT_USER } from '../../assistant/use_conversation/sample_conversations';
 
 const setApiConfig = jest.fn();
 const mockConversation = {
@@ -37,7 +38,7 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public/common/constants', () => ({
   }),
 }));
 
-jest.mock('../use_load_connectors', () => ({
+jest.mock('@kbn/inference-connectors', () => ({
   useLoadConnectors: jest.fn(() => {
     return {
       data: mockConnectors,
@@ -60,6 +61,9 @@ const defaultConvo: Conversation = {
   apiConfig: { connectorId: '123', actionTypeId: '.gen-ai' },
   replacements: {},
   title: 'conversation_id',
+  createdAt: '2025-02-19T23:28:54.962Z',
+  createdBy: MOCK_CURRENT_USER,
+  users: [MOCK_CURRENT_USER],
 };
 
 describe('ConnectorSelectorInline', () => {
@@ -78,7 +82,7 @@ describe('ConnectorSelectorInline', () => {
       </TestProviders>
     );
     fireEvent.click(getByTestId('connector-selector'));
-    expect(getByTestId('addNewConnectorButton')).toBeInTheDocument();
+    expect(getByTestId('aiAssistantAddConnectorButton')).toBeInTheDocument();
   });
 
   it('renders empty view if selectedConnectorId is NOT in list of connectors', () => {
@@ -93,7 +97,7 @@ describe('ConnectorSelectorInline', () => {
       </TestProviders>
     );
     fireEvent.click(getByTestId('connector-selector'));
-    expect(getByTestId('addNewConnectorButton')).toBeInTheDocument();
+    expect(getByTestId('aiAssistantAddConnectorButton')).toBeInTheDocument();
   });
   it('renders the connector selector', () => {
     const { getByTestId } = render(
@@ -136,8 +140,27 @@ describe('ConnectorSelectorInline', () => {
         id: 'conversation_id',
         messages: [],
         title: 'conversation_id',
+        createdAt: '2025-02-19T23:28:54.962Z',
+        createdBy: MOCK_CURRENT_USER,
+        users: [MOCK_CURRENT_USER],
       },
     });
+  });
+  it('passes loadConnectorFeatureId to ConnectorSelector when defined', () => {
+    render(
+      <TestProviders>
+        <ConnectorSelectorInline
+          isDisabled={false}
+          selectedConnectorId={mockConnectors[0].id}
+          selectedConversation={defaultConvo}
+          onConnectorSelected={jest.fn()}
+          loadConnectorFeatureId="test-feature-id"
+        />
+      </TestProviders>
+    );
+    expect(useLoadConnectors).toHaveBeenCalledWith(
+      expect.objectContaining({ featureId: 'test-feature-id' })
+    );
   });
   it('On connector change to add new connector, onchange event does nothing', () => {
     const { getByTestId } = render(

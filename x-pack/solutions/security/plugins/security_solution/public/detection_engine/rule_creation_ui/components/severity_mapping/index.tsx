@@ -10,7 +10,7 @@ import React, { useCallback } from 'react';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { Severity, SeverityMapping } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { AboutStepSeverity } from '../../../../detections/pages/detection_engine/rules/types';
+import type { AboutStepSeverity } from '../../../common/types';
 import { DefaultSeverity } from './default_severity';
 import { SeverityOverride } from './severity_override';
 
@@ -100,7 +100,11 @@ export const SeverityField = ({
 
   return (
     <EuiFlexGroup direction={'column'}>
-      <DefaultSeverity value={value} onChange={handleDefaultSeverityChange} />
+      <DefaultSeverity
+        value={value}
+        onChange={handleDefaultSeverityChange}
+        isDisabled={isDisabled}
+      />
       <EuiFlexItem>
         <SeverityOverride
           isDisabled={isDisabled}

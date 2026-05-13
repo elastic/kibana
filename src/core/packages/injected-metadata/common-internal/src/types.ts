@@ -63,13 +63,17 @@ export interface InjectedMetadata {
   env: {
     mode: EnvironmentMode;
     packageInfo: PackageInfo;
+    airgapped: boolean;
+    isCoreRenderingInReactConcurrentMode: boolean;
   };
   featureFlags?: {
     overrides: Record<string, unknown>;
+    initialFeatureFlags: Record<string, unknown>;
   };
   anonymousStatusPage: boolean;
   i18n: {
     translationsUrl: string;
+    availableLocales: Array<{ id: string; label: string }>;
   };
   theme: InjectedMetadataTheme;
   csp: {

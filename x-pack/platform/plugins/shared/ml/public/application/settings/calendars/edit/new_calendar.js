@@ -18,7 +18,7 @@ import { NewEventModal } from './new_event_modal';
 import { ImportModal } from './import_modal';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { GLOBAL_CALENDAR } from '../../../../../common/constants/calendars';
-import { ML_PAGES } from '../../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 import { HelpMenu } from '../../../components/help_menu';
 
@@ -66,7 +66,7 @@ class NewCalendarUI extends Component {
       },
     } = this.props.kibana;
     await navigateToUrl(
-      `${basePath.get()}/app/ml/${
+      `${basePath.get()}/app/management/ml/ad_settings/${
         this.props.isDst ? ML_PAGES.CALENDARS_DST_MANAGE : ML_PAGES.CALENDARS_MANAGE
       }`,
       true

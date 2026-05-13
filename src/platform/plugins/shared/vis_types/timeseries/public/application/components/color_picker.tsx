@@ -11,13 +11,8 @@
 // The color picker is not yet accessible.
 
 import React, { useState } from 'react';
-import {
-  EuiIconTip,
-  EuiColorPicker,
-  EuiColorPickerProps,
-  EuiColorPickerSwatch,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { EuiColorPickerProps } from '@elastic/eui';
+import { EuiIconTip, EuiColorPicker, EuiColorPickerSwatch, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
@@ -85,6 +80,7 @@ export function ColorPicker({ name, value, disableTrash = false, onChange }: Col
         secondaryInputDisplay="top"
         showAlpha
         button={<EuiColorPickerSwatch color={color} aria-label={label} />}
+        aria-label={label}
       />
       {!disableTrash && (
         <div

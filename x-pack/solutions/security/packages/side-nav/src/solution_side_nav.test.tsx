@@ -7,7 +7,9 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { SolutionSideNav, type SolutionSideNavProps } from './solution_side_nav';
+import { userEvent } from '@testing-library/user-event';
+import { SolutionSideNav } from './solution_side_nav';
+import type { SolutionSideNavProps } from './solution_side_nav';
 import type { SolutionSideNavItem } from './types';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { TELEMETRY_EVENT } from './telemetry/const';
@@ -33,6 +35,19 @@ const mockItems: SolutionSideNavItem[] = [
     label: 'Alerts',
     href: '/alerts',
   },
+  {
+    id: 'rulesLanding',
+    label: 'Rules',
+    href: '/rules',
+    items: [
+      {
+        id: 'rulesManagement',
+        label: 'Rules Management',
+        href: '/rules-management',
+        description: 'Rules Management description',
+      },
+    ],
+  },
 ];
 
 const renderNav = (props: Partial<SolutionSideNavProps> = {}) =>
@@ -56,13 +71,13 @@ describe('SolutionSideNav', () => {
       const result = renderNav();
       expect(
         result.getByTestId(`solutionSideNavItemLink-${'dashboardsLanding'}`).getAttribute('href')
-      ).toBe('/dashboards');
+      ).toBe('/overview');
       expect(result.getByTestId(`solutionSideNavItemLink-${'alerts'}`).getAttribute('href')).toBe(
         '/alerts'
       );
     });
 
-    it('should call onClick callback if link clicked', () => {
+    it('should call onClick callback if link clicked', async () => {
       const mockOnClick = jest.fn((ev) => {
         ev.preventDefault();
       });
@@ -76,11 +91,20 @@ describe('SolutionSideNav', () => {
         },
       ];
       const result = renderNav({ items });
-      result.getByTestId(`solutionSideNavItemLink-${'exploreLanding'}`).click();
+      await userEvent.click(result.getByTestId(`solutionSideNavItemLink-${'exploreLanding'}`));
       expect(mockOnClick).toHaveBeenCalled();
     });
 
-    it('should send telemetry if link clicked', () => {
+    it('renders right arrow hint when item has children', () => {
+      const result = renderNav({
+        items: mockItems,
+        selectedId: 'rules',
+      });
+
+      expect(result.getByTestId('solutionSideNavItemPanelHint-rulesLanding')).toBeInTheDocument();
+    });
+
+    it('should send telemetry when a link without children is clicked', async () => {
       const items = [
         ...mockItems,
         {
@@ -90,49 +114,39 @@ describe('SolutionSideNav', () => {
         },
       ];
       const result = renderNav({ items });
-      result.getByTestId(`solutionSideNavItemLink-${'exploreLanding'}`).click();
+      await userEvent.click(result.getByTestId(`solutionSideNavItemLink-${'exploreLanding'}`));
       expect(mockTrack).toHaveBeenCalledWith(
         METRIC_TYPE.CLICK,
         `${TELEMETRY_EVENT.NAVIGATION}${'exploreLanding'}`
       );
     });
-  });
 
-  describe('panel button toggle', () => {
-    it('should render the panel button only for nav items', () => {
-      const result = renderNav();
-      expect(
-        result.getByTestId(`solutionSideNavItemButton-${'dashboardsLanding'}`)
-      ).toBeInTheDocument();
-      expect(result.queryByTestId(`solutionSideNavItemButton-${'alerts'}`)).not.toBeInTheDocument();
-    });
-
-    it('should render the panel when button is clicked', () => {
+    it('should send telemetry when a parent link is clicked', async () => {
       const result = renderNav();
       expect(result.queryByTestId('solutionSideNavPanel')).not.toBeInTheDocument();
 
-      result.getByTestId(`solutionSideNavItemButton-${'dashboardsLanding'}`).click();
-      expect(result.getByTestId('solutionSideNavPanel')).toBeInTheDocument();
-      expect(result.getByText('Overview')).toBeInTheDocument();
-    });
-
-    it('should telemetry when button is clicked', () => {
-      const result = renderNav();
-      expect(result.queryByTestId('solutionSideNavPanel')).not.toBeInTheDocument();
-
-      result.getByTestId(`solutionSideNavItemButton-${'dashboardsLanding'}`).click();
+      await userEvent.click(result.getByTestId(`solutionSideNavItemLink-${'dashboardsLanding'}`));
       expect(mockTrack).toHaveBeenCalledWith(
         METRIC_TYPE.CLICK,
         `${TELEMETRY_EVENT.PANEL_NAVIGATION_TOGGLE}${'dashboardsLanding'}`
       );
     });
 
-    it('should close the panel when the same button is clicked', () => {
+    it('should render the sub-nav panel when link is clicked', async () => {
       const result = renderNav();
-      result.getByTestId(`solutionSideNavItemButton-${'dashboardsLanding'}`).click();
+      expect(result.queryByTestId('solutionSideNavPanel')).not.toBeInTheDocument();
+
+      await userEvent.click(result.getByTestId(`solutionSideNavItemLink-${'dashboardsLanding'}`));
+      expect(result.getByTestId('solutionSideNavPanel')).toBeInTheDocument();
+      expect(result.getByText('Overview')).toBeInTheDocument();
+    });
+
+    it('should close the sub-nav panel when the same link is clicked', async () => {
+      const result = renderNav();
+      await userEvent.click(result.getByTestId(`solutionSideNavItemLink-${'dashboardsLanding'}`));
       expect(result.getByTestId('solutionSideNavPanel')).toBeInTheDocument();
 
-      result.getByTestId(`solutionSideNavItemButton-${'dashboardsLanding'}`).click();
+      await userEvent.click(result.getByTestId(`solutionSideNavItemLink-${'dashboardsLanding'}`));
 
       // add check at the end of the event loop to ensure the panel is removed
       setTimeout(() => {
@@ -140,7 +154,7 @@ describe('SolutionSideNav', () => {
       });
     });
 
-    it('should open other panel when other button is clicked while open', () => {
+    it('should open relevant sub-nav panel when another link is clicked while sub-nav is open', async () => {
       const items = [
         ...mockItems,
         {
@@ -159,11 +173,11 @@ describe('SolutionSideNav', () => {
       ];
       const result = renderNav({ items });
 
-      result.getByTestId(`solutionSideNavItemButton-${'dashboardsLanding'}`).click();
+      await userEvent.click(result.getByTestId(`solutionSideNavItemLink-${'dashboardsLanding'}`));
       expect(result.getByTestId('solutionSideNavPanel')).toBeInTheDocument();
       expect(result.getByText('Overview')).toBeInTheDocument();
 
-      result.getByTestId(`solutionSideNavItemButton-${'exploreLanding'}`).click();
+      await userEvent.click(result.getByTestId(`solutionSideNavItemLink-${'exploreLanding'}`));
       expect(result.queryByTestId('solutionSideNavPanel')).toBeInTheDocument();
       expect(result.getByText('Users')).toBeInTheDocument();
     });

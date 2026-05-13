@@ -16,6 +16,10 @@ import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/u
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { JsonCodeEditorCommon } from '../json_code_editor';
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import { mockUnifiedDocViewerServices } from '../../__mocks__';
+import { setUnifiedDocViewerServices } from '../../plugin';
+
+setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
 
 const mockDataView = {
   getComputedFields: () => [],
@@ -93,5 +97,36 @@ describe('Source Viewer component', () => {
     expect(jsonCodeEditor.props().jsonValue).not.toContain('_score');
     expect(jsonCodeEditor.props().hasLineNumbers).toBe(true);
     expect(jsonCodeEditor.props().enableFindAction).toBe(true);
+  });
+
+  test('renders json code editor for ES|QL record', () => {
+    const record = {
+      _index: 'logstash-2014.09.09',
+      _id: 'id123',
+      message: 'Lorem ipsum dolor sit amet',
+      extension: 'html',
+    };
+    const mockHit = {
+      id: '22',
+      raw: record,
+      flattened: record,
+    };
+    jest.spyOn(useUiSettingHook, 'useUiSetting').mockImplementation(() => {
+      return false;
+    });
+    const comp = mountWithIntl(
+      <DocViewerSource
+        id={mockHit.id}
+        index={'index1'}
+        dataView={mockDataView}
+        esqlHit={mockHit}
+        width={123}
+        onRefresh={() => {}}
+      />
+    );
+    const jsonCodeEditor = comp.find(JsonCodeEditorCommon);
+    expect(jsonCodeEditor).not.toBe(null);
+    expect(jsonCodeEditor.props().jsonValue).toContain('message');
+    expect(jsonCodeEditor.props().jsonValue).toContain('_id');
   });
 });

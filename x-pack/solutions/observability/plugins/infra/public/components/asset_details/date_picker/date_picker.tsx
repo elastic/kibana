@@ -112,9 +112,11 @@ export const DatePicker = () => {
           width="full"
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ minHeight: '18px' }}>
-        {autoRefresh && !autoRefresh.isPaused && <AutoRefreshTroubleshootMessage />}
-      </EuiFlexItem>
+      {autoRefresh && !autoRefresh.isPaused && (
+        <EuiFlexItem grow={false}>
+          <AutoRefreshTroubleshootMessage />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
@@ -133,7 +135,7 @@ const AutoRefreshTroubleshootMessage = () => (
       <Popover
         iconSize="s"
         iconColor="subdued"
-        icon="iInCircle"
+        icon="info"
         data-test-subj="infraAssetDetailsMetadataPopoverButton"
       >
         <EuiText size="xs">

@@ -6,6 +6,7 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
 
 export const BadgesColumn: React.FC<{
@@ -15,9 +16,15 @@ export const BadgesColumn: React.FC<{
 }> = React.memo(({ items, prefix, color = 'hollow' }) =>
   items && items.length > 0 ? (
     <div>
-      {items.map((c, idx) => (
-        <EuiBadge key={`${prefix}-${idx}`} color={color}>
-          {c}
+      {items.map((title, idx) => (
+        <EuiBadge
+          key={`${prefix}-${idx}`}
+          color={color}
+          css={css`
+            max-width: 400px;
+          `}
+        >
+          {title}
         </EuiBadge>
       ))}
     </div>

@@ -5,262 +5,377 @@
  * 2.0.
  */
 
-import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { Location } from 'history';
+
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { i18n } from '@kbn/i18n';
-import { CONNECTORS_LABEL, WEB_CRAWLERS_LABEL } from '../common/i18n_string';
 
-export const navigationTree = ({ isAppRegistered }: ApplicationStart): NavigationTreeDefinition => {
-  function isAvailable<T>(appId: string, content: T): T[] {
-    return isAppRegistered(appId) ? [content] : [];
+function isEditingFromDashboard(
+  location: Location,
+  pathNameSerialized: string,
+  prepend: (path: string) => string
+): boolean {
+  const vizApps = ['/app/visualize', '/app/maps', '/app/lens'];
+  const isVizApp = vizApps.some((app) => pathNameSerialized.startsWith(prepend(app)));
+  const hasOriginatingApp =
+    location.search.includes('originatingApp=dashboards') ||
+    location.hash.includes('originatingApp=dashboards');
+  return isVizApp && hasOriginatingApp;
+}
+
+const NAV_TITLE = i18n.translate('xpack.serverlessSearch.nav.title', {
+  defaultMessage: 'Elasticsearch',
+});
+const PERFORMANCE_TITLE = i18n.translate('xpack.serverlessSearch.nav.performance', {
+  defaultMessage: 'Performance',
+});
+const ALERTS_AND_INSIGHTS_TITLE = i18n.translate(
+  'xpack.serverlessSearch.nav.mngt.alertsAndInsights',
+  {
+    defaultMessage: 'Alerts and insights',
   }
+);
+const MACHINE_LEARNING_TITLE = i18n.translate('xpack.serverlessSearch.nav.machineLearning', {
+  defaultMessage: 'Machine Learning',
+});
+const ACCESS_TITLE = i18n.translate('xpack.serverlessSearch.nav.mngt.access', {
+  defaultMessage: 'Access',
+});
+const CONTENT_TITLE = i18n.translate('xpack.serverlessSearch.nav.mngt.content', {
+  defaultMessage: 'Content',
+});
 
+const AI_TITLE = i18n.translate('xpack.serverlessSearch.nav.adminAndSettings.ai.title', {
+  defaultMessage: 'AI',
+});
+
+const PROJECT_PERFORMANCE_TITLE = i18n.translate(
+  'xpack.serverlessSearch.nav.adminAndSettings.projectPerformance.title',
+  {
+    defaultMessage: 'Project performance',
+  }
+);
+
+export function createNavigationTree({
+  isAppRegistered,
+  showAiAssistant = true,
+  showAlertingV2 = false,
+}: ApplicationStart & {
+  showAiAssistant?: boolean;
+  showAlertingV2?: boolean;
+}): NavigationTreeDefinition {
   return {
     body: [
       {
-        type: 'navGroup',
-        id: 'search_project_nav',
-        title: 'Elasticsearch',
         icon: 'logoElasticsearch',
-        defaultIsCollapsed: false,
-        isCollapsible: false,
+        link: 'searchHomepage',
+        renderAs: 'home',
+        title: NAV_TITLE,
         breadcrumbStatus: 'hidden',
+      },
+      {
+        link: 'discover',
+        icon: 'productDiscover',
+      },
+      {
+        link: 'dashboards',
+        icon: 'productDashboard',
+        getIsActive: ({ pathNameSerialized, prepend, location }) =>
+          pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
+          isEditingFromDashboard(location, pathNameSerialized, prepend),
+      },
+      {
+        icon: 'productAgent',
+        link: 'agent_builder',
+      },
+      {
+        link: 'workflows',
+      },
+      {
         children: [
           {
-            id: 'data',
-            title: i18n.translate('xpack.serverlessSearch.nav.data', {
-              defaultMessage: 'Data',
-            }),
-            spaceBefore: 'm',
+            id: 'ml_overview',
+            title: '',
             children: [
-              {
-                title: i18n.translate('xpack.serverlessSearch.nav.content.indices', {
-                  defaultMessage: 'Index Management',
-                }),
-                link: 'management:index_management',
-                breadcrumbStatus:
-                  'hidden' /* management sub-pages set their breadcrumbs themselves */,
-                getIsActive: ({ pathNameSerialized, prepend }) => {
-                  return (
-                    pathNameSerialized.startsWith(
-                      prepend('/app/management/data/index_management/')
-                    ) ||
-                    pathNameSerialized.startsWith(prepend('/app/elasticsearch/indices')) ||
-                    pathNameSerialized.startsWith(prepend('/app/elasticsearch/start'))
-                  );
-                },
-              },
-              {
-                title: CONNECTORS_LABEL,
-                link: 'serverlessConnectors',
-              },
-              {
-                title: WEB_CRAWLERS_LABEL,
-                link: 'serverlessWebCrawlers',
-              },
+              { link: 'ml:overview' },
+              { link: 'ml:dataVisualizer' },
+              { link: 'ml:dataDrift', sideNavStatus: 'hidden' },
+              { link: 'ml:dataDriftPage', sideNavStatus: 'hidden' },
+              { link: 'ml:fileUpload', sideNavStatus: 'hidden' },
+              { link: 'ml:indexDataVisualizer', sideNavStatus: 'hidden' },
+              { link: 'ml:indexDataVisualizerPage', sideNavStatus: 'hidden' },
             ],
           },
           {
-            id: 'build',
-            title: i18n.translate('xpack.serverlessSearch.nav.build', {
-              defaultMessage: 'Build',
+            id: 'category-anomaly_detection',
+            title: i18n.translate('xpack.serverlessSearch.nav.machineLearning.anomalyDetection', {
+              defaultMessage: 'Anomaly detection',
             }),
-            spaceBefore: 'm',
+            breadcrumbStatus: 'hidden',
             children: [
               {
-                id: 'dev_tools',
-                title: i18n.translate('xpack.serverlessSearch.nav.devTools', {
-                  defaultMessage: 'Dev Tools',
-                }),
-                link: 'dev_tools:console',
-                getIsActive: ({ pathNameSerialized, prepend }) => {
-                  return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
-                },
-              },
-              ...isAvailable('searchPlayground', {
-                id: 'searchPlayground',
-                title: i18n.translate('xpack.serverlessSearch.nav.build.searchPlayground', {
-                  defaultMessage: 'Playground',
-                }),
-                link: 'searchPlayground' as AppDeepLinkId,
-              }),
-            ],
-          },
-          {
-            id: 'relevance',
-            title: i18n.translate('xpack.serverlessSearch.nav.relevance', {
-              defaultMessage: 'Relevance',
-            }),
-            spaceBefore: 'm',
-            children: [
-              {
-                id: 'searchInferenceEndpoints',
+                link: 'management:anomaly_detection',
                 title: i18n.translate(
-                  'xpack.serverlessSearch.nav.relevance.searchInferenceEndpoints',
+                  'xpack.serverlessSearch.nav.machineLearning.anomalyDetection.manageJobs',
                   {
-                    defaultMessage: 'Inference Endpoints',
+                    defaultMessage: 'Manage jobs',
                   }
                 ),
-                link: 'searchInferenceEndpoints',
               },
-              {
-                id: 'searchSynonyms',
-                title: i18n.translate('xpack.serverlessSearch.nav.relevance.searchSynonyms', {
-                  defaultMessage: 'Synonyms',
-                }),
-                link: 'searchSynonyms',
-              },
+              { link: 'ml:anomalyExplorer' },
+              { link: 'ml:singleMetricViewer' },
             ],
           },
           {
-            id: 'analyze',
-            title: i18n.translate('xpack.serverlessSearch.nav.analyze', {
-              defaultMessage: 'Analyze',
+            id: 'category-data_frame analytics',
+            title: i18n.translate('xpack.serverlessSearch.nav.machineLearning.dataFrameAnalytics', {
+              defaultMessage: 'Data frame analytics',
             }),
-            spaceBefore: 'm',
+            breadcrumbStatus: 'hidden',
+            children: [{ link: 'ml:resultExplorer' }, { link: 'ml:analyticsMap' }],
+          },
+          {
+            id: 'category-aiops_labs',
+            title: i18n.translate('xpack.serverlessSearch.nav.machineLearning.aiops_labs', {
+              defaultMessage: 'AIOps labs',
+            }),
+            breadcrumbStatus: 'hidden',
             children: [
-              {
-                link: 'discover',
-              },
-              {
-                link: 'dashboards',
-                getIsActive: ({ pathNameSerialized, prepend }) => {
-                  return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-                },
-              },
+              { link: 'ml:logRateAnalysis' },
+              { link: 'ml:logRateAnalysisPage', sideNavStatus: 'hidden' },
+              { link: 'ml:logPatternAnalysis' },
+              { link: 'ml:logPatternAnalysisPage', sideNavStatus: 'hidden' },
+              { link: 'ml:changePointDetections' },
+              { link: 'ml:changePointDetectionsPage', sideNavStatus: 'hidden' },
             ],
-          },
-          {
-            id: 'otherTools',
-            title: i18n.translate('xpack.serverlessSearch.nav.otherTools', {
-              defaultMessage: 'Other tools',
-            }),
-            spaceBefore: 'm',
-            children: [{ link: 'maps' }],
           },
         ],
+        icon: 'productML',
+        id: 'machine_learning',
+        renderAs: 'panelOpener',
+        title: MACHINE_LEARNING_TITLE,
+      },
+      {
+        children: [
+          {
+            children: [
+              { link: 'management:index_management', breadcrumbStatus: 'hidden' },
+              { link: 'management:index_lifecycle_management', breadcrumbStatus: 'hidden' },
+              { link: 'management:snapshot_restore', breadcrumbStatus: 'hidden' },
+              { link: 'management:transform', breadcrumbStatus: 'hidden' },
+              { link: 'management:rollup_jobs', breadcrumbStatus: 'hidden' },
+              { link: 'management:data_quality', breadcrumbStatus: 'hidden' },
+              { link: 'management:data_usage', breadcrumbStatus: 'hidden' },
+            ],
+            title: i18n.translate('xpack.serverlessSearch.nav.ingest.indices.title', {
+              defaultMessage: 'Indices and data streams',
+            }),
+          },
+          {
+            children: [
+              { link: 'management:ingest_pipelines', breadcrumbStatus: 'hidden' },
+              { link: 'management:pipelines', breadcrumbStatus: 'hidden' },
+            ],
+            title: i18n.translate('xpack.serverlessSearch.nav.ingest.pipelines.title', {
+              defaultMessage: 'Ingest',
+            }),
+          },
+          {
+            children: [
+              { link: 'searchSynonyms:synonyms', breadcrumbStatus: 'hidden' },
+              { link: 'searchQueryRules' },
+              { link: 'searchPlayground' },
+            ],
+            id: 'search_relevance',
+            breadcrumbStatus: 'hidden',
+            title: i18n.translate('xpack.serverlessSearch.nav.ingest.relevance.title', {
+              defaultMessage: 'Relevance',
+            }),
+          },
+        ],
+        icon: 'database',
+        id: DATA_MANAGEMENT_NAV_ID, // important for tour
+        renderAs: 'panelOpener',
+        title: i18n.translate('xpack.serverlessSearch.nav.dataManagement', {
+          defaultMessage: 'Data management',
+        }),
       },
     ],
     footer: [
       {
-        id: 'gettingStarted',
-        type: 'navItem',
-        title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
-          defaultMessage: 'Getting Started',
-        }),
-        link: 'serverlessElasticsearch',
-        icon: 'launch',
+        id: 'search_getting_started',
+        icon: 'rocket',
+        link: 'searchGettingStarted',
       },
       {
-        type: 'navGroup',
-        id: 'project_settings_project_nav',
-        title: i18n.translate('xpack.serverlessSearch.nav.projectSettings', {
-          defaultMessage: 'Project settings',
+        id: 'dev_tools',
+        title: i18n.translate('xpack.serverlessSearch.nav.developerTools', {
+          defaultMessage: 'Developer Tools',
+        }),
+        icon: 'code',
+        link: 'dev_tools:console',
+        getIsActive: ({ pathNameSerialized, prepend }) => {
+          return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
+        },
+      },
+      {
+        id: 'admin_and_settings',
+        title: i18n.translate('xpack.serverlessSearch.nav.adminAndSettings', {
+          defaultMessage: 'Admin and Settings',
         }),
         icon: 'gear',
         breadcrumbStatus: 'hidden',
+        renderAs: 'panelOpener',
         children: [
           {
-            link: 'ml:modelManagement',
-            title: i18n.translate('xpack.serverlessSearch.nav.trainedModels', {
-              defaultMessage: 'Trained models',
-            }),
+            id: 'settings_access',
+            title: ACCESS_TITLE,
+            children: [
+              { link: 'management:api_keys', breadcrumbStatus: 'hidden' },
+              { link: 'management:roles', breadcrumbStatus: 'hidden' },
+            ],
           },
           {
-            id: 'management',
-            title: i18n.translate('xpack.serverlessSearch.nav.mngt', {
-              defaultMessage: 'Management',
+            id: 'organization',
+            title: i18n.translate('xpack.serverlessSearch.nav.adminAndSettings.org.title', {
+              defaultMessage: 'Organization',
             }),
-            spaceBefore: null,
-            renderAs: 'panelOpener',
             children: [
               {
-                title: i18n.translate('xpack.serverlessSearch.nav.mngt.data', {
-                  defaultMessage: 'Data',
-                }),
-                breadcrumbStatus: 'hidden',
-                children: [
-                  { link: 'management:index_management', breadcrumbStatus: 'hidden' },
-                  { link: 'management:transform', breadcrumbStatus: 'hidden' },
-                  { link: 'management:ingest_pipelines', breadcrumbStatus: 'hidden' },
-                  { link: 'management:dataViews', breadcrumbStatus: 'hidden' },
-                  { link: 'management:jobsListLink', breadcrumbStatus: 'hidden' },
-                  { link: 'management:pipelines', breadcrumbStatus: 'hidden' },
-                  { link: 'management:data_quality', breadcrumbStatus: 'hidden' },
-                  { link: 'management:data_usage', breadcrumbStatus: 'hidden' },
-                ],
+                id: 'cloudLinkBilling',
+                cloudLink: 'billingAndSub',
               },
               {
-                title: i18n.translate('xpack.serverlessSearch.nav.mngt.access', {
-                  defaultMessage: 'Access',
-                }),
-                breadcrumbStatus: 'hidden',
-                children: [
-                  { link: 'management:api_keys', breadcrumbStatus: 'hidden' },
-                  { link: 'management:roles', breadcrumbStatus: 'hidden' },
-                  {
-                    cloudLink: 'userAndRoles',
-                    title: i18n.translate('xpack.serverlessSearch.nav.mngt.access.userAndRoles', {
-                      defaultMessage: 'Manage Organization Members',
-                    }),
-                  },
-                ],
+                id: 'cloudLinkDeployment',
+                cloudLink: 'deployment',
+                title: PERFORMANCE_TITLE,
               },
               {
-                title: i18n.translate('xpack.serverlessSearch.nav.mngt.alertsAndInsights', {
-                  defaultMessage: 'Alerts and insights',
-                }),
-                breadcrumbStatus: 'hidden',
-                children: [
-                  { link: 'management:triggersActions', breadcrumbStatus: 'hidden' },
-                  { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
-                ],
+                cloudLink: 'userAndRoles',
               },
+            ],
+          },
+          ...(showAlertingV2
+            ? [
+                {
+                  id: 'v2_alerting_preview',
+                  title: i18n.translate('xpack.serverlessSearch.nav.management.v2AlertingPreview', {
+                    defaultMessage: 'V2 Alerting Preview',
+                  }),
+                  renderAs: 'panelOpener' as const,
+                  breadcrumbStatus: 'hidden' as const,
+                  children: [
+                    { link: 'management:rules' as const, breadcrumbStatus: 'hidden' as const },
+                    { link: 'management:episodes' as const, breadcrumbStatus: 'hidden' as const },
+                    {
+                      link: 'management:action_policies' as const,
+                      breadcrumbStatus: 'hidden' as const,
+                    },
+                  ],
+                },
+              ]
+            : []),
+          {
+            id: 'settings_alerts',
+            title: ALERTS_AND_INSIGHTS_TITLE,
+            breadcrumbStatus: 'hidden',
+            children: [
+              { link: 'management:triggersActionsAlerts', breadcrumbStatus: 'hidden' },
+              { link: 'rules', breadcrumbStatus: 'hidden' },
+              { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
+            ],
+          },
+          {
+            id: 'settings_project_performance',
+            title: PROJECT_PERFORMANCE_TITLE,
+            breadcrumbStatus: 'hidden',
+            children: [
               {
-                title: i18n.translate('xpack.serverlessSearch.nav.mngt.content', {
-                  defaultMessage: 'Content',
-                }),
+                link: 'management:queryActivity',
                 breadcrumbStatus: 'hidden',
-                children: [
-                  { link: 'management:spaces', breadcrumbStatus: 'hidden' },
-                  { link: 'management:objects', breadcrumbStatus: 'hidden' },
-                  { link: 'management:filesManagement', breadcrumbStatus: 'hidden' },
-                  { link: 'management:reporting', breadcrumbStatus: 'hidden' },
-                  { link: 'management:tags', breadcrumbStatus: 'hidden' },
-                ],
-              },
-              {
-                title: i18n.translate('xpack.serverlessSearch.nav.mngt.other', {
-                  defaultMessage: 'Other',
-                }),
-                breadcrumbStatus: 'hidden',
-                children: [
-                  { link: 'management:settings', breadcrumbStatus: 'hidden' },
-                  {
-                    link: 'management:observabilityAiAssistantManagement',
-                    breadcrumbStatus: 'hidden',
-                    title: i18n.translate(
-                      'xpack.serverlessSearch.nav.mngt.other.aiAssistantSettings',
-                      { defaultMessage: 'AI Assistant Settings' }
-                    ),
-                  },
-                ],
+                badgeType: 'new',
               },
             ],
           },
           {
-            id: 'cloudLinkDeployment',
-            cloudLink: 'deployment',
-            title: i18n.translate('xpack.serverlessSearch.nav.performance', {
-              defaultMessage: 'Performance',
-            }),
+            id: 'settings_ml',
+            title: MACHINE_LEARNING_TITLE,
+            children: [
+              { link: 'management:overview', breadcrumbStatus: 'hidden' },
+              { link: 'management:trained_models', breadcrumbStatus: 'hidden' },
+              { link: 'management:anomaly_detection' },
+              { link: 'management:analytics' },
+            ],
           },
           {
-            id: 'cloudLinkBilling',
-            cloudLink: 'billingAndSub',
+            id: 'settings_model_management',
+            title: i18n.translate('xpack.serverlessSearch.nav.adminAndSettings.modelManagement', {
+              defaultMessage: 'Model Management',
+            }),
+            children: [
+              {
+                id: 'searchInferenceEndpointsElasticInferenceService',
+                link: 'management:elastic_inference_service',
+              },
+              {
+                id: 'searchInferenceEndpoints',
+                link: 'management:inference_endpoints',
+              },
+              {
+                id: 'searchInferenceEndpointsModelSettings',
+                link: 'management:model_settings',
+              },
+            ],
+          },
+          {
+            id: 'settings_ai',
+            title: AI_TITLE,
+            children: [
+              { link: 'management:genAiSettings', breadcrumbStatus: 'hidden' },
+              { link: 'management:evals', breadcrumbStatus: 'hidden' },
+              ...(showAiAssistant
+                ? [
+                    {
+                      link: 'management:observabilityAiAssistantManagement' as const,
+                      breadcrumbStatus: 'hidden' as const,
+                    },
+                  ]
+                : []),
+            ],
+          },
+          {
+            id: 'settings_content',
+            title: CONTENT_TITLE,
+            children: [
+              { link: 'management:dataViews', breadcrumbStatus: 'hidden' },
+              { link: 'management:spaces', breadcrumbStatus: 'hidden' },
+              { link: 'management:objects', breadcrumbStatus: 'hidden' },
+              { link: 'management:filesManagement', breadcrumbStatus: 'hidden' },
+              { link: 'management:reporting', breadcrumbStatus: 'hidden' },
+              { link: 'management:tags', breadcrumbStatus: 'hidden' },
+            ],
+          },
+          {
+            title: i18n.translate('xpack.serverlessSearch.nav.adminAndSettings.settings.title', {
+              defaultMessage: 'Settings',
+            }),
+            breadcrumbStatus: 'hidden',
+            children: [{ link: 'management:settings', breadcrumbStatus: 'hidden' }],
+          },
+          {
+            // We include this link here to ensure that sidenav panel opens when user lands to legacy management landing page
+            // https://github.com/elastic/kibana/issues/240275
+            link: 'management',
+            sideNavStatus: 'hidden',
           },
         ],
       },
     ],
   };
+}
+
+export const navigationTree = (application: ApplicationStart): NavigationTreeDefinition => {
+  return createNavigationTree(application);
 };

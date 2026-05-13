@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { syntheticsAvailabilityIndicatorSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { syntheticsAvailabilityIndicatorSchema } from '@kbn/slo-schema';
 import React from 'react';
 import {
   syntheticsMonitorDetailLocatorID,
   syntheticsMonitorLocationQueryLocatorID,
 } from '@kbn/observability-plugin/common';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { OverviewItem } from './overview_item';
+import { DefinitionItem } from '../definition/definition_item';
 
 interface Props {
   slo: SLOWithSummaryResponse;
@@ -41,15 +42,19 @@ export function SyntheticsIndicatorOverview({ slo }: Props) {
 
   const onMonitorClick = () => monitorLocator?.navigate({ configId: monitorId, locationId });
   const onLocationClick = () => regionLocator?.navigate({ locationId: location });
-  const showOverviewItem = name || location;
+  const showDefinitionItem = name || location;
 
-  if (!showOverviewItem) {
+  if (!showDefinitionItem) {
     return null;
   }
 
   return (
-    <OverviewItem
-      title={MONITOR_LABEL}
+    <DefinitionItem
+      title={
+        <EuiText size="s">
+          <strong>{MONITOR_LABEL}</strong>
+        </EuiText>
+      }
       subtitle={
         <EuiFlexGroup direction="row" alignItems="flexStart" gutterSize="s" responsive={false} wrap>
           {name && (
@@ -57,9 +62,7 @@ export function SyntheticsIndicatorOverview({ slo }: Props) {
               <EuiBadge
                 color="hollow"
                 onClick={onMonitorClick}
-                iconOnClick={onMonitorClick}
                 onClickAriaLabel={MONITOR_ARIA_LABEL}
-                iconOnClickAriaLabel={MONITOR_ARIA_LABEL}
               >
                 {i18n.translate('xpack.slo.sloDetails.overview.syntheticsMonitor.name', {
                   defaultMessage: 'Name: {value}',
@@ -73,9 +76,7 @@ export function SyntheticsIndicatorOverview({ slo }: Props) {
               <EuiBadge
                 color="hollow"
                 onClick={onLocationClick}
-                iconOnClick={onLocationClick}
                 onClickAriaLabel={LOCATION_ARIA_LABEL}
-                iconOnClickAriaLabel={LOCATION_ARIA_LABEL}
               >
                 {i18n.translate('xpack.slo.sloDetails.overview.syntheticsMonitor.locationName', {
                   defaultMessage: 'Location: {value}',

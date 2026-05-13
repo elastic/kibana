@@ -15,21 +15,23 @@ import { EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
-import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { parseDuration } from '@kbn/alerting-plugin/common';
+import type { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
 import {
-  FieldOption,
   buildAggregation,
+  convertFieldSpecToFieldOption,
   parseAggregationResults,
   isGroupAggregation,
   isCountAggregation,
   BUCKET_SELECTOR_FIELD,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
-import { Comparator } from '../../../../common/comparator_types';
+import type { Comparator } from '../../../../common/comparator_types';
 import { getComparatorScript } from '../../../../common';
 import { hasExpressionValidationErrors } from '../validation';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
-import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType, SourceField } from '../types';
+import type { EsQueryRuleParams, EsQueryRuleMetaData } from '../types';
+import { SearchType } from '../types';
 import { IndexSelectPopover } from '../../components/index_select_popover';
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { RuleCommonExpressions } from '../rule_common_expressions';
@@ -39,9 +41,9 @@ const { useXJsonMode } = XJson;
 
 export const EsQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esQuery>, EsQueryRuleMetaData>
-> = ({ ruleParams, setRuleParams, setRuleProperty, errors, data }) => {
+> = ({ ruleParams, setRuleParams, setRuleProperty, errors, data, dataViews }) => {
   const services = useTriggerUiActionServices();
-  const { http, docLinks, isServerless } = services;
+  const { docLinks, isServerless } = services;
 
   const {
     index,
@@ -58,7 +60,6 @@ export const EsQueryExpression: React.FC<
     termSize,
     termField,
     excludeHitsFromPreviousRun,
-    sourceFields,
   } = ruleParams;
 
   const [currentRuleParams, setCurrentRuleParams] = useState<EsQueryRuleParams<SearchType.esQuery>>(
@@ -68,7 +69,7 @@ export const EsQueryExpression: React.FC<
       timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
       threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
       thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-      size: size ? size : isServerless ? SERVERLESS_DEFAULT_VALUES.SIZE : DEFAULT_VALUES.SIZE,
+      size: size ?? (isServerless ? SERVERLESS_DEFAULT_VALUES.SIZE : DEFAULT_VALUES.SIZE),
       esQuery: esQuery ?? DEFAULT_VALUES.QUERY,
       aggType: aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE,
       groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
@@ -76,7 +77,8 @@ export const EsQueryExpression: React.FC<
       searchType: SearchType.esQuery,
       excludeHitsFromPreviousRun:
         excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
-      sourceFields,
+      // The sourceFields param is ignored
+      sourceFields: [],
     }
   );
 
@@ -98,10 +100,12 @@ export const EsQueryExpression: React.FC<
 
   const setDefaultExpressionValues = async () => {
     setRuleProperty('params', currentRuleParams);
-    setXJson(esQuery ?? DEFAULT_VALUES.QUERY);
+    const query = esQuery ?? DEFAULT_VALUES.QUERY;
+    setXJson(query);
 
     if (index && index.length > 0) {
-      await refreshEsFields(index);
+      const initialRuntimeFields = getRuntimeFields(query);
+      await refreshEsFields(index, initialRuntimeFields);
     }
   };
 
@@ -110,10 +114,18 @@ export const EsQueryExpression: React.FC<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const refreshEsFields = async (indices: string[]) => {
-    const currentEsFields = await getFields(http, indices);
+  const refreshEsFields = async (indices: string[], initialRuntimeFields?: FieldOption[]) => {
+    const fieldSpecs = await dataViews.getFieldsForWildcard({
+      pattern: indices.join(','),
+      allowNoIndex: true,
+    });
+    const currentEsFields = convertFieldSpecToFieldOption(fieldSpecs, false);
     setEsFields(currentEsFields);
-    setCombinedFields(sortBy(currentEsFields.concat(runtimeFields), 'name'));
+
+    const combined = currentEsFields.concat(
+      initialRuntimeFields !== undefined ? initialRuntimeFields : runtimeFields
+    );
+    setCombinedFields(sortBy(combined, 'name'));
   };
 
   const getRuntimeFields = (xjson: string) => {
@@ -127,6 +139,7 @@ export const EsQueryExpression: React.FC<
       const currentRuntimeFields = convertRawRuntimeFieldtoFieldOption(runtimeMappings);
       setRuntimeFields(currentRuntimeFields);
       setCombinedFields(sortBy(esFields.concat(currentRuntimeFields), 'name'));
+      return currentRuntimeFields;
     }
   };
 
@@ -198,6 +211,7 @@ export const EsQueryExpression: React.FC<
     <Fragment>
       <EuiFormRow
         fullWidth
+        data-test-subj="indexSelectPopover"
         label={
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.selectIndexPrompt"
@@ -207,10 +221,10 @@ export const EsQueryExpression: React.FC<
       >
         <IndexSelectPopover
           index={index}
-          data-test-subj="indexSelectPopover"
           esFields={esFields}
           timeField={timeField}
           errors={errors}
+          dataViews={dataViews}
           onIndexChange={async (indices: string[]) => {
             setParam('index', indices);
 
@@ -355,11 +369,6 @@ export const EsQueryExpression: React.FC<
           [setParam]
         )}
         canSelectMultiTerms={DEFAULT_VALUES.CAN_SELECT_MULTI_TERMS}
-        onChangeSourceFields={useCallback(
-          (selectedSourceFields: SourceField[]) => setParam('sourceFields', selectedSourceFields),
-          [setParam]
-        )}
-        sourceFields={sourceFields}
       />
 
       <EuiSpacer />

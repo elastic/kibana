@@ -39,7 +39,10 @@ describe('<AccountManagementPage>', () => {
     authc.getCurrentUser.mockClear();
     coreStart.http.delete.mockClear();
     coreStart.http.get.mockClear();
-    coreStart.http.post.mockClear();
+    // The User Profile page triggers a silent "prime locale" save via usePrimeUserLocale,
+    // which posts to /internal/security/user_profile/_data. Ensure the mocked post
+    // returns a resolved promise so the chained .then() doesn't throw.
+    coreStart.http.post.mockReset().mockResolvedValue(undefined);
     coreStart.notifications.toasts.addDanger.mockClear();
     coreStart.notifications.toasts.addSuccess.mockClear();
   });
@@ -52,17 +55,19 @@ describe('<AccountManagementPage>', () => {
     coreStart.http.get.mockResolvedValue({ user, data });
 
     const { findByRole } = render(
-      <Providers
-        services={coreStart}
-        history={history}
-        authc={authc}
-        securityApiClients={{
-          userProfiles: new UserProfileAPIClient(coreStart.http),
-          users: new UserAPIClient(coreStart.http),
-        }}
-      >
-        <AccountManagementPage />
-      </Providers>
+      coreStart.rendering.addContext(
+        <Providers
+          services={coreStart}
+          history={history}
+          authc={authc}
+          securityApiClients={{
+            userProfiles: new UserProfileAPIClient(coreStart.http),
+            users: new UserAPIClient(coreStart.http),
+          }}
+        >
+          <AccountManagementPage />
+        </Providers>
+      )
     );
 
     await findByRole('form');

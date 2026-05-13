@@ -6,40 +6,72 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 import { EuiFlyout } from '@elastic/eui';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
 import { mockRiskScoreState } from '../../shared/mocks';
 import { HostPanelContent } from './content';
-import { mockObservedHostData } from '../mocks';
+import { mockObservedHostData, mockEntityRecord } from '../mocks';
 
 const riskScoreData = { ...mockRiskScoreState, data: [] };
 
-storiesOf('Components/HostPanelContent', module)
-  .addDecorator((storyFn) => (
-    <StorybookProviders>
-      <TestProvider>
-        <EuiFlyout size="m" onClose={() => {}}>
-          {storyFn()}
-        </EuiFlyout>
-      </TestProvider>
-    </StorybookProviders>
-  ))
-  .add('default', () => (
+export default {
+  title: 'Components/HostPanelContent',
+
+  decorators: [
+    (storyFn) => (
+      <StorybookProviders>
+        <TestProvider>
+          <EuiFlyout size="m" onClose={() => {}}>
+            {storyFn()}
+          </EuiFlyout>
+        </TestProvider>
+      </StorybookProviders>
+    ),
+  ],
+} as Meta;
+
+export const Default = {
+  render: () => (
     <HostPanelContent
       observedHost={mockObservedHostData}
       riskScoreState={riskScoreData}
       contextID={'test-host-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
-      hostName={'test-host-name'}
+      identityFields={{ 'host.name': 'test-host-name' }}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
-      isLinkEnabled={true}
+      isPreviewMode={false}
     />
-  ))
-  .add('no observed data', () => (
+  ),
+
+  name: 'default',
+};
+
+export const WithGraphVisualization = {
+  render: () => (
+    <HostPanelContent
+      observedHost={mockObservedHostData}
+      riskScoreState={riskScoreData}
+      contextID={'test-host-details'}
+      scopeId={'test-scopeId'}
+      openDetailsPanel={() => {}}
+      identityFields={{ 'host.name': 'test-host-name' }}
+      onAssetCriticalityChange={() => {}}
+      recalculatingScore={false}
+      isPreviewMode={false}
+      entityRecord={mockEntityRecord}
+      entityStoreEntityId={mockEntityRecord.entity.id}
+    />
+  ),
+
+  name: 'with graph visualization',
+};
+
+export const NoObservedData = {
+  render: () => (
     <HostPanelContent
       observedHost={{
         details: {},
@@ -52,19 +84,23 @@ storiesOf('Components/HostPanelContent', module)
           isLoading: false,
           date: undefined,
         },
-        anomalies: { isLoading: false, anomalies: null, jobNameById: {} },
       }}
       riskScoreState={riskScoreData}
       contextID={'test-host-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
-      hostName={'test-host-name'}
+      identityFields={{ 'host.name': 'test-host-name' }}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
-      isLinkEnabled={true}
+      isPreviewMode={false}
     />
-  ))
-  .add('loading', () => (
+  ),
+
+  name: 'no observed data',
+};
+
+export const Loading = {
+  render: () => (
     <HostPanelContent
       observedHost={{
         details: {},
@@ -77,15 +113,17 @@ storiesOf('Components/HostPanelContent', module)
           isLoading: true,
           date: undefined,
         },
-        anomalies: { isLoading: true, anomalies: null, jobNameById: {} },
       }}
       riskScoreState={riskScoreData}
       contextID={'test-host-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
-      hostName={'test-host-name'}
+      identityFields={{ 'host.name': 'test-host-name' }}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
-      isLinkEnabled={true}
+      isPreviewMode={false}
     />
-  ));
+  ),
+
+  name: 'loading',
+};

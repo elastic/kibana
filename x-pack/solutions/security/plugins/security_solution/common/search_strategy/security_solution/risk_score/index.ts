@@ -7,4 +7,4 @@
 
 export * from './all';
 export * from './common';
-export * from './kpi';
+export type * from './kpi';

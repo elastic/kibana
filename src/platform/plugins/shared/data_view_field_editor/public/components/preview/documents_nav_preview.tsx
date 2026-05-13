@@ -18,7 +18,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { useStateSelector } from '../../state_utils';
-import { PreviewState } from './types';
+import type { PreviewState } from './types';
 
 import { useFieldPreviewContext } from './field_preview_context';
 
@@ -28,6 +28,19 @@ const docIdSelector = (state: PreviewState) => {
     documentId: doc ? (doc._id as string) : undefined,
     customId: state.customId,
   };
+};
+
+export const getDocInputIdValue = (
+  customId: string | undefined,
+  documentId: string | undefined
+): string => {
+  if (typeof customId === 'string') {
+    return customId;
+  }
+  if (documentId) {
+    return documentId;
+  }
+  return '';
 };
 const fetchDocErrorSelector = (state: PreviewState) => state.fetchDocError;
 
@@ -64,7 +77,7 @@ export const DocumentsNavPreview = () => {
           >
             <EuiFieldText
               isInvalid={isInvalid}
-              value={customId || documentId || ''}
+              value={getDocInputIdValue(customId, documentId)}
               onChange={onDocumentIdChange}
               fullWidth
               data-test-subj="documentIdField"
@@ -98,7 +111,7 @@ export const DocumentsNavPreview = () => {
                   display="base"
                   size="m"
                   onClick={prev}
-                  iconType="arrowLeft"
+                  iconType="chevronSingleLeft"
                   data-test-subj="goToPrevDocButton"
                   aria-label={i18n.translate(
                     'indexPatternFieldEditor.fieldPreview.documentNav.previousArialabel',
@@ -113,7 +126,7 @@ export const DocumentsNavPreview = () => {
                   display="base"
                   size="m"
                   onClick={next}
-                  iconType="arrowRight"
+                  iconType="chevronSingleRight"
                   data-test-subj="goToNextDocButton"
                   aria-label={i18n.translate(
                     'indexPatternFieldEditor.fieldPreview.documentNav.nextArialabel',

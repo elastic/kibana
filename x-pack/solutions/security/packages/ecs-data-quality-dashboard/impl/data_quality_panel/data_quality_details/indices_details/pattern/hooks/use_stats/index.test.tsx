@@ -6,13 +6,14 @@
  */
 
 import { waitFor, renderHook } from '@testing-library/react';
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 
 import { DataQualityProvider } from '../../../../../data_quality_context';
 import { ERROR_LOADING_STATS } from '../../../../../translations';
 import { useStats } from '.';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { Theme } from '@elastic/charts';
+import type { Theme } from '@elastic/charts';
 import { mockStatsAuditbeatIndex } from '../../../../../mock/stats/mock_stats_auditbeat_index';
 
 const mockHttpFetch = jest.fn();

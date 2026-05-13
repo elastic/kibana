@@ -22,14 +22,22 @@ import {
 
 export const waitForMetadataTransformsReady = usageTracker.track(
   'waitForMetadataTransformsReady',
-  async (esClient: Client, version: string): Promise<void> => {
+  async (
+    esClient: Client,
+    /** The version of the Endpoint Package */
+    version: string
+  ): Promise<void> => {
     await waitFor(() => areMetadataTransformsReady(esClient, version));
   }
 );
 
 export const stopMetadataTransforms = usageTracker.track(
   'stopMetadataTransforms',
-  async (esClient: Client, version: string): Promise<void> => {
+  async (
+    esClient: Client,
+    /** The version of the Endpoint Package */
+    version: string
+  ): Promise<void> => {
     const transformIds = await getMetadataTransformIds(esClient, version);
 
     await Promise.all(
@@ -51,52 +59,103 @@ export const startMetadataTransforms = usageTracker.track(
     esClient: Client,
     // agentIds to wait for
     agentIds: string[],
+    /** The version of the Endpoint Package */
     version: string
   ): Promise<void> => {
-    const transformIds = await getMetadataTransformIds(esClient, version);
     const isV2 = isEndpointPackageV2(version);
     const currentTransformPrefix = isV2 ? METADATA_CURRENT_TRANSFORM_V2 : metadataTransformPrefix;
-    const currentTransformId = transformIds.find((transformId) =>
-      transformId.startsWith(currentTransformPrefix)
-    );
     const unitedTransformPrefix = isV2 ? METADATA_UNITED_TRANSFORM_V2 : METADATA_UNITED_TRANSFORM;
-    const unitedTransformId = transformIds.find((transformId) =>
-      transformId.startsWith(unitedTransformPrefix)
+
+    const { currentTransformId, unitedTransformId } = await waitForTransformsToBeCreated(
+      esClient,
+      version,
+      currentTransformPrefix,
+      unitedTransformPrefix
     );
+
     if (!currentTransformId || !unitedTransformId) {
       // eslint-disable-next-line no-console
-      console.warn('metadata transforms not found, skipping transform start');
+      console.warn('metadata transforms not found after waiting, skipping transform start');
       return;
     }
 
-    try {
-      await esClient.transform.startTransform({
-        transform_id: currentTransformId,
-      });
-    } catch (err) {
-      // ignore if transform already started
-      if (err.statusCode !== 409) {
-        throw err;
-      }
+    await startTransformWithRetry(esClient, currentTransformId);
+
+    if (agentIds.length > 0) {
+      await waitForCurrentMetdataDocs(esClient, agentIds);
     }
 
-    await waitForCurrentMetdataDocs(esClient, agentIds);
-
-    try {
-      await esClient.transform.startTransform({
-        transform_id: unitedTransformId,
-      });
-    } catch (err) {
-      // ignore if transform already started
-      if (err.statusCode !== 409) {
-        throw err;
-      }
-    }
+    await startTransformWithRetry(esClient, unitedTransformId);
   }
 );
 
+async function waitForTransformsToBeCreated(
+  esClient: Client,
+  version: string,
+  currentTransformPrefix: string,
+  unitedTransformPrefix: string,
+  maxAttempts = 10,
+  interval = 3000
+): Promise<{ currentTransformId: string | undefined; unitedTransformId: string | undefined }> {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const transformIds = await getMetadataTransformIds(esClient, version);
+    const currentTransformId = transformIds.find((id) => id.startsWith(currentTransformPrefix));
+    const unitedTransformId = transformIds.find((id) => id.startsWith(unitedTransformPrefix));
+
+    if (currentTransformId && unitedTransformId) {
+      return { currentTransformId, unitedTransformId };
+    }
+
+    if (attempt < maxAttempts) {
+      await new Promise((res) => setTimeout(res, interval));
+    }
+  }
+
+  return { currentTransformId: undefined, unitedTransformId: undefined };
+}
+
+async function startTransformWithRetry(
+  esClient: Client,
+  transformId: string,
+  maxAttempts = 3
+): Promise<void> {
+  let lastError: Error | undefined;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      await esClient.transform.startTransform({ transform_id: transformId });
+      return;
+    } catch (err) {
+      // 409: transform already started — not an error
+      if (err.statusCode === 409) {
+        return;
+      }
+
+      const isRetryable = err.statusCode === 404 || err.name === 'TimeoutError';
+      if (!isRetryable) {
+        throw err;
+      }
+
+      lastError = err;
+      if (attempt < maxAttempts) {
+        await new Promise((res) => setTimeout(res, 5000));
+      }
+    }
+  }
+
+  // Retries exhausted for 404/timeout — swallow since the transform may have been
+  // started by a prior timed-out attempt or will be started by Fleet reconciliation
+  if (lastError) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `startTransformWithRetry: failed to start transform [${transformId}] after ${maxAttempts} attempts: ${lastError.message}`
+    );
+  }
+}
+
 async function getMetadataTransformStats(
   esClient: Client,
+  /** The version of the Endpoint Package */
   version: string
 ): Promise<TransformGetTransformStatsTransformStats[]> {
   const transformId = isEndpointPackageV2(version)
@@ -110,7 +169,11 @@ async function getMetadataTransformStats(
   ).transforms;
 }
 
-async function getMetadataTransformIds(esClient: Client, version: string): Promise<string[]> {
+async function getMetadataTransformIds(
+  esClient: Client,
+  /** The version of the Endpoint Package */
+  version: string
+): Promise<string[]> {
   return (await getMetadataTransformStats(esClient, version)).map((transform) => transform.id);
 }
 

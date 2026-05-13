@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
-import { RuntimeField, RuntimePrimitiveTypes, FieldSpec, DataViewSpec } from '../types';
+import type { RuntimeField, RuntimePrimitiveTypes, FieldSpec, DataViewSpec } from '../types';
 import { stubLogstashFields } from '../field.stub';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import { last, map } from 'lodash';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
-import { DataViewField } from '../fields';
+import type { DataViewField } from '../fields';
 import { DataViewLazy } from './data_view_lazy';
 import { stubLogstashFieldSpecMap } from '../field.stub';
 
@@ -477,6 +477,23 @@ describe('DataViewLazy', () => {
       expect((await dataViewLazy.getFieldByName(newField))?.customDescription).toEqual('test2');
       dataViewLazy.setFieldCustomDescription(newField, undefined);
       expect((await dataViewLazy.getFieldByName(newField))?.customDescription).toBeUndefined();
+      dataViewLazy.removeRuntimeField(newField);
+    });
+
+    test('add and remove a popularity score from a runtime field', async () => {
+      const newField = 'new_field_test';
+      fieldCapsResponse = [];
+      dataViewLazy.addRuntimeField(newField, {
+        ...runtimeWithAttrs,
+        popularity: 10,
+      });
+      expect((await dataViewLazy.getFieldByName(newField))?.count).toEqual(10);
+      dataViewLazy.setFieldCount(newField, 20);
+      expect((await dataViewLazy.getFieldByName(newField))?.count).toEqual(20);
+      dataViewLazy.setFieldCount(newField, null);
+      expect((await dataViewLazy.getFieldByName(newField))?.count).toEqual(0);
+      dataViewLazy.setFieldCount(newField, undefined);
+      expect((await dataViewLazy.getFieldByName(newField))?.count).toEqual(0);
       dataViewLazy.removeRuntimeField(newField);
     });
 

@@ -11,7 +11,7 @@ import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { fillGapByIdRoute } from './fill_gap_by_id_route';
-import { ScheduleBackfillResults } from '../../../../application/backfill/methods/schedule/types';
+import type { ScheduleBackfillResults } from '../../../../application/backfill/methods/schedule/types';
 
 jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
@@ -36,6 +36,7 @@ describe('fillGapByIdRoute', () => {
       createdAt: '2024-01-30T00:00:00.000Z',
       duration: '12h',
       enabled: true,
+      initiator: 'user',
       rule: {
         name: 'my rule name',
         tags: ['foo'],
@@ -86,6 +87,7 @@ describe('fillGapByIdRoute', () => {
           created_at: '2024-01-30T00:00:00.000Z',
           duration: '12h',
           enabled: true,
+          initiator: 'user',
           rule: {
             name: 'my rule name',
             tags: ['foo'],

@@ -10,9 +10,9 @@
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 
-import { SettingType } from '@kbn/management-settings-types';
+import type { SettingType } from '@kbn/management-settings-types';
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
-import { KnownTypeToMetadata } from '@kbn/management-settings-types/metadata';
+import type { KnownTypeToMetadata } from '@kbn/management-settings-types/metadata';
 
 import { DATA_TEST_SUBJ_SCREEN_READER_MESSAGE, FieldRow } from './field_row';
 import { wrap } from './mocks';
@@ -327,6 +327,42 @@ describe('Field', () => {
         );
 
         expect(getByText('Custom setting')).toBeInTheDocument();
+      });
+
+      it('should render technical preview badge if it is technical preview', () => {
+        const { getByText } = render(
+          wrap(
+            <FieldRow
+              field={getFieldDefinition({
+                id,
+                setting: { ...setting, technicalPreview: true },
+                params: { isCustom: true },
+              })}
+              onFieldChange={handleChange}
+              isSavingEnabled={true}
+            />
+          )
+        );
+
+        expect(getByText('Technical preview')).toBeInTheDocument();
+      });
+
+      it('should NOT render technical preview badge if the technicalPreview is false or unspecified', () => {
+        const { queryByText } = render(
+          wrap(
+            <FieldRow
+              field={getFieldDefinition({
+                id,
+                setting,
+                params: { isCustom: true },
+              })}
+              onFieldChange={handleChange}
+              isSavingEnabled={true}
+            />
+          )
+        );
+
+        expect(queryByText('Technical preview')).not.toBeInTheDocument();
       });
 
       it('should render unsaved value if there are unsaved changes', () => {

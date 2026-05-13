@@ -50,7 +50,13 @@ func main() {
             })}
           </EuiMarkdownFormat>
           <EuiSpacer />
-          <EuiCodeBlock language="bash" isCopyable={true}>
+          <EuiCodeBlock
+            language="bash"
+            isCopyable={true}
+            copyAriaLabel={i18n.translate('xpack.apm.onboarding.go.install.copyAriaLabel', {
+              defaultMessage: 'Copy the code to install the APM agent for Go',
+            })}
+          >
             go get go.elastic.co/apm
           </EuiCodeBlock>
         </>
@@ -118,7 +124,13 @@ by using the tracer API directly.',
             })}
           </EuiMarkdownFormat>
           <EuiSpacer />
-          <EuiCodeBlock language="go" isCopyable={true}>
+          <EuiCodeBlock
+            language="go"
+            isCopyable={true}
+            copyAriaLabel={i18n.translate('xpack.apm.onboarding.go.instrument.copyAriaLabel', {
+              defaultMessage: 'Copy the code to instrument your Go application',
+            })}
+          >
             {codeBlock}
           </EuiCodeBlock>
           <EuiMarkdownFormat>

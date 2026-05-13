@@ -5,57 +5,49 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
-
+import { useQuery } from '@kbn/react-query';
 import { useKibana } from './use_kibana';
 
-type ApmIndex = string;
+export interface ApmIndicesData {
+  metric: string;
+  transaction: string;
+  span: string;
+}
 
-export interface UseFetchApmIndex {
-  data: ApmIndex;
+export interface UseFetchApmIndices {
+  data: ApmIndicesData;
   isLoading: boolean;
   isSuccess: boolean;
   isError: boolean;
 }
 
-interface ApiResponse {
-  apmIndexSettings: Array<{
-    configurationName: string;
-    defaultValue: string;
-    savedValue?: string;
-  }>;
-}
+const INITIAL_DATA: ApmIndicesData = { metric: '', transaction: '', span: '' };
 
-export function useFetchApmIndex(): UseFetchApmIndex {
-  const { http } = useKibana().services;
+export function useFetchApmIndices({
+  enabled = true,
+}: { enabled?: boolean } = {}): UseFetchApmIndices {
+  const { apmSourcesAccess } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
     queryKey: ['fetchApmIndices'],
     queryFn: async ({ signal }) => {
       try {
-        const response = await http.get<ApiResponse>('/internal/apm/settings/apm-index-settings', {
-          signal,
-        });
-
-        const metricSettings = response.apmIndexSettings.find(
-          (settings) => settings.configurationName === 'metric'
-        );
-
-        let index = '';
-        if (!!metricSettings) {
-          index = metricSettings.savedValue ?? metricSettings.defaultValue;
-        }
-
-        return index;
+        const response = await apmSourcesAccess.getApmIndices({ signal });
+        return {
+          metric: response.metric ?? '',
+          transaction: response.transaction ?? '',
+          span: response.span ?? '',
+        };
       } catch (error) {
         // ignore error
+        return INITIAL_DATA;
       }
     },
     refetchOnWindowFocus: false,
+    enabled,
   });
-
   return {
-    data: isInitialLoading ? '' : data ?? '',
+    data: isInitialLoading ? INITIAL_DATA : data ?? INITIAL_DATA,
     isLoading: isInitialLoading || isLoading || isRefetching,
     isSuccess,
     isError,

@@ -6,19 +6,14 @@
  */
 import React from 'react';
 
-import { screen } from '@testing-library/react';
+import { screen, render } from '@testing-library/react';
 
 import { CustomFieldTypes } from '../../../../common/types/domain';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
 import { getEuiTableColumn } from './get_eui_table_column';
+import { RIGHT_ALIGNMENT } from '@elastic/eui';
 
 describe('getEuiTableColumn ', () => {
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
-
     jest.clearAllMocks();
   });
 
@@ -28,7 +23,10 @@ describe('getEuiTableColumn ', () => {
     expect(getEuiTableColumn({ label })).toEqual({
       name: label,
       render: expect.any(Function),
-      width: '150px',
+      maxWidth: '17ch',
+      minWidth: '4em',
+      className: 'eui-textNumber eui-textNoWrap',
+      align: RIGHT_ALIGNMENT,
       'data-test-subj': 'number-custom-field-column',
     });
   });
@@ -38,7 +36,7 @@ describe('getEuiTableColumn ', () => {
     const value = 1234567;
     const column = getEuiTableColumn({ label: 'MockLabel' });
 
-    appMockRender.render(<div>{column.render({ key, type: CustomFieldTypes.NUMBER, value })}</div>);
+    render(<div>{column.render({ key, type: CustomFieldTypes.NUMBER, value })}</div>);
 
     expect(screen.getByTestId(`number-custom-field-column-view-${key}`)).toBeInTheDocument();
     expect(screen.getByTestId(`number-custom-field-column-view-${key}`)).toHaveTextContent(

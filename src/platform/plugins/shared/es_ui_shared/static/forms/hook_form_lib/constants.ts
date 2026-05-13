@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 // Field types
 export const FIELD_TYPES = {
   TEXT: 'text',
@@ -28,6 +32,10 @@ export const FIELD_TYPES = {
   HIDDEN: 'hidden',
 };
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 // Validation types
 export const VALIDATION_TYPES = {
   /** Default validation error (on the field value) */
@@ -37,5 +45,3 @@ export const VALIDATION_TYPES = {
   /** If the field value is an Array, this error type would be returned if an _item_ of the array is invalid */
   ARRAY_ITEM: 'arrayItem',
 };
-
-export const STORYBOOK_SECTION = 'Form lib';

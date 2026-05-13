@@ -20,7 +20,10 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import { catchAxiosErrorFormatAndThrow } from '@kbn/securitysolution-utils';
 
-import type { SetAlertAssigneesRequestBodyInput } from './detection_engine/alert_assignees/set_alert_assignees_route.gen';
+import type {
+  SetAlertAssigneesRequestBodyInput,
+  SetAlertAssigneesResponse,
+} from './detection_engine/alert_assignees/set_alert_assignees_route.gen';
 import type {
   SetAlertTagsRequestBodyInput,
   SetAlertTagsResponse,
@@ -29,7 +32,6 @@ import type { CreateAlertsIndexResponse } from './detection_engine/index_managem
 import type { DeleteAlertsIndexResponse } from './detection_engine/index_management/delete_index/delete_index.gen';
 import type { ReadAlertsIndexResponse } from './detection_engine/index_management/read_index/read_index.gen';
 import type { ReadPrivilegesResponse } from './detection_engine/index_management/read_privileges/read_privileges.gen';
-import type { BootstrapPrebuiltRulesResponse } from './detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import type { InstallPrebuiltRulesAndTimelinesResponse } from './detection_engine/prebuilt_rules/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route.gen';
 import type { ReadPrebuiltRulesAndTimelinesStatusResponse } from './detection_engine/prebuilt_rules/read_prebuilt_rules_and_timelines_status/read_prebuilt_rules_and_timelines_status_route.gen';
 import type {
@@ -37,24 +39,6 @@ import type {
   PerformRulesBulkActionRequestBodyInput,
   PerformRulesBulkActionResponse,
 } from './detection_engine/rule_management/bulk_actions/bulk_actions_route.gen';
-import type {
-  BulkCreateRulesRequestBodyInput,
-  BulkCreateRulesResponse,
-} from './detection_engine/rule_management/bulk_crud/bulk_create_rules/bulk_create_rules_route.gen';
-import type {
-  BulkDeleteRulesRequestBodyInput,
-  BulkDeleteRulesResponse,
-  BulkDeleteRulesPostRequestBodyInput,
-  BulkDeleteRulesPostResponse,
-} from './detection_engine/rule_management/bulk_crud/bulk_delete_rules/bulk_delete_rules_route.gen';
-import type {
-  BulkPatchRulesRequestBodyInput,
-  BulkPatchRulesResponse,
-} from './detection_engine/rule_management/bulk_crud/bulk_patch_rules/bulk_patch_rules_route.gen';
-import type {
-  BulkUpdateRulesRequestBodyInput,
-  BulkUpdateRulesResponse,
-} from './detection_engine/rule_management/bulk_crud/bulk_update_rules/bulk_update_rules_route.gen';
 import type {
   CreateRuleRequestBodyInput,
   CreateRuleResponse,
@@ -89,15 +73,14 @@ import type {
 } from './detection_engine/rule_management/import_rules/import_rules_route.gen';
 import type { ReadTagsResponse } from './detection_engine/rule_management/read_tags/read_tags_route.gen';
 import type {
-  GetRuleExecutionEventsRequestQueryInput,
-  GetRuleExecutionEventsRequestParamsInput,
-  GetRuleExecutionEventsResponse,
-} from './detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_events/get_rule_execution_events_route.gen';
+  SearchRulesRequestBodyInput,
+  SearchRulesResponse,
+} from './detection_engine/rule_management/search_rules/search_rules_route.gen';
 import type {
-  GetRuleExecutionResultsRequestQueryInput,
-  GetRuleExecutionResultsRequestParamsInput,
-  GetRuleExecutionResultsResponse,
-} from './detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen';
+  ReadRuleExecutionResultsRequestParamsInput,
+  ReadRuleExecutionResultsRequestBodyInput,
+  ReadRuleExecutionResultsResponse,
+} from './detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/read_rule_execution_results_route.gen';
 import type {
   RulePreviewRequestQueryInput,
   RulePreviewRequestBodyInput,
@@ -127,15 +110,24 @@ import type {
   SetAlertsStatusRequestBodyInput,
   SetAlertsStatusResponse,
 } from './detection_engine/signals/set_signal_status/set_signals_status_route.gen';
+import type {
+  SearchUnifiedAlertsRequestBodyInput,
+  SearchUnifiedAlertsResponse,
+} from './detection_engine/unified_alerts/search/search_route.gen';
+import type {
+  SetUnifiedAlertsAssigneesRequestBodyInput,
+  SetUnifiedAlertsAssigneesResponse,
+} from './detection_engine/unified_alerts/set_alert_assignees/set_alert_assignees_route.gen';
+import type {
+  SetUnifiedAlertsTagsRequestBodyInput,
+  SetUnifiedAlertsTagsResponse,
+} from './detection_engine/unified_alerts/set_alert_tags/set_alert_tags_route.gen';
+import type {
+  SetUnifiedAlertsWorkflowStatusRequestBodyInput,
+  SetUnifiedAlertsWorkflowStatusResponse,
+} from './detection_engine/unified_alerts/set_workflow_status/set_workflow_status_route.gen';
 import type { SuggestUserProfilesRequestQueryInput } from './detection_engine/users/suggest_user_profiles_route.gen';
-import type {
-  EndpointGetActionsDetailsRequestParamsInput,
-  EndpointGetActionsDetailsResponse,
-} from './endpoint/actions/details/details.gen';
-import type {
-  EndpointFileDownloadRequestParamsInput,
-  EndpointFileDownloadResponse,
-} from './endpoint/actions/file_download/file_download.gen';
+import type { EndpointFileDownloadRequestParamsInput } from './endpoint/actions/file_download/file_download.gen';
 import type {
   EndpointFileInfoRequestParamsInput,
   EndpointFileInfoResponse,
@@ -144,6 +136,10 @@ import type {
   EndpointGetActionsListRequestQueryInput,
   EndpointGetActionsListResponse,
 } from './endpoint/actions/list/list.gen';
+import type {
+  CancelActionRequestBodyInput,
+  CancelActionResponse,
+} from './endpoint/actions/response_actions/cancel/cancel.gen';
 import type {
   EndpointExecuteActionRequestBodyInput,
   EndpointExecuteActionResponse,
@@ -180,15 +176,13 @@ import type {
   EndpointUnisolateActionRequestBodyInput,
   EndpointUnisolateActionResponse,
 } from './endpoint/actions/response_actions/unisolate/unisolate.gen';
-import type {
-  EndpointUploadActionRequestBodyInput,
-  EndpointUploadActionResponse,
-} from './endpoint/actions/response_actions/upload/upload.gen';
+import type { EndpointUploadActionResponse } from './endpoint/actions/response_actions/upload/upload.gen';
 import type { EndpointGetActionsStateResponse } from './endpoint/actions/state/state.gen';
 import type {
   EndpointGetActionsStatusRequestQueryInput,
   EndpointGetActionsStatusResponse,
 } from './endpoint/actions/status/status.gen';
+import type { GetEndpointExceptionsPerPolicyOptInResponse } from './endpoint/endpoint_exceptions_per_policy_opt_in/endpoint_exceptions_per_policy_opt_in.gen';
 import type {
   GetEndpointMetadataListRequestQueryInput,
   GetEndpointMetadataListResponse,
@@ -209,13 +203,6 @@ import type {
   GetEndpointSuggestionsRequestBodyInput,
   GetEndpointSuggestionsResponse,
 } from './endpoint/suggestions/get_suggestions.gen';
-import type {
-  GetWorkflowInsightsRequestQueryInput,
-  GetWorkflowInsightsResponse,
-  UpdateWorkflowInsightRequestParamsInput,
-  UpdateWorkflowInsightRequestBodyInput,
-  UpdateWorkflowInsightResponse,
-} from './endpoint/workflow_insights/workflow_insights.gen';
 import type {
   BulkUpsertAssetCriticalityRecordsRequestBodyInput,
   BulkUpsertAssetCriticalityRecordsResponse,
@@ -239,9 +226,13 @@ import type {
   FindAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/list_asset_criticality.gen';
 import type {
-  InternalUploadAssetCriticalityRecordsResponse,
+  InternalUploadAssetCriticalityV2CsvResponse,
   UploadAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
+import type {
+  EntityDetailsHighlightsRequestBodyInput,
+  EntityDetailsHighlightsResponse,
+} from './entity_analytics/entity_details/highlights.gen';
 import type {
   InitEntityStoreRequestBodyInput,
   InitEntityStoreResponse,
@@ -251,6 +242,8 @@ import type {
   DeleteEntityEngineRequestQueryInput,
   DeleteEntityEngineRequestParamsInput,
   DeleteEntityEngineResponse,
+  DeleteEntityEnginesRequestQueryInput,
+  DeleteEntityEnginesResponse,
 } from './entity_analytics/entity_store/engine/delete.gen';
 import type { EntityStoreGetPrivilegesResponse } from './entity_analytics/entity_store/engine/get_privileges.gen';
 import type {
@@ -272,13 +265,78 @@ import type {
   StopEntityEngineResponse,
 } from './entity_analytics/entity_store/engine/stop.gen';
 import type {
+  DeleteSingleEntityRequestParamsInput,
+  DeleteSingleEntityRequestBodyInput,
+  DeleteSingleEntityResponse,
+} from './entity_analytics/entity_store/entities/delete_entity.gen';
+import type {
   ListEntitiesRequestQueryInput,
   ListEntitiesResponse,
 } from './entity_analytics/entity_store/entities/list_entities.gen';
 import type {
+  UpsertEntitiesBulkRequestQueryInput,
+  UpsertEntitiesBulkRequestBodyInput,
+} from './entity_analytics/entity_store/entities/upsert_entities_bulk.gen';
+import type {
+  UpsertEntityRequestQueryInput,
+  UpsertEntityRequestParamsInput,
+  UpsertEntityRequestBodyInput,
+  UpsertEntityResponse,
+} from './entity_analytics/entity_store/entities/upsert_entity.gen';
+import type {
   GetEntityStoreStatusRequestQueryInput,
   GetEntityStoreStatusResponse,
 } from './entity_analytics/entity_store/status.gen';
+import type { RunEntityAnalyticsMigrationsResponse } from './entity_analytics/migrations/run_migrations_route.gen';
+import type {
+  CreatePrivilegesImportIndexRequestBodyInput,
+  CreatePrivilegesImportIndexResponse,
+} from './entity_analytics/monitoring/create_index.gen';
+import type {
+  DeleteMonitoringEngineRequestQueryInput,
+  DeleteMonitoringEngineResponse,
+} from './entity_analytics/monitoring/engine/delete.gen';
+import type { DisableMonitoringEngineResponse } from './entity_analytics/monitoring/engine/disable.gen';
+import type { InitMonitoringEngineResponse } from './entity_analytics/monitoring/engine/init.gen';
+import type { ScheduleMonitoringEngineResponse } from './entity_analytics/monitoring/engine/schedule_now.gen';
+import type { PrivMonHealthResponse } from './entity_analytics/monitoring/health.gen';
+import type {
+  CreateEntitySourceRequestBodyInput,
+  CreateEntitySourceResponse,
+  DeleteEntitySourceRequestParamsInput,
+  GetEntitySourceRequestParamsInput,
+  GetEntitySourceResponse,
+  ListEntitySourcesRequestQueryInput,
+  ListEntitySourcesResponse,
+  UpdateEntitySourceRequestParamsInput,
+  UpdateEntitySourceRequestBodyInput,
+  UpdateEntitySourceResponse,
+} from './entity_analytics/monitoring/monitoring_entity_source/monitoring_entity_source.gen';
+import type { InstallPrivilegedAccessDetectionPackageResponse } from './entity_analytics/monitoring/privileged_access_detection/install.gen';
+import type { GetPrivilegedAccessDetectionPackageStatusResponse } from './entity_analytics/monitoring/privileged_access_detection/status.gen';
+import type { PrivMonPrivilegesResponse } from './entity_analytics/monitoring/privileges.gen';
+import type {
+  SearchPrivilegesIndicesRequestQueryInput,
+  SearchPrivilegesIndicesResponse,
+} from './entity_analytics/monitoring/search_indices.gen';
+import type {
+  CreatePrivMonUserRequestBodyInput,
+  CreatePrivMonUserResponse,
+} from './entity_analytics/monitoring/users/create.gen';
+import type {
+  DeletePrivMonUserRequestParamsInput,
+  DeletePrivMonUserResponse,
+} from './entity_analytics/monitoring/users/delete.gen';
+import type {
+  ListPrivMonUsersRequestQueryInput,
+  ListPrivMonUsersResponse,
+} from './entity_analytics/monitoring/users/list.gen';
+import type {
+  UpdatePrivMonUserRequestParamsInput,
+  UpdatePrivMonUserRequestBodyInput,
+  UpdatePrivMonUserResponse,
+} from './entity_analytics/monitoring/users/update.gen';
+import type { PrivmonBulkUploadUsersCSVResponse } from './entity_analytics/monitoring/users/upload_csv.gen';
 import type { CleanUpRiskEngineResponse } from './entity_analytics/risk_engine/engine_cleanup_route.gen';
 import type {
   ConfigureRiskEngineSavedObjectRequestBodyInput,
@@ -287,7 +345,10 @@ import type {
 import type { DisableRiskEngineResponse } from './entity_analytics/risk_engine/engine_disable_route.gen';
 import type { EnableRiskEngineResponse } from './entity_analytics/risk_engine/engine_enable_route.gen';
 import type { InitRiskEngineResponse } from './entity_analytics/risk_engine/engine_init_route.gen';
-import type { ScheduleRiskEngineNowResponse } from './entity_analytics/risk_engine/engine_schedule_now_route.gen';
+import type {
+  ScheduleRiskEngineNowRequestBodyInput,
+  ScheduleRiskEngineNowResponse,
+} from './entity_analytics/risk_engine/engine_schedule_now_route.gen';
 import type { ReadRiskEngineSettingsResponse } from './entity_analytics/risk_engine/engine_settings_route.gen';
 import type { GetRiskEngineStatusResponse } from './entity_analytics/risk_engine/engine_status_route.gen';
 import type {
@@ -302,6 +363,62 @@ import type {
   PreviewRiskScoreResponse,
 } from './entity_analytics/risk_engine/preview_route.gen';
 import type {
+  UploadWatchlistCsvRequestParamsInput,
+  UploadWatchlistCsvResponse,
+} from './entity_analytics/watchlists/csv_upload/csv_upload.gen';
+import type {
+  CreateWatchlistEntitySourceRequestParamsInput,
+  CreateWatchlistEntitySourceRequestBodyInput,
+  CreateWatchlistEntitySourceResponse,
+} from './entity_analytics/watchlists/data_source/create.gen';
+import type { DeleteWatchlistEntitySourceRequestParamsInput } from './entity_analytics/watchlists/data_source/delete.gen';
+import type {
+  GetWatchlistEntitySourceRequestParamsInput,
+  GetWatchlistEntitySourceResponse,
+} from './entity_analytics/watchlists/data_source/get.gen';
+import type {
+  ListWatchlistEntitySourcesRequestQueryInput,
+  ListWatchlistEntitySourcesRequestParamsInput,
+  ListWatchlistEntitySourcesResponse,
+} from './entity_analytics/watchlists/data_source/list.gen';
+import type {
+  UpdateWatchlistEntitySourceRequestParamsInput,
+  UpdateWatchlistEntitySourceRequestBodyInput,
+  UpdateWatchlistEntitySourceResponse,
+} from './entity_analytics/watchlists/data_source/update.gen';
+import type {
+  AssignWatchlistEntitiesRequestParamsInput,
+  AssignWatchlistEntitiesRequestBodyInput,
+  AssignWatchlistEntitiesResponse,
+} from './entity_analytics/watchlists/entities/assign.gen';
+import type {
+  UnassignWatchlistEntitiesRequestParamsInput,
+  UnassignWatchlistEntitiesRequestBodyInput,
+  UnassignWatchlistEntitiesResponse,
+} from './entity_analytics/watchlists/entities/unassign.gen';
+import type {
+  CreateWatchlistRequestBodyInput,
+  CreateWatchlistResponse,
+} from './entity_analytics/watchlists/management/create.gen';
+import type {
+  GetWatchlistRequestParamsInput,
+  GetWatchlistResponse,
+} from './entity_analytics/watchlists/management/get.gen';
+import type { ListWatchlistsResponse } from './entity_analytics/watchlists/management/list.gen';
+import type {
+  UpdateWatchlistRequestParamsInput,
+  UpdateWatchlistRequestBodyInput,
+  UpdateWatchlistResponse,
+} from './entity_analytics/watchlists/management/update.gen';
+import type {
+  SyncWatchlistRequestParamsInput,
+  SyncWatchlistResponse,
+} from './entity_analytics/watchlists/sync/sync.gen';
+import type {
+  InitializeSecuritySolutionRequestBodyInput,
+  InitializeSecuritySolutionResponse,
+} from './initialization/initialization.gen';
+import type {
   CleanDraftTimelinesRequestBodyInput,
   CleanDraftTimelinesResponse,
 } from './timeline/clean_draft_timelines/clean_draft_timelines_route.gen';
@@ -314,7 +431,10 @@ import type {
   CreateTimelinesResponse,
 } from './timeline/create_timelines/create_timelines_route.gen';
 import type { DeleteNoteRequestBodyInput } from './timeline/delete_note/delete_note_route.gen';
-import type { DeleteTimelinesRequestBodyInput } from './timeline/delete_timelines/delete_timelines_route.gen';
+import type {
+  DeleteTimelinesRequestBodyInput,
+  DeleteTimelinesResponse,
+} from './timeline/delete_timelines/delete_timelines_route.gen';
 import type {
   ExportTimelinesRequestQueryInput,
   ExportTimelinesRequestBodyInput,
@@ -364,14 +484,55 @@ import type {
   ResolveTimelineResponse,
 } from './timeline/resolve_timeline/resolve_timeline_route.gen';
 import type {
-  CreateRuleMigrationRequestParamsInput,
+  CreateDashboardMigrationRequestBodyInput,
+  CreateDashboardMigrationResponse,
+  CreateDashboardMigrationDashboardsRequestParamsInput,
+  CreateDashboardMigrationDashboardsRequestBodyInput,
+  DeleteDashboardMigrationRequestParamsInput,
+  GetAllDashboardMigrationsStatsResponse,
+  GetAllTranslationStatsDashboardMigrationRequestParamsInput,
+  GetAllTranslationStatsDashboardMigrationResponse,
+  GetDashboardMigrationRequestParamsInput,
+  GetDashboardMigrationResponse,
+  GetDashboardMigrationDashboardsRequestQueryInput,
+  GetDashboardMigrationDashboardsRequestParamsInput,
+  GetDashboardMigrationDashboardsResponse,
+  GetDashboardMigrationResourcesRequestQueryInput,
+  GetDashboardMigrationResourcesRequestParamsInput,
+  GetDashboardMigrationResourcesResponse,
+  GetDashboardMigrationResourcesMissingRequestParamsInput,
+  GetDashboardMigrationResourcesMissingResponse,
+  GetDashboardMigrationStatsRequestParamsInput,
+  GetDashboardMigrationStatsResponse,
+  InstallMigrationDashboardsRequestParamsInput,
+  InstallMigrationDashboardsRequestBodyInput,
+  InstallMigrationDashboardsResponse,
+  StartDashboardsMigrationRequestParamsInput,
+  StartDashboardsMigrationRequestBodyInput,
+  StartDashboardsMigrationResponse,
+  StopDashboardsMigrationRequestParamsInput,
+  StopDashboardsMigrationResponse,
+  UpdateDashboardMigrationRequestParamsInput,
+  UpdateDashboardMigrationRequestBodyInput,
+  UpsertDashboardMigrationResourcesRequestParamsInput,
+  UpsertDashboardMigrationResourcesRequestBodyInput,
+  UpsertDashboardMigrationResourcesResponse,
+} from '../siem_migrations/model/api/dashboards/dashboard_migration.gen';
+import type {
+  CreateQRadarRuleMigrationRulesRequestParamsInput,
+  CreateQRadarRuleMigrationRulesRequestBodyInput,
   CreateRuleMigrationRequestBodyInput,
   CreateRuleMigrationResponse,
+  CreateRuleMigrationRulesRequestParamsInput,
+  CreateRuleMigrationRulesRequestBodyInput,
+  CreateSentinelRuleMigrationRulesRequestParamsInput,
+  CreateSentinelRuleMigrationRulesRequestBodyInput,
+  DeleteRuleMigrationRequestParamsInput,
   GetAllStatsRuleMigrationResponse,
-  GetRuleMigrationRequestQueryInput,
   GetRuleMigrationRequestParamsInput,
   GetRuleMigrationResponse,
   GetRuleMigrationIntegrationsResponse,
+  GetRuleMigrationIntegrationsStatsResponse,
   GetRuleMigrationPrebuiltRulesRequestParamsInput,
   GetRuleMigrationPrebuiltRulesResponse,
   GetRuleMigrationPrivilegesResponse,
@@ -380,6 +541,9 @@ import type {
   GetRuleMigrationResourcesResponse,
   GetRuleMigrationResourcesMissingRequestParamsInput,
   GetRuleMigrationResourcesMissingResponse,
+  GetRuleMigrationRulesRequestQueryInput,
+  GetRuleMigrationRulesRequestParamsInput,
+  GetRuleMigrationRulesResponse,
   GetRuleMigrationStatsRequestParamsInput,
   GetRuleMigrationStatsResponse,
   GetRuleMigrationTranslationStatsRequestParamsInput,
@@ -387,6 +551,9 @@ import type {
   InstallMigrationRulesRequestParamsInput,
   InstallMigrationRulesRequestBodyInput,
   InstallMigrationRulesResponse,
+  RuleMigrationEnhanceRuleRequestParamsInput,
+  RuleMigrationEnhanceRuleRequestBodyInput,
+  RuleMigrationEnhanceRuleResponse,
   StartRuleMigrationRequestParamsInput,
   StartRuleMigrationRequestBodyInput,
   StartRuleMigrationResponse,
@@ -394,7 +561,12 @@ import type {
   StopRuleMigrationResponse,
   UpdateRuleMigrationRequestParamsInput,
   UpdateRuleMigrationRequestBodyInput,
-  UpdateRuleMigrationResponse,
+  UpdateRuleMigrationIndexPatternRequestParamsInput,
+  UpdateRuleMigrationIndexPatternRequestBodyInput,
+  UpdateRuleMigrationIndexPatternResponse,
+  UpdateRuleMigrationRulesRequestParamsInput,
+  UpdateRuleMigrationRulesRequestBodyInput,
+  UpdateRuleMigrationRulesResponse,
   UpsertRuleMigrationResourcesRequestParamsInput,
   UpsertRuleMigrationResourcesRequestBodyInput,
   UpsertRuleMigrationResourcesResponse,
@@ -414,13 +586,13 @@ export class Client {
     this.log = options.log;
   }
   /**
-    * Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of
-the migration process. A successful migration will result in both the old and new indices being present.
-As such, the old, orphaned index can (and likely should) be deleted.
+    * **DEPRECATED.** Cleanup API for old migration artifacts. Do not add new call sites.
+**WARNING:** This schedules deletions; ensure no production reads still point at the source index.
 
-While you can delete these indices manually,
-the endpoint accomplishes this task by applying a deletion policy to the relevant index, causing it to be deleted
-after 30 days. It also deletes other artifacts specific to the migration implementation.
+Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of
+the migration process. A successful migration can leave both the old and new indices present, so the old
+index may be deleted. While you can delete these indices manually, the endpoint applies a deletion policy
+to the relevant index, causing it to be deleted after 30 days, and removes other migration-specific artifacts.
 
     */
   async alertsMigrationCleanup(props: AlertsMigrationCleanupProps) {
@@ -436,6 +608,9 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Synchronize data view index patterns to all running entity engines so that newly added indices are picked up by the transforms.
+   */
   async applyEntityEngineDataviewIndices() {
     this.log.info(`${new Date().toISOString()} Calling API ApplyEntityEngineDataviewIndices`);
     return this.kbnClient
@@ -461,99 +636,25 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Ensures that the packages needed for prebuilt detection rules to work are installed and up to date
-   */
-  async bootstrapPrebuiltRules() {
-    this.log.info(`${new Date().toISOString()} Calling API BootstrapPrebuiltRules`);
-    return this.kbnClient
-      .request<BootstrapPrebuiltRulesResponse>({
-        path: '/internal/detection_engine/prebuilt_rules/_bootstrap',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'POST',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Create new detection rules in bulk.
-   */
-  async bulkCreateRules(props: BulkCreateRulesProps) {
-    this.log.info(`${new Date().toISOString()} Calling API BulkCreateRules`);
-    return this.kbnClient
-      .request<BulkCreateRulesResponse>({
-        path: '/api/detection_engine/rules/_bulk_create',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'POST',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Delete detection rules in bulk.
-   */
-  async bulkDeleteRules(props: BulkDeleteRulesProps) {
-    this.log.info(`${new Date().toISOString()} Calling API BulkDeleteRules`);
-    return this.kbnClient
-      .request<BulkDeleteRulesResponse>({
-        path: '/api/detection_engine/rules/_bulk_delete',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'DELETE',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Deletes multiple rules.
-   */
-  async bulkDeleteRulesPost(props: BulkDeleteRulesPostProps) {
-    this.log.info(`${new Date().toISOString()} Calling API BulkDeleteRulesPost`);
-    return this.kbnClient
-      .request<BulkDeleteRulesPostResponse>({
-        path: '/api/detection_engine/rules/_bulk_delete',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'POST',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Update specific fields of existing detection rules using the `rule_id` or `id` field.
-   */
-  async bulkPatchRules(props: BulkPatchRulesProps) {
-    this.log.info(`${new Date().toISOString()} Calling API BulkPatchRules`);
-    return this.kbnClient
-      .request<BulkPatchRulesResponse>({
-        path: '/api/detection_engine/rules/_bulk_update',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'PATCH',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-    * Update multiple detection rules using the `rule_id` or `id` field. The original rules are replaced, and all unspecified fields are deleted.
-> info
-> You cannot modify the `id` or `rule_id` values.
+    * Assigns the provided entities to the specified watchlist using a "manual" source label.
+The entities must already exist in the entity store.
+
+If an entity is already on the watchlist, no new document is created — the "manual" label
+is added to its existing source labels instead.
 
     */
-  async bulkUpdateRules(props: BulkUpdateRulesProps) {
-    this.log.info(`${new Date().toISOString()} Calling API BulkUpdateRules`);
+  async assignWatchlistEntities(props: AssignWatchlistEntitiesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API AssignWatchlistEntities`);
     return this.kbnClient
-      .request<BulkUpdateRulesResponse>({
-        path: '/api/detection_engine/rules/_bulk_update',
+      .request<AssignWatchlistEntitiesResponse>({
+        path: replaceParams(
+          '/api/entity_analytics/watchlists/{watchlist_id}/entities/assign',
+          props.params
+        ),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
-        method: 'PUT',
+        method: 'POST',
         body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
@@ -569,6 +670,22 @@ If asset criticality records already exist for the specified entities, those rec
     return this.kbnClient
       .request<BulkUpsertAssetCriticalityRecordsResponse>({
         path: '/api/asset_criticality/bulk',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Cancel a running or pending response action (Applies only to some agent types).
+   */
+  async cancelAction(props: CancelActionProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CancelAction`);
+    return this.kbnClient
+      .request<CancelActionResponse>({
+        path: '/api/endpoint/action/cancel',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -639,11 +756,17 @@ If asset criticality records already exist for the specified entities, those rec
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
-        method: 'GET',
+        method: 'POST',
         body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * Creates an index for Elastic Security alerts. Calling this API is not
+required for the detection engine to function properly. You can create
+rules and alerts without calling this API.
+
+    */
   async createAlertsIndex() {
     this.log.info(`${new Date().toISOString()} Calling API CreateAlertsIndex`);
     return this.kbnClient
@@ -657,8 +780,12 @@ If asset criticality records already exist for the specified entities, those rec
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Initiate a migration of detection alerts.
-Migrations are initiated per index. While the process is neither destructive nor interferes with existing data, it may be resource-intensive. As such, it is recommended that you plan your migrations accordingly.
+    * **DEPRECATED.** Legacy API for on-demand reindexing of old `.siem-signals-*` alert indices. Do not build new
+integrations; upgrade the Elastic Stack and rely on product-managed data lifecycle instead.
+**WARNING:** Migrations can be resource intensive and should be planned during a maintenance window.
+
+Initiate a migration of detection alerts. Migrations are initiated per index. The process is not destructive
+and should not remove existing data, but it can consume significant cluster resources. Plan capacity accordingly.
 
     */
   async createAlertsMigration(props: CreateAlertsMigrationProps) {
@@ -694,8 +821,158 @@ If a record already exists for the specified entity, that record is overwritten 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Create a new detection rule.
+   * Creates a new dashboard migration and returns the corresponding migration_id
    */
+  async createDashboardMigration(props: CreateDashboardMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateDashboardMigration`);
+    return this.kbnClient
+      .request<CreateDashboardMigrationResponse>({
+        path: '/internal/siem_migrations/dashboards',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'PUT',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Adds dashboards to an alreayd existing dashboard migration
+   */
+  async createDashboardMigrationDashboards(props: CreateDashboardMigrationDashboardsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateDashboardMigrationDashboards`);
+    return this.kbnClient
+      .request({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/dashboards',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async createEntitySource(props: CreateEntitySourceProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateEntitySource`);
+    return this.kbnClient
+      .request<CreateEntitySourceResponse>({
+        path: '/api/entity_analytics/monitoring/entity_source',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async createPrivilegesImportIndex(props: CreatePrivilegesImportIndexProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreatePrivilegesImportIndex`);
+    return this.kbnClient
+      .request<CreatePrivilegesImportIndexResponse>({
+        path: '/api/entity_analytics/monitoring/privileges/indices',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'PUT',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Creates a new privileged user to be monitored by the Privilege Monitoring Engine.
+   */
+  async createPrivMonUser(props: CreatePrivMonUserProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreatePrivMonUser`);
+    return this.kbnClient
+      .request<CreatePrivMonUserResponse>({
+        path: '/api/entity_analytics/monitoring/users',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Parses QRadar XML export and adds rules to an existing migration
+   */
+  async createQRadarRuleMigrationRules(props: CreateQRadarRuleMigrationRulesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateQRadarRuleMigrationRules`);
+    return this.kbnClient
+      .request({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/qradar/rules',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Create a new detection rule.
+> warn
+> When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
+> If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
+
+You can create the following types of rules:
+
+* **Custom query**: Searches the defined indices and creates an alert when a document matches the rule's KQL query.
+* **Event correlation**: Searches the defined indices and creates an alert when results match an [Event Query Language (EQL)](https://www.elastic.co/guide/en/elasticsearch/reference/current/eql.html) query.
+* **Threshold**: Searches the defined indices and creates an alert when the number of times the specified field's value meets the threshold during a single execution. When there are multiple values that meet the threshold, an alert is generated for each value.
+  For example, if the threshold `field` is `source.ip` and its `value` is `10`, an alert is generated for every source IP address that appears in at least 10 of the rule's search results. If you're interested, see [Terms Aggregation](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html) for more information.
+* **Indicator match**: Creates an alert when fields match values defined in the specified [Elasticsearch index](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html). For example, you can create an index for IP addresses and use this index to create an alert whenever an event's `destination.ip` equals a value in the index. The index's field mappings should be [ECS-compliant](https://www.elastic.co/guide/en/ecs/current/ecs-reference.html).
+* **New terms**: Generates an alert for each new term detected in source documents within a specified time range.
+* **ES|QL**: Uses [Elasticsearch Query Language (ES|QL)](https://www.elastic.co/guide/en/elasticsearch/reference/current/esql.html) to find events and aggregate search results.
+* **Machine learning rules**: Creates an alert when a machine learning job discovers an anomaly above the defined threshold.
+> info
+> To create machine learning rules, you must have the [appropriate license](https://www.elastic.co/subscriptions) or use a [cloud deployment](https://cloud.elastic.co/registration). Additionally, for the machine learning rule to function correctly, the associated machine learning job must be running.
+
+To retrieve machine learning job IDs, which are required to create machine learning jobs, call the [Elasticsearch Get jobs API](https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-job.html). Machine learning jobs that contain `siem` in the `groups` field can be used to create rules:
+
+```json
+...
+"job_id": "linux_anomalous_network_activity_ecs",
+"job_type": "anomaly_detector",
+"job_version": "7.7.0",
+"groups": [
+  "auditbeat",
+  "process",
+  "siem"
+],
+...
+```
+
+Additionally, you can set up notifications for when rules create alerts. The notifications use the [Alerting and Actions framework](https://www.elastic.co/docs/explore-analyze/alerting). Each action type requires a connector. Connectors store the information required to send notifications via external systems. The following connector types are supported for rule notifications:
+
+* Slack
+* Email
+* PagerDuty
+* Webhook
+* Microsoft Teams
+* IBM Resilient
+* Jira
+* ServiceNow ITSM
+> info
+> For more information on PagerDuty fields, see [Send a v2 Event](https://developer.pagerduty.com/docs/events-api-v2/trigger-events/).
+
+To retrieve connector IDs, which are required to configure rule notifications, call the [Find objects API](https://www.elastic.co/docs/api/doc/kibana/operation/operation-findsavedobjects) with `"type": "action"` in the request payload.
+
+For detailed information on Kibana actions and alerting, and additional API calls, see:
+
+* [Alerting API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-alerting)
+* [Alerting and Actions framework](https://www.elastic.co/docs/explore-analyze/alerting)
+* [Connectors API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-connectors)
+
+    */
   async createRule(props: CreateRuleProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateRule`);
     return this.kbnClient
@@ -710,13 +987,48 @@ If a record already exists for the specified entity, that record is overwritten 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Creates a new SIEM rules migration using the original vendor rules provided
+   * Creates a new rule migration and returns the corresponding migration_id
    */
   async createRuleMigration(props: CreateRuleMigrationProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateRuleMigration`);
     return this.kbnClient
       .request<CreateRuleMigrationResponse>({
-        path: replaceParams('/internal/siem_migrations/rules/{migration_id}', props.params),
+        path: '/internal/siem_migrations/rules',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'PUT',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Adds original vendor rules to an already existing migration. Can be called multiple times to add more rules
+   */
+  async createRuleMigrationRules(props: CreateRuleMigrationRulesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateRuleMigrationRules`);
+    return this.kbnClient
+      .request({
+        path: replaceParams('/internal/siem_migrations/rules/{migration_id}/rules', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Parses Microsoft Sentinel ARM template JSON export and adds rules to an existing migration
+   */
+  async createSentinelRuleMigrationRules(props: CreateSentinelRuleMigrationRulesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateSentinelRuleMigrationRules`);
+    return this.kbnClient
+      .request({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/sentinel/rules',
+          props.params
+        ),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -741,6 +1053,9 @@ If a record already exists for the specified entity, that record is overwritten 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Create or update the protection updates note for a package policy.
+   */
   async createUpdateProtectionUpdatesNote(props: CreateUpdateProtectionUpdatesNoteProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateUpdateProtectionUpdatesNote`);
     return this.kbnClient
@@ -757,6 +1072,44 @@ If a record already exists for the specified entity, that record is overwritten 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Creates a new entity analytics watchlist with an optional set of entity sources. Watchlists apply a risk score modifier to matched entities.
+   */
+  async createWatchlist(props: CreateWatchlistProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateWatchlist`);
+    return this.kbnClient
+      .request<CreateWatchlistResponse>({
+        path: '/api/entity_analytics/watchlists',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async createWatchlistEntitySource(props: CreateWatchlistEntitySourceProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateWatchlistEntitySource`);
+    return this.kbnClient
+      .request<CreateWatchlistEntitySourceResponse>({
+        path: replaceParams(
+          '/api/entity_analytics/watchlists/{watchlist_id}/entity_source',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Permanently deletes the Elastic Security alerts backing index in the current space, including the alerts
+stored in it. Use with caution; prefer lifecycle policies or the UI when available.
+Call `GET /api/detection_engine/index` first to confirm the index that will be removed.
+
+    */
   async deleteAlertsIndex() {
     this.log.info(`${new Date().toISOString()} Calling API DeleteAlertsIndex`);
     return this.kbnClient
@@ -786,6 +1139,21 @@ If a record already exists for the specified entity, that record is overwritten 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Deletes a SIEM dashboards migration using the migration id provided
+   */
+  async deleteDashboardMigration(props: DeleteDashboardMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteDashboardMigration`);
+    return this.kbnClient
+      .request({
+        path: replaceParams('/internal/siem_migrations/dashboards/{migration_id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'DELETE',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async deleteEntityEngine(props: DeleteEntityEngineProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteEntityEngine`);
     return this.kbnClient
@@ -800,9 +1168,57 @@ If a record already exists for the specified entity, that record is overwritten 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async deleteEntityEngines(props: DeleteEntityEnginesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteEntityEngines`);
+    return this.kbnClient
+      .request<DeleteEntityEnginesResponse>({
+        path: '/api/entity_store/engines',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'DELETE',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async deleteEntitySource(props: DeleteEntitySourceProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteEntitySource`);
+    return this.kbnClient
+      .request({
+        path: replaceParams('/api/entity_analytics/monitoring/entity_source/{id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'DELETE',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   /**
-   * Delete a note from a Timeline using the note ID.
+   * Deletes the Privilege Monitoring Engine and optionally removes all associated privileged user data.
    */
+  async deleteMonitoringEngine(props: DeleteMonitoringEngineProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteMonitoringEngine`);
+    return this.kbnClient
+      .request<DeleteMonitoringEngineResponse>({
+        path: '/api/entity_analytics/monitoring/engine/delete',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'DELETE',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Deletes notes by saved object ID. Send either `noteId` (single ID) or `noteIds` (array of IDs) in the JSON body.
+
+The response has HTTP 200 with an empty body on success.
+
+Requires the **Timeline and Notes** write privilege (`notes_write`).
+
+    */
   async deleteNote(props: DeleteNoteProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteNote`);
     return this.kbnClient
@@ -817,8 +1233,31 @@ If a record already exists for the specified entity, that record is overwritten 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Delete a detection rule using the `rule_id` or `id` field.
+   * Removes a privileged user from monitoring by their document ID.
    */
+  async deletePrivMonUser(props: DeletePrivMonUserProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeletePrivMonUser`);
+    return this.kbnClient
+      .request<DeletePrivMonUserResponse>({
+        path: replaceParams('/api/entity_analytics/monitoring/users/{id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'DELETE',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Delete a detection rule using the `rule_id` or `id` field.
+
+The URL query must include one of the following:
+
+* `id` - `DELETE /api/detection_engine/rules?id=<id>`
+* `rule_id`- `DELETE /api/detection_engine/rules?rule_id=<rule_id>`
+
+The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
+
+    */
   async deleteRule(props: DeleteRuleProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteRule`);
     return this.kbnClient
@@ -834,18 +1273,66 @@ If a record already exists for the specified entity, that record is overwritten 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Deletes a rule migration document stored in the system given the rule migration id
+   */
+  async deleteRuleMigration(props: DeleteRuleMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteRuleMigration`);
+    return this.kbnClient
+      .request({
+        path: replaceParams('/internal/siem_migrations/rules/{migration_id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'DELETE',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Delete a single entity in Entity Store.
+The entity will be immediately deleted from the latest index.  It will remain available in historical snapshots if it has been snapshotted.  The delete operation does not prevent the entity from being recreated if it is observed again in the future. 
+
+    */
+  async deleteSingleEntity(props: DeleteSingleEntityProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteSingleEntity`);
+    return this.kbnClient
+      .request<DeleteSingleEntityResponse>({
+        path: replaceParams('/api/entity_store/entities/{entityType}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'DELETE',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Delete one or more Timelines or Timeline templates.
    */
   async deleteTimelines(props: DeleteTimelinesProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteTimelines`);
     return this.kbnClient
-      .request({
+      .request<DeleteTimelinesResponse>({
         path: '/api/timeline',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'DELETE',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async deleteWatchlistEntitySource(props: DeleteWatchlistEntitySourceProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteWatchlistEntitySource`);
+    return this.kbnClient
+      .request({
+        path: replaceParams(
+          '/api/entity_analytics/watchlists/{watchlist_id}/entity_source/{id}',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'DELETE',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -862,6 +1349,21 @@ If a record already exists for the specified entity, that record is overwritten 
         },
         method: 'POST',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Disables the Privilege Monitoring Engine, stopping all monitoring activity without removing data.
+   */
+  async disableMonitoringEngine() {
+    this.log.info(`${new Date().toISOString()} Calling API DisableMonitoringEngine`);
+    return this.kbnClient
+      .request<DisableMonitoringEngineResponse>({
+        path: '/api/entity_analytics/monitoring/engine/disable',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -906,12 +1408,15 @@ If a record already exists for the specified entity, that record is overwritten 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Download a file from an endpoint.
-   */
+    * Download a file associated with a response action. Files are downloaded in a password-protected `.zip` archive to prevent the file from running. Use password `elastic` to open the `.zip` in a safe environment.
+> info
+> Files retrieved from third-party-protected hosts require a different password. Refer to [Third-party response actions](https://www.elastic.co/docs/solutions/security/endpoint-response-actions/third-party-response-actions) for your system's password.
+
+    */
   async endpointFileDownload(props: EndpointFileDownloadProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointFileDownload`);
     return this.kbnClient
-      .request<EndpointFileDownloadResponse>({
+      .request({
         path: replaceParams(
           '/api/endpoint/action/{action_id}/file/{file_id}/download',
           props.params
@@ -924,28 +1429,14 @@ If a record already exists for the specified entity, that record is overwritten 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Get information for the specified file using the file ID.
-   */
+    * Get information for the specified response action file download.
+
+    */
   async endpointFileInfo(props: EndpointFileInfoProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointFileInfo`);
     return this.kbnClient
       .request<EndpointFileInfoResponse>({
         path: replaceParams('/api/endpoint/action/{action_id}/file/{file_id}', props.params),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'GET',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Get the details of a response action using the action ID.
-   */
-  async endpointGetActionsDetails(props: EndpointGetActionsDetailsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API EndpointGetActionsDetails`);
-    return this.kbnClient
-      .request<EndpointGetActionsDetailsResponse>({
-        path: replaceParams('/api/endpoint/action/{action_id}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -1126,10 +1617,26 @@ If a record already exists for the specified entity, that record is overwritten 
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
+        body: props.attachment,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async entityDetailsHighlights(props: EntityDetailsHighlightsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API EntityDetailsHighlights`);
+    return this.kbnClient
+      .request<EntityDetailsHighlightsResponse>({
+        path: '/internal/entity_details/highlights',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
         body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Check whether the current user has the required Elasticsearch and Kibana privileges to use the Entity Store.
+   */
   async entityStoreGetPrivileges() {
     this.log.info(`${new Date().toISOString()} Calling API EntityStoreGetPrivileges`);
     return this.kbnClient
@@ -1147,7 +1654,11 @@ If a record already exists for the specified entity, that record is overwritten 
 - Actions
 - Exception lists
 > info
-> You cannot export prebuilt rules.
+> Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
+
+> You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
+
+> Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
 
     */
   async exportRules(props: ExportRulesProps) {
@@ -1182,9 +1693,12 @@ If a record already exists for the specified entity, that record is overwritten 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Finalize successful migrations of detection alerts. This replaces the original index's alias with the successfully migrated index's alias.
-The endpoint is idempotent; therefore, it can safely be used to poll a given migration and, upon completion,
-finalize it.
+    * **DEPRECATED.** Completes a legacy alert index migration. Do not automate against this in new code.
+**WARNING:** Finalizing swaps read aliases; confirm the migration has finished successfully before calling.
+
+Finalize successful migrations of detection alerts. This replaces the original index's alias with the
+successfully migrated index's alias. The endpoint is idempotent, so you can poll until a migration
+finishes and then call this operation once.
 
     */
   async finalizeAlertsMigration(props: FinalizeAlertsMigrationProps) {
@@ -1235,6 +1749,21 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Retrieves the dashboard migrations stats for all migrations stored in the system
+   */
+  async getAllDashboardMigrationsStats() {
+    this.log.info(`${new Date().toISOString()} Calling API GetAllDashboardMigrationsStats`);
+    return this.kbnClient
+      .request<GetAllDashboardMigrationsStatsResponse>({
+        path: '/internal/siem_migrations/dashboards/stats',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Retrieves the rule migrations stats for all migrations stored in the system
    */
   async getAllStatsRuleMigration() {
@@ -1242,6 +1771,28 @@ finalize it.
     return this.kbnClient
       .request<GetAllStatsRuleMigrationResponse>({
         path: '/internal/siem_migrations/rules/stats',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieves the translation stats of a SIEM dashboards migration using the migration id provided
+   */
+  async getAllTranslationStatsDashboardMigration(
+    props: GetAllTranslationStatsDashboardMigrationProps
+  ) {
+    this.log.info(
+      `${new Date().toISOString()} Calling API GetAllTranslationStatsDashboardMigration`
+    );
+    return this.kbnClient
+      .request<GetAllTranslationStatsDashboardMigrationResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/translation_stats',
+          props.params
+        ),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -1279,6 +1830,97 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Retrieves the dashboard migration document stored in the system given the dashboard migration id
+   */
+  async getDashboardMigration(props: GetDashboardMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetDashboardMigration`);
+    return this.kbnClient
+      .request<GetDashboardMigrationResponse>({
+        path: replaceParams('/internal/siem_migrations/dashboards/{migration_id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieves the dashboards added to an existing dashboard migration
+   */
+  async getDashboardMigrationDashboards(props: GetDashboardMigrationDashboardsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetDashboardMigrationDashboards`);
+    return this.kbnClient
+      .request<GetDashboardMigrationDashboardsResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/dashboards',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieves resources for an existing SIEM dashboards migration
+   */
+  async getDashboardMigrationResources(props: GetDashboardMigrationResourcesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetDashboardMigrationResources`);
+    return this.kbnClient
+      .request<GetDashboardMigrationResourcesResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/resources',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Identifies missing resources from all the dashboards of an existing SIEM dashboard migration
+   */
+  async getDashboardMigrationResourcesMissing(props: GetDashboardMigrationResourcesMissingProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetDashboardMigrationResourcesMissing`);
+    return this.kbnClient
+      .request<GetDashboardMigrationResourcesMissingResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/resources/missing',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieves the dashboard migrations stats for given migrations stored in the system
+   */
+  async getDashboardMigrationStats(props: GetDashboardMigrationStatsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetDashboardMigrationStats`);
+    return this.kbnClient
+      .request<GetDashboardMigrationStatsResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/stats',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Get the details of the draft Timeline  or Timeline template for the current user. If the user doesn't have a draft Timeline, an empty Timeline is returned.
    */
   async getDraftTimelines(props: GetDraftTimelinesProps) {
@@ -1295,6 +1937,21 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async getEndpointExceptionsPerPolicyOptIn() {
+    this.log.info(`${new Date().toISOString()} Calling API GetEndpointExceptionsPerPolicyOptIn`);
+    return this.kbnClient
+      .request<GetEndpointExceptionsPerPolicyOptInResponse>({
+        path: '/internal/api/endpoint/endpoint_exceptions_per_policy_opt_in',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Get a list of all endpoint host metadata.
+   */
   async getEndpointMetadataList(props: GetEndpointMetadataListProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetEndpointMetadataList`);
     return this.kbnClient
@@ -1322,6 +1979,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get the engine descriptor for a specific entity type, including its configuration and current status.
+   */
   async getEntityEngine(props: GetEntityEngineProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetEntityEngine`);
     return this.kbnClient
@@ -1334,6 +1994,21 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async getEntitySource(props: GetEntitySourceProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetEntitySource`);
+    return this.kbnClient
+      .request<GetEntitySourceResponse>({
+        path: replaceParams('/api/entity_analytics/monitoring/entity_source/{id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Get the overall Entity Store status and per-engine statuses, optionally including component-level health details.
+   */
   async getEntityStoreStatus(props: GetEntityStoreStatusProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetEntityStoreStatus`);
     return this.kbnClient
@@ -1349,8 +2024,19 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Get all notes for a given document.
-   */
+    * Returns Security Timeline notes as saved objects.
+
+**Query modes (mutually exclusive branches on the server):**
+
+1. **`documentIds` is set** — Returns notes whose `eventId` matches the given Elasticsearch document `_id` (single string or array). Pagination query parameters (`page`, `perPage`, etc.) are **not** applied; the server uses a fixed page size (up to 10000 notes).
+
+2. **`savedObjectIds` is set** — Returns notes linked to the given Timeline saved object id(s). Same fixed cap as above; list-mode query parameters are **not** applied.
+
+3. **Neither `documentIds` nor `savedObjectIds`** — Lists notes using saved-objects find semantics: `page` (default 1), `perPage` (default 10), optional `search`, `sortField`, `sortOrder`, `filter`, `createdByFilter`, and `associatedFilter`.
+
+Requires the **Timeline and Notes** read privilege (`notes_read`).
+
+    */
   async getNotes(props: GetNotesProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetNotes`);
     return this.kbnClient
@@ -1365,6 +2051,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get the most recent policy response for an endpoint.
+   */
   async getPolicyResponse(props: GetPolicyResponseProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetPolicyResponse`);
     return this.kbnClient
@@ -1379,6 +2068,26 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Returns the installation and ML module setup status of the privileged access detection package, along with the state of each associated ML job.
+   */
+  async getPrivilegedAccessDetectionPackageStatus() {
+    this.log.info(
+      `${new Date().toISOString()} Calling API GetPrivilegedAccessDetectionPackageStatus`
+    );
+    return this.kbnClient
+      .request<GetPrivilegedAccessDetectionPackageStatusResponse>({
+        path: '/api/entity_analytics/privileged_user_monitoring/pad/status',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Get the protection updates note for a package policy.
+   */
   async getProtectionUpdatesNote(props: GetProtectionUpdatesNoteProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetProtectionUpdatesNote`);
     return this.kbnClient
@@ -1409,42 +2118,8 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async getRuleExecutionEvents(props: GetRuleExecutionEventsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetRuleExecutionEvents`);
-    return this.kbnClient
-      .request<GetRuleExecutionEventsResponse>({
-        path: replaceParams(
-          '/internal/detection_engine/rules/{ruleId}/execution/events',
-          props.params
-        ),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'PUT',
-
-        query: props.query,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async getRuleExecutionResults(props: GetRuleExecutionResultsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetRuleExecutionResults`);
-    return this.kbnClient
-      .request<GetRuleExecutionResultsResponse>({
-        path: replaceParams(
-          '/internal/detection_engine/rules/{ruleId}/execution/results',
-          props.params
-        ),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'PUT',
-
-        query: props.query,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
   /**
-   * Retrieves the rule documents stored in the system given the rule migration id
+   * Retrieves the rule migration document stored in the system given the rule migration id
    */
   async getRuleMigration(props: GetRuleMigrationProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetRuleMigration`);
@@ -1455,8 +2130,6 @@ finalize it.
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
-
-        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1468,6 +2141,21 @@ finalize it.
     return this.kbnClient
       .request<GetRuleMigrationIntegrationsResponse>({
         path: '/internal/siem_migrations/rules/integrations',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieves the stats of all the integrations for all the rule migrations, including the number of rules associated with the integration
+   */
+  async getRuleMigrationIntegrationsStats() {
+    this.log.info(`${new Date().toISOString()} Calling API GetRuleMigrationIntegrationsStats`);
+    return this.kbnClient
+      .request<GetRuleMigrationIntegrationsStatsResponse>({
+        path: '/internal/siem_migrations/rules/integrations/stats',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -1547,6 +2235,23 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Retrieves the the list of rules included in a migration given the migration id
+   */
+  async getRuleMigrationRules(props: GetRuleMigrationRulesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetRuleMigrationRules`);
+    return this.kbnClient
+      .request<GetRuleMigrationRulesResponse>({
+        path: replaceParams('/internal/siem_migrations/rules/{migration_id}/rules', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Retrieves the stats of a SIEM rules migration using the migration id provided
    */
   async getRuleMigrationStats(props: GetRuleMigrationStatsProps) {
@@ -1613,17 +2318,33 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async getWorkflowInsights(props: GetWorkflowInsightsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetWorkflowInsights`);
+  /**
+   * Retrieves the details of an entity analytics watchlist by its unique identifier.
+   */
+  async getWatchlist(props: GetWatchlistProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetWatchlist`);
     return this.kbnClient
-      .request<GetWorkflowInsightsResponse>({
-        path: '/internal/api/endpoint/workflow_insights',
+      .request<GetWatchlistResponse>({
+        path: replaceParams('/api/entity_analytics/watchlists/{id}', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'GET',
-
-        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async getWatchlistEntitySource(props: GetWatchlistEntitySourceProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetWatchlistEntitySource`);
+    return this.kbnClient
+      .request<GetWatchlistEntitySourceResponse>({
+        path: replaceParams(
+          '/api/entity_analytics/watchlists/{watchlist_id}/entity_source/{id}',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1631,6 +2352,19 @@ finalize it.
     * Import detection rules from an `.ndjson` file, including actions and exception lists. The request must include:
 - The `Content-Type: multipart/form-data` HTTP header.
 - A link to the `.ndjson` file containing the rules.
+> warn
+> When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
+> If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
+> info
+> To import rules with actions, you need at least Read privileges for the Action and Connectors feature. To overwrite or add new connectors, you need All privileges for the Actions and Connectors feature. To import rules without actions, you don’t need Actions and Connectors privileges. Refer to [Enable and access detections](https://www.elastic.co/docs/solutions/security/detect-and-alert/detections-privileges) for more information.
+
+> info
+> Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
+
+> You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
+
+> Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
 
     */
   async importRules(props: ImportRulesProps) {
@@ -1663,6 +2397,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Initialize a single entity engine for the specified entity type.
+   */
   async initEntityEngine(props: InitEntityEngineProps) {
     this.log.info(`${new Date().toISOString()} Calling API InitEntityEngine`);
     return this.kbnClient
@@ -1676,6 +2413,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Initialize the entire Entity Store, creating engines for all or specified entity types.
+   */
   async initEntityStore(props: InitEntityStoreProps) {
     this.log.info(`${new Date().toISOString()} Calling API InitEntityStore`);
     return this.kbnClient
@@ -1686,6 +2426,34 @@ finalize it.
         },
         method: 'POST',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async initializeSecuritySolution(props: InitializeSecuritySolutionProps) {
+    this.log.info(`${new Date().toISOString()} Calling API InitializeSecuritySolution`);
+    return this.kbnClient
+      .request<InitializeSecuritySolutionResponse>({
+        path: '/api/security_solution/initialize',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Initializes the Privilege Monitoring Engine, setting up the required resources and starting the engine.
+   */
+  async initMonitoringEngine() {
+    this.log.info(`${new Date().toISOString()} Calling API InitMonitoringEngine`);
+    return this.kbnClient
+      .request<InitMonitoringEngineResponse>({
+        path: '/api/entity_analytics/monitoring/engine/init',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1701,6 +2469,25 @@ finalize it.
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Installs migration dashboards
+   */
+  async installMigrationDashboards(props: InstallMigrationDashboardsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API InstallMigrationDashboards`);
+    return this.kbnClient
+      .request<InstallMigrationDashboardsResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/install',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1721,8 +2508,19 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Install and update all Elastic prebuilt detection rules and Timelines.
-   */
+    * Install and update all Elastic prebuilt detection rules and Timelines.
+
+This endpoint allows you to install and update prebuilt detection rules and Timelines provided by Elastic. 
+When you call this endpoint, it will:
+- Install any new prebuilt detection rules that are not currently installed in your system.
+- Update any existing prebuilt detection rules that have been modified or improved by Elastic.
+- Install any new prebuilt Timelines that are not currently installed in your system.
+- Update any existing prebuilt Timelines that have been modified or improved by Elastic.
+
+This ensures that your detection engine is always up-to-date with the latest rules and Timelines, 
+providing you with the most current and effective threat detection capabilities.
+
+    */
   async installPrebuiltRulesAndTimelines() {
     this.log.info(`${new Date().toISOString()} Calling API InstallPrebuiltRulesAndTimelines`);
     return this.kbnClient
@@ -1751,11 +2549,36 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async internalUploadAssetCriticalityRecords(props: InternalUploadAssetCriticalityRecordsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API InternalUploadAssetCriticalityRecords`);
+  /**
+   * Installs the privileged access detection integration package and sets up the associated ML modules required for the Entity Analytics privileged user monitoring experience.
+   */
+  async installPrivilegedAccessDetectionPackage() {
+    this.log.info(
+      `${new Date().toISOString()} Calling API InstallPrivilegedAccessDetectionPackage`
+    );
     return this.kbnClient
-      .request<InternalUploadAssetCriticalityRecordsResponse>({
-        path: '/internal/asset_criticality/upload_csv',
+      .request<InstallPrivilegedAccessDetectionPackageResponse>({
+        path: '/api/entity_analytics/privileged_user_monitoring/pad/install',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Uploads a CSV file to assign asset criticality.
+
+CSV must contain header row with "type" and "criticality_level" columns, in addition to ECS fields used to match entities in the entity store (e.g. "host.name", "user.id", "user.email").
+
+Each row will match up to 10,000 entities.
+
+    */
+  async internalUploadAssetCriticalityV2Csv(props: InternalUploadAssetCriticalityV2CsvProps) {
+    this.log.info(`${new Date().toISOString()} Calling API InternalUploadAssetCriticalityV2Csv`);
+    return this.kbnClient
+      .request<InternalUploadAssetCriticalityV2CsvResponse>({
+        path: '/internal/asset_criticality/upload_csv_v2',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -1781,6 +2604,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get a list of all installed entity engines and their current status.
+   */
   async listEntityEngines() {
     this.log.info(`${new Date().toISOString()} Calling API ListEntityEngines`);
     return this.kbnClient
@@ -1793,9 +2619,79 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async listEntitySources(props: ListEntitySourcesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ListEntitySources`);
+    return this.kbnClient
+      .request<ListEntitySourcesResponse>({
+        path: '/api/entity_analytics/monitoring/entity_source/list',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   /**
-   * Update specific fields of an existing detection rule using the `rule_id` or `id` field.
+   * Returns a list of all privileged users currently being monitored. Supports optional KQL filtering.
    */
+  async listPrivMonUsers(props: ListPrivMonUsersProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ListPrivMonUsers`);
+    return this.kbnClient
+      .request<ListPrivMonUsersResponse>({
+        path: '/api/entity_analytics/monitoring/users/list',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async listWatchlistEntitySources(props: ListWatchlistEntitySourcesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ListWatchlistEntitySources`);
+    return this.kbnClient
+      .request<ListWatchlistEntitySourcesResponse>({
+        path: replaceParams(
+          '/api/entity_analytics/watchlists/{watchlist_id}/entity_source/list',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Returns a list of all entity analytics watchlists.
+   */
+  async listWatchlists() {
+    this.log.info(`${new Date().toISOString()} Calling API ListWatchlists`);
+    return this.kbnClient
+      .request<ListWatchlistsResponse>({
+        path: '/api/entity_analytics/watchlists/list',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Update specific fields of an existing detection rule using the `rule_id` or `id` field.
+
+The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
+> warn
+> When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
+> If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
+
+    */
   async patchRule(props: PatchRuleProps) {
     this.log.info(`${new Date().toISOString()} Calling API PatchRule`);
     return this.kbnClient
@@ -1825,9 +2721,31 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async performEndpointExceptionsPerPolicyOptIn() {
+    this.log.info(
+      `${new Date().toISOString()} Calling API PerformEndpointExceptionsPerPolicyOptIn`
+    );
+    return this.kbnClient
+      .request({
+        path: '/internal/api/endpoint/endpoint_exceptions_per_policy_opt_in',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   /**
-   * Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
-   */
+    * Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
+
+The edit action allows you to add, delete, or set tags, index patterns, investigation fields, rule actions and schedules for multiple rules at once. 
+The edit action is idempotent, meaning that if you add a tag to a rule that already has that tag, no changes are made. The same is true for other edit actions, for example removing an index pattern that is not specified in a rule will not result in any changes. The only exception is the `add_rule_actions` and `set_rule_actions` action, which is non-idempotent. This means that if you add or set a rule action to a rule that already has that action, a new action is created with a new unique ID.
+> warn
+> When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
+> If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
+
+    */
   async performRulesBulkAction(props: PerformRulesBulkActionProps) {
     this.log.info(`${new Date().toISOString()} Calling API PerformRulesBulkAction`);
     return this.kbnClient
@@ -1859,8 +2777,15 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Add a note to a Timeline or update an existing note.
-   */
+    * Creates a new note or updates an existing one.
+
+**Create:** Send `note` and omit `noteId` to create a new saved object.
+
+**Update:** Send `note` with the changed fields and set `noteId` to the note's saved object ID. Optionally include `version` for optimistic concurrency when the client has it from a prior read.
+
+Requires the **Timeline and Notes** write privilege (`notes_write`).
+
+    */
   async persistNoteRoute(props: PersistNoteRouteProps) {
     this.log.info(`${new Date().toISOString()} Calling API PersistNoteRoute`);
     return this.kbnClient
@@ -1875,7 +2800,7 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Pin an event to an existing Timeline.
+   * Pin/unpin an event to/from an existing Timeline.
    */
   async persistPinnedEventRoute(props: PersistPinnedEventRouteProps) {
     this.log.info(`${new Date().toISOString()} Calling API PersistPinnedEventRoute`);
@@ -1906,6 +2831,58 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Bulk upserts privileged users by uploading a CSV file. Returns per-row errors and aggregate upload statistics.
+   */
+  async privmonBulkUploadUsersCsv(props: PrivmonBulkUploadUsersCSVProps) {
+    this.log.info(`${new Date().toISOString()} Calling API PrivmonBulkUploadUsersCSV`);
+    return this.kbnClient
+      .request<PrivmonBulkUploadUsersCSVResponse>({
+        path: '/api/entity_analytics/monitoring/users/_csv',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.attachment,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Returns the current health status of the Privilege Monitoring Engine, including engine status, error details, and user count statistics.
+   */
+  async privMonHealth() {
+    this.log.info(`${new Date().toISOString()} Calling API PrivMonHealth`);
+    return this.kbnClient
+      .request<PrivMonHealthResponse>({
+        path: '/api/entity_analytics/monitoring/privileges/health',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Check if the current user has all required permissions for Privilege Monitoring
+   */
+  async privMonPrivileges() {
+    this.log.info(`${new Date().toISOString()} Calling API PrivMonPrivileges`);
+    return this.kbnClient
+      .request<PrivMonPrivilegesResponse>({
+        path: '/api/entity_analytics/monitoring/privileges/privileges',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Returns the backing Elasticsearch index for Elastic Security detection alerts in the current space, and
+whether its mapping is outdated. Use this to verify that an alert index is provisioned before creating
+or running rules that write alerts to it.
+
+    */
   async readAlertsIndex() {
     this.log.info(`${new Date().toISOString()} Calling API ReadAlertsIndex`);
     return this.kbnClient
@@ -1919,8 +2896,14 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Retrieve indices that contain detection alerts of a particular age, along with migration information for each of those indices.
-   */
+    * **DEPRECATED.** This endpoint was used for historical `.siem-signals-*` index migration workflows. Do not use
+for new automations; there is no supported replacement in this public API.
+**WARNING:** Prefer upgrading through supported Elastic stack upgrades rather than ad-hoc index migrations.
+
+Retrieves indices that contain detection alerts of a particular age, along with migration information for
+each of those indices.
+
+    */
   async readAlertsMigrationStatus(props: ReadAlertsMigrationStatusProps) {
     this.log.info(`${new Date().toISOString()} Calling API ReadAlertsMigrationStatus`);
     return this.kbnClient
@@ -1936,8 +2919,11 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Retrieve the status of all Elastic prebuilt detection rules and Timelines.
-   */
+    * Retrieve the status of all Elastic prebuilt detection rules and Timelines. 
+
+This endpoint provides detailed information about the number of custom rules, installed prebuilt rules, available prebuilt rules that are not installed, outdated prebuilt rules, installed prebuilt timelines, available prebuilt timelines that are not installed, and outdated prebuilt timelines.
+
+    */
   async readPrebuiltRulesAndTimelinesStatus() {
     this.log.info(`${new Date().toISOString()} Calling API ReadPrebuiltRulesAndTimelinesStatus`);
     return this.kbnClient
@@ -1982,8 +2968,16 @@ detection engine rules.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Retrieve a detection rule using the `rule_id` or `id` field.
-   */
+    * Retrieve a detection rule using the `rule_id` or `id` field.
+
+The URL query must include one of the following:
+
+* `id` - `GET /api/detection_engine/rules?id=<id>`
+* `rule_id` - `GET /api/detection_engine/rules?rule_id=<rule_id>`
+
+The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
+
+    */
   async readRule(props: ReadRuleProps) {
     this.log.info(`${new Date().toISOString()} Calling API ReadRule`);
     return this.kbnClient
@@ -1995,6 +2989,22 @@ detection engine rules.
         method: 'GET',
 
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async readRuleExecutionResults(props: ReadRuleExecutionResultsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ReadRuleExecutionResults`);
+    return this.kbnClient
+      .request<ReadRuleExecutionResultsResponse>({
+        path: replaceParams(
+          '/internal/detection_engine/rules/{ruleId}/execution/results',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2013,6 +3023,9 @@ detection engine rules.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Resolve a Timeline or Timeline template, surfacing outcomes such as `exactMatch`, `aliasMatch`, or `conflict` when object IDs have been remapped during upgrades or imports. Provide **either** `id` for default Timelines or `template_timeline_id` for templates.
+   */
   async resolveTimeline(props: ResolveTimelineProps) {
     this.log.info(`${new Date().toISOString()} Calling API ResolveTimeline`);
     return this.kbnClient
@@ -2039,6 +3052,31 @@ detection engine rules.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Enhances existing migration rules with additional vendor-specific data such as MITRE mappings
+   */
+  async ruleMigrationEnhanceRule(props: RuleMigrationEnhanceRuleProps) {
+    this.log.info(`${new Date().toISOString()} Calling API RuleMigrationEnhanceRule`);
+    return this.kbnClient
+      .request<RuleMigrationEnhanceRuleResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/rules/enhance',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Simulates a detection rule using the same rule type and query logic as a persisted rule, over a short
+time window, without persisting a rule or writing alerts. Use the response to validate queries, see sample
+matching documents, and inspect execution logs. Pair `invocationCount` and `timeframeEnd` to cap run time.
+
+    */
   async rulePreview(props: RulePreviewProps) {
     this.log.info(`${new Date().toISOString()} Calling API RulePreview`);
     return this.kbnClient
@@ -2053,8 +3091,20 @@ detection engine rules.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async runEntityAnalyticsMigrations() {
+    this.log.info(`${new Date().toISOString()} Calling API RunEntityAnalyticsMigrations`);
+    return this.kbnClient
+      .request<RunEntityAnalyticsMigrationsResponse>({
+        path: '/internal/entity_analytics/migrations/run',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   /**
-   * Run a shell command on an endpoint.
+   * Run a script on a host. Currently supported only for some agent types.
    */
   async runScriptAction(props: RunScriptActionProps) {
     this.log.info(`${new Date().toISOString()} Calling API RunScriptAction`);
@@ -2070,9 +3120,24 @@ detection engine rules.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Schedules the Privilege Monitoring Engine to run as soon as possible, triggering an immediate monitoring cycle.
+   */
+  async scheduleMonitoringEngine() {
+    this.log.info(`${new Date().toISOString()} Calling API ScheduleMonitoringEngine`);
+    return this.kbnClient
+      .request<ScheduleMonitoringEngineResponse>({
+        path: '/api/entity_analytics/monitoring/engine/schedule_now',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
    */
-  async scheduleRiskEngineNow() {
+  async scheduleRiskEngineNow(props: ScheduleRiskEngineNowProps) {
     this.log.info(`${new Date().toISOString()} Calling API ScheduleRiskEngineNow`);
     return this.kbnClient
       .request<ScheduleRiskEngineNowResponse>({
@@ -2081,6 +3146,7 @@ detection engine rules.
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2100,6 +3166,52 @@ detection engine rules.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async searchPrivilegesIndices(props: SearchPrivilegesIndicesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SearchPrivilegesIndices`);
+    return this.kbnClient
+      .request<SearchPrivilegesIndicesResponse>({
+        path: '/api/entity_analytics/monitoring/privileges/indices',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieve a paginated list of detection rules with KQL filter, facet counts, and search_after pagination.
+   */
+  async searchRules(props: SearchRulesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SearchRules`);
+    return this.kbnClient
+      .request<SearchRulesResponse>({
+        path: '/internal/detection_engine/rules/_search',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Find and/or aggregate detection and attack alerts that match the given query.
+   */
+  async searchUnifiedAlerts(props: SearchUnifiedAlertsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SearchUnifiedAlerts`);
+    return this.kbnClient
+      .request<SearchUnifiedAlertsResponse>({
+        path: '/internal/detection_engine/unified_alerts/search',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   /**
     * Assign users to detection alerts, and unassign them from alerts.
 > info
@@ -2109,7 +3221,7 @@ detection engine rules.
   async setAlertAssignees(props: SetAlertAssigneesProps) {
     this.log.info(`${new Date().toISOString()} Calling API SetAlertAssignees`);
     return this.kbnClient
-      .request({
+      .request<SetAlertAssigneesResponse>({
         path: '/api/detection_engine/signals/assignees',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -2136,7 +3248,7 @@ detection engine rules.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * And tags to detection alerts, and remove them from alerts.
+    * Add tags to detection alerts, and remove them from alerts, by alert IDs or a query, in a single request.
 > info
 > You cannot add and remove the same alert tag in the same request.
 
@@ -2154,6 +3266,82 @@ detection engine rules.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * Assign users to detection and attack alerts, and unassign them from alerts.
+> info
+> You cannot add and remove the same assignee in the same request.
+
+    */
+  async setUnifiedAlertsAssignees(props: SetUnifiedAlertsAssigneesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SetUnifiedAlertsAssignees`);
+    return this.kbnClient
+      .request<SetUnifiedAlertsAssigneesResponse>({
+        path: '/internal/detection_engine/unified_alerts/assignees',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Add tags to detection and attack alerts, and remove them from alerts.
+> info
+> You cannot add and remove the same alert tag in the same request.
+
+    */
+  async setUnifiedAlertsTags(props: SetUnifiedAlertsTagsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SetUnifiedAlertsTags`);
+    return this.kbnClient
+      .request<SetUnifiedAlertsTagsResponse>({
+        path: '/internal/detection_engine/unified_alerts/tags',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Set the workflow status of one or more detection and attack alerts by IDs.
+   */
+  async setUnifiedAlertsWorkflowStatus(props: SetUnifiedAlertsWorkflowStatusProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SetUnifiedAlertsWorkflowStatus`);
+    return this.kbnClient
+      .request<SetUnifiedAlertsWorkflowStatusResponse>({
+        path: '/internal/detection_engine/unified_alerts/workflow_status',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Starts a SIEM dashboards migration using the migration id provided
+   */
+  async startDashboardsMigration(props: StartDashboardsMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API StartDashboardsMigration`);
+    return this.kbnClient
+      .request<StartDashboardsMigrationResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/start',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Start a previously stopped entity engine, resuming transform processing for the given entity type.
+   */
   async startEntityEngine(props: StartEntityEngineProps) {
     this.log.info(`${new Date().toISOString()} Calling API StartEntityEngine`);
     return this.kbnClient
@@ -2177,11 +3365,32 @@ detection engine rules.
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
-        method: 'PUT',
+        method: 'POST',
         body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Stops a running SIEM dashboards migration using the migration id provided
+   */
+  async stopDashboardsMigration(props: StopDashboardsMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API StopDashboardsMigration`);
+    return this.kbnClient
+      .request<StopDashboardsMigrationResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/stop',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Stop a running entity engine, pausing transform processing for the given entity type.
+   */
   async stopEntityEngine(props: StopEntityEngineProps) {
     this.log.info(`${new Date().toISOString()} Calling API StopEntityEngine`);
     return this.kbnClient
@@ -2205,7 +3414,7 @@ detection engine rules.
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
-        method: 'PUT',
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2226,6 +3435,18 @@ detection engine rules.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async syncWatchlist(props: SyncWatchlistProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SyncWatchlist`);
+    return this.kbnClient
+      .request<SyncWatchlistResponse>({
+        path: replaceParams('/api/entity_analytics/watchlists/{watchlist_id}/sync', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   /**
    * Calculates and persists Risk Scores for an entity, returning the calculated risk score.
    */
@@ -2243,9 +3464,81 @@ detection engine rules.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+    * Unassigns the provided entities from the specified watchlist.
+This only removes the "manual" assignment. If the entity is also
+assigned via other sources (for example, index or integration), it will
+remain on the watchlist.
+
+    */
+  async unassignWatchlistEntities(props: UnassignWatchlistEntitiesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UnassignWatchlistEntities`);
+    return this.kbnClient
+      .request<UnassignWatchlistEntitiesResponse>({
+        path: replaceParams(
+          '/api/entity_analytics/watchlists/{watchlist_id}/entities/unassign',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Updates mutable fields of an existing dashboard migration
+   */
+  async updateDashboardMigration(props: UpdateDashboardMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdateDashboardMigration`);
+    return this.kbnClient
+      .request({
+        path: replaceParams('/internal/siem_migrations/dashboards/{migration_id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'PATCH',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async updateEntitySource(props: UpdateEntitySourceProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdateEntitySource`);
+    return this.kbnClient
+      .request<UpdateEntitySourceResponse>({
+        path: replaceParams('/api/entity_analytics/monitoring/entity_source/{id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'PUT',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Updates the details of an existing monitored privileged user by their document ID.
+   */
+  async updatePrivMonUser(props: UpdatePrivMonUserProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdatePrivMonUser`);
+    return this.kbnClient
+      .request<UpdatePrivMonUserResponse>({
+        path: replaceParams('/api/entity_analytics/monitoring/users/{id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'PUT',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
     * Update a detection rule using the `rule_id` or `id` field. The original rule is replaced, and all unspecified fields are deleted.
-> info
-> You cannot modify the `id` or `rule_id` values.
+
+The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
+> warn
+> When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
+> If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
     */
   async updateRule(props: UpdateRuleProps) {
@@ -2262,28 +3555,82 @@ detection engine rules.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Updates rules migrations attributes
+   * Updates rules migrations data
    */
   async updateRuleMigration(props: UpdateRuleMigrationProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdateRuleMigration`);
     return this.kbnClient
-      .request<UpdateRuleMigrationResponse>({
+      .request({
         path: replaceParams('/internal/siem_migrations/rules/{migration_id}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'PATCH',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Updates the index pattern for eligible and/or selected rules of a migration
+   */
+  async updateRuleMigrationIndexPattern(props: UpdateRuleMigrationIndexPatternProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdateRuleMigrationIndexPattern`);
+    return this.kbnClient
+      .request<UpdateRuleMigrationIndexPatternResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/update_index_pattern',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Updates rules migrations attributes
+   */
+  async updateRuleMigrationRules(props: UpdateRuleMigrationRulesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdateRuleMigrationRules`);
+    return this.kbnClient
+      .request<UpdateRuleMigrationRulesResponse>({
+        path: replaceParams('/internal/siem_migrations/rules/{migration_id}/rules', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'PATCH',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Updates the name, description, risk modifier, or managed status of an existing entity analytics watchlist.
+   */
+  async updateWatchlist(props: UpdateWatchlistProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdateWatchlist`);
+    return this.kbnClient
+      .request<UpdateWatchlistResponse>({
+        path: replaceParams('/api/entity_analytics/watchlists/{id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'PUT',
         body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async updateWorkflowInsight(props: UpdateWorkflowInsightProps) {
-    this.log.info(`${new Date().toISOString()} Calling API UpdateWorkflowInsight`);
+  async updateWatchlistEntitySource(props: UpdateWatchlistEntitySourceProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdateWatchlistEntitySource`);
     return this.kbnClient
-      .request<UpdateWorkflowInsightResponse>({
-        path: replaceParams('/internal/api/endpoint/workflow_insights/{insightId}', props.params),
+      .request<UpdateWatchlistEntitySourceResponse>({
+        path: replaceParams(
+          '/api/entity_analytics/watchlists/{watchlist_id}/entity_source/{id}',
+          props.params
+        ),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'PUT',
         body: props.body,
@@ -2300,6 +3647,93 @@ detection engine rules.
         },
         method: 'POST',
         body: props.attachment,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Uploads a CSV file to add entities to a watchlist. The CSV must contain a header row
+with a "type" column (user, host, service, or generic) and one or more ECS identity
+fields (e.g. "user.name", "host.hostname") used to match entities in the entity store.
+
+Matched entities are added to the watchlist and their `entity.attributes.watchlists`
+field is updated in the entity store.
+
+Each row will match up to 10,000 entities.
+
+    */
+  async uploadWatchlistCsv(props: UploadWatchlistCsvProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UploadWatchlistCsv`);
+    return this.kbnClient
+      .request<UploadWatchlistCsvResponse>({
+        path: replaceParams(
+          '/api/entity_analytics/watchlists/{watchlist_id}/csv_upload',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.attachment,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Creates or updates resources for an existing SIEM dashboards migration
+   */
+  async upsertDashboardMigrationResources(props: UpsertDashboardMigrationResourcesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpsertDashboardMigrationResources`);
+    return this.kbnClient
+      .request<UpsertDashboardMigrationResourcesResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/resources',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Update or create many entities in Entity Store.
+If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created.
+The creation is asynchronous. The time for a document to be present in the  final index depends on the entity store transform and usually takes more than 1 minute.
+
+    */
+  async upsertEntitiesBulk(props: UpsertEntitiesBulkProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpsertEntitiesBulk`);
+    return this.kbnClient
+      .request({
+        path: '/api/entity_store/entities/bulk',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'PUT',
+        body: props.body,
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Update or create an entity in Entity Store.
+If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created. By default, only the following fields can be updated: * `entity.attributes.*` * `entity.lifecycle.*` * `entity.behavior.*` To update other fields, set the `force` query parameter to `true`. > info > Some fields always retain the first observed value. Updates to these fields will not appear in the final index.
+> Due to technical limitations, not all updates are guaranteed to appear in the final list of observed values.
+> Due to technical limitations, create is an async operation. The time for a document to be present in the  > final index depends on the entity store transform and usually takes more than 1 minute.
+
+    */
+  async upsertEntity(props: UpsertEntityProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpsertEntity`);
+    return this.kbnClient
+      .request<UpsertEntityResponse>({
+        path: replaceParams('/api/entity_store/entities/{entityType}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'PUT',
+        body: props.body,
+        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2327,23 +3761,15 @@ detection engine rules.
 export interface AlertsMigrationCleanupProps {
   body: AlertsMigrationCleanupRequestBodyInput;
 }
-export interface BulkCreateRulesProps {
-  body: BulkCreateRulesRequestBodyInput;
-}
-export interface BulkDeleteRulesProps {
-  body: BulkDeleteRulesRequestBodyInput;
-}
-export interface BulkDeleteRulesPostProps {
-  body: BulkDeleteRulesPostRequestBodyInput;
-}
-export interface BulkPatchRulesProps {
-  body: BulkPatchRulesRequestBodyInput;
-}
-export interface BulkUpdateRulesProps {
-  body: BulkUpdateRulesRequestBodyInput;
+export interface AssignWatchlistEntitiesProps {
+  params: AssignWatchlistEntitiesRequestParamsInput;
+  body: AssignWatchlistEntitiesRequestBodyInput;
 }
 export interface BulkUpsertAssetCriticalityRecordsProps {
   body: BulkUpsertAssetCriticalityRecordsRequestBodyInput;
+}
+export interface CancelActionProps {
+  body: CancelActionRequestBodyInput;
 }
 export interface CleanDraftTimelinesProps {
   body: CleanDraftTimelinesRequestBodyInput;
@@ -2360,12 +3786,39 @@ export interface CreateAlertsMigrationProps {
 export interface CreateAssetCriticalityRecordProps {
   body: CreateAssetCriticalityRecordRequestBodyInput;
 }
+export interface CreateDashboardMigrationProps {
+  body: CreateDashboardMigrationRequestBodyInput;
+}
+export interface CreateDashboardMigrationDashboardsProps {
+  params: CreateDashboardMigrationDashboardsRequestParamsInput;
+  body: CreateDashboardMigrationDashboardsRequestBodyInput;
+}
+export interface CreateEntitySourceProps {
+  body: CreateEntitySourceRequestBodyInput;
+}
+export interface CreatePrivilegesImportIndexProps {
+  body: CreatePrivilegesImportIndexRequestBodyInput;
+}
+export interface CreatePrivMonUserProps {
+  body: CreatePrivMonUserRequestBodyInput;
+}
+export interface CreateQRadarRuleMigrationRulesProps {
+  params: CreateQRadarRuleMigrationRulesRequestParamsInput;
+  body: CreateQRadarRuleMigrationRulesRequestBodyInput;
+}
 export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
 }
 export interface CreateRuleMigrationProps {
-  params: CreateRuleMigrationRequestParamsInput;
   body: CreateRuleMigrationRequestBodyInput;
+}
+export interface CreateRuleMigrationRulesProps {
+  params: CreateRuleMigrationRulesRequestParamsInput;
+  body: CreateRuleMigrationRulesRequestBodyInput;
+}
+export interface CreateSentinelRuleMigrationRulesProps {
+  params: CreateSentinelRuleMigrationRulesRequestParamsInput;
+  body: CreateSentinelRuleMigrationRulesRequestBodyInput;
 }
 export interface CreateTimelinesProps {
   body: CreateTimelinesRequestBodyInput;
@@ -2374,21 +3827,53 @@ export interface CreateUpdateProtectionUpdatesNoteProps {
   params: CreateUpdateProtectionUpdatesNoteRequestParamsInput;
   body: CreateUpdateProtectionUpdatesNoteRequestBodyInput;
 }
+export interface CreateWatchlistProps {
+  body: CreateWatchlistRequestBodyInput;
+}
+export interface CreateWatchlistEntitySourceProps {
+  params: CreateWatchlistEntitySourceRequestParamsInput;
+  body: CreateWatchlistEntitySourceRequestBodyInput;
+}
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;
+}
+export interface DeleteDashboardMigrationProps {
+  params: DeleteDashboardMigrationRequestParamsInput;
 }
 export interface DeleteEntityEngineProps {
   query: DeleteEntityEngineRequestQueryInput;
   params: DeleteEntityEngineRequestParamsInput;
 }
+export interface DeleteEntityEnginesProps {
+  query: DeleteEntityEnginesRequestQueryInput;
+}
+export interface DeleteEntitySourceProps {
+  params: DeleteEntitySourceRequestParamsInput;
+}
+export interface DeleteMonitoringEngineProps {
+  query: DeleteMonitoringEngineRequestQueryInput;
+}
 export interface DeleteNoteProps {
   body: DeleteNoteRequestBodyInput;
+}
+export interface DeletePrivMonUserProps {
+  params: DeletePrivMonUserRequestParamsInput;
 }
 export interface DeleteRuleProps {
   query: DeleteRuleRequestQueryInput;
 }
+export interface DeleteRuleMigrationProps {
+  params: DeleteRuleMigrationRequestParamsInput;
+}
+export interface DeleteSingleEntityProps {
+  params: DeleteSingleEntityRequestParamsInput;
+  body: DeleteSingleEntityRequestBodyInput;
+}
 export interface DeleteTimelinesProps {
   body: DeleteTimelinesRequestBodyInput;
+}
+export interface DeleteWatchlistEntitySourceProps {
+  params: DeleteWatchlistEntitySourceRequestParamsInput;
 }
 export interface DeprecatedTriggerRiskScoreCalculationProps {
   body: DeprecatedTriggerRiskScoreCalculationRequestBodyInput;
@@ -2401,9 +3886,6 @@ export interface EndpointFileDownloadProps {
 }
 export interface EndpointFileInfoProps {
   params: EndpointFileInfoRequestParamsInput;
-}
-export interface EndpointGetActionsDetailsProps {
-  params: EndpointGetActionsDetailsRequestParamsInput;
 }
 export interface EndpointGetActionsListProps {
   query: EndpointGetActionsListRequestQueryInput;
@@ -2433,7 +3915,10 @@ export interface EndpointUnisolateActionProps {
   body: EndpointUnisolateActionRequestBodyInput;
 }
 export interface EndpointUploadActionProps {
-  body: EndpointUploadActionRequestBodyInput;
+  attachment: FormData;
+}
+export interface EntityDetailsHighlightsProps {
+  body: EntityDetailsHighlightsRequestBodyInput;
 }
 export interface ExportRulesProps {
   query: ExportRulesRequestQueryInput;
@@ -2452,8 +3937,28 @@ export interface FindAssetCriticalityRecordsProps {
 export interface FindRulesProps {
   query: FindRulesRequestQueryInput;
 }
+export interface GetAllTranslationStatsDashboardMigrationProps {
+  params: GetAllTranslationStatsDashboardMigrationRequestParamsInput;
+}
 export interface GetAssetCriticalityRecordProps {
   query: GetAssetCriticalityRecordRequestQueryInput;
+}
+export interface GetDashboardMigrationProps {
+  params: GetDashboardMigrationRequestParamsInput;
+}
+export interface GetDashboardMigrationDashboardsProps {
+  query: GetDashboardMigrationDashboardsRequestQueryInput;
+  params: GetDashboardMigrationDashboardsRequestParamsInput;
+}
+export interface GetDashboardMigrationResourcesProps {
+  query: GetDashboardMigrationResourcesRequestQueryInput;
+  params: GetDashboardMigrationResourcesRequestParamsInput;
+}
+export interface GetDashboardMigrationResourcesMissingProps {
+  params: GetDashboardMigrationResourcesMissingRequestParamsInput;
+}
+export interface GetDashboardMigrationStatsProps {
+  params: GetDashboardMigrationStatsRequestParamsInput;
 }
 export interface GetDraftTimelinesProps {
   query: GetDraftTimelinesRequestQueryInput;
@@ -2468,6 +3973,9 @@ export interface GetEndpointSuggestionsProps {
 export interface GetEntityEngineProps {
   params: GetEntityEngineRequestParamsInput;
 }
+export interface GetEntitySourceProps {
+  params: GetEntitySourceRequestParamsInput;
+}
 export interface GetEntityStoreStatusProps {
   query: GetEntityStoreStatusRequestQueryInput;
 }
@@ -2480,16 +3988,7 @@ export interface GetPolicyResponseProps {
 export interface GetProtectionUpdatesNoteProps {
   params: GetProtectionUpdatesNoteRequestParamsInput;
 }
-export interface GetRuleExecutionEventsProps {
-  query: GetRuleExecutionEventsRequestQueryInput;
-  params: GetRuleExecutionEventsRequestParamsInput;
-}
-export interface GetRuleExecutionResultsProps {
-  query: GetRuleExecutionResultsRequestQueryInput;
-  params: GetRuleExecutionResultsRequestParamsInput;
-}
 export interface GetRuleMigrationProps {
-  query: GetRuleMigrationRequestQueryInput;
   params: GetRuleMigrationRequestParamsInput;
 }
 export interface GetRuleMigrationPrebuiltRulesProps {
@@ -2501,6 +4000,10 @@ export interface GetRuleMigrationResourcesProps {
 }
 export interface GetRuleMigrationResourcesMissingProps {
   params: GetRuleMigrationResourcesMissingRequestParamsInput;
+}
+export interface GetRuleMigrationRulesProps {
+  query: GetRuleMigrationRulesRequestQueryInput;
+  params: GetRuleMigrationRulesRequestParamsInput;
 }
 export interface GetRuleMigrationStatsProps {
   params: GetRuleMigrationStatsRequestParamsInput;
@@ -2514,8 +4017,11 @@ export interface GetTimelineProps {
 export interface GetTimelinesProps {
   query: GetTimelinesRequestQueryInput;
 }
-export interface GetWorkflowInsightsProps {
-  query: GetWorkflowInsightsRequestQueryInput;
+export interface GetWatchlistProps {
+  params: GetWatchlistRequestParamsInput;
+}
+export interface GetWatchlistEntitySourceProps {
+  params: GetWatchlistEntitySourceRequestParamsInput;
 }
 export interface ImportRulesProps {
   query: ImportRulesRequestQueryInput;
@@ -2531,6 +4037,13 @@ export interface InitEntityEngineProps {
 export interface InitEntityStoreProps {
   body: InitEntityStoreRequestBodyInput;
 }
+export interface InitializeSecuritySolutionProps {
+  body: InitializeSecuritySolutionRequestBodyInput;
+}
+export interface InstallMigrationDashboardsProps {
+  params: InstallMigrationDashboardsRequestParamsInput;
+  body: InstallMigrationDashboardsRequestBodyInput;
+}
 export interface InstallMigrationRulesProps {
   params: InstallMigrationRulesRequestParamsInput;
   body: InstallMigrationRulesRequestBodyInput;
@@ -2538,11 +4051,21 @@ export interface InstallMigrationRulesProps {
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
 }
-export interface InternalUploadAssetCriticalityRecordsProps {
+export interface InternalUploadAssetCriticalityV2CsvProps {
   attachment: FormData;
 }
 export interface ListEntitiesProps {
   query: ListEntitiesRequestQueryInput;
+}
+export interface ListEntitySourcesProps {
+  query: ListEntitySourcesRequestQueryInput;
+}
+export interface ListPrivMonUsersProps {
+  query: ListPrivMonUsersRequestQueryInput;
+}
+export interface ListWatchlistEntitySourcesProps {
+  query: ListWatchlistEntitySourcesRequestQueryInput;
+  params: ListWatchlistEntitySourcesRequestParamsInput;
 }
 export interface PatchRuleProps {
   body: PatchRuleRequestBodyInput;
@@ -2566,14 +4089,25 @@ export interface PersistPinnedEventRouteProps {
 export interface PreviewRiskScoreProps {
   body: PreviewRiskScoreRequestBodyInput;
 }
+export interface PrivmonBulkUploadUsersCSVProps {
+  attachment: FormData;
+}
 export interface ReadAlertsMigrationStatusProps {
   query: ReadAlertsMigrationStatusRequestQueryInput;
 }
 export interface ReadRuleProps {
   query: ReadRuleRequestQueryInput;
 }
+export interface ReadRuleExecutionResultsProps {
+  params: ReadRuleExecutionResultsRequestParamsInput;
+  body: ReadRuleExecutionResultsRequestBodyInput;
+}
 export interface ResolveTimelineProps {
   query: ResolveTimelineRequestQueryInput;
+}
+export interface RuleMigrationEnhanceRuleProps {
+  params: RuleMigrationEnhanceRuleRequestParamsInput;
+  body: RuleMigrationEnhanceRuleRequestBodyInput;
 }
 export interface RulePreviewProps {
   query: RulePreviewRequestQueryInput;
@@ -2582,8 +4116,20 @@ export interface RulePreviewProps {
 export interface RunScriptActionProps {
   body: RunScriptActionRequestBodyInput;
 }
+export interface ScheduleRiskEngineNowProps {
+  body: ScheduleRiskEngineNowRequestBodyInput;
+}
 export interface SearchAlertsProps {
   body: SearchAlertsRequestBodyInput;
+}
+export interface SearchPrivilegesIndicesProps {
+  query: SearchPrivilegesIndicesRequestQueryInput;
+}
+export interface SearchRulesProps {
+  body: SearchRulesRequestBodyInput;
+}
+export interface SearchUnifiedAlertsProps {
+  body: SearchUnifiedAlertsRequestBodyInput;
 }
 export interface SetAlertAssigneesProps {
   body: SetAlertAssigneesRequestBodyInput;
@@ -2594,12 +4140,28 @@ export interface SetAlertsStatusProps {
 export interface SetAlertTagsProps {
   body: SetAlertTagsRequestBodyInput;
 }
+export interface SetUnifiedAlertsAssigneesProps {
+  body: SetUnifiedAlertsAssigneesRequestBodyInput;
+}
+export interface SetUnifiedAlertsTagsProps {
+  body: SetUnifiedAlertsTagsRequestBodyInput;
+}
+export interface SetUnifiedAlertsWorkflowStatusProps {
+  body: SetUnifiedAlertsWorkflowStatusRequestBodyInput;
+}
+export interface StartDashboardsMigrationProps {
+  params: StartDashboardsMigrationRequestParamsInput;
+  body: StartDashboardsMigrationRequestBodyInput;
+}
 export interface StartEntityEngineProps {
   params: StartEntityEngineRequestParamsInput;
 }
 export interface StartRuleMigrationProps {
   params: StartRuleMigrationRequestParamsInput;
   body: StartRuleMigrationRequestBodyInput;
+}
+export interface StopDashboardsMigrationProps {
+  params: StopDashboardsMigrationRequestParamsInput;
 }
 export interface StopEntityEngineProps {
   params: StopEntityEngineRequestParamsInput;
@@ -2610,8 +4172,27 @@ export interface StopRuleMigrationProps {
 export interface SuggestUserProfilesProps {
   query: SuggestUserProfilesRequestQueryInput;
 }
+export interface SyncWatchlistProps {
+  params: SyncWatchlistRequestParamsInput;
+}
 export interface TriggerRiskScoreCalculationProps {
   body: TriggerRiskScoreCalculationRequestBodyInput;
+}
+export interface UnassignWatchlistEntitiesProps {
+  params: UnassignWatchlistEntitiesRequestParamsInput;
+  body: UnassignWatchlistEntitiesRequestBodyInput;
+}
+export interface UpdateDashboardMigrationProps {
+  params: UpdateDashboardMigrationRequestParamsInput;
+  body: UpdateDashboardMigrationRequestBodyInput;
+}
+export interface UpdateEntitySourceProps {
+  params: UpdateEntitySourceRequestParamsInput;
+  body: UpdateEntitySourceRequestBodyInput;
+}
+export interface UpdatePrivMonUserProps {
+  params: UpdatePrivMonUserRequestParamsInput;
+  body: UpdatePrivMonUserRequestBodyInput;
 }
 export interface UpdateRuleProps {
   body: UpdateRuleRequestBodyInput;
@@ -2620,12 +4201,41 @@ export interface UpdateRuleMigrationProps {
   params: UpdateRuleMigrationRequestParamsInput;
   body: UpdateRuleMigrationRequestBodyInput;
 }
-export interface UpdateWorkflowInsightProps {
-  params: UpdateWorkflowInsightRequestParamsInput;
-  body: UpdateWorkflowInsightRequestBodyInput;
+export interface UpdateRuleMigrationIndexPatternProps {
+  params: UpdateRuleMigrationIndexPatternRequestParamsInput;
+  body: UpdateRuleMigrationIndexPatternRequestBodyInput;
+}
+export interface UpdateRuleMigrationRulesProps {
+  params: UpdateRuleMigrationRulesRequestParamsInput;
+  body: UpdateRuleMigrationRulesRequestBodyInput;
+}
+export interface UpdateWatchlistProps {
+  params: UpdateWatchlistRequestParamsInput;
+  body: UpdateWatchlistRequestBodyInput;
+}
+export interface UpdateWatchlistEntitySourceProps {
+  params: UpdateWatchlistEntitySourceRequestParamsInput;
+  body: UpdateWatchlistEntitySourceRequestBodyInput;
 }
 export interface UploadAssetCriticalityRecordsProps {
   attachment: FormData;
+}
+export interface UploadWatchlistCsvProps {
+  params: UploadWatchlistCsvRequestParamsInput;
+  attachment: FormData;
+}
+export interface UpsertDashboardMigrationResourcesProps {
+  params: UpsertDashboardMigrationResourcesRequestParamsInput;
+  body: UpsertDashboardMigrationResourcesRequestBodyInput;
+}
+export interface UpsertEntitiesBulkProps {
+  query: UpsertEntitiesBulkRequestQueryInput;
+  body: UpsertEntitiesBulkRequestBodyInput;
+}
+export interface UpsertEntityProps {
+  query: UpsertEntityRequestQueryInput;
+  params: UpsertEntityRequestParamsInput;
+  body: UpsertEntityRequestBodyInput;
 }
 export interface UpsertRuleMigrationResourcesProps {
   params: UpsertRuleMigrationResourcesRequestParamsInput;

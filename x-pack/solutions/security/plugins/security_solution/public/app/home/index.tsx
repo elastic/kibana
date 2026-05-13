@@ -13,56 +13,94 @@ import { SecuritySolutionAppWrapper } from '../../common/components/page';
 
 import { HelpMenu } from '../../common/components/help_menu';
 import { getScopeFromPath } from '../../sourcerer/containers/sourcerer_paths';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { GlobalHeader } from './global_header';
 import { ConsoleManager } from '../../management/components/console/components/console_manager';
-
-import { TourContextProvider } from '../../common/components/guided_onboarding_tour';
 
 import { useUrlState } from '../../common/hooks/use_url_state';
 import { useUpdateBrowserTitle } from '../../common/hooks/use_update_browser_title';
 import { useUpdateExecutionContext } from '../../common/hooks/use_update_execution_context';
-import { useUpgradeSecurityPackages } from '../../detection_engine/rule_management/logic/use_upgrade_security_packages';
-import { useSetupDetectionEngineHealthApi } from '../../detection_engine/rule_monitoring';
+import { useSecuritySolutionInitialization } from '../../common/components/initialization/use_security_solution_initialization';
+import {
+  INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
+  INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
+  INITIALIZATION_FLOW_INIT_AI_PROMPTS,
+  INITIALIZATION_FLOW_INIT_DETECTION_RULE_MONITORING,
+} from '../../../common/api/initialization';
 import { TopValuesPopover } from '../components/top_values_popover/top_values_popover';
-import { AssistantOverlay } from '../../assistant/overlay';
 import { useInitSourcerer } from '../../sourcerer/containers/use_init_sourcerer';
+import { useInitDataViewManager } from '../../data_view_manager/hooks/use_init_data_view_manager';
+import { useRestoreDataViewManagerStateFromURL } from '../../data_view_manager/hooks/use_sync_url_state';
+import { useBrowserFields } from '../../data_view_manager/hooks/use_browser_fields';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { type BrowserFields } from '../../common/containers/source';
 
 interface HomePageProps {
   children: React.ReactNode;
 }
 
+/**
+ * `useInitSourcerer` must only run under the legacy data view picker: it registers many hooks
+ * and must not be mounted with a changing hook count when `newDataViewPickerEnabled` toggles.
+ */
+const HomePageDragLayerLegacy: React.FC<{ children: React.ReactNode; pathname: string }> = ({
+  children,
+  pathname,
+}) => {
+  const { browserFields } = useInitSourcerer(getScopeFromPath(pathname, false));
+  return (
+    <DragDropContextWrapper browserFields={browserFields as BrowserFields}>
+      {children}
+    </DragDropContextWrapper>
+  );
+};
+
+const HomePageDragLayerNew: React.FC<{ children: React.ReactNode; pathname: string }> = ({
+  children,
+  pathname,
+}) => {
+  const browserFields = useBrowserFields(getScopeFromPath(pathname, true));
+  return (
+    <DragDropContextWrapper browserFields={browserFields as BrowserFields}>
+      {children}
+    </DragDropContextWrapper>
+  );
+};
+
 const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
   const { pathname } = useLocation();
-  useInitSourcerer(getScopeFromPath(pathname));
+
+  useRestoreDataViewManagerStateFromURL(
+    useInitDataViewManager(),
+    getScopeFromPath(pathname, newDataViewPickerEnabled)
+  );
+
   useUrlState();
   useUpdateBrowserTitle();
   useUpdateExecutionContext();
 
-  const { browserFields } = useSourcererDataView(getScopeFromPath(pathname));
-
-  // side effect: this will attempt to upgrade the endpoint package if it is not up to date
-  // this will run when a user navigates to the Security Solution app and when they navigate between
-  // tabs in the app. This is useful for keeping the endpoint package as up to date as possible until
-  // a background task solution can be built on the server side. Once a background task solution is available we
-  // can remove this.
-  useUpgradeSecurityPackages();
-  useSetupDetectionEngineHealthApi();
+  // Initialize dependencies of certain Security Solution areas and features
+  useSecuritySolutionInitialization([
+    INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
+    INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
+    INITIALIZATION_FLOW_INIT_AI_PROMPTS,
+    INITIALIZATION_FLOW_INIT_DETECTION_RULE_MONITORING,
+  ]);
 
   return (
     <SecuritySolutionAppWrapper id="security-solution-app" className="kbnAppWrapper">
       <ConsoleManager>
-        <TourContextProvider>
-          <>
-            <GlobalHeader />
-            <DragDropContextWrapper browserFields={browserFields}>
-              {children}
-            </DragDropContextWrapper>
-            <HelpMenu />
-            <TopValuesPopover />
-            <AssistantOverlay />
-          </>
-        </TourContextProvider>
+        <>
+          <GlobalHeader />
+          {newDataViewPickerEnabled ? (
+            <HomePageDragLayerNew pathname={pathname}>{children}</HomePageDragLayerNew>
+          ) : (
+            <HomePageDragLayerLegacy pathname={pathname}>{children}</HomePageDragLayerLegacy>
+          )}
+          <HelpMenu />
+          <TopValuesPopover />
+        </>
       </ConsoleManager>
     </SecuritySolutionAppWrapper>
   );

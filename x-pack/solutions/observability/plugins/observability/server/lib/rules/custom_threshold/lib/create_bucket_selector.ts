@@ -6,7 +6,7 @@
  */
 
 import { convertToBuiltInComparators } from '../../../../../common';
-import { CustomMetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
+import type { CustomMetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
 import { createConditionScript } from './create_condition_script';
 import { createLastPeriod } from './wrap_in_period';
 

@@ -10,16 +10,19 @@
 import React, { useMemo, useState } from 'react';
 import { afterFrame } from '@elastic/apm-rum-core';
 import { useLocation } from 'react-router-dom';
-import { PerformanceApi, PerformanceContext } from './use_performance_context';
-import { PerformanceMetricEvent } from '../../performance_metric_events';
+import type { PerformanceApi } from './use_performance_context';
+import { PerformanceContext } from './use_performance_context';
+import type { PerformanceMetricEvent } from '../../performance_metric_events';
 import { measureInteraction } from './measure_interaction';
-
+import type { DescriptionWithPrefix } from './types';
 export type CustomMetrics = Omit<PerformanceMetricEvent, 'eventName' | 'meta' | 'duration'>;
 
 export interface Meta {
-  rangeFrom: string;
-  rangeTo: string;
+  rangeFrom?: string;
+  rangeTo?: string;
+  description?: DescriptionWithPrefix;
 }
+
 export interface EventData {
   customMetrics?: CustomMetrics;
   meta?: Meta;
@@ -28,7 +31,8 @@ export interface EventData {
 export function PerformanceContextProvider({ children }: { children: React.ReactElement }) {
   const [isRendered, setIsRendered] = useState(false);
   const location = useLocation();
-  const interaction = measureInteraction();
+
+  const interaction = useMemo(() => measureInteraction(location.pathname), [location.pathname]);
 
   React.useEffect(() => {
     afterFrame(() => {
@@ -44,11 +48,14 @@ export function PerformanceContextProvider({ children }: { children: React.React
     () => ({
       onPageReady(eventData) {
         if (isRendered) {
-          interaction.pageReady(location.pathname, eventData);
+          interaction.pageReady(eventData);
         }
       },
+      onPageRefreshStart() {
+        interaction.pageRefreshStart();
+      },
     }),
-    [isRendered, location.pathname, interaction]
+    [isRendered, interaction]
   );
 
   return <PerformanceContext.Provider value={api}>{children}</PerformanceContext.Provider>;

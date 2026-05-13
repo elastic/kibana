@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { type AggregateQuery, type Query, isOfAggregateQueryType } from '@kbn/es-query';
-import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { ENABLE_ESQL, getESQLQueryVariables } from '@kbn/esql-utils';
 import type { LensEmbeddableStartServices } from '../types';
 

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger } from '@kbn/core/server';
-import { MaintenanceWindow } from '../../application/maintenance_window/types';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { MaintenanceWindowClient } from '@kbn/maintenance-windows-plugin/server';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { filterMaintenanceWindowsIds } from './get_maintenance_windows';
-import { MaintenanceWindowClientApi } from '../../types';
-import { AlertingEventLogger } from '../../lib/alerting_event_logger/alerting_event_logger';
+import type { AlertingEventLogger } from '../../lib/alerting_event_logger/alerting_event_logger';
 import { withAlertingSpan } from '../lib';
 
 export const DEFAULT_CACHE_INTERVAL_MS = 60000; // 1 minute cache
 
 interface MaintenanceWindowServiceOpts {
   cacheInterval?: number;
-  getMaintenanceWindowClientWithRequest(request: KibanaRequest): MaintenanceWindowClientApi;
+  getMaintenanceWindowClient: (request: KibanaRequest) => MaintenanceWindowClient | undefined;
   logger: Logger;
 }
 
@@ -61,11 +61,11 @@ export class MaintenanceWindowsService {
 
     // Filter maintenance windows on current time
     const now = Date.now();
-    const currentlyActiveMaintenanceWindows = activeMaintenanceWindows.filter((mw) => {
-      return mw.events.some((event) => {
-        return new Date(event.gte).getTime() <= now && new Date(event.lte).getTime;
-      });
-    });
+    const currentlyActiveMaintenanceWindows = activeMaintenanceWindows.filter((mw) =>
+      mw.events.some(
+        (event) => new Date(event.gte).getTime() <= now && now <= new Date(event.lte).getTime()
+      )
+    );
 
     // Only look at maintenance windows for this rule category
     const maintenanceWindows = currentlyActiveMaintenanceWindows.filter(({ categoryIds }) => {
@@ -133,10 +133,10 @@ export class MaintenanceWindowsService {
     now: number
   ): Promise<MaintenanceWindow[]> {
     return await withAlertingSpan('alerting:load-maintenance-windows', async () => {
-      const maintenanceWindowClient = this.options.getMaintenanceWindowClientWithRequest(request);
-      const activeMaintenanceWindows = await maintenanceWindowClient.getActiveMaintenanceWindows(
-        this.cacheIntervalMs
-      );
+      const maintenanceWindowClient = this.options.getMaintenanceWindowClient(request);
+      const activeMaintenanceWindows = maintenanceWindowClient
+        ? await maintenanceWindowClient.getActiveMaintenanceWindows(this.cacheIntervalMs)
+        : [];
       this.windows.set(spaceId, {
         lastUpdated: now,
         activeMaintenanceWindows,

@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
-import { CertificateList, CertSort } from './certificates_list';
+import type { CertSort } from './certificates_list';
+import { CertificateList } from './certificates_list';
 import { render } from '../../utils/testing';
+import type { Cert } from '../../../../../common/runtime_types';
 
 describe('CertificateList', () => {
   it('render empty state', () => {
@@ -66,7 +68,7 @@ describe('CertificateList', () => {
               not_before: '2015-04-09T00:00:00.000Z',
               common_name: '*.badssl.com',
               configId: 'uptime-advanced-http-tls',
-            },
+            } as Cert,
           ],
         }}
       />

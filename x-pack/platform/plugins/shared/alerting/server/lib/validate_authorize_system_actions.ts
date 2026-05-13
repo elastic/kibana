@@ -6,12 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
-import { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
-import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
+import type { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
+import type { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { getSystemActionKibanaPrivileges } from '../connector_adapters/get_system_action_kibana_privileges';
 import { bulkValidateConnectorAdapterActionParams } from '../connector_adapters/validate_rule_action_params';
-import { NormalizedSystemAction } from '../rules_client';
-import { RuleSystemAction } from '../types';
+import type { NormalizedSystemAction } from '../rules_client';
+import type { RuleSystemAction } from '../types';
 interface Params {
   actionsClient: ActionsClient;
   actionsAuthorization: ActionsAuthorization;
@@ -38,16 +38,23 @@ export const validateAndAuthorizeSystemActions = async ({
    * The actionTypeId is needed to get the schema of
    * the action params using the connector adapter registry
    */
-  const actionIds: Set<string> = new Set(systemActions.map((action) => action.id));
+  const systemActionCounts: Map<string, number> = systemActions.reduce((map, action) => {
+    map.set(action.id, (map.get(action.id) || 0) + 1);
+    return map;
+  }, new Map<string, number>());
 
-  if (actionIds.size !== systemActions.length) {
-    throw Boom.badRequest('Cannot use the same system action twice');
-  }
+  const actionIds: string[] = Array.from(systemActionCounts.keys());
 
   const actionResults = await actionsClient.getBulk({
-    ids: Array.from(actionIds),
+    ids: actionIds,
     throwIfSystemAction: false,
   });
+
+  const actionTypes = await actionsClient.listTypes({ includeSystemActionTypes: true });
+
+  const actionTypesWithAllowMultipleSystemActions = new Set(
+    actionTypes.filter((type) => type.allowMultipleSystemActions).map((type) => type.id)
+  );
 
   const systemActionsWithActionTypeId: RuleSystemAction[] = [];
 
@@ -57,6 +64,14 @@ export const validateAndAuthorizeSystemActions = async ({
 
     if (!isSystemAction || !foundAction) {
       throw Boom.badRequest(`Action ${systemAction.id} is not a system action`);
+    }
+
+    if (
+      systemActionCounts.has(systemAction.id) &&
+      systemActionCounts.get(systemAction.id)! > 1 &&
+      !actionTypesWithAllowMultipleSystemActions.has(foundAction.actionTypeId)
+    ) {
+      throw Boom.badRequest(`Cannot use action ${systemAction.id} more than once for this rule`);
     }
 
     systemActionsWithActionTypeId.push({

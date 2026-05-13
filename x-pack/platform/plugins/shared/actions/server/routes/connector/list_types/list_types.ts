@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { ConnectorTypesResponseV1 } from '../../../../common/routes/connector/response';
+import type { IRouter } from '@kbn/core/server';
 import {
-  connectorTypesQuerySchemaV1,
-  ConnectorTypesRequestQueryV1,
-} from '../../../../common/routes/connector/apis/connector_types';
+  getAllConnectorTypesResponseSchemaV1,
+  type GetAllConnectorTypesResponseV1,
+} from '../../../../common/routes/connector/response';
+import type { ConnectorTypesRequestQueryV1 } from '../../../../common/routes/connector/apis/connector_types';
+import { connectorTypesQuerySchemaV1 } from '../../../../common/routes/connector/apis/connector_types';
 import { transformListTypesResponseV1 } from './transforms';
-import { ActionsRequestHandlerContext } from '../../../types';
+import type { ActionsRequestHandlerContext } from '../../../types';
 import { BASE_ACTION_API_PATH } from '../../../../common';
-import { ILicenseState } from '../../../lib';
+import type { ILicenseState } from '../../../lib';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 
 export const listTypesRoute = (
@@ -37,7 +38,18 @@ export const listTypesRoute = (
         tags: ['oas-tag:connectors'],
       },
       validate: {
-        query: connectorTypesQuerySchemaV1,
+        request: {
+          query: connectorTypesQuerySchemaV1,
+        },
+        response: {
+          200: {
+            body: () => getAllConnectorTypesResponseSchemaV1,
+            description: 'Indicates a successful call.',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(
@@ -51,7 +63,7 @@ export const listTypesRoute = (
           featureId: query?.feature_id,
         });
 
-        const responseBody: ConnectorTypesResponseV1[] =
+        const responseBody: GetAllConnectorTypesResponseV1 =
           transformListTypesResponseV1(connectorTypes);
 
         return res.ok({ body: responseBody });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionConnectorWithoutId } from '../../../types';
+import type { ActionConnectorWithoutId } from '../../../types';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { createActionConnector } from '.';
 
@@ -53,5 +53,59 @@ describe('createActionConnector', () => {
         },
       ]
     `);
+  });
+
+  test('should call create action API with specific id when provided', async () => {
+    const apiResponse = {
+      connector_type_id: 'test',
+      is_preconfigured: false,
+      is_deprecated: false,
+      name: 'My test',
+      config: {},
+      secrets: {},
+      id: 'my-custom-id',
+    };
+    http.post.mockResolvedValueOnce(apiResponse);
+
+    const connector: Pick<
+      ActionConnectorWithoutId,
+      'actionTypeId' | 'name' | 'config' | 'secrets'
+    > = {
+      actionTypeId: 'test',
+      name: 'My test',
+      config: {},
+      secrets: {},
+    };
+
+    const result = await createActionConnector({ http, connector, id: 'my-custom-id' });
+    expect(result).toMatchObject({ id: 'my-custom-id' });
+    expect(http.post.mock.calls[0][0]).toBe('/api/actions/connector/my-custom-id');
+  });
+
+  test('should map auth_mode from the API response to authMode', async () => {
+    const apiResponse = {
+      connector_type_id: 'test',
+      is_preconfigured: false,
+      is_deprecated: false,
+      name: 'My test',
+      config: {},
+      secrets: {},
+      id: '123',
+      auth_mode: 'shared',
+    };
+    http.post.mockResolvedValueOnce(apiResponse);
+
+    const connector: Pick<
+      ActionConnectorWithoutId,
+      'actionTypeId' | 'name' | 'config' | 'secrets'
+    > = {
+      actionTypeId: 'test',
+      name: 'My test',
+      config: {},
+      secrets: {},
+    };
+
+    const result = await createActionConnector({ http, connector });
+    expect(result).toMatchObject({ authMode: 'shared' });
   });
 });

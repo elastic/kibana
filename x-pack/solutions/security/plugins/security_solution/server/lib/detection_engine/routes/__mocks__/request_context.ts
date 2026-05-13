@@ -8,7 +8,10 @@
 import type { AwaitedProperties } from '@kbn/utility-types';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { KibanaRequest } from '@kbn/core/server';
-import { coreMock } from '@kbn/core/server/mocks';
+import { analyticsServiceMock, coreMock } from '@kbn/core/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+
+import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
 
 import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
@@ -43,7 +46,12 @@ import { detectionRulesClientMock } from '../../rule_management/logic/detection_
 import { packageServiceMock } from '@kbn/fleet-plugin/server/services/epm/package_service.mock';
 import type { EndpointInternalFleetServicesInterface } from '../../../../endpoint/services/fleet';
 import { siemMigrationsServiceMock } from '../../../siem_migrations/__mocks__/mocks';
-import { AssetInventoryDataClientMock } from '../../../asset_inventory/asset_inventory_data_client.mock';
+import { createProductFeaturesServiceMock } from '../../../product_features_service/mocks';
+import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
+import { padPackageInstallationClientMock } from '../../../entity_analytics/privilege_monitoring/privileged_access_detection/pad_package_installation_client.mock';
+import { privilegeMonitorDataClientMock } from '../../../entity_analytics/privilege_monitoring/engine/data_client.mock';
+import { entityStoreCrudClientMock } from '../../../entity_analytics/entity_store/entity_store_crud_client.mock';
+import { getMockRulesAuthz } from '../../rule_management/__mocks__/authz';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -76,17 +84,22 @@ export const createMockClients = () => {
     riskScoreDataClient: riskScoreDataClientMock.create(),
     assetCriticalityDataClient: assetCriticalityDataClientMock.create(),
     entityStoreDataClient: entityStoreDataClientMock.create(),
+    entityStoreCrudClient: entityStoreCrudClientMock.create(),
+    privilegeMonitorDataClient: privilegeMonitorDataClientMock.create(),
+    padPackageInstallationClient: padPackageInstallationClientMock.create(),
 
     internalFleetServices: {
       packages: packageServiceMock.createClient(),
     },
     siemRuleMigrationsClient: siemMigrationsServiceMock.createRulesClient(),
+    siemDashboardMigrationsClient: siemMigrationsServiceMock.createDashboardsClient(),
     getInferenceClient: jest.fn(),
-    assetInventoryDataClient: AssetInventoryDataClientMock.create(),
+    productFeaturesService: createProductFeaturesServiceMock(),
+    logger: loggerMock.create(),
   };
 };
 
-type MockClients = ReturnType<typeof createMockClients>;
+export type MockClients = ReturnType<typeof createMockClients>;
 
 export type SecuritySolutionRequestHandlerContextMock = MockedKeys<
   AwaitedProperties<Omit<SecuritySolutionRequestHandlerContext, 'resolve'>>
@@ -96,7 +109,10 @@ export type SecuritySolutionRequestHandlerContextMock = MockedKeys<
 
 const createRequestContextMock = (
   clients: MockClients = createMockClients(),
-  overrides: { endpointAuthz?: Partial<EndpointAuthz> } = {}
+  overrides: {
+    endpointAuthz?: Partial<EndpointAuthz>;
+    endpointAppServices?: EndpointAppContextService;
+  } = {}
 ): SecuritySolutionRequestHandlerContextMock => {
   return {
     core: clients.core,
@@ -127,7 +143,10 @@ const convertRequestContextMock = (
 
 const createSecuritySolutionRequestContextMock = (
   clients: MockClients,
-  overrides: { endpointAuthz?: Partial<EndpointAuthz> } = {}
+  overrides: {
+    endpointAuthz?: Partial<EndpointAuthz>;
+    endpointAppServices?: EndpointAppContextService;
+  } = {}
 ): jest.Mocked<SecuritySolutionApiRequestHandlerContext> => {
   const core = clients.core;
   const kibanaRequest = requestMock.create();
@@ -135,10 +154,21 @@ const createSecuritySolutionRequestContextMock = (
 
   return {
     core,
+    getAnalytics: jest.fn(() => analyticsServiceMock.createAnalyticsServiceSetup()),
     getServerBasePath: jest.fn(() => ''),
     getEndpointAuthz: jest.fn(async () =>
       getEndpointAuthzInitialStateMock(overrides.endpointAuthz)
     ),
+    getCheckOsqueryResponseActionAuthz: jest.fn(() => jest.fn()),
+    getEndpointService: jest.fn(() => {
+      if (overrides.endpointAppServices) {
+        return overrides.endpointAppServices;
+      }
+
+      throw new Error(
+        `getEndpointService() not mocked. Needs to be done from withing testing context (due to circular dependencies)`
+      );
+    }),
     getConfig: jest.fn(() => clients.config),
     getFrameworkRequest: jest.fn(() => {
       return {
@@ -167,11 +197,27 @@ const createSecuritySolutionRequestContextMock = (
     getRiskScoreDataClient: jest.fn(() => clients.riskScoreDataClient),
     getAssetCriticalityDataClient: jest.fn(() => clients.assetCriticalityDataClient),
     getAuditLogger: jest.fn(() => mockAuditLogger),
+    getLogger: jest.fn(() => clients.logger),
     getDataViewsService: jest.fn(),
+    getInternalDataViewsService: jest.fn(async () => dataViewsService),
+    getEntityStoreApiKeyManager: jest.fn(),
+    getPrivilegedUserMonitoringApiKeyManager: jest.fn(),
+    getEntityStoreCrudClient: jest.fn(() => clients.entityStoreCrudClient),
+    getEntityStoreUpdateClient: jest.fn(() => clients.entityStoreCrudClient as never),
     getEntityStoreDataClient: jest.fn(() => clients.entityStoreDataClient),
-    getSiemRuleMigrationsClient: jest.fn(() => clients.siemRuleMigrationsClient),
+    getPrivilegeMonitoringDataClient: jest.fn(() => clients.privilegeMonitorDataClient),
+    getPadPackageInstallationClient: jest.fn(() => clients.padPackageInstallationClient),
+    getMonitoringEntitySourceDataClient: jest.fn(),
+    siemMigrations: {
+      getRulesClient: jest.fn(() => clients.siemRuleMigrationsClient),
+      getDashboardsClient: jest.fn(() => clients.siemDashboardMigrationsClient),
+    },
     getInferenceClient: jest.fn(() => clients.getInferenceClient()),
-    getAssetInventoryClient: jest.fn(() => clients.assetInventoryDataClient),
+    getProductFeatureService: jest.fn(() => clients.productFeaturesService),
+    getMlAuthz: jest.fn(() => ({
+      validateRuleType: jest.fn(async () => ({ valid: true, message: undefined })),
+    })),
+    getRulesAuthz: jest.fn(() => getMockRulesAuthz()),
   };
 };
 

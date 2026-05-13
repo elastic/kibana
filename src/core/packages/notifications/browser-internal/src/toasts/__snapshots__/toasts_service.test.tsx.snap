@@ -3,68 +3,35 @@
 exports[`#start() renders the GlobalToastList into the targetDomElement param 1`] = `
 Array [
   Array [
-    <KibanaRenderContextProvider
-      analytics={
-        Object {
-          "optIn": [MockFunction],
-          "reportEvent": [MockFunction],
-          "telemetryCounter$": Subject {
-            "closed": false,
-            "currentObservers": null,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [],
-            "thrownError": null,
-          },
-        }
-      }
-      i18n={
-        Object {
-          "Context": [Function],
-        }
-      }
-      theme={
-        Object {
-          "getTheme": [MockFunction],
-          "theme$": Observable {
-            "_subscribe": [Function],
-          },
-        }
-      }
-      userProfile={
-        Object {
-          "bulkGet": [MockFunction],
-          "getCurrent": [MockFunction],
-          "getEnabled$": [MockFunction],
-          "getUserProfile$": [MockFunction],
-          "partialUpdate": [MockFunction],
-          "suggest": [MockFunction],
-          "update": [MockFunction],
-        }
-      }
-    >
-      <GlobalToastList
-        dismissToast={[Function]}
-        reportEvent={
-          EventReporter {
-            "reportEvent": [MockFunction],
+    <I18nProvider>
+      <EuiProvider>
+        <GlobalToastList
+          dismissToast={[Function]}
+          reportEvent={
+            Object {
+              "onDismissToast": [Function],
+            }
           }
-        }
-        toasts$={
-          Observable {
-            "source": BehaviorSubject {
-              "_value": Array [],
-              "closed": false,
-              "currentObservers": null,
-              "hasError": false,
-              "isStopped": false,
-              "observers": Array [],
-              "thrownError": null,
-            },
+          toasts$={
+            Observable {
+              "operator": [Function],
+              "source": Observable {
+                "operator": [Function],
+                "source": Observable {
+                  "operator": [Function],
+                  "source": Observable {
+                    "operator": [Function],
+                    "source": Observable {
+                      "_subscribe": [Function],
+                    },
+                  },
+                },
+              },
+            }
           }
-        }
-      />
-    </KibanaRenderContextProvider>,
+        />
+      </EuiProvider>
+    </I18nProvider>,
     <div
       test="target-dom-element"
     />,

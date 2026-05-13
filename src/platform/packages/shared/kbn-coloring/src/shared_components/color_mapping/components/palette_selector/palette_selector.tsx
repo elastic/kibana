@@ -9,11 +9,18 @@
 
 import React, { useCallback, useState, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { EuiColorPalettePicker, EuiConfirmModal, EuiFormRow } from '@elastic/eui';
+import {
+  EuiColorPalettePicker,
+  EuiConfirmModal,
+  EuiFormRow,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { KbnPalettes, getAppendedTag } from '@kbn/palettes';
-import { RootState, updatePalette } from '../../state/color_mapping';
+import type { KbnPaletteId, KbnPalettes } from '@kbn/palettes';
+import { getAppendedTag } from '@kbn/palettes';
+import type { RootState } from '../../state/color_mapping';
+import { updatePalette } from '../../state/color_mapping';
 import { updateAssignmentsPalette, updateColorModePalette } from '../../config/assignments';
 
 export function PaletteSelector({ palettes }: { palettes: KbnPalettes }) {
@@ -21,7 +28,7 @@ export function PaletteSelector({ palettes }: { palettes: KbnPalettes }) {
   const model = useSelector((state: RootState) => state.colorMapping);
 
   const switchPaletteFn = useCallback(
-    (selectedPaletteId: string, preserveColorChanges: boolean) => {
+    (selectedPaletteId: KbnPaletteId, preserveColorChanges: boolean) => {
       dispatch(
         updatePalette({
           paletteId: selectedPaletteId,
@@ -43,14 +50,18 @@ export function PaletteSelector({ palettes }: { palettes: KbnPalettes }) {
     [dispatch, model.assignments, model.colorMode, palettes]
   );
 
-  const [preserveModalPaletteId, setPreserveModalPaletteId] = useState<string | null>(null);
+  const [preserveModalPaletteId, setPreserveModalPaletteId] = useState<KbnPaletteId | null>(null);
+
+  const confirmModalTitleId = useGeneratedHtmlId();
 
   const preserveChangesModal =
     preserveModalPaletteId !== null ? (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
         title={i18n.translate('coloring.colorMapping.colorChangesModal.title', {
           defaultMessage: 'Color changes detected',
         })}
+        titleProps={{ id: confirmModalTitleId }}
         onCancel={() => {
           if (preserveModalPaletteId) switchPaletteFn(preserveModalPaletteId, true);
           setPreserveModalPaletteId(null);
@@ -107,13 +118,14 @@ export function PaletteSelector({ palettes }: { palettes: KbnPalettes }) {
               type: 'fixed',
             }))}
           onChange={(selectedPaletteId) => {
+            const paletteId = selectedPaletteId as KbnPaletteId;
             const hasChanges = model.assignments.some((a) => a.touched);
             const hasGradientChanges =
               model.colorMode.type === 'gradient' && model.colorMode.steps.some((a) => a.touched);
             if (hasChanges || hasGradientChanges) {
-              setPreserveModalPaletteId(selectedPaletteId);
+              setPreserveModalPaletteId(paletteId);
             } else {
-              switchPaletteFn(selectedPaletteId, false);
+              switchPaletteFn(paletteId, false);
             }
           }}
           valueOfSelected={currentPaletteId}

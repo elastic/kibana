@@ -1,0 +1,553 @@
+{
+  "id": "@kbn/response-ops-oauth-hooks",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/response-ops-oauth-hooks",
+        "id": "def-public.useConnectorOAuthConnect",
+        "type": "Function",
+        "tags": [],
+        "label": "useConnectorOAuthConnect",
+        "description": [
+          "\nInitiates the OAuth authorization code grant flow for a connector\n(via `connect()`).\n\nIn `NewTab` mode, the hook listens for flow completion and invokes\n`onSuccess`/`onError` callbacks. `isAwaitingCallback` is `true` while waiting\nfor the user to complete authorization in the other tab, and resets after flow\ncompletion or after `timeout` elapses.\n\nIn `Redirect` mode, the page navigates away. `onSuccess` and\n`isAwaitingCallback` are not applicable.\n\nWhen `returnUrl` is provided, the OAuth callback redirects to that URL with\nresult query parameters (requires `useOAuthRedirectResult` at that page).\nWhen omitted, the callback renders a self-contained HTML page."
+        ],
+        "signature": [
+          "({ connectorId, redirectMode, returnUrl, timeout, onSuccess, onError, }: ",
+          {
+            "pluginId": "@kbn/response-ops-oauth-hooks",
+            "scope": "public",
+            "docId": "kibKbnResponseOpsOauthHooksPluginApi",
+            "section": "def-public.ConnectorOAuthConnectProps",
+            "text": "ConnectorOAuthConnectProps"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/response-ops-oauth-hooks",
+            "scope": "public",
+            "docId": "kibKbnResponseOpsOauthHooksPluginApi",
+            "section": "def-public.ConnectorOAuthConnect",
+            "text": "ConnectorOAuthConnect"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/oauth-hooks/hooks/use_connector_oauth_connect.ts",
+        "lineNumber": 74,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-oauth-hooks",
+            "id": "def-public.useConnectorOAuthConnect.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  connectorId,\n  redirectMode = OAuthRedirectMode.Redirect,\n  returnUrl,\n  timeout = DEFAULT_TIMEOUT_MS,\n  onSuccess,\n  onError,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/response-ops-oauth-hooks",
+                "scope": "public",
+                "docId": "kibKbnResponseOpsOauthHooksPluginApi",
+                "section": "def-public.ConnectorOAuthConnectProps",
+                "text": "ConnectorOAuthConnectProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/oauth-hooks/hooks/use_connector_oauth_connect.ts",
+            "lineNumber": 74,
+            "columnNumber": 42,
+            "deprecated": false,
+            "docsReferencedTypeName": "ConnectorOAuthConnectProps",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-oauth-hooks",
+        "id": "def-public.useConnectorOAuthDisconnect",
+        "type": "Function",
+        "tags": [],
+        "label": "useConnectorOAuthDisconnect",
+        "description": [
+          "\nDisconnects a connector from its OAuth authorization by removing all stored\naccess and refresh tokens (via `disconnect()`)."
+        ],
+        "signature": [
+          "({ connectorId, onSuccess, onError, }: ",
+          {
+            "pluginId": "@kbn/response-ops-oauth-hooks",
+            "scope": "public",
+            "docId": "kibKbnResponseOpsOauthHooksPluginApi",
+            "section": "def-public.ConnectorOAuthDisconnectProps",
+            "text": "ConnectorOAuthDisconnectProps"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/response-ops-oauth-hooks",
+            "scope": "public",
+            "docId": "kibKbnResponseOpsOauthHooksPluginApi",
+            "section": "def-public.ConnectorOAuthDisconnect",
+            "text": "ConnectorOAuthDisconnect"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/oauth-hooks/hooks/use_connector_oauth_disconnect.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-oauth-hooks",
+            "id": "def-public.useConnectorOAuthDisconnect.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  connectorId,\n  onSuccess,\n  onError,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/response-ops-oauth-hooks",
+                "scope": "public",
+                "docId": "kibKbnResponseOpsOauthHooksPluginApi",
+                "section": "def-public.ConnectorOAuthDisconnectProps",
+                "text": "ConnectorOAuthDisconnectProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/oauth-hooks/hooks/use_connector_oauth_disconnect.ts",
+            "lineNumber": 28,
+            "columnNumber": 45,
+            "deprecated": false,
+            "docsReferencedTypeName": "ConnectorOAuthDisconnectProps",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-oauth-hooks",
+        "id": "def-public.useOAuthRedirectResult",
+        "type": "Function",
+        "tags": [],
+        "label": "useOAuthRedirectResult",
+        "description": [
+          "\nDetects OAuth flow completion from URL query parameters set by the server-side\ncallback route. If the `auto_close` query parameter is present, it closes the\ncurrent tab after processing.\n\nShould be rendered in any page that serves as an OAuth return URL."
+        ],
+        "signature": [
+          "({ onSuccess, onError, }?: ",
+          {
+            "pluginId": "@kbn/response-ops-oauth-hooks",
+            "scope": "public",
+            "docId": "kibKbnResponseOpsOauthHooksPluginApi",
+            "section": "def-public.OAuthRedirectResultProps",
+            "text": "OAuthRedirectResultProps"
+          },
+          ") => void"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/oauth-hooks/hooks/use_oauth_redirect_result.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-oauth-hooks",
+            "id": "def-public.useOAuthRedirectResult.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  onSuccess,\n  onError,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/response-ops-oauth-hooks",
+                "scope": "public",
+                "docId": "kibKbnResponseOpsOauthHooksPluginApi",
+                "section": "def-public.OAuthRedirectResultProps",
+                "text": "OAuthRedirectResultProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/oauth-hooks/hooks/use_oauth_redirect_result.ts",
+            "lineNumber": 31,
+            "columnNumber": 40,
+            "deprecated": false,
+            "docsReferencedTypeName": "OAuthRedirectResultProps",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/response-ops-oauth-hooks",
+        "id": "def-public.ConnectorOAuthConnect",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConnectorOAuthConnect",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/oauth-hooks/hooks/use_connector_oauth_connect.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-oauth-hooks",
+            "id": "def-public.ConnectorOAuthConnect.connect",
+            "type": "Function",
+            "tags": [],
+            "label": "connect",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/oauth-hooks/hooks/use_connector_oauth_connect.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-oauth-hooks",
+            "id": "def-public.ConnectorOAuthConnect.cancelConnect",
+            "type": "Function",
+            "tags": [],
+            "label": "cancelConnect",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/oauth-hooks/hooks/use_connector_oauth_connect.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-oauth-hooks",
+            "id": "def-public.ConnectorOAuthConnect.isConnecting",
+            "type": "boolean",
+            "tags": [],
+            "label": "isConnecting",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/response-ops/oauth-hooks/hooks/use_connector_oauth_connect.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-oauth-hooks",
+            "id": "def-public.ConnectorOAuthConnect.isAwaitingCallback",
+            "type": "boolean",
+            "tags": [],
+            "label": "isAwaitingCallback",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/response-ops/oauth-hooks/hooks/use_connector_oauth_connect.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-oauth-hooks",
+        "id": "def-public.ConnectorOAuthDisconnect",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConnectorOAuthDisconnect",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/oauth-hooks/hooks/use_connector_oauth_disconnect.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-oauth-hooks",
+            "id": "def-public.ConnectorOAuthDisconnect.disconnect",
+            "type": "Function",
+            "tags": [],
+            "label": "disconnect",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/oauth-hooks/hooks/use_connector_oauth_disconnect.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-oauth-hooks",
+            "id": "def-public.ConnectorOAuthDisconnect.isDisconnecting",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDisconnecting",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/response-ops/oauth-hooks/hooks/use_connector_oauth_disconnect.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-oauth-hooks",
+        "id": "def-public.ConnectorOAuthDisconnectProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConnectorOAuthDisconnectProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/oauth-hooks/hooks/use_connector_oauth_disconnect.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-oauth-hooks",
+            "id": "def-public.ConnectorOAuthDisconnectProps.connectorId",
+            "type": "string",
+            "tags": [],
+            "label": "connectorId",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/response-ops/oauth-hooks/hooks/use_connector_oauth_disconnect.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-oauth-hooks",
+            "id": "def-public.ConnectorOAuthDisconnectProps.onSuccess",
+            "type": "Function",
+            "tags": [],
+            "label": "onSuccess",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/oauth-hooks/hooks/use_connector_oauth_disconnect.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-oauth-hooks",
+            "id": "def-public.ConnectorOAuthDisconnectProps.onError",
+            "type": "Function",
+            "tags": [],
+            "label": "onError",
+            "description": [],
+            "signature": [
+              "((error: Error) => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/oauth-hooks/hooks/use_connector_oauth_disconnect.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/response-ops-oauth-hooks",
+                "id": "def-public.ConnectorOAuthDisconnectProps.onError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "x-pack/platform/packages/shared/response-ops/oauth-hooks/hooks/use_connector_oauth_disconnect.ts",
+                "lineNumber": 16,
+                "columnNumber": 14,
+                "deprecated": false,
+                "docsReferencedTypeName": "Error",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-oauth-hooks",
+        "id": "def-public.OAuthRedirectResultProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "OAuthRedirectResultProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/oauth-hooks/hooks/use_oauth_redirect_result.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-oauth-hooks",
+            "id": "def-public.OAuthRedirectResultProps.onSuccess",
+            "type": "Function",
+            "tags": [],
+            "label": "onSuccess",
+            "description": [],
+            "signature": [
+              "((connectorId: string) => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/oauth-hooks/hooks/use_oauth_redirect_result.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/response-ops-oauth-hooks",
+                "id": "def-public.OAuthRedirectResultProps.onSuccess.$1",
+                "type": "string",
+                "tags": [],
+                "label": "connectorId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/response-ops/oauth-hooks/hooks/use_oauth_redirect_result.ts",
+                "lineNumber": 20,
+                "columnNumber": 16,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-oauth-hooks",
+            "id": "def-public.OAuthRedirectResultProps.onError",
+            "type": "Function",
+            "tags": [],
+            "label": "onError",
+            "description": [],
+            "signature": [
+              "((connectorId: string, error: Error) => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/oauth-hooks/hooks/use_oauth_redirect_result.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/response-ops-oauth-hooks",
+                "id": "def-public.OAuthRedirectResultProps.onError.$1",
+                "type": "string",
+                "tags": [],
+                "label": "connectorId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/response-ops/oauth-hooks/hooks/use_oauth_redirect_result.ts",
+                "lineNumber": 21,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/response-ops-oauth-hooks",
+                "id": "def-public.OAuthRedirectResultProps.onError.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "x-pack/platform/packages/shared/response-ops/oauth-hooks/hooks/use_oauth_redirect_result.ts",
+                "lineNumber": 21,
+                "columnNumber": 35,
+                "deprecated": false,
+                "docsReferencedTypeName": "Error",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/response-ops-oauth-hooks",
+        "id": "def-public.OAuthRedirectMode",
+        "type": "Enum",
+        "tags": [],
+        "label": "OAuthRedirectMode",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/oauth-hooks/hooks/use_connector_oauth_connect.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/response-ops-oauth-hooks",
+        "id": "def-public.ConnectorOAuthConnectProps",
+        "type": "Type",
+        "tags": [],
+        "label": "ConnectorOAuthConnectProps",
+        "description": [],
+        "signature": [
+          "ConnectorOAuthConnectNewTabProps | ConnectorOAuthConnectRedirectProps"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/oauth-hooks/hooks/use_connector_oauth_connect.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

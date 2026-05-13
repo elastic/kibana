@@ -7,7 +7,7 @@
 
 import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import { isString, startsWith } from 'lodash';
-import LRU from 'lru-cache';
+import { LRUCache as LRU } from 'lru-cache';
 import hash from 'object-hash';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/public';
 import type { FetchOptions } from '../../../common/fetch_options';
@@ -28,10 +28,10 @@ function fetchOptionsWithDebug(fetchOptions: FetchOptions, inspectableEsQueriesE
   };
 }
 
-const cache = new LRU<string, any>({ max: 100, maxAge: 1000 * 60 * 60 });
+const cache = new LRU<string, any>({ max: 100, ttl: 1000 * 60 * 60 });
 
 export function clearCache() {
-  cache.reset();
+  cache.clear();
 }
 
 export type CallApi = typeof callApi;
@@ -40,7 +40,7 @@ export async function callApi<T = void>(
   { http, uiSettings }: CoreStart | CoreSetup,
   fetchOptions: FetchOptions
 ): Promise<T> {
-  const inspectableEsQueriesEnabled: boolean = uiSettings.get(enableInspectEsQueries);
+  const inspectableEsQueriesEnabled: boolean = uiSettings?.get(enableInspectEsQueries) ?? false;
   const cacheKey = getCacheKey(fetchOptions);
   const cacheResponse = cache.get(cacheKey);
   if (cacheResponse) {

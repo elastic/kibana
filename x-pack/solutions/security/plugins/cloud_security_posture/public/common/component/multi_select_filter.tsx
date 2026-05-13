@@ -108,11 +108,7 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
   };
 
   return (
-    <EuiFilterGroup
-      css={css`
-        ${transparentBackground && 'background-color: transparent;'};
-      `}
-    >
+    <EuiFilterGroup>
       <EuiPopover
         ownFocus
         button={
@@ -121,7 +117,7 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
               max-width: 186px;
             `}
             data-test-subj={`options-filter-popover-button-${id}`}
-            iconType={buttonIconType || 'arrowDown'}
+            iconType={buttonIconType || 'chevronSingleDown'}
             onClick={toggleIsPopoverOpen}
             isSelected={isPopoverOpen}
             numFilters={showActiveOptionsNumber ? options.length : undefined}
@@ -143,6 +139,7 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
           <>
             <EuiHorizontalRule margin="none" />
             <EuiCallOut
+              announceOnMount
               title={limitReachedMessage}
               color="warning"
               size="s"
@@ -162,7 +159,7 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
             compressed: false,
             'data-test-subj': `${id}-search-input`,
             css: css`
-              border-radius: 0px !important;
+              box-shadow: none;
             `,
           }}
           emptyMessage={'empty'}

@@ -26,6 +26,7 @@ import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import { isSemanticTextField } from '../../../../components/mappings_editor/lib/utils';
 import { deNormalize } from '../../../../components/mappings_editor/lib';
 import { useMappingsState } from '../../../../components/mappings_editor/mappings_state_context';
@@ -41,7 +42,6 @@ export interface TrainedModelsDeploymentModalProps {
   >;
 }
 
-const ML_APP_LOCATOR = 'ML_APP_LOCATOR';
 const TRAINED_MODELS_MANAGE = 'trained_models';
 
 export function TrainedModelsDeploymentModal({
@@ -173,6 +173,7 @@ export function TrainedModelsDeploymentModal({
         </ul>
         <EuiSpacer />
         <EuiCallOut
+          announceOnMount
           iconType="warning"
           color="warning"
           title={i18n.translate(
@@ -208,7 +209,15 @@ export function TrainedModelsDeploymentModal({
       <EuiModalFooter>
         <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={closeModal}>
+            <EuiButtonEmpty
+              onClick={closeModal}
+              aria-label={i18n.translate(
+                'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.cancelButtonAriaLabel',
+                {
+                  defaultMessage: 'Cancel and close modal',
+                }
+              )}
+            >
               {i18n.translate(
                 'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.cancelButtonLabel',
                 {

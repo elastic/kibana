@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { VisualizeInput, VisSavedObject, Vis, VisParams } from '../..';
+import type { VisualizeInput, VisSavedObject, Vis } from '../..';
 import {
   getVisualizationInstance,
   getVisualizationInstanceFromInput,
@@ -16,6 +16,7 @@ import { createVisualizeServicesMock } from './mocks';
 import { BehaviorSubject } from 'rxjs';
 import type { VisualizeServices } from '../types';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
+import type { VisParams } from '@kbn/visualizations-common';
 
 const commonSerializedVisMock = {
   type: 'area',
@@ -92,7 +93,7 @@ describe('getVisualizationInstance', () => {
     );
     expect(mockServices.createVisEmbeddableFromObject).toHaveBeenCalledWith(visMock, {
       searchSessionId: undefined,
-      timeRange: undefined,
+      timeRange: { from: 'now-15m', to: 'now' },
       filters: undefined,
       renderMode: 'edit',
       id: '',
@@ -213,7 +214,7 @@ describe('getVisualizationInstanceInput', () => {
     expect(createVisAsync).toHaveBeenCalledWith(serializedVisMock.type, input.savedVis);
     expect(mockServices.createVisEmbeddableFromObject).toHaveBeenCalledWith(visMock, {
       searchSessionId: undefined,
-      timeRange: undefined,
+      timeRange: { from: 'now-15m', to: 'now' },
       filters: undefined,
       renderMode: 'edit',
       id: '',

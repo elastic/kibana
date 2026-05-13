@@ -7,7 +7,6 @@
 
 import React, { PureComponent } from 'react';
 import { get } from 'lodash';
-import PropTypes from 'prop-types';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -28,7 +27,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { encode } from '@kbn/presentation-util-plugin/common';
+import { encode } from '../../lib';
 import { VALID_IMAGE_TYPES } from '../../../common/lib/constants';
 import { ElementCard } from '../element_card';
 const MAX_NAME_LENGTH = 40;
@@ -119,15 +118,6 @@ interface State {
 }
 
 export class CustomElementModal extends PureComponent<Props, State> {
-  public static propTypes = {
-    name: PropTypes.string,
-    description: PropTypes.string,
-    image: PropTypes.string,
-    title: PropTypes.string.isRequired,
-    onSave: PropTypes.func.isRequired,
-    onCancel: PropTypes.func.isRequired,
-  };
-
   public state = {
     name: this.props.name || '',
     description: this.props.description || '',

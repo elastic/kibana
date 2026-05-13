@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import { get } from 'lodash/fp';
 import React from 'react';
-import styled from 'styled-components';
 
 import type { RowRenderer } from '../../../../../../../common/types/timeline';
 import { RowRendererIdEnum } from '../../../../../../../common/api/timeline';
@@ -64,10 +64,9 @@ import {
 } from '../../../../../../explore/network/components/source_destination/source_destination_arrows';
 import { RowRendererContainer } from '../row_renderer';
 
-const Details = styled.div`
+const detailsCss = css`
   margin: 5px 0;
 `;
-Details.displayName = 'Details';
 
 const EVENT_CATEGORY_FIELD = 'event.category';
 const EVENT_ACTION_FIELD = 'event.action';
@@ -91,8 +90,9 @@ export const netflowRowRenderer: RowRenderer = {
     eventActionMatches(get(EVENT_ACTION_FIELD, ecs)),
   renderRow: ({ data, scopeId }) => (
     <RowRendererContainer>
-      <Details>
+      <div css={detailsCss}>
         <Netflow
+          scopeId={scopeId}
           contextId={`netflow-row-renderer-render-row-${scopeId}-${data._id}`}
           destinationBytes={asArrayIfExists(get(DESTINATION_BYTES_FIELD_NAME, data))}
           destinationGeoContinentName={asArrayIfExists(
@@ -142,7 +142,7 @@ export const netflowRowRenderer: RowRenderer = {
           transport={asArrayIfExists(get(NETWORK_TRANSPORT_FIELD_NAME, data))}
           userName={asArrayIfExists(get(USER_NAME_FIELD_NAME, data))}
         />
-      </Details>
+      </div>
     </RowRendererContainer>
   ),
 };

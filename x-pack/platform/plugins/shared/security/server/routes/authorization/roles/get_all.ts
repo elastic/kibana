@@ -6,7 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { AuthzDisabled } from '@kbn/core-security-server';
 
+import { getRolesResponseSchema } from './model';
 import type { RouteDefinitionParams } from '../..';
 import { API_VERSIONS } from '../../../../common/constants';
 import { compareRolesByName, transformElasticsearchRoleToRole } from '../../../authorization';
@@ -26,18 +28,47 @@ export function defineGetAllRolesRoutes({
       path: '/api/security/role',
       access: 'public',
       summary: `Get all roles`,
+      description: 'Retrieve all Kibana roles.',
       options: {
         tags: ['oas-tag:roles'],
+      },
+      security: {
+        authz: AuthzDisabled.delegateToESClient,
       },
     })
     .addVersion(
       {
         version: API_VERSIONS.roles.public.v1,
-        security: {
-          authz: {
-            enabled: false,
-            reason: `This route delegates authorization to Core's scoped ES cluster client`,
-          },
+        options: {
+          oasOperationObject: () => ({
+            responses: {
+              200: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      getAllRolesResponse: {
+                        value: [
+                          {
+                            name: 'my_kibana_role',
+                            description: 'My custom Kibana role.',
+                            elasticsearch: {
+                              cluster: ['monitor'],
+                              indices: [{ names: ['logs-*'], privileges: ['read'] }],
+                              run_as: [],
+                            },
+                            kibana: [{ spaces: ['default'], base: ['read'], feature: {} }],
+                            metadata: {},
+                            transient_metadata: { enabled: true },
+                            _unrecognized_applications: [],
+                          },
+                        ],
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          }),
         },
         validate: {
           request: {
@@ -56,6 +87,7 @@ export function defineGetAllRolesRoutes({
           },
           response: {
             200: {
+              body: () => getRolesResponseSchema,
               description: 'Indicates a successful call.',
             },
           },

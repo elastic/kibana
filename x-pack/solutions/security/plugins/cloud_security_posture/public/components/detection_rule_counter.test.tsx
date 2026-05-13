@@ -12,7 +12,7 @@ import { DetectionRuleCounter } from './detection_rule_counter';
 import { TestProvider } from '../test/test_provider';
 import { useFetchDetectionRulesByTags } from '../common/api/use_fetch_detection_rules_by_tags';
 import { useFetchDetectionRulesAlertsStatus } from '../common/api/use_fetch_detection_rules_alerts_status';
-import { RuleResponse } from '../common/types';
+import type { RuleResponse } from '@kbn/cloud-security-posture-common';
 
 jest.mock('../common/api/use_fetch_detection_rules_by_tags', () => ({
   useFetchDetectionRulesByTags: jest.fn(),

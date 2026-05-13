@@ -15,23 +15,29 @@ import { unenrollAgent } from './unenroll';
 export async function unenrollForAgentPolicyId(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  policyId: string
+  policyId: string,
+  options?: { revoke?: boolean }
 ) {
+  const revoke = options?.revoke ?? false;
   let hasMore = true;
   let page = 1;
   while (hasMore) {
     const { agents } = await getAgentsByKuery(esClient, soClient, {
       kuery: `${AGENTS_PREFIX}.policy_id:"${policyId}"`,
+      showInactive: revoke,
       page: page++,
       perPage: 1000,
-      showInactive: false,
     });
 
     if (agents.length === 0) {
       hasMore = false;
     }
     for (const agent of agents) {
-      await unenrollAgent(soClient, esClient, agent.id);
+      await unenrollAgent(soClient, esClient, agent.id, {
+        force: revoke,
+        revoke,
+        skipAgentlessValidation: true,
+      });
     }
   }
 }

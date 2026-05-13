@@ -13,12 +13,13 @@ import { KbnPalette } from '../../../constants';
 
 export const kibana7Palette = new KbnCategoricalPalette({
   id: KbnPalette.Kibana7,
+  legacy: true,
   aliases: [
     KbnPalette.Default, // needed when switching between new and old themes
     KbnPalette.Amsterdam, // to assign to existing default palettes
   ],
   name: i18n.translate('palettes.kibana7.name', {
-    defaultMessage: 'Kibana 7',
+    defaultMessage: 'Kibana 7.0',
   }),
   colorCount: 10,
   colors: [

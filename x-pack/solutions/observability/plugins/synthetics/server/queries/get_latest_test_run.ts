@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { Ping } from '../../common/runtime_types';
-import { SyntheticsEsClient } from '../lib';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { Ping } from '../../common/runtime_types';
+import type { SyntheticsEsClient } from '../lib';
 import { getRangeFilter, SUMMARY_FILTER } from '../../common/constants/client_defaults';
 
 export async function getLatestTestRun<F>({
   syntheticsEsClient,
   monitorId,
   locationLabel,
+  locationId,
   from = 'now-1d',
   to = 'now',
 }: {
   syntheticsEsClient: SyntheticsEsClient;
   monitorId: string;
   locationLabel?: string;
+  locationId?: string;
   from?: string;
   to?: string;
 }): Promise<Ping | undefined> {
@@ -31,6 +33,7 @@ export async function getLatestTestRun<F>({
           getRangeFilter({ from, to }),
           { term: { 'monitor.id': monitorId } },
           ...(locationLabel ? [{ term: { 'observer.geo.name': locationLabel } }] : []),
+          ...(locationId ? [{ term: { 'observer.name': locationId } }] : []),
         ] as QueryDslQueryContainer[],
       },
     },

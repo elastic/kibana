@@ -6,7 +6,7 @@
  */
 
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
-import {
+import type {
   Observable,
   ExternalServiceSIR,
   ObservableResponse,
@@ -14,7 +14,7 @@ import {
 } from '../lib/servicenow/types';
 
 import { createExternalService as createExternalServiceCommon } from '../lib/servicenow/service';
-import { createServiceError } from '../lib/servicenow/utils';
+import { addServiceMessageToError } from '../lib/servicenow/utils';
 
 const getAddObservableToIncidentURL = (url: string, incidentID: string) =>
   `${url}/api/x_elas2_sir_int/elastic_api/incident/${incidentID}/observables`;
@@ -66,7 +66,7 @@ export const createExternalService: ServiceFactory<ExternalServiceSIR> = ({
         getAddObservableToIncidentURL(snService.getUrl(), incidentID)
       );
     } catch (error) {
-      throw createServiceError(
+      throw addServiceMessageToError(
         error,
         `Unable to add observable to security incident with id ${incidentID}`
       );
@@ -83,7 +83,7 @@ export const createExternalService: ServiceFactory<ExternalServiceSIR> = ({
         getBulkAddObservableToIncidentURL(snService.getUrl(), incidentID)
       );
     } catch (error) {
-      throw createServiceError(
+      throw addServiceMessageToError(
         error,
         `Unable to add observables to security incident with id ${incidentID}`
       );

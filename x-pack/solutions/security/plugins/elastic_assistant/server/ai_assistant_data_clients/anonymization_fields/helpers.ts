@@ -6,13 +6,13 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import {
+import type {
   AnonymizationFieldCreateProps,
   AnonymizationFieldResponse,
   AnonymizationFieldUpdateProps,
-} from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import { AuthenticatedUser } from '@kbn/core-security-common';
-import {
+} from '@kbn/elastic-assistant-common/impl/schemas';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
+import type {
   CreateAnonymizationFieldSchema,
   EsAnonymizationFieldsSchema,
   UpdateAnonymizationFieldSchema,

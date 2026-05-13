@@ -14,7 +14,8 @@ import { OverflowField } from '../../../../common/components/tables/helpers';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import { MESSAGE_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID } from './test_ids';
-import { hasPreview, PreviewLink } from '../../../shared/components/preview_link';
+import { isFlyoutLink } from '../../../shared/utils/link_utils';
+import { PreviewLink } from '../../../shared/components/preview_link';
 
 export interface FieldValueCellProps {
   /**
@@ -40,7 +41,7 @@ export interface FieldValueCellProps {
   /**
    * Whether the preview link is in rule preview
    */
-  isPreview: boolean;
+  isRulePreview: boolean;
   /**
    * Value of the link field if it exists. Allows to navigate to other pages like host, user, network...
    */
@@ -49,6 +50,10 @@ export interface FieldValueCellProps {
    * Values for the field, to render in the second column of the table
    */
   values: string[] | null | undefined;
+  /**
+   * Entity Store canonical id for host/user preview navigation when known
+   */
+  entityId?: string;
 }
 
 /**
@@ -63,18 +68,15 @@ export const TableFieldValueCell = memo(
     ruleId,
     getLinkValue,
     values,
-    isPreview,
+    isRulePreview,
+    entityId,
   }: FieldValueCellProps) => {
     if (values == null) {
       return null;
     }
 
     return (
-      <EuiFlexGroup
-        data-test-subj={`event-field-${data.field}`}
-        direction="column"
-        gutterSize="none"
-      >
+      <EuiFlexGroup data-test-subj={`event-field-${data.field}`} direction="column" gutterSize="xs">
         {values.map((value, i) => {
           if (fieldFromBrowserField == null) {
             return (
@@ -90,13 +92,13 @@ export const TableFieldValueCell = memo(
             <EuiFlexItem grow={false} key={`${i}-${value}`}>
               {data.field === MESSAGE_FIELD_NAME ? (
                 <OverflowField value={value} />
-              ) : hasPreview(data.field) ? (
+              ) : isFlyoutLink({ field: data.field, ruleId, scopeId }) ? (
                 <PreviewLink
                   field={data.field}
                   value={value}
+                  entityId={entityId}
                   scopeId={scopeId}
                   ruleId={ruleId}
-                  isPreview={isPreview}
                   data-test-subj={`${FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID}-${i}`}
                 />
               ) : (

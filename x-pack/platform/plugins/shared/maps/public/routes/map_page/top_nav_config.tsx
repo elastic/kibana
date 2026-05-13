@@ -7,29 +7,23 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Adapters } from '@kbn/inspector-plugin/public';
-import {
-  SavedObjectSaveModalOrigin,
+import type { Adapters } from '@kbn/inspector-plugin/public';
+import type {
   OnSaveProps,
-  showSaveModal,
+  SaveResult,
+  ShowSaveModalMinimalSaveModalProps,
 } from '@kbn/saved-objects-plugin/public';
-import {
-  LazySavedObjectSaveModalDashboard,
-  withSuspense,
-} from '@kbn/presentation-util-plugin/public';
-import { ScopedHistory } from '@kbn/core/public';
+import { SavedObjectSaveModalOrigin, showSaveModal } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
+import type { ScopedHistory } from '@kbn/core/public';
 import {
   getNavigateToApp,
   getMapsCapabilities,
   getInspector,
-  getCoreOverlays,
   getSavedObjectsTagging,
 } from '../../kibana_services';
-import { MAP_EMBEDDABLE_NAME } from '../../../common/constants';
-import { SavedMap } from './saved_map';
-import { checkForDuplicateTitle } from '../../content_management';
-
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
+import type { SavedMap } from './saved_map';
+import { hasLibraryItemWithTitle } from '../../content_management';
 
 export function getTopNavConfig({
   savedMap,
@@ -164,32 +158,14 @@ export function getTopNavConfig({
         ) : undefined;
 
         const saveModalProps = {
+          lastSavedTitle: savedMap.getSavedObjectId() ? savedMap.getTitle() : '',
+          hasLibraryItemWithTitle,
           onSave: async (
             props: OnSaveProps & {
               dashboardId?: string | null;
               addToLibrary: boolean;
             }
-          ) => {
-            try {
-              await checkForDuplicateTitle(
-                {
-                  id: props.newCopyOnSave ? undefined : savedMap.getSavedObjectId(),
-                  title: props.newTitle,
-                  copyOnSave: props.newCopyOnSave,
-                  lastSavedTitle: savedMap.getSavedObjectId() ? savedMap.getTitle() : '',
-                  isTitleDuplicateConfirmed: props.isTitleDuplicateConfirmed,
-                  getDisplayName: () => MAP_EMBEDDABLE_NAME,
-                  onTitleDuplicate: props.onTitleDuplicate,
-                },
-                {
-                  overlays: getCoreOverlays(),
-                }
-              );
-            } catch (e) {
-              // ignore duplicate title failure, user notified in save modal
-              return {};
-            }
-
+          ): Promise<SaveResult> => {
             await savedMap.save({
               ...props,
               tags,
@@ -210,7 +186,7 @@ export function getTopNavConfig({
           }),
         };
 
-        let saveModal;
+        let saveModal: React.ReactElement<ShowSaveModalMinimalSaveModalProps>;
 
         if (savedMap.hasOriginatingApp()) {
           saveModal = (
@@ -260,15 +236,13 @@ export function getTopNavConfig({
           defaultMessage: 'Save and return',
         }),
         emphasize: true,
-        iconType: 'checkInCircleFilled',
+        iconType: 'checkCircleFill',
         run: () => {
           savedMap.save({
             newTitle: savedMap.getTitle(),
             newDescription: mapDescription,
             newCopyOnSave: false,
-            isTitleDuplicateConfirmed: false,
             returnToOrigin: true,
-            onTitleDuplicate: () => {},
             saveByReference: !savedMap.isByValue(),
             history,
           });

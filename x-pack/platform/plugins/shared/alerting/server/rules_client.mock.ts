@@ -6,7 +6,7 @@
  */
 
 import { alertingAuthorizationMock } from './authorization/alerting_authorization.mock';
-import { RulesClientApi } from './types';
+import type { RulesClientApi } from './types';
 
 type Schema = RulesClientApi;
 export type RulesClientMock = jest.Mocked<Schema>;
@@ -27,6 +27,8 @@ const createRulesClientMock = () => {
     disableRule: jest.fn(),
     enableRule: jest.fn(),
     updateRuleApiKey: jest.fn(),
+    bulkMuteInstances: jest.fn(),
+    bulkUnmuteInstances: jest.fn(),
     muteAll: jest.fn(),
     unmuteAll: jest.fn(),
     muteInstance: jest.fn(),
@@ -38,6 +40,7 @@ const createRulesClientMock = () => {
     getExecutionLogForRule: jest.fn(),
     getRuleExecutionKPI: jest.fn(),
     getGlobalExecutionKpiWithAuth: jest.fn(),
+    getGlobalExecutionSummaryWithAuth: jest.fn(),
     getGlobalExecutionLogWithAuth: jest.fn(),
     getActionErrorLog: jest.fn(),
     getActionErrorLogWithAuth: jest.fn(),
@@ -46,7 +49,9 @@ const createRulesClientMock = () => {
     findBackfill: jest.fn(),
     deleteBackfill: jest.fn(),
     getSpaceId: jest.fn(),
+    bulkGetRules: jest.fn(),
     bulkEdit: jest.fn(),
+    bulkEditRuleParamsWithReadAuth: jest.fn(),
     bulkDeleteRules: jest.fn(),
     bulkEnableRules: jest.fn(),
     bulkDisableRules: jest.fn(),
@@ -60,6 +65,16 @@ const createRulesClientMock = () => {
     fillGapById: jest.fn(),
     getRuleIdsWithGaps: jest.fn(),
     getGapsSummaryByRuleIds: jest.fn(),
+    bulkFillGapsByRuleIds: jest.fn(),
+    getRuleTypesByQuery: jest.fn(),
+    getTemplate: jest.fn(),
+    findTemplates: jest.fn(),
+    createGapAutoFillScheduler: jest.fn(),
+    getGapAutoFillScheduler: jest.fn(),
+    updateGapAutoFillScheduler: jest.fn(),
+    deleteGapAutoFillScheduler: jest.fn(),
+    findGapAutoFillSchedulerLogs: jest.fn(),
+    getContext: jest.fn(),
   };
   return mocked;
 };

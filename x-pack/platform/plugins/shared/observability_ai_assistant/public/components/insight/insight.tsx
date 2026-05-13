@@ -20,7 +20,10 @@ import { i18n } from '@kbn/i18n';
 import { cloneDeep, isArray, isEmpty, last, once } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { ILicense } from '@kbn/licensing-plugin/public';
+import type { ILicense } from '@kbn/licensing-types';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { MessageRole, type Message } from '../../../common/types';
 import { ObservabilityAIAssistantChatServiceContext } from '../../context/observability_ai_assistant_chat_service_context';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
@@ -30,7 +33,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
 import { useFlyoutState } from '../../hooks/use_flyout_state';
-import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
+import { getModelManagementHref } from '../../utils/navigate_to_connectors';
 import { RegenerateResponseButton } from '../buttons/regenerate_response_button';
 import { StartChatButton } from '../buttons/start_chat_button';
 import { StopGeneratingButton } from '../buttons/stop_generating_button';
@@ -55,9 +58,17 @@ function ChatContent({
   initialMessages: Message[];
   connectorId: string;
 }) {
+  const {
+    services: {
+      plugins: {
+        start: { evals },
+      },
+    },
+  } = useKibana();
   const service = useObservabilityAIAssistant();
   const chatService = useObservabilityAIAssistantChatService();
   const scopes = chatService.getScopes();
+  const connectors = useGenAIConnectors();
 
   const initialMessagesRef = useRef(initialMessages);
 
@@ -77,6 +88,25 @@ function ChatContent({
     messages.slice(initialMessagesRef.current.length + 1),
     MessageRole.Assistant
   );
+  const addToDatasetAction =
+    evals?.getAddToDatasetAction && lastAssistantResponse
+      ? evals.getAddToDatasetAction({
+          initialExample: {
+            input: {
+              initialMessages,
+              connectorId,
+              scopes,
+            },
+            output: {
+              content: lastAssistantResponse.message.content,
+            },
+            metadata: {
+              source: 'observability_ai_assistant',
+              timestamp: lastAssistantResponse['@timestamp'],
+            },
+          },
+        })
+      : null;
 
   useEffect(() => {
     next(initialMessagesRef.current);
@@ -84,14 +114,17 @@ function ChatContent({
 
   useEffect(() => {
     if (state !== ChatState.Loading && lastAssistantResponse) {
+      const connector = connectors.getConnector(connectors.selectedConnector || '');
       chatService.sendAnalyticsEvent({
         type: ObservabilityAIAssistantTelemetryEventType.InsightResponse,
         payload: {
           '@timestamp': lastAssistantResponse['@timestamp'],
+          connector,
+          scopes,
         },
       });
     }
-  }, [state, lastAssistantResponse, chatService]);
+  }, [state, lastAssistantResponse, chatService, connectors, scopes]);
 
   return (
     <>
@@ -116,15 +149,29 @@ function ChatContent({
               <FeedbackButtons
                 onClickFeedback={(feedback) => {
                   if (lastAssistantResponse) {
+                    const connector = connectors.getConnector(connectors.selectedConnector || '');
                     chatService.sendAnalyticsEvent({
                       type: ObservabilityAIAssistantTelemetryEventType.InsightFeedback,
                       payload: {
                         feedback,
+                        connector,
+                        scopes,
                       },
                     });
                   }
                 }}
               />
+              {addToDatasetAction ? (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="s"
+                    iconType={addToDatasetAction.iconType}
+                    onClick={addToDatasetAction.onClick}
+                  >
+                    {addToDatasetAction.label}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              ) : null}
               <EuiFlexItem grow={false}>
                 <RegenerateResponseButton
                   onClick={() => {
@@ -213,6 +260,7 @@ export interface InsightProps {
   messages: Message[] | (() => Promise<Message[] | undefined>);
   title: string;
   dataTestSubj?: string;
+  showElasticLlmCallout?: boolean;
 }
 
 enum FETCH_STATUS {
@@ -226,6 +274,7 @@ export function Insight({
   messages: initialMessagesOrCallback,
   title,
   dataTestSubj,
+  showElasticLlmCallout = true,
 }: InsightProps) {
   const [messages, setMessages] = useState<{ messages: Message[]; status: FETCH_STATUS }>({
     messages: [],
@@ -346,9 +395,13 @@ export function Insight({
     },
   } = useKibana();
 
+  const [chatExperience] = useUiSetting$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
+  const isAgentChatExperienceEnabled = chatExperience === AIChatExperience.Agent;
+
   const license = useObservable<ILicense | null>(licensing.license$);
   const hasEnterpriseLicense = license?.hasAtLeast('enterprise');
-  if (isEmpty(connectors.connectors) || !hasEnterpriseLicense) {
+
+  if (isEmpty(connectors.connectors) || !hasEnterpriseLicense || isAgentChatExperienceEnabled) {
     return null;
   }
 
@@ -414,11 +467,12 @@ export function Insight({
     }
   } else if (!connectors.loading && !connectors.connectors?.length) {
     children = (
-      <MissingCredentialsCallout connectorsManagementHref={getConnectorsManagementHref(http!)} />
+      <MissingCredentialsCallout connectorsManagementHref={getModelManagementHref(http!)} />
     );
   } else if (messages.status === FETCH_STATUS.FAILURE) {
     children = (
       <EuiCallOut
+        announceOnMount
         size="s"
         title={i18n.translate(
           'xpack.observabilityAiAssistant.insight.div.errorFetchingMessagesLabel',

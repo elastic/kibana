@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { RuleType } from '../types';
+import type { RuleType } from '../types';
 import { Subject } from 'rxjs';
-import { LicenseState, ILicenseState } from './license_state';
+import type { ILicenseState } from './license_state';
+import { LicenseState } from './license_state';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { ILicense } from '@kbn/licensing-plugin/server';
+import type { ILicense } from '@kbn/licensing-types';
 
 describe('checkLicense()', () => {
   const getRawLicense = jest.fn();
@@ -70,6 +71,7 @@ describe('getLicenseCheckForRuleType', () => {
     executor: jest.fn(),
     category: 'test',
     producer: 'alerts',
+    solution: 'stack',
     minimumLicenseRequired: 'gold',
     isExportable: true,
     recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
@@ -209,6 +211,7 @@ describe('ensureLicenseForRuleType()', () => {
     executor: jest.fn(),
     category: 'test',
     producer: 'alerts',
+    solution: 'stack',
     minimumLicenseRequired: 'gold',
     isExportable: true,
     recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
@@ -360,6 +363,54 @@ describe('ensureLicenseForMaintenanceWindow()', () => {
     });
     license.next(platinumLicense);
     licenseState.ensureLicenseForMaintenanceWindow();
+  });
+});
+
+describe('ensureLicenseForGapAutoFillScheduler()', () => {
+  let license: Subject<ILicense>;
+  let licenseState: ILicenseState;
+
+  beforeEach(() => {
+    license = new Subject();
+    licenseState = new LicenseState(license);
+  });
+
+  test('should throw if license is not defined', () => {
+    expect(() =>
+      licenseState.ensureLicenseForGapAutoFillScheduler()
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Gap auto fill scheduler is disabled because license information is not available at this time."`
+    );
+  });
+
+  test('should throw if license is not available', () => {
+    license.next(createUnavailableLicense());
+    expect(() =>
+      licenseState.ensureLicenseForGapAutoFillScheduler()
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Gap auto fill scheduler is disabled because license information is not available at this time."`
+    );
+  });
+
+  test('should throw if license is not enterprise', () => {
+    const platinumLicense = licensingMock.createLicense({
+      license: { status: 'active', type: 'platinum' },
+    });
+    license.next(platinumLicense);
+
+    expect(() =>
+      licenseState.ensureLicenseForGapAutoFillScheduler()
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Gap auto fill scheduler is disabled because it requires an enterprise license. Go to License Management to view upgrade options."`
+    );
+  });
+
+  test('should not throw when license is valid', () => {
+    const enterpriseLicense = licensingMock.createLicense({
+      license: { status: 'active', type: 'enterprise' },
+    });
+    license.next(enterpriseLicense);
+    licenseState.ensureLicenseForGapAutoFillScheduler();
   });
 });
 

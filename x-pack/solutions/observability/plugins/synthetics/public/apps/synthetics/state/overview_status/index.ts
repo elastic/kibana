@@ -7,13 +7,16 @@
 
 import { createReducer } from '@reduxjs/toolkit';
 
-import { OverviewStatusMetaData, OverviewStatusState } from '../../../../../common/runtime_types';
-import { IHttpSerializedFetchError } from '..';
+import type {
+  OverviewStatusMetaData,
+  OverviewStatusState,
+} from '../../../../../common/runtime_types';
+import type { IHttpSerializedFetchError } from '..';
 import {
   clearOverviewStatusErrorAction,
-  clearOverviewStatusState,
   fetchOverviewStatusAction,
   quietFetchOverviewStatusAction,
+  initialLoadReported,
 } from './actions';
 
 export interface OverviewStatusStateReducer {
@@ -23,6 +26,7 @@ export interface OverviewStatusStateReducer {
   allConfigs?: OverviewStatusMetaData[];
   disabledConfigs?: OverviewStatusMetaData[];
   error: IHttpSerializedFetchError | null;
+  isInitialLoad: boolean;
 }
 
 const initialState: OverviewStatusStateReducer = {
@@ -30,24 +34,26 @@ const initialState: OverviewStatusStateReducer = {
   loaded: false,
   status: null,
   error: null,
+  isInitialLoad: true,
 };
 
 export const overviewStatusReducer = createReducer(initialState, (builder) => {
   builder
-    .addCase(fetchOverviewStatusAction.get, (state) => {
+    .addCase(fetchOverviewStatusAction.get, (state, action) => {
       state.status = null;
       state.loading = true;
     })
-    .addCase(quietFetchOverviewStatusAction.get, (state) => {
-      state.loading = true;
+    .addCase(quietFetchOverviewStatusAction.get, (_state) => {
+      // intentionally no loading state for quiet/background refreshes
     })
     .addCase(fetchOverviewStatusAction.success, (state, action) => {
       state.status = action.payload;
+
       state.allConfigs = Object.values({
-        ...action.payload.upConfigs,
-        ...action.payload.downConfigs,
-        ...action.payload.pendingConfigs,
-        ...action.payload.disabledConfigs,
+        ...state.status.upConfigs,
+        ...state.status.downConfigs,
+        ...state.status.pendingConfigs,
+        ...state.status.disabledConfigs,
       });
       state.disabledConfigs = state.allConfigs.filter((monitor) => !monitor.isEnabled);
       state.loaded = true;
@@ -57,14 +63,11 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
       state.error = action.payload;
       state.loading = false;
     })
-    .addCase(clearOverviewStatusState, (state, action) => {
-      state.status = null;
-      state.loading = false;
-      state.loaded = false;
-      state.error = null;
-    })
     .addCase(clearOverviewStatusErrorAction, (state) => {
       state.error = null;
+    })
+    .addCase(initialLoadReported, (state) => {
+      state.isInitialLoad = false;
     });
 });
 

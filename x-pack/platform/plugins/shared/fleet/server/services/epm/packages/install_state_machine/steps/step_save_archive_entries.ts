@@ -6,7 +6,7 @@
  */
 
 import { ASSETS_SAVED_OBJECT_TYPE } from '../../../../../constants';
-import type { PackageAssetReference } from '../../../../../types';
+import type { AssetsMap, KibanaAssetType, PackageAssetReference } from '../../../../../types';
 
 import { removeArchiveEntries, saveArchiveEntriesFromAssetsMap } from '../../../archive/storage';
 
@@ -14,43 +14,53 @@ import { withPackageSpan } from '../../utils';
 
 import type { InstallContext } from '../_state_machine_package_install';
 import { INSTALL_STATES } from '../../../../../../common/types';
-import { isKibanaAssetType } from '../../../kibana/assets/install';
+import { getPathParts } from '../../../archive';
 
 export async function stepSaveArchiveEntries(context: InstallContext) {
   const { packageInstallContext, savedObjectsClient, installSource, useStreaming } = context;
 
   const { packageInfo, archiveIterator } = packageInstallContext;
 
-  let assetsMap = packageInstallContext?.assetsMap;
-  let paths = packageInstallContext?.paths;
-  // For stream based installations, we don't want to save any assets but
-  // manifest.yaml due to the large number of assets in the package.
-  if (useStreaming) {
-    assetsMap = new Map();
-    await archiveIterator.traverseEntries(async (entry) => {
-      // Skip only kibana assets type
-      if (!isKibanaAssetType(entry.path)) {
-        assetsMap.set(entry.path, entry.buffer);
-      }
-    });
-    paths = Array.from(assetsMap.keys());
+  let assetsToSaveMap: AssetsMap = new Map();
+
+  let packageAssetRefs: PackageAssetReference[] = [];
+
+  async function flushAssets() {
+    const paths = Array.from(assetsToSaveMap.keys());
+    const packageAssetResults = await withPackageSpan('Update archive entries', () =>
+      saveArchiveEntriesFromAssetsMap({
+        savedObjectsClient,
+        assetsMap: assetsToSaveMap,
+        paths,
+        packageInfo,
+        installSource,
+      })
+    );
+    packageAssetRefs = [
+      ...packageAssetRefs,
+      ...packageAssetResults.saved_objects.map((result) => ({
+        id: result.id,
+        path: result.attributes?.asset_path,
+        type: ASSETS_SAVED_OBJECT_TYPE as typeof ASSETS_SAVED_OBJECT_TYPE,
+      })),
+    ];
+
+    assetsToSaveMap = new Map();
   }
 
-  const packageAssetResults = await withPackageSpan('Update archive entries', () =>
-    saveArchiveEntriesFromAssetsMap({
-      savedObjectsClient,
-      assetsMap,
-      paths,
-      packageInfo,
-      installSource,
-    })
-  );
-  const packageAssetRefs: PackageAssetReference[] = packageAssetResults.saved_objects.map(
-    (result) => ({
-      id: result.id,
-      type: ASSETS_SAVED_OBJECT_TYPE,
-    })
-  );
+  await archiveIterator.traverseEntries(async (entry) => {
+    const assetType = getPathParts(entry.path).type as KibanaAssetType;
+    if (assetType === 'security_rule' && useStreaming) {
+      // Skip security rules to avoid storing to many things
+    } else {
+      assetsToSaveMap.set(entry.path, entry.buffer);
+    }
+    if (assetsToSaveMap.size > 100) {
+      await flushAssets();
+    }
+  });
+
+  await flushAssets();
 
   return { packageAssetRefs };
 }

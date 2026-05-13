@@ -23,6 +23,7 @@ import {
   createIncident,
   dedupAssignees,
   getClosedInfoForUpdate,
+  getCloseReasonIfValid,
   getDurationForUpdate,
   getEntity,
   getLatestPushInfo,
@@ -31,8 +32,20 @@ import {
   addKibanaInformationToDescription,
   fillMissingCustomFields,
   normalizeCreateCaseRequest,
+  getInProgressInfoForUpdate,
+  getTimingMetricsForUpdate,
+  isObservable,
+  processObservables,
+  enrichCasesWithFieldLabels,
 } from './utils';
-import type { CaseCustomFields, CustomFieldsConfiguration } from '../../../common/types/domain';
+
+import type {
+  CaseCustomFields,
+  CustomFieldsConfiguration,
+  Observable,
+  CaseConnector,
+  JiraFieldsType,
+} from '../../../common/types/domain';
 import {
   CaseStatuses,
   CustomFieldTypes,
@@ -45,6 +58,8 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { casesConnectors } from '../../connectors';
 import { userProfiles, userProfilesMap } from '../user_profiles.mock';
 import { mappings, mockCases } from '../../mocks';
+import type { ObservablePost } from '../../../common/types/api';
+import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 const allComments = [
   commentObj,
@@ -78,6 +93,20 @@ describe('utils', () => {
     });
   });
 
+  describe('getCloseReasonIfValid', () => {
+    it('returns any non-empty close reason', () => {
+      expect(getCloseReasonIfValid('false_positive')).toBe('false_positive');
+      expect(getCloseReasonIfValid('automated_closure')).toBe('automated_closure');
+      expect(getCloseReasonIfValid('my custom reason')).toBe('my custom reason');
+    });
+
+    it('returns undefined for empty values', () => {
+      expect(getCloseReasonIfValid('')).toBeUndefined();
+      expect(getCloseReasonIfValid('   ')).toBeUndefined();
+      expect(getCloseReasonIfValid()).toBeUndefined();
+    });
+  });
+
   describe('createIncident', () => {
     const theCase = {
       ...flattenCaseSavedObject({
@@ -87,17 +116,14 @@ describe('utils', () => {
       totalComments: 1,
     };
 
-    const connector = {
+    const connector = createMockConnector({
       id: '456',
       actionTypeId: '.jira',
       name: 'Connector without isCaseOwned',
       config: {
         apiUrl: 'https://elastic.jira.com',
       },
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
-    };
+    });
 
     it('creates an external incident correctly for Jira', async () => {
       const res = await createIncident({
@@ -115,6 +141,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.',
@@ -217,6 +244,7 @@ describe('utils', () => {
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.',
           externalId: null,
+          additionalFields: null,
         },
         comments: [],
       });
@@ -302,6 +330,52 @@ describe('utils', () => {
           labels: ['LOLBins'],
           issueType: 'Task',
           parent: null,
+          otherFields: null,
+          summary: 'Another bad one',
+          description: 'Oh no, a bad meanie going LOLBins all over the place!\n\nAdded by elastic.',
+          externalId: null,
+        },
+        comments: [],
+      });
+    });
+
+    it('includes Jira otherFields in the incident payload', async () => {
+      const caseWithOtherFields = {
+        ...flattenCaseSavedObject({
+          savedObject: {
+            ...mockCases[2],
+            attributes: {
+              ...mockCases[2].attributes,
+              connector: {
+                ...mockCases[2].attributes.connector,
+                fields: {
+                  ...(mockCases[2].attributes.connector.fields as JiraFieldsType),
+                  otherFields: '{"customfield_123456":"Blue team"}',
+                },
+              } as CaseConnector,
+            },
+          },
+        }),
+        comments: [],
+        totalComments: 0,
+      };
+
+      const res = await createIncident({
+        theCase: caseWithOtherFields,
+        userActions: [],
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res).toEqual({
+        incident: {
+          priority: 'High',
+          labels: ['LOLBins'],
+          issueType: 'Task',
+          parent: null,
+          otherFields: '{"customfield_123456":"Blue team"}',
           summary: 'Another bad one',
           description: 'Oh no, a bad meanie going LOLBins all over the place!\n\nAdded by elastic.',
           externalId: null,
@@ -422,6 +496,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.\nFor more details, view this case in Kibana.\nCase URL: https://example.com/app/security/cases/mock-id-1',
@@ -448,6 +523,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.\nFor more details, view this case in Kibana.\nCase URL: https://example.com/s/test-space/app/security/cases/mock-id-1',
@@ -478,6 +554,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by Damaged Raccoon.',
@@ -516,6 +593,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by Damaged Raccoon.',
@@ -1073,6 +1151,349 @@ describe('utils', () => {
     });
   });
 
+  describe('getInProgressInfoForUpdate', () => {
+    const date = '2021-02-03T17:41:26.108Z';
+
+    it('returns the correct in_progress_at info when the case is marked as in-progress and the in_progress_at is not set', async () => {
+      expect(
+        getInProgressInfoForUpdate({
+          status: CaseStatuses['in-progress'],
+          stateTransitionTimestamp: date,
+        })
+      ).toEqual({
+        in_progress_at: date,
+      });
+    });
+
+    it('should not set the in_progress_at when the status is not in-progress', async () => {
+      expect(
+        getInProgressInfoForUpdate({ status: CaseStatuses.open, stateTransitionTimestamp: date })
+      ).toBeUndefined();
+    });
+
+    it('does not change the in_progress_at if it is already set', async () => {
+      expect(
+        getInProgressInfoForUpdate({
+          status: CaseStatuses['in-progress'],
+          stateTransitionTimestamp: date,
+          inProgressAt: date,
+        })
+      ).toBeUndefined();
+    });
+
+    it('returns undefined if the status is not provided', async () => {
+      expect(getInProgressInfoForUpdate({ stateTransitionTimestamp: date })).toBeUndefined();
+    });
+  });
+
+  describe('getTimingMetricsForUpdate', () => {
+    const createdAt = '2021-11-23T19:00:00Z';
+    const inProgressAt = '2021-11-23T19:00:10Z';
+    const stateTransitionTimestamp = '2021-11-23T19:00:20Z';
+
+    describe('changing status to in-progress', () => {
+      it('should return the correct metrics', () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses['in-progress'],
+            createdAt,
+            stateTransitionTimestamp,
+          })
+        ).toEqual({
+          time_to_acknowledge: 20,
+          time_to_investigate: null,
+          time_to_resolve: null,
+        });
+      });
+
+      it('setting inProgressAt does not affect the metrics', () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses['in-progress'],
+            createdAt,
+            inProgressAt,
+            stateTransitionTimestamp,
+          })
+        ).toEqual({
+          time_to_acknowledge: 20,
+          time_to_investigate: null,
+          time_to_resolve: null,
+        });
+      });
+
+      it.each([['invalid'], [null]])(
+        'returns undefined if the createdAt date is %s',
+        (createdAtInvalid) => {
+          expect(
+            getTimingMetricsForUpdate({
+              status: CaseStatuses['in-progress'],
+              // @ts-expect-error
+              createdAt: createdAtInvalid,
+              stateTransitionTimestamp,
+            })
+          ).toBeUndefined();
+        }
+      );
+
+      it.each([['invalid'], [null]])(
+        'returns undefined if the stateTransitionTimestamp date is %s',
+        (stateTransitionTimestampInvalid) => {
+          expect(
+            getTimingMetricsForUpdate({
+              status: CaseStatuses['in-progress'],
+              createdAt,
+              // @ts-expect-error
+              stateTransitionTimestamp: stateTransitionTimestampInvalid,
+            })
+          ).toBeUndefined();
+        }
+      );
+
+      it('returns undefined if createdAt > stateTransitionTimestamp', async () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses['in-progress'],
+            createdAt: '2021-11-23T19:05:00Z',
+            stateTransitionTimestamp: '2021-11-23T19:00:00Z',
+          })
+        ).toBeUndefined();
+      });
+
+      it('rounds the seconds correctly', () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses['in-progress'],
+            createdAt: '2022-04-11T15:56:00.087Z',
+            stateTransitionTimestamp: '2022-04-11T16:00:00.056Z',
+          })
+        ).toEqual({
+          time_to_acknowledge: 239,
+          time_to_investigate: null,
+          time_to_resolve: null,
+        });
+      });
+
+      it('rounds the zero correctly', () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses['in-progress'],
+            createdAt: '2022-04-11T15:56:00.087Z',
+            stateTransitionTimestamp: '2022-04-11T15:56:00.287Z',
+          })
+        ).toEqual({
+          time_to_acknowledge: 0,
+          time_to_investigate: null,
+          time_to_resolve: null,
+        });
+      });
+    });
+
+    describe('changing status to closed', () => {
+      it('should return the correct metrics when inProgressAt is not set', () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses.closed,
+            createdAt,
+            stateTransitionTimestamp,
+          })
+        ).toEqual({
+          time_to_acknowledge: 20,
+          time_to_investigate: 0,
+          time_to_resolve: 20,
+        });
+      });
+
+      it('should return the correct metrics when inProgressAt is set', () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses.closed,
+            createdAt,
+            inProgressAt,
+            stateTransitionTimestamp,
+          })
+        ).toEqual({
+          time_to_acknowledge: 10,
+          time_to_investigate: 10,
+          time_to_resolve: 20,
+        });
+      });
+
+      it.each([['invalid'], [null]])(
+        'returns undefined if the createdAt date is %s',
+        (createdAtInvalid) => {
+          expect(
+            getTimingMetricsForUpdate({
+              status: CaseStatuses.closed,
+              // @ts-expect-error
+              createdAt: createdAtInvalid,
+              stateTransitionTimestamp,
+            })
+          ).toBeUndefined();
+        }
+      );
+
+      it.each([['invalid']])(
+        'returns undefined if the inProgressAt date is %s',
+        (inProgressAtInvalid) => {
+          expect(
+            getTimingMetricsForUpdate({
+              status: CaseStatuses.closed,
+              createdAt,
+              inProgressAt: inProgressAtInvalid,
+              stateTransitionTimestamp,
+            })
+          ).toBeUndefined();
+        }
+      );
+
+      it.each([['invalid'], [null]])(
+        'returns undefined if the stateTransitionTimestamp date is %s',
+        (stateTransitionTimestampInvalid) => {
+          expect(
+            getTimingMetricsForUpdate({
+              status: CaseStatuses.closed,
+              createdAt,
+              // @ts-expect-error
+              stateTransitionTimestamp: stateTransitionTimestampInvalid,
+            })
+          ).toBeUndefined();
+        }
+      );
+
+      it('returns undefined if createdAt > stateTransitionTimestamp', async () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses.closed,
+            createdAt: '2021-11-23T19:05:00Z',
+            stateTransitionTimestamp: '2021-11-23T19:00:00Z',
+          })
+        ).toBeUndefined();
+      });
+
+      it('returns undefined if inProgressAt > stateTransitionTimestamp', async () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses.closed,
+            createdAt: '2021-11-23T19:05:00Z',
+            inProgressAt: '2021-11-23T19:06:00Z',
+            stateTransitionTimestamp: '2021-11-23T19:00:00Z',
+          })
+        ).toBeUndefined();
+      });
+
+      it('returns undefined if inProgressAt > createdAt', async () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses.closed,
+            createdAt: '2021-11-23T19:05:00Z',
+            inProgressAt: '2021-11-23T19:06:00Z',
+            stateTransitionTimestamp: '2021-11-23T19:00:00Z',
+          })
+        ).toBeUndefined();
+      });
+
+      it('rounds the seconds correctly', () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses.closed,
+            createdAt: '2022-04-11T15:56:00.087Z',
+            inProgressAt: '2022-04-11T15:58:00.043Z',
+            stateTransitionTimestamp: '2022-04-11T16:00:00.056Z',
+          })
+        ).toEqual({
+          time_to_acknowledge: 119,
+          time_to_investigate: 120,
+          time_to_resolve: 239,
+        });
+      });
+
+      it('rounds the zero correctly', () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses.closed,
+            createdAt: '2022-04-11T15:56:00.087Z',
+            inProgressAt: '2022-04-11T15:56:00.187Z',
+            stateTransitionTimestamp: '2022-04-11T15:56:00.287Z',
+          })
+        ).toEqual({
+          time_to_acknowledge: 0,
+          time_to_investigate: 0,
+          time_to_resolve: 0,
+        });
+      });
+    });
+
+    describe('changing status to open', () => {
+      it('should return the correct metrics', () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses.open,
+            createdAt,
+            stateTransitionTimestamp,
+          })
+        ).toEqual({
+          time_to_acknowledge: null,
+          time_to_investigate: null,
+          time_to_resolve: null,
+        });
+      });
+
+      it('setting inProgressAt does not affect the metrics', () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses.open,
+            createdAt,
+            inProgressAt,
+            stateTransitionTimestamp,
+          })
+        ).toEqual({
+          time_to_acknowledge: null,
+          time_to_investigate: null,
+          time_to_resolve: null,
+        });
+      });
+    });
+
+    it('should return the correct metrics when the case is marked as closed', () => {
+      expect(
+        getTimingMetricsForUpdate({
+          status: CaseStatuses.closed,
+          createdAt,
+          inProgressAt,
+          stateTransitionTimestamp,
+        })
+      ).toEqual({
+        time_to_acknowledge: 10,
+        time_to_investigate: 10,
+        time_to_resolve: 20,
+      });
+    });
+
+    it('should return the correct metrics when the case transitions from open to closed', () => {
+      expect(
+        getTimingMetricsForUpdate({
+          status: CaseStatuses.closed,
+          createdAt,
+          stateTransitionTimestamp,
+        })
+      ).toEqual({
+        time_to_acknowledge: 20,
+        time_to_investigate: 0,
+        time_to_resolve: 20,
+      });
+    });
+
+    it('returns undefined if the status is not provided', async () => {
+      expect(
+        getTimingMetricsForUpdate({
+          createdAt,
+          inProgressAt,
+          stateTransitionTimestamp,
+        })
+      ).toBe(undefined);
+    });
+  });
+
   describe('getDurationForUpdate', () => {
     const createdAt = '2021-11-23T19:00:00Z';
     const closedAt = '2021-11-23T19:02:00Z';
@@ -1124,7 +1545,7 @@ describe('utils', () => {
       }
     );
 
-    it('returns undefined if created_at > closed_at', async () => {
+    it('returns undefined if createdAt > closedAt', async () => {
       expect(
         getDurationForUpdate({
           status: CaseStatuses.closed,
@@ -1569,7 +1990,7 @@ describe('normalizeCreateCaseRequest', () => {
       type: ConnectorTypes.none,
       fields: null,
     },
-    settings: { syncAlerts: true },
+    settings: { syncAlerts: true, extractObservables: true },
     severity: CaseSeverity.LOW,
     owner: SECURITY_SOLUTION_OWNER,
     assignees: [{ uid: '1' }],
@@ -1647,6 +2068,229 @@ describe('normalizeCreateCaseRequest', () => {
     expect(normalizeCreateCaseRequest(omit(theCase, 'customFields'))).toEqual({
       ...theCase,
       customFields: [],
+    });
+  });
+});
+
+describe('isObservable', () => {
+  it('should return true if the observable is an Observable', () => {
+    expect(
+      isObservable({
+        id: '1',
+        typeKey: 'ip',
+        value: '127.0.0.1',
+        description: null,
+        createdAt: '2021-01-01',
+        updatedAt: '2021-01-01',
+      })
+    ).toBe(true);
+  });
+
+  it('should return false if the observable is not an Observable', () => {
+    expect(isObservable({ typeKey: 'ip', value: '127.0.0.1', description: null })).toBe(false);
+  });
+});
+
+describe('processObservables', () => {
+  const mockObservablePost: ObservablePost = {
+    typeKey: 'ip',
+    value: '127.0.0.1',
+    description: null,
+  };
+
+  const mockObservable: Observable = {
+    ...mockObservablePost,
+    id: '1',
+    createdAt: '2021-01-01',
+    updatedAt: '2021-01-01',
+  };
+
+  it('should process the current observable', () => {
+    const observablesMap = new Map<string, Observable>();
+    processObservables(observablesMap, mockObservable);
+    expect(observablesMap.get('ip-127.0.0.1')).toBeDefined();
+  });
+
+  it('should process the new observable post', () => {
+    const observablesMap = new Map<string, Observable>();
+    processObservables(observablesMap, mockObservablePost);
+    expect(observablesMap.get('ip-127.0.0.1')).toBeDefined();
+  });
+
+  it('should not add the observable if it already exists', () => {
+    const observablesMap = new Map<string, Observable>();
+    processObservables(observablesMap, mockObservable);
+    processObservables(observablesMap, mockObservable);
+    expect(observablesMap.get('ip-127.0.0.1')).toBeDefined();
+    expect(observablesMap.size).toBe(1);
+
+    processObservables(observablesMap, mockObservablePost);
+    expect(observablesMap.size).toBe(1);
+  });
+
+  it('should add a new observable if the key-value pair does not exist', () => {
+    const observablesMap = new Map<string, Observable>();
+    processObservables(observablesMap, mockObservablePost);
+    processObservables(observablesMap, { ...mockObservablePost, typeKey: 'ip2' });
+    expect(observablesMap.get('ip-127.0.0.1')).toBeDefined();
+    expect(observablesMap.get('ip2-127.0.0.1')).toBeDefined();
+    expect(observablesMap.size).toBe(2);
+  });
+
+  it('should not override the existing observable if the key-value pair already exists', () => {
+    const observablesMap = new Map<string, Observable>();
+    processObservables(observablesMap, mockObservable);
+    processObservables(observablesMap, {
+      ...mockObservable,
+      id: '2',
+      createdAt: '2021-01-02',
+      updatedAt: '2021-01-02',
+    });
+    expect(observablesMap.get('ip-127.0.0.1')).toBeDefined();
+    expect(observablesMap.get('ip-127.0.0.1')).toEqual(mockObservable);
+    expect(observablesMap.size).toBe(1);
+  });
+});
+
+describe('enrichCasesWithFieldLabels', () => {
+  const baseCase = flattenCaseSavedObject({ savedObject: mockCases[0], totalComment: 0 });
+
+  const caseWithTemplate = {
+    ...baseCase,
+    template: { id: 'template-id-1', version: 1 },
+    extended_fields: { priority_as_keyword: 'high', effort_as_integer: '3' },
+  };
+
+  const templateSO = {
+    id: 'so-id',
+    type: 'cases-template' as const,
+    references: [],
+    attributes: {
+      templateId: 'template-id-1',
+      name: 'My Template',
+      owner: 'cases',
+      definition: '',
+      templateVersion: 1,
+      deletedAt: null,
+      fieldNames: [
+        { name: 'priority', label: 'Priority Level', type: 'keyword', control: 'INPUT_TEXT' },
+        { name: 'effort', label: 'Effort Points', type: 'integer', control: 'INPUT_NUMBER' },
+      ],
+    },
+  };
+
+  it('populates extended_fields_labels from the matched template fieldNames', () => {
+    const result = enrichCasesWithFieldLabels([caseWithTemplate], [templateSO]);
+
+    expect(result[0].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level',
+      effort_as_integer: 'Effort Points',
+    });
+  });
+
+  it('returns case unchanged when it has no template reference', () => {
+    const result = enrichCasesWithFieldLabels([baseCase], [templateSO]);
+
+    expect(result[0]).toEqual(baseCase);
+  });
+
+  it('returns case unchanged when it has no extended_fields', () => {
+    const caseNoExtFields = { ...baseCase, template: { id: 'template-id-1', version: 1 } };
+
+    const result = enrichCasesWithFieldLabels([caseNoExtFields], [templateSO]);
+
+    expect(result[0]).toEqual(caseNoExtFields);
+  });
+
+  it('omits extended_fields_labels when the referenced template is not in the provided list', () => {
+    const result = enrichCasesWithFieldLabels([caseWithTemplate], []);
+
+    expect(result[0].extended_fields_labels).toBeUndefined();
+  });
+
+  it('uses the same template SO for multiple cases with the same templateId+version', () => {
+    const secondCase = {
+      ...caseWithTemplate,
+      id: 'mock-id-2',
+    };
+
+    const result = enrichCasesWithFieldLabels([caseWithTemplate, secondCase], [templateSO]);
+
+    expect(result[0].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level',
+      effort_as_integer: 'Effort Points',
+    });
+    expect(result[1].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level',
+      effort_as_integer: 'Effort Points',
+    });
+  });
+
+  it('resolves different template versions separately for the same templateId', () => {
+    const templateSOv2 = {
+      ...templateSO,
+      id: 'so-id-v2',
+      attributes: {
+        ...templateSO.attributes,
+        templateVersion: 2,
+        fieldNames: [
+          { name: 'priority', label: 'Priority Level v2', type: 'keyword', control: 'INPUT_TEXT' },
+        ],
+      },
+    };
+
+    const caseV2 = {
+      ...caseWithTemplate,
+      id: 'mock-id-2',
+      template: { id: 'template-id-1', version: 2 },
+    };
+
+    const result = enrichCasesWithFieldLabels(
+      [caseWithTemplate, caseV2],
+      [templateSO, templateSOv2]
+    );
+
+    expect(result[0].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level',
+      effort_as_integer: 'Effort Points',
+    });
+    expect(result[1].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level v2',
+    });
+  });
+
+  it('handles multiple cases with different templateIds independently', () => {
+    const templateSO2 = {
+      ...templateSO,
+      id: 'so-id-2',
+      attributes: {
+        ...templateSO.attributes,
+        templateId: 'template-id-2',
+        templateVersion: 1,
+        fieldNames: [
+          { name: 'severity', label: 'Severity Label', type: 'keyword', control: 'SELECT_BASIC' },
+        ],
+      },
+    };
+
+    const caseTwo = {
+      ...caseWithTemplate,
+      id: 'mock-id-2',
+      template: { id: 'template-id-2', version: 1 },
+      extended_fields: { severity_as_keyword: 'critical' },
+    };
+
+    const result = enrichCasesWithFieldLabels(
+      [caseWithTemplate, caseTwo],
+      [templateSO, templateSO2]
+    );
+
+    expect(result[0].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level',
+      effort_as_integer: 'Effort Points',
+    });
+    expect(result[1].extended_fields_labels).toEqual({
+      severity_as_keyword: 'Severity Label',
     });
   });
 });

@@ -6,15 +6,16 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApmRuleType } from '@kbn/rule-data-utils';
-import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
+import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import { APM_SERVER_FEATURE_ID } from '../../../../../common/rules/apm_rule_types';
 import { getInitialAlertValues } from '../../utils/get_initial_alert_values';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 import { useServiceName } from '../../../../hooks/use_service_name';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import type { AlertMetadata } from '../../utils/helper';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 
@@ -22,12 +23,21 @@ interface Props {
   addFlyoutVisible: boolean;
   setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
   ruleType: ApmRuleType | null;
+  serviceName?: string;
+  transactionName?: string;
 }
 
 export function AlertingFlyout(props: Props) {
-  const { addFlyoutVisible, setAddFlyoutVisibility, ruleType } = props;
+  const {
+    addFlyoutVisible,
+    setAddFlyoutVisibility,
+    ruleType,
+    serviceName: serviceNameProp,
+    transactionName: transactionNameProp,
+  } = props;
 
-  const serviceName = useServiceName();
+  const serviceNameFromUrl = useServiceName();
+  const serviceName = serviceNameProp ?? serviceNameFromUrl;
   const { query, path } = useApmParams('/*');
 
   const rangeFrom = 'rangeFrom' in query ? query.rangeFrom : undefined;
@@ -37,10 +47,16 @@ export function AlertingFlyout(props: Props) {
 
   const environment = 'environment' in query ? query.environment! : ENVIRONMENT_ALL.value;
   const transactionType = 'transactionType' in query ? query.transactionType : undefined;
-  const transactionName = 'transactionName' in query ? query.transactionName : undefined;
+  const transactionNameFromUrl = 'transactionName' in query ? query.transactionName : undefined;
+  const transactionName = transactionNameProp ?? transactionNameFromUrl;
   const errorGroupingKey = 'groupId' in path ? path.groupId : undefined;
 
-  const { services } = useKibana<ApmPluginStartDeps>();
+  const {
+    services: {
+      triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
+      ...services
+    },
+  } = useKibana<CoreStart & ApmPluginStartDeps>();
   const initialValues = getInitialAlertValues(ruleType, serviceName);
 
   const onCloseAddFlyout = useCallback(
@@ -51,29 +67,33 @@ export function AlertingFlyout(props: Props) {
   const addAlertFlyout = useMemo(
     () =>
       ruleType &&
-      services.triggersActionsUi.getAddRuleFlyout<RuleTypeParams, AlertMetadata>({
-        consumer: APM_SERVER_FEATURE_ID,
-        onClose: onCloseAddFlyout,
-        ruleTypeId: ruleType,
-        canChangeTrigger: false,
-        initialValues,
-        metadata: {
-          environment,
-          serviceName,
-          ...(ruleType === ApmRuleType.ErrorCount ? {} : { transactionType }),
-          transactionName,
-          errorGroupingKey,
-          start,
-          end,
-        },
-        useRuleProducer: true,
-      }),
+      isValidRuleFormPlugins(services) && (
+        <RuleFormFlyout
+          plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
+          consumer={APM_SERVER_FEATURE_ID}
+          onCancel={onCloseAddFlyout}
+          onSubmit={onCloseAddFlyout}
+          ruleTypeId={ruleType}
+          initialValues={initialValues}
+          initialMetadata={{
+            environment,
+            serviceName,
+            ...(ruleType === ApmRuleType.ErrorCount ? {} : { transactionType }),
+            transactionName,
+            errorGroupingKey,
+            start,
+            end,
+          }}
+          shouldUseRuleProducer
+        />
+      ),
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [
       ruleType,
       environment,
       onCloseAddFlyout,
-      services.triggersActionsUi,
+      ruleTypeRegistry,
+      actionTypeRegistry,
       serviceName,
       transactionName,
       errorGroupingKey,

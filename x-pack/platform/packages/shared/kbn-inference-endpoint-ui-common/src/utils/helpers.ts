@@ -5,10 +5,19 @@
  * 2.0.
  */
 
-import { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { isEmpty } from 'lodash/fp';
-import { Config, ConfigEntryView, FieldType, InferenceProvider } from '../types/types';
+import { FieldType } from '../types/types';
+import type { Config, ConfigEntryView, InferenceProvider } from '../types/types';
+import type { OverrideFieldsContentType } from '../types/dynamic_config/types';
 import * as LABELS from '../translations';
+import {
+  PROVIDER_CONFIG,
+  PROVIDER_SECRETS,
+  SERVICE_SETTINGS,
+  TASK_SETTINGS,
+  TASK_TYPE_CONFIG,
+} from '../constants';
 
 export interface TaskTypeOption {
   id: string;
@@ -32,25 +41,29 @@ export const generateInferenceEndpointId = (config: Config) => {
 };
 
 export const getNonEmptyValidator = (
-  schema: ConfigEntryView[],
+  requiredFieldsSchema: ConfigEntryView[],
   validationEventHandler: (fieldsWithErrors: ConfigEntryView[]) => void,
   isSubmitting: boolean = false,
   isSecrets: boolean = false
 ) => {
   return (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc> => {
     const [{ value, path }] = args;
-    const newSchema: ConfigEntryView[] = [];
+    const updatedFormFields: ConfigEntryView[] = [];
 
     const configData = (value ?? {}) as Record<string, unknown>;
     let hasErrors = false;
-    if (schema) {
-      schema
-        .filter((f: ConfigEntryView) => f.required)
-        .forEach((field: ConfigEntryView) => {
-          // validate if submitting or on field edit - value is not default to null
-          if (configData[field.key] !== null || isSubmitting) {
-            // validate secrets fields separately from regular
-            if (isSecrets ? field.sensitive : !field.sensitive) {
+    if (requiredFieldsSchema) {
+      requiredFieldsSchema.map((field: ConfigEntryView) => {
+        // validate if submitting or on field edit - value is not default to null
+        if (field.required && (configData[field.key] !== null || isSubmitting)) {
+          // validate secrets fields separately from regular
+          if (isSecrets ? field.sensitive : !field.sensitive) {
+            const fieldLocation = isSecrets
+              ? PROVIDER_SECRETS
+              : field.location === TASK_SETTINGS
+              ? TASK_TYPE_CONFIG
+              : PROVIDER_CONFIG;
+            if (path.includes(fieldLocation)) {
               if (
                 !configData[field.key] ||
                 (typeof configData[field.key] === 'string' && isEmpty(configData[field.key]))
@@ -64,10 +77,11 @@ export const getNonEmptyValidator = (
               }
             }
           }
-          newSchema.push(field);
-        });
+        }
+        updatedFormFields.push(field);
+      });
 
-      validationEventHandler(newSchema);
+      validationEventHandler(updatedFormFields);
       if (hasErrors) {
         return {
           code: 'ERR_FIELD_MISSING',
@@ -81,19 +95,51 @@ export const getNonEmptyValidator = (
 
 export const mapProviderFields = (
   taskType: string,
-  newProvider: InferenceProvider
+  newProvider: InferenceProvider,
+  fieldOverrides?: OverrideFieldsContentType
 ): ConfigEntryView[] => {
+  // fieldOverrides.additional
+  // e.g. [ { field: { default_value: 'value', ...}, other_field: { default_value: 'value', ...} } ]
+  if (fieldOverrides?.additional) {
+    fieldOverrides?.additional.forEach((additionalField) => {
+      const fieldKey = Object.keys(additionalField)[0];
+      if (!newProvider.configurations[fieldKey]) {
+        newProvider.configurations[fieldKey] = additionalField[fieldKey];
+      }
+    });
+  }
+
+  // fieldOverrides.supplementalData is a temporary solution until the 'location' field is added for the services api.
+  if (fieldOverrides?.supplementalData) {
+    fieldOverrides?.supplementalData.forEach((supplementalDataField) => {
+      const fieldKey = Object.keys(supplementalDataField)[0];
+      if (newProvider.configurations[fieldKey]) {
+        newProvider.configurations[fieldKey] = {
+          ...newProvider.configurations[fieldKey],
+          ...supplementalDataField[fieldKey],
+        };
+      }
+    });
+  }
+
   return Object.keys(newProvider.configurations ?? {})
-    .filter((pk) =>
-      (newProvider.configurations[pk].supported_task_types ?? [taskType]).includes(taskType)
+    .filter(
+      (pk) =>
+        (newProvider.configurations[pk].supported_task_types ?? [taskType]).includes(taskType) &&
+        (fieldOverrides?.hidden ?? []).indexOf(pk) === -1
     )
-    .map(
-      (k): ConfigEntryView => ({
+    .map((k): ConfigEntryView => {
+      // Use override defaultValues if provider config doesn't have a default_value set
+      const configDefaultValue = newProvider.configurations[k].default_value;
+      const overrideDefaultValue = fieldOverrides?.defaultValues?.[k];
+      const resolvedDefaultValue = configDefaultValue ?? overrideDefaultValue ?? null;
+
+      return {
         key: k,
         isValid: true,
         validationErrors: [],
-        value: newProvider.configurations[k].default_value ?? null,
-        default_value: newProvider.configurations[k].default_value ?? null,
+        value: resolvedDefaultValue,
+        default_value: resolvedDefaultValue,
         description: newProvider.configurations[k].description ?? null,
         label: newProvider.configurations[k].label ?? '',
         required: newProvider.configurations[k].required ?? false,
@@ -101,6 +147,7 @@ export const mapProviderFields = (
         updatable: newProvider.configurations[k].updatable ?? false,
         type: newProvider.configurations[k].type ?? FieldType.STRING,
         supported_task_types: newProvider.configurations[k].supported_task_types ?? [],
-      })
-    );
+        location: newProvider.configurations[k].location ?? SERVICE_SETTINGS,
+      };
+    });
 };

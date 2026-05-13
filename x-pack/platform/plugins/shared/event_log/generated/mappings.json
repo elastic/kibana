@@ -246,6 +246,10 @@
                         "id": {
                             "type": "keyword"
                         },
+                        "type": {
+                            "type": "keyword",
+                            "ignore_above": 1024
+                        },
                         "scheduled": {
                             "type": "date"
                         },
@@ -319,6 +323,13 @@
                             "type": "keyword",
                             "ignore_above": 1024
                         },
+                        "deletion": {
+                            "properties": {
+                                "num_deleted": {
+                                    "type": "long"
+                                }
+                            }
+                        },
                         "rule": {
                             "properties": {
                                 "consumer": {
@@ -367,6 +378,23 @@
                                         },
                                         "in_progress_duration_ms": {
                                             "type": "long"
+                                        },
+                                        "deleted": {
+                                            "type": "boolean"
+                                        },
+                                        "updated_at": {
+                                            "type": "date"
+                                        },
+                                        "failed_auto_fill_attempts": {
+                                            "type": "long"
+                                        },
+                                        "reason": {
+                                            "properties": {
+                                                "type": {
+                                                    "type": "keyword",
+                                                    "ignore_above": 1024
+                                                }
+                                            }
                                         }
                                     }
                                 },
@@ -441,6 +469,20 @@
                                                     "type": "date_range",
                                                     "format": "strict_date_optional_time||epoch_millis"
                                                 },
+                                                "gap_reason": {
+                                                    "properties": {
+                                                        "type": {
+                                                            "type": "keyword",
+                                                            "ignore_above": 1024
+                                                        }
+                                                    }
+                                                },
+                                                "matched_indices_count": {
+                                                    "type": "long"
+                                                },
+                                                "frozen_indices_queried_count": {
+                                                    "type": "long"
+                                                },
                                                 "rule_type_run_duration_ms": {
                                                     "type": "long"
                                                 },
@@ -466,6 +508,15 @@
                                                     "type": "long"
                                                 },
                                                 "total_enrichment_duration_ms": {
+                                                    "type": "long"
+                                                },
+                                                "update_alerts_duration_ms": {
+                                                    "type": "long"
+                                                },
+                                                "alerts_candidate_count": {
+                                                    "type": "long"
+                                                },
+                                                "alerts_suppressed_count": {
                                                     "type": "long"
                                                 }
                                             }
@@ -580,6 +631,128 @@
                         },
                         "name": {
                             "type": "keyword"
+                        }
+                    }
+                },
+                "gap_auto_fill": {
+                    "properties": {
+                        "execution": {
+                            "properties": {
+                                "status": {
+                                    "type": "keyword"
+                                },
+                                "start": {
+                                    "type": "date"
+                                },
+                                "end": {
+                                    "type": "date"
+                                },
+                                "duration_ms": {
+                                    "type": "long"
+                                },
+                                "rule_ids": {
+                                    "type": "keyword",
+                                    "meta": {
+                                        "isArray": "true"
+                                    }
+                                },
+                                "task_params": {
+                                    "properties": {
+                                        "name": {
+                                            "type": "keyword"
+                                        },
+                                        "num_retries": {
+                                            "type": "long"
+                                        },
+                                        "gap_fill_range": {
+                                            "type": "keyword"
+                                        },
+                                        "interval": {
+                                            "type": "keyword"
+                                        },
+                                        "max_backfills": {
+                                            "type": "long"
+                                        }
+                                    }
+                                },
+                                "results": {
+                                    "type": "nested",
+                                    "properties": {
+                                        "rule_id": {
+                                            "type": "keyword"
+                                        },
+                                        "processed_gaps": {
+                                            "type": "long"
+                                        },
+                                        "status": {
+                                            "type": "keyword"
+                                        },
+                                        "error": {
+                                            "type": "keyword"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "alerting_v2": {
+                    "properties": {
+                        "dispatcher": {
+                            "properties": {
+                                "episode_count": {
+                                    "type": "long"
+                                },
+                                "episode_ids": {
+                                    "type": "keyword",
+                                    "ignore_above": 1024,
+                                    "meta": {
+                                        "isArray": "true"
+                                    }
+                                },
+                                "rule_count": {
+                                    "type": "long"
+                                },
+                                "rule_ids": {
+                                    "type": "keyword",
+                                    "ignore_above": 1024,
+                                    "meta": {
+                                        "isArray": "true"
+                                    }
+                                },
+                                "action_group_count": {
+                                    "type": "long"
+                                },
+                                "action_group_ids": {
+                                    "type": "keyword",
+                                    "ignore_above": 1024,
+                                    "meta": {
+                                        "isArray": "true"
+                                    }
+                                },
+                                "workflow_ids": {
+                                    "type": "keyword",
+                                    "ignore_above": 1024,
+                                    "meta": {
+                                        "isArray": "true"
+                                    }
+                                },
+                                "workflow_execution_ids": {
+                                    "type": "keyword",
+                                    "ignore_above": 1024,
+                                    "meta": {
+                                        "isArray": "true"
+                                    }
+                                },
+                                "execution": {
+                                    "properties": {
+                                        "uuid": {
+                                            "type": "keyword",
+                                            "ignore_above": 1024
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }

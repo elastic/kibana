@@ -14,13 +14,11 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
+import { useAssistantContext } from '../../../..';
+import { useKnowledgeBaseUpdater } from '../use_settings_updater/use_knowledge_base_updater';
 import { ALERTS_LABEL } from '../../../knowledge_base/translations';
-import {
-  DEFAULT_CONVERSATIONS,
-  DEFAULT_PROMPTS,
-  useSettingsUpdater,
-} from '../use_settings_updater/use_settings_updater';
 import { AlertsSettings } from './alerts_settings';
 import { CANCEL, SAVE } from '../translations';
 
@@ -29,26 +27,26 @@ interface AlertSettingsModalProps {
 }
 
 export const AlertsSettingsModal = ({ onClose }: AlertSettingsModalProps) => {
-  const { knowledgeBase, setUpdatedKnowledgeBaseSettings, saveSettings } = useSettingsUpdater(
-    DEFAULT_CONVERSATIONS, // Alerts settings do not require conversations
-    DEFAULT_PROMPTS, // Alerts settings do not require prompts
-    false, // Alerts settings do not require conversations
-    false // Alerts settings do not require prompts
-  );
+  const { assistantTelemetry, knowledgeBase, setKnowledgeBase } = useAssistantContext();
+
+  const { knowledgeBaseSettings, saveKnowledgeBaseSettings, setUpdatedKnowledgeBaseSettings } =
+    useKnowledgeBaseUpdater({ assistantTelemetry, knowledgeBase, setKnowledgeBase });
+
+  const modalTitleId = useGeneratedHtmlId();
 
   const handleSave = useCallback(() => {
-    saveSettings();
+    saveKnowledgeBaseSettings();
     onClose();
-  }, [onClose, saveSettings]);
+  }, [onClose, saveKnowledgeBaseSettings]);
 
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal onClose={onClose} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{ALERTS_LABEL}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>{ALERTS_LABEL}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <AlertsSettings
-          knowledgeBase={knowledgeBase}
+          knowledgeBase={knowledgeBaseSettings}
           setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
         />
       </EuiModalBody>

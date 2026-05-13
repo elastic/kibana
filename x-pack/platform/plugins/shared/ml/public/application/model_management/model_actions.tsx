@@ -22,19 +22,19 @@ import type {
   DFAModelItem,
   TrainedModelItem,
   TrainedModelUIItem,
-} from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
 import {
   isBuiltInModel,
   isDFAModelItem,
   isExistingModel,
   isModelDownloadItem,
   isNLPModelItem,
-} from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useEnabledFeatures, useMlServerInfo } from '../contexts/ml';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { getUserInputModelDeploymentParamsProvider } from './deployment_setup';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../contexts/kibana';
-import { ML_PAGES } from '../../../common/constants/locator';
 import { isTestable } from './test_models';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useCloudCheck } from '../components/node_available_warning/hooks';
@@ -62,7 +62,7 @@ export function useModelActions({
       application: { navigateToUrl },
       overlays,
       docLinks,
-      mlServices: { mlApi, httpService, trainedModelsService },
+      mlServices: { mlApi, httpService, trainedModelsService, mlCapabilities },
       ...startServices
     },
   } = useMlKibana();
@@ -128,7 +128,8 @@ export function useModelActions({
         showNodeInfo,
         nlpSettings,
         httpService,
-        trainedModelsService
+        trainedModelsService,
+        mlCapabilities
       ),
     [
       overlays,
@@ -139,6 +140,7 @@ export function useModelActions({
       nlpSettings,
       httpService,
       trainedModelsService,
+      mlCapabilities,
     ]
   );
 
@@ -154,7 +156,7 @@ export function useModelActions({
             defaultMessage: 'Training data can be viewed when data frame analytics job exists.',
           }
         ),
-        icon: 'visTable',
+        icon: 'table',
         type: 'icon',
         available: (item) => isDFAModelItem(item) && !!item.metadata?.analytics_config?.id,
         enabled: (item) => isDFAModelItem(item) && item.origin_job_exists === true,
@@ -201,6 +203,7 @@ export function useModelActions({
           await navigateToPath(path, false);
         },
       },
+      // @ts-expect-error type icon or button is correct
       {
         name: i18n.translate('xpack.ml.inference.modelsList.startModelDeploymentActionLabel', {
           defaultMessage: 'Start deployment',
@@ -213,7 +216,6 @@ export function useModelActions({
         ),
         'data-test-subj': 'mlModelsTableRowStartDeploymentAction',
         icon: 'play',
-        // @ts-ignore
         type: isMobileLayout ? 'icon' : 'button',
         isPrimary: true,
         color: 'success',
@@ -222,6 +224,13 @@ export function useModelActions({
             (deployment) => deployment.modelId === item.model_id
           );
 
+          if (
+            isModelDownloadItem(item) &&
+            item.state === MODEL_STATE.DOWNLOADED_IN_DIFFERENT_SPACE
+          ) {
+            return false;
+          }
+
           return canStartStopTrainedModels && !isModelBeingDeployed;
         },
         available: (item) => {
@@ -229,7 +238,8 @@ export function useModelActions({
             isNLPModelItem(item) ||
             (canCreateTrainedModels &&
               isModelDownloadItem(item) &&
-              item.state === MODEL_STATE.NOT_DOWNLOADED)
+              (item.state === MODEL_STATE.NOT_DOWNLOADED ||
+                item.state === MODEL_STATE.DOWNLOADED_IN_DIFFERENT_SPACE))
           );
         },
         onClick: async (item) => {
@@ -245,20 +255,7 @@ export function useModelActions({
 
           if (!modelDeploymentParams) return;
 
-          trainedModelsService.startModelDeployment(
-            item.model_id,
-            {
-              priority: modelDeploymentParams.priority!,
-              threads_per_allocation: modelDeploymentParams.threads_per_allocation!,
-              number_of_allocations: modelDeploymentParams.number_of_allocations,
-              deployment_id: modelDeploymentParams.deployment_id,
-            },
-            {
-              ...(modelDeploymentParams.adaptive_allocations?.enabled
-                ? { adaptive_allocations: modelDeploymentParams.adaptive_allocations }
-                : {}),
-            }
-          );
+          trainedModelsService.startModelDeployment(item.model_id, modelDeploymentParams);
         },
       },
       {
@@ -272,7 +269,7 @@ export function useModelActions({
           }
         ),
         'data-test-subj': 'mlModelsTableRowUpdateDeploymentAction',
-        icon: 'documentEdit',
+        icon: 'pencil',
         type: 'icon',
         isPrimary: false,
         available: (item) =>
@@ -296,18 +293,7 @@ export function useModelActions({
 
           if (!deploymentParams) return;
 
-          trainedModelsService.updateModelDeployment(
-            item.model_id,
-            deploymentParams.deployment_id!,
-            {
-              ...(deploymentParams.adaptive_allocations
-                ? { adaptive_allocations: deploymentParams.adaptive_allocations }
-                : {
-                    number_of_allocations: deploymentParams.number_of_allocations!,
-                    adaptive_allocations: { enabled: false },
-                  }),
-            }
-          );
+          trainedModelsService.updateModelDeployment(item.model_id, deploymentParams);
         },
       },
       {
@@ -381,6 +367,7 @@ export function useModelActions({
           return canStartStopTrainedModels;
         },
       },
+      // @ts-expect-error type icon or button is correct
       {
         name: i18n.translate('xpack.ml.inference.modelsList.testModelActionLabel', {
           defaultMessage: 'Test',
@@ -390,7 +377,6 @@ export function useModelActions({
         }),
         'data-test-subj': 'mlModelsTableRowTestAction',
         icon: 'inputOutput',
-        // @ts-ignore
         type: isMobileLayout ? 'icon' : 'button',
         isPrimary: true,
         available: (item) => isTestable(item, true),
@@ -413,7 +399,7 @@ export function useModelActions({
           defaultMessage: 'Analyze data drift',
         }),
         'data-test-subj': 'mlModelsAnalyzeDataDriftAction',
-        icon: 'visTagCloud',
+        icon: 'chartTagCloud',
         type: 'icon',
         isPrimary: true,
         available: (item) => {
@@ -440,6 +426,7 @@ export function useModelActions({
           await navigateToPath(path, false);
         },
       },
+      // @ts-expect-error type icon or button is correct
       {
         name: (model) => {
           return isModelDownloadItem(model) && model.state === MODEL_STATE.DOWNLOADING ? (
@@ -486,7 +473,6 @@ export function useModelActions({
         },
         'data-test-subj': 'mlModelsTableRowDeleteAction',
         icon: 'trash',
-        // @ts-ignore
         type: isMobileLayout ? 'icon' : 'button',
         color: 'danger',
         isPrimary: false,

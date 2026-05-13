@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
+import type { Criteria } from '@elastic/eui';
 import {
   Comparators,
   EuiBasicTable,
   type EuiBasicTableColumn,
   EuiButtonIcon,
   EuiText,
-  Criteria,
 } from '@elastic/eui';
 import { ClusterView } from './cluster_view';
 import { ClusterHealth } from '../clusters_health';
@@ -87,7 +88,7 @@ export function ClustersTable({ clusters }: Props) {
                       defaultMessage: 'Expand table row to view cluster details',
                     })
               }
-              iconType={name in expandedRows ? 'arrowDown' : 'arrowRight'}
+              iconType={name in expandedRows ? 'chevronSingleDown' : 'chevronSingleRight'}
             />
             <EuiText size="xs" color="subdued">
               {name === LOCAL_CLUSTER_KEY
@@ -134,6 +135,9 @@ export function ClustersTable({ clusters }: Props) {
 
   return (
     <EuiBasicTable
+      tableCaption={i18n.translate('inspector.requests.clusters.table.caption', {
+        defaultMessage: 'Cluster details',
+      })}
       items={
         sortField
           ? items.sort(Comparators.property(sortField, Comparators.default(sortDirection)))
@@ -158,6 +162,9 @@ export function ClustersTable({ clusters }: Props) {
       }}
       noItemsMessage={i18n.translate('inspector.requests.clusters.table.noItemsFound', {
         defaultMessage: 'No clusters found',
+      })}
+      cellProps={(item, column) => ({
+        'data-test-subj': `inspectorRequestClustersTableCell-${column.name}-${item.name}`,
       })}
     />
   );

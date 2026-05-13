@@ -35,7 +35,9 @@ const getKibanaLinkForESAsset = (type: ElasticsearchAssetType, id: string): stri
     case 'transform':
       return `/app/management/data/transform?_a=(transform:(queryText:${id}))`;
     case 'ml_model':
-      return `/app/ml/trained_models?_a=(trained_models:(queryText:'model_id:(${id})'))`;
+      return `/app/management/ml/trained_models?_a=(trained_models:(queryText:'model_id:(${id})'))`;
+    case 'esql_view':
+    // TODO Update when feature flag is turned on https://github.com/elastic/kibana/issues/244655
     default:
       return '';
   }
@@ -86,12 +88,14 @@ export async function getBulkAssets(
         }
       }
 
+      const title = types[obj.type]?.management?.getTitle?.(obj) ?? obj.attributes?.title;
+
       return {
         id: obj.id,
         type: obj.type as unknown as ElasticsearchAssetType | KibanaSavedObjectType,
         updatedAt: obj.updated_at,
         attributes: {
-          title: obj.attributes?.title,
+          title,
           description: obj.attributes?.description,
         },
         appLink,

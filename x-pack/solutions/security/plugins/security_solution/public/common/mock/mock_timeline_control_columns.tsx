@@ -28,7 +28,7 @@ const SelectionHeaderCell = () => {
 const SimpleHeaderCell = () => {
   return (
     <div
-      style={{
+      css={{
         fontSize: '12px',
         fontWeight: 600,
         lineHeight: 1.5,
@@ -68,7 +68,7 @@ const TestTrailingColumn = () => {
       button={
         <EuiButtonIcon
           aria-label="show actions"
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           color="text"
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
         />
@@ -77,7 +77,7 @@ const TestTrailingColumn = () => {
       closePopover={() => setIsPopoverOpen(false)}
     >
       <EuiPopoverTitle>{'Actions'}</EuiPopoverTitle>
-      <div style={{ width: 150 }}>
+      <div css={{ width: 150 }}>
         <button type="button" onClick={() => {}}>
           <EuiFlexGroup alignItems="center" component="span" gutterSize="s">
             <EuiFlexItem grow={false}>

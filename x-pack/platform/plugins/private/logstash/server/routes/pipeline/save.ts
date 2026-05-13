@@ -11,19 +11,28 @@ import { i18n } from '@kbn/i18n';
 import { wrapRouteWithLicenseCheck } from '@kbn/licensing-plugin/server';
 import { Pipeline } from '../../models/pipeline';
 import { checkLicense } from '../../lib/check_license';
+import { validatePipelineId } from '../../lib/validate_pipeline_id';
 import type { LogstashPluginRouter } from '../../types';
 
 export function registerPipelineSaveRoute(router: LogstashPluginRouter) {
   router.put(
     {
       path: '/api/logstash/pipeline/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       options: {
         access: 'public',
         summary: `Create a managed Logstash pipeline`,
       },
       validate: {
         params: schema.object({
-          id: schema.string(),
+          id: schema.string({
+            validate: validatePipelineId,
+          }),
         }),
         body: schema.object({
           description: schema.maybe(schema.string()),

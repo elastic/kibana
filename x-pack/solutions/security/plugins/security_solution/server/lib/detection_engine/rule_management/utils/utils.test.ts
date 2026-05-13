@@ -5,32 +5,37 @@
  * 2.0.
  */
 
+jest.mock('../logic/search/get_gap_filtered_rule_ids');
+
 import { partition } from 'lodash/fp';
 import { Readable } from 'stream';
-import type { RuleAction, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { PartialRule } from '@kbn/alerting-plugin/server';
+import type { RuleAction } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { PartialRule, RulesClient } from '@kbn/alerting-plugin/server';
+import { gapFillStatus } from '@kbn/alerting-plugin/common/constants/gap_status';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import type { RuleToImport } from '../../../../../common/api/detection_engine/rule_management';
+import {
+  MAX_RULES_WITH_GAPS_LIMIT_REACHED_WARNING_TYPE,
+  MAX_RULES_WITH_GAPS_TO_FETCH,
+} from '../../../../../common/constants';
 import { getCreateRulesSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
-
+import type { ThreatMapping } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { requestContextMock } from '../../routes/__mocks__';
 import { getOutputRuleAlertForRest } from '../../routes/__mocks__/utils';
 import {
   getIdError,
+  resolveGapPreFilter,
   transformFindAlerts,
   transform,
-  getIdBulkError,
   transformAlertsToRules,
   getTupleDuplicateErrorsAndUniqueRules,
-  getInvalidConnectors,
   swapActionIds,
   migrateLegacyActionsIds,
   migrateLegacyInvestigationFields,
 } from './utils';
 import { getRuleMock } from '../../routes/__mocks__/request_responses';
 import type { PartialFilter } from '../../types';
-import type { BulkError } from '../../routes/utils';
 import { createBulkErrorObject } from '../../routes/utils';
 
 import type { RuleAlertType } from '../../rule_schema';
@@ -38,8 +43,13 @@ import { getMlRuleParams, getQueryRuleParams, getThreatRuleParams } from '../../
 
 import { createPromiseFromRuleImportStream } from '../logic/import/create_promise_from_rule_import_stream';
 import { internalRuleToAPIResponse } from '../logic/detection_rules_client/converters/internal_rule_to_api_response';
+import { getGapFilteredRuleIds } from '../logic/search/get_gap_filtered_rule_ids';
 
 type PromiseFromStreams = RuleToImport | Error;
+
+const mockGetGapFilteredRuleIds = getGapFilteredRuleIds as jest.MockedFunction<
+  typeof getGapFilteredRuleIds
+>;
 
 const createMockImportRule = async (rule: ReturnType<typeof getCreateRulesSchemaMock>) => {
   const ndJsonStream = new Readable({
@@ -293,6 +303,88 @@ describe('utils', () => {
         data: [expected],
       });
     });
+
+    test('includes warnings when provided', () => {
+      const warnings = [
+        {
+          type: 'some_warning_type',
+          message: 'Some warning',
+          actionPath: '',
+        },
+      ];
+      const output = transformFindAlerts(
+        {
+          page: 1,
+          perPage: 1,
+          total: 1,
+          data: [getRuleMock(getQueryRuleParams())],
+        },
+        warnings
+      );
+
+      expect(output.warnings).toEqual(warnings);
+    });
+  });
+
+  describe('resolveGapPreFilter', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    test('returns rule ids and empty warnings when results are not truncated', async () => {
+      mockGetGapFilteredRuleIds.mockResolvedValue({
+        ruleIds: ['rule-a', 'rule-b'],
+        truncated: false,
+      });
+
+      const result = await resolveGapPreFilter({
+        rulesClient: {} as RulesClient,
+        filter: 'alert.attributes.enabled: true',
+        sortField: 'name',
+        sortOrder: 'asc',
+        gapFillStatuses: [gapFillStatus.UNFILLED],
+        gapsRangeStart: '2024-01-01T00:00:00.000Z',
+        gapsRangeEnd: '2024-01-02T00:00:00.000Z',
+        excludedReasons: [],
+        schedulerId: 'scheduler-1',
+      });
+
+      expect(result).toEqual({
+        ruleIds: ['rule-a', 'rule-b'],
+        warnings: [],
+      });
+
+      expect(mockGetGapFilteredRuleIds).toHaveBeenCalledWith(
+        expect.objectContaining({
+          maxRuleIds: MAX_RULES_WITH_GAPS_TO_FETCH,
+          gapRange: {
+            start: '2024-01-01T00:00:00.000Z',
+            end: '2024-01-02T00:00:00.000Z',
+          },
+          gapFillStatuses: [gapFillStatus.UNFILLED],
+        })
+      );
+    });
+
+    test('adds a truncation warning when getGapFilteredRuleIds returns truncated', async () => {
+      mockGetGapFilteredRuleIds.mockResolvedValue({
+        ruleIds: ['rule-a'],
+        truncated: true,
+      });
+
+      const result = await resolveGapPreFilter({
+        rulesClient: {} as RulesClient,
+        filter: undefined,
+        gapFillStatuses: [gapFillStatus.UNFILLED],
+        gapsRangeStart: '2024-01-01T00:00:00.000Z',
+        gapsRangeEnd: '2024-01-02T00:00:00.000Z',
+      });
+
+      expect(result.ruleIds).toEqual(['rule-a']);
+      expect(result.warnings).toHaveLength(1);
+      expect(result.warnings[0].type).toBe(MAX_RULES_WITH_GAPS_LIMIT_REACHED_WARNING_TYPE);
+      expect(result.warnings[0].message).toContain(String(MAX_RULES_WITH_GAPS_TO_FETCH));
+    });
   });
 
   describe('transform', () => {
@@ -306,90 +398,6 @@ describe('utils', () => {
       const unsafeCast = { data: [{ random: 1 }] } as unknown as PartialRule;
       const output = transform(unsafeCast);
       expect(output).toBeNull();
-    });
-  });
-
-  describe('getIdBulkError', () => {
-    test('outputs message about id and rule_id not being found if both are not null', () => {
-      const error = getIdBulkError({ id: '123', ruleId: '456' });
-      const expected: BulkError = {
-        id: '123',
-        rule_id: '456',
-        error: { message: 'id: "123" and rule_id: "456" not found', status_code: 404 },
-      };
-      expect(error).toEqual(expected);
-    });
-
-    test('outputs message about id not being found if only id is defined and ruleId is undefined', () => {
-      const error = getIdBulkError({ id: '123', ruleId: undefined });
-      const expected: BulkError = {
-        id: '123',
-        error: { message: 'id: "123" not found', status_code: 404 },
-      };
-      expect(error).toEqual(expected);
-    });
-
-    test('outputs message about id not being found if only id is defined and ruleId is null', () => {
-      const error = getIdBulkError({ id: '123', ruleId: null });
-      const expected: BulkError = {
-        id: '123',
-        error: { message: 'id: "123" not found', status_code: 404 },
-      };
-      expect(error).toEqual(expected);
-    });
-
-    test('outputs message about ruleId not being found if only ruleId is defined and id is undefined', () => {
-      const error = getIdBulkError({ id: undefined, ruleId: 'rule-id-123' });
-      const expected: BulkError = {
-        rule_id: 'rule-id-123',
-        error: { message: 'rule_id: "rule-id-123" not found', status_code: 404 },
-      };
-      expect(error).toEqual(expected);
-    });
-
-    test('outputs message about ruleId not being found if only ruleId is defined and id is null', () => {
-      const error = getIdBulkError({ id: null, ruleId: 'rule-id-123' });
-      const expected: BulkError = {
-        rule_id: 'rule-id-123',
-        error: { message: 'rule_id: "rule-id-123" not found', status_code: 404 },
-      };
-      expect(error).toEqual(expected);
-    });
-
-    test('outputs message about both being not defined when both are undefined', () => {
-      const error = getIdBulkError({ id: undefined, ruleId: undefined });
-      const expected: BulkError = {
-        rule_id: '(unknown id)',
-        error: { message: 'id or rule_id should have been defined', status_code: 404 },
-      };
-      expect(error).toEqual(expected);
-    });
-
-    test('outputs message about both being not defined when both are null', () => {
-      const error = getIdBulkError({ id: null, ruleId: null });
-      const expected: BulkError = {
-        rule_id: '(unknown id)',
-        error: { message: 'id or rule_id should have been defined', status_code: 404 },
-      };
-      expect(error).toEqual(expected);
-    });
-
-    test('outputs message about both being not defined when id is null and ruleId is undefined', () => {
-      const error = getIdBulkError({ id: null, ruleId: undefined });
-      const expected: BulkError = {
-        rule_id: '(unknown id)',
-        error: { message: 'id or rule_id should have been defined', status_code: 404 },
-      };
-      expect(error).toEqual(expected);
-    });
-
-    test('outputs message about both being not defined when id is undefined and ruleId is null', () => {
-      const error = getIdBulkError({ id: undefined, ruleId: null });
-      const expected: BulkError = {
-        rule_id: '(unknown id)',
-        error: { message: 'id or rule_id should have been defined', status_code: 404 },
-      };
-      expect(error).toEqual(expected);
     });
   });
 
@@ -582,7 +590,7 @@ describe('utils', () => {
       const result = await swapActionIds(mockAction, soClient);
       expect(result instanceof Error).toBeTruthy();
       expect((result as unknown as Error).message).toEqual(
-        'Found two action connectors with originId or _id: some-7.x-id The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/guide/en/kibana/current/sharing-saved-objects.html for more details'
+        'Found two action connectors with originId or _id: some-7.x-id The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/docs/extend/kibana/saved-objects/share for more details'
       );
     });
 
@@ -737,7 +745,7 @@ describe('utils', () => {
             status_code: 409,
             message:
               // error message for when two or more action connectors are found for a single id
-              'Found two action connectors with originId or _id: some-7.x-id The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/guide/en/kibana/current/sharing-saved-objects.html for more details',
+              'Found two action connectors with originId or _id: some-7.x-id The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/docs/extend/kibana/saved-objects/share for more details',
           },
         })
       );
@@ -781,7 +789,7 @@ describe('utils', () => {
           error: {
             status_code: 409,
             message:
-              'Found two action connectors with originId or _id: some-7.x-id The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/guide/en/kibana/current/sharing-saved-objects.html for more details',
+              'Found two action connectors with originId or _id: some-7.x-id The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/docs/extend/kibana/saved-objects/share for more details',
           },
         })
       );
@@ -804,485 +812,6 @@ describe('utils', () => {
         actionsClient
       );
       expect(res).toEqual([{ ...rule, actions: [{ ...mockSystemAction }] }]);
-    });
-  });
-  describe('getInvalidConnectors', () => {
-    beforeEach(() => {
-      clients.actionsClient.getAll.mockReset();
-    });
-
-    test('returns empty errors array and rule array with instance of Syntax Error when imported rule contains parse error', async () => {
-      // This is a string because we have a double "::" below to make an error happen on purpose.
-      const multipartPayload =
-        '{"name"::"Simple Rule Query","description":"Simple Rule Query","risk_score":1,"rule_id":"rule-1","severity":"high","type":"query","query":"user.name: root or user.name: admin"}\n';
-      const ndJsonStream = new Readable({
-        read() {
-          this.push(multipartPayload);
-          this.push(null);
-        },
-      });
-      const [{ rules }] = await createPromiseFromRuleImportStream({
-        stream: ndJsonStream,
-        objectLimit: 1000,
-      });
-
-      clients.actionsClient.getAll.mockResolvedValue([]);
-      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
-      const isInstanceOfError = output[0] instanceof Error;
-
-      expect(isInstanceOfError).toEqual(true);
-      expect(errors.length).toEqual(0);
-    });
-
-    test('creates error with a rule has an action that does not exist within the actions client', async () => {
-      const rule: ReturnType<typeof getCreateRulesSchemaMock> = {
-        ...getCreateRulesSchemaMock('rule-1'),
-        actions: [
-          {
-            group: 'default',
-            id: '123',
-            action_type_id: '456',
-            params: {},
-          },
-        ],
-      };
-      const ndJsonStream = new Readable({
-        read() {
-          this.push(`${JSON.stringify(rule)}\n`);
-          this.push(null);
-        },
-      });
-      const [{ rules }] = await createPromiseFromRuleImportStream({
-        stream: ndJsonStream,
-        objectLimit: 1000,
-      });
-      clients.actionsClient.getAll.mockResolvedValue([]);
-      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
-      expect(output.length).toEqual(0);
-      expect(errors).toEqual<BulkError[]>([
-        {
-          error: {
-            message: '1 connector is missing. Connector id missing is: 123',
-            status_code: 404,
-          },
-          rule_id: 'rule-1',
-        },
-      ]);
-    });
-
-    test('creates output with no errors if 1 rule with an action exists within the actions client', async () => {
-      const rule: ReturnType<typeof getCreateRulesSchemaMock> = {
-        ...getCreateRulesSchemaMock('rule-1'),
-        actions: [
-          {
-            group: 'default',
-            id: '123',
-            action_type_id: '456',
-            params: {},
-          },
-        ],
-      };
-      const ndJsonStream = new Readable({
-        read() {
-          this.push(`${JSON.stringify(rule)}\n`);
-          this.push(null);
-        },
-      });
-      const [{ rules }] = await createPromiseFromRuleImportStream({
-        stream: ndJsonStream,
-        objectLimit: 1000,
-      });
-      clients.actionsClient.getAll.mockResolvedValue([
-        {
-          id: '123',
-          referencedByCount: 1,
-          actionTypeId: 'default',
-          name: 'name',
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
-        },
-      ]);
-      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
-      expect(errors.length).toEqual(0);
-      expect(output.length).toEqual(1);
-      expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule));
-    });
-
-    test('creates output with no errors if 1 rule with 2 actions exists within the actions client', async () => {
-      const rule: ReturnType<typeof getCreateRulesSchemaMock> = {
-        ...getCreateRulesSchemaMock('rule-1'),
-        actions: [
-          {
-            group: 'default',
-            id: '123',
-            action_type_id: '456',
-            params: {},
-          },
-          {
-            group: 'default',
-            id: '789',
-            action_type_id: '101112',
-            params: {},
-          },
-        ],
-      };
-      const ndJsonStream = new Readable({
-        read() {
-          this.push(`${JSON.stringify(rule)}\n`);
-          this.push(null);
-        },
-      });
-      const [{ rules }] = await createPromiseFromRuleImportStream({
-        stream: ndJsonStream,
-        objectLimit: 1000,
-      });
-      clients.actionsClient.getAll.mockResolvedValue([
-        {
-          id: '123',
-          referencedByCount: 1,
-          actionTypeId: 'default',
-          name: 'name',
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
-        },
-        {
-          id: '789',
-          referencedByCount: 1,
-          actionTypeId: 'default',
-          name: 'name',
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
-        },
-      ]);
-      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
-      expect(errors.length).toEqual(0);
-      expect(output.length).toEqual(1);
-      expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule));
-    });
-
-    test('creates output with no errors if 2 rules with 1 action each exists within the actions client', async () => {
-      const rule1: ReturnType<typeof getCreateRulesSchemaMock> = {
-        ...getCreateRulesSchemaMock('rule-1'),
-        actions: [
-          {
-            group: 'default',
-            id: '123',
-            action_type_id: '456',
-            params: {},
-          },
-        ],
-      };
-      const rule2: ReturnType<typeof getCreateRulesSchemaMock> = {
-        ...getCreateRulesSchemaMock('rule-2'),
-        actions: [
-          {
-            group: 'default',
-            id: '123',
-            action_type_id: '456',
-            params: {},
-          },
-        ],
-      };
-      const ndJsonStream = new Readable({
-        read() {
-          this.push(`${JSON.stringify(rule1)}\n`);
-          this.push(`${JSON.stringify(rule2)}\n`);
-          this.push(null);
-        },
-      });
-      const [{ rules }] = await createPromiseFromRuleImportStream({
-        stream: ndJsonStream,
-        objectLimit: 1000,
-      });
-      clients.actionsClient.getAll.mockResolvedValue([
-        {
-          id: '123',
-          referencedByCount: 1,
-          actionTypeId: 'default',
-          name: 'name',
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
-        },
-        {
-          id: '789',
-          referencedByCount: 1,
-          actionTypeId: 'default',
-          name: 'name',
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
-        },
-      ]);
-      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
-      expect(errors.length).toEqual(0);
-      expect(output.length).toEqual(2);
-      expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule1));
-      expect(output[1]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule2));
-    });
-
-    test('creates output with 1 error if 2 rules with 1 action each exists within the actions client but 1 has a nonexistent action', async () => {
-      const rule1: ReturnType<typeof getCreateRulesSchemaMock> = {
-        ...getCreateRulesSchemaMock('rule-1'),
-        actions: [
-          {
-            group: 'default',
-            id: '123',
-            action_type_id: '456',
-            params: {},
-          },
-        ],
-      };
-      const rule2: ReturnType<typeof getCreateRulesSchemaMock> = {
-        ...getCreateRulesSchemaMock('rule-2'),
-        actions: [
-          {
-            group: 'default',
-            id: '123',
-            action_type_id: '456',
-            params: {},
-          },
-          {
-            group: 'default',
-            id: '456', // <--- Non-existent that triggers the error.
-            action_type_id: '456',
-            params: {},
-          },
-        ],
-      };
-      const ndJsonStream = new Readable({
-        read() {
-          this.push(`${JSON.stringify(rule1)}\n`);
-          this.push(`${JSON.stringify(rule2)}\n`);
-          this.push(null);
-        },
-      });
-      const [{ rules }] = await createPromiseFromRuleImportStream({
-        stream: ndJsonStream,
-        objectLimit: 1000,
-      });
-      clients.actionsClient.getAll.mockResolvedValue([
-        {
-          id: '123',
-          referencedByCount: 1,
-          actionTypeId: 'default',
-          name: 'name',
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
-        },
-        {
-          id: '789',
-          referencedByCount: 1,
-          actionTypeId: 'default',
-          name: 'name',
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
-        },
-      ]);
-      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
-      expect(errors.length).toEqual(1);
-      expect(output.length).toEqual(1);
-      expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule1));
-      expect(errors).toEqual<BulkError[]>([
-        {
-          error: {
-            message: '1 connector is missing. Connector id missing is: 456',
-            status_code: 404,
-          },
-          rule_id: 'rule-2',
-        },
-      ]);
-    });
-
-    test('creates output with error if 1 rule with 2 actions but 1 action does not exist within the actions client', async () => {
-      const rule: ReturnType<typeof getCreateRulesSchemaMock> = {
-        ...getCreateRulesSchemaMock('rule-1'),
-        actions: [
-          {
-            group: 'default',
-            id: '123',
-            action_type_id: '456',
-            params: {},
-          },
-          {
-            group: 'default',
-            id: '789',
-            action_type_id: '101112',
-            params: {},
-          },
-          {
-            group: 'default',
-            id: '101112', // <-- Does not exist
-            action_type_id: '101112',
-            params: {},
-          },
-        ],
-      };
-      const ndJsonStream = new Readable({
-        read() {
-          this.push(`${JSON.stringify(rule)}\n`);
-          this.push(null);
-        },
-      });
-      const [{ rules }] = await createPromiseFromRuleImportStream({
-        stream: ndJsonStream,
-        objectLimit: 1000,
-      });
-      clients.actionsClient.getAll.mockResolvedValue([
-        {
-          id: '123',
-          referencedByCount: 1,
-          actionTypeId: 'default',
-          name: 'name',
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
-        },
-        {
-          id: '789',
-          referencedByCount: 1,
-          actionTypeId: 'default',
-          name: 'name',
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
-        },
-      ]);
-      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
-      expect(errors.length).toEqual(1);
-      expect(output.length).toEqual(0);
-      expect(errors).toEqual<BulkError[]>([
-        {
-          error: {
-            message: '1 connector is missing. Connector id missing is: 101112',
-            status_code: 404,
-          },
-          rule_id: 'rule-1',
-        },
-      ]);
-    });
-
-    test('creates output with 2 errors if 3 rules with actions but 1 action does not exist within the actions client', async () => {
-      const rule1: ReturnType<typeof getCreateRulesSchemaMock> = {
-        ...getCreateRulesSchemaMock('rule-1'),
-        actions: [
-          {
-            group: 'default',
-            id: '123',
-            action_type_id: '456',
-            params: {},
-          },
-          {
-            group: 'default',
-            id: '789',
-            action_type_id: '101112',
-            params: {},
-          },
-          {
-            group: 'default',
-            id: '101112', // <-- Does not exist
-            action_type_id: '101112',
-            params: {},
-          },
-        ],
-      };
-      const rule2: ReturnType<typeof getCreateRulesSchemaMock> = {
-        ...getCreateRulesSchemaMock('rule-1'),
-        actions: [
-          {
-            group: 'default',
-            id: '123',
-            action_type_id: '456',
-            params: {},
-          },
-          {
-            group: 'default',
-            id: '789',
-            action_type_id: '101112',
-            params: {},
-          },
-        ],
-      };
-      const rule3: ReturnType<typeof getCreateRulesSchemaMock> = {
-        ...getCreateRulesSchemaMock('rule-1'),
-        actions: [
-          {
-            group: 'default',
-            id: '123',
-            action_type_id: '456',
-            params: {},
-          },
-          {
-            group: 'default',
-            id: '789',
-            action_type_id: '101112',
-            params: {},
-          },
-          {
-            group: 'default',
-            id: '101112', // <-- Does not exist
-            action_type_id: '101112',
-            params: {},
-          },
-        ],
-      };
-      const ndJsonStream = new Readable({
-        read() {
-          this.push(`${JSON.stringify(rule1)}\n`);
-          this.push(`${JSON.stringify(rule2)}\n`);
-          this.push(`${JSON.stringify(rule3)}\n`);
-          this.push(null);
-        },
-      });
-      const [{ rules }] = await createPromiseFromRuleImportStream({
-        stream: ndJsonStream,
-        objectLimit: 1000,
-      });
-      clients.actionsClient.getAll.mockResolvedValue([
-        {
-          id: '123',
-          referencedByCount: 1,
-          actionTypeId: 'default',
-          name: 'name',
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
-        },
-        {
-          id: '789',
-          referencedByCount: 1,
-          actionTypeId: 'default',
-          name: 'name',
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
-        },
-      ]);
-      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
-      expect(errors.length).toEqual(2);
-      expect(output.length).toEqual(1);
-      expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule2));
-      expect(errors).toEqual<BulkError[]>([
-        {
-          error: {
-            message: '1 connector is missing. Connector id missing is: 101112',
-            status_code: 404,
-          },
-          rule_id: 'rule-1',
-        },
-        {
-          error: {
-            message: '1 connector is missing. Connector id missing is: 101112',
-            status_code: 404,
-          },
-          rule_id: 'rule-1',
-        },
-      ]);
     });
   });
 

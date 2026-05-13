@@ -11,14 +11,14 @@ import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { get, mergeWith } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 
-import { FormHook, FieldHook, FormData, FieldsMap, FormConfig } from '../types';
+import type { FormHook, FieldHook, FormData, FieldsMap, FormConfig } from '../types';
+import type { Subscription } from '../lib';
 import {
   mapFormFields,
   unflattenObject,
   flattenObject,
   stripOutUndefinedValues,
   Subject,
-  Subscription,
 } from '../lib';
 import { createArrayItem, getInternalArrayFieldPath } from '../components/use_array';
 
@@ -28,10 +28,18 @@ const DEFAULT_OPTIONS = {
   stripUnsetFields: false,
 };
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export interface UseFormReturn<T extends FormData, I extends FormData> {
   form: FormHook<T, I>;
 }
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export function useForm<T extends FormData = FormData, I extends FormData = T>(
   formConfig?: FormConfig<T, I>
 ): UseFormReturn<T, I> {

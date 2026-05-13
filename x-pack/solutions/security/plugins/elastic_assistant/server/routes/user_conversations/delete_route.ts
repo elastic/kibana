@@ -12,7 +12,7 @@ import {
   API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { ElasticAssistantPluginRouter } from '../../types';
+import type { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { performChecks } from '../helpers';
 
@@ -42,7 +42,7 @@ export const deleteConversationRoute = (router: ElasticAssistantPluginRouter) =>
           const { id } = request.params;
 
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
-          const checkResponse = performChecks({
+          const checkResponse = await performChecks({
             context: ctx,
             request,
             response,

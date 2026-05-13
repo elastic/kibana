@@ -10,10 +10,10 @@
 import React, { useState } from 'react';
 
 import { EuiButton, EuiButtonGroup, EuiFormRow, EuiPopover, EuiRange } from '@elastic/eui';
-import { GridSettings } from '@kbn/grid-layout';
+import type { GridSettings } from '@kbn/grid-layout';
 import { i18n } from '@kbn/i18n';
-import { ViewMode } from '@kbn/presentation-publishing';
-import { MockDashboardApi } from './types';
+import type { ViewMode } from '@kbn/presentation-publishing';
+import type { MockDashboardApi } from './types';
 
 export const GridLayoutOptions = ({
   viewMode,
@@ -43,6 +43,9 @@ export const GridLayoutOptions = ({
       }
       isOpen={isSettingsPopoverOpen}
       closePopover={() => setIsSettingsPopoverOpen(false)}
+      aria-label={i18n.translate('examples.gridExample.settingsPopover.ariaLabel', {
+        defaultMessage: 'Layout settings',
+      })}
     >
       <>
         <EuiFormRow

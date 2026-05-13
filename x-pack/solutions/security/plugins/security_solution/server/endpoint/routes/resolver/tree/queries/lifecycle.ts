@@ -12,6 +12,7 @@ import type { NodeID } from '../utils';
 import { validIDs } from '../utils';
 import type { ResolverQueryParams } from './base';
 import { BaseResolverQuery } from './base';
+import { createEventKindFilter } from '../../utils/event_kind_filters';
 
 /**
  * Builds a query for retrieving descendants of a node.
@@ -72,9 +73,7 @@ export class LifecycleQuery extends BaseResolverQuery {
             {
               terms: { 'event.category': ['process'] },
             },
-            {
-              terms: { 'event.kind': ['event', 'alert'] },
-            },
+            createEventKindFilter(),
           ],
         },
       },

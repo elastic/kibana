@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/main/state_management/discover_app_state_container';
-import type { InternalState } from '@kbn/discover-plugin/public/application/main/state_management/discover_internal_state_container';
+import type {
+  DiscoverInternalState,
+  DiscoverAppState,
+} from '@kbn/discover-plugin/public/application/main/state_management/redux';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 
 export interface SecuritySolutionDiscoverState {
   app: DiscoverAppState | undefined;
-  internal: InternalState | undefined;
+  internal: DiscoverInternalState | undefined;
   savedSearch: SavedSearch | undefined;
 }
 

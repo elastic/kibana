@@ -6,20 +6,21 @@
  */
 
 import { EuiButton, EuiForm } from '@elastic/eui';
-import React, { FormEventHandler } from 'react';
+import type { FormEventHandler } from 'react';
+import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QuestionInput } from './question_input';
 
 const mockButton = (
-  <EuiButton data-test="btn" className="btn" onClick={() => {}}>
+  <EuiButton data-test-subj="btn" className="btn" onClick={() => {}}>
     Send
   </EuiButton>
 );
 
 const handleOnSubmitMock = jest.fn();
 
-const MockChatForm = ({
+const MockPlaygroundForm = ({
   children,
   handleSubmit,
 }: {
@@ -40,9 +41,9 @@ describe('Question Input', () => {
     it('correctly', () => {
       render(
         <IntlProvider locale="en">
-          <MockChatForm handleSubmit={handleOnSubmitMock}>
+          <MockPlaygroundForm handleSubmit={handleOnSubmitMock}>
             <QuestionInput value="" onChange={() => {}} button={mockButton} isDisabled={false} />
-          </MockChatForm>
+          </MockPlaygroundForm>
         </IntlProvider>
       );
 
@@ -52,14 +53,14 @@ describe('Question Input', () => {
     it('disabled', () => {
       render(
         <IntlProvider locale="en">
-          <MockChatForm handleSubmit={handleOnSubmitMock}>
+          <MockPlaygroundForm handleSubmit={handleOnSubmitMock}>
             <QuestionInput
               value="my question"
               onChange={() => {}}
               button={mockButton}
               isDisabled={true}
             />
-          </MockChatForm>
+          </MockPlaygroundForm>
         </IntlProvider>
       );
 
@@ -69,14 +70,14 @@ describe('Question Input', () => {
     it('with value', () => {
       render(
         <IntlProvider locale="en">
-          <MockChatForm handleSubmit={handleOnSubmitMock}>
+          <MockPlaygroundForm handleSubmit={handleOnSubmitMock}>
             <QuestionInput
               value="my question"
               onChange={() => {}}
               button={mockButton}
               isDisabled={false}
             />
-          </MockChatForm>
+          </MockPlaygroundForm>
         </IntlProvider>
       );
 
@@ -86,9 +87,9 @@ describe('Question Input', () => {
   it('submits form', () => {
     render(
       <IntlProvider locale="en">
-        <MockChatForm handleSubmit={handleOnSubmitMock}>
+        <MockPlaygroundForm handleSubmit={handleOnSubmitMock}>
           <QuestionInput value="" onChange={() => {}} button={mockButton} isDisabled={false} />
-        </MockChatForm>
+        </MockPlaygroundForm>
       </IntlProvider>
     );
 

@@ -15,6 +15,8 @@
       "label": "ServerlessPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+      "lineNumber": 19,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -29,6 +31,8 @@
       "label": "ServerlessPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+      "lineNumber": 21,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -49,6 +53,8 @@
             "> | undefined) => void"
           ],
           "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+          "lineNumber": 22,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -66,6 +72,8 @@
                 "[]"
               ],
               "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+              "lineNumber": 23,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -83,41 +91,12 @@
                 "> | undefined"
               ],
               "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+              "lineNumber": 24,
+              "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "Partial",
               "trackAdoption": false,
               "isRequired": false
-            }
-          ],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "serverless",
-          "id": "def-public.ServerlessPluginStart.setProjectHome",
-          "type": "Function",
-          "tags": [],
-          "label": "setProjectHome",
-          "description": [],
-          "signature": [
-            "(homeHref: string) => void"
-          ],
-          "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "serverless",
-              "id": "def-public.ServerlessPluginStart.setProjectHome.$1",
-              "type": "string",
-              "tags": [],
-              "label": "homeHref",
-              "description": [],
-              "signature": [
-                "string"
-              ],
-              "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
             }
           ],
           "returnComment": []
@@ -130,25 +109,17 @@
           "label": "initNavigation",
           "description": [],
           "signature": [
-            "(id: ",
-            "SolutionId",
-            ", navigationTree$: ",
+            "(id: \"security\" | \"es\" | \"workplaceai\" | \"vectordb\" | \"oblt\", navigationTree$: ",
             "Observable",
             "<",
             "NavigationTreeDefinition",
             "<",
             "AppDeepLinkId",
-            ", string, string>>, config?: { dataTestSubj?: string | undefined; panelContentProvider?: ",
-            {
-              "pluginId": "@kbn/shared-ux-chrome-navigation",
-              "scope": "public",
-              "docId": "kibKbnSharedUxChromeNavigationPluginApi",
-              "section": "def-public.ContentProvider",
-              "text": "ContentProvider"
-            },
-            " | undefined; } | undefined) => void"
+            ", string, string>>) => void"
           ],
           "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+          "lineNumber": 26,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -160,10 +131,13 @@
               "label": "id",
               "description": [],
               "signature": [
-                "SolutionId"
+                "\"security\" | \"es\" | \"workplaceai\" | \"vectordb\" | \"oblt\""
               ],
               "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+              "lineNumber": 26,
+              "columnNumber": 18,
               "deprecated": false,
+              "docsReferencedTypeName": "SolutionId",
               "trackAdoption": false,
               "isRequired": true
             },
@@ -183,92 +157,10 @@
                 ", string, string>>"
               ],
               "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+              "lineNumber": 26,
+              "columnNumber": 34,
               "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            },
-            {
-              "parentPluginId": "serverless",
-              "id": "def-public.ServerlessPluginStart.initNavigation.$3",
-              "type": "Object",
-              "tags": [],
-              "label": "config",
-              "description": [],
-              "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "children": [
-                {
-                  "parentPluginId": "serverless",
-                  "id": "def-public.ServerlessPluginStart.initNavigation.$3.dataTestSubj",
-                  "type": "string",
-                  "tags": [],
-                  "label": "dataTestSubj",
-                  "description": [],
-                  "signature": [
-                    "string | undefined"
-                  ],
-                  "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
-                  "deprecated": false,
-                  "trackAdoption": false
-                },
-                {
-                  "parentPluginId": "serverless",
-                  "id": "def-public.ServerlessPluginStart.initNavigation.$3.panelContentProvider",
-                  "type": "Function",
-                  "tags": [],
-                  "label": "panelContentProvider",
-                  "description": [],
-                  "signature": [
-                    {
-                      "pluginId": "@kbn/shared-ux-chrome-navigation",
-                      "scope": "public",
-                      "docId": "kibKbnSharedUxChromeNavigationPluginApi",
-                      "section": "def-public.ContentProvider",
-                      "text": "ContentProvider"
-                    },
-                    " | undefined"
-                  ],
-                  "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
-                  "deprecated": false,
-                  "trackAdoption": false
-                }
-              ]
-            }
-          ],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "serverless",
-          "id": "def-public.ServerlessPluginStart.setSideNavComponentDeprecated",
-          "type": "Function",
-          "tags": [
-            "deprecated"
-          ],
-          "label": "setSideNavComponentDeprecated",
-          "description": [],
-          "signature": [
-            "(navigation: ",
-            "SideNavComponent",
-            ") => void"
-          ],
-          "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
-          "deprecated": true,
-          "trackAdoption": false,
-          "references": [],
-          "children": [
-            {
-              "parentPluginId": "serverless",
-              "id": "def-public.ServerlessPluginStart.setSideNavComponentDeprecated.$1",
-              "type": "CompoundType",
-              "tags": [],
-              "label": "navigation",
-              "description": [],
-              "signature": [
-                "SideNavComponent"
-              ],
-              "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
-              "deprecated": false,
+              "docsReferencedTypeName": "Observable",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -277,10 +169,10 @@
         },
         {
           "parentPluginId": "serverless",
-          "id": "def-public.ServerlessPluginStart.getNavigationCards",
+          "id": "def-public.ServerlessPluginStart.getNavigationCards$",
           "type": "Function",
           "tags": [],
-          "label": "getNavigationCards",
+          "label": "getNavigationCards$",
           "description": [],
           "signature": [
             "(roleManagementEnabled?: boolean | undefined, extendCardNavDefinitions?: Record<string, ",
@@ -291,7 +183,9 @@
               "section": "def-common.CardNavExtensionDefinition",
               "text": "CardNavExtensionDefinition"
             },
-            "> | undefined) => Record<string, ",
+            "> | undefined) => ",
+            "Observable",
+            "<Record<string, ",
             {
               "pluginId": "@kbn/management-cards-navigation",
               "scope": "common",
@@ -299,15 +193,17 @@
               "section": "def-common.CardNavExtensionDefinition",
               "text": "CardNavExtensionDefinition"
             },
-            "> | undefined"
+            "> | undefined>"
           ],
           "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+          "lineNumber": 27,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "serverless",
-              "id": "def-public.ServerlessPluginStart.getNavigationCards.$1",
+              "id": "def-public.ServerlessPluginStart.getNavigationCards$.$1",
               "type": "CompoundType",
               "tags": [],
               "label": "roleManagementEnabled",
@@ -316,13 +212,15 @@
                 "boolean | undefined"
               ],
               "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+              "lineNumber": 28,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
             },
             {
               "parentPluginId": "serverless",
-              "id": "def-public.ServerlessPluginStart.getNavigationCards.$2",
+              "id": "def-public.ServerlessPluginStart.getNavigationCards$.$2",
               "type": "Object",
               "tags": [],
               "label": "extendCardNavDefinitions",
@@ -339,7 +237,10 @@
                 "> | undefined"
               ],
               "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+              "lineNumber": 29,
+              "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "Record",
               "trackAdoption": false,
               "isRequired": false
             }
@@ -366,6 +267,8 @@
       "label": "ServerlessServerSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/serverless/server/types.ts",
+      "lineNumber": 8,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -380,6 +283,8 @@
             "(keys: string[]) => void"
           ],
           "path": "x-pack/platform/plugins/shared/serverless/server/types.ts",
+          "lineNumber": 9,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -394,6 +299,8 @@
                 "string[]"
               ],
               "path": "x-pack/platform/plugins/shared/serverless/server/types.ts",
+              "lineNumber": 9,
+              "columnNumber": 24,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -413,6 +320,8 @@
       "label": "ServerlessServerStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/serverless/server/types.ts",
+      "lineNumber": 13,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -437,6 +346,8 @@
           "\"serverless\""
         ],
         "path": "x-pack/platform/plugins/shared/serverless/common/index.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -452,6 +363,8 @@
           "\"serverless\""
         ],
         "path": "x-pack/platform/plugins/shared/serverless/common/index.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

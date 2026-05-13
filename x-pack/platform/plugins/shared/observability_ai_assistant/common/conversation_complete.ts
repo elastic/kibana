@@ -6,6 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ServerSentEventBase } from '@kbn/sse-utils';
+import type { DeanonymizationInput, DeanonymizationOutput } from './types';
 import { type Message } from './types';
 
 export enum StreamingChatResponseEventType {
@@ -18,27 +20,21 @@ export enum StreamingChatResponseEventType {
   BufferFlush = 'bufferFlush',
 }
 
-type StreamingChatResponseEventBase<
-  TEventType extends StreamingChatResponseEventType,
-  TData extends {}
-> = {
-  type: TEventType;
-} & TData;
-
-type BaseChatCompletionEvent<TType extends StreamingChatResponseEventType> =
-  StreamingChatResponseEventBase<
-    TType,
-    {
-      id: string;
-      message: {
-        content?: string;
-        function_call?: {
-          name?: string;
-          arguments?: string;
-        };
+type BaseChatCompletionEvent<TType extends StreamingChatResponseEventType> = ServerSentEventBase<
+  TType,
+  {
+    id: string;
+    message: {
+      content?: string;
+      function_call?: {
+        name?: string;
+        arguments?: string;
       };
-    }
-  >;
+    };
+    deanonymized_input?: DeanonymizationInput;
+    deanonymized_output?: DeanonymizationOutput;
+  }
+>;
 
 export type ChatCompletionChunkEvent =
   BaseChatCompletionEvent<StreamingChatResponseEventType.ChatCompletionChunk>;
@@ -46,7 +42,7 @@ export type ChatCompletionChunkEvent =
 export type ChatCompletionMessageEvent =
   BaseChatCompletionEvent<StreamingChatResponseEventType.ChatCompletionMessage>;
 
-export type ConversationCreateEvent = StreamingChatResponseEventBase<
+export type ConversationCreateEvent = ServerSentEventBase<
   StreamingChatResponseEventType.ConversationCreate,
   {
     conversation: {
@@ -57,7 +53,7 @@ export type ConversationCreateEvent = StreamingChatResponseEventBase<
   }
 >;
 
-export type ConversationUpdateEvent = StreamingChatResponseEventBase<
+export type ConversationUpdateEvent = ServerSentEventBase<
   StreamingChatResponseEventType.ConversationUpdate,
   {
     conversation: {
@@ -68,12 +64,15 @@ export type ConversationUpdateEvent = StreamingChatResponseEventBase<
   }
 >;
 
-export type MessageAddEvent = StreamingChatResponseEventBase<
+export type MessageAddEvent = ServerSentEventBase<
   StreamingChatResponseEventType.MessageAdd,
   { message: Message; id: string }
->;
+> & {
+  deanonymized_input?: DeanonymizationInput;
+  deanonymized_output?: DeanonymizationOutput;
+};
 
-export type ChatCompletionErrorEvent = StreamingChatResponseEventBase<
+export type ChatCompletionErrorEvent = ServerSentEventBase<
   StreamingChatResponseEventType.ChatCompletionError,
   {
     error: {
@@ -85,7 +84,7 @@ export type ChatCompletionErrorEvent = StreamingChatResponseEventBase<
   }
 >;
 
-export type BufferFlushEvent = StreamingChatResponseEventBase<
+export type BufferFlushEvent = ServerSentEventBase<
   StreamingChatResponseEventType.BufferFlush,
   {
     data?: string;
@@ -113,7 +112,6 @@ export enum ChatCompletionErrorCode {
   InternalError = 'internalError',
   NotFoundError = 'notFoundError',
   TokenLimitReachedError = 'tokenLimitReachedError',
-  FunctionNotFoundError = 'functionNotFoundError',
   FunctionLimitExceededError = 'functionLimitExceededError',
 }
 
@@ -123,9 +121,6 @@ interface ErrorMetaAttributes {
   [ChatCompletionErrorCode.TokenLimitReachedError]: {
     tokenLimit?: number;
     tokenCount?: number;
-  };
-  [ChatCompletionErrorCode.FunctionNotFoundError]: {
-    name: string;
   };
   [ChatCompletionErrorCode.FunctionLimitExceededError]: {};
 }
@@ -171,13 +166,6 @@ export function createInternalServerError(
   return new ChatCompletionError(ChatCompletionErrorCode.InternalError, originalErrorMessage);
 }
 
-export function createFunctionNotFoundError(name: string) {
-  return new ChatCompletionError(
-    ChatCompletionErrorCode.FunctionNotFoundError,
-    `Function ${name} called but was not available`
-  );
-}
-
 export function createFunctionLimitExceededError() {
   return new ChatCompletionError(
     ChatCompletionErrorCode.FunctionLimitExceededError,
@@ -191,15 +179,6 @@ export function isTokenLimitReachedError(
   return (
     error instanceof ChatCompletionError &&
     error.code === ChatCompletionErrorCode.TokenLimitReachedError
-  );
-}
-
-export function isFunctionNotFoundError(
-  error: Error
-): error is ChatCompletionError<ChatCompletionErrorCode.FunctionNotFoundError> {
-  return (
-    error instanceof ChatCompletionError &&
-    error.code === ChatCompletionErrorCode.FunctionNotFoundError
   );
 }
 

@@ -9,8 +9,8 @@ import axios from 'axios';
 
 import { createExternalService } from './service';
 import { request, createAxiosResponse } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { ExternalService } from './types';
-import { Logger } from '@kbn/core/server';
+import type { ExternalService } from './types';
+import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
@@ -18,10 +18,13 @@ import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 interface ResponseError extends Error {
-  response?: { data: { errors: Record<string, string>; errorMessages?: string[] } };
+  response?: {
+    status?: number;
+    data: { errors: Record<string, string>; errorMessages?: string[] };
+  };
 }
 
-jest.mock('axios');
+jest.mock('axios', () => jest.requireActual<typeof import('axios')>('axios'));
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
   const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
   return {
@@ -997,7 +1000,7 @@ describe('Jira service', () => {
         logger,
         method: 'get',
         configurationUtilities,
-        url: `https://coolsite.net/rest/api/2/search?jql=project%3D%22CK%22%20and%20summary%20~%22Test%20title%22`,
+        url: `https://coolsite.net/rest/api/2/search/jql?jql=project%3D%22CK%22%20and%20summary%20~%22Test%20title%22&fields=summary,key`,
         connectorUsageCollector,
       });
     });
@@ -1024,7 +1027,7 @@ describe('Jira service', () => {
         logger,
         method: 'get',
         configurationUtilities,
-        url: `https://coolsite.net/rest/api/2/search?jql=project%3D%22CK%22%20and%20summary%20~%22%5C%5C%5Bth%5C%5C!s%5C%5C%5Eis%5C%5C(%5C%5C)a%5C%5C-te%5C%5C%2Bst%5C%5C-%5C%5C%7B%5C%5C~is%5C%5C*s%5C%5C%26ue%5C%5C%3For%5C%5C%7Cand%5C%5Cbye%5C%5C%3A%5C%5C%7D%5C%5C%5D%5C%5C%7D%5C%5C%5D%22`,
+        url: `https://coolsite.net/rest/api/2/search/jql?jql=project%3D%22CK%22%20and%20summary%20~%22%5C%5C%5Bth%5C%5C!s%5C%5C%5Eis%5C%5C(%5C%5C)a%5C%5C-te%5C%5C%2Bst%5C%5C-%5C%5C%7B%5C%5C~is%5C%5C*s%5C%5C%26ue%5C%5C%3For%5C%5C%7Cand%5C%5Cbye%5C%5C%3A%5C%5C%7D%5C%5C%5D%5C%5C%7D%5C%5C%5D%22&fields=summary,key`,
         connectorUsageCollector,
       });
     });

@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export * from './affected-packages';
 export * from './agent_images';
 export * from './buildkite';
 export * as CiStats from './ci-stats';
 export * from './github';
 export * as TestFailures from './test-failures';
 export * from './utils';
+export * from './pr_labels';
+export * from './scout';

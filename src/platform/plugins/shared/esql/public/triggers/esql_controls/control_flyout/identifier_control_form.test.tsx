@@ -9,20 +9,45 @@
 
 import React from 'react';
 import { render, within, fireEvent } from '@testing-library/react';
-import { monaco } from '@kbn/monaco';
+import { coreMock } from '@kbn/core/public/mocks';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { monaco } from '@kbn/code-editor';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
-import { IdentifierControlForm } from './identifier_control_form';
-import { ESQLControlState, EsqlControlType } from '../types';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import { ControlTriggerSource, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
+import { ESQLControlsFlyout } from '.';
+import { ESQLEditorTelemetryService } from '@kbn/esql-editor';
+import {
+  DEFAULT_ESQL_OPTIONS_LIST_STATE,
+  DEFAULT_PINNED_CONTROL_STATE,
+} from '@kbn/controls-constants';
 
 jest.mock('@kbn/esql-utils', () => ({
   getESQLQueryColumnsRaw: jest.fn().mockResolvedValue([{ name: 'column1' }, { name: 'column2' }]),
+  getValuesFromQueryField: jest.fn().mockReturnValue('field'),
 }));
 
-describe('IdentifierControlForm', () => {
-  const dataMock = dataPluginMock.createStartContract();
-  const searchMock = dataMock.search.search;
+const core = coreMock.createStart();
+const defaultProps = {
+  initialVariableType: ESQLVariableType.FIELDS,
+  queryString: 'FROM foo | WHERE field ==',
+  onSaveControl: jest.fn(),
+  closeFlyout: jest.fn(),
+  onCancelControl: jest.fn(),
+  search: dataPluginMock.createStartContract().search.search,
+  cursorPosition: { column: 19, lineNumber: 1 } as monaco.Position,
+  esqlVariables: [],
+  ariaLabelledBy: 'esqlControlFlyoutTitle',
+  telemetryTriggerSource: ControlTriggerSource.QUESTION_MARK,
+  telemetryService: new ESQLEditorTelemetryService(core.analytics),
+};
 
+const services = {
+  core: coreMock.createStart(),
+};
+
+describe('IdentifierControlForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -30,25 +55,19 @@ describe('IdentifierControlForm', () => {
   describe('Field type', () => {
     it('should default correctly if no initial state is given', async () => {
       const { findByTestId, findByTitle } = render(
-        <IdentifierControlForm
-          variableType={ESQLVariableType.FIELDS}
-          queryString="FROM foo | STATS BY"
-          onCreateControl={jest.fn()}
-          closeFlyout={jest.fn()}
-          onEditControl={jest.fn()}
-          search={searchMock}
-          cursorPosition={{ column: 19, lineNumber: 1 } as monaco.Position}
-          esqlVariables={[]}
-        />
+        <IntlProvider locale="en">
+          <KibanaContextProvider services={services}>
+            <ESQLControlsFlyout {...defaultProps} />
+          </KibanaContextProvider>
+        </IntlProvider>
       );
       // control type dropdown should be rendered and default to 'STATIC_VALUES'
       // no need to test further as the control type is disabled
       expect(await findByTestId('esqlControlTypeDropdown')).toBeInTheDocument();
-      const controlTypeInputPopover = await findByTestId('esqlControlTypeInputPopover');
-      expect(within(controlTypeInputPopover).getByRole('combobox')).toHaveValue(`Static values`);
+      expect(await findByTestId('esqlControlTypeDropdown')).toHaveTextContent(`Static values`);
 
       // variable name input should be rendered and with the default value
-      expect(await findByTestId('esqlVariableName')).toHaveValue('field');
+      expect(await findByTestId('esqlVariableName')).toHaveValue('??field');
 
       // fields dropdown should be rendered with available fields column1 and column2
       const fieldsOptionsDropdown = await findByTestId('esqlIdentifiersOptions');
@@ -61,33 +80,41 @@ describe('IdentifierControlForm', () => {
 
       // variable label input should be rendered and with the default value (empty)
       expect(await findByTestId('esqlControlLabel')).toHaveValue('');
+    });
 
-      // control width dropdown should be rendered and default to 'MEDIUM'
-      expect(await findByTestId('esqlControlMinimumWidth')).toBeInTheDocument();
-      const pressedWidth = within(await findByTestId('esqlControlMinimumWidth')).getByTitle(
-        'Medium'
+    it('should be able to change in value type', async () => {
+      const { findByTestId } = render(
+        <IntlProvider locale="en">
+          <KibanaContextProvider services={services}>
+            <ESQLControlsFlyout {...defaultProps} queryString="FROM foo | STATS BY" />
+          </KibanaContextProvider>
+        </IntlProvider>
       );
-      expect(pressedWidth).toHaveAttribute('aria-pressed', 'true');
+      // variable name input should be rendered and with the default value
+      expect(await findByTestId('esqlVariableName')).toHaveValue('??field');
+      // change the variable name to ?value
+      const variableNameInput = await findByTestId('esqlVariableName');
+      fireEvent.change(variableNameInput, { target: { value: '?value' } });
 
-      // control grow switch should be rendered and default to 'false'
-      expect(await findByTestId('esqlControlGrow')).toBeInTheDocument();
-      const growSwitch = await findByTestId('esqlControlGrow');
-      expect(growSwitch).not.toBeChecked();
+      expect(await findByTestId('esqlControlTypeDropdown')).toBeInTheDocument();
+      expect(await findByTestId('esqlControlTypeDropdown')).toHaveTextContent(`Static values`);
+      // values dropdown should be rendered
+      const valuesOptionsDropdown = await findByTestId('esqlValuesOptions');
+      expect(valuesOptionsDropdown).toBeInTheDocument();
     });
 
     it('should call the onCreateControl callback, if no initialState is given', async () => {
       const onCreateControlSpy = jest.fn();
       const { findByTestId, findByTitle } = render(
-        <IdentifierControlForm
-          variableType={ESQLVariableType.FIELDS}
-          queryString="FROM foo | STATS BY"
-          onCreateControl={onCreateControlSpy}
-          closeFlyout={jest.fn()}
-          onEditControl={jest.fn()}
-          search={searchMock}
-          cursorPosition={{ column: 19, lineNumber: 1 } as monaco.Position}
-          esqlVariables={[]}
-        />
+        <IntlProvider locale="en">
+          <KibanaContextProvider services={services}>
+            <ESQLControlsFlyout
+              {...defaultProps}
+              queryString="FROM foo | STATS BY"
+              onSaveControl={onCreateControlSpy}
+            />
+          </KibanaContextProvider>
+        </IntlProvider>
       );
 
       // select the first field
@@ -104,17 +131,15 @@ describe('IdentifierControlForm', () => {
     it('should call the onCancelControl callback, if Cancel button is clicked', async () => {
       const onCancelControlSpy = jest.fn();
       const { findByTestId } = render(
-        <IdentifierControlForm
-          variableType={ESQLVariableType.FIELDS}
-          queryString="FROM foo | STATS BY"
-          onCreateControl={jest.fn()}
-          onCancelControl={onCancelControlSpy}
-          closeFlyout={jest.fn()}
-          onEditControl={jest.fn()}
-          search={searchMock}
-          cursorPosition={{ column: 19, lineNumber: 1 } as monaco.Position}
-          esqlVariables={[]}
-        />
+        <IntlProvider locale="en">
+          <KibanaContextProvider services={services}>
+            <ESQLControlsFlyout
+              {...defaultProps}
+              queryString="FROM foo | STATS BY"
+              onCancelControl={onCancelControlSpy}
+            />
+          </KibanaContextProvider>
+        </IntlProvider>
       );
       // click on the cancel button
       fireEvent.click(await findByTestId('cancelEsqlControlsFlyoutButton'));
@@ -123,31 +148,25 @@ describe('IdentifierControlForm', () => {
 
     it('should default correctly if initial state is given', async () => {
       const initialState = {
-        grow: true,
-        width: 'small',
+        ...DEFAULT_PINNED_CONTROL_STATE,
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
         title: 'my control',
-        availableOptions: ['column2'],
-        selectedOptions: ['column2'],
-        variableName: 'myField',
-        variableType: ESQLVariableType.FIELDS,
-        esqlQuery: 'FROM foo | STATS BY',
-        controlType: EsqlControlType.STATIC_VALUES,
-      } as ESQLControlState;
+        available_options: ['column2'],
+        selected_options: ['column2'],
+        variable_name: 'myField',
+        variable_type: ESQLVariableType.FIELDS,
+        esql_query: 'FROM foo | STATS BY',
+        control_type: EsqlControlType.STATIC_VALUES,
+      } as OptionsListESQLControlState;
       const { findByTestId } = render(
-        <IdentifierControlForm
-          variableType={ESQLVariableType.FIELDS}
-          queryString="FROM foo | STATS BY"
-          onCreateControl={jest.fn()}
-          closeFlyout={jest.fn()}
-          onEditControl={jest.fn()}
-          search={searchMock}
-          cursorPosition={{ column: 19, lineNumber: 1 } as monaco.Position}
-          initialState={initialState}
-          esqlVariables={[]}
-        />
+        <IntlProvider locale="en">
+          <KibanaContextProvider services={services}>
+            <ESQLControlsFlyout {...defaultProps} initialState={initialState} />
+          </KibanaContextProvider>
+        </IntlProvider>
       );
       // variable name input should be rendered and with the default value
-      expect(await findByTestId('esqlVariableName')).toHaveValue('myField');
+      expect(await findByTestId('esqlVariableName')).toHaveValue('??myField');
 
       // fields dropdown should be rendered with column2 selected
       const fieldsOptionsDropdown = await findByTestId('esqlIdentifiersOptions');
@@ -156,45 +175,32 @@ describe('IdentifierControlForm', () => {
 
       // variable label input should be rendered and with the default value (my control)
       expect(await findByTestId('esqlControlLabel')).toHaveValue('my control');
-
-      // control width dropdown should be rendered and default to 'MEDIUM'
-      expect(await findByTestId('esqlControlMinimumWidth')).toBeInTheDocument();
-      const pressedWidth = within(await findByTestId('esqlControlMinimumWidth')).getByTitle(
-        'Small'
-      );
-      expect(pressedWidth).toHaveAttribute('aria-pressed', 'true');
-
-      // control grow switch should be rendered and default to 'false'
-      expect(await findByTestId('esqlControlGrow')).toBeInTheDocument();
-      const growSwitch = await findByTestId('esqlControlGrow');
-      expect(growSwitch).toBeChecked();
     });
 
     it('should call the onEditControl callback, if initialState is given', async () => {
       const initialState = {
-        grow: true,
-        width: 'small',
+        ...DEFAULT_PINNED_CONTROL_STATE,
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
         title: 'my control',
-        availableOptions: ['column2'],
-        selectedOptions: ['column2'],
-        variableName: 'myField',
-        variableType: ESQLVariableType.FIELDS,
-        esqlQuery: 'FROM foo | STATS BY',
-        controlType: EsqlControlType.STATIC_VALUES,
-      } as ESQLControlState;
+        available_options: ['column2'],
+        selected_options: ['column2'],
+        variable_name: 'myField',
+        variable_type: ESQLVariableType.FIELDS,
+        esql_query: 'FROM foo | STATS BY',
+        control_type: EsqlControlType.STATIC_VALUES,
+      } as OptionsListESQLControlState;
       const onEditControlSpy = jest.fn();
       const { findByTestId, findByTitle } = render(
-        <IdentifierControlForm
-          variableType={ESQLVariableType.FIELDS}
-          queryString="FROM foo | STATS BY"
-          onCreateControl={jest.fn()}
-          closeFlyout={jest.fn()}
-          onEditControl={onEditControlSpy}
-          search={searchMock}
-          cursorPosition={{ column: 19, lineNumber: 1 } as monaco.Position}
-          initialState={initialState}
-          esqlVariables={[]}
-        />
+        <IntlProvider locale="en">
+          <KibanaContextProvider services={services}>
+            <ESQLControlsFlyout
+              {...defaultProps}
+              queryString="FROM foo | STATS BY"
+              onSaveControl={onEditControlSpy}
+              initialState={initialState}
+            />
+          </KibanaContextProvider>
+        </IntlProvider>
       );
 
       // select the first field
@@ -212,24 +218,23 @@ describe('IdentifierControlForm', () => {
   describe('Functions type', () => {
     it('should default correctly if no initial state is given', async () => {
       const { findByTestId, findByTitle } = render(
-        <IdentifierControlForm
-          variableType={ESQLVariableType.FUNCTIONS}
-          queryString="FROM foo | STATS "
-          onCreateControl={jest.fn()}
-          closeFlyout={jest.fn()}
-          onEditControl={jest.fn()}
-          search={searchMock}
-          cursorPosition={{ column: 17, lineNumber: 1 } as monaco.Position}
-          esqlVariables={[]}
-        />
+        <IntlProvider locale="en">
+          <KibanaContextProvider services={services}>
+            <ESQLControlsFlyout
+              {...defaultProps}
+              initialVariableType={ESQLVariableType.FUNCTIONS}
+              queryString="FROM foo | STATS "
+              cursorPosition={{ column: 17, lineNumber: 1 } as monaco.Position}
+            />
+          </KibanaContextProvider>
+        </IntlProvider>
       );
       // control type dropdown should be rendered and default to 'STATIC_VALUES'
       expect(await findByTestId('esqlControlTypeDropdown')).toBeInTheDocument();
-      const controlTypeInputPopover = await findByTestId('esqlControlTypeInputPopover');
-      expect(within(controlTypeInputPopover).getByRole('combobox')).toHaveValue(`Static values`);
+      expect(await findByTestId('esqlControlTypeDropdown')).toHaveTextContent(`Static values`);
 
       // variable name input should be rendered and with the default value
-      expect(await findByTestId('esqlVariableName')).toHaveValue('function');
+      expect(await findByTestId('esqlVariableName')).toHaveValue('??function');
 
       // fields dropdown should be rendered with available functions
       const fieldsOptionsDropdown = await findByTestId('esqlIdentifiersOptions');
@@ -237,7 +242,7 @@ describe('IdentifierControlForm', () => {
       const fieldsOptionsDropdownSearchInput = within(fieldsOptionsDropdown).getByRole('combobox');
       fireEvent.click(fieldsOptionsDropdownSearchInput);
       expect(await findByTitle('avg')).toBeDefined();
-      expect(await findByTitle('median')).toBeDefined();
+      expect(await findByTitle('last')).toBeDefined();
     });
   });
 });

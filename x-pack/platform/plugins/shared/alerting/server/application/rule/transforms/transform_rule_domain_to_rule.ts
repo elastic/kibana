@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleDomain, Rule, RuleParams } from '../types';
+import type { RuleDomain, Rule, RuleParams } from '../types';
 
 interface TransformRuleDomainToRuleOptions {
   isPublic?: boolean;
@@ -41,6 +41,7 @@ export const transformRuleDomainToRule = <Params extends RuleParams = never>(
     muteAll: ruleDomain.muteAll,
     notifyWhen: ruleDomain.notifyWhen,
     mutedInstanceIds: ruleDomain.mutedInstanceIds,
+    snoozedInstances: ruleDomain.snoozedInstances,
     executionStatus: ruleDomain.executionStatus,
     monitoring: ruleDomain.monitoring,
     snoozeSchedule: ruleDomain.snoozeSchedule,
@@ -54,9 +55,11 @@ export const transformRuleDomainToRule = <Params extends RuleParams = never>(
     alertDelay: ruleDomain.alertDelay,
     legacyId: ruleDomain.legacyId,
     flapping: ruleDomain.flapping,
+    artifacts: ruleDomain.artifacts,
   };
 
   if (isPublic) {
+    delete rule.snoozedInstances;
     delete rule.snoozeSchedule;
     delete rule.activeSnoozes;
     delete rule.isSnoozedUntil;

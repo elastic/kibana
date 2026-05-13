@@ -17,7 +17,7 @@ import type {
   AlertsByStatus,
   ParsedAlertsData,
 } from '../../../overview/components/detection_response/alerts_by_status/types';
-import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
+import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
 import { getSeverityColor } from '../../../detections/components/alerts_kpis/severity_level_panel/helpers';
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
@@ -64,16 +64,20 @@ export const AlertsPreview = ({
   alertsData,
   isPreviewMode,
   openDetailsPanel,
-  isLinkEnabled,
 }: {
   alertsData: ParsedAlertsData;
-  isPreviewMode?: boolean;
+  isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
-  isLinkEnabled: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
 
   const severityMap = new Map<string, number>();
+  const severityRank: Record<string, number> = {
+    critical: 4,
+    high: 3,
+    medium: 2,
+    low: 1,
+  };
 
   (Object.keys(alertsData || {}) as AlertsByStatus[]).forEach((status) => {
     if (alertsData?.[status]?.severities) {
@@ -84,42 +88,42 @@ export const AlertsPreview = ({
     }
   });
 
-  const alertStats = Array.from(severityMap, ([key, count]) => ({
+  const alertStats = Array.from(severityMap, ([key, count]: [string, number]) => ({
     key: capitalize(key),
     count,
     color: getSeverityColor(key, euiTheme),
-  }));
+    sort: severityRank[key.toLowerCase()] || 0,
+  })).sort((a, b) => b.sort - a.sort);
 
   const totalAlertsCount = alertStats.reduce((total, item) => total + item.count, 0);
 
   const hasNonClosedAlerts = totalAlertsCount > 0;
 
-  const goToEntityInsightTab = useCallback(() => {
-    openDetailsPanel({
-      tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-      subTab: CspInsightLeftPanelSubTab.ALERTS,
-    });
-  }, [openDetailsPanel]);
+  const goToEntityInsightTab = useCallback(
+    () =>
+      openDetailsPanel({
+        tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+        subTab: CspInsightLeftPanelSubTab.ALERTS,
+      }),
+    [openDetailsPanel]
+  );
 
   const link = useMemo(
-    () =>
-      isLinkEnabled
-        ? {
-            callback: goToEntityInsightTab,
-            tooltip: (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.right.insights.alerts.alertsTooltip"
-                defaultMessage="Show all alerts"
-              />
-            ),
-          }
-        : undefined,
-    [isLinkEnabled, goToEntityInsightTab]
+    () => ({
+      callback: goToEntityInsightTab,
+      tooltip: (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.insights.alerts.alertsTooltip"
+          defaultMessage="Show all alerts"
+        />
+      ),
+    }),
+    [goToEntityInsightTab]
   );
   return (
     <ExpandablePanel
       header={{
-        iconType: !isPreviewMode && hasNonClosedAlerts ? 'arrowStart' : '',
+        iconType: !isPreviewMode && hasNonClosedAlerts ? 'chevronLimitLeft' : '',
         title: (
           <EuiText
             size="xs"
@@ -145,7 +149,7 @@ export const AlertsPreview = ({
             <EuiFlexItem>
               <EuiSpacer />
               <DistributionBar
-                stats={alertStats.reverse()}
+                stats={alertStats}
                 data-test-subj="AlertsPreviewDistributionBarTestId"
               />
             </EuiFlexItem>

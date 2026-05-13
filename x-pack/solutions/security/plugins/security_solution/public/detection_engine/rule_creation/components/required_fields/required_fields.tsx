@@ -16,7 +16,7 @@ import { RequiredFieldsHelpInfo } from './required_fields_help_info';
 import * as defineRuleI18n from '../../../rule_creation_ui/components/step_define_rule/translations';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { RequiredFieldRow } from './required_fields_row';
-import { getFlattenedArrayFieldNames } from './utils';
+import { getFlattenedArrayFieldNames } from '../utils';
 import * as i18n from './translations';
 
 interface RequiredFieldsComponentProps {
@@ -105,6 +105,27 @@ const RequiredFieldsList = ({
 
   const allFieldNames = useMemo(() => Object.keys(typesByFieldName), [typesByFieldName]);
 
+  const esFlattenedFieldNames = useMemo(
+    () =>
+      new Set(
+        Object.entries(typesByFieldName)
+          .filter(([, types]) => types.includes('flattened'))
+          .map(([name]) => name)
+      ),
+    [typesByFieldName]
+  );
+
+  const isSubfieldOfFlattenedField = (fieldName: string): boolean => {
+    const parts = fieldName.split('.');
+    for (let i = parts.length - 1; i > 0; i--) {
+      const parentPath = parts.slice(0, i).join('.');
+      if (esFlattenedFieldNames.has(parentPath)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   const selectedFieldNames = fieldValue.map(({ name }) => name);
 
   const availableFieldNames = allFieldNames.filter((name) => !selectedFieldNames.includes(name));
@@ -114,7 +135,8 @@ const RequiredFieldsList = ({
       !isIndexPatternLoading &&
       /* Creating a warning only if "name" value is filled in */
       name !== '' &&
-      !allFieldNames.includes(name)
+      !allFieldNames.includes(name) &&
+      !isSubfieldOfFlattenedField(name)
     ) {
       warnings[name] = i18n.FIELD_NAME_NOT_FOUND_WARNING(name);
     }
@@ -147,9 +169,10 @@ const RequiredFieldsList = ({
     <>
       {hasWarnings && (
         <EuiCallOut
+          announceOnMount
           title={i18n.REQUIRED_FIELDS_GENERAL_WARNING_TITLE}
           color="warning"
-          iconType="help"
+          iconType="question"
           data-test-subj="requiredFieldsGeneralWarning"
         >
           <p>
@@ -179,6 +202,7 @@ const RequiredFieldsList = ({
         }
         hasChildLabel={false}
         labelType="legend"
+        data-test-subj="requiredFieldsFormRow"
       >
         <>
           {items.map((item) => (
@@ -196,7 +220,7 @@ const RequiredFieldsList = ({
           <EuiSpacer size="s" />
           <EuiButtonEmpty
             size="xs"
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={addItem}
             isDisabled={isIndexPatternLoading || hasEmptyFieldName}
             data-test-subj="addRequiredFieldButton"

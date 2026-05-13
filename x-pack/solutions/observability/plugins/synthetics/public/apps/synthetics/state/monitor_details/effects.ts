@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { PayloadAction } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 import { takeLeading, takeEvery, select, put } from 'redux-saga/effects';
 
-import { ConfigKey, Ping, PingsResponse } from '../../../../../common/runtime_types';
+import type { Ping, PingsResponse } from '../../../../../common/runtime_types';
+import { ConfigKey } from '../../../../../common/runtime_types';
 import { fetchEffectFactory } from '../utils/fetch_effect';
 import {
   getMonitorLastRunAction,
@@ -65,7 +66,7 @@ export function* fetchSyntheticsMonitorEffect() {
         recentPingFromList?.[ConfigKey.CONFIG_ID] &&
         lastRunPing?.[ConfigKey.CONFIG_ID] === recentPingFromList?.[ConfigKey.CONFIG_ID] &&
         lastRunPing?.observer?.geo?.name === recentPingFromList?.observer?.geo?.name &&
-        new Date(lastRunPing?.timestamp) < new Date(recentPingFromList?.timestamp)
+        new Date(lastRunPing?.['@timestamp']) < new Date(recentPingFromList?.['@timestamp'])
       ) {
         yield put(updateMonitorLastRunAction({ data: recentPingFromList }));
       }

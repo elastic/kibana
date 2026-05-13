@@ -15,6 +15,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 // This is a Cypress module and only used by Cypress, so disabling "should" be safe
 // eslint-disable-next-line import/no-nodejs-modules
 import { mkdir } from 'node:fs/promises';
+import type { HostVmExecResponse } from '../../../../scripts/endpoint/common/types';
 import type { IndexedEndpointHeartbeats } from '../../../../common/endpoint/data_loaders/index_endpoint_hearbeats';
 import {
   deleteIndexedEndpointHeartbeats,
@@ -58,6 +59,7 @@ import type {
   CreateUserAndRoleCyTaskOptions,
   LogItTaskOptions,
   CaptureHostVmAgentDiagnosticsOptions,
+  ExecuteCommandOnHostOptions,
 } from '../types';
 import type {
   DeletedIndexedEndpointRuleAlerts,
@@ -192,8 +194,13 @@ export const dataLoaders = (
     },
 
     deleteIndexedFleetEndpointPolicies: async (indexData: IndexedFleetEndpointPolicyResponse) => {
-      const { kbnClient } = await stackServicesPromise;
-      return deleteIndexedFleetEndpointPolicies(kbnClient, indexData);
+      const { kbnClient, log } = await stackServicesPromise;
+      return deleteIndexedFleetEndpointPolicies(kbnClient, indexData).catch((error) => {
+        // Don't return rejected promise during cleanup, since that can cause a test to fail during the
+        // cleanup phase (normally in a `after()` or `afterEach()`).
+        log.warning(`Failed to delete indexed fleet endpoint policies: ${error.message}`, error);
+        return null;
+      });
     },
 
     indexCase: async (newCase: Partial<CasePostRequest> = {}): Promise<IndexedCase['data']> => {
@@ -233,8 +240,13 @@ export const dataLoaders = (
     },
 
     deleteIndexedEndpointHosts: async (indexedData: IndexedHostsAndAlertsResponse) => {
-      const { kbnClient, esClient } = await stackServicesPromise;
-      return deleteIndexedHostsAndAlerts(esClient, kbnClient, indexedData);
+      const { kbnClient, esClient, log } = await stackServicesPromise;
+      return deleteIndexedHostsAndAlerts(esClient, kbnClient, indexedData).catch((error) => {
+        // Log any cleanup error but don't return a failed promise since we likely don't want the test
+        // that loaded it to fail on clean up.
+        log.warning(`Failed to delete indexed endpoint hosts and alerts: ${error.message}`, error);
+        return null;
+      });
     },
 
     indexEndpointHeartbeats: async (options: { count?: number; unbilledCount?: number }) => {
@@ -304,9 +316,16 @@ export const dataLoaders = (
       endpointAgentIds,
     }: {
       endpointAgentIds: string[];
-    }): Promise<DeleteAllEndpointDataResponse> => {
+    }): Promise<DeleteAllEndpointDataResponse | null> => {
       const { esClient, log } = await stackServicesPromise;
-      return deleteAllEndpointData(esClient, log, endpointAgentIds, !isCloudServerless);
+      return deleteAllEndpointData(esClient, log, endpointAgentIds, !isCloudServerless).catch(
+        (error) => {
+          // Don't return rejected promise during cleanup, since that can cause a test to fail during the
+          // cleanup phase (normally in a `after()` or `afterEach()`).
+          log.warning(`Failed to delete all endpoint data: ${error.message}`, error);
+          return null;
+        }
+      );
     },
 
     /**
@@ -467,8 +486,18 @@ ${s1Info.status}
     destroyEndpointHost: async (
       createdHost: CreateAndEnrollEndpointHostResponse
     ): Promise<null> => {
-      const { kbnClient } = await stackServicesPromise;
-      return destroyEndpointHost(kbnClient, createdHost).then(() => null);
+      const { kbnClient, log } = await stackServicesPromise;
+      return destroyEndpointHost(kbnClient, createdHost)
+        .then(() => null)
+        .catch((error) => {
+          // Don't return rejected promise during cleanup, since that can cause a test to fail during the
+          // cleanup phase (normally in a `after()` or `afterEach()`).
+          log.warning(
+            `Failed to destroy endpoint host ${createdHost.agentId}: ${error.message}`,
+            error
+          );
+          return null;
+        });
     },
 
     createFileOnEndpoint: async ({
@@ -577,7 +606,7 @@ ${s1Info.status}
         .toISOString()
         .replace(/:/g, '.')}.zip`;
       const vmDiagnosticsFile = `/tmp/${fileName}`;
-      const localDiagnosticsDir = `${REPO_ROOT}/target/test_failures`;
+      const localDiagnosticsDir = `${REPO_ROOT}/target/agent_diagnostics`;
       const localDiagnosticsFile = `${localDiagnosticsDir}/${
         fileNamePrefix
           ? // Insure the file name prefix does not have characters that can't be used in file names
@@ -597,6 +626,33 @@ ${s1Info.status}
 `);
         return { filePath: response.filePath };
       });
+    },
+
+    /**
+     * Runs a command on the given hostname, which is expected to be a hostname running on a vm.
+     *
+     * IMPORTANT: command execution failures on the host will NOT cause this task to fail/throw.
+     *            Ensure that the `stderr` is checked if wanting to determine success/failure of
+     *            command execution on the host machine.
+     * @param options
+     * @param options.hostname
+     * @param command.command
+     */
+    executeCommandOnHost: async ({
+      hostname,
+      command,
+    }: ExecuteCommandOnHostOptions): Promise<HostVmExecResponse> => {
+      const { log } = await stackServicesPromise;
+      return getHostVmClient(hostname)
+        .exec(command)
+        .catch((e) => {
+          log.warning(`command [${command}] execution on host [${hostname}] failed: ${e}]`);
+          return {
+            stdout: '',
+            stderr: e.message,
+            exitCode: 1,
+          };
+        });
     },
   });
 };

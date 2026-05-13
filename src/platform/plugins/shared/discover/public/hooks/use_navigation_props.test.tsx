@@ -7,14 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
+import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import { useNavigationProps } from './use_navigation_props';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MemoryRouter } from 'react-router-dom';
+import { DiscoverTestProvider } from '../__mocks__/test_provider';
+import type { DiscoverServices } from '../build_services';
+import { createDiscoverServicesMock } from '../__mocks__/services';
 
 const mockServices = {
+  ...createDiscoverServicesMock(),
   singleDocLocator: { getRedirectUrl: jest.fn(() => 'mock-doc-redirect-url'), navigate: jest.fn() },
   contextLocator: {
     getRedirectUrl: jest.fn(() => 'mock-context-redirect-url'),
@@ -34,7 +38,9 @@ const mockServices = {
       timefilter: { timefilter: { getTime: jest.fn(() => ({ from: 'now-15m', to: 'now' })) } },
     },
   },
-};
+} as unknown as DiscoverServices;
+const mockContextLocatorNavigate = jest.spyOn(mockServices.contextLocator, 'navigate');
+const mockSingleDocLocatorNavigate = jest.spyOn(mockServices.singleDocLocator, 'navigate');
 
 const dataViewMock = {
   id: '1',
@@ -60,7 +66,7 @@ const render = async () => {
     {
       wrapper: ({ children }: React.PropsWithChildren<{}>) => (
         <MemoryRouter initialEntries={['/']}>
-          <KibanaContextProvider services={mockServices}>{children}</KibanaContextProvider>
+          <DiscoverTestProvider services={mockServices}>{children}</DiscoverTestProvider>
         </MemoryRouter>
       ),
     }
@@ -83,14 +89,14 @@ describe('useNavigationProps', () => {
     };
 
     await result.current.onOpenContextView({ preventDefault: jest.fn() } as unknown as MouseEvent);
-    expect(mockServices.contextLocator.navigate.mock.calls[0][0]).toEqual({
+    expect(mockContextLocatorNavigate.mock.calls[0][0]).toEqual({
       ...commonParams,
       columns: ['mock-column'],
       filters: [],
     });
 
     await result.current.onOpenSingleDoc({ preventDefault: jest.fn() } as unknown as MouseEvent);
-    expect(mockServices.singleDocLocator.navigate.mock.calls[0][0]).toEqual({
+    expect(mockSingleDocLocatorNavigate.mock.calls[0][0]).toEqual({
       ...commonParams,
       rowIndex: 'mock-index',
     });

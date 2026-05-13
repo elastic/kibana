@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from '@kbn/core-security-common';
-import { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
+import type {
+  KnowledgeBaseEntryCreateProps,
+  KnowledgeBaseEntryResponse,
+} from '@kbn/elastic-assistant-common';
+import { isArray } from 'lodash';
+import type { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
 import { transformESSearchToKnowledgeBaseEntry } from '../../../ai_assistant_data_clients/knowledge_base/transforms';
-import { EsKnowledgeBaseEntrySchema } from '../../../ai_assistant_data_clients/knowledge_base/types';
+import type { EsKnowledgeBaseEntrySchema } from '../../../ai_assistant_data_clients/knowledge_base/types';
 
 export const getKBUserFilter = (user: AuthenticatedUser | null) => {
   // Only return the current users entries and all other global entries (where user[] is empty)
@@ -27,6 +32,9 @@ export const getKBUserFilter = (user: AuthenticatedUser | null) => {
 
   return `(${globalFilter}${userFilter})`;
 };
+
+export const isGlobalEntry = (entry: KnowledgeBaseEntryResponse | KnowledgeBaseEntryCreateProps) =>
+  entry.global ?? (isArray(entry.users) && !entry.users.length);
 
 export const validateDocumentsModification = async (
   kbDataClient: AIAssistantKnowledgeBaseDataClient | null,
@@ -50,8 +58,7 @@ export const validateDocumentsModification = async (
   const availableEntries = entries ? transformESSearchToKnowledgeBaseEntry(entries.data) : [];
   availableEntries.forEach((entry) => {
     // RBAC validation
-    const isGlobal = entry.users != null && entry.users.length === 0;
-    if (isGlobal && !manageGlobalKnowledgeBaseAIAssistant) {
+    if (isGlobalEntry(entry) && !manageGlobalKnowledgeBaseAIAssistant) {
       throw new Error(`User lacks privileges to ${operation} global knowledge base entries`);
     }
   });

@@ -9,5 +9,9 @@
 
 import { getInputStory, getStory } from './common';
 
-export default getStory('JSON Input', 'An input with a JSON value.');
+const Story = getStory('JSON Input', 'An input with a JSON value.');
 export const JSONInput = getInputStory('json' as const);
+
+export default {
+  ...Story,
+};

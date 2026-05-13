@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 /**
  * WARNING: Do not modify the existing versioned schema(s) below, instead define a new version (ex: 2, 3, 4).
@@ -25,12 +26,27 @@ export const stateSchemaByVersion = {
       total_invalidated: schema.number(),
     }),
   },
+  2: {
+    up: (state: Record<string, unknown>) => ({
+      runs: state.runs || 0,
+      total_invalidated: state.total_invalidated || 0,
+      missing_api_key_retries: state.missing_api_key_retries || {},
+    }),
+    schema: schema.object({
+      runs: schema.number(),
+      total_invalidated: schema.number(),
+      missing_api_key_retries: schema.recordOf(schema.string(), schema.number(), {
+        defaultValue: {},
+      }),
+    }),
+  },
 };
 
-const latestTaskStateSchema = stateSchemaByVersion[1].schema;
+const latestTaskStateSchema = stateSchemaByVersion[2].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {
   runs: 0,
   total_invalidated: 0,
+  missing_api_key_retries: {},
 };

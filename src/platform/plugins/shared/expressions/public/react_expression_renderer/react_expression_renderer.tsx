@@ -8,10 +8,10 @@
  */
 
 import React, { useRef } from 'react';
-import classNames from 'classnames';
-import { PanelLoader } from '@kbn/panel-loader';
 import { EuiProgress, useEuiTheme } from '@elastic/eui';
-import { ExpressionRenderError } from '../types';
+import { css } from '@emotion/react';
+import { PanelLoader } from '@kbn/panel-loader';
+import type { ExpressionRenderError } from '../types';
 import type { ExpressionRendererParams } from './use_expression_renderer';
 import { useExpressionRenderer } from './use_expression_renderer';
 
@@ -26,6 +26,7 @@ export interface ReactExpressionRendererProps
     error?: ExpressionRenderError | null
   ) => React.ReactElement | React.ReactElement[];
   padding?: 'xs' | 's' | 'm' | 'l' | 'xl';
+  paddingTop?: boolean;
 }
 
 export type ReactExpressionRendererType = React.ComponentType<ReactExpressionRendererProps>;
@@ -35,6 +36,7 @@ export function ReactExpressionRenderer({
   className,
   dataAttrs,
   padding,
+  paddingTop = true,
   renderError,
   abortController,
   ...expressionRendererOptions
@@ -46,25 +48,33 @@ export function ReactExpressionRenderer({
     hasCustomErrorRenderer: !!renderError,
   });
 
-  const classes = classNames('expExpressionRenderer', className, {
-    'expExpressionRenderer-isEmpty': isEmpty,
-    'expExpressionRenderer-hasError': !!error,
-  });
-
-  const expressionStyles: React.CSSProperties = {};
-
-  if (padding) {
-    expressionStyles.padding = euiTheme.size[padding];
-  }
-
   return (
-    <div {...dataAttrs} className={classes}>
+    <div {...dataAttrs} className={className} css={styles}>
       {isEmpty && <PanelLoader />}
       {isLoading && (
         <EuiProgress size="xs" color="accent" position="absolute" css={{ zIndex: 1 }} />
       )}
       {!isLoading && error && renderError?.(error.message, error)}
-      <div className="expExpressionRenderer__expression" style={expressionStyles} ref={nodeRef} />
+      <div
+        className="expExpressionRenderer__expression"
+        css={css({
+          width: '100%',
+          height: '100%',
+          ...(padding ? { padding: euiTheme.size[padding] } : {}),
+          ...(!paddingTop ? { paddingTop: 0 } : {}),
+          ...(isEmpty || !!error ? { display: 'none' } : {}),
+        })}
+        ref={nodeRef}
+      />
     </div>
   );
 }
+
+const styles = css({
+  position: 'relative',
+  display: 'flex',
+  width: '100%',
+  height: '100%',
+  alignItems: 'center',
+  justifyContent: 'center',
+});

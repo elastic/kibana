@@ -10,14 +10,12 @@ import { type AgentStatusRecords, HostStatus } from '../../../../../../common/en
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { AgentStatusClient } from '../lib/base_agent_status_client';
 import { getPendingActionsSummary } from '../../../actions';
-import { AgentStatusClientError } from '../errors';
 
 export class EndpointAgentStatusClient extends AgentStatusClient {
   protected readonly agentType: ResponseActionAgentType = 'endpoint';
 
   async getAgentStatuses(agentIds: string[]): Promise<AgentStatusRecords> {
     const soClient = this.options.soClient;
-    const esClient = this.options.esClient;
     const metadataService = this.options.endpointService.getEndpointMetadataService(
       soClient.getCurrentNamespace()
     );
@@ -30,7 +28,7 @@ export class EndpointAgentStatusClient extends AgentStatusClient {
           pageSize: 1000,
           kuery: agentIdsKql,
         }),
-        getPendingActionsSummary(esClient, metadataService, this.log, agentIds),
+        getPendingActionsSummary(this.options.endpointService, this.options.spaceId, agentIds),
       ]).catch(catchAndWrapError);
 
       return agentIds.reduce<AgentStatusRecords>((acc, agentId) => {
@@ -55,15 +53,7 @@ export class EndpointAgentStatusClient extends AgentStatusClient {
         return acc;
       }, {});
     } catch (err) {
-      const error = new AgentStatusClientError(
-        `Failed to fetch endpoint agent statuses for agentIds: [${agentIds.join()}], failed with: ${
-          err.message
-        }`,
-        500,
-        err
-      );
-      this.log.error(error);
-      throw error;
+      return this.handleUnexpectedFailureAndReturnDefaultResponse(agentIds, err);
     }
   }
 }

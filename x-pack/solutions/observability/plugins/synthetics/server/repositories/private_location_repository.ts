@@ -8,10 +8,11 @@ import { i18n } from '@kbn/i18n';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { isEmpty } from 'lodash';
 import { getAgentPoliciesAsInternalUser } from '../routes/settings/private_locations/get_agent_policies';
-import { PrivateLocationAttributes } from '../runtime_types/private_locations';
-import { PrivateLocationObject } from '../routes/settings/private_locations/add_private_location';
-import { RouteContext } from '../routes/types';
+import type { PrivateLocationAttributes } from '../runtime_types/private_locations';
+import type { PrivateLocationObject } from '../routes/settings/private_locations/add_private_location';
+import type { RouteContext } from '../routes/types';
 import { privateLocationSavedObjectName } from '../../common/saved_objects/private_locations';
+import type { EditPrivateLocationAttributes } from '../routes/settings/private_locations/edit_private_location';
 
 export class PrivateLocationRepository {
   internalSOClient: ISavedObjectsRepository;
@@ -33,7 +34,44 @@ export class PrivateLocationRepository {
       }
     );
   }
-  async validatePrivateLocation() {
+
+  async getPrivateLocation(locationId: string) {
+    const { savedObjectsClient } = this.routeContext;
+
+    return savedObjectsClient.get<PrivateLocationAttributes>(
+      privateLocationSavedObjectName,
+      locationId
+    );
+  }
+
+  async editPrivateLocation(locationId: string, newAttributes: EditPrivateLocationAttributes) {
+    const { savedObjectsClient } = this.routeContext;
+
+    return savedObjectsClient.update<PrivateLocationAttributes>(
+      privateLocationSavedObjectName,
+      locationId,
+      newAttributes
+    );
+  }
+
+  getLocationSpaces({
+    locationSpaces,
+    agentPolicySpaces,
+  }: {
+    locationSpaces?: string[];
+    agentPolicySpaces: string[];
+  }): string[] {
+    if (locationSpaces?.length) return locationSpaces;
+    return agentPolicySpaces;
+  }
+
+  async validatePrivateLocation({
+    agentPolicySpaces,
+    spaceId,
+  }: {
+    agentPolicySpaces: string[];
+    spaceId: string;
+  }) {
     const { response, request, server } = this.routeContext;
 
     let errorMessages = '';
@@ -46,9 +84,9 @@ export class PrivateLocationRepository {
       this.internalSOClient.find<PrivateLocationAttributes>({
         type: privateLocationSavedObjectName,
         perPage: 10000,
-        namespaces: spaces,
+        namespaces: this.getLocationSpaces({ locationSpaces: spaces, agentPolicySpaces }),
       }),
-      await getAgentPoliciesAsInternalUser({ server }),
+      await getAgentPoliciesAsInternalUser({ server, spaceId }),
     ]);
 
     const locations = data.saved_objects.map((loc) => ({

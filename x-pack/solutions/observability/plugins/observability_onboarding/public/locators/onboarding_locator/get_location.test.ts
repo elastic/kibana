@@ -7,20 +7,20 @@
 
 import { getLocation } from './get_location';
 import { PLUGIN_ID } from '../../../common';
-import { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
+import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 
 describe('getLocation', () => {
   it('should return the correct location with source and query', () => {
     const params: ObservabilityOnboardingLocatorParams = {
       source: 'customLogs',
-      category: 'infra',
+      category: 'host',
     };
 
     const result = getLocation(params);
 
     expect(result).toEqual({
       app: PLUGIN_ID,
-      path: '/customLogs?category=infra',
+      path: '/customLogs?category=host',
       state: {},
     });
   });
@@ -42,14 +42,14 @@ describe('getLocation', () => {
   it('should return the correct location with only query', () => {
     const params: ObservabilityOnboardingLocatorParams = {
       source: undefined,
-      category: 'metrics',
+      category: 'application',
     };
 
     const result = getLocation(params);
 
     expect(result).toEqual({
       app: PLUGIN_ID,
-      path: '/?category=metrics',
+      path: '/?category=application',
       state: {},
     });
   });

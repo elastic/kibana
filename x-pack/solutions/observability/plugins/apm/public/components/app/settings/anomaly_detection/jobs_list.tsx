@@ -78,7 +78,7 @@ const columns: Array<ITableColumn<Jobs[0]>> = [
             >
               {/* setting the key to remount the element as a workaround for https://github.com/elastic/kibana/issues/119951*/}
               <MLManageJobsLink jobId={jobId} key={jobId}>
-                <EuiIcon type="gear" />
+                <EuiIcon type="gear" aria-hidden={true} />
               </MLManageJobsLink>
             </EuiToolTip>
           </EuiFlexItem>
@@ -92,7 +92,7 @@ const columns: Array<ITableColumn<Jobs[0]>> = [
               )}
             >
               <MLExplorerLink jobId={jobId}>
-                <EuiIcon type="visTable" />
+                <EuiIcon type="table" aria-hidden={true} />
               </MLExplorerLink>
             </EuiToolTip>
           </EuiFlexItem>
@@ -135,7 +135,7 @@ export function JobsList({ data, status, onAddEnvironments, setupState, onUpdate
           defaultMessage="To add anomaly detection to a new environment, create a machine learning job. Existing machine learning jobs can be managed in {mlJobsLink}."
           values={{
             mlJobsLink: (
-              <MLManageJobsLink>
+              <MLManageJobsLink dataTestSubj="apmMLManageJobsTextLink">
                 {i18n.translate(
                   'xpack.apm.settings.anomalyDetection.jobList.mlDescriptionText.mlJobsLinkText',
                   {
@@ -230,7 +230,7 @@ export function JobsList({ data, status, onAddEnvironments, setupState, onUpdate
             <EuiButton
               data-test-subj="apmJobsListCreateJobButton"
               fill
-              iconType="plusInCircle"
+              iconType="plusCircle"
               onClick={onAddEnvironments}
               isDisabled={!canSave}
             >

@@ -8,7 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { DefendInsightStatus, DefendInsightType } from '@kbn/elastic-assistant-common';
 
-import type { EsDefendInsightSchema } from '../ai_assistant_data_clients/defend_insights/types';
+import type { EsDefendInsightSchema } from '../lib/defend_insights/persistence/types';
 
 export const getDefendInsightsSearchEsMock = () => {
   const searchResponse: estypes.SearchResponse<EsDefendInsightSchema> = {
@@ -40,14 +40,14 @@ export const getDefendInsightsSearchEsMock = () => {
                 name: 'elastic',
               },
             ],
-            status: DefendInsightStatus.Enum.succeeded,
+            status: DefendInsightStatus.enum.succeeded,
             api_config: {
               action_type_id: '.bedrock',
               connector_id: 'ac4e19d1-e2e2-49af-bf4b-59428473101c',
               model: 'anthropic.claude-3-5-sonnet-20240620-v1:0',
             },
             endpoint_ids: ['6e09ec1c-644c-4148-a02d-be451c35400d'],
-            insight_type: DefendInsightType.Enum.incompatible_antivirus,
+            insight_type: DefendInsightType.enum.incompatible_antivirus,
             insights: [
               {
                 group: 'windows_defenders',

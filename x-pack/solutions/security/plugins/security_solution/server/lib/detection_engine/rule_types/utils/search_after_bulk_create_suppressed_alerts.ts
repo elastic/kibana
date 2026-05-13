@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
-
 import { getSuppressionMaxSignalsWarning } from './utils';
 import type {
   SearchAfterAndBulkCreateParams,
@@ -14,14 +12,10 @@ import type {
   WrapSuppressedHits,
 } from '../types';
 import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
-import type { ExperimentalFeatures } from '../../../../../common';
 
 interface SearchAfterAndBulkCreateSuppressedAlertsParams extends SearchAfterAndBulkCreateParams {
   wrapSuppressedHits: WrapSuppressedHits;
-  alertTimestampOverride: Date | undefined;
-  alertWithSuppression: SuppressedAlertService;
-  alertSuppression?: AlertSuppressionCamel;
-  experimentalFeatures: ExperimentalFeatures;
+  alertSuppression: AlertSuppressionCamel;
 }
 
 import type { SearchAfterAndBulkCreateFactoryParams } from './search_after_bulk_create_factory';
@@ -35,38 +29,21 @@ import { bulkCreateSuppressedAlertsInMemory } from './bulk_create_suppressed_ale
 export const searchAfterAndBulkCreateSuppressedAlerts = async (
   params: SearchAfterAndBulkCreateSuppressedAlertsParams
 ): Promise<SearchAfterAndBulkCreateReturnType> => {
-  const {
-    wrapHits,
-    bulkCreate,
-    services,
-    buildReasonMessage,
-    ruleExecutionLogger,
-    tuple,
-    alertSuppression,
-    wrapSuppressedHits,
-    alertWithSuppression,
-    alertTimestampOverride,
-    experimentalFeatures,
-  } = params;
+  const { sharedParams, services, buildReasonMessage, alertSuppression, wrapSuppressedHits } =
+    params;
 
   const bulkCreateExecutor: SearchAfterAndBulkCreateFactoryParams['bulkCreateExecutor'] = async ({
     enrichedEvents,
     toReturn,
   }) => {
     return bulkCreateSuppressedAlertsInMemory({
-      wrapHits,
-      bulkCreate,
+      sharedParams,
       services,
       buildReasonMessage,
-      ruleExecutionLogger,
-      tuple,
       alertSuppression,
       wrapSuppressedHits,
-      alertWithSuppression,
-      alertTimestampOverride,
       enrichedEvents,
       toReturn,
-      experimentalFeatures,
     });
   };
 

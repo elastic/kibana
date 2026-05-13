@@ -5,15 +5,30 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { useLocation } from 'react-router-dom';
 import { useMetricsExplorerState } from './use_metric_explorer_state';
 import { MetricsExplorerOptionsContainer } from './use_metrics_explorer_options';
 import React from 'react';
 import { resp, createSeries } from '../../../../utils/fixtures/metrics_explorer';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
+
+jest.mock('../../../../hooks/use_kibana');
+
+const mockUseKibanaContextForPlugin = useKibanaContextForPlugin as jest.MockedFunction<
+  typeof useKibanaContextForPlugin
+>;
 
 jest.mock('../../../../hooks/use_kibana_timefilter_time', () => ({
   useKibanaTimefilterTime: (defaults: { from: string; to: string }) => [() => defaults],
   useSyncKibanaTimeFilterTime: () => [() => {}],
+}));
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: jest.fn(),
 }));
 
 jest.mock('../../../../alerting/use_alert_prefill', () => ({
@@ -27,7 +42,9 @@ jest.mock('../../../../alerting/use_alert_prefill', () => ({
 const renderUseMetricsExplorerStateHook = () =>
   renderHook(() => useMetricsExplorerState(), {
     wrapper: ({ children }: React.PropsWithChildren<{}>) => (
-      <MetricsExplorerOptionsContainer>{children}</MetricsExplorerOptionsContainer>
+      <PerformanceContextProvider>
+        <MetricsExplorerOptionsContainer>{children}</MetricsExplorerOptionsContainer>
+      </PerformanceContextProvider>
     ),
   });
 
@@ -73,6 +90,19 @@ describe('useMetricsExplorerState', () => {
     });
     delete STORE.MetricsExplorerOptions;
     delete STORE.MetricsExplorerTimeRange;
+
+    const pathname = '/hosts';
+    (useLocation as jest.Mock).mockReturnValue(() => ({
+      pathname,
+    }));
+    performance.mark = jest.fn();
+    performance.clearMeasures = jest.fn();
+
+    mockUseKibanaContextForPlugin.mockReturnValue({
+      services: {
+        data: dataPluginMock.createStartContract(),
+      },
+    } as unknown as ReturnType<typeof useKibanaContextForPlugin>);
   });
 
   afterEach(() => {
@@ -88,9 +118,11 @@ describe('useMetricsExplorerState', () => {
       },
     });
     const { result } = renderUseMetricsExplorerStateHook();
-    expect(result.current.data!.pages[0]).toEqual(resp);
-    expect(result.current.error).toBe(null);
-    expect(result.current.isLoading).toBe(false);
+    await waitFor(() => {
+      expect(result.current.data!.pages[0]).toEqual(resp);
+      expect(result.current.error).toBe(null);
+      expect(result.current.isLoading).toBe(false);
+    });
   });
 
   describe('handleRefresh', () => {
@@ -152,7 +184,9 @@ describe('useMetricsExplorerState', () => {
       const { result } = renderUseMetricsExplorerStateHook();
       const { handleFilterQuerySubmit } = result.current;
       act(() => {
-        handleFilterQuerySubmit('host.name: "example-host-01"');
+        handleFilterQuerySubmit({
+          query: { query: 'host.name: "example-host-01"', language: 'kuery' },
+        });
       });
       expect(result.current.options.filterQuery).toBe('host.name: "example-host-01"');
     });

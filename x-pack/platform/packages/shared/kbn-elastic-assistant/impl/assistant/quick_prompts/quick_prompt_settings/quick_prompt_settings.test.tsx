@@ -14,20 +14,22 @@ import { mockPromptContexts } from '../../../mock/prompt_context';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
 
-const onSelectedQuickPromptChange = jest.fn();
-const setPromptsBulkActions = jest.fn();
-const setUpdatedQuickPromptSettings = jest.fn().mockImplementation((fn) => {
-  return fn(MOCK_QUICK_PROMPTS);
-});
+const onQuickPromptColorChange = jest.fn();
+const onQuickPromptSelect = jest.fn();
+const onPromptContentChange = jest.fn();
+const onQuickPromptContextChange = jest.fn();
 
 const testProps = {
-  onSelectedQuickPromptChange,
-  quickPromptSettings: MOCK_QUICK_PROMPTS,
+  onPromptContentChange,
+  onQuickPromptColorChange,
+  onQuickPromptContextChange,
+  onQuickPromptDelete: jest.fn(),
+  onQuickPromptSelect,
+  resetSettings: jest.fn(),
   selectedQuickPrompt: MOCK_QUICK_PROMPTS[0],
-  setUpdatedQuickPromptSettings,
-  promptsBulkActions: {},
-  setPromptsBulkActions,
+  quickPromptSettings: MOCK_QUICK_PROMPTS,
 };
+
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
   chrome: {
@@ -51,17 +53,17 @@ jest.mock('../quick_prompt_selector/quick_prompt_selector', () => ({
       <button
         type="button"
         data-test-subj="delete-qp"
-        onClick={() => onQuickPromptDeleted('A_CUSTOM_OPTION', '#D36086')}
+        onClick={() => onQuickPromptDeleted('A_CUSTOM_OPTION')}
       />
       <button
         type="button"
         data-test-subj="change-qp"
-        onClick={() => onQuickPromptSelectionChange(MOCK_QUICK_PROMPTS[3], '#D36086')}
+        onClick={() => onQuickPromptSelectionChange(MOCK_QUICK_PROMPTS[3])}
       />
       <button
         type="button"
         data-test-subj="change-qp-custom"
-        onClick={() => onQuickPromptSelectionChange('sooper custom prompt', '#D36086')}
+        onClick={() => onQuickPromptSelectionChange('sooper custom prompt')}
       />
     </>
   ),
@@ -90,8 +92,7 @@ describe('QuickPromptSettings', () => {
       </TestProviders>
     );
     fireEvent.click(getByTestId('change-qp'));
-    expect(setUpdatedQuickPromptSettings).toHaveReturnedWith(MOCK_QUICK_PROMPTS);
-    expect(onSelectedQuickPromptChange).toHaveBeenCalledWith(MOCK_QUICK_PROMPTS[3]);
+    expect(onQuickPromptSelect).toHaveBeenCalledWith(MOCK_QUICK_PROMPTS[3]);
   });
   it('Entering a custom quick prompt creates a new quick prompt', () => {
     const { getByTestId } = render(
@@ -100,17 +101,7 @@ describe('QuickPromptSettings', () => {
       </TestProviders>
     );
     fireEvent.click(getByTestId('change-qp-custom'));
-    const customOption = {
-      categories: [],
-      color: '#D36086',
-      consumer: undefined,
-      content: '',
-      id: 'sooper custom prompt',
-      name: 'sooper custom prompt',
-      promptType: 'quick',
-    };
-    expect(setUpdatedQuickPromptSettings).toHaveReturnedWith([...MOCK_QUICK_PROMPTS, customOption]);
-    expect(onSelectedQuickPromptChange).toHaveBeenCalledWith(customOption);
+    expect(onQuickPromptSelect).toHaveBeenCalledWith('sooper custom prompt');
   });
   it('Quick prompt badge color can be updated', () => {
     const { getByTestId } = render(
@@ -124,13 +115,12 @@ describe('QuickPromptSettings', () => {
       code: 'Enter',
       charCode: 13,
     });
-    const mutatableQuickPrompts = [...MOCK_QUICK_PROMPTS];
-    const previousFirstElementOfTheArray = mutatableQuickPrompts.shift();
 
-    expect(setUpdatedQuickPromptSettings).toHaveReturnedWith([
-      { ...previousFirstElementOfTheArray, color: '#000' },
-      ...mutatableQuickPrompts,
-    ]);
+    expect(onQuickPromptColorChange).toHaveBeenCalledWith('#000', {
+      hex: '#000000',
+      isValid: true,
+      rgba: [0, 0, 0, 1],
+    });
   });
   it('Updating the current prompt input updates the prompt', () => {
     const { getByTestId } = render(
@@ -141,13 +131,8 @@ describe('QuickPromptSettings', () => {
     fireEvent.change(getByTestId('quick-prompt-prompt'), {
       target: { value: 'what does this do' },
     });
-    const mutatableQuickPrompts = [...MOCK_QUICK_PROMPTS];
-    const previousFirstElementOfTheArray = mutatableQuickPrompts.shift();
 
-    expect(setUpdatedQuickPromptSettings).toHaveReturnedWith([
-      { ...previousFirstElementOfTheArray, content: 'what does this do' },
-      ...mutatableQuickPrompts,
-    ]);
+    expect(onPromptContentChange).toHaveBeenCalledWith('what does this do');
   });
   it('Updating prompt contexts updates the categories of the prompt', () => {
     const { getByTestId } = render(
@@ -156,12 +141,7 @@ describe('QuickPromptSettings', () => {
       </TestProviders>
     );
     fireEvent.click(getByTestId('change-pc'));
-    const mutatableQuickPrompts = [...MOCK_QUICK_PROMPTS];
-    const previousFirstElementOfTheArray = mutatableQuickPrompts.shift();
 
-    expect(setUpdatedQuickPromptSettings).toHaveReturnedWith([
-      { ...previousFirstElementOfTheArray, categories: ['alert', 'event'] },
-      ...mutatableQuickPrompts,
-    ]);
+    expect(onQuickPromptContextChange).toHaveBeenCalledWith(mockPromptContexts);
   });
 });

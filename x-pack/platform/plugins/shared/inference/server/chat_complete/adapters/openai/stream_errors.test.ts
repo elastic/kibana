@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  convertStreamError,
-  OpenAIErrorLine,
-  ElasticInferenceErrorLine,
-  UnknownErrorLine,
-} from './stream_errors';
+import type { OpenAIErrorLine, ElasticInferenceErrorLine, UnknownErrorLine } from './stream_errors';
+import { convertStreamError } from './stream_errors';
 
 describe('convertStreamError', () => {
   it('handles the openAI format', () => {
@@ -24,7 +20,7 @@ describe('convertStreamError', () => {
     expect(error.toJSON()).toEqual({
       type: 'error',
       error: {
-        code: 'internalError',
+        code: 'providerError',
         message: 'something bad happened',
         meta: {},
       },
@@ -43,7 +39,7 @@ describe('convertStreamError', () => {
     expect(error.toJSON()).toEqual({
       type: 'error',
       error: {
-        code: 'internalError',
+        code: 'providerError',
         message: 'some_error_type - something bad happened',
         meta: {},
       },
@@ -61,7 +57,7 @@ describe('convertStreamError', () => {
     expect(error.toJSON()).toEqual({
       type: 'error',
       error: {
-        code: 'internalError',
+        code: 'providerError',
         message: '{"anotherErrorField":"something bad happened"}',
         meta: {},
       },

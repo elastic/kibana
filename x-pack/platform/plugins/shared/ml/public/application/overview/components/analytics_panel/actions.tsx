@@ -14,10 +14,14 @@ import {
   getAnalysisType,
   type DataFrameAnalysisConfigType,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { useMlLink, useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import {
+  useMlLink,
+  useMlManagementLocatorInternal,
+  useNavigateToPath,
+} from '../../../contexts/kibana';
 import type { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import { getViewLinkStatus } from '../../../data_frame_analytics/pages/analytics_management/components/action_view/get_view_link_status';
-import { ML_PAGES } from '../../../../../common/constants/locator';
 
 interface Props {
   item: DataFrameAnalyticsListRow;
@@ -49,7 +53,7 @@ export const ViewLink: FC<Props> = ({ item }) => {
       <EuiButtonIcon
         href={viewAnalyticsResultsLink}
         size="xs"
-        iconType="visTable"
+        iconType="table"
         aria-label={viewJobResultsButtonText}
         data-test-subj="mlOverviewAnalyticsJobViewButton"
         isDisabled={disabled}
@@ -59,7 +63,7 @@ export const ViewLink: FC<Props> = ({ item }) => {
 };
 
 export function useTableActions(): Array<Action<DataFrameAnalyticsListRow>> {
-  const locator = useMlLocator();
+  const mlManagementLocator = useMlManagementLocatorInternal();
   const navigateToPath = useNavigateToPath();
 
   return [
@@ -72,15 +76,18 @@ export function useTableActions(): Array<Action<DataFrameAnalyticsListRow>> {
         defaultMessage: 'View job',
       }),
       type: 'icon',
-      icon: 'list',
+      icon: 'listBullet',
       onClick: async (item) => {
-        const path = await locator?.getUrl({
-          page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
-          pageState: {
-            jobId: item.id,
+        const { url } = await mlManagementLocator?.getUrl(
+          {
+            page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+            pageState: {
+              jobId: item.id,
+            },
           },
-        });
-        await navigateToPath(path);
+          'analytics'
+        );
+        await navigateToPath(url);
       },
     },
     {

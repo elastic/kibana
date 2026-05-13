@@ -7,24 +7,52 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Logger } from '@kbn/logging';
-import {
-  isSSEError,
-  ServerSentErrorEvent,
-  ServerSentEventErrorCode,
-} from '@kbn/sse-utils/src/errors';
-import { ServerSentEvent, ServerSentEventType } from '@kbn/sse-utils/src/events';
-import { catchError, map, Observable, of } from 'rxjs';
+import { repeat } from 'lodash';
+import type { Logger } from '@kbn/logging';
+import type { ServerSentErrorEvent } from '@kbn/sse-utils/src/errors';
+import { isSSEError, ServerSentEventErrorCode } from '@kbn/sse-utils/src/errors';
+import type { ServerSentEvent } from '@kbn/sse-utils/src/events';
+import { ServerSentEventType } from '@kbn/sse-utils/src/events';
+import type { Observable } from 'rxjs';
+import { catchError, map, of, Subject, throttleTime } from 'rxjs';
 import { PassThrough } from 'stream';
+import type { Zlib } from 'zlib';
+
+class ResponseStream extends PassThrough {
+  private _compressor?: Zlib;
+  setCompressor(compressor: Zlib) {
+    this._compressor = compressor;
+  }
+  flush() {
+    this._compressor?.flush();
+  }
+}
+
+export const cloudProxyBufferSize = 4096;
 
 export function observableIntoEventSourceStream(
   source$: Observable<ServerSentEvent>,
   {
     logger,
     signal,
+    flushThrottleMs = 100,
+    flushMinBytes,
   }: {
     logger: Pick<Logger, 'debug' | 'error'>;
     signal: AbortSignal;
+    /**
+     * The minimum time in milliseconds between flushes of the stream.
+     * This is to avoid flushing too often if the source emits events in quick succession.
+     *
+     * @default 100
+     */
+    flushThrottleMs?: number;
+    /**
+     * The Cloud proxy currently buffers 4kb or 8kb of data until flushing.
+     * This decreases the responsiveness of the streamed response,
+     * so we manually insert some data during stream flushes to force the proxy to flush too.
+     */
+    flushMinBytes?: number;
   }
 ) {
   const withSerializedErrors$ = source$.pipe(
@@ -54,36 +82,61 @@ export function observableIntoEventSourceStream(
     }),
     map((event) => {
       const { type, ...rest } = event;
-      return `event: ${type}\ndata: ${JSON.stringify(rest)}\n\n`;
+      return createLine({ event: type, data: rest });
     })
   );
 
-  const stream = new PassThrough();
+  let currentBufferSize = 0;
 
-  const intervalId = setInterval(() => {
+  const stream = new ResponseStream();
+  const flush$ = new Subject<void>();
+  flush$
+    // Using `leading: true` and `trailing: true` to avoid holding the flushing for too long,
+    // but still avoid flushing too often (it will emit at the beginning of the throttling process, and at the end).
+    .pipe(throttleTime(flushThrottleMs, void 0, { leading: true, trailing: true }))
+    .subscribe(() => {
+      if (currentBufferSize > 0 && flushMinBytes && currentBufferSize <= flushMinBytes) {
+        const forceFlushContent = repeat('0', flushMinBytes * 2);
+        stream.write(`: ${forceFlushContent}\n`);
+      }
+      stream.flush();
+      currentBufferSize = 0;
+    });
+
+  const keepAliveIntervalId = setInterval(() => {
     // `:` denotes a comment - this is to keep the connection open
     // it will be ignored by the SSE parser on the client
-    stream.write(': keep-alive');
+    stream.write(': keep-alive\n');
+    flush$.next();
   }, 10000);
 
   const subscription = withSerializedErrors$.subscribe({
     next: (line) => {
       stream.write(line);
+      currentBufferSize += line.length;
+      // Make sure to flush the written lines to emit them immediately (instead of waiting for buffer to fill)
+      flush$.next();
     },
     complete: () => {
+      flush$.complete();
       stream.end();
-      clearTimeout(intervalId);
+      clearTimeout(keepAliveIntervalId);
     },
     error: (error) => {
-      clearTimeout(intervalId);
+      clearTimeout(keepAliveIntervalId);
       stream.write(
-        `event:error\ndata: ${JSON.stringify({
-          error: {
-            code: ServerSentEventErrorCode.internalError,
-            message: error.message,
+        createLine({
+          event: 'error',
+          data: {
+            error: {
+              code: ServerSentEventErrorCode.internalError,
+              message: error.message,
+            },
           },
-        })}\n\n`
+        })
       );
+      flush$.complete();
+      // No need to flush because we're ending the stream anyway
       stream.end();
     },
   });
@@ -94,4 +147,14 @@ export function observableIntoEventSourceStream(
   });
 
   return stream;
+}
+
+function createLine({ event, data }: { event: string; data: unknown }) {
+  return [
+    `event: ${event}`,
+    `data: ${JSON.stringify(data)}`,
+    // We could also include `id` and `retry` if we see fit in the future.
+    // https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#fields
+    `\n`,
+  ].join(`\n`);
 }

@@ -20,7 +20,6 @@ export function SyntheticsAddData() {
       })}
       href={kibana.services?.application?.getUrlForApp('/home#/tutorial/uptimeMonitors')}
       color="primary"
-      iconType="indexOpen"
     >
       {ADD_DATA_LABEL}
     </EuiHeaderLink>

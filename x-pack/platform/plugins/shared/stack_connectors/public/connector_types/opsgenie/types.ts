@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { RecursivePartial } from '@elastic/eui';
-import {
+import type { RecursivePartial } from '@elastic/eui';
+import type {
   ActionParamsProps,
   UserConfiguredActionConnector,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type {
-  OpsgenieActionConfig,
-  OpsgenieActionSecrets,
-  OpsgenieActionParams,
-} from '../../../server/connector_types';
+  Config as OpsgenieActionConfig,
+  Secrets as OpsgenieActionSecrets,
+  Params as OpsgenieActionParams,
+} from '@kbn/connector-schemas/opsgenie';
 
 export type OpsgenieActionConnector = UserConfiguredActionConnector<
   OpsgenieActionConfig,

@@ -6,7 +6,7 @@ Object {
   "references": Array [
     Object {
       "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-mockLayerId",
+      "name": "indexpattern-datasource-layer-layer-id-generated-uuid",
       "type": "index-pattern",
     },
   ],
@@ -15,14 +15,14 @@ Object {
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
-          "mockLayerId": Object {
+          "layer-id-generated-uuid": Object {
             "columnOrder": Array [
-              "mockTopValuesOfStackByFieldColumnId",
-              "mockTopValuesOfBreakdownFieldColumnId",
-              "mockCountColumnId",
+              "top-values-of-stack-by-field-column-id-generated-uuid",
+              "top-values-of-breakdown-field-column-id-generated-uuid",
+              "count-column-id-generated-uuid",
             ],
             "columns": Object {
-              "mockCountColumnId": Object {
+              "count-column-id-generated-uuid": Object {
                 "dataType": "number",
                 "isBucketed": false,
                 "label": "Count of agent.type",
@@ -33,7 +33,7 @@ Object {
                 "scale": "ratio",
                 "sourceField": "agent.type",
               },
-              "mockTopValuesOfBreakdownFieldColumnId": Object {
+              "top-values-of-breakdown-field-column-id-generated-uuid": Object {
                 "dataType": "string",
                 "isBucketed": true,
                 "label": "Top values of agent.type",
@@ -45,7 +45,7 @@ Object {
                   "includeIsRegex": false,
                   "missingBucket": false,
                   "orderBy": Object {
-                    "columnId": "mockCountColumnId",
+                    "columnId": "count-column-id-generated-uuid",
                     "type": "column",
                   },
                   "orderDirection": "desc",
@@ -58,7 +58,7 @@ Object {
                 "scale": "ordinal",
                 "sourceField": "agent.type",
               },
-              "mockTopValuesOfStackByFieldColumnId": Object {
+              "top-values-of-stack-by-field-column-id-generated-uuid": Object {
                 "dataType": "string",
                 "isBucketed": true,
                 "label": "Top values of event.category",
@@ -70,7 +70,7 @@ Object {
                   "includeIsRegex": false,
                   "missingBucket": false,
                   "orderBy": Object {
-                    "columnId": "mockCountColumnId",
+                    "columnId": "count-column-id-generated-uuid",
                     "type": "column",
                   },
                   "orderDirection": "desc",
@@ -102,6 +102,7 @@ Object {
           "negate": false,
           "params": Array [
             "signal-index",
+            "*:signal-index",
           ],
           "type": "phrases",
         },
@@ -112,6 +113,11 @@ Object {
               Object {
                 "match_phrase": Object {
                   "_index": "signal-index",
+                },
+              },
+              Object {
+                "match_phrase": Object {
+                  "_index": "*:signal-index",
                 },
               },
             ],
@@ -144,20 +150,20 @@ Object {
     "visualization": Object {
       "columns": Array [
         Object {
-          "columnId": "mockTopValuesOfStackByFieldColumnId",
+          "columnId": "top-values-of-stack-by-field-column-id-generated-uuid",
           "isTransposed": false,
           "width": 362,
         },
         Object {
-          "columnId": "mockCountColumnId",
+          "columnId": "count-column-id-generated-uuid",
           "isTransposed": false,
         },
         Object {
-          "columnId": "mockTopValuesOfBreakdownFieldColumnId",
+          "columnId": "top-values-of-breakdown-field-column-id-generated-uuid",
           "isTransposed": false,
         },
       ],
-      "layerId": "mockLayerId",
+      "layerId": "layer-id-generated-uuid",
       "layerType": "data",
     },
   },
@@ -172,7 +178,7 @@ Object {
   "references": Array [
     Object {
       "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-mockLayerId",
+      "name": "indexpattern-datasource-layer-layer-id-generated-uuid",
       "type": "index-pattern",
     },
   ],
@@ -181,13 +187,13 @@ Object {
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
-          "mockLayerId": Object {
+          "layer-id-generated-uuid": Object {
             "columnOrder": Array [
-              "mockTopValuesOfStackByFieldColumnId",
-              "mockCountColumnId",
+              "top-values-of-stack-by-field-column-id-generated-uuid",
+              "count-column-id-generated-uuid",
             ],
             "columns": Object {
-              "mockCountColumnId": Object {
+              "count-column-id-generated-uuid": Object {
                 "dataType": "number",
                 "isBucketed": false,
                 "label": "Count of event.category",
@@ -198,7 +204,7 @@ Object {
                 "scale": "ratio",
                 "sourceField": "event.category",
               },
-              "mockTopValuesOfStackByFieldColumnId": Object {
+              "top-values-of-stack-by-field-column-id-generated-uuid": Object {
                 "dataType": "string",
                 "isBucketed": true,
                 "label": "Top values of event.category",
@@ -210,7 +216,7 @@ Object {
                   "includeIsRegex": false,
                   "missingBucket": false,
                   "orderBy": Object {
-                    "columnId": "mockCountColumnId",
+                    "columnId": "count-column-id-generated-uuid",
                     "type": "column",
                   },
                   "orderDirection": "desc",
@@ -266,6 +272,7 @@ Object {
           "negate": false,
           "params": Array [
             "signal-index",
+            "*:signal-index",
           ],
           "type": "phrases",
         },
@@ -276,6 +283,11 @@ Object {
               Object {
                 "match_phrase": Object {
                   "_index": "signal-index",
+                },
+              },
+              Object {
+                "match_phrase": Object {
+                  "_index": "*:signal-index",
                 },
               },
             ],
@@ -308,16 +320,16 @@ Object {
     "visualization": Object {
       "columns": Array [
         Object {
-          "columnId": "mockTopValuesOfStackByFieldColumnId",
+          "columnId": "top-values-of-stack-by-field-column-id-generated-uuid",
           "isTransposed": false,
           "width": 362,
         },
         Object {
-          "columnId": "mockCountColumnId",
+          "columnId": "count-column-id-generated-uuid",
           "isTransposed": false,
         },
       ],
-      "layerId": "mockLayerId",
+      "layerId": "layer-id-generated-uuid",
       "layerType": "data",
     },
   },
@@ -332,7 +344,7 @@ Object {
   "references": Array [
     Object {
       "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-mockLayerId",
+      "name": "indexpattern-datasource-layer-layer-id-generated-uuid",
       "type": "index-pattern",
     },
   ],
@@ -341,13 +353,13 @@ Object {
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
-          "mockLayerId": Object {
+          "layer-id-generated-uuid": Object {
             "columnOrder": Array [
-              "mockTopValuesOfStackByFieldColumnId",
-              "mockCountColumnId",
+              "top-values-of-stack-by-field-column-id-generated-uuid",
+              "count-column-id-generated-uuid",
             ],
             "columns": Object {
-              "mockCountColumnId": Object {
+              "count-column-id-generated-uuid": Object {
                 "dataType": "number",
                 "isBucketed": false,
                 "label": "Count of event.category",
@@ -358,7 +370,7 @@ Object {
                 "scale": "ratio",
                 "sourceField": "event.category",
               },
-              "mockTopValuesOfStackByFieldColumnId": Object {
+              "top-values-of-stack-by-field-column-id-generated-uuid": Object {
                 "dataType": "string",
                 "isBucketed": true,
                 "label": "Top values of event.category",
@@ -370,7 +382,7 @@ Object {
                   "includeIsRegex": false,
                   "missingBucket": false,
                   "orderBy": Object {
-                    "columnId": "mockCountColumnId",
+                    "columnId": "count-column-id-generated-uuid",
                     "type": "column",
                   },
                   "orderDirection": "desc",
@@ -402,6 +414,7 @@ Object {
           "negate": false,
           "params": Array [
             "signal-index",
+            "*:signal-index",
           ],
           "type": "phrases",
         },
@@ -412,6 +425,11 @@ Object {
               Object {
                 "match_phrase": Object {
                   "_index": "signal-index",
+                },
+              },
+              Object {
+                "match_phrase": Object {
+                  "_index": "*:signal-index",
                 },
               },
             ],
@@ -444,16 +462,16 @@ Object {
     "visualization": Object {
       "columns": Array [
         Object {
-          "columnId": "mockTopValuesOfStackByFieldColumnId",
+          "columnId": "top-values-of-stack-by-field-column-id-generated-uuid",
           "isTransposed": false,
           "width": 362,
         },
         Object {
-          "columnId": "mockCountColumnId",
+          "columnId": "count-column-id-generated-uuid",
           "isTransposed": false,
         },
       ],
-      "layerId": "mockLayerId",
+      "layerId": "layer-id-generated-uuid",
       "layerType": "data",
     },
   },

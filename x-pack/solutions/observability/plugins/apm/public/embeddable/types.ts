@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EmbeddableInput } from '@kbn/embeddable-plugin/common';
+
 import type { CoreStart, CoreSetup } from '@kbn/core/public';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import type { ApmPluginStartDeps, ApmPluginSetupDeps } from '../plugin';
+import type { ITelemetryClient } from '../services/telemetry';
 import type { ConfigSchema } from '..';
 import type { KibanaEnvContext } from '../context/kibana_environment_context/kibana_environment_context';
 export interface EmbeddableDeps {
@@ -18,6 +19,7 @@ export interface EmbeddableDeps {
   config: ConfigSchema;
   kibanaEnvironment: KibanaEnvContext;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
+  telemetry: ITelemetryClient;
 }
 export interface APMEmbeddableProps {
   transactionName?: string;
@@ -26,4 +28,4 @@ export interface APMEmbeddableProps {
   kuery?: string;
 }
 
-export type APMEmbeddableInput = EmbeddableInput & APMEmbeddableProps;
+export type APMEmbeddableInput = APMEmbeddableProps;

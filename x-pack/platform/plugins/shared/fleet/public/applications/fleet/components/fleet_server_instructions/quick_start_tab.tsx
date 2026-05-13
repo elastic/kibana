@@ -53,7 +53,7 @@ export const QuickStartTab: React.FunctionComponent<Props> = ({ onClose }) => {
     }),
     getInstallFleetServerStep({
       isFleetServerReady,
-      fleetServerHost: fleetServerHost?.host_urls[0],
+      fleetServerHost,
       fleetServerPolicyId,
       serviceToken,
       deploymentMode: 'quickstart',

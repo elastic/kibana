@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab } from '@elastic/eui';
 import * as i18n from './translations';
 import { ControlGeneralView } from '../control_general_view';
 import { ControlYamlView } from '../control_yaml_view';
-import { SettingsDeps, OnChangeDeps } from '../../types';
+import type { SettingsDeps, OnChangeDeps } from '../../types';
 
 const VIEW_MODE_GENERAL = 'general';
 const VIEW_MODE_YAML = 'yaml';

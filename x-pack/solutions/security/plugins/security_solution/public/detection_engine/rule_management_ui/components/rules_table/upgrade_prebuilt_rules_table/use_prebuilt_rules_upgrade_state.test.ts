@@ -6,9 +6,9 @@
  */
 
 import { FieldUpgradeStateEnum } from '../../../../rule_management/model/prebuilt_rule_upgrade';
-import type { RuleResponse } from '../../../../../../common/api/detection_engine';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import {
+  type RuleResponse,
   type RuleUpgradeInfoForReview,
   ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
@@ -429,6 +429,8 @@ function createRuleUpgradeInfoMock(
       num_fields_with_non_solvable_conflicts: 0,
       fields: {},
     },
+    has_base_version: true,
+    version: 1,
     revision: 1,
     ...rewrites,
   };

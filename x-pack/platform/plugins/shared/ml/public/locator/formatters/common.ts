@@ -7,7 +7,7 @@
 
 import { isEmpty } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import type { MlGenericUrlState } from '../../../common/types/locator';
+import type { MlGenericUrlState } from '@kbn/ml-common-types/locator';
 
 export function extractParams<UrlState>(urlState: UrlState) {
   // page should be guaranteed to exist here but <UrlState> is unknown
@@ -22,7 +22,7 @@ export function extractParams<UrlState>(urlState: UrlState) {
  */
 export function formatGenericMlUrl(
   appBasePath: string,
-  page: MlGenericUrlState['page'],
+  page: MlGenericUrlState['page'] | string,
   pageState: MlGenericUrlState['pageState']
 ): string {
   let url = `${appBasePath}/${page}`;

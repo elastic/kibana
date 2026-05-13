@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { ErrorIndexPatternFieldNotFound } from '../../../error';
 import { handleErrors } from '../util/handle_errors';
 import type {
@@ -28,15 +28,18 @@ export const registerDeleteScriptedFieldRoute = (
     .delete({
       path: '/api/index_patterns/index_pattern/{id}/scripted_field/{name}',
       access: 'public',
+      summary: 'Delete a scripted field',
+      description:
+        'Deprecated. Scripted fields are superseded by runtime fields. Use the runtime field endpoints instead.',
+      security: {
+        authz: {
+          requiredPrivileges: ['indexPatterns:manage'],
+        },
+      },
     })
     .addVersion(
       {
         version: INITIAL_REST_VERSION,
-        security: {
-          authz: {
-            requiredPrivileges: ['indexPatterns:manage'],
-          },
-        },
         validate: {
           request: {
             params: schema.object(

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { castArray } from 'lodash';
 import { createValidationFunction } from '../../../common/runtime_types';
 import { FIND_FIELDS_METADATA_URL } from '../../../common/fields_metadata';
 import * as fieldsMetadataV1 from '../../../common/fields_metadata/v1';
-import { FieldsMetadataBackendLibs } from '../../lib/shared_types';
-import { FindFieldsMetadataResponsePayload } from '../../../common/fields_metadata/v1';
+import type { FieldsMetadataBackendLibs } from '../../lib/shared_types';
+import type { FindFieldsMetadataResponsePayload } from '../../../common/fields_metadata/v1';
 import { PackageNotFoundError } from '../../services/fields_metadata/errors';
 
 export const initFindFieldsMetadataRoute = ({
@@ -20,17 +21,17 @@ export const initFindFieldsMetadataRoute = ({
     .get({
       access: 'internal',
       path: FIND_FIELDS_METADATA_URL,
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization to keep available the access to static fields metadata such as ECS fields. For other sources (fleet integrations), appropriate checks are performed at the API level.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization to keep available the access to static fields metadata such as ECS fields. For other sources (fleet integrations), appropriate checks are performed at the API level.',
-          },
-        },
         validate: {
           request: {
             query: createValidationFunction(fieldsMetadataV1.findFieldsMetadataRequestQueryRT),
@@ -38,24 +39,46 @@ export const initFindFieldsMetadataRoute = ({
         },
       },
       async (_requestContext, request, response) => {
-        const { attributes, fieldNames, integration, dataset } = request.query;
+        const { attributes, fieldNames, integration, dataset, source, streamNames } = request.query;
         const [_core, _startDeps, startContract] = await getStartServices();
 
         const fieldsMetadataClient = await startContract.getClient(request);
 
         try {
-          const fieldsDictionary = await fieldsMetadataClient.find({
-            fieldNames,
-            integration,
-            dataset,
-          });
+          const responsePayload: FindFieldsMetadataResponsePayload = {
+            fields: {},
+            streamFields: {},
+          };
 
-          const responsePayload: FindFieldsMetadataResponsePayload = { fields: {} };
+          const isStreamsOnly =
+            source !== undefined && castArray(source).every((s) => s === 'streams');
 
-          if (attributes) {
-            responsePayload.fields = fieldsDictionary.pick(attributes);
-          } else {
-            responsePayload.fields = fieldsDictionary.toPlain();
+          if (!isStreamsOnly) {
+            const fieldsDictionary = await fieldsMetadataClient.find({
+              fieldNames,
+              integration,
+              dataset,
+              source,
+            });
+
+            if (attributes) {
+              responsePayload.fields = fieldsDictionary.pick(attributes);
+            } else {
+              responsePayload.fields = fieldsDictionary.toPlain();
+            }
+          }
+
+          if (streamNames?.length) {
+            const results = await Promise.all(
+              streamNames.map((streamName) =>
+                fieldsMetadataClient.find({ fieldNames, source, streamName })
+              )
+            );
+            for (const [i, dict] of results.entries()) {
+              responsePayload.streamFields[streamNames[i]] = attributes
+                ? dict.pick(attributes)
+                : dict.toPlain();
+            }
           }
 
           return response.ok({

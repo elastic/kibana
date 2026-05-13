@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { LocatorDefinition } from '@kbn/share-plugin/common';
-import { LocatorClient } from '@kbn/share-plugin/common/url_service';
+import { type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { ALL_LOGS_DATA_VIEW_ID } from '@kbn/discover-utils/src';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { LocatorDefinition } from '@kbn/share-plugin/common';
+import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
 
 /**
  * Locator used to link to all log sources in Discover.
@@ -17,7 +17,7 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 export const LOGS_LOCATOR_ID = 'LOGS_LOCATOR';
 
 /**
- * Accepts the same parameters as `DiscoverAppLocatorParams`, but automatically sets the `dataViewSpec` param to all log sources.
+ * Accepts the same parameters as `DiscoverAppLocatorParams`, but automatically sets the `dataViewId` param to all log sources.
  */
 export type LogsLocatorParams = DiscoverAppLocatorParams;
 
@@ -28,6 +28,7 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
     private readonly deps: {
       locators: LocatorClient;
       getLogSourcesService(): Promise<LogsDataAccessPluginStart['services']['logSourcesService']>;
+      getIsEsqlDefault(): Promise<boolean>;
     }
   ) {}
 
@@ -35,18 +36,21 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
     const discoverAppLocator =
       this.deps.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
 
+    const isEsqlDefault = await this.deps.getIsEsqlDefault();
+
+    if (isEsqlDefault && !params.query) {
+      const logSourcesService = await this.deps.getLogSourcesService();
+      const flattenedLogSources = await logSourcesService.getFlattenedLogSources();
+
+      return discoverAppLocator.getLocation({
+        ...params,
+        query: { esql: `FROM ${flattenedLogSources}` },
+      });
+    }
+
     return discoverAppLocator.getLocation({
-      dataViewSpec: params.dataViewSpec ?? (await this.getLogSourcesDataViewSpec()),
+      dataViewId: ALL_LOGS_DATA_VIEW_ID,
       ...params,
     });
   };
-
-  private async getLogSourcesDataViewSpec(): Promise<DataViewSpec> {
-    const logSourcesService = await this.deps.getLogSourcesService();
-    const logSources = await logSourcesService.getLogSources();
-    return {
-      title: logSources.map((logSource) => logSource.indexPattern).join(','),
-      timeFieldName: '@timestamp',
-    };
-  }
 }

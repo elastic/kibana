@@ -17,7 +17,7 @@ import {
   ruleLastRunOutcomeValues as ruleLastRunOutcomeValuesV1,
 } from '../../common/constants/v1';
 import { validateNotifyWhenV1 } from '../../validation';
-import { flappingSchemaV1 } from '../../common';
+import { flappingSchemaV2 } from '../../common';
 
 export const actionParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()), {
   meta: {
@@ -475,6 +475,21 @@ export const alertDelaySchema = schema.object(
   }
 );
 
+export const dashboardsSchema = schema.arrayOf(schema.object({ id: schema.string() }));
+
+export const investigationGuideSchema = schema.object({
+  blob: schema.string({
+    meta: {
+      description: 'User-created content that describes alert causes and remdiation.',
+    },
+  }),
+});
+
+export const artifactsSchema = schema.object({
+  dashboards: schema.maybe(dashboardsSchema),
+  investigation_guide: schema.maybe(investigationGuideSchema),
+});
+
 export const ruleResponseSchema = schema.object({
   id: schema.string({
     meta: {
@@ -638,7 +653,8 @@ export const ruleResponseSchema = schema.object({
     )
   ),
   alert_delay: schema.maybe(alertDelaySchema),
-  flapping: schema.maybe(schema.nullable(flappingSchemaV1)),
+  flapping: schema.maybe(schema.nullable(flappingSchemaV2)),
+  artifacts: schema.maybe(artifactsSchema),
 });
 
 export const scheduleIdsSchema = schema.maybe(schema.arrayOf(schema.string()));

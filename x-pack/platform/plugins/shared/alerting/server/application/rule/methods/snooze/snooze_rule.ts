@@ -7,6 +7,8 @@
 
 import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
+import type { SavedObject } from '@kbn/core/server';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { ruleSnoozeScheduleSchema } from '../../../../../common/routes/rule/request';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getRuleSavedObject } from '../../../../rules_client/lib';
@@ -15,20 +17,24 @@ import { WriteOperations, AlertingAuthorizationEntity } from '../../../../author
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { validateSnoozeStartDate } from '../../../../lib/validate_snooze_date';
 import { RuleMutedError } from '../../../../lib/errors/rule_muted';
-import { RulesClientContext } from '../../../../rules_client/types';
+import type { RulesClientContext } from '../../../../rules_client/types';
+import type { RawRule, SanitizedRule } from '../../../../types';
 import {
   getSnoozeAttributes,
   verifySnoozeAttributeScheduleLimit,
 } from '../../../../rules_client/common';
 import { updateRuleSo } from '../../../../data/rule';
 import { updateMetaAttributes } from '../../../../rules_client/lib/update_meta_attributes';
+import type { RuleParams } from '../../types';
+import { transformRuleDomainToRule, transformRuleAttributesToRuleDomain } from '../../transforms';
+import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
 import { snoozeRuleParamsSchema } from './schemas';
 import type { SnoozeRuleOptions } from './types';
 
-export async function snoozeRule(
+export async function snoozeRule<Params extends RuleParams = never>(
   context: RulesClientContext,
   { id, snoozeSchedule }: SnoozeRuleOptions
-): Promise<void> {
+): Promise<SanitizedRule<Params>> {
   try {
     snoozeRuleParamsSchema.validate({ id });
     ruleSnoozeScheduleSchema.validate({ ...snoozeSchedule });
@@ -47,7 +53,7 @@ export async function snoozeRule(
   );
 }
 
-async function snoozeWithOCC(
+async function snoozeWithOCC<Params extends RuleParams = never>(
   context: RulesClientContext,
   { id, snoozeSchedule }: SnoozeRuleOptions
 ) {
@@ -99,14 +105,42 @@ async function snoozeWithOCC(
     throw Boom.badRequest(error.message);
   }
 
-  await updateRuleSo({
+  const username = await context.getUserName();
+  const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
+
+  const snoozeRuleTimestamp = Date.now();
+  const updatedRuleRaw = await updateRuleSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     savedObjectsUpdateOptions: { version },
     id,
     updateRuleAttributes: updateMetaAttributes(context, {
       ...newAttrs,
-      updatedBy: await context.getUserName(),
+      updatedBy: username,
       updatedAt: new Date().toISOString(),
     }),
   });
+
+  await logBulkRuleChanges({
+    ruleSOs: [updatedRuleRaw] as Array<SavedObject<RawRule>>,
+    rulesClientContext: context,
+    changesContext: {
+      action: RuleChangeTrackingAction.ruleSnooze,
+      timestamp: snoozeRuleTimestamp,
+    },
+  });
+
+  const ruleDomain = transformRuleAttributesToRuleDomain<Params>(
+    updatedRuleRaw.attributes as RawRule,
+    {
+      id: updatedRuleRaw.id,
+      logger: context.logger,
+      ruleType,
+      references: updatedRuleRaw.references,
+    },
+    context.isSystemAction
+  );
+
+  const rule = transformRuleDomainToRule<Params>(ruleDomain);
+
+  return rule as SanitizedRule<Params>;
 }

@@ -7,8 +7,9 @@
 
 import { readFileSync } from 'fs';
 import { cloneDeep } from 'lodash';
-import { Logger } from '@kbn/core/server';
-import { ActionsConfig, CustomHostSettings } from '../config';
+import type { Logger } from '@kbn/core/server';
+import type { CustomHostSettings } from '@kbn/actions-utils';
+import type { ActionsConfig } from '../config';
 
 type DeepWriteable<T> = { -readonly [P in keyof T]: DeepWriteable<T[P]> };
 

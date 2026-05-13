@@ -6,21 +6,26 @@
  */
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { LLM } from '@langchain/core/language_models/llms';
 import { get } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
+import type { InferenceClient } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
 import { DEFAULT_TIMEOUT, getDefaultArguments } from './constants';
 
 import { getMessageContentAndRole } from './helpers';
-import { TraceOptions } from './types';
+import type { TraceOptions } from './types';
 
 const LLM_TYPE = 'ActionsClientLlm';
 
 interface ActionsClientLlmParams {
   actionsClient: PublicMethodsOf<ActionsClient>;
   connectorId: string;
+  inferenceClient?: InferenceClient;
+  isInferenceEndpoint?: boolean;
   llmType?: string;
   logger: Logger;
   model?: string;
@@ -28,14 +33,18 @@ interface ActionsClientLlmParams {
   timeout?: number;
   traceId?: string;
   traceOptions?: TraceOptions;
+  telemetryMetadata?: TelemetryMetadata;
 }
 
 export class ActionsClientLlm extends LLM {
   #actionsClient: PublicMethodsOf<ActionsClient>;
   #connectorId: string;
+  #inferenceClient?: InferenceClient;
+  #isInferenceEndpoint: boolean;
   #logger: Logger;
   #traceId: string;
   #timeout?: number;
+  telemetryMetadata?: TelemetryMetadata;
 
   // Local `llmType` as it can change and needs to be accessed by abstract `_llmType()` method
   // Not using getter as `this._llmType()` is called in the constructor via `super({})`
@@ -47,6 +56,8 @@ export class ActionsClientLlm extends LLM {
   constructor({
     actionsClient,
     connectorId,
+    inferenceClient,
+    isInferenceEndpoint = false,
     traceId = uuidv4(),
     llmType,
     logger,
@@ -54,6 +65,7 @@ export class ActionsClientLlm extends LLM {
     temperature,
     timeout,
     traceOptions,
+    telemetryMetadata,
   }: ActionsClientLlmParams) {
     super({
       callbacks: [...(traceOptions?.tracers ?? [])],
@@ -61,12 +73,15 @@ export class ActionsClientLlm extends LLM {
 
     this.#actionsClient = actionsClient;
     this.#connectorId = connectorId;
+    this.#inferenceClient = inferenceClient;
+    this.#isInferenceEndpoint = isInferenceEndpoint;
     this.#traceId = traceId;
     this.llmType = llmType ?? LLM_TYPE;
     this.#logger = logger;
     this.#timeout = timeout;
     this.model = model;
     this.temperature = temperature;
+    this.telemetryMetadata = telemetryMetadata;
   }
 
   _llmType() {
@@ -90,6 +105,24 @@ export class ActionsClientLlm extends LLM {
         )} `
     );
 
+    if (this.#isInferenceEndpoint) {
+      if (!this.#inferenceClient) {
+        throw new Error(
+          `${LLM_TYPE}: inferenceClient is required when isInferenceEndpoint is true`
+        );
+      }
+
+      const result = await this.#inferenceClient.chatComplete({
+        connectorId: this.#connectorId,
+        messages: [{ role: MessageRole.User, content: prompt }],
+        temperature: this.temperature,
+        modelName: this.model,
+        timeout: this.#timeout,
+      });
+
+      return result.content;
+    }
+
     // create a new connector request body with the assistant message:
     const requestBody = {
       actionId: this.#connectorId,
@@ -102,6 +135,7 @@ export class ActionsClientLlm extends LLM {
                   model: this.model,
                   messages: [assistantMessage], // the assistant message
                 },
+                telemetryMetadata: this.telemetryMetadata,
               },
             }
           : {
@@ -113,6 +147,7 @@ export class ActionsClientLlm extends LLM {
                 ...getDefaultArguments(this.llmType, this.temperature),
                 // This timeout is large because LangChain prompts can be complicated and take a long time
                 timeout: this.#timeout ?? DEFAULT_TIMEOUT,
+                telemetryMetadata: this.telemetryMetadata,
               },
             },
     };

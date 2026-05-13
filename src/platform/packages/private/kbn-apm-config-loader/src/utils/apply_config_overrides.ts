@@ -8,13 +8,26 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import { getArgValue } from './read_argv';
+import { getArgValue, getAllArgKeysValueWithPrefix } from './read_argv';
+
+const CONFIG_PREFIXES = ['--elastic.apm', '--telemetry', '--monitoring_collection'];
+
+const coerceCliValue = (value: string): string | boolean | number => {
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+  const num = Number(value);
+  if (value !== '' && !isNaN(num)) return num;
+  return value;
+};
 
 /**
  * Manually applies the specific configuration overrides we need to load the APM config.
  * Currently, only these are needed:
  *   - server.uuid
  *   - path.data
+ *   - elastic.apm.*
+ *   - telemetry.*
+ *   - monitoring_collection.*
  */
 export const applyConfigOverrides = (config: Record<string, any>, argv: string[]) => {
   const serverUuid = getArgValue(argv, '--server.uuid');
@@ -25,4 +38,13 @@ export const applyConfigOverrides = (config: Record<string, any>, argv: string[]
   if (dataPath) {
     set(config, 'path.data', dataPath);
   }
+
+  CONFIG_PREFIXES.forEach((prefix) => {
+    getAllArgKeysValueWithPrefix(argv, prefix).forEach(([key, value]) => {
+      if (typeof value === 'undefined') {
+        value = 'true'; // Add support to boolean flags without values (i.e.: --telemetry.enabled)
+      }
+      set(config, key, coerceCliValue(value));
+    });
+  });
 };

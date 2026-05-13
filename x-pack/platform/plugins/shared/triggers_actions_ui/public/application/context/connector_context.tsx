@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
-import { ConnectorServices } from '../../types';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
+import type { ConnectorServices } from '../../types';
 
 export interface ConnectorContextValue {
   services: ConnectorServices;
+  isServerless?: boolean;
 }
 
 export const ConnectorContext = React.createContext<ConnectorContextValue | undefined>(undefined);

@@ -12,10 +12,8 @@ import {
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import {
-  CollectorOptions,
-  createUsageCollectionSetupMock,
-} from '@kbn/usage-collection-plugin/server/mocks';
+import type { CollectorOptions } from '@kbn/usage-collection-plugin/server/mocks';
+import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { cloudDetailsMock, registerEbtCountersMock } from './plugin.test.mocks';
 import { plugin } from '.';
 import type { KibanaUsageCollectionPlugin } from './plugin';

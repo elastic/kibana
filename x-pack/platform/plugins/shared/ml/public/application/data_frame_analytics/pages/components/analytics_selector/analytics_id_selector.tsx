@@ -19,18 +19,19 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTabbedContent,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { BUILT_IN_MODEL_TAG } from '@kbn/ml-trained-models-utils';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
+import type { TrainedModelConfigResponse } from '@kbn/ml-common-types/trained_models';
 import { useTrainedModelsApiService } from '../../../../services/ml_api_service/trained_models';
 import type { GetDataFrameAnalyticsResponse } from '../../../../services/ml_api_service/data_frame_analytics';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { ModelsTableToConfigMapping } from '../../../../model_management/config_mapping';
 import { useMlApi } from '../../../../contexts/kibana';
-import type { TrainedModelConfigResponse } from '../../../../../../common/types/trained_models';
 
 export interface AnalyticsSelectorIds {
   model_id?: string;
@@ -120,6 +121,9 @@ export function AnalyticsIdSelector({
   const [selected, setSelected] = useState<
     { model_id?: string; job_id?: string; analysis_type?: string } | undefined
   >();
+  const flyoutTitleId = useGeneratedHtmlId({
+    prefix: 'jobSelectorFlyout',
+  });
   const [analyticsJobs, setAnalyticsJobs] = useState<DataFrameAnalyticsConfig[]>([]);
   const [trainedModels, setTrainedModels] = useState<TrainedModelConfigResponse[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -239,6 +243,9 @@ export function AnalyticsIdSelector({
           pagination={pagination}
           sorting={true}
           selection={selectionValue}
+          tableCaption={i18n.translate('xpack.ml.analyticsSelector.jobsTableCaption', {
+            defaultMessage: 'Analytics jobs available for selection',
+          })}
         />
       ),
     },
@@ -259,6 +266,9 @@ export function AnalyticsIdSelector({
           pagination={pagination}
           sorting={true}
           selection={selectionValue}
+          tableCaption={i18n.translate('xpack.ml.analyticsSelector.modelsTableCaption', {
+            defaultMessage: 'Trained models available for selection',
+          })}
         />
       ),
     });
@@ -268,11 +278,11 @@ export function AnalyticsIdSelector({
     <EuiFlyout
       onClose={closeFlyout}
       data-test-subj="mlFlyoutJobSelector"
-      aria-labelledby="jobSelectorFlyout"
+      aria-labelledby={flyoutTitleId}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id="flyoutTitle">
+          <h2 id={flyoutTitleId}>
             {i18n.translate('xpack.ml.analyticsSelector.flyoutTitle', {
               defaultMessage: 'Analytics selection',
             })}

@@ -89,7 +89,7 @@ export const AgentsSummary = memo<AgentsSummaryProps>((props) => {
           >
             <EuiDescriptionList
               textStyle="reverse"
-              style={{ textAlign: 'right' }}
+              css={{ textAlign: 'right' }}
               listItems={[
                 {
                   title,

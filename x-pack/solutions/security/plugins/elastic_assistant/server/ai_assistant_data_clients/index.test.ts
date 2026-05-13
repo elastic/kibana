@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { AIAssistantDataClient, AIAssistantDataClientParams } from '.';
+import type { AIAssistantDataClientParams } from '.';
+import { AIAssistantDataClient } from '.';
 import { authenticatedUser } from '../__mocks__/user';
 const date = '2023-03-28T22:27:28.159Z';
 let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
@@ -151,7 +152,6 @@ describe('AIAssistantDataClient', () => {
                 },
               ],
               title: 'Alert summary',
-              is_default: true,
               users: [
                 {
                   name: 'elastic',
@@ -185,7 +185,6 @@ describe('AIAssistantDataClient', () => {
                   model: 'anthropic.claude-v2',
                 },
                 created_at: '2024-01-25T01:32:37.649Z',
-                is_default: true,
                 messages: [
                   {
                     '@timestamp': '1/24/2024, 5:32:19 PM',

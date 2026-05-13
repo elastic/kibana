@@ -5,19 +5,21 @@
  * 2.0.
  */
 import type { EndpointOf, ServerRouteRepository } from '@kbn/server-route-repository';
-import { elasticAgentRouteRepository } from './elastic_agent/route';
 import { flowRouteRepository } from './flow/route';
 import { kubernetesOnboardingRouteRepository } from './kubernetes/route';
-import { logsOnboardingRouteRepository } from './logs/route';
 import { firehoseOnboardingRouteRepository } from './firehose/route';
+import { otelHostOnboardingRouteRepository } from './otel_host/route';
+import { otelApmOnboardingRouteRepository } from './otel_apm/route';
+import { cloudforwarderOnboardingRouteRepository } from './cloudforwarder/route';
 
 function getTypedObservabilityOnboardingServerRouteRepository() {
   const repository = {
     ...flowRouteRepository,
-    ...logsOnboardingRouteRepository,
-    ...elasticAgentRouteRepository,
     ...kubernetesOnboardingRouteRepository,
     ...firehoseOnboardingRouteRepository,
+    ...otelHostOnboardingRouteRepository,
+    ...otelApmOnboardingRouteRepository,
+    ...cloudforwarderOnboardingRouteRepository,
   };
 
   return repository;

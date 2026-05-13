@@ -5,10 +5,53 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 
 export const PREBUILT_RULE_ASSETS_SO_TYPE = 'security-rule';
+
+/**
+ * Upper bound for the number of tags per prebuilt rule asset.
+ * In practice, prebuilt rule assets typically have fewer than 15 tags.
+ * This limit exists to satisfy the "unbounded-array-in-schema" CodeQL check.
+ * See: https://github.com/elastic/kibana/security/code-scanning/2072
+ */
+const MAX_TAGS_PER_RULE = 100;
+
+const securityRuleV1 = schema.object(
+  {
+    rule_id: schema.string(),
+    version: schema.number(),
+  },
+  { unknowns: 'allow' }
+);
+
+const securityRuleV2 = securityRuleV1.extends(
+  {
+    name: schema.string(),
+    tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: MAX_TAGS_PER_RULE })),
+    severity: schema.string(),
+    risk_score: schema.number(),
+  },
+  { unknowns: 'allow' }
+);
+
+const securityRuleV3 = schema.object(
+  {
+    rule_id: schema.string(),
+    version: schema.number(),
+    name: schema.string(),
+    tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: MAX_TAGS_PER_RULE })),
+    // Relaxed to optional for V3: deprecated rule stubs from the Fleet package
+    // lack severity and risk_score since they only carry identification fields.
+    severity: schema.maybe(schema.string()),
+    risk_score: schema.maybe(schema.number()),
+    // New field for deprecated detection-rule objects
+    deprecated: schema.maybe(schema.boolean()),
+  },
+  { unknowns: 'allow' }
+);
 
 const prebuiltRuleAssetMappings: SavedObjectsType['mappings'] = {
   dynamic: false,
@@ -18,6 +61,27 @@ const prebuiltRuleAssetMappings: SavedObjectsType['mappings'] = {
     },
     version: {
       type: 'long',
+    },
+    name: {
+      type: 'text',
+      fields: {
+        keyword: {
+          type: 'keyword',
+          normalizer: 'lowercase',
+        },
+      },
+    },
+    tags: {
+      type: 'keyword',
+    },
+    severity: {
+      type: 'keyword',
+    },
+    risk_score: {
+      type: 'float',
+    },
+    deprecated: {
+      type: 'boolean',
     },
   },
 };
@@ -32,4 +96,60 @@ export const prebuiltRuleAssetType: SavedObjectsType = {
   },
   namespaceType: 'agnostic',
   mappings: prebuiltRuleAssetMappings,
+  modelVersions: {
+    '1': {
+      changes: [],
+      schemas: {
+        forwardCompatibility: securityRuleV1,
+        create: securityRuleV1,
+      },
+    },
+    '2': {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            name: {
+              type: 'text',
+              fields: {
+                keyword: {
+                  type: 'keyword',
+                  normalizer: 'lowercase',
+                },
+              },
+            },
+            tags: {
+              type: 'keyword',
+            },
+            severity: {
+              type: 'keyword',
+            },
+            risk_score: {
+              type: 'float',
+            },
+          },
+        },
+      ],
+      schemas: {
+        forwardCompatibility: securityRuleV2,
+        create: securityRuleV2,
+      },
+    },
+    '3': {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            deprecated: {
+              type: 'boolean',
+            },
+          },
+        },
+      ],
+      schemas: {
+        forwardCompatibility: securityRuleV3,
+        create: securityRuleV3,
+      },
+    },
+  },
 };

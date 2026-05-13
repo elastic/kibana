@@ -5,124 +5,119 @@
  * 2.0.
  */
 
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import {
-  isGroupStreamDefinition,
-  StreamDefinition,
-  StreamGetResponse,
-  isWiredStreamDefinition,
-  streamUpsertRequestSchema,
-  isGroupStreamDefinitionBase,
-} from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
-import { badData, badRequest } from '@hapi/boom';
-import { hasSupportedStreamsRoot } from '../../../lib/streams/root_stream_definition';
-import { UpsertStreamResponse } from '../../../lib/streams/client';
+import { z } from '@kbn/zod/v4';
+import { badData } from '@hapi/boom';
+import { Streams } from '@kbn/streams-schema';
+import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
+import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import type { UpsertStreamResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
+import { classicIngestHasEsLevelChanges } from '../../../lib/streams/state_management/streams/helpers';
 import { readStream } from './read_stream';
+import { createClassicStreamRoute } from './create_classic_stream_route';
+import { validateClassicStreamRoute } from './validate_classic_stream_route';
+import {
+  createWiredStreamRequest,
+  updateClassicStreamRequest,
+  createQueryStreamRequest,
+  getWiredStreamResponse,
+  listStreamsResponse,
+} from '../../../oas_examples';
 
 export const readStreamRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{name}',
+  endpoint: 'GET /api/streams/{name} 2023-10-31',
   options: {
-    access: 'internal',
+    access: 'public',
+    summary: 'Get a stream',
+    description: 'Fetches a stream definition and associated dashboards',
+    availability: {
+      since: '9.1.0',
+      stability: 'experimental',
+    },
+    oasOperationObject: () => ({
+      responses: {
+        200: {
+          description: 'Stream definition and associated metadata.',
+          content: {
+            'application/json': {
+              examples: {
+                getWiredStream: { value: getWiredStreamResponse },
+              },
+            },
+          },
+        },
+      },
+    }),
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().describe('The name of the stream.') }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<StreamGetResponse> => {
-    const { assetClient, streamsClient, scopedClusterClient } = await getScopedClients({
-      request,
-    });
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<Streams.all.GetResponse> => {
+    const { getQueryClient, attachmentClient, streamsClient, scopedClusterClient } =
+      await getScopedClients({
+        request,
+      });
 
+    const queryClient = await getQueryClient();
     const body = await readStream({
       name: params.path.name,
-      assetClient,
+      queryClient,
+      attachmentClient,
       scopedClusterClient,
       streamsClient,
+      logger,
     });
 
     return body;
   },
 });
 
-export interface StreamDetailsResponse {
-  details: {
-    count: number;
-  };
-}
-
-export const streamDetailRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{name}/_details',
+export const listStreamsRoute = createServerRoute({
+  endpoint: 'GET /api/streams 2023-10-31',
   options: {
-    access: 'internal',
-  },
-  security: {
-    authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    access: 'public',
+    description: 'Fetches list of all streams',
+    summary: 'Get stream list',
+    availability: {
+      since: '9.1.0',
+      stability: 'experimental',
     },
-  },
-  params: z.object({
-    path: z.object({ name: z.string() }),
-    query: z.object({
-      start: z.string(),
-      end: z.string(),
-    }),
-  }),
-  handler: async ({ params, request, getScopedClients }): Promise<StreamDetailsResponse> => {
-    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
-    const streamEntity = await streamsClient.getStream(params.path.name);
-
-    const indexPattern = isGroupStreamDefinition(streamEntity)
-      ? streamEntity.group.members.join(',')
-      : streamEntity.name;
-    // check doc count
-    const docCountResponse = await scopedClusterClient.asCurrentUser.search({
-      index: indexPattern,
-      track_total_hits: true,
-      query: {
-        range: {
-          '@timestamp': {
-            gte: params.query.start,
-            lte: params.query.end,
+    oasOperationObject: () => ({
+      responses: {
+        200: {
+          description: 'A list of all streams.',
+          content: {
+            'application/json': {
+              examples: {
+                listStreams: { value: listStreamsResponse },
+              },
+            },
           },
         },
       },
-      size: 0,
-    });
-
-    const count = (docCountResponse.hits.total as SearchTotalHits).value;
-
-    return {
-      details: {
-        count,
-      },
-    };
-  },
-});
-
-export const listStreamsRoute = createServerRoute({
-  endpoint: 'GET /api/streams',
-  options: {
-    access: 'internal',
+    }),
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({}),
-  handler: async ({ request, getScopedClients }): Promise<{ streams: StreamDefinition[] }> => {
+  handler: async ({
+    request,
+    getScopedClients,
+  }): Promise<{ streams: Streams.all.Definition[] }> => {
     const { streamsClient } = await getScopedClients({ request });
     return {
       streams: await streamsClient.listStreams(),
@@ -131,78 +126,114 @@ export const listStreamsRoute = createServerRoute({
 });
 
 export const editStreamRoute = createServerRoute({
-  endpoint: 'PUT /api/streams/{name}',
+  endpoint: 'PUT /api/streams/{name} 2023-10-31',
   options: {
-    access: 'internal',
+    access: 'public',
+    summary: 'Create or update a stream',
+    description:
+      'Creates or updates a stream definition. Classic streams can not be created through this API, only updated',
+    availability: {
+      since: '9.1.0',
+      stability: 'experimental',
+    },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              createWiredStream: { value: createWiredStreamRequest },
+              updateClassicStream: { value: updateClassicStreamRequest },
+              createQueryStream: { value: createQueryStreamRequest },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'The stream was created or updated successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the stream.'),
     }),
-    body: streamUpsertRequestSchema,
+    body: Streams.all.UpsertRequest.right,
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<UpsertStreamResponse> => {
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    context,
+  }): Promise<UpsertStreamResponse> => {
     const { streamsClient } = await getScopedClients({ request });
 
-    if (!(await streamsClient.isStreamsEnabled())) {
-      throw badData('Streams are not enabled');
+    // Replicated data streams are managed by the source cluster via CCR.
+    // Only Kibana-side data (description, dashboards, queries) can be updated.
+    if (Streams.ClassicStream.UpsertRequest.is(params.body)) {
+      const dataStream = await streamsClient.getDataStream(params.path.name).catch(() => null);
+      if (dataStream?.replicated && classicIngestHasEsLevelChanges(params.body.stream.ingest)) {
+        throw badData(
+          'Cannot modify Elasticsearch-managed settings (processing, lifecycle, settings, field overrides, failure store) of a replicated stream. It is managed by the source cluster via cross-cluster replication.'
+        );
+      }
     }
 
     if (
-      isWiredStreamDefinition({ ...params.body.stream, name: params.path.name }) &&
-      !hasSupportedStreamsRoot(params.path.name)
+      Streams.WiredStream.UpsertRequest.is(params.body) &&
+      !(await streamsClient.isStreamsEnabled())
     ) {
-      throw badRequest('Cannot create wired stream due to unsupported root stream');
+      throw badData('Streams are not enabled for Wired streams.');
     }
 
-    if (
-      isGroupStreamDefinition({ ...params.body.stream, name: params.path.name }) &&
-      params.path.name.startsWith('logs.')
-    ) {
-      throw badRequest('A group stream name can not start with [logs.]');
-    }
+    const core = await context.core;
+    const queryStreamsEnabled = await core.uiSettings.client.get(
+      OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS
+    );
 
-    const body = isGroupStreamDefinitionBase(params.body.stream)
-      ? {
-          ...params.body,
-          stream: {
-            group: {
-              ...params.body.stream.group,
-              members: Array.from(new Set(params.body.stream.group.members)),
-            },
-          },
-        }
-      : params.body;
+    if (Streams.QueryStream.UpsertRequest.is(params.body) && !queryStreamsEnabled) {
+      throw badData('Streams are not enabled for Query streams.');
+    }
 
     return await streamsClient.upsertStream({
-      request: body,
+      request: params.body,
       name: params.path.name,
     });
   },
 });
 
 export const deleteStreamRoute = createServerRoute({
-  endpoint: 'DELETE /api/streams/{name}',
+  endpoint: 'DELETE /api/streams/{name} 2023-10-31',
   options: {
-    access: 'internal',
+    access: 'public',
+    summary: 'Delete a stream',
+    description: 'Deletes a stream definition and the underlying data stream',
+    availability: {
+      since: '9.1.0',
+      stability: 'experimental',
+    },
+    oasOperationObject: () => ({
+      responses: {
+        200: {
+          description: 'The stream was deleted successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the stream.'),
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<{ acknowledged: true }> => {
@@ -210,14 +241,23 @@ export const deleteStreamRoute = createServerRoute({
       request,
     });
 
+    // Replicated data streams are managed by the source cluster via CCR and cannot be deleted locally
+    const dataStream = await streamsClient.getDataStream(params.path.name).catch(() => null);
+    if (dataStream?.replicated) {
+      throw badData(
+        'Cannot delete a replicated stream. It is managed by the source cluster via cross-cluster replication.'
+      );
+    }
+
     return await streamsClient.deleteStream(params.path.name);
   },
 });
 
 export const crudRoutes = {
   ...readStreamRoute,
-  ...streamDetailRoute,
   ...listStreamsRoute,
   ...editStreamRoute,
   ...deleteStreamRoute,
+  ...createClassicStreamRoute,
+  ...validateClassicStreamRoute,
 };

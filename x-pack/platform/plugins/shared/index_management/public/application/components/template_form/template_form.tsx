@@ -5,32 +5,27 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButton, EuiPageHeader } from '@elastic/eui';
-import { ScopedHistory } from '@kbn/core/public';
+import type { ScopedHistory } from '@kbn/core/public';
 
 import { allowAutoCreateRadioIds, STANDARD_INDEX_MODE } from '../../../../common/constants';
-import { TemplateDeserialized } from '../../../../common';
+import type { TemplateDeserialized } from '../../../../common';
 import { serializers, Forms, GlobalFlyout } from '../../../shared_imports';
-import {
-  CommonWizardSteps,
-  StepSettingsContainer,
-  StepMappingsContainer,
-  StepAliasesContainer,
-} from '../shared';
+import type { CommonWizardSteps } from '../shared';
+import { StepSettingsContainer, StepMappingsContainer, StepAliasesContainer } from '../shared';
 import { documentationService } from '../../services/documentation';
 import { SectionError } from '../section_error';
-import { serializeAsESLifecycle } from '../../../../common/lib';
+import type { SimulateTemplateProps, SimulateTemplateFilters } from '../index_templates';
 import {
   SimulateTemplateFlyoutContent,
-  SimulateTemplateProps,
   simulateTemplateFlyoutProps,
-  SimulateTemplateFilters,
   LegacyIndexTemplatesDeprecation,
 } from '../index_templates';
 import { StepLogisticsContainer, StepComponentContainer, StepReviewContainer } from './steps';
+import { buildTemplateFromWizardData } from './utils/build_template_from_wizard_data';
 
 const { stripEmptyFields } = serializers;
 const { FormWizard, FormWizardStep } = Forms;
@@ -129,11 +124,31 @@ export const TemplateForm = ({
   };
 
   const {
-    template: { settings, mappings, aliases } = {},
+    template: {
+      settings,
+      mappings: initialMappings,
+      aliases,
+      data_stream_options: dataStreamOptions,
+    } = {},
     composedOf,
     _kbnMeta,
     ...logistics
   } = indexTemplate;
+
+  const mappings = useMemo(() => {
+    if (initialMappings && initialMappings._source && 'mode' in initialMappings._source) {
+      const { mode, ...otherSource } = initialMappings._source;
+      const newMappings = {
+        ...initialMappings,
+        _source: Object.keys(otherSource).length > 0 ? otherSource : undefined,
+      };
+      if (newMappings._source === undefined) {
+        delete newMappings._source;
+      }
+      return Object.keys(newMappings).length > 0 ? newMappings : undefined;
+    }
+    return initialMappings;
+  }, [initialMappings]);
 
   const wizardDefaultValue: WizardContent = {
     logistics,
@@ -160,12 +175,9 @@ export const TemplateForm = ({
   const apiError = saveError ? (
     <>
       <SectionError
-        title={
-          <FormattedMessage
-            id="xpack.idxMgmt.templateForm.saveTemplateError"
-            defaultMessage="Unable to create template"
-          />
-        }
+        title={i18n.translate('xpack.idxMgmt.templateForm.saveTemplateError', {
+          defaultMessage: 'Unable to create template',
+        })}
         error={saveError}
         data-test-subj="saveTemplateError"
       />
@@ -173,58 +185,16 @@ export const TemplateForm = ({
     </>
   ) : null;
 
-  /**
-   * If no mappings, settings or aliases are defined, it is better to not send empty
-   * object for those values.
-   * This method takes care of that and other cleanup of empty fields.
-   * @param template The template object to clean up
-   */
-  const cleanupTemplateObject = (template: TemplateDeserialized) => {
-    const outputTemplate = { ...template };
-
-    if (outputTemplate.template) {
-      if (outputTemplate.template.settings === undefined) {
-        delete outputTemplate.template.settings;
-      }
-      if (outputTemplate.template.mappings === undefined) {
-        delete outputTemplate.template.mappings;
-      }
-      if (outputTemplate.template.aliases === undefined) {
-        delete outputTemplate.template.aliases;
-      }
-      if (Object.keys(outputTemplate.template).length === 0) {
-        delete outputTemplate.template;
-      }
-      if (outputTemplate.lifecycle) {
-        delete outputTemplate.lifecycle;
-      }
-    }
-
-    return outputTemplate;
-  };
-
   const buildTemplateObject = useCallback(
     (initialTemplate: TemplateDeserialized) =>
       (wizardData: WizardContent): TemplateDeserialized => {
-        const outputTemplate = {
-          ...wizardData.logistics,
-          _kbnMeta: initialTemplate._kbnMeta,
-          deprecated: initialTemplate.deprecated,
-          composedOf: wizardData.components,
-          template: {
-            settings: wizardData.settings,
-            mappings: wizardData.mappings,
-            aliases: wizardData.aliases,
-            lifecycle: wizardData.logistics.lifecycle
-              ? serializeAsESLifecycle(wizardData.logistics.lifecycle)
-              : undefined,
-          },
-          ignoreMissingComponentTemplates: initialTemplate.ignoreMissingComponentTemplates,
-        };
-
-        return cleanupTemplateObject(outputTemplate as TemplateDeserialized);
+        return buildTemplateFromWizardData({
+          initialTemplate,
+          wizardData,
+          dataStreamOptions,
+        });
       },
-    []
+    [dataStreamOptions]
   );
 
   const onWizardContentChange = useCallback((content: Forms.Content<WizardContent>) => {
@@ -360,7 +330,10 @@ export const TemplateForm = ({
         </FormWizardStep>
 
         <FormWizardStep id={wizardSections.review.id} label={wizardSections.review.label}>
-          <StepReviewContainer getTemplateData={buildTemplateObject(indexTemplate)} />
+          <StepReviewContainer
+            getTemplateData={buildTemplateObject(indexTemplate)}
+            dataStreamOptions={dataStreamOptions}
+          />
         </FormWizardStep>
       </FormWizard>
     </>

@@ -13,13 +13,13 @@ const Fs = require('fs');
 const { REPO_ROOT } = require('@kbn/repo-info');
 
 const localDist = Path.resolve(__dirname, '../shared_built_assets');
-const bazelDist = Path.resolve(REPO_ROOT, 'bazel-bin', Path.relative(REPO_ROOT, localDist));
+const builtDist = Path.resolve(REPO_ROOT, 'target', 'build', Path.relative(REPO_ROOT, localDist));
 
 // extracted const vars
 /**
  * Absolute path to the distributable directory
  */
-const distDir = Fs.existsSync(localDist) ? localDist : bazelDist;
+const distDir = Fs.existsSync(localDist) ? localDist : builtDist;
 
 /**
  * Filename of the main bundle file in the distributable directory
@@ -43,6 +43,9 @@ const externals = {
   '@kbn/i18n-react': '__kbnSharedDeps__.KbnI18nReact',
   '@emotion/cache': '__kbnSharedDeps__.EmotionCache',
   '@emotion/react': '__kbnSharedDeps__.EmotionReact',
+  // JSX runtime exports for SWC's importSource: '@emotion/react'
+  '@emotion/react/jsx-runtime': '__kbnSharedDeps__.EmotionReactJsxRuntime',
+  '@emotion/react/jsx-dev-runtime': '__kbnSharedDeps__.EmotionReactJsxDevRuntime',
   jquery: '__kbnSharedDeps__.Jquery',
   moment: '__kbnSharedDeps__.Moment',
   'moment-timezone': '__kbnSharedDeps__.MomentTimezone',
@@ -52,17 +55,56 @@ const externals = {
   'react-router': '__kbnSharedDeps__.ReactRouter',
   'react-router-dom': '__kbnSharedDeps__.ReactRouterDom',
   'react-router-dom-v5-compat': '__kbnSharedDeps__.ReactRouterDomV5Compat',
+  'react-use': '__kbnSharedDeps__.ReactUse',
   'styled-components': '__kbnSharedDeps__.StyledComponents',
   '@kbn/monaco': '__kbnSharedDeps__.KbnMonaco',
   // this is how plugins/consumers from npm load monaco
   'monaco-editor/esm/vs/editor/editor.api': '__kbnSharedDeps__.MonacoBarePluginApi',
+  'fp-ts/Option': '__kbnSharedDeps__.FpTs.option',
+  'fp-ts/pipeable': '__kbnSharedDeps__.FpTs.pipeable',
+  'fp-ts/TaskEither': '__kbnSharedDeps__.FpTs.taskEither',
+  'fp-ts/Either': '__kbnSharedDeps__.FpTs.either',
+  'fp-ts/function': '__kbnSharedDeps__.FpTs.function',
+  'fp-ts/Task': '__kbnSharedDeps__.FpTs.task',
+  'fp-ts/Set': '__kbnSharedDeps__.FpTs.set',
+  'fp-ts/Ord': '__kbnSharedDeps__.FpTs.ord',
+  'fp-ts/Array': '__kbnSharedDeps__.FpTs.array',
   'io-ts': '__kbnSharedDeps__.IoTs',
+  'io-ts/lib/Reporter': '__kbnSharedDeps__.IoTsReporter',
+  'io-ts/lib/PathReporter': '__kbnSharedDeps__.IoTsPathReporter',
+  'io-ts/lib/ThrowReporter': '__kbnSharedDeps__.IoTsThrowReporter',
+  'zod/v4': '__kbnSharedDeps__.Zod',
   '@reduxjs/toolkit': '__kbnSharedDeps__.ReduxjsToolkit',
   'react-redux': '__kbnSharedDeps__.ReactRedux',
   redux: '__kbnSharedDeps__.Redux',
   immer: '__kbnSharedDeps__.Immer',
   reselect: '__kbnSharedDeps__.Reselect',
   'fastest-levenshtein': '__kbnSharedDeps__.FastestLevenshtein',
+  'chroma-js': '__kbnSharedDeps__.ChromaJs',
+  // cache some used methods of the react-use library
+  ...[
+    'useAsync',
+    'useAsyncFn',
+    'useDebounce',
+    'useDeepCompareEffect',
+    'useEffectOnce',
+    'useEvent',
+    'useLatest',
+    'useList',
+    'useLocalStorage',
+    'useMount',
+    'useMountedState',
+    'usePrevious',
+    'useSessionStorage',
+    'useTimeoutFn',
+    'useToggle',
+    'useUnmount',
+    'useUpdateEffect',
+    'useObservable',
+  ].reduce((memo, subset) => {
+    memo[`react-use/lib/${subset}`] = `__kbnSharedDeps__.ReactUse.${subset}`;
+    return memo;
+  }, {}),
 
   /**
    * big deps which are locked to a single version
@@ -71,6 +113,8 @@ const externals = {
   numeral: '__kbnSharedDeps__.ElasticNumeral',
   '@elastic/numeral': '__kbnSharedDeps__.ElasticNumeral',
   '@elastic/charts': '__kbnSharedDeps__.ElasticCharts',
+  '@elastic/esql': '__kbnSharedDeps__.ElasticEsql',
+  '@elastic/esql/types': '__kbnSharedDeps__.ElasticEsqlTypes',
   '@kbn/datemath': '__kbnSharedDeps__.KbnDatemath',
   '@elastic/eui': '__kbnSharedDeps__.ElasticEui',
   '@elastic/eui/lib/components/provider/nested':
@@ -82,8 +126,6 @@ const externals = {
   '@hello-pangea/dnd': '__kbnSharedDeps__.HelloPangeaDnd',
   lodash: '__kbnSharedDeps__.Lodash',
   'lodash/fp': '__kbnSharedDeps__.LodashFp',
-  fflate: '__kbnSharedDeps__.Fflate',
-
   /**
    * runtime deps which don't need to be copied across all bundles
    */
@@ -99,17 +141,23 @@ const externals = {
   '@kbn/rison': '__kbnSharedDeps__.KbnRison',
   history: '__kbnSharedDeps__.History',
   classnames: '__kbnSharedDeps__.Classnames',
-  '@tanstack/react-query': '__kbnSharedDeps__.ReactQuery',
+  '@kbn/react-query': '__kbnSharedDeps__.ReactQuery',
   '@tanstack/react-query-devtools': '__kbnSharedDeps__.ReactQueryDevtools',
   '@kbn/code-editor': '__kbnSharedDeps__.KbnCodeEditor',
-  '@kbn/esql-ast': '__kbnSharedDeps__.KbnEsqlAst',
+  '@kbn/esql-language': '__kbnSharedDeps__.KbnEsqlAst',
   '@kbn/ebt-tools': '__kbnSharedDeps__.KbnEbtTools',
   '@elastic/apm-rum-core': '__kbnSharedDeps__.ElasticApmRumCore',
   '@kbn/react-kibana-context-common': '__kbnSharedDeps__.KbnReactKibanaContextCommon',
   '@kbn/react-kibana-context-root': '__kbnSharedDeps__.KbnReactKibanaContextRoot',
   '@kbn/react-kibana-context-render': '__kbnSharedDeps__.KbnReactKibanaContextRender',
   '@kbn/react-kibana-context-theme': '__kbnSharedDeps__.KbnReactKibanaContextTheme',
+  '@kbn/react-kibana-context-env': '__kbnSharedDeps__.KbnReactKibanaContextEnv',
   '@kbn/shared-ux-router': '__kbnSharedDeps__.KbnSharedUxRouter',
+  '@kbn/react-kibana-mount': '__kbnSharedDeps__.KbnReactKibanaMount',
+  '@kbn/visualizations-common': '__kbnSharedDeps__.KbnVisualizationsCommon',
+  '@kbn/core-di-browser': '__kbnSharedDeps__.KbnCoreDi',
+  '@kbn/core-chrome-sidebar-context': '__kbnSharedDeps__.KbnCoreSidebarContext',
+  '@kbn/core-chrome-browser-context': '__kbnSharedDeps__.KbnCoreChromeBrowserContext',
 };
 
 module.exports = { distDir, jsFilename, cssDistFilename, externals };

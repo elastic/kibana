@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ReindexingCompletedFlyoutStep } from './completed_step';
+export { MigrationCompletedFlyoutStep } from './completed_step';

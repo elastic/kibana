@@ -8,9 +8,9 @@
 import React from 'react';
 import ConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai/constants';
+import { DEFAULT_MODEL, OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { useGetDashboard } from '../lib/gen_ai/use_get_dashboard';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
@@ -22,6 +22,12 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
     services: mockUseKibanaReturnValue,
   })),
 }));
+jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
+  ...jest.requireActual(
+    '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
+  ),
+  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
+}));
 jest.mock('../lib/gen_ai/use_get_dashboard');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
@@ -29,14 +35,17 @@ const mockDashboard = useGetDashboard as jest.Mock;
 const openAiConnector = {
   actionTypeId: '.gen-ai',
   name: 'OpenAI',
-  id: '123',
+  id: 'openai',
   config: {
     apiUrl: 'https://openaiurl.com',
     apiProvider: OpenAiProviderType.OpenAi,
-    defaultModel: DEFAULT_OPENAI_MODEL,
+    defaultModel: DEFAULT_MODEL,
   },
   secrets: {
     apiKey: 'thats-a-nice-looking-key',
+  },
+  __internal__: {
+    hasHeaders: false,
   },
   isDeprecated: false,
 };
@@ -56,6 +65,7 @@ const otherOpenAiConnector = {
     apiUrl: 'https://localhost/oss-llm',
     apiProvider: OpenAiProviderType.Other,
     defaultModel: 'local-model',
+    enableNativeFunctionCalling: false,
   },
   secrets: {
     apiKey: 'thats-a-nice-looking-key',
@@ -84,12 +94,15 @@ describe('ConnectorFields renders', () => {
     expect(getAllByTestId('config.apiProvider-select')[0]).toHaveValue(
       openAiConnector.config.apiProvider
     );
+    expect(getAllByTestId('config.organizationId-input')[0]).toBeInTheDocument();
+    expect(getAllByTestId('config.projectId-input')[0]).toBeInTheDocument();
     expect(getAllByTestId('open-ai-api-doc')[0]).toBeInTheDocument();
     expect(getAllByTestId('open-ai-api-keys-doc')[0]).toBeInTheDocument();
+    expect(getAllByTestId('optional-label')).toHaveLength(4);
   });
 
   test('azure ai connector fields are rendered', async () => {
-    const { getAllByTestId } = render(
+    const { getAllByTestId, queryByTestId } = render(
       <ConnectorFormTestProvider connector={azureConnector}>
         <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
       </ConnectorFormTestProvider>
@@ -102,10 +115,12 @@ describe('ConnectorFields renders', () => {
     );
     expect(getAllByTestId('azure-ai-api-doc')[0]).toBeInTheDocument();
     expect(getAllByTestId('azure-ai-api-keys-doc')[0]).toBeInTheDocument();
+    expect(queryByTestId('config.organizationId-input')).not.toBeInTheDocument();
+    expect(queryByTestId('config.projectId-input')).not.toBeInTheDocument();
   });
 
   test('other open ai connector fields are rendered', async () => {
-    const { getAllByTestId } = render(
+    const { getAllByTestId, queryByTestId } = render(
       <ConnectorFormTestProvider connector={otherOpenAiConnector}>
         <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
       </ConnectorFormTestProvider>
@@ -120,6 +135,249 @@ describe('ConnectorFields renders', () => {
     );
     expect(getAllByTestId('other-ai-api-doc')[0]).toBeInTheDocument();
     expect(getAllByTestId('other-ai-api-keys-doc')[0]).toBeInTheDocument();
+    expect(queryByTestId('config.organizationId-input')).not.toBeInTheDocument();
+    expect(queryByTestId('config.projectId-input')).not.toBeInTheDocument();
+    expect(queryByTestId('config.enableNativeFunctionCallingSwitch')).toBeInTheDocument();
+  });
+
+  test('enableNativeFunctionCalling toggle only renders for Other provider', async () => {
+    const { queryByTestId: queryByTestIdOpenAi } = render(
+      <ConnectorFormTestProvider connector={openAiConnector}>
+        <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+      </ConnectorFormTestProvider>
+    );
+    expect(queryByTestIdOpenAi('config.enableNativeFunctionCallingSwitch')).not.toBeInTheDocument();
+
+    const { queryByTestId: queryByTestIdAzure } = render(
+      <ConnectorFormTestProvider connector={azureConnector}>
+        <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+      </ConnectorFormTestProvider>
+    );
+    expect(queryByTestIdAzure('config.enableNativeFunctionCallingSwitch')).not.toBeInTheDocument();
+
+    const { queryByTestId: queryByTestIdOther } = render(
+      <ConnectorFormTestProvider connector={otherOpenAiConnector}>
+        <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+      </ConnectorFormTestProvider>
+    );
+    expect(queryByTestIdOther('config.enableNativeFunctionCallingSwitch')).toBeInTheDocument();
+  });
+
+  test('enabling enableNativeFunctionCalling saves to config for Other provider', async () => {
+    const onSubmit = jest.fn();
+    render(
+      <ConnectorFormTestProvider connector={otherOpenAiConnector} onSubmit={onSubmit}>
+        <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+      </ConnectorFormTestProvider>
+    );
+
+    const toggle = await screen.findByTestId('config.enableNativeFunctionCallingSwitch');
+    expect(toggle).toBeInTheDocument();
+
+    await userEvent.click(toggle);
+
+    await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalled();
+    });
+
+    const testFormData = {
+      ...otherOpenAiConnector,
+      config: {
+        ...otherOpenAiConnector.config,
+        enableNativeFunctionCalling: true,
+      },
+      __internal__: {
+        hasHeaders: false,
+        hasPKI: false,
+      },
+    };
+
+    expect(onSubmit).toHaveBeenCalledWith({
+      data: {
+        ...testFormData,
+      },
+      isValid: true,
+    });
+  });
+
+  describe('Headers', () => {
+    it('toggles headers as expected', async () => {
+      const testFormData = {
+        actionTypeId: '.gen-ai',
+        name: 'OpenAI',
+        id: '123',
+        config: {
+          apiUrl: 'https://openaiurl.com',
+          apiProvider: OpenAiProviderType.OpenAi,
+          defaultModel: DEFAULT_MODEL,
+        },
+        secrets: {
+          apiKey: 'thats-a-nice-looking-key',
+        },
+        isDeprecated: false,
+        __internal__: {
+          hasHeaders: false,
+        },
+      };
+      render(
+        <ConnectorFormTestProvider connector={testFormData}>
+          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+
+      const headersToggle = await screen.findByTestId('openAIViewHeadersSwitch');
+
+      expect(headersToggle).toBeInTheDocument();
+
+      await userEvent.click(headersToggle);
+
+      expect(await screen.findByTestId('openAIHeaderText')).toBeInTheDocument();
+      expect(await screen.findByTestId('openAIHeadersKeyInput')).toBeInTheDocument();
+      expect(await screen.findByTestId('openAIHeadersValueInput')).toBeInTheDocument();
+      expect(await screen.findByTestId('openAIAddHeaderButton')).toBeInTheDocument();
+    });
+    it('focuses the newly added header key input when clicking add header', async () => {
+      const testFormData = {
+        actionTypeId: '.gen-ai',
+        name: 'OpenAI',
+        id: '123',
+        config: {
+          apiUrl: 'https://openaiurl.com',
+          apiProvider: OpenAiProviderType.OpenAi,
+          defaultModel: DEFAULT_MODEL,
+        },
+        secrets: {
+          apiKey: 'thats-a-nice-looking-key',
+        },
+        isDeprecated: false,
+        __internal__: {
+          hasHeaders: false,
+        },
+      };
+      render(
+        <ConnectorFormTestProvider connector={testFormData}>
+          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+
+      const headersToggle = await screen.findByTestId('openAIViewHeadersSwitch');
+
+      await userEvent.click(headersToggle);
+
+      const addHeaderButton = await screen.findByTestId('openAIAddHeaderButton');
+      await userEvent.click(addHeaderButton);
+
+      await waitFor(() => {
+        const keyInputs = screen.getAllByTestId('openAIHeadersKeyInput');
+        expect(keyInputs[keyInputs.length - 1]).toHaveFocus();
+      });
+    });
+    it('succeeds without headers', async () => {
+      const testFormData = {
+        actionTypeId: '.gen-ai',
+        name: 'OpenAI',
+        id: 'openai',
+        config: {
+          apiUrl: 'https://openaiurl.com',
+          apiProvider: OpenAiProviderType.OpenAi,
+          defaultModel: DEFAULT_MODEL,
+        },
+        secrets: {
+          apiKey: 'thats-a-nice-looking-key',
+        },
+        isDeprecated: false,
+        __internal__: {
+          hasHeaders: false,
+        },
+      };
+      const onSubmit = jest.fn();
+      render(
+        <ConnectorFormTestProvider connector={testFormData} onSubmit={onSubmit}>
+          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {
+            actionTypeId: '.gen-ai',
+            name: 'OpenAI',
+            id: 'openai',
+            isDeprecated: false,
+            config: {
+              apiUrl: 'https://openaiurl.com',
+              apiProvider: OpenAiProviderType.OpenAi,
+              defaultModel: DEFAULT_MODEL,
+            },
+            secrets: {
+              apiKey: 'thats-a-nice-looking-key',
+            },
+            __internal__: {
+              hasHeaders: false,
+            },
+          },
+          isValid: true,
+        });
+      });
+    });
+    it('succeeds with headers', async () => {
+      const testFormData = {
+        actionTypeId: '.gen-ai',
+        name: 'OpenAI',
+        id: 'openai',
+        config: {
+          apiUrl: 'https://openaiurl.com',
+          apiProvider: OpenAiProviderType.OpenAi,
+          defaultModel: DEFAULT_MODEL,
+        },
+        secrets: {
+          apiKey: 'thats-a-nice-looking-key',
+        },
+        isDeprecated: false,
+        __internal__: {
+          hasHeaders: false,
+        },
+      };
+      const onSubmit = jest.fn();
+      render(
+        <ConnectorFormTestProvider connector={testFormData} onSubmit={onSubmit}>
+          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+      const headersToggle = await screen.findByTestId('openAIViewHeadersSwitch');
+      expect(headersToggle).toBeInTheDocument();
+      await userEvent.click(headersToggle);
+
+      await userEvent.type(screen.getByTestId('openAIHeadersKeyInput'), 'hello');
+      await userEvent.type(screen.getByTestId('openAIHeadersValueInput'), 'world');
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {
+            actionTypeId: '.gen-ai',
+            name: 'OpenAI',
+            id: 'openai',
+            isDeprecated: false,
+            config: {
+              apiUrl: 'https://openaiurl.com',
+              apiProvider: OpenAiProviderType.OpenAi,
+              defaultModel: DEFAULT_MODEL,
+              headers: [{ key: 'hello', value: 'world' }],
+            },
+            secrets: {
+              apiKey: 'thats-a-nice-looking-key',
+            },
+            __internal__: {
+              hasHeaders: true,
+            },
+          },
+          isValid: true,
+        });
+      });
+    });
   });
 
   describe('Dashboard link', () => {
@@ -132,7 +390,7 @@ describe('ConnectorFields renders', () => {
       expect(queryByTestId('link-gen-ai-token-dashboard')).not.toBeInTheDocument();
     });
     it('Does not render if isEdit is true and dashboardUrl is null', async () => {
-      mockDashboard.mockImplementation((id: string) => ({
+      mockDashboard.mockImplementation(() => ({
         dashboardUrl: null,
       }));
       const { queryByTestId } = render(
@@ -157,7 +415,7 @@ describe('ConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
       fireEvent.click(getByTestId('link-gen-ai-token-dashboard'));
-      expect(navigateToUrl).toHaveBeenCalledWith(`https://dashboardurl.com/123`);
+      expect(navigateToUrl).toHaveBeenCalledWith(`https://dashboardurl.com/openai`);
     });
   });
   describe('Validation', () => {
@@ -174,17 +432,13 @@ describe('ConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(getByTestId('form-test-provide-submit'));
 
-      await waitFor(async () => {
-        expect(onSubmit).toHaveBeenCalled();
-      });
-
-      expect(onSubmit).toBeCalledWith({
-        data: openAiConnector,
-        isValid: true,
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: openAiConnector,
+          isValid: true,
+        });
       });
     });
 
@@ -203,14 +457,11 @@ describe('ConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
-      await waitFor(async () => {
-        expect(onSubmit).toHaveBeenCalled();
-      });
+      await userEvent.click(res.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      });
     });
 
     const tests: Array<[string, string]> = [
@@ -240,11 +491,107 @@ describe('ConnectorFields renders', () => {
       }
 
       await userEvent.click(res.getByTestId('form-test-provide-submit'));
-      await waitFor(async () => {
-        expect(onSubmit).toHaveBeenCalled();
-      });
 
-      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      });
+    });
+  });
+
+  describe('PKI Configuration', () => {
+    it('toggles pki as expected', async () => {
+      const testFormData = {
+        ...otherOpenAiConnector,
+        __internal__: {
+          hasHeaders: false,
+          hasPKI: false,
+        },
+      };
+      render(
+        <ConnectorFormTestProvider connector={testFormData}>
+          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+
+      const pkiToggle = await screen.findByTestId('openAIViewPKISwitch');
+
+      expect(screen.queryByTestId('openAISSLCRTInput')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('openAISSLKEYInput')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('verificationModeSelect')).not.toBeInTheDocument();
+      expect(pkiToggle).toBeInTheDocument();
+
+      await userEvent.click(pkiToggle);
+      expect(screen.getByTestId('openAISSLCRTInput')).toBeInTheDocument();
+      expect(screen.getByTestId('openAISSLKEYInput')).toBeInTheDocument();
+      expect(screen.getByTestId('verificationModeSelect')).toBeInTheDocument();
+    });
+    it('succeeds without pki', async () => {
+      const testFormData = {
+        ...otherOpenAiConnector,
+        __internal__: {
+          hasHeaders: false,
+          hasPKI: false,
+        },
+      };
+      const onSubmit = jest.fn();
+      render(
+        <ConnectorFormTestProvider connector={testFormData} onSubmit={onSubmit}>
+          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {
+            ...testFormData,
+          },
+          isValid: true,
+        });
+      });
+    });
+    it('succeeds with pki', async () => {
+      const testFormData = {
+        ...otherOpenAiConnector,
+        __internal__: {
+          hasHeaders: false,
+          hasPKI: false,
+        },
+      };
+      const onSubmit = jest.fn();
+      render(
+        <ConnectorFormTestProvider connector={testFormData} onSubmit={onSubmit}>
+          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+      const pkiToggle = await screen.findByTestId('openAIViewPKISwitch');
+      await userEvent.click(pkiToggle);
+      const certFile = new File(['hello'], 'cert.crt', { type: 'text/plain' });
+      const keyFile = new File(['world'], 'key.key', { type: 'text/plain' });
+      await userEvent.upload(screen.getByTestId('openAISSLCRTInput'), certFile);
+      await userEvent.upload(screen.getByTestId('openAISSLKEYInput'), keyFile);
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {
+            ...testFormData,
+            config: {
+              ...testFormData.config,
+              verificationMode: 'full',
+            },
+            secrets: {
+              apiKey: 'thats-a-nice-looking-key',
+              certificateData: Buffer.from('hello').toString('base64'),
+              privateKeyData: Buffer.from('world').toString('base64'),
+            },
+            __internal__: {
+              hasHeaders: false,
+              hasPKI: true,
+            },
+          },
+          isValid: true,
+        });
+      });
     });
   });
 });

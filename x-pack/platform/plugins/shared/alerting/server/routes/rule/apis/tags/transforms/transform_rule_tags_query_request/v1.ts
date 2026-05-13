@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { RewriteRequestCase } from '@kbn/actions-plugin/common';
+import type { RuleTagsRequestQueryV1 } from '../../../../../../../common/routes/rule/apis/tags';
 import type { RuleTagsParams } from '../../../../../../application/rule/methods/tags';
 
-export const transformRuleTagsQueryRequest: RewriteRequestCase<RuleTagsParams> = ({
+export const transformRuleTagsQueryRequest = ({
   per_page: perPage,
   page,
   search,
-}) => ({
+  rule_type_ids: ruleTypeIds,
+}: RuleTagsRequestQueryV1): RuleTagsParams => ({
   page,
   search,
   perPage,
+  ...(ruleTypeIds ? { ruleTypeIds: Array.isArray(ruleTypeIds) ? ruleTypeIds : [ruleTypeIds] } : {}),
 });

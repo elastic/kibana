@@ -12,9 +12,13 @@ import {
   singleEntryThreat,
 } from '../../../../../common/components/threat_match/helpers';
 import type { FormData, ValidationFunc } from '../../../../../shared_imports';
-import type { ThreatMapEntries } from '../../../../../common/components/threat_match/types';
+import type { ThreatMapping } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { THREAT_MATCH_MAPPING_ERROR_CODES } from './error_codes';
 import { getUnknownThreatMatchMappingFieldNames } from './get_unknown_threat_match_mapping_field_names';
+import {
+  containsDoesNotMatchEntriesOnly,
+  containsInvalidDoesNotMatchEntries,
+} from '../../../../../../common/utils/request_validation/indicator_match';
 
 interface ThreatMatchMappingValidatorFactoryParams {
   indexPatterns: DataViewBase;
@@ -24,7 +28,7 @@ interface ThreatMatchMappingValidatorFactoryParams {
 export function threatMatchMappingValidatorFactory({
   indexPatterns,
   threatIndexPatterns,
-}: ThreatMatchMappingValidatorFactoryParams): ValidationFunc<FormData, string, ThreatMapEntries[]> {
+}: ThreatMatchMappingValidatorFactoryParams): ValidationFunc<FormData, string, ThreatMapping> {
   return (...args) => {
     const [{ path, value }] = args;
 
@@ -108,6 +112,33 @@ export function threatMatchMappingValidatorFactory({
             values: {
               unknownThreatMatchIndicesFields: `"${unknownThreatMatchIndicesFields.join('", "')}"`,
             },
+          }
+        ),
+      };
+    }
+
+    if (containsDoesNotMatchEntriesOnly(value)) {
+      return {
+        code: THREAT_MATCH_MAPPING_ERROR_CODES.ERR_SINGLE_NOT_MATCH_CLAUSE,
+        path,
+        message: i18n.translate(
+          'xpack.securitySolution.detectionEngine.ruleManagement.threatMappingField.singleNotMatchClauseError',
+          {
+            defaultMessage: 'Entries with AND clauses must have at least one MATCHES condition.',
+          }
+        ),
+      };
+    }
+
+    if (containsInvalidDoesNotMatchEntries(value)) {
+      return {
+        code: THREAT_MATCH_MAPPING_ERROR_CODES.ERR_INVALID_NOT_MATCH_CLAUSE,
+        path,
+        message: i18n.translate(
+          'xpack.securitySolution.detectionEngine.ruleManagement.threatMappingField.invalidNotMatchClauseError',
+          {
+            defaultMessage:
+              'DOES NOT MATCH and MATCHES entries that are connected by an AND clause cannot use the same threat mappings. Choose a different threat mapping for one of the entries.',
           }
         ),
       };

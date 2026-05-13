@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import './chart_switch.scss';
 import React from 'react';
+import type { IconType } from '@elastic/eui';
 import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiIcon,
   EuiText,
   EuiHighlight,
-  IconType,
   useEuiTheme,
   EuiIconTip,
 } from '@elastic/eui';
@@ -36,7 +35,7 @@ export const ChartOption = ({
       `}
     >
       <EuiFlexItem grow={false}>
-        <EuiIcon className="lnsChartSwitch__chartIcon" type={option.icon || 'empty'} />
+        <EuiIcon type={option.icon || 'empty'} aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s" data-test-subj="lnsChartSwitch-option-label">
@@ -74,7 +73,7 @@ export const getDataLossWarning = (dataLoss: 'nothing' | 'layers' | 'everything'
 
 const CheckIcon = () => {
   const { euiTheme } = useEuiTheme();
-  return <EuiIcon type="check" color={euiTheme.colors.darkestShade} />;
+  return <EuiIcon type="check" color={euiTheme.colors.darkestShade} aria-hidden={true} />;
 };
 
 const DataLossWarning = ({ content, id }: { content?: string; id: string }) => {
@@ -88,7 +87,6 @@ const DataLossWarning = ({ content, id }: { content?: string; id: string }) => {
       color={euiTheme.colors.warning}
       content={content}
       iconProps={{
-        className: 'lnsChartSwitch__chartIcon',
         'data-test-subj': `lnsChartSwitchPopoverAlert_${id}`,
       }}
     />
@@ -109,7 +107,7 @@ export const ChartSwitchOptionPrepend = ({
     <EuiFlexItem grow={false}>
       {isChecked && <CheckIcon />}
       {dataLossWarning && <DataLossWarning content={dataLossWarning} id={subtypeId} />}
-      {!dataLossWarning && !isChecked && <EuiIcon type="empty" />}
+      {!dataLossWarning && !isChecked && <EuiIcon type="empty" aria-hidden={true} />}
     </EuiFlexItem>
   );
 };

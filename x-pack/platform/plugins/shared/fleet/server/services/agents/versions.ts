@@ -13,7 +13,7 @@ import pRetry from 'p-retry';
 import { uniq } from 'lodash';
 import semverGte from 'semver/functions/gte';
 import semverGt from 'semver/functions/gt';
-import semverRcompare from 'semver/functions/rcompare';
+import semverCompareBuild from 'semver/functions/compare-build';
 import semverLt from 'semver/functions/lt';
 import semverParse from 'semver/functions/parse';
 
@@ -54,7 +54,7 @@ export const getLatestAvailableAgentVersion = async ({
   let latestCompatibleVersion;
 
   const versions = await getAvailableVersions({ includeCurrentVersion, ignoreCache });
-  versions.sort(semverRcompare);
+  versions.sort(semverCompareBuild).reverse();
 
   if (versions && versions.length > 0 && versions.indexOf(kibanaVersion) !== 0) {
     latestCompatibleVersion =
@@ -66,6 +66,17 @@ export const getLatestAvailableAgentVersion = async ({
   }
 
   return latestCompatibleVersion;
+};
+
+export const getLatestAgentAvailableDockerImageVersion = async ({
+  includeCurrentVersion = false,
+  ignoreCache = false,
+}: {
+  includeCurrentVersion?: boolean;
+  ignoreCache?: boolean;
+} = {}): Promise<string> => {
+  const fullVersion = await getLatestAvailableAgentVersion({ includeCurrentVersion, ignoreCache });
+  return fullVersion.replace('+', '.');
 };
 
 export const getAvailableVersions = async ({
@@ -110,7 +121,7 @@ export const getAvailableVersions = async ({
   // fetch from the live API more than `TIME_BETWEEN_FETCHES` milliseconds.
   const apiVersions = await fetchAgentVersionsFromApi();
 
-  // Take each version and compare to our `MINIMUM_SUPPORTED_VERSION` - we
+  // Take each version and compare to our `MINIMUM_SUPPORTED_VERSION`, also only get the version <= to the current cluster version (inclusive of patches) - we
   // only want support versions in the final result. We'll also sort by newest version first.
   availableVersions = uniq(
     [...availableVersions, ...apiVersions]
@@ -124,7 +135,10 @@ export const getAvailableVersions = async ({
         ) {
           return false;
         }
-        return semverGte(v, MINIMUM_SUPPORTED_VERSION);
+        return (
+          semverGte(v, MINIMUM_SUPPORTED_VERSION) &&
+          (!semverGt(v, kibanaVersion) || differsOnlyInPatch(v, kibanaVersion))
+        );
       })
       .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1))
   );

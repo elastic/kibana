@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "isolatedModules": true
@@ -10,7 +10,6 @@
     "server/**/*",
   ],
   "kbn_references": [
-    { "path": "../tsconfig.json" },
     "@kbn/charts-plugin",
     "@kbn/core",
     "@kbn/expressions-plugin",
@@ -18,7 +17,6 @@
     "@kbn/usage-collection-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/event-annotation-plugin",
-    "@kbn/visualizations-plugin",
     "@kbn/coloring",
     "@kbn/i18n",
     "@kbn/utility-types",
@@ -37,6 +35,13 @@
     "@kbn/react-kibana-context-render",
     "@kbn/core-rendering-browser",
     "@kbn/palettes",
+    "@kbn/alerts-ui-shared",
+    "@kbn/ebt-tools",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/chart-test-jest-helpers",
+    "@kbn/field-formats-common",
+    "@kbn/visualizations-common",
+    "@kbn/ui-actions-plugin"
   ],
   "exclude": [
     "target/**/*",

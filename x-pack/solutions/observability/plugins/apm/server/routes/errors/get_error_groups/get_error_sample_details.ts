@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { rangeQuery, kqlQuery, termQuery } from '@kbn/observability-plugin/server';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { maybe } from '../../../../common/utils/maybe';
 import {
@@ -24,11 +24,20 @@ import {
   PROCESSOR_NAME,
   SERVICE_NAME,
   TIMESTAMP_US,
+  ID,
   TRACE_ID,
   TRANSACTION_ID,
   ERROR_STACK_TRACE,
   SPAN_ID,
   SERVICE_LANGUAGE_NAME,
+  URL_FULL,
+  HTTP_REQUEST_METHOD,
+  HTTP_RESPONSE_STATUS_CODE,
+  TRANSACTION_PAGE_URL,
+  USER_AGENT_NAME,
+  USER_AGENT_VERSION,
+  ERROR_MESSAGE,
+  ERROR_TYPE,
 } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { ApmDocumentType } from '../../../../common/document_type';
@@ -42,6 +51,7 @@ export interface ErrorSampleDetailsResponse {
   transaction: Transaction | undefined;
   error: Omit<APMError, 'transaction' | 'error'> & {
     transaction?: { id?: string; type?: string };
+    user_agent?: { name?: string; version?: string };
     error: {
       id: string;
     } & Omit<APMError['error'], 'exception' | 'log'> & {
@@ -69,12 +79,12 @@ export async function getErrorSampleDetails({
   end: number;
 }): Promise<Partial<ErrorSampleDetailsResponse>> {
   const requiredFields = asMutableArray([
+    ID,
     AGENT_NAME,
     PROCESSOR_EVENT,
     TIMESTAMP_US,
     AT_TIMESTAMP,
     SERVICE_NAME,
-    ERROR_ID,
     ERROR_GROUP_ID,
   ] as const);
 
@@ -90,6 +100,15 @@ export async function getErrorSampleDetails({
     ERROR_EXC_MESSAGE,
     ERROR_EXC_HANDLED,
     ERROR_EXC_TYPE,
+    ERROR_ID,
+    ERROR_MESSAGE,
+    ERROR_TYPE,
+    URL_FULL,
+    HTTP_REQUEST_METHOD,
+    HTTP_RESPONSE_STATUS_CODE,
+    TRANSACTION_PAGE_URL,
+    USER_AGENT_NAME,
+    USER_AGENT_VERSION,
   ] as const);
 
   const params = {
@@ -107,10 +126,15 @@ export async function getErrorSampleDetails({
       bool: {
         filter: [
           { term: { [SERVICE_NAME]: serviceName } },
-          { term: { [ERROR_ID]: errorId } },
           ...rangeQuery(start, end),
           ...environmentQuery(environment),
           ...kqlQuery(kuery),
+          {
+            bool: {
+              should: [...termQuery(ERROR_ID, errorId), ...termQuery(ID, errorId)],
+              minimum_should_match: 1,
+            },
+          },
         ],
       },
     },
@@ -130,20 +154,26 @@ export async function getErrorSampleDetails({
 
   const source = 'error' in hit._source ? hit._source : undefined;
 
-  const errorFromFields = unflattenKnownApmEventFields(hit.fields, requiredFields);
+  const errorFromFields = accessKnownApmEventFields(hit.fields)
+    .requireFields(requiredFields)
+    .unflatten();
 
   const transactionId = errorFromFields.transaction?.id ?? errorFromFields.span?.id;
   const traceId = errorFromFields.trace?.id;
 
   let transaction: Transaction | undefined;
   if (transactionId && traceId) {
-    transaction = await getTransaction({
-      transactionId,
-      traceId,
-      apmEventClient,
-      start,
-      end,
-    });
+    try {
+      transaction = await getTransaction({
+        transactionId,
+        traceId,
+        apmEventClient,
+        start,
+        end,
+      });
+    } catch {
+      transaction = undefined;
+    }
   }
 
   return {
@@ -156,6 +186,7 @@ export async function getErrorSampleDetails({
       },
       error: {
         ...errorFromFields.error,
+        id: errorFromFields.error?.id ?? errorFromFields[ID],
         exception:
           (source?.error.exception?.length ?? 0) > 0
             ? source?.error.exception

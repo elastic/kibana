@@ -9,7 +9,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Spacer } from '../../../../common/components/page';
-import { DefaultDraggable } from '../../../../common/components/draggables';
+import { CellActionsRenderer } from '../../../../common/components/cell_actions/cell_actions_renderer';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { MoreContainer } from '../more_container';
@@ -27,6 +27,10 @@ interface DefaultFieldRendererProps {
 /** The default max-height of the popover used to show "+n More" items (e.g. `+9 More`) */
 export const DEFAULT_MORE_MAX_HEIGHT = '200px';
 
+/** Normalizes a value to string[] for use as rowItems (ES fields can be single value or array). */
+export const toFieldRendererItems = (value: string | string[] | null | undefined): string[] =>
+  Array.isArray(value) ? value : value != null ? [value] : [];
+
 export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> = ({
   attrName,
   displayCount = 1,
@@ -36,8 +40,9 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
   rowItems,
   scopeId,
 }) => {
-  if (rowItems != null && rowItems.length > 0) {
-    const draggables = rowItems.slice(0, displayCount).map((rowItem, index) => {
+  const items = Array.isArray(rowItems) ? rowItems : rowItems != null ? [rowItems] : [];
+  if (items.length > 0) {
+    const draggables = items.slice(0, displayCount).map((rowItem, index) => {
       const id = escapeDataProviderId(
         `default-field-renderer-default-draggable-${idPrefix}-${attrName}-${rowItem}`
       );
@@ -50,16 +55,9 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
             </>
           )}
           {typeof rowItem === 'string' && (
-            <DefaultDraggable
-              id={id}
-              field={attrName}
-              value={rowItem}
-              isAggregatable={true}
-              scopeId={scopeId}
-              fieldType={'keyword'}
-            >
+            <CellActionsRenderer field={attrName} value={rowItem} scopeId={scopeId}>
               {render ? render(rowItem) : rowItem}
-            </DefaultDraggable>
+            </CellActionsRenderer>
           )}
         </EuiFlexItem>
       );
@@ -81,7 +79,7 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
             moreMaxHeight={moreMaxHeight}
             overflowIndexStart={displayCount}
             render={render}
-            rowItems={rowItems}
+            rowItems={items}
             scopeId={scopeId}
           />
         </EuiFlexItem>

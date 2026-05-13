@@ -31,10 +31,20 @@ export function useShowBulkSuccessToast() {
           ? explainBulkEditSuccess(editPayload ?? [], summary)
           : explainBulkSuccess(actionType, summary);
 
-      toasts.addSuccess({
-        title: summarizeBulkSuccess(actionType),
+      const toastBody = {
+        title: summarizeBulkSuccess(actionType, summary),
         text,
-      });
+      };
+
+      const shouldShowSuccessToast = summary.succeeded >= 1;
+
+      if (shouldShowSuccessToast) {
+        toasts.addSuccess(toastBody);
+      } else {
+        // In the case when the succeeded count is 0, show a neutral toast instead.
+        // This can happen when all elements in the bulk action were skipped.
+        toasts.addInfo(toastBody);
+      }
     },
     [toasts]
   );

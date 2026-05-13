@@ -57,10 +57,14 @@ export const AdminSearchBar = memo(() => {
             onQuerySubmit={onQuerySubmit}
             fillSubmitButton={true}
             isLoading={false}
-            iconType="search"
+            iconType="magnify"
             showFilterBar={false}
             showDatePicker={false}
             showQueryInput={true}
+            suggestionsAbstraction={{
+              type: 'endpoints',
+              fields: {},
+            }}
           />
         </div>
       )}

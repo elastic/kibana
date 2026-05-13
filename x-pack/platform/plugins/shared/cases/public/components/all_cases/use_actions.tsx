@@ -13,6 +13,7 @@ import type {
 } from '@elastic/eui';
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { CaseStatuses } from '@kbn/cases-components';
 import type { CaseUI } from '../../containers/types';
 import { useDeleteAction } from '../actions/delete/use_delete_action';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
@@ -29,16 +30,19 @@ import { useAssigneesAction } from '../actions/assignees/use_assignees_action';
 import { EditAssigneesFlyout } from '../actions/assignees/edit_assignees_flyout';
 import { useCopyIDAction } from '../actions/copy_id/use_copy_id_action';
 import { useShouldDisableStatus } from '../actions/status/use_should_disable_status';
+import { useCloseCaseModal } from './use_close_case_modal';
+import { useCanSyncCloseReasonToAlerts } from './use_can_sync_close_reason_to_alerts';
 
 const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean }> = ({
   theCase,
   disableActions,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const tooglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
+  const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const refreshCases = useRefreshCases();
   const { permissions } = useCasesContext();
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
 
   const shouldDisable = useShouldDisableStatus();
 
@@ -81,6 +85,39 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
     onAction: closePopover,
     onActionSuccess: refreshCases,
   });
+
+  const onCloseCase = useCallback(
+    (closeReason?: string) => {
+      statusAction.handleUpdateCaseStatus([theCase], CaseStatuses.closed, closeReason);
+    },
+    [statusAction, theCase]
+  );
+  const canSyncCloseReasonToAlerts = useCanSyncCloseReasonToAlerts({
+    totalAlerts: theCase.totalAlerts,
+    syncAlertsEnabled: theCase.settings.syncAlerts,
+  });
+
+  const { openCloseCaseModal, closeCaseModal } = useCloseCaseModal({
+    canSyncCloseReasonToAlerts,
+    onCloseCase,
+  });
+
+  const statusActions: EuiContextMenuPanelItemDescriptor[] = useMemo(() => {
+    return statusAction
+      .getActions([theCase])
+      .map((statusActionMenuItem: EuiContextMenuPanelItemDescriptor) => {
+        if (
+          statusActionMenuItem.key === 'cases-bulk-action-status-closed' &&
+          theCase.status !== CaseStatuses.closed
+        ) {
+          return {
+            ...statusActionMenuItem,
+            onClick: openCloseCaseModal,
+          } as EuiContextMenuPanelItemDescriptor;
+        }
+        return statusActionMenuItem;
+      });
+  }, [openCloseCaseModal, statusAction, theCase]);
 
   const canDelete = deleteAction.canDelete;
   const canUpdate = statusAction.canUpdateStatus;
@@ -154,7 +191,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
       panelsToBuild.push({
         id: 1,
         title: i18n.STATUS,
-        items: statusAction.getActions([theCase]),
+        items: statusActions,
       });
     }
     if (severityAction.canUpdateSeverity) {
@@ -175,6 +212,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
     deleteAction,
     severityAction,
     statusAction,
+    statusActions,
     tagsAction,
     theCase,
     shouldDisableStatus,
@@ -188,13 +226,14 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
         data-test-subj={`case-action-popover-${theCase.id}`}
         button={
           <EuiButtonIcon
-            onClick={tooglePopover}
-            iconType="boxesHorizontal"
+            onClick={togglePopover}
+            iconType="boxesVertical"
             aria-label={i18n.ACTIONS_BUTTON_ARIA_LABEL(theCase.title)}
             color="text"
             key={`case-action-popover-button-${theCase.id}`}
             data-test-subj={`case-action-popover-button-${theCase.id}`}
             disabled={disableActions}
+            buttonRef={buttonRef}
           />
         }
         isOpen={isPopoverOpen}
@@ -214,6 +253,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
           totalCasesToBeDeleted={1}
           onCancel={deleteAction.onCloseModal}
           onConfirm={deleteAction.onConfirmDeletion}
+          focusButtonRef={buttonRef}
         />
       ) : null}
       {tagsAction.isFlyoutOpen ? (
@@ -221,6 +261,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
           onClose={tagsAction.onFlyoutClosed}
           selectedCases={[theCase]}
           onSaveTags={tagsAction.onSaveTags}
+          focusButtonRef={buttonRef}
         />
       ) : null}
       {assigneesAction.isFlyoutOpen ? (
@@ -228,8 +269,10 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
           onClose={assigneesAction.onFlyoutClosed}
           selectedCases={[theCase]}
           onSaveAssignees={assigneesAction.onSaveAssignees}
+          focusButtonRef={buttonRef}
         />
       ) : null}
+      {closeCaseModal}
     </>
   );
 };
@@ -255,13 +298,14 @@ export const useActions = ({ disableActions }: UseBulkActionsProps): UseBulkActi
     actions: shouldShowActions
       ? {
           name: i18n.ACTIONS,
+          width: '4.5em',
+          minWidth: '4.5em',
           align: 'right',
           render: (theCase: CaseUI) => {
             return (
               <ActionColumn theCase={theCase} key={theCase.id} disableActions={disableActions} />
             );
           },
-          width: '100px',
         }
       : null,
   };

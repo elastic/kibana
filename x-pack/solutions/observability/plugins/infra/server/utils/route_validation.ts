@@ -9,9 +9,9 @@ import type {
   RouteValidationResultFactory,
   RouteValidationError,
 } from '@kbn/core/server';
-import { either, fold } from 'fp-ts/lib/Either';
-import get from 'lodash/get';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { either, fold } from 'fp-ts/Either';
+import { get } from 'lodash';
+import { pipe } from 'fp-ts/pipeable';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import * as rt from 'io-ts';
 

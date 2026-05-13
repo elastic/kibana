@@ -6,19 +6,21 @@
  */
 
 import { get } from 'lodash';
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { RequestHandler } from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 
 import { API_BASE_PATH, SNIFF_MODE, PROXY_MODE } from '../../../common/constants';
-import { serializeCluster, deserializeCluster, Cluster, ClusterInfoEs } from '../../../common/lib';
-import { RouteDependencies } from '../../types';
+import type { Cluster, ClusterInfoEs } from '../../../common/lib';
+import { serializeCluster, deserializeCluster } from '../../../common/lib';
+import type { RouteDependencies } from '../../types';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 
 const bodyValidation = schema.object({
   skipUnavailable: schema.boolean(),
   mode: schema.oneOf([schema.literal(PROXY_MODE), schema.literal(SNIFF_MODE)]),
-  seeds: schema.nullable(schema.arrayOf(schema.string())),
+  seeds: schema.nullable(schema.arrayOf(schema.string(), { maxSize: 1000 })),
   nodeConnections: schema.nullable(schema.number()),
   proxyAddress: schema.nullable(schema.string()),
   proxySocketConnections: schema.nullable(schema.number()),

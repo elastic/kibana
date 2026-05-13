@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { IngestPipelinesPlugin } from './plugin';
 
 export function plugin(context: PluginInitializerContext) {
@@ -14,3 +14,5 @@ export function plugin(context: PluginInitializerContext) {
 
 export { INGEST_PIPELINES_APP_LOCATOR, INGEST_PIPELINES_PAGES } from './locator';
 export type { IngestPipelinesListParams } from './locator';
+
+export type { IngestPipelinesPluginStart } from './types';

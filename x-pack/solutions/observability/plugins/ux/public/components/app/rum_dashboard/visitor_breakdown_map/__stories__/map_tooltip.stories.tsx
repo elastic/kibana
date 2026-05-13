@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { MapToolTip } from '../map_tooltip';
 import { COUNTRY_NAME, TRANSACTION_DURATION_COUNTRY } from '../use_layer_list';
 
-storiesOf('app/rum_dashboard/VisitorsRegionMap', module).add(
-  'Tooltip',
-  () => {
+export default {
+  title: 'app/rum_dashboard/VisitorsRegionMap',
+};
+
+export const Tooltip = {
+  render: () => {
     const loadFeatureProps = async () => {
       return [
         {
@@ -33,6 +35,7 @@ storiesOf('app/rum_dashboard/VisitorsRegionMap', module).add(
             id: 'US',
             layerId: 'e8d1d974-eed8-462f-be2c-f0004b7619b2',
             mbProperties: {
+              // eslint-disable-next-line @typescript-eslint/naming-convention
               __kbn__feature_id__: 'US',
               name: 'United States',
               iso2: 'US',
@@ -47,10 +50,11 @@ storiesOf('app/rum_dashboard/VisitorsRegionMap', module).add(
       />
     );
   },
-  {
+
+  parameters: {
     info: {
       propTables: false,
       source: false,
     },
-  }
-);
+  },
+};

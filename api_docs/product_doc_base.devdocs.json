@@ -2,11 +2,522 @@
   "id": "productDocBase",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
+    "functions": [
+      {
+        "parentPluginId": "productDocBase",
+        "id": "def-public.useInstallProductDoc",
+        "type": "Function",
+        "tags": [],
+        "label": "useInstallProductDoc",
+        "description": [
+          "\nHook to install product documentation.\nAutomatically invalidates the status query on success."
+        ],
+        "signature": [
+          "(productDocBase: ",
+          {
+            "pluginId": "productDocBase",
+            "scope": "public",
+            "docId": "kibProductDocBasePluginApi",
+            "section": "def-public.ProductDocBasePluginStart",
+            "text": "ProductDocBasePluginStart"
+          },
+          ", options: ",
+          {
+            "pluginId": "productDocBase",
+            "scope": "public",
+            "docId": "kibProductDocBasePluginApi",
+            "section": "def-public.UseInstallProductDocOptions",
+            "text": "UseInstallProductDocOptions"
+          },
+          ") => ",
+          "UseMutationResult",
+          "<",
+          "PerformInstallResponse",
+          ", ServerError, InstallVars, unknown>"
+        ],
+        "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_install_product_doc.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "productDocBase",
+            "id": "def-public.useInstallProductDoc.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "productDocBase",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "productDocBase",
+                "scope": "public",
+                "docId": "kibProductDocBasePluginApi",
+                "section": "def-public.ProductDocBasePluginStart",
+                "text": "ProductDocBasePluginStart"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_install_product_doc.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "ProductDocBasePluginStart",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "productDocBase",
+            "id": "def-public.useInstallProductDoc.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "productDocBase",
+                "scope": "public",
+                "docId": "kibProductDocBasePluginApi",
+                "section": "def-public.UseInstallProductDocOptions",
+                "text": "UseInstallProductDocOptions"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_install_product_doc.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "UseInstallProductDocOptions",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "productDocBase",
+        "id": "def-public.useProductDocStatus",
+        "type": "Function",
+        "tags": [],
+        "label": "useProductDocStatus",
+        "description": [
+          "\nHook to fetch the installation status of product documentation.\nAutomatically polls when installation or uninstallation is in progress."
+        ],
+        "signature": [
+          "(productDocBase: ",
+          {
+            "pluginId": "productDocBase",
+            "scope": "public",
+            "docId": "kibProductDocBasePluginApi",
+            "section": "def-public.ProductDocBasePluginStart",
+            "text": "ProductDocBasePluginStart"
+          },
+          ", options: ",
+          {
+            "pluginId": "productDocBase",
+            "scope": "public",
+            "docId": "kibProductDocBasePluginApi",
+            "section": "def-public.UseProductDocStatusOptions",
+            "text": "UseProductDocStatusOptions"
+          },
+          ") => { status: ",
+          "InstallationStatusResponse",
+          " | ",
+          "SecurityLabsInstallStatusResponse",
+          " | undefined; refetch: <TPageData>(options?: (",
+          "RefetchOptions",
+          " & ",
+          "RefetchQueryFilters",
+          "<TPageData>) | undefined) => Promise<",
+          "QueryObserverResult",
+          "<",
+          "InstallationStatusResponse",
+          " | ",
+          "SecurityLabsInstallStatusResponse",
+          ", unknown>>; isLoading: boolean; isRefetching: boolean; isSuccess: boolean; isError: boolean; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_product_doc_status.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "productDocBase",
+            "id": "def-public.useProductDocStatus.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "productDocBase",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "productDocBase",
+                "scope": "public",
+                "docId": "kibProductDocBasePluginApi",
+                "section": "def-public.ProductDocBasePluginStart",
+                "text": "ProductDocBasePluginStart"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_product_doc_status.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "ProductDocBasePluginStart",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "productDocBase",
+            "id": "def-public.useProductDocStatus.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "productDocBase",
+                "scope": "public",
+                "docId": "kibProductDocBasePluginApi",
+                "section": "def-public.UseProductDocStatusOptions",
+                "text": "UseProductDocStatusOptions"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_product_doc_status.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "UseProductDocStatusOptions",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "productDocBase",
+        "id": "def-public.useUninstallProductDoc",
+        "type": "Function",
+        "tags": [],
+        "label": "useUninstallProductDoc",
+        "description": [
+          "\nHook to uninstall product documentation.\nAutomatically invalidates the status query on success."
+        ],
+        "signature": [
+          "(productDocBase: ",
+          {
+            "pluginId": "productDocBase",
+            "scope": "public",
+            "docId": "kibProductDocBasePluginApi",
+            "section": "def-public.ProductDocBasePluginStart",
+            "text": "ProductDocBasePluginStart"
+          },
+          ", options: ",
+          {
+            "pluginId": "productDocBase",
+            "scope": "public",
+            "docId": "kibProductDocBasePluginApi",
+            "section": "def-public.UseUninstallProductDocOptions",
+            "text": "UseUninstallProductDocOptions"
+          },
+          ") => ",
+          "UseMutationResult",
+          "<",
+          "UninstallResponse",
+          ", ServerError, UninstallVars, unknown>"
+        ],
+        "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_uninstall_product_doc.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "productDocBase",
+            "id": "def-public.useUninstallProductDoc.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "productDocBase",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "productDocBase",
+                "scope": "public",
+                "docId": "kibProductDocBasePluginApi",
+                "section": "def-public.ProductDocBasePluginStart",
+                "text": "ProductDocBasePluginStart"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_uninstall_product_doc.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "ProductDocBasePluginStart",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "productDocBase",
+            "id": "def-public.useUninstallProductDoc.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "productDocBase",
+                "scope": "public",
+                "docId": "kibProductDocBasePluginApi",
+                "section": "def-public.UseUninstallProductDocOptions",
+                "text": "UseUninstallProductDocOptions"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_uninstall_product_doc.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "UseUninstallProductDocOptions",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "productDocBase",
+        "id": "def-public.UseInstallProductDocOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseInstallProductDocOptions",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_install_product_doc.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "productDocBase",
+            "id": "def-public.UseInstallProductDocOptions.onSuccess",
+            "type": "Function",
+            "tags": [],
+            "label": "onSuccess",
+            "description": [
+              "Callback fired on successful installation"
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_install_product_doc.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "productDocBase",
+            "id": "def-public.UseInstallProductDocOptions.onError",
+            "type": "Function",
+            "tags": [],
+            "label": "onError",
+            "description": [
+              "Callback fired on installation error"
+            ],
+            "signature": [
+              "((error: ServerError) => void) | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_install_product_doc.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "productDocBase",
+                "id": "def-public.UseInstallProductDocOptions.onError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "ServerError"
+                ],
+                "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_install_product_doc.ts",
+                "lineNumber": 22,
+                "columnNumber": 14,
+                "deprecated": false,
+                "docsReferencedTypeName": "ServerError",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "productDocBase",
+        "id": "def-public.UseProductDocStatusOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseProductDocStatusOptions",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_product_doc_status.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "productDocBase",
+            "id": "def-public.UseProductDocStatusOptions.inferenceId",
+            "type": "string",
+            "tags": [],
+            "label": "inferenceId",
+            "description": [
+              "The inference ID to check status for. Defaults to ELSER."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_product_doc_status.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "productDocBase",
+            "id": "def-public.UseProductDocStatusOptions.resourceType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "resourceType",
+            "description": [
+              "The resource type to check status for. Defaults to product docs."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/product-doc-common",
+                "scope": "common",
+                "docId": "kibKbnProductDocCommonPluginApi",
+                "section": "def-common.ResourceType",
+                "text": "ResourceType"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_product_doc_status.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "productDocBase",
+        "id": "def-public.UseUninstallProductDocOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseUninstallProductDocOptions",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_uninstall_product_doc.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "productDocBase",
+            "id": "def-public.UseUninstallProductDocOptions.onSuccess",
+            "type": "Function",
+            "tags": [],
+            "label": "onSuccess",
+            "description": [
+              "Callback fired on successful uninstallation"
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_uninstall_product_doc.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "productDocBase",
+            "id": "def-public.UseUninstallProductDocOptions.onError",
+            "type": "Function",
+            "tags": [],
+            "label": "onError",
+            "description": [
+              "Callback fired on uninstallation error"
+            ],
+            "signature": [
+              "((error: ServerError) => void) | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_uninstall_product_doc.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "productDocBase",
+                "id": "def-public.UseUninstallProductDocOptions.onError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "ServerError"
+                ],
+                "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_uninstall_product_doc.ts",
+                "lineNumber": 22,
+                "columnNumber": 14,
+                "deprecated": false,
+                "docsReferencedTypeName": "ServerError",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
-    "objects": [],
+    "objects": [
+      {
+        "parentPluginId": "productDocBase",
+        "id": "def-public.REACT_QUERY_KEYS",
+        "type": "Object",
+        "tags": [],
+        "label": "REACT_QUERY_KEYS",
+        "description": [
+          "\nReact Query keys for product documentation queries and mutations"
+        ],
+        "signature": [
+          "{ readonly GET_PRODUCT_DOC_STATUS: \"productDocBase.status\"; readonly INSTALL_PRODUCT_DOC: \"productDocBase.install\"; readonly UNINSTALL_PRODUCT_DOC: \"productDocBase.uninstall\"; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "setup": {
       "parentPluginId": "productDocBase",
       "id": "def-public.ProductDocBasePluginSetup",
@@ -15,6 +526,8 @@
       "label": "ProductDocBasePluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/types.ts",
+      "lineNumber": 18,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -29,6 +542,8 @@
       "label": "ProductDocBasePluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/types.ts",
+      "lineNumber": 20,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -43,6 +558,8 @@
             "InstallationAPI"
           ],
           "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/types.ts",
+          "lineNumber": 21,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -62,9 +579,18 @@
         "tags": [],
         "label": "DocSearchOptions",
         "description": [
-          "\nOptions for the Product documentation {@link SearchApi}"
+          "\nOptions for the Product documentation ",
+          {
+            "pluginId": "productDocBase",
+            "scope": "server",
+            "docId": "kibProductDocBasePluginApi",
+            "section": "def-server.SearchApi",
+            "text": "SearchApi"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -78,6 +604,8 @@
               "plain text search query"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -94,6 +622,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -110,6 +640,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -126,6 +658,51 @@
               "(\"security\" | \"kibana\" | \"observability\" | \"elasticsearch\")[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "productDocBase",
+            "id": "def-server.DocSearchOptions.inferenceId",
+            "type": "string",
+            "tags": [],
+            "label": "inferenceId",
+            "description": [
+              "optional inference ID to filter search"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "productDocBase",
+            "id": "def-server.DocSearchOptions.resourceTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "resourceTypes",
+            "description": [
+              "\nResource types to include in the search.\nDefaults to `['product_doc']`."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/product-doc-common",
+                "scope": "common",
+                "docId": "kibKbnProductDocCommonPluginApi",
+                "section": "def-common.ResourceType",
+                "text": "ResourceType"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -139,9 +716,18 @@
         "tags": [],
         "label": "DocSearchResponse",
         "description": [
-          "\nResponse for the {@link SearchApi}"
+          "\nResponse for the ",
+          {
+            "pluginId": "productDocBase",
+            "scope": "server",
+            "docId": "kibProductDocBasePluginApi",
+            "section": "def-server.SearchApi",
+            "text": "SearchApi"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -165,6 +751,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -178,9 +766,26 @@
         "tags": [],
         "label": "DocSearchResult",
         "description": [
-          "\nIndividual result returned in a {@link DocSearchResponse} by the {@link SearchApi}"
+          "\nIndividual result returned in a ",
+          {
+            "pluginId": "productDocBase",
+            "scope": "server",
+            "docId": "kibProductDocBasePluginApi",
+            "section": "def-server.DocSearchResponse",
+            "text": "DocSearchResponse"
+          },
+          " by the ",
+          {
+            "pluginId": "productDocBase",
+            "scope": "server",
+            "docId": "kibProductDocBasePluginApi",
+            "section": "def-server.SearchApi",
+            "text": "SearchApi"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -194,6 +799,8 @@
               "title of the doc article page"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -207,6 +814,8 @@
               "full url to the online documentation"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -223,6 +832,8 @@
               "\"security\" | \"kibana\" | \"observability\" | \"elasticsearch\""
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -236,6 +847,8 @@
               "full content of the doc article"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -252,6 +865,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -290,6 +905,8 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+        "lineNumber": 55,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -311,7 +928,10 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 26,
             "deprecated": false,
+            "docsReferencedTypeName": "DocSearchOptions",
             "trackAdoption": false
           }
         ],
@@ -327,6 +947,8 @@
       "label": "ProductDocBaseSetupContract",
       "description": [],
       "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/types.ts",
+      "lineNumber": 30,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -341,6 +963,8 @@
       "label": "ProductDocBaseStartContract",
       "description": [],
       "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/types.ts",
+      "lineNumber": 32,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -371,6 +995,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/types.ts",
+          "lineNumber": 33,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -392,7 +1018,10 @@
                 }
               ],
               "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+              "lineNumber": 58,
+              "columnNumber": 26,
               "deprecated": false,
+              "docsReferencedTypeName": "DocSearchOptions",
               "trackAdoption": false
             }
           ]
@@ -408,6 +1037,8 @@
             "DocumentationManagerAPI"
           ],
           "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/types.ts",
+          "lineNumber": 34,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }

@@ -17,10 +17,11 @@ interface Props {
   eventId: string;
   processExitCode: number | null | undefined;
   text: string | null | undefined;
+  scopeId: string;
 }
 
 export const ExitCodeDraggable = React.memo<Props>(
-  ({ contextId, endgameExitCode, eventId, processExitCode, text }) => {
+  ({ contextId, endgameExitCode, eventId, processExitCode, text, scopeId }) => {
     if (isNillEmptyOrNotFinite(processExitCode) && isNillEmptyOrNotFinite(endgameExitCode)) {
       return null;
     }
@@ -36,6 +37,7 @@ export const ExitCodeDraggable = React.memo<Props>(
         {!isNillEmptyOrNotFinite(processExitCode) && (
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="process.exit_code"
@@ -49,6 +51,7 @@ export const ExitCodeDraggable = React.memo<Props>(
         {!isNillEmptyOrNotFinite(endgameExitCode) && (
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="endgame.exit_code"

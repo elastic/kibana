@@ -19,14 +19,7 @@ import { SetupTechnology } from '../../../../../types';
 import { useStartServices } from '../../../../../hooks';
 import { SelectedPolicyTab } from '../../components';
 import {
-  AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
-  AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
-  AGENTLESS_GLOBAL_TAG_NAME_TEAM,
-  AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
-  AGENTLESS_AGENT_POLICY_MONITORING,
-} from '../../../../../../../../common/constants';
-import {
-  isAgentlessIntegration as isAgentlessIntegrationFn,
+  isAgentlessIntegration,
   getAgentlessAgentPolicyNameFromPackagePolicyName,
   isOnlyAgentlessIntegration,
 } from '../../../../../../../../common/services/agentless_policy_helper';
@@ -38,24 +31,49 @@ export const useAgentless = () => {
   const isCloud = !!cloud?.isCloudEnabled;
 
   const isAgentlessEnabled = (isCloud || isServerless) && config.agentless?.enabled === true;
+  const isAgentlessDefault = isAgentlessEnabled && config.agentless?.isDefault === true;
+  const isAgentlessCustomIntegrationsEnabled =
+    isAgentlessEnabled && config.agentless?.customIntegrations?.enabled === true;
 
   const isAgentlessAgentPolicy = (agentPolicy: AgentPolicy | undefined) => {
     if (!agentPolicy) return false;
     return isAgentlessEnabled && !!agentPolicy?.supports_agentless;
   };
 
-  // When an integration has at least a policy template enabled for agentless
-  const isAgentlessIntegration = (packageInfo: PackageInfo | undefined) => {
-    if (isAgentlessEnabled && isAgentlessIntegrationFn(packageInfo)) {
-      return true;
-    }
-    return false;
-  };
+  const getAgentlessStatusForPackage = useCallback(
+    (packageInfo: PackageInfo | undefined, integrationToEnable?: string) => {
+      const installSource =
+        packageInfo &&
+        'installationInfo' in packageInfo &&
+        packageInfo.installationInfo?.install_source;
+      const isCustomIntegration = installSource === 'custom' || installSource === 'upload';
+
+      if (isCustomIntegration && !isAgentlessCustomIntegrationsEnabled) {
+        return { isAgentless: false, isDefaultDeploymentMode: false };
+      }
+
+      if (isAgentlessEnabled && isAgentlessIntegration(packageInfo, integrationToEnable)) {
+        return {
+          isAgentless: true,
+          isDefaultDeploymentMode: isAgentlessSetupDefault(
+            isAgentlessDefault,
+            packageInfo,
+            integrationToEnable
+          ),
+        };
+      }
+      return { isAgentless: false, isDefaultDeploymentMode: false };
+    },
+    [isAgentlessEnabled, isAgentlessCustomIntegrationsEnabled, isAgentlessDefault]
+  );
 
   return {
     isAgentlessEnabled,
+    isAgentlessDefault,
     isAgentlessAgentPolicy,
-    isAgentlessIntegration,
+    getAgentlessStatusForPackage,
+    isServerless,
+    isCloud,
   };
 };
 
@@ -69,6 +87,7 @@ export function useSetupTechnology({
   isEditPage,
   agentPolicies,
   integrationToEnable,
+  hideAgentlessSelector,
 }: {
   setNewAgentPolicy: (policy: NewAgentPolicy) => void;
   newAgentPolicy: NewAgentPolicy;
@@ -79,17 +98,26 @@ export function useSetupTechnology({
   isEditPage?: boolean;
   agentPolicies?: AgentPolicy[];
   integrationToEnable?: string;
+  hideAgentlessSelector?: boolean;
 }) {
-  const { isAgentlessEnabled } = useAgentless();
+  const { isAgentlessEnabled, isAgentlessDefault } = useAgentless();
 
   // this is a placeholder for the new agent-BASED policy that will be used when the user switches from agentless to agent-based and back
   const orginalAgentPolicyRef = useRef<NewAgentPolicy>({ ...newAgentPolicy });
   const [currentAgentPolicy, setCurrentAgentPolicy] = useState(newAgentPolicy);
 
   const allowedSetupTechnologies = useMemo(() => {
-    return isOnlyAgentlessIntegration(packageInfo, integrationToEnable)
-      ? [SetupTechnology.AGENTLESS]
-      : [SetupTechnology.AGENTLESS, SetupTechnology.AGENT_BASED];
+    const setupTechnologies = [];
+
+    if (isAgentlessIntegration(packageInfo, integrationToEnable)) {
+      setupTechnologies.push(SetupTechnology.AGENTLESS);
+    }
+
+    if (!isOnlyAgentlessIntegration(packageInfo, integrationToEnable)) {
+      setupTechnologies.push(SetupTechnology.AGENT_BASED);
+    }
+
+    return setupTechnologies;
   }, [integrationToEnable, packageInfo]);
   const [selectedSetupTechnology, setSelectedSetupTechnology] = useState<SetupTechnology>(
     SetupTechnology.AGENT_BASED
@@ -101,13 +129,20 @@ export function useSetupTechnology({
   useEffect(() => {
     const shouldBeDefault =
       isAgentlessEnabled &&
+      !hideAgentlessSelector &&
       (isOnlyAgentlessIntegration(packageInfo, integrationToEnable) ||
-        isAgentlessSetupDefault(packageInfo, integrationToEnable))
+        isAgentlessSetupDefault(isAgentlessDefault, packageInfo, integrationToEnable))
         ? SetupTechnology.AGENTLESS
         : SetupTechnology.AGENT_BASED;
     setDefaultSetupTechnology(shouldBeDefault);
     setSelectedSetupTechnology(shouldBeDefault);
-  }, [isAgentlessEnabled, packageInfo, integrationToEnable]);
+  }, [
+    isAgentlessEnabled,
+    isAgentlessDefault,
+    packageInfo,
+    integrationToEnable,
+    hideAgentlessSelector,
+  ]);
 
   const agentlessPolicyName = getAgentlessAgentPolicyNameFromPackagePolicyName(packagePolicy.name);
 
@@ -121,7 +156,6 @@ export function useSetupTechnology({
     },
     [isAgentlessEnabled, selectedSetupTechnology, setSelectedPolicyTab, setSelectedSetupTechnology]
   );
-
   if (
     isEditPage &&
     agentPolicies &&
@@ -138,20 +172,10 @@ export function useSetupTechnology({
     selectedSetupTechnology === SetupTechnology.AGENTLESS &&
     (!currentAgentPolicy.supports_agentless || agentlessPolicyName !== currentAgentPolicy.name)
   ) {
-    const nextNewAgentlessPolicy = {
-      ...generateNewAgentPolicyWithDefaults({
-        inactivity_timeout: AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
-        supports_agentless: true,
-        monitoring_enabled: AGENTLESS_AGENT_POLICY_MONITORING,
-      }),
+    const nextNewAgentlessPolicy = generateNewAgentPolicyWithDefaults({
       name: agentlessPolicyName,
-      global_data_tags: getGlobaDataTags(packageInfo),
-    };
-
-    const agentlessPolicy = getAgentlessPolicy(packageInfo);
-    if (agentlessPolicy) {
-      nextNewAgentlessPolicy.agentless = agentlessPolicy;
-    }
+      supports_agentless: true,
+    });
 
     setCurrentAgentPolicy(nextNewAgentlessPolicy);
     setNewAgentPolicy(nextNewAgentlessPolicy as NewAgentPolicy);
@@ -184,79 +208,39 @@ export function useSetupTechnology({
   };
 }
 
-const isAgentlessSetupDefault = (packageInfo?: PackageInfo, integrationToEnable?: string) => {
-  if (
-    packageInfo &&
-    packageInfo.policy_templates &&
-    packageInfo.policy_templates.length > 0 &&
-    ((integrationToEnable &&
-      packageInfo?.policy_templates?.find((p) => p.name === integrationToEnable)?.deployment_modes
-        ?.agentless.is_default) ||
-      packageInfo?.policy_templates?.every((p) => p.deployment_modes?.agentless.is_default))
-  ) {
+export const isAgentlessSetupDefault = (
+  isAgentlessDefault: boolean,
+  packageInfo?: PackageInfo,
+  integrationToEnable?: string
+): boolean => {
+  const policyTemplates = packageInfo?.policy_templates ?? [];
+  if (policyTemplates.length === 0) {
+    return false;
+  }
+
+  const hasDefaultAgentlessIntegration =
+    integrationToEnable &&
+    policyTemplates.find((p) => p.name === integrationToEnable)?.deployment_modes?.agentless
+      ?.is_default;
+  if (hasDefaultAgentlessIntegration) {
     return true;
   }
 
+  const allPolicyTemplatesAreDefaultAgentless = policyTemplates.every(
+    (template) => template.deployment_modes?.agentless?.is_default
+  );
+  if (allPolicyTemplatesAreDefaultAgentless) {
+    return true;
+  }
+
+  if (isAgentlessDefault) {
+    const allPolicyTemplatesHaveAgentlessDefined = policyTemplates.every(
+      (template) => template.deployment_modes?.agentless
+    );
+    if (allPolicyTemplatesHaveAgentlessDefined) {
+      return true;
+    }
+  }
+
   return false;
-};
-
-const getGlobaDataTags = (packageInfo?: PackageInfo) => {
-  if (
-    !packageInfo?.policy_templates &&
-    !packageInfo?.policy_templates?.some((policy) => policy.deployment_modes)
-  ) {
-    return undefined;
-  }
-  const agentlessPolicyTemplate = packageInfo.policy_templates.find(
-    (policy) => policy.deployment_modes
-  );
-
-  // assumes that all the policy templates agentless deployments modes indentify have the same organization, division and team
-  const agentlessInfo = agentlessPolicyTemplate?.deployment_modes?.agentless;
-  if (
-    agentlessInfo === undefined ||
-    !agentlessInfo.organization ||
-    !agentlessInfo.division ||
-    !agentlessInfo.team
-  ) {
-    return undefined;
-  }
-
-  return [
-    {
-      name: AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
-      value: agentlessInfo.organization,
-    },
-    {
-      name: AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
-      value: agentlessInfo.division,
-    },
-    {
-      name: AGENTLESS_GLOBAL_TAG_NAME_TEAM,
-      value: agentlessInfo.team,
-    },
-  ];
-};
-
-const getAgentlessPolicy = (packageInfo?: PackageInfo) => {
-  if (
-    !packageInfo?.policy_templates &&
-    !packageInfo?.policy_templates?.some((policy) => policy.deployment_modes)
-  ) {
-    return;
-  }
-  const agentlessPolicyTemplate = packageInfo.policy_templates.find(
-    (policy) => policy.deployment_modes
-  );
-
-  // assumes that all the policy templates agentless deployments modes indentify have the same organization, division and team
-  const agentlessInfo = agentlessPolicyTemplate?.deployment_modes?.agentless;
-
-  if (!agentlessInfo?.resources) {
-    return;
-  }
-
-  return {
-    resources: agentlessInfo.resources,
-  };
 };

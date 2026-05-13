@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiToolTip, EuiIcon, IconType } from '@elastic/eui';
-import { ProcessorStatus } from '../types';
+import type { IconType } from '@elastic/eui';
+import { EuiIcon, EuiIconTip } from '@elastic/eui';
+import type { ProcessorStatus } from '../types';
 import { ErrorIcon, ErrorIgnoredIcon, SkippedIcon } from './shared';
 
 interface ProcessorStatusIcon {
@@ -19,7 +21,7 @@ interface ProcessorStatusIcon {
 
 const processorStatusToIconMap: Record<ProcessorStatus, ProcessorStatusIcon> = {
   success: {
-    icon: 'checkInCircleFilled',
+    icon: 'checkCircleFill',
     iconColor: 'success',
     label: i18n.translate('xpack.ingestPipelines.pipelineEditorItem.successStatusAriaLabel', {
       defaultMessage: 'Success',
@@ -74,20 +76,38 @@ const unknownStatus = {
 
 interface Props {
   processorStatus: ProcessorStatus;
+  isInMoveMode?: boolean;
 }
 
-export const PipelineProcessorsItemStatus: FunctionComponent<Props> = ({ processorStatus }) => {
+export const PipelineProcessorsItemStatus: FunctionComponent<Props> = ({
+  processorStatus,
+  isInMoveMode = false,
+}) => {
   const { icon, iconColor, label } = processorStatusToIconMap[processorStatus] || unknownStatus;
 
-  return (
-    <EuiToolTip position="top" content={<p>{label}</p>}>
+  if (isInMoveMode) {
+    return (
       <EuiIcon
-        color={iconColor}
         type={icon}
-        aria-label={label}
+        color={iconColor}
         size="s"
+        aria-label={label}
         data-test-subj="processorStatusIcon"
       />
-    </EuiToolTip>
+    );
+  }
+
+  return (
+    <EuiIconTip
+      content={<p>{label}</p>}
+      position="top"
+      type={icon}
+      color={iconColor}
+      aria-label={label}
+      size="s"
+      iconProps={{
+        'data-test-subj': 'processorStatusIcon',
+      }}
+    />
   );
 };

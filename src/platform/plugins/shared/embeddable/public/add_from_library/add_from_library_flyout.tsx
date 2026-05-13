@@ -7,24 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import { partition } from 'lodash';
+import React, { useCallback, useMemo } from 'react';
 
-import { i18n } from '@kbn/i18n';
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
-import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { i18n } from '@kbn/i18n';
+import type { CanAddNewPanel } from '@kbn/presentation-publishing';
+import { apiHasType } from '@kbn/presentation-publishing';
+import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import type { SavedObjectFinderProps } from '@kbn/saved-objects-finder-plugin/public';
 import {
   SavedObjectFinder,
-  SavedObjectFinderProps,
   type SavedObjectMetaData,
 } from '@kbn/saved-objects-finder-plugin/public';
 
-import { METRIC_TYPE } from '@kbn/analytics';
-import { apiHasType } from '@kbn/presentation-publishing';
-import { CanAddNewPanel } from '@kbn/presentation-containers';
 import {
+  contentManagement,
   core,
   savedObjectsTaggingOss,
-  contentManagement,
   usageCollection,
 } from '../kibana_services';
 import { getAddFromLibraryType, useAddFromLibraryTypes } from './registry';
@@ -42,14 +43,20 @@ const runAddTelemetry = (
   usageCollection?.reportUiCounter?.(parent.type, METRIC_TYPE.CLICK, `${type}:add`);
 };
 
-export const AddFromLibraryFlyout = ({
-  container,
-  modalTitleId,
-}: {
+export interface AddFromLibraryFormProps {
   container: CanAddNewPanel;
   modalTitleId?: string;
-}) => {
+}
+
+export interface AddFromLibraryContentProps {
+  container: CanAddNewPanel;
+}
+
+export const AddFromLibraryContent = ({ container }: AddFromLibraryContentProps) => {
   const libraryTypes = useAddFromLibraryTypes();
+  const [typesWithoutCM, typesWithCM] = useMemo(() => {
+    return partition(libraryTypes, (type) => Boolean(type.getSavedObjects));
+  }, [libraryTypes]);
 
   const onChoose: SavedObjectFinderProps['onChoose'] = useCallback(
     async (
@@ -68,13 +75,49 @@ export const AddFromLibraryFlyout = ({
         );
         return;
       }
-
       libraryType.onAdd(container, savedObject);
       runAddTelemetry(container, savedObject, libraryType.savedObjectMetaData);
     },
     [container]
   );
 
+  return (
+    <SavedObjectFinder
+      id="embeddableAddPanel"
+      services={{
+        contentClient: contentManagement.client,
+        savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
+        uiSettings: core.uiSettings,
+      }}
+      onChoose={onChoose}
+      savedObjectMetaData={typesWithCM}
+      showFilter={true}
+      noItemsMessage={i18n.translate('embeddableApi.addPanel.noMatchingObjectsMessage', {
+        defaultMessage: 'No matching objects found.',
+      })}
+      extraItems={{
+        metaData: typesWithoutCM,
+        get: async (searchRequest) => {
+          const { perPage, ...rest } = searchRequest;
+          const getPromises = typesWithoutCM.map(({ getSavedObjects }) =>
+            getSavedObjects!({ ...rest, per_page: perPage })
+          );
+          return (await Promise.all(getPromises)).flat();
+        },
+      }}
+      getTooltipText={(item) => {
+        return item.managed
+          ? i18n.translate('embeddableApi.addPanel.managedPanelTooltip', {
+              defaultMessage:
+                'Elastic manages this panel. Adding it to a dashboard unlinks it from the library.',
+            })
+          : undefined;
+      }}
+    />
+  );
+};
+
+export const AddFromLibraryFlyout = ({ container, modalTitleId }: AddFromLibraryFormProps) => {
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -85,28 +128,7 @@ export const AddFromLibraryFlyout = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <SavedObjectFinder
-          id="embeddableAddPanel"
-          services={{
-            contentClient: contentManagement.client,
-            savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
-            uiSettings: core.uiSettings,
-          }}
-          onChoose={onChoose}
-          savedObjectMetaData={libraryTypes}
-          showFilter={true}
-          noItemsMessage={i18n.translate('embeddableApi.addPanel.noMatchingObjectsMessage', {
-            defaultMessage: 'No matching objects found.',
-          })}
-          getTooltipText={(item) => {
-            return item.managed
-              ? i18n.translate('embeddableApi.addPanel.managedPanelTooltip', {
-                  defaultMessage:
-                    'Elastic manages this panel. Adding it to a dashboard unlinks it from the library.',
-                })
-              : undefined;
-          }}
-        />
+        <AddFromLibraryContent container={container} />
       </EuiFlyoutBody>
     </>
   );

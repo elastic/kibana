@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UMServerLibs } from '../../lib/lib';
-import { UMRestApiRouteFactory } from '../types';
+import type { UMServerLibs } from '../../lib/lib';
+import type { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../../common/constants';
 
 export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
@@ -21,7 +21,7 @@ export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =>
       // provides a filter for the types of synthetic events to include
       // when fetching a journey's data
       syntheticEventTypes: schema.maybe(
-        schema.oneOf([schema.arrayOf(schema.string()), schema.string()])
+        schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10 }), schema.string()])
       ),
     }),
   },
@@ -58,7 +58,7 @@ export const createJourneyFailedStepsRoute: UMRestApiRouteFactory = (libs: UMSer
   path: API_URLS.JOURNEY_FAILED_STEPS,
   validate: {
     query: schema.object({
-      checkGroups: schema.arrayOf(schema.string()),
+      checkGroups: schema.arrayOf(schema.string(), { maxSize: 100 }),
     }),
   },
   handler: async ({ uptimeEsClient, request, response }): Promise<any> => {

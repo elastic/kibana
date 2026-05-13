@@ -16,11 +16,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  ActionParamsProps,
-  TextFieldWithMessageVariables,
-} from '@kbn/triggers-actions-ui-plugin/public';
-import { PagerDutyActionParams } from '../types';
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { TextFieldWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import type { PagerDutyActionParams } from '../types';
 import { OPTIONAL_LABEL } from './translations';
 
 type LinksListProps = Pick<
@@ -112,7 +110,7 @@ export const LinksList: React.FC<LinksListProps> = ({
                       links.splice(currentLinkIndex, 1);
                       editAction('links', links, index);
                     }}
-                    iconType="minusInCircle"
+                    iconType="minusCircle"
                     css={{ marginTop: 28 }}
                     data-test-subj="pagerDutyRemoveLinkButton"
                   />
@@ -123,7 +121,7 @@ export const LinksList: React.FC<LinksListProps> = ({
         <EuiFlexItem>
           <div>
             <EuiButton
-              iconType="plusInCircle"
+              iconType="plusCircle"
               onClick={() =>
                 editAction(
                   'links',

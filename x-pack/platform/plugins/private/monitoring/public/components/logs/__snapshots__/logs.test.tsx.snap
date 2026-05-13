@@ -2,6 +2,7 @@
 
 exports[`Logs should render a link to filter by cluster uuid 1`] = `
 <EuiCallOut
+  announceOnMount={true}
   iconType="logsApp"
   size="m"
   title="Want to see more log entries?"
@@ -13,6 +14,7 @@ exports[`Logs should render a link to filter by cluster uuid 1`] = `
       values={
         Object {
           "link": <EuiLink
+            data-test-subj="monitoringLogsLink"
             href="http://localhost:5601/app/discover"
           >
             Discover
@@ -26,6 +28,7 @@ exports[`Logs should render a link to filter by cluster uuid 1`] = `
 
 exports[`Logs should render a link to filter by cluster uuid and index uuid 1`] = `
 <EuiCallOut
+  announceOnMount={true}
   iconType="logsApp"
   size="m"
   title="Want to see more log entries?"
@@ -37,6 +40,7 @@ exports[`Logs should render a link to filter by cluster uuid and index uuid 1`] 
       values={
         Object {
           "link": <EuiLink
+            data-test-subj="monitoringLogsLink"
             href="http://localhost:5601/app/discover"
           >
             Discover
@@ -50,6 +54,7 @@ exports[`Logs should render a link to filter by cluster uuid and index uuid 1`] 
 
 exports[`Logs should render a link to filter by cluster uuid and node uuid 1`] = `
 <EuiCallOut
+  announceOnMount={true}
   iconType="logsApp"
   size="m"
   title="Want to see more log entries?"
@@ -61,6 +66,7 @@ exports[`Logs should render a link to filter by cluster uuid and node uuid 1`] =
       values={
         Object {
           "link": <EuiLink
+            data-test-subj="monitoringLogsLink"
             href="http://localhost:5601/app/discover"
           >
             Discover
@@ -73,7 +79,9 @@ exports[`Logs should render a link to filter by cluster uuid and node uuid 1`] =
 `;
 
 exports[`Logs should render a reason if the logs are disabled 1`] = `
-<div>
+<div
+  data-test-subj="monitoringLogs"
+>
   <EuiTitle>
     <h1>
       Recent Log Entries
@@ -131,7 +139,9 @@ Array [
 `;
 
 exports[`Logs should render normally 1`] = `
-<div>
+<div
+  data-test-subj="monitoringLogs"
+>
   <EuiTitle>
     <h1>
       Recent Log Entries
@@ -274,12 +284,14 @@ exports[`Logs should render normally 1`] = `
         token="euiBasicTable.noItemsMessage"
       />
     }
+    tableCaption="Recent log entries"
     tableLayout="fixed"
   />
   <EuiSpacer
     size="m"
   />
   <EuiCallOut
+    announceOnMount={true}
     iconType="logsApp"
     size="m"
     title="Want to see more log entries?"
@@ -291,6 +303,7 @@ exports[`Logs should render normally 1`] = `
         values={
           Object {
             "link": <EuiLink
+              data-test-subj="monitoringLogsLink"
               href="http://localhost:5601/app/discover"
             >
               Discover

@@ -8,7 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { kqlQuery } from '@kbn/observability-plugin/server';
-import { profilingFetchTopNFunctionsFromStacktraces } from '@kbn/observability-plugin/common';
+import { SERVICE_NAME } from '@kbn/observability-shared-plugin/common';
 import type { RouteRegisterParameters } from '.';
 import { IDLE_SOCKET_TIMEOUT } from '.';
 import { getRoutePaths } from '../../common';
@@ -48,7 +48,7 @@ export function registerTopNFunctionsSearchRoute({
       try {
         const core = await context.core;
 
-        const { timeFrom, timeTo, startIndex, endIndex, kuery }: QuerySchemaType = request.query;
+        const { timeFrom, timeTo, kuery }: QuerySchemaType = request.query;
         const startSecs = timeFrom / 1000;
         const endSecs = timeTo / 1000;
 
@@ -71,27 +71,15 @@ export function registerTopNFunctionsSearchRoute({
           },
         };
 
-        const useStacktracesAPI = await core.uiSettings.client.get<boolean>(
-          profilingFetchTopNFunctionsFromStacktraces
-        );
         const totalSeconds = endSecs - startSecs;
 
-        const topNFunctions = useStacktracesAPI
-          ? await profilingDataAccess.services.fetchFunctions({
-              core,
-              esClient,
-              startIndex,
-              endIndex,
-              totalSeconds,
-              query,
-            })
-          : await profilingDataAccess.services.fetchESFunctions({
-              core,
-              esClient,
-              query,
-              aggregationFields: ['service.name'],
-              totalSeconds,
-            });
+        const topNFunctions = await profilingDataAccess.services.fetchESFunctions({
+          core,
+          esClient,
+          query,
+          aggregationFields: [SERVICE_NAME],
+          totalSeconds,
+        });
 
         return response.ok({
           body: topNFunctions,

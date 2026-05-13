@@ -6,8 +6,10 @@
  */
 import Semver from 'semver';
 import Boom from '@hapi/boom';
-import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
@@ -23,11 +25,16 @@ import {
   validateActions,
   addGeneratedActionValues,
 } from '../../../../rules_client/lib';
-import { generateAPIKeyName, apiKeyAsRuleDomainProperties } from '../../../../rules_client/common';
+import {
+  generateAPIKeyName,
+  apiKeyAsRuleDomainProperties,
+  addMissingUiamKeyTagIfNeeded,
+  resolveRuleAPIKey,
+} from '../../../../rules_client/common';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { RulesClientContext } from '../../../../rules_client/types';
-import { RuleDomain, RuleParams } from '../../types';
-import { RawRule, SanitizedRule } from '../../../../types';
+import type { RulesClientContext } from '../../../../rules_client/types';
+import type { RuleDomain, RuleParams } from '../../types';
+import type { RawRule, SanitizedRule } from '../../../../types';
 import {
   transformRuleAttributesToRuleDomain,
   transformRuleDomainToRuleAttributes,
@@ -37,7 +44,9 @@ import { ruleDomainSchema } from '../../schemas';
 import type { CreateRuleData } from './types';
 import { createRuleDataSchema } from './schemas';
 import { createRuleSavedObject } from '../../../../rules_client/lib';
-import { validateScheduleLimit, ValidateScheduleLimitResult } from '../get_schedule_frequency';
+import type { ValidateScheduleLimitResult } from '../get_schedule_frequency';
+import { validateScheduleLimit } from '../get_schedule_frequency';
+import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
 
 export interface CreateRuleOptions {
   id?: string;
@@ -47,7 +56,6 @@ export interface CreateRuleParams<Params extends RuleParams = never> {
   data: CreateRuleData<Params>;
   options?: CreateRuleOptions;
   allowMissingConnectorSecrets?: boolean;
-  isFlappingEnabled?: boolean;
 }
 
 export async function createRule<Params extends RuleParams = never>(
@@ -55,12 +63,7 @@ export async function createRule<Params extends RuleParams = never>(
   createParams: CreateRuleParams<Params>
   // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
 ): Promise<SanitizedRule<Params>> {
-  const {
-    data: initialData,
-    options,
-    allowMissingConnectorSecrets,
-    isFlappingEnabled = false,
-  } = createParams;
+  const { data: initialData, options, allowMissingConnectorSecrets } = createParams;
 
   const actionsClient = await context.getActionsClient();
 
@@ -140,19 +143,10 @@ export async function createRule<Params extends RuleParams = never>(
   let createdAPIKey = null;
   let isAuthTypeApiKey = false;
   try {
-    isAuthTypeApiKey = context.isAuthenticationTypeAPIKey();
-    const name = generateAPIKeyName(ruleType.id, data.name);
-    createdAPIKey = data.enabled
-      ? isAuthTypeApiKey
-        ? context.getAuthenticationAPIKey(`${name}-user-created`)
-        : await withSpan(
-            {
-              name: 'createAPIKey',
-              type: 'rules',
-            },
-            () => context.createAPIKey(name)
-          )
-      : null;
+    const apiKeyName = generateAPIKeyName(ruleType.id, data.name);
+    const resolved = await resolveRuleAPIKey(context, apiKeyName, data.enabled);
+    createdAPIKey = resolved.createdAPIKey;
+    isAuthTypeApiKey = resolved.isAuthTypeApiKey;
   } catch (error) {
     throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
   }
@@ -182,20 +176,16 @@ export async function createRule<Params extends RuleParams = never>(
     );
   }
 
-  if (initialData.flapping !== undefined && !isFlappingEnabled) {
-    throw Boom.badRequest(
-      'Error creating rule: can not create rule with flapping if global flapping is disabled'
-    );
-  }
-
   const allActions = [...data.actions, ...(data.systemActions ?? [])];
+  const artifacts = data.artifacts ?? {};
   // Extract saved object references for this rule
   const {
     references,
     params: updatedParams,
     actions: actionsWithRefs,
+    artifacts: artifactsWithRefs,
   } = await withSpan({ name: 'extractReferences', type: 'rules' }, () =>
-    extractReferences(context, ruleType, allActions, validatedRuleTypeParams)
+    extractReferences(context, ruleType, allActions, validatedRuleTypeParams, artifacts)
   );
 
   const createTime = Date.now();
@@ -205,14 +195,26 @@ export async function createRule<Params extends RuleParams = never>(
   const throttle = data.throttle ?? null;
 
   const { systemActions, actions: actionToNotUse, ...restData } = data;
+
+  const apiKeyProps = apiKeyAsRuleDomainProperties(createdAPIKey, username, isAuthTypeApiKey);
+  const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
+    data.tags,
+    apiKeyProps.uiamApiKey,
+    apiKeyProps.apiKeyCreatedByUser,
+    context.isServerless,
+    context.featureFlags
+  );
+
   // Convert domain rule object to ES rule attributes
   const ruleAttributes = transformRuleDomainToRuleAttributes({
     actionsWithRefs,
+    artifactsWithRefs,
     rule: {
       ...restData,
+      tags: tagsWithUiamCheck,
       // TODO (http-versioning) create a rule domain version of this function
       // Right now this works because the 2 types can interop but it's not ideal
-      ...apiKeyAsRuleDomainProperties(createdAPIKey, username, isAuthTypeApiKey),
+      ...apiKeyProps,
       id,
       createdBy: username,
       updatedBy: username,
@@ -234,6 +236,10 @@ export async function createRule<Params extends RuleParams = never>(
     },
   });
 
+  if (data.enabled) {
+    ruleAttributes.lastEnabledAt = new Date(createTime).toISOString();
+  }
+
   const createdRuleSavedObject: SavedObject<RawRule> = await withSpan(
     { name: 'createRuleSavedObject', type: 'rules' },
     () =>
@@ -246,6 +252,15 @@ export async function createRule<Params extends RuleParams = never>(
         returnRuleAttributes: true,
       })
   );
+
+  await logBulkRuleChanges({
+    ruleSOs: [createdRuleSavedObject],
+    rulesClientContext: context,
+    changesContext: {
+      action: RuleChangeTrackingAction.ruleCreate,
+      timestamp: createTime,
+    },
+  });
 
   // Convert ES RawRule back to domain rule object
   const ruleDomain: RuleDomain<Params> = transformRuleAttributesToRuleDomain<Params>(

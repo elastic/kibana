@@ -7,20 +7,22 @@
 
 import { cloneDeep } from 'lodash';
 
-import { RulesClient, ConstructorOptions } from './rules_client';
+import type { ConstructorOptions } from './rules_client';
+import { RulesClient } from './rules_client';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
+  coreFeatureFlagsMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from './rule_type_registry.mock';
 import { alertingAuthorizationMock } from './authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsClientMock, actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from './authorization/alerting_authorization';
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import type { AlertingAuthorization } from './authorization/alerting_authorization';
+import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { RetryForConflictsAttempts } from './lib/retry_if_conflicts';
 import { TaskStatus } from '@kbn/task-manager-plugin/server/task';
@@ -60,6 +62,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
+  cloneAPIKey: jest.fn(),
   logger,
   internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -76,6 +79,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   isSystemAction: jest.fn(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  featureFlags: coreFeatureFlagsMock.createStart(),
+  isServerless: false,
 };
 
 // this suite consists of two suites running tests against mutable RulesClient APIs:
@@ -203,7 +208,10 @@ async function unmuteAll(success: boolean) {
 
 async function muteInstance(success: boolean) {
   try {
-    await rulesClient.muteInstance({ alertId: MockRuleId, alertInstanceId: 'instance-id' });
+    await rulesClient.muteInstance({
+      params: { alertId: MockRuleId, alertInstanceId: 'instance-id' },
+      query: { validateAlertsExistence: false },
+    });
   } catch (err) {
     return expectConflict(success, err);
   }
@@ -223,11 +231,7 @@ async function unmuteInstance(success: boolean) {
 }
 
 // tests to run when the method is expected to succeed
-function expectSuccess(
-  success: boolean,
-  count: number = 2,
-  method: 'update' | 'create' = 'update'
-) {
+function expectSuccess(success: boolean, count = 2, method: 'update' | 'create' = 'update') {
   expect(success).toBe(true);
   expect(unsecuredSavedObjectsClient[method]).toHaveBeenCalledTimes(count);
   // message content checked in the update test
@@ -345,7 +349,7 @@ beforeEach(() => {
   rulesClientParams.createAPIKey.mockResolvedValue({ apiKeysEnabled: false });
   rulesClientParams.getUserName.mockResolvedValue('elastic');
 
-  taskManager.runSoon.mockResolvedValue({ id: '' });
+  taskManager.runSoon.mockResolvedValue({ id: '', forced: false });
   taskManager.schedule.mockResolvedValue({
     id: 'scheduled-task-id',
     scheduledAt: new Date(),
@@ -393,6 +397,7 @@ beforeEach(() => {
     },
     category: 'test',
     producer: 'alerts',
+    solution: 'stack',
     validate: {
       params: { validate: (params) => params },
     },
@@ -412,6 +417,7 @@ beforeEach(() => {
     },
     category: 'test',
     producer: 'alerts',
+    solution: 'stack',
     validate: {
       params: { validate: (params) => params },
     },

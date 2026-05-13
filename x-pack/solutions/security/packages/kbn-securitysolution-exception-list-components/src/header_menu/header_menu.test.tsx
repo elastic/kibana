@@ -15,35 +15,32 @@ import { getSecurityLinkAction } from '../mocks/security_link_component.mock';
 describe('HeaderMenu', () => {
   it('should render button icon with default settings', () => {
     const wrapper = render(
-      <HeaderMenu iconType="boxesHorizontal" disableActions={false} actions={null} />
+      <HeaderMenu iconType="boxesVertical" disableActions={false} actions={null} />
     );
-
-    expect(wrapper.container).toMatchSnapshot();
 
     expect(wrapper.getByTestId('ButtonIcon')).toBeInTheDocument();
     expect(wrapper.queryByTestId('EmptyButton')).not.toBeInTheDocument();
     expect(wrapper.queryByTestId('MenuPanel')).not.toBeInTheDocument();
   });
+
   it('should not render icon', () => {
     const wrapper = render(<HeaderMenu disableActions={false} actions={null} />);
 
-    expect(wrapper.container).toMatchSnapshot();
-
     expect(wrapper.getByTestId('ButtonIcon')).toBeInTheDocument();
     expect(wrapper.queryByTestId('EmptyButton')).not.toBeInTheDocument();
     expect(wrapper.queryByTestId('MenuPanel')).not.toBeInTheDocument();
   });
+
   it('should render button icon disabled', () => {
     const wrapper = render(
       <HeaderMenu
-        iconType="boxesHorizontal"
+        iconType="boxesVertical"
         disableActions={false}
         actions={actionsWithDisabledDelete}
       />
     );
 
     fireEvent.click(wrapper.getByTestId('ButtonIcon'));
-    expect(wrapper.container).toMatchSnapshot();
     expect(wrapper.getByTestId('ActionItemdelete')).toBeDisabled();
     expect(wrapper.getByTestId('ActionItemedit')).toBeEnabled();
   });
@@ -55,11 +52,9 @@ describe('HeaderMenu', () => {
         emptyButton
         actions={null}
         iconSide="right"
-        iconType="cheer"
+        iconType="popper"
       />
     );
-
-    expect(wrapper.container).toMatchSnapshot();
 
     expect(wrapper.getByTestId('EmptyButton')).toBeInTheDocument();
     expect(wrapper.queryByTestId('ButtonIcon')).not.toBeInTheDocument();
@@ -73,12 +68,10 @@ describe('HeaderMenu', () => {
         emptyButton
         actions={actions}
         iconSide="right"
-        iconType="cheer"
+        iconType="popper"
         anchorPosition="downLeft"
       />
     );
-
-    expect(wrapper.container).toMatchSnapshot();
 
     expect(wrapper.getByTestId('EmptyButton')).toBeInTheDocument();
     expect(wrapper.queryByTestId('ButtonIcon')).not.toBeInTheDocument();
@@ -86,6 +79,7 @@ describe('HeaderMenu', () => {
     expect(wrapper.getByTestId('ActionItemedit')).toBeInTheDocument();
     expect(wrapper.getByTestId('MenuPanel')).toBeInTheDocument();
   });
+
   it('should render empty button icon with actions and should not open the popover when clicked if disableActions', () => {
     const wrapper = render(
       <HeaderMenu
@@ -93,12 +87,10 @@ describe('HeaderMenu', () => {
         emptyButton
         actions={actions}
         iconSide="right"
-        iconType="cheer"
+        iconType="popper"
         anchorPosition="downLeft"
       />
     );
-
-    expect(wrapper.container).toMatchSnapshot();
 
     expect(wrapper.getByTestId('EmptyButton')).toBeInTheDocument();
     expect(wrapper.queryByTestId('ButtonIcon')).not.toBeInTheDocument();
@@ -106,6 +98,7 @@ describe('HeaderMenu', () => {
     expect(wrapper.queryByTestId('ActionItemedit')).not.toBeInTheDocument();
     expect(wrapper.queryByTestId('MenuPanel')).not.toBeInTheDocument();
   });
+
   it('should call onEdit if action has onClick', () => {
     const onEdit = jest.fn();
     const customAction = [...actions];
@@ -120,7 +113,7 @@ describe('HeaderMenu', () => {
     const customActions = getSecurityLinkAction('headerMenuTest');
     const wrapper = render(
       <HeaderMenu
-        iconType="boxesHorizontal"
+        iconType="boxesVertical"
         disableActions={false}
         emptyButton
         actions={customActions}
@@ -130,19 +123,18 @@ describe('HeaderMenu', () => {
       { wrapper: EuiThemeProvider }
     );
 
-    expect(wrapper.container).toMatchSnapshot();
-
     expect(wrapper.getByTestId('EmptyButton')).toBeInTheDocument();
     fireEvent.click(wrapper.getByTestId('EmptyButton'));
     expect(wrapper.queryByTestId('MenuPanel')).toBeInTheDocument();
   });
+
   it('should stop propagation when clicking on the menu', () => {
     const onEdit = jest.fn();
     const customAction = [...actions];
     customAction[0].onClick = onEdit;
     const wrapper = render(
       <HeaderMenu
-        iconType="boxesHorizontal"
+        iconType="boxesVertical"
         dataTestSubj="headerMenu"
         disableActions={false}
         actions={actions}

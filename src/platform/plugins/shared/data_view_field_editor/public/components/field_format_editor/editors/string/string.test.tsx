@@ -9,13 +9,13 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 import { StringFormatEditor } from './string';
 
 const fieldType = 'string';
 const format = {
-  getConverterFor: jest.fn().mockImplementation(() => (input: string) => input.toUpperCase()),
+  reactConvert: jest.fn().mockImplementation((input: string) => input.toUpperCase()),
   getParamDefaults: jest.fn().mockImplementation(() => {
     return { transform: 'upper' };
   }),

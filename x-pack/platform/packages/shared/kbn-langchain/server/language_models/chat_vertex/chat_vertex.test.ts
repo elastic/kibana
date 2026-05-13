@@ -9,10 +9,11 @@ import { PassThrough } from 'stream';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 
-import { BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
+import type { BaseMessage } from '@langchain/core/messages';
+import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { ActionsClientChatVertexAI } from './chat_vertex';
-import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
-import { GeminiContent } from '@langchain/google-common';
+import type { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
+import type { GeminiContent } from '@langchain/google-common';
 import { FinishReason } from '@google/generative-ai';
 
 const connectorId = 'mock-connector-id';
@@ -140,6 +141,7 @@ const callOptions = {
 const handleLLMNewToken = jest.fn();
 const callRunManager = {
   handleLLMNewToken,
+  handleCustomEvent: jest.fn().mockResolvedValue({}),
 } as unknown as CallbackManagerForLLMRun;
 const onFailedAttempt = jest.fn();
 const defaultArgs = {
@@ -149,6 +151,7 @@ const defaultArgs = {
   streaming: false,
   maxRetries: 0,
   onFailedAttempt,
+  convertSystemMessageToHumanContent: false,
 };
 
 const testMessage = 'Yes, your name is Andrew. How can I assist you further, Andrew?';
@@ -188,7 +191,6 @@ describe('ActionsClientChatVertexAI', () => {
   describe('_generate streaming: false', () => {
     it('returns the expected content when _generate is invoked', async () => {
       const actionsClientChatVertexAI = new ActionsClientChatVertexAI(defaultArgs);
-
       const result = await actionsClientChatVertexAI._generate(
         callMessages,
         callOptions,
@@ -220,7 +222,7 @@ describe('ActionsClientChatVertexAI', () => {
       expect(onFailedAttempt).toHaveBeenCalled();
     });
 
-    it('rejects with the expected error the message has invalid content', async () => {
+    it('resolves to expected result when message has invalid content', async () => {
       actionsClient.execute.mockImplementation(
         jest.fn().mockResolvedValue({
           data: {
@@ -235,7 +237,7 @@ describe('ActionsClientChatVertexAI', () => {
 
       await expect(
         actionsClientChatVertexAI._generate(callMessages, callOptions, callRunManager)
-      ).rejects.toThrowError("Cannot read properties of undefined (reading 'text')");
+      ).resolves.toEqual({ generations: [], llmOutput: {} });
     });
   });
 

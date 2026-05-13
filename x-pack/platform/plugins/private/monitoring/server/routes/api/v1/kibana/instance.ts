@@ -9,8 +9,8 @@ import { getKibanaInfo } from '../../../../lib/kibana/get_kibana_info';
 import { handleError } from '../../../../lib/errors';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { metricSet } from './metric_set_instance';
-import { LegacyRequest } from '../../../../types';
-import { MonitoringCore } from '../../../../types';
+import type { LegacyRequest } from '../../../../types';
+import type { MonitoringCore } from '../../../../types';
 import {
   postKibanaInstanceRequestParamsRT,
   postKibanaInstanceRequestPayloadRT,
@@ -25,6 +25,12 @@ export function kibanaInstanceRoute(server: MonitoringCore) {
   server.route({
     method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/kibana/{kibanaUuid}',
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'This route delegates authorization to the scoped ES cluster client',
+      },
+    },
     validate: {
       params: validateParams,
       body: validateBody,

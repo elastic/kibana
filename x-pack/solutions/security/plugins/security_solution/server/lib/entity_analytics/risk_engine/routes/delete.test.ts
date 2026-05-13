@@ -24,8 +24,6 @@ describe('risk engine cleanup route', () => {
   let getStartServicesMock: jest.Mock;
 
   beforeEach(() => {
-    jest.resetAllMocks();
-
     server = serverMock.create();
     const { clients } = requestContextMock.createTools();
     mockRiskEngineDataClient = riskEngineDataClientMock.create();
@@ -54,7 +52,7 @@ describe('risk engine cleanup route', () => {
           security: riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess(),
         },
       ]);
-      riskEngineCleanupRoute(server.router, getStartServicesMock);
+      riskEngineCleanupRoute(server.router, getStartServicesMock, false);
     });
 
     it('should call the router with the correct route and handler', async () => {
@@ -145,7 +143,7 @@ describe('risk engine cleanup route', () => {
           security: riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess(),
         },
       ]);
-      riskEngineCleanupRoute(server.router, getStartServicesMock);
+      riskEngineCleanupRoute(server.router, getStartServicesMock, false);
     });
 
     it('returns a 400 when task manager is unavailable', async () => {
@@ -169,7 +167,7 @@ describe('risk engine cleanup route', () => {
           security: riskEnginePrivilegesMock.createMockSecurityStartWithNoRiskEngineAccess(),
         },
       ]);
-      riskEngineCleanupRoute(server.router, getStartServicesMock);
+      riskEngineCleanupRoute(server.router, getStartServicesMock, false);
     });
 
     it('returns a 403 when user does not have the required privileges', async () => {
@@ -178,7 +176,7 @@ describe('risk engine cleanup route', () => {
       expect(response.status).toBe(403);
       expect(response.body).toEqual({
         message:
-          'User is missing risk engine privileges.  Missing cluster privileges: manage_index_templates, manage_transform.',
+          'User is missing risk engine privileges.  Missing cluster privileges to run the risk engine: manage_transform. Missing cluster privileges to enable the risk engine: manage_index_templates, manage_transform, manage_ingest_pipelines.',
         status_code: 403,
       });
     });

@@ -30,6 +30,8 @@
           "(obj: Record<string, any>, accessor: string, defaultValue: any) => any"
         ],
         "path": "x-pack/platform/packages/private/ml/nested_property/src/get_nested_property.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,7 +46,10 @@
               "Record<string, any>"
             ],
             "path": "x-pack/platform/packages/private/ml/nested_property/src/get_nested_property.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -59,6 +64,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/private/ml/nested_property/src/get_nested_property.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -74,6 +81,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/private/ml/nested_property/src/get_nested_property.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -93,6 +102,8 @@
           "(obj: Record<string, any>, accessor: string, value: any) => Record<string, any>"
         ],
         "path": "x-pack/platform/packages/private/ml/nested_property/src/set_nested_property.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -107,7 +118,10 @@
               "Record<string, any>"
             ],
             "path": "x-pack/platform/packages/private/ml/nested_property/src/set_nested_property.ts",
+            "lineNumber": 10,
+            "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -122,6 +136,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/private/ml/nested_property/src/set_nested_property.ts",
+            "lineNumber": 10,
+            "columnNumber": 61,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -137,6 +153,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/private/ml/nested_property/src/set_nested_property.ts",
+            "lineNumber": 10,
+            "columnNumber": 79,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

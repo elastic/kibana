@@ -8,7 +8,7 @@
  */
 
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
-import { WebElementWrapper } from './web_element_wrapper';
+import type { WebElementWrapper } from './web_element_wrapper';
 import type { TimeoutOpt } from '../types';
 import { FtrService } from './ftr_provider_context';
 
@@ -163,10 +163,16 @@ export class TestSubjects extends FtrService {
   public async click(
     selector: string,
     timeout: number = this.FIND_TIME,
-    topOffset?: number
+    topOffsetOrOptions?: number | { topOffset?: number; bottomOffset?: number },
+    preclickDelay: number = 0
   ): Promise<void> {
     this.log.debug(`TestSubjects.click(${selector})`);
-    await this.findService.clickByCssSelector(testSubjSelector(selector), timeout, topOffset);
+    await this.findService.clickByCssSelector(
+      testSubjSelector(selector),
+      timeout,
+      topOffsetOrOptions,
+      preclickDelay
+    );
   }
 
   public async pressEnter(selector: string, timeout: number = this.FIND_TIME): Promise<void> {
@@ -427,5 +433,40 @@ export class TestSubjects extends FtrService {
       this.log.debug(`updating checkbox ${selector} from ${isChecked} to ${states[state]}`);
       await this.click(selector);
     }
+  }
+
+  public async getAccordionState(selector: string) {
+    const container = await this.find(selector);
+    const buttons = await container.findAllByCssSelector('button');
+
+    if (buttons.length > 0) {
+      const firstButton = buttons[0];
+      return await firstButton.getAttribute('aria-expanded');
+    } else {
+      throw new Error(
+        `Container '${selector}' has no 'button' child elements, check for EUI upgrades`
+      );
+    }
+  }
+
+  /**
+   * Helper function to wait for accordion state to reach expected value
+   * This helps avoid race conditions in tests where UI updates are still in progress
+   */
+  public async waitForAccordionState(
+    selector: string,
+    expectedState: string,
+    timeout: number = 5000
+  ) {
+    await this.existOrFail(selector);
+
+    await this.retry.waitForWithTimeout(
+      `accordion ${selector} to reach state ${expectedState}`,
+      timeout,
+      async () => {
+        const currentState = await this.getAccordionState(selector);
+        return currentState === expectedState;
+      }
+    );
   }
 }

@@ -12,12 +12,17 @@ import {
 } from '@elastic/eui';
 import { useMemo } from 'react';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
-import type { TemporaryProcessingPluginsType } from './types';
 import { KibanaServices, useApplicationCapabilities } from '../../common/lib/kibana';
 import * as lensMarkdownPlugin from './plugins/lens';
 import { ID as LensPluginId } from './plugins/lens/constants';
 
-export const usePlugins = (disabledPlugins?: string[]) => {
+export const usePlugins = (
+  disabledPlugins?: string[]
+): {
+  uiPlugins: ReturnType<typeof getDefaultEuiMarkdownUiPlugins>;
+  parsingPlugins: ReturnType<typeof getDefaultEuiMarkdownParsingPlugins>;
+  processingPlugins: ReturnType<typeof getDefaultEuiMarkdownProcessingPlugins>;
+} => {
   const kibanaConfig = KibanaServices.getConfig();
   const timelinePlugins = useTimelineContext()?.editor_plugins;
   const appCapabilities = useApplicationCapabilities();
@@ -25,8 +30,7 @@ export const usePlugins = (disabledPlugins?: string[]) => {
   return useMemo(() => {
     const uiPlugins = getDefaultEuiMarkdownUiPlugins();
     const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
-    const processingPlugins =
-      getDefaultEuiMarkdownProcessingPlugins() as TemporaryProcessingPluginsType;
+    const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
 
     if (timelinePlugins) {
       uiPlugins.push(timelinePlugins.uiPlugin);

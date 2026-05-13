@@ -4,39 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import _ from 'lodash';
-import {
-  DataGridDensity,
+import type {
   UnifiedDataTableSettings,
   UnifiedDataTableSettingsColumn,
-  useColumns,
 } from '@kbn/unified-data-table';
+import { DataGridDensity, useColumns } from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { SHOW_MULTIFIELDS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
-import { DataTableRecord } from '@kbn/discover-utils/types';
-import {
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type {
   EuiDataGridCellValueElementProps,
   EuiDataGridControlColumn,
   EuiDataGridStyle,
-  EuiProgress,
 } from '@elastic/eui';
-import { AddFieldFilterHandler } from '@kbn/unified-field-list';
+import { EuiProgress } from '@elastic/eui';
+import type { AddFieldFilterHandler } from '@kbn/unified-field-list';
 import { generateFilters } from '@kbn/data-plugin/public';
-import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { MAX_FINDINGS_TO_LOAD } from '@kbn/cloud-security-posture-common';
+import type { RuleResponse } from '@kbn/cloud-security-posture-common';
 import { useKibana } from '../../common/hooks/use_kibana';
-import { CloudPostureDataTableResult } from '../../common/hooks/use_cloud_posture_data_table';
+import type { CloudPostureDataTableResult } from '../../common/hooks/use_cloud_posture_data_table';
 import { EmptyState } from '../empty_state';
 import { useStyles } from './use_styles';
 import { AdditionalControls } from './additional_controls';
 import { useDataViewContext } from '../../common/contexts/data_view_context';
 import { TakeAction } from '../take_action';
+import { useExpandableFlyoutCsp } from '../../common/hooks/use_expandable_flyout_csp';
 
-import { RuleResponse } from '../../common/types';
 export interface CloudSecurityDefaultColumn {
   id: string;
   width?: number;
@@ -61,7 +61,7 @@ export interface CloudSecurityDataTableProps {
    * This is the component that will be rendered in the flyout when a row is expanded.
    * This component will receive the row data and a function to close the flyout.
    */
-  flyoutComponent: (hit: DataTableRecord, onCloseFlyout: () => void) => JSX.Element;
+  onOpenFlyoutCallback: () => JSX.Element;
   /**
    * This is the object that contains all the data and functions from the useCloudPostureDataTable hook.
    * This is also used to manage the table state from the parent component.
@@ -100,6 +100,8 @@ export interface CloudSecurityDataTableProps {
    * Specify if distribution bar is shown on data table, used to calculate height of data table in virtualized mode
    */
   hasDistributionBar?: boolean;
+  /* Specify Flyout type so the expandable API hook knows what parameter it uses to call the flout */
+  flyoutType?: 'misconfiguration' | 'vulnerability';
 }
 
 export const CloudSecurityDataTable = ({
@@ -107,7 +109,7 @@ export const CloudSecurityDataTable = ({
   defaultColumns,
   rows,
   total,
-  flyoutComponent,
+  onOpenFlyoutCallback,
   cloudPostureDataTable,
   loadMore,
   title,
@@ -117,6 +119,7 @@ export const CloudSecurityDataTable = ({
   createRuleFn,
   columnHeaders,
   hasDistributionBar = true,
+  flyoutType = 'misconfiguration',
   ...rest
 }: CloudSecurityDataTableProps) => {
   const {
@@ -134,6 +137,7 @@ export const CloudSecurityDataTable = ({
     columnsLocalStorageKey,
     defaultColumns.map((c) => c.id)
   );
+
   const [persistedSettings, setPersistedSettings] = useLocalStorage<UnifiedDataTableSettings>(
     `${columnsLocalStorageKey}:settings`,
     {
@@ -161,14 +165,6 @@ export const CloudSecurityDataTable = ({
     };
   }, [persistedSettings, columnHeaders]);
 
-  const { dataView, dataViewIsRefetching } = useDataViewContext();
-
-  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
-
-  const renderDocumentView = (hit: DataTableRecord) =>
-    flyoutComponent(hit, () => setExpandedDoc(undefined));
-
-  // services needed for unified-data-table package
   const {
     uiSettings,
     uiActions,
@@ -182,19 +178,8 @@ export const CloudSecurityDataTable = ({
   } = useKibana().services;
 
   const styles = useStyles();
-
+  const { dataView, dataViewIsRefetching } = useDataViewContext();
   const { capabilities } = application;
-  const { filterManager } = data.query;
-
-  const services = {
-    theme,
-    fieldFormats,
-    uiSettings,
-    toastNotifications,
-    storage,
-    data,
-  };
-
   const {
     columns: currentColumns,
     onSetColumns,
@@ -209,32 +194,42 @@ export const CloudSecurityDataTable = ({
     columns,
     sort,
   });
+  const isGroupingEnabled = groupSelectorComponent === undefined;
 
   /**
    * This object is used to determine if the table rendering will be virtualized and the virtualization wrapper height.
    * mode should be passed as a key to the UnifiedDataTable component to force a re-render when the mode changes.
    */
   const computeDataTableRendering = useMemo(() => {
-    // Enable virtualization mode when the table is set to a large page size.
-    const isVirtualizationEnabled = pageSize >= 100;
+    // Enable virtualization mode when the table is set to a large page size and has many rows.
+    const isVirtualizationEnabled = pageSize >= 100 && total >= 100;
 
     const getWrapperHeight = () => {
       if (height) return height;
 
-      // If virtualization is not needed the table will render unconstrained.
-      if (!isVirtualizationEnabled) return 'auto';
+      // constrain height when virtualization is enabled or for groups with more than 10 rows
+      if (isVirtualizationEnabled && !isGroupingEnabled) {
+        const baseHeight = 362; // height of Kibana Header + Findings page header and search bar
+        const filterBarHeight = filters?.length > 0 ? 40 : 0;
+        const distributionBarHeight = hasDistributionBar ? 52 : 0;
+        return `calc(100vh - ${baseHeight}px - ${filterBarHeight}px - ${distributionBarHeight}px)`;
+      }
 
-      const baseHeight = 362; // height of Kibana Header + Findings page header and search bar
-      const filterBarHeight = filters?.length > 0 ? 40 : 0;
-      const distributionBarHeight = hasDistributionBar ? 52 : 0;
-      return `calc(100vh - ${baseHeight}px - ${filterBarHeight}px - ${distributionBarHeight}px)`;
+      // constrain height for groups with more than 10 rows when grouping is enabled so users can see the groups without scrolling
+      if (isGroupingEnabled && total > 10) {
+        return 512;
+      }
+
+      return 'auto';
     };
 
     return {
       wrapperHeight: getWrapperHeight(),
       mode: isVirtualizationEnabled ? 'virtualized' : 'standard',
     };
-  }, [pageSize, height, filters?.length, hasDistributionBar]);
+  }, [pageSize, total, height, filters?.length, hasDistributionBar, isGroupingEnabled]);
+
+  const { filterManager } = data.query;
 
   const onAddFilter: AddFieldFilterHandler | undefined = useMemo(
     () =>
@@ -255,6 +250,27 @@ export const CloudSecurityDataTable = ({
         : undefined,
     [dataView, filterManager, setUrlQuery]
   );
+  const externalCustomRenderers = useMemo(() => {
+    if (!customCellRenderer) {
+      return undefined;
+    }
+    return customCellRenderer(rows);
+  }, [customCellRenderer, rows]);
+
+  const { expandedDoc, onExpandDocClick } = useExpandableFlyoutCsp(flyoutType);
+
+  if (!onExpandDocClick) {
+    return <></>;
+  }
+
+  const services = {
+    theme,
+    fieldFormats,
+    uiSettings,
+    toastNotifications,
+    storage,
+    data,
+  };
 
   const onResize = (colSettings: { columnId: string; width: number | undefined }) => {
     const grid = persistedSettings || {};
@@ -265,13 +281,6 @@ export const CloudSecurityDataTable = ({
     const newGrid = { ...grid, columns: newColumns };
     setPersistedSettings(newGrid);
   };
-
-  const externalCustomRenderers = useMemo(() => {
-    if (!customCellRenderer) {
-      return undefined;
-    }
-    return customCellRenderer(rows);
-  }, [customCellRenderer, rows]);
 
   const onResetColumns = () => {
     setColumns(defaultColumns.map((c) => c.id));
@@ -326,7 +335,7 @@ export const CloudSecurityDataTable = ({
           height: computeDataTableRendering.wrapperHeight,
         }}
       >
-        <EuiProgress size="xs" color="accent" style={loadingStyle} />
+        <EuiProgress size="xs" color="accent" css={loadingStyle} />
         <UnifiedDataTable
           key={computeDataTableRendering.mode}
           className={styles.gridStyle}
@@ -341,8 +350,8 @@ export const CloudSecurityDataTable = ({
           onSort={onSort}
           rows={rows}
           sampleSizeState={MAX_FINDINGS_TO_LOAD}
-          setExpandedDoc={setExpandedDoc}
-          renderDocumentView={renderDocumentView}
+          setExpandedDoc={onExpandDocClick}
+          renderDocumentView={onOpenFlyoutCallback}
           sort={sort}
           rowsPerPageState={pageSize}
           totalHits={total}

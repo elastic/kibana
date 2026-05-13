@@ -8,13 +8,8 @@
  */
 
 import React from 'react';
-import {
-  EuiButtonIcon,
-  EuiDataGridControlColumn,
-  EuiScreenReaderOnly,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { EuiDataGridControlColumn } from '@elastic/eui';
+import { EuiButtonIcon, EuiIconTip, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { FieldRow } from './field_row';
@@ -48,11 +43,11 @@ const PinControlCell: React.FC<PinControlCellProps> = React.memo(({ row, onToggl
         overflow: hidden;
       `}
     >
-      <EuiToolTip content={label} delay="long">
+      <EuiToolTip content={label} disableScreenReaderOutput>
         <EuiButtonIcon
           data-test-subj={`unifiedDocViewer_pinControlButton_${fieldName}`}
           iconSize="m"
-          iconType={isPinned ? 'pinFilled' : 'pin'}
+          iconType={isPinned ? 'pinFill' : 'pin'}
           color="text"
           aria-label={label}
           onClick={() => {
@@ -71,17 +66,15 @@ export const getPinColumnControl = ({
   rows: FieldRow[];
   onTogglePinned: (fieldName: string) => void;
 }): EuiDataGridControlColumn => {
+  const pinColumnHeader = i18n.translate('unifiedDocViewer.fieldsTable.pinControlColumnHeader', {
+    defaultMessage: 'Pin field column',
+  });
+
   return {
     id: 'pin_field',
     width: 32,
     headerCellRender: () => (
-      <EuiScreenReaderOnly>
-        <span>
-          {i18n.translate('unifiedDocViewer.fieldsTable.pinControlColumnHeader', {
-            defaultMessage: 'Pin field column',
-          })}
-        </span>
-      </EuiScreenReaderOnly>
+      <EuiIconTip aria-label={pinColumnHeader} type="info" content={pinColumnHeader} />
     ),
     rowCellRender: ({ rowIndex }) => {
       const row = rows[rowIndex];

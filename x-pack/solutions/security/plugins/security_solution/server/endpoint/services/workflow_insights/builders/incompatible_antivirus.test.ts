@@ -5,23 +5,19 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import moment from 'moment';
 
-import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import type { DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common';
-
-import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
-
+import type { EndpointMetadataService } from '../../metadata';
 import type { BuildWorkflowInsightParams } from '.';
-
 import {
-  Category,
-  SourceType,
-  TargetType,
-  ActionType,
+  WorkflowInsightCategory,
+  WorkflowInsightSourceType,
+  WorkflowInsightTargetType,
+  WorkflowInsightActionType,
 } from '../../../../../common/endpoint/types/workflow_insights';
 import { createMockEndpointAppContext } from '../../../mocks';
-import type { EndpointMetadataService } from '../../metadata';
 import { groupEndpointIdsByOS } from '../helpers';
 import { buildIncompatibleAntivirusWorkflowInsights } from './incompatible_antivirus';
 
@@ -55,19 +51,6 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
         ],
       },
     ],
-    request: {
-      body: {
-        insightType: 'incompatible_antivirus',
-        endpointIds: ['endpoint-1'],
-        apiConfig: {
-          connectorId: 'connector-id-1',
-          actionTypeId: 'action-type-id-1',
-          model: 'model-1',
-        },
-        anonymizationFields: [],
-        subAction: 'invokeAI',
-      },
-    } as unknown as KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>,
     endpointMetadataService,
     esClient: {
       search: jest.fn().mockResolvedValue({
@@ -76,29 +59,35 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
         },
       }),
     } as unknown as ElasticsearchClient,
+    options: {
+      insightType: 'incompatible_antivirus',
+      endpointIds: ['endpoint-1'],
+      connectorId: 'connector-id-1',
+      model: 'model-1',
+    },
   });
 
   const buildExpectedInsight = (os: string, signerField?: string, signerValue?: string) =>
     expect.objectContaining({
       '@timestamp': expect.any(moment),
       message: 'Incompatible antiviruses detected',
-      category: Category.Endpoint,
+      category: WorkflowInsightCategory.enum.endpoint,
       type: 'incompatible_antivirus',
       source: {
-        type: SourceType.LlmConnector,
+        type: WorkflowInsightSourceType.enum['llm-connector'],
         id: 'connector-id-1',
         data_range_start: expect.any(moment),
         data_range_end: expect.any(moment),
       },
       target: {
-        type: TargetType.Endpoint,
+        type: WorkflowInsightTargetType.enum.endpoint,
         ids: ['endpoint-1'],
       },
       action: {
-        type: ActionType.Refreshed,
+        type: WorkflowInsightActionType.enum.refreshed,
         timestamp: expect.any(moment),
       },
-      value: `AVGAntivirus /Applications/AVGAntivirus.app/Contents/Backend/services/com.avg.activity${
+      value: `/Applications/AVGAntivirus.app/Contents/Backend/services/com.avg.activity${
         signerValue ? ` ${signerValue}` : ''
       }`,
       remediation: {
@@ -106,7 +95,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
           {
             list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
             name: 'AVGAntivirus',
-            description: 'Suggested by Security Workflow Insights',
+            description: 'Suggested by Automatic Troubleshooting',
             entries: [
               {
                 field: 'process.executable.caseless',

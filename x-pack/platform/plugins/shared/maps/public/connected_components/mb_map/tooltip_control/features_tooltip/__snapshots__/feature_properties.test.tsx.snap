@@ -2,44 +2,40 @@
 
 exports[`FeatureProperties should render 1`] = `
 <div
-  className="mapFeatureTooltip_tableWrapper"
+  css="unknown styles"
 >
   <table
-    className="eui-yScrollWithShadows mapFeatureTooltip_table"
+    className="eui-yScrollWithShadows"
   >
     <tbody>
-      <tr
+      <MapFeatureTooltipRow
         className="mapFeatureTooltip_row"
         key="prop1"
       >
         <td
-          className="eui-textBreakWord mapFeatureTooltip__propertyLabel"
+          className="mapFeatureTooltip__propertyLabel"
         >
           prop1
         </td>
-        <td
-          className="eui-textBreakWord"
-        >
+        <td>
           foobar1
         </td>
         <td />
-      </tr>
-      <tr
+      </MapFeatureTooltipRow>
+      <MapFeatureTooltipRow
         className="mapFeatureTooltip_row"
         key="prop2"
       >
         <td
-          className="eui-textBreakWord mapFeatureTooltip__propertyLabel"
+          className="mapFeatureTooltip__propertyLabel"
         >
           prop2
         </td>
-        <td
-          className="eui-textBreakWord"
-        >
+        <td>
           foobar2
         </td>
         <td />
-      </tr>
+      </MapFeatureTooltipRow>
     </tbody>
   </table>
 </div>
@@ -47,6 +43,7 @@ exports[`FeatureProperties should render 1`] = `
 
 exports[`FeatureProperties should show error message if unable to load tooltip content 1`] = `
 <EuiCallOut
+  announceOnMount={true}
   color="danger"
   iconType="warning"
   size="s"
@@ -60,24 +57,22 @@ exports[`FeatureProperties should show error message if unable to load tooltip c
 
 exports[`FeatureProperties should show filter button for filterable properties 1`] = `
 <div
-  className="mapFeatureTooltip_tableWrapper"
+  css="unknown styles"
 >
   <table
-    className="eui-yScrollWithShadows mapFeatureTooltip_table"
+    className="eui-yScrollWithShadows"
   >
     <tbody>
-      <tr
+      <MapFeatureTooltipRow
         className="mapFeatureTooltip_row"
         key="prop1"
       >
         <td
-          className="eui-textBreakWord mapFeatureTooltip__propertyLabel"
+          className="mapFeatureTooltip__propertyLabel"
         >
           prop1
         </td>
-        <td
-          className="eui-textBreakWord"
-        >
+        <td>
           foobar1
         </td>
         <td>
@@ -89,27 +84,26 @@ exports[`FeatureProperties should show filter button for filterable properties 1
             title="Filter on property"
           >
             <EuiIcon
+              aria-hidden={true}
               type="filter"
             />
           </EuiButtonEmpty>
         </td>
-      </tr>
-      <tr
+      </MapFeatureTooltipRow>
+      <MapFeatureTooltipRow
         className="mapFeatureTooltip_row"
         key="prop2"
       >
         <td
-          className="eui-textBreakWord mapFeatureTooltip__propertyLabel"
+          className="mapFeatureTooltip__propertyLabel"
         >
           prop2
         </td>
-        <td
-          className="eui-textBreakWord"
-        >
+        <td>
           foobar2
         </td>
         <td />
-      </tr>
+      </MapFeatureTooltipRow>
     </tbody>
   </table>
 </div>
@@ -117,24 +111,22 @@ exports[`FeatureProperties should show filter button for filterable properties 1
 
 exports[`FeatureProperties should show view actions button when there are available actions 1`] = `
 <div
-  className="mapFeatureTooltip_tableWrapper"
+  css="unknown styles"
 >
   <table
-    className="eui-yScrollWithShadows mapFeatureTooltip_table"
+    className="eui-yScrollWithShadows"
   >
     <tbody>
-      <tr
+      <MapFeatureTooltipRow
         className="mapFeatureTooltip_row"
         key="prop1"
       >
         <td
-          className="eui-textBreakWord mapFeatureTooltip__propertyLabel"
+          className="mapFeatureTooltip__propertyLabel"
         >
           prop1
         </td>
-        <td
-          className="eui-textBreakWord"
-        >
+        <td>
           foobar1
         </td>
         <td
@@ -149,6 +141,7 @@ exports[`FeatureProperties should show view actions button when there are availa
               title="Filter on property"
             >
               <EuiIcon
+                aria-hidden={true}
                 type="filter"
               />
             </EuiButtonEmpty>
@@ -160,28 +153,27 @@ exports[`FeatureProperties should show view actions button when there are availa
               title="View filter actions"
             >
               <EuiIcon
-                type="arrowRight"
+                aria-hidden={true}
+                type="chevronSingleRight"
               />
             </EuiButtonEmpty>
           </span>
         </td>
-      </tr>
-      <tr
+      </MapFeatureTooltipRow>
+      <MapFeatureTooltipRow
         className="mapFeatureTooltip_row"
         key="prop2"
       >
         <td
-          className="eui-textBreakWord mapFeatureTooltip__propertyLabel"
+          className="mapFeatureTooltip__propertyLabel"
         >
           prop2
         </td>
-        <td
-          className="eui-textBreakWord"
-        >
+        <td>
           foobar2
         </td>
         <td />
-      </tr>
+      </MapFeatureTooltipRow>
     </tbody>
   </table>
 </div>

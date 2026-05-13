@@ -23,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { generatePath } from 'react-router-dom';
 import type { BenchmarksCisId } from '@kbn/cloud-security-posture-common';
 import { useNavigateFindings } from '@kbn/cloud-security-posture/src/hooks/use_navigate_findings';
+import { benchmarksNavigation } from '@kbn/cloud-security-posture';
 import { FINDINGS_GROUPING_OPTIONS } from '../../common/constants';
 import type { BenchmarkScore, Benchmark } from '../../../common/types/latest';
 import * as TEST_SUBJ from './test_subjects';
@@ -31,11 +32,8 @@ import { FullSizeCenteredPage } from '../../components/full_size_centered_page';
 import { ComplianceScoreBar } from '../../components/compliance_score_bar';
 import { getBenchmarkCisName, getBenchmarkApplicableTo } from '../../../common/utils/helpers';
 import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
-import { benchmarksNavigation } from '../../common/navigation/constants';
-import {
-  GetBenchmarkDynamicValues,
-  useBenchmarkDynamicValues,
-} from '../../common/hooks/use_benchmark_dynamic_values';
+import type { GetBenchmarkDynamicValues } from '../../common/hooks/use_benchmark_dynamic_values';
+import { useBenchmarkDynamicValues } from '../../common/hooks/use_benchmark_dynamic_values';
 import { useKibana } from '../../common/hooks/use_kibana';
 
 export const ERROR_STATE_TEST_SUBJECT = 'benchmark_page_error';
@@ -147,7 +145,11 @@ const getBenchmarkTableColumns = (
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <CISBenchmarkIcon type={benchmarkId} size={'l'} />
+            <CISBenchmarkIcon
+              type={benchmarkId}
+              name={getBenchmarkApplicableTo(benchmarkId)}
+              size={'l'}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{getBenchmarkApplicableTo(benchmarkId)}</EuiFlexItem>
         </EuiFlexGroup>
@@ -174,7 +176,7 @@ const getBenchmarkTableColumns = (
           <EuiButtonEmpty
             data-test-subj={EMPTY_EVALUATION_TEST_SUBJECT}
             href={integrationLink}
-            iconType="plusInCircle"
+            iconType="plusCircle"
             flush="left"
           >
             {i18n.translate('xpack.csp.benchmarks.benchmarksTable.addIntegrationTitle', {
@@ -196,6 +198,15 @@ const getBenchmarkTableColumns = (
           onClick={() => {
             navToFindings({ 'rule.benchmark.id': benchmark.id }, [groupByField]);
           }}
+          aria-label={i18n.translate('xpack.csp.benchmarks.benchmarksTable.evaluatedAriaLabel', {
+            defaultMessage:
+              'CIS Benchmark {benchmarkId} version {benchmarkVersion} evaluated with {resourceCountLabel} ',
+            values: {
+              benchmarkId: benchmark.id,
+              benchmarkVersion: benchmark.version || 'N/A',
+              resourceCountLabel,
+            },
+          })}
         >
           {i18n.translate('xpack.csp.benchmarks.benchmarksTable.accountsCountTitle', {
             defaultMessage: '{benchmarkEvaluation} {resourceCountLabel}',
@@ -279,6 +290,9 @@ export const BenchmarksTable = ({
       loading={loading}
       noItemsMessage={noItemsMessage}
       error={error}
+      tableCaption={i18n.translate('xpack.csp.benchmarks.benchmarksTable.tableCaption', {
+        defaultMessage: 'Cloud security posture benchmark results',
+      })}
       /* Disabled Sorting until we have the final Benchmark table */
       // sorting={sorting}
     />

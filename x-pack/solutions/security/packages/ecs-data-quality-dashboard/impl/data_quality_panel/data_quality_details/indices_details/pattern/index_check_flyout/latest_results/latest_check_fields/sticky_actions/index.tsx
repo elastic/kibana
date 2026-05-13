@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -17,6 +18,7 @@ interface Props {
   showCopyToClipboardAction?: boolean;
   showChatAction?: boolean;
   indexName?: string;
+  checkedAt?: number;
 }
 
 const useStyles = () => {
@@ -41,12 +43,14 @@ const StickyActionsComponent: FC<Props> = ({
   showCopyToClipboardAction,
   showAddToNewCaseAction,
   showChatAction,
+  checkedAt,
 }) => {
   const styles = useStyles();
 
   return (
     <div css={styles.stickyContainer}>
       <Actions
+        checkedAt={checkedAt}
         indexName={indexName}
         markdownComment={markdownComment}
         showChatAction={showChatAction}

@@ -17,10 +17,8 @@ import {
 import useMeasure from 'react-use/lib/useMeasure';
 
 import { css } from '@emotion/react';
-import {
-  PromptResponse,
-  PromptTypeEnum,
-} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import type { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import { PromptTypeEnum } from '@kbn/elastic-assistant-common/impl/schemas';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { QUICK_PROMPTS_TAB } from '../settings/const';
@@ -144,7 +142,7 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
                   button={
                     <EuiButtonIcon
                       color={'primary'}
-                      iconType={'boxesHorizontal'}
+                      iconType={'boxesVertical'}
                       onClick={toggleOverflowPopover}
                       aria-label={i18n.QUICK_PROMPT_OVERFLOW_ARIA}
                     />

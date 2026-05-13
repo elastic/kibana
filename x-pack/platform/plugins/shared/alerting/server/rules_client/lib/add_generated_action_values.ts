@@ -6,9 +6,10 @@
  */
 
 import { v4 } from 'uuid';
-import { buildEsQuery, Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import Boom from '@hapi/boom';
-import {
+import type {
   NormalizedAlertAction,
   NormalizedAlertDefaultActionWithGeneratedValues,
   NormalizedAlertSystemActionWithGeneratedValues,
@@ -16,6 +17,7 @@ import {
   RulesClientContext,
 } from '..';
 import { getEsQueryConfig } from '../../lib/get_es_query_config';
+import type { RawRuleAlertsFilter } from '../../types';
 
 export async function addGeneratedActionValues(
   actions: NormalizedAlertAction[] = [],
@@ -54,7 +56,7 @@ export async function addGeneratedActionValues(
                       dsl: generateDSL(alertsFilter.query.kql, alertsFilter.query.filters) ?? '',
                     }
                   : undefined,
-              },
+              } as RawRuleAlertsFilter,
             }
           : {}),
       };

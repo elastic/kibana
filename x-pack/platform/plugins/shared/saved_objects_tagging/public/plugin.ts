@@ -6,15 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, CoreStart, PluginInitializerContext, Plugin } from '@kbn/core/public';
-import { ManagementSetup } from '@kbn/management-plugin/public';
-import { SavedObjectTaggingOssPluginSetup } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { CoreSetup, CoreStart, PluginInitializerContext, Plugin } from '@kbn/core/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { SavedObjectTaggingOssPluginSetup } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { tagManagementSectionId } from '../common/constants';
 import { getTagsCapabilities } from '../common/capabilities';
-import { SavedObjectTaggingPluginStart } from './types';
+import type { SavedObjectTaggingPluginStart } from './types';
 import { TagsClient, TagsCache, TagAssignmentService } from './services';
 import { getUiApi } from './ui_api';
-import { SavedObjectsTaggingClientConfig, SavedObjectsTaggingClientConfigRawType } from './config';
+import type { SavedObjectsTaggingClientConfigRawType } from './config';
+import { SavedObjectsTaggingClientConfig } from './config';
 
 interface SetupDeps {
   management: ManagementSetup;
@@ -69,10 +70,16 @@ export class SavedObjectTaggingPlugin
 
   public start({ http, application, analytics, ...startServices }: CoreStart) {
     this.tagCache = new TagsCache({
-      refreshHandler: () => this.tagClient!.getAll({ asSystemRequest: true }),
+      refreshHandler: () => this.tagClient!.fetchAllFromNetwork({ asSystemRequest: true }),
       refreshInterval: this.config.cacheRefreshInterval,
     });
-    this.tagClient = new TagsClient({ analytics, http, changeListener: this.tagCache });
+
+    this.tagClient = new TagsClient({
+      analytics,
+      http,
+      cache: this.tagCache,
+    });
+
     this.assignmentService = new TagAssignmentService({ http });
 
     // do not fetch tags on anonymous page
@@ -88,7 +95,6 @@ export class SavedObjectTaggingPlugin
       cache: this.tagCache,
       ui: getUiApi({
         ...startServices,
-        analytics,
         cache: this.tagCache,
         client: this.tagClient,
         capabilities: getTagsCapabilities(application.capabilities),

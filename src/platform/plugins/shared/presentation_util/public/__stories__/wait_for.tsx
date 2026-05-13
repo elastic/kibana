@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect, useRef, ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { act } from 'react-test-renderer';
-import { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
 export const waitFor =
-  (waitTarget: Promise<any>, spinner: ReactElement | null = <EuiLoadingSpinner />) =>
-  (CurrentStory: Story) => {
+  (waitTarget: Promise<any>, spinner: ReactElement = <EuiLoadingSpinner />) =>
+  (CurrentStory: StoryFn) => {
     const [storyComponent, setStory] = useState<ReactElement>();
     const componentIsMounted = useRef(false);
 

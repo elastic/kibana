@@ -10,8 +10,9 @@
 import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiPopoverTitle, EuiTab, EuiTabs, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IKbnPalette, KbnPalette, KbnPalettes } from '@kbn/palettes';
-import { ColorMapping } from '../../config';
+import type { IKbnPalette, KbnPalettes } from '@kbn/palettes';
+import { KbnPalette } from '@kbn/palettes';
+import type { ColorMapping } from '../../config';
 import { PaletteColors } from './palette_colors';
 import { RGBPicker } from './rgb_picker';
 
@@ -46,12 +47,20 @@ export function ColorPicker({
         }}
       >
         <EuiTabs size="m" expand>
-          <EuiTab onClick={() => setTab('palette')} isSelected={tab === 'palette'}>
+          <EuiTab
+            data-test-subj="lns-colorMapping-colorPicker-tab-colors"
+            onClick={() => setTab('palette')}
+            isSelected={tab === 'palette'}
+          >
             {i18n.translate('coloring.colorMapping.colorPicker.paletteTabLabel', {
               defaultMessage: 'Colors',
             })}
           </EuiTab>
-          <EuiTab onClick={() => setTab('custom')} isSelected={tab === 'custom'}>
+          <EuiTab
+            data-test-subj="lns-colorMapping-colorPicker-tab-custom"
+            onClick={() => setTab('custom')}
+            isSelected={tab === 'custom'}
+          >
             {i18n.translate('coloring.colorMapping.colorPicker.customTabLabel', {
               defaultMessage: 'Custom',
             })}

@@ -8,12 +8,17 @@
 import { i18n } from '@kbn/i18n';
 import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import { useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import {
+  useMlLocator,
+  useNavigateToPath,
+  useMlManagementLocatorInternal,
+} from '../../../contexts/kibana';
 import type { Group } from './anomaly_detection_panel';
 
 export function useGroupActions(): Array<Action<Group>> {
   const locator = useMlLocator();
+  const mlManagementLocator = useMlManagementLocatorInternal();
   const timefilter = useTimefilter();
   const navigateToPath = useNavigateToPath();
 
@@ -29,16 +34,19 @@ export function useGroupActions(): Array<Action<Group>> {
           defaultMessage: 'View jobs',
         }
       ),
-      icon: 'list',
+      icon: 'listBullet',
       type: 'icon',
       onClick: async (item) => {
-        const path = await locator?.getUrl({
-          page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-          pageState: {
-            groupIds: [item.id],
+        const { url } = await mlManagementLocator?.getUrl(
+          {
+            page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+            pageState: {
+              groupIds: [item.id],
+            },
           },
-        });
-        await navigateToPath(path);
+          'anomaly_detection'
+        );
+        await navigateToPath(url);
       },
     },
     {
@@ -52,7 +60,7 @@ export function useGroupActions(): Array<Action<Group>> {
           defaultMessage: 'View in Anomaly Explorer',
         }
       ),
-      icon: 'visTable',
+      icon: 'table',
       type: 'icon',
       onClick: async (item) => {
         const path = await locator?.getUrl({

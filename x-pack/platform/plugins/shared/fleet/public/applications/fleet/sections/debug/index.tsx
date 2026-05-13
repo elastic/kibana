@@ -19,7 +19,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import { i18n } from '@kbn/i18n';
@@ -30,6 +30,7 @@ import { useLink, useStartServices } from '../../hooks';
 
 import {
   AgentPolicyDebugger,
+  AgentlessResourcesToggle,
   IntegrationDebugger,
   PreconfigurationDebugger,
   FleetIndexDebugger,
@@ -92,6 +93,13 @@ const panels = [
     id: 'orphanedIntegrationPolicyDebugger',
     component: <OrphanedIntegrationPolicyDebugger />,
   },
+  {
+    title: i18n.translate('xpack.fleet.debug.agentlessResourcesToggle.title', {
+      defaultMessage: 'Show Agentless Resources',
+    }),
+    id: 'agentlessResourcesToggle',
+    component: <AgentlessResourcesToggle />,
+  },
 ];
 
 export const DebugPage: React.FunctionComponent<{
@@ -144,7 +152,7 @@ export const DebugPage: React.FunctionComponent<{
             {!isInitialized && setupError?.message && (
               <>
                 <EuiSpacer size="s" />
-                <EuiCallOut color="danger" iconType="warning" title="Setup error">
+                <EuiCallOut announceOnMount color="danger" iconType="warning" title="Setup error">
                   <EuiText grow={false}>
                     <FormattedMessage
                       id="xpack.fleet.debug.initializationError.description"
@@ -206,7 +214,7 @@ export const DebugPage: React.FunctionComponent<{
                     defaultMessage: 'Troubleshooting Guide',
                   }),
                   href: 'https://www.elastic.co/guide/en/fleet/current/fleet-troubleshooting.html',
-                  iconType: 'popout',
+                  iconType: 'external',
                   target: '_blank',
                 },
               ]}

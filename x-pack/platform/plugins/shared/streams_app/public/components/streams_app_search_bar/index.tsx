@@ -4,69 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TimeRange } from '@kbn/es-query';
-import { SearchBar } from '@kbn/unified-search-plugin/public';
-import React, { useMemo } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { useKibana } from '../../hooks/use_kibana';
+import React from 'react';
+import type { UncontrolledStreamsAppSearchBarProps } from './uncontrolled_streams_app_bar';
+import { UncontrolledStreamsAppSearchBar } from './uncontrolled_streams_app_bar';
+import { useTimeRange } from '../../hooks/use_time_range';
+import { useTimeRangeUpdate } from '../../hooks/use_time_range_update';
+import { useTimefilter } from '../../hooks/use_timefilter';
 
-export interface StreamsAppSearchBarProps {
-  query?: string;
-  dateRangeFrom?: string;
-  dateRangeTo?: string;
-  onQueryChange?: (payload: { dateRange?: TimeRange; query: string }) => void;
-  onQuerySubmit?: (payload: { dateRange?: TimeRange; query: string }, isUpdate?: boolean) => void;
-  onRefresh?: Required<React.ComponentProps<typeof SearchBar>>['onRefresh'];
-  placeholder?: string;
-  dataViews?: DataView[];
-}
+export type StreamsAppSearchBarProps = UncontrolledStreamsAppSearchBarProps;
 
-export function StreamsAppSearchBar({
-  dateRangeFrom,
-  dateRangeTo,
-  onQueryChange,
-  onQuerySubmit,
-  onRefresh,
-  query,
-  placeholder,
-  dataViews,
-}: StreamsAppSearchBarProps) {
-  const {
-    dependencies: {
-      start: { unifiedSearch },
-    },
-  } = useKibana();
-
-  const queryObj = useMemo(() => (query ? { query, language: 'kuery' } : undefined), [query]);
-
-  const showQueryInput = query === undefined;
+export function StreamsAppSearchBar({ onQuerySubmit, ...props }: StreamsAppSearchBarProps) {
+  const { rangeFrom, rangeTo } = useTimeRange();
+  const { updateTimeRange } = useTimeRangeUpdate();
+  const { refresh } = useTimefilter();
 
   return (
-    <unifiedSearch.ui.SearchBar
-      appName="streamsApp"
-      onQuerySubmit={({ dateRange, query: nextQuery }, isUpdate) => {
-        onQuerySubmit?.(
-          { dateRange, query: (nextQuery?.query as string | undefined) ?? '' },
-          isUpdate
-        );
+    <UncontrolledStreamsAppSearchBar
+      onQuerySubmit={({ dateRange, query }, isUpdate) => {
+        if (dateRange) {
+          updateTimeRange(dateRange);
+        }
+        if (!isUpdate) {
+          refresh();
+        }
+        onQuerySubmit?.({ dateRange, query }, isUpdate);
       }}
-      onQueryChange={({ dateRange, query: nextQuery }) => {
-        onQueryChange?.({ dateRange, query: (nextQuery?.query as string | undefined) ?? '' });
-      }}
-      query={queryObj}
-      showQueryInput={showQueryInput}
-      showFilterBar={false}
-      showQueryMenu={false}
-      showDatePicker={Boolean(dateRangeFrom && dateRangeTo)}
-      showSubmitButton={true}
-      submitButtonStyle="iconOnly"
-      dateRangeFrom={dateRangeFrom}
-      dateRangeTo={dateRangeTo}
-      onRefresh={onRefresh}
-      displayStyle="inPage"
-      disableQueryLanguageSwitcher
-      placeholder={placeholder}
-      indexPatterns={dataViews}
+      dateRangeFrom={rangeFrom}
+      dateRangeTo={rangeTo}
+      {...props}
     />
   );
 }

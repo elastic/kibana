@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { TakeActionButton } from '../shared/components/take_action_button';
 import { getField } from '../shared/utils';
-import { EventKind } from '../shared/constants/event_kinds';
+import { EventKind } from '../../../flyout_v2/document/main/constants/event_kinds';
 import { DocumentDetailsRightPanelKey } from '../shared/constants/panel_keys';
 import { useDocumentDetailsContext } from '../shared/context';
 import { PREVIEW_FOOTER_TEST_ID, PREVIEW_FOOTER_LINK_TEST_ID } from './test_ids';
@@ -23,7 +23,7 @@ import { DocumentEventTypes } from '../../../common/lib/telemetry';
  * Footer at the bottom of preview panel with a link to open document details flyout
  */
 export const PreviewPanelFooter: FC = () => {
-  const { eventId, indexName, scopeId, getFieldsData, isPreview } = useDocumentDetailsContext();
+  const { eventId, indexName, scopeId, getFieldsData, isRulePreview } = useDocumentDetailsContext();
   const { openFlyout } = useExpandableFlyoutApi();
   const { telemetry } = useKibana().services;
 
@@ -67,7 +67,7 @@ export const PreviewPanelFooter: FC = () => {
     [isAlert, openDocumentFlyout]
   );
 
-  if (isPreview) return null;
+  if (isRulePreview) return null;
 
   return (
     <EuiFlyoutFooter data-test-subj={PREVIEW_FOOTER_TEST_ID}>

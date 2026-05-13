@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { migration860, SyntheticsUnsanitizedDoc860 } from './8.6.0';
+import type { SyntheticsUnsanitizedDoc860 } from './8.6.0';
+import { migration860 } from './8.6.0';
 import { migrationMocks } from '@kbn/core/server/mocks';
 import { ConfigKey, LocationStatus } from '../../../../common/runtime_types';
 

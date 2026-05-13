@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Either from 'fp-ts/lib/Either';
-import * as TaskEither from 'fp-ts/lib/TaskEither';
+import * as Either from 'fp-ts/Either';
+import type * as TaskEither from 'fp-ts/TaskEither';
 import { flatten } from 'lodash';
 import type {
   AggregationsMultiBucketAggregateBase,
@@ -20,6 +20,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
 import {
   catchRetryableEsClientErrors,
+  catchRetryableSearchPhaseExecutionException,
   type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
 import { addExcludedTypesToBoolQuery } from '../model/helpers';
@@ -52,16 +53,22 @@ export interface UnknownDocsFound {
  * @param esClient The ES client to perform the search query
  * @param targetIndices The ES indices to target
  * @param query An optional query that can be used to filter
+ * @param options Additional search options
+ * @param options.ignoreUnavailable When true, the search will not fail if any of the named
+ *   `targetIndices` do not exist. Useful when the target list includes indices that may not yet
+ *   have been created (e.g. version-aliased SO indices for plugins that were never loaded).
  * @returns A list of documents with their types
  */
 export async function getAggregatedTypesDocuments(
   esClient: ElasticsearchClient,
   targetIndices: Indices,
-  query?: QueryDslQueryContainer
+  query?: QueryDslQueryContainer,
+  { ignoreUnavailable = false }: { ignoreUnavailable?: boolean } = {}
 ): Promise<DocumentIdAndType[]> {
   const params: SearchRequest = {
     index: targetIndices,
     size: 0,
+    ignore_unavailable: ignoreUnavailable,
     // apply the desired filters (e.g. filter out registered types)
     query,
     // aggregate docs by type, so that we have a sneak peak of all types
@@ -118,7 +125,7 @@ export const checkForUnknownDocs =
     UnknownDocsFound | {}
   > =>
   () => {
-    const excludeQuery = addExcludedTypesToBoolQuery(knownTypes, excludeOnUpgradeQuery.bool);
+    const excludeQuery = addExcludedTypesToBoolQuery(knownTypes, excludeOnUpgradeQuery?.bool);
     return getAggregatedTypesDocuments(client, indexName, excludeQuery)
       .then((unknownDocs) => {
         if (unknownDocs.length) {
@@ -127,5 +134,6 @@ export const checkForUnknownDocs =
 
         return Either.right({});
       })
+      .catch(catchRetryableSearchPhaseExecutionException)
       .catch(catchRetryableEsClientErrors);
   };

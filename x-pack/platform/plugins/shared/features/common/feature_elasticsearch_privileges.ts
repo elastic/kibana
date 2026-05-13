@@ -11,14 +11,14 @@
 export interface FeatureElasticsearchPrivileges {
   /**
    * A set of Elasticsearch cluster privileges which are required for this feature to be enabled.
-   * See https://www.elastic.co/guide/en/elasticsearch/reference/current/security-privileges.html
+   * See https://www.elastic.co/docs/reference/elasticsearch/security-privileges
    *
    */
   requiredClusterPrivileges: string[];
 
   /**
    * A set of Elasticsearch index privileges which are required for this feature to be enabled, keyed on index name or pattern.
-   * See https://www.elastic.co/guide/en/elasticsearch/reference/current/security-privileges.html#privileges-list-indices
+   * See https://www.elastic.co/docs/reference/elasticsearch/security-privileges#privileges-list-indices
    *
    * @example
    *

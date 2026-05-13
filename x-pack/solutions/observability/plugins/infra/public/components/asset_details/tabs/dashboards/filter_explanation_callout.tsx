@@ -7,7 +7,7 @@
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiIcon, EuiCode } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiCode } from '@elastic/eui';
 
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { css } from '@emotion/react';
@@ -17,7 +17,7 @@ interface Props {
   dashboardFilterAssetIdEnabled: boolean;
 }
 export const FilterExplanationCallout = ({ dashboardFilterAssetIdEnabled }: Props) => {
-  const { asset } = useAssetDetailsRenderPropsContext();
+  const { entity } = useAssetDetailsRenderPropsContext();
 
   return (
     <EuiCallOut
@@ -25,7 +25,7 @@ export const FilterExplanationCallout = ({ dashboardFilterAssetIdEnabled }: Prop
       title={
         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiToolTip
+            <EuiIconTip
               content={
                 dashboardFilterAssetIdEnabled ? (
                   <>
@@ -40,33 +40,34 @@ export const FilterExplanationCallout = ({ dashboardFilterAssetIdEnabled }: Prop
                       css={css`
                         color: inherit;
                       `}
-                    >{`${findInventoryFields(asset.type).id}: ${asset.id}`}</EuiCode>
+                    >{`${findInventoryFields(entity.type).id}: ${entity.id}`}</EuiCode>
                   </>
                 ) : (
                   i18n.translate('xpack.infra.customDashboards.notFilteredExplanation.tooltip', {
                     defaultMessage:
-                      'You can change this dashboard to filter by the {assetType} by editing the link for it',
-                    values: { assetType: asset.type },
+                      'You can change this dashboard to filter by the {entityType} by editing the link for it',
+                    values: { entityType: entity.type },
                   })
                 )
               }
-            >
-              <EuiIcon color="primary" size="m" type="iInCircle" />
-            </EuiToolTip>
+              color="primary"
+              size="m"
+              type="info"
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {dashboardFilterAssetIdEnabled
               ? i18n.translate(
                   'xpack.infra.customDashboards.filteredByCurrentAssetExplanation.message',
                   {
-                    defaultMessage: 'This dashboard is filtered by the current {assetType}',
-                    values: { assetType: asset.type },
+                    defaultMessage: 'This dashboard is filtered by the current {entityType}',
+                    values: { entityType: entity.type },
                   }
                 )
               : i18n.translate('xpack.infra.customDashboards.notFilteredExplanation.message', {
                   defaultMessage:
-                    'This dashboard is not filtered by the {assetType} you are viewing',
-                  values: { assetType: asset.type },
+                    'This dashboard is not filtered by the {entityType} you are viewing',
+                  values: { entityType: entity.type },
                 })}
           </EuiFlexItem>
         </EuiFlexGroup>

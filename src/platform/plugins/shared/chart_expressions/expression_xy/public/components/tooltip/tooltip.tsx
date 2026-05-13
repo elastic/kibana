@@ -7,23 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TooltipInfo, XYChartSeriesIdentifier } from '@elastic/charts';
-import { FormatFactory } from '@kbn/field-formats-plugin/common';
-import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
-import React, { FC } from 'react';
-import { CommonXYDataLayerConfig } from '../../../common';
-import {
+import type { TooltipInfo, XYChartSeriesIdentifier } from '@elastic/charts';
+import type { FormatFactory } from '@kbn/field-formats-plugin/common';
+import { getAccessorByDimension } from '@kbn/chart-expressions-common';
+import type { FC } from 'react';
+import React from 'react';
+import { euiFontSize, euiShadow, type UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { CommonXYDataLayerConfig } from '../../../common';
+import type {
   DatatablesWithFormatInfo,
-  getMetaFromSeriesId,
   LayersAccessorsTitles,
   LayersFieldFormats,
 } from '../../helpers';
-import { XDomain } from '../x_domain';
+import { getMetaFromSeriesId } from '../../helpers';
+import type { XDomain } from '../x_domain';
 import { EndzoneTooltipHeader } from './endzone_tooltip_header';
-import { TooltipData, TooltipRow } from './tooltip_row';
+import type { TooltipData } from './tooltip_row';
+import { TooltipRow } from './tooltip_row';
 import { isEndzoneBucket } from './utils';
-
-import './tooltip.scss';
 
 type Props = TooltipInfo & {
   xDomain?: XDomain;
@@ -126,9 +128,9 @@ export const Tooltip: FC<Props> = ({
   const renderEndzoneTooltip = header ? isEndzoneBucket(header?.value, xDomain) : false;
 
   return (
-    <div className="detailedTooltip">
+    <div css={styles.customToolTip}>
       {renderEndzoneTooltip && (
-        <div className="detailedTooltip__header">
+        <div css={styles.header}>
           <EndzoneTooltipHeader />
         </div>
       )}
@@ -137,4 +139,43 @@ export const Tooltip: FC<Props> = ({
       </table>
     </div>
   );
+};
+
+const styles = {
+  header: ({ euiTheme }: UseEuiTheme) => css`
+    > :last-child {
+      margin-bottom: ${euiTheme.size.s};
+    }
+  `,
+
+  customToolTip: (euiThemeContext: UseEuiTheme) =>
+    css`
+      z-index: ${euiThemeContext.euiTheme.levels.toast};
+      pointer-events: none;
+
+      padding: ${euiThemeContext.euiTheme.size.s};
+      border-radius: ${euiThemeContext.euiTheme.border.radius.medium};
+      max-width: calc(${euiThemeContext.euiTheme.size.xl} * 10);
+      overflow: hidden;
+      border: ${euiThemeContext.euiTheme.border.width.thin} solid
+        ${euiThemeContext.euiTheme.components.tooltipBorderFloating};
+
+      ${euiFontSize(euiThemeContext, 's')}
+      color: ${euiThemeContext.euiTheme.colors.textParagraph};
+
+      ${euiShadow(euiThemeContext, 'l', { border: 'none' })}
+      background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
+
+      table {
+        table-layout: fixed;
+        width: 100%;
+
+        td,
+        th {
+          text-align: left;
+          padding: ${euiThemeContext.euiTheme.size.xs};
+          overflow-wrap: break-word;
+        }
+      }
+    `,
 };

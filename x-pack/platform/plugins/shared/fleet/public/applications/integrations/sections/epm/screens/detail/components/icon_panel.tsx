@@ -38,7 +38,7 @@ export function IconPanel({
 
   return (
     <Panel>
-      <EuiIcon type={iconType} size="original" />
+      <EuiIcon type={iconType} size="original" aria-hidden={true} />
     </Panel>
   );
 }
@@ -49,4 +49,23 @@ export function LoadingIconPanel() {
       <Loading />
     </Panel>
   );
+}
+
+export function ErrorIconPanel() {
+  return (
+    <Panel>
+      <EuiIcon type="error" size="original" aria-hidden={true} />
+    </Panel>
+  );
+}
+
+export interface MiniIconProps
+  extends Pick<UsePackageIconType, 'packageName' | 'integrationName' | 'version' | 'icons'> {
+  size?: number; // Optional size multiplier
+}
+
+export function MiniIcon({ packageName, integrationName, version, icons }: MiniIconProps) {
+  const iconType = usePackageIconType({ packageName, integrationName, version, icons });
+
+  return <EuiIcon type={iconType} size="l" aria-hidden={true} />;
 }

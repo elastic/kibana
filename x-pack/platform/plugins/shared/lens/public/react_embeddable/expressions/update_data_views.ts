@@ -6,8 +6,9 @@
  */
 
 import { uniqBy } from 'lodash';
+import type { LensRuntimeState } from '@kbn/lens-common';
 import { getIndexPatternsObjects } from '../../utils';
-import { LensEmbeddableStartServices, LensRuntimeState } from '../types';
+import type { LensEmbeddableStartServices } from '../types';
 
 export async function getUsedDataViews(
   references: LensRuntimeState['attributes']['references'],
@@ -15,8 +16,13 @@ export async function getUsedDataViews(
   dataViews: LensEmbeddableStartServices['dataViews']
 ) {
   const [{ indexPatterns }, ...adHocDataViews] = await Promise.all([
-    getIndexPatternsObjects(references.map(({ id }) => id) || [], dataViews),
-    ...Object.values(adHocDataViewsSpecs || {}).map((spec) => dataViews.create(spec)),
+    getIndexPatternsObjects(
+      // get index pattern only references
+      references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id),
+      dataViews
+    ),
+
+    ...Object.values(adHocDataViewsSpecs ?? {}).map((spec) => dataViews.create(spec)),
   ]);
 
   return uniqBy(indexPatterns.concat(adHocDataViews), 'id');

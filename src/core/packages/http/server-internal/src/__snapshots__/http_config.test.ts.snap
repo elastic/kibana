@@ -69,6 +69,7 @@ Object {
       },
     },
   },
+  "excludeRoutes": Array [],
   "host": "localhost",
   "http2": Object {
     "allowUnsecure": false,
@@ -84,7 +85,7 @@ Object {
   "payloadTimeout": 20000,
   "port": 5601,
   "protocol": "http1",
-  "prototypeHardening": false,
+  "prototypeHardening": true,
   "rateLimiter": Object {
     "enabled": false,
   },
@@ -102,6 +103,8 @@ Object {
     "strictTransportSecurity": null,
     "xContentTypeOptions": "nosniff",
   },
+  "serverTiming": false,
+  "serverTimingElasticsearch": false,
   "shutdownTimeout": "PT30S",
   "socketTimeout": 120000,
   "ssl": Object {

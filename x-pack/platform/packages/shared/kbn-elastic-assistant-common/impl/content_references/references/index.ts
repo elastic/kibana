@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import {
+import type {
   SecurityAlertContentReference,
   SecurityAlertsPageContentReference,
   KnowledgeBaseEntryContentReference,
   ProductDocumentationContentReference,
   EsqlContentReference,
+  HrefContentReference,
 } from '../../schemas';
-import { ContentReferenceId } from '../types';
+import type { ContentReferenceId } from '../types';
 
 /**
  * Generates a contentReference for the alerts count tool.
@@ -60,6 +61,26 @@ export const knowledgeBaseReference = (
     id,
     knowledgeBaseEntryName,
     knowledgeBaseEntryId,
+  };
+};
+
+/**
+ * Generates a contentReference for when a external page is referenced.
+ * @param id id of the contentReference
+ * @param href the external page url
+ * @param label content reference label
+ * @returns HrefContentReference
+ */
+export const hrefReference = (
+  id: ContentReferenceId,
+  href: string,
+  label?: string
+): HrefContentReference => {
+  return {
+    type: 'Href',
+    id,
+    href,
+    label,
   };
 };
 

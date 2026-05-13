@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
+import type {
   IRouter,
   RequestHandlerContext,
   KibanaRequest,
@@ -14,7 +14,8 @@ import {
   KibanaResponseFactory,
 } from '@kbn/core/server';
 import nodemailerGetService from 'nodemailer/lib/well-known';
-import SMTPConnection from 'nodemailer/lib/smtp-connection';
+import type SMTPConnection from 'nodemailer/lib/smtp-connection';
+import type { AwsSesConfig } from '@kbn/actions-plugin/server/types';
 import { AdditionalEmailServices, INTERNAL_BASE_STACK_CONNECTORS_API_PATH } from '../../common';
 import { ELASTIC_CLOUD_SERVICE } from '../connector_types/email';
 
@@ -22,7 +23,7 @@ const paramSchema = schema.object({
   service: schema.string(),
 });
 
-export const getWellKnownEmailServiceRoute = (router: IRouter) => {
+export const getWellKnownEmailServiceRoute = (router: IRouter, awsSesConfig: AwsSesConfig) => {
   router.get(
     {
       path: `${INTERNAL_BASE_STACK_CONNECTORS_API_PATH}/_email_config/{service}`,
@@ -53,6 +54,12 @@ export const getWellKnownEmailServiceRoute = (router: IRouter) => {
     let response: SMTPConnection.Options = {};
     if (service === AdditionalEmailServices.ELASTIC_CLOUD) {
       response = ELASTIC_CLOUD_SERVICE;
+    } else if (awsSesConfig && service === AdditionalEmailServices.AWS_SES) {
+      response = {
+        host: awsSesConfig.host,
+        port: awsSesConfig.port,
+        secure: true,
+      };
     } else {
       const serviceEntry = nodemailerGetService(service);
       if (serviceEntry) {

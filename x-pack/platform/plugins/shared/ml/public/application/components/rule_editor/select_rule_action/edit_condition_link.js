@@ -79,7 +79,7 @@ export class EditConditionLink extends Component {
             />
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false} className="condition-edit-value-field">
+        <EuiFlexItem grow={false}>
           <EuiFieldNumber
             placeholder={i18n.translate(
               'xpack.ml.ruleEditor.editConditionLink.enterValuePlaceholder',

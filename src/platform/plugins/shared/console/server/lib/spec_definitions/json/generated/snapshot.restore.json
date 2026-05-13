@@ -18,7 +18,7 @@
     "patterns": [
       "_snapshot/{repository}/{snapshot}/_restore"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/restore-snapshot-api.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-restore",
     "availability": {
       "stack": true,
       "serverless": false

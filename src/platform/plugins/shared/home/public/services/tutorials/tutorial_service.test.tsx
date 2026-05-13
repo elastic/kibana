@@ -139,12 +139,12 @@ describe('TutorialService', () => {
     });
     test('returns custom component', async () => {
       const service = new TutorialService();
-      const customComponent = <div>foo</div>;
-      service.setup().registerCustomComponent('foo', async () => customComponent);
-      const customStatusCheckCallback = service.getCustomComponent('foo');
-      expect(customStatusCheckCallback).toBeDefined();
-      const result = await customStatusCheckCallback();
-      expect(result).toEqual(customComponent);
+      const customComponent = { default: () => <div>foo</div> };
+      service.setup().registerCustomComponent('foo', async () => customComponent.default);
+      const customComponentCallback = service.getCustomComponent('foo');
+      expect(customComponentCallback).toBeDefined();
+      const result = await customComponentCallback();
+      expect(result).toEqual(customComponent.default);
     });
   });
 });

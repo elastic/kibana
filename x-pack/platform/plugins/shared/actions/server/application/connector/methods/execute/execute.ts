@@ -6,20 +6,20 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { RawAction, ActionTypeExecutorResult } from '../../../../types';
+import type { RawAction, ActionTypeExecutorResult } from '../../../../types';
 import { getActionKibanaPrivileges } from '../../../../lib/get_action_kibana_privileges';
 import { isPreconfigured } from '../../../../lib/is_preconfigured';
 import { isSystemAction } from '../../../../lib/is_system_action';
-import { ConnectorExecuteParams } from './types';
+import type { ConnectorExecuteParams } from './types';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../constants/saved_objects';
-import { ActionsClientContext } from '../../../../actions_client';
+import type { ActionsClientContext } from '../../../../actions_client';
 
 export async function execute(
   context: ActionsClientContext,
   connectorExecuteParams: ConnectorExecuteParams
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const log = context.logger;
-  const { actionId, params, source, relatedSavedObjects } = connectorExecuteParams;
+  const { actionId, params, source, relatedSavedObjects, signal } = connectorExecuteParams;
   let actionTypeId: string | undefined;
 
   try {
@@ -58,7 +58,10 @@ export async function execute(
     params,
     source,
     request: context.request,
+    spaceId: context.spaceId,
     relatedSavedObjects,
     actionExecutionId: uuidv4(),
+    connectorTokenClient: context.connectorTokenClient,
+    signal,
   });
 }

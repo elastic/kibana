@@ -22,13 +22,15 @@ import type {
   OpenPointInTimeResponse,
   SearchRequest,
   SearchResponse,
-  SearchHit,
   SearchRequest as ESSearchRequest,
   SortResults,
   IndicesGetDataStreamRequest,
   IndicesStatsRequest,
   IlmGetLifecycleRequest,
   IndicesGetRequest,
+  NodesStatsRequest,
+  Duration,
+  IndicesGetIndexTemplateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import {
@@ -51,6 +53,8 @@ import type {
 } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import moment from 'moment';
+
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { DEFAULT_DIAGNOSTIC_INDEX_PATTERN } from '../../../common/endpoint/constants';
 import type { ExperimentalFeatures } from '../../../common';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
@@ -60,6 +64,7 @@ import {
   ruleExceptionListItemToTelemetryEvent,
   setClusterInfo,
   newTelemetryLogger,
+  withErrorMessage,
 } from './helpers';
 import { Fetcher } from '../../endpoint/routes/resolver/tree/utils/fetch';
 import type { TreeOptions, TreeResponse } from '../../endpoint/routes/resolver/tree/utils/fetch';
@@ -85,6 +90,7 @@ import type {
   EndpointPolicyResponseAggregation,
   EndpointMetadataAggregation,
   EndpointMetadataDocument,
+  TelemetryQueryConfiguration,
 } from './types';
 import { telemetryConfiguration } from './configuration';
 import { ENDPOINT_METRICS_INDEX } from '../../../common/constants';
@@ -97,9 +103,17 @@ import type {
   IlmPolicy,
   IlmStats,
   Index,
+  IndexSettings,
   IndexStats,
+  IndexTemplateInfo,
 } from './indices.metadata.types';
 import { chunkStringsByMaxLength } from './collections_helpers';
+import type {
+  NodeIngestPipelinesStats,
+  Pipeline,
+  Processor,
+  Totals,
+} from './ingest_pipelines_stats.types';
 
 export interface ITelemetryReceiver {
   start(
@@ -108,7 +122,8 @@ export interface ITelemetryReceiver {
     alertsIndex?: string,
     endpointContextService?: EndpointAppContextService,
     exceptionListClient?: ExceptionListClient,
-    packageService?: PackageService
+    packageService?: PackageService,
+    queryConfig?: TelemetryQueryConfiguration
   ): Promise<void>;
 
   getClusterInfo(): Nullable<ESClusterInfo>;
@@ -188,7 +203,11 @@ export interface ITelemetryReceiver {
    * @see {ITelemetryReceiver#setMaxPageSizeBytes}
    * @see {ITelemetryReceiver#setNumDocsToSample}
    */
-  paginate<T>(index: string, query: ESSearchRequest): AsyncGenerator<T[], void, unknown>;
+  paginate<T>(
+    index: string,
+    query: ESSearchRequest,
+    queryConfig: TelemetryQueryConfiguration | undefined
+  ): AsyncGenerator<T[], void, unknown>;
 
   fetchPolicyConfigs(id: string): Promise<AgentPolicy | null | undefined>;
 
@@ -206,6 +225,13 @@ export interface ITelemetryReceiver {
       SearchResponse<RuleSearchResult, Record<string, AggregationsAggregate>>,
       unknown
     >
+  >;
+
+  fetchResponseActionsRules(
+    executeFrom: string,
+    executeTo: string
+  ): Promise<
+    TransportResult<SearchResponse<unknown, Record<string, AggregationsAggregate>>, unknown>
   >;
 
   fetchDetectionExceptionList(
@@ -227,8 +253,9 @@ export interface ITelemetryReceiver {
   fetchTimelineAlerts(
     index: string,
     rangeFrom: string,
-    rangeTo: string
-  ): Promise<Array<SearchHit<EnhancedAlertEvent>>>;
+    rangeTo: string,
+    queryConfig: TelemetryQueryConfiguration
+  ): AsyncGenerator<EnhancedAlertEvent[], void, unknown>;
 
   buildProcessTree(
     entityId: string,
@@ -252,11 +279,14 @@ export interface ITelemetryReceiver {
 
   setNumDocsToSample(n: number): void;
 
-  getIndices(): Promise<string[]>;
+  getIndices(): Promise<IndexSettings[]>;
   getDataStreams(): Promise<DataStream[]>;
-  getIndicesStats(indices: string[]): AsyncGenerator<IndexStats, void, unknown>;
-  getIlmsStats(indices: string[]): AsyncGenerator<IlmStats, void, unknown>;
-  getIlmsPolicies(ilms: string[]): AsyncGenerator<IlmPolicy, void, unknown>;
+  getIndicesStats(indices: string[], chunkSize: number): AsyncGenerator<IndexStats, void, unknown>;
+  getIlmsStats(indices: string[], chunkSize: number): AsyncGenerator<IlmStats, void, unknown>;
+  getIndexTemplatesStats(): Promise<IndexTemplateInfo[]>;
+  getIlmsPolicies(ilms: string[], chunkSize: number): AsyncGenerator<IlmPolicy, void, unknown>;
+
+  getIngestPipelinesStats(timeout: Duration): Promise<NodeIngestPipelinesStats[]>;
 }
 
 export class TelemetryReceiver implements ITelemetryReceiver {
@@ -274,6 +304,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   private packageService?: PackageService;
   private experimentalFeatures: ExperimentalFeatures | undefined;
   private readonly maxRecords = 10_000 as const;
+  private queryConfig?: TelemetryQueryConfiguration;
 
   // default to 2% of host's total memory or 80MiB, whichever is smaller
   private maxPageSizeBytes: number = Math.min(os.totalmem() * 0.02, 80 * 1024 * 1024);
@@ -290,7 +321,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     alertsIndex?: string,
     endpointContextService?: EndpointAppContextService,
     exceptionListClient?: ExceptionListClient,
-    packageService?: PackageService
+    packageService?: PackageService,
+    queryConfig?: TelemetryQueryConfiguration
   ) {
     this.getIndexForType = getIndexForType;
     this.alertsIndex = alertsIndex;
@@ -306,6 +338,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     this.experimentalFeatures = endpointContextService?.experimentalFeatures;
     const elasticsearch = core?.elasticsearch.client as unknown as IScopedClusterClient;
     this.processTreeFetcher = new Fetcher(elasticsearch);
+    this.queryConfig = queryConfig;
 
     setClusterInfo(this.clusterInfo);
   }
@@ -553,7 +586,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   }
 
   public async *fetchDiagnosticAlertsBatch(executeFrom: string, executeTo: string) {
-    this.logger.l('Searching diagnostic alerts', {
+    this.logger.debug('Searching diagnostic alerts', {
       from: executeFrom,
       to: executeTo,
     } as LogMeta);
@@ -597,10 +630,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           fetchMore = false;
         }
 
-        this.logger.l('Diagnostic alerts to return', { numOfHits } as LogMeta);
+        this.logger.debug('Diagnostic alerts to return', { numOfHits } as LogMeta);
         fetchMore = numOfHits > 0 && numOfHits < telemetryConfiguration.telemetry_max_buffer_size;
-      } catch (e) {
-        this.logger.warn('Error fetching alerts', { error_message: e.message } as LogMeta);
+      } catch (error) {
+        this.logger.warn('Error fetching alerts', withErrorMessage(error));
         fetchMore = false;
       }
 
@@ -735,6 +768,78 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     return this.esClient().search<RuleSearchResult>(query, { meta: true });
   }
 
+  /**
+   * Find elastic rules SOs which are the rules that have immutable set to true and are of a particular rule type
+   * @returns custom elastic rules SOs with response actions enabled
+   */
+  public async fetchResponseActionsRules(executeFrom: string, executeTo: string) {
+    const query: SearchRequest = {
+      index: `${this.getIndexForType?.(RULE_SAVED_OBJECT_TYPE)}`,
+      ignore_unavailable: true,
+      size: 0, // no query results required - only aggregation quantity
+      from: 0,
+      query: {
+        bool: {
+          must: [
+            {
+              term: {
+                type: 'alert',
+              },
+            },
+            {
+              term: {
+                'alert.params.immutable': {
+                  value: false,
+                },
+              },
+            },
+            {
+              term: {
+                'alert.enabled': {
+                  value: true,
+                },
+              },
+            },
+            {
+              terms: {
+                'alert.consumer': ['siem', 'securitySolution'],
+              },
+            },
+            {
+              terms: {
+                'alert.params.responseActions.actionTypeId': ['.endpoint', '.osquery'],
+              },
+            },
+            {
+              range: {
+                'alert.updatedAt': {
+                  gte: executeFrom,
+                  lte: executeTo,
+                },
+              },
+            },
+          ],
+        },
+      },
+      sort: [
+        {
+          'alert.updatedAt': {
+            order: 'desc',
+          },
+        },
+      ],
+      aggs: {
+        actionTypes: {
+          terms: {
+            field: 'alert.params.responseActions.actionTypeId',
+          },
+        },
+      },
+    };
+
+    return this.esClient().search<unknown>(query, { meta: true });
+  }
+
   public async fetchDetectionExceptionList(listId: string, ruleVersion: number) {
     if (this?.exceptionListClient === undefined || this?.exceptionListClient === null) {
       throw Error('exception list client is unavailable: could not retrieve trusted applications');
@@ -771,7 +876,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     executeFrom: string,
     executeTo: string
   ) {
-    this.logger.l('Searching prebuilt rule alerts from', {
+    this.logger.debug('Searching prebuilt rule alerts from', {
       executeFrom,
       executeTo,
     } as LogMeta);
@@ -909,14 +1014,14 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           pitId = response?.pit_id;
         }
 
-        this.logger.l('Prebuilt rule alerts to return', { alerts: alerts.length } as LogMeta);
+        this.logger.debug('Prebuilt rule alerts to return', { alerts: alerts.length } as LogMeta);
 
         yield alerts;
       }
-    } catch (e) {
+    } catch (error) {
       // to keep backward compatibility with the previous implementation, silent return
       // once we start using `paginate` this error should be managed downstream
-      this.logger.warn('Error fetching alerts', { error_message: e.message } as LogMeta);
+      this.logger.warn('Error fetching alerts', withErrorMessage(error));
       return;
     } finally {
       await this.closePointInTime(pitId);
@@ -940,120 +1045,74 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     try {
       await this.esClient().closePointInTime({ id: pitId });
     } catch (error) {
-      this.logger.warn('Error trying to close point in time', {
-        pit: pitId,
-        error_message: error.message,
-      } as LogMeta);
+      this.logger.warn(
+        'Error trying to close point in time',
+        withErrorMessage(error, {
+          pit: pitId,
+        } as LogMeta)
+      );
     }
   }
 
-  async fetchTimelineAlerts(index: string, rangeFrom: string, rangeTo: string) {
-    // default is from looking at Kibana saved objects and online documentation
-    const keepAlive = '5m';
-
-    // create and assign an initial point in time
-    let pitId: OpenPointInTimeResponse['id'] = (
-      await this.esClient().openPointInTime({
-        index: `${index}*`,
-        keep_alive: keepAlive,
-      })
-    ).id;
-
-    let fetchMore = true;
-    let searchAfter: SortResults | undefined;
-    let alertsToReturn: Array<SearchHit<EnhancedAlertEvent>> = [];
-    while (fetchMore) {
-      const query: ESSearchRequest = {
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  should: [
-                    {
-                      match_phrase: {
-                        'event.module': 'endpoint',
-                      },
+  fetchTimelineAlerts(
+    index: string,
+    rangeFrom: string,
+    rangeTo: string,
+    queryConfig: TelemetryQueryConfiguration
+  ): AsyncGenerator<EnhancedAlertEvent[], void, unknown> {
+    const query: ESSearchRequest = {
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  {
+                    match_phrase: {
+                      'event.module': 'endpoint',
                     },
-                  ],
-                },
-              },
-              {
-                bool: {
-                  should: [
-                    {
-                      match_phrase: {
-                        'kibana.alert.rule.parameters.immutable': 'true',
-                      },
-                    },
-                  ],
-                },
-              },
-              {
-                range: {
-                  '@timestamp': {
-                    gte: rangeFrom,
-                    lte: rangeTo,
                   },
+                ],
+              },
+            },
+            {
+              bool: {
+                should: [
+                  {
+                    match_phrase: {
+                      'kibana.alert.rule.parameters.immutable': 'true',
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              range: {
+                '@timestamp': {
+                  gte: rangeFrom,
+                  lte: rangeTo,
                 },
               },
-            ],
-          },
-        },
-        aggs: {
-          endpoint_alert_count: {
-            cardinality: {
-              field: 'event.id',
             },
+          ],
+        },
+      },
+      aggs: {
+        endpoint_alert_count: {
+          cardinality: {
+            field: 'event.id',
           },
         },
-        track_total_hits: false,
-        sort: [
-          { '@timestamp': { order: 'asc', format: 'strict_date_optional_time_nanos' } },
-          { _shard_doc: 'desc' },
-        ] as unknown as string[],
-        pit: { id: pitId },
-        search_after: searchAfter,
-        size: 1000,
-      };
+      },
+      track_total_hits: false,
+      sort: [
+        { '@timestamp': { order: 'asc', format: 'strict_date_optional_time_nanos' } },
+        { _shard_doc: 'desc' },
+      ] as unknown as string[],
+      size: this.queryConfig?.pageSize ?? queryConfig.pageSize, // plugin config have precedence over CDN parameter
+    };
 
-      let response = null;
-      try {
-        response = await this.esClient().search<EnhancedAlertEvent>(query);
-        const numOfHits = response?.hits.hits.length;
-
-        if (numOfHits > 0) {
-          const lastHit = response?.hits.hits[numOfHits - 1];
-          searchAfter = lastHit?.sort;
-        }
-
-        fetchMore = numOfHits > 0;
-      } catch (e) {
-        this.logger.warn('Error fetching alerts', { error_message: e.message } as LogMeta);
-        fetchMore = false;
-      }
-
-      const alerts = response?.hits.hits;
-      alertsToReturn = alertsToReturn.concat(alerts ?? []);
-
-      if (response?.pit_id != null) {
-        pitId = response?.pit_id;
-      }
-    }
-
-    try {
-      await this.esClient().closePointInTime({ id: pitId });
-    } catch (error) {
-      this.logger.warn('Error trying to close point in time', {
-        pit: pitId,
-        error_message: error.message,
-        keepAlive,
-      } as LogMeta);
-    }
-
-    this.logger.l('Timeline alerts to return', { alerts: alertsToReturn.length });
-
-    return alertsToReturn || [];
+    return this.paginate(index, query, queryConfig);
   }
 
   public async buildProcessTree(
@@ -1086,7 +1145,31 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     return this.processTreeFetcher.tree(request, true);
   }
 
+  async tierFilter() {
+    const excludeColdAndFrozenTiers = !!(await this.queryConfig?.excludeColdAndFrozenTiers());
+    if (excludeColdAndFrozenTiers) {
+      return [
+        {
+          bool: {
+            must_not: {
+              terms: {
+                _tier: ['data_frozen', 'data_cold'],
+              },
+            },
+          },
+        },
+      ];
+    }
+    return [];
+  }
+
   public async fetchTimelineEvents(nodeIds: string[]) {
+    const tierFilter = await this.tierFilter();
+
+    this.logger.debug('Fetching timeline events for node IDs', {
+      tierFilters: tierFilter,
+    } as LogMeta);
+
     const query: SearchRequest = {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: [`${this.alertsIndex}*`, 'logs-*'],
@@ -1116,6 +1199,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
                 'event.category': 'process',
               },
             },
+            ...tierFilter,
           ],
         },
       },
@@ -1231,8 +1315,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       })) as { license: ESLicense };
 
       return ret.license;
-    } catch (err) {
-      this.logger.warn('failed retrieving license', { error_message: err.message } as LogMeta);
+    } catch (error) {
+      this.logger.warn('failed retrieving license', withErrorMessage(error));
       return undefined;
     }
   }
@@ -1257,15 +1341,44 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     return Math.max(Math.floor(this.maxPageSizeBytes / docSizeBytes), 1);
   }
 
-  public async *paginate<T>(index: string, query: ESSearchRequest) {
+  public async *paginate<T>(
+    index: string,
+    query: ESSearchRequest,
+    queryConfig: TelemetryQueryConfiguration | undefined = undefined
+  ) {
     if (query.sort == null) {
       throw Error('Not possible to paginate a query without a sort attribute');
     }
 
-    const size = await this.docsPerPage(index, query);
-    if (size === -1) {
-      return;
+    let queryOptions = {};
+    let pageSize = -1;
+    // kibana.yml configurations take precedence over CDN parameters
+    if (this.queryConfig?.pageSize !== undefined) {
+      queryOptions = {
+        maxResponseSize: this.queryConfig.maxResponseSize,
+        maxCompressedResponseSize: this.queryConfig.maxCompressedResponseSize,
+      };
+      pageSize = this.queryConfig.pageSize;
+    } else if (queryConfig?.pageSize !== undefined) {
+      queryOptions = {
+        maxResponseSize: queryConfig.maxResponseSize,
+        maxCompressedResponseSize: queryConfig.maxCompressedResponseSize,
+      };
+      pageSize = queryConfig.pageSize;
+    } else {
+      pageSize = await this.docsPerPage(index, query);
     }
+
+    if (pageSize === -1) {
+      this.logger.warn('Page size is not defined, default to 100');
+      pageSize = 100;
+    }
+
+    this.logger.debug('Running paginated query', {
+      queryConfig,
+      queryOptions,
+      pageSize,
+    } as LogMeta);
 
     const pit = {
       id: await this.openPointInTime(index),
@@ -1273,11 +1386,12 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     const esQuery: ESSearchRequest = {
       ...cloneDeep(query),
       pit,
-      size: Math.min(size, 10_000),
+      // not allow more than 10K pages
+      size: Math.min(pageSize, 10_000),
     };
     try {
       do {
-        const response = await this.nextPage(esQuery);
+        const response = await this.nextPage(esQuery, queryOptions);
         const hits = response?.hits.hits.length ?? 0;
 
         if (hits === 0) {
@@ -1292,18 +1406,19 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
         yield data;
       } while (esQuery.search_after !== undefined);
-    } catch (e) {
-      this.logger.warn('Error running paginated query', { error_message: e.message } as LogMeta);
-      throw e;
+    } catch (error) {
+      this.logger.warn('Error running paginated query', withErrorMessage(error));
+      throw error;
     } finally {
       await this.closePointInTime(pit.id);
     }
   }
 
   private async nextPage(
-    esQuery: ESSearchRequest
+    esQuery: ESSearchRequest,
+    queryOptions: {}
   ): Promise<SearchResponse<unknown, Record<string, AggregationsAggregate>>> {
-    return this.esClient().search(esQuery);
+    return this.esClient().search(esQuery, queryOptions);
   }
 
   public setMaxPageSizeBytes(bytes: number) {
@@ -1321,22 +1436,38 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     return this._esClient;
   }
 
-  public async getIndices(): Promise<string[]> {
+  public async getIndices(): Promise<IndexSettings[]> {
     const es = this.esClient();
 
-    this.logger.l('Fetching indices');
+    this.logger.debug('Fetching indices');
 
     const request: IndicesGetRequest = {
       index: '*',
       expand_wildcards: ['open', 'hidden'],
-      filter_path: ['*.settings.index.provided_name'],
+      filter_path: [
+        '*.mappings._source.mode',
+        '*.settings.index.default_pipeline',
+        '*.settings.index.final_pipeline',
+        '*.settings.index.mode',
+        '*.settings.index.provided_name',
+      ],
     };
 
     return es.indices
       .get(request)
-      .then((indices) => Array.from(Object.keys(indices)))
+      .then((indices) =>
+        Object.entries(indices).map(([index, value]) => {
+          return {
+            index_name: index,
+            default_pipeline: value.settings?.index?.default_pipeline,
+            final_pipeline: value.settings?.index?.final_pipeline,
+            index_mode: value.settings?.index?.mode,
+            source_mode: value.mappings?._source?.mode,
+          } as IndexSettings;
+        })
+      )
       .catch((error) => {
-        this.logger.warn('Error fetching indices', { error_message: error } as LogMeta);
+        this.logger.warn('Error fetching indices', withErrorMessage(error));
         throw error;
       });
   }
@@ -1344,12 +1475,18 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   public async getDataStreams(): Promise<DataStream[]> {
     const es = this.esClient();
 
-    this.logger.l('Fetching datstreams');
+    this.logger.debug('Fetching datstreams');
 
     const request: IndicesGetDataStreamRequest = {
       name: '*',
       expand_wildcards: ['open', 'hidden'],
-      filter_path: ['data_streams.name', 'data_streams.indices'],
+      filter_path: [
+        'data_streams.ilm_policy',
+        'data_streams.indices.ilm_policy',
+        'data_streams.indices.index_name',
+        'data_streams.name',
+        'data_streams.template',
+      ],
     };
 
     return es.indices
@@ -1358,6 +1495,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         response.data_streams.map((ds) => {
           return {
             datastream_name: ds.name,
+            ilm_policy: ds.ilm_policy,
+            template: ds.template,
             indices:
               ds.indices?.map((index) => {
                 return {
@@ -1369,19 +1508,20 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         })
       )
       .catch((error) => {
-        this.logger.warn('Error fetching datastreams', { error_message: error } as LogMeta);
+        this.logger.warn('Error fetching datastreams', withErrorMessage(error));
         throw error;
       });
   }
 
-  public async *getIndicesStats(indices: string[]) {
+  public async *getIndicesStats(indices: string[], chunkSize: number) {
     const es = this.esClient();
+    const safeChunkSize = Math.min(chunkSize, 3000);
 
-    this.logger.l('Fetching indices stats');
+    this.logger.debug('Fetching indices stats');
 
-    const groupedIndices = chunkStringsByMaxLength(indices);
+    const groupedIndices = chunkStringsByMaxLength(indices, safeChunkSize);
 
-    this.logger.l('Splitted indices into groups', {
+    this.logger.debug('Splitted indices into groups', {
       groups: groupedIndices.length,
       indices: indices.length,
     } as LogMeta);
@@ -1390,14 +1530,22 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       const request: IndicesStatsRequest = {
         index: group,
         level: 'indices',
-        metric: ['docs', 'search', 'store'],
+        metric: ['docs', 'search', 'store', 'indexing'],
         expand_wildcards: ['open', 'hidden'],
         filter_path: [
           'indices.*.total.search.query_total',
           'indices.*.total.search.query_time_in_millis',
+
           'indices.*.total.docs.count',
           'indices.*.total.docs.deleted',
           'indices.*.total.store.size_in_bytes',
+
+          'indices.*.primaries.docs.count',
+          'indices.*.primaries.docs.deleted',
+          'indices.*.primaries.store.size_in_bytes',
+
+          'indices.*.total.indexing.index_failed',
+          'indices.*.total.indexing.index_failed_due_to_version_conflict',
         ],
       };
 
@@ -1406,26 +1554,38 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         for (const [indexName, stats] of Object.entries(response.indices ?? {})) {
           yield {
             index_name: indexName,
+
             query_total: stats.total?.search?.query_total,
             query_time_in_millis: stats.total?.search?.query_time_in_millis,
+
             docs_count: stats.total?.docs?.count,
             docs_deleted: stats.total?.docs?.deleted,
             docs_total_size_in_bytes: stats.total?.store?.size_in_bytes,
+
+            index_failed: stats.total?.indexing?.index_failed,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            index_failed_due_to_version_conflict: (stats.total?.indexing as any)
+              ?.index_failed_due_to_version_conflict,
+
+            docs_count_primaries: stats.primaries?.docs?.count,
+            docs_deleted_primaries: stats.primaries?.docs?.deleted,
+            docs_total_size_in_bytes_primaries: stats.primaries?.store?.size_in_bytes,
           } as IndexStats;
         }
       } catch (error) {
-        this.logger.warn('Error fetching indices stats', { error_message: error } as LogMeta);
+        this.logger.warn('Error fetching indices stats', withErrorMessage(error));
         throw error;
       }
     }
   }
 
-  public async *getIlmsStats(indices: string[]) {
+  public async *getIlmsStats(indices: string[], chunkSize: number) {
     const es = this.esClient();
+    const safeChunkSize = Math.min(chunkSize, 3000);
 
-    const groupedIndices = chunkStringsByMaxLength(indices);
+    const groupedIndices = chunkStringsByMaxLength(indices, safeChunkSize);
 
-    this.logger.l('Splitted ilms into groups', {
+    this.logger.debug('Splitted ilms into groups', {
       groups: groupedIndices.length,
       indices: indices.length,
     } as LogMeta);
@@ -1451,14 +1611,63 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           yield entry;
         }
       } catch (error) {
-        this.logger.warn('Error fetching ilm stats', { error_message: error } as LogMeta);
+        this.logger.warn('Error fetching ilm stats', withErrorMessage(error));
         throw error;
       }
     }
   }
 
-  public async *getIlmsPolicies(ilms: string[]) {
+  public async getIndexTemplatesStats(): Promise<IndexTemplateInfo[]> {
     const es = this.esClient();
+
+    this.logger.debug('Fetching datstreams');
+
+    const request: IndicesGetIndexTemplateRequest = {
+      name: '*',
+      filter_path: [
+        'index_templates.name',
+        'index_templates.index_template.template.settings.index.mode',
+        'index_templates.index_template.data_stream',
+        'index_templates.index_template._meta.package.name',
+        'index_templates.index_template._meta.managed_by',
+        'index_templates.index_template._meta.beat',
+        'index_templates.index_template._meta.managed',
+        'index_templates.index_template.composed_of',
+        'index_templates.index_template.template.mappings._source.enabled',
+        'index_templates.index_template.template.mappings._source.includes',
+        'index_templates.index_template.template.mappings._source.excludes',
+      ],
+    };
+
+    return es.indices
+      .getIndexTemplate(request)
+      .then((response) =>
+        response.index_templates.map((props) => {
+          const datastream = props.index_template?.data_stream !== undefined;
+          return {
+            template_name: props.name,
+            index_mode: props.index_template.template?.settings?.index?.mode,
+            package_name: props.index_template._meta?.package?.name,
+            datastream,
+            managed_by: props.index_template._meta?.managed_by,
+            beat: props.index_template._meta?.beat,
+            is_managed: props.index_template._meta?.managed,
+            composed_of: props.index_template.composed_of,
+            source_enabled: props.index_template.template?.mappings?._source?.enabled,
+            source_includes: props.index_template.template?.mappings?._source?.includes ?? [],
+            source_excludes: props.index_template.template?.mappings?._source?.excludes ?? [],
+          } as IndexTemplateInfo;
+        })
+      )
+      .catch((error) => {
+        this.logger.warn('Error fetching index templates', withErrorMessage(error));
+        throw error;
+      });
+  }
+
+  public async *getIlmsPolicies(ilms: string[], chunkSize: number) {
+    const es = this.esClient();
+    const safeChunkSize = Math.min(chunkSize, 3000);
 
     const phase = (obj: unknown): Nullable<IlmPhase> => {
       let value: Nullable<IlmPhase>;
@@ -1470,15 +1679,15 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       return value;
     };
 
-    const groupedIlms = chunkStringsByMaxLength(ilms);
+    const groupedIlms = chunkStringsByMaxLength(ilms, safeChunkSize);
 
-    this.logger.l('Splitted ilms into groups', {
+    this.logger.debug('Splitted ilms into groups', {
       groups: groupedIlms.length,
       ilms: ilms.length,
     } as LogMeta);
 
     for (const group of groupedIlms) {
-      this.logger.l('Fetching ilm policies');
+      this.logger.debug('Fetching ilm policies');
       const request: IlmGetLifecycleRequest = {
         name: group.join(','),
         filter_path: [
@@ -1507,11 +1716,79 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           } as IlmPolicy;
         }
       } catch (error) {
-        this.logger.warn('Error fetching ilm policies', {
-          error_message: error.message,
-        } as LogMeta);
+        this.logger.warn('Error fetching ilm policies', withErrorMessage(error));
         throw error;
       }
     }
+  }
+
+  public async getIngestPipelinesStats(timeout: Duration): Promise<NodeIngestPipelinesStats[]> {
+    const es = this.esClient();
+
+    this.logger.debug('Fetching ingest pipelines stats');
+
+    const request: NodesStatsRequest = {
+      metric: 'ingest',
+      filter_path: [
+        'nodes.*.ingest.total',
+        'nodes.*.ingest.pipelines.*.count',
+        'nodes.*.ingest.pipelines.*.time_in_millis',
+        'nodes.*.ingest.pipelines.*.failed',
+        'nodes.*.ingest.pipelines.*.current',
+        'nodes.*.ingest.pipelines.*.processors.*.stats.count',
+        'nodes.*.ingest.pipelines.*.processors.*.stats.time_in_millis',
+        'nodes.*.ingest.pipelines.*.processors.*.stats.failed',
+        'nodes.*.ingest.pipelines.*.processors.*.stats.current',
+      ],
+      timeout,
+    };
+
+    return es.nodes
+      .stats(request)
+      .then((response) => {
+        return Object.entries(response.nodes).map(([nodeName, node]) => {
+          return {
+            name: nodeName,
+            totals: {
+              count: node.ingest?.total?.count ?? 0,
+              time_in_millis: node.ingest?.total?.time_in_millis ?? 0,
+              current: node.ingest?.total?.current ?? 0,
+              failed: node.ingest?.total?.failed ?? 0,
+            } as Totals,
+            pipelines: Object.entries(node.ingest?.pipelines ?? []).map(
+              ([pipelineName, pipeline]) => {
+                return {
+                  name: pipelineName,
+                  totals: {
+                    count: pipeline.count,
+                    time_in_millis: pipeline.time_in_millis,
+                    current: pipeline.current,
+                    failed: pipeline.failed,
+                  } as Totals,
+                  processors: (pipeline.processors ?? [])
+                    .map((processors) => {
+                      return Object.entries(processors).map(([processorName, processor]) => {
+                        return {
+                          name: processorName,
+                          totals: {
+                            count: processor.stats?.count ?? 0,
+                            time_in_millis: processor.stats?.time_in_millis ?? 0,
+                            current: processor.stats?.current ?? 0,
+                            failed: processor.stats?.failed ?? 0,
+                          } as Totals,
+                        } as Processor;
+                      });
+                    })
+                    .flat(),
+                } as Pipeline;
+              }
+            ),
+          } as NodeIngestPipelinesStats;
+        });
+      })
+      .catch((error) => {
+        this.logger.warn('Error fetching ingest pipelines stats', withErrorMessage(error));
+        throw error;
+      });
   }
 }

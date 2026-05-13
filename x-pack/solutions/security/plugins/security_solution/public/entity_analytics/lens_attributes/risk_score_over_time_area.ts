@@ -8,14 +8,17 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { GetLensAttributes } from '../../common/components/visualization_actions/types';
 
-const internalReferenceIdMapping: Record<string, string> = { host: uuidv4(), user: uuidv4() };
+const internalReferenceIdMapping: Record<string, string> = {
+  host: `host-${uuidv4()}`,
+  user: `user-${uuidv4()}`,
+};
 
 export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = ({
   stackByField = 'host',
   extraOptions = { spaceId: 'default' },
 }) => {
-  const layerIds = [uuidv4(), uuidv4()];
-  const layer2ColumnId = uuidv4();
+  const layerIds = [`layer-id1-${uuidv4()}`, `layer-id2-${uuidv4()}`];
+  const layer2ColumnId = `layer2-column-id-${uuidv4()}`;
   const internalReferenceId = internalReferenceIdMapping[stackByField];
   return {
     title: `${stackByField} risk score over time`,
@@ -57,7 +60,7 @@ export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = ({
                 axisMode: 'left',
                 lineWidth: 2,
                 color: '#aa6556',
-                icon: 'alert',
+                icon: 'warning',
                 textVisibility: true,
                 fill: 'none',
                 iconPosition: 'left',

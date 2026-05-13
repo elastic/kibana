@@ -27,7 +27,7 @@ import {
 import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
 import { HttpFetchError } from './http_fetch_error';
 import { HttpInterceptController } from './http_intercept_controller';
-import { interceptRequest, interceptResponse } from './intercept';
+import { interceptFetch, interceptRequest, interceptResponse } from './intercept';
 import { HttpInterceptHaltError } from './http_intercept_halt_error';
 
 interface Params {
@@ -92,7 +92,12 @@ export class Fetch {
           this.interceptors,
           controller
         );
-        const initialResponse = this.fetchResponse(interceptedOptions);
+        const initialResponse = interceptFetch(
+          this.fetchResponse.bind(this),
+          interceptedOptions,
+          this.interceptors,
+          controller
+        );
 
         const interceptedResponse = await interceptResponse(
           interceptedOptions,

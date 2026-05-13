@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './advanced_editor.scss';
-
 import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -21,18 +19,24 @@ import {
   EuiToolTip,
   htmlIdGenerator,
   keys,
+  useEuiTheme,
+  EuiFormPrepend,
+  EuiFormAppend,
 } from '@elastic/eui';
-import { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import {
   DragDropBuckets,
   DraggableBucketContainer,
   NewBucketButton,
 } from '@kbn/visualization-ui-components';
+import { css } from '@emotion/react';
+import type { RangeTypeLens } from '@kbn/lens-common';
 import { useDebounceWithOptions } from '../../../../../shared_components';
-import { RangeTypeLens, isValidRange } from './ranges';
+import { isValidRange } from './ranges';
 import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
 import { LabelInput } from '../shared_components';
 import { isValidNumber } from '../helpers';
+import { draggablePopoverButtonStyles } from '../styles';
 
 const generateId = htmlIdGenerator();
 
@@ -90,6 +94,9 @@ export const RangePopover = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.lens.indexPattern.ranges.popoverAriaLabel', {
+        defaultMessage: 'Range editor',
+      })}
       display="block"
       ownFocus
       isOpen={isOpen}
@@ -101,7 +108,9 @@ export const RangePopover = ({
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
           <EuiFlexItem>
             <EuiFieldNumber
-              className="lnsRangesOperation__popoverNumberField"
+              css={css`
+                width: 14ch; // Roughly 10 characters plus extra for the padding
+              `}
               value={isValidNumber(from) ? Number(from) : ''}
               onChange={({ target }) => {
                 const newRange = {
@@ -113,7 +122,7 @@ export const RangePopover = ({
               }}
               append={
                 <EuiToolTip content={lteTooltipContent}>
-                  <EuiText size="s">{lteAppendLabel}</EuiText>
+                  <EuiFormAppend label={lteAppendLabel} tabIndex={0} />
                 </EuiToolTip>
               }
               onKeyDown={({ key }: React.KeyboardEvent<HTMLInputElement>) => {
@@ -128,11 +137,13 @@ export const RangePopover = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="sortRight" color="subdued" />
+            <EuiIcon type="sortRight" color="subdued" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFieldNumber
-              className="lnsRangesOperation__popoverNumberField"
+              css={css`
+                width: 14ch; // Roughly 10 characters plus extra for the padding
+              `}
               value={isValidNumber(to) ? Number(to) : ''}
               inputRef={(node) => {
                 if (toRef && node) {
@@ -149,7 +160,7 @@ export const RangePopover = ({
               }}
               prepend={
                 <EuiToolTip content={ltTooltipContent}>
-                  <EuiText size="s">{ltPrependLabel}</EuiText>
+                  <EuiFormPrepend label={ltPrependLabel} tabIndex={0} />
                 </EuiToolTip>
               }
               compressed
@@ -203,6 +214,7 @@ export const AdvancedRangeEditor = ({
   onToggleEditor: () => void;
   formatter: IFieldFormat;
 }) => {
+  const euiThemeContext = useEuiTheme();
   const [activeRangeId, setActiveRangeId] = useState('');
   // use a local state to store ids with range objects
   const [localRanges, setLocalRanges] = useState<LocalRangeType[]>(() =>
@@ -253,7 +265,7 @@ export const AdvancedRangeEditor = ({
       labelAppend={
         <EuiText size="xs">
           <EuiLink color="danger" onClick={onToggleEditor}>
-            <EuiIcon size="s" type="cross" color="danger" />{' '}
+            <EuiIcon size="s" type="cross" color="danger" aria-hidden={true} />{' '}
             {i18n.translate('xpack.lens.indexPattern.ranges.customRangesRemoval', {
               defaultMessage: 'Remove custom ranges',
             })}
@@ -303,8 +315,8 @@ export const AdvancedRangeEditor = ({
                   <EuiLink
                     color="text"
                     onClick={() => changeActiveRange(range.id)}
-                    className="lnsRangesOperation__popoverButton"
-                    data-test-subj="indexPattern-ranges-popover-trigger"
+                    data-test-subj="dataView-ranges-popover-trigger"
+                    css={draggablePopoverButtonStyles(euiThemeContext)}
                   >
                     <EuiText
                       size="s"

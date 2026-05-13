@@ -8,22 +8,58 @@
  */
 
 import { useEffect, useState } from 'react';
+import usePrevious from 'react-use/lib/usePrevious';
 import type { CustomMetrics, Meta } from './performance_context';
 import { usePerformanceContext } from '../../..';
 
-export const usePageReady = (state: {
+interface UsePageReadyProps {
   customMetrics?: CustomMetrics;
   isReady: boolean;
   meta?: Meta;
-}) => {
-  const { onPageReady } = usePerformanceContext();
+  isRefreshing: boolean;
+  customInitialLoad?: { value: boolean; onInitialLoadReported: () => void };
+}
 
-  const [isReported, setIsReported] = useState(false);
+export const usePageReady = ({
+  customInitialLoad,
+  isReady,
+  isRefreshing,
+  customMetrics,
+  meta,
+}: UsePageReadyProps) => {
+  const { onPageReady, onPageRefreshStart } = usePerformanceContext();
+  const prevIsRefreshing = usePrevious(isRefreshing);
+  const [isInitialLoadInternal, setIsInitialLoadInternal] = useState(true);
+
+  const isInitialLoad = customInitialLoad ? customInitialLoad.value : isInitialLoadInternal;
 
   useEffect(() => {
-    if (state.isReady && !isReported) {
-      onPageReady({ customMetrics: state.customMetrics, meta: state.meta });
-      setIsReported(true);
+    // Skip until either the page is ready for the first time or a refresh cycle begins
+    if (isInitialLoad && !isReady) return;
+
+    // Initial load flow
+    if (isReady && isInitialLoad) {
+      onPageReady({ customMetrics, meta });
+      customInitialLoad?.onInitialLoadReported();
+      setIsInitialLoadInternal(false);
+      return;
     }
-  }, [isReported, onPageReady, state.customMetrics, state.isReady, state.meta]);
+
+    // Refresh flow (only after the initial load has been reported)
+    if (!prevIsRefreshing && isRefreshing) {
+      onPageRefreshStart();
+    } else if (prevIsRefreshing && !isRefreshing) {
+      onPageReady({ customMetrics, meta });
+    }
+  }, [
+    customInitialLoad,
+    customMetrics,
+    isInitialLoad,
+    isReady,
+    isRefreshing,
+    meta,
+    onPageReady,
+    onPageRefreshStart,
+    prevIsRefreshing,
+  ]);
 };

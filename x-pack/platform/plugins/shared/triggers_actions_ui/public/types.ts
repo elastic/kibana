@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ComponentType } from 'react';
+import type { ComponentType, ReactNode } from 'react';
+import type React from 'react';
 import type { Moment } from 'moment';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -15,18 +16,16 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
-import { HttpSetup } from '@kbn/core/public';
-import { KueryNode } from '@kbn/es-query';
+import type { HttpSetup } from '@kbn/core/public';
+import type { Filter, KueryNode } from '@kbn/es-query';
+import type { ActionType, AsApiContract } from '@kbn/actions-plugin/common';
 import {
-  ALERT_HISTORY_PREFIX,
-  ActionType,
   AlertHistoryDefaultIndexName,
   AlertHistoryDocumentTemplate,
   AlertHistoryEsIndexConnectorId,
-  AsApiContract,
 } from '@kbn/actions-plugin/common';
-import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import {
+import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import type {
   ActionGroup,
   AlertStatus,
   SanitizedRule as AlertingSanitizedRule,
@@ -44,13 +43,15 @@ import {
 } from '@kbn/alerting-plugin/common';
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
 import type { RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
-import {
+import type {
+  AlertFormatter,
   ValidationResult,
   UserConfiguredActionConnector,
   ActionConnector,
   ActionTypeRegistryContract,
 } from '@kbn/alerts-ui-shared/src/common/types';
-import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
+import type { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
+import type { RULE_PREBUILD_DESCRIPTION_FIELDS } from '.';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
 import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
@@ -67,7 +68,7 @@ import type { GlobalRuleEventLogListProps } from './application/sections/rule_de
 import type { AlertSummaryTimeRange } from './application/sections/alert_summary_widget/types';
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
-import { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
+import type { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
 import type { RulesListNotifyBadgePropsWithApi } from './application/sections/rules_list/components/notify_badge';
 
 export type {
@@ -106,6 +107,7 @@ type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
   actions: RuleUiAction[];
 };
 type Rule<Params extends RuleTypeParams = RuleTypeParams> = SanitizedRule<Params>;
+
 type ResolvedRule = Omit<
   ResolvedSanitizedRule<RuleTypeParams>,
   'alertTypeId' | 'actions' | 'systemActions'
@@ -114,8 +116,35 @@ type ResolvedRule = Omit<
   actions: RuleUiAction[];
 };
 
+type PrebuildField<T> = (props: T) => {
+  title: string;
+  description: NonNullable<React.ReactNode>;
+};
+
+export interface PrebuildFieldsMap {
+  [RULE_PREBUILD_DESCRIPTION_FIELDS.INDEX_PATTERN]: PrebuildField<string[]>;
+  [RULE_PREBUILD_DESCRIPTION_FIELDS.CUSTOM_QUERY]: PrebuildField<string>;
+  [RULE_PREBUILD_DESCRIPTION_FIELDS.ESQL_QUERY]: PrebuildField<string>;
+  [RULE_PREBUILD_DESCRIPTION_FIELDS.DATA_VIEW_ID]: PrebuildField<string>;
+  [RULE_PREBUILD_DESCRIPTION_FIELDS.DATA_VIEW_INDEX_PATTERN]: PrebuildField<string>;
+  [RULE_PREBUILD_DESCRIPTION_FIELDS.QUERY_FILTERS]: PrebuildField<{
+    filters: Filter[];
+    dataViewId: string;
+  }>;
+  [RULE_PREBUILD_DESCRIPTION_FIELDS.KQL_FILTERS]: PrebuildField<string>;
+}
+
+export type GetDescriptionFieldsFn<Params extends RuleTypeParams = RuleTypeParams> = ({
+  rule,
+  prebuildFields,
+  http,
+}: {
+  rule: Rule<Params>;
+  prebuildFields: PrebuildFieldsMap | undefined;
+  http?: HttpSetup;
+}) => { title: string; description: NonNullable<ReactNode> }[];
+
 export {
-  ALERT_HISTORY_PREFIX,
   AlertHistoryDefaultIndexName,
   AlertHistoryDocumentTemplate,
   AlertHistoryEsIndexConnectorId,
@@ -235,11 +264,13 @@ export type RuleSnoozeSettings = Pick<
 
 export interface RuleTableItem extends Rule {
   ruleType: RuleType['name'];
+  autoRecoverAlerts?: RuleType['autoRecoverAlerts'];
   index: number;
   actionsCount: number;
   isEditable: boolean;
   enabledInLicense: boolean;
   showIntervalWarning?: boolean;
+  isInternallyManaged: boolean;
 }
 
 export interface RuleTypeParamsExpressionProps<
@@ -271,6 +302,7 @@ export interface RuleTypeParamsExpressionProps<
 export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   id: string;
   description: string;
+  getDescriptionFields?: GetDescriptionFieldsFn<Params>;
   iconClass: string;
   documentationUrl: string | ((docLinks: DocLinksStart) => string) | null;
   validate: (ruleParams: Params, isServerless?: boolean) => ValidationResult;
@@ -284,6 +316,12 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   alertDetailsAppSection?:
     | React.FunctionComponent<any>
     | React.LazyExoticComponent<ComponentType<any>>;
+  isInternallyManaged?: boolean;
+  /**
+   * Optional formatter for alert-level context (reason, deep link URL).
+   * Used to generate "View in App" links for individual alerts.
+   */
+  format?: AlertFormatter;
 }
 
 export interface IErrorObject {
@@ -353,7 +391,7 @@ export interface RuleDefinitionProps<Params extends RuleTypeParams = RuleTypePar
   onEditRule: () => Promise<void>;
   hideEditButton?: boolean;
   filteredRuleTypes?: string[];
-  useNewRuleForm?: boolean;
+  navigateToEditRuleForm?: (ruleId: string) => void;
 }
 
 export enum Percentiles {
@@ -377,6 +415,7 @@ export enum RRuleFrequency {
   MONTHLY = 1,
   WEEKLY = 2,
   DAILY = 3,
+  HOURLY = 4,
 }
 
 export interface RecurrenceSchedule {
@@ -400,6 +439,8 @@ export interface SnoozeSchedule {
 
 export interface ConnectorServices {
   validateEmailAddresses: ActionsPublicPluginSetup['validateEmailAddresses'];
+  enabledEmailServices: ActionsPublicPluginSetup['enabledEmailServices'];
+  isWebhookSslWithPfxEnabled?: ActionsPublicPluginSetup['isWebhookSslWithPfxEnabled'];
 }
 
 export interface RulesListFilters {

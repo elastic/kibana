@@ -7,7 +7,7 @@
 
 import type {
   AnalyticsServiceSetup,
-  IBasePath,
+  IStaticAssets,
   PluginInitializerContext,
   CoreSetup,
   Plugin,
@@ -17,7 +17,7 @@ import { duration } from 'moment';
 
 interface SetupFullStoryDeps {
   analytics: AnalyticsServiceSetup;
-  basePath: IBasePath;
+  staticAssets: IStaticAssets;
 }
 
 export interface CloudFullStoryConfig {
@@ -45,10 +45,14 @@ export class CloudFullStoryPlugin implements Plugin {
           .info('Skipping FullStory setup for a Elastic-owned deployments');
         return;
       }
-      this.setupFullStory({ analytics: core.analytics, basePath: core.http.basePath }).catch((e) =>
-        // eslint-disable-next-line no-console
-        console.debug(`Error setting up FullStory: ${e.toString()}`)
-      );
+      this.setupFullStory({
+        analytics: core.analytics,
+        staticAssets: core.http.staticAssets,
+      }).catch((e) => {
+        this.initializerContext.logger
+          .get()
+          .debug(`Error setting up FullStory: ${e.toString()}`, { error: e });
+      });
     }
   }
 
@@ -59,10 +63,10 @@ export class CloudFullStoryPlugin implements Plugin {
   /**
    * If the right config is provided, register the FullStory shipper to the analytics client.
    * @param analytics Core's Analytics service's setup contract.
-   * @param basePath Core's http.basePath helper.
-   * @private
+   * @param staticAssets Core's http.staticAssets helper.
+   * @internal
    */
-  private async setupFullStory({ analytics, basePath }: SetupFullStoryDeps) {
+  private async setupFullStory({ analytics, staticAssets }: SetupFullStoryDeps) {
     const { org_id: fullStoryOrgId, eventTypesAllowlist, pageVarsDebounceTime } = this.config;
     if (!fullStoryOrgId) {
       return; // do not load any FullStory code in the browser if not enabled
@@ -77,15 +81,9 @@ export class CloudFullStoryPlugin implements Plugin {
       ...(pageVarsDebounceTime
         ? { pageVarsDebounceTimeMs: duration(pageVarsDebounceTime).asMilliseconds() }
         : {}),
-      /**
-       * FIXME: this should use the {@link IStaticAssets['getPluginAssetHref']}
-       * function. Then we can avoid registering our own endpoint in this plugin.
-       */
-      scriptUrl: basePath.prepend(
-        `/internal/cloud/${this.initializerContext.env.packageInfo.buildNum}/fullstory.js`
-      ),
+      scriptUrl: staticAssets.getPluginAssetHref('fs.js'),
       namespace: 'FSKibana',
-      // Tell FullStory to not capture from the start, and wait for the opt-in confirmation
+      // Tell FullStory to not capture from the start and wait for the opt-in confirmation
       captureOnStartup: false,
     });
   }

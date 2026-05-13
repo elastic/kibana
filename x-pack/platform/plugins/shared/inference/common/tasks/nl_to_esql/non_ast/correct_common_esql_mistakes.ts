@@ -5,13 +5,20 @@
  * 2.0.
  */
 
+import { scalarFunctionDefinitions } from '@kbn/esql-language/src/commands/definitions/generated/scalar_functions';
+import { groupingFunctionDefinitions } from '@kbn/esql-language/src/commands/definitions/generated/grouping_functions';
+import { aggFunctionDefinitions } from '@kbn/esql-language/src/commands/definitions/generated/aggregation_functions';
+import { timeSeriesAggFunctionDefinitions } from '@kbn/esql-language/src/commands/definitions/generated/time_series_agg_functions';
+import type { FunctionDefinition } from '@kbn/esql-language';
+import { memoize } from 'lodash';
+
 const STRING_DELIMITER_TOKENS = ['`', "'", '"'];
 const ESCAPE_TOKEN = '\\\\';
 
 // this function splits statements by a certain token,
 // and takes into account escaping, or function calls
 
-function split(value: string, splitToken: string) {
+function split(value: string, splitToken: string | RegExp) {
   const statements: string[] = [];
 
   let delimiterToken: string | undefined;
@@ -25,18 +32,28 @@ function split(value: string, splitToken: string) {
   for (let index = 0; index < trimmed.length; index++) {
     const char = trimmed[index];
 
-    if (
-      !delimiterToken &&
-      groupingCount === 0 &&
-      trimmed
-        .slice(index, index + splitToken.length)
-        .join('')
-        .toLowerCase() === splitToken.toLowerCase()
-    ) {
-      index += splitToken.length - 1;
-      statements.push(currentStatement.trim());
-      currentStatement = '';
-      continue;
+    if (!delimiterToken && groupingCount === 0) {
+      let charsMatched: number = 0;
+
+      if (typeof splitToken === 'string') {
+        charsMatched =
+          trimmed
+            .slice(index, index + splitToken.length)
+            .join('')
+            .toLowerCase() === splitToken.toLowerCase()
+            ? splitToken.length
+            : 0;
+      } else {
+        charsMatched = trimmed.slice(index).join('').match(splitToken)?.[0].length ?? 0;
+      }
+
+      if (charsMatched) {
+        // decrement by 1 to account for increment in loop
+        index += charsMatched - 1;
+        statements.push(currentStatement.trim());
+        currentStatement = '';
+        continue;
+      }
     }
 
     currentStatement += char;
@@ -80,8 +97,8 @@ export function splitIntoCommands(query: string) {
 }
 
 function replaceSingleQuotesWithDoubleQuotes(command: string) {
-  const regex = /'(?=(?:[^"]*"[^"]*")*[^"]*$)/g;
-  return command.replace(regex, '"');
+  const regex = /'(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/g;
+  return command.replaceAll(regex, '"');
 }
 
 function removeColumnQuotesAndEscape(column: string) {
@@ -92,6 +109,67 @@ function removeColumnQuotesAndEscape(column: string) {
   }
 
   return '`' + plainColumnIdentifier + '`';
+}
+
+const getFunctionDefinitionMap = memoize(() => {
+  const functionDefinitionMap = new Map<string, FunctionDefinition>();
+  const allFunctionDefinitions = [
+    ...scalarFunctionDefinitions,
+    ...aggFunctionDefinitions,
+    ...timeSeriesAggFunctionDefinitions,
+    ...groupingFunctionDefinitions,
+  ];
+  allFunctionDefinitions.forEach((definition) => {
+    const functionName = definition.name.toLowerCase();
+    if (!functionDefinitionMap.has(functionName)) {
+      functionDefinitionMap.set(functionName, definition);
+    }
+  });
+  return functionDefinitionMap;
+});
+
+/**
+ * Replaces quotes for fields in function argument if present.
+ * @example
+ * Example 1: Without quotes
+ * escapeColumnsInFunctions('MIN(total_bytes)'); // 'MIN(total_bytes)'
+ *
+ * @example
+ * Example 2: With quotes
+ * escapeColumnsInFunctions('MIN("Total Bytes")'); // 'MIN(`Total Bytes`)'
+ */
+function escapeColumnsInFunctions(string: string): string {
+  const regex = /([A-Za-z_]+)\s*\(([^()]*?)\)/g;
+
+  return string.replace(regex, (match: string, functionName: string, args: string) => {
+    const functionDefinition = getFunctionDefinitionMap().get(functionName.toLowerCase());
+    if (!functionDefinition) {
+      // function definition not found, return the original match
+      return match;
+    }
+
+    const escapedArgs = args.length
+      ? args
+          .split(',')
+          .map((arg, index) => {
+            const trimmedArg = arg.trim();
+            // Only escape field names
+            const paramName = functionDefinition.signatures[0].params[index]?.name;
+            if (paramName !== 'field' && paramName !== 'number') {
+              // It should be just a field, but some functions like SUM and AVG have a "number" name 🤷‍♂️
+              return trimmedArg;
+            }
+            // If the string is not wrapped in quotes, return it as is
+            if (!trimmedArg.match(/^["'].*["']$/)) {
+              return trimmedArg;
+            }
+            return removeColumnQuotesAndEscape(trimmedArg);
+          })
+          .join(', ')
+      : args;
+
+    return `${functionName}(${escapedArgs})`;
+  });
 }
 
 function replaceAsKeywordWithAssignments(command: string) {
@@ -112,11 +190,16 @@ function escapeColumns(line: string) {
 
   const escapedBody = split(body.trim(), ',')
     .map((statement) => {
-      const [lhs, rhs] = split(statement, '=');
+      // It's an assignment, so we need to split on the equals sign.
+      // We want to split on assignments only, so we use a regex that looks for
+      // an equals sign that is not preceded or followed by another equals sign.
+      const [lhs, rhs] = split(statement, /(?<!=)=(?!=)/);
       if (!rhs) {
-        return lhs;
+        // This is not a valid assignment, so we don't need to do anything.
+        return statement;
       }
-      return `${removeColumnQuotesAndEscape(lhs)} = ${rhs}`;
+      const escapedRhs = escapeColumnsInFunctions(rhs);
+      return `${removeColumnQuotesAndEscape(lhs)} = ${escapedRhs}`;
     })
     .join(', ');
 
@@ -232,12 +315,17 @@ export function correctCommonEsqlMistakes(query: string): {
 } {
   const commands = splitIntoCommands(query.trim());
 
-  const formattedCommands: string[] = commands.map(({ name, command }, index) => {
+  const formattedCommands = commands.map(({ name, command }, idx) => {
     let formattedCommand = command;
 
     formattedCommand = formattedCommand
       .replaceAll(/"@timestamp"/g, '@timestamp')
       .replaceAll(/'@timestamp'/g, '@timestamp');
+
+    // Do this for all commands, except for FROM that has special logic for quotes
+    if (name !== 'FROM') {
+      formattedCommand = replaceSingleQuotesWithDoubleQuotes(formattedCommand);
+    }
 
     switch (name) {
       case 'FROM': {
@@ -247,12 +335,10 @@ export function correctCommonEsqlMistakes(query: string): {
         break;
       }
       case 'WHERE':
-        formattedCommand = replaceSingleQuotesWithDoubleQuotes(formattedCommand);
         formattedCommand = ensureEqualityOperators(formattedCommand);
         break;
 
       case 'EVAL':
-        formattedCommand = replaceSingleQuotesWithDoubleQuotes(formattedCommand);
         formattedCommand = escapeColumns(formattedCommand);
         break;
 
@@ -266,7 +352,7 @@ export function correctCommonEsqlMistakes(query: string): {
         break;
 
       case 'KEEP':
-        formattedCommand = verifyKeepColumns(formattedCommand, commands.slice(index + 1));
+        formattedCommand = verifyKeepColumns(formattedCommand, commands.slice(idx + 1));
         break;
 
       case 'SORT':

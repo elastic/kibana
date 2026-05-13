@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { ILicenseState } from './license_state';
+import type { ILicenseState } from './license_state';
 
 export const createLicenseStateMock = () => {
   const licenseState: jest.Mocked<ILicenseState> = {
     clean: jest.fn(),
     getLicenseInformation: jest.fn(),
     ensureLicenseForRuleType: jest.fn(),
+    ensureLicenseForGapAutoFillScheduler: jest.fn(),
     ensureLicenseForMaintenanceWindow: jest.fn(),
     getLicenseCheckForRuleType: jest.fn().mockResolvedValue({
       isValid: true,

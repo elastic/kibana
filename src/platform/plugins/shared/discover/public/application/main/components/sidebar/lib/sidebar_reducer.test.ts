@@ -11,10 +11,10 @@ import {
   stubDataViewWithoutTimeField,
   stubLogstashDataView as dataView,
 } from '@kbn/data-views-plugin/common/data_view.stub';
+import type { DiscoverSidebarReducerState } from './sidebar_reducer';
 import {
   discoverSidebarReducer,
   DiscoverSidebarReducerActionType,
-  DiscoverSidebarReducerState,
   DiscoverSidebarReducerStatus,
   getInitialState,
 } from './sidebar_reducer';
@@ -132,12 +132,14 @@ describe('sidebar reducer', function () {
           esTypes: undefined,
           aggregatable: false,
           isNull: true,
+          isComputedColumn: true,
           searchable: true,
         }),
         new DataViewField({
           name: 'text2',
           type: 'string',
           esTypes: ['keyword'],
+          isComputedColumn: true,
           aggregatable: false,
           isNull: false,
           searchable: true,

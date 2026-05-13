@@ -26,6 +26,7 @@ export {
   actionAlertsFilterSchema as actionAlertsFilterSchemaV1,
   actionSchema as actionSchemaV1,
   updateBodySchema as updateBodySchemaV1,
+  updateRuleParamsExamples as updateRuleParamsExamplesV1,
   updateParamsSchema as updateParamsSchemaV1,
 } from './schemas/v1';
 

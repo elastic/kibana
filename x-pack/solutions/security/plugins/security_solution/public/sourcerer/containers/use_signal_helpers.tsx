@@ -5,16 +5,23 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
-import { sourcererSelectors, sourcererActions } from '../store';
+import { PageScope } from '../../data_view_manager/constants';
+import { sourcererActions, sourcererSelectors } from '../store';
 import { useSourcererDataView } from '.';
-import { SourcererScopeName } from '../store/model';
-import { useDataView } from '../../common/containers/source/use_data_view';
+import { useDataView as useOldDataView } from '../../common/containers/source/use_data_view';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useKibana } from '../../common/lib/kibana';
-import { createSourcererDataView } from './create_sourcerer_data_view';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useSignalIndexName } from '../../data_view_manager/hooks/use_signal_index_name';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useSecuritySolutionInitialization } from '../../common/components/initialization/use_security_solution_initialization';
+import {
+  INITIALIZATION_FLOW_SECURITY_DATA_VIEWS,
+  INITIALIZATION_FLOW_STATUS_READY,
+} from '../../../common/api/initialization';
 
 export const useSignalHelpers = (): {
   /* when defined, signal index has been initiated but does not exist */
@@ -22,8 +29,10 @@ export const useSignalHelpers = (): {
   /* when false, signal index has been initiated */
   signalIndexNeedsInit: boolean;
 } => {
-  const { indicesExist, dataViewId } = useSourcererDataView(SourcererScopeName.detections);
-  const { indexFieldsSearch } = useDataView();
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const { indicesExist } = useSourcererDataView(PageScope.alerts);
+  const { indexFieldsSearch } = useOldDataView();
   const dispatch = useDispatch();
   const { addError } = useAppToasts();
   const abortCtrl = useRef(new AbortController());
@@ -32,11 +41,42 @@ export const useSignalHelpers = (): {
   } = useKibana().services;
 
   const signalIndexNameSourcerer = useSelector(sourcererSelectors.signalIndexName);
-  const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
-  const signalIndexNeedsInit = useMemo(
-    () => !defaultDataView.title.includes(`${signalIndexNameSourcerer}`),
-    [defaultDataView.title, signalIndexNameSourcerer]
+  const experimentalSignalIndexName = useSignalIndexName();
+  const oldDefaultDataView = useSelector(sourcererSelectors.defaultDataView);
+
+  // Request sourcerer data view initialization from the backend (legacy path only).
+  const initState = useSecuritySolutionInitialization(
+    newDataViewPickerEnabled ? [] : [INITIALIZATION_FLOW_SECURITY_DATA_VIEWS]
   );
+  const sourcererInitResult = initState[INITIALIZATION_FLOW_SECURITY_DATA_VIEWS];
+  const initPayload =
+    sourcererInitResult?.result?.status === INITIALIZATION_FLOW_STATUS_READY
+      ? sourcererInitResult.result.payload
+      : null;
+
+  useEffect(() => {
+    if (newDataViewPickerEnabled || initPayload === null) return;
+    dispatch(sourcererActions.setSourcererDataViews(initPayload));
+    dispatch(sourcererActions.setSignalIndexName({ signalIndexName: initPayload.signalIndexName }));
+  }, [dispatch, initPayload, newDataViewPickerEnabled]);
+
+  const signalIndexName = newDataViewPickerEnabled
+    ? experimentalSignalIndexName
+    : signalIndexNameSourcerer;
+
+  const { dataView: experimentalDefaultDataView, status } = useDataView(PageScope.alerts);
+
+  const defaultDataViewPattern = newDataViewPickerEnabled
+    ? experimentalDefaultDataView.getIndexPattern() ?? ''
+    : oldDefaultDataView.title;
+
+  const signalIndexNeedsInit = useMemo(() => {
+    if (newDataViewPickerEnabled && status === 'pristine') {
+      return false;
+    }
+    return !defaultDataViewPattern.includes(`${signalIndexName}`);
+  }, [defaultDataViewPattern, newDataViewPickerEnabled, signalIndexName, status]);
+
   const shouldWePollForIndex = useMemo(
     () => !indicesExist && !signalIndexNeedsInit,
     [indicesExist, signalIndexNeedsInit]
@@ -46,51 +86,35 @@ export const useSignalHelpers = (): {
     const asyncSearch = async () => {
       abortCtrl.current = new AbortController();
       try {
-        const sourcererDataView = await createSourcererDataView({
-          body: { patternList: defaultDataView.title.split(',') },
-          signal: abortCtrl.current.signal,
-          dataViewId,
-          dataViewService: dataViews,
-        });
+        if (initPayload === null || signalIndexName === null) return;
 
-        if (
-          signalIndexNameSourcerer !== null &&
-          sourcererDataView?.defaultDataView.patternList.includes(signalIndexNameSourcerer)
-        ) {
-          // first time signals is defined and validated in the sourcerer
-          // redo indexFieldsSearch
-          indexFieldsSearch({ dataViewId: sourcererDataView.defaultDataView.id });
-          dispatch(sourcererActions.setSourcererDataViews(sourcererDataView));
+        const existingIndices = await dataViews.getExistingIndices(
+          initPayload.defaultDataView.patternList
+        );
+
+        if (existingIndices.includes(signalIndexName)) {
+          // Signal index is now physically present — refresh the field list so
+          // the sourcerer reflects the real mappings.
+          indexFieldsSearch({ dataViewId: initPayload.defaultDataView.id });
         }
       } catch (err) {
-        if (err.name === 'AbortError') {
-          // the fetch was canceled, we don't need to do anything about it
-        } else {
-          addError(err, {
-            title: i18n.translate('xpack.securitySolution.sourcerer.error.title', {
-              defaultMessage: 'Error updating Security Data View',
-            }),
-            toastMessage: i18n.translate('xpack.securitySolution.sourcerer.error.toastMessage', {
-              defaultMessage: 'Refresh the page',
-            }),
-          });
-        }
+        if (err.name === 'AbortError') return;
+        addError(err, {
+          title: i18n.translate('xpack.securitySolution.sourcerer.error.title', {
+            defaultMessage: 'Error updating Security Data View',
+          }),
+          toastMessage: i18n.translate('xpack.securitySolution.sourcerer.error.toastMessage', {
+            defaultMessage: 'Refresh the page',
+          }),
+        });
       }
     };
 
-    if (signalIndexNameSourcerer !== null) {
+    if (signalIndexName !== null) {
       abortCtrl.current.abort();
       asyncSearch();
     }
-  }, [
-    addError,
-    dataViewId,
-    dataViews,
-    defaultDataView.title,
-    dispatch,
-    indexFieldsSearch,
-    signalIndexNameSourcerer,
-  ]);
+  }, [addError, dataViews, indexFieldsSearch, initPayload, signalIndexName]);
 
   return {
     ...(shouldWePollForIndex ? { pollForSignalIndex } : {}),

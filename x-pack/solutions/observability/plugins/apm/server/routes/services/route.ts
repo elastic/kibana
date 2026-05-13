@@ -15,7 +15,7 @@ import {
 import type { Annotation } from '@kbn/observability-plugin/common/annotations';
 import type { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import * as t from 'io-ts';
-import { isEmpty, mergeWith, uniq } from 'lodash';
+import { mergeWith, uniq } from 'lodash';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import type { ServiceAnomalyTimeseries } from '../../../common/anomaly_detection/service_anomaly_timeseries';
 import { offsetRt } from '../../../common/comparison_rt';
@@ -28,6 +28,7 @@ import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getMlClient } from '../../lib/helpers/get_ml_client';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
+import { getApmSloClient } from '../../lib/helpers/get_apm_slo_client';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
@@ -46,6 +47,11 @@ import type { ServicesItemsResponse } from './get_services/get_services_items';
 import { getServicesItems } from './get_services/get_services_items';
 import type { ServiceAlertsResponse } from './get_services/get_service_alerts';
 import { getServicesAlerts } from './get_services/get_service_alerts';
+import type { ServiceAnomalyScoreResponse } from './get_services/get_service_anomaly_score_for_service';
+import { getServiceAnomalyScoreForService } from './get_services/get_service_anomaly_score_for_service';
+import type { ServiceSlosResponse } from './get_service_slos';
+import { getServiceSlos } from './get_service_slos';
+import { getSloAlertsClient } from '../../lib/helpers/get_slo_alerts_client';
 import type { ServiceTransactionDetailedStatPeriodsResponse } from './get_services_detailed_statistics/get_service_transaction_detailed_statistics';
 import { getServiceTransactionDetailedStatsPeriods } from './get_services_detailed_statistics/get_service_transaction_detailed_statistics';
 import type { ServiceAgentResponse } from './get_service_agent';
@@ -73,8 +79,6 @@ import type { ServiceTransactionTypesResponse } from './get_service_transaction_
 import { getServiceTransactionTypes } from './get_service_transaction_types';
 import type { ServiceThroughputResponse } from './get_throughput';
 import { getThroughput } from './get_throughput';
-import { getServiceEntitySummary } from '../entities/services/get_service_entity_summary';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
@@ -117,11 +121,13 @@ const servicesRoute = createApmServerRoute({
     const savedObjectsClient = (await context.core).savedObjects.client;
 
     const coreStart = await core.start();
-    const [mlClient, apmEventClient, apmAlertsClient, serviceGroup, randomSampler] =
+
+    const [mlClient, apmEventClient, apmAlertsClient, sloClient, serviceGroup, randomSampler] =
       await Promise.all([
         getMlClient(resources),
         getApmEventClient(resources),
         getApmAlertsClient(resources),
+        getApmSloClient(resources),
         serviceGroupId
           ? getServiceGroup({ savedObjectsClient, serviceGroupId })
           : Promise.resolve(null),
@@ -134,6 +140,7 @@ const servicesRoute = createApmServerRoute({
       mlClient,
       apmEventClient,
       apmAlertsClient,
+      sloClient,
       logger,
       start,
       end,
@@ -283,32 +290,19 @@ const serviceAgentRoute = createApmServerRoute({
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceAgentResponse> => {
-    const { request, plugins } = resources;
-    const entityManagerStart = await plugins.entityManager.start();
-
     const apmEventClient = await getApmEventClient(resources);
-    const entityManagerClient = await entityManagerStart.getScopedClient({ request });
     const { params } = resources;
     const { serviceName } = params.path;
     const { start, end } = params.query;
 
-    const [apmServiceAgent, serviceEntitySummary] = await Promise.all([
-      getServiceAgent({
-        serviceName,
-        apmEventClient,
-        start,
-        end,
-      }),
-      getServiceEntitySummary({
-        serviceName,
-        entityManagerClient,
-        environment: ENVIRONMENT_ALL.value,
-      }),
-    ]);
+    const apmServiceAgent = await getServiceAgent({
+      serviceName,
+      apmEventClient,
+      start,
+      end,
+    });
 
-    return isEmpty(apmServiceAgent)
-      ? { agentName: serviceEntitySummary?.agentName }
-      : apmServiceAgent;
+    return apmServiceAgent;
   },
 });
 
@@ -509,8 +503,8 @@ const serviceThroughputRoute = createApmServerRoute({
       serviceName: t.string,
     }),
     query: t.intersection([
-      t.type({ transactionType: t.string, bucketSizeInSeconds: toNumberRt }),
-      t.partial({ transactionName: t.string, filters: filtersRt }),
+      t.type({ bucketSizeInSeconds: toNumberRt }),
+      t.partial({ transactionType: t.string, transactionName: t.string, filters: filtersRt }),
       t.intersection([environmentRt, kueryRt, rangeRt, offsetRt, serviceTransactionDataSourceRt]),
     ]),
   }),
@@ -921,6 +915,89 @@ const serviceAlertsRoute = createApmServerRoute({
   },
 });
 
+const serviceAnomalyScoreRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/anomaly_score',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([rangeRt, environmentRt]),
+  }),
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<ServiceAnomalyScoreResponse> => {
+    const mlClient = await getMlClient(resources);
+    if (!mlClient) {
+      return {};
+    }
+
+    const { path, query } = resources.params;
+    const { serviceName } = path;
+    const { start, end, environment } = query;
+
+    try {
+      return await getServiceAnomalyScoreForService({
+        mlClient,
+        environment,
+        start,
+        end,
+        serviceName,
+      });
+    } catch (error) {
+      if (
+        (Boom.isBoom(error) && error.output.statusCode === 501) ||
+        error instanceof UnknownMLCapabilitiesError ||
+        error instanceof InsufficientMLCapabilities ||
+        error instanceof MLPrivilegesUninitialized
+      ) {
+        return {};
+      }
+      throw error;
+    }
+  },
+});
+
+const serviceSlosRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/slos',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      environmentRt,
+      t.type({
+        page: toNumberRt,
+        perPage: toNumberRt,
+      }),
+      t.partial({
+        statusFilters: jsonRt.pipe(t.array(t.string)),
+        kqlQuery: t.string,
+      }),
+    ]),
+  }),
+  security: { authz: { requiredPrivileges: ['apm', 'slo_read'] } },
+  async handler(resources): Promise<ServiceSlosResponse> {
+    const { params } = resources;
+    const { serviceName } = params.path;
+    const { environment, page, perPage, statusFilters, kqlQuery } = params.query;
+
+    const [sloClient, sloAlertsClient] = await Promise.all([
+      getApmSloClient(resources),
+      getSloAlertsClient(resources),
+    ]);
+
+    return getServiceSlos({
+      sloClient,
+      sloAlertsClient,
+      serviceName,
+      environment,
+      statusFilters,
+      kqlQuery,
+      page,
+      perPage,
+    });
+  },
+});
+
 export const serviceRouteRepository = {
   ...servicesRoute,
   ...servicesDetailedStatisticsRoute,
@@ -939,4 +1016,6 @@ export const serviceRouteRepository = {
   ...serviceDependenciesBreakdownRoute,
   ...serviceAnomalyChartsRoute,
   ...serviceAlertsRoute,
+  ...serviceAnomalyScoreRoute,
+  ...serviceSlosRoute,
 };

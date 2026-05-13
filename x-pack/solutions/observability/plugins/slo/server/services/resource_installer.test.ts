@@ -8,6 +8,10 @@
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
+  COMPOSITE_SLO_RESOURCES_VERSION,
+  COMPOSITE_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
+  COMPOSITE_SUMMARY_INDEX_TEMPLATE_NAME,
+  HEALTH_INDEX_TEMPLATE_NAME,
   SLI_COMPONENT_TEMPLATE_MAPPINGS_NAME,
   SLI_COMPONENT_TEMPLATE_SETTINGS_NAME,
   SLI_INDEX_TEMPLATE_NAME,
@@ -19,7 +23,7 @@ import {
 import { DefaultResourceInstaller } from './resource_installer';
 
 describe('resourceInstaller', () => {
-  it('installs the common resources when there is a version mismatch', async () => {
+  it('installs the common resources (including composite SLO) when there is a version mismatch and composite SLO is enabled', async () => {
     const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
     mockClusterClient.cluster.getComponentTemplate.mockResponse({
       component_templates: [
@@ -51,11 +55,11 @@ describe('resourceInstaller', () => {
       ],
     });
 
-    const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create());
+    const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create(), true);
 
     await installer.ensureCommonResourcesInstalled();
 
-    expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+    expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(5);
     expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({ name: SLI_COMPONENT_TEMPLATE_MAPPINGS_NAME })
@@ -72,7 +76,11 @@ describe('resourceInstaller', () => {
       4,
       expect.objectContaining({ name: SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME })
     );
-    expect(mockClusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(2);
+    expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenNthCalledWith(
+      5,
+      expect.objectContaining({ name: COMPOSITE_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME })
+    );
+    expect(mockClusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(4);
     expect(mockClusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({ name: SLI_INDEX_TEMPLATE_NAME })
@@ -81,21 +89,65 @@ describe('resourceInstaller', () => {
       2,
       expect.objectContaining({ name: SUMMARY_INDEX_TEMPLATE_NAME })
     );
+    expect(mockClusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
+      3,
+      expect.objectContaining({ name: COMPOSITE_SUMMARY_INDEX_TEMPLATE_NAME })
+    );
+    expect(mockClusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
+      4,
+      expect.objectContaining({ name: HEALTH_INDEX_TEMPLATE_NAME })
+    );
   });
 
   it('does not install the common resources when there is a version match', async () => {
+    const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+    mockClusterClient.cluster.getComponentTemplate.mockImplementation((params) => {
+      const name = params?.name ?? '';
+      const version = name.includes('composite')
+        ? COMPOSITE_SLO_RESOURCES_VERSION
+        : SLO_RESOURCES_VERSION;
+      return Promise.resolve({
+        component_templates: [
+          { name, component_template: { _meta: { version }, template: { settings: {} } } },
+        ],
+      });
+    });
+    mockClusterClient.indices.getIndexTemplate.mockImplementation((params) => {
+      const name = params?.name ?? '';
+      const version = name.includes('composite')
+        ? COMPOSITE_SLO_RESOURCES_VERSION
+        : SLO_RESOURCES_VERSION;
+      return Promise.resolve({
+        index_templates: [
+          {
+            name,
+            index_template: {
+              index_patterns: name,
+              composed_of: [],
+              _meta: { version },
+            },
+          },
+        ],
+      });
+    });
+
+    const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create(), true);
+
+    await installer.ensureCommonResourcesInstalled();
+
+    expect(mockClusterClient.cluster.putComponentTemplate).not.toHaveBeenCalled();
+    expect(mockClusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+  });
+
+  it('skips composite SLO resources when composite SLO is disabled', async () => {
     const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
     mockClusterClient.cluster.getComponentTemplate.mockResponse({
       component_templates: [
         {
           name: SLI_INDEX_TEMPLATE_NAME,
           component_template: {
-            _meta: {
-              version: SLO_RESOURCES_VERSION,
-            },
-            template: {
-              settings: {},
-            },
+            _meta: { version: 2 },
+            template: { settings: {} },
           },
         },
       ],
@@ -106,58 +158,31 @@ describe('resourceInstaller', () => {
           name: SLI_INDEX_TEMPLATE_NAME,
           index_template: {
             index_patterns: SLI_INDEX_TEMPLATE_NAME,
-            composed_of: [SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME],
-            _meta: {
-              version: SLO_RESOURCES_VERSION,
-            },
+            composed_of: [],
+            _meta: { version: 2 },
           },
         },
       ],
     });
 
-    const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create());
+    const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create(), false);
 
     await installer.ensureCommonResourcesInstalled();
 
-    expect(mockClusterClient.cluster.putComponentTemplate).not.toHaveBeenCalled();
-    expect(mockClusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
-  });
-
-  it('runs the installation only once at a time', async () => {
-    const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
-    mockClusterClient.cluster.getComponentTemplate.mockImplementation(
-      () =>
-        new Promise((resolve) =>
-          setTimeout(
-            () =>
-              resolve({
-                component_templates: [
-                  {
-                    name: SLI_INDEX_TEMPLATE_NAME,
-                    component_template: {
-                      _meta: {
-                        version: SLO_RESOURCES_VERSION - 1,
-                      },
-                      template: {
-                        settings: {},
-                      },
-                    },
-                  },
-                ],
-              }),
-            1000
-          )
-        )
+    const putComponentTemplateCalls = mockClusterClient.cluster.putComponentTemplate.mock.calls;
+    expect(putComponentTemplateCalls).toHaveLength(4);
+    const componentTemplateNames = putComponentTemplateCalls.map((call) => call[0].name);
+    expect(componentTemplateNames).not.toContain(
+      COMPOSITE_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME
     );
 
-    const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create());
+    const putIndexTemplateCalls = mockClusterClient.indices.putIndexTemplate.mock.calls;
+    const indexTemplateNames = putIndexTemplateCalls.map((call) => call[0].name);
+    expect(indexTemplateNames).not.toContain(COMPOSITE_SUMMARY_INDEX_TEMPLATE_NAME);
 
-    await Promise.all([
-      installer.ensureCommonResourcesInstalled(),
-      installer.ensureCommonResourcesInstalled(),
-    ]);
-
-    // Ensure that the installation was only run once, e.g. 4 calls to the put component template API, and not 2x 4 calls
-    expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+    const createCalls = mockClusterClient.indices.create.mock.calls;
+    const createIndexNames = createCalls.map((call) => call[0].index);
+    expect(createIndexNames).not.toContain('.slo-observability.composite-summary-v1');
+    expect(mockClusterClient.indices.putMapping).not.toHaveBeenCalled();
   });
 });

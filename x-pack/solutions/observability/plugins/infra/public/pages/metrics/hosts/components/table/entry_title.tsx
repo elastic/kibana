@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
 import { CloudProviderIcon } from '@kbn/custom-icons';
 import { useAssetDetailsRedirect } from '@kbn/metrics-data-access-plugin/public';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
+import { DEFAULT_SCHEMA } from '../../../../../../common/constants';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 
 interface EntryTitleProps {
@@ -19,23 +20,23 @@ interface EntryTitleProps {
 
 export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
   const { name, cloudProvider } = title;
-  const { parsedDateRange } = useUnifiedSearchContext();
+  const { parsedDateRange, searchCriteria } = useUnifiedSearchContext();
   const { getAssetDetailUrl } = useAssetDetailsRedirect();
 
   const link = getAssetDetailUrl({
-    assetId: name,
-    assetType: 'host',
+    entityId: name,
+    entityType: 'host',
     search: {
       from: parsedDateRange?.from ? new Date(parsedDateRange?.from).getTime() : undefined,
       to: parsedDateRange?.to ? new Date(parsedDateRange.to).getTime() : undefined,
       name,
     },
+    preferredSchema: searchCriteria?.preferredSchema ?? DEFAULT_SCHEMA,
   });
 
   const providerName = cloudProvider ?? 'Unknown';
   return (
     <EuiToolTip
-      delay="long"
       anchorClassName="eui-displayBlock"
       content={i18n.translate('xpack.infra.hostsViewPage.table.nameTooltip', {
         defaultMessage: '{providerName}: {name}',
@@ -45,7 +46,17 @@ export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
         },
       })}
     >
-      <EuiLink data-test-subj="hostsViewTableEntryTitleLink" {...link}>
+      <EuiLink
+        data-test-subj="hostsViewTableEntryTitleLink"
+        aria-label={i18n.translate(
+          'xpack.infra.hostsViewPage.table.openHostDetailsLink.ariaLabel',
+          {
+            defaultMessage: 'Open host details {hostName}',
+            values: { hostName: name },
+          }
+        )}
+        {...link}
+      >
         <EuiFlexGroup
           className="eui-textTruncate"
           alignItems="center"

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { css } from '@emotion/react';
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiCheckbox,
@@ -21,13 +23,15 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiTabbedContent,
-  EuiTabbedContentTab,
   EuiText,
   EuiTitle,
+  type UseEuiTheme,
 } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
-import { IInspectorInfo } from '@kbn/data-plugin/common';
-import { DataPublicPluginStart, isRunningResponse } from '@kbn/data-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { IInspectorInfo } from '@kbn/data-plugin/common';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { isRunningResponse } from '@kbn/data-plugin/public';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -35,12 +39,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { CreateAggConfigParams } from '@kbn/data-plugin/common';
 import React, { useEffect, useState } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { PLUGIN_ID, PLUGIN_NAME, SERVER_SEARCH_ROUTE_PATH } from '../../common';
-import { IMyStrategyResponse } from '../../common/types';
+import type { IMyStrategyResponse } from '../../common/types';
 
 interface SearchExamplesAppDeps
   extends Pick<
@@ -109,6 +114,7 @@ export const SearchExamplesApp = ({
   const [rawResponse, setRawResponse] = useState<Record<string, any>>({});
   const [warningContents, setWarningContents] = useState<SearchResponseWarning[]>([]);
   const [selectedTab, setSelectedTab] = useState(0);
+  const styles = useMemoCss(componentStyles);
 
   function setResponse(response: IKibanaSearchResponse) {
     setWarningContents([]);
@@ -277,7 +283,7 @@ export const SearchExamplesApp = ({
         .setField('size', selectedFields.length ? 100 : 0)
         .setField('trackTotalHits', 100);
 
-      const aggDef = [];
+      const aggDef: CreateAggConfigParams[] = [];
       if (selectedBucketField) {
         aggDef.push({
           type: bucketAggType,
@@ -552,8 +558,9 @@ export const SearchExamplesApp = ({
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormLabel>Field (using {bucketAggType} buckets)</EuiFormLabel>
+            <EuiFormLabel id="bucketFieldLabel">Field (using {bucketAggType} buckets)</EuiFormLabel>
             <EuiComboBox
+              aria-labelledby="bucketFieldLabel"
               options={formatFieldsToComboBox(getAggregatableStrings(fields))}
               selectedOptions={formatFieldToComboBox(selectedBucketField)}
               singleSelection={true}
@@ -570,8 +577,11 @@ export const SearchExamplesApp = ({
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormLabel>Numeric Field (using {metricAggType} metrics)</EuiFormLabel>
+            <EuiFormLabel id="metricFieldLabel">
+              Numeric Field (using {metricAggType} metrics)
+            </EuiFormLabel>
             <EuiComboBox
+              aria-labelledby="metricFieldLabel"
               options={formatFieldsToComboBox(getNumeric(fields))}
               selectedOptions={formatFieldToComboBox(selectedNumericField)}
               singleSelection={true}
@@ -588,8 +598,9 @@ export const SearchExamplesApp = ({
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormLabel>Fields to queryString</EuiFormLabel>
+            <EuiFormLabel id="queryStringFieldsLabel">Fields to queryString</EuiFormLabel>
             <EuiComboBox
+              aria-labelledby="queryStringFieldsLabel"
               options={formatFieldsToComboBox(fields)}
               selectedOptions={formatFieldsToComboBox(selectedFields)}
               singleSelection={false}
@@ -624,7 +635,7 @@ export const SearchExamplesApp = ({
                   defaultMessage="Request from low-level client (data.search.search)."
                 />
               </EuiButtonEmpty>
-              <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
+              <EuiText size="xs" color="subdued" css={styles.stepDsc}>
                 <FormattedMessage
                   id="searchExamples.buttonText"
                   defaultMessage="Metrics aggregation with raw documents in response."
@@ -641,7 +652,7 @@ export const SearchExamplesApp = ({
                   defaultMessage="Request from high-level client (data.search.searchSource)"
                 />
               </EuiButtonEmpty>
-              <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
+              <EuiText size="xs" color="subdued" css={styles.stepDsc}>
                 <FormattedMessage
                   id="searchExamples.buttonText"
                   defaultMessage="Bucket and metrics aggregations, with other bucket and default warnings."
@@ -658,7 +669,7 @@ export const SearchExamplesApp = ({
                   defaultMessage="Request from high-level client (data.search.searchSource)"
                 />
               </EuiButtonEmpty>
-              <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
+              <EuiText size="xs" color="subdued" css={styles.stepDsc}>
                 <FormattedMessage
                   id="searchExamples.buttonText"
                   defaultMessage="Bucket and metrics aggregations, without other bucket and with custom logic to handle warnings."
@@ -815,7 +826,7 @@ export const SearchExamplesApp = ({
             </EuiText>
           </EuiFlexItem>
 
-          <EuiFlexItem style={{ width: '60%' }}>
+          <EuiFlexItem css={styles.tabbedContentContainer}>
             <EuiTabbedContent
               tabs={reqTabs}
               selectedTab={reqTabs[selectedTab]}
@@ -835,4 +846,15 @@ export const SearchExamplesApp = ({
       </EuiPageTemplate.Section>
     </>
   );
+};
+
+const componentStyles = {
+  stepDsc: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      paddingLeft: euiTheme.size.xl,
+      fontStyle: 'italic',
+    }),
+  tabbedContentContainer: css({
+    width: '60%',
+  }),
 };

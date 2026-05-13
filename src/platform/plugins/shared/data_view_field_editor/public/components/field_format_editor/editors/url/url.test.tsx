@@ -10,18 +10,17 @@
 import React from 'react';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { UrlFormatEditor, UrlFormatEditorFormatParams } from './url';
+import type { UrlFormatEditorFormatParams } from './url';
+import { UrlFormatEditor } from './url';
 import { coreMock } from '@kbn/core/public/mocks';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Serializable } from '@kbn/utility-types';
+import type { Serializable } from '@kbn/utility-types';
 
 const fieldType = 'string';
 const format = {
-  getConverterFor: jest
-    .fn()
-    .mockImplementation(() => (input: string) => `converted url for ${input}`),
+  reactConvert: jest.fn().mockImplementation((input: string) => `converted url for ${input}`),
   type: {
     urlTypes: [
       { kind: 'a', text: 'Link' },

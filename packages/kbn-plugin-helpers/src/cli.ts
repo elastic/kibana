@@ -15,9 +15,17 @@ import { createFlagError, createFailError } from '@kbn/dev-cli-errors';
 import { findPluginDir } from './find_plugin_dir';
 import { loadKibanaPlatformPlugin } from './load_kibana_platform_plugin';
 import * as Tasks from './tasks';
-import { TaskContext } from './task_context';
+import type { TaskContext } from './task_context';
 import { resolveKibanaVersion } from './resolve_kibana_version';
 import { loadConfig } from './config';
+
+/**
+ * Check if RSPack mode is enabled via environment variable
+ */
+function isRspackMode(): boolean {
+  const v = process.env.KBN_USE_RSPACK;
+  return v === 'true' || v === '1';
+}
 
 export function runCli() {
   new RunWithCommands({
@@ -83,11 +91,20 @@ export function runCli() {
           sourceDir,
           buildDir,
           kibanaVersion,
+          quiet: true,
         };
 
         await Tasks.initTargets(context);
-        await Tasks.buildBazelPackages(context);
-        await Tasks.optimize(context);
+        await Tasks.buildWebpackPackages(context);
+
+        // Use RSPack or webpack based on environment
+        if (isRspackMode()) {
+          log.info('Using RSPack optimizer (KBN_USE_RSPACK=true)');
+          await Tasks.optimizeRspack(context);
+        } else {
+          await Tasks.optimize(context);
+        }
+
         await Tasks.brotliCompressBundles(context);
         await Tasks.writePublicAssets(context);
         await Tasks.writeServerFiles(context);
@@ -160,11 +177,19 @@ export function runCli() {
           sourceDir,
           buildDir: '',
           kibanaVersion: 'kibana',
+          quiet: false,
         };
 
         await Tasks.initDev(context);
-        await Tasks.buildBazelPackages(context);
-        await Tasks.optimize(context);
+        await Tasks.buildWebpackPackages(context);
+
+        // Use RSPack or webpack based on environment
+        if (isRspackMode()) {
+          log.info('Using RSPack optimizer (KBN_USE_RSPACK=true)');
+          await Tasks.optimizeRspack(context);
+        } else {
+          await Tasks.optimize(context);
+        }
       },
     })
     .execute();

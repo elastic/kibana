@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { EuiContextMenu } from '@elastic/eui';
 
@@ -20,13 +20,13 @@ const iconButtons = [
   {
     label: 'Text',
     onClick: action('onTextClick'),
-    iconType: 'visText',
+    iconType: 'text',
     title: 'Text as markdown',
   },
   {
     label: 'Control',
     onClick: action('onControlClick'),
-    iconType: 'controlsHorizontal',
+    iconType: 'controls',
   },
   {
     label: 'Link',
@@ -41,7 +41,7 @@ const iconButtons = [
   {
     label: 'Markup',
     onClick: action('onMarkupClick'),
-    iconType: 'visVega',
+    iconType: 'code',
   },
 ];
 
@@ -58,7 +58,7 @@ const primaryButtonConfigs = {
     <ToolbarPopover
       type="primary"
       label="Add element"
-      iconType="plusInCircle"
+      iconType="plusCircle"
       panelPaddingSize="none"
     >
       {() => (
@@ -95,7 +95,7 @@ const primaryButtonConfigs = {
     <ToolbarButton
       type="primary"
       label="Create chart"
-      iconType="plusInCircle"
+      iconType="plusCircle"
       onClick={action('dashboard')}
     />
   ),
@@ -174,7 +174,7 @@ export default {
   },
 };
 
-const Template: Story<{
+const Template: StoryFn<{
   solution: 'Generic' | 'Canvas' | 'Dashboard';
   iconButtonCount: number;
   showAddFromLibraryButton: boolean;
@@ -205,20 +205,29 @@ const Template: Story<{
   );
 };
 
-export const Generic = Template.bind({});
-Generic.args = {
-  ...Template.args,
-  solution: 'Generic',
+export const Generic = {
+  render: Template,
+
+  args: {
+    ...Template.args,
+    solution: 'Generic',
+  },
 };
 
-export const Canvas = Template.bind({});
-Canvas.args = {
-  ...Template.args,
-  solution: 'Canvas',
+export const Canvas = {
+  render: Template,
+
+  args: {
+    ...Template.args,
+    solution: 'Canvas',
+  },
 };
 
-export const Dashboard = Template.bind({});
-Dashboard.args = {
-  ...Template.args,
-  solution: 'Dashboard',
+export const Dashboard = {
+  render: Template,
+
+  args: {
+    ...Template.args,
+    solution: 'Dashboard',
+  },
 };

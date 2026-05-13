@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
-import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { DataViewsService } from '../../../common';
+import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import type { DataViewsService } from '../../../common';
 import { handleErrors } from './util/handle_errors';
 import type {
   DataViewsServerPluginStartDependencies,
@@ -20,6 +20,7 @@ import {
   SPECIFIC_DATA_VIEW_PATH,
   SPECIFIC_DATA_VIEW_PATH_LEGACY,
   INITIAL_REST_VERSION,
+  DELETE_DATA_VIEW_SUMMARY,
   DELETE_DATA_VIEW_DESCRIPTION,
 } from '../../constants';
 
@@ -41,7 +42,7 @@ export const deleteDataView = async ({
 };
 
 const deleteIndexPatternRouteFactory =
-  (path: string, description?: string) =>
+  (path: string, summary?: string, description?: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -50,59 +51,70 @@ const deleteIndexPatternRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.delete({ path, access: 'public', description }).addVersion(
-      {
-        version: INITIAL_REST_VERSION,
+    router.versioned
+      .delete({
+        path,
+        access: 'public',
+        summary,
+        description,
         security: {
           authz: {
             requiredPrivileges: ['indexPatterns:manage'],
           },
         },
-        validate: {
-          request: {
-            params: schema.object(
-              {
-                id: schema.string({
-                  minLength: 1,
-                  maxLength: 1_000,
-                }),
-              },
-              { unknowns: 'allow' }
-            ),
+      })
+      .addVersion(
+        {
+          version: INITIAL_REST_VERSION,
+          validate: {
+            request: {
+              params: schema.object(
+                {
+                  id: schema.string({
+                    minLength: 1,
+                    maxLength: 1_000,
+                    meta: { description: 'The unique identifier of the data view to delete.' },
+                  }),
+                },
+                { unknowns: 'allow' }
+              ),
+            },
           },
         },
-      },
-      router.handleLegacyErrors(
-        handleErrors(async (ctx, req, res) => {
-          const core = await ctx.core;
-          const savedObjectsClient = core.savedObjects.client;
-          const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-          const [, , { dataViewsServiceFactory }] = await getStartServices();
-          const dataViewsService = await dataViewsServiceFactory(
-            savedObjectsClient,
-            elasticsearchClient,
-            req
-          );
-          const id = req.params.id;
+        router.handleLegacyErrors(
+          handleErrors(async (ctx, req, res) => {
+            const core = await ctx.core;
+            const savedObjectsClient = core.savedObjects.client;
+            const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
+            const [, , { dataViewsServiceFactory }] = await getStartServices();
+            const dataViewsService = await dataViewsServiceFactory(
+              savedObjectsClient,
+              elasticsearchClient,
+              req
+            );
+            const id = req.params.id;
 
-          await deleteDataView({
-            dataViewsService,
-            usageCollection,
-            counterName: `${req.route.method} ${path}`,
-            id,
-          });
+            await deleteDataView({
+              dataViewsService,
+              usageCollection,
+              counterName: `${req.route.method} ${path}`,
+              id,
+            });
 
-          return res.ok();
-        })
-      )
-    );
+            return res.ok();
+          })
+        )
+      );
   };
 
 export const registerDeleteDataViewRoute = deleteIndexPatternRouteFactory(
   SPECIFIC_DATA_VIEW_PATH,
+  DELETE_DATA_VIEW_SUMMARY,
   DELETE_DATA_VIEW_DESCRIPTION
 );
 
 export const registerDeleteDataViewRouteLegacy = deleteIndexPatternRouteFactory(
-  SPECIFIC_DATA_VIEW_PATH_LEGACY
+  SPECIFIC_DATA_VIEW_PATH_LEGACY,
+  DELETE_DATA_VIEW_SUMMARY,
+  'Deprecated in 8.0.0. Use the data_views/data_view/{id} endpoint instead.'
 );

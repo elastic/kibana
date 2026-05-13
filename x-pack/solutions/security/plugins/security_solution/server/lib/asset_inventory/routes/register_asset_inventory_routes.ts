@@ -6,17 +6,8 @@
  */
 
 import type { AssetInventoryRoutesDeps } from '../types';
-import { deleteAssetInventoryRoute } from './delete';
-import { enableAssetInventoryRoute } from './enablement';
-import { statusAssetInventoryRoute } from './status';
+import { installAssetInventoryDataViewRoute } from './install_data_view';
 
-export const registerAssetInventoryRoutes = ({
-  router,
-  logger,
-  config,
-  getStartServices,
-}: AssetInventoryRoutesDeps) => {
-  enableAssetInventoryRoute(router, logger, config);
-  deleteAssetInventoryRoute(router, logger);
-  statusAssetInventoryRoute(router, logger, getStartServices);
+export const registerAssetInventoryRoutes = ({ router, logger }: AssetInventoryRoutesDeps) => {
+  installAssetInventoryDataViewRoute(router, logger);
 };

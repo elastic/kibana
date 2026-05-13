@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { I18nCheckTaskContext, MessageDescriptor } from '../../types';
+import type { I18nCheckTaskContext, MessageDescriptor } from '../../types';
 import { verifyMessageDescriptor } from '../../extractors/formatjs';
 import type { GroupedMessagesByNamespace } from './group_messages_by_namespace';
-import { TaskReporter } from '../../utils/task_reporter';
-import { ErrorReporter } from '../../utils';
+import type { TaskReporter } from '../../utils/task_reporter';
+import type { ErrorReporter } from '../../utils';
 export const removeOutdatedTranslations = ({
   context,
   namespacedTranslatedMessages,

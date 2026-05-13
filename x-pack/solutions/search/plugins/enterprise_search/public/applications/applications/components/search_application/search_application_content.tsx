@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiButton, EuiIcon, EuiFlexGroup } from '@elastic/eui';
+import { EuiButton, EuiIcon, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
@@ -29,7 +29,7 @@ import { SearchApplicationIndices } from './search_application_indices';
 import { SearchApplicationIndicesLogic } from './search_application_indices_logic';
 import { SearchApplicationSchema } from './search_application_schema';
 import { SearchApplicationViewLogic } from './search_application_view_logic';
-import './search_application_layout.scss';
+import * as Styles from './styles';
 
 const pageTitle = i18n.translate(
   'xpack.enterpriseSearch.searchApplications.searchApplication.content.pageTitle',
@@ -62,6 +62,7 @@ const getTabBreadCrumb = (tabId: string) => {
 };
 
 export const SearchApplicationContent = () => {
+  const { euiTheme } = useEuiTheme();
   const { searchApplicationName, isLoadingSearchApplication, hasSchemaConflicts } = useValues(
     SearchApplicationViewLogic
   );
@@ -98,18 +99,18 @@ export const SearchApplicationContent = () => {
               ),
             text: (
               <>
-                <EuiIcon size="s" type="arrowLeft" /> {searchApplicationName}
+                <EuiIcon size="s" type="chevronSingleLeft" /> {searchApplicationName}
               </>
             ),
           },
         ],
-        className: 'searchApplicationHeaderBackgroundColor',
+        css: Styles.searchApplicationHeaderBackgroundColor(euiTheme),
         pageTitle,
         rightSideItems: [
           <EuiButton
             data-telemetry-id="entSearchApplications-indices-addNewIndices"
             data-test-subj="search-application-add-new-indices-btn"
-            iconType="plusInCircle"
+            iconType="plusCircle"
             fill
             onClick={openAddIndicesFlyout}
           >

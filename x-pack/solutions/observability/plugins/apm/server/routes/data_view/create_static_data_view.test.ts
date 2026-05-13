@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
@@ -14,10 +14,38 @@ import * as HistoricalAgentData from '../historical_data/has_historical_agent_da
 import type { APMCore } from '../typings';
 import { createOrUpdateStaticDataView } from './create_static_data_view';
 
-function getMockedDataViewService(existingDataViewTitle: string) {
+const expectedDataViewIndexPattern =
+  'apm-*-error-*,apm-*-metrics-*,apm-*-span-*,apm-*-transaction-*';
+
+const expectedFieldFormats = {
+  'transaction.id': {
+    id: 'url',
+    params: {
+      urlTemplate: 'apm/link-to/transaction/{{value}}',
+      labelTemplate: '{{value}}',
+    },
+  },
+  'transaction.duration.us': {
+    id: 'duration',
+    params: {
+      inputFormat: 'microseconds',
+      outputFormat: 'asMilliseconds',
+      showSuffix: true,
+      useShortSuffix: true,
+      outputPrecision: 2,
+      includeSpaceWithSuffix: true,
+    },
+  },
+};
+
+function getMockedDataViewService(
+  existingDataViewTitle: string,
+  fieldFormatMap: Record<string, unknown> = expectedFieldFormats
+) {
   return {
     get: jest.fn(() => ({
       getIndexPattern: () => existingDataViewTitle,
+      fieldFormatMap,
     })),
     createAndSave: jest.fn(),
     delete: () => {},
@@ -40,6 +68,7 @@ const coreMock = {
 
 const logger = {
   info: jest.fn,
+  debug: jest.fn,
 } as unknown as Logger;
 
 const apmEventClientMock = {
@@ -76,7 +105,7 @@ describe('createStaticDataView', () => {
     await createOrUpdateStaticDataView({
       apmEventClient: apmEventClientMock,
       resources: {
-        config: { autoCreateApmDataView: false },
+        config: { autoCreateApmDataView: true },
       } as APMRouteHandlerResources,
       dataViewService,
       spaceId: 'default',
@@ -110,7 +139,6 @@ describe('createStaticDataView', () => {
     jest.spyOn(HistoricalAgentData, 'hasHistoricalAgentData').mockResolvedValue(true);
 
     const dataViewService = getMockedDataViewService('apm-*');
-    const expectedDataViewTitle = 'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*';
 
     await createOrUpdateStaticDataView({
       apmEventClient: apmEventClientMock,
@@ -126,7 +154,7 @@ describe('createStaticDataView', () => {
     expect(dataViewService.get).toHaveBeenCalled();
     expect(dataViewService.createAndSave).toHaveBeenCalled();
     // @ts-ignore
-    expect(dataViewService.createAndSave.mock.calls[0][0].title).toBe(expectedDataViewTitle);
+    expect(dataViewService.createAndSave.mock.calls[0][0].title).toBe(expectedDataViewIndexPattern);
     // @ts-ignore
     expect(dataViewService.createAndSave.mock.calls[0][1]).toBe(true);
   });
@@ -135,9 +163,7 @@ describe('createStaticDataView', () => {
     // does have APM data
     jest.spyOn(HistoricalAgentData, 'hasHistoricalAgentData').mockResolvedValue(true);
 
-    const dataViewService = getMockedDataViewService(
-      'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*'
-    );
+    const dataViewService = getMockedDataViewService(expectedDataViewIndexPattern);
 
     await createOrUpdateStaticDataView({
       apmEventClient: apmEventClientMock,
@@ -152,5 +178,40 @@ describe('createStaticDataView', () => {
 
     expect(dataViewService.get).toHaveBeenCalled();
     expect(dataViewService.createAndSave).not.toHaveBeenCalled();
+  });
+
+  it(`should overwrite the data view if the field formats have changed`, async () => {
+    jest.spyOn(HistoricalAgentData, 'hasHistoricalAgentData').mockResolvedValue(true);
+
+    const staleFieldFormats = {
+      ...expectedFieldFormats,
+      // trace.id field format makes this data view stale, as it doesn't match the new expected field format
+      'trace.id': {
+        id: 'url',
+        params: {
+          urlTemplate: 'apm/link-to/trace/{{value}}',
+          labelTemplate: '{{value}}',
+        },
+      },
+    };
+
+    const dataViewService = getMockedDataViewService(
+      expectedDataViewIndexPattern,
+      staleFieldFormats
+    );
+
+    await createOrUpdateStaticDataView({
+      apmEventClient: apmEventClientMock,
+      resources: {
+        core: coreMock,
+        config: { autoCreateApmDataView: true },
+      } as APMRouteHandlerResources,
+      dataViewService,
+      spaceId: 'default',
+      logger,
+    });
+
+    expect(dataViewService.get).toHaveBeenCalled();
+    expect(dataViewService.createAndSave).toHaveBeenCalled();
   });
 });

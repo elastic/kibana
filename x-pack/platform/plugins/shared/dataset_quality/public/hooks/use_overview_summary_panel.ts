@@ -28,8 +28,6 @@ export const useOverviewSummaryPanel = () => {
     .map((key: string) => services[key].length)
     .reduce((a, b) => a + b, 0);
 
-  const totalDocsCount = formatNumber(dataStreamDetails.docsCount, NUMBER_FORMAT);
-
   const sizeInBytes = formatNumber(dataStreamDetails.sizeBytes, BYTE_NUMBER_FORMAT);
   const isUserAllowedToSeeSizeInBytes = dataStreamDetails?.userPrivileges?.canMonitor ?? true;
 
@@ -57,14 +55,17 @@ export const useOverviewSummaryPanel = () => {
   );
 
   const totalFailedDocsCount = formatNumber(dataStreamDetails?.failedDocsCount ?? 0, NUMBER_FORMAT);
+  const totalDocs = (dataStreamDetails.docsCount ?? 0) + (dataStreamDetails?.failedDocsCount ?? 0);
+
+  const totalDocsCount = formatNumber(totalDocs, NUMBER_FORMAT);
 
   const degradedPercentage = calculatePercentage({
-    totalDocs: dataStreamDetails.docsCount,
+    totalDocs,
     count: dataStreamDetails?.degradedDocsCount,
   });
 
   const failedPercentage = calculatePercentage({
-    totalDocs: dataStreamDetails.docsCount,
+    totalDocs,
     count: dataStreamDetails?.failedDocsCount,
   });
 
@@ -79,6 +80,10 @@ export const useOverviewSummaryPanel = () => {
     isSummaryPanelLoading,
     totalDegradedDocsCount,
     totalFailedDocsCount,
+    degradedPercentage,
+    failedPercentage,
+    degradedQuality: mapPercentageToQuality([degradedPercentage]),
+    failedQuality: mapPercentageToQuality([failedPercentage]),
     quality,
   };
 };

@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
-import { EuiToolTip, EuiButton } from '@elastic/eui';
+import { EuiButton, EuiToolTip } from '@elastic/eui';
 import * as i18n from './translations';
 import { getTooltipContent, StyledBadge, StyledButtonEmpty } from './helpers';
 import type { ModifiedTypes } from './use_pick_index_patterns';
@@ -80,10 +80,11 @@ export const TriggerComponent: FC<Props> = ({
         data-test-subj={isTimelineSourcerer ? 'timeline-sourcerer-trigger' : 'sourcerer-trigger'}
         color="primary"
         iconSide="right"
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         disabled={disabled}
         isLoading={loading}
         onClick={onClick}
+        size="s"
         title={i18n.DATA_VIEW}
       >
         {i18n.DATA_VIEW}

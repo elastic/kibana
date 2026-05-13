@@ -6,17 +6,23 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import type * as useKibanaContextForPluginHook from '../../../../hooks/use_kibana';
+import * as useTimeRangeMetadataContextModule from '../../../../hooks/use_time_range_metadata';
 import * as useUnifiedSearchHooks from './use_unified_search';
 import { useHostCount } from './use_host_count';
 
 jest.mock('../../../../hooks/use_fetcher');
 jest.mock('../../../../hooks/use_kibana');
+jest.mock('../../../../containers/plugin_config_context');
 jest.mock('./use_unified_search');
 
 describe('useHostCount', () => {
+  jest.spyOn(useTimeRangeMetadataContextModule, 'useTimeRangeMetadataContext').mockReturnValue({
+    data: { preferredSchema: 'ecs', schemas: ['ecs', 'semconv'] },
+    status: FETCH_STATUS.SUCCESS,
+  });
   const useKibanaContextForPluginMock = useKibanaContextForPlugin as jest.MockedFunction<
     typeof useKibanaContextForPlugin
   >;
@@ -61,6 +67,7 @@ describe('useHostCount', () => {
           query: { query: null },
           filters: [],
           panelFilters: [],
+          preferredSchema: 'ecs',
         });
 
         await renderHook(() => useHostCount());
@@ -69,13 +76,21 @@ describe('useHostCount', () => {
           total: fetcherDataMock.count,
           with_query: false,
           with_filters: false,
+          schema_selected: 'ecs',
+          schemas_available: ['ecs', 'semconv'],
+          schema_error: false,
         });
       });
     });
 
     describe('and query is applied', () => {
       it('should call reportHostsViewTotalHostCountRetrieved with the correct data', async () => {
-        mockUseUnifiedContext({ query: { query: 'test' }, filters: [], panelFilters: [] });
+        mockUseUnifiedContext({
+          query: { query: 'test' },
+          filters: [],
+          panelFilters: [],
+          preferredSchema: 'ecs',
+        });
 
         await renderHook(() => useHostCount());
 
@@ -83,6 +98,9 @@ describe('useHostCount', () => {
           total: fetcherDataMock.count,
           with_query: true,
           with_filters: false,
+          schema_selected: 'ecs',
+          schemas_available: ['ecs', 'semconv'],
+          schema_error: false,
         });
       });
     });
@@ -93,6 +111,7 @@ describe('useHostCount', () => {
           query: { query: null },
           filters: [{ filter: 'filter' }],
           panelFilters: [],
+          preferredSchema: 'otel',
         });
 
         await renderHook(() => useHostCount());
@@ -101,6 +120,9 @@ describe('useHostCount', () => {
           total: fetcherDataMock.count,
           with_query: false,
           with_filters: true,
+          schema_selected: 'otel',
+          schemas_available: ['ecs', 'semconv'],
+          schema_error: false,
         });
       });
     });
@@ -111,6 +133,7 @@ describe('useHostCount', () => {
           query: { query: null },
           filters: [{ filter: 'filter' }],
           panelFilters: [{ filter: 'filter' }],
+          preferredSchema: 'otel',
         });
 
         await renderHook(() => useHostCount());
@@ -119,6 +142,44 @@ describe('useHostCount', () => {
           total: fetcherDataMock.count,
           with_query: false,
           with_filters: true,
+          schema_selected: 'otel',
+          schemas_available: ['ecs', 'semconv'],
+          schema_error: false,
+        });
+      });
+    });
+
+    describe('when no data is available', () => {
+      it('should call reportHostsViewTotalHostCountRetrieved with the correct data', async () => {
+        mockUseUnifiedContext({
+          query: { query: null },
+          filters: [],
+          panelFilters: [],
+          preferredSchema: 'no schema available',
+        });
+
+        (useFetcher as jest.Mock).mockReturnValue({
+          data: { count: 0 },
+          status: 'success',
+          error: null,
+        });
+
+        jest
+          .spyOn(useTimeRangeMetadataContextModule, 'useTimeRangeMetadataContext')
+          .mockReturnValue({
+            data: { preferredSchema: 'ecs', schemas: [] },
+            status: FETCH_STATUS.SUCCESS,
+          });
+
+        await renderHook(() => useHostCount());
+
+        expect(telemetryMock.reportHostsViewTotalHostCountRetrieved).toHaveBeenCalledWith({
+          total: 0,
+          with_query: false,
+          with_filters: false,
+          schema_selected: 'no schema available',
+          schemas_available: ['no schema available'],
+          schema_error: false,
         });
       });
     });

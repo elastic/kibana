@@ -1,6 +1,6 @@
 # REPEAT
 
-The REPEAT function generates a string by repeating a specified string a certain number of times.
+The REPEAT function returns a string created by concatenating the input string with itself a specified number of times.
 
 ## Syntax
 
@@ -10,20 +10,17 @@ The REPEAT function generates a string by repeating a specified string a certain
 
 #### string
 
-The string that you want to repeat.
+String expression to be repeated.
 
 #### number
 
-The number of times you want to repeat the string.
+Number of times to repeat the string.
 
 ## Examples
+
+Repeats the value in column `a` three times and stores the result in a new column `triple_a`:
 
 ```esql
 ROW a = "Hello!"
 | EVAL triple_a = REPEAT(a, 3)
-```
-
-```esql
-ROW greeting = "Hi"
-| EVAL repeated_greeting = REPEAT(greeting, 5)
 ```

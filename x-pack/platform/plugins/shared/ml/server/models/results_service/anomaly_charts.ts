@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import type { ErrorType } from 'eventsource-parser';
+import { each, find, get, keyBy, map, reduce, sortBy } from 'lodash';
+import { extent, max, min } from 'd3';
+
+import type { estypes } from '@elastic/elasticsearch';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { each, find, get, keyBy, map, reduce, sortBy } from 'lodash';
-import type { estypes } from '@elastic/elasticsearch';
-import { extent, max, min } from 'd3';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
 import {
@@ -27,8 +30,8 @@ import {
 } from '@kbn/ml-anomaly-utils';
 import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { parseInterval } from '@kbn/ml-parse-interval';
-
-import type { MlClient } from '../../lib/ml_client';
+import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
+import type { CriteriaField } from '@kbn/ml-anomaly-utils/types';
 import type {
   MetricData,
   ModelPlotOutput,
@@ -39,7 +42,10 @@ import type {
   ChartPoint,
   SeriesConfig,
   ExplorerChartsData,
-} from '../../../common/types/results';
+} from '@kbn/ml-common-types/results';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+
 import {
   isMappableJob,
   isModelPlotChartableForDetector,
@@ -48,14 +54,13 @@ import {
   ML_MEDIAN_PERCENTS,
   mlFunctionToESAggregation,
 } from '../../../common/util/job_utils';
-import type { CriteriaField } from './results_service';
-import type { CombinedJob, Datafeed } from '../../shared';
-
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { findAggField } from '../../../common/util/validation_utils';
 import type { ChartType } from '../../../common/constants/charts';
 import { CHART_TYPE, SCHEDULE_EVENT_MARKER_ENTITY } from '../../../common/constants/charts';
 import { getChartType } from '../../../common/util/chart_utils';
+
+import type { MlClient } from '../../lib/ml_client';
 import type { MlJob } from '../..';
 
 export function chartLimits(data: ChartPoint[] = []) {
@@ -531,6 +536,11 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         record.partition_field_name ?? record.by_field_name ?? record.over_field_name;
       const firstFieldValue =
         record.partition_field_value ?? record.by_field_value ?? record.over_field_value;
+
+      if (fieldsSafe([firstFieldName, firstFieldValue]) === false) {
+        return;
+      }
+
       if (firstFieldName !== undefined && firstFieldValue !== undefined) {
         const groupsForDetector = detectorsForJob[detectorIndex];
 
@@ -567,25 +577,31 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
           const secondFieldName = record.over_field_name ?? record.by_field_name;
           const secondFieldValue = record.over_field_value ?? record.by_field_value;
 
-          if (secondFieldName !== undefined && secondFieldValue !== undefined) {
-            if (dataForGroupValue[secondFieldName] === undefined) {
-              dataForGroupValue[secondFieldName] = Object.create(null);
-            }
+          if (
+            secondFieldName === undefined ||
+            secondFieldValue === undefined ||
+            fieldsSafe([secondFieldName, secondFieldValue]) === false
+          ) {
+            return;
+          }
 
-            const splitsForGroup = dataForGroupValue[secondFieldName];
-            if (splitsForGroup[secondFieldValue] === undefined) {
-              splitsForGroup[secondFieldValue] = Object.create(null);
-            }
+          if (dataForGroupValue[secondFieldName] === undefined) {
+            dataForGroupValue[secondFieldName] = Object.create(null);
+          }
 
-            const dataForSplitValue = splitsForGroup[secondFieldValue];
-            if (dataForSplitValue.maxScoreRecord === undefined) {
+          const splitsForGroup = dataForGroupValue[secondFieldName];
+          if (splitsForGroup[secondFieldValue] === undefined) {
+            splitsForGroup[secondFieldValue] = Object.create(null);
+          }
+
+          const dataForSplitValue = splitsForGroup[secondFieldValue];
+          if (dataForSplitValue.maxScoreRecord === undefined) {
+            dataForSplitValue.maxScore = record.record_score;
+            dataForSplitValue.maxScoreRecord = record;
+          } else {
+            if (record.record_score > dataForSplitValue.maxScore) {
               dataForSplitValue.maxScore = record.record_score;
               dataForSplitValue.maxScoreRecord = record;
-            } else {
-              if (record.record_score > dataForSplitValue.maxScore) {
-                dataForSplitValue.maxScore = record.record_score;
-                dataForSplitValue.maxScoreRecord = record;
-              }
             }
           }
         }
@@ -646,6 +662,15 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     recordsForSeries = sortBy(recordsForSeries, 'record_score').reverse();
 
     return { records: recordsForSeries, errors: errorMessages };
+  }
+
+  function fieldsSafe(fields: Array<string | number | undefined>) {
+    return fields.every((field) => {
+      if (typeof field === 'string') {
+        return field !== '__proto__' && field !== 'prototype';
+      }
+      return true;
+    });
   }
 
   function buildConfigFromDetector(job: MlJob, detectorIndex: number) {
@@ -926,13 +951,18 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     selectedLatestMs: number,
     numberOfPoints: number,
     timeBounds: { min?: number; max?: number },
-    severity = 0,
+    severity: SeverityThreshold[],
     maxSeries = 6
   ) {
     const data = getDefaultChartsData();
 
     const filteredRecords = anomalyRecords.filter((record) => {
-      return Number(record.record_score) >= severity;
+      return severity.some((threshold) => {
+        return (
+          Number(record.record_score) >= threshold.min &&
+          (threshold.max === undefined || Number(record.record_score) <= threshold.max)
+        );
+      });
     });
     const { records: allSeriesRecords, errors: errorMessages } = processRecordsForDisplay(
       combinedJobRecords,
@@ -948,9 +978,9 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       (record) => (record.function_description || record.function) === ML_JOB_AGGREGATION.LAT_LONG
     );
 
-    const seriesConfigs = recordsToPlot.map((record) =>
-      buildConfig(record, combinedJobRecords[record.job_id])
-    );
+    const seriesConfigs = recordsToPlot
+      .filter((record) => record.job_id !== undefined)
+      .map((record) => buildConfig(record, combinedJobRecords[record.job_id]));
 
     const seriesConfigsNoGeoData = [];
 
@@ -1266,7 +1296,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
           }),
           job.job_id
         );
-        return { success: false, results: {}, error };
+        return { success: false, results: {}, error: error as ErrorType };
       }
     } else {
       // Extract the partition, by, over fields on which to filter.
@@ -1333,7 +1363,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
           job.job_id
         );
 
-        return { success: false, results: {}, error };
+        return { success: false, results: {}, error: error as ErrorType };
       }
     }
   }
@@ -1465,7 +1495,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         }),
         config.jobId
       );
-      return { success: false, events: {}, error };
+      return { success: false, events: {}, error: error as ErrorType };
     }
   }
 
@@ -1697,7 +1727,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         }),
         config.jobId
       );
-      return { success: false, records: [], error };
+      return { success: false, records: [], error: error as ErrorType };
     }
   }
 
@@ -1845,7 +1875,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
   async function getRecordsForInfluencer(
     jobIds: string[],
     influencers: MlEntityField[],
-    threshold: number,
+    threshold: SeverityThreshold[],
     earliestMs: number,
     latestMs: number,
     maxResults: number,
@@ -1860,13 +1890,6 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
             gte: earliestMs,
             lte: latestMs,
             format: 'epoch_millis',
-          },
-        },
-      },
-      {
-        range: {
-          record_score: {
-            gte: threshold,
           },
         },
       },
@@ -1926,6 +1949,22 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       });
     }
 
+    const thresholdCriteria = threshold.map((t) => ({
+      range: {
+        record_score: {
+          gte: t.min,
+          ...(t.max !== undefined && { lte: t.max }),
+        },
+      },
+    }));
+
+    boolCriteria.push({
+      bool: {
+        should: thresholdCriteria,
+        minimum_should_match: 1,
+      },
+    });
+
     const response = await mlClient.anomalySearch<estypes.SearchResponse<MlRecordForInfluencer>>(
       {
         size: maxResults !== undefined ? maxResults : 100,
@@ -1964,7 +2003,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
   async function getAnomalyChartsData(options: {
     jobIds: string[];
     influencers: MlEntityField[];
-    threshold: number;
+    threshold: SeverityThreshold[];
     earliestMs: number;
     latestMs: number;
     maxResults: number;

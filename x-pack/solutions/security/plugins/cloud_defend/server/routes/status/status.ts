@@ -21,7 +21,7 @@ import type {
   PackagePolicyClient,
 } from '@kbn/fleet-plugin/server';
 import moment from 'moment';
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   ALERTS_INDEX_PATTERN_DEFAULT_NS,
   FILE_INDEX_PATTERN_DEFAULT_NS,

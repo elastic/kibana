@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { RuleTypeRegistry } from './rule_type_registry';
+import type { RuleTypeRegistry } from './rule_type_registry';
 
 type Schema = PublicMethodsOf<RuleTypeRegistry>;
 
@@ -15,8 +15,9 @@ const createRuleTypeRegistryMock = () => {
     has: jest.fn(),
     register: jest.fn(),
     get: jest.fn(),
-    list: jest.fn(),
+    list: jest.fn().mockReturnValue(new Map()),
     getAllTypes: jest.fn(),
+    getFilteredTypes: jest.fn(),
     ensureRuleTypeEnabled: jest.fn(),
   };
   return mocked;

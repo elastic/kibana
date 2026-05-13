@@ -8,10 +8,10 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { uniq } from 'lodash';
 
-import type { AgentPolicy } from '../../types';
+import type { AgentPolicy, FleetProxy } from '../../types';
 import { outputService } from '../output';
 
-import { getSourceUriForAgentPolicy } from '../../routes/agent/source_uri_utils';
+import { getDownloadSourceForAgentPolicy } from '../../routes/agent/source_uri_utils';
 
 import { getFleetServerHostsForAgentPolicy } from '../fleet_server_host';
 import { appContextService } from '../app_context';
@@ -22,9 +22,18 @@ export async function fetchRelatedSavedObjects(
   soClient: SavedObjectsClientContract,
   agentPolicy: AgentPolicy
 ) {
+  const logger = appContextService.getLogger().get('fetchRelatedSavedObjects');
+
+  logger.debug(
+    () =>
+      `getting related saved objects for policy [${
+        agentPolicy.id
+      }] with soClient scoped to [${soClient.getCurrentNamespace()}]`
+  );
+
   const [defaultDataOutputId, defaultMonitoringOutputId] = await Promise.all([
-    outputService.getDefaultDataOutputId(soClient),
-    outputService.getDefaultMonitoringOutputId(soClient),
+    outputService.getDefaultDataOutputId(),
+    outputService.getDefaultMonitoringOutputId(),
   ]);
 
   if (!defaultDataOutputId) {
@@ -46,18 +55,20 @@ export async function fetchRelatedSavedObjects(
     }, []),
   ]);
 
-  const [outputs, { host: downloadSourceUri, proxy_id: downloadSourceProxyId }, fleetServerHosts] =
-    await Promise.all([
-      outputService.bulkGet(outputIds, { ignoreNotFound: true }),
-      getSourceUriForAgentPolicy(soClient, agentPolicy),
-      getFleetServerHostsForAgentPolicy(soClient, agentPolicy).catch((err) => {
-        appContextService
-          .getLogger()
-          ?.warn(`Unable to get fleet server hosts for policy ${agentPolicy?.id}: ${err.message}`);
+  logger.debug(
+    `Fetching outputs, download source and fleet server hosts for agent policy [${agentPolicy.id}]`
+  );
 
-        return;
-      }),
-    ]);
+  const [outputs, downloadSource, fleetServerHosts] = await Promise.all([
+    outputService.bulkGet(outputIds, { ignoreNotFound: true }),
+    getDownloadSourceForAgentPolicy(agentPolicy),
+    getFleetServerHostsForAgentPolicy(soClient, agentPolicy).catch((err) => {
+      logger.warn(`Unable to get fleet server hosts for policy ${agentPolicy?.id}: ${err.message}`);
+
+      return undefined;
+    }),
+  ]);
+  const { proxy_id: downloadSourceProxyId } = downloadSource;
 
   const dataOutput = outputs.find((output) => output.id === dataOutputId);
   if (!dataOutput) {
@@ -76,24 +87,23 @@ export async function fetchRelatedSavedObjects(
       .concat(downloadSourceProxyId ? [downloadSourceProxyId] : [])
   );
 
+  logger.debug(`fetching list of fleet-server proxies`);
   const proxies = proxyIds.length ? await bulkGetFleetProxies(soClient, proxyIds) : [];
 
-  let downloadSourceProxyUri: string | null = null;
-
+  let downloadSourceProxy: FleetProxy | undefined;
   if (downloadSourceProxyId) {
-    const downloadSourceProxy = proxies.find((proxy) => proxy.id === downloadSourceProxyId);
-    if (downloadSourceProxy) {
-      downloadSourceProxyUri = downloadSourceProxy.url;
-    }
+    downloadSourceProxy = proxies.find((proxy) => proxy.id === downloadSourceProxyId);
   }
+
+  logger.debug(`Returning related saved objects for policy [${agentPolicy.id}]`);
 
   return {
     outputs,
     proxies,
     dataOutput,
     monitoringOutput,
-    downloadSourceUri,
-    downloadSourceProxyUri,
-    fleetServerHosts,
+    downloadSource,
+    downloadSourceProxy,
+    fleetServerHost: fleetServerHosts,
   };
 }

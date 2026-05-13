@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppUnmount } from '@kbn/core-application-browser';
-import { Mounter } from '../types';
-import { ApplicationService } from '../application_service';
+import type { AppUnmount } from '@kbn/core-application-browser';
+import type { Mounter } from '../types';
+import type { ApplicationService } from '../application_service';
 
 /** @internal */
 export type MockedUnmount = jest.Mocked<AppUnmount>;

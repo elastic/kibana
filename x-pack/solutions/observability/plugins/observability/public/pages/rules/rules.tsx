@@ -6,15 +6,15 @@
  */
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { RuleTypeModal } from '@kbn/response-ops-rule-form/src/rule_type_modal';
-import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { RuleTypeModal } from '@kbn/response-ops-rule-form';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import { useLoadRuleTypesQuery } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { lazy, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { RULES_LOGS_PATH, RULES_PATH, paths } from '../../../common/locators/paths';
+import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
+import { getCreateRuleFromTemplateRoute, getCreateRuleRoute } from '@kbn/rule-data-utils';
+import { RULES_LOGS_PATH, RULES_PATH } from '../../../common/locators/paths';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useKibana } from '../../utils/kibana_react';
@@ -30,6 +30,7 @@ interface RulesPageProps {
   activeTab?: string;
 }
 export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
+  const { services } = useKibana();
   const {
     http,
     docLinks,
@@ -38,7 +39,8 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
     application,
     triggersActionsUi: { ruleTypeRegistry, getRulesSettingsLink: RulesSettingsLink },
     serverless,
-  } = useKibana().services;
+    cps,
+  } = services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
   const [ruleTypeModalVisibility, setRuleTypeModalVisibility] = useState<boolean>(false);
@@ -63,16 +65,11 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
   );
 
   const filteredRuleTypes = useGetFilteredRuleTypes();
-  const {
-    ruleTypesState: { data: ruleTypes },
-  } = useLoadRuleTypesQuery({
+  const { authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
+    http,
+    toasts,
     filteredRuleTypes,
   });
-
-  const authorizedRuleTypes = [...ruleTypes.values()];
-  const authorizedToCreateAnyRules = authorizedRuleTypes.some(
-    (ruleType) => ruleType.authorizedConsumers[ALERTING_FEATURE_ID]?.all
-  );
 
   const { setScreenContext } = observabilityAIAssistant?.service || {};
 
@@ -124,28 +121,24 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
   ];
 
   const rightSideItems = [
-    ...(activeTab === RULES_TAB_NAME
-      ? [
-          <EuiButton
-            data-test-subj="createRuleButton"
-            disabled={!authorizedToCreateAnyRules}
-            fill
-            iconType="plusInCircle"
-            key="create-alert"
-            onClick={() => setRuleTypeModalVisibility(true)}
-          >
-            <FormattedMessage
-              id="xpack.observability.rules.addRuleButtonLabel"
-              defaultMessage="Create rule"
-            />
-          </EuiButton>,
-        ]
-      : []),
+    <EuiButton
+      data-test-subj="createRuleButton"
+      disabled={!authorizedToCreateAnyRules}
+      fill
+      iconType="plusCircle"
+      key="create-alert"
+      onClick={() => setRuleTypeModalVisibility(true)}
+    >
+      <FormattedMessage
+        id="xpack.observability.rules.addRuleButtonLabel"
+        defaultMessage="Create rule"
+      />
+    </EuiButton>,
     <RulesSettingsLink />,
     <EuiButtonEmpty
       data-test-subj="documentationLink"
       href={docLinks.links.observability.createAlerts}
-      iconType="help"
+      iconType="question"
       target="_blank"
     >
       <FormattedMessage
@@ -182,14 +175,21 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
           onClose={() => setRuleTypeModalVisibility(false)}
           onSelectRuleType={(ruleTypeId) => {
             setRuleTypeModalVisibility(false);
-            return application.navigateToUrl(
-              http.basePath.prepend(paths.observability.createRule(ruleTypeId))
-            );
+            return application.navigateToApp('rules', {
+              path: `${getCreateRuleRoute(ruleTypeId)}`,
+            });
+          }}
+          onSelectTemplate={(templateId) => {
+            setRuleTypeModalVisibility(false);
+            return application.navigateToApp('rules', {
+              path: `${getCreateRuleFromTemplateRoute(templateId)}`,
+            });
           }}
           http={http}
           toasts={toasts}
           registeredRuleTypes={ruleTypeRegistry.list()}
           filteredRuleTypes={filteredRuleTypes}
+          cps={cps}
         />
       )}
     </ObservabilityPageTemplate>

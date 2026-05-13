@@ -6,11 +6,13 @@
  */
 
 import React from 'react';
-import { LocationDescriptorObject } from 'history';
+import { merge } from 'lodash';
+import type { LocationDescriptorObject } from 'history';
 
 import type { CoreStart, HttpSetup } from '@kbn/core/public';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import {
   notificationServiceMock,
   applicationServiceMock,
@@ -20,7 +22,7 @@ import {
 import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
 
 import { breadcrumbService } from '../../../../../services/breadcrumbs';
-import { AppContextProvider } from '../../../../../app_context';
+import { AppContextProvider, type AppDependencies } from '../../../../../app_context';
 import { MappingsEditorProvider } from '../../../../mappings_editor';
 import { ComponentTemplatesProvider } from '../../../component_templates_context';
 
@@ -35,11 +37,19 @@ history.createHref.mockImplementation((location: LocationDescriptorObject) => {
 });
 
 // We provide the minimum deps required to make the tests pass
-const appDependencies = {
-  docLinks: {} as any,
-  plugins: { ml: {} as any },
-  history,
-} as any;
+const createAppDependencies = (): AppDependencies =>
+  ({
+    docLinks: docLinksServiceMock.createStartContract(),
+    url: sharePluginMock.createStartContract().url,
+    plugins: { ml: {} } as unknown as AppDependencies['plugins'],
+    history,
+    privs: {
+      monitor: true,
+      manageEnrich: true,
+      monitorEnrich: true,
+      manageIndexTemplates: true,
+    },
+  } as unknown as AppDependencies);
 
 export const componentTemplatesDependencies = (httpSetup: HttpSetup, coreStart?: CoreStart) => {
   const coreMockStart = coreMock.createStart();
@@ -62,8 +72,15 @@ export const setupEnvironment = () => {
 };
 
 export const WithAppDependencies =
-  (Comp: any, httpSetup: HttpSetup, coreStart?: CoreStart) => (props: any) =>
-    (
+  <P extends object>(
+    Comp: React.ComponentType<P>,
+    httpSetup: HttpSetup,
+    coreStart?: CoreStart,
+    appContextMerge?: Record<string, unknown>
+  ) =>
+  (props: P) => {
+    const appDependencies = merge({}, createAppDependencies(), appContextMerge) as AppDependencies;
+    return (
       <AppContextProvider value={appDependencies}>
         <MappingsEditorProvider>
           <ComponentTemplatesProvider value={componentTemplatesDependencies(httpSetup, coreStart)}>
@@ -72,6 +89,6 @@ export const WithAppDependencies =
             </GlobalFlyoutProvider>
           </ComponentTemplatesProvider>
         </MappingsEditorProvider>
-        /
       </AppContextProvider>
     );
+  };

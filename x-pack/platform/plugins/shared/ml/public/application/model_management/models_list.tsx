@@ -13,14 +13,13 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiIconTip,
   EuiInMemoryTable,
   EuiLink,
   EuiSpacer,
   EuiSwitch,
   EuiText,
   EuiTitle,
-  EuiToolTip,
   type EuiSearchBarProps,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
@@ -30,7 +29,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useStorage } from '@kbn/ml-local-storage';
-import { ELSER_ID_V1 } from '@kbn/ml-trained-models-utils';
+import { ELSER_ID_V1, MODEL_STATE } from '@kbn/ml-trained-models-utils';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { dynamic } from '@kbn/shared-ux-utility';
@@ -40,20 +39,21 @@ import useObservable from 'react-use/lib/useObservable';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { useEuiMaxBreakpoint } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ML_PAGES } from '../../../common/constants/locator';
-import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { ML_ELSER_CALLOUT_DISMISSED } from '@kbn/ml-common-types/storage';
 import type {
   DFAModelItem,
   NLPModelItem,
   TrainedModelItem,
   TrainedModelUIItem,
-} from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
 import {
   isBaseNLPModelItem,
   isBuiltInModel,
   isModelDownloadItem,
   isNLPModelItem,
-} from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
+import { TRAINED_MODEL_SAVED_OBJECT_TYPE } from '@kbn/ml-common-types/saved_objects';
 import { AddInferencePipelineFlyout } from '../components/ml_inference';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import type { ModelsBarStats } from '../components/stats_bar';
@@ -71,8 +71,8 @@ import { useInitTrainedModelsService } from './hooks/use_init_trained_models_ser
 import { ModelStatusIndicator } from './model_status_indicator';
 import { MLSavedObjectsSpacesList } from '../components/ml_saved_objects_spaces_list';
 import { useCanManageSpacesAndSavedObjects } from '../hooks/use_spaces';
-import { TRAINED_MODEL_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
 import { SpaceManagementContextWrapper } from '../components/space_management_context_wrapper';
+import { SynchronizeSavedObjectsButton } from '../jobs/jobs_list/components/top_level_actions/synchronize_saved_objects_button';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.TRAINED_MODELS_MANAGE;
@@ -99,6 +99,9 @@ export const getDefaultModelsListState = (): ListingPageUrlState => ({
   showAll: false,
 });
 
+const isModelDeployed = (item: TrainedModelUIItem) =>
+  isNLPModelItem(item) && item.state === MODEL_STATE.STARTED;
+
 interface Props {
   pageState?: ListingPageUrlState;
   updatePageState?: (update: Partial<ListingPageUrlState>) => void;
@@ -120,7 +123,7 @@ export const ModelsList: FC<Props> = ({
 
   const canManageSpacesAndSavedObjects = useCanManageSpacesAndSavedObjects();
 
-  const trainedModelsService = useInitTrainedModelsService(canManageSpacesAndSavedObjects);
+  const trainedModelsService = useInitTrainedModelsService();
 
   const items = useObservable(trainedModelsService.modelItems$, trainedModelsService.modelItems);
   const isLoading = useObservable(trainedModelsService.isLoading$, trainedModelsService.isLoading);
@@ -313,7 +316,9 @@ export const ModelsList: FC<Props> = ({
                     defaultMessage: 'Expand',
                   })
             }
-            iconType={itemIdToExpandedRowMap[item.model_id] ? 'arrowDown' : 'arrowRight'}
+            iconType={
+              itemIdToExpandedRowMap[item.model_id] ? 'chevronSingleDown' : 'chevronSingleRight'
+            }
           />
         );
       },
@@ -378,9 +383,7 @@ export const ModelsList: FC<Props> = ({
                 {tooltipContent ? (
                   <>
                     &nbsp;
-                    <EuiToolTip content={tooltipContent}>
-                      <EuiIcon type={'warning'} color="warning" />
-                    </EuiToolTip>
+                    <EuiIconTip content={tooltipContent} type="warning" color="warning" />
                   </>
                 ) : null}
               </EuiText>
@@ -513,13 +516,22 @@ export const ModelsList: FC<Props> = ({
               defaultMessage: 'Built-in model',
             });
           }
+          if (isModelDeployed(item)) {
+            return i18n.translate('xpack.ml.trainedModels.modelsList.deployedModelMessage', {
+              defaultMessage: 'Model is deployed',
+            });
+          }
           return '';
         },
         selectable: (item) =>
-          !isModelDownloadItem(item) && !isPopulatedObject(item.pipelines) && !isBuiltInModel(item),
+          !isModelDownloadItem(item) &&
+          !isPopulatedObject(item.pipelines) &&
+          !isBuiltInModel(item) &&
+          !isModelDeployed(item),
         onSelectionChange: (selectedItems) => {
           setSelectedModels(selectedItems);
         },
+        selected: selectedModels,
       }
     : undefined;
 
@@ -573,7 +585,7 @@ export const ModelsList: FC<Props> = ({
   }
 
   return (
-    <>
+    <div data-test-subj="mlTrainedModelsList">
       <SpaceManagementContextWrapper>
         <SavedObjectsWarning onCloseFlyout={fetchModels} forceRefresh={isLoading} />
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -600,9 +612,12 @@ export const ModelsList: FC<Props> = ({
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem grow={false}>
+            <SynchronizeSavedObjectsButton refreshJobs={fetchModels} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              iconType={'plusInCircle'}
+              iconType={'plusCircle'}
               color={'primary'}
               onClick={setIsAddModelFlyoutVisible.bind(null, true)}
               data-test-subj="mlModelsAddTrainedModelButton"
@@ -640,10 +655,14 @@ export const ModelsList: FC<Props> = ({
             onTableChange={onTableChange}
             sorting={sorting}
             data-test-subj={isLoading ? 'mlModelsTable loading' : 'mlModelsTable loaded'}
+            tableCaption={i18n.translate('xpack.ml.trainedModels.modelsList.modelsTableCaption', {
+              defaultMessage: 'Trained models',
+            })}
             childrenBetween={
               isElserCalloutVisible ? (
                 <>
                   <EuiCallOut
+                    announceOnMount={false}
                     size="s"
                     title={
                       <FormattedMessage
@@ -676,11 +695,10 @@ export const ModelsList: FC<Props> = ({
         </div>
         {modelsToDelete.length > 0 && (
           <DeleteModelsModal
-            onClose={(refreshList) => {
-              modelsToDelete.forEach((model) => {
-                trainedModelsService.removeScheduledDeployments({ modelId: model.model_id });
-              });
-
+            onClose={() => {
+              setModelsToDelete([]);
+            }}
+            onDelete={(refreshList) => {
               setItemIdToExpandedRowMap((prev) => {
                 const newMap = { ...prev };
                 modelsToDelete.forEach((model) => {
@@ -690,6 +708,7 @@ export const ModelsList: FC<Props> = ({
               });
 
               setModelsToDelete([]);
+              setSelectedModels([]);
 
               if (refreshList) {
                 fetchModels();
@@ -732,6 +751,6 @@ export const ModelsList: FC<Props> = ({
           />
         ) : null}
       </SpaceManagementContextWrapper>
-    </>
+    </div>
   );
 };

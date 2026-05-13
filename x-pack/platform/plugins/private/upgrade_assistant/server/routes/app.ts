@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-pkg-server';
 import {
   API_BASE_PATH,
   DEPRECATION_LOGS_INDEX,
   APP_LOGS_COUNT_INDEX_PRIVILEGES,
   APP_LOGS_COUNT_CLUSTER_PRIVILEGES,
 } from '../../common/constants';
-import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
-import { Privileges } from '../shared_imports';
-import { RouteDependencies } from '../types';
+import type { Privileges } from '../shared_imports';
+import type { RouteDependencies } from '../types';
 
 const extractMissingIndexPrivileges = (
   privilegesObject: { [key: string]: Record<string, boolean> } = {}
@@ -39,6 +39,7 @@ export function registerAppRoutes({
   router,
   lib: { handleEsError },
   config: { isSecurityEnabled },
+  current,
 }: RouteDependencies) {
   router.get(
     {
@@ -51,7 +52,7 @@ export function registerAppRoutes({
       },
       validate: false,
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       const {
         elasticsearch: { client },
       } = await core;

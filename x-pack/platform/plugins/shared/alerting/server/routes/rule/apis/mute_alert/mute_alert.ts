@@ -4,14 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IRouter } from '@kbn/core/server';
-import { transformRequestParamsToApplicationV1 } from './transforms';
-import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
+import type { IRouter } from '@kbn/core/server';
+import {
+  transformRequestParamsToApplicationV1,
+  transformRequestQueryToApplicationV1,
+} from './transforms';
+import type { ILicenseState } from '../../../../lib';
+import { RuleTypeDisabledError } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
+import type { AlertingRequestHandlerContext } from '../../../../types';
+import { BASE_ALERTING_API_PATH } from '../../../../types';
+import type {
+  MuteAlertRequestQueryV1,
+  MuteAlertRequestParamsV1,
+} from '../../../../../common/routes/rule/apis/mute_alert';
 import {
   muteAlertParamsSchemaV1,
-  MuteAlertRequestParamsV1,
+  muteAlertQuerySchemaV1,
 } from '../../../../../common/routes/rule/apis/mute_alert';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
@@ -31,6 +40,7 @@ export const muteAlertRoute = (
       validate: {
         request: {
           params: muteAlertParamsSchemaV1,
+          query: muteAlertQuerySchemaV1,
         },
         response: {
           204: {
@@ -53,8 +63,13 @@ export const muteAlertRoute = (
         const alertingContext = await context.alerting;
         const rulesClient = await alertingContext.getRulesClient();
         const params: MuteAlertRequestParamsV1 = req.params;
+        const query: MuteAlertRequestQueryV1 = req.query || {};
+
         try {
-          await rulesClient.muteInstance(transformRequestParamsToApplicationV1(params));
+          await rulesClient.muteInstance({
+            params: transformRequestParamsToApplicationV1(params),
+            query: transformRequestQueryToApplicationV1(query),
+          });
           return res.noContent();
         } catch (e) {
           if (e instanceof RuleTypeDisabledError) {

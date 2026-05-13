@@ -8,16 +8,17 @@
  */
 
 import * as Rx from 'rxjs';
-import { Writable } from 'stream';
+import type { Writable } from 'stream';
 
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';
-import { TaskPayloadPDF } from '@kbn/reporting-export-types-pdf-common';
+import type { TaskPayloadPDF } from '@kbn/reporting-export-types-pdf-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { cryptoFactory } from '@kbn/reporting-server';
 import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
-
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { PdfV1ExportType } from '.';
+import type { FakeRawRequest, KibanaRequest } from '@kbn/core/server';
 
 let content: string;
 let mockPdfExportType: PdfV1ExportType;
@@ -31,6 +32,13 @@ const mockEncryptionKey = 'testencryptionkey';
 const encryptHeaders = async (headers: Record<string, string>) => {
   const crypto = cryptoFactory(mockEncryptionKey);
   return await crypto.encrypt(headers);
+};
+
+const fakeRawRequest: FakeRawRequest = {
+  headers: {
+    authorization: `ApiKey skdjtq4u543yt3rhewrh`,
+  },
+  path: '/',
 };
 
 const screenshottingMock = createMockScreenshottingStart();
@@ -57,6 +65,7 @@ beforeEach(async () => {
     savedObjects: mockCoreStart.savedObjects,
     uiSettings: mockCoreStart.uiSettings,
     screenshotting: screenshottingMock,
+    licensing: licensingMock.createStart(),
   });
   getScreenshotsSpy.mockImplementation((opts) => {
     const { logger } = opts;
@@ -74,17 +83,18 @@ test(`passes browserTimezone to getScreenshots`, async () => {
   const encryptedHeaders = await encryptHeaders({});
 
   const browserTimezone = 'UTC';
-  await mockPdfExportType.runTask(
-    'pdfJobId',
-    getBasePayload({
+  await mockPdfExportType.runTask({
+    jobId: 'pdfJobId',
+    request: fakeRawRequest as unknown as KibanaRequest,
+    payload: getBasePayload({
       browserTimezone,
       headers: encryptedHeaders,
       objects: [{ relativeUrl: '/app/kibana#/something' }],
     }),
     taskInstanceFields,
     cancellationToken,
-    stream
-  );
+    stream,
+  });
 
   expect(getScreenshotsSpy).toHaveBeenCalledWith(
     expect.objectContaining({ browserTimezone: 'UTC' })
@@ -94,25 +104,27 @@ test(`passes browserTimezone to getScreenshots`, async () => {
 test(`returns content_type of application/pdf`, async () => {
   const encryptedHeaders = await encryptHeaders({});
 
-  const { content_type: contentType } = await mockPdfExportType.runTask(
-    'pdfJobId',
-    getBasePayload({ objects: [], headers: encryptedHeaders }),
+  const { content_type: contentType } = await mockPdfExportType.runTask({
+    jobId: 'pdfJobId',
+    request: fakeRawRequest as unknown as KibanaRequest,
+    payload: getBasePayload({ objects: [], headers: encryptedHeaders }),
     taskInstanceFields,
     cancellationToken,
-    stream
-  );
+    stream,
+  });
   expect(contentType).toBe('application/pdf');
 });
 
 test(`returns buffer content base64 encoded`, async () => {
   const encryptedHeaders = await encryptHeaders({});
-  await mockPdfExportType.runTask(
-    'pdfJobId',
-    getBasePayload({ objects: [], headers: encryptedHeaders }),
+  await mockPdfExportType.runTask({
+    jobId: 'pdfJobId',
+    request: fakeRawRequest as unknown as KibanaRequest,
+    payload: getBasePayload({ objects: [], headers: encryptedHeaders }),
     taskInstanceFields,
     cancellationToken,
-    stream
-  );
+    stream,
+  });
 
   expect(content).toEqual(testContent);
 });
@@ -121,13 +133,14 @@ test(`screenshotting plugin uses the logger provided by the PDF export-type`, as
   const logSpy = jest.spyOn(mockLogger, 'get');
 
   const encryptedHeaders = await encryptHeaders({});
-  await mockPdfExportType.runTask(
-    'pdfJobId',
-    getBasePayload({ objects: [], headers: encryptedHeaders }),
+  await mockPdfExportType.runTask({
+    jobId: 'pdfJobId',
+    request: fakeRawRequest as unknown as KibanaRequest,
+    payload: getBasePayload({ objects: [], headers: encryptedHeaders }),
     taskInstanceFields,
     cancellationToken,
-    stream
-  );
+    stream,
+  });
 
   expect(logSpy).toHaveBeenCalledWith('screenshotting');
 });

@@ -7,7 +7,7 @@
 
 export interface TrendKey {
   configId: string;
-  locationId: string;
+  locationIds: string[];
 }
 
 export type TrendRequest = TrendKey & { schedule: string };
@@ -19,7 +19,7 @@ export interface TrendDatum {
 
 export interface OverviewTrend {
   configId: string;
-  locationId: string;
+  locationIds: string[];
   data: TrendDatum[];
   count: number;
   min: number | null;
@@ -29,7 +29,7 @@ export interface OverviewTrend {
   median: number | null;
 }
 
-export type TrendTable = Record<string, OverviewTrend | null | 'loading'>;
+export type TrendTable = Record<string, OverviewTrend | null | 'loading' | undefined>;
 
 export interface GetTrendPayload {
   trendStats: TrendTable;

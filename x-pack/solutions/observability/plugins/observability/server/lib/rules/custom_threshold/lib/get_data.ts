@@ -8,7 +8,7 @@
 import type { SearchResponse, AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { EsQueryConfig } from '@kbn/es-query';
+import type { DataViewBase, EsQueryConfig } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
 import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import type {
@@ -17,7 +17,8 @@ import type {
 } from '../../../../../common/custom_threshold_rule/types';
 
 import { UNGROUPED_FACTORY_KEY } from '../constants';
-import { CONTAINER_ID, AdditionalContext, doFieldsExist, KUBERNETES_POD_UID } from '../utils';
+import type { AdditionalContext } from '../utils';
+import { CONTAINER_ID, doFieldsExist, KUBERNETES_POD_UID } from '../utils';
 import { getElasticsearchMetricQuery } from './metric_query';
 
 export type GetDataResponse = Record<
@@ -26,6 +27,7 @@ export type GetDataResponse = Record<
     trigger: boolean;
     value: number | null;
     bucketKey: BucketKey;
+    flattenGrouping?: Record<string, string>;
   } & AdditionalContext
 >;
 
@@ -106,6 +108,7 @@ export const getData = async (
   timeFieldName: string,
   groupBy: string | undefined | string[],
   searchConfiguration: SearchConfigurationType,
+  dataView: DataViewBase | undefined,
   esQueryConfig: EsQueryConfig,
   compositeSize: number,
   alertOnGroupDisappear: boolean,
@@ -140,12 +143,18 @@ export const getData = async (
         const bucketHits = additionalContext?.hits?.hits;
         const additionalContextSource =
           bucketHits && bucketHits.length > 0 ? bucketHits[0]._source : null;
+        const flattenGrouping: Record<string, string> = {};
+        const groups: string[] = typeof groupBy === 'string' ? [groupBy] : groupBy ?? [];
+        groups.map((group: string, groupIndex) => {
+          flattenGrouping[group] = bucket.key[`groupBy${groupIndex}`];
+        });
 
         if (missingGroup && missingGroup.value > 0) {
           previous[key] = {
             trigger: false,
             value: null,
             bucketKey: bucket.key,
+            flattenGrouping,
           };
         } else {
           const value = aggregatedValue ? aggregatedValue.value : null;
@@ -154,6 +163,7 @@ export const getData = async (
             trigger: (shouldTrigger && shouldTrigger.value > 0) || false,
             value,
             bucketKey: bucket.key,
+            flattenGrouping,
             container: containerList,
             ...additionalContextSource,
           };
@@ -167,6 +177,7 @@ export const getData = async (
           timeFieldName,
           groupBy,
           searchConfiguration,
+          dataView,
           esQueryConfig,
           compositeSize,
           alertOnGroupDisappear,
@@ -211,6 +222,7 @@ export const getData = async (
       compositeSize,
       alertOnGroupDisappear,
       searchConfiguration,
+      dataView,
       esQueryConfig,
       runtimeMappings,
       lastPeriodEnd,

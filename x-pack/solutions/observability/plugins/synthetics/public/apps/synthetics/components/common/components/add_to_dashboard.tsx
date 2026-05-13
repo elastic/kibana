@@ -14,54 +14,99 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
-import {
-  LazySavedObjectSaveModalDashboard,
-  SaveModalDashboardProps,
-  withSuspense,
-} from '@kbn/presentation-util-plugin/public';
+import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ClientPluginsStart } from '../../../../../plugin';
-import {
-  SYNTHETICS_MONITORS_EMBEDDABLE,
-  SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
-} from '../../../../embeddables/constants';
+import { useSelector } from 'react-redux';
+import type { ClientPluginsStart } from '../../../../../plugin';
+import type { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../../common/embeddables/monitors_overview/constants';
+import { selectOverviewView } from '../../../state';
+import type { OverviewMonitorsEmbeddableCustomState } from '../../../../embeddables/monitors_overview/monitors_embeddable_factory';
+import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../../../../../../common/embeddables/stats_overview/constants';
+import type { OverviewStatsEmbeddableCustomState } from '../../../../../../common/types';
 
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
-
-export const AddToDashboard = ({
+export const useAddToDashboard = ({
   type,
-  asButton = false,
+  embeddableInput = {},
+  objectType = i18n.translate('xpack.synthetics.item.actions.addToDashboard.objectTypeLabel', {
+    defaultMessage: 'Status Overview',
+  }),
+  documentTitle = i18n.translate('xpack.synthetics.item.actions.addToDashboard.attachmentTitle', {
+    defaultMessage: 'Status Overview',
+  }),
 }: {
-  type: typeof SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE | typeof SYNTHETICS_MONITORS_EMBEDDABLE;
-  asButton?: boolean;
-}) => {
-  const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
+  objectType?: string;
+  documentTitle?: string;
+} & (
+  | {
+      type: typeof SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE;
+      embeddableInput?: OverviewStatsEmbeddableCustomState;
+    }
+  | {
+      type: typeof SYNTHETICS_MONITORS_EMBEDDABLE;
+      embeddableInput?: OverviewMonitorsEmbeddableCustomState;
+    }
+)) => {
   const [isDashboardAttachmentReady, setDashboardAttachmentReady] = React.useState(false);
-  const closePopover = () => {
-    setIsPopoverOpen(false);
-  };
 
   const { embeddable } = useKibana<ClientPluginsStart>().services;
 
   const handleAttachToDashboardSave: SaveModalDashboardProps['onSave'] = useCallback(
-    ({ dashboardId, newTitle, newDescription }) => {
+    async ({ dashboardId }) => {
       const stateTransfer = embeddable.getStateTransfer();
-      const embeddableInput = {};
 
       const state = {
-        input: embeddableInput,
+        serializedState: embeddableInput,
         type,
       };
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-        state,
+      stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
+        state: [state],
         path,
       });
     },
-    [embeddable, type]
+    [embeddable, type, embeddableInput]
   );
+
+  const MaybeSavedObjectSaveModalDashboard = isDashboardAttachmentReady ? (
+    <SavedObjectSaveModalDashboard
+      objectType={objectType}
+      documentInfo={{
+        title: documentTitle,
+      }}
+      canSaveByReference={false}
+      onClose={() => {
+        setDashboardAttachmentReady(false);
+      }}
+      onSave={handleAttachToDashboardSave}
+    />
+  ) : null;
+
+  return { setDashboardAttachmentReady, MaybeSavedObjectSaveModalDashboard };
+};
+
+export const AddToDashboard = ({
+  type,
+  isLoading,
+  asButton = false,
+}: {
+  type: typeof SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE | typeof SYNTHETICS_MONITORS_EMBEDDABLE;
+  asButton?: boolean;
+  isLoading?: boolean;
+}) => {
+  const view = useSelector(selectOverviewView);
+
+  const { setDashboardAttachmentReady, MaybeSavedObjectSaveModalDashboard } = useAddToDashboard(
+    type === SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE ? { type } : { type, embeddableInput: { view } }
+  );
+
+  const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
+  const closePopover = () => {
+    setIsPopoverOpen(false);
+  };
+
   const isSyntheticsApp = window.location.pathname.includes('/app/synthetics');
 
   if (!isSyntheticsApp) {
@@ -77,6 +122,7 @@ export const AddToDashboard = ({
           data-test-subj="syntheticsEmbeddablePanelWrapperButton"
           iconType="dashboardApp"
           onClick={() => setDashboardAttachmentReady(true)}
+          isLoading={isLoading}
         >
           {i18n.translate('xpack.synthetics.embeddablePanelWrapper.shareButtonLabel', {
             defaultMessage: 'Add to dashboard',
@@ -88,7 +134,7 @@ export const AddToDashboard = ({
             <EuiButtonIcon
               color="text"
               data-test-subj="syntheticsEmbeddablePanelWrapperButton"
-              iconType="boxesHorizontal"
+              iconType="boxesVertical"
               onClick={() => setIsPopoverOpen(!isPopoverOpen)}
               aria-label={i18n.translate(
                 'xpack.synthetics.embeddablePanelWrapper.shareButtonAriaLabel',
@@ -96,6 +142,7 @@ export const AddToDashboard = ({
                   defaultMessage: 'Add to dashboard',
                 }
               )}
+              isLoading={isLoading}
             />
           }
           isOpen={isPopoverOpen}
@@ -123,26 +170,7 @@ export const AddToDashboard = ({
           />
         </EuiPopover>
       )}
-      {isDashboardAttachmentReady ? (
-        <SavedObjectSaveModalDashboard
-          objectType={i18n.translate(
-            'xpack.synthetics.item.actions.addToDashboard.objectTypeLabel',
-            {
-              defaultMessage: 'Status Overview',
-            }
-          )}
-          documentInfo={{
-            title: i18n.translate('xpack.synthetics.item.actions.addToDashboard.attachmentTitle', {
-              defaultMessage: 'Status Overview',
-            }),
-          }}
-          canSaveByReference={false}
-          onClose={() => {
-            setDashboardAttachmentReady(false);
-          }}
-          onSave={handleAttachToDashboardSave}
-        />
-      ) : null}
+      {MaybeSavedObjectSaveModalDashboard}
     </>
   );
 };

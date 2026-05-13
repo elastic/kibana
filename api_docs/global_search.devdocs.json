@@ -11,9 +11,19 @@
         "tags": [],
         "label": "GlobalSearchBatchedResults",
         "description": [
-          "\nResponse returned from the {@link GlobalSearchPluginStart | global search service}'s `find` API\n"
+          "\nResponse returned from the ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "public",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-public.GlobalSearchPluginStart",
+            "text": "global search service"
+          },
+          "'s `find` API\n"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 86,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -31,6 +41,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -44,9 +56,18 @@
         "tags": [],
         "label": "GlobalSearchFindOptions",
         "description": [
-          "\nOptions for the server-side {@link GlobalSearchPluginStart.find | find API}"
+          "\nOptions for the server-side ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "public",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-public.GlobalSearchPluginStart.find",
+            "text": "find API"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/global_search/public/services/types.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -63,6 +84,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/public/services/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -80,6 +103,8 @@
               "<void> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/public/services/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -97,6 +122,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/public/services/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -110,9 +137,19 @@
         "tags": [],
         "label": "GlobalSearchFindParams",
         "description": [
-          "\nSearch parameters for the {@link GlobalSearchPluginStart.find | `find` API}\n"
+          "\nSearch parameters for the ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "public",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-public.GlobalSearchPluginStart.find",
+            "text": "`find` API"
+          },
+          "\n"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 98,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -129,6 +166,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -145,6 +184,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -161,6 +202,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -174,9 +217,19 @@
         "tags": [],
         "label": "GlobalSearchProviderFindOptions",
         "description": [
-          "\nOptions provided to {@link GlobalSearchResultProvider | a result provider}'s `find` method."
+          "\nOptions provided to ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "public",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-public.GlobalSearchResultProvider",
+            "text": "a result provider"
+          },
+          "'s `find` method."
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -190,6 +243,8 @@
               "\nA custom preference token associated with a search 'session' that should be used to get consistent scoring\nwhen performing calls to ES. Can also be used as a 'session' token for providers returning data from elsewhere\nthan an elasticsearch cluster."
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -207,6 +262,8 @@
               "<void>"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -224,6 +281,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -237,6 +296,8 @@
               "\nThe total maximum number of results (including all batches, not per emission) that should be returned by the provider for a given `find` request.\nAny result emitted exceeding this quota will be ignored by the service and not emitted to the consumer."
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -250,9 +311,18 @@
         "tags": [],
         "label": "GlobalSearchProviderResult",
         "description": [
-          "\nRepresentation of a result returned by a {@link GlobalSearchResultProvider | result provider}"
+          "\nRepresentation of a result returned by a ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "public",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-public.GlobalSearchResultProvider",
+            "text": "result provider"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -266,6 +336,8 @@
               "an id that should be unique for an individual provider's results"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -279,6 +351,8 @@
               "the title/label of the result"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -292,6 +366,8 @@
               "the type of result"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -308,6 +384,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -324,6 +402,8 @@
               "string | { path: string; prependBasePath: boolean; }"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -337,6 +417,8 @@
               "the score of the result, from 1 (lowest) to 100 (highest)"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -361,6 +443,8 @@
               "> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -374,9 +458,18 @@
         "tags": [],
         "label": "GlobalSearchResultProvider",
         "description": [
-          "\nGlobalSearch result provider, to be registered using the {@link GlobalSearchPluginSetup | global search API}"
+          "\nGlobalSearch result provider, to be registered using the ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "public",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-public.GlobalSearchPluginSetup",
+            "text": "global search API"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -390,6 +483,8 @@
               "\nid of the provider"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -414,6 +509,8 @@
               "[]>"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -428,7 +525,10 @@
                   "GlobalSearchFindParams"
                 ],
                 "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
+                "lineNumber": 45,
+                "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GlobalSearchProviderFindParams",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -443,7 +543,10 @@
                   "GlobalSearchProviderFindOptions"
                 ],
                 "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
+                "lineNumber": 46,
+                "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GlobalSearchProviderFindOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -457,12 +560,22 @@
             "tags": [],
             "label": "getSearchableTypes",
             "description": [
-              "\nMethod that should return all the possible {@link GlobalSearchProviderResult.type | type} of results that\nthis provider can return."
+              "\nMethod that should return all the possible ",
+              {
+                "pluginId": "globalSearch",
+                "scope": "public",
+                "docId": "kibGlobalSearchPluginApi",
+                "section": "def-public.GlobalSearchProviderResult.type",
+                "text": "type"
+              },
+              " of results that\nthis provider can return."
             ],
             "signature": [
               "() => string[] | Promise<string[]>"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -485,6 +598,8 @@
           "GlobalSearchFindParams"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 118,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -496,12 +611,21 @@
         "tags": [],
         "label": "GlobalSearchProviderResultUrl",
         "description": [
-          "\nStructured type for the {@link GlobalSearchProviderResult.url | provider result's url property}"
+          "\nStructured type for the ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "public",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-public.GlobalSearchProviderResult.url",
+            "text": "provider result's url property"
+          }
         ],
         "signature": [
           "string | { path: string; prependBasePath: boolean; }"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -513,7 +637,14 @@
         "tags": [],
         "label": "GlobalSearchResult",
         "description": [
-          "\nRepresentation of a result returned by the {@link GlobalSearchPluginStart.find | `find` API}"
+          "\nRepresentation of a result returned by the ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "public",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-public.GlobalSearchPluginStart.find",
+            "text": "`find` API"
+          }
         ],
         "signature": [
           "Omit<",
@@ -521,6 +652,8 @@
           ", \"url\"> & { url: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 75,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -546,6 +679,8 @@
         ") => void; }"
       ],
       "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
+      "lineNumber": 16,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -576,6 +711,8 @@
         ">; getSearchableTypes: () => Promise<string[]>; }"
       ],
       "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
+      "lineNumber": 17,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -593,9 +730,19 @@
         "tags": [],
         "label": "GlobalSearchBatchedResults",
         "description": [
-          "\nResponse returned from the {@link GlobalSearchPluginStart | global search service}'s `find` API\n"
+          "\nResponse returned from the ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "server",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-server.GlobalSearchPluginStart",
+            "text": "global search service"
+          },
+          "'s `find` API\n"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 86,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -613,6 +760,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -626,9 +775,19 @@
         "tags": [],
         "label": "GlobalSearchFindOptions",
         "description": [
-          "\nOptions for the server-side {@link GlobalSearchPluginStart.find | find API}\n"
+          "\nOptions for the server-side ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "server",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-server.GlobalSearchPluginStart.find",
+            "text": "find API"
+          },
+          "\n"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+        "lineNumber": 78,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -645,6 +804,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -662,6 +823,8 @@
               "<void> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -679,6 +842,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -695,6 +860,8 @@
           "\nContext passed to server-side {@GlobalSearchResultProvider | result provider}'s `find` method.\n"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -719,6 +886,8 @@
               ">; }"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -732,9 +901,19 @@
         "tags": [],
         "label": "GlobalSearchProviderFindOptions",
         "description": [
-          "\nOptions provided to {@link GlobalSearchResultProvider | a result provider}'s `find` method."
+          "\nOptions provided to ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "server",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-server.GlobalSearchResultProvider",
+            "text": "a result provider"
+          },
+          "'s `find` method."
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -748,6 +927,8 @@
               "\nA custom preference token associated with a search 'session' that should be used to get consistent scoring\nwhen performing calls to ES. Can also be used as a 'session' token for providers returning data from elsewhere\nthan an elasticsearch cluster."
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -765,6 +946,8 @@
               "<void>"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -782,6 +965,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -795,6 +980,8 @@
               "\nThe total maximum number of results (including all batches, not per emission) that should be returned by the provider for a given `find` request.\nAny result emitted exceeding this quota will be ignored by the service and not emitted to the consumer."
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -808,9 +995,18 @@
         "tags": [],
         "label": "GlobalSearchProviderResult",
         "description": [
-          "\nRepresentation of a result returned by a {@link GlobalSearchResultProvider | result provider}"
+          "\nRepresentation of a result returned by a ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "server",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-server.GlobalSearchResultProvider",
+            "text": "result provider"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -824,6 +1020,8 @@
               "an id that should be unique for an individual provider's results"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -837,6 +1035,8 @@
               "the title/label of the result"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -850,6 +1050,8 @@
               "the type of result"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -866,6 +1068,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -882,6 +1086,8 @@
               "string | { path: string; prependBasePath: boolean; }"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -895,6 +1101,8 @@
               "the score of the result, from 1 (lowest) to 100 (highest)"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -919,6 +1127,8 @@
               "> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -932,9 +1142,19 @@
         "tags": [],
         "label": "GlobalSearchResultProvider",
         "description": [
-          "\nGlobalSearch result provider, to be registered using the {@link GlobalSearchPluginSetup | global search API}\n"
+          "\nGlobalSearch result provider, to be registered using the ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "server",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-server.GlobalSearchPluginSetup",
+            "text": "global search API"
+          },
+          "\n"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+        "lineNumber": 103,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -948,6 +1168,8 @@
               "\nid of the provider"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -980,6 +1202,8 @@
               "[]>"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -994,7 +1218,10 @@
                   "GlobalSearchFindParams"
                 ],
                 "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+                "lineNumber": 131,
+                "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GlobalSearchProviderFindParams",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1009,7 +1236,10 @@
                   "GlobalSearchProviderFindOptions"
                 ],
                 "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+                "lineNumber": 132,
+                "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GlobalSearchProviderFindOptions",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1030,7 +1260,10 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+                "lineNumber": 133,
+                "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GlobalSearchProviderContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1044,7 +1277,15 @@
             "tags": [],
             "label": "getSearchableTypes",
             "description": [
-              "\nMethod that should return all the possible {@link GlobalSearchProviderResult.type | type} of results that\nthis provider can return."
+              "\nMethod that should return all the possible ",
+              {
+                "pluginId": "globalSearch",
+                "scope": "server",
+                "docId": "kibGlobalSearchPluginApi",
+                "section": "def-server.GlobalSearchProviderResult.type",
+                "text": "type"
+              },
+              " of results that\nthis provider can return."
             ],
             "signature": [
               "(context: ",
@@ -1058,6 +1299,8 @@
               ") => string[] | Promise<string[]>"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1078,7 +1321,10 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+                "lineNumber": 140,
+                "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "GlobalSearchProviderContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1098,6 +1344,8 @@
           "\nglobalSearch route handler context.\n"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1108,7 +1356,14 @@
             "tags": [],
             "label": "find",
             "description": [
-              "\nSee {@link SearchServiceStart.find | the find API}"
+              "\nSee ",
+              {
+                "pluginId": "globalSearch",
+                "scope": "server",
+                "docId": "kibGlobalSearchPluginApi",
+                "section": "def-server.SearchServiceStart.find",
+                "text": "the find API"
+              }
             ],
             "signature": [
               "(params: ",
@@ -1128,6 +1383,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1142,7 +1399,10 @@
                   "GlobalSearchFindParams"
                 ],
                 "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+                "lineNumber": 51,
+                "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GlobalSearchFindParams",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1163,7 +1423,10 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+                "lineNumber": 52,
+                "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GlobalSearchFindOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1177,12 +1440,21 @@
             "tags": [],
             "label": "getSearchableTypes",
             "description": [
-              "\nSee {@link SearchServiceStart.getSearchableTypes | the getSearchableTypes API}"
+              "\nSee ",
+              {
+                "pluginId": "globalSearch",
+                "scope": "server",
+                "docId": "kibGlobalSearchPluginApi",
+                "section": "def-server.SearchServiceStart.getSearchableTypes",
+                "text": "the getSearchableTypes API"
+              }
             ],
             "signature": [
               "() => Promise<string[]>"
             ],
             "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1201,12 +1473,21 @@
         "tags": [],
         "label": "GlobalSearchProviderResultUrl",
         "description": [
-          "\nStructured type for the {@link GlobalSearchProviderResult.url | provider result's url property}"
+          "\nStructured type for the ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "server",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-server.GlobalSearchProviderResult.url",
+            "text": "provider result's url property"
+          }
         ],
         "signature": [
           "string | { path: string; prependBasePath: boolean; }"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1218,7 +1499,14 @@
         "tags": [],
         "label": "GlobalSearchResult",
         "description": [
-          "\nRepresentation of a result returned by the {@link GlobalSearchPluginStart.find | `find` API}"
+          "\nRepresentation of a result returned by the ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "server",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-server.GlobalSearchPluginStart.find",
+            "text": "`find` API"
+          }
         ],
         "signature": [
           "Omit<",
@@ -1226,6 +1514,8 @@
           ", \"url\"> & { url: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 75,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1261,6 +1551,8 @@
         "<unknown, unknown, unknown, any>) => Promise<string[]>; }"
       ],
       "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+      "lineNumber": 28,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -1285,6 +1577,8 @@
         ") => void; }"
       ],
       "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+      "lineNumber": 27,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",

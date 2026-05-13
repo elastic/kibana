@@ -1,0 +1,25 @@
+{
+  "sha1": "0d2ef682f8567257fb79e7262673600d332cf05e",
+  "tests": [
+    {
+      "id": "02d80852a962c29-e415bfd276d9b51",
+      "title": "dashboard REST schema Registered embeddable schemas have not changed",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout_oas_schema/api/tests/schema.spec.ts",
+        "line": 44,
+        "column": 10
+      }
+    }
+  ]
+}

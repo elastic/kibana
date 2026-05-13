@@ -12,7 +12,7 @@ import type { EuiSelectableProps } from '@elastic/eui';
 import type { DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewsList } from './dataview_list';
-import { IUnifiedSearchPluginServices } from '../types';
+import type { IUnifiedSearchPluginServices } from '../types';
 import { ExploreMatchingButton } from './explore_matching_button';
 
 export interface DataViewSelectorProps {
@@ -93,7 +93,3 @@ export const DataViewSelector = ({
     </Fragment>
   );
 };
-
-// React.lazy support
-// eslint-disable-next-line import/no-default-export
-export default DataViewSelector;

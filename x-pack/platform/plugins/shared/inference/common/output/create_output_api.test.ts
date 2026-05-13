@@ -6,13 +6,10 @@
  */
 
 import { firstValueFrom, isObservable, of, toArray } from 'rxjs';
-import {
-  ChatCompleteResponse,
-  ChatCompletionEvent,
-  ChatCompletionEventType,
-} from '@kbn/inference-common';
+import type { ChatCompleteResponse, ChatCompletionEvent } from '@kbn/inference-common';
+import { ChatCompletionEventType } from '@kbn/inference-common';
 import { createOutputApi } from './create_output_api';
-import { createToolValidationError } from '../../server/chat_complete/errors';
+import { createToolValidationError } from '../chat_complete/errors';
 
 describe('createOutputApi', () => {
   let chatComplete: jest.Mock;
@@ -217,6 +214,32 @@ describe('createOutputApi', () => {
     expect(chatComplete).toHaveBeenCalledWith(
       expect.objectContaining({
         abortSignal: abortController.signal,
+      })
+    );
+  });
+
+  it('propagates retry options when provided', async () => {
+    chatComplete.mockResolvedValue(Promise.resolve({ content: 'content', toolCalls: [] }));
+
+    const output = createOutputApi(chatComplete);
+
+    await output({
+      id: 'id',
+      connectorId: '.my-connector',
+      input: 'input message',
+      maxRetries: 42,
+      retryConfiguration: {
+        retryOn: 'all',
+      },
+    });
+
+    expect(chatComplete).toHaveBeenCalledTimes(1);
+    expect(chatComplete).toHaveBeenCalledWith(
+      expect.objectContaining({
+        maxRetries: 42,
+        retryConfiguration: {
+          retryOn: 'all',
+        },
       })
     );
   });

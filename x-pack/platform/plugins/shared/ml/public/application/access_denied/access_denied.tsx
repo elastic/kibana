@@ -10,8 +10,8 @@ import React, { type FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiPageTemplate } from '@elastic/eui';
+import type { MlCapabilitiesKey } from '@kbn/ml-common-types/capabilities';
 import { createPermissionFailureMessage } from '../capabilities/check_capabilities';
-import type { MlCapabilitiesKey } from '../../../common/types/capabilities';
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana } from '../contexts/kibana';
 
@@ -30,6 +30,7 @@ export const AccessDeniedCallout: FC<AccessDeniedCalloutProps> = ({ missingCapab
   return (
     <>
       <EuiPageTemplate.EmptyPrompt
+        data-test-subj="mlAccessDenied"
         color={'danger'}
         alignment={'horizontalCenter'}
         iconType="warning"

@@ -7,8 +7,12 @@
 
 import type { FC } from 'react';
 import React, { useState, useContext, useEffect, useMemo } from 'react';
-import { useEuiTheme, type EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox } from '@elastic/eui';
+import {
+  useEuiTheme,
+  EuiComboBox,
+  type EuiComboBoxOptionOption,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { tabColor } from '../../../../../../../../../common/util/group_color_utils';
@@ -17,10 +21,11 @@ import { Description } from './description';
 export const GroupsInput: FC = () => {
   const { euiTheme } = useEuiTheme();
 
-  const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } =
+  const { jobCreator, jobCreatorUpdate, jobCreatorUpdated, jobValidator, jobValidatorUpdated } =
     useContext(JobCreatorContext);
   const { existingJobsAndGroups } = useContext(JobCreatorContext);
   const [selectedGroups, setSelectedGroups] = useState(jobCreator.groups);
+  const titleId = useGeneratedHtmlId({ prefix: 'groupsInput' });
 
   const validation = useMemo(() => {
     const valid =
@@ -79,8 +84,15 @@ export const GroupsInput: FC = () => {
     setSelectedGroups([...selectedOptions, newGroup].map((g) => g.label));
   }
 
+  useEffect(() => {
+    if (jobCreator.groups.join() !== selectedGroups.join()) {
+      setSelectedGroups(jobCreator.groups);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobCreatorUpdated]);
+
   return (
-    <Description validation={validation}>
+    <Description validation={validation} titleId={titleId}>
       <EuiComboBox
         placeholder={i18n.translate(
           'xpack.ml.newJob.wizard.jobDetailsStep.jobGroupSelect.placeholder',
@@ -95,6 +107,7 @@ export const GroupsInput: FC = () => {
         isClearable={true}
         isInvalid={validation.valid === false}
         data-test-subj="mlJobWizardComboBoxJobGroups"
+        aria-labelledby={titleId}
       />
     </Description>
   );

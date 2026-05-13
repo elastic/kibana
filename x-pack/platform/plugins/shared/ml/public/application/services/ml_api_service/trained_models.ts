@@ -15,70 +15,25 @@ import type {
   GetModelDownloadConfigOptions,
   ModelDefinitionResponse,
 } from '@kbn/ml-trained-models-utils';
-import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
-import type { MlSavedObjectType } from '../../../../common/types/saved_objects';
-import type { HttpService } from '../http_service';
-import { useMlKibana } from '../../contexts/kibana';
+import type { MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
 import type {
   ModelPipelines,
-  TrainedModelStat,
   NodesOverviewResponse,
   MemoryUsageInfo,
   ModelDownloadState,
   TrainedModelUIItem,
   TrainedModelConfigResponse,
   StartTrainedModelDeploymentResponse,
-} from '../../../../common/types/trained_models';
-
-export interface InferenceQueryParams {
-  from?: number;
-  size?: number;
-  tags?: string;
-  include?: 'total_feature_importance' | 'feature_importance_baseline' | string;
-}
-
-export interface InferenceStatsQueryParams {
-  from?: number;
-  size?: number;
-}
-
-export interface IngestStats {
-  count: number;
-  time_in_millis: number;
-  current: number;
-  failed: number;
-}
-
-export interface InferenceStatsResponse {
-  count: number;
-  trained_model_stats: TrainedModelStat[];
-}
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type CommonDeploymentParams = {
-  deployment_id?: string;
-  threads_per_allocation: number;
-  priority: 'low' | 'normal';
-  number_of_allocations?: number;
-};
-
-export interface AdaptiveAllocationsParams {
-  adaptive_allocations?: {
-    enabled: boolean;
-    min_number_of_allocations?: number;
-    max_number_of_allocations?: number;
-  };
-}
-
-export interface StartAllocationParams {
-  modelId: string;
-  deploymentParams: CommonDeploymentParams;
-  adaptiveAllocationsParams?: AdaptiveAllocationsParams;
-}
-
-export interface UpdateAllocationParams extends AdaptiveAllocationsParams {
-  number_of_allocations?: number;
-}
+  InferenceQueryParams,
+  InferenceStatsQueryParams,
+  InferenceStatsResponse,
+  StartAllocationParams,
+  DeleteModelParams,
+  UpdateAllocationParams,
+} from '@kbn/ml-common-types/trained_models';
+import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
+import type { HttpService } from '../http_service';
+import { useMlKibana } from '../../contexts/kibana';
 
 /**
  * Service with APIs calls to perform operations with trained models.
@@ -175,8 +130,8 @@ export function trainedModelsApiProvider(httpService: HttpService) {
     /**
      * Fetches all ingest pipelines
      */
-    getAllIngestPipelines() {
-      return httpService.http<NodesOverviewResponse>({
+    getAllIngestPipelines(): Promise<string[]> {
+      return httpService.http<string[]>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/ingest_pipelines`,
         method: 'GET',
         version: '1',
@@ -199,13 +154,13 @@ export function trainedModelsApiProvider(httpService: HttpService) {
      * Deletes an existing trained inference model.
      * @param modelId - Model ID
      */
-    deleteTrainedModel(
-      modelId: string,
-      options: { with_pipelines?: boolean; force?: boolean } = {
+    deleteTrainedModel({
+      modelId,
+      options = {
         with_pipelines: false,
         force: false,
-      }
-    ) {
+      },
+    }: DeleteModelParams) {
       return httpService.http<{ acknowledge: boolean }>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/${modelId}`,
         method: 'DELETE',
@@ -243,7 +198,13 @@ export function trainedModelsApiProvider(httpService: HttpService) {
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/${modelId}/deployment/_start`,
         method: 'POST',
         query: deploymentParams,
-        ...(adaptiveAllocationsParams ? { body: JSON.stringify(adaptiveAllocationsParams) } : {}),
+        ...(adaptiveAllocationsParams
+          ? {
+              body: JSON.stringify({
+                adaptive_allocations: adaptiveAllocationsParams,
+              }),
+            }
+          : {}),
         version: '1',
       });
     },
@@ -266,7 +227,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
     },
 
     updateModelDeployment(modelId: string, deploymentId: string, params: UpdateAllocationParams) {
-      return httpService.http<{ acknowledge: boolean }>({
+      return httpService.http<estypes.MlUpdateTrainedModelDeploymentResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/${modelId}/${deploymentId}/deployment/_update`,
         method: 'POST',
         body: JSON.stringify(params),

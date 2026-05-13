@@ -7,23 +7,27 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { EuiText, type EuiStepProps, type EuiStepStatus } from '@elastic/eui';
+import { useGetMissingResources } from '../../../../../../../common/hooks/use_get_missing_resources';
 import type { RuleMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import { useGetMissingResources } from '../../../../../../service/hooks/use_get_missing_resources';
-import type { OnMissingResourcesFetched } from '../../../../types';
 import * as i18n from './translations';
+import { MigrationSource, type OnMissingResourcesFetched } from '../../../../../../../common/types';
 
 export interface CheckResourcesStepProps {
   status: EuiStepStatus;
   migrationStats: RuleMigrationTaskStats | undefined;
   onMissingResourcesFetched: OnMissingResourcesFetched;
+  migrationSource?: MigrationSource;
 }
 export const useCheckResourcesStep = ({
   status,
   migrationStats,
+  migrationSource,
   onMissingResourcesFetched,
 }: CheckResourcesStepProps): EuiStepProps => {
-  const { getMissingResources, isLoading, error } =
-    useGetMissingResources(onMissingResourcesFetched);
+  const { getMissingResources, isLoading, error } = useGetMissingResources(
+    'rule',
+    onMissingResourcesFetched
+  );
 
   useEffect(() => {
     if (status === 'current' && migrationStats?.id) {
@@ -41,12 +45,24 @@ export const useCheckResourcesStep = ({
     return status;
   }, [isLoading, error, status]);
 
+  if (migrationSource === MigrationSource.QRADAR) {
+    return {
+      title: i18n.RULES_DATA_INPUT_CHECK_RESOURCES_QRADAR_TITLE,
+      status: uploadStepStatus,
+      children: (
+        <EuiText size="s" data-test-subj="checkResourcesDescription">
+          {i18n.RULES_DATA_INPUT_CHECK_RESOURCES_QRADAR_DESCRIPTION}
+        </EuiText>
+      ),
+    };
+  }
+
   return {
-    title: i18n.RULES_DATA_INPUT_CHECK_RESOURCES_TITLE,
+    title: i18n.RULES_DATA_INPUT_CHECK_RESOURCES_SPLUNK_TITLE,
     status: uploadStepStatus,
     children: (
-      <EuiText size="xs" color="subdued">
-        {i18n.RULES_DATA_INPUT_CHECK_RESOURCES_DESCRIPTION}
+      <EuiText size="s" data-test-subj="checkResourcesDescription">
+        {i18n.RULES_DATA_INPUT_CHECK_RESOURCES_SPLUNK_DESCRIPTION}
       </EuiText>
     ),
   };

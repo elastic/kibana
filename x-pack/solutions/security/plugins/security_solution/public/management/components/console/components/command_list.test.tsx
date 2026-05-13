@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { act } from '@testing-library/react';
 import type { ConsoleTestSetup, HelpSidePanelSelectorsAndActions } from '../mocks';
 import {
   getCommandListMock,
@@ -35,6 +36,7 @@ describe('When rendering the command list (help output)', () => {
       renderAndOpenHelpPanel = (props) => {
         render(props);
         helpPanelSelectors = getHelpSidePanelSelectorsAndActionsMock(renderResult);
+
         consoleSelectors.openHelpPanel();
 
         return renderResult;
@@ -67,10 +69,12 @@ describe('When rendering the command list (help output)', () => {
       renderAndOpenHelpPanel();
 
       expect(renderResult.getByTestId('test-commandList-helpfulTips')).toHaveTextContent(
-        'Helpful tips:You can enter consecutive response actions — no need to wait for previous ' +
-          'actions to complete.Leaving the response console does not terminate any actions that have ' +
-          'been submitted.Learn more(external, opens in a new tab or window) about response actions ' +
-          'and using the console.'
+        'Helpful tips:' +
+          'Escape values with double dashes (--) as \\-\\-, unless they are command arguments; ' +
+          'otherwise the console interprets them as arguments.' +
+          'You can enter consecutive response actions — no need to wait for previous actions to complete.' +
+          'Leaving the response console does not terminate any actions that have been submitted.' +
+          'Learn more(external, opens in a new tab or window) about response actions and using the console.'
       );
 
       expect(renderResult.getByTestId('test-commandList-helpfulHintDocLink')).toBeTruthy();
@@ -121,7 +125,10 @@ describe('When rendering the command list (help output)', () => {
 
     it('should add command to console input when [+] button is clicked', () => {
       renderAndOpenHelpPanel();
-      renderResult.getByTestId('test-commandList-group1-cmd6-addToInput').click();
+      act(() => {
+        renderResult.getByTestId('test-commandList-group1-cmd6-addToInput').click();
+      });
+
       expect(consoleSelectors.getInputText()).toEqual('cmd6 --foo ');
     });
 

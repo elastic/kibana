@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiCommentList } from '@elastic/eui';
 import React from 'react';
+import { EuiCommentList } from '@elastic/eui';
+import { screen } from '@testing-library/react';
 import { UserActionActions } from '../../../common/types/domain';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
+import { renderWithTestingProviders } from '../../common/mock';
 import { getUserAction } from '../../containers/mock';
 import { getMockBuilderArgs } from './mock';
 import { createSettingsUserActionBuilder } from './settings';
@@ -17,23 +18,51 @@ import { createSettingsUserActionBuilder } from './settings';
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
 
-describe('createStatusUserActionBuilder ', () => {
+describe('createSettingsUserActionBuilder ', () => {
   const builderArgs = getMockBuilderArgs();
-  let appMock: AppMockRenderer;
 
   beforeEach(() => {
-    appMock = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   const tests = [
+    [false, 'disabled', false, 'disabled'],
+    [false, 'disabled', true, 'enabled'],
+    [true, 'enabled', false, 'disabled'],
+    [true, 'enabled', true, 'enabled'],
+  ];
+
+  const tests2 = [
     [false, 'disabled'],
     [true, 'enabled'],
   ];
 
   it.each(tests)(
-    'renders correctly when changed setting sync-alerts to %s',
-    async (syncAlerts, label) => {
+    'renders correctly when both settings are changed',
+    async (syncAlerts, syncAlertsLabel, extractObservables, extractObservablesLabel) => {
+      const userAction = getUserAction('settings', UserActionActions.update, {
+        payload: { settings: { syncAlerts, extractObservables } },
+      });
+      const builder = createSettingsUserActionBuilder({
+        ...builderArgs,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByTestId('settings-update-action-settings-update')).toBeTruthy();
+      expect(
+        screen.getByText(
+          `${syncAlertsLabel} sync alerts, ${extractObservablesLabel} extract observables`
+        )
+      ).toBeTruthy();
+    }
+  );
+
+  it.each(tests2)(
+    'renders correctly when sync alerts is changed and extract observables is not changed',
+    async (syncAlerts, syncAlertsLabel) => {
       const userAction = getUserAction('settings', UserActionActions.update, {
         payload: { settings: { syncAlerts } },
       });
@@ -43,10 +72,27 @@ describe('createStatusUserActionBuilder ', () => {
       });
 
       const createdUserAction = builder.build();
-      const result = appMock.render(<EuiCommentList comments={createdUserAction} />);
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(result.getByTestId('settings-update-action-settings-update')).toBeTruthy();
-      expect(result.getByText(`${label} sync alerts`)).toBeTruthy();
+      expect(screen.getByText(`${syncAlertsLabel} sync alerts`)).toBeTruthy();
+    }
+  );
+
+  it.each(tests2)(
+    'renders correctly when extract observables is changed and sync alerts is not changed',
+    async (extractObservables, extractObservablesLabel) => {
+      const userAction = getUserAction('settings', UserActionActions.update, {
+        payload: { settings: { extractObservables } },
+      });
+      const builder = createSettingsUserActionBuilder({
+        ...builderArgs,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByText(`${extractObservablesLabel} extract observables`)).toBeTruthy();
     }
   );
 });

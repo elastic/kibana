@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDeleteRules } from '../../../hooks/use_delete_rules';
 
@@ -29,6 +29,8 @@ export function DeleteConfirmationModal({
 
   const { mutateAsync: deleteRules } = useDeleteRules();
 
+  const modalTitleId = useGeneratedHtmlId();
+
   const handleConfirm = async () => {
     if (ruleIdToDelete) {
       setIsVisible(false);
@@ -43,6 +45,8 @@ export function DeleteConfirmationModal({
 
   return isVisible ? (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       buttonColor="danger"
       data-test-subj="deleteIdsConfirmation"
       title={i18n.translate('xpack.observability.rules.deleteConfirmationModal.descriptionText', {

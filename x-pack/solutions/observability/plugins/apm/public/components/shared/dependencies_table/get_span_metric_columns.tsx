@@ -5,11 +5,11 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, RIGHT_ALIGNMENT } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { listMetricColumnPreset, impactColumnPreset } from '../../../utils/column_presets';
 import { ChartType, getTimeSeriesColor } from '../charts/helper/get_timeseries_color';
 import { ListMetric } from '../list_metric';
-import type { ITableColumn } from '../managed_table';
 import type { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { isPending } from '../../../hooks/use_fetcher';
 import {
@@ -20,6 +20,7 @@ import {
 import type { Coordinate } from '../../../../typings/timeseries';
 import { ImpactBar } from '../impact_bar';
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
+import type { ITableColumn } from '../managed_table';
 
 export interface SpanMetricGroup {
   latency: number | null;
@@ -28,17 +29,17 @@ export interface SpanMetricGroup {
   impact: number | null;
   currentStats:
     | {
-        latency: Coordinate[];
-        throughput: Coordinate[];
-        failureRate: Coordinate[];
+        latency?: Coordinate[];
+        throughput?: Coordinate[];
+        failureRate?: Coordinate[];
       }
     | undefined;
   previousStats:
     | {
-        latency: Coordinate[];
-        throughput: Coordinate[];
-        failureRate: Coordinate[];
-        impact: number;
+        latency?: Coordinate[];
+        throughput?: Coordinate[];
+        failureRate?: Coordinate[];
+        impact?: number;
       }
     | undefined;
 }
@@ -54,11 +55,11 @@ export function getSpanMetricColumns({
 
   return [
     {
+      ...listMetricColumnPreset(),
       field: 'latency',
       name: i18n.translate('xpack.apm.dependenciesTable.columnLatency', {
         defaultMessage: 'Latency (avg.)',
       }),
-      align: RIGHT_ALIGNMENT,
       render: (_, { latency, currentStats, previousStats }) => {
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
           ChartType.LATENCY_AVG
@@ -80,11 +81,11 @@ export function getSpanMetricColumns({
       sortable: true,
     },
     {
+      ...listMetricColumnPreset(),
       field: 'throughput',
       name: i18n.translate('xpack.apm.dependenciesTable.columnThroughput', {
         defaultMessage: 'Throughput',
       }),
-      align: RIGHT_ALIGNMENT,
       render: (_, { throughput, currentStats, previousStats }) => {
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
           ChartType.THROUGHPUT
@@ -106,26 +107,17 @@ export function getSpanMetricColumns({
       sortable: true,
     },
     {
+      ...listMetricColumnPreset(),
       field: 'failureRate',
-      name: (
-        <>
-          {i18n.translate('xpack.apm.dependenciesTable.columnErrorRate', {
-            defaultMessage: 'Failed transaction rate',
-          })}
-          &nbsp;
-          <EuiIconTip
-            size="s"
-            color="subdued"
-            type="questionInCircle"
-            content={i18n.translate('xpack.apm.dependenciesTable.columnErrorRateTip', {
-              defaultMessage:
-                "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
-            })}
-            className="eui-alignCenter"
-          />
-        </>
-      ),
-      align: RIGHT_ALIGNMENT,
+      name: i18n.translate('xpack.apm.dependenciesTable.columnErrorRate', {
+        defaultMessage: 'Failed transaction rate',
+      }),
+      nameTooltip: {
+        content: i18n.translate('xpack.apm.dependenciesTable.columnErrorRateTip', {
+          defaultMessage:
+            "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
+        }),
+      },
       render: (_, { failureRate, currentStats, previousStats }) => {
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
           ChartType.FAILED_TRANSACTION_RATE
@@ -147,26 +139,17 @@ export function getSpanMetricColumns({
       sortable: true,
     },
     {
+      ...impactColumnPreset(),
       field: 'impact',
-      name: (
-        <>
-          {i18n.translate('xpack.apm.dependenciesTable.columnImpact', {
-            defaultMessage: 'Impact',
-          })}
-          &nbsp;
-          <EuiIconTip
-            size="s"
-            color="subdued"
-            type="questionInCircle"
-            className="eui-alignCenter"
-            content={i18n.translate('xpack.apm.dependenciesTable.columnImpactTip', {
-              defaultMessage:
-                'The most used and slowest endpoints in your service. Calculated by multiplying latency by throughput.',
-            })}
-          />
-        </>
-      ),
-      align: RIGHT_ALIGNMENT,
+      name: i18n.translate('xpack.apm.dependenciesTable.columnImpact', {
+        defaultMessage: 'Impact',
+      }),
+      nameTooltip: {
+        content: i18n.translate('xpack.apm.dependenciesTable.columnImpactTip', {
+          defaultMessage:
+            'The most used and slowest endpoints in your service. Calculated by multiplying latency by throughput.',
+        }),
+      },
       render: (_, { impact, previousStats }) => {
         return (
           <EuiFlexGroup alignItems="flexEnd" gutterSize="xs" direction="column">

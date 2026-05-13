@@ -19,25 +19,29 @@ import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import { replaceParamsQuery } from '../../../common/utils/replace_params_query';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { StartPlugins } from '../../types';
 import { createActionHandler } from '../../handlers';
 import { parser as OsqueryParser } from './osquery_parser';
+import { getUserInfo } from '../../lib/get_user_info';
+import { isOsqueryResponseActionAuthorized } from '../../lib/check_response_action_authz';
+import { createLiveQueryResponseSchema } from './response_schemas';
 
 export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
     .post({
       access: 'public',
       path: '/api/osquery/live_queries',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'We do the check for 2 different scenarios below (const isInvalid): writeLiveQueries and runSavedQueries with saved_query_id, or pack_id',
+        },
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'We do the check for 2 different scenarios below (const isInvalid): writeLiveQueries and runSavedQueries with saved_query_id, or pack_id',
-          },
-        },
         validate: {
           request: {
             body: buildRouteValidation<
@@ -45,23 +49,20 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
               CreateLiveQueryRequestBodySchema
             >(createLiveQueryRequestBodySchema),
           },
+          response: {
+            200: {
+              body: () => createLiveQueryResponseSchema,
+            },
+          },
         },
       },
       async (context, request, response) => {
-        const [coreStartServices] = await osqueryContext.getStartServices();
-        const coreContext = await context.core;
-        const soClient = coreContext.savedObjects.client;
+        const [coreStartServices, startPlugins] = await osqueryContext.getStartServices();
 
-        const {
-          osquery: { writeLiveQueries, runSavedQueries },
-        } = await coreStartServices.capabilities.resolveCapabilities(request, {
-          capabilityPath: 'osquery.*',
-        });
-
-        const isInvalid = !(
-          writeLiveQueries ||
-          (runSavedQueries && (request.body.saved_query_id || request.body.pack_id))
-        );
+        const isInvalid = !(await isOsqueryResponseActionAuthorized(coreStartServices, request, {
+          saved_query_id: request.body.saved_query_id,
+          pack_id: request.body.pack_id,
+        }));
 
         const client = await osqueryContext.service
           .getRuleRegistryService()
@@ -114,14 +115,22 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         }
 
         try {
-          const currentUser = coreContext.security.authc.getCurrentUser()?.username;
+          const securityStart = (startPlugins as StartPlugins).security;
+          const currentUser = await getUserInfo({
+            request,
+            security: securityStart,
+            logger: osqueryContext.logFactory.get('liveQuery'),
+          });
+          const username = currentUser?.username ?? undefined;
+          const userProfileUid = currentUser?.profile_uid ?? undefined;
+          const space = await osqueryContext.service.getActiveSpace(request);
           const { response: osqueryAction, fleetActionsCount } = await createActionHandler(
             osqueryContext,
             request.body,
             {
-              soClient,
-              metadata: { currentUser },
+              metadata: { currentUser: username, userProfileUid },
               alertData,
+              space,
             }
           );
           if (!fleetActionsCount) {

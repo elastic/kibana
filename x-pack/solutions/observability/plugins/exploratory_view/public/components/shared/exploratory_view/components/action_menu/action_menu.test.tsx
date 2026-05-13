@@ -10,7 +10,7 @@ import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 import { sampleAttribute } from '../../configurations/test_data/sample_attribute';
 import * as pluginHook from '../../../../../hooks/use_plugin_context';
-import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { ExpViewActionMenuContent } from './action_menu';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 
@@ -60,7 +60,7 @@ describe('Action Menu', function () {
       {
         id: '',
         attributes: sampleAttribute,
-        timeRange: { to: 'now', from: 'now-10m' },
+        time_range: { to: 'now', from: 'now-10m' },
       },
       {
         openInNewTab: true,

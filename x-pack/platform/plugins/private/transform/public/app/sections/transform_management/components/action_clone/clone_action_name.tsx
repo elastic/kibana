@@ -27,7 +27,7 @@ export const CloneActionName: FC<CloneActionNameProps> = ({ disabled }) => {
   if (disabled) {
     return (
       <EuiToolTip position="top" content={createCapabilityFailureMessage('canStartStopTransform')}>
-        <>{cloneActionNameText}</>
+        <span tabIndex={0}>{cloneActionNameText}</span>
       </EuiToolTip>
     );
   }

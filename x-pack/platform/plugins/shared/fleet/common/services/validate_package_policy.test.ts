@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 
 import { installationStatuses } from '../constants';
 import type {
@@ -20,6 +20,7 @@ import {
   validatePackagePolicy,
   validatePackagePolicyConfig,
   validationHasErrors,
+  parseDuration,
 } from './validate_package_policy';
 import { AWS_PACKAGE, INVALID_AWS_POLICY, VALID_AWS_POLICY } from './fixtures/aws_package';
 
@@ -387,13 +388,13 @@ describe('Fleet - validatePackagePolicy()', () => {
     };
 
     it('returns no errors for valid package policy', () => {
-      expect(validatePackagePolicy(validPackagePolicy, mockPackage, load)).toEqual(
+      expect(validatePackagePolicy(validPackagePolicy, mockPackage, parse)).toEqual(
         noErrorsValidationResults
       );
     });
 
     it('returns errors for invalid package policy', () => {
-      expect(validatePackagePolicy(invalidPackagePolicy, mockPackage, load)).toEqual({
+      expect(validatePackagePolicy(invalidPackagePolicy, mockPackage, parse)).toEqual({
         name: ['Name is required'],
         description: null,
         namespace: null,
@@ -441,7 +442,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         enabled: false,
       }));
       expect(
-        validatePackagePolicy({ ...validPackagePolicy, inputs: disabledInputs }, mockPackage, load)
+        validatePackagePolicy({ ...validPackagePolicy, inputs: disabledInputs }, mockPackage, parse)
       ).toEqual(noErrorsValidationResults);
     });
 
@@ -458,7 +459,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         validatePackagePolicy(
           { ...invalidPackagePolicy, inputs: inputsWithDisabledStreams },
           mockPackage,
-          load
+          parse
         )
       ).toEqual({
         name: ['Name is required'],
@@ -512,7 +513,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             ...mockPackage,
             policy_templates: undefined,
           },
-          load
+          parse
         )
       ).toEqual({
         name: null,
@@ -529,7 +530,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             ...mockPackage,
             policy_templates: [],
           },
-          load
+          parse
         )
       ).toEqual({
         name: null,
@@ -549,7 +550,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             ...mockPackage,
             policy_templates: [{} as RegistryPolicyTemplate],
           },
-          load
+          parse
         )
       ).toEqual({
         name: null,
@@ -566,7 +567,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             ...mockPackage,
             policy_templates: [{ inputs: [] } as unknown as RegistryPolicyTemplate],
           },
-          load
+          parse
         )
       ).toEqual({
         name: null,
@@ -604,7 +605,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             ],
           },
           mockPackage,
-          load
+          parse
         )
       ).toEqual({
         name: null,
@@ -630,135 +631,6 @@ describe('Fleet - validatePackagePolicy()', () => {
         vars: {},
       });
     });
-
-    // TODO enable when https://github.com/elastic/kibana/issues/125655 is fixed
-    it.skip('returns package policy validation error if input var does not exist', () => {
-      expect(
-        validatePackagePolicy(
-          {
-            description: 'Linux Metrics',
-            enabled: true,
-            inputs: [
-              {
-                enabled: true,
-                streams: [
-                  {
-                    data_stream: {
-                      dataset: 'linux.memory',
-                      type: 'metrics',
-                    },
-                    enabled: true,
-                  },
-                ],
-                type: 'linux/metrics',
-                vars: {
-                  period: {
-                    type: 'string',
-                    value: '1s',
-                  },
-                },
-              },
-            ],
-            name: 'linux-3d13ada6-a9ae-46df-8e57-ff5050f4b671',
-            namespace: 'default',
-            package: {
-              name: 'linux',
-              title: 'Linux Metrics',
-              version: '0.6.2',
-            },
-            policy_id: 'b25cb6e0-8347-11ec-96f9-6590c25bacf9',
-            policy_ids: ['b25cb6e0-8347-11ec-96f9-6590c25bacf9'],
-          },
-          {
-            ...mockPackage,
-            name: 'linux',
-            policy_templates: [
-              {
-                name: 'system',
-                title: 'Linux kernel metrics',
-                description: 'Collect system metrics from Linux operating systems',
-                inputs: [
-                  {
-                    title: 'Collect system metrics from Linux instances',
-                    vars: [
-                      {
-                        name: 'system.hostfs',
-                        type: 'text',
-                        title: 'Proc Filesystem Directory',
-                        multi: false,
-                        required: false,
-                        show_user: true,
-                        description: 'The proc filesystem base directory.',
-                      },
-                    ],
-                    type: 'system/metrics',
-                    description:
-                      'Collecting Linux entropy, Network Summary, RAID, service, socket, and users metrics',
-                  },
-                  {
-                    title: 'Collect low-level system metrics from Linux instances',
-                    vars: [],
-                    type: 'linux/metrics',
-                    description: 'Collecting Linux conntrack, ksm, pageinfo metrics.',
-                  },
-                ],
-                multiple: true,
-              },
-            ],
-            data_streams: [
-              {
-                dataset: 'linux.memory',
-                package: 'linux',
-                path: 'memory',
-                streams: [
-                  {
-                    input: 'linux/metrics',
-                    title: 'Linux memory metrics',
-                    vars: [
-                      {
-                        name: 'period',
-                        type: 'text',
-                        title: 'Period',
-                        multi: false,
-                        required: true,
-                        show_user: true,
-                        default: '10s',
-                      },
-                    ],
-                    template_path: 'stream.yml.hbs',
-                    description: 'Linux paging and memory management metrics',
-                  },
-                ],
-                title: 'Linux-only memory metrics',
-                release: 'experimental',
-                type: 'metrics',
-              },
-            ],
-          },
-          load
-        )
-      ).toEqual({
-        description: null,
-        additional_datastreams_permissions: null,
-        inputs: {
-          'linux/metrics': {
-            streams: {
-              'linux.memory': {
-                vars: {
-                  period: ['Period is required'],
-                },
-              },
-            },
-            vars: {
-              period: ['period var definition does not exist'],
-            },
-          },
-        },
-        vars: {},
-        name: null,
-        namespace: null,
-      });
-    });
   });
 
   describe('works for packages with multiple policy templates (aka integrations)', () => {
@@ -767,7 +639,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         validatePackagePolicy(
           INVALID_AWS_POLICY as NewPackagePolicy,
           AWS_PACKAGE as unknown as PackageInfo,
-          load
+          parse
         )
       ).toMatchSnapshot();
     });
@@ -778,10 +650,119 @@ describe('Fleet - validatePackagePolicy()', () => {
           validatePackagePolicy(
             VALID_AWS_POLICY as NewPackagePolicy,
             AWS_PACKAGE as unknown as PackageInfo,
-            load
+            parse
           )
         )
       ).toBe(false);
+    });
+  });
+
+  describe('works for inputs with same type but different ids', () => {
+    const packageWithDuplicateTypeInputs: PackageInfo = {
+      name: 'nginx',
+      title: 'Nginx',
+      version: '1.0.0',
+      latestVersion: '1.0.0',
+      description: 'Nginx integration',
+      type: 'integration',
+      categories: [],
+      conditions: { kibana: { version: '' } },
+      format_version: '',
+      download: '',
+      path: '',
+      assets: { kibana: {} as any, elasticsearch: {} as any },
+      status: 'not_installed',
+      release: 'ga',
+      owner: { github: 'elastic/fleet' },
+      policy_templates: [
+        {
+          name: 'nginx',
+          title: 'Nginx',
+          description: 'Nginx logs and metrics',
+          data_streams: ['access', 'stubstatus'],
+          inputs: [
+            {
+              name: 'filelog_otel',
+              type: 'otelcol',
+              title: 'Logs via filelog',
+              description: 'Collect logs',
+              vars: [{ name: 'log_path', type: 'text', required: true }],
+            },
+            {
+              name: 'nginx_otel',
+              type: 'otelcol',
+              title: 'Metrics via nginx receiver',
+              description: 'Collect metrics',
+              vars: [{ name: 'endpoint', type: 'text', required: true }],
+            },
+          ],
+        },
+      ] as unknown as RegistryPolicyTemplate[],
+      data_streams: [
+        {
+          type: 'logs',
+          dataset: 'nginx.access',
+          title: 'Access logs',
+          path: 'access',
+          release: 'ga',
+          package: 'nginx',
+          streams: [{ input: 'filelog_otel', title: 'Access logs', vars: [] }],
+        },
+        {
+          type: 'metrics',
+          dataset: 'nginx.stubstatus',
+          title: 'Stub status',
+          path: 'stubstatus',
+          release: 'ga',
+          package: 'nginx',
+          streams: [{ input: 'nginx_otel', title: 'Stub status', vars: [] }],
+        },
+      ] as any,
+    };
+
+    it('validates each input independently using name as key', () => {
+      const packagePolicy: NewPackagePolicy = {
+        name: 'nginx-1',
+        namespace: 'default',
+        policy_ids: ['policy1'],
+        enabled: true,
+        inputs: [
+          {
+            type: 'otelcol',
+            name: 'filelog_otel',
+            policy_template: 'nginx',
+            enabled: true,
+            vars: { log_path: { value: '/var/log/nginx/access.log' } },
+            streams: [
+              {
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'nginx.access' },
+              },
+            ],
+          },
+          {
+            type: 'otelcol',
+            name: 'nginx_otel',
+            policy_template: 'nginx',
+            enabled: true,
+            vars: { endpoint: { value: undefined } },
+            streams: [
+              {
+                enabled: true,
+                data_stream: { type: 'metrics', dataset: 'nginx.stubstatus' },
+              },
+            ],
+          },
+        ],
+      };
+
+      const result = validatePackagePolicy(packagePolicy, packageWithDuplicateTypeInputs, parse);
+
+      // The first input (filelog_otel) has a valid var, so no error
+      // Single policy template packages use just the effectiveName as key (no template prefix)
+      expect(result.inputs?.filelog_otel?.vars?.log_path).toBeNull();
+      // The second input (nginx_otel) has an empty required var, so it should error
+      expect(result.inputs?.nginx_otel?.vars?.endpoint).not.toBeNull();
     });
   });
 });
@@ -958,7 +939,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
     const validationResults = validatePackagePolicy(
       invalidPackagePolicyWithRequiredVars,
       mockPackageInfoRequireVars,
-      load
+      parse
     );
 
     expect(validationResults).toEqual({
@@ -1058,7 +1039,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
     const validationResults = validatePackagePolicy(
       invalidPackagePolicyWithRequiredVars,
       mockPackageInfoRequireVars,
-      load
+      parse
     );
 
     expect(validationResults).toEqual({
@@ -1162,7 +1143,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
     const validationResults = validatePackagePolicy(
       invalidPackagePolicyWithRequiredVars,
       mockPackageInfoRequireVars,
-      load
+      parse
     );
 
     expect(validationResults).toEqual({
@@ -1256,7 +1237,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
     const validationResults = validatePackagePolicy(
       invalidPackagePolicyWithRequiredVars,
       mockPackageInfoRequireVars,
-      load
+      parse
     );
 
     expect(validationResults).toEqual({
@@ -1395,6 +1376,82 @@ describe('Fleet - validationHasErrors()', () => {
 });
 
 describe('Fleet - validatePackagePolicyConfig', () => {
+  describe('Text', () => {
+    it('should return required error message for undefined variable', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: undefined,
+        },
+        {
+          name: 'myvariable',
+          type: 'text',
+          multi: false,
+          required: true,
+        },
+        'myvariable',
+        parse
+      );
+
+      expect(res).toEqual(['myvariable is required']);
+    });
+
+    it('should accept empty string', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: '',
+        },
+        {
+          name: 'myvariable',
+          type: 'text',
+          multi: false,
+          required: true,
+        },
+        'myvariable',
+        parse
+      );
+
+      expect(res).toBeNull();
+    });
+    it('should accept blank spaces', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: '  ',
+        },
+        {
+          name: 'myvariable',
+          type: 'text',
+          multi: false,
+          required: true,
+        },
+        'myvariable',
+        parse
+      );
+
+      expect(res).toBeNull();
+    });
+
+    it('should accept string', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: 'some text',
+        },
+        {
+          name: 'myvariable',
+          type: 'text',
+          multi: false,
+          required: true,
+        },
+        'myvariable',
+        parse
+      );
+
+      expect(res).toBeNull();
+    });
+  });
   describe('Multi Text', () => {
     it('should return required error message for empty string', () => {
       const res = validatePackagePolicyConfig(
@@ -1409,7 +1466,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           required: true,
         },
         'myvariable',
-        load
+        parse
       );
 
       expect(res).toEqual(['myvariable is required']);
@@ -1428,7 +1485,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           required: true,
         },
         'myvariable',
-        load
+        parse
       );
 
       expect(res).toEqual(['myvariable is required']);
@@ -1447,7 +1504,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           required: true,
         },
         'myvariable',
-        load
+        parse
       );
 
       expect(res).toBeNull();
@@ -1466,7 +1523,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           type: 'integer',
         },
         'myvariable',
-        load
+        parse
       );
 
       expect(res).toEqual(['Invalid integer']);
@@ -1483,7 +1540,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           type: 'integer',
         },
         'myvariable',
-        load
+        parse
       );
 
       expect(res).toBeNull();
@@ -1501,7 +1558,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           multi: true,
         },
         'myvariable',
-        load
+        parse
       );
 
       expect(res).toEqual(['Invalid integer']);
@@ -1519,7 +1576,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           multi: true,
         },
         'myvariable',
-        load
+        parse
       );
 
       expect(res).toBeNull();
@@ -1542,7 +1599,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           ],
         },
         'myvariable',
-        load
+        parse
       );
 
       expect(res).toEqual(['Invalid value for select type']);
@@ -1563,7 +1620,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           ],
         },
         'myvariable',
-        load
+        parse
       );
 
       expect(res).toEqual(['Invalid value for select type']);
@@ -1584,7 +1641,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           ],
         },
         'myvariable',
-        load
+        parse
       );
 
       expect(res).toBeNull();
@@ -1605,12 +1662,12 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           ],
         },
         'myvariable',
-        load
+        parse
       );
 
       expect(res).toBeNull();
     });
-    it('should accept a secret ref instead of a text value for a secret field', () => {
+    it('should accept a secret ref id instead of a text value for a secret field', () => {
       const res = validatePackagePolicyConfig(
         {
           value: { isSecretRef: true, id: 'secret1' },
@@ -1621,12 +1678,29 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           secret: true,
         },
         'secret_variable',
-        load
+        parse
       );
 
       expect(res).toBeNull();
     });
-    it('secret refs should always have an id', () => {
+    it('should accept secret ref ids instead of a text value for a secret field', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          value: { isSecretRef: true, ids: ['secret1', 'secret2'] },
+        },
+        {
+          name: 'secret_variable',
+          type: 'text',
+          multi: true,
+          secret: true,
+        },
+        'secret_variable',
+        parse
+      );
+
+      expect(res).toBeNull();
+    });
+    it('secret refs should always have an id or ids', () => {
       const res = validatePackagePolicyConfig(
         {
           value: { isSecretRef: true },
@@ -1637,10 +1711,10 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           secret: true,
         },
         'secret_variable',
-        load
+        parse
       );
 
-      expect(res).toEqual(['Secret reference is invalid, id must be a string']);
+      expect(res).toEqual(['Secret reference is invalid, id or ids must be provided']);
     });
     it('secret ref id should be a string', () => {
       const res = validatePackagePolicyConfig(
@@ -1653,10 +1727,224 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           secret: true,
         },
         'secret_variable',
-        load
+        parse
       );
 
       expect(res).toEqual(['Secret reference is invalid, id must be a string']);
+    });
+    it('secret ref ids should all be strings', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          value: { isSecretRef: true, ids: ['someid', 123] },
+        },
+        {
+          name: 'secret_variable',
+          type: 'text',
+          multi: true,
+          secret: true,
+        },
+        'secret_variable',
+        parse
+      );
+
+      expect(res).toEqual(['Secret reference is invalid, ids must be an array of strings']);
+    });
+  });
+
+  describe('Duration', () => {
+    it('should validate a valid duration format', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '1h30m45s',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+        },
+        'timeout',
+        parse
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should validate a valid duration with milliseconds', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '2h15m30s500ms',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+        },
+        'timeout',
+        parse
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should validate a valid duration with a single unit', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '60s',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+        },
+        'timeout',
+        parse
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should return error for invalid duration format', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: 'invalid',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+        },
+        'timeout',
+        parse
+      );
+
+      expect(res).toContain('Invalid duration format. Expected format like "1h30m45s"');
+    });
+
+    it('should validate duration with min_duration constraint (valid)', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '1h30m',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+          min_duration: '1h',
+        },
+        'timeout',
+        parse
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should return error for duration below min_duration', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '30m',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+          min_duration: '1h',
+        },
+        'timeout',
+        parse
+      );
+
+      expect(res).toContain('Duration is below the minimum allowed value of 1h');
+    });
+
+    it('should validate duration with max_duration constraint (valid)', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '1h30m',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+          max_duration: '2h',
+        },
+        'timeout',
+        parse
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should return error for duration above max_duration', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '3h',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+          max_duration: '2h',
+        },
+        'timeout',
+        parse
+      );
+
+      expect(res).toContain('Duration is above the maximum allowed value of 2h');
+    });
+
+    it('should validate duration with both min and max constraints (valid)', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '1h30m',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+          min_duration: '1h',
+          max_duration: '2h',
+        },
+        'timeout',
+        parse
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should return error for invalid min_duration specification', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '1h30m',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+          min_duration: 'invalid',
+        },
+        'timeout',
+        parse
+      );
+
+      expect(res).toContain('Invalid min_duration specification');
+    });
+
+    it('should return error for invalid max_duration specification', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '1h30m',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+          max_duration: 'invalid',
+        },
+        'timeout',
+        parse
+      );
+
+      expect(res).toContain('Invalid max_duration specification');
     });
   });
 
@@ -1674,7 +1962,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           type: 'text',
         },
         'data_stream.dataset',
-        load,
+        parse,
         'input'
       );
     };
@@ -1720,7 +2008,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           type: 'text',
         },
         'data_stream.dataset',
-        load,
+        parse,
         'input'
       );
 
@@ -1738,7 +2026,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           type: 'text',
         },
         'data_stream.dataset',
-        load,
+        parse,
         'integration'
       );
 
@@ -1756,7 +2044,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           type: 'text',
         },
         'test_field',
-        load,
+        parse,
         'input'
       );
 
@@ -1774,7 +2062,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           type: 'text',
         },
         'data_stream.dataset',
-        load,
+        parse,
         'input'
       );
 
@@ -1792,11 +2080,473 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           type: 'text',
         },
         'data_stream.dataset',
-        load,
+        parse,
         'input'
       );
 
       expect(res).toEqual(['Dataset contains invalid characters']);
     });
+  });
+
+  describe('URL validation', () => {
+    it('should not return an error message for a valid URL', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'https://example.com',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+        },
+        'test_url',
+        parse
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should not return an error message for a valid URL with port', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'https://example.com:8080',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+        },
+        'test_url',
+        parse
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should not return an error message for a valid URL with userinfo', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'https://foo:bar@example.com',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+        },
+        'test_url',
+        parse
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should not return an error message for a valid URL with path', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'phony://example.com/path',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+        },
+        'test_url',
+        parse
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should not return an error message for a valid URL with query params', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'https://example.com/?foo=bar',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+        },
+        'test_url',
+        parse
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should not return an error message for a valid URL with IPv4', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'https://192.0.2.1',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+        },
+        'test_url',
+        parse
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should not return an error message for a valid URL with IPv6', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'https://[2001:db8::1]:443',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+        },
+        'test_url',
+        parse
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should return an error message for an invalid URL', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'not-a-valid-url',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+        },
+        'test_url',
+        parse
+      );
+
+      expect(res).toEqual([expect.stringContaining('Invalid URL format')]);
+    });
+
+    it('should not return an error message for a URL with allowed scheme', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'https://example.com',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+          url_allowed_schemes: ['https', 'http'],
+        },
+        'test_url',
+        parse
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should return an error message for a URL with disallowed scheme', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'ftp://example.com',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+          url_allowed_schemes: ['https', 'http'],
+        },
+        'test_url',
+        parse
+      );
+
+      expect(res).toEqual([expect.stringContaining('URL scheme "ftp" is not allowed')]);
+    });
+
+    it('should not validate empty URL values', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: '',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+        },
+        'test_url',
+        parse
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should validate required URL values', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: undefined,
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+          required: true,
+        },
+        'test_url',
+        parse
+      );
+
+      expect(res).toEqual([expect.stringContaining('is required')]);
+    });
+  });
+});
+
+describe('Fleet - parseDuration()', () => {
+  it('correctly calculates nanoseconds for a valid duration string', () => {
+    const result = parseDuration('1h30m45s500ms');
+
+    const expectedNs =
+      3_600_000_000_000 + // 1 hour
+      1_800_000_000_000 + // 30 minutes
+      45_000_000_000 + // 45 seconds
+      500_000_000; // 500 milliseconds
+
+    expect(result.isValid).toBe(true);
+    expect(result.valueNs).toBe(expectedNs);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('produces an error when given an invalid duration', () => {
+    // Test with an invalid duration format
+    const result = parseDuration('invalid');
+
+    expect(result.isValid).toBe(false);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]).toContain('Invalid duration format');
+  });
+});
+
+describe('Fleet - validatePackagePolicy with var_groups', () => {
+  const packageInfoWithVarGroups: PackageInfo = {
+    name: 'test_package',
+    version: '1.0.0',
+    title: 'Test Package',
+    description: 'Test package with var_groups',
+    type: 'integration',
+    format_version: '3.0.0',
+    owner: { github: 'elastic/integrations', type: 'elastic' },
+    categories: ['custom'],
+    status: installationStatuses.NotInstalled,
+    assets: { kibana: {} },
+    data_streams: [],
+    policy_templates: [],
+    vars: [
+      { name: 'api_key', type: 'password', title: 'API Key' },
+      { name: 'api_url', type: 'text', title: 'API URL' },
+      { name: 'client_id', type: 'text', title: 'Client ID' },
+      { name: 'client_secret', type: 'password', title: 'Client Secret' },
+      { name: 'proxy_url', type: 'text', title: 'Proxy URL' },
+    ],
+    var_groups: [
+      {
+        name: 'auth_method',
+        title: 'Authentication',
+        selector_title: 'Select method',
+        required: true,
+        options: [
+          {
+            name: 'api_key',
+            title: 'API Key',
+            vars: ['api_key', 'api_url'],
+          },
+          {
+            name: 'oauth',
+            title: 'OAuth',
+            vars: ['client_id', 'client_secret'],
+          },
+        ],
+      },
+    ],
+  } as unknown as PackageInfo;
+
+  const basePackagePolicy: NewPackagePolicy = {
+    name: 'test-policy',
+    namespace: 'default',
+    description: '',
+    policy_ids: ['policy-1'],
+    enabled: true,
+    inputs: [],
+    vars: {
+      api_key: { type: 'password', value: '' },
+      api_url: { type: 'text', value: '' },
+      client_id: { type: 'text', value: '' },
+      client_secret: { type: 'password', value: '' },
+      proxy_url: { type: 'text', value: '' },
+    },
+    var_group_selections: { auth_method: 'api_key' },
+  };
+
+  it('should validate vars in selected var_group option as required when var_group.required is true', () => {
+    const policyWithUndefinedApiKey = {
+      ...basePackagePolicy,
+      vars: {
+        ...basePackagePolicy.vars,
+        api_key: { type: 'password', value: undefined }, // Undefined - should be invalid
+        api_url: { type: 'text', value: undefined }, // Undefined - should be invalid
+      },
+      var_group_selections: { auth_method: 'api_key' },
+    };
+
+    const result = validatePackagePolicy(
+      policyWithUndefinedApiKey,
+      packageInfoWithVarGroups,
+      parse
+    );
+
+    // api_key and api_url should have validation errors because they're required by var_group
+    expect(result.vars?.api_key).toEqual([expect.stringContaining('is required')]);
+    expect(result.vars?.api_url).toEqual([expect.stringContaining('is required')]);
+  });
+
+  it('should allow empty strings for var_group required vars (same as regular required vars)', () => {
+    const policyWithEmptyApiKey = {
+      ...basePackagePolicy,
+      vars: {
+        ...basePackagePolicy.vars,
+        api_key: { type: 'password', value: '' }, // Empty string is allowed
+        api_url: { type: 'text', value: '' }, // Empty string is allowed
+      },
+      var_group_selections: { auth_method: 'api_key' },
+    };
+
+    const result = validatePackagePolicy(policyWithEmptyApiKey, packageInfoWithVarGroups, parse);
+
+    // Empty strings are allowed for var_group required vars (same as regular required vars)
+    expect(result.vars?.api_key).toBeNull();
+    expect(result.vars?.api_url).toBeNull();
+  });
+
+  it('should not validate vars outside selected var_group option', () => {
+    const policyWithApiKeySelected = {
+      ...basePackagePolicy,
+      vars: {
+        ...basePackagePolicy.vars,
+        api_key: { type: 'password', value: 'my-api-key' },
+        api_url: { type: 'text', value: 'https://api.example.com' },
+        client_id: { type: 'text', value: '' }, // Empty but not in selected option
+        client_secret: { type: 'password', value: '' }, // Empty but not in selected option
+      },
+      var_group_selections: { auth_method: 'api_key' },
+    };
+
+    const result = validatePackagePolicy(policyWithApiKeySelected, packageInfoWithVarGroups, parse);
+
+    // api_key and api_url have values, should be valid (null)
+    expect(result.vars?.api_key).toBeNull();
+    expect(result.vars?.api_url).toBeNull();
+    // client_id and client_secret are not in selected option, should be skipped (null)
+    expect(result.vars?.client_id).toBeNull();
+    expect(result.vars?.client_secret).toBeNull();
+  });
+
+  it('should validate oauth vars when oauth option is selected', () => {
+    const policyWithOAuthSelected = {
+      ...basePackagePolicy,
+      vars: {
+        ...basePackagePolicy.vars,
+        api_key: { type: 'password', value: '' }, // Not in selected option
+        api_url: { type: 'text', value: '' }, // Not in selected option
+        client_id: { type: 'text', value: undefined }, // In selected option - should be required
+        client_secret: { type: 'password', value: undefined }, // In selected option - should be required
+      },
+      var_group_selections: { auth_method: 'oauth' },
+    };
+
+    const result = validatePackagePolicy(policyWithOAuthSelected, packageInfoWithVarGroups, parse);
+
+    // api_key and api_url are not in selected option, should be skipped
+    expect(result.vars?.api_key).toBeNull();
+    expect(result.vars?.api_url).toBeNull();
+    // client_id and client_secret are in selected option and undefined, should be invalid
+    expect(result.vars?.client_id).toEqual([expect.stringContaining('is required')]);
+    expect(result.vars?.client_secret).toEqual([expect.stringContaining('is required')]);
+  });
+
+  it('should always validate vars not controlled by any var_group', () => {
+    const packageInfoWithRequiredNonGroupVar: PackageInfo = {
+      ...packageInfoWithVarGroups,
+      vars: [
+        ...packageInfoWithVarGroups.vars!,
+        { name: 'required_var', type: 'text', title: 'Required Var', required: true },
+      ],
+    } as unknown as PackageInfo;
+
+    // Test with undefined value - should fail required validation
+    const policyWithMissingRequiredVar = {
+      ...basePackagePolicy,
+      vars: {
+        ...basePackagePolicy.vars,
+        api_key: { type: 'password', value: 'my-key' },
+        api_url: { type: 'text', value: 'https://api.example.com' },
+        required_var: { type: 'text', value: undefined }, // Required by varDef, value is undefined
+      },
+      var_group_selections: { auth_method: 'api_key' },
+    };
+
+    const result = validatePackagePolicy(
+      policyWithMissingRequiredVar,
+      packageInfoWithRequiredNonGroupVar,
+      parse
+    );
+
+    // required_var is not controlled by var_group but has required: true and undefined value
+    expect(result.vars?.required_var).toEqual([expect.stringContaining('is required')]);
+  });
+
+  it('should allow empty strings for regular required vars (not required by var_group)', () => {
+    const packageInfoWithRequiredNonGroupVar: PackageInfo = {
+      ...packageInfoWithVarGroups,
+      vars: [
+        ...packageInfoWithVarGroups.vars!,
+        { name: 'required_var', type: 'text', title: 'Required Var', required: true },
+      ],
+    } as unknown as PackageInfo;
+
+    // Note: Empty strings are allowed for regular required vars in Fleet
+    // Only undefined values trigger required validation error
+    const policyWithEmptyRequiredVar = {
+      ...basePackagePolicy,
+      vars: {
+        ...basePackagePolicy.vars,
+        api_key: { type: 'password', value: 'my-key' },
+        api_url: { type: 'text', value: 'https://api.example.com' },
+        required_var: { type: 'text', value: '' }, // Required by varDef but empty string is OK
+      },
+      var_group_selections: { auth_method: 'api_key' },
+    };
+
+    const result = validatePackagePolicy(
+      policyWithEmptyRequiredVar,
+      packageInfoWithRequiredNonGroupVar,
+      parse
+    );
+
+    // Empty strings are allowed for regular required vars
+    expect(result.vars?.required_var).toBeNull();
+  });
+
+  it('should pass validation when all required var_group vars have values', () => {
+    const validPolicy = {
+      ...basePackagePolicy,
+      vars: {
+        ...basePackagePolicy.vars,
+        api_key: { type: 'password', value: 'my-api-key' },
+        api_url: { type: 'text', value: 'https://api.example.com' },
+      },
+      var_group_selections: { auth_method: 'api_key' },
+    };
+
+    const result = validatePackagePolicy(validPolicy, packageInfoWithVarGroups, parse);
+
+    expect(result.vars?.api_key).toBeNull();
+    expect(result.vars?.api_url).toBeNull();
+    expect(validationHasErrors(result)).toBe(false);
   });
 });

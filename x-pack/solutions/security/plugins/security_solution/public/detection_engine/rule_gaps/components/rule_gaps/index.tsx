@@ -19,35 +19,45 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiBetaBadge,
   EuiProgress,
   EuiText,
   EuiHealth,
   EuiSuperDatePicker,
+  EuiTextColor,
+  EuiToolTip,
 } from '@elastic/eui';
-import { useUserData } from '../../../../detections/components/user_info';
-import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
-import { BETA, BETA_TOOLTIP } from '../../../../common/translations';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { TableHeaderTooltipCell } from '../../../rule_management_ui/components/rules_table/table_header_tooltip_cell';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
+import { EXCLUDED_GAP_REASONS_KEY } from '../../../../../common/constants';
 import * as i18n from './translations';
-import type { Gap, GapStatus } from '../../types';
-import { getStatusLabel } from './utils';
+import type { Gap, GapReasonType, GapStatus } from '../../types';
+import { getStatusLabel, getReasonLabel } from './utils';
 import { GapStatusFilter } from './status_filter';
+import { GapReasonFilter, GAP_REASON_FILTER_ITEMS } from './reason_filter';
 import { useFindGapsForRule } from '../../api/hooks/use_find_gaps_for_rule';
 import { FillGap } from './fill_gap';
+import { FillRuleGapsButton } from './fill_rule_gaps_button';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+
 const DatePickerEuiFlexItem = styled(EuiFlexItem)`
   max-width: 582px;
 `;
 
-const getGapsTableColumns = (hasCRUDPermissions: boolean, ruleId: string, enabled: boolean) => {
+const getGapsTableColumns = (
+  ruleId: string,
+  enabled: boolean,
+  canManualRunRules: boolean,
+  gapReasonDetectionEnabled: boolean
+) => {
   const fillActions = {
     name: i18n.GAPS_TABLE_ACTIONS_LABEL,
     align: 'right' as const,
-    render: (gap: Gap) => <FillGap isRuleEnabled={enabled} ruleId={ruleId} gap={gap} />,
+    render: (gap: Gap) =>
+      canManualRunRules ? <FillGap isRuleEnabled={enabled} ruleId={ruleId} gap={gap} /> : null,
     width: '15%',
   };
 
@@ -55,14 +65,54 @@ const getGapsTableColumns = (hasCRUDPermissions: boolean, ruleId: string, enable
     {
       field: 'status',
       sortable: true,
-      name: <TableHeaderTooltipCell title={i18n.GAPS_TABLE_STATUS_LABEL} tooltipContent="" />,
-      render: (value: GapStatus) => getStatusLabel(value),
+      name: (
+        <TableHeaderTooltipCell
+          title={i18n.GAPS_TABLE_STATUS_LABEL}
+          tooltipContent={i18n.GAPS_TABLE_STATUS_LABEL_TOOLTIP}
+        />
+      ),
+      render: (value: GapStatus, gap: Gap) => {
+        const status = getStatusLabel(value);
+        if (gap.failed_auto_fill_attempts != null && gap.failed_auto_fill_attempts > 0) {
+          return (
+            <EuiToolTip
+              content={i18n.GAPS_FAILED_AUTO_FILL_ATTEMPTS_TOOLTIP(gap.failed_auto_fill_attempts)}
+            >
+              <EuiHealth color="danger" data-test-subj="auto-fill-failed-attempts-indicator">
+                {status}
+              </EuiHealth>
+            </EuiToolTip>
+          );
+        }
+
+        return status;
+      },
       width: '10%',
     },
+    ...(gapReasonDetectionEnabled
+      ? [
+          {
+            field: 'reason',
+            name: (
+              <TableHeaderTooltipCell
+                title={i18n.GAPS_TABLE_REASON_LABEL}
+                tooltipContent={i18n.GAPS_TABLE_REASON_LABEL_TOOLTIP}
+              />
+            ),
+            render: (value: Gap['reason']) => getReasonLabel(value?.type),
+            width: '10%',
+          },
+        ]
+      : []),
     {
       field: '@timestamp',
       sortable: true,
-      name: <TableHeaderTooltipCell title={i18n.GAPS_TABLE_EVENT_TIME_LABEL} tooltipContent="" />,
+      name: (
+        <TableHeaderTooltipCell
+          title={i18n.GAPS_TABLE_EVENT_TIME_LABEL}
+          tooltipContent={i18n.GAPS_TABLE_EVENT_TIME_LABEL_TOOLTIP}
+        />
+      ),
       render: (value: Gap['@timestamp']) => (
         <FormattedDate value={value} fieldName={'@timestamp'} />
       ),
@@ -71,7 +121,10 @@ const getGapsTableColumns = (hasCRUDPermissions: boolean, ruleId: string, enable
     {
       field: 'in_progress_intervals',
       name: (
-        <TableHeaderTooltipCell title={i18n.GAPS_TABLE_MANUAL_FILL_TASKS_LABEL} tooltipContent="" />
+        <TableHeaderTooltipCell
+          title={i18n.GAPS_TABLE_MANUAL_FILL_TASKS_LABEL}
+          tooltipContent={i18n.GAPS_TABLE_MANUAL_FILL_TASKS_LABEL_TOOLTIP}
+        />
       ),
       render: (value: Gap['in_progress_intervals']) => {
         if (!value || !value.length) return null;
@@ -85,7 +138,7 @@ const getGapsTableColumns = (hasCRUDPermissions: boolean, ruleId: string, enable
       name: (
         <TableHeaderTooltipCell
           title={i18n.GAPS_TABLE_EVENT_TIME_COVERED_LABEL}
-          tooltipContent=""
+          tooltipContent={i18n.GAPS_TABLE_EVENT_TIME_COVERED_LABEL_TOOLTIP}
         />
       ),
       render: (item: Gap) => {
@@ -105,7 +158,7 @@ const getGapsTableColumns = (hasCRUDPermissions: boolean, ruleId: string, enable
                 </p>
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem style={{ maxWidth: '40px' }}>
+            <EuiFlexItem css={{ maxWidth: '40px' }}>
               <EuiProgress value={value} max={100} size="xs" />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -114,7 +167,12 @@ const getGapsTableColumns = (hasCRUDPermissions: boolean, ruleId: string, enable
     },
     {
       field: 'range',
-      name: <TableHeaderTooltipCell title={i18n.GAPS_TABLE_GAP_RANGE_LABEL} tooltipContent={''} />,
+      name: (
+        <TableHeaderTooltipCell
+          title={i18n.GAPS_TABLE_GAP_RANGE_LABEL}
+          tooltipContent={i18n.GAPS_TABLE_GAP_RANGE_LABEL_TOOLTIP}
+        />
+      ),
       render: (value: Gap['range']) => (
         <>
           <FormattedDate value={value?.gte} fieldName={'start'} />
@@ -128,7 +186,10 @@ const getGapsTableColumns = (hasCRUDPermissions: boolean, ruleId: string, enable
       field: 'total_gap_duration_ms',
       sortable: true,
       name: (
-        <TableHeaderTooltipCell title={i18n.GAPS_TABLE_GAP_DURATION_TOOLTIP} tooltipContent={''} />
+        <TableHeaderTooltipCell
+          title={i18n.GAPS_TABLE_GAP_DURATION_LABEL}
+          tooltipContent={i18n.GAPS_TABLE_GAP_DURATION_LABEL_TOOLTIP}
+        />
       ),
       render: (value: Gap['total_gap_duration_ms']) => (
         <> {value != null ? moment.duration(value, 'ms').humanize() : getEmptyTagValue()}</>
@@ -137,7 +198,7 @@ const getGapsTableColumns = (hasCRUDPermissions: boolean, ruleId: string, enable
     },
   ];
 
-  if (hasCRUDPermissions) {
+  if (canManualRunRules) {
     columns.push(fillActions);
   }
 
@@ -153,16 +214,29 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
     start: 'now-24h',
     end: 'now',
   });
-  const [{ canUserCRUD }] = useUserData();
-  const { timelines } = useKibana().services;
-  const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
+  const { timelines, uiSettings } = useKibana().services;
+  const excludedReasonsFromAdvancedSettings = uiSettings.get<string[]>(EXCLUDED_GAP_REASONS_KEY);
+  const {
+    rulesPrivileges: {
+      manualRun: { edit: canManualRunRules },
+    },
+  } = useUserPrivileges();
+  const gapReasonDetectionEnabled = useIsExperimentalFeatureEnabled('gapReasonDetectionEnabled');
   const [refreshInterval, setRefreshInterval] = useState(1000);
   const [isPaused, setIsPaused] = useState(true);
   const [selectedStatuses, setSelectedStatuses] = useState<GapStatus[]>([]);
+  const [selectedReasonTypes, setSelectedReasonTypes] = useState<GapReasonType[]>(() =>
+    GAP_REASON_FILTER_ITEMS.filter(
+      (reason) => !excludedReasonsFromAdvancedSettings.includes(reason)
+    )
+  );
   const [sort, setSort] = useState<{ field: keyof Gap; direction: 'desc' | 'asc' }>({
     field: '@timestamp',
     direction: 'desc',
   });
+  const excludedReasons = GAP_REASON_FILTER_ITEMS.filter(
+    (reason) => !selectedReasonTypes.includes(reason)
+  );
 
   const getSortField = (field: keyof Gap) => {
     if (field === '@timestamp' || !field) {
@@ -178,17 +252,25 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
     start: dateRange.start,
     end: dateRange.end,
     statuses: selectedStatuses,
+    excludedReasons: gapReasonDetectionEnabled ? excludedReasons : undefined,
     sortField: getSortField(sort.field),
     sortOrder: sort.direction,
   });
 
+  const totalItemCount = data?.total ?? 0;
+  const MaxItemCount = 10000;
   const pagination = {
     pageIndex,
     pageSize,
-    totalItemCount: data?.total ?? 0,
+    totalItemCount: Math.min(totalItemCount, MaxItemCount),
   };
 
-  const columns = getGapsTableColumns(hasCRUDPermissions, ruleId, enabled);
+  const columns = getGapsTableColumns(
+    ruleId,
+    enabled,
+    canManualRunRules,
+    gapReasonDetectionEnabled
+  );
 
   const onRefreshCallback = () => {
     refetch();
@@ -230,6 +312,13 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
     [setSelectedStatuses]
   );
 
+  const handleReasonChange = useCallback(
+    (reasons: GapReasonType[]) => {
+      setSelectedReasonTypes(reasons);
+    },
+    [setSelectedReasonTypes]
+  );
+
   return (
     <EuiPanel hasBorder>
       <EuiFlexGroup
@@ -241,15 +330,22 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
         <EuiFlexItem grow={true}>
           <EuiFlexGroup gutterSize="s" alignItems="baseline">
             <HeaderSection title={'Gaps'} subtitle={'Rule gaps'} />
-            <EuiBetaBadge label={BETA} tooltipContent={BETA_TOOLTIP} />
           </EuiFlexGroup>
         </EuiFlexItem>
 
         <EuiFlexItem grow={true}>
-          <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
             <EuiFlexItem grow={false}>
               <GapStatusFilter selectedItems={selectedStatuses} onChange={handleStatusChange} />
             </EuiFlexItem>
+            {gapReasonDetectionEnabled && (
+              <EuiFlexItem grow={false}>
+                <GapReasonFilter
+                  selectedItems={selectedReasonTypes}
+                  onChange={handleReasonChange}
+                />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <DatePickerEuiFlexItem>
                 <EuiSuperDatePicker
@@ -266,10 +362,23 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
                 />
               </DatePickerEuiFlexItem>
             </EuiFlexItem>
+            {canManualRunRules && (
+              <EuiFlexItem grow={false}>
+                <FillRuleGapsButton ruleId={ruleId} />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexGroup justifyContent="flexEnd">
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          {totalItemCount > MaxItemCount && (
+            <EuiTextColor color="danger">
+              {i18n.GAPS_TABLE_TOTAL_GAPS_LABEL(totalItemCount, MaxItemCount)}
+            </EuiTextColor>
+          )}
+        </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
           {timelines.getLastUpdated({
             showUpdating: isLoading,
@@ -279,6 +388,7 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
       </EuiFlexGroup>
       <EuiBasicTable
         data-test-subj="rule-gaps-table"
+        tableCaption={i18n.GAPS_TABLE_CAPTION}
         items={data?.data ?? []}
         columns={columns}
         pagination={pagination}

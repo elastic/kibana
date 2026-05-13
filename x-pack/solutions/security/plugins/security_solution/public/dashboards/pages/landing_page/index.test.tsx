@@ -24,8 +24,8 @@ jest.mock('../../../common/containers/tags/api');
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/utils/route/spy_routes', () => ({ SpyRoute: () => null }));
 jest.mock('@kbn/dashboard-plugin/public', () => ({
-  DashboardListingTable: jest.fn().mockReturnValue(<span data-test-subj="dashboardsTable" />),
-  DashboardTopNav: jest.fn().mockReturnValue(<span data-test-subj="dashboardTopNav" />),
+  DashboardListingTable: jest.fn(() => <span data-test-subj="dashboardsTable" />),
+  DashboardTopNav: jest.fn(() => <span data-test-subj="dashboardTopNav" />),
 }));
 
 const mockUseContractComponents = jest.fn(() => ({}));
@@ -116,10 +116,15 @@ describe('Dashboards landing', () => {
       });
       await renderDashboardLanding();
 
-      const renderedItems = screen.queryAllByTestId('LandingImageCard-item');
+      const overviewItem = screen.queryByTestId(
+        `LandingImageCard-item-${SecurityPageName.overview}`
+      );
+      const detectionItem = screen.queryByTestId(
+        `LandingImageCard-item-${SecurityPageName.detectionAndResponse}`
+      );
 
-      expect(renderedItems[0]).toHaveTextContent(OVERVIEW_ITEM_LABEL);
-      expect(renderedItems[1]).toHaveTextContent(DETECTION_RESPONSE_ITEM_LABEL);
+      expect(overviewItem).toHaveTextContent(OVERVIEW_ITEM_LABEL);
+      expect(detectionItem).toHaveTextContent(DETECTION_RESPONSE_ITEM_LABEL);
     });
 
     it('should not render items if all items filtered', async () => {

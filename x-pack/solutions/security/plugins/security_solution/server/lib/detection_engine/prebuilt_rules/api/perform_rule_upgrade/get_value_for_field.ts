@@ -8,7 +8,7 @@
 import type {
   PickVersionValues,
   PerformRuleUpgradeRequestBody,
-  AllFieldsDiff,
+  AllThreeWayFieldsDiff,
 } from '../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
@@ -22,7 +22,7 @@ interface GetValueForFieldArgs {
   upgradeableRule: RuleTriad;
   globalPickVersion: PickVersionValues;
   requestBody: PerformRuleUpgradeRequestBody;
-  ruleFieldsDiff: AllFieldsDiff;
+  ruleFieldsDiff: AllThreeWayFieldsDiff;
 }
 
 export const getValueForField = ({
@@ -47,6 +47,7 @@ export const getValueForField = ({
             pick_version: globalPickVersion,
           },
           ruleFieldsDiff,
+          onConflict: requestBody.on_conflict,
         })
       : getValueFromRuleTriad({
           fieldName,
@@ -85,6 +86,7 @@ export const getValueForField = ({
         upgradeableRule,
         fieldUpgradeSpecifier,
         ruleFieldsDiff,
+        onConflict: requestBody.on_conflict,
       })
     : getValueFromRuleTriad({
         fieldName,

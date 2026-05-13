@@ -20,8 +20,8 @@ export const ConnectToApiButton: React.FC<ConnectToApiButtonProps> = ({ onClick 
       iconType="endpoint"
       onClick={onClick}
     >
-      {i18n.translate('xpack.searchSynonyms.synonymsSetDetail.connectToApiButton', {
-        defaultMessage: 'Connect to API',
+      {i18n.translate('xpack.searchSynonyms.synonymsSetDetail.assignToIndexButton', {
+        defaultMessage: 'Assign to index',
       })}
     </EuiButton>
   );

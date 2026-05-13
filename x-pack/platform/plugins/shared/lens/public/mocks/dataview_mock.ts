@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
 const fields = [

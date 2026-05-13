@@ -5,19 +5,19 @@
  * 2.0.
  */
 import { errors } from '@elastic/elasticsearch';
+import { isResponseError } from '@kbn/es-errors';
 import Boom from '@hapi/boom';
-import { CoreSetup, Logger, RouteRegistrar } from '@kbn/core/server';
+import type { CoreSetup, Logger, RouteRegistrar, RouteSecurity } from '@kbn/core/server';
+import type { IoTsParamsObject, ServerRouteRepository } from '@kbn/server-route-repository';
 import {
-  IoTsParamsObject,
-  ServerRouteRepository,
   decodeRequestParams,
   stripNullishRequestParameters,
   parseEndpoint,
   passThroughValidationObject,
 } from '@kbn/server-route-repository';
 import * as t from 'io-ts';
-import { DatasetQualityRequestHandlerContext } from '../types';
-import { DatasetQualityRouteHandlerResources } from './types';
+import type { DatasetQualityRequestHandlerContext } from '../types';
+import type { DatasetQualityRouteHandlerResources } from './types';
 
 interface RegisterRoutes {
   core: CoreSetup;
@@ -25,6 +25,7 @@ interface RegisterRoutes {
   logger: Logger;
   plugins: DatasetQualityRouteHandlerResources['plugins'];
   getEsCapabilities: DatasetQualityRouteHandlerResources['getEsCapabilities'];
+  getIsSecurityEnabled: DatasetQualityRouteHandlerResources['getIsSecurityEnabled'];
 }
 
 export function registerRoutes({
@@ -33,6 +34,7 @@ export function registerRoutes({
   logger,
   plugins,
   getEsCapabilities,
+  getIsSecurityEnabled,
 }: RegisterRoutes) {
   const routes = Object.values(repository);
 
@@ -50,7 +52,7 @@ export function registerRoutes({
         path: pathname,
         validate: passThroughValidationObject,
         options,
-        security: route.security,
+        security: route.security as RouteSecurity,
       },
       async (context, request, response) => {
         try {
@@ -63,14 +65,15 @@ export function registerRoutes({
             (params as IoTsParamsObject) ?? t.strict({})
           );
 
-          const data = (await handler({
+          const data = await handler({
             context,
             request,
             logger,
             params: decodedParams,
             plugins,
             getEsCapabilities,
-          })) as any;
+            getIsSecurityEnabled,
+          });
 
           if (data === undefined) {
             return response.noContent();
@@ -79,30 +82,65 @@ export function registerRoutes({
           return response.ok({ body: data });
         } catch (error) {
           if (Boom.isBoom(error)) {
-            logger.error(error.output.payload.message);
+            logRouteError(logger, {
+              statusCode: error.output.statusCode,
+              message: error.output.payload.message,
+              cause: error,
+            });
             return response.customError({
               statusCode: error.output.statusCode,
               body: { message: error.output.payload.message },
             });
           }
 
-          logger.error(error);
-
-          const opts = {
-            statusCode: 500,
-            body: {
-              message: error.message,
-            },
-          };
+          let statusCode = 500;
+          let message: string = error.message;
 
           if (error instanceof errors.RequestAbortedError) {
-            opts.statusCode = 499;
-            opts.body.message = 'Client closed request';
+            statusCode = 499;
+            message = 'Client closed request';
+          } else if (isResponseError(error)) {
+            statusCode = error.statusCode ?? 500;
+            message =
+              extractEsReason(error.body) ?? `Elasticsearch responded with status ${statusCode}`;
           }
 
-          return response.customError(opts);
+          logRouteError(logger, { statusCode, message, cause: error });
+
+          return response.customError({ statusCode, body: { message } });
         }
       }
     );
   });
+}
+
+interface EsErrorBody {
+  error?: {
+    reason?: string;
+    caused_by?: { reason?: string };
+    root_cause?: Array<{ reason?: string }>;
+  };
+}
+
+function extractEsReason(body: unknown): string | undefined {
+  if (typeof body !== 'object' || body === null) return undefined;
+  const error = (body as EsErrorBody).error;
+  return error?.reason ?? error?.caused_by?.reason ?? error?.root_cause?.[0]?.reason;
+}
+
+function logRouteError(
+  logger: Logger,
+  failure: { statusCode: number; message: string; cause?: Error }
+) {
+  const { statusCode, message, cause } = failure;
+
+  if (statusCode >= 500) {
+    // Forward the Error so BaseLogger emits ECS error.stack_trace / error.type.
+    logger.error(cause ?? message);
+  } else if (statusCode === 429) {
+    // Capacity / circuit-breaker signal
+    logger.warn(cause ?? message);
+  } else {
+    logger.debug(message);
+  }
 }

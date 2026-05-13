@@ -9,31 +9,29 @@
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { TimefilterContract } from '@kbn/data-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
-import {
-  apiCanAccessViewMode,
-  apiHasUniqueId,
+import type {
   CanAccessViewMode,
   EmbeddableApiContext,
-  getInheritedViewMode,
   HasUniqueId,
   PublishesUnifiedSearch,
   PublishesDescription,
   PublishesTitle,
 } from '@kbn/presentation-publishing';
-import { Action } from '@kbn/ui-actions-plugin/public';
+import {
+  apiCanAccessViewMode,
+  apiHasUniqueId,
+  getInheritedViewMode,
+} from '@kbn/presentation-publishing';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import React from 'react';
 import { take } from 'rxjs';
+import { DASHBOARD_VISUALIZATION_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
   apiHasVisualizeConfig,
   type HasVisualizeConfig,
 } from '../embeddable/interfaces/has_visualize_config';
-import {
-  apiHasExpressionVariables,
-  HasExpressionVariables,
-} from '../embeddable/interfaces/has_expression_variables';
 import {
   getApplication,
   getCapabilities,
@@ -41,7 +39,6 @@ import {
   getUiActions,
   getUsageCollection,
 } from '../services';
-import { DASHBOARD_VISUALIZATION_PANEL_TRIGGER } from '../triggers';
 import { ACTION_EDIT_IN_LENS } from './constants';
 
 const displayName = i18n.translate('visualizations.actions.editInLens.displayName', {
@@ -66,7 +63,7 @@ const MenuItem: React.FC = () => {
 type EditInLensActionApi = HasUniqueId &
   HasVisualizeConfig &
   CanAccessViewMode &
-  Partial<PublishesUnifiedSearch & HasExpressionVariables & PublishesTitle & PublishesDescription>;
+  Partial<PublishesUnifiedSearch & PublishesTitle & PublishesDescription>;
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']): api is EditInLensActionApi =>
   apiHasUniqueId(api) && apiCanAccessViewMode(api) && apiHasVisualizeConfig(api);
@@ -125,7 +122,7 @@ export class EditInLensAction implements Action<EmbeddableApiContext> {
         );
       }
       getEmbeddable().getStateTransfer().isTransferInProgress = true;
-      getUiActions().getTrigger(DASHBOARD_VISUALIZATION_PANEL_TRIGGER).exec(updatedWithMeta);
+      getUiActions().executeTriggerActions(DASHBOARD_VISUALIZATION_PANEL_TRIGGER, updatedWithMeta);
     }
   }
 
@@ -141,7 +138,7 @@ export class EditInLensAction implements Action<EmbeddableApiContext> {
 
   async isCompatible(context: EmbeddableApiContext) {
     const { embeddable } = context;
-    if (!compatibilityCheck(embeddable) || getInheritedViewMode(embeddable) !== ViewMode.EDIT)
+    if (!compatibilityCheck(embeddable) || getInheritedViewMode(embeddable) !== 'edit')
       return false;
 
     const vis = embeddable.getVis();
@@ -151,10 +148,7 @@ export class EditInLensAction implements Action<EmbeddableApiContext> {
     }
 
     // determine whether navigation to lens is available
-    if (
-      apiHasExpressionVariables(embeddable) &&
-      embeddable.getExpressionVariables()?.canNavigateToLens
-    ) {
+    if (embeddable.getExpressionVariables?.()?.canNavigateToLens) {
       return true;
     }
     return Boolean(await vis.type.navigateToLens?.(vis, this.timefilter));

@@ -75,7 +75,7 @@ export type ScriptedRangeFilter = Filter & {
 export type MatchAllRangeFilter = Filter & {
   meta: RangeFilterMeta;
   query: {
-    match_all: estypes.QueryDslQueryContainer['match_all'];
+    match_all: NonNullable<estypes.QueryDslQueryContainer>['match_all'];
   };
 };
 
@@ -189,12 +189,13 @@ export const buildRangeFilter = (
 
 export const buildSimpleNumberRangeFilter = (
   fieldName: string,
+  fieldType: 'number' | 'date',
   params: RangeFilterParams,
   value: string,
   dataViewId: string
 ) => {
   return buildRangeFilter(
-    { name: fieldName, type: 'number' },
+    { name: fieldName, type: fieldType },
     params,
     { id: dataViewId, title: dataViewId },
     value

@@ -10,7 +10,7 @@
 import type { ComponentProps } from 'react';
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 
-import { TabbedModal } from '..';
+import type { TabbedModal } from '..';
 
 type TabbedModalProps = ComponentProps<typeof TabbedModal>;
 type TabbedModalServiceArguments = Record<string, unknown>;
@@ -31,19 +31,19 @@ export class StorybookMock extends AbstractStorybookMock<
   propArguments = {
     tabs: {
       control: {
-        type: 'array',
+        control: 'array',
       },
       defaultValue: [],
     },
     defaultSelectedTabId: {
       control: {
-        type: 'array',
+        control: 'array',
       },
       defaultValue: [],
     },
     onClose: {
       control: {
-        type: 'array',
+        control: 'array',
       },
       defaultValue: [],
     },

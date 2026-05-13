@@ -24,7 +24,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import {
+import type {
   EnrichedDeprecationInfo,
   IndexSettingAction,
   ResponseError,
@@ -114,10 +114,7 @@ export const RemoveIndexSettingsFlyout = ({
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <DeprecationBadge
-          isCritical={deprecation.isCritical}
-          isResolved={statusType === 'complete'}
-        />
+        <DeprecationBadge level={deprecation.level} isResolved={statusType === 'complete'} />
         <EuiSpacer size="s" />
         <EuiTitle size="s" data-test-subj="flyoutTitle">
           <h2 id="indexSettingsDetailsFlyoutTitle">{message}</h2>
@@ -132,6 +129,7 @@ export const RemoveIndexSettingsFlyout = ({
         {statusType === 'error' && (
           <>
             <EuiCallOut
+              announceOnMount
               title={i18nTexts.errorTitle}
               color="danger"
               iconType="warning"

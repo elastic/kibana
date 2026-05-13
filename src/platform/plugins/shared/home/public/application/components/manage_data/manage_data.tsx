@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, MouseEvent } from 'react';
+import type { FC, MouseEvent } from 'react';
+import React from 'react';
+import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
 import { EuiButtonEmpty, EuiFlexGroup, EuiSpacer, EuiTitle, EuiFlexItem } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { ApplicationStart } from '@kbn/core/public';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { FeatureCatalogueEntry } from '../../../services';
+import type { ApplicationStart } from '@kbn/core/public';
+import type { FeatureCatalogueEntry } from '../../../services';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 import { Synopsis } from '../synopsis';
 import { getServices } from '../../kibana_services';
@@ -27,6 +29,7 @@ interface Props {
 
 export const ManageData: FC<Props> = ({ addBasePath, application, features }) => {
   const { share, trackUiMetric } = getServices();
+
   const consoleHref = share.url.locators.get('CONSOLE_APP_LOCATOR')?.useUrl({});
   const managementHref = share.url.locators
     .get('MANAGEMENT_APP_LOCATOR')
@@ -40,66 +43,51 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
       <KibanaPageTemplate.Section
         bottomBorder
         paddingSize="xl"
-        className="homDataManage"
-        aria-labelledby="homDataManage__title"
-        data-test-subj="homDataManage"
+        aria-labelledby="homeDataManage__title"
+        data-test-subj="homeDataManage"
       >
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={1}>
             <EuiTitle size="s">
-              <h2 id="homDataManage__title">
+              <h2 id="homeDataManage__title">
                 <FormattedMessage id="home.manageData.sectionTitle" defaultMessage="Management" />
               </h2>
             </EuiTitle>
           </EuiFlexItem>
 
           {isDevToolsEnabled || isManagementEnabled ? (
-            <EuiFlexItem className="homDataManage__actions" grow={false}>
+            <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" responsive={false} wrap>
                 {/* Check if both the Dev Tools UI and the Console UI are enabled. */}
                 {isDevToolsEnabled && consoleHref !== undefined ? (
                   <EuiFlexItem grow={false}>
-                    <RedirectAppLinks
-                      coreStart={{
-                        application,
-                      }}
+                    <EuiButtonEmpty
+                      data-test-subj="homeDevTools"
+                      flush="both"
+                      iconType="wrench"
+                      href={consoleHref}
                     >
-                      <EuiButtonEmpty
-                        data-test-subj="homeDevTools"
-                        className="kbnOverviewPageHeader__actionButton"
-                        flush="both"
-                        iconType="wrench"
-                        href={consoleHref}
-                      >
-                        <FormattedMessage
-                          id="home.manageData.devToolsButtonLabel"
-                          defaultMessage="Dev Tools"
-                        />
-                      </EuiButtonEmpty>
-                    </RedirectAppLinks>
+                      <FormattedMessage
+                        id="home.manageData.devToolsButtonLabel"
+                        defaultMessage="Dev Tools"
+                      />
+                    </EuiButtonEmpty>
                   </EuiFlexItem>
                 ) : null}
 
                 {isManagementEnabled ? (
                   <EuiFlexItem grow={false}>
-                    <RedirectAppLinks
-                      coreStart={{
-                        application,
-                      }}
+                    <EuiButtonEmpty
+                      data-test-subj="homeManage"
+                      flush="both"
+                      iconType="gear"
+                      href={managementHref}
                     >
-                      <EuiButtonEmpty
-                        data-test-subj="homeManage"
-                        className="kbnOverviewPageHeader__actionButton"
-                        flush="both"
-                        iconType="gear"
-                        href={managementHref}
-                      >
-                        <FormattedMessage
-                          id="home.manageData.stackManagementButtonLabel"
-                          defaultMessage="Stack Management"
-                        />
-                      </EuiButtonEmpty>
-                    </RedirectAppLinks>
+                      <FormattedMessage
+                        id="home.manageData.stackManagementButtonLabel"
+                        defaultMessage="Stack Management"
+                      />
+                    </EuiButtonEmpty>
                   </EuiFlexItem>
                 ) : null}
               </EuiFlexGroup>
@@ -109,9 +97,18 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
 
         <EuiSpacer />
 
-        <EuiFlexGroup className="homDataManage__content">
+        <EuiFlexGroup>
           {features.map((feature) => (
-            <EuiFlexItem className="homDataManage__item" key={feature.id}>
+            <EuiFlexItem
+              css={({ euiTheme }: UseEuiTheme) =>
+                css({
+                  [`@media (min-width: ${euiTheme.breakpoint.l}px)`]: {
+                    maxWidth: `calc(33.33% - ${euiTheme.size.l})`,
+                  },
+                })
+              }
+              key={feature.id}
+            >
               <Synopsis
                 description={feature.description}
                 iconType={feature.icon}

@@ -7,12 +7,16 @@
 
 import { type TypeOf } from '@kbn/config-schema';
 import * as v1 from './v1';
+import * as v2 from './v2';
+import * as v3 from './v3';
 
 export const stateSchemaByVersion = {
   1: v1.versionDefinition,
+  2: v2.versionDefinition,
+  3: v3.versionDefinition,
 };
 
-const latest = v1;
+const latest = v3;
 /**
  * WARNING: Do not modify the code below when doing a new version.
  * Update the "latest" variable instead.

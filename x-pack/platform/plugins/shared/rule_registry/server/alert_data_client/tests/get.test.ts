@@ -12,7 +12,8 @@ import {
   SPACE_IDS,
   ALERT_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
-import { AlertsClient, ConstructorOptions } from '../alerts_client';
+import type { ConstructorOptions } from '../alerts_client';
+import { AlertsClient } from '../alerts_client';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
@@ -27,6 +28,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   logger: loggingSystemMock.create().get(),
   authorization: alertingAuthMock,
   esClient: esClientMock,
+  esClientScoped: esClientMock,
   auditLogger,
   ruleDataService: ruleDataServiceMock.create(),
   getRuleType: jest.fn(),
@@ -124,6 +126,10 @@ describe('get()', () => {
         Object {
           "_source": undefined,
           "aggs": undefined,
+          "expand_wildcards": Array [
+            "open",
+            "hidden",
+          ],
           "fields": Array [
             "kibana.alert.rule.rule_type_id",
             "kibana.alert.rule.consumer",
@@ -148,8 +154,11 @@ describe('get()', () => {
                   },
                 },
                 Object {
-                  "term": Object {
-                    "kibana.space_ids": "test_default_space_id",
+                  "terms": Object {
+                    "kibana.space_ids": Array [
+                      "test_default_space_id",
+                      "*",
+                    ],
                   },
                 },
               ],

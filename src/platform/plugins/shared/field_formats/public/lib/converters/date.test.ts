@@ -9,7 +9,7 @@
 
 import moment from 'moment-timezone';
 import { DateFormat } from './date';
-import { FieldFormatsGetConfigFn } from '../../../common';
+import { type FieldFormatsGetConfigFn, TEXT_CONTEXT_TYPE } from '../../../common';
 
 describe('Date Format', () => {
   let convert: Function;
@@ -33,8 +33,8 @@ describe('Date Format', () => {
   });
 
   test('decoding an undefined or null date should return an empty string', () => {
-    expect(convert(null)).toBe('-');
-    expect(convert(undefined)).toBe('-');
+    expect(convert(null, TEXT_CONTEXT_TYPE)).toBe('(null)');
+    expect(convert(undefined, TEXT_CONTEXT_TYPE)).toBe('(null)');
   });
 
   test('should clear the memoization cache after changing the date', () => {

@@ -12,10 +12,12 @@ import type {
   AttachmentAggregationResult,
   AttachmentFrameworkAggsResult,
   CaseAggregationResult,
+  CasesTelemetryWithAlertsAggsByOwnerResults,
   FileAttachmentAggregationResults,
 } from '../types';
 import { getCasesTelemetryData } from './cases';
 import { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
+import { OBSERVABLE_TYPE_IPV4 } from '../../../common/constants';
 
 const MOCK_FIND_TOTAL = 5;
 const SOLUTION_TOTAL = 1;
@@ -73,8 +75,43 @@ describe('getCasesTelemetryData', () => {
         totalAssignees: { value: 5 },
       };
 
+      const observables = {
+        observables: {
+          doc_count: 1,
+          byDescription: {
+            buckets: [
+              {
+                key: 'Auto extract observables',
+                doc_count: 1,
+                byType: {
+                  buckets: [
+                    {
+                      key: OBSERVABLE_TYPE_IPV4.key,
+                      doc_count: 1,
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        totalWithMaxObservables: {
+          buckets: [
+            {
+              key: 50,
+              doc_count: 1,
+            },
+            {
+              key: 3,
+              doc_count: 1,
+            },
+          ],
+        },
+      };
+
       const solutionValues = {
         counts,
+        ...observables,
         ...assignees,
       };
 
@@ -86,7 +123,20 @@ describe('getCasesTelemetryData', () => {
         securitySolution: { ...solutionValues },
         observability: { ...solutionValues },
         cases: { ...solutionValues },
+        ...observables,
         syncAlerts: {
+          buckets: [
+            {
+              key: 0,
+              doc_count: 1,
+            },
+            {
+              key: 1,
+              doc_count: 1,
+            },
+          ],
+        },
+        extractObservables: {
           buckets: [
             {
               key: 0,
@@ -119,6 +169,45 @@ describe('getCasesTelemetryData', () => {
             {
               key: 'cases',
               doc_count: SOLUTION_TOTAL,
+            },
+          ],
+        },
+      };
+      const caseWithAlertsResult: CasesTelemetryWithAlertsAggsByOwnerResults = {
+        by_owner: {
+          buckets: [
+            {
+              key: 'cases',
+              doc_count: 10,
+              references: {
+                referenceType: {
+                  referenceAgg: {
+                    value: 10,
+                  },
+                },
+              },
+            },
+            {
+              key: 'observability',
+              doc_count: 8,
+              references: {
+                referenceType: {
+                  referenceAgg: {
+                    value: 5,
+                  },
+                },
+              },
+            },
+            {
+              key: 'securitySolution',
+              doc_count: 10,
+              references: {
+                referenceType: {
+                  referenceAgg: {
+                    value: 20,
+                  },
+                },
+              },
             },
           ],
         },
@@ -251,9 +340,12 @@ describe('getCasesTelemetryData', () => {
       };
 
       mockFind(caseAggsResult);
+      mockFind(caseWithAlertsResult);
       mockFind(attachmentAggsResult);
+
       mockFind({ references: { referenceType: { referenceAgg: { value: 3 } } } });
       mockFind({ references: { referenceType: { referenceAgg: { value: 4 } } } });
+
       mockSavedObjectResponse({
         created_at: '2022-03-08T12:24:11.429Z',
       });
@@ -357,6 +449,14 @@ describe('getCasesTelemetryData', () => {
           },
           syncAlertsOff: 1,
           syncAlertsOn: 1,
+          extractObservablesOff: 1,
+          extractObservablesOn: 1,
+          observables: {
+            auto: { default: 1, custom: 0 },
+            manual: { default: 0, custom: 0 },
+            total: 1,
+          },
+          totalWithMaxObservables: 1,
           totalParticipants: 2,
           totalTags: 2,
           totalUsers: 1,
@@ -380,6 +480,18 @@ describe('getCasesTelemetryData', () => {
           daily: 3,
           weekly: 2,
           monthly: 1,
+          status: {
+            closed: 0,
+            inProgress: 0,
+            open: 0,
+          },
+          totalWithAlerts: 10,
+          observables: {
+            auto: { default: 1, custom: 0 },
+            manual: { default: 0, custom: 0 },
+            total: 1,
+          },
+          totalWithMaxObservables: 1,
         },
         obs: {
           assignees: {
@@ -387,11 +499,23 @@ describe('getCasesTelemetryData', () => {
             totalWithZero: 100,
             totalWithAtLeastOne: 0,
           },
+          observables: {
+            auto: { default: 1, custom: 0 },
+            manual: { default: 0, custom: 0 },
+            total: 1,
+          },
+          totalWithMaxObservables: 1,
           ...solutionAttachmentFrameworkStats,
           total: 1,
           daily: 3,
           weekly: 2,
           monthly: 1,
+          status: {
+            closed: 0,
+            inProgress: 0,
+            open: 0,
+          },
+          totalWithAlerts: 5,
         },
         sec: {
           assignees: {
@@ -399,11 +523,23 @@ describe('getCasesTelemetryData', () => {
             totalWithZero: 100,
             totalWithAtLeastOne: 0,
           },
+          observables: {
+            auto: { default: 1, custom: 0 },
+            manual: { default: 0, custom: 0 },
+            total: 1,
+          },
+          totalWithMaxObservables: 1,
           ...solutionAttachmentFrameworkStats,
           total: 1,
           daily: 3,
           weekly: 2,
           monthly: 1,
+          status: {
+            closed: 0,
+            inProgress: 0,
+            open: 0,
+          },
+          totalWithAlerts: 20,
         },
       });
     });
@@ -486,9 +622,42 @@ describe('getCasesTelemetryData', () => {
                     ],
                   },
                 },
+                "observables": Object {
+                  "aggs": Object {
+                    "byDescription": Object {
+                      "aggs": Object {
+                        "byType": Object {
+                          "terms": Object {
+                            "field": "cases.attributes.observables.typeKey",
+                          },
+                        },
+                      },
+                      "terms": Object {
+                        "field": "cases.attributes.observables.description",
+                      },
+                    },
+                  },
+                  "nested": Object {
+                    "path": "cases.attributes.observables",
+                  },
+                },
+                "status": Object {
+                  "terms": Object {
+                    "field": "cases.attributes.status",
+                  },
+                },
                 "totalAssignees": Object {
                   "value_count": Object {
                     "field": "cases.attributes.assignees.uid",
+                  },
+                },
+                "totalWithMaxObservables": Object {
+                  "terms": Object {
+                    "field": "cases.attributes.total_observables",
+                    "order": Object {
+                      "_key": "desc",
+                    },
+                    "size": 100,
                   },
                 },
               },
@@ -518,6 +687,11 @@ describe('getCasesTelemetryData', () => {
                 ],
               },
             },
+            "extractObservables": Object {
+              "terms": Object {
+                "field": "cases.attributes.settings.extractObservables",
+              },
+            },
             "observability": Object {
               "aggs": Object {
                 "assigneeFilters": Object {
@@ -564,9 +738,42 @@ describe('getCasesTelemetryData', () => {
                     ],
                   },
                 },
+                "observables": Object {
+                  "aggs": Object {
+                    "byDescription": Object {
+                      "aggs": Object {
+                        "byType": Object {
+                          "terms": Object {
+                            "field": "cases.attributes.observables.typeKey",
+                          },
+                        },
+                      },
+                      "terms": Object {
+                        "field": "cases.attributes.observables.description",
+                      },
+                    },
+                  },
+                  "nested": Object {
+                    "path": "cases.attributes.observables",
+                  },
+                },
+                "status": Object {
+                  "terms": Object {
+                    "field": "cases.attributes.status",
+                  },
+                },
                 "totalAssignees": Object {
                   "value_count": Object {
                     "field": "cases.attributes.assignees.uid",
+                  },
+                },
+                "totalWithMaxObservables": Object {
+                  "terms": Object {
+                    "field": "cases.attributes.total_observables",
+                    "order": Object {
+                      "_key": "desc",
+                    },
+                    "size": 100,
                   },
                 },
               },
@@ -574,6 +781,25 @@ describe('getCasesTelemetryData', () => {
                 "term": Object {
                   "cases.attributes.owner": "observability",
                 },
+              },
+            },
+            "observables": Object {
+              "aggs": Object {
+                "byDescription": Object {
+                  "aggs": Object {
+                    "byType": Object {
+                      "terms": Object {
+                        "field": "cases.attributes.observables.typeKey",
+                      },
+                    },
+                  },
+                  "terms": Object {
+                    "field": "cases.attributes.observables.description",
+                  },
+                },
+              },
+              "nested": Object {
+                "path": "cases.attributes.observables",
               },
             },
             "securitySolution": Object {
@@ -622,9 +848,42 @@ describe('getCasesTelemetryData', () => {
                     ],
                   },
                 },
+                "observables": Object {
+                  "aggs": Object {
+                    "byDescription": Object {
+                      "aggs": Object {
+                        "byType": Object {
+                          "terms": Object {
+                            "field": "cases.attributes.observables.typeKey",
+                          },
+                        },
+                      },
+                      "terms": Object {
+                        "field": "cases.attributes.observables.description",
+                      },
+                    },
+                  },
+                  "nested": Object {
+                    "path": "cases.attributes.observables",
+                  },
+                },
+                "status": Object {
+                  "terms": Object {
+                    "field": "cases.attributes.status",
+                  },
+                },
                 "totalAssignees": Object {
                   "value_count": Object {
                     "field": "cases.attributes.assignees.uid",
+                  },
+                },
+                "totalWithMaxObservables": Object {
+                  "terms": Object {
+                    "field": "cases.attributes.total_observables",
+                    "order": Object {
+                      "_key": "desc",
+                    },
+                    "size": 100,
                   },
                 },
               },
@@ -654,6 +913,15 @@ describe('getCasesTelemetryData', () => {
                 "field": "cases.attributes.assignees.uid",
               },
             },
+            "totalWithMaxObservables": Object {
+              "terms": Object {
+                "field": "cases.attributes.total_observables",
+                "order": Object {
+                  "_key": "desc",
+                },
+                "size": 100,
+              },
+            },
             "totalsByOwner": Object {
               "terms": Object {
                 "field": "cases.attributes.owner",
@@ -677,97 +945,15 @@ describe('getCasesTelemetryData', () => {
       expect(savedObjectsClient.find.mock.calls[1][0]).toMatchInlineSnapshot(`
         Object {
           "aggs": Object {
-            "cases": Object {
-              "aggs": Object {
-                "externalReferenceTypes": Object {
-                  "aggs": Object {
-                    "references": Object {
-                      "aggregations": Object {
-                        "cases": Object {
-                          "aggregations": Object {
-                            "ids": Object {
-                              "terms": Object {
-                                "field": "cases-comments.references.id",
-                              },
-                            },
-                            "max": Object {
-                              "max_bucket": Object {
-                                "buckets_path": "ids._count",
-                              },
-                            },
-                          },
-                          "filter": Object {
-                            "term": Object {
-                              "cases-comments.references.type": "cases",
-                            },
-                          },
-                        },
-                      },
-                      "nested": Object {
-                        "path": "cases-comments.references",
-                      },
-                    },
-                  },
-                  "terms": Object {
-                    "field": "cases-comments.attributes.externalReferenceAttachmentTypeId",
-                    "size": 10,
-                  },
-                },
-                "persistableReferenceTypes": Object {
-                  "aggs": Object {
-                    "references": Object {
-                      "aggregations": Object {
-                        "cases": Object {
-                          "aggregations": Object {
-                            "ids": Object {
-                              "terms": Object {
-                                "field": "cases-comments.references.id",
-                              },
-                            },
-                            "max": Object {
-                              "max_bucket": Object {
-                                "buckets_path": "ids._count",
-                              },
-                            },
-                          },
-                          "filter": Object {
-                            "term": Object {
-                              "cases-comments.references.type": "cases",
-                            },
-                          },
-                        },
-                      },
-                      "nested": Object {
-                        "path": "cases-comments.references",
-                      },
-                    },
-                  },
-                  "terms": Object {
-                    "field": "cases-comments.attributes.persistableStateAttachmentTypeId",
-                    "size": 10,
-                  },
-                },
-              },
-              "filter": Object {
-                "term": Object {
-                  "cases-comments.attributes.owner": "cases",
-                },
-              },
-            },
-            "externalReferenceTypes": Object {
+            "by_owner": Object {
               "aggs": Object {
                 "references": Object {
                   "aggregations": Object {
-                    "cases": Object {
+                    "referenceType": Object {
                       "aggregations": Object {
-                        "ids": Object {
-                          "terms": Object {
+                        "referenceAgg": Object {
+                          "cardinality": Object {
                             "field": "cases-comments.references.id",
-                          },
-                        },
-                        "max": Object {
-                          "max_bucket": Object {
-                            "buckets_path": "ids._count",
                           },
                         },
                       },
@@ -784,203 +970,31 @@ describe('getCasesTelemetryData', () => {
                 },
               },
               "terms": Object {
-                "field": "cases-comments.attributes.externalReferenceAttachmentTypeId",
-                "size": 10,
+                "field": "cases-comments.attributes.owner",
+                "include": Array [
+                  "securitySolution",
+                  "observability",
+                  "cases",
+                ],
+                "size": 3,
               },
             },
-            "observability": Object {
-              "aggs": Object {
-                "externalReferenceTypes": Object {
-                  "aggs": Object {
-                    "references": Object {
-                      "aggregations": Object {
-                        "cases": Object {
-                          "aggregations": Object {
-                            "ids": Object {
-                              "terms": Object {
-                                "field": "cases-comments.references.id",
-                              },
-                            },
-                            "max": Object {
-                              "max_bucket": Object {
-                                "buckets_path": "ids._count",
-                              },
-                            },
-                          },
-                          "filter": Object {
-                            "term": Object {
-                              "cases-comments.references.type": "cases",
-                            },
-                          },
-                        },
-                      },
-                      "nested": Object {
-                        "path": "cases-comments.references",
-                      },
-                    },
-                  },
-                  "terms": Object {
-                    "field": "cases-comments.attributes.externalReferenceAttachmentTypeId",
-                    "size": 10,
-                  },
-                },
-                "persistableReferenceTypes": Object {
-                  "aggs": Object {
-                    "references": Object {
-                      "aggregations": Object {
-                        "cases": Object {
-                          "aggregations": Object {
-                            "ids": Object {
-                              "terms": Object {
-                                "field": "cases-comments.references.id",
-                              },
-                            },
-                            "max": Object {
-                              "max_bucket": Object {
-                                "buckets_path": "ids._count",
-                              },
-                            },
-                          },
-                          "filter": Object {
-                            "term": Object {
-                              "cases-comments.references.type": "cases",
-                            },
-                          },
-                        },
-                      },
-                      "nested": Object {
-                        "path": "cases-comments.references",
-                      },
-                    },
-                  },
-                  "terms": Object {
-                    "field": "cases-comments.attributes.persistableStateAttachmentTypeId",
-                    "size": 10,
-                  },
-                },
+          },
+          "filter": Object {
+            "arguments": Array [
+              Object {
+                "isQuoted": false,
+                "type": "literal",
+                "value": "cases-comments.attributes.type",
               },
-              "filter": Object {
-                "term": Object {
-                  "cases-comments.attributes.owner": "observability",
-                },
+              Object {
+                "isQuoted": false,
+                "type": "literal",
+                "value": "alert",
               },
-            },
-            "participants": Object {
-              "cardinality": Object {
-                "field": "cases-comments.attributes.created_by.username",
-              },
-            },
-            "persistableReferenceTypes": Object {
-              "aggs": Object {
-                "references": Object {
-                  "aggregations": Object {
-                    "cases": Object {
-                      "aggregations": Object {
-                        "ids": Object {
-                          "terms": Object {
-                            "field": "cases-comments.references.id",
-                          },
-                        },
-                        "max": Object {
-                          "max_bucket": Object {
-                            "buckets_path": "ids._count",
-                          },
-                        },
-                      },
-                      "filter": Object {
-                        "term": Object {
-                          "cases-comments.references.type": "cases",
-                        },
-                      },
-                    },
-                  },
-                  "nested": Object {
-                    "path": "cases-comments.references",
-                  },
-                },
-              },
-              "terms": Object {
-                "field": "cases-comments.attributes.persistableStateAttachmentTypeId",
-                "size": 10,
-              },
-            },
-            "securitySolution": Object {
-              "aggs": Object {
-                "externalReferenceTypes": Object {
-                  "aggs": Object {
-                    "references": Object {
-                      "aggregations": Object {
-                        "cases": Object {
-                          "aggregations": Object {
-                            "ids": Object {
-                              "terms": Object {
-                                "field": "cases-comments.references.id",
-                              },
-                            },
-                            "max": Object {
-                              "max_bucket": Object {
-                                "buckets_path": "ids._count",
-                              },
-                            },
-                          },
-                          "filter": Object {
-                            "term": Object {
-                              "cases-comments.references.type": "cases",
-                            },
-                          },
-                        },
-                      },
-                      "nested": Object {
-                        "path": "cases-comments.references",
-                      },
-                    },
-                  },
-                  "terms": Object {
-                    "field": "cases-comments.attributes.externalReferenceAttachmentTypeId",
-                    "size": 10,
-                  },
-                },
-                "persistableReferenceTypes": Object {
-                  "aggs": Object {
-                    "references": Object {
-                      "aggregations": Object {
-                        "cases": Object {
-                          "aggregations": Object {
-                            "ids": Object {
-                              "terms": Object {
-                                "field": "cases-comments.references.id",
-                              },
-                            },
-                            "max": Object {
-                              "max_bucket": Object {
-                                "buckets_path": "ids._count",
-                              },
-                            },
-                          },
-                          "filter": Object {
-                            "term": Object {
-                              "cases-comments.references.type": "cases",
-                            },
-                          },
-                        },
-                      },
-                      "nested": Object {
-                        "path": "cases-comments.references",
-                      },
-                    },
-                  },
-                  "terms": Object {
-                    "field": "cases-comments.attributes.persistableStateAttachmentTypeId",
-                    "size": 10,
-                  },
-                },
-              },
-              "filter": Object {
-                "term": Object {
-                  "cases-comments.attributes.owner": "securitySolution",
-                },
-              },
-            },
+            ],
+            "function": "is",
+            "type": "function",
           },
           "namespaces": Array [
             "*",
@@ -991,7 +1005,7 @@ describe('getCasesTelemetryData', () => {
         }
       `);
 
-      expect(savedObjectsClient.find.mock.calls[2][0]).toEqual({
+      expect(savedObjectsClient.find.mock.calls[3][0]).toEqual({
         aggs: {
           references: {
             aggregations: {
@@ -1037,7 +1051,7 @@ describe('getCasesTelemetryData', () => {
         namespaces: ['*'],
       });
 
-      expect(savedObjectsClient.find.mock.calls[3][0]).toEqual({
+      expect(savedObjectsClient.find.mock.calls[4][0]).toEqual({
         aggs: {
           references: {
             aggregations: {
@@ -1084,7 +1098,7 @@ describe('getCasesTelemetryData', () => {
       });
 
       for (const [index, sortField] of ['created_at', 'updated_at', 'closed_at'].entries()) {
-        const callIndex = index + 4;
+        const callIndex = index + 5;
 
         expect(savedObjectsClient.find.mock.calls[callIndex][0]).toEqual({
           page: 1,
@@ -1096,7 +1110,7 @@ describe('getCasesTelemetryData', () => {
         });
       }
 
-      expect(savedObjectsClient.find.mock.calls[7][0]).toMatchInlineSnapshot(`
+      expect(savedObjectsClient.find.mock.calls[8][0]).toMatchInlineSnapshot(`
         Object {
           "aggs": Object {
             "averageSize": Object {

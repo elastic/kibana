@@ -10,11 +10,13 @@ import { renderHook } from '@testing-library/react';
 import { getExternalAlertLensAttributes } from './lens_attributes/common/external_alert';
 import { useLensAttributes } from './use_lens_attributes';
 import {
+  expandIndexPatternsForCps,
   fieldNameExistsFilter,
   getDetailsPageFilter,
   getIndexFilters,
   sourceOrDestinationIpExistsFilter,
   getNetworkDetailsPageFilter,
+  getESQLGlobalFilters,
 } from './utils';
 
 import { filterFromSearchBar, queryFromSearchBar, wrapper } from './mocks';
@@ -25,24 +27,35 @@ import { SecurityPageName } from '../../../app/types';
 import type { Query } from '@kbn/es-query';
 import { getEventsHistogramLensAttributes } from './lens_attributes/common/events';
 import type { EuiThemeComputed } from '@elastic/eui';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import {
+  defaultImplementation,
+  withIndices,
+} from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('uuid', () => ({
-  v4: jest
-    .fn()
-    .mockReturnValueOnce('a3c54471-615f-4ff9-9fda-69b5b2ea3eef')
-    .mockReturnValueOnce('37bdf546-3c11-4b08-8c5d-e37debc44f1d')
-    .mockReturnValueOnce('0a923af2-c880-4aa3-aa93-a0b9c2801f6d')
-    .mockReturnValueOnce('42334c6e-98d9-47a2-b4cb-a445abb44c93'),
+  v4: jest.fn().mockReturnValue('generated-uuid'),
 }));
 
 jest.mock('../../../sourcerer/containers');
 jest.mock('../../utils/route/use_route_spy', () => ({
   useRouteSpy: jest.fn(),
 }));
+
+jest.mock('../../hooks/use_global_filter_query', () => ({
+  useGlobalFilterQuery: () => () => ({
+    filterQuery: undefined,
+  }),
+}));
+
 const params = {
   euiTheme: {} as EuiThemeComputed,
 };
 describe('useLensAttributes', () => {
+  beforeAll(() => {
+    jest.mocked(useDataView).mockReturnValue(withIndices(['auditbeat-*']));
+  });
+
   beforeEach(() => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       dataViewId: 'security-solution-default',
@@ -86,7 +99,52 @@ describe('useLensAttributes', () => {
       ...getExternalAlertLensAttributes(params).state.filters,
       ...getDetailsPageFilter('hosts', 'mockHost'),
       ...fieldNameExistsFilter('hosts'),
-      ...getIndexFilters(['auditbeat-*']),
+      ...getIndexFilters(expandIndexPatternsForCps(['auditbeat-*'])),
+      ...filterFromSearchBar,
+    ]);
+  });
+
+  it('skips host.name exists tab filter when entityStoreV2Enabled extraOption is set', () => {
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          extraOptions: { entityStoreV2Enabled: true },
+          getLensAttributes: getExternalAlertLensAttributes,
+          stackByField: 'event.dataset',
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current?.state.filters).toEqual([
+      ...getExternalAlertLensAttributes(params).state.filters,
+      ...getDetailsPageFilter('hosts', 'mockHost'),
+      ...getIndexFilters(expandIndexPatternsForCps(['auditbeat-*'])),
+      ...filterFromSearchBar,
+    ]);
+  });
+
+  it('skips user.name exists tab filter when entityStoreV2Enabled on users page', () => {
+    (useRouteSpy as jest.Mock).mockReturnValue([
+      {
+        detailName: 'elastic',
+        pageName: SecurityPageName.users,
+        tabName: 'events',
+      },
+    ]);
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          extraOptions: { entityStoreV2Enabled: true },
+          getLensAttributes: getExternalAlertLensAttributes,
+          stackByField: 'event.dataset',
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current?.state.filters).toEqual([
+      ...getExternalAlertLensAttributes(params).state.filters,
+      ...getDetailsPageFilter(SecurityPageName.users, 'elastic'),
+      ...getIndexFilters(expandIndexPatternsForCps(['auditbeat-*'])),
       ...filterFromSearchBar,
     ]);
   });
@@ -112,7 +170,7 @@ describe('useLensAttributes', () => {
       ...getExternalAlertLensAttributes(params).state.filters,
       ...getNetworkDetailsPageFilter('192.168.1.1'),
       ...sourceOrDestinationIpExistsFilter,
-      ...getIndexFilters(['auditbeat-*']),
+      ...getIndexFilters(expandIndexPatternsForCps(['auditbeat-*'])),
       ...filterFromSearchBar,
     ]);
   });
@@ -137,7 +195,7 @@ describe('useLensAttributes', () => {
     expect(result?.current?.state.filters).toEqual([
       ...getExternalAlertLensAttributes(params).state.filters,
       ...getDetailsPageFilter('user', 'elastic'),
-      ...getIndexFilters(['auditbeat-*']),
+      ...getIndexFilters(expandIndexPatternsForCps(['auditbeat-*'])),
       ...filterFromSearchBar,
     ]);
   });
@@ -164,7 +222,36 @@ describe('useLensAttributes', () => {
 
     expect(result?.current?.state.filters).toEqual([
       ...getExternalAlertLensAttributes(params).state.filters,
-      ...getIndexFilters(['auditbeat-*']),
+      ...getIndexFilters(expandIndexPatternsForCps(['auditbeat-*'])),
+    ]);
+  });
+
+  it('should apply esql query and filter', () => {
+    const esql = 'SELECT * FROM test-*';
+    (useRouteSpy as jest.Mock).mockReturnValue([
+      {
+        detailName: undefined,
+        pageName: SecurityPageName.entityAnalytics,
+        tabName: undefined,
+      },
+    ]);
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getExternalAlertLensAttributes,
+          stackByField: 'event.dataset',
+          applyGlobalQueriesAndFilters: true,
+          esql,
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current?.state.query as Query).toEqual({ esql });
+
+    expect(result?.current?.state.filters).toEqual([
+      ...getExternalAlertLensAttributes(params).state.filters,
+      ...getIndexFilters(expandIndexPatternsForCps(['auditbeat-*'])),
+      ...getESQLGlobalFilters(undefined),
     ]);
   });
 
@@ -188,7 +275,7 @@ describe('useLensAttributes', () => {
 
     expect(result?.current?.state.filters).toEqual([
       ...getExternalAlertLensAttributes(params).state.filters,
-      ...getIndexFilters(['auditbeat-*']),
+      ...getIndexFilters(expandIndexPatternsForCps(['auditbeat-*'])),
       ...filterFromSearchBar,
     ]);
   });
@@ -212,7 +299,7 @@ describe('useLensAttributes', () => {
       {
         type: 'index-pattern',
         id: 'security-solution-default',
-        name: 'indexpattern-datasource-layer-a3c54471-615f-4ff9-9fda-69b5b2ea3eef',
+        name: 'indexpattern-datasource-layer-layer-id-generated-uuid',
       },
       {
         type: 'index-pattern',
@@ -227,7 +314,7 @@ describe('useLensAttributes', () => {
     ]);
   });
 
-  it('should not set splitAccessor if stackByField is undefined', () => {
+  it('should not set splitAccessors if stackByField is undefined', () => {
     const { result } = renderHook(
       () =>
         useLensAttributes({
@@ -240,13 +327,15 @@ describe('useLensAttributes', () => {
     expect(result?.current?.state?.visualization).toEqual(
       expect.objectContaining({
         layers: expect.arrayContaining([
-          expect.objectContaining({ seriesType: 'bar_stacked', splitAccessor: undefined }),
+          expect.objectContaining({ seriesType: 'bar_stacked', splitAccessors: undefined }),
         ]),
       })
     );
   });
 
   it('should return null if no indices exist', () => {
+    jest.mocked(useDataView).mockImplementation(defaultImplementation);
+
     (useSourcererDataView as jest.Mock).mockReturnValue({
       dataViewId: 'security-solution-default',
       indicesExist: false,
@@ -304,6 +393,75 @@ describe('useLensAttributes', () => {
     );
 
     expect(result?.current).toBeNull();
+  });
+
+  it('layers a CPS-expanded negated drop-list on top of the CPS-expanded allowlist when excludedPatterns is set', () => {
+    // The "should return null if no indices exist" test (above this one in execution order)
+    // changes useDataView to the default (no matched indices), so restore it here.
+    // The scope includes both event and alert-backing index patterns.
+    jest
+      .mocked(useDataView)
+      .mockReturnValue(withIndices(['auditbeat-*', '.alerts-security.alerts-default']));
+
+    const excludedPatterns = ['.alerts-security.alerts-default'];
+
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getEventsHistogramLensAttributes,
+          stackByField: 'event.dataset',
+          excludedPatterns,
+        }),
+      { wrapper }
+    );
+
+    // The _index filter is a CPS-expanded allowlist for selectedPatterns plus a
+    // CPS-expanded negated drop-list for excludedPatterns. The allowlist bounds
+    // the chart to the user's scope (locally and across remote clusters), and
+    // the drop-list defensively removes alert-backing indices on top.
+    const allowlist = getIndexFilters(
+      expandIndexPatternsForCps(['auditbeat-*', '.alerts-security.alerts-default'])
+    );
+    const dropList = getIndexFilters(expandIndexPatternsForCps(excludedPatterns)).map((f) => ({
+      ...f,
+      meta: { ...f.meta, negate: true },
+    }));
+
+    // Default beforeEach route: hosts/events/mockHost, so pageFilters + tabsFilters apply.
+    expect(result?.current?.state.filters).toEqual([
+      ...getEventsHistogramLensAttributes(params).state.filters,
+      ...getDetailsPageFilter('hosts', 'mockHost'),
+      ...fieldNameExistsFilter('hosts'),
+      ...allowlist,
+      ...dropList,
+      ...filterFromSearchBar,
+    ]);
+  });
+
+  it('signalIndexName scope is maintained even when excludedPatterns is also provided', () => {
+    jest.mocked(useDataView).mockReturnValue(withIndices(['auditbeat-*']));
+
+    // When signalIndexName is present the negated-exclusion path is bypassed so that
+    // the Alerts trend chart always scopes to the local signal index only.
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getEventsHistogramLensAttributes,
+          stackByField: 'event.dataset',
+          signalIndexName: '.alerts-security.alerts-default',
+          excludedPatterns: ['logs-*'],
+        }),
+      { wrapper }
+    );
+
+    // _index filter is the allowlist for [signalIndexName], not affected by excludedPatterns.
+    expect(result?.current?.state.filters).toEqual([
+      ...getEventsHistogramLensAttributes(params).state.filters,
+      ...getDetailsPageFilter('hosts', 'mockHost'),
+      ...fieldNameExistsFilter('hosts'),
+      ...getIndexFilters(['.alerts-security.alerts-default']),
+      ...filterFromSearchBar,
+    ]);
   });
 
   it('should return Lens attributes if adHocDataViews exist', () => {

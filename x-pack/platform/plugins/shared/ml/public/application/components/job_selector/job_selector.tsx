@@ -11,27 +11,28 @@ import {
   EuiButtonEmpty,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiFlyout,
   EuiHorizontalRule,
+  EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import './_index.scss';
-
-import { useStorage } from '@kbn/ml-local-storage';
-import { ML_PAGES } from '../../../locator';
-import type { Dictionary } from '../../../../common/types/common';
-import { IdBadges } from './id_badges';
-import type { JobSelectorFlyoutProps } from './job_selector_flyout';
-import { BADGE_LIMIT, JobSelectorFlyoutContent } from './job_selector_flyout';
+import type { Dictionary } from '@kbn/ml-common-types/common';
 import type {
   MlJobWithTimeRange,
   MlSummaryJob,
-} from '../../../../common/types/anomaly_detection_jobs';
-import { ML_APPLY_TIME_RANGE_CONFIG } from '../../../../common/types/storage';
-import { FeedBackButton } from '../feedback_button';
+} from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { AnomalyResultsViewSelector } from '../anomaly_results_view_selector';
+import type { ExplorerJob } from '../../explorer/explorer_utils';
+import { IdBadges } from './id_badges';
+import { BADGE_LIMIT } from './job_selector_flyout';
 import { JobInfoFlyoutsProvider } from '../../jobs/components/job_details_flyout';
 import { JobInfoFlyoutsManager } from '../../jobs/components/job_details_flyout/job_details_context_manager';
+import { usePermissionCheck } from '../../capabilities/check_capabilities';
+import { useCreateAndNavigateToManagementMlLink } from '../../contexts/kibana/use_create_url';
+import { useJobSelectionFlyout } from '../../contexts/ml/use_job_selection_flyout';
 
 export interface GroupObj {
   groupId: string;
@@ -91,7 +92,7 @@ export interface JobSelectorProps {
   }) => void;
   selectedJobIds?: string[];
   selectedGroups?: GroupObj[];
-  selectedJobs?: MlSummaryJob[];
+  selectedJobs?: MlSummaryJob[] | ExplorerJob[];
 }
 
 export interface JobSelectionMaps {
@@ -108,17 +109,13 @@ export function JobSelector({
   selectedJobs = [],
   onSelectionChange,
 }: JobSelectorProps) {
-  const [applyTimeRangeConfig, setApplyTimeRangeConfig] = useStorage(
-    ML_APPLY_TIME_RANGE_CONFIG,
-    true
-  );
-
   const [selectedIds, setSelectedIds] = useState(
     mergeSelection(selectedJobIds, selectedGroups, singleSelection)
   );
 
   const [showAllBarBadges, setShowAllBarBadges] = useState(false);
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+
+  const openJobSelectionFlyout = useJobSelectionFlyout();
 
   // Ensure JobSelectionBar gets updated when selection via globalState changes.
   useEffect(() => {
@@ -126,27 +123,24 @@ export function JobSelector({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify([selectedJobIds, selectedGroups])]);
 
-  function closeFlyout() {
-    setIsFlyoutVisible(false);
-  }
+  const handleJobSelectionClick = useCallback(async () => {
+    try {
+      const result = await openJobSelectionFlyout({
+        singleSelection,
+        withTimeRangeSelector: true,
+        timeseriesOnly,
+        selectedIds,
+      });
 
-  function showFlyout() {
-    setIsFlyoutVisible(true);
-  }
-
-  function handleJobSelectionClick() {
-    showFlyout();
-  }
-
-  const applySelection: JobSelectorFlyoutProps['onSelectionConfirmed'] = useCallback(
-    ({ newSelection, jobIds, time }) => {
-      setSelectedIds(newSelection);
-
-      onSelectionChange?.({ jobIds, time });
-      closeFlyout();
-    },
-    [onSelectionChange]
-  );
+      if (result) {
+        const { newSelection, jobIds, time } = result;
+        setSelectedIds(newSelection);
+        onSelectionChange?.({ jobIds, time });
+      }
+    } catch {
+      // Flyout closed without selection
+    }
+  }, [onSelectionChange, openJobSelectionFlyout, selectedIds, singleSelection, timeseriesOnly]);
 
   const page = useMemo(() => {
     return singleSelection ? ML_PAGES.SINGLE_METRIC_VIEWER : ML_PAGES.ANOMALY_EXPLORER;
@@ -154,12 +148,25 @@ export function JobSelector({
 
   const removeJobId = (jobOrGroupId: string[]) => {
     const newSelection = selectedIds.filter((id) => !jobOrGroupId.includes(id));
-    applySelection({ newSelection, jobIds: newSelection, time: undefined });
+    setSelectedIds(newSelection);
+    onSelectionChange?.({ jobIds: newSelection, time: undefined });
   };
+
+  const { euiTheme } = useEuiTheme();
+  const [canGetJobs, canCreateJob] = usePermissionCheck(['canGetJobs', 'canCreateJob']);
+
+  const redirectToADJobManagement = useCreateAndNavigateToManagementMlLink('', 'anomaly_detection');
+
   function renderJobSelectionBar() {
     return (
       <>
-        <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
+        <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <AnomalyResultsViewSelector
+              viewId={singleSelection ? 'timeseriesexplorer' : 'explorer'}
+              selectedJobs={selectedJobs}
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {selectedIds.length > 0 ? (
               <EuiFlexGroup
@@ -181,66 +188,67 @@ export function JobSelector({
                 />
               </EuiFlexGroup>
             ) : (
-              <span>
+              <EuiText
+                size="s"
+                css={css`
+                  color: ${euiTheme.colors.textSubdued};
+                `}
+              >
                 <FormattedMessage
                   id="xpack.ml.jobSelector.noJobsSelectedLabel"
                   defaultMessage="No jobs selected"
                 />
-              </span>
+              </EuiText>
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              size="xs"
+              size="s"
               iconType="pencil"
               onClick={handleJobSelectionClick}
               data-test-subj="mlButtonEditJobSelection"
             >
               {i18n.translate('xpack.ml.jobSelector.jobSelectionButton', {
-                defaultMessage: 'Edit job selection',
+                defaultMessage: 'Job selection',
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>
 
           <EuiFlexItem />
 
-          <EuiFlexItem grow={false}>
-            <FeedBackButton jobIds={selectedIds} page={page} />
-          </EuiFlexItem>
+          {canGetJobs ? (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                color="primary"
+                onClick={redirectToADJobManagement}
+                disabled={!canGetJobs}
+                data-test-subj="mlJobSelectorManageJobsButton"
+              >
+                {canCreateJob ? (
+                  <FormattedMessage
+                    id="xpack.ml.jobSelector.manageJobsLinkLabel"
+                    defaultMessage="Manage jobs"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.ml.jobSelector.viewJobsLinkLabel"
+                    defaultMessage="View jobs"
+                  />
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
         <EuiHorizontalRule margin="s" />
       </>
     );
   }
 
-  function renderFlyout() {
-    if (isFlyoutVisible) {
-      return (
-        <EuiFlyout
-          onClose={closeFlyout}
-          data-test-subj="mlFlyoutJobSelector"
-          aria-labelledby="jobSelectorFlyout"
-        >
-          <JobSelectorFlyoutContent
-            dateFormatTz={dateFormatTz}
-            timeseriesOnly={timeseriesOnly}
-            singleSelection={singleSelection}
-            selectedIds={selectedIds}
-            onSelectionConfirmed={applySelection}
-            onFlyoutClose={closeFlyout}
-            applyTimeRangeConfig={applyTimeRangeConfig}
-            onTimeRangeConfigChange={setApplyTimeRangeConfig}
-          />
-        </EuiFlyout>
-      );
-    }
-  }
-
   return (
     <div>
       <JobInfoFlyoutsProvider>
         {renderJobSelectionBar()}
-        {renderFlyout()}
         <JobInfoFlyoutsManager />
       </JobInfoFlyoutsProvider>
     </div>

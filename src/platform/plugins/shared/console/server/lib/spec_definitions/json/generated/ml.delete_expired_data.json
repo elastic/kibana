@@ -19,7 +19,7 @@
       "_ml/_delete_expired_data/{job_id}",
       "_ml/_delete_expired_data"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-delete-expired-data.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-expired-data",
     "availability": {
       "stack": true,
       "serverless": false

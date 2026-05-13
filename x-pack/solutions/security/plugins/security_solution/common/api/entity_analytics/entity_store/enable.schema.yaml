@@ -10,9 +10,10 @@ paths:
       x-codegen-enabled: true
       operationId: InitEntityStore
       summary: Initialize the Entity Store
+      description: Initialize the entire Entity Store, creating engines for all or specified entity types.
 
       requestBody:
-        description: Schema for the entity store initialization
+        description: Configuration for the entity store initialization.
         required: true
         content:
           application/json:
@@ -37,9 +38,9 @@ paths:
                   type: string
                   description: The field to use as the timestamp.
                   default: '@timestamp'
-                lookbackPeriod: 
+                lookbackPeriod:
                   type: string
-                  default: 24h
+                  default: 3h
                   pattern: '[smdh]$'
                   description: The amount of time the transform looks back to calculate the aggregations.
                 timeout:
@@ -48,18 +49,23 @@ paths:
                   pattern: '[smdh]$'
                   description: The timeout for initializing the aggregating transform.
                 frequency:
-                  type: string 
+                  type: string
                   default: 1m
                   pattern: '[smdh]$'
                   description: The frequency at which the transform will run.
                 delay:
                   type: string
-                  default: 1m 
-                  pattern: '[smdh]$'               
+                  default: 1m
+                  pattern: '[smdh]$'
                   description: The delay before the transform will run.
                 docsPerSecond:
-                  type: integer  
-                  description: The number of documents per second to process.    
+                  type: integer
+                  default: -1
+                  description: The number of documents per second to process.
+                maxPageSearchSize:
+                  type: integer
+                  default: 500
+                  description: The initial page size to use for the composite aggregation of each checkpoint.
       responses:
         '200':
           description: Successful response
@@ -70,7 +76,36 @@ paths:
                 properties:
                   succeeded:
                     type: boolean
+                    description: Whether the Entity Store was initialized successfully.
                   engines:
                     type: array
+                    description: The engine descriptors created during initialization.
                     items:
                       $ref: './common.schema.yaml#/components/schemas/EngineDescriptor'
+              examples:
+                initEntityStoreExample:
+                  summary: Entity Store initialized with host and user engines
+                  description: The Entity Store was successfully initialized, creating host and user engines in the installing state.
+                  value:
+                    succeeded: true
+                    engines:
+                      - type: host
+                        indexPattern: ''
+                        status: installing
+                        fieldHistoryLength: 10
+                        lookbackPeriod: '24h'
+                        timestampField: '@timestamp'
+                        timeout: '180s'
+                        frequency: '1m'
+                        delay: '1m'
+                      - type: user
+                        indexPattern: ''
+                        status: installing
+                        fieldHistoryLength: 10
+                        lookbackPeriod: '24h'
+                        timestampField: '@timestamp'
+                        timeout: '180s'
+                        frequency: '1m'
+                        delay: '1m'
+        '400':
+          description: Invalid request

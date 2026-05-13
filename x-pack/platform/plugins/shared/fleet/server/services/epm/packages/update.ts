@@ -18,14 +18,27 @@ import { auditLoggingService } from '../../audit_logging';
 
 import { getInstallationObject, getPackageInfo } from './get';
 
+export interface NamespaceCustomizationDiff {
+  addedNamespaces: string[];
+  removedNamespaces: string[];
+}
+
 export async function updatePackage(
   options: {
     savedObjectsClient: SavedObjectsClientContract;
     pkgName: string;
     keepPoliciesUpToDate?: boolean;
   } & TypeOf<typeof UpdatePackageRequestSchema.body>
-) {
-  const { savedObjectsClient, pkgName, keepPoliciesUpToDate } = options;
+): Promise<{
+  packageInfo: Awaited<ReturnType<typeof getPackageInfo>>;
+  namespaceCustomizationDiff: NamespaceCustomizationDiff;
+}> {
+  const {
+    savedObjectsClient,
+    pkgName,
+    keepPoliciesUpToDate,
+    namespace_customization_enabled_for: newNamespaceCustomization,
+  } = options;
   const installedPackage = await getInstallationObject({ savedObjectsClient, pkgName });
 
   if (!installedPackage) {
@@ -35,12 +48,36 @@ export async function updatePackage(
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
     id: installedPackage.id,
+    name: installedPackage.attributes.name,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
-  await savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, installedPackage.id, {
-    keep_policies_up_to_date: keepPoliciesUpToDate ?? false,
-  });
+  const updateAttrs: Partial<Installation> = {};
+  const namespaceCustomizationDiff: NamespaceCustomizationDiff = {
+    addedNamespaces: [],
+    removedNamespaces: [],
+  };
+
+  if (keepPoliciesUpToDate !== undefined) {
+    updateAttrs.keep_policies_up_to_date = keepPoliciesUpToDate;
+    if (keepPoliciesUpToDate === false) {
+      updateAttrs.pending_upgrade_review = undefined;
+    }
+  }
+
+  if (newNamespaceCustomization) {
+    const oldList = installedPackage.attributes.namespace_customization_enabled_for ?? [];
+    const newList = [...new Set(newNamespaceCustomization)];
+    namespaceCustomizationDiff.addedNamespaces = newList.filter((ns) => !oldList.includes(ns));
+    namespaceCustomizationDiff.removedNamespaces = oldList.filter((ns) => !newList.includes(ns));
+    updateAttrs.namespace_customization_enabled_for = newList;
+  }
+
+  await savedObjectsClient.update<Installation>(
+    PACKAGES_SAVED_OBJECT_TYPE,
+    installedPackage.id,
+    updateAttrs
+  );
 
   const packageInfo = await getPackageInfo({
     savedObjectsClient,
@@ -48,7 +85,43 @@ export async function updatePackage(
     pkgVersion: installedPackage.attributes.version,
   });
 
-  return packageInfo;
+  return { packageInfo, namespaceCustomizationDiff };
+}
+
+export async function reviewUpgrade(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+  action: 'accept' | 'decline' | 'pending';
+  targetVersion: string;
+}) {
+  const { savedObjectsClient, pkgName, action: userAction, targetVersion } = options;
+  const installedPackage = await getInstallationObject({ savedObjectsClient, pkgName });
+
+  if (!installedPackage) {
+    throw new PackageNotFoundError(`Error while reviewing upgrade: ${pkgName} is not installed`);
+  }
+
+  const review = installedPackage.attributes.pending_upgrade_review;
+  if (!review || review.target_version !== targetVersion) {
+    throw new PackageNotFoundError(`No pending upgrade review for ${pkgName}@${targetVersion}`);
+  }
+
+  auditLoggingService.writeCustomSoAuditLog({
+    action: 'update',
+    id: installedPackage.id,
+    name: installedPackage.attributes.name,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+  });
+
+  await savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, installedPackage.id, {
+    pending_upgrade_review: {
+      ...review,
+      action: { accept: 'accepted', decline: 'declined', pending: 'pending' }[userAction] as
+        | 'accepted'
+        | 'declined'
+        | 'pending',
+    },
+  });
 }
 
 export async function updateDatastreamExperimentalFeatures(
@@ -62,6 +135,7 @@ export async function updateDatastreamExperimentalFeatures(
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
     id: pkgName,
+    name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 

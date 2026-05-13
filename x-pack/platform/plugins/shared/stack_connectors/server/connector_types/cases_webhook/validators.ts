@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { ValidatorServices } from '@kbn/actions-plugin/server/types';
+import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { isEmpty } from 'lodash';
+import { AuthType } from '@kbn/connector-schemas/common/auth';
+import type {
+  CasesWebhookPublicConfigurationType,
+  CasesWebhookSecretConfigurationType,
+} from '@kbn/connector-schemas/cases_webhook';
 import * as i18n from './translations';
-import { CasesWebhookPublicConfigurationType, CasesWebhookSecretConfigurationType } from './types';
 
 export const validateCasesWebhookConfig = (
   configObject: CasesWebhookPublicConfigurationType,
@@ -31,6 +35,10 @@ export const validateCasesWebhookConfig = (
     getIncidentUrl,
     updateIncidentUrl,
   ];
+
+  if (configObject.authType === AuthType.OAuth2ClientCredentials) {
+    throw new Error(i18n.OAUTH2_NOT_SUPPORTED);
+  }
 
   for (const url of urls) {
     if (url) {

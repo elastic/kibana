@@ -10,19 +10,19 @@ import React, { useEffect, useState } from 'react';
 import {
   EuiSteps,
   EuiPageHeader,
-  EuiButtonEmpty,
   EuiSpacer,
   EuiLink,
   EuiPageBody,
   EuiPageSection,
   EuiText,
+  EuiLoadingSpinner,
+  EuiIconTip,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import { useAppContext } from '../../app_context';
 import { uiMetricService, UIM_OVERVIEW_PAGE_LOAD } from '../../lib/ui_metric';
@@ -31,18 +31,25 @@ import { getFixIssuesStep } from './fix_issues_step';
 import { getUpgradeStep } from './upgrade_step';
 import { getMigrateSystemIndicesStep } from './migrate_system_indices';
 import { getLogsStep } from './logs_step';
+import { useCloudStackVersionInfo } from './use_cloud_stack_version_info';
 
 type OverviewStep = 'backup' | 'migrate_system_indices' | 'fix_issues' | 'logs';
 
-export const Overview = withRouter(({ history }: RouteComponentProps) => {
+export const Overview = () => {
   const {
     featureSet: { migrateSystemIndices },
     services: {
+      api,
       breadcrumbs,
       core: { docLinks },
     },
     plugins: { cloud },
+    kibanaVersionInfo: { currentMajor, currentMinor, currentPatch },
   } = useAppContext();
+
+  const currentVersion = `${currentMajor}.${currentMinor}.${currentPatch}`;
+
+  const cloudStackVersion = useCloudStackVersionInfo(api, currentVersion);
 
   useEffect(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.LOADED, UIM_OVERVIEW_PAGE_LOAD);
@@ -61,51 +68,123 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
 
   const isStepComplete = (step: OverviewStep) => completedStepsMap[step];
   const setCompletedStep = (step: OverviewStep, isCompleted: boolean) => {
-    setCompletedStepsMap({
-      ...completedStepsMap,
+    setCompletedStepsMap((prevStepsMap) => ({
+      ...prevStepsMap,
       [step]: isCompleted,
-    });
+    }));
   };
+
+  const latestVersionNode =
+    cloudStackVersion.status === 'loaded' ? (
+      <strong>{cloudStackVersion.latestAvailableVersion}</strong>
+    ) : cloudStackVersion.status === 'error' ? (
+      <strong>
+        {i18n.translate('xpack.upgradeAssistant.overview.latestAvailableVersionUnavailable', {
+          defaultMessage: 'Unavailable',
+        })}
+      </strong>
+    ) : (
+      <EuiLoadingSpinner
+        size="s"
+        aria-label={i18n.translate(
+          'xpack.upgradeAssistant.overview.latestAvailableVersionLoading',
+          {
+            defaultMessage: 'Loading latest available version',
+          }
+        )}
+      />
+    );
+
+  const directUpgradeableVersionRange =
+    cloudStackVersion.status === 'loaded' ? cloudStackVersion.directUpgradeableVersionRange : null;
+
+  const versionTooltipContent =
+    cloudStackVersion.status === 'loaded' && cloudStackVersion.minVersionToUpgradeToLatest ? (
+      <EuiIconTip
+        position="right"
+        content={
+          <FormattedMessage
+            id="xpack.upgradeAssistant.overview.latestMinVersionTooltip"
+            defaultMessage="Upgrading to v{latestVersion} requires v{minVersionToUpgradeToLatest}."
+            values={{
+              latestVersion: cloudStackVersion.latestAvailableVersion,
+              minVersionToUpgradeToLatest: cloudStackVersion.minVersionToUpgradeToLatest,
+            }}
+          />
+        }
+        type="info"
+        size="s"
+      />
+    ) : null;
+
+  const canUpgradeDirectlyToLatest =
+    cloudStackVersion.status === 'loaded' && cloudStackVersion.minVersionToUpgradeToLatest === null;
+  const shouldShowDirectUpgradeRangeLine =
+    cloudStackVersion.status === 'loaded' &&
+    !canUpgradeDirectlyToLatest &&
+    directUpgradeableVersionRange !== null;
 
   return (
     <EuiPageBody restrictWidth={true} data-test-subj="overview">
       <EuiPageSection color="transparent" paddingSize="none">
         <EuiPageHeader
           bottomBorder
+          data-test-subj="overviewPageHeader"
           pageTitle={i18n.translate('xpack.upgradeAssistant.overview.pageTitle', {
             defaultMessage: 'Upgrade Assistant',
           })}
-          description={i18n.translate('xpack.upgradeAssistant.overview.pageDescription', {
-            defaultMessage: 'Get ready for the next version of the Elastic Stack!',
-          })}
-          rightSideItems={[
-            <EuiButtonEmpty
-              href={docLinks.links.upgradeAssistant.overview}
-              target="_blank"
-              iconType="help"
-              data-test-subj="documentationLink"
-            >
-              <FormattedMessage
-                id="xpack.upgradeAssistant.overview.documentationLinkText"
-                defaultMessage="Documentation"
-              />
-            </EuiButtonEmpty>,
-          ]}
+          description={
+            <EuiText size="s">
+              <p>
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.overview.versionInfo"
+                  defaultMessage="Current version: {currentVersion} | Latest available version: {latestVersion} {versionTooltip}"
+                  values={{
+                    currentVersion: <strong>{currentVersion}</strong>,
+                    latestVersion: latestVersionNode,
+                    versionTooltip: versionTooltipContent,
+                  }}
+                />
+              </p>
+              {shouldShowDirectUpgradeRangeLine && directUpgradeableVersionRange && (
+                <em>
+                  {directUpgradeableVersionRange.min === directUpgradeableVersionRange.max ? (
+                    <FormattedMessage
+                      id="xpack.upgradeAssistant.overview.directUpgradeSingle"
+                      defaultMessage="From your current version, you can upgrade to version {version}."
+                      values={{
+                        version: directUpgradeableVersionRange.min,
+                      }}
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.upgradeAssistant.overview.directUpgradeRange"
+                      defaultMessage="From your current version, you can upgrade to versions {minVersion} - {maxVersion}."
+                      values={{
+                        minVersion: directUpgradeableVersionRange.min,
+                        maxVersion: directUpgradeableVersionRange.max,
+                      }}
+                    />
+                  )}
+                </em>
+              )}
+            </EuiText>
+          }
         >
           <EuiText>
             <FormattedMessage
-              id="xpack.upgradeAssistant.overview.upgradeToLatestMinorBeforeMajorMessage"
-              defaultMessage="Check the {link}. Before upgrading to a new major version, you must first upgrade to the latest minor of this major version."
+              id="xpack.upgradeAssistant.overview.linkToReleaseNotes"
+              defaultMessage="{linkToReleaseNotes}"
               values={{
-                link: (
+                linkToReleaseNotes: (
                   <EuiLink
                     data-test-subj="whatsNewLink"
                     href={docLinks.links.elasticsearch.latestReleaseHighlights}
                     target="_blank"
                   >
                     <FormattedMessage
-                      id="xpack.upgradeAssistant.overview.minorOfLatestMajorReleaseNotes"
-                      defaultMessage="latest release highlights"
+                      id="xpack.upgradeAssistant.overview.releaseHighlightsLinkText"
+                      defaultMessage="Elastic release notes"
                     />
                   </EuiLink>
                 ),
@@ -135,7 +214,6 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
               getLogsStep({
                 isComplete: isStepComplete('logs'),
                 setIsComplete: setCompletedStep.bind(null, 'logs'),
-                navigateToEsDeprecationLogs: () => history.push('/es_deprecation_logs'),
               }),
               getUpgradeStep(),
             ].filter(Boolean) as EuiStepProps[]
@@ -144,4 +222,4 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
       </EuiPageSection>
     </EuiPageBody>
   );
-});
+};

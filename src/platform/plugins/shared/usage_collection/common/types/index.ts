@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * as Stats from './stats';
-export * as UiCounters from './ui_counters';
-export * as UsageCounters from './usage_counters';
+export type * as Stats from './stats';
+export type * as UiCounters from './ui_counters';
+export type * as UsageCounters from './usage_counters';

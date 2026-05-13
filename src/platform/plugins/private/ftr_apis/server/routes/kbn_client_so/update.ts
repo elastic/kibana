@@ -29,6 +29,7 @@ export const registerUpdateRoute = (router: IRouter) => {
           attributes: schema.recordOf(schema.string(), schema.any()),
           migrationVersion: schema.maybe(schema.string()),
           references: schema.maybe(
+            // codeql[js/kibana/unbounded-array-in-schema] FTR test-only API, input from test code not end users
             schema.arrayOf(
               schema.object({
                 name: schema.string(),
@@ -48,7 +49,7 @@ export const registerUpdateRoute = (router: IRouter) => {
       const hiddenTypes = listHiddenTypes(savedObjects.typeRegistry);
       const soClient = savedObjects.getClient({ includedHiddenTypes: hiddenTypes });
 
-      const options = { version: migrationVersion, references };
+      const options = { version: migrationVersion, references, refresh: true };
       const result = await soClient.update(type, id, attributes, options);
       return res.ok({ body: result });
     })

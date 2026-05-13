@@ -80,6 +80,8 @@ export type {
   GetOneEnrollmentAPIKeyResponse,
   PostEnrollmentAPIKeyRequest,
   PostEnrollmentAPIKeyResponse,
+  BulkDeleteEnrollmentAPIKeysRequest,
+  BulkDeleteEnrollmentAPIKeysResponse,
   PostStandaloneAgentAPIKeyRequest,
   PostStandaloneAgentAPIKeyResponse,
   PostLogstashApiKeyResponse,
@@ -102,11 +104,14 @@ export type {
   CategorySummaryList,
   PackageInfo,
   PackageMetadata,
+  RegistrySection,
   RegistryVarsEntry,
   RegistryInput,
   RegistryStream,
   RegistryStreamWithDataStream,
   RegistryPolicyTemplate,
+  RegistryVarGroup,
+  RegistryVarGroupOption,
   PackageList,
   PackageListItem,
   PackagesGroupedByStatus,
@@ -128,6 +133,7 @@ export type {
   PackageSpecCategory,
   UpdatePackageRequest,
   UpdatePackageResponse,
+  ReviewUpgradeResponse,
   GetDownloadSourceResponse,
   PostDownloadSourceRequest,
   PutDownloadSourceRequest,
@@ -144,12 +150,24 @@ export type {
   BulkGetAgentPoliciesResponse,
   RegistryPolicyIntegrationTemplate,
   EnrollmentSettingsFleetServerPolicy,
+  EnrollmentSettingsProxy,
   GetEnrollmentSettingsRequest,
   GetEnrollmentSettingsResponse,
   GetSpaceSettingsResponse,
   GetAgentPolicyOutputsResponse,
   GetListAgentPolicyOutputsRequest,
   GetListAgentPolicyOutputsResponse,
+  CloudConnector,
+  CloudConnectorListOptions,
+  CreateCloudConnectorRequest,
+  CloudConnectorVars,
+  CloudProvider,
+  AccountType,
+  CloudConnectorSecretVar,
+  AwsCloudConnectorVars,
+  CloudConnectorSecretReference,
+  ComponentHealth,
+  ProxyConfig,
 } from '../../common/types';
 export {
   entries,
@@ -159,6 +177,6 @@ export {
   SetupTechnology,
 } from '../../common/types';
 
-export * from './intra_app_route_state';
-export * from './ui_extensions';
-export * from './in_memory_package_policy';
+export type * from './intra_app_route_state';
+export type * from './ui_extensions';
+export type * from './in_memory_package_policy';

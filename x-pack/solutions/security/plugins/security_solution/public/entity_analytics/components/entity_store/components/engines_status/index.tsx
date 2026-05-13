@@ -17,7 +17,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useStoreEntityTypes } from '../../../../hooks/use_enabled_entity_types';
+
+import { useEntityStoreTypes } from '../../../../hooks/use_enabled_entity_types';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { downloadBlob } from '../../../../../common/utils/download_blob';
 import { EngineComponentsStatusTable } from './components/engine_components_status';
@@ -25,6 +26,8 @@ import { useEntityStoreStatus } from '../../hooks/use_entity_store';
 import { isEngineLoading } from './helpers';
 import { EngineStatusHeader } from './components/engine_status_header';
 import { EngineStatusHeaderAction } from './components/engine_status_header_action';
+import { EntityStoreErrorCallout } from '../entity_store_error_callout';
+import { ENGINE_STATUS_PANEL_TEST_ID } from '../../../../test_ids';
 
 const FILE_NAME = 'engines_status.json';
 
@@ -35,13 +38,15 @@ const errorMessage = i18n.translate(
   }
 );
 
-export const EngineStatus: React.FC = () => {
+export const EngineStatus = () => {
   const {
     data,
     isLoading: isStatusAPILoading,
     error,
-  } = useEntityStoreStatus({ withComponents: true });
-  const enabledEntityTypes = useStoreEntityTypes();
+  } = useEntityStoreStatus({
+    withComponents: true,
+  });
+  const enabledEntityTypes = useEntityStoreTypes();
 
   const downloadJson = () => {
     downloadBlob(new Blob([JSON.stringify(data)]), FILE_NAME);
@@ -50,7 +55,7 @@ export const EngineStatus: React.FC = () => {
   useErrorToast(errorMessage, error);
 
   if (error) {
-    return <EuiCallOut title={errorMessage} color="danger" iconType="alert" />;
+    return <EuiCallOut announceOnMount title={errorMessage} color="danger" iconType="warning" />;
   }
 
   if (!data || isStatusAPILoading) return <EuiLoadingSpinner size="xl" />;
@@ -70,7 +75,7 @@ export const EngineStatus: React.FC = () => {
   }));
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
+    <EuiFlexGroup direction="column" gutterSize="none" data-test-subj={ENGINE_STATUS_PANEL_TEST_ID}>
       {data?.engines?.length > 0 && (
         <EuiFlexItem grow={false}>
           <EuiFlexGroup justifyContent="flexEnd">
@@ -93,6 +98,7 @@ export const EngineStatus: React.FC = () => {
                 entityType={type}
                 actionButton={<EngineStatusHeaderAction engine={engine} type={type} />}
               />
+              <EntityStoreErrorCallout engine={engine} size="s" />
               <EuiSpacer size="s" />
               <EuiPanel hasShadow={false} hasBorder={false}>
                 {engine && !isEngineLoading(engine.status) && engine.components && (

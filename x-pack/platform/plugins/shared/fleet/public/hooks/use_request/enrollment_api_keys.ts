@@ -4,20 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { useQuery } from '@kbn/react-query';
 
 import { enrollmentAPIKeyRouteService } from '../../services';
-
 import type {
   GetOneEnrollmentAPIKeyResponse,
   GetEnrollmentAPIKeysResponse,
   GetEnrollmentAPIKeysRequest,
   PostEnrollmentAPIKeyRequest,
   PostEnrollmentAPIKeyResponse,
+  BulkDeleteEnrollmentAPIKeysRequest,
+  BulkDeleteEnrollmentAPIKeysResponse,
 } from '../../types';
 
 import { API_VERSIONS } from '../../../common/constants';
 
-import { useRequest, sendRequest, useConditionalRequest } from './use_request';
+import { sendRequest, useConditionalRequest, sendRequestForRq } from './use_request';
 import type { UseRequestConfig, SendConditionalRequestConfig } from './use_request';
 
 type RequestOptions = Pick<Partial<UseRequestConfig>, 'pollIntervalMs'>;
@@ -40,11 +42,25 @@ export function sendGetOneEnrollmentAPIKey(keyId: string, options?: RequestOptio
   });
 }
 
-export function sendDeleteOneEnrollmentAPIKey(keyId: string, options?: RequestOptions) {
+export async function getOneEnrollmentAPIKeyToken(keyId: string): Promise<string> {
+  const data = await sendRequestForRq<GetOneEnrollmentAPIKeyResponse>({
+    method: 'get',
+    path: enrollmentAPIKeyRouteService.getInfoPath(keyId),
+    version: API_VERSIONS.public.v1,
+  });
+  return data.item.api_key;
+}
+
+export function sendDeleteOneEnrollmentAPIKey(
+  keyId: string,
+  query?: { forceDelete?: boolean },
+  options?: RequestOptions
+) {
   return sendRequest({
     method: 'delete',
     path: enrollmentAPIKeyRouteService.getDeletePath(keyId),
     version: API_VERSIONS.public.v1,
+    query,
     ...options,
   });
 }
@@ -62,16 +78,18 @@ export function sendGetEnrollmentAPIKeys(
   });
 }
 
-export function useGetEnrollmentAPIKeys(
+export function useGetEnrollmentAPIKeysQuery(
   query: GetEnrollmentAPIKeysRequest['query'],
   options?: RequestOptions
 ) {
-  return useRequest<GetEnrollmentAPIKeysResponse>({
-    method: 'get',
-    path: enrollmentAPIKeyRouteService.getListPath(),
-    version: API_VERSIONS.public.v1,
-    query,
-    ...options,
+  return useQuery(['get-enrollment-api-keys', query], () => {
+    return sendRequestForRq<GetEnrollmentAPIKeysResponse>({
+      method: 'get',
+      path: enrollmentAPIKeyRouteService.getListPath(),
+      version: API_VERSIONS.public.v1,
+      query,
+      ...options,
+    });
   });
 }
 
@@ -79,6 +97,15 @@ export function sendCreateEnrollmentAPIKey(body: PostEnrollmentAPIKeyRequest['bo
   return sendRequest<PostEnrollmentAPIKeyResponse>({
     method: 'post',
     path: enrollmentAPIKeyRouteService.getCreatePath(),
+    version: API_VERSIONS.public.v1,
+    body,
+  });
+}
+
+export function sendBulkDeleteEnrollmentAPIKeys(body: BulkDeleteEnrollmentAPIKeysRequest['body']) {
+  return sendRequest<BulkDeleteEnrollmentAPIKeysResponse>({
+    method: 'post',
+    path: enrollmentAPIKeyRouteService.getBulkDeletePath(),
     version: API_VERSIONS.public.v1,
     body,
   });

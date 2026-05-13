@@ -9,8 +9,10 @@ import { partition, isEmpty } from 'lodash/fp';
 import pMap from 'p-map';
 import { v4 as uuidv4 } from 'uuid';
 
-import type { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server';
-import type { FindResult, PartialRule } from '@kbn/alerting-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { GapFillStatus } from '@kbn/alerting-plugin/common/constants/gap_status';
+import type { GapReasonType } from '@kbn/alerting-plugin/common/constants/gap_reason';
+import type { FindResult, PartialRule, RulesClient } from '@kbn/alerting-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { RuleAction } from '@kbn/securitysolution-io-ts-alerting-types';
 
@@ -20,15 +22,23 @@ import type {
   RuleAction as RuleActionSchema,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type {
+  FindRulesSortField,
   FindRulesResponse,
   RuleToImport,
 } from '../../../../../common/api/detection_engine/rule_management';
+import type { SortOrder, WarningSchema } from '../../../../../common/api/detection_engine';
+import {
+  MAX_RULES_WITH_GAPS_LIMIT_REACHED_WARNING_TYPE,
+  MAX_RULES_WITH_GAPS_TO_FETCH,
+} from '../../../../../common/constants';
 
 import type { BulkError, OutputError } from '../../routes/utils';
 import { createBulkErrorObject } from '../../routes/utils';
 import type { InvestigationFieldsCombined, RuleAlertType, RuleParams } from '../../rule_schema';
 import { hasValidRuleType } from '../../rule_schema';
 import { internalRuleToAPIResponse } from '../logic/detection_rules_client/converters/internal_rule_to_api_response';
+import type { BulkActionError } from '../api/rules/bulk_actions/bulk_actions_response';
+import { getGapFilteredRuleIds } from '../logic/search/get_gap_filtered_rule_ids';
 
 type PromiseFromStreams = RuleToImport | Error;
 const MAX_CONCURRENT_SEARCHES = 10;
@@ -58,45 +68,14 @@ export const getIdError = ({
   }
 };
 
-export const getIdBulkError = ({
-  id,
-  ruleId,
-}: {
-  id: string | undefined | null;
-  ruleId: string | undefined | null;
-}): BulkError => {
-  if (id != null && ruleId != null) {
-    return createBulkErrorObject({
-      id,
-      ruleId,
-      statusCode: 404,
-      message: `id: "${id}" and rule_id: "${ruleId}" not found`,
-    });
-  } else if (id != null) {
-    return createBulkErrorObject({
-      id,
-      statusCode: 404,
-      message: `id: "${id}" not found`,
-    });
-  } else if (ruleId != null) {
-    return createBulkErrorObject({
-      ruleId,
-      statusCode: 404,
-      message: `rule_id: "${ruleId}" not found`,
-    });
-  } else {
-    return createBulkErrorObject({
-      statusCode: 404,
-      message: `id or rule_id should have been defined`,
-    });
-  }
-};
-
 export const transformAlertsToRules = (rules: RuleAlertType[]): RuleResponse[] => {
   return rules.map((rule) => internalRuleToAPIResponse(rule));
 };
 
-export const transformFindAlerts = (ruleFindResults: FindResult<RuleParams>): FindRulesResponse => {
+export const transformFindAlerts = (
+  ruleFindResults: FindResult<RuleParams>,
+  warnings?: WarningSchema[]
+): FindRulesResponse => {
   return {
     page: ruleFindResults.page,
     perPage: ruleFindResults.perPage,
@@ -104,6 +83,54 @@ export const transformFindAlerts = (ruleFindResults: FindResult<RuleParams>): Fi
     data: ruleFindResults.data.map((rule) => {
       return internalRuleToAPIResponse(rule);
     }),
+    ...(warnings && warnings.length > 0 ? { warnings } : {}),
+  };
+};
+
+export const resolveGapPreFilter = async ({
+  rulesClient,
+  filter,
+  sortField,
+  sortOrder,
+  gapFillStatuses,
+  gapsRangeStart,
+  gapsRangeEnd,
+  excludedReasons,
+  schedulerId,
+}: {
+  rulesClient: RulesClient;
+  filter: string | undefined;
+  sortField?: FindRulesSortField;
+  sortOrder?: SortOrder;
+  gapFillStatuses: GapFillStatus[];
+  gapsRangeStart: string;
+  gapsRangeEnd: string;
+  excludedReasons?: GapReasonType[];
+  schedulerId?: string;
+}): Promise<{ ruleIds: string[]; warnings: WarningSchema[] }> => {
+  const { ruleIds, truncated } = await getGapFilteredRuleIds({
+    rulesClient,
+    gapRange: { start: gapsRangeStart, end: gapsRangeEnd },
+    gapFillStatuses,
+    maxRuleIds: MAX_RULES_WITH_GAPS_TO_FETCH,
+    filter,
+    sortField,
+    sortOrder,
+    excludedReasons,
+    schedulerId,
+  });
+
+  return {
+    ruleIds,
+    warnings: truncated
+      ? [
+          {
+            type: MAX_RULES_WITH_GAPS_LIMIT_REACHED_WARNING_TYPE,
+            message: `Only the first ${MAX_RULES_WITH_GAPS_TO_FETCH} rules with gaps in the selected time range are returned. Additional rules with gaps are not included in this response.`,
+            actionPath: '',
+          },
+        ]
+      : [],
   };
 };
 
@@ -178,7 +205,7 @@ export const swapActionIds = async (
       return { ...action, id: foundAction.saved_objects[0].id };
     } else if (foundAction.saved_objects.length > 1) {
       return new Error(
-        `Found two action connectors with originId or _id: ${action.id} The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/guide/en/kibana/current/sharing-saved-objects.html for more details`
+        `Found two action connectors with originId or _id: ${action.id} The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/docs/extend/kibana/saved-objects/share for more details`
       );
     }
     return action;
@@ -270,84 +297,6 @@ export const migrateLegacyActionsIds = async (
 };
 
 /**
- * Given a set of rules and an actions client this will return connectors that are invalid
- * such as missing connectors and filter out the rules that have invalid connectors.
- * @param rules The rules to check for invalid connectors
- * @param actionsClient The actions client to get all the connectors.
- * @returns An array of connector errors if it found any and then the promise stream of valid and invalid connectors.
- */
-export const getInvalidConnectors = async (
-  rules: PromiseFromStreams[],
-  actionsClient: ActionsClient
-): Promise<[BulkError[], PromiseFromStreams[]]> => {
-  let actionsFind: FindActionResult[] = [];
-  const reducerAccumulator = {
-    errors: new Map<string, BulkError>(),
-    rulesAcc: new Map<string, PromiseFromStreams>(),
-  };
-  try {
-    actionsFind = await actionsClient.getAll();
-  } catch (exc) {
-    if (exc?.output?.statusCode === 403) {
-      reducerAccumulator.errors.set(
-        uuidv4(),
-        createBulkErrorObject({
-          statusCode: exc.output.statusCode,
-          message: `You may not have actions privileges required to import rules with actions: ${exc.output.payload.message}`,
-        })
-      );
-    } else {
-      reducerAccumulator.errors.set(
-        uuidv4(),
-        createBulkErrorObject({
-          statusCode: 404,
-          message: JSON.stringify(exc),
-        })
-      );
-    }
-  }
-  const actionIds = new Set(actionsFind.map((action) => action.id));
-  const { errors, rulesAcc } = rules.reduce(
-    (acc, parsedRule) => {
-      if (parsedRule instanceof Error) {
-        acc.rulesAcc.set(uuidv4(), parsedRule);
-      } else {
-        const { rule_id: ruleId, actions } = parsedRule;
-        const missingActionIds = actions
-          ? actions.flatMap((action) => {
-              if (!actionIds.has(action.id)) {
-                return [action.id];
-              } else {
-                return [];
-              }
-            })
-          : [];
-        if (missingActionIds.length === 0) {
-          acc.rulesAcc.set(ruleId, parsedRule);
-        } else {
-          const errorMessage =
-            missingActionIds.length > 1
-              ? 'connectors are missing. Connector ids missing are:'
-              : 'connector is missing. Connector id missing is:';
-          acc.errors.set(
-            uuidv4(),
-            createBulkErrorObject({
-              ruleId,
-              statusCode: 404,
-              message: `${missingActionIds.length} ${errorMessage} ${missingActionIds.join(', ')}`,
-            })
-          );
-        }
-      }
-      return acc;
-    }, // using map (preserves ordering)
-    reducerAccumulator
-  );
-
-  return [Array.from(errors.values()), Array.from(rulesAcc.values())];
-};
-
-/**
  * In ESS 8.10.x "investigation_fields" are mapped as string[].
  * For 8.11+ logic is added on read in our endpoints to migrate
  * the data over to it's intended type of { field_names: string[] }.
@@ -378,3 +327,20 @@ export const separateActionsAndSystemAction = (
   !isEmpty(actions)
     ? partition((action: RuleActionSchema) => actionsClient.isSystemAction(action.id))(actions)
     : [[], actions];
+
+export const createBulkActionError = ({
+  message,
+  statusCode,
+  id,
+}: {
+  message: string;
+  statusCode: number;
+  id: string;
+}): BulkActionError => {
+  const error: Error & { statusCode?: number } = new Error(message);
+  error.statusCode = statusCode;
+  return {
+    item: id,
+    error,
+  };
+};

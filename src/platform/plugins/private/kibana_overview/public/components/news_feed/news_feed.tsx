@@ -7,17 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
+import type { UseEuiTheme } from '@elastic/eui';
 import { EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FetchResult } from '@kbn/newsfeed-plugin/public';
+import type { FetchResult } from '@kbn/newsfeed-plugin/public';
 
 interface Props {
-  newsFetchResult: FetchResult;
+  newsFetchResult: FetchResult | null | void;
 }
+const styles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    article: {
+      '& + article': {
+        marginTop: euiTheme.size.l,
+      },
+      '&, header': {
+        '& > * + *': {
+          marginTop: euiTheme.size.xs,
+        },
+      },
+      h3: {
+        fontWeight: 'inherit',
+      },
+    },
+  });
 
 export const NewsFeed: FC<Props> = ({ newsFetchResult }) => (
-  <section aria-labelledby="kbnOverviewNews__title" className="kbnOverviewNews">
+  <section aria-labelledby="kbnOverviewNews__title">
     <EuiTitle size="s">
       <h2 id="kbnOverviewNews__title">
         <FormattedMessage id="kibanaOverview.news.title" defaultMessage="What's new" />
@@ -25,9 +44,8 @@ export const NewsFeed: FC<Props> = ({ newsFetchResult }) => (
     </EuiTitle>
 
     <EuiSpacer size="m" />
-
-    <div className="kbnOverviewNews__content">
-      {newsFetchResult.feedItems
+    <div css={styles}>
+      {newsFetchResult?.feedItems
         .slice(0, 3)
         .map(({ title, description, linkUrl, publishOn }, index) => (
           <article key={title} aria-labelledby={`kbnOverviewNews__title${index}`}>

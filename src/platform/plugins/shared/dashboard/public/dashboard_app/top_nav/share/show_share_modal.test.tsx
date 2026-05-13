@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Capabilities } from '@kbn/core/public';
-import { convertPanelMapToPanelsArray } from '../../../../common';
-import { DashboardLocatorParams } from '../../../dashboard_container/types';
-
+import type { Capabilities } from '@kbn/core/public';
+import type { DashboardLocatorParams, DashboardState } from '../../../../common/types';
+import { getDashboardBackupService } from '../../../services/dashboard_api_services';
 import { shareService } from '../../../services/kibana_services';
-import { showPublicUrlSwitch, ShowShareModal, ShowShareModalProps } from './show_share_modal';
-import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
-import { DashboardState } from '../../../dashboard_api/types';
+import { showPublicUrlSwitch, ShowShareModal } from './show_share_modal';
+import type { AccessControlClient } from '@kbn/content-management-access-control-public';
+import type { SavedObjectAccessControl } from '@kbn/core/server';
+import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
 
 describe('showPublicUrlSwitch', () => {
   test('returns false if "dashboard_v2" app is not available', () => {
@@ -59,7 +59,7 @@ describe('showPublicUrlSwitch', () => {
 
 describe('ShowShareModal', () => {
   const dashboardBackupService = getDashboardBackupService();
-  const unsavedStateKeys = ['query', 'filters', 'options', 'savedQuery', 'panels'] as Array<
+  const unsavedStateKeys = ['options', 'savedQuery', 'panels'] as Array<
     keyof DashboardLocatorParams
   >;
   const toggleShareMenuSpy = jest.spyOn(shareService!, 'toggleShareContextMenu');
@@ -68,18 +68,22 @@ describe('ShowShareModal', () => {
     jest.clearAllMocks();
   });
 
-  const getPropsAndShare = (unsavedState?: Partial<DashboardState>): ShowShareModalProps => {
-    dashboardBackupService.getState = jest.fn().mockReturnValue({ dashboardState: unsavedState });
-    return {
-      isDirty: true,
-      anchorElement: document.createElement('div'),
-      getPanelsState: () => ({}),
-    };
+  const defaultShareModalProps = {
+    isDirty: true,
+    anchorElement: document.createElement('div'),
+    canSave: true,
+    saveDashboard: jest.fn(),
+    changeAccessMode: jest.fn(),
+    accessControlClient: {} as AccessControlClient,
+    accessControl: {} as SavedObjectAccessControl,
+    isManaged: false,
+    getCurrentUser: jest.fn().mockResolvedValue({} as { uid: string }),
+    getActiveSpace: jest.fn().mockResolvedValue({ name: 'default' }),
   };
 
   it('locatorParams is missing all unsaved state when none is given', () => {
-    const showModalProps = getPropsAndShare();
-    ShowShareModal(showModalProps);
+    dashboardBackupService.getState = jest.fn().mockReturnValue(undefined);
+    ShowShareModal(defaultShareModalProps);
     expect(toggleShareMenuSpy).toHaveBeenCalledTimes(1);
     const shareLocatorParams = (
       toggleShareMenuSpy.mock.calls[0][0].sharingData as {
@@ -92,123 +96,69 @@ describe('ShowShareModal', () => {
   });
 
   it('locatorParams unsaved state is properly propagated to locator', () => {
-    const unsavedDashboardState = {
-      panels: {
-        panel_1: {
+    const unsavedDashboardState: DashboardState = {
+      ...DEFAULT_DASHBOARD_STATE,
+      title: 'My Dashboard',
+      panels: [
+        {
           type: 'panel_type',
-          gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
-          panelRefName: 'superPanel',
-          explicitInput: {
+          grid: { w: 0, h: 0, x: 0, y: 0 },
+          config: {
             id: 'superPanel',
           },
-        },
-      },
-      hidePanelTitles: true,
-      useMargins: true,
-      syncColors: true,
-      syncCursor: true,
-      syncTooltips: true,
-      filters: [
-        {
-          meta: {
-            alias: null,
-            disabled: false,
-            negate: false,
-          },
-          query: { query: 'hi' },
         },
       ],
-      query: { query: 'bye', language: 'kuery' },
-    };
-    const showModalProps = getPropsAndShare(unsavedDashboardState);
-    showModalProps.getPanelsState = () => {
-      return {
-        panel_1: {
-          type: 'panel_type',
-          gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
-          panelRefName: 'superPanel',
-          explicitInput: {
-            id: 'superPanel',
+      filters: [
+        {
+          type: 'condition',
+          condition: {
+            field: 'status',
+            operator: 'is',
+            value: 'active',
           },
         },
-      };
+      ],
+      query: { expression: 'bye', language: 'kql' },
     };
-    ShowShareModal(showModalProps);
+    dashboardBackupService.getState = jest.fn().mockReturnValue(unsavedDashboardState);
+    ShowShareModal(defaultShareModalProps);
     expect(toggleShareMenuSpy).toHaveBeenCalledTimes(1);
     const shareLocatorParams = (
       toggleShareMenuSpy.mock.calls[0][0].sharingData as {
         locatorParams: { params: DashboardLocatorParams };
       }
     ).locatorParams.params;
-    const rawDashboardState = {
-      ...unsavedDashboardState,
-      panels: convertPanelMapToPanelsArray(unsavedDashboardState.panels),
-    };
     unsavedStateKeys.forEach((key) => {
       expect(shareLocatorParams[key]).toStrictEqual(
-        (rawDashboardState as unknown as Partial<DashboardLocatorParams>)[key]
+        (unsavedDashboardState as Partial<DashboardLocatorParams>)[key]
       );
     });
-  });
-
-  it('applies unsaved panel state from backup service into the locator params', () => {
-    const unsavedDashboardState = {
-      panels: {
-        panel_1: {
-          gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
-          type: 'superType',
-          explicitInput: {
-            id: 'whatever',
-            changedKey1: 'not changed....',
+    // Query in the locator params is in the storedQuery format
+    expect(shareLocatorParams.query).toMatchInlineSnapshot(`
+      Object {
+        "language": "kuery",
+        "query": "bye",
+      }
+    `);
+    // Filters in the locator params are in the storedFilter format
+    expect(shareLocatorParams.filters).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "meta": Object {
+            "field": "status",
+            "key": "status",
+            "params": Object {
+              "query": "active",
+            },
+            "type": "phrase",
+          },
+          "query": Object {
+            "match_phrase": Object {
+              "status": "active",
+            },
           },
         },
-      },
-    };
-    const props = getPropsAndShare(unsavedDashboardState);
-    dashboardBackupService.getState = jest.fn().mockReturnValue({
-      dashboardState: unsavedDashboardState,
-      panels: {
-        panel_1: { changedKey1: 'changed' },
-        panel_2: { changedKey2: 'definitely changed' },
-      },
-    });
-    props.getPanelsState = () => ({
-      panel_1: {
-        gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
-        type: 'superType',
-        explicitInput: {
-          id: 'whatever',
-          changedKey1: 'NOT changed',
-        },
-      },
-      panel_2: {
-        gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
-        type: 'superType',
-        explicitInput: {
-          id: 'whatever2',
-          changedKey2: 'definitely NOT changed',
-        },
-      },
-      panel_3: {
-        gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
-        type: 'superType',
-        explicitInput: {
-          id: 'whatever2',
-          changedKey3: 'should still exist',
-        },
-      },
-    });
-    ShowShareModal(props);
-    expect(toggleShareMenuSpy).toHaveBeenCalledTimes(1);
-    const shareLocatorParams = (
-      toggleShareMenuSpy.mock.calls[0][0].sharingData as {
-        locatorParams: { params: DashboardLocatorParams };
-      }
-    ).locatorParams.params;
-
-    expect(shareLocatorParams.panels).toBeDefined();
-    expect(shareLocatorParams.panels![0].panelConfig.changedKey1).toBe('changed');
-    expect(shareLocatorParams.panels![1].panelConfig.changedKey2).toBe('definitely changed');
-    expect(shareLocatorParams.panels![2].panelConfig.changedKey3).toBe('should still exist');
+      ]
+    `);
   });
 });

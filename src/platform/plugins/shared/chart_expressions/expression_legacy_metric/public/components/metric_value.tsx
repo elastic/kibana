@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { CSSProperties, useLayoutEffect } from 'react';
+import type { CSSProperties } from 'react';
+import React, { useLayoutEffect } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
+import type { UseEuiTheme } from '@elastic/eui';
+import { euiTextTruncate } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { MetricOptions, MetricStyle, MetricVisParam } from '../../common/types';
 
 interface MetricVisValueProps {
@@ -22,8 +26,20 @@ interface MetricVisValueProps {
   renderComplete?: () => void;
 }
 
+const ELASTIC_UI_NUMERIC_FONT_FAMILY = "'Elastic UI Numeric'";
+
+const prependNumericFontFamily = (style: CSSProperties): CSSProperties => {
+  const { fontFamily } = style;
+  if (!fontFamily || typeof fontFamily !== 'string') return style;
+
+  return fontFamily.includes(ELASTIC_UI_NUMERIC_FONT_FAMILY)
+    ? style
+    : { ...style, fontFamily: `${ELASTIC_UI_NUMERIC_FONT_FAMILY}, ${fontFamily}` };
+};
+
 export const MetricVisValue = (props: MetricVisValueProps) => {
   const { style, metric, onFilter, labelConfig, colorFullBackground, autoScale } = props;
+
   const containerClassName = classNames('legacyMtrVis__container', {
     'legacyMtrVis__container--light': metric.lightText,
     'legacyMtrVis__container-isfilterable': onFilter,
@@ -38,30 +54,25 @@ export const MetricVisValue = (props: MetricVisValueProps) => {
   const metricComponent = (
     <div
       className={containerClassName}
+      css={styles.legacyMtrVisContainer}
       style={autoScale && colorFullBackground ? {} : { backgroundColor: metric.bgColor }}
     >
       <div
         data-test-subj="metric_value"
         className="legacyMtrVis__value"
+        css={styles.legacyMtrVisValue}
         style={{
-          ...(style.spec as CSSProperties),
+          ...prependNumericFontFamily(style.spec as CSSProperties),
           ...(metric.color ? { color: metric.color } : {}),
         }}
-        /*
-         * Justification for dangerouslySetInnerHTML:
-         * This is one of the visualizations which makes use of the HTML field formatters.
-         * Since these formatters produce raw HTML, this visualization needs to be able to render them as-is, relying
-         * on the field formatter to only produce safe HTML.
-         * `metric.value` is set by the MetricVisComponent, so this component must make sure this value never contains
-         * any unsafe HTML (e.g. by bypassing the field formatter).
-         */
-        dangerouslySetInnerHTML={{ __html: metric.value }} // eslint-disable-line react/no-danger
-      />
+      >
+        {metric.value}
+      </div>
       {labelConfig.show && (
         <div
           data-test-subj="metric_label"
           style={{
-            ...(labelConfig.style.spec as CSSProperties),
+            ...prependNumericFontFamily(labelConfig.style.spec as CSSProperties),
             order: labelConfig.position === 'top' ? -1 : 2,
           }}
         >
@@ -74,6 +85,7 @@ export const MetricVisValue = (props: MetricVisValueProps) => {
   if (onFilter) {
     return (
       <button
+        data-test-subj="metric_value_button"
         css={{ display: 'block' }}
         onClick={() => onFilter()}
         title={i18n.translate('expressionLegacyMetricVis.filterTitle', {
@@ -86,4 +98,43 @@ export const MetricVisValue = (props: MetricVisValueProps) => {
   }
 
   return metricComponent;
+};
+
+const styles = {
+  legacyMtrVisValue: ({ euiTheme }: UseEuiTheme) =>
+    css`
+      ${euiTextTruncate()};
+      font-weight: ${euiTheme.font.weight.bold};
+    `,
+  legacyMtrVisContainer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      '&.legacyMtrVis__container': {
+        textAlign: 'center',
+        padding: euiTheme.size.base,
+        display: 'flex',
+        flexDirection: 'column',
+      },
+      '&.legacyMtrVis__container--light': {
+        color: euiTheme.colors.emptyShade,
+      },
+      '&.legacyMtrVis__container-isfull': {
+        minHeight: '100%',
+        minWidth: 'max-content',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        flex: '1 0 100%',
+      },
+      '&.legacyMtrVis__container-isfilterable': {
+        cursor: 'pointer',
+        transition: `transform ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`,
+        transform: 'translate(0, 0)',
+
+        '&:hover, &:focus': {
+          boxShadow: 'none',
+          transform: 'translate(0, -2px)',
+        },
+      },
+    }),
 };

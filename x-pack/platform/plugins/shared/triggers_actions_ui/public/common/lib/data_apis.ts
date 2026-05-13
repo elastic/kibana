@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
-import { FieldOption } from '../types';
+import type { HttpSetup } from '@kbn/core/public';
+import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
+import type { FieldOption } from '../types';
 
 const DATA_API_ROOT = '/internal/triggers_actions_ui/data';
 
@@ -25,17 +25,23 @@ const formatPattern = (pattern: string) => {
 export async function getMatchingIndices({
   pattern,
   http,
+  projectRouting,
 }: {
   pattern: string;
   http: HttpSetup;
+  projectRouting?: string;
 }): Promise<Record<string, any>> {
   try {
-    // prepend and append index search requests with `*` to match the given text in middle of index names
     const formattedPattern = formatPattern(pattern);
 
     const { indices } = await http.post<ReturnType<typeof getMatchingIndices>>(
       `${DATA_API_ROOT}/_indices`,
-      { body: JSON.stringify({ pattern: formattedPattern }) }
+      {
+        body: JSON.stringify({
+          pattern: formattedPattern,
+          ...(projectRouting ? { project_routing: projectRouting } : {}),
+        }),
+      }
     );
     return indices;
   } catch (e) {

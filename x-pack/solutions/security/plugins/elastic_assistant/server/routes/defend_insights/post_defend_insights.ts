@@ -5,33 +5,30 @@
  * 2.0.
  */
 
+import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import moment from 'moment/moment';
-
-import type { IKibanaResponse } from '@kbn/core/server';
-
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import {
   DEFEND_INSIGHTS,
   DefendInsightsPostRequestBody,
   DefendInsightsPostResponse,
   API_VERSIONS,
-  Replacements,
+  DefendInsightType,
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { IRouter, Logger } from '@kbn/core/server';
 
-import { getPrompt } from '@kbn/security-ai-prompts';
-import { localToolPrompts, promptGroupId } from '../../lib/prompt/tool_prompts';
+import type { ElasticAssistantRequestHandlerContext } from '../../types';
 import { buildResponse } from '../../lib/build_response';
-import { ElasticAssistantRequestHandlerContext } from '../../types';
-import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
+import { CallbackIds, appContextService } from '../../services/app_context';
+import { InvalidDefendInsightTypeError } from '../../lib/defend_insights/errors';
 import {
-  getAssistantTool,
-  getAssistantToolParams,
-  handleToolError,
   createDefendInsight,
   updateDefendInsights,
-  isDefendInsightsEnabled,
+  invokeDefendInsightsGraph,
+  handleGraphError,
+  runExternalCallbacks,
+  isDefendInsightsPolicyResponseFailureEnabled,
 } from './helpers';
 
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
@@ -73,36 +70,29 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
         const resp = buildResponse(response);
 
         const ctx = await context.resolve(['licensing', 'elasticAssistant']);
-        const savedObjectsClient = ctx.elasticAssistant.savedObjectsClient;
-
         const assistantContext = ctx.elasticAssistant;
 
         const logger: Logger = assistantContext.logger;
         const telemetry = assistantContext.telemetry;
+        const savedObjectsClient = assistantContext.savedObjectsClient;
 
         try {
-          const isEnabled = isDefendInsightsEnabled({
-            request,
-            logger,
-            assistantContext,
-          });
-          if (!isEnabled) {
-            return response.notFound();
-          }
-
           if (!ctx.licensing.license.hasAtLeast('enterprise')) {
             return response.forbidden({
               body: {
                 message:
-                  'Your license does not support Defend Workflows. Please upgrade your license.',
+                  'Your license does not support Automatic Troubleshooting. Please upgrade your license.',
               },
             });
           }
 
           const actions = assistantContext.actions;
           const actionsClient = await actions.getActionsClientWithRequest(request);
+          const inference = assistantContext.inference;
+          const inferenceClient = inference.getClient({ request });
           const dataClient = await assistantContext.getDefendInsightsDataClient();
-          const authenticatedUser = assistantContext.getCurrentUser();
+          const kbDataClient = await assistantContext.getAIAssistantKnowledgeBaseDataClient();
+          const authenticatedUser = await assistantContext.getCurrentUser();
           if (authenticatedUser == null) {
             return resp.error({
               body: `Authenticated user not found`,
@@ -116,16 +106,7 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             });
           }
 
-          const pluginName = getPluginNameFromRequest({
-            request,
-            defaultPluginName: DEFAULT_PLUGIN_NAME,
-            logger,
-          });
-          const assistantTool = getAssistantTool(assistantContext.getRegisteredTools, pluginName);
-
-          if (!assistantTool) {
-            return response.notFound();
-          }
+          await runExternalCallbacks(CallbackIds.DefendInsightsPreCreate, request);
 
           const {
             endpointIds,
@@ -144,34 +125,6 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             latestReplacements = { ...latestReplacements, ...newReplacements };
           };
 
-          const assistantToolParams = getAssistantToolParams({
-            endpointIds,
-            insightType,
-            actionsClient,
-            anonymizationFields,
-            apiConfig,
-            esClient,
-            latestReplacements,
-            contentReferencesStore: undefined,
-            connectorTimeout: CONNECTOR_TIMEOUT,
-            langChainTimeout: LANG_CHAIN_TIMEOUT,
-            langSmithProject,
-            langSmithApiKey,
-            logger,
-            onNewReplacements,
-            request,
-          });
-
-          const description = await getPrompt({
-            actionsClient,
-            connectorId: apiConfig.connectorId,
-            localPrompts: localToolPrompts,
-            promptId: assistantTool.name,
-            promptGroupId,
-            savedObjectsClient,
-          });
-          const toolInstance = assistantTool.getTool({ ...assistantToolParams, description });
-
           const { currentInsight, defendInsightId } = await createDefendInsight(
             endpointIds,
             insightType,
@@ -180,23 +133,59 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             apiConfig
           );
 
-          toolInstance
-            ?.invoke('')
-            .then((rawDefendInsights: string) =>
+          const isPolicyResponseFailureEnabled = isDefendInsightsPolicyResponseFailureEnabled({
+            request,
+            logger,
+            assistantContext,
+          });
+          if (
+            insightType === DefendInsightType.enum.policy_response_failure &&
+            !isPolicyResponseFailureEnabled
+          ) {
+            throw new InvalidDefendInsightTypeError();
+          }
+
+          invokeDefendInsightsGraph({
+            insightType,
+            endpointIds,
+            actionsClient,
+            getInferenceConnectorById: (id) =>
+              assistantContext.inference.getConnectorById(id, request),
+            anonymizationFields,
+            apiConfig,
+            connectorTimeout: CONNECTOR_TIMEOUT,
+            esClient,
+            inferenceClient,
+            langSmithProject,
+            langSmithApiKey,
+            latestReplacements,
+            logger,
+            onNewReplacements,
+            savedObjectsClient,
+            kbDataClient,
+          })
+            .then(({ anonymizedEvents, insights }) =>
               updateDefendInsights({
+                anonymizedEvents,
                 apiConfig,
                 defendInsightId,
+                insights,
                 authenticatedUser,
                 dataClient,
                 latestReplacements,
                 logger,
-                rawDefendInsights,
                 startTime,
                 telemetry,
-              })
+                insightType,
+              }).then(() => insights)
+            )
+            .then((insights) =>
+              appContextService
+                .getRegisteredCallbacks(CallbackIds.DefendInsightsPostCreate)
+                .map((cb) => cb(insights, request))
             )
             .catch((err) =>
-              handleToolError({
+              handleGraphError({
                 apiConfig,
                 defendInsightId,
                 authenticatedUser,

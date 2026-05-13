@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
+import React from 'react';
 import { shallow } from 'enzyme';
 import { EuiFieldNumber } from '@elastic/eui';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 import { TruncateFormatEditor } from './truncate';
 
 const fieldType = 'string';
 const format = {
-  getConverterFor: jest.fn().mockImplementation(() => (input: string) => input.substring(0, 10)),
+  reactConvert: jest.fn().mockImplementation((input: string) => input.substring(0, 10)),
   getParamDefaults: jest.fn().mockImplementation(() => {
     return { fieldLength: 10 };
   }),

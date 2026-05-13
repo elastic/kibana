@@ -1,0 +1,8 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/mcp-dev-server",
+  "owner": "@elastic/appex-ai-infra",
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
+}

@@ -8,6 +8,7 @@
 import React, { Fragment } from 'react';
 import { css } from '@emotion/react';
 import { capitalize, get } from 'lodash';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiHealth,
@@ -19,7 +20,6 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiToolTip,
-  UseEuiTheme,
   euiFontSize,
 } from '@elastic/eui';
 
@@ -31,7 +31,7 @@ import type { TableChange, Sorting, Pagination } from '../../../application/hook
 import type { AlertsByName } from '../../../alerts/types';
 import { KIBANA_SYSTEM_ID } from '../../../../common/constants';
 import { SetupModeFeature } from '../../../../common/enums';
-import { ElasticsearchSourceKibanaStats } from '../../../../common/types/es';
+import type { ElasticsearchSourceKibanaStats } from '../../../../common/types/es';
 import { AlertsStatus } from '../../../alerts/status';
 import { ExternalConfigContext } from '../../../application/contexts/external_config_context';
 import { formatMetric, formatNumber } from '../../../lib/format_number';
@@ -270,6 +270,7 @@ export const KibanaInstances: React.FC<Props> = (props: Props) => {
             customRenderResponse.componentToRender = (
               <Fragment>
                 <EuiCallOut
+                  announceOnMount={false}
                   title={i18n.translate(
                     'xpack.monitoring.kibana.instances.metricbeatMigration.detectedNodeTitle',
                     {
@@ -375,7 +376,7 @@ function prepareLastSeenTimestamp(lastSeenTimestampRaw: string, dateFormat: stri
   if (shouldShowRelativeTime) {
     return (
       <EuiToolTip position="top" content={formattedTimestamp}>
-        <span>{relativeTime}</span>
+        <span tabIndex={0}>{relativeTime}</span>
       </EuiToolTip>
     );
   }

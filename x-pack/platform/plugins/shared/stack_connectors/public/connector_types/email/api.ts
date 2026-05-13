@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { INTERNAL_BASE_STACK_CONNECTORS_API_PATH } from '../../../common';
-import { EmailConfig } from '../types';
+import type { EmailConfig } from '../types';
 
 export async function getServiceConfig({
   http,

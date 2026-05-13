@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { extname } from 'path';
-import { Readable } from 'stream';
+import path from 'node:path';
+import type { Readable } from 'stream';
 import { chain } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
@@ -43,17 +43,36 @@ export const registerResolveImportErrorsRoute = (
         access: 'public',
         description:
           'To resolve errors from the import objects API, you can retry certain saved objects, overwrite specific saved objects, and change references to different saved objects',
+        oasOperationObject: () => path.resolve(__dirname, './resolve_import_errors.examples.yaml'),
         body: {
           maxBytes: maxImportPayloadBytes,
           output: 'stream',
           accepts: 'multipart/form-data',
         },
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the Saved Objects Client',
+        },
+      },
       validate: {
         query: schema.object(
           {
-            createNewCopies: schema.boolean({ defaultValue: false }),
-            compatibilityMode: schema.boolean({ defaultValue: false }),
+            createNewCopies: schema.boolean({
+              defaultValue: false,
+              meta: {
+                description:
+                  'Creates copies of saved objects, regenerates each object ID, and resets the origin.',
+              },
+            }),
+            compatibilityMode: schema.boolean({
+              defaultValue: false,
+              meta: {
+                description:
+                  'Applies adjustments to maintain compatibility between different Kibana versions.',
+              },
+            }),
           },
           {
             validate: (object) => {
@@ -77,11 +96,12 @@ export const registerResolveImportErrorsRoute = (
                   from: schema.string(),
                   to: schema.string(),
                 }),
-                { defaultValue: [] }
+                { defaultValue: [], maxSize: 100 }
               ),
               createNewCopy: schema.maybe(schema.boolean()),
               ignoreMissingReferences: schema.maybe(schema.boolean()),
-            })
+            }),
+            { maxSize: 10_000 }
           ),
         }),
       },
@@ -99,7 +119,7 @@ export const registerResolveImportErrorsRoute = (
         .catch(() => {});
 
       const file = req.body.file as FileStream;
-      const fileExtension = extname(file.hapi.filename).toLowerCase();
+      const fileExtension = path.extname(file.hapi.filename).toLowerCase();
       if (fileExtension !== '.ndjson') {
         return res.badRequest({ body: `Invalid file extension ${fileExtension}` });
       }

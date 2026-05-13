@@ -5,27 +5,31 @@
  * 2.0.
  */
 
-import { ServiceLocationErrors, SyntheticsMonitor } from '../../../../../common/runtime_types';
-import { TestNowResponse } from '../../../../../common/types';
+import type { ServiceLocationErrors, SyntheticsMonitor } from '../../../../../common/runtime_types';
+import type { TestNowResponse } from '../../../../../common/types';
 import { apiService } from '../../../../utils/api_service';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
+
+export interface EnrichedTestNowResponse extends TestNowResponse {
+  configId: string;
+}
 
 export const triggerTestNowMonitor = async ({
   configId,
   spaceId,
 }: {
   configId: string;
-  name: string;
   spaceId?: string;
-}): Promise<TestNowResponse | undefined> => {
-  return await apiService.post(
-    SYNTHETICS_API_URLS.TRIGGER_MONITOR + `/${configId}`,
+}): Promise<EnrichedTestNowResponse | undefined> => {
+  const res = await apiService.post<TestNowResponse>(
+    SYNTHETICS_API_URLS.TEST_NOW_MONITOR + `/${configId}`,
     undefined,
     undefined,
     {
       spaceId,
     }
   );
+  return { ...res, configId };
 };
 
 export const runOnceMonitor = async ({

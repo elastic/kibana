@@ -12,13 +12,7 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 import { DragDropContextWrapper } from '../../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TimelineId } from '../../../../common/types/timeline';
-import {
-  createMockStore,
-  mockGlobalState,
-  mockIndexNames,
-  mockIndexPattern,
-  TestProviders,
-} from '../../../common/mock';
+import { mockGlobalState, mockIndexPattern, TestProviders } from '../../../common/mock';
 
 import type { Props as StatefulTimelineOwnProps } from '.';
 import { StatefulTimeline } from '.';
@@ -27,7 +21,8 @@ import { DefaultCellRenderer } from './cell_rendering/default_cell_renderer';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from './styles';
 import { defaultRowRenderers } from './body/renderers';
 import { useSourcererDataView } from '../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { withIndices } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -103,6 +98,15 @@ describe('StatefulTimeline', () => {
   };
 
   beforeEach(() => {
+    jest
+      .mocked(useDataView)
+      .mockReturnValue(
+        withIndices(
+          mockGlobalState.timeline.timelineById[TimelineId.test]?.indexNames,
+          mockGlobalState.timeline.timelineById[TimelineId.test]?.dataViewId as string
+        )
+      );
+
     jest.clearAllMocks();
     (useTimelineEvents as jest.Mock).mockReturnValue([
       false,
@@ -140,81 +144,5 @@ describe('StatefulTimeline', () => {
         .first()
         .exists()
     ).toEqual(true);
-  });
-
-  test('on create timeline and timeline savedObjectId: null, sourcerer does not update timeline', () => {
-    mount(
-      <TestProviders>
-        <StatefulTimeline {...props} />
-      </TestProviders>
-    );
-    expect(mockDispatch).toBeCalledTimes(1);
-    expect(mockDispatch.mock.calls[0][0].payload.indexNames).toEqual(
-      mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline].selectedPatterns
-    );
-  });
-  test('sourcerer data view updates and timeline already matches the data view, no updates', () => {
-    mount(
-      <TestProviders
-        store={createMockStore({
-          ...mockGlobalState,
-          timeline: {
-            ...mockGlobalState.timeline,
-            timelineById: {
-              [TimelineId.test]: {
-                ...mockGlobalState.timeline.timelineById[TimelineId.test],
-                savedObjectId: 'definitely-not-null',
-                indexNames:
-                  mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline]
-                    .selectedPatterns,
-              },
-            },
-          },
-        })}
-      >
-        <StatefulTimeline {...props} />
-      </TestProviders>
-    );
-    expect(mockDispatch).not.toHaveBeenCalled();
-  });
-
-  test('sourcerer data view updates, update timeline data view', () => {
-    mount(
-      <TestProviders
-        store={createMockStore({
-          ...mockGlobalState,
-          timeline: {
-            ...mockGlobalState.timeline,
-            timelineById: {
-              [TimelineId.test]: {
-                ...mockGlobalState.timeline.timelineById[TimelineId.test],
-                savedObjectId: 'definitely-not-null',
-              },
-            },
-          },
-          sourcerer: {
-            ...mockGlobalState.sourcerer,
-            sourcererScopes: {
-              ...mockGlobalState.sourcerer.sourcererScopes,
-              [SourcererScopeName.timeline]: {
-                ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
-                selectedPatterns: mockIndexNames,
-              },
-            },
-          },
-        })}
-      >
-        <StatefulTimeline {...props} />
-      </TestProviders>
-    );
-    expect(mockDispatch).toBeCalledTimes(1);
-    expect(mockDispatch).toHaveBeenNthCalledWith(1, {
-      payload: {
-        id: TimelineId.test,
-        dataViewId: mockDataView.dataViewId,
-        indexNames: mockIndexNames,
-      },
-      type: 'x-pack/security_solution/local/timeline/UPDATE_DATA_VIEW',
-    });
   });
 });

@@ -6,14 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { MonitorSummaryStatusRule } from './status_rule/types';
+import type { MonitorSummaryTLSRule } from './tls_rule/types';
+import type { MonitorSummaryStatusRule } from './status_rule/types';
 
 export const STATUS_RULE_NAME = i18n.translate('xpack.synthetics.alertRules.monitorStatus', {
   defaultMessage: 'Synthetics monitor status',
 });
 
 export const commonMonitorStateI18: Array<{
-  name: keyof MonitorSummaryStatusRule;
+  name: keyof MonitorSummaryStatusRule | keyof MonitorSummaryTLSRule;
   description: string;
 }> = [
   {

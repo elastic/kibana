@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiConfirmModal, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiConfirmModal, EuiSpacer, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import * as i18n from './translations';
 
 interface ConfirmValidationErrorsModalProps {
@@ -20,10 +20,14 @@ export const ConfirmValidationErrorsModal = memo(function ConfirmValidationError
   onCancel,
   onConfirm,
 }: ConfirmValidationErrorsModalProps): JSX.Element {
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
-      data-test-subj="save-with-errors-confirmation-modal"
+      aria-labelledby={modalTitleId}
       title={i18n.SAVE_WITH_ERRORS_MODAL_TITLE}
+      titleProps={{ id: modalTitleId }}
+      data-test-subj="save-with-errors-confirmation-modal"
       onCancel={onCancel}
       onConfirm={onConfirm}
       cancelButtonText={i18n.CANCEL}

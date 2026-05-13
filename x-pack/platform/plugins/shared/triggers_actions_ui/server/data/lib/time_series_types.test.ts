@@ -6,9 +6,10 @@
  */
 
 import type { Writable } from '@kbn/utility-types';
-import { TimeSeriesQuerySchema, TimeSeriesQuery } from './time_series_types';
+import type { TimeSeriesQuery } from './time_series_types';
+import { TimeSeriesQuerySchema } from './time_series_types';
 import { runTests } from './core_query_types.test';
-import { TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 
 const DefaultParams: Writable<Partial<TimeSeriesQuery>> = {
   index: 'index-name',
@@ -99,6 +100,23 @@ describe('TimeSeriesParams validate()', () => {
     params.interval = '1s';
     expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
       `"calculated number of intervals 31622400 is greater than maximum 1000"`
+    );
+  });
+
+  it('accepts optional project_routing', async () => {
+    params.project_routing = '_alias:*';
+    expect(validate()).toEqual(expect.objectContaining({ project_routing: '_alias:*' }));
+  });
+
+  it('omits project_routing when unset', async () => {
+    const result = validate();
+    expect(result).not.toHaveProperty('project_routing');
+  });
+
+  it('fails for invalid project_routing type', async () => {
+    params.project_routing = 99;
+    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
+      `"[project_routing]: expected value of type [string] but got [number]"`
     );
   });
 

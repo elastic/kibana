@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  Logger,
+  SavedObjectsClientContract,
+  KibanaRequest,
+} from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { uniqBy } from 'lodash';
 import pMap from 'p-map';
-
-import type { HTTPAuthorizationHeader } from '../../../../../common/http_authorization_header';
 
 import type { SecondaryAuthorizationHeader } from '../../../../../common/types/models/transform_api_key';
 
@@ -40,16 +43,21 @@ import type {
   ESAssetMetadata,
   IndexTemplate,
   RegistryElasticsearch,
+  AssetsMap,
 } from '../../../../../common/types/models';
 import { getInstallation } from '../../packages';
 import { retryTransientEsErrors } from '../retry';
 import { isUserSettingsTemplate } from '../template/utils';
 
-import { MAX_CONCURRENT_TRANSFORMS_OPERATIONS } from '../../../../constants';
+import {
+  MAX_CONCURRENT_TRANSFORMS_OPERATIONS,
+  STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
+} from '../../../../constants';
 
 import { deleteTransforms } from './remove';
 import { getDestinationIndexAliases } from './transform_utils';
 import { loadMappingForTransform } from './mappings';
+import { appContextService } from '../../../app_context';
 
 const DEFAULT_TRANSFORM_TEMPLATES_PRIORITY = 250;
 enum TRANSFORM_SPECS_TYPES {
@@ -93,6 +101,17 @@ const installLegacyTransformsAssets = async (
 
   let installedTransforms: EsAssetReference[] = [];
   if (transformPaths.length > 0) {
+    const transformAssetsMap: AssetsMap = new Map();
+    await packageInstallContext.archiveIterator.traverseEntries(
+      async (entry) => {
+        if (!entry.buffer) {
+          return;
+        }
+
+        transformAssetsMap.set(entry.path, entry.buffer);
+      },
+      (path) => transformPaths.includes(path)
+    );
     const transformRefs = transformPaths.reduce<EsAssetReference[]>((acc, path) => {
       acc.push({
         id: getLegacyTransformNameForInstallation(
@@ -117,9 +136,7 @@ const installLegacyTransformsAssets = async (
     );
 
     const transforms: TransformInstallation[] = transformPaths.map((path: string) => {
-      const content = JSON.parse(
-        getAssetFromAssetsMap(packageInstallContext.assetsMap, path).toString('utf-8')
-      );
+      const content = JSON.parse(getAssetFromAssetsMap(transformAssetsMap, path).toString('utf-8'));
       content._meta = getESAssetMetadata({ packageName: packageInstallContext.packageInfo.name });
 
       return {
@@ -153,7 +170,7 @@ const installLegacyTransformsAssets = async (
   return { installedTransforms, esReferences };
 };
 
-const processTransformAssetsPerModule = (
+const processTransformAssetsPerModule = async (
   packageInstallContext: PackageInstallContext,
   installNameSuffix: string,
   transformPaths: string[],
@@ -161,7 +178,7 @@ const processTransformAssetsPerModule = (
   force?: boolean,
   username?: string
 ) => {
-  const { assetsMap, packageInfo: installablePackage } = packageInstallContext;
+  const { packageInfo: installablePackage } = packageInstallContext;
   const transformsSpecifications = new Map();
   const destinationIndexTemplates: DestinationIndexTemplateInstallation[] = [];
   const transforms: TransformInstallation[] = [];
@@ -170,6 +187,17 @@ const processTransformAssetsPerModule = (
   const transformsToRemoveWithDestIndex: EsAssetReference[] = [];
   const indicesToAddRefs: EsAssetReference[] = [];
 
+  const transformAssetsMap: AssetsMap = new Map();
+  await packageInstallContext.archiveIterator.traverseEntries(
+    async (entry) => {
+      if (!entry.buffer) {
+        return;
+      }
+
+      transformAssetsMap.set(entry.path, entry.buffer);
+    },
+    (path) => transformPaths.includes(path)
+  );
   transformPaths.forEach((path: string) => {
     const { transformModuleId, fileName } = getTransformFolderAndFileNames(
       installablePackage,
@@ -182,7 +210,7 @@ const processTransformAssetsPerModule = (
     }
     const packageAssets = transformsSpecifications.get(transformModuleId);
 
-    const content = load(getAssetFromAssetsMap(assetsMap, path).toString('utf-8'));
+    const content = parse(getAssetFromAssetsMap(transformAssetsMap, path).toString('utf-8'));
 
     // Handling fields.yml and all other files within 'fields' folder
     if (fileName === TRANSFORM_SPECS_TYPES.FIELDS || isFields(path)) {
@@ -387,6 +415,12 @@ const processTransformAssetsPerModule = (
     version: t.transformVersion,
   }));
 
+  const fieldAssetsMap: AssetsMap = new Map();
+  await packageInstallContext.archiveIterator.traverseEntries(async (entry) => {
+    if (entry.buffer) {
+      fieldAssetsMap.set(entry.path, entry.buffer);
+    }
+  }, isFields);
   // Load and generate mappings
   for (const destinationIndexTemplate of destinationIndexTemplates) {
     if (!destinationIndexTemplate.transformModuleId) {
@@ -397,7 +431,11 @@ const processTransformAssetsPerModule = (
       .get(destinationIndexTemplate.transformModuleId)
       ?.set(
         'mappings',
-        loadMappingForTransform(packageInstallContext, destinationIndexTemplate.transformModuleId)
+        loadMappingForTransform(
+          packageInstallContext,
+          fieldAssetsMap,
+          destinationIndexTemplate.transformModuleId
+        )
       );
   }
 
@@ -425,10 +463,13 @@ const installTransformsAssets = async (
   esReferences: EsAssetReference[] = [],
   previousInstalledTransformEsAssets: EsAssetReference[] = [],
   force?: boolean,
-  authorizationHeader?: HTTPAuthorizationHeader | null
+  request?: KibanaRequest
 ) => {
   let installedTransforms: EsAssetReference[] = [];
-  const username = authorizationHeader?.getUsername();
+
+  const username = request
+    ? appContextService.getSecurityCore().authc.getCurrentUser(request)?.username
+    : undefined;
 
   if (transformPaths.length > 0) {
     const {
@@ -441,7 +482,7 @@ const installTransformsAssets = async (
       transformsSpecifications,
       transformsToRemove,
       transformsToRemoveWithDestIndex,
-    } = processTransformAssetsPerModule(
+    } = await processTransformAssetsPerModule(
       packageInstallContext,
       installNameSuffix,
       transformPaths,
@@ -456,7 +497,7 @@ const installTransformsAssets = async (
     // generate api key, and pass es-secondary-authorization in header when creating the transforms.
     const secondaryAuth = transforms.some((t) => t.runAsKibanaSystem === false)
       ? await generateTransformSecondaryAuthHeaders({
-          authorizationHeader,
+          request,
           logger,
           pkgName: packageInstallContext.packageInfo.name,
           pkgVersion: packageInstallContext.packageInfo.version,
@@ -535,10 +576,16 @@ const installTransformsAssets = async (
               componentTemplates,
               indexTemplate: {
                 templateName: destinationIndexTemplate.installationName,
-                // @ts-expect-error data_stream property is not needed here
+                // @ts-expect-error `data_stream` property is not needed/allowed for transform index templates
                 indexTemplate: {
                   template: {
-                    settings: undefined,
+                    settings: {
+                      index: {
+                        mapping: {
+                          ignore_malformed: true,
+                        },
+                      },
+                    },
                     mappings: undefined,
                   },
                   priority: DEFAULT_TRANSFORM_TEMPLATES_PRIORITY,
@@ -548,7 +595,10 @@ const installTransformsAssets = async (
                       ?.get('destinationIndex').index,
                   ],
                   _meta: destinationIndexTemplate._meta,
-                  composed_of: Object.keys(componentTemplates),
+                  composed_of: [
+                    ...Object.keys(componentTemplates),
+                    STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
+                  ],
                   ignore_missing_component_templates:
                     Object.keys(componentTemplates).filter(isUserSettingsTemplate),
                 },
@@ -626,10 +676,10 @@ interface InstallTransformsParams {
    */
   force?: boolean;
   /**
-   * Authorization header parsed from original Kibana request, used to generate API key from user
+   * Original Kibana request, used to generate API key from user
    * to pass in secondary authorization info to transform
    */
-  authorizationHeader?: HTTPAuthorizationHeader | null;
+  request?: KibanaRequest;
 }
 export const installTransforms = async ({
   packageInstallContext,
@@ -638,7 +688,7 @@ export const installTransforms = async ({
   logger,
   force,
   esReferences,
-  authorizationHeader,
+  request,
 }: InstallTransformsParams) => {
   const { paths, packageInfo } = packageInstallContext;
   const transformPaths = paths.filter((path) => isTransform(path));
@@ -690,7 +740,7 @@ export const installTransforms = async ({
     esReferences,
     previousInstalledTransformEsAssets,
     force,
-    authorizationHeader
+    request
   );
 };
 
@@ -808,9 +858,7 @@ async function handleTransformInstall({
         if (
           transformHealth &&
           transformHealth.status === 'red' &&
-          // @ts-expect-error TransformGetTransformStatsTransformStatsHealth should have 'issues'
           Array.isArray(transformHealth.issues) &&
-          // @ts-expect-error TransformGetTransformStatsTransformStatsHealth should have 'issues'
           transformHealth.issues.find(
             (i: { issue: string }) => i.issue === 'Privileges check failed'
           )

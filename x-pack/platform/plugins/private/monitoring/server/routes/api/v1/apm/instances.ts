@@ -14,7 +14,7 @@ import { getApms, getStats } from '../../../../lib/apm';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { handleError } from '../../../../lib/errors';
 import { getIndexPatterns } from '../../../../../common/get_index_patterns';
-import { MonitoringCore } from '../../../../types';
+import type { MonitoringCore } from '../../../../types';
 
 export function apmInstancesRoute(server: MonitoringCore) {
   const validateParams = createValidationFunction(postApmInstancesRequestParamsRT);
@@ -23,6 +23,12 @@ export function apmInstancesRoute(server: MonitoringCore) {
   server.route({
     method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/apm/instances',
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'This route delegates authorization to the scoped ES cluster client',
+      },
+    },
     validate: {
       params: validateParams,
       body: validateBody,

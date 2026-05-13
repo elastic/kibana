@@ -6,9 +6,8 @@
  */
 
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
-import type { PolicyConfig, ProtectionModes } from '../../common/endpoint/types';
+import type { PolicyConfig, PolicyData, ProtectionModes } from '../../common/endpoint/types';
 import { PolicyOperatingSystem } from '../../common/endpoint/types';
-import type { EndpointMetadataService } from '../endpoint/services/metadata';
 import type { FeatureUsageService } from '../endpoint/services/feature_usage/service';
 
 const OS_KEYS = Object.values(PolicyOperatingSystem);
@@ -37,8 +36,8 @@ function notifyProtection(type: string, featureUsageService: FeatureUsageService
 
 export async function notifyProtectionFeatureUsage(
   newPackagePolicy: NewPackagePolicy,
-  featureUsageService: FeatureUsageService,
-  endpointMetadataService: EndpointMetadataService
+  currentPackagePolicy: PolicyData,
+  featureUsageService: FeatureUsageService
 ) {
   if (
     !newPackagePolicy?.id ||
@@ -49,12 +48,6 @@ export async function notifyProtectionFeatureUsage(
   }
 
   const newPolicyConfig = newPackagePolicy.inputs[0].config?.policy?.value as PolicyConfig;
-
-  // function is only called on policy update, we need to fetch the current policy
-  // to compare whether the updated policy is newly enabling protections
-  const currentPackagePolicy = await endpointMetadataService.getFleetEndpointPackagePolicy(
-    newPackagePolicy.id as string
-  );
   const currentPolicyConfig = currentPackagePolicy.inputs[0].config.policy.value;
 
   // ransomware is windows only

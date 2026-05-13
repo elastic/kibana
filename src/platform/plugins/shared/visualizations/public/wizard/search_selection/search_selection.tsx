@@ -11,9 +11,9 @@ import React from 'react';
 import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ContentClient } from '@kbn/content-management-plugin/public';
+import type { ContentClient } from '@kbn/content-management-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type { BaseVisType } from '../../vis_types';
 import { DialogNavigation } from '../dialog_navigation';
 import { showSavedObject } from './show_saved_object';
@@ -32,7 +32,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
     return (
       <React.Fragment>
         <EuiModalHeader>
-          <EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id="vis-wizard-modal-title">
             <FormattedMessage
               id="visualizations.newVisWizard.newVisTypeTitle"
               defaultMessage="New {visTypeName}"

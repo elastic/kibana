@@ -60,12 +60,11 @@ export const AddFilterButton: React.FC<Props> = ({ newFilters, onNewFilter, aler
   const button = (
     <EuiButtonEmpty
       data-test-subj="uptimeCreateAlertAddFilter"
-      disabled={items.length === 0}
-      iconType="plusInCircleFilled"
+      disabled={items.length === 0 || !dataView}
+      iconType="plusCircle"
       onClick={onButtonClick}
       size="s"
       flush="left"
-      isLoading={!dataView}
     >
       {labels.ADD_FILTER}
     </EuiButtonEmpty>

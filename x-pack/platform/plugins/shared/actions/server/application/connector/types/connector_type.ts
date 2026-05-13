@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { connectorTypeSchema } from '../schemas';
+import type { TypeOf } from '@kbn/config-schema';
+import type { connectorTypeSchema } from '../schemas';
 
 type ConnectorTypeSchemaType = TypeOf<typeof connectorTypeSchema>;
 
@@ -19,5 +19,8 @@ export interface ConnectorType {
   minimumLicenseRequired: ConnectorTypeSchemaType['minimumLicenseRequired'];
   supportedFeatureIds: ConnectorTypeSchemaType['supportedFeatureIds'];
   isSystemActionType: ConnectorTypeSchemaType['isSystemActionType'];
+  source: ConnectorTypeSchemaType['source'];
   subFeature?: ConnectorTypeSchemaType['subFeature'];
+  isDeprecated: ConnectorTypeSchemaType['isDeprecated'];
+  allowMultipleSystemActions?: ConnectorTypeSchemaType['allowMultipleSystemActions'];
 }

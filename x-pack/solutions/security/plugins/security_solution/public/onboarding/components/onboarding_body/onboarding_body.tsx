@@ -8,7 +8,7 @@
 import React, { Suspense, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { CenteredLoadingSpinner } from '../../../common/components/centered_loading_spinner';
-import type { OnboardingCardId } from '../../constants';
+import type { OnboardingCardId, OnboardingTopicId } from '../../constants';
 import { useBodyConfig } from './hooks/use_body_config';
 import { OnboardingCardGroup } from './onboarding_card_group';
 import { OnboardingCardPanel } from './onboarding_card_panel';
@@ -16,8 +16,8 @@ import { useExpandedCard } from './hooks/use_expanded_card';
 import { useCompletedCards } from './hooks/use_completed_cards';
 import type { IsCardAvailable } from '../../types';
 
-export const OnboardingBody = React.memo(() => {
-  const bodyConfig = useBodyConfig();
+export const OnboardingBody = React.memo<{ topicId?: OnboardingTopicId }>(({ topicId }) => {
+  const bodyConfig = useBodyConfig(topicId);
   const { expandedCardId, setExpandedCardId } = useExpandedCard();
   const { isCardComplete, setCardComplete, getCardCheckCompleteResult, checkCardComplete } =
     useCompletedCards(bodyConfig);
@@ -61,7 +61,8 @@ export const OnboardingBody = React.memo(() => {
           <EuiSpacer size="xxl" />
           <OnboardingCardGroup title={group.title}>
             <EuiFlexGroup direction="column" gutterSize="m">
-              {group.cards.map(({ id, title, icon, Component: LazyCardComponent }) => {
+              {group.cards.map((card) => {
+                const { id, title, icon, iconDark, badge, Component: LazyCardComponent } = card;
                 const cardCheckCompleteResult = getCardCheckCompleteResult(id);
                 return (
                   <EuiFlexItem key={id} grow={false}>
@@ -69,6 +70,8 @@ export const OnboardingBody = React.memo(() => {
                       id={id}
                       title={title}
                       icon={icon}
+                      iconDark={iconDark}
+                      badge={badge}
                       checkCompleteResult={cardCheckCompleteResult}
                       isExpanded={expandedCardId === id}
                       isComplete={isCardComplete(id)}

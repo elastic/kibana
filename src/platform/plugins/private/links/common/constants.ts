@@ -12,6 +12,8 @@ import { i18n } from '@kbn/i18n';
 export const LATEST_VERSION = 1;
 
 export const CONTENT_ID = 'links';
+export const LINKS_EMBEDDABLE_TYPE = 'links';
+export const LINKS_SAVED_OBJECT_TYPE = 'links';
 
 export const APP_ICON = 'link';
 
@@ -22,3 +24,8 @@ export const APP_NAME = i18n.translate('links.visTypeAlias.title', {
 export const DISPLAY_NAME = i18n.translate('links.displayName', {
   defaultMessage: 'links',
 });
+
+export const DEFAULT_EXTERNAL_LINK_OPTIONS = {
+  encode_url: true,
+  open_in_new_tab: true,
+};

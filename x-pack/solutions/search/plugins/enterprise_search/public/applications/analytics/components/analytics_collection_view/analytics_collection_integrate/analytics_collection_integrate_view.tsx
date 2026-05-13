@@ -20,13 +20,15 @@ import {
   EuiLink,
   EuiText,
   EuiCodeBlock,
+  EuiTitle,
+  EuiBadge,
 } from '@elastic/eui';
 
-import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
+import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
 import { i18n } from '@kbn/i18n';
 
-import { AnalyticsCollection } from '../../../../../../common/types/analytics';
+import type { AnalyticsCollection } from '../../../../../../common/types/analytics';
 import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
 import { docLinks } from '../../../../shared/doc_links';
 
@@ -152,7 +154,7 @@ const apiKeyStep = (
           <EuiButton
             data-test-subj="enterpriseSearchApiKeyStepCreateApiKeyButton"
             iconSide="left"
-            iconType="plusInCircleFilled"
+            iconType="plusCircle"
             onClick={openApiKeyModal}
             data-telemetry-id="entSearchContent-analytics-apiKey-createApiKeyButton"
           >
@@ -168,7 +170,7 @@ const apiKeyStep = (
           <EuiButton
             data-test-subj="enterpriseSearchApiKeyStepViewKeysButton"
             iconSide="left"
-            iconType="popout"
+            iconType="external"
             data-telemetry-id="entSearchContent-analytics-apiKey-viewKeysButton"
             onClick={() =>
               navigateToUrl('/app/management/security/api_keys', {
@@ -265,11 +267,28 @@ export const AnalyticsCollectionIntegrateView: React.FC<AnalyticsCollectionInteg
       pageViewTelemetry={`View Analytics Collection - integrate`}
       pageHeader={{
         bottomBorder: false,
-        pageTitle: i18n.translate(
-          'xpack.enterpriseSearch.analytics.collectionsView.integration.title',
-          {
-            defaultMessage: 'Tracker Integration',
-          }
+        pageTitle: (
+          <EuiFlexGroup responsive={false} alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiTitle>
+                <h1>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.analytics.collectionsView.integration.title',
+                    {
+                      defaultMessage: 'Tracker Integration',
+                    }
+                  )}
+                </h1>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="warning">
+                {i18n.translate('xpack.enterpriseSearch.analytics.collections.deprecatedBadge', {
+                  defaultMessage: 'Deprecated',
+                })}
+              </EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
         description: i18n.translate(
           'xpack.enterpriseSearch.analytics.collectionsView.integration.description',

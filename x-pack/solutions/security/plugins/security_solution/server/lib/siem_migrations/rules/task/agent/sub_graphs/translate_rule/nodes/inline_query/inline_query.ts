@@ -4,68 +4,55 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import {
+  getInlineSplQuery,
+  type GetInlineSplQueryParams,
+  getSPLQueryKeywords,
+  SPL_KEYWORDS,
+} from '../../../../../../../common/task/agent/helpers/inline_spl_query';
+import { OriginalRuleVendorEnum } from '../../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { GraphNode } from '../../types';
+import type { RuleMigrationTelemetryClient } from '../../../../../rule_migrations_telemetry_client';
 
-import { StringOutputParser } from '@langchain/core/output_parsers';
-import { isEmpty } from 'lodash/fp';
-import type { RuleMigrationsRetriever } from '../../../../../retrievers';
-import type { ChatModel } from '../../../../../util/actions_client_chat';
-import type { GraphNode } from '../../../../types';
-import { REPLACE_QUERY_RESOURCE_PROMPT, getResourcesContext } from './prompts';
-import { cleanMarkdown, generateAssistantComment } from '../../../../../util/comments';
-
-interface GetInlineQueryNodeParams {
-  model: ChatModel;
-  ruleMigrationsRetriever: RuleMigrationsRetriever;
+interface InlineQueryNodeParams extends GetInlineSplQueryParams {
+  telemetryClient: RuleMigrationTelemetryClient;
 }
 
-export const getInlineQueryNode = ({
-  model,
-  ruleMigrationsRetriever,
-}: GetInlineQueryNodeParams): GraphNode => {
+export const getInlineQueryNode = (params: InlineQueryNodeParams): GraphNode => {
+  const { telemetryClient, ...inlineParams } = params;
+  const inlineSplQuery = getInlineSplQuery(inlineParams);
   return async (state) => {
-    let query = state.original_rule.query;
-
-    // Check before to avoid unnecessary LLM calls
-    let unsupportedComment = getUnsupportedComment(query);
-    if (unsupportedComment) {
-      return { comments: [generateAssistantComment(unsupportedComment)] };
-    }
-
-    const resources = await ruleMigrationsRetriever.resources.getResources(state.original_rule);
-    if (!isEmpty(resources)) {
-      const replaceQueryParser = new StringOutputParser();
-      const replaceQueryResourcePrompt =
-        REPLACE_QUERY_RESOURCE_PROMPT.pipe(model).pipe(replaceQueryParser);
-      const resourceContext = getResourcesContext(resources);
-      const response = await replaceQueryResourcePrompt.invoke({
-        query: state.original_rule.query,
-        macros: resourceContext.macros,
-        lookups: resourceContext.lookups,
-      });
-      const splQuery = response.match(/```spl\n([\s\S]*?)\n```/)?.[1].trim() ?? '';
-      const inliningSummary = response.match(/## Inlining Summary[\s\S]*$/)?.[0] ?? '';
-      if (splQuery) {
-        query = splQuery;
-      }
-
-      // Check after replacing in case the replacements made it untranslatable
-      unsupportedComment = getUnsupportedComment(query);
-      if (unsupportedComment) {
-        return { comments: [generateAssistantComment(unsupportedComment)] };
-      }
-
+    if (state.original_rule.vendor === OriginalRuleVendorEnum['microsoft-sentinel']) {
+      // For Sentinel rules, the KQL query is already in a translatable form — pass it through as-is.
       return {
-        inline_query: query,
-        comments: [generateAssistantComment(cleanMarkdown(inliningSummary))],
+        inline_query: state.original_rule.query,
       };
     }
-    return { inline_query: query };
+    if (state.original_rule.vendor !== OriginalRuleVendorEnum.splunk) {
+      // For other non-Splunk vendors (e.g. QRadar), inline query substitution is not applicable.
+      // The nl_query from the resolveDependencies node is used instead.
+      return {
+        inline_query: undefined,
+      };
+    }
+    const { inlineQuery, isUnsupported, comments } = await inlineSplQuery({
+      query: state.original_rule.query,
+      resources: state.resources,
+    });
+    if (isUnsupported) {
+      // Graph conditional edge detects undefined inline_query as unsupported query
+      return { inline_query: undefined, comments };
+    }
+    const finalInlineQuery = inlineQuery ?? state.original_rule.query;
+    if (finalInlineQuery) {
+      telemetryClient.reportSourceQueryKeywords({
+        type: 'rules',
+        keywords: getSPLQueryKeywords(finalInlineQuery, SPL_KEYWORDS),
+      });
+    }
+    return {
+      inline_query: finalInlineQuery,
+      comments,
+    };
   };
-};
-
-const getUnsupportedComment = (query: string): string | undefined => {
-  const unsupportedText = '## Translation Summary\nCan not create custom translation.\n';
-  if (query.includes(' inputlookup')) {
-    return `${unsupportedText}Reason: \`inputlookup\` command is not supported.`;
-  }
 };

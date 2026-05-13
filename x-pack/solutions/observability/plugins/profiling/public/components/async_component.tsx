@@ -15,14 +15,12 @@ export function AsyncComponent({
   children,
   status,
   error,
-  mono,
   size,
   style,
   alignTop,
 }: AsyncState<any> & {
   style?: EuiFlexGroupProps['style'];
   children: React.ReactElement;
-  mono?: boolean;
   size: 'm' | 'l' | 'xl';
   alignTop?: boolean;
 }) {
@@ -42,7 +40,7 @@ export function AsyncComponent({
         {error && status === AsyncStatus.Settled ? (
           <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
             <EuiFlexItem>
-              <EuiIcon type="warning" color="warning" />
+              <EuiIcon type="warning" color="warning" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText style={{ whiteSpace: 'nowrap' }}>
@@ -53,7 +51,7 @@ export function AsyncComponent({
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
-          <EuiLoadingChart mono={mono} size={size} />
+          <EuiLoadingChart size={size} />
         )}
       </EuiFlexItem>
     </EuiFlexGroup>

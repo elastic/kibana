@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-export * from './bulk_actions/bulk_actions_types';
+export type * from './bulk_actions/bulk_actions_types';
 export * from './bulk_actions/bulk_actions_route.gen';
-export * from './bulk_crud/bulk_create_rules/bulk_create_rules_route.gen';
-export * from './bulk_crud/bulk_delete_rules/bulk_delete_rules_route.gen';
-export * from './bulk_crud/bulk_patch_rules/bulk_patch_rules_route.gen';
-export * from './bulk_crud/bulk_update_rules/bulk_update_rules_route.gen';
-export * from './bulk_crud/response_schema.gen';
 export * from './coverage_overview/coverage_overview_route';
 export * from './crud/create_rule/create_rule_route.gen';
 export * from './crud/create_rule/request_schema_validation';
@@ -21,10 +16,14 @@ export * from './crud/patch_rule/request_schema_validation';
 export * from './crud/read_rule/read_rule_route.gen';
 export * from './crud/update_rule/request_schema_validation';
 export * from './crud/update_rule/update_rule_route.gen';
+export * from './crud/update_rule/update_rule_with_read_privileges';
 export * from './export_rules/export_rules_details_schema';
 export * from './export_rules/export_rules_route.gen';
 export * from './find_rules/find_rules_route.gen';
 export * from './find_rules/request_schema_validation';
+export * from './search_rules/search_rules_route.gen';
+export * from './granular_rules/granular_rules_contract.gen';
+export * from './granular_rules/granular_rules_facet_dimensions';
 export * from './get_rule_management_filters/get_rule_management_filters_route';
 export * from './import_rules/import_rules_route.gen';
 export * from './import_rules/rule_to_import_validation';

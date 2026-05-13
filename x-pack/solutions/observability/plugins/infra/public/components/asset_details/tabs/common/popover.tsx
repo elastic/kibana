@@ -22,6 +22,7 @@ export const Popover = ({
   iconColor?: IconColor;
   iconSize?: IconSize;
   'data-test-subj'?: string;
+  'aria-label'?: string;
 }) => {
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
 
@@ -29,10 +30,11 @@ export const Popover = ({
     <EuiPopover
       panelPaddingSize="s"
       focusTrapProps={{
-        returnFocus: false,
+        returnFocus: true,
       }}
       button={
         <button
+          aria-label={props['aria-label']}
           onClick={(e) => {
             e.stopPropagation();
             togglePopover();
@@ -43,9 +45,10 @@ export const Popover = ({
           data-test-subj={props['data-test-subj']}
         >
           <EuiIcon
-            type="questionInCircle"
+            type={icon}
             color={iconColor ?? 'text'}
             size={iconSize ?? 'original'}
+            aria-hidden={true}
           />
         </button>
       }

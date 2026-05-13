@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import type { EuiSearchBarProps } from '@elastic/eui';
 import { EuiText, EuiIcon, EuiInMemoryTable, type HorizontalAlignment } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo, useState } from 'react';
-import { debounce } from 'lodash';
-import { Query } from '@elastic/eui';
+import React, { useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { AddMetadataFilterButton } from './add_metadata_filter_button';
 import { ExpandableContent } from '../../components/expandable_content';
@@ -22,11 +19,6 @@ export interface Props {
   loading: boolean;
   showActionsColumn?: boolean;
   search?: string;
-  onSearchChange?: (query: string) => void;
-}
-
-interface SearchErrorType {
-  message: string;
 }
 
 /**
@@ -43,10 +35,6 @@ const VALUE_LABEL = i18n.translate('xpack.infra.metadataEmbeddable.value', {
 /**
  * Component translations
  */
-const SEARCH_PLACEHOLDER = i18n.translate('xpack.infra.metadataEmbeddable.searchForMetadata', {
-  defaultMessage: 'Search for metadata…',
-});
-
 const NO_METADATA_FOUND = i18n.translate('xpack.infra.metadataEmbeddable.noMetadataFound', {
   defaultMessage: 'No metadata found.',
 });
@@ -57,9 +45,7 @@ const LOADING = i18n.translate('xpack.infra.metadataEmbeddable.loading', {
 
 const LOCAL_STORAGE_PINNED_METADATA_ROWS = 'hostsView:pinnedMetadataRows';
 
-export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn }: Props) => {
-  const [searchError, setSearchError] = useState<SearchErrorType | null>(null);
-  const [metadataSearch, setMetadataSearch] = useState(search);
+export const Table = ({ loading, rows, search, showActionsColumn }: Props) => {
   const [fieldsWithPins, setFieldsWithPins] = useState(rows);
 
   const [pinnedItems, setPinnedItems] = useLocalStorage<Array<Field['name']>>(
@@ -77,7 +63,14 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
     () => [
       {
         field: 'value',
-        name: <EuiIcon type="pin" />,
+        name: (
+          <EuiIcon
+            type="pin"
+            aria-label={i18n.translate('xpack.infra.metadataEmbeddable.pinFieldsColumn.ariaLabel', {
+              defaultMessage: 'Pin fields',
+            })}
+          />
+        ),
         align: 'center' as HorizontalAlignment,
         width: '5%',
         sortable: false,
@@ -103,45 +96,25 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
         name: VALUE_LABEL,
         width: '50%',
         sortable: false,
-        render: (_name: string, item: Field) => <ExpandableContent values={item.value} />,
+        render: (_name: string, item: Field) => (
+          <ExpandableContent fieldName={item.name} values={item.value} />
+        ),
       },
     ],
     [pinnedItems, setPinnedItems]
   );
 
-  const debouncedSearchOnChange = useMemo(
-    () =>
-      debounce<(queryText: string) => void>((queryText) => {
-        if (onSearchChange) {
-          onSearchChange(queryText);
-        }
-        setMetadataSearch(queryText);
-      }, 500),
-    [onSearchChange]
-  );
-
-  const searchBarOnChange = useCallback(
-    ({ queryText, error }: any) => {
-      if (error) {
-        setSearchError(error);
-      } else {
-        setSearchError(null);
-        debouncedSearchOnChange(queryText);
-      }
-    },
-    [debouncedSearchOnChange]
-  );
-
-  const searchBar: EuiSearchBarProps = {
-    onChange: searchBarOnChange,
-    box: {
-      'data-test-subj': 'infraAssetDetailsMetadataSearchBarInput',
-      incremental: true,
-      schema: true,
-      placeholder: SEARCH_PLACEHOLDER,
-    },
-    query: metadataSearch ? Query.parse(metadataSearch) : Query.MATCH_ALL,
-  };
+  const filteredItems = useMemo(() => {
+    if (!search) return fieldsWithPins;
+    const lowerSearch = search.toLowerCase();
+    return fieldsWithPins.filter(
+      (field) =>
+        field.name.toLowerCase().includes(lowerSearch) ||
+        (Array.isArray(field.value)
+          ? field.value.some((v) => String(v).toLowerCase().includes(lowerSearch))
+          : String(field.value).toLowerCase().includes(lowerSearch))
+    );
+  }, [fieldsWithPins, search]);
 
   const columns = useMemo(
     () =>
@@ -168,11 +141,12 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
       tableLayout="fixed"
       responsiveBreakpoint={false}
       columns={columns}
-      items={fieldsWithPins}
-      search={searchBar}
+      items={filteredItems}
       loading={loading}
-      error={searchError ? `${searchError.message}` : ''}
-      message={
+      tableCaption={i18n.translate('xpack.infra.metadataEmbeddable.metadataCaption', {
+        defaultMessage: 'Metadata entries',
+      })}
+      noItemsMessage={
         loading ? (
           <div data-test-subj="infraAssetDetailsMetadataLoading">{LOADING}</div>
         ) : (

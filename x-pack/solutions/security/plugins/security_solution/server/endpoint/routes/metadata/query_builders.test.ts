@@ -78,11 +78,6 @@ describe('query builder', () => {
           },
           filter: [
             {
-              terms: {
-                'united.agent.policy_id': [],
-              },
-            },
-            {
               exists: {
                 field: 'united.endpoint.agent.id',
               },
@@ -97,6 +92,11 @@ describe('query builder', () => {
                 'united.agent.active': {
                   value: true,
                 },
+              },
+            },
+            {
+              terms: {
+                'united.agent.policy_id': [],
               },
             },
           ],

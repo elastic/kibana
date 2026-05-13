@@ -13,11 +13,13 @@ import { APP_ID, API_VERSIONS } from '../../../../../common/constants';
 
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
-import { getEntityStorePrivileges } from '../utils/get_entity_store_privileges';
 import { buildIndexPatterns } from '../utils';
+import type { ITelemetryEventsSender } from '../../../telemetry/sender';
+import { ENTITY_STORE_API_CALL_EVENT } from '../../../telemetry/event_based/events';
 
 export const entityStoreInternalPrivilegesRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
+  telemetry: ITelemetryEventsSender,
   logger: Logger,
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
@@ -43,7 +45,6 @@ export const entityStoreInternalPrivilegesRoute = (
       ): Promise<IKibanaResponse<EntityStoreGetPrivilegesResponse>> => {
         const siemResponse = buildSiemResponse(response);
         try {
-          const [_, { security }] = await getStartServices();
           const { getSpaceId, getAppClient, getDataViewsService } = await context.securitySolution;
 
           const securitySolution = await context.securitySolution;
@@ -62,11 +63,22 @@ export const entityStoreInternalPrivilegesRoute = (
             getAppClient(),
             getDataViewsService()
           );
-          const body = await getEntityStorePrivileges(request, security, securitySolutionIndices);
 
+          const body = await securitySolution
+            .getEntityStoreDataClient()
+            .getEntityStoreInitPrivileges(securitySolutionIndices);
+
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+          });
           return response.ok({ body });
         } catch (e) {
           const error = transformError(e);
+
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+            error: error.message,
+          });
 
           return siemResponse.error({
             statusCode: error.statusCode,

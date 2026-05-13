@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Either from 'fp-ts/lib/Either';
-import { errors as EsErrors, TransportResult } from '@elastic/elasticsearch';
+import * as Either from 'fp-ts/Either';
+import type { TransportResult } from '@elastic/elasticsearch';
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { waitForTask } from './wait_for_task';
 

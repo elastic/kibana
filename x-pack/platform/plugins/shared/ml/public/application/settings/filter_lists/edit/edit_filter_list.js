@@ -31,7 +31,7 @@ import { EditFilterListToolbar } from './toolbar';
 import { ItemsGrid } from '../../../components/items_grid';
 import { isValidFilterListId, saveFilterList } from './utils';
 import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
-import { ML_PAGES } from '../../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { HelpMenu } from '../../../components/help_menu';
 
 const DEFAULT_ITEMS_PER_PAGE = 50;
@@ -110,7 +110,10 @@ export class EditFilterListUI extends Component {
         application: { navigateToUrl },
       },
     } = this.props.kibana;
-    await navigateToUrl(`${basePath.get()}/app/ml/${ML_PAGES.FILTER_LISTS_MANAGE}`, true);
+    await navigateToUrl(
+      `${basePath.get()}/app/management/ml/ad_settings/${ML_PAGES.FILTER_LISTS_MANAGE}`,
+      true
+    );
   };
 
   loadFilterList = (filterId) => {

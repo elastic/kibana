@@ -6,8 +6,8 @@
  */
 
 import { getRuleHealthColor, getRuleStatusMessage } from './rule_status_helpers';
-import { EuiThemeComputed } from '@elastic/eui';
-import { RuleTableItem } from '../../types';
+import type { EuiThemeComputed } from '@elastic/eui';
+import type { RuleTableItem } from '../../types';
 
 import { getIsExperimentalFeatureEnabled } from '../get_experimental_features';
 import {

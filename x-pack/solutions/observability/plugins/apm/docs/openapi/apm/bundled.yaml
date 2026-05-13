@@ -10,7 +10,9 @@ tags:
     description: |
       Adjust APM agent configuration without need to redeploy your application.
   - name: APM sourcemaps
-    description: Configure APM source maps.
+    description: |
+      Configure APM source maps. A source map allows minified files to be mapped back to original source code--allowing you to maintain the speed advantage of minified code, without losing the ability to quickly and easily debug your application.
+      For best results, uploading source maps should become a part of your deployment procedure, and not something you only do when you see unhelpful errors. That's because uploading source maps after errors happen won't make old errors magically readable--errors must occur again for source mapping to occur.
   - name: APM annotations
     description: |
       Annotate visualizations in the APM app with significant events. Annotations enable you to easily see how events are impacting the performance of your applications.
@@ -20,7 +22,10 @@ paths:
   /api/apm/agent_keys:
     post:
       summary: Create an APM agent key
-      description: Create a new agent key for APM.
+      description: |
+        Create a new agent key for APM.
+        The user creating an APM agent API key must have at least the `manage_own_api_key` cluster privilege and the APM application-level privileges that it wishes to grant.
+        After it is created, you can copy the API key (Base64 encoded) and use it to to authorize requests from APM agents to the APM Server.
       operationId: createAgentKey
       tags:
         - APM agent keys
@@ -33,6 +38,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/agent_keys_object'
+            examples:
+              createAgentKeyRequest1:
+                $ref: '#/components/examples/agent_keys_object_post_request1'
       responses:
         '200':
           description: Agent key created successfully
@@ -40,30 +48,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/agent_keys_response'
+              examples:
+                createAgentKeyResponse1:
+                  $ref: '#/components/examples/agent_keys_object_post_200_response1'
         '400':
           description: Bad Request response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/error_400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/error_401_response'
         '403':
           description: Forbidden response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/403_response'
+              examples:
+                forbiddenResponse:
+                  $ref: '#/components/examples/error_403_response'
         '500':
           description: Internal Server Error response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/500_response'
+              examples:
+                internalServerErrorResponse:
+                  $ref: '#/components/examples/error_500_response'
   /api/apm/services/{serviceName}/annotation/search:
     get:
       summary: Search for annotations
@@ -91,12 +114,16 @@ paths:
           description: The start date for the search
           schema:
             type: string
+            format: date-time
+          example: '2024-01-01T00:00:00.000Z'
         - name: end
           in: query
           required: false
           description: The end date for the search
           schema:
             type: string
+            format: date-time
+          example: '2024-01-31T23:59:59.999Z'
       responses:
         '200':
           description: Successful response
@@ -104,24 +131,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/annotation_search_response'
+              examples:
+                getAnnotationResponse1:
+                  $ref: '#/components/examples/annotation_search_get_200_response1'
         '400':
           description: Bad Request response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/error_400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/error_401_response'
         '500':
           description: Internal Server Error response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/500_response'
+              examples:
+                internalServerErrorResponse:
+                  $ref: '#/components/examples/error_500_response'
   /api/apm/services/{serviceName}/annotation:
     post:
       summary: Create a service annotation
@@ -144,6 +183,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/create_annotation_object'
+            examples:
+              createAnnotationRequest1:
+                $ref: '#/components/examples/annotation_object_post_request1'
       responses:
         '200':
           description: Annotation created successfully
@@ -151,33 +193,65 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/create_annotation_response'
+              examples:
+                createAnnotationResponse1:
+                  $ref: '#/components/examples/annotation_object_post_200_response1'
         '400':
           description: Bad Request response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/error_400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/error_401_response'
         '403':
           description: Forbidden response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/403_response'
+              examples:
+                forbiddenResponse:
+                  $ref: '#/components/examples/error_403_response'
         '404':
           description: Not found response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                notFoundResponse:
+                  $ref: '#/components/examples/error_404_response'
+      x-codeSamples:
+        - lang: Curl
+          source: |
+            curl -X POST \
+            http://localhost:5601/api/apm/services/opbeans-java/annotation \
+            -H 'Content-Type: application/json' \
+            -H 'kbn-xsrf: true' \
+            -H 'Authorization: Basic YhUlubWZhM0FDbnlQeE6WRtaW49FQmSGZ4RUWXdX' \
+            -d '{
+                "@timestamp": "2020-05-08T10:31:30.452Z",
+                "service": {
+                    "version": "1.2"
+                },
+                "message": "Deployment 1.2"
+                }'
   /api/apm/settings/agent-configuration:
     get:
       summary: Get a list of agent configurations
+      description: |
+        Retrieve all agent configurations. You must have `read` privileges for the APM and User Experience feature in Kibana. If agent configuration is not available on the current deployment, the API returns a 404.
       operationId: getAgentConfigurations
       tags:
         - APM agent configuration
@@ -190,26 +264,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/agent_configurations_response'
+              examples:
+                getAgentConfigurationsResponseExample1:
+                  $ref: '#/components/examples/agent_configuration_intake_object_get_200_response1'
         '400':
           description: Bad Request response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/error_400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/error_401_response'
         '404':
           description: Not found response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                notFoundResponse:
+                  $ref: '#/components/examples/error_404_response'
     delete:
       summary: Delete agent configuration
+      description: |
+        Delete an existing agent configuration. You must have `all` privileges for the APM and User Experience feature in Kibana. When successful, the configuration is removed and, if Fleet is enabled, APM package policies are synchronized accordingly.
       operationId: deleteAgentConfiguration
       tags:
         - APM agent configuration
@@ -221,7 +309,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/service_object'
+              $ref: '#/components/schemas/delete_service_object'
+            examples:
+              deleteAgentConfigurationRequest1:
+                $ref: '#/components/examples/agent_configuration_intake_object_delete_request1'
       responses:
         '200':
           description: Successful response
@@ -229,32 +320,49 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/delete_agent_configurations_response'
+              examples:
+                deleteAgentConfigurationResponseExample1:
+                  $ref: '#/components/examples/agent_configuration_intake_object_delete_200_response1'
         '400':
           description: Bad Request response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/error_400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/error_401_response'
         '403':
           description: Forbidden response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/403_response'
+              examples:
+                forbiddenResponse:
+                  $ref: '#/components/examples/error_403_response'
         '404':
           description: Not found response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                notFoundResponse:
+                  $ref: '#/components/examples/error_404_response'
     put:
       summary: Create or update agent configuration
+      description: |
+        Create or update an agent configuration. You must have `all` privileges for the APM and User Experience feature in Kibana. When updating an existing configuration, the `?overwrite=true` query parameter is required. If the configuration already exists and `overwrite` is not set to `true`, the API returns a 400 error. When successful and Fleet is enabled, APM package policies are synchronized accordingly.
       operationId: createUpdateAgentConfiguration
       tags:
         - APM agent configuration
@@ -272,6 +380,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/agent_configuration_intake_object'
+            examples:
+              createUpdateAgentConfigurationRequestExample1:
+                $ref: '#/components/examples/agent_configuration_intake_object_put_request1'
       responses:
         '200':
           description: Successful response
@@ -280,33 +391,51 @@ paths:
               schema:
                 type: object
                 additionalProperties: false
+                description: The response body is intentionally empty for this endpoint.
+              examples:
+                createUpdateAgentConfigurationResponseExample1:
+                  $ref: '#/components/examples/agent_configuration_intake_object_put_200_response1'
         '400':
           description: Bad Request response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/error_400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/error_401_response'
         '403':
           description: Forbidden response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/403_response'
+              examples:
+                forbiddenResponse:
+                  $ref: '#/components/examples/error_403_response'
         '404':
           description: Not found response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                notFoundResponse:
+                  $ref: '#/components/examples/error_404_response'
   /api/apm/settings/agent-configuration/view:
     get:
       summary: Get single agent configuration
+      description: |
+        Retrieve a single agent configuration matching the given service name and environment. You must have `read` privileges for the APM and User Experience feature in Kibana. If no matching configuration is found, the API returns a 404.
       operationId: getSingleAgentConfiguration
       tags:
         - APM agent configuration
@@ -331,29 +460,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/single_agent_configuration_response'
+              examples:
+                getSingleAgentConfigurationResponseExample1:
+                  $ref: '#/components/examples/agent_configuration_intake_object_view_200_response1'
         '400':
           description: Bad Request response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/error_400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/error_401_response'
         '404':
           description: Not found response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                notFoundResponse:
+                  $ref: '#/components/examples/error_404_response'
   /api/apm/settings/agent-configuration/search:
     post:
       summary: Lookup single agent configuration
+      deprecated: true
       description: |
-        This endpoint allows to search for single agent configuration and update 'applied_by_agent' field.
+        DEPRECATED: This endpoint is intended for internal use by APM agents to fetch their configuration and mark it as applied. Do not use for new integrations. It searches for a single agent configuration matching the given service, and optionally updates the `applied_by_agent` field when the provided `etag` matches the current configuration.
       operationId: searchSingleConfiguration
       tags:
         - APM agent configuration
@@ -366,6 +508,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/search_agent_configuration_object'
+            examples:
+              searchSingleConfigurationRequest1:
+                $ref: '#/components/examples/agent_configuration_intake_object_search_request1'
       responses:
         '200':
           description: Successful response
@@ -373,27 +518,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/search_agent_configuration_response'
+              examples:
+                searchSingleConfigurationResponse1:
+                  $ref: '#/components/examples/agent_configuration_intake_object_search_200_response1'
         '400':
           description: Bad Request response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/error_400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/error_401_response'
         '404':
           description: Not found response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                notFoundResponse:
+                  $ref: '#/components/examples/error_404_response'
   /api/apm/settings/agent-configuration/environments:
     get:
       summary: Get environments for service
+      description: |
+        Retrieve the available environments for a given service, to be used in agent configuration. You must have `read` privileges for the APM and User Experience feature in Kibana. If `serviceName` is omitted, environments across all services are returned.
       operationId: getEnvironmentsForService
       tags:
         - APM agent configuration
@@ -401,9 +560,10 @@ paths:
         - $ref: '#/components/parameters/elastic_api_version'
         - name: serviceName
           in: query
-          description: The name of the service
+          description: The name of the service. If omitted, environments across all services are returned.
           schema:
             type: string
+          example: opbeans-node
       responses:
         '200':
           description: Successful response
@@ -411,24 +571,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/service_environments_response'
+              examples:
+                getEnvironmentsForServiceResponseExample1:
+                  $ref: '#/components/examples/agent_configuration_environments_200_response1'
         '400':
           description: Bad Request response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/error_400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/error_401_response'
         '404':
           description: Not found response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                notFoundResponse:
+                  $ref: '#/components/examples/error_404_response'
   /api/apm/settings/agent-configuration/agent_name:
     get:
       summary: Get agent name for service
@@ -452,28 +624,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/service_agent_name_response'
+              examples:
+                getAgentNameForServiceResponse1:
+                  $ref: '#/components/examples/service_agent_name_get_200_response1'
         '400':
           description: Bad Request response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/error_400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/error_401_response'
         '404':
           description: Not found response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                notFoundResponse:
+                  $ref: '#/components/examples/error_404_response'
   /api/apm/sourcemaps:
     get:
       summary: Get source maps
-      description: Returns an array of Fleet artifacts, including source map uploads.
+      description: |
+        Get an array of Fleet artifacts, including source map uploads. You must have `read` or `all` Kibana privileges for the APM and User Experience feature.
       operationId: getSourceMaps
       tags:
         - APM sourcemaps
@@ -496,33 +681,57 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/source_maps_response'
+              examples:
+                getSourceMapsResponse1:
+                  $ref: '#/components/examples/source_maps_get_200_response1'
         '400':
           description: Bad Request response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/error_400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/error_401_response'
         '500':
           description: Internal Server Error response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/500_response'
+              examples:
+                internalServerErrorResponse:
+                  $ref: '#/components/examples/error_500_response'
         '501':
           description: Not Implemented response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/501_response'
+              examples:
+                notImplementedResponse:
+                  $ref: '#/components/examples/error_501_response'
+      x-codeSamples:
+        - lang: Curl
+          source: |
+            curl -X GET "http://localhost:5601/api/apm/sourcemaps" \
+            -H 'Content-Type: application/json' \
+            -H 'kbn-xsrf: true' \
+            -H 'Authorization: ApiKey ${YOUR_API_KEY}'
     post:
-      summary: Upload source map
-      description: Upload a source map for a specific service and version.
+      summary: Upload a source map
+      description: |
+        Upload a source map for a specific service and version. You must have `all` Kibana privileges for the APM and User Experience feature.
+        The maximum payload size is `1mb`. If you attempt to upload a source map that exceeds the maximum payload size, you will get a 413 error. Before uploading source maps that exceed this default, change the maximum payload size allowed by Kibana with the `server.maxPayload` variable.
       operationId: uploadSourceMap
       tags:
         - APM sourcemaps
@@ -535,6 +744,9 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/upload_source_map_object'
+            examples:
+              uploadSourceMapRequest:
+                $ref: '#/components/examples/source_maps_upload_request1'
       responses:
         '200':
           description: Successful response
@@ -542,40 +754,70 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/upload_source_maps_response'
+              examples:
+                uploadSourceMapResponse1:
+                  $ref: '#/components/examples/source_maps_upload_200_response1'
         '400':
           description: Bad Request response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/error_400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/error_401_response'
         '403':
           description: Forbidden response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/403_response'
+              examples:
+                forbiddenResponse:
+                  $ref: '#/components/examples/error_403_response'
         '500':
           description: Internal Server Error response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/500_response'
+              examples:
+                internalServerErrorResponse:
+                  $ref: '#/components/examples/error_500_response'
         '501':
           description: Not Implemented response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/501_response'
+              examples:
+                notImplementedResponse:
+                  $ref: '#/components/examples/error_501_response'
+      x-codeSamples:
+        - lang: Curl
+          source: |
+            curl -X POST "http://localhost:5601/api/apm/sourcemaps" \
+            -H 'Content-Type: multipart/form-data' \
+            -H 'kbn-xsrf: true' \
+            -H 'Authorization: ApiKey ${YOUR_API_KEY}' \
+            -F 'service_name="foo"' \
+            -F 'service_version="1.0.0"' \
+            -F 'bundle_filepath="/test/e2e/general-usecase/bundle.js"' \
+            -F 'sourcemap="{\"version\":3,\"file\":\"static/js/main.chunk.js\",\"sources\":[\"fleet-source-map-client/src/index.css\",\"fleet-source-map-client/src/App.js\",\"webpack:///./src/index.css?bb0a\",\"fleet-source-map-client/src/index.js\",\"fleet-source-map-client/src/reportWebVitals.js\"],\"sourcesContent\":[\"content\"],\"mappings\":\"mapping\",\"sourceRoot\":\"\"}"' 
   /api/apm/sourcemaps/{id}:
     delete:
       summary: Delete source map
-      description: Delete a previously uploaded source map.
+      description: |
+        Delete a previously uploaded source map. You must have `all` Kibana privileges for the APM and User Experience feature.
       operationId: deleteSourceMap
       tags:
         - APM sourcemaps
@@ -596,39 +838,68 @@ paths:
               schema:
                 type: object
                 additionalProperties: false
+                description: The response body is intentionally empty for this endpoint.
+              examples:
+                deleteSourceMapResponseExample1:
+                  $ref: '#/components/examples/source_maps_delete_200_response1'
         '400':
           description: Bad Request response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/error_400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/error_401_response'
         '403':
           description: Forbidden response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/403_response'
+              examples:
+                forbiddenResponse:
+                  $ref: '#/components/examples/error_403_response'
         '500':
           description: Internal Server Error response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/500_response'
+              examples:
+                internalServerErrorResponse:
+                  $ref: '#/components/examples/error_500_response'
         '501':
           description: Not Implemented response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/501_response'
+              examples:
+                notImplementedResponse:
+                  $ref: '#/components/examples/error_501_response'
+      x-codeSamples:
+        - lang: Curl
+          source: |
+            curl -X DELETE "http://localhost:5601/api/apm/sourcemaps/apm:foo-1.0.0-644fd5a9" \
+            -H 'Content-Type: application/json' \
+            -H 'kbn-xsrf: true' \
+            -H 'Authorization: ApiKey ${YOUR_API_KEY}'
   /api/apm/fleet/apm_server_schema:
     post:
       summary: Save APM server schema
+      deprecated: true
+      description: |
+        DEPRECATED: This endpoint is intended for internal use by Fleet integrations to push the APM Server configuration schema. Do not use for new integrations. It stores the provided schema object as a Kibana saved object. If Fleet migration is not available on the current deployment, the API returns a 404.
       operationId: saveApmServerSchema
       tags:
         - APM server schema
@@ -648,6 +919,12 @@ paths:
                   additionalProperties: true
                   example:
                     foo: bar
+            examples:
+              saveApmServerSchemaRequest:
+                description: An example request payload for `POST /api/apm/fleet/apm_server_schema`.
+                value:
+                  schema:
+                    foo: bar
       responses:
         '200':
           description: Successful response
@@ -656,30 +933,46 @@ paths:
               schema:
                 type: object
                 additionalProperties: false
+                description: The response body is intentionally empty for this endpoint.
+              examples:
+                saveApmServerSchemaResponseExample1:
+                  $ref: '#/components/examples/fleet_apm_server_schema_200_response1'
         '400':
           description: Bad Request response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/error_400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/error_401_response'
         '403':
           description: Forbidden response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/403_response'
+              examples:
+                forbiddenResponse:
+                  $ref: '#/components/examples/error_403_response'
         '404':
           description: Not found response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                notFoundResponse:
+                  $ref: '#/components/examples/error_404_response'
 components:
   parameters:
     elastic_api_version:
@@ -709,10 +1002,12 @@ components:
       properties:
         name:
           type: string
-          description: Agent name
+          description: The name of the APM agent key.
         privileges:
           type: array
-          description: Privileges configuration
+          description: |
+            The APM agent key privileges. It can take one or more of the following values:
+            * `event:write`, which is required for ingesting APM agent events. * `config_agent:read`, which is required for APM agents to read agent configuration remotely.
           items:
             type: string
             enum:
@@ -825,23 +1120,26 @@ components:
       properties:
         '@timestamp':
           type: string
-          description: Timestamp
+          description: The date and time of the annotation. It must be in ISO 8601 format.
         service:
           type: object
-          description: Service
+          description: The service that identifies the configuration to create or update.
           required:
             - version
           properties:
             version:
               type: string
+              description: The version of the service.
             environment:
               type: string
+              description: The environment of the service.
         message:
           type: string
-          description: Message
+          description: The message displayed in the annotation. It defaults to `service.version`.
         tags:
           type: array
-          description: Tags
+          description: |
+            Tags are used by the Applications UI to distinguish APM annotations from other annotations. Tags may have additional functionality in future releases. It defaults to `[apm]`. While you can add additional tags, you cannot remove the `apm` tag.
           items:
             type: string
     create_annotation_response:
@@ -908,11 +1206,11 @@ components:
         name:
           type: string
           example: node
-          description: Name
+          description: The name of the service.
         environment:
           type: string
           example: prod
-          description: Environment
+          description: The environment of the service.
     settings_object:
       type: object
       description: Agent configuration settings
@@ -945,7 +1243,8 @@ components:
         etag:
           type: string
           example: 0bc3b5ebf18fba8163fe4c96f491e3767a358f85
-          description: Etag
+          description: |
+            `etag` is sent by the APM agent to indicate the `etag` of the last successfully applied configuration. If the `etag` matches an existing configuration its `applied_by_agent` property will be set to `true`. Every time a configuration is edited `applied_by_agent` is reset to `false`.
     agent_configurations_response:
       type: object
       properties:
@@ -962,11 +1261,19 @@ components:
       properties:
         agent_name:
           type: string
-          description: Agent name
+          description: The agent name is used by the UI to determine which settings to display.
         service:
           $ref: '#/components/schemas/service_object'
         settings:
           $ref: '#/components/schemas/settings_object'
+    delete_service_object:
+      type: object
+      description: Service
+      required:
+        - service
+      properties:
+        service:
+          $ref: '#/components/schemas/service_object'
     delete_agent_configurations_response:
       type: object
       properties:
@@ -998,6 +1305,11 @@ components:
           description: |
             `markAsAppliedByAgent=true` means "force setting it to true regardless of etag".
             This is needed for Jaeger agent that doesn't have etags
+        error:
+          type: string
+          description: |
+            If provided, the agent configuration will be marked as error and `applied_by_agent` will be set to `false`.
+            This is useful for cases where the agent configuration was not applied successfully.
     search_agent_configuration_response:
       type: object
       properties:
@@ -1151,8 +1463,8 @@ components:
           type: string
           format: binary
           description: |
-            The source map. String or file upload. It must follow the
-            [source map revision 3 proposal](https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k).
+            The source map. It can be a string or file upload. It must follow the
+            [source map format specification](https://tc39.es/ecma426/).
     upload_source_maps_response:
       allOf:
         - type: object
@@ -1160,3 +1472,272 @@ components:
             body:
               type: string
         - $ref: '#/components/schemas/base_source_map_object'
+  examples:
+    agent_keys_object_post_request1:
+      description: Run `POST /api/apm/agent_keys` to create an APM agent API key with the specified privileges.
+      value:
+        name: apm-key
+        privileges:
+          - event:write
+          - config_agent:read
+    agent_keys_object_post_200_response1:
+      description: An example of a successful response from `POST /api/apm/agent_keys`, which creates an APM agent API key.
+      value:
+        agentKey:
+          id: 3DCLmn0B3ZMhLUa7WBG9
+          name: apm-key
+          api_key: PjGloCGOTzaZr8ilUPvkjA
+          encoded: M0RDTG1uMEIzWk1oTFVhN1dCRzk6UGpHbG9DR09UemFacjhpbFVQdmtqQQ==
+    error_400_response:
+      description: An example of a 400 Bad Request response, returned when the request payload or query parameters fail validation.
+      value:
+        statusCode: 400
+        error: Bad Request
+        message: '[request body]: expected value of type [string] but got [undefined]'
+    error_401_response:
+      description: An example of a 401 Unauthorized response, returned when the request is missing valid authentication credentials.
+      value:
+        statusCode: 401
+        error: Unauthorized
+        message: '[security_exception]: missing authentication credentials for REST request'
+    error_403_response:
+      description: An example of a 403 Forbidden response, returned when the authenticated user lacks the required APM and User Experience privileges.
+      value:
+        statusCode: 403
+        error: Forbidden
+        message: Insufficient privileges to perform this action. The APM and User Experience feature requires `all` privileges.
+    error_500_response:
+      description: An example of a 500 Internal Server Error response, returned when an unexpected error occurs while processing the request.
+      value:
+        statusCode: 500
+        error: Internal Server Error
+        message: An internal server error occurred. Check the Kibana server logs for details.
+    annotation_search_get_200_response1:
+      description: An example of a successful response from `GET /api/apm/services/{serviceName}/annotation/search`, which returns the annotations associated with a service over the given time range.
+      value:
+        annotations:
+          - type: version
+            id: opbeans-node@2.0.0
+            '@timestamp': 1735689600000
+            text: opbeans-node@2.0.0
+          - type: version
+            id: opbeans-node@2.1.0
+            '@timestamp': 1736294400000
+            text: opbeans-node@2.1.0
+    annotation_object_post_request1:
+      description: Run `POST /api/apm/services/{serviceName}/annotation` to create a deployment annotation for a service.
+      value:
+        '@timestamp': '2024-01-15T12:00:00.000Z'
+        service:
+          version: 1.2.0
+          environment: production
+        message: Deployment 1.2.0
+        tags:
+          - apm
+          - deployment
+    annotation_object_post_200_response1:
+      description: An example of a successful response from `POST /api/apm/services/opbeans-java/annotation`, which creates an annotation for a service named `opbeans-java`.
+      value:
+        _index: observability-annotations
+        _id: Lc9I93EBh6DbmkeV7nFX
+        _version: 1
+        _seq_no: 12
+        _primary_term: 1
+        found: true
+        _source:
+          message: Deployment 1.2
+          '@timestamp': '2020-05-08T10:31:30.452Z'
+          service:
+            version: '1.2'
+            name: opbeans-java
+          tags:
+            - apm
+            - elastic.co
+            - customer
+          annotation:
+            type: deployment
+          event:
+            created: '2020-05-09T02:34:43.937Z'
+    error_404_response:
+      description: An example of a 404 Not Found response, returned when the requested resource does not exist or the feature is not available on the current deployment.
+      value:
+        statusCode: 404
+        error: Not Found
+        message: Not Found
+    agent_configuration_intake_object_get_200_response1:
+      description: An example of a successful response from `GET /api/apm/settings/agent-configuration`.
+      value:
+        - agent_name: go
+          service:
+            name: opbeans-go
+            environment: production
+          settings:
+            transaction_sample_rate: '1'
+            capture_body: 'off'
+            transaction_max_spans: '200'
+          '@timestamp': 1581934104843
+          applied_by_agent: false
+          etag: 1e58c178efeebae15c25c539da740d21dee422fc
+        - agent_name: go
+          service:
+            name: opbeans-go
+          settings:
+            transaction_sample_rate: '1'
+            capture_body: 'off'
+            transaction_max_spans: '300'
+          '@timestamp': 1581934111727
+          applied_by_agent: false
+          etag: 3eed916d3db434d9fb7f039daa681c7a04539a64
+        - agent_name: nodejs
+          service:
+            name: frontend
+          settings:
+            transaction_sample_rate: '1'
+          '@timestamp': 1582031336265
+          applied_by_agent: false
+          etag: 5080ed25785b7b19f32713681e79f46996801a5b
+    agent_configuration_intake_object_put_request1:
+      description: Run `PUT /api/apm/settings/agent-configuration` to create or update configuration details.
+      value:
+        service:
+          name: frontend
+          environment: production
+        settings:
+          transaction_sample_rate: '0.4'
+          capture_body: 'off'
+          transaction_max_spans: '500'
+        agent_name: nodejs
+    agent_configuration_intake_object_put_200_response1:
+      description: An example of a successful response from `PUT /api/apm/settings/agent-configuration`. The response body is intentionally empty.
+      value: {}
+    agent_configuration_intake_object_delete_request1:
+      description: Run `DELETE /api/apm/settings/agent-configuration` to delete a configuration.
+      value:
+        service:
+          name: frontend
+          environment: production
+    agent_configuration_intake_object_delete_200_response1:
+      description: An example of a successful response from `DELETE /api/apm/settings/agent-configuration`.
+      value:
+        result: deleted
+    agent_configuration_intake_object_view_200_response1:
+      description: An example of a successful response from `GET /api/apm/settings/agent-configuration/view`.
+      value:
+        id: CIaqXXABmQCdPphWj8EJ
+        agent_name: nodejs
+        service:
+          name: frontend
+          environment: production
+        settings:
+          transaction_sample_rate: '0.4'
+          capture_body: 'off'
+          transaction_max_spans: '500'
+        '@timestamp': 1582031336265
+        applied_by_agent: true
+        etag: 5080ed25785b7b19f32713681e79f46996801a5b
+    agent_configuration_intake_object_search_request1:
+      description: Run `POST /api/apm/settings/agent-configuration/search` to search configuration details.
+      value:
+        etag: 1e58c178efeebae15c25c539da740d21dee422fc
+        service:
+          name: frontend
+          environment: production
+    agent_configuration_intake_object_search_200_response1:
+      description: An example of a successful response from `POST /api/apm/settings/agent-configuration/search`.
+      value:
+        _index: .apm-agent-configuration
+        _id: CIaqXXABmQCdPphWj8EJ
+        _score: 2
+        _source:
+          agent_name: nodejs
+          service:
+            name: frontend
+          settings:
+            transaction_sample_rate: '1'
+          '@timestamp': 1582031336265
+          applied_by_agent: false
+          etag: 5080ed25785b7b19f32713681e79f46996801a5b
+    agent_configuration_environments_200_response1:
+      description: An example of a successful response from `GET /api/apm/settings/agent-configuration/environments`.
+      value:
+        environments:
+          - name: production
+            alreadyConfigured: true
+          - name: development
+            alreadyConfigured: false
+          - name: ALL_OPTION_VALUE
+            alreadyConfigured: false
+    service_agent_name_get_200_response1:
+      description: An example of a successful response from `GET /api/apm/settings/agent-configuration/agent_name`, which returns the detected APM agent name for a service.
+      value:
+        agentName: nodejs
+    source_maps_get_200_response1:
+      description: A successful response from `GET /api/apm/sourcemaps`.
+      value:
+        artifacts:
+          - type: sourcemap
+            identifier: foo-1.0.0
+            relative_url: /api/fleet/artifacts/foo-1.0.0/644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456
+            body:
+              serviceName: foo
+              serviceVersion: 1.0.0
+              bundleFilepath: /test/e2e/general-usecase/bundle.js
+              sourceMap:
+                version: 3
+                file: static/js/main.chunk.js
+                sources:
+                  - fleet-source-map-client/src/index.css
+                  - fleet-source-map-client/src/App.js
+                  - webpack:///./src/index.css?bb0a
+                  - fleet-source-map-client/src/index.js
+                  - fleet-source-map-client/src/reportWebVitals.js
+                sourcesContent:
+                  - content
+                mappings: mapping
+                sourceRoot: ''
+            created: '2021-07-09T20:47:44.812Z'
+            id: apm:foo-1.0.0-644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456
+            compressionAlgorithm: zlib
+            decodedSha256: 644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456
+            decodedSize: 441
+            encodedSha256: 024c72749c3e3dd411b103f7040ae62633558608f480bce4b108cf5b2275bd24
+            encodedSize: 237
+            encryptionAlgorithm: none
+            packageName: apm
+    error_501_response:
+      description: An example of a 501 Not Implemented response, returned when the source map feature is not available on the current deployment.
+      value:
+        statusCode: 501
+        error: Not Implemented
+        message: Not Implemented
+    source_maps_upload_request1:
+      description: |
+        An example of a multipart/form-data request body for `POST /api/apm/sourcemaps`.
+        Each field is a separate form part; `sourcemap` is the source map file content (typically uploaded as a file).
+      value:
+        service_name: opbeans-node
+        service_version: 1.0.0
+        bundle_filepath: /test/e2e/general-usecase/bundle.js.map
+        sourcemap: '{"version":3,"sources":["bundle.js"],"names":[],"mappings":"AAAA","file":"bundle.js","sourcesContent":["console.log(''hello'');"]}'
+    source_maps_upload_200_response1:
+      description: A successful response from `POST /api/apm/sourcemaps`.
+      value:
+        type: sourcemap
+        identifier: foo-1.0.0
+        relative_url: /api/fleet/artifacts/foo-1.0.0/644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456
+        body: eJyFkL1OwzAUhd/Fc+MbYMuCEBIbHRjKgBgc96R16tiWr1OQqr47NwqJxEK3q/PzWccXxchnZ7E1A1SjuhjVZtF2yOxiEPlO17oWox3D3uPFeSRTjmJQARfCPeiAgGx8NTKsYdAc1T3rwaSJGcds8Sp3c1HnhfywUZ3QhMTFFGepZxqMC9oex3CS9tpk1XyozgOlmoVKuJX1DqEQZ0su7PGtLU+V/3JPKc3cL7TJ2FNDRPov4bFta3MDM4f7W69lpJjLO9qdK8bzVPhcJz3HUCQ4LbO/p5hCSC4cZPByrp/wFqOklbpefwAhzpqI
+        created: '2021-07-09T20:47:44.812Z'
+        id: apm:foo-1.0.0-644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456
+        compressionAlgorithm: zlib
+        decodedSha256: 644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456
+        decodedSize: 441
+        encodedSha256: 024c72749c3e3dd411b103f7040ae62633558608f480bce4b108cf5b2275bd24
+        encodedSize: 237
+        encryptionAlgorithm: none
+        packageName: apm
+    source_maps_delete_200_response1:
+      description: An example of a successful response from `DELETE /api/apm/sourcemaps/{id}`. The response body is intentionally empty.
+      value: {}
+    fleet_apm_server_schema_200_response1:
+      description: An example of a successful response from `POST /api/apm/fleet/apm_server_schema`. The response body is intentionally empty.
+      value: {}

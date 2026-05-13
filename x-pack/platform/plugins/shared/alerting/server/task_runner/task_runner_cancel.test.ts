@@ -7,7 +7,7 @@
 
 import sinon from 'sinon';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-import {
+import type {
   RuleExecutorOptions,
   RuleTypeParams,
   RuleTypeState,
@@ -15,10 +15,9 @@ import {
   AlertInstanceContext,
   Rule,
   RuleAlertData,
-  DEFAULT_FLAPPING_SETTINGS,
-  DEFAULT_QUERY_DELAY_SETTINGS,
 } from '../types';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { DEFAULT_FLAPPING_SETTINGS, DEFAULT_QUERY_DELAY_SETTINGS } from '../types';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
@@ -30,19 +29,17 @@ import {
   elasticsearchServiceMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { actionsMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { alertsMock } from '../mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
-import { IEventLogger } from '@kbn/event-log-plugin/server';
+import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { getAlertFromRaw } from '../rules_client/lib/get_alert_from_raw';
-import {
-  AlertingEventLogger,
-  ContextOpts,
-} from '../lib/alerting_event_logger/alerting_event_logger';
+import type { ContextOpts } from '../lib/alerting_event_logger/alerting_event_logger';
+import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import {
   mockTaskInstance,
@@ -54,15 +51,16 @@ import {
   mockedRawRuleSO,
 } from './fixtures';
 import { EVENT_LOG_ACTIONS } from '../plugin';
-import { SharePluginStart } from '@kbn/share-plugin/server';
-import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
-import { TaskRunnerContext } from './types';
+import type { TaskRunnerContext } from './types';
+import { ApiKeyType } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
@@ -159,6 +157,7 @@ describe('Task Runner Cancel', () => {
     usageCounter: mockUsageCounter,
     isServerless: false,
     getEventLogClient: jest.fn().mockReturnValue(eventLogClientMock.create()),
+    apiKeyType: ApiKeyType.ES,
   };
 
   beforeEach(() => {
@@ -226,6 +225,22 @@ describe('Task Runner Cancel', () => {
       { tags: ['1', 'test'] }
     );
 
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      5,
+      `skipping persisting alerts for rule test:1: 'rule-name': rule execution has been cancelled.`,
+      { tags: ['1', 'test'] }
+    );
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      6,
+      `no scheduling of actions for rule test:1: 'rule-name': rule execution has been cancelled.`,
+      { tags: ['1', 'test'] }
+    );
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      7,
+      `skipping updating alerts for rule test:1: 'rule-name': rule execution has been cancelled.`,
+      { tags: ['1', 'test'] }
+    );
+
     testAlertingEventLogCalls({ status: 'ok' });
 
     expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledTimes(1);
@@ -264,8 +279,8 @@ describe('Task Runner Cancel', () => {
                   metrics: {
                     duration: 0,
                     gap_duration_s: null,
-                    // TODO: uncomment after intermidiate release
-                    // gap_range: null,
+                    gap_range: null,
+                    gap_reason: null,
                     total_alerts_created: null,
                     total_alerts_detected: null,
                     total_indexing_duration_ms: null,
@@ -573,6 +588,7 @@ describe('Task Runner Cancel', () => {
         rule_type_run_duration_ms: 0,
         total_run_duration_ms: 0,
         trigger_actions_duration_ms: 0,
+        update_alerts_duration_ms: 0,
       },
     });
 

@@ -18,4 +18,6 @@ export {
   contentReferenceString,
   contentReferenceBlock,
   removeContentReferences,
+  enrichDocument,
+  sanitizeMessages,
 } from './references/utils';

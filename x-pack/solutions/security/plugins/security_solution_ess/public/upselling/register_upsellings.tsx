@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ILicense, LicenseType } from '@kbn/licensing-plugin/public';
+import type { ILicense, LicenseType } from '@kbn/licensing-types';
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import {
   ALERT_SUPPRESSION_RULE_DETAILS,
@@ -29,8 +29,12 @@ import type { Services } from '../common/services';
 import { withServicesProvider } from '../common/services';
 import {
   AttackDiscoveryUpsellingPageLazy,
+  AIValueUpsellingPageLazy,
   EntityAnalyticsUpsellingPageLazy,
   EntityAnalyticsUpsellingSectionLazy,
+  GraphVisualizationUpsellingSectionLazy,
+  SiemMigrationsStartUpsellSectionLazy,
+  SiemMigrationsTranslatedRulesUpsellPageLazy,
 } from './lazy_upselling';
 
 interface UpsellingsConfig {
@@ -101,6 +105,17 @@ export const upsellingPages: UpsellingPages = [
     minimumLicenseRequired: 'enterprise',
     component: AttackDiscoveryUpsellingPageLazy,
   },
+  {
+    pageName: SecurityPageName.aiValue,
+    minimumLicenseRequired: 'enterprise',
+    component: AIValueUpsellingPageLazy,
+  },
+
+  {
+    pageName: SecurityPageName.siemMigrationsRules,
+    minimumLicenseRequired: 'enterprise',
+    component: SiemMigrationsTranslatedRulesUpsellPageLazy,
+  },
 ];
 
 // Upsellings for sections, linked by arbitrary ids
@@ -110,6 +125,16 @@ export const upsellingSections: UpsellingSections = [
     id: 'entity_analytics_panel',
     minimumLicenseRequired: 'platinum',
     component: EntityAnalyticsUpsellingSectionLazy,
+  },
+  {
+    id: 'siem_migrations_start',
+    minimumLicenseRequired: 'enterprise',
+    component: SiemMigrationsStartUpsellSectionLazy,
+  },
+  {
+    id: 'graph_visualization',
+    minimumLicenseRequired: 'platinum',
+    component: GraphVisualizationUpsellingSectionLazy,
   },
 ];
 

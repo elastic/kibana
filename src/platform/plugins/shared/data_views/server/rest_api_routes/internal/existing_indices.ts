@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IRouter, RequestHandler } from '@kbn/core/server';
+import type { IRouter, RequestHandler } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { INITIAL_REST_VERSION_INTERNAL as version } from '../../constants';
 import { IndexPatternsFetcher } from '../..';
@@ -44,8 +44,8 @@ export const handler: RequestHandler<{}, { indices: string | string[] }, string[
     const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
     const indexPatterns = new IndexPatternsFetcher(elasticsearchClient);
 
-    const response: string[] = await indexPatterns.getExistingIndices(indexArray);
-    return res.ok({ body: response });
+    const { matchedIndexPatterns } = await indexPatterns.getIndexPatternMatches(indexArray);
+    return res.ok({ body: matchedIndexPatterns });
   } catch (error) {
     return res.badRequest();
   }
@@ -56,16 +56,16 @@ export const registerExistingIndicesPath = (router: IRouter): void => {
     .get({
       path: EXISTING_INDICES_PATH,
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
     })
     .addVersion(
       {
         version,
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
-          },
-        },
         validate: {
           request: {
             query: schema.object({

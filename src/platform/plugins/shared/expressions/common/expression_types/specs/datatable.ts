@@ -11,9 +11,19 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import { map, pick, zipObject } from 'lodash';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
-import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
-import { PointSeries, PointSeriesColumn } from './pointseries';
-import { ExpressionValueRender } from './render';
+import type { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
+import type { PointSeries, PointSeriesColumn } from './pointseries';
+import type { ExpressionValueRender } from './render';
+
+export enum DimensionType {
+  Y_AXIS = 'y',
+  X_AXIS = 'x',
+  REFERENCE_LINE = 'reference',
+  BREAKDOWN = 'breakdown',
+  MARK_SIZE = 'markSize',
+  SPLIT_COLUMN = 'splitCol',
+  SPLIT_ROW = 'splitRow',
+}
 
 const name = 'datatable';
 
@@ -44,6 +54,7 @@ export type DatatableColumnType =
   | 'object'
   | 'nested'
   | 'histogram'
+  | 'flattened'
   | 'null';
 
 /**
@@ -73,9 +84,13 @@ export interface DatatableColumnMeta {
    */
   index?: string;
   /**
-   * names the domain this column represents
+   * i18nized names the domain this column represents
    */
   dimensionName?: string;
+  /**
+   * types of dimension this column represents
+   */
+  dimensionType?: string;
   /**
    * serialized field format
    */
@@ -102,7 +117,6 @@ export function isSourceParamsESQL(obj: Record<string, unknown>): obj is SourceP
     obj &&
     typeof obj.indexPattern === 'string' &&
     typeof obj.sourceField === 'string' &&
-    typeof obj.operationType === 'string' &&
     (typeof obj.interval === 'number' || !obj.interval)
   );
 }
@@ -115,6 +129,8 @@ export interface DatatableColumn {
   name: string;
   meta: DatatableColumnMeta;
   isNull?: boolean;
+  // Whether the column is computed by the query (not from the index)
+  isComputedColumn?: boolean;
   variable?: string;
 }
 

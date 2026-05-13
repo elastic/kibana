@@ -4,85 +4,90 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSuperDatePicker,
-  EuiTitle,
-  OnRefreshProps,
-  OnTimeChangeProps,
-} from '@elastic/eui';
+import type { OnTimeChangeProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSuperDatePicker, EuiTitle } from '@elastic/eui';
 import DateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React, { useMemo, useState } from 'react';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import React from 'react';
+import { getDefaultRangeFromSlo, useUrlAppState } from './hooks/use_url_app_state';
 import { ErrorRateChart } from '../../../../components/slo/error_rate_chart';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { TimeBounds } from '../../types';
-import { EventsChartPanel } from '../events_chart_panel';
+import { isApmIndicatorType } from '../../../../utils/slo/indicator';
+import { toDuration } from '../../../../utils/slo/duration';
+import type { TimeBounds } from '../../types';
+import { ApmSourcePanel } from '../apm_source_panel';
+import { EventsChartPanel } from '../events_chart_panel/events_chart_panel';
 import { HistoricalDataCharts } from '../historical_data_charts';
-import { SloTabId } from '../slo_details';
+import { CalendarPeriodPicker } from './calendar_period_picker';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
-  isAutoRefreshing: boolean;
-  selectedTabId: SloTabId;
 }
 
-export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Props) {
+export function SloDetailsHistory({ slo }: Props) {
   const { uiSettings } = useKibana().services;
-  const [start, setStart] = useState(`now-${slo.timeWindow.duration}`);
-  const [end, setEnd] = useState('now');
 
-  const onTimeChange = (val: OnTimeChangeProps) => {
-    setStart(val.start);
-    setEnd(val.end);
-  };
-
-  const onRefresh = (val: OnRefreshProps) => {};
-
-  const range = useMemo(() => {
-    return {
-      from: new Date(DateMath.parse(start)!.valueOf()),
-      to: new Date(DateMath.parse(end, { roundUp: true })!.valueOf()),
-    };
-  }, [start, end]);
+  const { state, updateState } = useUrlAppState(slo);
+  const defaultRange = getDefaultRangeFromSlo(slo);
+  const isCalendarRangeModified =
+    state.range.from.getTime() !== defaultRange.from.getTime() ||
+    state.range.to.getTime() !== defaultRange.to.getTime();
 
   const onBrushed = ({ from, to }: TimeBounds) => {
-    setStart(from.toISOString());
-    setEnd(to.toISOString());
+    updateState({ range: { from, to } });
   };
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem
-          grow
-          css={{
-            maxWidth: 500,
-          }}
-        >
-          <EuiSuperDatePicker
-            isLoading={false}
-            start={start}
-            end={end}
-            onTimeChange={onTimeChange}
-            onRefresh={onRefresh}
-            width="full"
-            commonlyUsedRanges={uiSettings
-              .get('timepicker:quickRanges')
-              .map(({ from, to, display }: { from: string; to: string; display: string }) => {
-                return {
+      <EuiFlexGroup justifyContent="flexEnd" direction="row" gutterSize="s">
+        <EuiFlexItem grow css={{ maxWidth: 500 }}>
+          {slo.timeWindow.type === 'calendarAligned' ? (
+            <CalendarPeriodPicker
+              period={toDuration(slo.timeWindow.duration).unit === 'w' ? 'week' : 'month'}
+              range={state.range}
+              onChange={(updatedRange: TimeBounds) => {
+                updateState({ range: updatedRange });
+              }}
+              onReset={() => {
+                updateState({ range: defaultRange });
+              }}
+              isResetDisabled={!isCalendarRangeModified}
+            />
+          ) : (
+            <EuiSuperDatePicker
+              isLoading={false}
+              start={state.range.from.toISOString()}
+              end={state.range.to.toISOString()}
+              onTimeChange={(val: OnTimeChangeProps) => {
+                const newRange = {
+                  from: new Date(DateMath.parse(val.start)!.valueOf()),
+                  to: new Date(DateMath.parse(val.end, { roundUp: true })!.valueOf()),
+                };
+                updateState({ range: newRange });
+              }}
+              width="full"
+              showUpdateButton={false}
+              commonlyUsedRanges={uiSettings
+                .get('timepicker:quickRanges')
+                .map(({ from, to, display }: { from: string; to: string; display: string }) => ({
                   start: from,
                   end: to,
                   label: display,
-                };
-              })}
-          />
+                }))}
+            />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
-
+      {isApmIndicatorType(slo.indicator) && (
+        <ApmSourcePanel
+          slo={slo}
+          timeRange={{
+            from: state.range.from.toISOString(),
+            to: state.range.to.toISOString(),
+          }}
+        />
+      )}
       <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="errorRatePanel">
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexItem grow={false}>
@@ -96,27 +101,21 @@ export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Prop
           </EuiFlexItem>
           <ErrorRateChart
             slo={slo}
-            dataTimeRange={range}
+            dataTimeRange={state.range}
             onBrushed={onBrushed}
             variant={['VIOLATED', 'DEGRADING'].includes(slo.summary.status) ? 'danger' : 'success'}
           />
         </EuiFlexGroup>
       </EuiPanel>
-
       <HistoricalDataCharts
         slo={slo}
-        selectedTabId={selectedTabId}
-        isAutoRefreshing={isAutoRefreshing}
-        range={range}
+        isAutoRefreshing={false}
+        range={state.range}
         onBrushed={onBrushed}
+        hideHeaderDurationLabel={true}
       />
 
-      <EventsChartPanel
-        slo={slo}
-        range={range}
-        selectedTabId={selectedTabId}
-        onBrushed={onBrushed}
-      />
+      <EventsChartPanel slo={slo} range={state.range} dynamicTimeRange onBrushed={onBrushed} />
     </EuiFlexGroup>
   );
 }

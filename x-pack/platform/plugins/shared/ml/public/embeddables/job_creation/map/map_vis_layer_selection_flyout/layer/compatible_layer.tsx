@@ -50,7 +50,6 @@ export const CompatibleLayer: FC<Props> = ({ embeddable, layer, layerIndex }) =>
       data,
       share,
       uiSettings,
-      dashboardService,
       mlServices: { mlApi },
     },
   } = useMlFromLensKibanaContext();
@@ -61,7 +60,7 @@ export const CompatibleLayer: FC<Props> = ({ embeddable, layer, layerIndex }) =>
         data.dataViews,
         uiSettings,
         data.query.timefilter.timefilter,
-        dashboardService,
+        share,
         mlApi
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -150,7 +149,7 @@ export const CompatibleLayer: FC<Props> = ({ embeddable, layer, layerIndex }) =>
           <EuiFlexGroup gutterSize="s" data-test-subj="mlMapLayerCompatible">
             <EuiFlexItem grow={false}>
               <EuiText size="s">
-                <EuiIcon type="checkInCircleFilled" color="success" />
+                <EuiIcon aria-hidden={true} type="checkCircleFill" color="success" />
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>

@@ -25,12 +25,17 @@ jest.mock('@kbn/expandable-flyout', () => ({
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../../common/lib/kibana');
   return {
+    ...actual,
     useKibana: () => ({
+      ...actual.useKibana(),
       services: {
+        ...actual.useKibana().services,
         telemetry: mockedTelemetry,
       },
     }),
+    useUiSetting: jest.fn().mockReturnValue(false),
   };
 });
 
@@ -75,7 +80,7 @@ describe('TableFieldValueCell', () => {
               eventId={eventId}
               values={hostIpValues}
               ruleId="ruleId"
-              isPreview={false}
+              isRulePreview={false}
             />
           </DocumentDetailsContext.Provider>
         </TestProviders>
@@ -99,7 +104,7 @@ describe('TableFieldValueCell', () => {
               fieldFromBrowserField={undefined} // <-- no metadata
               values={hostIpValues}
               ruleId="ruleId"
-              isPreview={false}
+              isRulePreview={false}
             />
           </DocumentDetailsContext.Provider>
         </TestProviders>
@@ -147,7 +152,7 @@ describe('TableFieldValueCell', () => {
               fieldFromBrowserField={messageFieldFromBrowserField}
               values={messageValues}
               ruleId="ruleId"
-              isPreview={false}
+              isRulePreview={false}
             />
           </DocumentDetailsContext.Provider>
         </TestProviders>
@@ -185,7 +190,7 @@ describe('TableFieldValueCell', () => {
               fieldFromBrowserField={hostIpFieldFromBrowserField} // <-- metadata
               values={hostIpValues}
               ruleId="ruleId"
-              isPreview={false}
+              isRulePreview={false}
             />
           </DocumentDetailsContext.Provider>
         </TestProviders>

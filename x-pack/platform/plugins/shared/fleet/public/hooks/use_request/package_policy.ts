@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 
 import { packagePolicyRouteService } from '../../services';
 import type {
@@ -29,8 +29,20 @@ import { API_VERSIONS } from '../../../common/constants';
 import type { RequestError } from './use_request';
 import { sendRequest, sendRequestForRq, useRequest } from './use_request';
 
+/**
+ * @deprecated use sendCreatePackagePolicyForRq instead
+ */
 export const sendCreatePackagePolicy = (body: CreatePackagePolicyRequest['body']) => {
   return sendRequest<CreatePackagePolicyResponse>({
+    path: packagePolicyRouteService.getCreatePath(),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: JSON.stringify(body),
+  });
+};
+
+export const sendCreatePackagePolicyForRq = (body: CreatePackagePolicyRequest['body']) => {
+  return sendRequestForRq<CreatePackagePolicyResponse>({
     path: packagePolicyRouteService.getCreatePath(),
     method: 'post',
     version: API_VERSIONS.public.v1,
@@ -58,6 +70,26 @@ export const sendDeletePackagePolicy = (body: DeletePackagePoliciesRequest['body
     body: JSON.stringify(body),
   });
 };
+
+export function useDeletePackagePolicyMutation() {
+  const queryClient = useQueryClient();
+  return useMutation(
+    (body: DeletePackagePoliciesRequest['body']) => {
+      return sendRequestForRq<PostDeletePackagePoliciesResponse>({
+        path: packagePolicyRouteService.getDeletePath(),
+        method: 'post',
+        version: API_VERSIONS.public.v1,
+        body: JSON.stringify(body),
+      });
+    },
+    {
+      retry: false,
+      onSuccess: () => {
+        return queryClient.invalidateQueries({ queryKey: ['get-packages'] });
+      },
+    }
+  );
+}
 
 export function useGetPackagePoliciesQuery(
   query: GetPackagePoliciesRequest['query'],

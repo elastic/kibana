@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataStreamAdapter, GetDataStreamAdapterOpts } from './data_stream_adapter';
+import type { DataStreamAdapter, GetDataStreamAdapterOpts } from './data_stream_adapter';
 
 export function createDataStreamAdapterMock(opts?: GetDataStreamAdapterOpts): DataStreamAdapter {
   return {

@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { type AppMockRenderer, createAppMockRenderer } from '../../common/mock';
+import { screen } from '@testing-library/react';
 import { ObservableForm, type ObservableFormProps } from './observable_form';
+import { renderWithTestingProviders } from '../../common/mock';
 
 describe('ObservableForm', () => {
-  let appMock: AppMockRenderer;
   const props: ObservableFormProps = {
     isLoading: false,
     onSubmit: jest.fn(),
@@ -18,13 +18,12 @@ describe('ObservableForm', () => {
   };
 
   beforeEach(() => {
-    appMock = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('renders correctly', async () => {
-    const result = appMock.render(<ObservableForm {...props} />);
+    renderWithTestingProviders(<ObservableForm {...props} />);
 
-    expect(result.getByTestId('save-observable')).toBeInTheDocument();
+    expect(screen.getByTestId('save-observable')).toBeInTheDocument();
   });
 });

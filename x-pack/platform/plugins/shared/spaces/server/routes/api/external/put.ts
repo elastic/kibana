@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type { ExternalRouteDeps } from '.';
+import { putSpaceExamples } from './examples';
 import { API_VERSIONS, type Space } from '../../../../common';
 import { wrapError } from '../../../lib/errors';
 import { getSpaceSchema } from '../../../lib/space_schema';
@@ -22,19 +23,23 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
       path: '/api/spaces/space/{id}',
       access: 'public',
       summary: `Update a space`,
+      description: 'Update an existing Kibana space.',
       options: {
         tags: ['oas-tag:spaces'],
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route delegates authorization to the spaces service via a scoped spaces client',
+        },
       },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route delegates authorization to the spaces service via a scoped spaces client',
-          },
+        options: {
+          oasOperationObject: putSpaceExamples,
         },
         validate: {
           request: {
@@ -50,6 +55,7 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
           },
           response: {
             200: {
+              body: () => getSpaceSchema(isServerless),
               description: 'Indicates a successful call.',
             },
           },

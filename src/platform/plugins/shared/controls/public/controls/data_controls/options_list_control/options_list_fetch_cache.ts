@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import LRUCache from 'lru-cache';
+import { LRUCache } from 'lru-cache';
 import hash from 'object-hash';
 
 import dateMath from '@kbn/datemath';
@@ -37,7 +37,7 @@ export class OptionsListFetchCache {
   constructor() {
     this.cache = new LRUCache<string, OptionsListSuccessResponse>({
       max: REQUEST_CACHE_SIZE,
-      maxAge: REQUEST_CACHE_TTL,
+      ttl: REQUEST_CACHE_TTL,
     });
   }
 
@@ -83,8 +83,7 @@ export class OptionsListFetchCache {
     abortSignal: AbortSignal
   ): Promise<OptionsListResponse> {
     const requestHash = this.getRequestHash(request);
-
-    if (this.cache.has(requestHash)) {
+    if (!request.isReload && this.cache.has(requestHash)) {
       return Promise.resolve(this.cache.get(requestHash)!);
     } else {
       const index = request.dataView.getIndexPattern();
@@ -101,7 +100,7 @@ export class OptionsListFetchCache {
         filters: esFilters,
         fieldName: field.name,
         fieldSpec: field,
-        runtimeFieldMap: dataView.toSpec?.().runtimeFieldMap,
+        runtimeFieldMap: dataView.toSpec?.(false).runtimeFieldMap,
       };
 
       const result = await coreServices.http.fetch<OptionsListResponse>(
@@ -123,6 +122,6 @@ export class OptionsListFetchCache {
   }
 
   public clearCache = () => {
-    this.cache.reset();
+    this.cache.clear();
   };
 }

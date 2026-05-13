@@ -8,7 +8,8 @@
  */
 
 import { getFieldValue } from '@kbn/discover-utils';
-import { DocumentProfileProvider, DocumentType } from '../../../profiles';
+import type { DocumentProfileProvider } from '../../../profiles';
+import { DocumentType } from '../../../profiles';
 
 export const createExampleDocumentProfileProvider = (): DocumentProfileProvider => ({
   profileId: 'example-document-profile',

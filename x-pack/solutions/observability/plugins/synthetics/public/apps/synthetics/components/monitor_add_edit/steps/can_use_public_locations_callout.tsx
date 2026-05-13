@@ -17,6 +17,7 @@ export const CanUsePublicLocationsCallout = ({
     return (
       <>
         <EuiCallOut
+          announceOnMount
           color="warning"
           title={
             <FormattedMessage
@@ -24,7 +25,7 @@ export const CanUsePublicLocationsCallout = ({
               defaultMessage="You do not have permission to use Elastic managed locations"
             />
           }
-          iconType="alert"
+          iconType="warning"
         >
           <p>
             <FormattedMessage

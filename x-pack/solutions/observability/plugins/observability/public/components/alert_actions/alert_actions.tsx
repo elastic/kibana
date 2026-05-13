@@ -8,7 +8,6 @@
 import {
   EuiButtonIcon,
   EuiFlexItem,
-  EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiPopover,
   EuiToolTip,
@@ -16,86 +15,41 @@ import {
 
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { CaseAttachmentsWithoutOwner, CasesPublicStart } from '@kbn/cases-plugin/public';
-import { AttachmentType } from '@kbn/cases-plugin/common';
-import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
+import { getRulesAppDetailsRoute, rulesAppRoute } from '@kbn/rule-data-utils';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
-import { useAlertsTableContext } from '@kbn/response-ops-alerts-table/contexts/alerts_table_context';
-import type { EventNonEcsData } from '../../../common/typings';
-import { GetObservabilityAlertsTableProp } from '../alerts_table/types';
+import { useCaseAlertActionItems } from '@kbn/response-ops-alerts-table/hooks/use_case_alert_action_items';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
-import { paths, SLO_DETAIL_PATH } from '../../../common/locators/paths';
+import { SLO_DETAIL_PATH } from '../../../common/locators/paths';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
+import type { GetObservabilityAlertsTableProp, ObservabilityAlertsTableContext } from '../..';
 import { observabilityFeatureId } from '../..';
-import { ALERT_DETAILS_PAGE_ID } from '../../pages/alert_details/alert_details';
 
-// eslint-disable-next-line react/function-component-definition
-export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> = ({
-  config,
-  observabilityRuleTypeRegistry,
-  alert,
-  id,
-  tableId,
-  dataGridRef,
-  refresh,
-  isLoading,
-  isLoadingAlerts,
-  alerts,
-  oldAlertsData,
-  ecsAlertsData,
-  alertsCount,
-  browserFields,
-  isLoadingMutedAlerts,
-  mutedAlerts,
-  isLoadingCases,
-  cases,
-  isLoadingMaintenanceWindows,
-  maintenanceWindows,
-  pageIndex,
-  pageSize,
-  openAlertInFlyout,
-  showAlertStatusWithFlapping,
-  bulkActionsStore,
-  columns,
-  renderCellValue,
-  renderCellPopover,
-  renderActionsCell,
-  renderFlyoutHeader,
-  renderFlyoutBody,
-  renderFlyoutFooter,
-}) => {
-  const { services } = useAlertsTableContext();
+export function AlertActions(
+  props: React.ComponentProps<GetObservabilityAlertsTableProp<'renderActionsCell'>>
+) {
+  const {
+    observabilityRuleTypeRegistry,
+    alert,
+    tableId,
+    refresh,
+    parentAlert,
+    rowIndex,
+    onExpandedAlertIndexChange,
+    services,
+  } = props;
   const {
     http: {
       basePath: { prepend },
     },
+    cases,
   } = services;
-  const {
-    helpers: { getRuleIdFromEvent, canUseCases },
-    hooks: { useCasesAddToNewCaseFlyout, useCasesAddToExistingCaseModal },
-  } = services.cases! as unknown as CasesPublicStart; // Cases is guaranteed to be defined in Observability
   const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
 
-  const isInApp = Boolean(id === SLO_ALERTS_TABLE_ID && isSLODetailsPage);
-  const data = useMemo(
-    () =>
-      Object.entries(alert ?? {}).reduce<EventNonEcsData[]>(
-        (acc, [field, value]) => [...acc, { field, value: value as string[] }],
-        []
-      ),
-    [alert]
-  );
+  const isInApp = Boolean(tableId === SLO_ALERTS_TABLE_ID && isSLODetailsPage);
 
-  const ecsData = useMemo<Ecs>(
-    () => ({
-      _id: alert._id,
-      _index: alert._index,
-    }),
-    [alert._id, alert._index]
-  );
-  const userCasesPermissions = canUseCases([observabilityFeatureId]);
+  const userCasesPermissions = cases?.helpers.canUseCases([observabilityFeatureId]);
   const [viewInAppUrl, setViewInAppUrl] = useState<string>();
 
   const parseObservabilityAlert = useMemo(
@@ -104,6 +58,22 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
   );
 
   const observabilityAlert = parseObservabilityAlert(alert);
+
+  const closeActionsPopover = useCallback(() => {
+    setIsPopoverOpen(false);
+  }, []);
+
+  const toggleActionsPopover = useCallback(() => {
+    setIsPopoverOpen((open) => !open);
+  }, []);
+
+  const caseAlertActionItems = useCaseAlertActionItems({
+    alert,
+    cases,
+    refresh,
+    onActionExecuted: closeActionsPopover,
+    owner: [observabilityFeatureId],
+  });
 
   useEffect(() => {
     const alertLink = observabilityAlert.link;
@@ -124,154 +94,28 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
     }
   }, [observabilityAlert.link, observabilityAlert.hasBasePath, prepend]);
 
-  const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
-
-  const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(() => {
-    return ecsData?._id
-      ? [
-          {
-            alertId: ecsData?._id ?? '',
-            index: ecsData?._index ?? '',
-            type: AttachmentType.alert,
-            rule: getRuleIdFromEvent({ ecs: ecsData, data: data ?? [] }),
-          },
-        ]
-      : [];
-  }, [ecsData, getRuleIdFromEvent, data]);
-
-  const onSuccess = useCallback(() => {
-    refresh();
-  }, [refresh]);
-
-  const createCaseFlyout = useCasesAddToNewCaseFlyout({ onSuccess });
-  const selectCaseModal = useCasesAddToExistingCaseModal({ onSuccess });
-
-  const closeActionsPopover = () => {
-    setIsPopoverOpen(false);
-  };
-
-  const toggleActionsPopover = () => {
-    setIsPopoverOpen(!isPopoverOpen);
-  };
-
-  const handleAddToNewCaseClick = () => {
-    createCaseFlyout.open({ attachments: caseAttachments });
-    closeActionsPopover();
-  };
-
-  const handleAddToExistingCaseClick = () => {
-    selectCaseModal.open({ getAttachments: () => caseAttachments });
-    closeActionsPopover();
-  };
-
-  const defaultRowActions = useMemo(
-    () => (
-      <DefaultAlertActions
-        key="defaultRowActions"
-        onActionExecuted={closeActionsPopover}
-        isAlertDetailsEnabled={true}
-        resolveRulePagePath={(ruleId, currentPageId) =>
-          currentPageId !== RULE_DETAILS_PAGE_ID ? paths.observability.ruleDetails(ruleId) : null
-        }
-        resolveAlertPagePath={(alertId, currentPageId) =>
-          currentPageId !== ALERT_DETAILS_PAGE_ID ? paths.observability.alertDetails(alertId) : null
-        }
-        tableId={tableId}
-        dataGridRef={dataGridRef}
-        refresh={refresh}
-        isLoading={isLoading}
-        isLoadingAlerts={isLoadingAlerts}
-        alert={alert}
-        alerts={alerts}
-        oldAlertsData={oldAlertsData}
-        ecsAlertsData={ecsAlertsData}
-        alertsCount={alertsCount}
-        browserFields={browserFields}
-        isLoadingMutedAlerts={isLoadingMutedAlerts}
-        mutedAlerts={mutedAlerts}
-        isLoadingCases={isLoadingCases}
-        cases={cases}
-        isLoadingMaintenanceWindows={isLoadingMaintenanceWindows}
-        maintenanceWindows={maintenanceWindows}
-        pageIndex={pageIndex}
-        pageSize={pageSize}
-        openAlertInFlyout={openAlertInFlyout}
-        showAlertStatusWithFlapping={showAlertStatusWithFlapping}
-        bulkActionsStore={bulkActionsStore}
-        columns={columns}
-        renderCellValue={renderCellValue}
-        renderCellPopover={renderCellPopover}
-        renderActionsCell={renderActionsCell}
-        renderFlyoutHeader={renderFlyoutHeader}
-        renderFlyoutBody={renderFlyoutBody}
-        renderFlyoutFooter={renderFlyoutFooter}
-        services={services}
-        config={config}
-        observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
-      />
-    ),
-    [
-      alert,
-      alerts,
-      alertsCount,
-      browserFields,
-      bulkActionsStore,
-      cases,
-      columns,
-      config,
-      dataGridRef,
-      ecsAlertsData,
-      isLoading,
-      isLoadingAlerts,
-      isLoadingCases,
-      isLoadingMaintenanceWindows,
-      isLoadingMutedAlerts,
-      maintenanceWindows,
-      mutedAlerts,
-      observabilityRuleTypeRegistry,
-      oldAlertsData,
-      openAlertInFlyout,
-      pageIndex,
-      pageSize,
-      refresh,
-      renderActionsCell,
-      renderCellPopover,
-      renderCellValue,
-      renderFlyoutBody,
-      renderFlyoutFooter,
-      renderFlyoutHeader,
-      services,
-      showAlertStatusWithFlapping,
-      tableId,
-    ]
-  );
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const actionsMenuItems = [
-    ...(userCasesPermissions.createComment && userCasesPermissions.read
-      ? [
-          <EuiContextMenuItem
-            data-test-subj="add-to-existing-case-action"
-            key="addToExistingCase"
-            onClick={handleAddToExistingCaseClick}
-            size="s"
-          >
-            {i18n.translate('xpack.observability.alerts.actions.addToCase', {
-              defaultMessage: 'Add to existing case',
-            })}
-          </EuiContextMenuItem>,
-          <EuiContextMenuItem
-            data-test-subj="add-to-new-case-action"
-            key="addToNewCase"
-            onClick={handleAddToNewCaseClick}
-            size="s"
-          >
-            {i18n.translate('xpack.observability.alerts.actions.addToNewCase', {
-              defaultMessage: 'Add to new case',
-            })}
-          </EuiContextMenuItem>,
-        ]
+    ...(userCasesPermissions?.createComment && userCasesPermissions?.read
+      ? caseAlertActionItems
       : []),
-    defaultRowActions,
+
+    useMemo(
+      () => (
+        <DefaultAlertActions<ObservabilityAlertsTableContext>
+          {...props}
+          key="defaultRowActions"
+          onActionExecuted={closeActionsPopover}
+          resolveRulePagePath={(ruleId, currentPageId) =>
+            currentPageId !== RULE_DETAILS_PAGE_ID
+              ? `${rulesAppRoute}${getRulesAppDetailsRoute(ruleId)}`
+              : null
+          }
+        />
+      ),
+      [closeActionsPopover, props]
+    ),
   ];
 
   const actionsToolTip =
@@ -283,14 +127,39 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
           defaultMessage: 'More actions',
         });
 
+  const onExpandEvent = () => {
+    onExpandedAlertIndexChange(rowIndex);
+  };
+
+  const hideViewInApp = isInApp || viewInAppUrl === '' || parentAlert;
+
   return (
     <>
-      {viewInAppUrl !== '' && !isInApp ? (
+      {!parentAlert && (
+        <EuiFlexItem>
+          <EuiToolTip
+            data-test-subj="expand-event-tool-tip"
+            content={VIEW_DETAILS}
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj="expand-event"
+              iconType="maximize"
+              onClick={onExpandEvent}
+              size="s"
+              color="text"
+              aria-label={VIEW_DETAILS}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
+      {!hideViewInApp && (
         <EuiFlexItem>
           <EuiToolTip
             content={i18n.translate('xpack.observability.alertsTable.viewInAppTextLabel', {
               defaultMessage: 'View in app',
             })}
+            disableScreenReaderOutput
           >
             <EuiButtonIcon
               data-test-subj="o11yAlertActionsButton"
@@ -305,23 +174,24 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
             />
           </EuiToolTip>
         </EuiFlexItem>
-      ) : null}
+      )}
 
       <EuiFlexItem
         css={{
           textAlign: 'center',
         }}
+        grow={parentAlert ? false : undefined}
       >
         <EuiPopover
           anchorPosition="downLeft"
           button={
-            <EuiToolTip content={actionsToolTip}>
+            <EuiToolTip content={actionsToolTip} disableScreenReaderOutput>
               <EuiButtonIcon
                 aria-label={actionsToolTip}
                 color="text"
                 data-test-subj="alertsTableRowActionMore"
                 display="empty"
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 onClick={toggleActionsPopover}
                 size="s"
               />
@@ -340,10 +210,14 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
       </EuiFlexItem>
     </>
   );
-};
+}
 
 // Default export used for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default AlertActions;
+
+const VIEW_DETAILS = i18n.translate('xpack.observability.alertsTable.viewDetailsTextLabel', {
+  defaultMessage: 'Alert details',
+});
 
 export type AlertActions = typeof AlertActions;

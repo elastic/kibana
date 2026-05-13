@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { buildEsQuery, fromKueryExpression } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { isEmpty } from 'lodash';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import {
+import type {
   CustomMetricExpressionParams,
   CustomThresholdSearchSourceFields,
 } from '../../../../common/custom_threshold_rule/types';
@@ -130,7 +130,10 @@ export function validateCustomThreshold({
       });
     }
 
-    if (comparator === COMPARATORS.BETWEEN && (!threshold || threshold.length < 2)) {
+    if (
+      (comparator === COMPARATORS.BETWEEN || comparator === COMPARATORS.BETWEEN_INCLUSIVE) &&
+      (!threshold || threshold.length < 2)
+    ) {
       errors[id].critical.threshold1.push(
         i18n.translate(
           'xpack.observability.customThreshold.rule.alertFlyout.error.thresholdRequired',

@@ -6,24 +6,20 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
-import { EuiButton, EuiButtonEmpty, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiShowFor, EuiToolTip, type EuiToolTipRef } from '@elastic/eui';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
-import {
-  AIAssistantAppService,
-  useAIAssistantAppService,
-  ChatFlyout,
-  FlyoutPositionMode,
-} from '@kbn/ai-assistant';
-import { AssistantIcon } from '@kbn/ai-assistant-icon';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { AIAssistantAppService } from '@kbn/ai-assistant';
+import { useAIAssistantAppService, ChatFlyout, FlyoutPositionMode } from '@kbn/ai-assistant';
+import { isMac } from '@kbn/shared-ux-utility';
+import { AiButton } from '@kbn/shared-ux-ai-components';
+import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
-import { useTheme } from '../../hooks/use_theme';
 import { useNavControlScreenContext } from '../../hooks/use_nav_control_screen_context';
 import { SharedProviders } from '../../utils/shared_providers';
-import { ObservabilityAIAssistantAppPluginStartDependencies } from '../../types';
+import type { ObservabilityAIAssistantAppPluginStartDependencies } from '../../types';
 import { useNavControlScope } from '../../hooks/use_nav_control_scope';
 import { useLocalStorage } from '../../hooks/use_local_storage';
 
@@ -63,6 +59,7 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
       plugins: {
         start: {
           observabilityAIAssistant: { ObservabilityAIAssistantChatServiceContext },
+          aiAssistantManagementSelection,
         },
       },
     },
@@ -79,7 +76,11 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
     }
   );
 
-  const [isOpen, setIsOpen] = useState(flyoutSettings.isOpen);
+  // only open on mount when in docked mode
+  const [isOpen, setIsOpen] = useState(() =>
+    flyoutSettings.mode === FlyoutPositionMode.PUSH ? flyoutSettings.isOpen : false
+  );
+
   const [hasBeenOpened, setHasBeenOpened] = useState(isOpen);
   const keyRef = useRef(v4());
 
@@ -119,6 +120,19 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
     };
   }, [service.conversations.predefinedConversation$, setFlyoutSettings]);
 
+  useEffect(() => {
+    const openChatSubscription = aiAssistantManagementSelection.openChat$.subscribe((selection) => {
+      if (selection === AIAssistantType.Observability) {
+        service.conversations.openNewConversation({ messages: [] });
+        aiAssistantManagementSelection.completeOpenChat();
+      }
+    });
+
+    return () => {
+      openChatSubscription.unsubscribe();
+    };
+  }, [aiAssistantManagementSelection, service.conversations]);
+
   const { messages, title, hideConversationList } = useObservable(
     service.conversations.predefinedConversation$
   ) ?? {
@@ -126,72 +140,122 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
     title: undefined,
     hideConversationList: false,
   };
-
-  const theme = useTheme();
-
-  const buttonCss = css`
-    padding: 0px 8px;
-
-    svg path {
-      fill: ${theme.colors.darkestShade};
-    }
-  `;
-
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const tooltipRef = useRef<EuiToolTipRef>(null);
+  const [tooltipVisible, setTooltipVisible] = useState(true);
   useEffect(() => {
     const keyboardListener = (event: KeyboardEvent) => {
-      if (event.ctrlKey && event.code === 'Semicolon') {
+      const hasModifier = isMac ? event.metaKey : event.ctrlKey;
+      if (hasModifier && (event.code === 'Semicolon' || event.key === ';')) {
+        event.preventDefault();
         service.conversations.openNewConversation({
           messages: [],
         });
       }
+      if (event.key === 'Escape' && isOpen) {
+        setTooltipVisible(true);
+        buttonRef.current?.focus();
+      }
     };
 
-    window.addEventListener('keypress', keyboardListener);
+    window.addEventListener('keydown', keyboardListener);
 
     return () => {
-      window.removeEventListener('keypress', keyboardListener);
+      window.removeEventListener('keydown', keyboardListener);
     };
-  }, [service.conversations]);
+  }, [service.conversations, isOpen, setFlyoutSettings, setIsOpen, setTooltipVisible]);
 
+  const buttonLabel = i18n.translate('xpack.observabilityAiAssistant.navControl.assistantNavLink', {
+    defaultMessage: 'AI Assistant',
+  });
+
+  const openAIAssistantLabel = i18n.translate(
+    'xpack.observabilityAiAssistant.navControl.openAIAssistantLabel',
+    { defaultMessage: 'Open the AI Assistant' }
+  );
+
+  const shortcutLabel = i18n.translate(
+    'xpack.observabilityAiAssistant.navControl.openTheAIAssistantKeyboardShortcutLabel',
+    {
+      values: { keyboardShortcut: isMac ? '⌘ ;' : 'Ctrl ;' },
+      defaultMessage: 'Keyboard shortcut {keyboardShortcut}',
+    }
+  );
+
+  const fullTooltipContent = (
+    <div style={{ textAlign: 'center' }}>
+      <span>{openAIAssistantLabel}</span>
+      <br />
+      <span>{shortcutLabel}</span>
+    </div>
+  );
+
+  const handleClick = () => {
+    tooltipRef.current?.hideToolTip();
+    setTooltipVisible(false);
+    if (isOpen) {
+      setFlyoutSettings((prev) => ({ ...prev, isOpen: false }));
+      setIsOpen(false);
+    } else {
+      service.conversations.openNewConversation({
+        messages: [],
+      });
+    }
+  };
+  const variant = isOpen ? 'accent' : 'base';
+  const showTooltip = !isOpen && tooltipVisible;
+  const textButton = (
+    <AiButton
+      buttonRef={buttonRef}
+      variant={variant}
+      size="s"
+      iconType="aiAssistantLogo"
+      data-test-subj="observabilityAiAssistantAppNavControlButton"
+      isLoading={chatService.loading}
+      onClick={handleClick}
+      onMouseLeave={() => setTooltipVisible(true)}
+      onBlur={() => setTooltipVisible(true)}
+    >
+      {buttonLabel}
+    </AiButton>
+  );
+
+  const iconButton = (
+    <AiButton
+      buttonRef={buttonRef}
+      iconOnly
+      variant={variant}
+      size="s"
+      iconType="aiAssistantLogo"
+      aria-label={openAIAssistantLabel}
+      data-test-subj="observabilityAiAssistantAppNavControlButtonIcon"
+      isLoading={chatService.loading}
+      onClick={handleClick}
+      onMouseLeave={() => setTooltipVisible(true)}
+      onBlur={() => setTooltipVisible(true)}
+    />
+  );
   return (
     <>
-      <EuiToolTip content={buttonLabel}>
-        {isServerless ? (
-          <EuiButtonEmpty
-            aria-label={buttonLabel}
-            data-test-subj="observabilityAiAssistantAppNavControlButton"
-            css={css`
-              padding: 0px 8px;
-            `}
-            onClick={() => {
-              service.conversations.openNewConversation({
-                messages: [],
-              });
-            }}
-            color="primary"
-            size="s"
-          >
-            {chatService.loading ? <EuiLoadingSpinner size="s" /> : <AssistantIcon size="m" />}
-          </EuiButtonEmpty>
+      <EuiShowFor sizes={['m', 'l', 'xl']}>
+        {showTooltip ? (
+          <EuiToolTip content={shortcutLabel} ref={tooltipRef}>
+            {textButton}
+          </EuiToolTip>
         ) : (
-          <EuiButton
-            aria-label={buttonLabel}
-            data-test-subj="observabilityAiAssistantAppNavControlButton"
-            css={buttonCss}
-            onClick={() => {
-              service.conversations.openNewConversation({
-                messages: [],
-              });
-            }}
-            color="primary"
-            size="s"
-            fullWidth={false}
-            minWidth={0}
-          >
-            {chatService.loading ? <EuiLoadingSpinner size="s" /> : <AssistantIcon size="m" />}
-          </EuiButton>
+          textButton
         )}
-      </EuiToolTip>
+      </EuiShowFor>
+
+      <EuiShowFor sizes={['xs', 's']}>
+        {showTooltip ? (
+          <EuiToolTip content={fullTooltipContent} ref={tooltipRef}>
+            {iconButton}
+          </EuiToolTip>
+        ) : (
+          iconButton
+        )}
+      </EuiShowFor>
       {chatService.value ? (
         <ObservabilityAIAssistantChatServiceContext.Provider value={chatService.value}>
           <ChatFlyout
@@ -203,6 +267,10 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
             onClose={() => {
               setFlyoutSettings((prev) => ({ ...prev, isOpen: false }));
               setIsOpen(false);
+              setTooltipVisible(true);
+              if (document.activeElement?.matches(':focus-visible')) {
+                buttonRef.current?.focus();
+              }
             }}
             onFlyoutPositionModeChange={(next) => {
               setFlyoutSettings((prev) => ({ ...prev, mode: next }));
@@ -221,8 +289,3 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
     </>
   );
 }
-
-const buttonLabel = i18n.translate(
-  'xpack.observabilityAiAssistant.navControl.openTheAIAssistantPopoverLabel',
-  { defaultMessage: 'Open the AI Assistant' }
-);

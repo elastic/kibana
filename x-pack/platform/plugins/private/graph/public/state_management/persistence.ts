@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import actionCreatorFactory, { Action } from 'typescript-fsa';
+import type { Action } from 'typescript-fsa';
+import actionCreatorFactory from 'typescript-fsa';
 import { i18n } from '@kbn/i18n';
 import { takeLatest, call, put, select, cps } from 'redux-saga/effects';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
-import { GraphWorkspaceSavedObject, Workspace } from '../types';
-import { GraphStoreDependencies, GraphState, submitSearch } from '.';
+import type { GraphWorkspaceSavedObject, Workspace } from '../types';
+import type { GraphStoreDependencies, GraphState } from '.';
+import { submitSearch } from '.';
 import { datasourceSelector } from './datasource';
-import { setDatasource, IndexpatternDatasource } from './datasource';
+import type { IndexpatternDatasource } from './datasource';
+import { setDatasource } from './datasource';
 import { loadFields, selectedFieldsSelector } from './fields';
 import { updateSettings, settingsSelector } from './advanced_settings';
 import { loadTemplates, templatesSelector } from './url_templates';
@@ -23,7 +26,8 @@ import {
   lookupIndexPatternId,
 } from '../services/persistence';
 import { updateMetaData, metaDataSelector } from './meta_data';
-import { openSaveModal, SaveWorkspaceHandler } from '../services/save_modal';
+import type { SaveWorkspaceHandler } from '../services/save_modal';
+import { openSaveModal } from '../services/save_modal';
 import { getEditPath } from '../services/url';
 import { saveSavedWorkspace } from '../helpers/saved_workspace_utils';
 

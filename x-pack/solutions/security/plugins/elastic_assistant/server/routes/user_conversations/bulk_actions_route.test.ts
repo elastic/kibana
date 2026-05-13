@@ -47,7 +47,7 @@ describe('Perform bulk action route', () => {
       docs_deleted: [],
       errors: [],
     });
-    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser1);
+    context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
     bulkActionConversationsRoute(server.router, logger);
   });
 
@@ -175,7 +175,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'delete.ids: Array must contain at least 1 element(s)'
+        'delete.ids: Too small: expected array to have >=1 items'
       );
     });
 

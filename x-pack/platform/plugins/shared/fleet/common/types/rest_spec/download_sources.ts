@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DownloadSourceBase, DownloadSource } from '../models';
+import type { DownloadSourceBase, DownloadSource, DownloadSourceSecrets } from '../models';
 
 import type { ListResult } from './common';
 
@@ -31,6 +31,18 @@ export interface PutDownloadSourceRequest {
     name: string;
     host: string;
     is_default?: boolean;
+    ssl?: {
+      certificate_authorities?: string[];
+      certificate?: string;
+      key?: string;
+    };
+    auth?: {
+      username?: string;
+      password?: string;
+      api_key?: string;
+      headers?: Array<{ key: string; value: string }>;
+    } | null;
+    secrets?: DownloadSourceSecrets;
   };
 }
 
@@ -41,6 +53,18 @@ export interface PostDownloadSourceRequest {
     host: string;
     is_default?: boolean;
     proxy_id?: string | null;
+    ssl?: {
+      certificate_authorities?: string[];
+      certificate?: string;
+      key?: string;
+    };
+    auth?: {
+      username?: string;
+      password?: string;
+      api_key?: string;
+      headers?: Array<{ key: string; value: string }>;
+    } | null;
+    secrets?: DownloadSourceSecrets;
   };
 }
 

@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
-import { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
+import type { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
 import { getDocsCount, getSizeInBytes } from '../../../../../utils/stats';
 import { getIlmPhase } from '../../../../../utils/get_ilm_phase';
 import { ErrorEmptyPrompt } from '../../error_empty_prompt';
@@ -32,9 +32,11 @@ export interface Props {
   indexName: string;
   patternRollup: PatternRollup | undefined;
   stats: Record<string, MeteringStatsIndex> | null;
+  checkedAt?: number;
 }
 
 const LatestResultsComponent: React.FC<Props> = ({
+  checkedAt,
   indexName,
   patternRollup,
   stats,
@@ -80,6 +82,7 @@ const LatestResultsComponent: React.FC<Props> = ({
       <IndexStatsPanel docsCount={docsCount} sizeInBytes={sizeInBytes ?? 0} ilmPhase={ilmPhase} />
       <EuiSpacer />
       <LatestCheckFields
+        checkedAt={checkedAt}
         docsCount={docsCount}
         ilmPhase={ilmPhase}
         indexName={indexName}

@@ -14,7 +14,7 @@ import {
   readCasesPermissions,
   writeCasesPermissions,
 } from '../../../cases_test_utils';
-import { AttachmentType } from '@kbn/cases-plugin/common';
+import { LENS_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 
 jest.mock('../../lib/kibana');
 
@@ -131,13 +131,14 @@ describe('useAddToExistingCase', () => {
 
     expect(attachments).toEqual([
       {
-        persistableStateAttachmentState: {
-          attributes: kpiHostMetricLensAttributes,
-          timeRange,
-          metadata: lensMetadata,
+        type: LENS_ATTACHMENT_TYPE,
+        data: {
+          state: {
+            attributes: kpiHostMetricLensAttributes,
+            timeRange,
+            metadata: lensMetadata,
+          },
         },
-        persistableStateAttachmentTypeId: '.lens',
-        type: AttachmentType.persistableState as const,
       },
     ]);
     expect(mockClick).toHaveBeenCalled();

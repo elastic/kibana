@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { Type } from '@kbn/config-schema';
+import type * as z4 from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
-import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-types';
 
 import type { Method, AxiosRequestConfig } from 'axios';
-import { KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SSLSettings } from '@kbn/actions-utils';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type {
   ActionTypeParams,
@@ -18,10 +19,10 @@ import type {
   Services,
   ValidatorType as ValidationSchema,
 } from '../types';
-import { SubFeature } from '../../common';
+import type { SubFeature } from '../../common';
 import type { SubActionConnector } from './sub_action_connector';
 import type { HookServices } from '../types';
-import { ActionExecutionSourceType } from '../lib';
+import type { ActionExecutionSourceType } from '../lib';
 
 export interface ServiceParams<Config, Secrets> {
   /**
@@ -39,8 +40,9 @@ export interface ServiceParams<Config, Secrets> {
 
 export type SubActionRequestParams<R> = {
   url: string;
-  responseSchema: Type<R>;
+  responseSchema: z4.ZodType<R>;
   method?: Method;
+  sslOverrides?: SSLSettings;
 } & AxiosRequestConfig;
 
 export type IService<Config, Secrets> = new (
@@ -53,7 +55,7 @@ export type IServiceAbstract<Config, Secrets> = abstract new (
 
 export type ICaseServiceAbstract<Config, Secrets, Incident, GetIncidentResponse> = abstract new (
   params: ServiceParams<Config, Secrets>,
-  pushToServiceIncidentParamsSchema: Record<string, Type<unknown>>
+  pushToServiceIncidentParamsSchema: Record<string, z4.ZodType<unknown>>
 ) => SubActionConnector<Config, Secrets>;
 
 export enum ValidatorType {
@@ -114,13 +116,14 @@ export interface SubActionConnectorType<Config, Secrets> {
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
   schema: {
-    config: Type<Config>;
-    secrets: Type<Secrets>;
+    config: z4.ZodType<Config>;
+    secrets: z4.ZodType<Secrets | undefined>;
   };
   validators?: Array<ConfigValidator<Config> | SecretsValidator<Secrets>>;
   getService: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;
   renderParameterTemplates?: RenderParameterTemplates<ExecutorParams>;
   isSystemActionType?: boolean;
+  isDeprecated?: boolean;
   subFeature?: SubFeature;
   getKibanaPrivileges?: (args?: {
     params?: { subAction: string; subActionParams: Record<string, unknown> };
@@ -143,7 +146,7 @@ export type ExtractFunctionKeys<T> = {
 export interface SubAction {
   name: string;
   method: string;
-  schema: Type<unknown> | null;
+  schema: z4.ZodType<unknown> | null;
 }
 
 export interface PushToServiceParams {

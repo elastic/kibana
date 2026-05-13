@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
-import { APMTransactionErrorRateIndicator } from '@kbn/slo-schema';
+import type { APMTransactionErrorRateIndicator } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
@@ -14,8 +14,8 @@ import { useApmDefaultValues } from '../apm_common/use_apm_default_values';
 import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
 import { useCreateDataView } from '../../../../../hooks/use_create_data_view';
 import { GroupByField } from '../../common/group_by_field';
-import { useFetchApmIndex } from '../../../../../hooks/use_fetch_apm_indices';
-import { CreateSLOForm } from '../../../types';
+import { useFetchApmIndices } from '../../../../../hooks/use_fetch_apm_indices';
+import type { CreateSLOForm } from '../../../types';
 import { FieldSelector } from '../apm_common/field_selector';
 import { DataPreviewChart } from '../../common/data_preview_chart';
 import { QueryBuilder } from '../../common/query_builder';
@@ -24,7 +24,9 @@ import { getGroupByCardinalityFilters } from '../apm_common/get_group_by_cardina
 
 export function ApmAvailabilityIndicatorTypeForm() {
   const { watch } = useFormContext<CreateSLOForm<APMTransactionErrorRateIndicator>>();
-  const { data: apmIndex } = useFetchApmIndex();
+  const {
+    data: { metric: apmIndex },
+  } = useFetchApmIndices();
   const dataViewId = watch(DATA_VIEW_FIELD);
 
   const [
@@ -59,7 +61,6 @@ export function ApmAvailabilityIndicatorTypeForm() {
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexGroup direction="row" gutterSize="m">
         <FieldSelector
-          allowAllOption={false}
           label={i18n.translate('xpack.slo.sloEdit.apmAvailability.serviceName', {
             defaultMessage: 'Service name',
           })}

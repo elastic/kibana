@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiScreenReaderOnly } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SolutionPanel } from './solution_panel';
-import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../..';
+import type { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../..';
 
 const sortByOrder = (
   { order: orderA = 0 }: FeatureCatalogueSolution | FeatureCatalogueEntry,
@@ -32,12 +33,10 @@ export const SolutionsSection: FC<Props> = ({ addBasePath, solutions }) => {
       <KibanaPageTemplate.Section
         bottomBorder
         paddingSize="xl"
-        aria-labelledby="homSolutions__title"
-        className="homSolutions"
-        contentProps={{ className: 'homSolutions__content' }}
+        aria-labelledby="homeSolutions__title"
       >
         <EuiScreenReaderOnly>
-          <h2 id="homSolutions__title">
+          <h2 id="homeSolutions__title">
             <FormattedMessage
               id="home.solutionsSection.sectionTitle"
               defaultMessage="Pick your solution"
@@ -45,7 +44,7 @@ export const SolutionsSection: FC<Props> = ({ addBasePath, solutions }) => {
           </h2>
         </EuiScreenReaderOnly>
 
-        <EuiFlexGroup className="homSolutions__content">
+        <EuiFlexGroup>
           {solutions.map((solution) => (
             <SolutionPanel addBasePath={addBasePath} key={solution.id} solution={solution} />
           ))}

@@ -27,8 +27,11 @@ interface UseRulePreviewFlyoutBaseParams {
   flyoutProps: RulePreviewFlyoutProps;
 }
 
+export type RulePreviewFlyoutCloseReason = 'dismiss' | 'call_to_action';
+
 interface UseRulePreviewFlyoutParams extends UseRulePreviewFlyoutBaseParams {
   rules: RuleResponse[];
+  closeRulePreviewAction?: (rule: RuleResponse, reason: RulePreviewFlyoutCloseReason) => void;
 }
 
 interface RulePreviewFlyoutProps {
@@ -42,7 +45,7 @@ interface RulePreviewFlyoutProps {
 interface UseRulePreviewFlyoutResult {
   rulePreviewFlyout: ReactNode;
   openRulePreview: (ruleId: RuleSignatureId) => void;
-  closeRulePreview: () => void;
+  closeRulePreview: (reason: RulePreviewFlyoutCloseReason) => void;
 }
 
 export function useRulePreviewFlyout({
@@ -51,9 +54,18 @@ export function useRulePreviewFlyout({
   ruleActionsFactory,
   subHeaderFactory,
   flyoutProps,
+  closeRulePreviewAction,
 }: UseRulePreviewFlyoutParams): UseRulePreviewFlyoutResult {
   const [rule, setRuleForPreview] = useState<RuleResponse | undefined>();
-  const closeRulePreview = useCallback(() => setRuleForPreview(undefined), []);
+  const closeRulePreview = useCallback(
+    (reason: RulePreviewFlyoutCloseReason) => {
+      if (closeRulePreviewAction && rule) {
+        closeRulePreviewAction(rule, reason);
+      }
+      setRuleForPreview(undefined);
+    },
+    [closeRulePreviewAction, rule]
+  );
   const openRulePreview = useCallback(
     (ruleId: RuleSignatureId) => {
       const ruleToShowInFlyout = rules.find((x) => x.rule_id === ruleId);
@@ -92,12 +104,12 @@ const RulePreviewFlyoutInternal = memo(function RulePreviewFlyoutInternal({
   flyoutProps,
 }: UseRulePreviewFlyoutBaseParams & {
   rule: RuleResponse | undefined;
-  closeRulePreview: () => void;
+  closeRulePreview: (reason: RulePreviewFlyoutCloseReason) => void;
 }) {
   const { isEditingRule } = useRulePreviewContext();
 
   const ruleActions = useMemo(
-    () => rule && ruleActionsFactory(rule, closeRulePreview, isEditingRule),
+    () => rule && ruleActionsFactory(rule, () => closeRulePreview('call_to_action'), isEditingRule),
     [rule, ruleActionsFactory, closeRulePreview, isEditingRule]
   );
   const extraTabs = useMemo(
@@ -120,7 +132,7 @@ const RulePreviewFlyoutInternal = memo(function RulePreviewFlyoutInternal({
       size="l"
       id={flyoutProps.id}
       dataTestSubj={flyoutProps.dataTestSubj}
-      closeFlyout={closeRulePreview}
+      closeFlyout={() => closeRulePreview('dismiss')}
       ruleActions={ruleActions}
       extraTabs={extraTabs}
       subHeader={subHeader}

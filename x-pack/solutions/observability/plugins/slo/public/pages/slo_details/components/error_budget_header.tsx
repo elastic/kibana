@@ -5,30 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { rollingTimeWindowTypeSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { SloTabId } from './slo_details';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { rollingTimeWindowTypeSchema } from '@kbn/slo-schema';
+import React from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { toDurationAdverbLabel, toDurationLabel } from '../../../utils/slo/labels';
 
-import { ErrorBudgetActions } from './error_budget_actions';
-
 interface Props {
   slo: SLOWithSummaryResponse;
-  showTitle?: boolean;
-  isMouseOver?: boolean;
+  hideTitle?: boolean;
+  hideHeaderDurationLabel?: boolean;
   setDashboardAttachmentReady?: (value: boolean) => void;
-  selectedTabId?: SloTabId;
 }
 
 export function ErrorBudgetHeader({
   slo,
-  showTitle = true,
-  isMouseOver,
+  hideTitle = false,
+  hideHeaderDurationLabel = false,
   setDashboardAttachmentReady,
-  selectedTabId,
 }: Props) {
   const { executionContext } = useKibana().services;
   const executionContextName = executionContext.get().name;
@@ -38,7 +34,7 @@ export function ErrorBudgetHeader({
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
         <EuiFlexGroup>
-          {showTitle && (
+          {!hideTitle && (
             <EuiFlexItem>
               <EuiTitle size="xs" data-test-subj="errorBudgetPanelTitle">
                 <h2>
@@ -49,18 +45,21 @@ export function ErrorBudgetHeader({
               </EuiTitle>
             </EuiFlexItem>
           )}
-          {!isDashboardContext && (
-            <EuiFlexGroup justifyContent="flexEnd" wrap>
-              {isMouseOver && (
-                <EuiFlexItem grow={false}>
-                  <ErrorBudgetActions setDashboardAttachmentReady={setDashboardAttachmentReady} />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+          {!isDashboardContext && setDashboardAttachmentReady && (
+            <EuiFlexItem grow={false}>
+              <EuiLink
+                onClick={() => setDashboardAttachmentReady(true)}
+                data-test-subj="sloActionsAddToDashboard"
+              >
+                {i18n.translate('xpack.slo.item.actions.addToDashboard', {
+                  defaultMessage: 'Add to Dashboard',
+                })}
+              </EuiLink>
+            </EuiFlexItem>
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      {selectedTabId !== 'history' && (
+      {!hideHeaderDurationLabel && (
         <EuiFlexItem>
           <EuiText color="subdued" size="s">
             {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)

@@ -16,7 +16,7 @@ import {
   SAME_FAMILY,
 } from '../../../../../../translations';
 import { useIndicesCheckContext } from '../../../../../../contexts/indices_check_context';
-import { IlmPhase, PatternRollup } from '../../../../../../types';
+import type { IlmPhase, PatternRollup } from '../../../../../../types';
 import { EMPTY_METADATA } from '../../../../../../constants';
 import {
   ALL_TAB_ID,
@@ -52,6 +52,7 @@ export interface Props {
   patternRollup: PatternRollup | undefined;
   ilmPhase: IlmPhase | undefined;
   docsCount: number;
+  checkedAt?: number;
 }
 
 const LatestCheckFieldsComponent: React.FC<Props> = ({
@@ -59,6 +60,7 @@ const LatestCheckFieldsComponent: React.FC<Props> = ({
   patternRollup,
   ilmPhase,
   docsCount,
+  checkedAt,
 }) => {
   const { checkState } = useIndicesCheckContext();
   const partitionedFieldMetadata =
@@ -95,6 +97,7 @@ const LatestCheckFieldsComponent: React.FC<Props> = ({
         badgeCount: incompatibleFieldsCount,
         content: (
           <IncompatibleTab
+            checkedAt={checkedAt}
             docsCount={docsCount}
             ilmPhase={ilmPhase}
             indexName={indexName}
@@ -165,6 +168,7 @@ const LatestCheckFieldsComponent: React.FC<Props> = ({
     [
       allFields,
       allFieldsCount,
+      checkedAt,
       customFields,
       customFieldsCount,
       docsCount,

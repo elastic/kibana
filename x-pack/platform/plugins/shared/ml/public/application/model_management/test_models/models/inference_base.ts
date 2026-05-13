@@ -16,10 +16,11 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { MLHttpFetchError } from '@kbn/ml-error-utils';
 import type { trainedModelsApiProvider } from '../../../services/ml_api_service/trained_models';
 import { getInferenceInfoComponent } from './inference_info';
+import type { ITelemetryClient } from '../../../services/telemetry/types';
 
 export type InferenceType =
   | SupportedPytorchTasksType
-  | keyof estypes.AggregationsInferenceConfigContainer;
+  | keyof NonNullable<estypes.AggregationsInferenceConfigContainer>;
 
 export type InferenceOptions =
   | estypes.MlRegressionInferenceOptions
@@ -84,7 +85,8 @@ export abstract class InferenceBase<TInferResponse> {
     protected readonly trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     protected readonly model: estypes.MlTrainedModelConfig,
     protected readonly inputType: INPUT_TYPE,
-    protected readonly deploymentId: string
+    protected readonly deploymentId: string,
+    private readonly telemetryClient: ITelemetryClient
   ) {
     this.modelInputField = model.input?.field_names[0] ?? DEFAULT_INPUT_FIELD;
     this.inputField$.next(this.modelInputField);
@@ -317,9 +319,14 @@ export abstract class InferenceBase<TInferResponse> {
       this.inferenceResult$.next([processedResponse]);
       this.setFinished();
 
+      this.trackModelTested('success');
+
       return [processedResponse];
     } catch (error) {
       this.setFinishedWithErrors(error);
+
+      this.trackModelTested('failure');
+
       throw error;
     }
   }
@@ -336,9 +343,15 @@ export abstract class InferenceBase<TInferResponse> {
       const processedResponse = docs.map((d) => processResponse(this.getDocFromResponse(d)));
       this.inferenceResult$.next(processedResponse);
       this.setFinished();
+
+      this.trackModelTested('success');
+
       return processedResponse;
     } catch (error) {
       this.setFinishedWithErrors(error);
+
+      this.trackModelTested('failure');
+
       throw error;
     }
   }
@@ -357,17 +370,16 @@ export abstract class InferenceBase<TInferResponse> {
     }));
   }
 
-  private getDefaultInferenceConfig(): estypes.MlInferenceConfigUpdateContainer[keyof estypes.MlInferenceConfigUpdateContainer] {
+  private getDefaultInferenceConfig(): NonNullable<estypes.MlInferenceConfigUpdateContainer>[InferenceType] {
     return this.model.inference_config![
       this.inferenceType as keyof estypes.MlInferenceConfigUpdateContainer
     ];
   }
 
   protected getNumTopClassesConfig(defaultOverride = 5) {
-    const options: estypes.MlInferenceConfigUpdateContainer[keyof estypes.MlInferenceConfigUpdateContainer] =
-      this.getDefaultInferenceConfig();
+    const options = this.getDefaultInferenceConfig();
 
-    if (options && 'num_top_classes' in options && (options?.num_top_classes ?? 0 > 0)) {
+    if (options && 'num_top_classes' in options && (options.num_top_classes ?? 0) > 0) {
       return {};
     }
 
@@ -380,7 +392,7 @@ export abstract class InferenceBase<TInferResponse> {
     if (doc === undefined) {
       if (error) {
         this.setFinishedWithErrors(error as unknown as MLHttpFetchError);
-        throw Error(error.reason);
+        throw Error(error.reason ?? undefined); // reason can be null and it's not a valid parameter for Error
       }
 
       throw Error(
@@ -390,5 +402,14 @@ export abstract class InferenceBase<TInferResponse> {
       );
     }
     return doc;
+  }
+
+  private trackModelTested(result: 'success' | 'failure') {
+    this.telemetryClient.trackTrainedModelsModelTested({
+      model_id: this.model.model_id,
+      model_type: this.model.model_type,
+      task_type: this.inferenceType,
+      result,
+    });
   }
 }

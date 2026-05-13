@@ -9,7 +9,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { EuiDescriptionListDescription, EuiDescriptionListTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Tls, X509Expiry } from '../../../../../../common/runtime_types';
+import type { Tls, X509Expiry } from '../../../../../../common/runtime_types';
 import { CERTIFICATES_ROUTE } from '../../../../../../common/constants';
 import { CertStatusColumn } from '../../../overview/monitor_list/columns/cert_status_column';
 
@@ -24,11 +24,6 @@ export const MonitorSSLCertificate = ({ tls }: Props) => {
   let expiry: X509Expiry | null = null;
   if (tls?.server?.x509) {
     expiry = tls.server.x509;
-  } else if (tls?.certificate_not_valid_after && tls?.certificate_not_valid_before) {
-    expiry = {
-      not_after: tls.certificate_not_valid_after,
-      not_before: tls.certificate_not_valid_before,
-    };
   }
 
   if (!expiry) {

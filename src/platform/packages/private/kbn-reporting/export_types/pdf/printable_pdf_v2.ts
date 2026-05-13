@@ -8,13 +8,11 @@
  */
 
 import apm from 'elastic-apm-node';
+import { withActiveSpan } from '@kbn/tracing-utils';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, of, takeUntil, tap } from 'rxjs';
-import { Writable } from 'stream';
 
-import { Headers } from '@kbn/core/server';
 import {
-  CancellationToken,
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
@@ -22,15 +20,12 @@ import {
   LICENSE_TYPE_TRIAL,
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
 } from '@kbn/reporting-common';
+import type { RunTaskOpts } from '@kbn/reporting-server';
 import { REPORTING_TRANSACTION_TYPE } from '@kbn/reporting-server';
-import type { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';
-import type { TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
-import {
-  JobParamsPDFV2,
-  PDF_JOB_TYPE_V2,
-  PDF_REPORT_TYPE_V2,
-} from '@kbn/reporting-export-types-pdf-common';
-import { ExportType, decryptJobHeaders, getFullRedirectAppUrl } from '@kbn/reporting-server';
+import type { TaskRunResult } from '@kbn/reporting-common/types';
+import type { TaskPayloadPDFV2, JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import { PDF_JOB_TYPE_V2, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
+import { ExportType, getFullRedirectAppUrl } from '@kbn/reporting-server';
 import type { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
 
 import { getCustomLogo } from './get_custom_logo';
@@ -76,113 +71,128 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
    * @param cancellationToken
    * @param stream
    */
-  public runTask = (
-    jobId: string,
-    payload: TaskPayloadPDFV2,
-    taskInstanceFields: TaskInstanceFields,
-    cancellationToken: CancellationToken,
-    stream: Writable
-  ) => {
-    const logger = this.logger.get(`execute-job:${jobId}`);
-    const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
-    const apmGetAssets = apmTrans.startSpan('get-assets', 'setup');
-    let apmGeneratePdf: { end: () => void } | null | undefined;
-    const { encryptionKey } = this.config;
-
-    const process$: Rx.Observable<TaskRunResult> = of(1).pipe(
-      mergeMap(() => decryptJobHeaders(encryptionKey, payload.headers, logger)),
-      mergeMap(async (headers: Headers) => {
-        const fakeRequest = this.getFakeRequest(headers, payload.spaceId, logger);
-        const uiSettingsClient = await this.getUiSettingsClient(fakeRequest);
-        return await getCustomLogo(uiSettingsClient, headers);
-      }),
-      mergeMap(({ logo, headers }) => {
-        const { browserTimezone, layout, title, locatorParams } = payload;
-
-        apmGetAssets?.end();
-
-        apmGeneratePdf = apmTrans.startSpan('generate-pdf-pipeline', 'execute');
+  public runTask = ({
+    jobId,
+    payload,
+    request,
+    taskInstanceFields,
+    cancellationToken,
+    stream,
+  }: RunTaskOpts<TaskPayloadPDFV2>) => {
+    return withActiveSpan(
+      'execute-job-pdf-v2',
+      { attributes: { 'transaction.type': REPORTING_TRANSACTION_TYPE } },
+      async () => {
+        const logger = this.logger.get('execute-job');
+        const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
+        const apmGetAssets = apmTrans.startSpan('get-assets', 'setup');
+        let apmGeneratePdf: { end: () => void } | null | undefined;
 
         const tracker = getTracker();
-        tracker.startScreenshots();
 
-        /**
-         * For each locator we get the relative URL to the redirect app
-         */
-        const urls = locatorParams.map((locator) => [
-          getFullRedirectAppUrl(
-            this.config,
-            this.getServerInfo(),
-            payload.spaceId,
-            payload.forceNow
-          ),
-          locator,
-        ]) as unknown as UrlOrUrlWithContext[];
-
-        return this.startDeps
-          .screenshotting!.getScreenshots({
-            format: 'pdf',
-            title,
-            logo,
-            browserTimezone,
-            headers,
-            layout,
-            urls: urls.map((url) =>
-              typeof url === 'string'
-                ? url
-                : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
-            ),
-            taskInstanceFields,
-            logger,
-          })
-          .pipe(
-            tap(({ metrics }) => {
-              if (metrics.cpu) {
-                tracker.setCpuUsage(metrics.cpu);
-              }
-              if (metrics.memory) {
-                tracker.setMemoryUsage(metrics.memory);
-              }
-            }),
-            mergeMap(async ({ data: buffer, errors, metrics, renderErrors }) => {
-              tracker.endScreenshots();
-              const warnings: string[] = [];
-              if (errors) {
-                warnings.push(...errors.map((error) => error.message));
-              }
-              if (renderErrors) {
-                warnings.push(...renderErrors);
-              }
-
-              return {
-                buffer,
-                metrics,
-                warnings,
-              };
+        const process$: Rx.Observable<TaskRunResult> = of(1).pipe(
+          mergeMap(() =>
+            withActiveSpan('get-assets', { attributes: { 'span.type': 'setup' } }, async () => {
+              const uiSettingsClient = await this.getUiSettingsClient(request);
+              const logo = await getCustomLogo(uiSettingsClient);
+              const { browserTimezone, layout, title, locatorParams } = payload;
+              return { logo, browserTimezone, layout, title, locatorParams };
             })
-          );
-      }),
-      tap(({ buffer }) => {
-        apmGeneratePdf?.end();
+          ),
+          tap(() => apmGetAssets?.end()),
+          mergeMap(({ logo, browserTimezone, layout, title, locatorParams }) => {
+            apmGeneratePdf = apmTrans.startSpan('generate-pdf-pipeline', 'execute');
 
-        if (buffer) {
-          stream.write(buffer);
-        }
-      }),
-      map(({ metrics, warnings }) => ({
-        content_type: 'application/pdf',
-        metrics: { pdf: metrics },
-        warnings,
-      })),
-      catchError((err) => {
-        logger.error(err);
-        return Rx.throwError(() => err);
-      })
+            // "generate-pdf-pipeline" and "generate-pdf" (from withGeneratePdfSpan) cover the same span.
+            // The difference is that the legacy Elastic APM agent only supports 1-deep nested spans.
+            // With OTel this seems like unnecessary duplication, but we keep it for compatibility.
+            return withActiveSpan(
+              'generate-pdf-pipeline',
+              { attributes: { 'span.type': 'execute' } },
+              () =>
+                tracker.withGeneratePdfSpan(() =>
+                  tracker
+                    .withScreenshotsSpan(() => {
+                      /**
+                       * For each locator we get the relative URL to the redirect app
+                       */
+                      const urls = locatorParams.map((locator) => [
+                        getFullRedirectAppUrl(
+                          this.config,
+                          this.getServerInfo(),
+                          payload.spaceId,
+                          payload.forceNow
+                        ),
+                        locator,
+                      ]) as unknown as UrlOrUrlWithContext[];
+
+                      return this.startDeps.screenshotting!.getScreenshots({
+                        format: 'pdf',
+                        title,
+                        logo,
+                        request,
+                        browserTimezone,
+                        layout,
+                        urls: urls.map((url) =>
+                          typeof url === 'string'
+                            ? url
+                            : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
+                        ),
+                        taskInstanceFields,
+                        logger,
+                      });
+                    })
+                    .pipe(
+                      tap(({ metrics }) => {
+                        if (metrics.cpu) {
+                          tracker.setCpuUsage(metrics.cpu);
+                        }
+                        if (metrics.memory) {
+                          tracker.setMemoryUsage(metrics.memory);
+                        }
+                      }),
+                      mergeMap(async ({ data: buffer, errors, metrics, renderErrors }) => {
+                        const warnings: string[] = [];
+                        if (errors) {
+                          warnings.push(...errors.map((error) => error.message));
+                        }
+                        if (renderErrors) {
+                          warnings.push(...renderErrors);
+                        }
+
+                        return {
+                          buffer,
+                          metrics,
+                          warnings,
+                        };
+                      })
+                    )
+                )
+            );
+          }),
+          tap(({ buffer }) => {
+            apmGeneratePdf?.end();
+
+            if (buffer) {
+              stream.write(buffer);
+            }
+          }),
+          map(({ metrics, warnings }) => ({
+            content_type: 'application/pdf',
+            metrics: { pdf: metrics },
+            warnings,
+          })),
+          catchError((err) => {
+            logger.debug(err, { tags: ['execute-job', jobId] });
+            return Rx.throwError(() => err);
+          })
+        );
+
+        const stop$ = Rx.fromEventPattern(cancellationToken.on);
+
+        apmTrans.end();
+        return Rx.firstValueFrom(process$.pipe(takeUntil(stop$)));
+      }
     );
-
-    const stop$ = Rx.fromEventPattern(cancellationToken.on);
-
-    apmTrans.end();
-    return Rx.firstValueFrom(process$.pipe(takeUntil(stop$)));
   };
 }

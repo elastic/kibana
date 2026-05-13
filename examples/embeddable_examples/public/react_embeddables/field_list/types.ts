@@ -7,27 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { PublishesDataViews, SerializedTitles } from '@kbn/presentation-publishing';
-import { PublishesSelectedFields } from './publishes_selected_fields';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { PublishesUnsavedChanges, SerializedTitles } from '@kbn/presentation-publishing';
 
-export type FieldListSerializedStateState = SerializedTitles & {
+export interface FieldListState {
   dataViewId?: string;
   selectedFieldNames?: string[];
+}
+
+export type FieldListRuntimeState = FieldListState & {
+  dataViews?: DataView[];
 };
 
-export type FieldListRuntimeState = FieldListSerializedStateState;
+export type FieldListSerializedState = SerializedTitles & FieldListState;
 
-export type FieldListApi = DefaultEmbeddableApi<
-  FieldListSerializedStateState,
-  FieldListSerializedStateState
-> &
-  PublishesSelectedFields &
-  PublishesDataViews;
+export type FieldListApi = DefaultEmbeddableApi<FieldListSerializedState> & PublishesUnsavedChanges;
 
 export interface Services {
   dataViews: DataViewsPublicPluginStart;

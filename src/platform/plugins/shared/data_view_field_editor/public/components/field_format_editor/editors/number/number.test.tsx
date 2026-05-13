@@ -11,7 +11,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { coreMock } from '@kbn/core/public/mocks';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 import { NumberFormatEditor } from './number';
 
@@ -19,7 +19,7 @@ type NumberFormatEditorProps = React.ComponentProps<typeof NumberFormatEditor>;
 
 const fieldType = 'number';
 const format = {
-  getConverterFor: jest.fn().mockImplementation(() => (input: number) => input * 2),
+  reactConvert: jest.fn().mockImplementation((input: number) => input * 2),
   getParamDefaults: jest.fn().mockImplementation(() => {
     return { pattern: '0,0.[000]' };
   }),

@@ -22,12 +22,17 @@ export type {
 
 export type {
   ShareContext,
-  ShareMenuProvider,
   ShareMenuItemLegacy,
-  ShareMenuItemV2,
   ShowShareMenuOptions,
   ShareContextMenuPanelItem,
   BrowserUrlService,
+  ExportShare,
+  ExportShareConfig,
+  ExportShareDerivatives,
+  RegisterShareIntegrationArgs,
+  ShareableLocatorParams,
+  SharingData,
+  ShareActionConfigArgs,
 } from './types';
 
 export type { RedirectOptions } from '../common/url_service';
@@ -37,7 +42,10 @@ import { SharePlugin } from './plugin';
 
 export { downloadMultipleAs, downloadFileAs } from './lib/download_as';
 export type { DownloadableContent } from './lib/download_as';
+export { convertRelativeTimeStringToAbsoluteTimeString } from './lib/time_utils';
 
 export function plugin(ctx: PluginInitializerContext) {
   return new SharePlugin(ctx);
 }
+
+export { useShareTypeContext } from './components/context';

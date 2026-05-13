@@ -11,11 +11,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { NotificationsStart } from '@kbn/core/public';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
+import type { ConversationCreateEvent, ConversationUpdateEvent } from '../../common';
 import {
   MessageRole,
   type Message,
-  ConversationCreateEvent,
-  ConversationUpdateEvent,
   isTokenLimitReachedError,
   StreamingChatResponseEventType,
 } from '../../common';
@@ -34,7 +33,7 @@ export interface UseChatResult {
   messages: Message[];
   setMessages: (messages: Message[]) => void;
   state: ChatState;
-  next: (messages: Message[]) => void;
+  next: (messages: Message[], onError?: (error: any) => void) => void;
   stop: () => void;
 }
 
@@ -131,7 +130,7 @@ function useChatWithoutContext({
   );
 
   const next = useCallback(
-    async (nextMessages: Message[]) => {
+    async (nextMessages: Message[], onError?: (error: any) => void) => {
       // make sure we ignore any aborts for the previous signal
       abortControllerRef.current.signal.removeEventListener('abort', handleSignalAbort);
 
@@ -239,6 +238,7 @@ function useChatWithoutContext({
         error: (error) => {
           setPendingMessages([]);
           setMessages(nextMessages.concat(getPendingMessages()));
+          onError?.(error);
           handleError(error);
         },
       });

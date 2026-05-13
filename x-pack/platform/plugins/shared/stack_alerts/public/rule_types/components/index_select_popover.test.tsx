@@ -6,10 +6,26 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import userEvent from '@testing-library/user-event';
+import { screen, waitFor, within } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { IndexSelectPopover } from './index_select_popover';
-import { EuiComboBox } from '@elastic/eui';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+
+// EuiComboBox uses FixedSizeList from react-window for virtualized rendering.
+// In jsdom the container has zero height so FixedSizeList renders no items.
+// Mock it to render all items directly so options appear in the DOM.
+jest.mock('react-window', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  FixedSizeList: ({ children, itemCount, itemData }: any) => (
+    <div>
+      {Array.from({ length: itemCount }, (_, index) =>
+        children({ index, style: {}, data: itemData })
+      )}
+    </div>
+  ),
+}));
 
 jest.mock('lodash', () => {
   const module = jest.requireActual('lodash');
@@ -34,18 +50,6 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
         },
       ];
     },
-    getFields: () => {
-      return Promise.resolve([
-        {
-          name: '@timestamp',
-          type: 'date',
-        },
-        {
-          name: 'field',
-          type: 'text',
-        },
-      ]);
-    },
     getIndexOptions: () => {
       return Promise.resolve([
         {
@@ -66,6 +70,30 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
   };
 });
 
+const dataViewsMock =
+  dataViewPluginMocks.createStartContract() as jest.Mocked<DataViewsPublicPluginStart>;
+
+const setupDataViewsMock = () => {
+  dataViewsMock.getFieldsForWildcard = jest.fn().mockResolvedValue([
+    {
+      name: '@timestamp',
+      type: 'date',
+      esTypes: ['date'],
+      searchable: true,
+      aggregatable: true,
+      isMapped: true,
+    },
+    {
+      name: 'field',
+      type: 'string',
+      esTypes: ['text'],
+      searchable: true,
+      aggregatable: false,
+      isMapped: true,
+    },
+  ]);
+};
+
 describe('IndexSelectPopover', () => {
   const onIndexChange = jest.fn();
   const onTimeFieldChange = jest.fn();
@@ -77,79 +105,60 @@ describe('IndexSelectPopover', () => {
       index: [],
       timeField: [],
     },
+    dataViews: dataViewsMock,
     onIndexChange,
     onTimeFieldChange,
   };
 
   beforeEach(() => {
     jest.resetAllMocks();
+    setupDataViewsMock();
   });
 
   test('renders closed popover initially and opens on click', async () => {
-    const wrapper = mountWithIntl(<IndexSelectPopover {...props} />);
+    renderWithI18n(<IndexSelectPopover {...props} />);
 
-    expect(wrapper.find('[data-test-subj="selectIndexExpression"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="thresholdIndexesComboBox"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="thresholdAlertTimeFieldSelect"]').exists()).toBeFalsy();
+    const selectIndexExpression = screen.getByTestId('selectIndexExpression');
+    expect(selectIndexExpression).toBeInTheDocument();
+    expect(screen.queryByTestId('thresholdIndexesComboBox')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('thresholdAlertTimeFieldSelect')).not.toBeInTheDocument();
 
-    wrapper.find('[data-test-subj="selectIndexExpression"]').last().simulate('click');
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    await userEvent.click(selectIndexExpression);
 
-    expect(wrapper.find('[data-test-subj="thresholdIndexesComboBox"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="thresholdAlertTimeFieldSelect"]').exists()).toBeTruthy();
+    await screen.findByTestId('thresholdIndexesComboBox');
+    expect(screen.getByTestId('thresholdAlertTimeFieldSelect')).toBeInTheDocument();
   });
 
   test('renders search input', async () => {
-    const wrapper = mountWithIntl(<IndexSelectPopover {...props} />);
+    renderWithI18n(<IndexSelectPopover {...props} />);
 
-    expect(wrapper.find('[data-test-subj="selectIndexExpression"]').exists()).toBeTruthy();
-    wrapper.find('[data-test-subj="selectIndexExpression"]').last().simulate('click');
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+    const selectIndexExpression = screen.getByTestId('selectIndexExpression');
+    expect(selectIndexExpression).toBeInTheDocument();
+    await userEvent.click(selectIndexExpression);
+
+    await screen.findByTestId('thresholdIndexesComboBox');
+
+    const searchInput = screen.getByTestId('comboBoxSearchInput') as HTMLInputElement;
+    expect(searchInput).toHaveValue('');
+
+    await userEvent.type(searchInput, 'indexPattern1');
+    expect(searchInput).toHaveValue('indexPattern1');
+
+    // Options should be loaded - click first available option in the combobox options list
+    // (scoped to avoid matching <select><option> elements from the time field selector)
+    const optionsList = await screen.findByTestId(/comboBoxOptionsList/);
+    const comboOptions = within(optionsList).getAllByRole('option');
+    expect(comboOptions.length).toBeGreaterThan(0);
+    await userEvent.click(comboOptions[0]);
+
+    await waitFor(() => {
+      expect(onIndexChange).toHaveBeenCalledWith(['index1']);
     });
 
-    expect(wrapper.find('[data-test-subj="thresholdIndexesComboBox"]').exists()).toBeTruthy();
-    const indexSearchBoxValue = wrapper.find('[data-test-subj="comboBoxSearchInput"]');
-    expect(indexSearchBoxValue.first().props().value).toEqual('');
-
-    const indexComboBox = wrapper.find('#indexSelectSearchBox');
-    indexComboBox.first().simulate('click');
-
-    await act(async () => {
-      const event = { target: { value: 'indexPattern1' } };
-      indexComboBox.find('input').first().simulate('change', event);
-      await nextTick();
-      wrapper.update();
-    });
-
-    const updatedIndexSearchValue = wrapper.find('[data-test-subj="comboBoxSearchInput"]');
-    expect(updatedIndexSearchValue.first().props().value).toEqual('indexPattern1');
-
-    const thresholdComboBox = wrapper
-      .find(EuiComboBox)
-      .filter('[data-test-subj="thresholdIndexesComboBox"]');
-    const thresholdOptions = thresholdComboBox.prop('options');
-    expect(thresholdOptions.length > 0).toBeTruthy();
-
-    await act(async () => {
-      thresholdComboBox.prop('onChange')!([thresholdOptions[0].options![0]]);
-      await nextTick();
-      wrapper.update();
-    });
-    expect(onIndexChange).toHaveBeenCalledWith(
-      [thresholdOptions[0].options![0]].map((opt) => opt.value)
+    await userEvent.selectOptions(
+      screen.getByTestId('thresholdAlertTimeFieldSelect'),
+      '@timestamp'
     );
-
-    const timeFieldSelect = wrapper.find('select[data-test-subj="thresholdAlertTimeFieldSelect"]');
-    await act(async () => {
-      timeFieldSelect.simulate('change', { target: { value: '@timestamp' } });
-      await nextTick();
-      wrapper.update();
-    });
     expect(onTimeFieldChange).toHaveBeenCalledWith('@timestamp');
   });
 
@@ -161,19 +170,18 @@ describe('IndexSelectPopover', () => {
       index: [index],
       timeField,
     };
-    const wrapper = mountWithIntl(<IndexSelectPopover {...indexSelectProps} />);
-    expect(wrapper.find('button[data-test-subj="selectIndexExpression"]').text()).toEqual(
-      `index ${index}`
-    );
+    renderWithI18n(<IndexSelectPopover {...indexSelectProps} />);
+    const selectIndexExpression = screen.getByTestId('selectIndexExpression');
+    expect(selectIndexExpression).toHaveTextContent(`index ${index}`);
 
-    wrapper.find('[data-test-subj="selectIndexExpression"]').last().simulate('click');
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    await userEvent.click(selectIndexExpression);
 
-    expect(
-      wrapper.find('EuiSelect[data-test-subj="thresholdAlertTimeFieldSelect"]').text()
-    ).toEqual(`Select a field${timeField}`);
+    await screen.findByTestId('thresholdAlertTimeFieldSelect');
+
+    const select = screen.getByTestId('thresholdAlertTimeFieldSelect') as HTMLSelectElement;
+    const optionsText = Array.from(select.options)
+      .map((o) => o.text)
+      .join('');
+    expect(optionsText).toContain(timeField);
   });
 });

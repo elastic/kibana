@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  ClusterPutComponentTemplateRequest,
+  MappingDynamicTemplate,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import { getComponentTemplateFromFieldMap } from '../../common';
 
@@ -22,6 +25,8 @@ export const VALID_ALERT_INDEX_PREFIXES = [
   '.preview.alerts-',
   '.internal.preview.alerts-',
   '.reindexed-v8-internal.preview.alerts-',
+  '.adhoc.alerts-',
+  '.internal.adhoc.alerts-',
 ];
 
 export const getComponentTemplateName = ({ context, name }: GetComponentTemplateNameOpts = {}) =>
@@ -68,6 +73,7 @@ type GetComponentTemplateOpts = GetComponentTemplateNameOpts & {
   fieldMap: FieldMap;
   dynamic?: 'strict' | false;
   includeSettings?: boolean;
+  dynamicTemplates?: Array<Record<string, MappingDynamicTemplate>>;
 };
 
 export const getComponentTemplate = ({
@@ -76,10 +82,12 @@ export const getComponentTemplate = ({
   name,
   dynamic,
   includeSettings,
+  dynamicTemplates,
 }: GetComponentTemplateOpts): ClusterPutComponentTemplateRequest =>
   getComponentTemplateFromFieldMap({
     name: getComponentTemplateName({ context, name }),
     fieldMap,
     dynamic,
     includeSettings,
+    dynamicTemplates,
   });

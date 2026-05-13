@@ -14,7 +14,6 @@ import { SimpleMemCache } from '../../endpoint/lib/simple_mem_cache';
 import {
   DEFAULT_DIAGNOSTIC_INDEX_PATTERN,
   ENDPOINT_ACTION_RESPONSES_DS,
-  ENDPOINT_HEARTBEAT_INDEX_PATTERN,
 } from '../../../common/endpoint/constants';
 import { stringify } from '../../endpoint/utils/stringify';
 
@@ -53,11 +52,7 @@ export const createPolicyDataStreamsIfNeeded: PolicyDataStreamsCreator = async (
       )}]`
   );
 
-  // FIXME:PT Need to ensure that the datastreams are created in all associated space ids that the policy is shared with
-  //          This can be deferred to activity around support of Spaces - team issue: 8199 (epic)
-  //          We might need to do much here other than to ensure we can access all policies across all spaces in order to get the namespace value
-
-  const fleetServices = endpointServices.getInternalFleetServices();
+  const fleetServices = endpointServices.getInternalFleetServices(undefined, true);
   const policyNamespaces = await fleetServices.getPolicyNamespace({
     integrationPolicies: endpointPolicyIds,
   });
@@ -68,10 +63,6 @@ export const createPolicyDataStreamsIfNeeded: PolicyDataStreamsCreator = async (
       for (const namespace of namespaceList) {
         acc.add(buildIndexNameWithNamespace(DEFAULT_DIAGNOSTIC_INDEX_PATTERN, namespace));
         acc.add(buildIndexNameWithNamespace(ENDPOINT_ACTION_RESPONSES_DS, namespace));
-
-        if (endpointServices.isServerless()) {
-          acc.add(buildIndexNameWithNamespace(ENDPOINT_HEARTBEAT_INDEX_PATTERN, namespace));
-        }
       }
 
       return acc;

@@ -9,16 +9,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiSpacer, EuiFormRow, EuiButtonGroup } from '@elastic/eui';
 import { get } from 'lodash';
-import {
-  encode,
-  getElasticOutline,
-  isValidHttpUrl,
-  resolveFromArgs,
-} from '@kbn/presentation-util-plugin/common';
 import { AssetPicker } from '../../../../public/components/asset_picker';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { VALID_IMAGE_TYPES } from '../../../../common/lib/constants';
 import { ArgumentStrings } from '../../../../i18n';
+import { getElasticOutline, encode, resolveFromArgs, isValidHttpUrl } from '../../../../public/lib';
 import { FileForm, LinkForm } from './forms';
 
 const { ImageUpload: strings } = ArgumentStrings;

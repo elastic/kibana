@@ -17,7 +17,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SearchEmptyPrompt, DecorativeHorizontalStepper } from '@kbn/search-shared-ui';
+import { DecorativeHorizontalStepper } from '@kbn/search-connectors';
+import { SearchEmptyPrompt } from '@kbn/search-shared-ui';
 
 import { GithubIcon } from '../../../shared/icons/github_icon';
 
@@ -60,7 +61,7 @@ export const SelfManagedWebCrawlerEmptyPrompt: React.FC = () => {
                         <EuiIcon size="m" type="sortRight" />
                       </EuiFlexItem>
                       <EuiFlexItem>
-                        <EuiIcon color="primary" size="l" type="launch" />
+                        <EuiIcon color="primary" size="l" type="rocket" />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                     <EuiFlexItem>

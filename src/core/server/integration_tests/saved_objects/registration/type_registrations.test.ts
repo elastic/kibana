@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { REMOVED_TYPES } from '@kbn/core-saved-objects-migration-server-internal';
 import { createRoot } from '@kbn/core-test-helpers-kbn-server';
+import removedTypes from '@kbn/core-saved-objects-server-internal/removed_types.json';
 
 // Types should NEVER be removed from this array
 const previouslyRegisteredTypes = [
@@ -16,13 +16,16 @@ const previouslyRegisteredTypes = [
   'action_task_params',
   'ad_hoc_run_params',
   'alert',
+  'alerting_rule_template',
   'api_key_pending_invalidation',
+  'api_key_to_invalidate',
   'apm-custom-dashboards',
   'apm-indices',
   'apm-server-schema',
   'apm-service-group',
   'apm-services-telemetry',
   'apm-telemetry',
+  'anonymization-salt',
   'app_search_telemetry',
   'application_usage_daily',
   'application_usage_totals',
@@ -33,11 +36,13 @@ const previouslyRegisteredTypes = [
   'canvas-workpad',
   'canvas-workpad-template',
   'cloud',
+  'cloud-connect-api-key',
   'cloud-security-posture-settings',
   'cases',
   'cases-comments',
   'cases-configure',
   'cases-connector-mappings',
+  'cases-incrementing-id', // Added in 8.19/9.1 to allow for incremental numerical ids in cases
   'cases-rules',
   'cases-sub-case',
   'cases-user-actions',
@@ -49,14 +54,23 @@ const previouslyRegisteredTypes = [
   'csp-rule-template',
   'csp_rule',
   'dashboard',
+  'data_connector',
+  'data_stream-config',
   'dynamic-config-overrides', // Added in 8.16 to persist the dynamic config overrides and share it with other nodes
   'event-annotation-group',
   'endpoint:user-artifact',
   'endpoint:user-artifact-manifest',
   'endpoint:unified-user-artifact-manifest',
   'enterprise_search_telemetry',
+  'entity-analytics-monitoring-entity-source',
+  'watchlist-config',
+  'watchlist-entity-source',
   'entity-definition',
+  'privmon-api-key',
   'entity-discovery-api-key',
+  'entity-store-ccs-state',
+  'entity-engine-descriptor-v2',
+  'entity-store-global-state',
   'epm-packages',
   'epm-packages-assets',
   'event_loop_delays_daily',
@@ -80,21 +94,28 @@ const previouslyRegisteredTypes = [
   'fleet-uninstall-tokens',
   'fleet-setup-lock',
   'fleet-space-settings',
+  'fleet-cloud-connector',
   'graph-workspace',
   'guided-setup-state',
   'guided-onboarding-guide-state',
   'guided-onboarding-plugin-state',
   'index-pattern',
+  'intercept_interaction_record',
+  'intercept_trigger_record',
   'infrastructure-monitoring-log-view',
   'infrastructure-ui-source',
   'infra-custom-dashboards',
+  'inference-settings',
   'ingest-agent-policies',
   'ingest-download-sources',
   'ingest-outputs',
   'ingest-package-policies',
   'ingest_manager_settings',
+  'integration-config',
   'inventory-view',
+  'investigation',
   'kql-telemetry',
+  'lead-generation-config',
   'legacy-url-alias',
   'lens',
   'lens-ui-telemetry',
@@ -102,6 +123,7 @@ const previouslyRegisteredTypes = [
   'maintenance-window',
   'map',
   'maps-telemetry',
+  'markdown',
   'metrics-data-source',
   'metrics-explorer-view',
   'ml-job',
@@ -109,6 +131,7 @@ const previouslyRegisteredTypes = [
   'ml-module',
   'ml-telemetry',
   'monitoring-telemetry',
+  'oauth_state',
   'observability-onboarding-state',
   'osquery-pack',
   'osquery-pack-asset',
@@ -116,16 +139,21 @@ const previouslyRegisteredTypes = [
   'osquery-usage-metric',
   'osquery-manager-usage-metric',
   'policy-settings-protection-updates-note',
+  'privilege-monitoring-status',
   'product-doc-install-status',
   'query',
   'rules-settings',
   'sample-data-telemetry',
+  'scheduled_report',
   'search',
   'search-session',
   'search-telemetry',
+  'search_playground',
   'security-ai-prompt',
   'security-rule',
   'security-solution-signals-migration',
+  'security:reference-data',
+  'security:endpoint-scripts-library',
   'risk-engine-configuration',
   'entity-engine-status',
   'server',
@@ -137,9 +165,12 @@ const previouslyRegisteredTypes = [
   'siem-ui-timeline-pinned-event',
   'slo',
   'slo-settings',
+  'slo_template',
   'space',
   'spaces-usage-stats',
+  'stream-prompts',
   'synthetics-monitor',
+  'synthetics-monitor-multi-space',
   'synthetics-param',
   'synthetics-privates-locations',
   'synthetics-private-location',
@@ -149,6 +180,7 @@ const previouslyRegisteredTypes = [
   'timelion-sheet',
   'tsvb-validation-telemetry',
   'threshold-explorer-view',
+  'uiam_api_keys_provisioning_status',
   'ui-counter',
   'ui-metric',
   'upgrade-assistant-ml-upgrade-operation',
@@ -160,8 +192,18 @@ const previouslyRegisteredTypes = [
   'url',
   'usage-counter', // added in 8.16.0: richer mappings, located in .kibana_usage_counters
   'usage-counters', // deprecated in favor of 'usage-counter'
+  'user-storage',
+  'user-storage-global',
+  'user_connector_token',
   'visualization',
   'workplace_search_telemetry',
+  'gap_auto_fill_scheduler',
+  'trial-companion-nba-milestone',
+  'streams-significant-events-settings',
+  'alerting_notification_policy', // renamed in 9.4 https://github.com/elastic/kibana/pull/264182 for alerting_action_policy
+  'alerting_api_key_pending_invalidation',
+  'alerting_rule',
+  'alerting_action_policy',
 ].sort();
 
 describe('SO type registrations', () => {
@@ -176,7 +218,21 @@ describe('SO type registrations', () => {
   });
 
   it('does not remove types from registrations without updating excludeOnUpgradeQuery', async () => {
-    root = createRoot({}, { oss: false });
+    root = createRoot(
+      {
+        plugins: {
+          forceEnableAllPlugins: true,
+        },
+        node: {
+          roles: ['ui'],
+        },
+      },
+      {
+        oss: false,
+        // running in 'dev' mode prevents cloud-experiments plugin to fail due to missing config
+        dev: true,
+      }
+    );
     await root.preboot();
     const setup = await root.setup();
     const currentlyRegisteredTypes = setup.savedObjects
@@ -186,12 +242,12 @@ describe('SO type registrations', () => {
       .sort();
     await root.shutdown();
 
-    // Make sure that all `REMOVED_TYPES` are in `previouslyRegisteredTypes`
-    expect(previouslyRegisteredTypes.filter((type) => REMOVED_TYPES.includes(type))).toEqual(
-      REMOVED_TYPES // Use array comparison for readable test failure messages
+    // Make sure that all removed types are in `previouslyRegisteredTypes`
+    expect(previouslyRegisteredTypes.filter((type) => removedTypes.includes(type))).toEqual(
+      [...removedTypes].sort() // Use array comparison for readable test failure messages
     );
-    // Make sure that no `REMOVED_TYPES` are in `currentlyRegisteredTypes`
-    expect(currentlyRegisteredTypes.filter((type) => REMOVED_TYPES.includes(type))).toEqual([]);
+    // Make sure that no removed types are in `currentlyRegisteredTypes`
+    expect(currentlyRegisteredTypes.filter((type) => removedTypes.includes(type))).toEqual([]);
 
     // Make sure all new types are added to `previouslyRegisteredTypes`
     // If this assertion fails, add the new type name to the `previouslyRegisteredTypes` array above (alphabetically)
@@ -200,9 +256,9 @@ describe('SO type registrations', () => {
     );
     expect(typesMissingFromPrevious).toEqual([]);
 
-    // Make sure all removed types are added to `REMOVED_TYPES`
-    // If this assertion fails, add the removed type to `REMOVED_TYPES` array in ../../migrations/core/elastic_index.ts
-    expect(previouslyRegisteredTypes.filter((type) => !REMOVED_TYPES.includes(type))).toEqual(
+    // Make sure all removed types are added to removed_types.json
+    // If this assertion fails, add the removed type to `removed_types.json` (via --fix flag on the check_saved_objects script)
+    expect(previouslyRegisteredTypes.filter((type) => !removedTypes.includes(type))).toEqual(
       currentlyRegisteredTypes
     );
   });

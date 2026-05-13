@@ -7,7 +7,7 @@
 
 import type { HttpSetup } from '@kbn/core/public';
 import type { AsApiContract } from '@kbn/actions-plugin/common';
-import { KueryNode } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 import type { Rule, Pagination, Sorting, RuleStatus } from '../../../types';
 import { transformRule } from './common_transformations';
 

@@ -8,9 +8,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AppIds, AppId, AppDefinition, appCategories } from './types';
+import type { AppId, AppDefinition } from './types';
+import { AppIds, appCategories } from './types';
 
 export { AppIds, appCategories } from './types';
+
+import connectorLogo from './assets/connector_logo.svg';
 
 export const appDefinitions: Record<AppId, AppDefinition> = {
   [AppIds.INDEX_MANAGEMENT]: {
@@ -29,7 +32,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     description: i18n.translate('management.landing.withCardNavigation.transformDescription', {
       defaultMessage: 'Pivot your data or copy the latest documents into an entity-centric index.',
     }),
-    icon: 'indexFlush',
+    icon: 'chartThreshold',
   },
   [AppIds.INGEST_PIPELINES]: {
     category: appCategories.DATA,
@@ -54,7 +57,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
       defaultMessage:
         'Identify, analyze, and process your data using advanced analysis techniques.',
     }),
-    icon: 'indexMapping',
+    icon: 'mapping',
   },
   [AppIds.PIPELINES]: {
     category: appCategories.DATA,
@@ -62,7 +65,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
       defaultMessage:
         'Manage and view the Logstash event processing pipeline from inputs to outputs.',
     }),
-    icon: 'logstashQueue',
+    icon: 'queue',
   },
   [AppIds.DATA_QUALITY]: {
     category: appCategories.DATA,
@@ -80,19 +83,30 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     icon: 'stats',
   },
 
+  [AppIds.CONTENT_CONNECTORS]: {
+    category: appCategories.DATA,
+    description: i18n.translate(
+      'management.landing.withCardNavigation.searchConnectorsDescription',
+      {
+        defaultMessage: 'Manage Content Connectors.',
+      }
+    ),
+    icon: connectorLogo,
+  },
+
   [AppIds.RULES]: {
     category: appCategories.ALERTS,
     description: i18n.translate('management.landing.withCardNavigation.rulesDescription', {
       defaultMessage: 'Define when to generate alerts and notifications.',
     }),
-    icon: 'editorChecklist',
+    icon: 'listCheck',
   },
   [AppIds.CONNECTORS]: {
     category: appCategories.ALERTS,
     description: i18n.translate('management.landing.withCardNavigation.connectorsDescription', {
       defaultMessage: 'Configure connections to third party systems for use in cases and rules.',
     }),
-    icon: 'desktop',
+    icon: 'display',
   },
   [AppIds.MAINTENANCE_WINDOWS]: {
     category: appCategories.ALERTS,
@@ -132,7 +146,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     description: i18n.translate('management.landing.withCardNavigation.reportingDescription', {
       defaultMessage: 'Manage generated CSV reports.',
     }),
-    icon: 'visPie',
+    icon: 'chartPie',
   },
   [AppIds.TAGS]: {
     category: appCategories.CONTENT,

@@ -5,77 +5,272 @@
  * 2.0.
  */
 
-import type { SearchQuery } from '@kbn/content-management-plugin/common';
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import type {
-  SerializableAttributes,
-  VisualizationClient,
-} from '@kbn/visualizations-plugin/public';
-import { DOC_TYPE } from '../../common/constants';
+import type { HttpStart } from '@kbn/core/public';
+import { buildPath } from '@kbn/core-http-browser';
+import type { Reference } from '@kbn/content-management-utils';
+import type { LensApiConfig, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+
+import type { LensSavedObjectAttributes } from '@kbn/lens-common';
+import { LENS_INTERNAL_VIS_API_PATH, LENS_INTERNAL_API_VERSION } from '../../common/constants';
+import type { LensAttributes, LensItem } from '../../server/content_management';
 import {
-  LensCreateIn,
-  LensCreateOut,
-  LensDeleteIn,
-  LensDeleteOut,
-  LensGetIn,
-  LensGetOut,
-  LensSearchIn,
-  LensSearchOut,
-  LensSearchQuery,
-  LensUpdateIn,
-  LensUpdateOut,
-} from '../../common/content_management';
+  type LensGetResponseBody,
+  type LensCreateRequestBody,
+  type LensCreateResponseBody,
+  type LensUpdateRequestBody,
+  type LensUpdateResponseBody,
+  type LensSearchRequestQuery,
+  type LensSearchResponseBody,
+} from '../../server';
+import type {
+  LensCreateRequestQuery,
+  LensItemMeta,
+  LensUpdateRequestQuery,
+} from '../../server/api/routes/types';
+import { getLensBuilder } from '../lazy_builder';
 
-export function getLensClient<Attr extends SerializableAttributes = SerializableAttributes>(
-  cm: ContentManagementPublicStart
-): VisualizationClient<'lens', Attr> {
-  const get = async (id: string) => {
-    return cm.client.get<LensGetIn, LensGetOut>({
-      contentTypeId: DOC_TYPE,
-      id,
-    });
-  };
+export interface LensItemResponse<M extends Record<string, string | boolean> = {}> {
+  item: LensItem;
+  // TODO: align meta with public routes when internal routes are removed
+  meta: LensItemMeta & M;
+}
 
-  const create = async ({ data, options }: Omit<LensCreateIn, 'contentTypeId'>) => {
-    const res = await cm.client.create<LensCreateIn, LensCreateOut>({
-      contentTypeId: DOC_TYPE,
+/**
+ * This type is to allow `visualizationType` to be `null` in the public context.
+ *
+ * The stored attributes must have a `visualizationType`.
+ */
+export type LooseLensAttributes = Omit<LensAttributes, 'visualizationType'> &
+  Pick<LensSavedObjectAttributes, 'visualizationType'>;
+
+export class LensClient {
+  private builder: LensConfigBuilder | null;
+
+  constructor(private http: HttpStart) {
+    this.builder = getLensBuilder();
+  }
+
+  async get(id: string): Promise<LensItemResponse<LensGetResponseBody['meta']>> {
+    const {
       data,
-      options,
-    });
-    return res;
-  };
+      meta,
+      id: responseId,
+    } = await this.http.get<LensGetResponseBody>(
+      buildPath(`${LENS_INTERNAL_VIS_API_PATH}/{id}`, { id }),
+      {
+        version: LENS_INTERNAL_API_VERSION,
+      }
+    );
 
-  const update = async ({ id, data, options }: Omit<LensUpdateIn, 'contentTypeId'>) => {
-    const res = await cm.client.update<LensUpdateIn, LensUpdateOut>({
-      contentTypeId: DOC_TYPE,
-      id,
-      data,
-      options,
-    });
-    return res;
-  };
+    const chartType = this.builder?.getType(data);
 
-  const deleteLens = async (id: string) => {
-    const res = await cm.client.delete<LensDeleteIn, LensDeleteOut>({
-      contentTypeId: DOC_TYPE,
-      id,
-    });
-    return res;
-  };
+    if (this.builder?.isEnabled && this.builder?.isSupported(chartType)) {
+      const config = data as LensApiConfig;
+      return {
+        item: {
+          ...this.builder.fromAPIFormat(config),
+          id: responseId,
+        },
+        meta,
+      };
+    }
 
-  const search = async (query: SearchQuery = {}, options?: LensSearchQuery) => {
-    return cm.client.search<LensSearchIn, LensSearchOut>({
-      contentTypeId: DOC_TYPE,
-      query,
-      options,
-    });
-  };
+    if (!('state' in data)) {
+      // This should never happen, only to typeguard until fully supported
+      throw new Error('Failure to transform API Format');
+    }
 
-  return {
-    get,
-    create,
-    update,
-    delete: deleteLens,
-    search,
-  } as unknown as VisualizationClient<'lens', Attr>;
+    return {
+      item: {
+        ...data,
+        id: responseId,
+        description: data.description ?? undefined,
+      },
+      meta,
+    };
+  }
+
+  async create(
+    { description, visualizationType, state, title, version }: LooseLensAttributes,
+    references: Reference[],
+    options: LensCreateRequestQuery = {}
+  ): Promise<LensItemResponse> {
+    if (visualizationType === null) {
+      throw new Error('Missing visualization type');
+    }
+
+    const useApiFormat = this.builder?.isEnabled && this.builder?.isSupported(visualizationType);
+    const body: LensCreateRequestBody =
+      useApiFormat && this.builder
+        ? this.builder.toAPIFormat({
+            description,
+            visualizationType,
+            state,
+            title,
+            version,
+            references,
+          })
+        : {
+            description,
+            visualizationType,
+            state,
+            title,
+            version,
+            references,
+          };
+
+    const { data, meta, ...rest } = await this.http.post<LensCreateResponseBody>(
+      LENS_INTERNAL_VIS_API_PATH,
+      {
+        body: JSON.stringify(body),
+        query: options,
+        version: LENS_INTERNAL_API_VERSION,
+      }
+    );
+
+    if (useApiFormat && this.builder) {
+      const config = data as LensApiConfig;
+      return {
+        item: {
+          ...rest,
+          ...this.builder.fromAPIFormat(config),
+        },
+        meta,
+      };
+    }
+
+    if (!('state' in data)) {
+      // This should never happen, only to typeguard until fully supported
+      throw new Error('Failure to transform API Format');
+    }
+
+    return {
+      item: {
+        ...rest,
+        ...data,
+        description: data.description ?? undefined,
+      },
+      meta,
+    };
+  }
+
+  async update(
+    id: string,
+    { description, visualizationType, state, title, version }: LooseLensAttributes,
+    references: Reference[],
+    options: LensUpdateRequestQuery = {}
+  ): Promise<LensItemResponse> {
+    if (visualizationType === null) {
+      throw new Error('Missing visualization type');
+    }
+
+    const useApiFormat = this.builder?.isEnabled && this.builder?.isSupported(visualizationType);
+    const body: LensUpdateRequestBody =
+      useApiFormat && this.builder
+        ? this.builder.toAPIFormat({
+            description,
+            visualizationType,
+            state,
+            title,
+            version,
+            references,
+          })
+        : {
+            description,
+            visualizationType,
+            state,
+            title,
+            version,
+            references,
+          };
+
+    const { data, meta, ...rest } = await this.http.put<LensUpdateResponseBody>(
+      buildPath(`${LENS_INTERNAL_VIS_API_PATH}/{id}`, { id }),
+      {
+        body: JSON.stringify(body),
+        query: options,
+        version: LENS_INTERNAL_API_VERSION,
+      }
+    );
+
+    if (useApiFormat && this.builder) {
+      const config = data as LensApiConfig;
+      return {
+        item: {
+          ...rest,
+          ...this.builder.fromAPIFormat(config),
+        },
+        meta,
+      };
+    }
+
+    if (!('state' in data)) {
+      // This should never happen, only to typeguard until fully supported
+      throw new Error('Failure to transform API Format');
+    }
+
+    return {
+      item: {
+        ...rest,
+        ...data,
+        description: data.description ?? undefined,
+      },
+      meta,
+    };
+  }
+
+  async delete(id: string): Promise<{ success: boolean }> {
+    const response = await this.http.delete(
+      buildPath(`${LENS_INTERNAL_VIS_API_PATH}/{id}`, { id }),
+      {
+        asResponse: true,
+        version: LENS_INTERNAL_API_VERSION,
+      }
+    );
+    const success = response.response?.ok ?? false;
+
+    return { success };
+  }
+
+  async search({
+    query,
+    page,
+    perPage,
+    fields,
+    searchFields,
+  }: LensSearchRequestQuery): Promise<LensItem[]> {
+    const result = await this.http.get<LensSearchResponseBody>(LENS_INTERNAL_VIS_API_PATH, {
+      query: {
+        query,
+        page,
+        perPage,
+        fields,
+        searchFields,
+      } satisfies LensSearchRequestQuery,
+      version: LENS_INTERNAL_API_VERSION,
+    });
+
+    return result.data.map(({ id, data }) => {
+      const chartType = this.builder?.getType(data);
+
+      if (this.builder?.isEnabled && this.builder?.isSupported(chartType)) {
+        const config = data as LensApiConfig;
+        return {
+          id,
+          ...this.builder.fromAPIFormat(config),
+        } satisfies LensItem;
+      }
+
+      if (!('state' in data)) {
+        // This should never happen, only to typeguard until fully supported
+        throw new Error('Failure to transform API Format');
+      }
+
+      return {
+        id,
+        ...data,
+        description: data.description ?? undefined,
+      } satisfies LensItem;
+    });
+  }
 }

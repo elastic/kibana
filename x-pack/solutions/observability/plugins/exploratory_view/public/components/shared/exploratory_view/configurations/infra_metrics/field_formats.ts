@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldFormat } from '../../types';
+import type { FieldFormat } from '../../types';
 import {
   SYSTEM_CPU_PERCENTAGE_FIELD,
   DOCKER_CPU_PERCENTAGE_FIELD,

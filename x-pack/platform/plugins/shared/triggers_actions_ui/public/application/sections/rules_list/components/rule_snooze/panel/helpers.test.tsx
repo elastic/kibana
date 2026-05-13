@@ -71,5 +71,22 @@ describe('Snooze panel helpers', () => {
         })
       ).toEqual('Every month on the 4th Tuesday for 5 occurrences');
     });
+
+    test('should capitalize first letter and display correct month for yearly recurrence', () => {
+      expect(
+        scheduleSummary({
+          id: null,
+          duration: 864000,
+          rRule: {
+            dtstart: NOW,
+            tzid: 'UTC',
+            freq: RRuleFrequency.YEARLY,
+            interval: 1,
+            bymonth: [3],
+            bymonthday: [21],
+          },
+        })
+      ).toEqual('Every year on March 21');
+    });
   });
 });

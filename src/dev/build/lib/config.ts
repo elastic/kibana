@@ -10,27 +10,26 @@
 import Path from 'path';
 import os from 'os';
 
-import { REPO_ROOT, kibanaPackageJson, KibanaPackageJson } from '@kbn/repo-info';
+import { REPO_ROOT, kibanaPackageJson, type KibanaPackageJson } from '@kbn/repo-info';
 import {
-  Package,
+  type Package,
   getPackages,
-  PluginSelector,
-  PluginPackage,
+  type PluginSelector,
+  type PluginPackage,
   getPluginPackagesFilter,
 } from '@kbn/repo-packages';
-
-import { getVersionInfo, VersionInfo } from './version_info';
-import {
-  PlatformName,
-  PlatformArchitecture,
-  ALL_PLATFORMS,
-  SERVERLESS_PLATFORMS,
-} from './platform';
+import type { KibanaSolution } from '@kbn/projects-solutions-groups';
+import type { VersionInfo } from './version_info';
+import { getVersionInfo } from './version_info';
+import type { PlatformName, PlatformArchitecture } from './platform';
+import { ALL_PLATFORMS, SERVERLESS_PLATFORMS, DOWNLOAD_PLATFORMS } from './platform';
+import type { BuildOptions } from '../build_distributables';
 
 interface Options {
   isRelease: boolean;
   targetAllPlatforms: boolean;
   targetServerlessPlatforms: boolean;
+  skipServerless: boolean;
   versionQualifier?: string;
   dockerContextUseLocalArtifact: boolean | null;
   dockerCrossCompile: boolean;
@@ -53,6 +52,7 @@ export class Config {
     return new Config(
       opts.targetAllPlatforms,
       opts.targetServerlessPlatforms,
+      opts.skipServerless,
       kibanaPackageJson,
       nodeVersion,
       REPO_ROOT,
@@ -72,7 +72,8 @@ export class Config {
       {
         examples: opts.withExamplePlugins,
         testPlugins: opts.withTestPlugins,
-      }
+      },
+      opts
     );
   }
 
@@ -81,6 +82,7 @@ export class Config {
   constructor(
     private readonly targetAllPlatforms: boolean,
     private readonly targetServerlessPlatforms: boolean,
+    private readonly skipServerless: boolean,
     private readonly pkg: KibanaPackageJson,
     private readonly nodeVersion: string,
     private readonly repoRoot: string,
@@ -93,7 +95,8 @@ export class Config {
     private readonly dockerPush: boolean,
     public readonly isRelease: boolean,
     public readonly downloadFreshNode: boolean,
-    public readonly pluginSelector: PluginSelector
+    public readonly pluginSelector: PluginSelector,
+    public readonly buildOptions: Partial<BuildOptions>
   ) {
     this.pluginFilter = getPluginPackagesFilter(this.pluginSelector);
   }
@@ -177,7 +180,7 @@ export class Config {
       return SERVERLESS_PLATFORMS;
     }
     if (this.targetAllPlatforms) {
-      return ALL_PLATFORMS;
+      return this.skipServerless ? DOWNLOAD_PLATFORMS : ALL_PLATFORMS;
     }
 
     return [this.getPlatformForThisOs()];
@@ -193,7 +196,7 @@ export class Config {
       return SERVERLESS_PLATFORMS;
     }
     if (this.targetAllPlatforms) {
-      return ALL_PLATFORMS;
+      return this.skipServerless ? DOWNLOAD_PLATFORMS : ALL_PLATFORMS;
     }
 
     if (process.platform === 'linux' && process.arch === 'x64') {
@@ -272,7 +275,17 @@ export class Config {
     );
   }
 
+  getTarZstd() {
+    return Boolean(this.buildOptions.tarZstd);
+  }
+
   getDistPluginsFromRepo() {
     return getPackages(this.repoRoot).filter((p) => !p.isDevOnly() && this.pluginFilter(p));
+  }
+
+  getPrivateSolutionPackagesFromRepo(project: KibanaSolution) {
+    return getPackages(this.repoRoot).filter(
+      (p) => p.group === project && p.visibility === 'private'
+    );
   }
 }

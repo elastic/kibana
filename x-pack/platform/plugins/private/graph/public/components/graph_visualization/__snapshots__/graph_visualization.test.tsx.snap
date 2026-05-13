@@ -12,11 +12,11 @@ exports[`graph_visualization should render to svg elements 1`] = `
   <g>
     <g>
       <g
-        className="gphEdge--wrapper"
+        css="unknown styles"
         key="A..1-B..2"
       >
         <line
-          className="gphEdge gphEdge--selected"
+          className="gphEdge"
           strokeLinecap="round"
           style={
             Object {
@@ -43,11 +43,11 @@ exports[`graph_visualization should render to svg elements 1`] = `
         />
       </g>
       <g
-        className="gphEdge--wrapper"
+        css="unknown styles"
         key="B..2-C..3"
       >
         <line
-          className="gphEdge gphEdge--selected"
+          className="gphEdge"
           strokeLinecap="round"
           style={
             Object {
@@ -81,15 +81,10 @@ exports[`graph_visualization should render to svg elements 1`] = `
       onMouseDown={[Function]}
     >
       <circle
-        className="gphNode__circle gphNode__circle--selected"
+        css="unknown styles"
         cx={5}
         cy={5}
         r={10}
-        style={
-          Object {
-            "fill": "black",
-          }
-        }
       />
       <IconRenderer
         color="black"
@@ -115,14 +110,14 @@ exports[`graph_visualization should render to svg elements 1`] = `
       </text>
       <g>
         <circle
-          className="gphNode__markerCircle"
+          css="unknown styles"
           cx={5}
           cy={5}
           r="5"
           transform="translate(10,10)"
         />
         <text
-          className="gphNode__markerText"
+          css="unknown styles"
           textAnchor="middle"
           transform="translate(10,12)"
           x={5}
@@ -139,15 +134,10 @@ exports[`graph_visualization should render to svg elements 1`] = `
       onMouseDown={[Function]}
     >
       <circle
-        className="gphNode__circle"
+        css="unknown styles"
         cx={7}
         cy={9}
         r={10}
-        style={
-          Object {
-            "fill": "red",
-          }
-        }
       />
       <IconRenderer
         color="red"
@@ -179,15 +169,10 @@ exports[`graph_visualization should render to svg elements 1`] = `
       onMouseDown={[Function]}
     >
       <circle
-        className="gphNode__circle"
+        css="unknown styles"
         cx={12}
         cy={2}
         r={10}
-        style={
-          Object {
-            "fill": "yellow",
-          }
-        }
       />
       <IconRenderer
         color="yellow"

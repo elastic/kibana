@@ -7,17 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FunctionComponent, ReactElement, useState } from 'react';
-import {
-  EuiInMemoryTable,
-  EuiIcon,
-  EuiButtonIcon,
-  EuiBasicTableColumn,
-  EuiScreenReaderOnly,
-} from '@elastic/eui';
+import type { FunctionComponent, ReactElement } from 'react';
+import React, { useState } from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiInMemoryTable, EuiIcon, EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FormattedStatus, getLevelSortValue } from '../lib';
+import type { FormattedStatus } from '../lib';
+import { getLevelSortValue } from '../lib';
 import { StatusExpandedRow } from './status_expanded_row';
 
 interface StatusTableProps {
@@ -94,7 +91,7 @@ export const StatusTable: FunctionComponent<StatusTableProps> = ({ statuses }) =
         <EuiButtonIcon
           onClick={() => toggleDetails(item)}
           aria-label={itemIdToExpandedRowMap[item.id] ? collapseLabel : expandLabel}
-          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+          iconType={itemIdToExpandedRowMap[item.id] ? 'chevronSingleUp' : 'chevronSingleDown'}
         />
       ),
     },
@@ -116,6 +113,9 @@ export const StatusTable: FunctionComponent<StatusTableProps> = ({ statuses }) =
         },
       }}
       data-test-subj="statusBreakdown"
+      tableCaption={i18n.translate('core.statusPage.statusTable.tableCaption', {
+        defaultMessage: 'Status breakdown',
+      })}
     />
   );
 };

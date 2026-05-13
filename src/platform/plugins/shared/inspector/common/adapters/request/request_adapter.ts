@@ -10,7 +10,8 @@
 import { EventEmitter } from 'events';
 import { v4 as uuidv4 } from 'uuid';
 import { RequestResponder } from './request_responder';
-import { Request, RequestParams, RequestStatus } from './types';
+import type { Request, RequestParams } from './types';
+import { RequestStatus } from './types';
 
 /**
  * An generic inspector adapter to log requests.
@@ -21,10 +22,12 @@ import { Request, RequestParams, RequestStatus } from './types';
  */
 export class RequestAdapter extends EventEmitter {
   private requests: Map<string, Request>;
+  private responses: WeakMap<Request, RequestResponder>;
 
   constructor() {
     super();
     this.requests = new Map();
+    this.responses = new WeakMap();
   }
 
   /**
@@ -52,7 +55,17 @@ export class RequestAdapter extends EventEmitter {
     };
     this.requests.set(req.id, req);
     this._onChange();
-    return new RequestResponder(req, () => this._onChange());
+    const responder = new RequestResponder(req, () => this._onChange());
+    this.responses.set(req, responder);
+    return responder;
+  }
+
+  public loadFromEntries(
+    requests: Map<string, Request>,
+    responses: WeakMap<Request, RequestResponder>
+  ) {
+    this.requests = requests;
+    this.responses = responses;
   }
 
   public reset(): void {
@@ -61,12 +74,26 @@ export class RequestAdapter extends EventEmitter {
   }
 
   public resetRequest(id: string): void {
+    const req = this.requests.get(id);
     this.requests.delete(id);
+    if (req) {
+      this.responses.delete(req);
+    }
     this._onChange();
   }
 
   public getRequests(): Request[] {
     return Array.from(this.requests.values());
+  }
+
+  public getRequestsSince(time: number): Request[] {
+    return Array.from(this.requests.values().filter((req) => req.startTime >= time));
+  }
+
+  public getRequestEntries(): Array<[Request, RequestResponder]> {
+    return this.getRequests()
+      .map((req) => [req, this.responses.get(req)] as [Request, RequestResponder])
+      .filter(([_req, responder]) => responder != null);
   }
 
   private _onChange(): void {

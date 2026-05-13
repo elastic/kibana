@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { addBasePath } from '../../../services';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 export const registerStartRoute = ({
   router,
@@ -25,7 +25,7 @@ export const registerStartRoute = ({
       },
       validate: {
         body: schema.object({
-          jobIds: schema.arrayOf(schema.string()),
+          jobIds: schema.arrayOf(schema.string(), { maxSize: 1000 }),
         }),
         query: schema.maybe(
           schema.object({

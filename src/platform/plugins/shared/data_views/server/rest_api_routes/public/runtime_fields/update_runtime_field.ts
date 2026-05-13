@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
-import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { DataViewsService } from '../../../../common/data_views';
-import { RuntimeField } from '../../../../common/types';
+import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import type { DataViewsService } from '../../../../common/data_views';
+import type { RuntimeField } from '../../../../common/types';
 import { ErrorIndexPatternFieldNotFound } from '../../../error';
 import { handleErrors } from '../util/handle_errors';
 import { runtimeFieldSchemaUpdate } from '../../../schemas';
@@ -19,13 +19,14 @@ import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
 } from '../../../types';
+import type { SERVICE_KEY_TYPE } from '../../../constants';
 import {
   SPECIFIC_RUNTIME_FIELD_PATH,
   SPECIFIC_RUNTIME_FIELD_PATH_LEGACY,
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
-  SERVICE_KEY_TYPE,
   INITIAL_REST_VERSION,
+  UPDATE_RUNTIME_FIELD_SUMMARY,
   UPDATE_RUNTIME_FIELD_DESCRIPTION,
 } from '../../../constants';
 import { responseFormatter } from './response_formatter';
@@ -69,7 +70,7 @@ export const updateRuntimeField = async ({
 };
 
 const updateRuntimeFieldRouteFactory =
-  (path: string, serviceKey: SERVICE_KEY_TYPE, description?: string) =>
+  (path: string, serviceKey: SERVICE_KEY_TYPE, summary?: string, description?: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -78,79 +79,91 @@ const updateRuntimeFieldRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.post({ path, access: 'public', description }).addVersion(
-      {
-        version: INITIAL_REST_VERSION,
+    router.versioned
+      .post({
+        path,
+        access: 'public',
+        summary,
+        description,
         security: {
           authz: {
             requiredPrivileges: ['indexPatterns:manage'],
           },
         },
-        validate: {
-          request: {
-            params: schema.object({
-              id: schema.string({
-                minLength: 1,
-                maxLength: 1_000,
+      })
+      .addVersion(
+        {
+          version: INITIAL_REST_VERSION,
+          validate: {
+            request: {
+              params: schema.object({
+                id: schema.string({
+                  minLength: 1,
+                  maxLength: 1_000,
+                  meta: { description: 'The unique identifier of the data view.' },
+                }),
+                name: schema.string({
+                  minLength: 1,
+                  maxLength: 1_000,
+                  meta: { description: 'The name of the runtime field to update.' },
+                }),
               }),
-              name: schema.string({
-                minLength: 1,
-                maxLength: 1_000,
+              body: schema.object({
+                name: schema.never(),
+                runtimeField: runtimeFieldSchemaUpdate,
               }),
-            }),
-            body: schema.object({
-              name: schema.never(),
-              runtimeField: runtimeFieldSchemaUpdate,
-            }),
-          },
-          response: {
-            200: {
-              body: runtimeResponseSchema,
+            },
+            response: {
+              200: {
+                body: runtimeResponseSchema,
+              },
             },
           },
         },
-      },
-      handleErrors(async (ctx, req, res) => {
-        const core = await ctx.core;
-        const savedObjectsClient = core.savedObjects.client;
-        const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-        const [, , { dataViewsServiceFactory }] = await getStartServices();
-        const dataViewsService = await dataViewsServiceFactory(
-          savedObjectsClient,
-          elasticsearchClient,
-          req
-        );
-        const id = req.params.id;
-        const name = req.params.name;
-        const runtimeField = req.body.runtimeField as Partial<RuntimeField>;
+        handleErrors(async (ctx, req, res) => {
+          const core = await ctx.core;
+          const savedObjectsClient = core.savedObjects.client;
+          const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
+          const [, , { dataViewsServiceFactory }] = await getStartServices();
+          const dataViewsService = await dataViewsServiceFactory(
+            savedObjectsClient,
+            elasticsearchClient,
+            req
+          );
+          const id = req.params.id;
+          const name = req.params.name;
+          const runtimeField = req.body.runtimeField as Partial<RuntimeField>;
 
-        const { dataView, fields } = await updateRuntimeField({
-          dataViewsService,
-          usageCollection,
-          counterName: `${req.route.method} ${path}`,
-          id,
-          name,
-          runtimeField,
-        });
+          const { dataView, fields } = await updateRuntimeField({
+            dataViewsService,
+            usageCollection,
+            counterName: `${req.route.method} ${path}`,
+            id,
+            name,
+            runtimeField,
+          });
 
-        const response: RuntimeResponseType = await responseFormatter({
-          serviceKey,
-          dataView,
-          fields,
-        });
+          const response: RuntimeResponseType = await responseFormatter({
+            serviceKey,
+            dataView,
+            fields,
+          });
 
-        return res.ok(response);
-      })
-    );
+          return res.ok(response);
+        })
+      );
   };
 
 export const registerUpdateRuntimeFieldRoute = updateRuntimeFieldRouteFactory(
   SPECIFIC_RUNTIME_FIELD_PATH,
   SERVICE_KEY,
+  UPDATE_RUNTIME_FIELD_SUMMARY,
   UPDATE_RUNTIME_FIELD_DESCRIPTION
 );
 
 export const registerUpdateRuntimeFieldRouteLegacy = updateRuntimeFieldRouteFactory(
   SPECIFIC_RUNTIME_FIELD_PATH_LEGACY,
-  SERVICE_KEY_LEGACY
+  SERVICE_KEY_LEGACY,
+  UPDATE_RUNTIME_FIELD_SUMMARY,
+  'Deprecated in 8.0.0. Use the data_views/data_view/{id}/runtime_field/{name} endpoint instead.'
 );

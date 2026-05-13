@@ -8,16 +8,15 @@
  */
 
 import React, {
-  useRef,
   useMemo,
-  useState,
-  useLayoutEffect,
   useCallback,
   Fragment,
   type ComponentProps,
   type FC,
   type ReactElement,
+  type ReactNode,
 } from 'react';
+import { Global } from '@emotion/react';
 import {
   EuiButton,
   EuiModal,
@@ -61,10 +60,12 @@ export interface IModalTabDeclaration<S = {}> extends EuiTabProps, ITabDeclarati
   modalActionBtn?: IModalTabActionBtn<S>;
 }
 
-export interface ITabbedModalInner extends Pick<ComponentProps<typeof EuiModal>, 'onClose'> {
+export interface ITabbedModalInner
+  extends Pick<ComponentProps<typeof EuiModal>, 'onClose' | 'outsideClickCloses'> {
   modalWidth?: number;
   modalTitle?: string;
   anchorElement?: HTMLElement;
+  aboveTabsContent?: ReactNode;
   'data-test-subj'?: string;
 }
 
@@ -73,42 +74,15 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
   modalTitle,
   modalWidth,
   anchorElement,
+  aboveTabsContent: AboveTabsContent,
+  outsideClickCloses,
   ...props
 }) => {
   const { tabs, state, dispatch } =
     useModalContext<Array<IModalTabDeclaration<Record<string, any>>>>();
-  const { selectedTabId, defaultSelectedTabId } = state.meta;
+  const { selectedTabId } = state.meta;
   const tabbedModalHTMLId = useGeneratedHtmlId({ prefix: 'tabbedModal' });
-  const tabbedModalHeadingHTMLId = useGeneratedHtmlId({ prefix: 'tabbedModal' });
-  const defaultTabCoordinates = useRef(new Map<string, Pick<DOMRect, 'top'>>());
-  const [translateYValue, setTranslateYValue] = useState(0);
-
-  const onTabContentRender = useCallback(() => {
-    const tabbedModal = document.querySelector(`[id="${tabbedModalHTMLId}"]`) as HTMLDivElement;
-
-    if (!defaultTabCoordinates.current.get(defaultSelectedTabId)) {
-      // on initial render the modal animates into it's final position
-      // hence the need to wait till said animation has completed
-      tabbedModal.onanimationend = () => {
-        const { top } = tabbedModal.getBoundingClientRect();
-        defaultTabCoordinates.current.set(defaultSelectedTabId, { top });
-      };
-    } else {
-      let translateYOverride = 0;
-
-      if (defaultSelectedTabId !== selectedTabId) {
-        const defaultTabData = defaultTabCoordinates.current.get(defaultSelectedTabId);
-
-        const rect = tabbedModal.getBoundingClientRect();
-
-        translateYOverride = translateYValue + (defaultTabData?.top! - rect.top);
-      }
-
-      if (translateYOverride !== translateYValue) {
-        setTranslateYValue(translateYOverride);
-      }
-    }
-  }, [tabbedModalHTMLId, defaultSelectedTabId, selectedTabId, translateYValue]);
+  const tabbedModalHeadingHTMLId = useGeneratedHtmlId({ prefix: 'tabbedModalHeading' });
 
   const selectedTabState = useMemo(
     () => (selectedTabId ? state[selectedTabId] : {}),
@@ -127,28 +101,30 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
   );
 
   const renderTabs = useCallback(() => {
-    return tabs.map((tab, index) => {
-      return (
-        <EuiTab
-          key={index}
-          onClick={() => onSelectedTabChanged(tab.id)}
-          isSelected={tab.id === selectedTabId}
-          disabled={tab.disabled}
-          prepend={tab.prepend}
-          append={tab.append}
-          data-test-subj={tab.id}
-        >
-          {tab.name}
-        </EuiTab>
-      );
-    });
-  }, [onSelectedTabChanged, selectedTabId, tabs]);
+    if (tabs.length === 1) {
+      return null;
+    }
 
-  const modalPositionOverrideStyles: React.CSSProperties = {
-    transform: `translateY(${translateYValue}px)`,
-    transformOrigin: 'top',
-    willChange: 'transform',
-  };
+    return (
+      <EuiTabs>
+        {tabs.map((tab, index) => {
+          return (
+            <EuiTab
+              key={index}
+              onClick={() => onSelectedTabChanged(tab.id)}
+              isSelected={tab.id === selectedTabId}
+              disabled={tab.disabled}
+              prepend={tab.prepend}
+              append={tab.append}
+              data-test-subj={tab.id}
+            >
+              {tab.name}
+            </EuiTab>
+          );
+        })}
+      </EuiTabs>
+    );
+  }, [onSelectedTabChanged, selectedTabId, tabs]);
 
   return (
     <EuiModal
@@ -161,29 +137,36 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
       data-test-subj={props['data-test-subj']}
       css={{
         ...(modalWidth ? { width: modalWidth } : {}),
-        ...modalPositionOverrideStyles,
       }}
       aria-labelledby={tabbedModalHeadingHTMLId}
+      outsideClickCloses={outsideClickCloses}
     >
+      <Global
+        styles={{
+          // overrides so modal retains a fixed position from top of viewport, despite having content of varying heights
+          [`.euiOverlayMask:has([id="${tabbedModalHTMLId}"])`]: {
+            alignItems: 'flex-start',
+            paddingBlockStart: '20vh',
+          },
+        }}
+      />
       <EuiModalHeader>
         <EuiModalHeaderTitle id={tabbedModalHeadingHTMLId}>{modalTitle}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <Fragment>
-          <EuiTabs>{renderTabs()}</EuiTabs>
-          <EuiSpacer size="m" />
-          {React.createElement(function RenderSelectedTabContent() {
-            useLayoutEffect(onTabContentRender, []);
-            return (
-              <SelectedTabContent
-                {...{
-                  state: selectedTabState,
-                  dispatch,
-                }}
-              />
-            );
-          })}
-        </Fragment>
+        {AboveTabsContent && (
+          <div data-test-subj="tabbedModal-above-tabs-content">{AboveTabsContent}</div>
+        )}
+        <Fragment>{renderTabs()}</Fragment>
+        <EuiSpacer size="m" />
+        <div css={{ display: 'contents' }} data-test-subj={`tabbedModal-${selectedTabId}-content`}>
+          <SelectedTabContent
+            {...{
+              state: selectedTabState,
+              dispatch,
+            }}
+          />
+        </div>
       </EuiModalBody>
       {modalActionBtn?.id !== undefined && selectedTabState && (
         <EuiModalFooter>

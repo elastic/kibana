@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IBasePath } from '@kbn/core/server';
+import type { IBasePath } from '@kbn/core/server';
 import { setTLSRecoveredAlertsContext } from './message_utils';
-import { TLSLatestPing } from './tls_rule_executor';
+import type { TLSLatestPing } from './tls_rule_executor';
 
 describe('setTLSRecoveredAlertsContext', () => {
   const timestamp = new Date().toISOString();
@@ -16,6 +16,7 @@ describe('setTLSRecoveredAlertsContext', () => {
   const basePath = {
     publicBaseUrl: 'https://localhost:5601',
   } as IBasePath;
+
   const alertState = {
     summary: 'test-summary',
     status: 'has expired',

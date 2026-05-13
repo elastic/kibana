@@ -12,20 +12,20 @@ import type { DataViewBase } from '@kbn/es-query';
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import type { FieldSpec, IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
-
+import { buildBrowserFields } from '../../../data_view_manager/utils/build_browser_fields';
 import { useKibana } from '../../lib/kibana';
 import * as i18n from './translations';
-import { getDataViewStateFromIndexFields } from './use_data_view';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import type { ENDPOINT_FIELDS_SEARCH_STRATEGY } from '../../../../common/endpoint/constants';
 
 export type { BrowserFields };
 
 export function getAllBrowserFields(browserFields: BrowserFields): Array<Partial<FieldSpec>> {
-  const result: Array<Partial<FieldSpec>> = [];
+  let result: Array<Partial<FieldSpec>> = [];
   for (const namespace of Object.values(browserFields)) {
     if (namespace.fields) {
-      result.push(...Object.values(namespace.fields));
+      const namespaceFields = Object.values(namespace.fields);
+      result = result.concat(namespaceFields);
     }
   }
   return result;
@@ -36,9 +36,11 @@ export function getAllBrowserFields(browserFields: BrowserFields): Array<Partial
  * @param browserFields
  * @returns
  */
-export const getAllFieldsByName = (
-  browserFields: BrowserFields
-): { [fieldName: string]: Partial<FieldSpec> } => keyBy('name', getAllBrowserFields(browserFields));
+export const getAllFieldsByName = memoizeOne(
+  (browserFields: BrowserFields): { [fieldName: string]: Partial<FieldSpec> } =>
+    keyBy('name', getAllBrowserFields(browserFields)),
+  (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
+);
 
 export const getIndexFields = memoizeOne(
   (title: string, fields: IIndexPatternFieldList): DataViewBase =>
@@ -112,10 +114,7 @@ export const useFetchIndex = (
           abortCtrl.current = new AbortController();
           const dv = await data.dataViews.create({ title: iNames.join(','), allowNoIndex: true });
           const dataView = dv.toSpec();
-          const { browserFields } = getDataViewStateFromIndexFields(
-            iNames.join(','),
-            dataView.fields
-          );
+          const browserFields = buildBrowserFields(dv?.fields);
 
           previousIndexesName.current = dv.getIndexPattern().split(',');
 

@@ -18,7 +18,12 @@ export {
 export { builtInComparators, builtInAggregationTypes, builtInGroupByTypes } from './constants';
 export { connectorDeprecatedMessage, deprecatedMessage } from './connectors_selection';
 export type { IOption } from './index_controls';
-export { getFields, getIndexOptions, firstFieldOption } from './index_controls';
+export {
+  convertFieldSpecToFieldOption,
+  getFields,
+  getIndexOptions,
+  firstFieldOption,
+} from './index_controls';
 export { getTimeFieldOptions, getTimeOptions, useKibana } from './lib';
 export type {
   AggregationType,
@@ -32,7 +37,7 @@ export {
   buildAggregation,
   isCountAggregation,
   isGroupAggregation,
+  isPerRowAggregation,
   parseAggregationResults,
   NORMALIZED_FIELD_TYPES,
 } from '../../common';
-export type { ParsedAggregationGroup } from '../../common';

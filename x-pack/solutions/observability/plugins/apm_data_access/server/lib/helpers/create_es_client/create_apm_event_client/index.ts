@@ -9,7 +9,7 @@ import type {
   EqlSearchRequest,
   FieldCapsRequest,
   FieldCapsResponse,
-  MsearchMultisearchBody,
+  SearchSearchRequestBody,
   MsearchMultisearchHeader,
   TermsEnumRequest,
   TermsEnumResponse,
@@ -17,20 +17,19 @@ import type {
 import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { InferSearchResponseOf } from '@kbn/es-types';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { unwrapEsResponse } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/apm-types-shared';
 import { compact, omit } from 'lodash';
 import type { ValuesType } from 'utility-types';
 import type { APMError, Metric, Span, Transaction, Event } from '@kbn/apm-types/es_schemas_ui';
-import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
-import type { DataTier } from '@kbn/observability-shared-plugin/common';
+import { type InspectResponse, type DataTier } from '@kbn/observability-shared-plugin/common';
+import { unwrapEsResponse } from '@kbn/observability-utils-server/es/unwrap_es_response';
 import { excludeTiersQuery } from '@kbn/observability-utils-common/es/queries/exclude_tiers_query';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { withApmSpan } from '../../../../utils';
 import type { ApmDataSource } from '../../../../../common/data_source';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
-import { callAsyncWithDebug, getDebugBody, getDebugTitle } from '../call_async_with_debug';
+import { callAsyncWithDebug } from '../call_async_with_debug';
 import type { ProcessorEventOfDocumentType } from '../document_type';
-import type { APMIndices } from '../../../..';
 import { getRequestBase, processorEventsToIndex } from './get_request_base';
 import { getDataTierFilterCombined } from '../../tier_filter';
 
@@ -89,6 +88,7 @@ export interface APMEventClientConfig {
     includeFrozen: boolean;
     inspectableEsQueriesMap?: WeakMap<KibanaRequest, InspectResponse>;
     excludedDataTiers?: DataTier[];
+    projectRouting?: string;
   };
 }
 
@@ -102,6 +102,7 @@ export class APMEventClient {
   private readonly includeFrozen: boolean;
   private readonly excludedDataTiers: DataTier[];
   private readonly inspectableEsQueriesMap?: WeakMap<KibanaRequest, InspectResponse>;
+  private readonly projectRouting?: string;
 
   constructor(config: APMEventClientConfig) {
     this.esClient = config.esClient;
@@ -111,6 +112,7 @@ export class APMEventClient {
     this.includeFrozen = config.options.includeFrozen;
     this.excludedDataTiers = config.options.excludedDataTiers ?? [];
     this.inspectableEsQueriesMap = config.options.inspectableEsQueriesMap;
+    this.projectRouting = config.options.projectRouting;
   }
 
   private callAsyncWithDebug<T extends { body: any }>({
@@ -125,14 +127,6 @@ export class APMEventClient {
     operationName: string;
   }): Promise<T['body']> {
     return callAsyncWithDebug({
-      getDebugMessage: () => ({
-        body: getDebugBody({
-          params,
-          requestType,
-          operationName,
-        }),
-        title: getDebugTitle(this.request),
-      }),
       isCalledWithInternalUser: false,
       debug: this.debug,
       request: this.request,
@@ -157,11 +151,13 @@ export class APMEventClient {
 
   async search<TParams extends APMEventESSearchRequest>(
     operationName: string,
-    params: TParams
+    params: TParams,
+    options?: { skipProcessorEventFilter?: boolean }
   ): Promise<TypedSearchResponse<TParams>> {
     const { index, filters } = getRequestBase({
       apm: params.apm,
       indices: this.indices,
+      skipProcessorEventFilter: options?.skipProcessorEventFilter,
     });
 
     if (this.excludedDataTiers.length > 0) {
@@ -179,6 +175,7 @@ export class APMEventClient {
       },
       body: params.body,
       ...(this.includeFrozen ? { ignore_throttled: false } : {}),
+      ...(this.projectRouting ? { project_routing: this.projectRouting } : {}),
       ignore_unavailable: true,
       preference: 'any',
       expand_wildcards: ['open' as const, 'hidden' as const],
@@ -216,6 +213,7 @@ export class APMEventClient {
         },
       },
       ...(this.includeFrozen ? { ignore_throttled: false } : {}),
+      ...(this.projectRouting ? { project_routing: this.projectRouting } : {}),
       ignore_unavailable: true,
       preference: 'any',
       expand_wildcards: ['open' as const, 'hidden' as const],
@@ -247,7 +245,7 @@ export class APMEventClient {
           filters.push(...excludeTiersQuery(this.excludedDataTiers));
         }
 
-        const searchParams: [MsearchMultisearchHeader, MsearchMultisearchBody] = [
+        const searchParams: [MsearchMultisearchHeader, SearchSearchRequestBody] = [
           {
             index,
             preference: 'any',
@@ -275,6 +273,7 @@ export class APMEventClient {
         this.esClient.msearch(
           {
             searches,
+            ...(this.projectRouting ? { project_routing: this.projectRouting } : {}),
           },
           opts
         ) as unknown as Promise<{
@@ -292,6 +291,7 @@ export class APMEventClient {
     const requestParams = {
       ...omit(params, 'apm'),
       index,
+      ...(this.projectRouting ? { project_routing: this.projectRouting } : {}),
     };
 
     return this.callAsyncWithDebug({
@@ -311,6 +311,7 @@ export class APMEventClient {
     const requestParams: Omit<APMEventFieldCapsRequest, 'apm'> & { index: string[] } = {
       ...omit(params, 'apm'),
       index,
+      ...(this.projectRouting ? { project_routing: this.projectRouting } : {}),
       index_filter: getDataTierFilterCombined({
         filter: params.index_filter,
         excludedDataTiers: this.excludedDataTiers,
@@ -329,6 +330,12 @@ export class APMEventClient {
     operationName: string,
     params: APMEventTermsEnumRequest
   ): Promise<TermsEnumResponse> {
+    // The terms_enum API does not support project_routing. Return empty
+    // results so callers fall back to a search-based approach that does.
+    if (this.projectRouting) {
+      return { terms: [], _shards: { total: 0, successful: 0, failed: 0 }, complete: false };
+    }
+
     const index = processorEventsToIndex(params.apm.events, this.indices);
 
     const requestParams: Omit<APMEventTermsEnumRequest, 'apm'> & { index: string } = {

@@ -10,12 +10,12 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import type { estypes } from '@elastic/elasticsearch';
 
 import { EuiCallOut, EuiSpacer, EuiLink } from '@elastic/eui';
+import type { CloudInfo } from '@kbn/ml-common-types/ml_server_info';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { JOB_STATE } from '../../../../../common/constants/states';
 import { mlApiProvider } from '../../../services/ml_api_service';
 import { HttpService } from '../../../services/http_service';
-import type { CloudInfo } from '../../../services/ml_server_info';
 import { extractDeploymentId } from '../../../services/ml_server_info';
 
 interface Props {
@@ -32,6 +32,7 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
 
   const [unassignedJobCount, setUnassignedJobCount] = useState<number>(0);
   const [cloudInfo, setCloudInfo] = useState<CloudInfo | null>(null);
+  const [showNodeInfo, setShowNodeInfo] = useState<boolean>(false);
 
   const checkNodes = useCallback(async () => {
     try {
@@ -66,6 +67,7 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
       const resp = await mlApi.mlInfo();
       const cloudId = resp.cloudId ?? null;
       const isCloudTrial = resp.isCloudTrial === true;
+      setShowNodeInfo(resp.showNodeInfo);
       setCloudInfo({
         isCloud: cloudId !== null,
         cloudId,
@@ -106,7 +108,7 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
           />
         }
         color="primary"
-        iconType="iInCircle"
+        iconType="info"
       >
         <div>
           <FormattedMessage
@@ -118,6 +120,7 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
           />
           <EuiSpacer size="s" />
           {cloudInfo &&
+            showNodeInfo &&
             (cloudInfo.isCloud ? (
               <>
                 <FormattedMessage

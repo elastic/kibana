@@ -8,7 +8,7 @@
 import React, { Component } from 'react';
 import type { Adapters } from '@kbn/inspector-plugin/public';
 import { MapDetails } from './map_details';
-import { Stats } from './types';
+import type { Stats } from './types';
 
 interface Props {
   adapters: Adapters;

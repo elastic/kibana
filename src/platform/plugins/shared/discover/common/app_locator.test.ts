@@ -14,9 +14,12 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import { mockStorage } from '@kbn/kibana-utils-plugin/public/storage/hashed_item_store/mock';
 import { FilterStateStore } from '@kbn/es-query';
-import { DiscoverAppLocatorDefinition } from './app_locator';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { DiscoverAppLocatorParams } from './app_locator';
+import { DISCOVER_APP_LOCATOR } from './app_locator';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { createDataViewDataSource, createEsqlDataSource } from './data_sources';
+import { appLocatorGetLocationCommon } from './app_locator_get_location';
+import { NEW_TAB_ID } from './constants';
 
 const dataViewId: string = 'c367b774-a4c2-11ea-bb37-0242ac130002';
 const savedSearchId: string = '571aaf70-4c88-11e8-b3d7-01146121b73d';
@@ -26,11 +29,14 @@ interface SetupParams {
 }
 
 const setup = async ({ useHash = false }: SetupParams = {}) => {
-  const locator = new DiscoverAppLocatorDefinition({ useHash, setStateToKbnUrl });
-
-  return {
-    locator,
+  const locator = {
+    id: DISCOVER_APP_LOCATOR,
+    getLocation: (params: DiscoverAppLocatorParams) => {
+      return appLocatorGetLocationCommon({ useHash, setStateToKbnUrl }, params);
+    },
   };
+
+  return { locator };
 };
 
 beforeEach(() => {
@@ -231,6 +237,45 @@ describe('Discover url generator', () => {
     expect(path).toContain('__test__');
   });
 
+  test('can specify a tab id', async () => {
+    const { locator } = await setup();
+    const { path } = await locator.getLocation({
+      tab: { id: '__test__' },
+    });
+
+    expect(path).toMatchInlineSnapshot(`"#/?_tab=(tabId:__test__)"`);
+  });
+
+  test('can specify to open in a new tab', async () => {
+    const { locator } = await setup();
+    const { path } = await locator.getLocation({
+      tab: { id: NEW_TAB_ID, label: 'My new tab' },
+      query: {
+        esql: 'SELECT * FROM test',
+      },
+      searchSessionId: '__test__',
+    });
+
+    expect(path).toMatchInlineSnapshot(
+      `"#/?searchSessionId=__test__&_a=(dataSource:(type:esql),query:(esql:'SELECT%20*%20FROM%20test'))&_tab=(tabId:new,tabLabel:'My%20new%20tab')"`
+    );
+  });
+
+  test('can create a shared link with a selected tab and the fallback label', async () => {
+    const { locator } = await setup();
+    const { path } = await locator.getLocation({
+      tab: { id: 'tab_test_id', label: 'My new tab' },
+      query: {
+        esql: 'SELECT * FROM test',
+      },
+      savedSearchId: 'saved_search_test_id',
+    });
+
+    expect(path).toMatchInlineSnapshot(
+      `"#/view/saved_search_test_id?_a=(dataSource:(type:esql),query:(esql:'SELECT%20*%20FROM%20test'))&_tab=(tabId:tab_test_id,tabLabel:'My%20new%20tab')"`
+    );
+  });
+
   test('can specify columns, grid, interval, sort and savedQuery', async () => {
     const { locator } = await setup();
     const { path } = await locator.getLocation({
@@ -267,7 +312,27 @@ describe('Discover url generator', () => {
     const { locator } = await setup();
     const { state } = await locator.getLocation({ dataViewSpec: dataViewSpecMock });
 
-    expect(state.dataViewSpec).toEqual(dataViewSpecMock);
+    expect((state as Record<string, unknown>).dataViewSpec).toEqual(dataViewSpecMock);
+  });
+
+  describe('when esqlControls is used', () => {
+    test('should return esqlControls', async () => {
+      const esqlControls = {};
+
+      const { locator } = await setup();
+      const { state } = await locator.getLocation({ esqlControls });
+
+      expect((state as Record<string, unknown>).esqlControls).toEqual(esqlControls);
+    });
+  });
+
+  describe('when esqlControls is not used', () => {
+    test('esqlControls shoud be undefined', async () => {
+      const { locator } = await setup();
+      const { state } = await locator.getLocation({});
+
+      expect((state as Record<string, unknown>).esqlControls).toBeUndefined();
+    });
   });
 
   describe('useHash property', () => {

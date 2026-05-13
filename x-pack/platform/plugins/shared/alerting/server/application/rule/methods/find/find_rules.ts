@@ -7,8 +7,9 @@
 
 import Boom from '@hapi/boom';
 import { pick } from 'lodash';
-import { KueryNode } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import {
   buildConsumersFilter,
   buildRuleTypeIdsFilter,
@@ -16,7 +17,7 @@ import {
   combineFilters,
 } from '../../../../rules_client/common/filters';
 import { AlertingAuthorizationEntity } from '../../../../authorization/types';
-import { SanitizedRule, Rule as DeprecatedRule, RawRule } from '../../../../types';
+import type { SanitizedRule, Rule as DeprecatedRule, RawRule } from '../../../../types';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
   mapSortField,
@@ -36,14 +37,16 @@ import { formatLegacyActions, getAlertFromRaw } from '../../../../rules_client/l
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { FindRulesParams } from './types';
 import { findRulesParamsSchema } from './schemas';
-import { Rule, RuleParams } from '../../types';
+import type { Rule, RuleParams } from '../../types';
 import { findRulesSo } from '../../../../data/rule';
 
 export interface FindResult<Params extends RuleParams> {
   page: number;
   perPage: number;
   total: number;
+  searchAfter?: SortResults;
   data: Array<SanitizedRule<Params>>;
+  aggregations?: Record<string, unknown>;
 }
 
 export async function findRules<Params extends RuleParams = never>(
@@ -134,6 +137,7 @@ export async function findRules<Params extends RuleParams = never>(
     per_page: perPage,
     total,
     saved_objects: data,
+    aggregations,
   } = await findRulesSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     savedObjectsFindOptions: {
@@ -143,6 +147,8 @@ export async function findRules<Params extends RuleParams = never>(
       fields: fields ? includeFieldsRequiredForAuthentication(fields) : fields,
     },
   });
+
+  const searchAfter = data.length > 0 ? data[data.length - 1]?.sort : undefined;
 
   const siemRules: Rule[] = [];
 
@@ -210,6 +216,8 @@ export async function findRules<Params extends RuleParams = never>(
       page,
       perPage,
       total,
+      ...(searchAfter !== undefined ? { searchAfter } : {}),
+      ...(aggregations !== undefined ? { aggregations } : {}),
       // replace siem formatted rules
       data: authorizedData.map((rule) => formattedRulesMap[rule.id] ?? rule),
     };
@@ -219,6 +227,8 @@ export async function findRules<Params extends RuleParams = never>(
     page,
     perPage,
     total,
+    ...(searchAfter !== undefined ? { searchAfter } : {}),
+    ...(aggregations !== undefined ? { aggregations } : {}),
     data: authorizedData as Array<SanitizedRule<Params>>,
   };
 }

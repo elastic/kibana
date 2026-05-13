@@ -8,7 +8,7 @@
  */
 
 import { REFERENCE_LINE_LAYER, REFERENCE_LINE_DECORATION_CONFIG } from '../constants';
-import { ReferenceLineLayerFn } from '../types';
+import type { ReferenceLineLayerFn } from '../types';
 import { strings } from '../i18n';
 
 export const referenceLineLayerFunction: ReferenceLineLayerFn = {
@@ -42,7 +42,7 @@ export const referenceLineLayerFunction: ReferenceLineLayerFn = {
     },
   },
   async fn(input, args, context) {
-    const { referenceLineLayerFn } = await import('./reference_line_layer_fn');
+    const { referenceLineLayerFn } = await import('./expression_module');
     return await referenceLineLayerFn(input, args, context);
   },
 };

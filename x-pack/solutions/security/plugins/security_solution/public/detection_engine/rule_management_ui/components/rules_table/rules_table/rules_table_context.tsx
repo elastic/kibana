@@ -15,10 +15,14 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { getGapRange } from '../../../../rule_gaps/api/hooks/utils';
 import { useFetchRulesSnoozeSettingsQuery } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings_query';
 import { useGetGapsSummaryByRuleIds } from '../../../../rule_gaps/api/hooks/use_get_gaps_summary_by_rule_id';
-import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
+import {
+  DEFAULT_RULES_TABLE_REFRESH_SETTING,
+  EXCLUDED_GAP_REASONS_KEY,
+} from '../../../../../../common/constants';
+import { useGapAutoFillSchedulerContext } from '../../../../rule_gaps/context/gap_auto_fill_scheduler_context';
+import { convertRulesFilterToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
@@ -30,6 +34,7 @@ import type {
   RulesSnoozeSettingsMap,
   SortingOptions,
 } from '../../../../rule_management/logic/types';
+import type { WarningSchema } from '../../../../../../common/api/detection_engine';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
 import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
 import {
@@ -41,6 +46,7 @@ import {
 import { RuleSource } from './rules_table_saved_state';
 import { useRulesTableSavedState } from './use_rules_table_saved_state';
 import { defaultRangeValue } from '../../../../rule_gaps/constants';
+import { getGapRange } from '../../../../rule_gaps/api/hooks/utils';
 
 interface RulesSnoozeSettings {
   /**
@@ -131,6 +137,10 @@ export interface RulesTableState {
    * Rules snooze settings for the current rules
    */
   rulesSnoozeSettings: RulesSnoozeSettings;
+  /**
+   * Warning, such as when the number of rules with gaps is greater than the limit.
+   */
+  warnings?: WarningSchema[];
 }
 
 export type LoadingRuleAction =
@@ -142,6 +152,7 @@ export type LoadingRuleAction =
   | 'load'
   | 'edit'
   | 'run'
+  | 'fill_gaps'
   | null;
 
 export interface LoadingRules {
@@ -190,12 +201,15 @@ interface RulesTableContextProviderProps {
 }
 
 export const RulesTableContextProvider = ({ children }: RulesTableContextProviderProps) => {
+  const { scheduler } = useGapAutoFillSchedulerContext();
+  const activeSchedulerId = scheduler?.enabled ? scheduler.id : undefined;
   const [autoRefreshSettings] = useUiSetting$<{
     on: boolean;
     value: number;
     idleTimeout: number;
   }>(DEFAULT_RULES_TABLE_REFRESH_SETTING);
-  const { sessionStorage } = useKibana().services;
+  const { sessionStorage, uiSettings } = useKibana().services;
+  const excludedReasons = uiSettings.get<string[]>(EXCLUDED_GAP_REASONS_KEY);
   const {
     filter: savedFilter,
     sorting: savedSorting,
@@ -205,15 +219,16 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     filter: savedFilter?.searchTerm ?? DEFAULT_FILTER_OPTIONS.filter,
     tags: savedFilter?.tags ?? DEFAULT_FILTER_OPTIONS.tags,
-    showCustomRules:
-      savedFilter?.source === RuleSource.Custom ?? DEFAULT_FILTER_OPTIONS.showCustomRules,
-    showElasticRules:
-      savedFilter?.source === RuleSource.Prebuilt ?? DEFAULT_FILTER_OPTIONS.showElasticRules,
+    showCustomRules: savedFilter?.source
+      ? savedFilter.source === RuleSource.Custom
+      : DEFAULT_FILTER_OPTIONS.showCustomRules,
+    showElasticRules: savedFilter?.source
+      ? savedFilter.source === RuleSource.Prebuilt
+      : DEFAULT_FILTER_OPTIONS.showElasticRules,
     enabled: savedFilter?.enabled,
     ruleExecutionStatus:
       savedFilter?.ruleExecutionStatus ?? DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
-    gapSearchRange: DEFAULT_FILTER_OPTIONS.gapSearchRange,
-    showRulesWithGaps: false,
+    gapFillStatuses: DEFAULT_FILTER_OPTIONS.gapFillStatuses,
   });
 
   const [sortingOptions, setSortingOptions] = useState<SortingOptions>({
@@ -231,15 +246,30 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
   const [page, setPage] = useState(savedPagination?.page ?? DEFAULT_PAGE);
   const [perPage, setPerPage] = useState(savedPagination?.perPage ?? DEFAULT_RULES_PER_PAGE);
   const [selectedRuleIds, setSelectedRuleIds] = useState<string[]>([]);
-  const [gapRangeForSearch, setGapRangeForSearch] = useState<{
-    start: string;
-    end: string;
-  }>();
   const autoRefreshBeforePause = useRef<boolean | null>(null);
 
   const isActionInProgress = loadingRules.ids.length > 0;
 
   const pagination = useMemo(() => ({ page, perPage }), [page, perPage]);
+
+  const findRulesQueryArgs = useMemo(() => {
+    const searchTerm = filterOptions.filter?.trim();
+    const structuredKql = convertRulesFilterToKQL({ ...filterOptions, filter: '' });
+
+    const shouldApplyGaps = Boolean(filterOptions.gapFillStatuses?.length);
+    const gapRange = shouldApplyGaps ? getGapRange(defaultRangeValue) : undefined;
+
+    return {
+      filter: structuredKql,
+      sort_field: sortingOptions.field,
+      sort_order: sortingOptions.order,
+      pagination,
+      ...(searchTerm !== '' ? { search: { term: searchTerm, mode: 'legacy' as const } } : {}),
+      ...(shouldApplyGaps ? { gap_fill_statuses: filterOptions.gapFillStatuses } : {}),
+      ...(gapRange ? { gaps_range_start: gapRange.start, gaps_range_end: gapRange.end } : {}),
+      ...(activeSchedulerId ? { gap_auto_fill_scheduler_id: activeSchedulerId } : {}),
+    };
+  }, [filterOptions, sortingOptions, pagination, activeSchedulerId]);
 
   const handleFilterOptionsChange = useCallback((newFilter: Partial<FilterOptions>) => {
     setFilterOptions((currentFilter) => ({ ...currentFilter, ...newFilter }));
@@ -262,6 +292,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       tags: DEFAULT_FILTER_OPTIONS.tags,
       enabled: undefined,
       ruleExecutionStatus: DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
+      gapFillStatuses: undefined,
     });
     setSortingOptions({
       field: DEFAULT_SORTING_OPTIONS.field,
@@ -289,38 +320,22 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     }
   }, [selectedRuleIds, isRefreshOn]);
 
-  useEffect(() => {
-    if (filterOptions.showRulesWithGaps) {
-      setGapRangeForSearch(getGapRange(filterOptions.gapSearchRange ?? defaultRangeValue));
-    } else {
-      setGapRangeForSearch(undefined);
-    }
-  }, [filterOptions.showRulesWithGaps, filterOptions.gapSearchRange]);
-
   // Fetch rules
   const {
-    data: { rules, total } = { rules: [], total: 0 },
+    data: { rules, total, warnings } = { rules: [], total: 0, warnings: [] },
     refetch,
     dataUpdatedAt,
     isFetched,
     isFetching,
     isLoading,
     isRefetching,
-  } = useFindRules(
-    {
-      filterOptions,
-      sortingOptions,
-      pagination,
-      ...(gapRangeForSearch ? { gapsRange: gapRangeForSearch } : {}),
-    },
-    {
-      // We don't need refreshes on windows focus and reconnects if auto-refresh if off
-      refetchOnWindowFocus: isRefreshOn && !isActionInProgress,
-      refetchOnReconnect: isRefreshOn && !isActionInProgress,
-      refetchInterval: isRefreshOn && !isActionInProgress && autoRefreshSettings.value,
-      keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
-    }
-  );
+  } = useFindRules(findRulesQueryArgs, {
+    // We don't need refreshes on windows focus and reconnects if auto-refresh if off
+    refetchOnWindowFocus: isRefreshOn && !isActionInProgress,
+    refetchOnReconnect: isRefreshOn && !isActionInProgress,
+    refetchInterval: isRefreshOn && !isActionInProgress && autoRefreshSettings.value,
+    keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
+  });
 
   // Fetch rules snooze settings
   const {
@@ -337,7 +352,9 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
   const { data: rulesGapInfoByRuleIds, refetch: refetchGapInfo } = useGetGapsSummaryByRuleIds(
     {
       ruleIds: rules.map((x) => x.id),
-      gapRange: filterOptions.gapSearchRange ?? defaultRangeValue,
+      gapRange: defaultRangeValue,
+      excludedReasons,
+      schedulerId: activeSchedulerId,
     },
     {
       enabled: rules.length > 0,
@@ -425,6 +442,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
           perPage,
           total,
         }),
+        warnings,
       },
       actions,
     };
@@ -452,6 +470,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     selectedRuleIds,
     sortingOptions,
     actions,
+    warnings,
   ]);
 
   return <RulesTableContext.Provider value={providerValue}>{children}</RulesTableContext.Provider>;

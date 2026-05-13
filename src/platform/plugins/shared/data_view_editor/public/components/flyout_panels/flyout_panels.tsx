@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React, {
   useState,
   createContext,
@@ -14,12 +15,11 @@ import React, {
   useCallback,
   useMemo,
   useLayoutEffect,
-  FC,
-  PropsWithChildren,
 } from 'react';
-import { EuiFlexGroup, EuiFlexGroupProps } from '@elastic/eui';
-
-import './flyout_panels.scss';
+import { css } from '@emotion/react';
+import type { EuiFlexGroupProps, UseEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, euiMaxBreakpoint } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 interface Panel {
   width?: number;
@@ -52,6 +52,8 @@ export interface Props {
 }
 
 export const Panels: FC<PropsWithChildren<Props>> = ({ maxWidth, flyoutClassName, ...props }) => {
+  const styles = useMemoCss(componentStyles);
+
   const flyoutDOMelement = useMemo(() => {
     const el = document.getElementsByClassName(flyoutClassName);
 
@@ -106,7 +108,7 @@ export const Panels: FC<PropsWithChildren<Props>> = ({ maxWidth, flyoutClassName
 
   return (
     <flyoutPanelsContext.Provider value={ctx}>
-      <EuiFlexGroup className="fieldEditor__flyoutPanels" gutterSize="none" {...props} />
+      <EuiFlexGroup css={styles.flyoutPanels} gutterSize="none" {...props} />
     </flyoutPanelsContext.Provider>
   );
 };
@@ -119,4 +121,19 @@ export const useFlyoutPanelsContext = (): Context => {
   }
 
   return ctx;
+};
+
+const componentStyles = {
+  flyoutPanels: (themeContext: UseEuiTheme) =>
+    css({
+      height: '100%',
+      [euiMaxBreakpoint(themeContext, 'm')]: {
+        overflow: 'auto',
+        '.euiFlyoutFooter': {
+          position: 'sticky',
+          bottom: 0,
+          flexGrow: 1,
+        },
+      },
+    }),
 };

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { registerFileUploadAnalyticsEvents } from '@kbn/file-upload-common/src/telemetry/register_telemetry';
+import type { FileUploadPluginStartApi } from './api';
 import {
-  FileUploadStartApi,
   FileUploadComponent,
   importerFactory,
   hasImportPermission,
@@ -17,6 +18,7 @@ import {
   getTimeFieldRange,
   analyzeFile,
   previewTikaFile,
+  isIndexSearchable,
 } from './api';
 import { setStartServices } from './kibana_services';
 import {
@@ -27,8 +29,8 @@ import {
 } from './importer/get_max_bytes';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface FileUploadSetupDependencies {}
-export interface FileUploadStartDependencies {
+export interface FileUploadPluginSetupDependencies {}
+export interface FileUploadPluginStartDependencies {
   data: DataPublicPluginStart;
 }
 
@@ -40,13 +42,18 @@ export class FileUploadPlugin
     Plugin<
       FileUploadPluginSetup,
       FileUploadPluginStart,
-      FileUploadSetupDependencies,
-      FileUploadStartDependencies
+      FileUploadPluginSetupDependencies,
+      FileUploadPluginStartDependencies
     >
 {
-  public setup() {}
+  public setup(core: CoreSetup) {
+    registerFileUploadAnalyticsEvents(core.analytics);
+  }
 
-  public start(core: CoreStart, plugins: FileUploadStartDependencies): FileUploadStartApi {
+  public start(
+    core: CoreStart,
+    plugins: FileUploadPluginStartDependencies
+  ): FileUploadPluginStartApi {
     setStartServices(core, plugins);
     return {
       FileUploadComponent,
@@ -61,6 +68,7 @@ export class FileUploadPlugin
       getTimeFieldRange,
       analyzeFile,
       previewTikaFile,
+      isIndexSearchable,
     };
   }
 }

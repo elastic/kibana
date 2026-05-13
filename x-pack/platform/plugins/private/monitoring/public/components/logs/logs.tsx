@@ -12,12 +12,12 @@ import { EuiBasicTable, EuiTitle, EuiSpacer, EuiText, EuiCallOut, EuiLink } from
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { Reason, type IReason } from './reason';
 import { formatDateTimeLocal } from '../../../common/formatting';
 import { Legacy } from '../../legacy_shims';
 import { ExternalConfigContext } from '../../application/contexts/external_config_context';
-import { MonitoringStartServices } from '../../types';
+import type { MonitoringStartServices } from '../../types';
 
 interface LogsProps {
   logs: {
@@ -192,7 +192,13 @@ export class LogsContent extends PureComponent<LogsContentProps> {
     }
 
     return (
-      <EuiBasicTable items={logs || []} columns={nodeId || indexUuid ? columns : clusterColumns} />
+      <EuiBasicTable
+        items={logs || []}
+        columns={nodeId || indexUuid ? columns : clusterColumns}
+        tableCaption={i18n.translate('xpack.monitoring.logs.listing.tableCaption', {
+          defaultMessage: 'Recent log entries',
+        })}
+      />
     );
   }
 
@@ -227,6 +233,7 @@ export class LogsContent extends PureComponent<LogsContentProps> {
 
     return discoverLink ? (
       <EuiCallOut
+        announceOnMount
         size="m"
         title={i18n.translate('xpack.monitoring.logs.listing.calloutTitle', {
           defaultMessage: 'Want to see more log entries?',
@@ -239,7 +246,7 @@ export class LogsContent extends PureComponent<LogsContentProps> {
             defaultMessage="Visit {link} to dive deeper."
             values={{
               link: (
-                <EuiLink href={discoverLink}>
+                <EuiLink href={discoverLink} data-test-subj="monitoringLogsLink">
                   {i18n.translate('xpack.monitoring.logs.listing.calloutLinkText', {
                     defaultMessage: 'Discover',
                   })}
@@ -288,7 +295,7 @@ export class LogsContent extends PureComponent<LogsContentProps> {
     }
 
     return (
-      <div>
+      <div data-test-subj="monitoringLogs">
         <EuiTitle>
           <h1>
             {i18n.translate('xpack.monitoring.logs.listing.pageTitle', {

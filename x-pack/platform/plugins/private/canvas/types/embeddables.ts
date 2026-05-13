@@ -12,17 +12,20 @@ import type {
   PublishesReload,
   PublishesViewMode,
   PublishesUnifiedSearch,
+  CanAddNewPanel,
+  HasLastSavedChildState,
+  HasSerializedChildState,
 } from '@kbn/presentation-publishing';
-import type { CanAddNewPanel, HasSerializedChildState } from '@kbn/presentation-containers';
 
 export type CanvasContainerApi = PublishesViewMode &
   CanAddNewPanel &
   HasDisableTriggers &
   HasType &
   HasSerializedChildState &
+  HasLastSavedChildState &
   HasAppContext &
   PublishesReload &
   Partial<PublishesUnifiedSearch> &
   Partial<HasAppContext & PublishesUnifiedSearch> & {
-    reload: () => void;
+    setSerializedStateForChild: (childId: string, panelState: object) => void;
   };

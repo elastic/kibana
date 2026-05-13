@@ -9,31 +9,37 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type { ExternalRouteDeps } from '.';
+import { getSpaceExamples } from './examples';
 import { API_VERSIONS } from '../../../../common';
 import { wrapError } from '../../../lib/errors';
+import { getSpaceSchema } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initGetSpaceApi(deps: ExternalRouteDeps) {
-  const { router, getSpacesService } = deps;
+  const { router, getSpacesService, isServerless } = deps;
 
   router.versioned
     .get({
       path: '/api/spaces/space/{id}',
       access: 'public',
       summary: `Get a space`,
+      description: 'Retrieve a single Kibana space by its identifier.',
       options: {
         tags: ['oas-tag:spaces'],
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route delegates authorization to the spaces service via a scoped spaces client',
+        },
       },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route delegates authorization to the spaces service via a scoped spaces client',
-          },
+        options: {
+          oasOperationObject: getSpaceExamples,
         },
         validate: {
           request: {
@@ -43,6 +49,7 @@ export function initGetSpaceApi(deps: ExternalRouteDeps) {
           },
           response: {
             200: {
+              body: () => getSpaceSchema(isServerless),
               description: 'Indicates a successful call.',
             },
           },

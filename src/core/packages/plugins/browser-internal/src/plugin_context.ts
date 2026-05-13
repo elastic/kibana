@@ -80,6 +80,7 @@ export function createPluginSetupContext<
       register: (app) => deps.application.register(plugin.opaqueId, app),
       registerAppUpdater: (statusUpdater$) => deps.application.registerAppUpdater(statusUpdater$),
     },
+    chrome: deps.chrome,
     customBranding: deps.customBranding,
     fatalErrors: deps.fatalErrors,
     featureFlags: deps.featureFlags,
@@ -90,6 +91,9 @@ export function createPluginSetupContext<
         getPluginAssetHref: (assetPath: string) =>
           deps.http.staticAssets.getPluginAssetHref(plugin.name, assetPath),
       },
+    },
+    injection: {
+      getContainer: () => deps.injection.getContainer(plugin.opaqueId),
     },
     notifications: deps.notifications,
     uiSettings: deps.uiSettings,
@@ -157,13 +161,16 @@ export function createPluginStartContext<
           deps.http.staticAssets.getPluginAssetHref(plugin.name, assetPath),
       },
     },
+    injection: {
+      fork: () => deps.injection.fork(plugin.opaqueId),
+      getContainer: () => deps.injection.getContainer(plugin.opaqueId),
+    },
     chrome: omit(deps.chrome, 'getComponent'),
     i18n: deps.i18n,
     notifications: deps.notifications,
     overlays: deps.overlays,
     uiSettings: deps.uiSettings,
     settings: deps.settings,
-    savedObjects: deps.savedObjects,
     fatalErrors: deps.fatalErrors,
     deprecations: deps.deprecations,
     theme: deps.theme,
@@ -174,5 +181,7 @@ export function createPluginStartContext<
     plugins: {
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
+    rendering: deps.rendering,
+    pricing: deps.pricing,
   };
 }

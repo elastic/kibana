@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { useState } from 'react';
 import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, type EuiBasicTableColumn, EuiButtonIcon, EuiText } from '@elastic/eui';
@@ -64,7 +65,7 @@ export function ShardFailureTable({ failures }: Props) {
                       defaultMessage: 'Expand table row to view shard details',
                     })
               }
-              iconType={item.rowId in expandedRows ? 'arrowDown' : 'arrowRight'}
+              iconType={item.rowId in expandedRows ? 'chevronSingleDown' : 'chevronSingleRight'}
             />
             <EuiText size="xs" color="subdued">
               {shard}
@@ -101,10 +102,13 @@ export function ShardFailureTable({ failures }: Props) {
 
   return (
     <EuiBasicTable
+      tableCaption={i18n.translate('inspector.requests.clusters.shards.table.caption', {
+        defaultMessage: 'Shard failures',
+      })}
       items={failures.map((failure) => {
         return {
           rowId: getRowId(failure),
-          shard: failure.shard,
+          shard: failure.shard!,
           index: failure.index,
           failureType: failure.reason.type,
         };

@@ -8,13 +8,13 @@
 import { set } from '@kbn/safer-lodash-set';
 import { isArray, camelCase, isObject, omit, get } from 'lodash';
 import type {
-  AttachmentRequest,
+  AttachmentRequestV2,
   CaseResolveResponse,
   CasesFindResponse,
   CasesSimilarResponse,
 } from '../../common/types/api';
 import type {
-  Attachment,
+  AttachmentV2,
   Case,
   Cases,
   SimilarCase,
@@ -24,6 +24,7 @@ import type {
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
+  isUnifiedAttachmentRequest,
 } from '../../common/utils/attachments';
 import { isCommentUserAction } from '../../common/utils/user_actions';
 import type {
@@ -31,6 +32,7 @@ import type {
   CasesUI,
   CaseUI,
   AttachmentUI,
+  AttachmentUIV2,
   ResolvedCase,
   CasesSimilarResponseUI,
   SimilarCasesUI,
@@ -89,11 +91,11 @@ export const convertCaseResolveToCamelCase = (res: CaseResolveResponse): Resolve
   };
 };
 
-export const convertAttachmentsToCamelCase = (attachments: Attachment[]): AttachmentUI[] => {
+export const convertAttachmentsToCamelCase = (attachments: AttachmentV2[]): AttachmentUIV2[] => {
   return attachments.map((attachment) => convertAttachmentToCamelCase(attachment));
 };
 
-export const convertAttachmentToCamelCase = (attachment: AttachmentRequest): AttachmentUI => {
+export const convertAttachmentToCamelCase = (attachment: AttachmentRequestV2): AttachmentUIV2 => {
   if (isCommentRequestTypeExternalReference(attachment)) {
     return convertAttachmentToCamelExceptProperty(attachment, 'externalReferenceMetadata');
   }
@@ -102,7 +104,11 @@ export const convertAttachmentToCamelCase = (attachment: AttachmentRequest): Att
     return convertAttachmentToCamelExceptProperty(attachment, 'persistableStateAttachmentState');
   }
 
-  return convertToCamelCase<AttachmentRequest, AttachmentUI>(attachment);
+  if (isUnifiedAttachmentRequest(attachment)) {
+    return convertAttachmentToCamelExceptProperty(attachment, 'data');
+  }
+
+  return convertToCamelCase<AttachmentRequestV2, AttachmentUIV2>(attachment);
 };
 
 export const convertUserActionsToCamelCase = (userActions: UserActions) => {
@@ -124,9 +130,9 @@ export const convertUserActionsToCamelCase = (userActions: UserActions) => {
 };
 
 const convertAttachmentToCamelExceptProperty = (
-  attachment: AttachmentRequest,
+  attachment: AttachmentRequestV2,
   key: string
-): AttachmentUI => {
+): AttachmentUIV2 => {
   const intactValue = get(attachment, key);
   const attachmentWithoutIntactValue = omit(attachment, key);
   const camelCaseAttachmentWithoutIntactValue = convertToCamelCase(attachmentWithoutIntactValue);

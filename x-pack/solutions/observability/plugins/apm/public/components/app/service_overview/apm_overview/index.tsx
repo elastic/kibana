@@ -7,8 +7,9 @@
 import type { EuiFlexGroupProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { chartHeight } from '..';
 import type { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
 import {
@@ -17,6 +18,7 @@ import {
   isServerlessAgentName,
 } from '../../../../../common/agent_name';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useServiceSloContext } from '../../../../context/service_slo/use_service_slo_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
@@ -33,19 +35,26 @@ import { ServiceOverviewInstancesChartAndTable } from '../service_overview_insta
 import { ServiceOverviewThroughputChart } from '../service_overview_throughput_chart';
 import { SloCallout } from '../../../shared/slo_callout';
 import { useLocalStorage } from '../../../../hooks/use_local_storage';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
 const latencyChartHeight = 200;
+
+export interface TablesLoadedState {
+  transactions: boolean;
+  dependencies: boolean;
+  errors: boolean;
+}
 
 export function ApmOverview() {
   const router = useApmRouter();
   const { serviceName, fallbackToTransactions, agentName, serverlessType } = useApmServiceContext();
   const {
     query,
-    query: { kuery, environment, rangeFrom, rangeTo, transactionType },
+    query: { kuery, environment, rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const [haveTablesLoaded, setHaveTablesLoaded] = useState({
+  const [haveTablesLoaded, setHaveTablesLoaded] = useState<TablesLoadedState>({
     transactions: false,
     dependencies: false,
     errors: false,
@@ -76,26 +85,36 @@ export function ApmOverview() {
   const nonLatencyChartHeight = isSingleColumn ? latencyChartHeight : chartHeight;
   const rowDirection: EuiFlexGroupProps['direction'] = isSingleColumn ? 'column' : 'row';
 
+  const { hasSlos, sloFetchStatus } = useServiceSloContext();
+
+  const trackEvent = useUiTracker({ app: 'apm' });
   const [sloCalloutDismissed, setSloCalloutDismissed] = useLocalStorage(
     'apm.sloCalloutDismissed',
     false
   );
+  const dismissSloCallout = useCallback(() => {
+    setSloCalloutDismissed(true);
+    trackEvent({ metric: 'slo_callout_dismissed', metricType: METRIC_TYPE.CLICK });
+  }, [trackEvent, setSloCalloutDismissed]);
 
-  const onLoadTable = (key: string) => {
+  const handleOnLoadTable = (key: keyof TablesLoadedState) =>
     setHaveTablesLoaded((currentValues) => ({ ...currentValues, [key]: true }));
-  };
+
+  const onTransactionsTableLoad = useCallback(() => handleOnLoadTable('transactions'), []);
+  const onErrorsTableLoad = useCallback(() => handleOnLoadTable('errors'), []);
+  const onDependenciesTableLoad = useCallback(() => handleOnLoadTable('dependencies'), []);
+
+  const shouldRenderCallout =
+    !sloCalloutDismissed && !hasSlos && sloFetchStatus === FETCH_STATUS.SUCCESS;
 
   return (
     <>
-      {!sloCalloutDismissed && (
+      {shouldRenderCallout && (
         <>
           <SloCallout
-            dismissCallout={() => {
-              setSloCalloutDismissed(true);
-            }}
+            dismissCallout={dismissSloCallout}
             serviceName={serviceName}
             environment={environment}
-            transactionType={transactionType}
           />
           <EuiSpacer />
         </>
@@ -115,13 +134,13 @@ export function ApmOverview() {
           <EuiFlexItem grow={3}>
             <ServiceOverviewThroughputChart height={nonLatencyChartHeight} kuery={kuery} />
           </EuiFlexItem>
-          <EuiFlexItem grow={7}>
+          <EuiFlexItem grow={7} style={{ minWidth: 0 }}>
             <EuiPanel hasBorder={true}>
               <TransactionsTable
                 kuery={kuery}
                 environment={environment}
                 fixedHeight={true}
-                onLoadTable={() => onLoadTable('transactions')}
+                onLoadTable={onTransactionsTableLoad}
                 start={start}
                 end={end}
                 showPerPageOptions={false}
@@ -143,11 +162,11 @@ export function ApmOverview() {
               />
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={7}>
+          <EuiFlexItem grow={7} style={{ minWidth: 0 }}>
             <EuiPanel hasBorder={true}>
               <ServiceOverviewErrorsTable
                 serviceName={serviceName}
-                onLoadTable={() => onLoadTable('errors')}
+                onLoadTable={onErrorsTableLoad}
               />
             </EuiPanel>
           </EuiFlexItem>
@@ -175,10 +194,10 @@ export function ApmOverview() {
             )
           )}
           {!isRumAgent && (
-            <EuiFlexItem grow={7}>
+            <EuiFlexItem grow={7} style={{ minWidth: 0 }}>
               <EuiPanel hasBorder={true}>
                 <ServiceOverviewDependenciesTable
-                  onLoadTable={() => onLoadTable('dependencies')}
+                  onLoadTable={onDependenciesTableLoad}
                   fixedHeight={true}
                   showPerPageOptions={false}
                   link={

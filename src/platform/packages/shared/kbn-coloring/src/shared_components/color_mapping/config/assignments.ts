@@ -7,22 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KbnPalettes } from '@kbn/palettes';
+import type { KbnPaletteId, KbnPalettes } from '@kbn/palettes';
 import type { ColorMapping } from '.';
 
 export function updateAssignmentsPalette(
   assignments: ColorMapping.Config['assignments'],
   colorMode: ColorMapping.Config['colorMode'],
-  paletteId: string,
+  paletteId: KbnPaletteId,
   palettes: KbnPalettes,
   preserveColorChanges: boolean
 ): ColorMapping.Config['assignments'] {
   const palette = palettes.get(paletteId);
-  return assignments.map(({ rule, color, touched }, index) => {
+  return assignments.map(({ rules, color, touched }, index) => {
     if (preserveColorChanges && touched) {
-      return { rule, color, touched };
+      return { rules, color, touched };
     } else {
-      const newColor: ColorMapping.Config['assignments'][number]['color'] =
+      const newColor: ColorMapping.Assignment['color'] =
         colorMode.type === 'categorical'
           ? {
               type: 'categorical',
@@ -31,7 +31,7 @@ export function updateAssignmentsPalette(
             }
           : { type: 'gradient' };
       return {
-        rule,
+        rules,
         color: newColor,
         touched: false,
       };
@@ -41,7 +41,7 @@ export function updateAssignmentsPalette(
 
 export function updateColorModePalette(
   colorMode: ColorMapping.Config['colorMode'],
-  paletteId: string,
+  paletteId: KbnPaletteId,
   preserveColorChanges: boolean
 ): ColorMapping.Config['colorMode'] {
   return colorMode.type === 'categorical'

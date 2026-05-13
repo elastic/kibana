@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { filterYamlChangelog } from '.';
+import { parse } from 'yaml';
 
-describe('filterYamlChangelog', () => {
+import { parseYamlChangelog } from '.';
+
+describe('parseYamlChangelog', () => {
   const changelogText = `
 - version: "2.4.0"
   changes:
@@ -31,7 +33,7 @@ describe('filterYamlChangelog', () => {
       link: https://github.com/elastic/integrations/pull/4399`;
 
   it('should return the changelog from latest to current version', () => {
-    expect(filterYamlChangelog(changelogText, `2.4.0`, `2.2.0`)).toEqual([
+    expect(parseYamlChangelog(parse, changelogText, `2.4.0`, `2.2.0`)).toEqual([
       {
         version: '2.4.0',
         changes: [
@@ -66,7 +68,7 @@ describe('filterYamlChangelog', () => {
   });
 
   it('should return the changelog to latest version when there is no current version defined', () => {
-    expect(filterYamlChangelog(changelogText, `2.4.0`)).toEqual([
+    expect(parseYamlChangelog(parse, changelogText, `2.4.0`)).toEqual([
       {
         version: '2.4.0',
         changes: [
@@ -111,9 +113,9 @@ describe('filterYamlChangelog', () => {
   });
 
   it('should return empty array if changelog text is undefined', () => {
-    expect(filterYamlChangelog(undefined, `2.4.0`, `2.2.0`)).toEqual([]);
+    expect(parseYamlChangelog(parse, undefined, `2.4.0`, `2.2.0`)).toEqual([]);
   });
   it('should return empty array if changelog text is null', () => {
-    expect(filterYamlChangelog(null, `2.4.0`, `2.2.0`)).toEqual([]);
+    expect(parseYamlChangelog(parse, null, `2.4.0`, `2.2.0`)).toEqual([]);
   });
 });

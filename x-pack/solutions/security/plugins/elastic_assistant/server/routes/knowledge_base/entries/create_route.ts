@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import { IKibanaResponse } from '@kbn/core/server';
+import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import {
-  KnowledgeBaseEntryCreateProps,
-  KnowledgeBaseEntryResponse,
-} from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
-import { ElasticAssistantPluginRouter } from '../../../types';
+import type { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import { KnowledgeBaseEntryCreateProps } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
 import { performChecks } from '../../helpers';
 
@@ -48,7 +46,7 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
           const logger = ctx.elasticAssistant.logger;
 
           // Perform license, authenticated user and FF checks
-          const checkResponse = performChecks({
+          const checkResponse = await performChecks({
             context: ctx,
             request,
             response,
@@ -61,8 +59,10 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
 
           logger.debug(() => `Creating KB Entry:\n${JSON.stringify(request.body)}`);
           const createResponse = await kbDataClient?.createKnowledgeBaseEntry({
-            knowledgeBaseEntry: request.body,
-            global: request.body.users != null && request.body.users.length === 0,
+            knowledgeBaseEntry: {
+              ...request.body,
+              ...(request.body.global ? { users: [] } : {}),
+            },
             auditLogger: ctx.elasticAssistant.auditLogger,
             telemetry: ctx.elasticAssistant.telemetry,
           });

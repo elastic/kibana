@@ -160,6 +160,7 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
             }
           >
             <EuiRadioGroup
+              name="kafkaConnectionType"
               style={{ display: 'flex', gap: 30 }}
               data-test-subj={'settingsOutputsFlyout.kafkaConnectionTypeRadioInput'}
               options={kafkaConnectionTypeOptions}
@@ -186,7 +187,7 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                 rows={5}
                 {...inputs.kafkaSslCertificateInput.props}
                 placeholder={i18n.translate(
-                  'xpack.fleet.settings.editOutputFlyout.sslCertificateInputPlaceholder',
+                  'xpack.fleet.settings.editOutputFlyout.kafkaSslCertificateInputPlaceholder',
                   {
                     defaultMessage: 'Specify ssl certificate',
                   }
@@ -322,6 +323,7 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
               }
             >
               <EuiRadioGroup
+                name="kafkaSaslMechanism"
                 style={{ display: 'flex', gap: 30 }}
                 data-test-subj={'settingsOutputsFlyout.kafkaSaslInput'}
                 options={kafkaSaslOptions}
@@ -355,7 +357,7 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
             }
           )}
           label={i18n.translate(
-            'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputLabel',
+            'xpack.fleet.settings.editOutputFlyout.kafkaSslCertificateAuthoritiesInputLabel',
             {
               defaultMessage: 'Server SSL certificate authorities (optional)',
             }
@@ -405,6 +407,7 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
         <EuiSpacer size="m" />
         <EuiFormRow fullWidth>
           <EuiRadioGroup
+            name="kafkaAuthMethod"
             style={{ display: 'flex', gap: 30 }}
             data-test-subj={'settingsOutputsFlyout.kafkaAuthenticationRadioInput'}
             options={kafkaAuthenticationsOptions}

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import { SCOUT_TEST_EVENTS_TEMPLATE_NAME, SCOUT_TEST_EVENTS_INDEX_PATTERN } from '@kbn/scout-info';
 import * as componentTemplates from './component_templates';
 

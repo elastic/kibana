@@ -5,40 +5,27 @@
  * 2.0.
  */
 
-import { RootSchema, EventTypeOpts } from '@kbn/core/server';
+import type { RootSchema, EventTypeOpts } from '@kbn/core/server';
+import { type Connector, type Scope, connectorSchema, scopeSchema } from '../../common/analytics';
 
-interface ScoredDocument {
-  content: string;
-  elserScore: number;
+interface ScoredDocument extends Connector, Scope {
+  esScore: number;
   llmScore: number;
 }
 
 export interface RecallRanking {
-  prompt: string;
   scoredDocuments: ScoredDocument[];
 }
 
 const schema: RootSchema<RecallRanking> = {
-  prompt: {
-    type: 'text',
-    _meta: {
-      description: 'The user prompt that was used for the ELSER text_expansion',
-    },
-  },
   scoredDocuments: {
     type: 'array',
     items: {
       properties: {
-        content: {
-          type: 'text',
-          _meta: {
-            description: 'The raw content of the recalled document',
-          },
-        },
-        elserScore: {
+        esScore: {
           type: 'float',
           _meta: {
-            description: 'The score produced by ELSER text_expansion',
+            description: 'The score produced by Elasticsearch',
           },
         },
         llmScore: {
@@ -47,6 +34,10 @@ const schema: RootSchema<RecallRanking> = {
             description: 'The score produced by the LLM when asked to rerank',
           },
         },
+        connector: {
+          properties: connectorSchema,
+        },
+        scopes: scopeSchema,
       },
     },
   },

@@ -7,15 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Command } from '@kbn/dev-cli-runner';
-import { initLogsDir } from '@kbn/test';
+import type { Command } from '@kbn/dev-cli-runner';
+import type { FlagsReader } from '@kbn/dev-cli-runner';
+import type { ToolingLog } from '@kbn/tooling-log';
+
+import { initLogsDir } from './init_logs_dir';
 import { TEST_FLAG_OPTIONS } from '../playwright/runner';
-import { parseTestFlags, runTests as runTestsFn } from '../playwright/runner';
+import { parseTestFlags, runTests } from '../playwright/runner';
+
+export const runScoutPlaywrightConfig = async (flagsReader: FlagsReader, log: ToolingLog) => {
+  const options = await parseTestFlags(flagsReader);
+
+  if (options.logsDir) {
+    await initLogsDir(log, options.logsDir);
+  }
+
+  await runTests(log, options);
+};
 
 /**
  * Start servers and run the tests
  */
-export const runTests: Command<void> = {
+export const runTestsCmd: Command<void> = {
   name: 'run-tests',
   description: `
   Run a Scout Playwright config.
@@ -24,17 +37,25 @@ export const runTests: Command<void> = {
     This also handles server starts. Make sure a Scout test server is not already running before invoking this command.
 
   Common usage:
-    node scripts/scout run-tests --stateful --config <playwright_config_path>
-    node scripts/scout run-tests --serverless=es --headed --config <playwright_config_path>
+    On local stateful:
+    node scripts/scout run-tests --arch stateful --domain classic --config <playwright_config_path>
+
+    On local serverless:
+    node scripts/scout run-tests --arch serverless --domain search --headed --config <playwright_config_path>
+    node scripts/scout run-tests --arch serverless --domain search --testFiles <spec_path1,spec_path2>
+    node scripts/scout run-tests --arch serverless --domain search --testFiles <spec_directory_path>
+
+    On Elastic Cloud Hosted deployment (ECH):
+    node scripts/scout run-tests --location cloud --arch stateful --domain classic --config <playwright_config_path>
+
+    On Elastic Cloud projects (MKI):
+    node scripts/scout run-tests --location cloud --arch serverless --domain search --config <playwright_config_path>
+
+    Local flakiness validation (run each test N times):
+    node scripts/scout run-tests --arch stateful --domain classic --config <playwright_config_path> --repeatEach 5
   `,
   flags: TEST_FLAG_OPTIONS,
   run: async ({ flagsReader, log }) => {
-    const options = await parseTestFlags(flagsReader);
-
-    if (options.logsDir) {
-      await initLogsDir(log, options.logsDir);
-    }
-
-    await runTestsFn(log, options);
+    await runScoutPlaywrightConfig(flagsReader, log);
   },
 };

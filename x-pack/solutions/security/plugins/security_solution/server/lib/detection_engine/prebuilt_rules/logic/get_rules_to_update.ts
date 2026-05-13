@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { MlAuthz } from '../../../machine_learning/authz';
 import type { RuleAlertType } from '../../rule_schema';
 import type { PrebuiltRuleAsset } from '../model/rule_assets/prebuilt_rule_asset';
+import { excludeLicenseRestrictedRules } from './utils';
 
 /**
  * Returns the rules to update by doing a compare to the rules from the file system against
@@ -15,13 +17,15 @@ import type { PrebuiltRuleAsset } from '../model/rule_assets/prebuilt_rule_asset
  * @param latestPrebuiltRules The latest rules to check against installed
  * @param installedRules The installed rules
  */
-export const getRulesToUpdate = (
+export const getRulesToUpdate = async (
   latestPrebuiltRules: PrebuiltRuleAsset[],
-  installedRules: Map<string, RuleAlertType>
+  installedRules: Map<string, RuleAlertType>,
+  mlAuthz: MlAuthz
 ) => {
-  return latestPrebuiltRules
-    .filter((latestRule) => filterInstalledRules(latestRule, installedRules))
-    .map((latestRule) => mergeExceptionLists(latestRule, installedRules));
+  const rulesToUpdate = latestPrebuiltRules.filter((latestRule) =>
+    filterInstalledRules(latestRule, installedRules)
+  );
+  return excludeLicenseRestrictedRules(rulesToUpdate, mlAuthz);
 };
 
 /**
@@ -37,34 +41,4 @@ export const filterInstalledRules = (
   const installedRule = installedRules.get(latestPrebuiltRule.rule_id);
 
   return !!installedRule && installedRule.params.version < latestPrebuiltRule.version;
-};
-
-/**
- * Given a rule from the file system and the set of installed rules this will merge the exception lists
- * from the installed rules onto the rules from the file system.
- * @param latestPrebuiltRule The latest prepackaged rule version that might have exceptions_lists
- * @param installedRules The installed rules which might have user driven exceptions_lists
- */
-export const mergeExceptionLists = (
-  latestPrebuiltRule: PrebuiltRuleAsset,
-  installedRules: Map<string, RuleAlertType>
-): PrebuiltRuleAsset => {
-  if (latestPrebuiltRule.exceptions_list != null) {
-    const installedRule = installedRules.get(latestPrebuiltRule.rule_id);
-
-    if (installedRule != null && installedRule.params.exceptionsList != null) {
-      const installedExceptionList = installedRule.params.exceptionsList;
-      const fileSystemExceptions = latestPrebuiltRule.exceptions_list.filter((potentialDuplicate) =>
-        installedExceptionList.every((item) => item.list_id !== potentialDuplicate.list_id)
-      );
-      return {
-        ...latestPrebuiltRule,
-        exceptions_list: [...fileSystemExceptions, ...installedRule.params.exceptionsList],
-      };
-    } else {
-      return latestPrebuiltRule;
-    }
-  } else {
-    return latestPrebuiltRule;
-  }
 };

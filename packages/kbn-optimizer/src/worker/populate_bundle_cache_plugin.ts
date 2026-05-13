@@ -17,19 +17,13 @@ import {
   isIgnoredModule,
   isConcatenatedModule,
   isDelegatedModule,
-  isRuntimeModule,
   getModulePath,
 } from '@kbn/optimizer-webpack-helpers';
 
-import {
-  Bundle,
-  WorkerConfig,
-  ascending,
-  parseFilePath,
-  Hashes,
-  ParsedDllManifest,
-} from '../common';
+import type { Bundle, WorkerConfig, ParsedDllManifest } from '../common';
+import { ascending, parseFilePath, Hashes } from '../common';
 import { BundleRemoteModule } from './bundle_remote_module';
+import { isRuntimeModule } from '../common/webpack_helpers';
 
 interface InputFileSystem {
   readFile: (

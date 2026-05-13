@@ -8,11 +8,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { DataViewSpecRestResponse } from '../route_types';
-import { DataViewsService } from '../../../common/data_views';
-import { DataViewSpec } from '../../../common/types';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import type { DataViewSpecRestResponse } from '../route_types';
+import type { DataViewsService } from '../../../common/data_views';
+import type { DataViewSpec } from '../../../common/types';
 import { handleErrors } from './util/handle_errors';
 import { fieldSpecSchema, runtimeFieldSchema, serializedFieldFormatSchema } from '../../schemas';
 import { dataViewSpecSchema } from '../schema';
@@ -26,8 +26,10 @@ import {
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
   INITIAL_REST_VERSION,
+  UPDATE_DATA_VIEW_SUMMARY,
   UPDATE_DATA_VIEW_DESCRIPTION,
 } from '../../constants';
+import { toApiSpec } from './util/to_api_spec';
 
 const indexPatternUpdateSchema = schema.object({
   title: schema.maybe(schema.string()),
@@ -135,7 +137,7 @@ export const updateDataView = async ({
 };
 
 const updateDataViewRouteFactory =
-  (path: string, serviceKey: string, description?: string) =>
+  (path: string, serviceKey: string, summary?: string, description?: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -144,92 +146,108 @@ const updateDataViewRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.post({ path, access: 'public', description }).addVersion(
-      {
-        version: INITIAL_REST_VERSION,
+    router.versioned
+      .post({
+        path,
+        access: 'public',
+        summary,
+        description,
         security: {
           authz: {
             requiredPrivileges: ['indexPatterns:manage'],
           },
         },
-        validate: {
-          request: {
-            params: schema.object(
-              {
-                id: schema.string({
-                  minLength: 1,
-                  maxLength: 1_000,
-                }),
+      })
+      .addVersion(
+        {
+          version: INITIAL_REST_VERSION,
+          validate: {
+            request: {
+              params: schema.object(
+                {
+                  id: schema.string({
+                    minLength: 1,
+                    maxLength: 1_000,
+                    meta: { description: 'The unique identifier of the data view to update.' },
+                  }),
+                },
+                { unknowns: 'allow' }
+              ),
+              body: schema.object({
+                refresh_fields: schema.maybe(
+                  schema.boolean({
+                    defaultValue: false,
+                    meta: {
+                      description:
+                        'When `true`, reloads the data view fields after the data view is updated.',
+                    },
+                  })
+                ),
+                [serviceKey]: indexPatternUpdateSchema,
+              }),
+            },
+            response: {
+              200: {
+                body: () =>
+                  schema.object({
+                    [serviceKey]: dataViewSpecSchema,
+                  }),
               },
-              { unknowns: 'allow' }
-            ),
-            body: schema.object({
-              refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
-              [serviceKey]: indexPatternUpdateSchema,
-            }),
-          },
-          response: {
-            200: {
-              body: () =>
-                schema.object({
-                  [serviceKey]: dataViewSpecSchema,
-                }),
             },
           },
         },
-      },
-      router.handleLegacyErrors(
-        handleErrors(async (ctx, req, res) => {
-          const core = await ctx.core;
-          const savedObjectsClient = core.savedObjects.client;
-          const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-          const [, , { dataViewsServiceFactory }] = await getStartServices();
+        router.handleLegacyErrors(
+          handleErrors(async (ctx, req, res) => {
+            const core = await ctx.core;
+            const savedObjectsClient = core.savedObjects.client;
+            const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
+            const [, , { dataViewsServiceFactory }] = await getStartServices();
 
-          const dataViewsService = await dataViewsServiceFactory(
-            savedObjectsClient,
-            elasticsearchClient,
-            req
-          );
-          const id = req.params.id;
+            const dataViewsService = await dataViewsServiceFactory(
+              savedObjectsClient,
+              elasticsearchClient,
+              req
+            );
+            const id = req.params.id;
 
-          const {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            refresh_fields = true,
-          } = req.body;
+            const { refresh_fields = true } = req.body;
 
-          const spec = req.body[serviceKey] as DataViewSpec;
+            const spec = req.body[serviceKey] as DataViewSpec;
 
-          const dataView = await updateDataView({
-            dataViewsService,
-            usageCollection,
-            id,
-            refreshFields: refresh_fields as boolean,
-            spec,
-            counterName: `${req.route.method} ${path}`,
-          });
+            const dataView = await updateDataView({
+              dataViewsService,
+              usageCollection,
+              id,
+              refreshFields: refresh_fields as boolean,
+              spec,
+              counterName: `${req.route.method} ${path}`,
+            });
 
-          const body: Record<string, DataViewSpecRestResponse> = {
-            [serviceKey]: await dataView.toSpec({ fieldParams: { fieldName: ['*'] } }),
-          };
+            const body: Record<string, DataViewSpecRestResponse> = {
+              [serviceKey]: toApiSpec(await dataView.toSpec({ fieldParams: { fieldName: ['*'] } })),
+            };
 
-          return res.ok({
-            headers: {
-              'content-type': 'application/json',
-            },
-            body,
-          });
-        })
-      )
-    );
+            return res.ok({
+              headers: {
+                'content-type': 'application/json',
+              },
+              body,
+            });
+          })
+        )
+      );
   };
 
 export const registerUpdateDataViewRoute = updateDataViewRouteFactory(
   SPECIFIC_DATA_VIEW_PATH,
   SERVICE_KEY,
+  UPDATE_DATA_VIEW_SUMMARY,
   UPDATE_DATA_VIEW_DESCRIPTION
 );
 
 export const registerUpdateDataViewRouteLegacy = updateDataViewRouteFactory(
   SPECIFIC_DATA_VIEW_PATH_LEGACY,
-  SERVICE_KEY_LEGACY
+  SERVICE_KEY_LEGACY,
+  UPDATE_DATA_VIEW_SUMMARY,
+  'Deprecated in 8.0.0. Use the data_views/data_view/{id} endpoint instead.'
 );

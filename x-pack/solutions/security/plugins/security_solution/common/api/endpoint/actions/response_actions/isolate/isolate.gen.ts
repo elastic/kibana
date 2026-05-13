@@ -14,18 +14,26 @@
  *   version: 2023-10-31
  */
 
-import type { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-import { SuccessResponse, BaseActionSchema } from '../../../model/schema/common.gen';
+import { BaseActionSchema, ResponseActionDetails } from '../../../model/schema/common.gen';
 
-export type IsolateRouteRequestBody = z.infer<typeof IsolateRouteRequestBody>;
-export const IsolateRouteRequestBody = BaseActionSchema;
+export const IsolateRouteResponse = lazySchema(() =>
+  z.object({
+    /**
+     * The action ID (legacy field, same as `data.id`).
+     */
+    action: z.string().optional(),
+    data: ResponseActionDetails.optional(),
+  })
+);
+export type IsolateRouteResponse = z.infer<typeof IsolateRouteResponse>;
 
+export const EndpointIsolateActionRequestBody = lazySchema(() => BaseActionSchema);
 export type EndpointIsolateActionRequestBody = z.infer<typeof EndpointIsolateActionRequestBody>;
-export const EndpointIsolateActionRequestBody = IsolateRouteRequestBody;
 export type EndpointIsolateActionRequestBodyInput = z.input<
   typeof EndpointIsolateActionRequestBody
 >;
 
+export const EndpointIsolateActionResponse = lazySchema(() => IsolateRouteResponse);
 export type EndpointIsolateActionResponse = z.infer<typeof EndpointIsolateActionResponse>;
-export const EndpointIsolateActionResponse = SuccessResponse;

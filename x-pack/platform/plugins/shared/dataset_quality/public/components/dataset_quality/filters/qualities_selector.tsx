@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
-import { QualityIndicators } from '../../../../common/types';
+import type { QualityIndicators } from '../../../../common/types';
 import { QualityIndicator } from '../../quality_indicator';
 
 const qualitiesSelectorLabel = i18n.translate('xpack.datasetQuality.qualitiesSelectorLabel', {
@@ -63,18 +63,14 @@ export function QualitiesSelector({
 
   const renderOption = (quality: QualityItem) => (
     <EuiText size="s">
-      <QualityIndicator
-        quality={quality.label}
-        description={capitalize(quality.label)}
-        isColoredDescription
-      />
+      <QualityIndicator quality={quality.label} description={capitalize(quality.label)} />
     </EuiText>
   );
 
   const button = (
     <EuiFilterButton
       data-test-subj="datasetQualityQualitiesSelectableButton"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       badgeColor="success"
       onClick={onButtonClick}
       isSelected={isPopoverOpen}

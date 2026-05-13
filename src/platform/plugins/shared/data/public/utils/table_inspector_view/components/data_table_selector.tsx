@@ -17,7 +17,7 @@ import {
   EuiFlexItem,
   EuiPopover,
 } from '@elastic/eui';
-import { Datatable } from '@kbn/expressions-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 
 interface TableSelectorState {
   isPopoverOpen: boolean;
@@ -84,7 +84,7 @@ export class TableSelector extends Component<TableSelectorProps, TableSelectorSt
               id="inspectorTableChooser"
               button={
                 <EuiButtonEmpty
-                  iconType="arrowDown"
+                  iconType="chevronSingleDown"
                   iconSide="right"
                   size="s"
                   onClick={this.togglePopover}

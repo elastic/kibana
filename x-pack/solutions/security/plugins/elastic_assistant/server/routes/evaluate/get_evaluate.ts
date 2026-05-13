@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type IKibanaResponse, IRouter } from '@kbn/core/server';
+import type { IRouter, IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import {
@@ -16,10 +16,10 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { buildResponse } from '../../lib/build_response';
-import { ElasticAssistantRequestHandlerContext } from '../../types';
+import type { ElasticAssistantRequestHandlerContext } from '../../types';
 import { performChecks } from '../helpers';
 import { ASSISTANT_GRAPH_MAP } from '../../lib/langchain/graphs';
-import { fetchLangSmithDatasets } from './utils';
+import { fetchLangSmithDatasets, getEvaluationResults } from './utils';
 
 export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
   router.versioned
@@ -46,10 +46,11 @@ export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerC
       async (context, request, response): Promise<IKibanaResponse<GetEvaluateResponse>> => {
         const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
         const assistantContext = ctx.elasticAssistant;
+        const esClientInternalUser = ctx.core.elasticsearch.client.asInternalUser;
         const logger = assistantContext.logger.get('evaluate');
 
         // Perform license, authenticated user and evaluation FF checks
-        const checkResponse = performChecks({
+        const checkResponse = await performChecks({
           capability: 'assistantModelEvaluation',
           context: ctx,
           request,
@@ -60,11 +61,16 @@ export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerC
           return checkResponse.response;
         }
 
-        // Fetch datasets from LangSmith // TODO: plumb apiKey so this will work in cloud w/o env vars
-        const datasets = await fetchLangSmithDatasets({ logger });
+        const datasets = await fetchLangSmithDatasets({
+          logger,
+        });
+
+        const results = await getEvaluationResults({ esClientInternalUser, logger });
 
         try {
-          return response.ok({ body: { graphs: Object.keys(ASSISTANT_GRAPH_MAP), datasets } });
+          return response.ok({
+            body: { graphs: Object.keys(ASSISTANT_GRAPH_MAP), datasets, results },
+          });
         } catch (err) {
           logger.error(err);
           const error = transformError(err);

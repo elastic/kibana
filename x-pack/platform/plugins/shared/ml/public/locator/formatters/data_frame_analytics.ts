@@ -11,7 +11,6 @@
 import { isEmpty } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
-import { formatGenericMlUrl } from './common';
 import type {
   DataFrameAnalyticsExplorationQueryState,
   DataFrameAnalyticsExplorationUrlState,
@@ -19,16 +18,17 @@ import type {
   ExplorationPageUrlState,
   MlGenericUrlState,
   MlCommonGlobalState,
-} from '../../../common/types/locator';
-import { ML_PAGES } from '../../../common/constants/locator';
+} from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import type { AppPageState } from '@kbn/ml-common-types/common';
 import { getGroupQueryText, getJobQueryText } from '../../../common/util/string_utils';
-import type { AppPageState } from '../../../common/types/common';
+import { formatGenericMlUrl } from './common';
 
 export function formatDataFrameAnalyticsJobManagementUrl(
   appBasePath: string,
   mlUrlGeneratorState: DataFrameAnalyticsUrlState['pageState']
 ): string {
-  let url = `${appBasePath}/${ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE}`;
+  let url = `${appBasePath}`;
 
   if (mlUrlGeneratorState) {
     const { jobId, groupIds, globalState } = mlUrlGeneratorState;
@@ -45,7 +45,7 @@ export function formatDataFrameAnalyticsJobManagementUrl(
       };
 
       const queryState: AppPageState<ListingPageUrlState> = {
-        [ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE]: jobsListState,
+        [ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE_FOR_URL]: jobsListState,
       };
 
       url = setStateToKbnUrl<AppPageState<ListingPageUrlState>>(

@@ -15,17 +15,17 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { DynamicColorProperty } from './dynamic_color_property';
+import type { RawValue } from '../../../../../common/constants';
 import {
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,
-  RawValue,
   DATA_MAPPING_FUNCTION,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
 import { mockField, MockLayer, MockStyle } from './test_helpers/test_util';
-import { ColorDynamicOptions } from '../../../../../common/descriptor_types';
-import { IVectorLayer } from '../../../layers/vector_layer';
-import { IField } from '../../../fields/field';
+import type { ColorDynamicOptions } from '../../../../../common/descriptor_types';
+import type { IVectorLayer } from '../../../layers/vector_layer';
+import type { IField } from '../../../fields/field';
 import { OTHER_CATEGORY_DEFAULT_COLOR } from '../style_util';
 
 const makeProperty = (options: ColorDynamicOptions, style?: MockStyle, field?: IField) => {
@@ -418,19 +418,19 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
           -1,
           'rgba(0,0,0,0)',
           0,
-          '#e4eefd',
+          '#e0ecff',
           12.5,
-          '#d3e3fe',
+          '#cfe1ff',
           25,
-          '#c1d8fe',
+          '#bed7ff',
           37.5,
-          '#afceff',
+          '#adccff',
           50,
-          '#9dc3ff',
+          '#9bc2ff',
           62.5,
-          '#8bb8ff',
+          '#89b7ff',
           75,
-          '#77adff',
+          '#76adff',
           87.5,
           '#61a2ff',
         ]);

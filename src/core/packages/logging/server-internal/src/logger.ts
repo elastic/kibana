@@ -8,7 +8,8 @@
  */
 
 import apmAgent from 'elastic-apm-node';
-import { LogLevel, LogRecord, LogMeta } from '@kbn/logging';
+import { trace } from '@opentelemetry/api';
+import type { LogLevel, LogRecord, LogMeta } from '@kbn/logging';
 import { AbstractLogger } from '@kbn/core-logging-common-internal';
 
 function isError(x: any): x is Error {
@@ -48,9 +49,9 @@ export class BaseLogger extends AbstractLogger {
 
   private getTraceIds() {
     return {
-      spanId: apmAgent.currentTraceIds['span.id'],
-      traceId: apmAgent.currentTraceIds['trace.id'],
-      transactionId: apmAgent.currentTraceIds['transaction.id'],
+      spanId: apmAgent.currentTraceIds['span.id'] ?? trace.getActiveSpan()?.spanContext().spanId,
+      traceId: apmAgent.currentTraceIds['trace.id'] ?? trace.getActiveSpan()?.spanContext().traceId,
+      transactionId: apmAgent.currentTraceIds['transaction.id'], // TODO we cannot obtain OTel's root span ID yet
     };
   }
 }

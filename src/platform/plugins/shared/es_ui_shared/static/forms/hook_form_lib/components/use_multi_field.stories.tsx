@@ -8,16 +8,15 @@
  */
 
 import React from 'react';
-import { ComponentMeta } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 
-import { STORYBOOK_SECTION } from '../constants';
-import { FormHook } from '../types';
+import type { FormHook } from '../types';
 import { useForm } from '../hooks/use_form';
 
 import { Form } from './form';
-import { UseField } from './use_field';
+import type { UseField } from './use_field';
 import { UseMultiFields } from './use_multi_fields';
 import { useMultiFieldStories } from './__stories__';
 
@@ -38,7 +37,7 @@ const submitForm = async (form: FormHook) => {
 
 export default {
   component: UseMultiFields,
-  title: `${STORYBOOK_SECTION}/UseMultiFields`,
+  title: 'Form lib/UseMultiFields',
   decorators: [
     (Story) => {
       const { form } = useForm();
@@ -55,6 +54,6 @@ export default {
       );
     },
   ],
-} as ComponentMeta<typeof UseField>;
+} as Meta<Partial<typeof UseField>>;
 
 export { UseMultiFieldBasic };

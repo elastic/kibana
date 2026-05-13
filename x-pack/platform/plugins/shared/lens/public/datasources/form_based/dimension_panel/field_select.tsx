@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import './field_select.scss';
 import { partition } from 'lodash';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
+import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
-import { FieldOption, FieldOptionValue, FieldPicker } from '@kbn/visualization-ui-components';
+import type {
+  FieldOption as VisFieldOption,
+  FieldOptionValue,
+} from '@kbn/visualization-ui-components';
+import { FieldPicker } from '@kbn/visualization-ui-components';
 import { getFieldIconType } from '@kbn/field-utils';
+import type { IndexPattern } from '@kbn/lens-common';
 import type { OperationType } from '../form_based';
 import type { OperationSupportMatrix } from './operation_support';
 import { fieldContainsData } from '../../../shared_components';
-import type { IndexPattern } from '../../../types';
 
 export type FieldChoiceWithOperationType = FieldOptionValue & {
   operationType: OperationType;
@@ -34,6 +37,8 @@ export interface FieldSelectProps extends EuiComboBoxProps<EuiComboBoxOptionOpti
   markAllFieldsCompatible?: boolean;
   'data-test-subj'?: string;
   showTimeSeriesDimensions: boolean;
+  'aria-describedby'?: string;
+  'aria-label'?: string;
 }
 
 export function FieldSelect({
@@ -48,6 +53,8 @@ export function FieldSelect({
   markAllFieldsCompatible,
   ['data-test-subj']: dataTestSub,
   showTimeSeriesDimensions,
+  ['aria-describedby']: ariaDescribedby,
+  ['aria-label']: ariaLabel,
 }: FieldSelectProps) {
   const { hasFieldData } = useExistingFieldsReader();
   const memoizedFieldOptions = useMemo(() => {
@@ -77,6 +84,7 @@ export function FieldSelect({
     }
 
     function fieldNamesToOptions(items: string[]): FieldOption[] {
+      // @ts-expect-error upgrade typescript v5.9.3
       return items
         .filter((field) => currentIndexPattern.getFieldByName(field)?.displayName)
         .map((field) => {
@@ -194,9 +202,9 @@ export function FieldSelect({
                 selectedField,
               value: { type: 'field', field: selectedField },
             }
-          : undefined) as unknown as FieldOption<FieldChoiceWithOperationType>
+          : undefined) as unknown as VisFieldOption<FieldChoiceWithOperationType>
       }
-      options={memoizedFieldOptions as Array<FieldOption<FieldChoiceWithOperationType>>}
+      options={memoizedFieldOptions as Array<VisFieldOption<FieldChoiceWithOperationType>>}
       onChoose={(choice) => {
         if (choice && choice.field !== selectedField) {
           onChoose(choice);
@@ -205,6 +213,8 @@ export function FieldSelect({
       onDelete={onDeleteColumn}
       fieldIsInvalid={Boolean(incompleteOperation || fieldIsInvalid)}
       data-test-subj={dataTestSub ?? 'indexPattern-dimension-field'}
+      aria-describedby={ariaDescribedby}
+      aria-label={ariaLabel}
     />
   );
 }

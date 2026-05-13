@@ -8,17 +8,19 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
-import { reverseSortDir, SortDirection } from '../utils/sorting';
+import { getEsQuerySort } from '@kbn/discover-utils';
+import type { SortDirection } from '../utils/sorting';
+import { reverseSortDir } from '../utils/sorting';
 import { convertIsoToMillis, extractNanos } from '../utils/date_conversion';
 import { fetchHitsInInterval } from '../utils/fetch_hits_in_interval';
 import { generateIntervals } from '../utils/generate_intervals';
 import { getEsQuerySearchAfter } from '../utils/get_es_query_search_after';
-import { getEsQuerySort } from '../../../../common/utils/sorting/get_es_query_sort';
 import type { DiscoverServices } from '../../../build_services';
+import type { ScopedProfilesManager } from '../../../context_awareness';
 
 export enum SurrDocType {
   SUCCESSORS = 'successors',
@@ -53,7 +55,8 @@ export async function fetchSurroundingDocs(
   size: number,
   filters: Filter[],
   data: DataPublicPluginStart,
-  services: DiscoverServices
+  services: DiscoverServices,
+  scopedProfilesManager: ScopedProfilesManager
 ): Promise<{
   rows: DataTableRecord[];
   interceptedWarnings: SearchResponseWarning[] | undefined;
@@ -106,7 +109,8 @@ export async function fetchSurroundingDocs(
       nanos,
       anchor.raw._id,
       type,
-      services
+      services,
+      scopedProfilesManager
     );
 
     rows =

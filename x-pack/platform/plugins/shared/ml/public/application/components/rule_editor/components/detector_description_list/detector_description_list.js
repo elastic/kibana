@@ -15,9 +15,8 @@ import React from 'react';
 
 import { EuiDescriptionList } from '@elastic/eui';
 
-import { formatValue } from '../../../../formatters/format_value';
-
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AnomalyValueDisplay } from '../../../anomalies_table/anomaly_value_display';
 
 export function DetectorDescriptionList({ job, detector, anomaly }) {
   const listItems = [
@@ -45,8 +44,6 @@ export function DetectorDescriptionList({ job, detector, anomaly }) {
     // Format based on magnitude of value at this stage, rather than using the
     // Kibana field formatter (if set) which would add complexity converting
     // the entered value to / from e.g. bytes.
-    const actual = formatValue(anomaly.actual, anomaly.source.function);
-    const typical = formatValue(anomaly.typical, anomaly.source.function);
 
     listItems.push({
       title: (
@@ -59,20 +56,28 @@ export function DetectorDescriptionList({ job, detector, anomaly }) {
         <FormattedMessage
           id="xpack.ml.ruleEditor.detectorDescriptionList.selectedAnomalyDescription"
           defaultMessage="actual {actual}, typical {typical}"
-          values={{ actual, typical }}
+          values={{
+            actual: (
+              <AnomalyValueDisplay
+                value={anomaly.actual}
+                function={anomaly.source.function}
+                record={anomaly}
+              />
+            ),
+            typical: (
+              <AnomalyValueDisplay
+                value={anomaly.typical}
+                function={anomaly.source.function}
+                record={anomaly}
+              />
+            ),
+          }}
         />
       ),
     });
   }
 
-  return (
-    <EuiDescriptionList
-      className="rule-detector-description-list"
-      type="column"
-      columnWidths={[15, 85]}
-      listItems={listItems}
-    />
-  );
+  return <EuiDescriptionList type="column" columnWidths={[15, 85]} listItems={listItems} />;
 }
 DetectorDescriptionList.propTypes = {
   job: PropTypes.object.isRequired,

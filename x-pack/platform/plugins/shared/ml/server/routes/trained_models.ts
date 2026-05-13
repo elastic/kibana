@@ -11,9 +11,9 @@ import { schema } from '@kbn/config-schema';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import type { ElasticCuratedModelName, ElserVersion } from '@kbn/ml-trained-models-utils';
 import { TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
+import { type TrainedModelConfigResponse } from '@kbn/ml-common-types/trained_models';
 import { ML_INTERNAL_BASE_PATH, type MlFeatures } from '../../common/constants/app';
 import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../common/constants/trained_models';
-import { type TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { wrapError } from '../client/error_wrapper';
 import { modelsProvider } from '../models/model_management';
 import type { RouteInitialization } from '../types';
@@ -74,17 +74,20 @@ export function trainedModelsRoutes(
         version: '1',
         validate: false,
       },
-      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
-        try {
-          const modelsClient = modelsProvider(client, mlClient, cloud, getEnabledFeatures());
-          const models = await modelsClient.getTrainedModelList();
-          return response.ok({
-            body: models,
-          });
-        } catch (e) {
-          return response.customError(wrapError(e));
+      routeGuard.fullLicenseAPIGuard(
+        async ({ client, mlClient, request, response, mlSavedObjectService }) => {
+          try {
+            const modelsClient = modelsProvider(client, mlClient, cloud, getEnabledFeatures());
+            const models = await modelsClient.getTrainedModelList(mlSavedObjectService);
+
+            return response.ok({
+              body: models,
+            });
+          } catch (e) {
+            return response.customError(wrapError(e));
+          }
         }
-      })
+      )
     );
 
   router.versioned

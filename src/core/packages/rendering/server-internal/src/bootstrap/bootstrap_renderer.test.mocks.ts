@@ -12,17 +12,14 @@ jest.doMock('./render_template', () => ({
   renderTemplate: renderTemplateMock,
 }));
 
-export const getThemeTagMock = jest.fn();
-jest.doMock('./get_theme_tag', () => ({
-  getThemeTag: getThemeTagMock,
-}));
-
 export const getPluginsBundlePathsMock = jest.fn();
 jest.doMock('./get_plugin_bundle_paths', () => ({
   getPluginsBundlePaths: getPluginsBundlePathsMock,
 }));
 
 export const getJsDependencyPathsMock = jest.fn();
+export const getRspackDependencyPathsMock = jest.fn();
 jest.doMock('./get_js_dependency_paths', () => ({
   getJsDependencyPaths: getJsDependencyPathsMock,
+  getRspackDependencyPaths: getRspackDependencyPathsMock,
 }));

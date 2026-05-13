@@ -5,38 +5,50 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import React from 'react';
 
 import { Footer } from '.';
+import { CLOSE } from './translations';
+
+const defaultProps = {
+  closeModal: jest.fn(),
+};
 
 describe('Footer', () => {
-  const closeModal = jest.fn();
-  const onReset = jest.fn();
-  const onSave = jest.fn();
-
-  beforeEach(() => jest.clearAllMocks());
-
-  it('calls onReset when the reset button is clicked', () => {
-    render(<Footer closeModal={closeModal} onReset={onReset} onSave={onSave} />);
-
-    fireEvent.click(screen.getByTestId('reset'));
-
-    expect(onReset).toHaveBeenCalled();
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('calls closeModal when the cancel button is clicked', () => {
-    render(<Footer closeModal={closeModal} onReset={onReset} onSave={onSave} />);
+  it('renders the default close button text', () => {
+    render(<Footer {...defaultProps} />);
 
-    fireEvent.click(screen.getByTestId('cancel'));
+    const closeButton = screen.getByTestId('close');
 
-    expect(closeModal).toHaveBeenCalled();
+    expect(closeButton).toHaveTextContent(CLOSE);
   });
 
-  it('calls onSave when the save button is clicked', () => {
-    render(<Footer closeModal={closeModal} onReset={onReset} onSave={onSave} />);
-    fireEvent.click(screen.getByTestId('save'));
+  it('renders custom close button text', () => {
+    render(<Footer {...defaultProps} closeButtonText="Custom Close" />);
 
-    expect(onSave).toHaveBeenCalled();
+    const closeButton = screen.getByTestId('close');
+
+    expect(closeButton).toHaveTextContent('Custom Close');
+  });
+
+  it('calls closeModal when the button is clicked', () => {
+    render(<Footer {...defaultProps} />);
+
+    fireEvent.click(screen.getByTestId('close'));
+
+    expect(defaultProps.closeModal).toHaveBeenCalled();
+  });
+
+  it('renders actionButtons when provided', () => {
+    render(
+      <Footer {...defaultProps} actionButtons={<div data-test-subj="action">{'Action'}</div>} />
+    );
+
+    expect(screen.getByTestId('action')).toBeInTheDocument();
   });
 });

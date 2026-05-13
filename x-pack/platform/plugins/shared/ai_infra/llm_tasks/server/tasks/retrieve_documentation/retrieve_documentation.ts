@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { OutputAPI } from '@kbn/inference-common';
+import { type OutputAPI } from '@kbn/inference-common';
 import type { ProductDocSearchAPI, DocSearchResult } from '@kbn/product-doc-base-plugin/server';
 import { truncate, count as countTokens } from '../../utils/tokens';
 import type { RetrieveDocumentationAPI } from './types';
@@ -29,7 +29,9 @@ export const retrieveDocumentation =
     searchTerm,
     connectorId,
     products,
+    resourceTypes,
     functionCalling,
+    inferenceId,
     max = MAX_DOCUMENTS_DEFAULT,
     maxDocumentTokens = MAX_TOKENS_DEFAULT,
     tokenReductionStrategy = 'highlight',
@@ -63,8 +65,10 @@ export const retrieveDocumentation =
       const { results } = await searchDocAPI({
         query: searchTerm,
         products,
+        ...(resourceTypes ? { resourceTypes } : {}),
         max,
         highlights,
+        inferenceId,
       });
 
       log.debug(`searching with term=[${searchTerm}] returned ${results.length} documents`);

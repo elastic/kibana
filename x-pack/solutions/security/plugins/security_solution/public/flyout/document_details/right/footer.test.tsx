@@ -16,8 +16,12 @@ import { useKibana } from '../../../common/lib/kibana';
 import { useAlertExceptionActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
 import { useInvestigateInTimeline } from '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
+import { FooterAiActions } from '../../../flyout_v2/document/main/components/footer_ai_actions';
 
 jest.mock('../../../common/lib/kibana');
+jest.mock('../../../flyout_v2/document/main/components/footer_ai_actions', () => ({
+  FooterAiActions: jest.fn(() => <div data-test-subj="footerAiActions" />),
+}));
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
   return {
@@ -31,15 +35,22 @@ jest.mock(
 );
 jest.mock('../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions');
 
+const renderPanelFooter = (isPreview: boolean) =>
+  render(
+    <TestProviders>
+      <DocumentDetailsContext.Provider value={mockContextValue}>
+        <PanelFooter isRulePreview={isPreview} />
+      </DocumentDetailsContext.Provider>
+    </TestProviders>
+  );
+
 describe('PanelFooter', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should not render the take action dropdown if preview mode', () => {
-    const { queryByTestId } = render(
-      <TestProviders>
-        <DocumentDetailsContext.Provider value={mockContextValue}>
-          <PanelFooter isPreview={true} />
-        </DocumentDetailsContext.Provider>
-      </TestProviders>
-    );
+    const { queryByTestId } = renderPanelFooter(true);
 
     expect(queryByTestId(FLYOUT_FOOTER_TEST_ID)).not.toBeInTheDocument();
   });
@@ -57,14 +68,27 @@ describe('PanelFooter', () => {
     });
     (useAddToCaseActions as jest.Mock).mockReturnValue({ addToCaseActionItems: [] });
 
-    const wrapper = render(
-      <TestProviders>
-        <DocumentDetailsContext.Provider value={mockContextValue}>
-          <PanelFooter isPreview={false} />
-        </DocumentDetailsContext.Provider>
-      </TestProviders>
+    const { getByTestId } = renderPanelFooter(false);
+
+    expect(getByTestId(FLYOUT_FOOTER_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should render footer AI actions with document details context data', () => {
+    const { getByTestId } = renderPanelFooter(false);
+
+    expect(getByTestId('footerAiActions')).toBeInTheDocument();
+    expect(FooterAiActions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dataFormattedForFieldBrowser: mockContextValue.dataFormattedForFieldBrowser,
+        hit: expect.objectContaining({
+          raw: expect.objectContaining({
+            _id: mockContextValue.searchHit._id,
+            _index: mockContextValue.searchHit._index,
+          }),
+        }),
+      }),
+      {}
     );
-    expect(wrapper.getByTestId(FLYOUT_FOOTER_TEST_ID)).toBeInTheDocument();
-    expect(wrapper.getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 });

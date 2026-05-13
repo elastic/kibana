@@ -7,6 +7,7 @@
 
 import { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useInputCommand } from '../../../hooks/state_selectors/use_input_command';
 import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
 import { getArgumentsForCommand } from '../../../service/parsed_command_input';
 import type { CommandDefinition } from '../../..';
@@ -36,23 +37,27 @@ export const UP_ARROW_ACCESS_HISTORY_HINT = i18n.translate(
 export const useInputHints = () => {
   const dispatch = useConsoleStateDispatch();
   const isInputPopoverOpen = Boolean(useWithInputShowPopover());
-  const commandEntered = useWithInputCommandEntered();
+  const commandNameEntered = useWithInputCommandEntered();
   const commandList = useWithCommandList();
+  const inputCommand = useInputCommand();
   const { leftOfCursorText } = useWithInputTextEntered();
 
   const commandEnteredDefinition = useMemo<CommandDefinition | undefined>(() => {
-    if (commandEntered) {
-      return commandList.find((commandDef) => commandDef.name === commandEntered);
+    if (commandNameEntered) {
+      return commandList.find((commandDef) => commandDef.name === commandNameEntered);
     }
-  }, [commandEntered, commandList]);
+  }, [commandNameEntered, commandList]);
 
   useEffect(() => {
     // If we know the command name and the input popover is not opened, then show hints (if any)
-    if (commandEntered && !isInputPopoverOpen) {
+    if (commandNameEntered && !isInputPopoverOpen) {
       // Is valid command name? ==> show usage
       if (commandEnteredDefinition && commandEnteredDefinition.helpHidden !== true) {
         const exampleInstruction = commandEnteredDefinition?.exampleInstruction ?? '';
-        const exampleUsage = commandEnteredDefinition?.exampleUsage ?? '';
+        const exampleUsage =
+          typeof commandEnteredDefinition?.exampleUsage === 'function'
+            ? commandEnteredDefinition?.exampleUsage(inputCommand)
+            : commandEnteredDefinition?.exampleUsage ?? '';
 
         let hint = exampleInstruction ?? '';
 
@@ -95,7 +100,7 @@ export const useInputHints = () => {
         dispatch({
           type: 'updateFooterContent',
           payload: {
-            value: UNKNOWN_COMMAND_HINT(commandEntered),
+            value: UNKNOWN_COMMAND_HINT(commandNameEntered),
           },
         });
 
@@ -110,5 +115,12 @@ export const useInputHints = () => {
       });
       dispatch({ type: 'setInputState', payload: { value: undefined } });
     }
-  }, [commandEntered, commandEnteredDefinition, dispatch, isInputPopoverOpen, leftOfCursorText]);
+  }, [
+    commandNameEntered,
+    commandEnteredDefinition,
+    dispatch,
+    isInputPopoverOpen,
+    leftOfCursorText,
+    inputCommand,
+  ]);
 };

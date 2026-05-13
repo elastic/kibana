@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { EuiBadge, EuiSpacer, EuiText } from '@elastic/eui';
 import { STATUS } from '../../../../../../../../common/constants';
-import { Ping } from '../../../../../../../../common/runtime_types';
+import type { Ping } from '../../../../../../../../common/runtime_types';
 import {
   STATUS_DOWN_LABEL,
   STATUS_UP_LABEL,
@@ -26,7 +26,7 @@ const getPingStatusLabel = (status: string) => {
 };
 
 export const PingStatusColumn = ({ pingStatus, item }: Props) => {
-  const timeStamp = moment(item.timestamp);
+  const timeStamp = moment(item['@timestamp']);
 
   let checkedTime = '';
 

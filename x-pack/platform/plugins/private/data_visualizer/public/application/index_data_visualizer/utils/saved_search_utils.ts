@@ -20,40 +20,6 @@ import { getDefaultDSLQuery } from '@kbn/ml-query-utils';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { SavedSearchSavedObject } from '../../../../common/types';
-import { isSavedSearchSavedObject } from '../../../../common/types';
-
-/**
- * Parse the stringified searchSourceJSON
- * from a saved search or saved search object
- */
-export function getQueryFromSavedSearchObject(savedSearch: SavedSearchSavedObject | SavedSearch) {
-  if (!isSavedSearchSavedObject(savedSearch)) {
-    return savedSearch.searchSource.getSerializedFields();
-  }
-  const search =
-    savedSearch?.attributes?.kibanaSavedObjectMeta ?? // @ts-ignore
-    savedSearch?.kibanaSavedObjectMeta;
-
-  const parsed =
-    typeof search?.searchSourceJSON === 'string'
-      ? (JSON.parse(search.searchSourceJSON) as {
-          query: Query;
-          filter: Filter[];
-        })
-      : undefined;
-
-  // Remove indexRefName because saved search might no longer be relevant
-  // if user modifies the query or filter
-  // after opening a saved search
-  if (parsed && Array.isArray(parsed.filter)) {
-    parsed.filter.forEach((f) => {
-      // @ts-expect-error indexRefName does appear in meta for newly created saved search
-      f.meta.indexRefName = undefined;
-    });
-  }
-  return parsed;
-}
 
 function getSavedSearchSource(savedSearch?: SavedSearch | null) {
   return isDefined(savedSearch) &&
@@ -107,10 +73,10 @@ export function getEsQueryFromSavedSearch({
       cloneDeep(savedSearchSource.getSearchRequestBody()?.query) ?? getDefaultDSLQuery();
     const timeField = savedSearchSource.getField('index')?.timeFieldName;
 
-    if (Array.isArray(savedQuery.bool.filter) && timeField !== undefined) {
+    if (savedQuery?.bool && Array.isArray(savedQuery.bool.filter) && timeField !== undefined) {
       savedQuery.bool.filter = savedQuery.bool.filter.filter(
         (c: QueryDslQueryContainer) =>
-          !(Object.hasOwn(c, 'range') && Object.hasOwn(c.range ?? {}, timeField))
+          c != null && !(Object.hasOwn(c, 'range') && Object.hasOwn(c.range ?? {}, timeField))
       );
     }
 
@@ -126,18 +92,25 @@ export function getEsQueryFromSavedSearch({
     !savedSearch &&
     (userQuery || userFilters || (filterManager && filterManager.getGlobalFilters()?.length > 0))
   ) {
-    const combinedQuery = buildEsQuery(
-      dataView,
-      userQuery ?? [],
-      [...(filterManager?.getFilters() ?? []), ...(userFilters ?? [])],
-      uiSettings ? getEsQueryConfig(uiSettings) : undefined
-    );
+    try {
+      // buildEsQuery throws an exception for a fallible operation (anti-pattern).
+      // We MUST always wrap it in a try block to prevent a failed parse from being unhandled &
+      // bubbling up to the error boundary.
+      const combinedQuery = buildEsQuery(
+        dataView,
+        userQuery ?? [],
+        [...(filterManager?.getFilters() ?? []), ...(userFilters ?? [])],
+        uiSettings ? getEsQueryConfig(uiSettings) : undefined
+      );
 
-    return {
-      searchQuery: combinedQuery,
-      searchString: userQuery?.query ?? '',
-      queryLanguage: (userQuery?.language ?? 'kuery') as SearchQueryLanguage,
-    };
+      return {
+        searchQuery: combinedQuery,
+        searchString: userQuery?.query ?? '',
+        queryLanguage: (userQuery?.language ?? 'kuery') as SearchQueryLanguage,
+      };
+    } catch (e) {
+      return undefined;
+    }
   }
 
   // If saved search available, merge saved search with the latest user query or filters
@@ -150,18 +123,25 @@ export function getEsQueryFromSavedSearch({
         filterManager.addFilters(savedSearchSource.getField('filter') as Filter[]);
       }
     }
-    const combinedQuery = buildEsQuery(
-      dataView,
-      currentQuery,
-      [...(filterManager?.getFilters() ?? []), ...(userFilters ?? [])],
-      uiSettings ? getEsQueryConfig(uiSettings) : undefined
-    );
+    try {
+      // buildEsQuery throws an exception for a fallible operation (anti-pattern).
+      // We MUST always wrap it in a try block to prevent a failed parse from being unhandled &
+      // bubbling up to the error boundary.
+      const combinedQuery = buildEsQuery(
+        dataView,
+        currentQuery,
+        [...(filterManager?.getFilters() ?? []), ...(userFilters ?? [])],
+        uiSettings ? getEsQueryConfig(uiSettings) : undefined
+      );
 
-    return {
-      searchQuery: combinedQuery,
-      searchString: currentQuery?.query ?? '',
-      queryLanguage: (currentQuery?.language as SearchQueryLanguage) ?? 'kuery',
-      queryOrAggregateQuery: currentQuery,
-    };
+      return {
+        searchQuery: combinedQuery,
+        searchString: currentQuery?.query ?? '',
+        queryLanguage: (currentQuery?.language as SearchQueryLanguage) ?? 'kuery',
+        queryOrAggregateQuery: currentQuery,
+      };
+    } catch (e) {
+      return undefined;
+    }
   }
 }

@@ -7,9 +7,18 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
-import { ControlType, TermIntersect, Workspace } from '../../types';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiToolTip,
+  type UseEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { ControlType, TermIntersect, Workspace } from '../../types';
 import { VennDiagram } from '../venn_diagram';
+import { gphSidebarHeaderStyles, gphSidebarPanelStyles } from '../../styles';
 
 interface MergeCandidatesProps {
   workspace: Workspace;
@@ -42,9 +51,9 @@ export const MergeCandidates = ({
   };
 
   return (
-    <div className="gphSidebar__panel">
-      <div className="gphSidebar__header">
-        <EuiIcon type="link" />{' '}
+    <div css={gphSidebarPanelStyles}>
+      <div css={gphSidebarHeaderStyles}>
+        <EuiIcon type="link" aria-hidden={true} />{' '}
         {i18n.translate('xpack.graph.sidebar.linkSummaryTitle', {
           defaultMessage: 'Link summary',
         })}
@@ -101,9 +110,9 @@ export const MergeCandidates = ({
         return (
           <div>
             <span>
-              <EuiToolTip content={mergeTerm1ToTerm2ButtonMsg}>
+              <EuiToolTip content={mergeTerm1ToTerm2ButtonMsg} disableScreenReaderOutput>
                 <EuiButtonIcon
-                  iconType="doubleArrowRight"
+                  iconType="chevronDoubleRight"
                   size="xs"
                   style={{ opacity: 0.2 + mc.overlap / mc.v1 }}
                   aria-label={mergeTerm1ToTerm2ButtonMsg}
@@ -111,12 +120,16 @@ export const MergeCandidates = ({
                 />
               </EuiToolTip>
 
-              <span className="gphLinkSummary__term--1">{mc.term1}</span>
-              <span className="gphLinkSummary__term--2">{mc.term2}</span>
+              <span className="gphLinkSummary__term--1" css={styles.term1}>
+                {mc.term1}
+              </span>
+              <span className="gphLinkSummary__term--2" css={styles.term2}>
+                {mc.term2}
+              </span>
 
-              <EuiToolTip content={mergeTerm2ToTerm1ButtonMsg}>
+              <EuiToolTip content={mergeTerm2ToTerm1ButtonMsg} disableScreenReaderOutput>
                 <EuiButtonIcon
-                  iconType="doubleArrowLeft"
+                  iconType="chevronDoubleLeft"
                   size="xs"
                   style={{ opacity: 0.2 + mc.overlap / mc.v2 }}
                   aria-label={mergeTerm2ToTerm1ButtonMsg}
@@ -128,17 +141,39 @@ export const MergeCandidates = ({
             <VennDiagram leftValue={mc.v1} rightValue={mc.v2} overlap={mc.overlap} />
 
             <EuiToolTip content={leftTermCountMsg}>
-              <small className="gphLinkSummary__term--1">{mc.v1}</small>
+              <small tabIndex={0} className="gphLinkSummary__term--1" css={styles.term1}>
+                {mc.v1}
+              </small>
             </EuiToolTip>
             <EuiToolTip content={bothTermsCountMsg}>
-              <small className="gphLinkSummary__term--1-2">&nbsp;({mc.overlap})&nbsp;</small>
+              <small tabIndex={0} className="gphLinkSummary__term--1-2" css={styles.term1_2}>
+                &nbsp;({mc.overlap})&nbsp;
+              </small>
             </EuiToolTip>
             <EuiToolTip content={rightTermCountMsg}>
-              <small className="gphLinkSummary__term--2">{mc.v2}</small>
+              <small tabIndex={0} className="gphLinkSummary__term--2" css={styles.term2}>
+                {mc.v2}
+              </small>
             </EuiToolTip>
           </div>
         );
       })}
     </div>
   );
+};
+
+const styles = {
+  term1: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      color: euiTheme.colors.danger,
+    }),
+
+  term2: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      color: euiTheme.colors.primary,
+    }),
+
+  term1_2: ({ euiTheme }: UseEuiTheme) => css`
+    color: color-mix(in srgb, ${euiTheme.colors.danger}, ${euiTheme.colors.primary});
+  `,
 };

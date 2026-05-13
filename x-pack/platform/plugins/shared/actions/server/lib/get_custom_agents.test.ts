@@ -8,7 +8,7 @@
 import { Agent as HttpsAgent } from 'https';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { getCustomAgents } from './get_custom_agents';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
@@ -59,6 +59,39 @@ describe('getCustomAgents', () => {
     const { httpAgent, httpsAgent } = getCustomAgents(configurationUtilities, logger, targetUrl);
     expect(httpAgent).toBe(undefined);
     expect(httpsAgent instanceof HttpsAgent).toBeTruthy();
+  });
+
+  test('uses provided proxySettings override instead of global config', () => {
+    configurationUtilities.getProxySettings.mockReturnValue({
+      proxyUrl: 'https://someproxyhost',
+      proxySSLSettings: {
+        verificationMode: 'none',
+      },
+      proxyBypassHosts: undefined,
+      proxyOnlyHosts: undefined,
+    });
+
+    const connectorProxySettings = {
+      proxyUrl: 'http://connector-proxy:3128',
+      proxyBypassHosts: undefined,
+      proxyOnlyHosts: undefined,
+      proxySSLSettings: { verificationMode: 'full' as const },
+    };
+    const { httpAgent, httpsAgent } = getCustomAgents(
+      configurationUtilities,
+      logger,
+      targetUrl,
+      undefined,
+      connectorProxySettings
+    );
+    expect(httpAgent instanceof HttpProxyAgent).toBeTruthy();
+    expect(httpsAgent instanceof HttpsProxyAgent).toBeTruthy();
+
+    // Accessing private property via any to test the proxy settings
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((httpAgent as any)?.proxy?.host).toBe('connector-proxy');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((httpsAgent as any)?.proxy?.host).toBe('connector-proxy');
   });
 
   test('returns non-proxy agents for matching proxyBypassHosts', () => {

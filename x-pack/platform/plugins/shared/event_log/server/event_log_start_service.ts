@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { IClusterClient, KibanaRequest } from '@kbn/core/server';
-import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import type { Observable } from 'rxjs';
+import type { IClusterClient, KibanaRequest } from '@kbn/core/server';
+import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
-import { EsContext } from './es';
-import { IEventLogClientService } from './types';
+import type { EsContext } from './es';
+import type { IEventLogClientService } from './types';
 import { EventLogClient } from './event_log_client';
-import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
+import type { SavedObjectProviderRegistry } from './saved_object_provider_registry';
 export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 
@@ -44,6 +44,19 @@ export class EventLogClientService implements IEventLogClientService {
       savedObjectGetter: this.savedObjectProviderRegistry.getProvidersClient(request),
       spacesService: this.spacesService,
       request,
+    });
+  }
+
+  getClientWithRequestInSpace(request: KibanaRequest, spaceId: string) {
+    return new EventLogClient({
+      esContext: this.esContext,
+      savedObjectGetter: this.savedObjectProviderRegistry.getProvidersClientWithRequestInSpace(
+        request,
+        spaceId
+      ),
+      spacesService: this.spacesService,
+      request,
+      spaceId,
     });
   }
 }

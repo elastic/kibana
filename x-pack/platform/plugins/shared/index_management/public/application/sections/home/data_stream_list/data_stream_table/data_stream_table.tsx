@@ -5,50 +5,55 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import React, { useState, Fragment, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiInMemoryTable,
-  EuiBasicTableColumn,
   EuiButton,
+  useEuiTheme,
   EuiLink,
-  EuiIcon,
-  EuiToolTip,
   EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSwitch,
   EuiIconTip,
+  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
-import { ScopedHistory } from '@kbn/core/public';
+import type { ScopedHistory } from '@kbn/core/public';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
+import { columnPresetActions } from '@kbn/shared-ux-column-presets';
 
-import { EuiContextMenuPanelItemDescriptor } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui/src/components/context_menu/context_menu';
 import { MAX_DATA_RETENTION } from '../../../../../../common/constants';
 import { useAppContext } from '../../../../app_context';
-import { DataStream } from '../../../../../../common/types';
-import { getLifecycleValue } from '../../../../lib/data_streams';
-import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
+import type { DataStream } from '../../../../../../common/types';
+import { isNextGenIlm } from '../../../../lib/data_streams';
+import type { UseRequestResponse } from '../../../../../shared_imports';
+import { reactRouterNavigate } from '../../../../../shared_imports';
 import { getDataStreamDetailsLink, getIndexListUri } from '../../../../services/routing';
 import { DataHealth } from '../../../../components';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
 import { humanizeTimeStamp } from '../humanize_time_stamp';
 import { DataStreamsBadges } from '../data_stream_badges';
 import { ConditionalWrap } from '../data_stream_detail_panel';
-import { isDataStreamFullyManagedByILM } from '../../../../lib/data_streams';
 import { indexModeLabels } from '../../../../lib/index_mode_labels';
-import { FilterListButton, Filters } from '../../components';
+import type { Filters } from '../../components';
+import { FilterListButton } from '../../components';
 import { type DataStreamFilterName } from '../data_stream_list';
 import { DataStreamActionsMenu } from '../data_stream_actions_menu';
 import { EditDataRetentionModal } from '../edit_data_retention_modal';
+import { DataRetentionValue } from '../data_retention_value';
 
 interface TableDataStream extends DataStream {
-  isDataStreamFullyManagedByILM: boolean;
+  isNextGenIlm: boolean;
 }
 
 interface Props {
   dataStreams?: DataStream[];
+  isLoading?: boolean;
   reload: UseRequestResponse['resendRequest'];
   history: ScopedHistory;
   includeStats: boolean;
@@ -61,8 +66,19 @@ interface Props {
 const INFINITE_AS_ICON = true;
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    bulkDeleteButton: css`
+      color: ${euiTheme.colors.danger};
+    `,
+  };
+};
+
 export const DataStreamTable: React.FunctionComponent<Props> = ({
   dataStreams,
+  isLoading,
   reload,
   history,
   filters,
@@ -71,6 +87,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
   onViewFilterChange,
   viewFilters,
 }) => {
+  const styles = useStyles();
   const [selection, setSelection] = useState<DataStream[]>([]);
   const [dataStreamsToDelete, setDataStreamsToDelete] = useState<string[]>([]);
   const [dataStreamsToEditDataRetention, setDataStreamsToEditDataRetention] = useState<
@@ -81,7 +98,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
   const data = useMemo(() => {
     return (dataStreams || []).map((dataStream) => ({
       ...dataStream,
-      isDataStreamFullyManagedByILM: isDataStreamFullyManagedByILM(dataStream),
+      isNextGenIlm: isNextGenIlm(dataStream),
     }));
   }, [dataStreams]);
 
@@ -130,20 +147,24 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         name: i18n.translate('xpack.idxMgmt.dataStreamList.table.storageSizeColumnTitle', {
           defaultMessage: 'Storage size',
         }),
-        truncateText: true,
         sortable: true,
-        render: (
-          meteringStorageSizeBytes: DataStream['meteringStorageSizeBytes'],
-          dataStream: DataStream
-        ) => dataStream.meteringStorageSize,
+        minWidth: '9em',
+        width: '12em',
+        className: 'eui-textNoWrap',
+        align: RIGHT_ALIGNMENT,
+        render: (_: DataStream['meteringStorageSizeBytes'], dataStream: DataStream) =>
+          dataStream.meteringStorageSize,
       });
       columns.push({
         field: 'meteringDocsCount',
         name: i18n.translate('xpack.idxMgmt.dataStreamList.table.docsCountColumnTitle', {
           defaultMessage: 'Documents count',
         }),
-        truncateText: true,
         sortable: true,
+        minWidth: '8em',
+        width: '12em',
+        className: 'eui-textNoWrap',
+        align: RIGHT_ALIGNMENT,
       });
     }
     if (config.enableDataStreamStats) {
@@ -166,9 +187,12 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         name: i18n.translate('xpack.idxMgmt.dataStreamList.table.storageSizeColumnTitle', {
           defaultMessage: 'Storage size',
         }),
-        truncateText: true,
         sortable: true,
-        render: (storageSizeBytes: DataStream['storageSizeBytes'], dataStream: DataStream) =>
+        minWidth: '9em',
+        width: '12em',
+        className: 'eui-textNoWrap',
+        align: RIGHT_ALIGNMENT,
+        render: (_: DataStream['storageSizeBytes'], dataStream: DataStream) =>
           dataStream.storageSize,
       });
     }
@@ -179,8 +203,10 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     name: i18n.translate('xpack.idxMgmt.dataStreamList.table.indicesColumnTitle', {
       defaultMessage: 'Indices',
     }),
-    truncateText: true,
     sortable: true,
+    align: RIGHT_ALIGNMENT,
+    minWidth: '6em',
+    width: '7em',
     render: (indices: DataStream['indices'], dataStream) => (
       <EuiLink
         data-test-subj="indicesLink"
@@ -196,72 +222,74 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     name: i18n.translate('xpack.idxMgmt.dataStreamList.table.indexModeColumnTitle', {
       defaultMessage: 'Index mode',
     }),
-    truncateText: true,
     sortable: true,
     render: (indexMode: DataStream['indexMode']) => indexModeLabels[indexMode],
+    width: '7.5em',
+    minWidth: '7.5em',
   });
 
   columns.push({
     field: 'lifecycle',
-    name: (
-      <EuiToolTip
-        content={i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTooltip', {
-          defaultMessage: `Data is kept at least this long before being automatically deleted. The data retention value only applies to the data managed directly by the data stream. {canDisableDataRetention, plural, one {If some data is subject to an index lifecycle management policy, then the data retention value set for the data stream doesn't apply to that data.} other {}}`,
-          values: {
-            // ILM is not applicable on serverless, so when the user isnt able to
-            // disable data retention (which is only for serverless) we want to
-            // tweak the copy of the tooltip to hide any references to it.
-            canDisableDataRetention: config.enableTogglingDataRetention ? 1 : 0,
-          },
-        })}
-      >
-        <span>
-          {i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTitle', {
-            defaultMessage: 'Data retention',
-          })}{' '}
-          <EuiIcon size="s" color="subdued" type="questionInCircle" />
-        </span>
-      </EuiToolTip>
-    ),
+    name: i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTitle', {
+      defaultMessage: 'Data retention',
+    }),
+    nameTooltip: {
+      content: i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTooltip', {
+        defaultMessage: `Data is kept at least this long before being automatically deleted. The data retention value only applies to the data managed directly by the data stream. {canDisableDataRetention, plural, one {If some data is subject to an index lifecycle management policy, then the data retention value set for the data stream doesn't apply to that data.} other {}}`,
+        values: {
+          // ILM is not applicable on serverless, so when the user isn't able to
+          // disable data retention (which is only for serverless) we want to
+          // tweak the copy of the tooltip to hide any references to it.
+          canDisableDataRetention: config.enableTogglingDataRetention ? 1 : 0,
+        },
+      }),
+      icon: 'question',
+      iconProps: {
+        color: 'subdued',
+      },
+    },
+    width: '12em',
+    minWidth: '10em',
     truncateText: true,
     sortable: true,
     render: (lifecycle: DataStream['lifecycle'], dataStream) => (
       <ConditionalWrap
-        condition={dataStream.isDataStreamFullyManagedByILM}
+        condition={dataStream.isNextGenIlm}
         wrap={(children) => <EuiTextColor color="subdued">{children}</EuiTextColor>}
       >
         <>
-          {getLifecycleValue(lifecycle, INFINITE_AS_ICON)}
+          <DataRetentionValue dataStream={dataStream} infiniteAsIcon={INFINITE_AS_ICON} />
 
-          {lifecycle?.retention_determined_by === MAX_DATA_RETENTION && (
-            <>
-              {' '}
-              <EuiToolTip
-                content={i18n.translate(
-                  'xpack.idxMgmt.dataStreamList.table.usingEffectiveRetentionTooltip',
-                  {
-                    defaultMessage: `This data stream is using the maximum allowed data retention: [{effectiveRetention}].`,
-                    values: {
-                      effectiveRetention: lifecycle?.effective_retention,
-                    },
-                  }
-                )}
-              >
-                <EuiIcon
+          {!dataStream.isNextGenIlm &&
+            dataStream.lifecycle?.retention_determined_by === MAX_DATA_RETENTION && (
+              <>
+                {' '}
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.idxMgmt.dataStreamList.table.usingEffectiveRetentionTooltip',
+                    {
+                      defaultMessage:
+                        'This data stream is using the maximum allowed data retention: [{effectiveRetention}].',
+                      values: {
+                        effectiveRetention: dataStream.lifecycle?.effective_retention,
+                      },
+                    }
+                  )}
+                  position="top"
+                  type="info"
                   size="s"
                   color="subdued"
-                  type="iInCircle"
-                  data-test-subj="usingMaxRetention"
+                  iconProps={{ 'data-test-subj': 'usingMaxRetention' }}
                 />
-              </EuiToolTip>
-            </>
-          )}
+              </>
+            )}
         </>
       </ConditionalWrap>
     ),
   });
 
   columns.push({
+    ...columnPresetActions({}),
     name: i18n.translate('xpack.idxMgmt.dataStreamList.table.actionColumnTitle', {
       defaultMessage: 'Actions',
     }),
@@ -288,12 +316,19 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
 
   const selectionConfig = {
     onSelectionChange: setSelection,
+    selectableMessage: () =>
+      i18n.translate('xpack.idxMgmt.dataStreamList.table.selection.selectRowAriaLabel', {
+        defaultMessage: 'Select this row',
+      }),
   };
 
   const dataStreamActions: EuiContextMenuPanelItemDescriptor[] = [];
 
   if (
-    selection.every((dataStream: DataStream) => dataStream.privileges.manage_data_stream_lifecycle)
+    selection.every(
+      (dataStream: DataStream) =>
+        dataStream.privileges.manage_data_stream_lifecycle && !isNextGenIlm(dataStream)
+    )
   ) {
     dataStreamActions.push({
       name: i18n.translate('xpack.idxMgmt.dataStreamList.table.bulkEditDataRetentionButtonLabel', {
@@ -312,7 +347,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       }),
       icon: 'trash',
       onClick: () => setDataStreamsToDelete(selection.map(({ name }: DataStream) => name)),
-      className: 'dataStreamsBulkDeleteButton',
+      css: styles.bulkDeleteButton,
       'data-test-subj': 'deleteDataStreamsButton',
     });
   }
@@ -330,7 +365,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         />
       ) : undefined,
     toolsRight: [
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup gutterSize="s" key="includeStats">
         <EuiFlexItem grow={false}>
           <EuiSwitch
             label={i18n.translate('xpack.idxMgmt.dataStreamListControls.includeStatsSwitchLabel', {
@@ -357,6 +392,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       <FilterListButton<DataStreamFilterName>
         filters={viewFilters}
         onChange={onViewFilterChange}
+        key="filterListButton"
       />,
       <EuiButton
         color="success"
@@ -393,10 +429,9 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       {dataStreamsToEditDataRetention && dataStreamsToEditDataRetention.length > 0 ? (
         <EditDataRetentionModal
           onClose={(res) => {
+            setDataStreamsToEditDataRetention([]);
             if (res && res.hasUpdatedDataRetention) {
               reload();
-            } else {
-              setDataStreamsToEditDataRetention([]);
             }
           }}
           dataStreams={dataStreamsToEditDataRetention}
@@ -406,10 +441,9 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       {dataStreamsToDelete && dataStreamsToDelete.length > 0 ? (
         <DeleteDataStreamConfirmationModal
           onClose={(res) => {
+            setDataStreamsToDelete([]);
             if (res && res.hasDeletedDataStreams) {
               reload();
-            } else {
-              setDataStreamsToDelete([]);
             }
           }}
           dataStreams={dataStreamsToDelete}
@@ -423,20 +457,20 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         sorting={sorting}
         selection={selectionConfig}
         pagination={pagination}
-        rowProps={() => ({
-          'data-test-subj': 'row',
-        })}
-        cellProps={() => ({
-          'data-test-subj': 'cell',
-        })}
+        loading={isLoading}
         data-test-subj="dataStreamTable"
-        message={
+        tableCaption={i18n.translate('xpack.idxMgmt.dataStreamList.table.caption', {
+          defaultMessage: 'Data streams',
+        })}
+        noItemsMessage={
           <FormattedMessage
             id="xpack.idxMgmt.dataStreamList.table.noDataStreamsMessage"
             defaultMessage="No data streams found"
           />
         }
-        tableLayout={'auto'}
+        tableLayout="auto"
+        scrollableInline
+        responsiveBreakpoint={false}
         onTableChange={onTableChange}
       />
     </>

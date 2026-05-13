@@ -10,15 +10,12 @@ import { act, type RenderHookResult } from '@testing-library/react';
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
 import type { Agent } from '../../../../../../../common';
+import { sendPostGenerateAgentsReport } from '../../../../../../hooks';
 
 import { useExportCSV } from './export_csv';
 
 jest.mock('../../../../../../hooks', () => ({
-  useGetAgentStatusRuntimeFieldQuery: jest.fn().mockReturnValue({
-    data: 'emit("offline")',
-    isLoading: false,
-  }),
-  useKibanaVersion: jest.fn().mockReturnValue('9.0.0'),
+  sendPostGenerateAgentsReport: jest.fn(),
   useStartServices: jest.fn().mockReturnValue({
     notifications: {
       toasts: {
@@ -26,23 +23,19 @@ jest.mock('../../../../../../hooks', () => ({
         addError: jest.fn(),
       },
     },
-    http: {},
-    uiSettings: {},
+    http: {
+      basePath: {
+        prepend: jest.fn((path) => path),
+      },
+    },
+    uiSettings: {
+      get: () => 'America/Los_Angeles',
+    },
   }),
 }));
 
-const mockGetDecoratedJobParams = jest.fn().mockImplementation((params) => params);
-const mockCreateReportingShareJob = jest.fn().mockResolvedValue({});
-
-jest.mock('@kbn/reporting-public', () => ({
-  ReportingAPIClient: jest.fn().mockImplementation(() => ({
-    getDecoratedJobParams: mockGetDecoratedJobParams,
-    createReportingShareJob: mockCreateReportingShareJob,
-  })),
-}));
-
 describe('export_csv', () => {
-  let result: RenderHookResult<any, any>;
+  let renderResult: RenderHookResult<any, any>;
 
   function render() {
     const renderer = createFleetTestRendererMock();
@@ -52,7 +45,7 @@ describe('export_csv', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     act(() => {
-      result = render();
+      renderResult = render();
     });
   });
 
@@ -65,65 +58,15 @@ describe('export_csv', () => {
     const columns = [{ field: 'agent.id' }];
 
     act(() => {
-      result.result.current.generateReportingJobCSV(agents, columns, sortOptions);
+      renderResult.result.current(agents, columns, sortOptions);
     });
 
-    expect(mockGetDecoratedJobParams.mock.calls[0][0].columns.length).toEqual(1);
-    expect(mockGetDecoratedJobParams.mock.calls[0][0].searchSource).toEqual(
-      expect.objectContaining({
-        filter: expect.objectContaining({
-          query: {
-            bool: {
-              minimum_should_match: 1,
-              should: [
-                {
-                  bool: {
-                    minimum_should_match: 1,
-                    should: [
-                      {
-                        match: {
-                          'agent.id': 'agent1',
-                        },
-                      },
-                    ],
-                  },
-                },
-                {
-                  bool: {
-                    minimum_should_match: 1,
-                    should: [
-                      {
-                        match: {
-                          'agent.id': 'agent2',
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        }),
-        index: expect.objectContaining({
-          runtimeFieldMap: {
-            status: {
-              script: {
-                source: 'emit("offline")',
-              },
-              type: 'keyword',
-            },
-          },
-        }),
-        sort: [
-          {
-            'agent.id': {
-              order: 'asc',
-            },
-          },
-        ],
-      })
-    );
-    expect(mockCreateReportingShareJob).toHaveBeenCalled();
+    expect(jest.mocked(sendPostGenerateAgentsReport)).toBeCalledWith({
+      agents: ['agent1', 'agent2'],
+      fields: ['agent.id'],
+      timezone: 'America/Los_Angeles',
+      sort: sortOptions,
+    });
   });
 
   it('should generate reporting job for export csv with agents query', () => {
@@ -131,58 +74,13 @@ describe('export_csv', () => {
     const columns = [{ field: 'agent.id' }];
 
     act(() => {
-      result.result.current.generateReportingJobCSV(agents, columns, undefined);
+      renderResult.result.current(agents, columns, undefined);
     });
 
-    expect(mockGetDecoratedJobParams.mock.calls[0][0].columns.length).toEqual(1);
-    expect(mockGetDecoratedJobParams.mock.calls[0][0].searchSource).toEqual(
-      expect.objectContaining({
-        filter: expect.objectContaining({
-          query: {
-            bool: {
-              filter: [
-                {
-                  bool: {
-                    minimum_should_match: 1,
-                    should: [
-                      {
-                        match: {
-                          policy_id: '1',
-                        },
-                      },
-                    ],
-                  },
-                },
-                {
-                  bool: {
-                    minimum_should_match: 1,
-                    should: [
-                      {
-                        match: {
-                          status: 'online',
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        }),
-        sort: [
-          {
-            enrolled_at: {
-              order: 'desc',
-            },
-          },
-          {
-            'local_metadata.host.hostname.keyword': {
-              order: 'asc',
-            },
-          },
-        ],
-      })
-    );
-    expect(mockCreateReportingShareJob).toHaveBeenCalled();
+    expect(jest.mocked(sendPostGenerateAgentsReport)).toBeCalledWith({
+      agents,
+      fields: ['agent.id'],
+      timezone: 'America/Los_Angeles',
+    });
   });
 });

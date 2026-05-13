@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -17,6 +17,7 @@
     "@kbn/repo-packages",
     "@kbn/some-dev-log",
     "@kbn/stdio-dev-helpers",
+    "@kbn/projects-solutions-groups",
   ],
   "exclude": [
     "target/**/*",

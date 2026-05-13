@@ -7,15 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  Action,
-  ActionType,
-  defaultGroup,
-  EMPTY_GROUP_BY_ID,
-  GroupMap,
-  GroupsById,
-  Storage,
-} from '../types';
+import type { Action, GroupMap, GroupsById, Storage } from '../types';
+import { ActionType, defaultGroup, EMPTY_GROUP_BY_ID } from '../types';
 import { addGroupsToStorage, getAllGroupsInStorage } from '../..';
 
 const storage: Storage = window.localStorage;
@@ -51,6 +44,16 @@ const groupsReducer = (state: GroupMap, action: Action, groupsById: GroupsById) 
             ...groupsById[id],
             options: newOptionList,
           },
+        },
+      };
+    }
+    case ActionType.updateGroupSettings: {
+      const { id, settings } = action.payload;
+      return {
+        ...state,
+        groupById: {
+          ...groupsById,
+          [id]: { ...defaultGroup, ...groupsById[id], settings },
         },
       };
     }

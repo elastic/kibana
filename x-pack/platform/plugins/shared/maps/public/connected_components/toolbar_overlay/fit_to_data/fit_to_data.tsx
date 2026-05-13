@@ -37,9 +37,10 @@ export function FitToData(props: Props) {
         size="s"
         onClick={props.fitToBounds}
         data-test-subj="fitToData"
-        iconType="expand"
+        iconType="maximize"
         aria-label={label}
         title={title}
+        color="text"
         display={props.autoFitToDataBounds ? 'fill' : 'empty'}
       />
     </EuiPanel>

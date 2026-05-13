@@ -5,14 +5,31 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid, EuiSpacer } from '@elastic/eui';
+import React, { useEffect, useState, useMemo } from 'react';
+import type { IconType } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiCard,
+  EuiIcon,
+  EuiFlexGrid,
+  EuiSpacer,
+  EuiIconTip,
+  EuiFlexGroup,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isEmpty } from 'lodash';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
+import {
+  DEPRECATED_CONNECTOR_TOOLTIP_CONTENT,
+  DEPRECATED_LABEL,
+  DEPRECATED_LLM_CONNECTOR_INFO,
+} from '@kbn/response-ops-rule-form/src/translations';
+import { isLLMConnectorTypeId } from '@kbn/response-ops-rule-form/src/constants';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
-import { ActionType, ActionTypeIndex, ActionTypeRegistryContract } from '../../../types';
+import type { ActionType, ActionTypeIndex, ActionTypeRegistryContract } from '../../../types';
 import { loadActionTypes } from '../../lib/action_connector_api';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { useKibana } from '../../../common/lib/kibana';
@@ -24,7 +41,32 @@ interface Props {
   setHasActionsUpgradeableByTrial?: (value: boolean) => void;
   setAllActionTypes?: (actionsType: ActionTypeIndex) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
+  searchValue?: string;
 }
+
+interface RegisteredActionType {
+  iconClass: IconType;
+  selectMessage: string;
+  actionType: ActionType;
+  name: string;
+  isExperimental: boolean | undefined;
+  isDeprecated: boolean;
+}
+
+const filterActionTypes = (actionTypes: RegisteredActionType[], searchValue: string) => {
+  if (isEmpty(searchValue)) {
+    return actionTypes;
+  }
+  return actionTypes.filter((actionType) => {
+    const searchTargets = [actionType.name, actionType.selectMessage, actionType.actionType?.name]
+      .filter(Boolean)
+      .map((text) => text.toLowerCase());
+
+    const searchValueLowerCase = searchValue.toLowerCase();
+
+    return searchTargets.some((searchTarget) => searchTarget.includes(searchValueLowerCase));
+  });
+};
 
 export const ActionTypeMenu = ({
   onActionTypeChange,
@@ -32,6 +74,7 @@ export const ActionTypeMenu = ({
   setHasActionsUpgradeableByTrial,
   setAllActionTypes,
   actionTypeRegistry,
+  searchValue = '',
 }: Props) => {
   const {
     http,
@@ -39,6 +82,7 @@ export const ActionTypeMenu = ({
   } = useKibana().services;
   const [loadingActionTypes, setLoadingActionTypes] = useState<boolean>(false);
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
+
   useEffect(() => {
     (async () => {
       try {
@@ -78,12 +122,14 @@ export const ActionTypeMenu = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const registeredActionTypes = Object.entries(actionTypesIndex ?? [])
-    .filter(
-      ([id, details]) =>
-        actionTypeRegistry.has(id) &&
-        details.enabledInConfig === true &&
-        !actionTypeRegistry.get(id).hideInUi
-    )
+    .filter(([id, details]) => {
+      const actionTypeModel = actionTypeRegistry.has(id) ? actionTypeRegistry.get(id) : undefined;
+      const shouldHideInUi = actionTypeModel?.getHideInUi?.(
+        actionTypesIndex ? Object.values(actionTypesIndex) : []
+      );
+
+      return details.enabledInConfig === true && !shouldHideInUi;
+    })
     .map(([id, actionType]) => {
       const actionTypeModel = actionTypeRegistry.get(id);
       return {
@@ -92,25 +138,61 @@ export const ActionTypeMenu = ({
         actionType,
         name: actionType.name,
         isExperimental: actionTypeModel.isExperimental,
+        isDeprecated: actionType.isDeprecated,
       };
     });
 
-  const cardNodes = registeredActionTypes
+  const filteredConnectors = useMemo(
+    () => filterActionTypes(registeredActionTypes, searchValue),
+    [registeredActionTypes, searchValue]
+  );
+
+  const cardNodes = filteredConnectors
     .sort((a, b) => actionTypeCompare(a.actionType, b.actionType))
     .map((item, index) => {
       const checkEnabledResult = checkActionTypeEnabled(item.actionType);
+      const isLLMConnector = isLLMConnectorTypeId(item.actionType.id);
+      const description = isLLMConnector ? (
+        <EuiFlexGroup
+          gutterSize="xs"
+          alignItems="center"
+          justifyContent="center"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">{item.selectMessage}</EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              type="info"
+              color="subdued"
+              content={DEPRECATED_LLM_CONNECTOR_INFO}
+              data-test-subj={`${item.actionType.id}-deprecation-info`}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        item.selectMessage
+      );
       const card = (
         <EuiCard
           betaBadgeProps={
-            item.isExperimental
+            item.isDeprecated
+              ? {
+                  label: DEPRECATED_LABEL,
+                  tooltipContent: DEPRECATED_CONNECTOR_TOOLTIP_CONTENT,
+                  color: 'warning',
+                }
+              : item.isExperimental
               ? { label: TECH_PREVIEW_LABEL, tooltipContent: TECH_PREVIEW_DESCRIPTION }
               : undefined
           }
+          role="listitem"
           titleSize="xs"
           data-test-subj={`${item.actionType.id}-card`}
           icon={<EuiIcon size="xl" type={item.iconClass} />}
           title={item.name}
-          description={item.selectMessage}
+          description={description}
           isDisabled={!checkEnabledResult.isEnabled}
           onClick={() => {
             onActionTypeChange(item.actionType);
@@ -140,7 +222,16 @@ export const ActionTypeMenu = ({
   ) : (
     <div className="actConnectorsListGrid">
       <EuiSpacer size="s" />
-      <EuiFlexGrid gutterSize="xl" columns={3}>
+
+      <EuiFlexGrid
+        gutterSize="xl"
+        columns={3}
+        role="list"
+        aria-label={i18n.translate(
+          'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListLabel',
+          { defaultMessage: 'Available connector types' }
+        )}
+      >
         {cardNodes}
       </EuiFlexGrid>
     </div>

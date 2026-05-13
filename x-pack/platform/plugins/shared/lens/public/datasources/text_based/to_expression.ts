@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Ast } from '@kbn/interpreter';
+import type { Ast } from '@kbn/interpreter';
 import { textBasedQueryStateToExpressionAst } from '@kbn/data-plugin/common';
-import { ExpressionAstFunction } from '@kbn/expressions-plugin/common';
-import { TextBasedPrivateState, TextBasedLayer, IndexPatternRef } from './types';
+import type { ExpressionAstFunction } from '@kbn/expressions-plugin/common';
+import type { TextBasedPrivateState, TextBasedLayer, IndexPatternRef } from '@kbn/lens-common';
 import type { OriginalColumn } from '../../../common/types';
 
 function getExpressionForLayer(
@@ -94,6 +94,7 @@ function getExpressionForLayer(
         defaultMessage:
           'This request queries Elasticsearch to fetch the data for the visualization.',
       }),
+      ignoreGlobalFilters: Boolean(layer.ignoreGlobalFilters),
     });
 
     textBasedQueryToAst.chain.push({
@@ -122,6 +123,7 @@ function getExpressionForLayer(
           function: 'lens_map_to_columns',
           arguments: {
             idMap: [JSON.stringify(idMapper)],
+            isTextBased: [true],
           },
         },
         ...formatterOverrides,

@@ -8,7 +8,7 @@
  */
 
 import { siblingPipelineType } from '../../../..';
-import { IMetricAggConfig } from '../metric_agg_type';
+import type { IMetricAggConfig } from '../metric_agg_type';
 import { METRIC_TYPES } from '../metric_agg_types';
 
 export const siblingPipelineAggWriter = (agg: IMetricAggConfig, output: Record<string, any>) => {

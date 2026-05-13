@@ -7,11 +7,12 @@
 
 import type { SavedObjectMigrationFn } from '@kbn/core/server';
 import type { InfraSourceConfiguration } from '../../../../common/source_configuration/source_configuration';
-import { LOGS_INDEX_PATTERN } from '../../../../common/constants';
 
 type SevenTwelveZeroSourceConfig = Omit<InfraSourceConfiguration, 'logIndices'> & {
   logAlias: string;
 };
+
+const LOGS_INDEX_PATTERN = 'logs-*,filebeat-*,kibana_sample_data_logs*';
 
 export const convertLogAliasToLogIndices: SavedObjectMigrationFn<
   SevenTwelveZeroSourceConfig,

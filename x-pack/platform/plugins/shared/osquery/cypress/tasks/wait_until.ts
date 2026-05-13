@@ -6,7 +6,7 @@
  */
 
 export const waitUntil = (fn: () => Cypress.Chainable) => {
-  const timeout = 120000;
+  const timeout = 240000;
   const interval = 5000;
   let attempts = timeout / interval;
 

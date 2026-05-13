@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import {
-  EuiCode,
-  EuiCodeBlock,
-  EuiInMemoryTable,
-  EuiInMemoryTableProps,
-  EuiText,
-} from '@elastic/eui';
+import type { EuiInMemoryTableProps } from '@elastic/eui';
+import { EuiCode, EuiCodeBlock, EuiInMemoryTable, EuiText } from '@elastic/eui';
 import React from 'react';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
@@ -66,7 +61,7 @@ const columns: EuiInMemoryTableProps<FlattenedItem>['columns'] = [
   {
     field: 'value',
     name: i18n.translate('xpack.csp.flyout.tableTab.fieldValueLabel', { defaultMessage: 'Value' }),
-    render: (value, record) => <div style={{ width: '100%' }}>{getDescriptionDisplay(value)}</div>,
+    render: (value, record) => <div css={{ width: '100%' }}>{getDescriptionDisplay(value)}</div>,
   },
 ];
 
@@ -80,5 +75,8 @@ export const TableTab = ({ data }: { data: CspFinding }) => (
     sorting={sorting}
     search={search}
     pagination={pagination}
+    tableCaption={i18n.translate('xpack.csp.flyout.tableTab.caption', {
+      defaultMessage: 'Flattened finding field details',
+    })}
   />
 );

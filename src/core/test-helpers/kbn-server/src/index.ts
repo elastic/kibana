@@ -16,7 +16,7 @@ export {
   request,
 } from './create_root';
 
-export { createTestServerlessInstances } from './create_serverless_root';
+export { createTestServerlessInstances, createServerlessKibana } from './create_serverless_root';
 
 export type {
   TestServerlessUtils,

@@ -9,21 +9,20 @@
 
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiSelectableOption, Direction } from '@elastic/eui';
 import {
   EuiSelectable,
   EuiPopover,
   EuiFilterButton,
-  EuiSelectableOption,
   EuiIcon,
-  Direction,
   EuiText,
   useEuiTheme,
   EuiIconTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
-import { State } from '../table_list_view_table';
+import type { State } from '../table_list_view_table';
 
 type SortItem = EuiSelectableOption & {
   column: SortColumnField;
@@ -40,24 +39,24 @@ const i18nText = {
     }
   ),
   nameAscSort: i18n.translate('contentManagement.tableList.listing.tableSortSelect.nameAscLabel', {
-    defaultMessage: 'Name A-Z',
+    defaultMessage: 'A-Z',
   }),
   nameDescSort: i18n.translate(
     'contentManagement.tableList.listing.tableSortSelect.nameDescLabel',
     {
-      defaultMessage: 'Name Z-A',
+      defaultMessage: 'Z-A',
     }
   ),
   updatedAtAscSort: i18n.translate(
     'contentManagement.tableList.listing.tableSortSelect.updatedAtAscLabel',
     {
-      defaultMessage: 'Least recently updated',
+      defaultMessage: 'Old-Recent',
     }
   ),
   updatedAtDescSort: i18n.translate(
     'contentManagement.tableList.listing.tableSortSelect.updatedAtDescLabel',
     {
-      defaultMessage: 'Recently updated',
+      defaultMessage: 'Recent-Old',
     }
   ),
   headerSort: i18n.translate('contentManagement.tableList.listing.tableSortSelect.headerLabel', {
@@ -98,13 +97,13 @@ export function TableSortSelect({
         label: i18nText.nameAscSort,
         column: 'attributes.title',
         direction: 'asc',
-        append: <EuiIcon type="sortUp" />,
+        append: <EuiIcon type="sortUp" aria-hidden={true} />,
       },
       {
         label: i18nText.nameDescSort,
         column: 'attributes.title',
         direction: 'desc',
-        append: <EuiIcon type="sortDown" />,
+        append: <EuiIcon type="sortDown" aria-hidden={true} />,
       },
     ];
 
@@ -115,7 +114,12 @@ export function TableSortSelect({
             column: customSortingOptions.field,
             label,
             direction,
-            append: direction === 'asc' ? <EuiIcon type="sortUp" /> : <EuiIcon type="sortDown" />,
+            append:
+              direction === 'asc' ? (
+                <EuiIcon type="sortUp" aria-hidden={true} />
+              ) : (
+                <EuiIcon type="sortDown" aria-hidden={true} />
+              ),
           };
         })
       );
@@ -140,7 +144,7 @@ export function TableSortSelect({
               color="inherit"
               iconProps={{ style: { verticalAlign: 'text-bottom', marginLeft: 2 } }}
               css={{ textWrap: 'balance' }}
-              type={'questionInCircle'}
+              type={'question'}
               content={i18n.translate(
                 'contentManagement.tableList.listing.tableSortSelect.recentlyAccessedTip',
                 {
@@ -161,13 +165,13 @@ export function TableSortSelect({
           label: i18nText.updatedAtDescSort,
           column: 'updatedAt',
           direction: 'desc',
-          append: <EuiIcon type="sortDown" />,
+          append: <EuiIcon type="sortDown" aria-hidden={true} />,
         },
         {
           label: i18nText.updatedAtAscSort,
           column: 'updatedAt',
           direction: 'asc',
-          append: <EuiIcon type="sortUp" />,
+          append: <EuiIcon type="sortUp" aria-hidden={true} />,
         },
       ]);
     }
@@ -175,7 +179,8 @@ export function TableSortSelect({
     return opts;
   });
 
-  const selectedOptionLabel = options.find(({ checked }) => checked === 'on')?.label ?? '';
+  const selectedOptionLabel =
+    options.find(({ checked }) => checked === 'on')?.label ?? i18nText.nameAscSort;
 
   const panelHeaderCSS = css`
     border-bottom: ${euiTheme.border.thin};
@@ -193,8 +198,9 @@ export function TableSortSelect({
 
   const button = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
+      isSelected={isPopoverOpen}
       onClick={togglePopOver}
       data-test-subj="tableSortSelectBtn"
       grow
@@ -236,6 +242,10 @@ export function TableSortSelect({
       panelPaddingSize="none"
       anchorPosition="downCenter"
       panelProps={{ css: { width: euiTheme.base * 18 } }}
+      aria-label={i18n.translate(
+        'contentManagement.tableList.listing.tableSortSelect.popoverAriaLabel',
+        { defaultMessage: 'Sort options' }
+      )}
     >
       <>
         <EuiText css={panelHeaderCSS}>{i18nText.headerSort}</EuiText>

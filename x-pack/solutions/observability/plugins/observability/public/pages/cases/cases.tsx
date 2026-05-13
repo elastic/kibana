@@ -16,10 +16,10 @@ import { useKibana } from '../../utils/kibana_react';
 
 export function CasesPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
-  const { canUseCases } = useKibana().services.cases.helpers;
-  const userCasesPermissions = canUseCases([observabilityFeatureId]);
+  const canUseCases = useKibana().services.cases?.helpers.canUseCases;
+  const userCasesPermissions = canUseCases?.([observabilityFeatureId]);
 
-  return userCasesPermissions.read ? (
+  return userCasesPermissions?.read ? (
     <ObservabilityPageTemplate isPageDataLoaded data-test-subj="o11yCasesPage">
       <HeaderMenu />
       <Cases permissions={userCasesPermissions} />

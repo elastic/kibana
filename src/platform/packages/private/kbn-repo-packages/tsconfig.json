@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "checkJs": true,
     "outDir": "target/types",
@@ -16,6 +16,6 @@
     "target/**/*",
   ],
   "kbn_references": [
-    "@kbn/repo-info",
+    "@kbn/projects-solutions-groups",
   ]
 }

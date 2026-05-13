@@ -26,6 +26,7 @@ import { createTextHandler } from '../../lib/create_text_handler';
 import { Aggs } from '../../aggs/aggs';
 import { SeriesDragHandler } from '../../series_drag_handler';
 import { tsvbEditorRowStyles, aggRowSplitStyles } from '../../../styles/common.styles';
+import { useSeriesBodyStyles } from '../../_series_editor';
 
 function MarkdownSeriesUi(props) {
   const {
@@ -44,14 +45,15 @@ function MarkdownSeriesUi(props) {
   } = props;
 
   const { euiTheme } = useEuiTheme();
+  const seriesBodyStyles = useSeriesBodyStyles();
 
   const defaults = { label: '', var_name: '' };
   const model = { ...defaults, ...props.model };
 
   const handleChange = createTextHandler(onChange);
 
-  let caretIcon = 'arrowDown';
-  if (!visible) caretIcon = 'arrowRight';
+  let caretIcon = 'chevronSingleDown';
+  if (!visible) caretIcon = 'chevronSingleRight';
 
   let body = null;
   if (visible) {
@@ -91,7 +93,7 @@ function MarkdownSeriesUi(props) {
       );
     }
     body = (
-      <div className="tvbSeries__body">
+      <div className="tvbSeries__body" css={seriesBodyStyles}>
         <EuiTabs size="s">
           <EuiTab isSelected={selectedTab === 'metrics'} onClick={() => props.switchTab('metrics')}>
             <FormattedMessage

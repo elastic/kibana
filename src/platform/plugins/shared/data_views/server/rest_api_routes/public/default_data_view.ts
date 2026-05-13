@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
-import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { DataViewsService } from '../../../common';
+import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import type { DataViewsService } from '../../../common';
 import type {
   DataViewsServerPluginStartDependencies,
   DataViewsServerPluginStart,
@@ -22,7 +22,9 @@ import {
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
   INITIAL_REST_VERSION,
+  GET_DEFAULT_DATA_VIEW_SUMMARY,
   GET_DEFAULT_DATA_VIEW_DESCRIPTION,
+  SET_DEFAULT_DATA_VIEW_SUMMARY,
   SET_DEFAULT_DATA_VIEW_DESCRIPTION,
 } from '../../constants';
 
@@ -61,7 +63,14 @@ export const setDefault = async ({
 };
 
 const manageDefaultIndexPatternRoutesFactory =
-  (path: string, serviceKey: string, getDescription?: string, postDescription?: string) =>
+  (
+    path: string,
+    serviceKey: string,
+    getSummary?: string,
+    getDescription?: string,
+    postSummary?: string,
+    postDescription?: string
+  ) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -70,115 +79,145 @@ const manageDefaultIndexPatternRoutesFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.get({ path, access: 'public', description: getDescription }).addVersion(
-      {
-        version: INITIAL_REST_VERSION,
+    router.versioned
+      .get({
+        path,
+        access: 'public',
+        summary: getSummary,
+        description: getDescription,
         security: {
           authz: {
             enabled: false,
             reason: 'Authorization provided by saved objects client',
           },
         },
-        validate: {
-          request: {},
-          response: {
-            200: {
-              body: () => schema.object({ [`${serviceKey}_id`]: schema.string() }),
+      })
+      .addVersion(
+        {
+          version: INITIAL_REST_VERSION,
+          validate: {
+            request: {},
+            response: {
+              200: {
+                body: () => schema.object({ [`${serviceKey}_id`]: schema.string() }),
+              },
             },
           },
         },
-      },
-      handleErrors(async (ctx, req, res) => {
-        const core = await ctx.core;
-        const savedObjectsClient = core.savedObjects.client;
-        const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-        const [, , { dataViewsServiceFactory }] = await getStartServices();
-        const dataViewsService = await dataViewsServiceFactory(
-          savedObjectsClient,
-          elasticsearchClient,
-          req
-        );
+        handleErrors(async (ctx, req, res) => {
+          const core = await ctx.core;
+          const savedObjectsClient = core.savedObjects.client;
+          const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
+          const [, , { dataViewsServiceFactory }] = await getStartServices();
+          const dataViewsService = await dataViewsServiceFactory(
+            savedObjectsClient,
+            elasticsearchClient,
+            req
+          );
 
-        const id = await getDefault({
-          dataViewsService,
-          usageCollection,
-          counterName: `${req.route.method} ${path}`,
-        });
+          const id = await getDefault({
+            dataViewsService,
+            usageCollection,
+            counterName: `${req.route.method} ${path}`,
+          });
 
-        return res.ok({
-          body: {
-            [`${serviceKey}_id`]: id,
-          },
-        });
-      })
-    );
+          return res.ok({
+            body: {
+              [`${serviceKey}_id`]: id,
+            },
+          });
+        })
+      );
 
-    router.versioned.post({ path, access: 'public', description: postDescription }).addVersion(
-      {
-        version: INITIAL_REST_VERSION,
+    router.versioned
+      .post({
+        path,
+        access: 'public',
+        summary: postSummary,
+        description: postDescription,
         security: {
           authz: {
             requiredPrivileges: ['indexPatterns:manage'],
           },
         },
-        validate: {
-          request: {
-            body: schema.object({
-              [`${serviceKey}_id`]: schema.nullable(
-                schema.string({
-                  minLength: 1,
-                  maxLength: 1_000,
-                })
-              ),
-              force: schema.boolean({ defaultValue: false }),
-            }),
-          },
-          response: {
-            200: {
-              body: () => schema.object({ acknowledged: schema.boolean() }),
+      })
+      .addVersion(
+        {
+          version: INITIAL_REST_VERSION,
+          validate: {
+            request: {
+              body: schema.object({
+                [`${serviceKey}_id`]: schema.nullable(
+                  schema.string({
+                    minLength: 1,
+                    maxLength: 1_000,
+                    meta: {
+                      description:
+                        'The unique identifier of the data view to set as default. Set to `null` to clear the default.',
+                    },
+                  })
+                ),
+                force: schema.boolean({
+                  defaultValue: false,
+                  meta: {
+                    description:
+                      'When `true`, sets the default data view even if a default is already configured.',
+                  },
+                }),
+              }),
+            },
+            response: {
+              200: {
+                body: () => schema.object({ acknowledged: schema.boolean() }),
+              },
             },
           },
         },
-      },
-      handleErrors(async (ctx, req, res) => {
-        const core = await ctx.core;
-        const savedObjectsClient = core.savedObjects.client;
-        const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-        const [, , { dataViewsServiceFactory }] = await getStartServices();
-        const dataViewsService = await dataViewsServiceFactory(
-          savedObjectsClient,
-          elasticsearchClient,
-          req
-        );
+        handleErrors(async (ctx, req, res) => {
+          const core = await ctx.core;
+          const savedObjectsClient = core.savedObjects.client;
+          const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
+          const [, , { dataViewsServiceFactory }] = await getStartServices();
+          const dataViewsService = await dataViewsServiceFactory(
+            savedObjectsClient,
+            elasticsearchClient,
+            req
+          );
 
-        const newDefaultId = req.body[`${serviceKey}_id`] as string;
-        const force = req.body.force as boolean;
+          const newDefaultId = req.body[`${serviceKey}_id`] as string;
+          const force = req.body.force as boolean;
 
-        await setDefault({
-          dataViewsService,
-          usageCollection,
-          counterName: `${req.route.method} ${path}`,
-          newDefaultId,
-          force,
-        });
+          await setDefault({
+            dataViewsService,
+            usageCollection,
+            counterName: `${req.route.method} ${path}`,
+            newDefaultId,
+            force,
+          });
 
-        return res.ok({
-          body: {
-            acknowledged: true,
-          },
-        });
-      })
-    );
+          return res.ok({
+            body: {
+              acknowledged: true,
+            },
+          });
+        })
+      );
   };
 
 export const registerManageDefaultDataViewRoute = manageDefaultIndexPatternRoutesFactory(
   `${SERVICE_PATH}/default`,
   SERVICE_KEY,
+  GET_DEFAULT_DATA_VIEW_SUMMARY,
   GET_DEFAULT_DATA_VIEW_DESCRIPTION,
+  SET_DEFAULT_DATA_VIEW_SUMMARY,
   SET_DEFAULT_DATA_VIEW_DESCRIPTION
 );
 
 export const registerManageDefaultDataViewRouteLegacy = manageDefaultIndexPatternRoutesFactory(
   `${SERVICE_PATH_LEGACY}/default`,
-  SERVICE_KEY_LEGACY
+  SERVICE_KEY_LEGACY,
+  GET_DEFAULT_DATA_VIEW_SUMMARY,
+  'Deprecated in 8.0.0. Use the data_views/default endpoint instead.',
+  SET_DEFAULT_DATA_VIEW_SUMMARY,
+  'Deprecated in 8.0.0. Use the data_views/default endpoint instead.'
 );

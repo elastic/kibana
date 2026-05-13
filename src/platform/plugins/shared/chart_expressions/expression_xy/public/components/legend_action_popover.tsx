@@ -10,7 +10,8 @@
 import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
-import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import { useLegendAction } from '@elastic/charts';
 import type { CellValueAction } from '../types';
 
@@ -53,7 +54,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
           defaultMessage: 'Filter for',
         }),
         'data-test-subj': `legend-${label}-filterIn`,
-        iconType: 'plusInCircle',
+        iconType: 'plusCircle',
         execute: () => {
           setPopoverOpen(false);
           onFilter();
@@ -65,7 +66,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
           defaultMessage: 'Filter out',
         }),
         'data-test-subj': `legend-${label}-filterOut`,
-        iconType: 'minusInCircle',
+        iconType: 'minusCircle',
         execute: () => {
           setPopoverOpen(false);
           onFilter({ negate: true });
@@ -81,7 +82,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
     const legendCellValueActionPanelItems = allActions.map((action) => ({
       name: action.displayName,
       'data-test-subj': `legend-${label}-${action.id}`,
-      icon: <EuiIcon type={action.iconType} size="m" />,
+      icon: <EuiIcon type={action.iconType} size="m" aria-hidden={true} />,
       onClick: () => {
         action.execute();
         setPopoverOpen(false);
@@ -118,11 +119,15 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
         defaultMessage: 'Legend actions',
       })}
     >
-      <EuiIcon size="s" type="boxesVertical" />
+      <EuiIcon size="s" type="boxesVertical" aria-hidden={true} />
     </div>
   );
   return (
     <EuiPopover
+      aria-label={i18n.translate('expressionXY.legend.filterOptionsLegend', {
+        defaultMessage: '{legendDataLabel}, filter options',
+        values: { legendDataLabel: label },
+      })}
       button={Button}
       isOpen={popoverOpen}
       closePopover={() => {

@@ -12,8 +12,8 @@ import { ElasticsearchMetric } from '../../../metrics';
 import { getMetricAggs } from './get_metric_aggs';
 import { handleResponse } from './handle_response';
 import { LISTING_METRICS_NAMES, LISTING_METRICS_PATHS } from './nodes_listing_metrics';
-import { LegacyRequest } from '../../../../types';
-import { ElasticsearchModifiedSource } from '../../../../../common/types/es';
+import type { LegacyRequest } from '../../../../types';
+import type { ElasticsearchModifiedSource } from '../../../../../common/types/es';
 import {
   getIndexPatterns,
   getElasticsearchDataset,

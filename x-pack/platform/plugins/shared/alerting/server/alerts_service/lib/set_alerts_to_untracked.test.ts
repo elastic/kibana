@@ -4,11 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  ElasticsearchClientMock,
-  elasticsearchServiceMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 import { setAlertsToUntracked } from './set_alerts_to_untracked';
 
@@ -17,7 +14,7 @@ let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 
 const getAllAuthorizedRuleTypesFindOperationMock = jest.fn();
 const getAlertIndicesAliasMock = jest.fn();
-const ensureAuthorizedMock = jest.fn();
+const bulkEnsureAuthorizedMock = jest.fn();
 
 describe('setAlertsToUntracked()', () => {
   beforeEach(() => {
@@ -199,7 +196,7 @@ describe('setAlertsToUntracked()', () => {
     );
   });
 
-  describe('ensureAuthorized', () => {
+  describe('bulkEnsureAuthorized', () => {
     test('should fail on siem consumer', async () => {
       clusterClient.search.mockResponseOnce({
         took: 1,
@@ -254,7 +251,7 @@ describe('setAlertsToUntracked()', () => {
           esClient: clusterClient,
           indices: ['test-index'],
           ruleIds: ['test-rule'],
-          ensureAuthorized: () => Promise.resolve(),
+          bulkEnsureAuthorized: () => Promise.resolve(),
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Untracking Security alerts is not permitted"`);
     });
@@ -298,8 +295,11 @@ describe('setAlertsToUntracked()', () => {
           esClient: clusterClient,
           indices: ['test-index'],
           ruleIds: ['test-rule'],
-          ensureAuthorized: async ({ consumer }) => {
-            if (consumer === 'unauthorized') throw new Error('Unauthorized consumer');
+          bulkEnsureAuthorized: async ({ ruleTypeIdConsumersPairs }) => {
+            const hasUnauthorized = ruleTypeIdConsumersPairs.some((p) =>
+              p.consumers.includes('unauthorized')
+            );
+            if (hasUnauthorized) throw new Error('Unauthorized consumer');
           },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Unauthorized consumer"`);
@@ -348,8 +348,11 @@ describe('setAlertsToUntracked()', () => {
         esClient: clusterClient,
         indices: ['test-index'],
         ruleIds: ['test-rule'],
-        ensureAuthorized: async ({ consumer }) => {
-          if (consumer === 'unauthorized') throw new Error('Unauthorized consumer');
+        bulkEnsureAuthorized: async ({ ruleTypeIdConsumersPairs }) => {
+          const hasUnauthorized = ruleTypeIdConsumersPairs.some((p) =>
+            p.consumers.includes('unauthorized')
+          );
+          if (hasUnauthorized) throw new Error('Unauthorized consumer');
         },
       })
     ).resolves;
@@ -444,7 +447,7 @@ describe('setAlertsToUntracked()', () => {
       spaceId: 'default',
       getAllAuthorizedRuleTypesFindOperation: getAllAuthorizedRuleTypesFindOperationMock,
       getAlertIndicesAlias: getAlertIndicesAliasMock,
-      ensureAuthorized: ensureAuthorizedMock,
+      bulkEnsureAuthorized: bulkEnsureAuthorizedMock,
       logger,
       esClient: clusterClient,
     });
@@ -579,7 +582,7 @@ describe('setAlertsToUntracked()', () => {
       spaceId: 'default',
       getAllAuthorizedRuleTypesFindOperation: getAllAuthorizedRuleTypesFindOperationMock,
       getAlertIndicesAlias: getAlertIndicesAliasMock,
-      ensureAuthorized: ensureAuthorizedMock,
+      bulkEnsureAuthorized: bulkEnsureAuthorizedMock,
       logger,
       esClient: clusterClient,
     });

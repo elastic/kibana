@@ -28,7 +28,7 @@ import {
 } from '../../common/constants/epm';
 import {
   usePlatform,
-  VISIBLE_PALFORM_OPTIONS,
+  VISIBLE_PLATFORM_OPTIONS,
   EXTENDED_PLATFORM_OPTIONS,
   KUBERNETES_PLATFORM_OPTION,
 } from '../hooks';
@@ -149,9 +149,11 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
               defaultMessage: 'Platform options',
             })}
           >
-            {VISIBLE_PALFORM_OPTIONS.map((option) => (
+            {VISIBLE_PLATFORM_OPTIONS.map((option) => (
               <EuiFilterButton
                 key={option.id}
+                isToggle
+                isSelected={platform === option.id}
                 hasActiveFilters={platform === option.id}
                 onClick={() => setPlatform(option.id)}
                 data-test-subj={option['data-test-subj']}
@@ -162,12 +164,15 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             <EuiPopover
               button={
                 <EuiFilterButton
-                  iconType="arrowDown"
+                  iconType="chevronSingleDown"
                   data-test-subj="platformSelectorExtended"
                   onClick={() => setShowExtendedPlatforms(!showExtendedPlatforms)}
                   isSelected={showExtendedPlatforms}
                   hasActiveFilters={extendedPlatforms.includes(platform)}
                   numActiveFilters={extendedPlatforms.includes(platform) ? 1 : 0}
+                  aria-label={i18n.translate('xpack.fleet.agentEnrollment.morePlatformsLabel', {
+                    defaultMessage: 'More platforms',
+                  })}
                   css={css`
                     .euiFilterButton__text {
                       min-inline-size: 0;
@@ -196,8 +201,11 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
                   checked: platform === option.id ? 'on' : undefined,
                   'data-test-subj': option['data-test-subj'],
                 }))}
-                onChange={(_allOptions, _event, option) => setPlatform(option.key)}
-                style={{ width: 150 }}
+                onChange={(_allOptions, _event, option) => {
+                  setPlatform(option.key);
+                  setShowExtendedPlatforms(false);
+                }}
+                css={{ width: 150 }}
                 listProps={{ paddingSize: 'none', onFocusBadge: false }}
               >
                 {(list) => list}
@@ -261,6 +269,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             )}
 
             <EuiCodeBlock
+              data-test-subj="enrollmentInstructionsCodeBlock"
               onClick={onTextAreaClick}
               fontSize="m"
               isCopyable={!fullCopyButton}
@@ -279,7 +288,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
                 {(copy) => (
                   <EuiButton
                     color="primary"
-                    iconType="copyClipboard"
+                    iconType="copy"
                     size="m"
                     onClick={() => onCopyButtonClick(copy)}
                   >

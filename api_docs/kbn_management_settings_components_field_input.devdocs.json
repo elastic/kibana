@@ -34,6 +34,8 @@
           ">>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/field_input.tsx",
+        "lineNumber": 85,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -45,13 +47,24 @@
             "tags": [],
             "label": "props",
             "description": [
-              "The props for the {@link FieldInput } component."
+              "The props for the ",
+              {
+                "pluginId": "@kbn/management-settings-components-field-input",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
+                "section": "def-public.FieldInput",
+                "text": "FieldInput"
+              },
+              " component."
             ],
             "signature": [
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -69,6 +82,8 @@
           "\nAn interface containing a collection of Kibana plugins and services required to\nrender this component."
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -79,7 +94,15 @@
             "tags": [],
             "label": "notifications",
             "description": [
-              "The portion of the {@link ToastsStart} contract used by this component."
+              "The portion of the ",
+              {
+                "pluginId": "@kbn/management-settings-components-field-input",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
+                "section": "def-public.ToastsStart",
+                "text": "ToastsStart"
+              },
+              " contract used by this component."
             ],
             "signature": [
               "{ toasts: Pick<",
@@ -87,6 +110,8 @@
               ", \"addDanger\">; }"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -103,6 +128,8 @@
               "; }"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -116,7 +143,15 @@
         "tags": [],
         "label": "FieldInputProps",
         "description": [
-          "\nThe props that are passed to the {@link FieldInput} component."
+          "\nThe props that are passed to the ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-input",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
+            "section": "def-public.FieldInput",
+            "text": "FieldInput"
+          },
+          " component."
         ],
         "signature": [
           {
@@ -129,6 +164,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/field_input.tsx",
+        "lineNumber": 57,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -139,12 +176,22 @@
             "tags": [],
             "label": "field",
             "description": [
-              "The {@link FieldDefinition} for the component."
+              "The ",
+              {
+                "pluginId": "@kbn/management-settings-components-field-input",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
+                "section": "def-public.FieldDefinition",
+                "text": "FieldDefinition"
+              },
+              " for the component."
             ],
             "signature": [
               "{ id: string; type: T; name: string; ariaAttributes: { ariaLabel: string; ariaDescribedBy?: string | undefined; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/field_input.tsx",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -155,7 +202,15 @@
             "tags": [],
             "label": "unsavedChange",
             "description": [
-              "An {@link UnsavedFieldChange} for the component, if any."
+              "An ",
+              {
+                "pluginId": "@kbn/management-settings-components-field-input",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
+                "section": "def-public.UnsavedFieldChange",
+                "text": "UnsavedFieldChange"
+              },
+              " for the component, if any."
             ],
             "signature": [
               {
@@ -168,6 +223,8 @@
               "<T> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/field_input.tsx",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -192,6 +249,8 @@
               "<T> | undefined) => void"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/field_input.tsx",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -214,7 +273,10 @@
                   "<T> | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-management/settings/types/index.ts",
+                "lineNumber": 86,
+                "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "UnsavedFieldChange",
                 "trackAdoption": false
               }
             ]
@@ -229,6 +291,8 @@
               "True if the input can be saved, false otherwise."
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/field_input.tsx",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -245,6 +309,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/field_input.tsx",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -258,9 +324,19 @@
         "tags": [],
         "label": "FieldInputServices",
         "description": [
-          "\nContextual services used by a {@link FieldInput} component."
+          "\nContextual services used by a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-input",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
+            "section": "def-public.FieldInput",
+            "text": "FieldInput"
+          },
+          " component."
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -277,6 +353,8 @@
               "(value: string) => void"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -293,6 +371,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
+                "lineNumber": 28,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -313,6 +393,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -327,6 +409,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
+                "lineNumber": 29,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -342,6 +426,8 @@
                   "any"
                 ],
                 "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
+                "lineNumber": 29,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -359,7 +445,15 @@
         "tags": [],
         "label": "InputProps",
         "description": [
-          "\nProps passed to a {@link FieldInput} component."
+          "\nProps passed to a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-input",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
+            "section": "def-public.FieldInput",
+            "text": "FieldInput"
+          },
+          " component."
         ],
         "signature": [
           {
@@ -372,6 +466,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -383,7 +479,7 @@
             "label": "field",
             "description": [],
             "signature": [
-              "{ id: string; type: T; defaultValue?: ",
+              "{ id: string; type: T; name: string; defaultValue?: ",
               {
                 "pluginId": "@kbn/management-settings-types",
                 "scope": "public",
@@ -391,7 +487,7 @@
                 "section": "def-public.KnownTypeToValue",
                 "text": "KnownTypeToValue"
               },
-              "<T> | null | undefined; name: string; isOverridden: boolean; ariaAttributes: { ariaLabel: string; ariaDescribedBy?: string | undefined; }; savedValue?: ",
+              "<T> | null | undefined; isOverridden: boolean; ariaAttributes: { ariaLabel: string; ariaDescribedBy?: string | undefined; }; savedValue?: ",
               {
                 "pluginId": "@kbn/management-settings-types",
                 "scope": "public",
@@ -402,6 +498,8 @@
               "<T> | null | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -423,6 +521,8 @@
               "<T> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -434,6 +534,8 @@
             "label": "isSavingEnabled",
             "description": [],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -458,6 +560,8 @@
               "<T> | undefined) => void"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -480,7 +584,10 @@
                   "<T> | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-management/settings/types/index.ts",
+                "lineNumber": 86,
+                "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "UnsavedFieldChange",
                 "trackAdoption": false
               }
             ]

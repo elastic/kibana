@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import { Ast } from '@kbn/interpreter';
+import type { Ast } from '@kbn/interpreter';
 import { Position, ScaleType } from '@elastic/charts';
-import { PaletteRegistry } from '@kbn/coloring';
-import {
-  buildExpression,
-  buildExpressionFunction,
-  ExpressionFunctionTheme,
-} from '@kbn/expressions-plugin/common';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { type PaletteRegistry } from '@kbn/coloring';
+import type { ExpressionFunctionTheme } from '@kbn/expressions-plugin/common';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import {
   isManualPointAnnotationConfig,
   isRangeAnnotationConfig,
 } from '@kbn/event-annotation-common';
-import { LegendSize } from '@kbn/visualizations-plugin/public';
-import {
+import { LegendSize } from '@kbn/chart-expressions-common';
+import type {
   AvailableReferenceLineIcon,
   DataDecorationConfigFn,
   EventAnnotationResultFn,
@@ -36,12 +33,16 @@ import {
   YAxisConfigFn,
 } from '@kbn/expression-xy-plugin/common';
 
-import { FittingFunctions } from '@kbn/expression-xy-plugin/public';
+import {
+  LayerTypes,
+  FittingFunctions,
+  PointVisibilityOptions,
+} from '@kbn/expression-xy-plugin/public';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
+import type { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
+import type { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '@kbn/lens-common';
 import type {
-  State as XYState,
+  XYVisualizationState,
   YConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
@@ -50,8 +51,8 @@ import type {
   ValidXYDataLayerConfig,
   XYLayerConfig,
 } from './types';
-import type { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '../../types';
 import { getColumnToLabelMap } from './state_helpers';
+import { getDefaultPalette } from './default_palette';
 import { defaultReferenceLineColor } from './color_assignment';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import {
@@ -68,10 +69,11 @@ import {
 } from '../../shared_components';
 import type { CollapseExpressionFunction } from '../../../common/expressions';
 import { hasIcon } from './xy_config_panel/shared/marker_decoration_settings';
+import { getColorMappingDefaults } from '../../utils';
 
 type XYLayerConfigWithSimpleView = XYLayerConfig & { simpleView?: boolean };
 type XYAnnotationLayerConfigWithSimpleView = XYAnnotationLayerConfig & { simpleView?: boolean };
-type State = Omit<XYState, 'layers'> & { layers: XYLayerConfigWithSimpleView[] };
+type State = Omit<XYVisualizationState, 'layers'> & { layers: XYLayerConfigWithSimpleView[] };
 
 export const getSortedAccessors = (
   datasource: DatasourcePublicAPI | undefined,
@@ -343,6 +345,7 @@ export const buildXYExpression = (
     emphasizeFitting: state.emphasizeFitting ?? true,
     minBarHeight: state.minBarHeight ?? 1,
     fillOpacity: state.fillOpacity ?? 0.3,
+    pointVisibility: state.pointVisibility ?? PointVisibilityOptions.AUTO,
     valueLabels: state.valueLabels ?? 'hide',
     hideEndzones: state.hideEndzones ?? false,
     addTimeMarker:
@@ -486,6 +489,7 @@ const dataLayerToExpression = (
     fn: [layer.collapseFn!],
   });
 
+  const hasActiveSplits = !layer.collapseFn && Boolean(layer.splitAccessors?.length);
   const extendedDataLayerFn = buildExpressionFunction<ExtendedDataLayerFn>('extendedDataLayer', {
     layerId: layer.layerId,
     simpleView: Boolean(layer.simpleView),
@@ -498,7 +502,7 @@ const dataLayerToExpression = (
     isPercentage,
     isStacked,
     isHorizontal,
-    splitAccessors: layer.collapseFn || !layer.splitAccessor ? undefined : [layer.splitAccessor],
+    splitAccessors: hasActiveSplits ? layer.splitAccessors : undefined,
     decorations: layer.yConfig
       ? layer.yConfig.map((yConfig) =>
           yConfigToDataDecorationConfigExpression(yConfig, yAxisConfigs)
@@ -510,16 +514,24 @@ const dataLayerToExpression = (
     accessors: layer.accessors,
     columnToLabel: JSON.stringify(columnToLabel),
     palette: buildExpression([
-      layer.palette
+      layer.palette && !layer.collapseFn
         ? buildExpressionFunction<ExpressionFunctionTheme>('theme', {
             variable: 'palette',
             default: [paletteService.get(layer.palette.name).toExpression(layer.palette.params)],
           })
         : buildExpressionFunction<SystemPaletteExpressionFunctionDefinition>('system_palette', {
-            name: 'default',
+            name: getDefaultPalette(layer.seriesType),
           }),
     ]).toAst(),
-    colorMapping: layer.colorMapping ? JSON.stringify(layer.colorMapping) : undefined,
+    colorMapping: hasActiveSplits
+      ? layer.colorMapping
+        ? JSON.stringify(layer.colorMapping)
+        : !layer.palette
+        ? JSON.stringify(
+            getColorMappingDefaults({ defaultPaletteId: getDefaultPalette(layer.seriesType) })
+          )
+        : undefined
+      : undefined,
   });
 
   return {

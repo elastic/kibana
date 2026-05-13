@@ -36,7 +36,7 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../../common/es_fields/apm';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetchParams } from '../use_fetch_params';
 import type { ApmPluginStartDeps } from '../../../../plugin';
@@ -188,7 +188,7 @@ export function FieldStatsPopover({
 }) {
   const {
     query: { kuery: kql },
-  } = useApmParams('/services/{serviceName}');
+  } = useAnyOfApmParams('/services/{serviceName}', '/mobile-services/{serviceName}');
 
   const { start, end } = useFetchParams();
 
@@ -264,7 +264,8 @@ export function FieldStatsPopover({
       content={i18n.translate(
         'xpack.apm.correlations.fieldContextPopover.descriptionTooltipContent',
         {
-          defaultMessage: 'Show top 10 field values',
+          defaultMessage: 'Show top 10 field values for {fieldName}',
+          values: { fieldName },
         }
       )}
     >
@@ -276,7 +277,8 @@ export function FieldStatsPopover({
         aria-label={i18n.translate(
           'xpack.apm.correlations.fieldContextPopover.topFieldValuesAriaLabel',
           {
-            defaultMessage: 'Show top 10 field values',
+            defaultMessage: 'Show top 10 field values for {fieldName}',
+            values: { fieldName },
           }
         )}
         data-test-subj={'apmCorrelationsContextPopoverButton'}

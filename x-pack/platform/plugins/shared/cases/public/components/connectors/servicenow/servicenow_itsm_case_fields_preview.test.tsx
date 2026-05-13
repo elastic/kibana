@@ -11,9 +11,9 @@ import { screen } from '@testing-library/react';
 import { connector, choices } from '../mock';
 import { useGetChoices } from './use_get_choices';
 import FieldsPreview from './servicenow_itsm_case_fields_preview';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
-import { createQueryWithMarkup } from '../../../common/test_utils';
+
+import { renderWithTestingProviders } from '../../../common/mock';
+import { tableMatchesExpectedContent } from '../../../common/test_utils';
 
 jest.mock('./use_get_choices');
 
@@ -29,10 +29,7 @@ describe('ServiceNowITSM Fields: Preview', () => {
     additionalFields: '{"foo": "bar"}',
   };
 
-  let appMockRenderer: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRenderer = createAppMockRenderer();
     useGetChoicesMock.mockReturnValue({
       isLoading: false,
       isFetching: false,
@@ -42,16 +39,18 @@ describe('ServiceNowITSM Fields: Preview', () => {
   });
 
   it('renders all fields correctly', () => {
-    appMockRenderer.render(<FieldsPreview connector={connector} fields={fields} />);
+    renderWithTestingProviders(<FieldsPreview connector={connector} fields={fields} />);
 
-    const getByText = createQueryWithMarkup(screen.getByText);
+    const rows = screen.getAllByTestId('card-list-item-row');
+    const expectedContent = [
+      ['Urgency', '2 - High'],
+      ['Severity', '1 - Critical'],
+      ['Impact', '3 - Moderate'],
+      ['Category', 'Denial of Service'],
+      ['Subcategory', 'Inbound or outbound'],
+      ['foo', 'bar'],
+    ];
 
-    expect(getByText('Urgency: 2 - High')).toBeInTheDocument();
-    expect(getByText('Severity: 1 - Critical')).toBeInTheDocument();
-    expect(getByText('Impact: 3 - Moderate')).toBeInTheDocument();
-    expect(getByText('Category: Denial of Service')).toBeInTheDocument();
-    expect(getByText('Subcategory: Inbound or outbound')).toBeInTheDocument();
-    expect(getByText('Additional Fields:')).toBeInTheDocument();
-    expect(getByText('{"foo": "bar"}')).toBeInTheDocument();
+    tableMatchesExpectedContent({ expectedContent, tableRows: rows });
   });
 });

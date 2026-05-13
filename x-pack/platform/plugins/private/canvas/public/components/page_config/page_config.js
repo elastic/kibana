@@ -64,9 +64,9 @@ export const PageConfig = ({
         display="columnCompressed"
         label={
           <EuiToolTip content={strings.getBackgroundColorDescription()}>
-            <span>
+            <span tabIndex={0}>
               {strings.getBackgroundColorLabel()}{' '}
-              <EuiIcon type="questionInCircle" color="subdued" />
+              <EuiIcon type="question" color="subdued" aria-hidden />
             </span>
           </EuiToolTip>
         }

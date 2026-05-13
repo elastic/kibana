@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { MonitorOverviewState } from '../../state';
+import type { MonitorOverviewState, OverviewView } from '../../state';
+import { DEFAULT_OVERVIEW_VIEW, isOverviewView } from '../../state';
 import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../common/constants/synthetics/client_defaults';
+import type { UseLogicalAndField } from '../../../../../common/constants';
 import { CLIENT_DEFAULTS } from '../../../../../common/constants';
 import { parseAbsoluteDate } from './parse_absolute_date';
 
@@ -26,6 +28,7 @@ export interface SyntheticsUrlParams {
   tags?: string[];
   locations?: string[];
   monitorTypes?: string[] | string;
+  configIds?: string[];
   status?: string[];
   locationId?: string;
   projects?: string[] | string;
@@ -35,6 +38,8 @@ export interface SyntheticsUrlParams {
   packagePolicyId?: string;
   cloneId?: string;
   spaceId?: string;
+  useLogicalAndFor?: UseLogicalAndField[];
+  view?: Exclude<OverviewView, typeof DEFAULT_OVERVIEW_VIEW>;
 }
 
 const { ABSOLUTE_DATE_RANGE_START, ABSOLUTE_DATE_RANGE_END, SEARCH, FILTERS, STATUS_FILTER } =
@@ -83,6 +88,7 @@ export const getSupportedUrlParams = (params: {
     query,
     tags,
     monitorTypes,
+    configIds,
     locations,
     locationId,
     projects,
@@ -91,6 +97,8 @@ export const getSupportedUrlParams = (params: {
     groupOrderBy,
     packagePolicyId,
     spaceId,
+    useLogicalAndFor,
+    view,
   } = filteredParams;
 
   return {
@@ -117,12 +125,15 @@ export const getSupportedUrlParams = (params: {
     query: query || '',
     tags: parseFilters(tags),
     monitorTypes: parseFilters(monitorTypes),
+    configIds: parseFilters(configIds),
     locations: parseFilters(locations),
     projects: parseFilters(projects),
     schedules: parseFilters(schedules),
     locationId: locationId || undefined,
     cloneId: filteredParams.cloneId,
     spaceId: spaceId || undefined,
+    useLogicalAndFor: parseFilters(useLogicalAndFor),
+    view: view && isOverviewView(view) && view !== DEFAULT_OVERVIEW_VIEW ? view : undefined,
   };
 };
 

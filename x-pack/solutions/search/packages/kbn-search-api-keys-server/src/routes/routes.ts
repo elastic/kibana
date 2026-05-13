@@ -20,6 +20,12 @@ export function registerSearchApiKeysRoutes(router: IRouter, logger: Logger) {
   router.post(
     {
       path: APIRoutes.API_KEY_VALIDITY,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({
           id: schema.string(),
@@ -60,6 +66,12 @@ export function registerSearchApiKeysRoutes(router: IRouter, logger: Logger) {
   router.post(
     {
       path: APIRoutes.API_KEYS,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {},
       options: {
         access: 'internal',

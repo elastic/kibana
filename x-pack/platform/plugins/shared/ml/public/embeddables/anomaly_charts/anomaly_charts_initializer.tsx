@@ -22,10 +22,10 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { AnomalyChartsEmbeddableState } from '..';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import type { AnomalyChartsEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../../application/services/anomaly_explorer_charts_service';
 import { JobSelectorControl } from '../../alerting/job_selector';
-import { ML_PAGES } from '../../../common/constants/locator';
 import { getDefaultExplorerChartsPanelTitle } from './utils';
 import { useMlLink } from '../../application/contexts/kibana';
 import { getJobSelectionErrors } from '../utils';
@@ -39,7 +39,7 @@ export interface AnomalyChartsInitializerProps {
   onCreate: (props: {
     jobIds: AnomalyChartsEmbeddableState['jobIds'];
     title: string;
-    maxSeriesToPlot?: number;
+    maxSeriesToPlot: number;
   }) => void;
   onCancel: () => void;
   adJobsApiService: MlApi['jobs'];
@@ -143,6 +143,7 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
               }
             >
               <EuiFieldNumber
+                isInvalid={!isMaxSeriesToPlotValid}
                 data-test-subj="mlAnomalyChartsInitializerMaxSeries"
                 id="selectMaxSeriesToPlot"
                 name="selectMaxSeriesToPlot"

@@ -36,6 +36,8 @@
           "<TCode, TMeta> extends Error"
         ],
         "path": "src/platform/packages/shared/kbn-sse-utils/src/errors.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -50,6 +52,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-sse-utils/src/errors.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -64,7 +68,10 @@
                   "TCode"
                 ],
                 "path": "src/platform/packages/shared/kbn-sse-utils/src/errors.ts",
+                "lineNumber": 23,
+                "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "TCode",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -79,6 +86,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-sse-utils/src/errors.ts",
+                "lineNumber": 23,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -94,12 +103,31 @@
                   "TMeta"
                 ],
                 "path": "src/platform/packages/shared/kbn-sse-utils/src/errors.ts",
+                "lineNumber": 23,
+                "columnNumber": 52,
                 "deprecated": false,
+                "docsReferencedTypeName": "TMeta",
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/sse-utils",
+            "id": "def-common.ServerSentEventError.status",
+            "type": "number",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-sse-utils/src/errors.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/sse-utils",
@@ -114,6 +142,8 @@
               ".error; }"
             ],
             "path": "src/platform/packages/shared/kbn-sse-utils/src/errors.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -136,6 +166,8 @@
           "ServerSentEventInternalError"
         ],
         "path": "src/platform/packages/shared/kbn-sse-utils/src/errors.ts",
+        "lineNumber": 67,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -150,6 +182,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-sse-utils/src/errors.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -170,6 +204,8 @@
           "ServerSentEventRequestError"
         ],
         "path": "src/platform/packages/shared/kbn-sse-utils/src/errors.ts",
+        "lineNumber": 75,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -184,6 +220,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-sse-utils/src/errors.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -199,6 +237,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-sse-utils/src/errors.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -218,6 +258,8 @@
           "(error: unknown) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-sse-utils/src/errors.ts",
+        "lineNumber": 84,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -232,6 +274,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-sse-utils/src/errors.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -251,6 +295,8 @@
           "(error: unknown) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-sse-utils/src/errors.ts",
+        "lineNumber": 90,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -265,6 +311,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-sse-utils/src/errors.ts",
+            "lineNumber": 90,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -284,6 +332,8 @@
           "(error: unknown) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-sse-utils/src/errors.ts",
+        "lineNumber": 94,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -298,6 +348,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-sse-utils/src/errors.ts",
+            "lineNumber": 94,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -321,6 +373,8 @@
           "Record<string, unknown> & { type: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-sse-utils/src/events.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -336,6 +390,8 @@
           "keyof TData extends \"type\" ? never : TData & { type: TEventType; }"
         ],
         "path": "src/platform/packages/shared/kbn-sse-utils/src/events.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

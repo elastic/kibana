@@ -10,6 +10,8 @@
         "label": "NotificationsService",
         "description": [],
         "path": "src/core/packages/notifications/browser-internal/src/notifications_service.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -24,6 +26,8 @@
               "any"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/notifications_service.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -43,6 +47,8 @@
               "NotificationsSetup"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/notifications_service.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -57,7 +63,10 @@
                   "SetupDeps"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/notifications_service.ts",
+                "lineNumber": 52,
+                "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "SetupDeps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -72,12 +81,14 @@
             "label": "start",
             "description": [],
             "signature": [
-              "({ overlays, targetDomElement, ...startDeps }: ",
+              "({ overlays, targetDomElement, settings, ...startDeps }: ",
               "StartDeps",
               ") => ",
               "NotificationsStart"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/notifications_service.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -86,13 +97,16 @@
                 "id": "def-public.NotificationsService.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ overlays, targetDomElement, ...startDeps }",
+                "label": "{\n    overlays,\n    targetDomElement,\n    settings,\n    ...startDeps\n  }",
                 "description": [],
                 "signature": [
                   "StartDeps"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/notifications_service.ts",
+                "lineNumber": 70,
+                "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "StartDeps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -110,6 +124,8 @@
               "() => void"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/notifications_service.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -133,6 +149,8 @@
           "IToasts"
         ],
         "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+        "lineNumber": 84,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -147,6 +165,8 @@
               "any"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -158,6 +178,8 @@
                 "label": "deps",
                 "description": [],
                 "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+                "lineNumber": 95,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -172,6 +194,8 @@
                       "IUiSettingsClient"
                     ],
                     "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+                    "lineNumber": 95,
+                    "columnNumber": 23,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -187,7 +211,7 @@
             "tags": [],
             "label": "get$",
             "description": [
-              "Observable of the toast messages to show to the user."
+              "Observable of the toast messages queued to be shown to the user."
             ],
             "signature": [
               "() => ",
@@ -197,6 +221,8 @@
               "[]>"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -218,6 +244,8 @@
               "Toast"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -228,19 +256,29 @@
                 "tags": [],
                 "label": "toastOrTitle",
                 "description": [
-                  "- a {@link ToastInput }"
+                  "- a {@link ToastInput}"
                 ],
                 "signature": [
                   "ToastInput"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+                "lineNumber": 115,
+                "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToastInput",
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": [
-              "a {@link Toast }"
+              "a ",
+              {
+                "pluginId": "@kbn/core-notifications-browser-internal",
+                "scope": "public",
+                "docId": "kibKbnCoreNotificationsBrowserInternalPluginApi",
+                "section": "def-public.Toast",
+                "text": "Toast"
+              }
             ]
           },
           {
@@ -258,6 +296,8 @@
               ") => void"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+            "lineNumber": 127,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -268,13 +308,15 @@
                 "tags": [],
                 "label": "toastOrId",
                 "description": [
-                  "- a {@link Toast } returned by {@link ToastsApi.add } or its id"
+                  "- a {@link Toast} returned by {@link ToastsApi.add} or its id"
                 ],
                 "signature": [
                   "string | ",
                   "Toast"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+                "lineNumber": 131,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -300,6 +342,8 @@
               "Toast"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+            "lineNumber": 140,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -310,13 +354,16 @@
                 "tags": [],
                 "label": "toastOrTitle",
                 "description": [
-                  "- a {@link ToastInput }"
+                  "- a {@link ToastInput}"
                 ],
                 "signature": [
                   "ToastInput"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+                "lineNumber": 147,
+                "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToastInput",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -327,20 +374,30 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- a {@link ToastOptions }"
+                  "- a {@link ToastOptions}"
                 ],
                 "signature": [
                   "ToastOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+                "lineNumber": 147,
+                "columnNumber": 44,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToastOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
             "returnComment": [
-              "a {@link Toast }"
+              "a ",
+              {
+                "pluginId": "@kbn/core-notifications-browser-internal",
+                "scope": "public",
+                "docId": "kibKbnCoreNotificationsBrowserInternalPluginApi",
+                "section": "def-public.Toast",
+                "text": "Toast"
+              }
             ]
           },
           {
@@ -361,6 +418,8 @@
               "Toast"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+            "lineNumber": 156,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -371,13 +430,16 @@
                 "tags": [],
                 "label": "toastOrTitle",
                 "description": [
-                  "- a {@link ToastInput }"
+                  "- a {@link ToastInput}"
                 ],
                 "signature": [
                   "ToastInput"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+                "lineNumber": 163,
+                "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToastInput",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -388,20 +450,30 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- a {@link ToastOptions }"
+                  "- a {@link ToastOptions}"
                 ],
                 "signature": [
                   "ToastOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+                "lineNumber": 163,
+                "columnNumber": 47,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToastOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
             "returnComment": [
-              "a {@link Toast }"
+              "a ",
+              {
+                "pluginId": "@kbn/core-notifications-browser-internal",
+                "scope": "public",
+                "docId": "kibKbnCoreNotificationsBrowserInternalPluginApi",
+                "section": "def-public.Toast",
+                "text": "Toast"
+              }
             ]
           },
           {
@@ -422,6 +494,8 @@
               "Toast"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+            "lineNumber": 172,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -432,13 +506,16 @@
                 "tags": [],
                 "label": "toastOrTitle",
                 "description": [
-                  "- a {@link ToastInput }"
+                  "- a {@link ToastInput}"
                 ],
                 "signature": [
                   "ToastInput"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+                "lineNumber": 179,
+                "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToastInput",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -449,20 +526,30 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- a {@link ToastOptions }"
+                  "- a {@link ToastOptions}"
                 ],
                 "signature": [
                   "ToastOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+                "lineNumber": 179,
+                "columnNumber": 47,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToastOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
             "returnComment": [
-              "a {@link Toast }"
+              "a ",
+              {
+                "pluginId": "@kbn/core-notifications-browser-internal",
+                "scope": "public",
+                "docId": "kibKbnCoreNotificationsBrowserInternalPluginApi",
+                "section": "def-public.Toast",
+                "text": "Toast"
+              }
             ]
           },
           {
@@ -483,6 +570,8 @@
               "Toast"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+            "lineNumber": 189,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -493,13 +582,16 @@
                 "tags": [],
                 "label": "toastOrTitle",
                 "description": [
-                  "- a {@link ToastInput }"
+                  "- a {@link ToastInput}"
                 ],
                 "signature": [
                   "ToastInput"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+                "lineNumber": 196,
+                "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToastInput",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -510,20 +602,30 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- a {@link ToastOptions }"
+                  "- a {@link ToastOptions}"
                 ],
                 "signature": [
                   "ToastOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+                "lineNumber": 196,
+                "columnNumber": 46,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToastOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
             "returnComment": [
-              "a {@link Toast }"
+              "a ",
+              {
+                "pluginId": "@kbn/core-notifications-browser-internal",
+                "scope": "public",
+                "docId": "kibKbnCoreNotificationsBrowserInternalPluginApi",
+                "section": "def-public.Toast",
+                "text": "Toast"
+              }
             ]
           },
           {
@@ -542,6 +644,8 @@
               "Toast"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+            "lineNumber": 210,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -558,7 +662,10 @@
                   "Error"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+                "lineNumber": 217,
+                "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "Error",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -569,19 +676,29 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- {@link ErrorToastOptions }"
+                  "- {@link ErrorToastOptions}"
                 ],
                 "signature": [
                   "ErrorToastOptions"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+                "lineNumber": 217,
+                "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "ErrorToastOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": [
-              "a {@link Toast }"
+              "a ",
+              {
+                "pluginId": "@kbn/core-notifications-browser-internal",
+                "scope": "public",
+                "docId": "kibKbnCoreNotificationsBrowserInternalPluginApi",
+                "section": "def-public.Toast",
+                "text": "Toast"
+              }
             ]
           }
         ],
@@ -600,7 +717,7 @@
         "label": "NotificationsServiceContract",
         "description": [],
         "signature": [
-          "{ start: ({ overlays, targetDomElement, ...startDeps }: ",
+          "{ start: ({ overlays, targetDomElement, settings, ...startDeps }: ",
           "StartDeps",
           ") => ",
           "NotificationsStart",
@@ -611,6 +728,8 @@
           "; stop: () => void; }"
         ],
         "path": "src/core/packages/notifications/browser-internal/src/notifications_service.ts",
+        "lineNumber": 112,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

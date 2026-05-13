@@ -1,0 +1,365 @@
+{
+  "id": "@kbn/core-chrome-browser-internal-types",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-chrome-browser-internal-types",
+        "id": "def-common.ChromeApplicationContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChromeApplicationContext",
+        "description": [
+          "\nMinimal application contract needed by Chrome components.\nReplaces `InternalApplicationStart` to break the dependency on the private\n`@kbn/core-application-browser-internal` package."
+        ],
+        "signature": [
+          "ChromeApplicationContext",
+          " extends Pick<",
+          "ApplicationStart",
+          ", \"navigateToUrl\" | \"navigateToApp\" | \"currentAppId$\">"
+        ],
+        "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-internal-types",
+            "id": "def-common.ChromeApplicationContext.currentActionMenu$",
+            "type": "Object",
+            "tags": [],
+            "label": "currentActionMenu$",
+            "description": [
+              "Current app's action menu mount point."
+            ],
+            "signature": [
+              "Observable",
+              "<",
+              "MountPoint",
+              "<HTMLElement> | undefined>"
+            ],
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser-internal-types",
+        "id": "def-common.ChromeComponentsDeps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChromeComponentsDeps",
+        "description": [],
+        "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+        "lineNumber": 92,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-internal-types",
+            "id": "def-common.ChromeComponentsDeps.config",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "ChromeComponentsConfig"
+            ],
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-internal-types",
+            "id": "def-common.ChromeComponentsDeps.application",
+            "type": "Object",
+            "tags": [],
+            "label": "application",
+            "description": [],
+            "signature": [
+              "ChromeApplicationContext"
+            ],
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-internal-types",
+            "id": "def-common.ChromeComponentsDeps.basePath",
+            "type": "Object",
+            "tags": [],
+            "label": "basePath",
+            "description": [],
+            "signature": [
+              "IBasePath"
+            ],
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-internal-types",
+            "id": "def-common.ChromeComponentsDeps.docLinks",
+            "type": "Object",
+            "tags": [],
+            "label": "docLinks",
+            "description": [],
+            "signature": [
+              "DocLinksStart"
+            ],
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-internal-types",
+            "id": "def-common.ChromeComponentsDeps.navControls",
+            "type": "Object",
+            "tags": [],
+            "label": "navControls",
+            "description": [],
+            "signature": [
+              "NavControlsObservables"
+            ],
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-internal-types",
+            "id": "def-common.ChromeComponentsDeps.classic",
+            "type": "Object",
+            "tags": [],
+            "label": "classic",
+            "description": [
+              "Classic-layout-specific chrome state."
+            ],
+            "signature": [
+              "ClassicChromeObservables"
+            ],
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-internal-types",
+            "id": "def-common.ChromeComponentsDeps.project",
+            "type": "Object",
+            "tags": [],
+            "label": "project",
+            "description": [
+              "Project/solution-layout-specific chrome state."
+            ],
+            "signature": [
+              "ProjectChromeObservables"
+            ],
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-internal-types",
+            "id": "def-common.ChromeComponentsDeps.loadingCount$",
+            "type": "Object",
+            "tags": [],
+            "label": "loadingCount$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<number>"
+            ],
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-internal-types",
+            "id": "def-common.ChromeComponentsDeps.helpMenu",
+            "type": "Object",
+            "tags": [],
+            "label": "helpMenu",
+            "description": [],
+            "signature": [
+              "{ menuLinks$: ",
+              "Observable",
+              "<",
+              "ChromeHelpMenuLink",
+              "[]>; extension$: ",
+              "Observable",
+              "<",
+              "ChromeHelpExtension",
+              " | undefined>; supportUrl$: ",
+              "Observable",
+              "<string>; globalExtensionMenuLinks$: ",
+              "Observable",
+              "<",
+              "ChromeGlobalHelpExtensionMenuLink",
+              "[]>; }"
+            ],
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-internal-types",
+            "id": "def-common.ChromeComponentsDeps.navLinks$",
+            "type": "Object",
+            "tags": [],
+            "label": "navLinks$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              "ChromeNavLink",
+              "[]>"
+            ],
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-internal-types",
+            "id": "def-common.ChromeComponentsDeps.customBranding$",
+            "type": "Object",
+            "tags": [],
+            "label": "customBranding$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              "CustomBranding",
+              ">"
+            ],
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-internal-types",
+            "id": "def-common.ChromeComponentsDeps.breadcrumbsAppendExtensions$",
+            "type": "Object",
+            "tags": [],
+            "label": "breadcrumbsAppendExtensions$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              "ChromeBreadcrumbsAppendExtension",
+              "[]>"
+            ],
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-internal-types",
+            "id": "def-common.ChromeComponentsDeps.appMenu$",
+            "type": "Object",
+            "tags": [],
+            "label": "appMenu$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              "AppMenuConfig",
+              " | undefined>"
+            ],
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-internal-types",
+            "id": "def-common.ChromeComponentsDeps.headerBanner$",
+            "type": "Object",
+            "tags": [],
+            "label": "headerBanner$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              "ChromeUserBanner",
+              " | undefined>"
+            ],
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-internal-types",
+            "id": "def-common.ChromeComponentsDeps.sideNav",
+            "type": "Object",
+            "tags": [],
+            "label": "sideNav",
+            "description": [],
+            "signature": [
+              "{ collapsed$: ",
+              "Observable",
+              "<boolean>; initialCollapsed: boolean; onToggleCollapsed: (collapsed: boolean) => void; }"
+            ],
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

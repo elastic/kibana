@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { IngestPipelineParams } from '@kbn/search-connectors';
 import {
   createConnector,
   deleteConnectorById,
@@ -13,7 +14,6 @@ import {
   fetchConnectors,
   fetchSyncJobs,
   generateConnectorName,
-  IngestPipelineParams,
   startConnectorSync,
   updateConnectorConfiguration,
   updateConnectorIndexName,
@@ -22,7 +22,7 @@ import {
   updateConnectorServiceType,
 } from '@kbn/search-connectors';
 import { DEFAULT_INGESTION_PIPELINE } from '../../common';
-import { RouteDependencies } from '../plugin';
+import type { RouteDependencies } from '../plugin';
 import { errorHandler } from '../utils/error_handler';
 
 export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependencies) => {
@@ -30,6 +30,12 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
     {
       path: '/internal/serverless_search/connectors',
       validate: {},
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the es client',
+        },
+      },
     },
     errorHandler(logger)(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
@@ -59,6 +65,12 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
           connectorId: schema.string(),
         }),
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the es client',
+        },
+      },
     },
     errorHandler(logger)(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
@@ -79,6 +91,12 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
     {
       path: '/internal/serverless_search/connectors',
       validate: {},
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the es client',
+        },
+      },
     },
     errorHandler(logger)(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
@@ -109,11 +127,17 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
       path: '/internal/serverless_search/connectors/{connectorId}/name',
       validate: {
         body: schema.object({
-          name: schema.string(),
+          name: schema.string({ maxLength: 1000 }),
         }),
         params: schema.object({
           connectorId: schema.string(),
         }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the es client',
+        },
       },
     },
     errorHandler(logger)(async (context, request, response) => {
@@ -140,11 +164,17 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
       path: '/internal/serverless_search/connectors/{connectorId}/description',
       validate: {
         body: schema.object({
-          description: schema.string(),
+          description: schema.string({ maxLength: 4096 }),
         }),
         params: schema.object({
           connectorId: schema.string(),
         }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the es client',
+        },
       },
     },
     errorHandler(logger)(async (context, request, response) => {
@@ -171,11 +201,17 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
       path: '/internal/serverless_search/connectors/{connectorId}/index_name',
       validate: {
         body: schema.object({
-          index_name: schema.string(),
+          index_name: schema.string({ maxLength: 255 }),
         }),
         params: schema.object({
           connectorId: schema.string(),
         }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the es client',
+        },
       },
     },
     errorHandler(logger)(async (context, request, response) => {
@@ -203,11 +239,17 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
       path: '/internal/serverless_search/connectors/{connectorId}/service_type',
       validate: {
         body: schema.object({
-          service_type: schema.string(),
+          service_type: schema.string({ maxLength: 512 }),
         }),
         params: schema.object({
           connectorId: schema.string(),
         }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the es client',
+        },
       },
     },
     errorHandler(logger)(async (context, request, response) => {
@@ -235,6 +277,12 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
           connectorId: schema.string(),
         }),
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the es client',
+        },
+      },
     },
     errorHandler(logger)(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
@@ -254,13 +302,19 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
       validate: {
         body: schema.object({
           configuration: schema.recordOf(
-            schema.string(),
-            schema.oneOf([schema.string(), schema.number(), schema.boolean()])
+            schema.string({ maxLength: 1000 }),
+            schema.oneOf([schema.string({ maxLength: 4096 }), schema.number(), schema.boolean()])
           ),
         }),
         params: schema.object({
           connectorId: schema.string(),
         }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the es client',
+        },
       },
     },
     errorHandler(logger)(async (context, request, response) => {
@@ -285,6 +339,12 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
         params: schema.object({
           connectorId: schema.string(),
         }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the es client',
+        },
       },
     },
     errorHandler(logger)(async (context, request, response) => {
@@ -313,6 +373,12 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
           type: schema.maybe(schema.string()),
         }),
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the es client',
+        },
+      },
     },
     errorHandler(logger)(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
@@ -335,13 +401,28 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
       path: '/internal/serverless_search/connectors/{connectorId}/scheduling',
       validate: {
         body: schema.object({
-          access_control: schema.object({ enabled: schema.boolean(), interval: schema.string() }),
-          full: schema.object({ enabled: schema.boolean(), interval: schema.string() }),
-          incremental: schema.object({ enabled: schema.boolean(), interval: schema.string() }),
+          access_control: schema.object({
+            enabled: schema.boolean(),
+            interval: schema.string({ maxLength: 512 }),
+          }),
+          full: schema.object({
+            enabled: schema.boolean(),
+            interval: schema.string({ maxLength: 512 }),
+          }),
+          incremental: schema.object({
+            enabled: schema.boolean(),
+            interval: schema.string({ maxLength: 512 }),
+          }),
         }),
         params: schema.object({
           connectorId: schema.string(),
         }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the es client',
+        },
       },
     },
     errorHandler(logger)(async (context, request, response) => {
@@ -360,13 +441,19 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
       path: '/internal/serverless_search/connectors/{connectorId}/generate_name',
       validate: {
         body: schema.object({
-          name: schema.string(),
+          name: schema.string({ maxLength: 1000 }),
           is_native: schema.boolean(),
-          service_type: schema.string(),
+          service_type: schema.string({ maxLength: 512 }),
         }),
         params: schema.object({
           connectorId: schema.string(),
         }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the es client',
+        },
       },
     },
     errorHandler(logger)(async (context, request, response) => {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { connectorSchema, connectorWithExtraFindDataSchema } from '../schemas';
+import type { TypeOf } from '@kbn/config-schema';
+import type { connectorSchema, connectorWithExtraFindDataSchema } from '../schemas';
 
 type ConnectorSchemaType = TypeOf<typeof connectorSchema>;
 type ConnectorWithExtraFindDataSchema = TypeOf<typeof connectorWithExtraFindDataSchema>;
@@ -20,6 +20,8 @@ export interface Connector {
   isPreconfigured: ConnectorSchemaType['isPreconfigured'];
   isDeprecated: ConnectorSchemaType['isDeprecated'];
   isSystemAction: ConnectorSchemaType['isSystemAction'];
+  isConnectorTypeDeprecated: ConnectorSchemaType['isConnectorTypeDeprecated'];
+  authMode?: ConnectorSchemaType['authMode'];
 }
 
 export interface ConnectorWithExtraFindData extends Connector {

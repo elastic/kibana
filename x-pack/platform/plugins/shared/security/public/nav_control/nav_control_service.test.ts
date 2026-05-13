@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import type { httpServiceMock } from '@kbn/core/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { ILicense } from '@kbn/licensing-plugin/public';
-import { nextTick } from '@kbn/test-jest-helpers';
+import type { ILicense } from '@kbn/licensing-types';
 
 import { SecurityNavControlService } from './nav_control_service';
 import { SecurityLicenseService } from '../../common/licensing';
@@ -51,11 +51,11 @@ const mockApiClients = (http: ReturnType<typeof httpServiceMock.createStartContr
 });
 
 describe('SecurityNavControlService', () => {
-  it('can render and cleanup the control via the mount() function', async () => {
+  it('registers a ReactNode content for the nav control', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
     const coreStart = coreMock.createStart();
 
-    const navControlService = new SecurityNavControlService('traditional');
+    const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
@@ -66,66 +66,16 @@ describe('SecurityNavControlService', () => {
 
     navControlService.start({ core: coreStart, authc });
     expect(coreStart.chrome.navControls.registerRight).toHaveBeenCalledTimes(1);
-    const [{ mount }] = coreStart.chrome.navControls.registerRight.mock.calls[0];
+    const [{ content }] = coreStart.chrome.navControls.registerRight.mock.calls[0];
 
-    const target = document.createElement('div');
-    const cleanup = mount(target);
-
-    await nextTick();
-
-    expect(target).toMatchInlineSnapshot(`
-      <div>
-        <div
-          css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
-          data-test-subj="kbnRedirectAppLink"
-        >
-          <div
-            class="euiPopover emotion-euiPopover-inline-block"
-            id="headerUserMenu"
-          >
-            <button
-              aria-controls="headerUserMenu"
-              aria-expanded="false"
-              aria-haspopup="true"
-              aria-label="Account menu"
-              class="euiButtonEmpty euiHeaderSectionItemButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiHeaderSectionItemButton"
-              data-test-subj="userMenuButton"
-              style="line-height: normal;"
-              type="button"
-            >
-              <span
-                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
-              >
-                <span
-                  class="eui-textTruncate euiButtonEmpty__text"
-                >
-                  <span
-                    class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
-                  >
-                    <span
-                      aria-label="Loading"
-                      class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
-                      role="progressbar"
-                    />
-                  </span>
-                </span>
-              </span>
-            </button>
-          </div>
-        </div>
-      </div>
-    `);
-
-    cleanup();
-
-    expect(target).toMatchInlineSnapshot(`<div />`);
+    expect(React.isValidElement(content)).toBe(true);
   });
 
   it('should register the nav control once the license supports it', () => {
     const license$ = new BehaviorSubject<ILicense>({} as ILicense);
     const coreStart = coreMock.createStart();
 
-    const navControlService = new SecurityNavControlService('traditional');
+    const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
@@ -145,7 +95,7 @@ describe('SecurityNavControlService', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
     const coreStart = coreMock.createStart();
 
-    const navControlService = new SecurityNavControlService('traditional');
+    const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
@@ -162,7 +112,7 @@ describe('SecurityNavControlService', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
     const coreStart = coreMock.createStart();
 
-    const navControlService = new SecurityNavControlService('traditional');
+    const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
@@ -184,7 +134,7 @@ describe('SecurityNavControlService', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
     const coreStart = coreMock.createStart();
 
-    const navControlService = new SecurityNavControlService('traditional');
+    const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
@@ -207,7 +157,7 @@ describe('SecurityNavControlService', () => {
       const coreSetup = coreMock.createSetup();
       const license$ = new BehaviorSubject<ILicense>({} as ILicense);
 
-      navControlService = new SecurityNavControlService('traditional');
+      navControlService = new SecurityNavControlService();
       navControlService.setup({
         securityLicense: new SecurityLicenseService().setup({ license$ }).license,
         logoutUrl: '/some/logout/url',

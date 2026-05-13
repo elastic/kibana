@@ -5,26 +5,28 @@
  * 2.0.
  */
 
-import { IUiSettingsClient } from '@kbn/core/server';
-import { ILicense } from '@kbn/licensing-plugin/server';
-import { BannersConfigType } from '../config';
-import { BannerInfoResponse, BannerConfiguration, BannerPlacement } from '../../common';
-import { BannersRouter } from '../types';
+import type { IUiSettingsClient } from '@kbn/core/server';
+import type { ILicense } from '@kbn/licensing-types';
+import type { BannersConfigType } from '../config';
+import type { BannerInfoResponse, BannerConfiguration, BannerPlacement } from '../../common';
+import type { BannersRouter } from '../types';
 
 export const registerInfoRoute = (router: BannersRouter, config: BannersConfigType) => {
   router.get(
     {
       path: '/api/banners/info',
       security: {
+        authc: {
+          enabled: 'optional',
+          reason:
+            'Banner info must be accessible on the login page before the user is authenticated',
+        },
         authz: {
           enabled: false,
           reason: 'This route is opted out from authorization',
         },
       },
       validate: false,
-      options: {
-        authRequired: 'optional',
-      },
     },
     async (ctx, req, res) => {
       const allowed = isValidLicense((await ctx.licensing).license);
@@ -49,10 +51,11 @@ const isValidLicense = (license: ILicense): boolean => {
 };
 
 const getBannerConfig = async (client: IUiSettingsClient): Promise<BannerConfiguration> => {
-  const [placement, textContent, textColor, backgroundColor] = await Promise.all([
+  const [placement, textContent, textColor, linkColor, backgroundColor] = await Promise.all([
     client.get<BannerPlacement>('banners:placement'),
     client.get<string>('banners:textContent'),
     client.get<string>('banners:textColor'),
+    client.get<string>('banners:linkColor'),
     client.get<string>('banners:backgroundColor'),
   ]);
 
@@ -60,6 +63,7 @@ const getBannerConfig = async (client: IUiSettingsClient): Promise<BannerConfigu
     placement,
     textContent,
     textColor,
+    linkColor,
     backgroundColor,
   };
 };

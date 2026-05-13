@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
 import { renderHook, act } from '@testing-library/react';
 import { useItemsState } from './use_items_state';
 
 import { basicCase } from '../../containers/mock';
 import type { ItemSelectableOption } from './types';
+import { TestProviders } from '../../common/mock';
 
 describe('useItemsState', () => {
-  let appMockRender: AppMockRenderer;
   const onChangeItems = jest.fn();
   const fieldSelector = jest.fn();
   const itemToSelectableOption = jest
@@ -30,7 +28,6 @@ describe('useItemsState', () => {
   };
 
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     fieldSelector.mockReturnValueOnce(['one', 'two']);
     fieldSelector.mockReturnValueOnce(['one', 'three']);
     jest.clearAllMocks();
@@ -38,7 +35,7 @@ describe('useItemsState', () => {
 
   it('inits the state correctly', async () => {
     const { result } = renderHook(() => useItemsState(props), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     expect(result.current.state).toMatchInlineSnapshot(`
@@ -84,7 +81,7 @@ describe('useItemsState', () => {
 
   it('inits the options correctly', async () => {
     const { result } = renderHook(() => useItemsState(props), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     expect(result.current.options).toMatchInlineSnapshot(`
@@ -128,7 +125,7 @@ describe('useItemsState', () => {
 
   it('inits the totalSelectedItems correctly', async () => {
     const { result } = renderHook(() => useItemsState(props), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     expect(result.current.totalSelectedItems).toBe(3);
@@ -136,7 +133,7 @@ describe('useItemsState', () => {
 
   it('selects all items correctly', async () => {
     const { result } = renderHook(() => useItemsState(props), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -234,7 +231,7 @@ describe('useItemsState', () => {
 
   it('unselects all items correctly', async () => {
     const { result } = renderHook(() => useItemsState(props), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -328,7 +325,7 @@ describe('useItemsState', () => {
 
   it('selects and unselects correctly', async () => {
     const { result } = renderHook(() => useItemsState(props), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     const newOptions = [
@@ -425,7 +422,7 @@ describe('useItemsState', () => {
 
   it('changes the label of the new item correctly', async () => {
     const { result } = renderHook(() => useItemsState(props), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     const newOptions = [
@@ -445,7 +442,7 @@ describe('useItemsState', () => {
 
   it('keeps the data of the option', async () => {
     const { result } = renderHook(() => useItemsState(props), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     const newOptions = [
@@ -473,7 +470,7 @@ describe('useItemsState', () => {
 
   it('does not add the new item as unselected', async () => {
     const { result } = renderHook(() => useItemsState(props), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     const newOptions = [
@@ -493,7 +490,7 @@ describe('useItemsState', () => {
 
   it('does not add non dirty items as unselected', async () => {
     const { result } = renderHook(() => useItemsState(props), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     const newOptions = [{ key: 'two', label: 'two', checked: 'on' }] as ItemSelectableOption[];
@@ -514,7 +511,7 @@ describe('useItemsState', () => {
 
   it('calls itemToSelectableOption correctly', async () => {
     renderHook(() => useItemsState(props), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     expect(itemToSelectableOption).toHaveBeenNthCalledWith(1, {
@@ -535,7 +532,7 @@ describe('useItemsState', () => {
 
   it('calls itemToSelectableOption with data correctly', async () => {
     const { result } = renderHook(() => useItemsState(props), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     const newOptions = [
@@ -558,7 +555,7 @@ describe('useItemsState', () => {
     }));
 
     const { result } = renderHook(() => useItemsState(props), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     for (const option of result.current.options) {
@@ -575,7 +572,7 @@ describe('useItemsState', () => {
     const validIcons = ['check', 'asterisk', 'empty'];
 
     const { result } = renderHook(() => useItemsState(props), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     for (const option of result.current.options) {
@@ -586,7 +583,7 @@ describe('useItemsState', () => {
 
   it('calls fieldSelector correctly', async () => {
     renderHook(() => useItemsState(props), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     expect(fieldSelector).toHaveBeenCalledWith(basicCase);

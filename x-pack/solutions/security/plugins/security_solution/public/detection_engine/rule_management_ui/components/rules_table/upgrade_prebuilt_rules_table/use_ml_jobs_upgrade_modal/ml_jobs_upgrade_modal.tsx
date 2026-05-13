@@ -6,8 +6,8 @@
  */
 
 import React, { memo } from 'react';
-import { EuiConfirmModal } from '@elastic/eui';
-import type { MlSummaryJob } from '@kbn/ml-plugin/common';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import styled from 'styled-components';
 import { rgba } from 'polished';
 import * as i18n from './translations';
@@ -44,9 +44,13 @@ export const OutdatedMlJobsUpgradeModal = memo(function LegacyMlJobsUpgradeModal
   onCancel,
   onConfirm,
 }: OutdatedMlJobsUpgradeModalProps): JSX.Element {
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={i18n.ML_JOB_UPGRADE_MODAL_TITLE}
+      titleProps={{ id: modalTitleId }}
       onCancel={onCancel}
       onConfirm={onConfirm}
       cancelButtonText={i18n.ML_JOB_UPGRADE_MODAL_CANCEL}

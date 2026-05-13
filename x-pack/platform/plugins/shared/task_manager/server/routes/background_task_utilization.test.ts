@@ -12,10 +12,11 @@ import { mockHandlerArguments } from './_mock_handler_arguments';
 import { sleep } from '../test_utils';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-import { MonitoringStats } from '../monitoring';
-import { configSchema, TaskManagerConfig } from '../config';
+import type { MonitoringStats } from '../monitoring';
+import type { TaskManagerConfig } from '../config';
+import { configSchema } from '../config';
 import { backgroundTaskUtilizationRoute } from './background_task_utilization';
-import { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
@@ -56,17 +57,17 @@ describe('backgroundTaskUtilizationRoute', () => {
     expect(config1.path).toMatchInlineSnapshot(
       `"/internal/task_manager/_background_task_utilization"`
     );
-    expect(config1.options?.authRequired).toEqual(true);
+    expect(config1.security?.authc?.enabled).not.toBe(false);
     expect(config1.options?.tags).toEqual(['security:acceptJWT']);
 
     const [config2] = router.get.mock.calls[1];
 
     expect(config2.path).toMatchInlineSnapshot(`"/api/task_manager/_background_task_utilization"`);
-    expect(config2.options?.authRequired).toEqual(true);
+    expect(config2.security?.authc?.enabled).not.toBe(false);
     expect(config2.options?.tags).toEqual(['security:acceptJWT']);
   });
 
-  it(`sets "authRequired" to false when config.unsafe.authenticate_background_task_utilization is set to false`, async () => {
+  it(`sets security.authc.enabled to false on the public route when config.unsafe.authenticate_background_task_utilization is set to false`, async () => {
     const router = httpServiceMock.createRouter();
     backgroundTaskUtilizationRoute({
       router,
@@ -88,12 +89,12 @@ describe('backgroundTaskUtilizationRoute', () => {
     expect(config1.path).toMatchInlineSnapshot(
       `"/internal/task_manager/_background_task_utilization"`
     );
-    expect(config1.options?.authRequired).toEqual(true);
+    expect(config1.security?.authc?.enabled).not.toBe(false);
 
     const [config2] = router.get.mock.calls[1];
 
     expect(config2.path).toMatchInlineSnapshot(`"/api/task_manager/_background_task_utilization"`);
-    expect(config2.options?.authRequired).toEqual(false);
+    expect(config2.security?.authc?.enabled).toBe(false);
   });
 
   it('checks user privileges and increments usage counter when API is accessed', async () => {

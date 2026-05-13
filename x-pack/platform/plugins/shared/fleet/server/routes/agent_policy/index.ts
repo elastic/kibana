@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import path from 'path';
+
 import { schema } from '@kbn/config-schema';
 
 import type { FleetAuthzRouter } from '../../services/security';
@@ -11,7 +13,6 @@ import type { FleetAuthzRouter } from '../../services/security';
 import { API_VERSIONS } from '../../../common/constants';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import { AGENT_POLICY_API_ROUTES } from '../../constants';
-import { type FleetConfigType } from '../../config';
 import {
   GetAgentPoliciesRequestSchema,
   GetOneAgentPolicyRequestSchema,
@@ -35,10 +36,13 @@ import {
   GetListAgentPolicyOutputsRequestSchema,
   GetAutoUpgradeAgentsStatusRequestSchema,
   GetAutoUpgradeAgentsStatusResponseSchema,
+  CreateAgentAndPackagePolicyRequestSchema,
+  RunAgentPolicyRevisionsCleanupTaskRequestSchema,
+  RunAgentPolicyRevisionsCleanupTaskResponseSchema,
 } from '../../types';
 
 import { K8S_API_ROUTES } from '../../../common/constants';
-import { parseExperimentalConfigValue } from '../../../common/experimental_features';
+import { type ExperimentalFeatures } from '../../../common/experimental_features';
 
 import { genericErrorResponse } from '../schema/errors';
 import { ListResponseSchema } from '../schema/utils';
@@ -58,9 +62,14 @@ import {
   GetAgentPolicyOutputsHandler,
   GetListAgentPolicyOutputsHandler,
   getAutoUpgradeAgentsStatusHandler,
+  createAgentAndPackagePoliciesHandler,
+  RunAgentPolicyRevisionsCleanupTaskHandler,
 } from './handlers';
 
-export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
+export const registerRoutes = (
+  router: FleetAuthzRouter,
+  experimentalFeatures: ExperimentalFeatures
+) => {
   // List - Fleet Server needs access to run setup
   router.versioned
     .get({
@@ -79,6 +88,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         },
       },
       summary: `Get agent policies`,
+      description: `List all agent policies.`,
       options: {
         tags: ['oas-tag:Elastic Agent policies'],
       },
@@ -86,13 +96,18 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_agent_policies.yaml'),
+        },
         validate: {
           request: GetAgentPoliciesRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => ListResponseSchema(AgentPolicyResponseSchema),
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -119,6 +134,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         },
       },
       summary: `Bulk get agent policies`,
+      description: `Get multiple agent policies by ID.`,
       options: {
         tags: ['oas-tag:Elastic Agent policies'],
       },
@@ -126,13 +142,19 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/post_bulk_get_agent_policies.yaml'),
+        },
         validate: {
           request: BulkGetAgentPoliciesRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => BulkGetAgentPoliciesResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -167,13 +189,18 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_agent_policy.yaml'),
+        },
         validate: {
           request: GetOneAgentPolicyRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetAgentPolicyResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -182,7 +209,6 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       getOneAgentPolicyHandler
     );
 
-  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
   if (experimentalFeatures.enableAutomaticAgentUpgrades) {
     router.versioned
       .get({
@@ -193,7 +219,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           },
         },
         summary: `Get auto upgrade agent status`,
-        description: `Get auto upgrade agent status`,
+        description: `Get the auto-upgrade status for agents assigned to an agent policy.`,
         options: {
           tags: ['oas-tag:Elastic Agent policies'],
         },
@@ -201,13 +227,19 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       .addVersion(
         {
           version: API_VERSIONS.public.v1,
+          options: {
+            oasOperationObject: () =>
+              path.join(__dirname, 'examples/get_auto_upgrade_agents_status.yaml'),
+          },
           validate: {
             request: GetAutoUpgradeAgentsStatusRequestSchema,
             response: {
               200: {
+                description: 'OK: A successful request.',
                 body: () => GetAutoUpgradeAgentsStatusResponseSchema,
               },
               400: {
+                description: 'A bad request.',
                 body: genericErrorResponse,
               },
             },
@@ -227,6 +259,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         },
       },
       summary: `Create an agent policy`,
+      description: `Create a new agent policy.`,
       options: {
         tags: ['oas-tag:Elastic Agent policies'],
       },
@@ -234,19 +267,64 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_agent_policy.yaml'),
+        },
         validate: {
           request: CreateAgentPolicyRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetAgentPolicyResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
         },
       },
       createAgentPolicyHandler
+    );
+
+  // Create agent + package policies in a single request
+  // Used for agentless integrations
+  router.versioned
+    .post({
+      path: AGENT_POLICY_API_ROUTES.CREATE_WITH_PACKAGE_POLICIES,
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL],
+        },
+      },
+      summary: `Create an agent policy and its package policies in one request`,
+      description: `Create a new agent policy together with its package policies in a single request. Used for agentless integrations.`,
+      options: {
+        tags: ['oas-tag:Elastic Agent policies'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/post_agent_and_package_policies.yaml'),
+        },
+        validate: {
+          request: CreateAgentAndPackagePolicyRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => GetAgentPolicyResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      createAgentAndPackagePoliciesHandler
     );
 
   // Update
@@ -267,13 +345,18 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/put_agent_policy.yaml'),
+        },
         validate: {
           request: UpdateAgentPolicyRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetAgentPolicyResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -300,13 +383,18 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_copy_agent_policy.yaml'),
+        },
         validate: {
           request: CopyAgentPolicyRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetAgentPolicyResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -333,13 +421,18 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_delete_agent_policy.yaml'),
+        },
         validate: {
           request: DeleteAgentPolicyRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => DeleteAgentPolicyResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -366,13 +459,18 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_full_agent_policy.yaml'),
+        },
         validate: {
           request: GetFullAgentPolicyRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetFullAgentPolicyResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -388,8 +486,9 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       security: {
         authz: {
           requiredPrivileges: [
-            FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
-            FLEET_API_PRIVILEGES.SETUP,
+            {
+              anyRequired: [FLEET_API_PRIVILEGES.AGENT_POLICIES.READ, FLEET_API_PRIVILEGES.SETUP],
+            },
           ],
         },
       },
@@ -403,16 +502,22 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_download_agent_policy.yaml'),
+        },
         validate: {
           request: GetFullAgentPolicyRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => DownloadFullAgentPolicyResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
             404: {
+              description: 'Not found.',
               body: genericErrorResponse,
             },
           },
@@ -428,12 +533,14 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       security: {
         authz: {
           requiredPrivileges: [
-            FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
-            FLEET_API_PRIVILEGES.SETUP,
+            {
+              anyRequired: [FLEET_API_PRIVILEGES.AGENT_POLICIES.READ, FLEET_API_PRIVILEGES.SETUP],
+            },
           ],
         },
       },
       summary: `Get a full K8s agent manifest`,
+      description: `Get the Kubernetes manifest for deploying Elastic Agent.`,
       options: {
         tags: ['oas-tag:Elastic Agent policies'],
       },
@@ -441,13 +548,18 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_k8s_manifest.yaml'),
+        },
         validate: {
           request: GetK8sManifestRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetK8sManifestResponseScheme,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -463,13 +575,15 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       security: {
         authz: {
           requiredPrivileges: [
-            FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
-            FLEET_API_PRIVILEGES.SETUP,
+            {
+              anyRequired: [FLEET_API_PRIVILEGES.AGENT_POLICIES.READ, FLEET_API_PRIVILEGES.SETUP],
+            },
           ],
         },
       },
       enableQueryVersion: true,
       summary: `Download an agent manifest`,
+      description: `Download the Kubernetes manifest for deploying Elastic Agent.`,
       options: {
         tags: ['oas-tag:Elastic Agent policies'],
       },
@@ -477,16 +591,22 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_download_k8s_manifest.yaml'),
+        },
         validate: {
           request: GetK8sManifestRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => schema.string(),
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
             404: {
+              description: 'Not found.',
               body: genericErrorResponse,
             },
           },
@@ -515,13 +635,19 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/post_list_agent_policy_outputs.yaml'),
+        },
         validate: {
           request: GetListAgentPolicyOutputsRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetListAgentPolicyOutputsResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -550,18 +676,60 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_agent_policy_outputs.yaml'),
+        },
         validate: {
           request: GetAgentPolicyOutputsRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetAgentPolicyOutputsResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
         },
       },
       GetAgentPolicyOutputsHandler
+    );
+  router.versioned
+    .post({
+      path: AGENT_POLICY_API_ROUTES.CLEANUP_REVISIONS_PATTERN,
+      access: 'internal',
+      enableQueryVersion: true,
+      security: {
+        authz: {
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+            FLEET_API_PRIVILEGES.AGENTS.READ,
+          ],
+        },
+      },
+      summary: `Run a task to cleanup excess agent policy revisions`,
+      options: {
+        tags: ['oas-tag:Elastic Agent policies'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: RunAgentPolicyRevisionsCleanupTaskRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => RunAgentPolicyRevisionsCleanupTaskResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      RunAgentPolicyRevisionsCleanupTaskHandler
     );
 };

@@ -5,20 +5,15 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
-  EuiPopover,
-} from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { MonitoringStartServices } from '../types';
+import type { MonitoringStartServices } from '../types';
 import { useAlertsModal } from '../application/hooks/use_alerts_modal';
 import { WatcherMigrationStep } from './enable_alerts_modal';
-
 export const AlertsDropdown: React.FC<{}> = () => {
   const [shouldShowModal, setShouldShowModal] = useState(false);
   const alertsEnableModalProvider = useAlertsModal();
@@ -49,7 +44,11 @@ export const AlertsDropdown: React.FC<{}> = () => {
   };
 
   const button = (
-    <EuiButtonEmpty iconSide={'right'} iconType={'arrowDown'} onClick={togglePopoverVisibility}>
+    <EuiButtonEmpty
+      iconSide={'right'}
+      iconType={'chevronSingleDown'}
+      onClick={togglePopoverVisibility}
+    >
       <FormattedMessage
         id="xpack.monitoring.alerts.dropdown.button"
         defaultMessage="Alerts and rules"
@@ -69,8 +68,7 @@ export const AlertsDropdown: React.FC<{}> = () => {
         defaultMessage: 'Manage rules',
       }),
       icon: 'tableOfContents',
-      onClick: () =>
-        navigateToApp('management', { path: '/insightsAndAlerting/triggersActions/rules' }),
+      onClick: () => navigateToApp('rules'),
     },
   ];
 

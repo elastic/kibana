@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RawRule } from '../../../types';
-import { RuleDomain } from '../types';
+import type { RawRule } from '../../../types';
+import type { RuleDomain } from '../types';
 import { getMappedParams } from '../../../rules_client/common';
-import { DenormalizedAction } from '../../../rules_client';
+import type { DenormalizedAction, DenormalizedArtifacts } from '../../../rules_client';
 
 interface TransformRuleToEsParams {
   legacyId: RawRule['legacyId'];
@@ -17,10 +17,12 @@ interface TransformRuleToEsParams {
 
 export const transformRuleDomainToRuleAttributes = ({
   actionsWithRefs,
+  artifactsWithRefs,
   rule,
   params,
 }: {
   actionsWithRefs: DenormalizedAction[];
+  artifactsWithRefs: DenormalizedArtifacts;
   rule: Omit<RuleDomain, 'actions' | 'params' | 'systemActions'>;
   params: TransformRuleToEsParams;
 }): RawRule => {
@@ -45,6 +47,7 @@ export const transformRuleDomainToRuleAttributes = ({
     updatedAt: rule.updatedAt.toISOString(),
     apiKey: rule.apiKey,
     apiKeyOwner: rule.apiKeyOwner,
+    ...(rule.uiamApiKey !== undefined ? { uiamApiKey: rule.uiamApiKey } : {}),
     ...(rule.apiKeyCreatedByUser !== undefined
       ? { apiKeyCreatedByUser: rule.apiKeyCreatedByUser }
       : {}),
@@ -52,6 +55,7 @@ export const transformRuleDomainToRuleAttributes = ({
     ...(rule.notifyWhen !== undefined ? { notifyWhen: rule.notifyWhen } : {}),
     muteAll: rule.muteAll,
     mutedInstanceIds: rule.mutedInstanceIds,
+    ...(rule.snoozedInstances !== undefined ? { snoozedInstances: rule.snoozedInstances } : {}),
     ...(meta ? { meta } : {}),
     ...(rule.executionStatus
       ? {
@@ -80,6 +84,8 @@ export const transformRuleDomainToRuleAttributes = ({
     revision: rule.revision,
     ...(rule.running !== undefined ? { running: rule.running } : {}),
     ...(rule.alertDelay !== undefined ? { alertDelay: rule.alertDelay } : {}),
+    ...(rule.lastEnabledAt ? { lastEnabledAt: rule.lastEnabledAt.toISOString() } : {}),
     ...(rule.flapping !== undefined ? { flapping: rule.flapping } : {}),
+    artifacts: artifactsWithRefs,
   } as RawRule;
 };

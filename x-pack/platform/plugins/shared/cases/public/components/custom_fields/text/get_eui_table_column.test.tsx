@@ -6,19 +6,13 @@
  */
 import React from 'react';
 
-import { screen } from '@testing-library/react';
+import { screen, render } from '@testing-library/react';
 
 import { CustomFieldTypes } from '../../../../common/types/domain';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
 import { getEuiTableColumn } from './get_eui_table_column';
 
 describe('getEuiTableColumn ', () => {
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
-
     jest.clearAllMocks();
   });
 
@@ -28,7 +22,8 @@ describe('getEuiTableColumn ', () => {
     expect(getEuiTableColumn({ label })).toEqual({
       name: label,
       render: expect.any(Function),
-      width: '250px',
+      maxWidth: '18em',
+      minWidth: '6em',
       'data-test-subj': 'text-custom-field-column',
     });
   });
@@ -38,7 +33,7 @@ describe('getEuiTableColumn ', () => {
     const value = 'foobar';
     const column = getEuiTableColumn({ label: 'MockLabel' });
 
-    appMockRender.render(<div>{column.render({ key, type: CustomFieldTypes.TEXT, value })}</div>);
+    render(<div>{column.render({ key, type: CustomFieldTypes.TEXT, value })}</div>);
 
     expect(screen.getByTestId(`text-custom-field-column-view-${key}`)).toBeInTheDocument();
     expect(screen.getByTestId(`text-custom-field-column-view-${key}`)).toHaveTextContent(value);

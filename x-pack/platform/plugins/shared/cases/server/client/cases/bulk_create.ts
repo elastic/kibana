@@ -20,6 +20,7 @@ import { createCaseError, isSODecoratedError, isSOError } from '../../common/err
 import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
+import type { Owner } from '../../../common/constants/types';
 import type {
   BulkCreateCasesRequest,
   BulkCreateCasesResponse,
@@ -38,7 +39,13 @@ export const bulkCreate = async (
   casesClient: CasesClient
 ): Promise<BulkCreateCasesResponse> => {
   const {
-    services: { caseService, userActionService, licensingService, notificationService },
+    services: {
+      caseService,
+      userActionService,
+      licensingService,
+      notificationService,
+      templatesService,
+    },
     user,
     logger,
     authorization: auth,
@@ -134,7 +141,32 @@ export const bulkCreate = async (
       await notificationService.bulkNotifyAssignees(assigneesPerCase);
     }
 
-    return decodeOrThrow(BulkCreateCasesResponseRt)({ cases: res });
+    const templateIds = [
+      ...new Set(
+        casesSOs.map((c) => c.attributes.template?.id).filter((id): id is string => id != null)
+      ),
+    ];
+
+    await Promise.allSettled(
+      templateIds.map(async (templateId) => {
+        try {
+          await templatesService.incrementUsageStats(templateId);
+        } catch (error) {
+          logger.warn(`Failed to update template usage stats for template ${templateId}: ${error}`);
+        }
+      })
+    );
+
+    const createdCasesResponse = decodeOrThrow(BulkCreateCasesResponseRt)({ cases: res });
+
+    createdCasesResponse.cases.forEach((createdCase) => {
+      clientArgs.casesEventBus?.emitCaseCreated(clientArgs.request, {
+        caseId: createdCase.id,
+        owner: createdCase.owner as Owner,
+      });
+    });
+
+    return createdCasesResponse;
   } catch (error) {
     throw createCaseError({ message: `Failed to bulk create cases: ${error}`, error, logger });
   }

@@ -10,14 +10,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
-import { LegendAction, SeriesIdentifier, useLegendAction } from '@elastic/charts';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { Datatable } from '@kbn/expressions-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
+import type { LegendAction, SeriesIdentifier } from '@elastic/charts';
+import { useLegendAction } from '@elastic/charts';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
-import { PartitionVisParams } from '../../common/types';
-import { CellValueAction, ColumnCellValueActions, FilterEvent } from '../types';
+import type { IInterpreterRenderEvent } from '@kbn/expressions-plugin/common';
+import type { PartitionVisParams } from '../../common/types';
+import type { CellValueAction, ColumnCellValueActions, FilterEvent } from '../types';
 import { getSeriesValueColumnIndex, getFilterPopoverTitle } from './filter_helpers';
 
 const hasFilterCellAction = (actions: CellValueAction[]) => {
@@ -25,16 +27,12 @@ const hasFilterCellAction = (actions: CellValueAction[]) => {
 };
 
 export const getLegendActions = (
-  canFilter: (
-    data: FilterEvent | null,
-    actions: DataPublicPluginStart['actions']
-  ) => Promise<boolean>,
+  canFilter: ((data: IInterpreterRenderEvent<unknown>) => Promise<boolean>) | undefined,
   getFilterEventData: (series: SeriesIdentifier) => FilterEvent | null,
   onFilter: (data: FilterEvent, negate?: any) => void,
   columnCellValueActions: ColumnCellValueActions,
   visParams: PartitionVisParams,
   visData: Datatable,
-  actions: DataPublicPluginStart['actions'],
   formatter: FieldFormatsStart
 ): LegendAction => {
   return ({ series: [pieSeries] }) => {
@@ -48,10 +46,21 @@ export const getLegendActions = (
     const [ref, onClose] = useLegendAction<HTMLDivElement>();
 
     useEffect(() => {
-      (async () => setIsFilterable(await canFilter(filterData, actions)))();
+      if (!canFilter || !filterData) {
+        setIsFilterable(false);
+        return;
+      }
+
+      (async () => setIsFilterable(await canFilter(filterData)))();
     }, [filterData]);
 
     if (columnIndex === -1) {
+      return null;
+    }
+
+    // Don't show filter actions for computed columns
+    const column = visData.columns[columnIndex];
+    if (column?.isComputedColumn === true) {
       return null;
     }
 
@@ -74,7 +83,7 @@ export const getLegendActions = (
             defaultMessage: 'Filter for',
           }),
           'data-test-subj': `legend-${title}-filterIn`,
-          icon: <EuiIcon type="plusInCircle" size="m" />,
+          icon: <EuiIcon type="plusCircle" size="m" aria-hidden={true} />,
           onClick: () => {
             setPopoverOpen(false);
             onFilter(filterData);
@@ -85,7 +94,7 @@ export const getLegendActions = (
             defaultMessage: 'Filter out',
           }),
           'data-test-subj': `legend-${title}-filterOut`,
-          icon: <EuiIcon type="minusInCircle" size="m" />,
+          icon: <EuiIcon type="minusCircle" size="m" aria-hidden={true} />,
           onClick: () => {
             setPopoverOpen(false);
             onFilter(filterData, true);
@@ -99,7 +108,7 @@ export const getLegendActions = (
       panelItems.push({
         name: action.displayName,
         'data-test-subj': `legend-${title}-${action.id}`,
-        icon: <EuiIcon type={action.iconType} size="m" />,
+        icon: <EuiIcon type={action.iconType} size="m" aria-hidden={true} />,
         onClick: () => {
           action.execute([{ columnMeta, value: pieSeries.key }]);
           setPopoverOpen(false);
@@ -140,12 +149,16 @@ export const getLegendActions = (
           defaultMessage: 'Legend actions',
         })}
       >
-        <EuiIcon size="s" type="boxesVertical" />
+        <EuiIcon size="s" type="boxesVertical" aria-hidden={true} />
       </div>
     );
 
     return (
       <EuiPopover
+        aria-label={i18n.translate('expressionPartitionVis.legend.filterOptionsLegend', {
+          defaultMessage: '{legendDataLabel}, filter options',
+          values: { legendDataLabel: title },
+        })}
         button={Button}
         isOpen={popoverOpen}
         closePopover={() => {

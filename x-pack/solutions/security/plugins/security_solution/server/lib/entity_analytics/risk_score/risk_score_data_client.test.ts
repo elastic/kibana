@@ -45,6 +45,7 @@ const totalFieldsLimit = 1000;
 describe('RiskScoreDataClient', () => {
   let riskScoreDataClient: RiskScoreDataClient;
   let riskScoreDataClientWithNameSpace: RiskScoreDataClient;
+  let riskScoreDataClientWithLongNameSpace: RiskScoreDataClient;
   let mockSavedObjectClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
@@ -60,6 +61,8 @@ describe('RiskScoreDataClient', () => {
     riskScoreDataClient = new RiskScoreDataClient(options);
     const optionsWithNamespace = { ...options, namespace: 'space-1' };
     riskScoreDataClientWithNameSpace = new RiskScoreDataClient(optionsWithNamespace);
+    const optionsWithLongNamespace = { ...options, namespace: 'a_a-'.repeat(200) };
+    riskScoreDataClientWithLongNameSpace = new RiskScoreDataClient(optionsWithLongNamespace);
   });
 
   afterEach(() => {
@@ -91,8 +94,6 @@ describe('RiskScoreDataClient', () => {
       assertComponentTemplate('default');
       assertIndexTemplate('default');
       assertDataStream('default');
-      assertIndex('default');
-      assertTransform('default');
 
       // Space-1 namespace
       esClient.cluster.existsComponentTemplate.mockResolvedValue(false);
@@ -100,12 +101,28 @@ describe('RiskScoreDataClient', () => {
       assertComponentTemplate('space-1');
       assertIndexTemplate('space-1');
       assertDataStream('space-1');
-      assertIndex('space-1');
-      assertTransform('space-1');
 
       expect(
         (createOrUpdateComponentTemplate as jest.Mock).mock.lastCall[0].template.template
       ).toMatchSnapshot();
+    });
+  });
+
+  describe('initLegacyTransforms success', () => {
+    it('should initialize legacy risk engine transforms in the appropriate space', async () => {
+      // Default namespace
+      await riskScoreDataClient.initLegacyTransforms();
+      assertIndex('default');
+      assertTransform('default');
+
+      // Space-1 namespace
+      await riskScoreDataClientWithNameSpace.initLegacyTransforms();
+      assertIndex('space-1');
+      assertTransform('space-1');
+
+      // Space with more than 36 characters
+      await riskScoreDataClientWithLongNameSpace.initLegacyTransforms();
+      assertTransform('a_a-'.repeat(200));
     });
   });
 
@@ -244,14 +261,51 @@ const assertIndex = (namespace: string) => {
                   category_1_score: {
                     type: 'float',
                   },
+                  modifiers: {
+                    properties: {
+                      contribution: {
+                        type: 'float',
+                      },
+                      metadata: {
+                        type: 'flattened',
+                      },
+                      modifier_value: {
+                        type: 'float',
+                      },
+                      subtype: {
+                        type: 'keyword',
+                      },
+                      type: {
+                        type: 'keyword',
+                      },
+                    },
+                    type: 'object',
+                  },
                   id_field: {
                     type: 'keyword',
                   },
                   id_value: {
                     type: 'keyword',
                   },
+                  calculation_run_id: {
+                    type: 'keyword',
+                  },
+                  score_type: {
+                    type: 'keyword',
+                  },
                   notes: {
                     type: 'keyword',
+                  },
+                  related_entities: {
+                    type: 'object',
+                    properties: {
+                      entity_id: {
+                        type: 'keyword',
+                      },
+                      relationship_type: {
+                        type: 'keyword',
+                      },
+                    },
                   },
                   inputs: {
                     properties: {
@@ -303,10 +357,36 @@ const assertIndex = (namespace: string) => {
                   category_1_score: {
                     type: 'float',
                   },
+                  modifiers: {
+                    properties: {
+                      contribution: {
+                        type: 'float',
+                      },
+                      metadata: {
+                        type: 'flattened',
+                      },
+                      modifier_value: {
+                        type: 'float',
+                      },
+                      subtype: {
+                        type: 'keyword',
+                      },
+                      type: {
+                        type: 'keyword',
+                      },
+                    },
+                    type: 'object',
+                  },
                   id_field: {
                     type: 'keyword',
                   },
                   id_value: {
+                    type: 'keyword',
+                  },
+                  calculation_run_id: {
+                    type: 'keyword',
+                  },
+                  score_type: {
                     type: 'keyword',
                   },
                   inputs: {
@@ -335,6 +415,17 @@ const assertIndex = (namespace: string) => {
                   notes: {
                     type: 'keyword',
                   },
+                  related_entities: {
+                    type: 'object',
+                    properties: {
+                      entity_id: {
+                        type: 'keyword',
+                      },
+                      relationship_type: {
+                        type: 'keyword',
+                      },
+                    },
+                  },
                 },
                 type: 'object',
               },
@@ -362,14 +453,51 @@ const assertIndex = (namespace: string) => {
                   category_1_score: {
                     type: 'float',
                   },
+                  modifiers: {
+                    properties: {
+                      contribution: {
+                        type: 'float',
+                      },
+                      metadata: {
+                        type: 'flattened',
+                      },
+                      modifier_value: {
+                        type: 'float',
+                      },
+                      subtype: {
+                        type: 'keyword',
+                      },
+                      type: {
+                        type: 'keyword',
+                      },
+                    },
+                    type: 'object',
+                  },
                   id_field: {
                     type: 'keyword',
                   },
                   id_value: {
                     type: 'keyword',
                   },
+                  calculation_run_id: {
+                    type: 'keyword',
+                  },
+                  score_type: {
+                    type: 'keyword',
+                  },
                   notes: {
                     type: 'keyword',
+                  },
+                  related_entities: {
+                    type: 'object',
+                    properties: {
+                      entity_id: {
+                        type: 'keyword',
+                      },
+                      relationship_type: {
+                        type: 'keyword',
+                      },
+                    },
                   },
                   inputs: {
                     properties: {
@@ -402,7 +530,7 @@ const assertIndex = (namespace: string) => {
         },
       },
       settings: {
-        'index.default_pipeline': `entity_analytics_create_eventIngest_from_timestamp-pipeline-${namespace}`,
+        'index.default_pipeline': null,
       },
     },
   });
@@ -443,7 +571,7 @@ const assertTransform = (namespace: string) => {
           field: '@timestamp',
         },
       },
-      transform_id: `risk_score_latest_transform_${namespace}`,
+      transform_id: transforms.getLatestTransformId(namespace),
       settings: {
         unattended: true,
       },
@@ -451,6 +579,7 @@ const assertTransform = (namespace: string) => {
         version: 3,
         managed: true,
         managed_by: 'security-entity-analytics',
+        space_id: namespace,
       },
     },
   });

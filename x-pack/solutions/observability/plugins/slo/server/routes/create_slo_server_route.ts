@@ -5,13 +5,24 @@
  * 2.0.
  */
 import { createServerRouteFactory } from '@kbn/server-route-repository';
-import { Boom, forbidden, notFound, conflict, badRequest } from '@hapi/boom';
-import { CreateServerRouteFactory } from '@kbn/server-route-repository-utils/src/typings';
-import { SLORouteHandlerResources } from './types';
-import { SLOError, SLONotFound, SLOIdConflict, SecurityException } from '../errors';
+import type { Boom } from '@hapi/boom';
+import { forbidden, notFound, conflict, badRequest } from '@hapi/boom';
+import type { CreateServerRouteFactory } from '@kbn/server-route-repository-utils/src/typings';
+import type { SLORouteHandlerResources } from './types';
+import {
+  SLOError,
+  SLONotFound,
+  SLOIdConflict,
+  SecurityException,
+  SLOTemplateNotFound,
+} from '../errors';
 
 function handleSLOError(error: SLOError): Boom {
   if (error instanceof SLONotFound) {
+    return notFound(error.message);
+  }
+
+  if (error instanceof SLOTemplateNotFound) {
     return notFound(error.message);
   }
 

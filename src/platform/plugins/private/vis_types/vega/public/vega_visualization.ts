@@ -9,8 +9,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { IInterpreterRenderHandlers, RenderMode } from '@kbn/expressions-plugin/common';
-import { VegaParser } from './data_model/vega_parser';
-import { VegaVisualizationDependencies } from './plugin';
+import type { VegaParser } from './data_model/vega_parser';
+import type { VegaVisualizationDependencies } from './plugin';
 import { getNotifications, getData } from './services';
 import type { VegaView } from './vega_view/vega_view';
 import { createVegaStateRestorer } from './lib/vega_state_restorer';
@@ -95,7 +95,7 @@ export const createVegaVisualization = (
           const { VegaMapView } = await import('./vega_view/vega_map_view/view');
           this.vegaView = new VegaMapView(vegaViewParams);
         } else {
-          const { VegaView: VegaViewClass } = await import('./vega_view/vega_view');
+          const { VegaView: VegaViewClass } = await import('./async_services');
           this.vegaView = new VegaViewClass(vegaViewParams);
         }
         await this.vegaView?.init();

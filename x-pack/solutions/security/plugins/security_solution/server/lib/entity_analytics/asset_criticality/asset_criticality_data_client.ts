@@ -5,7 +5,11 @@
  * 2.0.
  */
 import type { ESFilter } from '@kbn/es-types';
-import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslFieldAndFormat,
+  SearchRequest,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
@@ -26,11 +30,11 @@ import {
 } from './constants';
 import { AssetCriticalityAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
-import { getImplicitEntityFields } from './helpers';
+import { getImplicitEntityFields, getImplicitEntityFieldsWithDeleted } from './helpers';
 import {
   getIngestPipelineName,
-  createEventIngestedFromTimestamp,
-} from '../utils/create_ingest_pipeline';
+  createEventIngestedPipeline,
+} from '../utils/event_ingested_pipeline';
 
 interface AssetCriticalityClientOpts {
   logger: Logger;
@@ -67,7 +71,7 @@ export class AssetCriticalityDataClient {
    * Initialize asset criticality resources.
    */
   public async init() {
-    await createEventIngestedFromTimestamp(this.options.esClient, this.options.namespace);
+    await createEventIngestedPipeline(this.options.esClient, this.options.namespace);
     await this.createOrUpdateIndex();
 
     this.options.auditLogger?.log({
@@ -115,11 +119,13 @@ export class AssetCriticalityDataClient {
     size = DEFAULT_CRITICALITY_RESPONSE_SIZE,
     from,
     sort = ['@timestamp'], // without a default sort order the results are not deterministic which makes testing hard
+    fields,
   }: {
     query: ESFilter;
     size?: number;
     from?: number;
     sort?: SearchRequest['sort'];
+    fields?: (QueryDslFieldAndFormat | string)[];
   }): Promise<SearchResponse<AssetCriticalityRecord>> {
     const response = await this.options.esClient.search<AssetCriticalityRecord>({
       index: this.getIndex(),
@@ -128,6 +134,7 @@ export class AssetCriticalityDataClient {
       size: Math.min(size, MAX_CRITICALITY_RESPONSE_SIZE),
       from,
       sort,
+      fields,
       post_filter: {
         bool: {
           must_not: {
@@ -338,7 +345,7 @@ export class AssetCriticalityDataClient {
               asset: {
                 criticality: criticalityLevel,
               },
-              ...getImplicitEntityFields({
+              ...getImplicitEntityFieldsWithDeleted({
                 ...record,
                 criticalityLevel,
               }),
@@ -392,7 +399,7 @@ export class AssetCriticalityDataClient {
             criticality: CRITICALITY_VALUES.DELETED,
           },
           '@timestamp': new Date().toISOString(),
-          ...getImplicitEntityFields({
+          ...getImplicitEntityFieldsWithDeleted({
             ...idParts,
             criticalityLevel: CRITICALITY_VALUES.DELETED,
           }),

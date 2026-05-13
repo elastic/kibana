@@ -67,33 +67,11 @@ vault_kv_set() {
   vault kv put "$VAULT_KV_PREFIX/$kv_path" "${fields[@]}"
 }
 
-function get_vault_role_id() {
-  if [[ "$IS_LEGACY_VAULT_ADDR" == "true" ]]; then
-    VAULT_ROLE_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-role-id)"
-  else
-    VAULT_ROLE_ID="$(vault_get kibana-buildkite-vault-credentials role-id)"
-  fi
-
-  echo "$VAULT_ROLE_ID"
-}
-
-function get_vault_secret_id() {
-    if [[ "$IS_LEGACY_VAULT_ADDR" == "true" ]]; then
-      VAULT_SECRET_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-secret-id)"
-    else
-      VAULT_SECRET_ID="$(vault_get kibana-buildkite-vault-credentials secret-id)"
-    fi
-
-    echo "$VAULT_SECRET_ID"
-}
-
 function set_in_legacy_vault() {
   key_path=$1
   shift
   fields=("$@")
 
-  VAULT_ROLE_ID="$(get_vault_role_id)"
-  VAULT_SECRET_ID="$(get_vault_secret_id)"
   VAULT_TOKEN_BAK="$VAULT_TOKEN"
 
   # Make sure to either keep this variable name `VAULT_TOKEN` or unset `VAULT_TOKEN`,
@@ -115,8 +93,6 @@ function set_in_legacy_vault() {
 function unset_in_legacy_vault() {
   key_path=$1
 
-  VAULT_ROLE_ID="$(get_vault_role_id)"
-  VAULT_SECRET_ID="$(get_vault_secret_id)"
   VAULT_TOKEN_BAK="$VAULT_TOKEN"
 
   # Make sure to either keep this variable name `VAULT_TOKEN` or unset `VAULT_TOKEN`,

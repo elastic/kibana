@@ -3,7 +3,7 @@
 exports[`CollapsibleStatement component renders child components 1`] = `
 <EuiFlexGroup
   alignItems="center"
-  css={[Function]}
+  css="unknown styles"
   gutterSize="none"
   responsive={false}
 >
@@ -14,7 +14,7 @@ exports[`CollapsibleStatement component renders child components 1`] = `
     <EuiButtonIcon
       aria-label="collapse"
       color="text"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={[Function]}
       size="s"
     />

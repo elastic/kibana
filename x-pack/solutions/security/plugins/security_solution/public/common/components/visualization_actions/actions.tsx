@@ -11,6 +11,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from '@emotion/styled';
 
 import useAsync from 'react-use/lib/useAsync';
+import { PageScope } from '../../../data_view_manager/constants';
 import { InputsModelId } from '../../store/inputs/constants';
 import { ModalInspectQuery } from '../inspect/modal';
 
@@ -21,7 +22,6 @@ import type { VisualizationActionsProps } from './types';
 import { MORE_ACTIONS } from './translations';
 import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from './utils';
 import { DEFAULT_ACTIONS, useActions, VISUALIZATION_CONTEXT_MENU_TRIGGER } from './use_actions';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 
 const Wrapper = styled.div`
   &.viz-actions {
@@ -50,7 +50,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   queryId,
   timerange,
   title: inspectTitle,
-  scopeId = SourcererScopeName.default,
+  scopeId = PageScope.default,
   stackByField,
   withActions = DEFAULT_ACTIONS,
   casesAttachmentMetadata,
@@ -143,7 +143,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
         aria-label={MORE_ACTIONS}
         className={VISUALIZATION_ACTIONS_BUTTON_CLASS}
         data-test-subj={dataTestSubj}
-        iconType="boxesHorizontal"
+        iconType="boxesVertical"
         onClick={onButtonClick}
       />
     ),

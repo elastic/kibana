@@ -162,6 +162,7 @@ export function getTransformHealthRuleType(
     },
     category: DEFAULT_APP_CATEGORIES.management.id,
     producer: 'stackAlerts',
+    solution: 'stack',
     minimumLicenseRequired: PLUGIN.MINIMUM_LICENSE_REQUIRED,
     isExportable: true,
     doesSetRecoveryContext: true,

@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SavedObjectAttributes } from '@kbn/core/server';
-import { RouteInitializerDeps } from '..';
+import type { SavedObjectAttributes } from '@kbn/core/server';
+import type { RouteInitializerDeps } from '..';
 import { CANVAS_TYPE, API_ROUTE_WORKPAD } from '../../../common/lib/constants';
 
 export function initializeFindWorkpadsRoute(deps: RouteInitializerDeps) {
@@ -16,17 +16,17 @@ export function initializeFindWorkpadsRoute(deps: RouteInitializerDeps) {
     .get({
       path: `${API_ROUTE_WORKPAD}/find`,
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because authorization is provided by saved objects client.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because authorization is provided by saved objects client.',
-          },
-        },
         validate: {
           request: {
             query: schema.object({

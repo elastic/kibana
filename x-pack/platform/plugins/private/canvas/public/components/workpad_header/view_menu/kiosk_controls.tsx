@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactNode, useCallback } from 'react';
-import PropTypes from 'prop-types';
+import type { ReactNode } from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiButtonIcon,
   EuiDescriptionList,
@@ -115,7 +115,11 @@ export const KioskControls = ({ autoplayInterval, onSetInterval }: Props) => {
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
               {autoplayInterval > 0 ? (
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip position="bottom" content={strings.getDisableTooltip()}>
+                  <EuiToolTip
+                    position="bottom"
+                    content={strings.getDisableTooltip()}
+                    disableScreenReaderOutput
+                  >
                     <EuiButtonIcon
                       iconType="cross"
                       onClick={disableAutoplay}
@@ -174,9 +178,4 @@ export const KioskControls = ({ autoplayInterval, onSetInterval }: Props) => {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
-
-KioskControls.propTypes = {
-  autoplayInterval: PropTypes.number.isRequired,
-  onSetInterval: PropTypes.func.isRequired,
 };

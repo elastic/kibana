@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
-import { useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
+import { useStableExpandableFlyoutState } from '../../../flyout/shared/hooks/use_stable_expandable_flyout_state';
 import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { MisconfigurationFindingsDetailsTable } from './misconfiguration_findings_details_table';
 import { VulnerabilitiesFindingsDetailsTable } from './vulnerabilities_findings_details_table';
@@ -43,8 +43,20 @@ function isCspFlyoutPanelProps(
 }
 
 export const InsightsTabCsp = memo(
-  ({ value, field }: { value: string; field: CloudPostureEntityIdentifier }) => {
-    const panels = useExpandableFlyoutState();
+  ({
+    value,
+    field,
+    scopeId,
+    entityId,
+    entityType,
+  }: {
+    value: string;
+    field: CloudPostureEntityIdentifier;
+    scopeId: string;
+    entityId?: string;
+    entityType?: string;
+  }) => {
+    const panels = useStableExpandableFlyoutState();
 
     let hasMisconfigurationFindings = false;
     let hasVulnerabilitiesFindings = false;
@@ -74,6 +86,11 @@ export const InsightsTabCsp = memo(
     };
 
     const [activeInsightsId, setActiveInsightsId] = useState(getDefaultTab());
+    useEffect(() => {
+      if (subTab) {
+        setActiveInsightsId(subTab);
+      }
+    }, [subTab]);
 
     const insightsButtons: EuiButtonGroupOptionProps[] = useMemo(() => {
       const buttons: EuiButtonGroupOptionProps[] = [];
@@ -124,8 +141,12 @@ export const InsightsTabCsp = memo(
       panels.left?.params?.hasVulnerabilitiesFindings,
     ]);
 
+    const isSingleOption = insightsButtons.length === 1;
+
     const onTabChange = (id: string) => {
-      setActiveInsightsId(id);
+      if (!isSingleOption) {
+        setActiveInsightsId(id);
+      }
     };
 
     if (insightsButtons.length === 0) {
@@ -147,15 +168,28 @@ export const InsightsTabCsp = memo(
           onChange={onTabChange}
           buttonSize="compressed"
           isFullWidth
+          isDisabled={isSingleOption}
           data-test-subj={'insightButtonGroupsTestId'}
         />
         <EuiSpacer size="xl" />
         {activeInsightsId === CspInsightLeftPanelSubTab.MISCONFIGURATIONS ? (
-          <MisconfigurationFindingsDetailsTable field={field} value={value} />
+          <MisconfigurationFindingsDetailsTable
+            field={field}
+            value={value}
+            scopeId={scopeId}
+            entityId={entityId}
+            entityType={entityType}
+          />
         ) : activeInsightsId === CspInsightLeftPanelSubTab.VULNERABILITIES ? (
-          <VulnerabilitiesFindingsDetailsTable value={value} />
+          <VulnerabilitiesFindingsDetailsTable
+            identityField={field}
+            value={value}
+            scopeId={scopeId}
+            entityId={entityId}
+            entityType={entityType}
+          />
         ) : (
-          <AlertsDetailsTable field={field} value={value} />
+          <AlertsDetailsTable field={field} value={value} entityId={entityId} />
         )}
       </>
     );

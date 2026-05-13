@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/Either';
+import { pipe } from 'fp-ts/pipeable';
 import type * as rt from 'io-ts';
 import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import type {
@@ -14,8 +14,8 @@ import type {
   RouteValidationResultFactory,
   RouteValidationError,
 } from '@kbn/core/server';
-import type { TypeOf, ZodType } from '@kbn/zod';
-import { stringifyZodError } from '@kbn/zod-helpers';
+import type { TypeOf, ZodType } from '@kbn/zod/v4';
+import { stringifyZodError } from '@kbn/zod-helpers/v4';
 
 type RequestValidationResult<T> =
   | {
@@ -40,7 +40,7 @@ export const buildRouteValidation =
     );
 
 export const buildRouteValidationWithZod =
-  <T extends ZodType, A = TypeOf<T>>(schema: T): RouteValidationFunction<A> =>
+  <T extends ZodType>(schema: T): RouteValidationFunction<TypeOf<T>> =>
   (inputValue: unknown, validationResult: RouteValidationResultFactory) => {
     const decoded = schema.safeParse(inputValue);
     if (decoded.success) {

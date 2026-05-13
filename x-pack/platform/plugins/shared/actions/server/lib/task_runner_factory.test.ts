@@ -7,7 +7,8 @@
 
 import sinon from 'sinon';
 import { ActionExecutor } from './action_executor';
-import { ConcreteTaskInstance, TaskErrorSource, TaskStatus } from '@kbn/task-manager-plugin/server';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { TaskErrorSource, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerFactory } from './task_runner_factory';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { actionExecutorMock } from './action_executor.mock';
@@ -32,6 +33,7 @@ import {
   isUnrecoverableError,
 } from '@kbn/task-manager-plugin/server/task_running';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { ConnectorRateLimiter } from './connector_rate_limiter';
 
 const executeParamsFields = [
   'actionId',
@@ -99,6 +101,7 @@ const actionExecutorInitializerParams = {
   inMemoryConnectors: [],
   analyticsService: analyticsServiceMock.createAnalyticsServiceStart(),
   security: securityServiceMock.createStart(),
+  getCurrentUserProfileIdFromAPIKey: jest.fn().mockResolvedValue(undefined),
 };
 
 const taskRunnerFactoryInitializerParams = {
@@ -119,19 +122,30 @@ describe('Task Runner Factory', () => {
 
   test(`throws an error if factory isn't initialized`, () => {
     const factory = new TaskRunnerFactory(
-      new ActionExecutor({ isESOCanEncrypt: true }),
+      new ActionExecutor({
+        isESOCanEncrypt: true,
+        connectorRateLimiter: new ConnectorRateLimiter({
+          config: { email: { limit: 100, lookbackWindow: '1m' } },
+        }),
+      }),
       inMemoryMetrics
     );
     expect(() =>
       factory.create({
         taskInstance: mockedTaskInstance,
+        abortController: new AbortController(),
       })
     ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory not initialized"`);
   });
 
   test(`throws an error if factory is already initialized`, () => {
     const factory = new TaskRunnerFactory(
-      new ActionExecutor({ isESOCanEncrypt: true }),
+      new ActionExecutor({
+        isESOCanEncrypt: true,
+        connectorRateLimiter: new ConnectorRateLimiter({
+          config: { email: { limit: 100, lookbackWindow: '1m' } },
+        }),
+      }),
       inMemoryMetrics
     );
     factory.initialize(taskRunnerFactoryInitializerParams);
@@ -143,6 +157,7 @@ describe('Task Runner Factory', () => {
   test('executes the task by calling the executor with proper parameters, using given actionId when no actionRef in references', async () => {
     const taskRunner = taskRunnerFactory.create({
       taskInstance: mockedTaskInstance,
+      abortController: new AbortController(),
     });
 
     mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
@@ -196,6 +211,7 @@ describe('Task Runner Factory', () => {
   test('executes the task by calling the executor with proper parameters, using stored actionId when actionRef is in references', async () => {
     const taskRunner = taskRunnerFactory.create({
       taskInstance: mockedTaskInstance,
+      abortController: new AbortController(),
     });
 
     mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
@@ -255,6 +271,7 @@ describe('Task Runner Factory', () => {
   test('executes the task by calling the executor with proper parameters when consumer is provided', async () => {
     const taskRunner = taskRunnerFactory.create({
       taskInstance: mockedTaskInstance,
+      abortController: new AbortController(),
     });
 
     mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
@@ -310,6 +327,7 @@ describe('Task Runner Factory', () => {
   test('executes the task by calling the executor with proper parameters when saved_object source is provided', async () => {
     const taskRunner = taskRunnerFactory.create({
       taskInstance: mockedTaskInstance,
+      abortController: new AbortController(),
     });
 
     mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
@@ -370,6 +388,7 @@ describe('Task Runner Factory', () => {
   test('executes the task by calling the executor with proper parameters when notification source is provided', async () => {
     const taskRunner = taskRunnerFactory.create({
       taskInstance: mockedTaskInstance,
+      abortController: new AbortController(),
     });
 
     mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
@@ -427,9 +446,37 @@ describe('Task Runner Factory', () => {
     );
   });
 
+  test('should pass abort signal to the action executor', async () => {
+    const abortController = new AbortController();
+    const taskRunner = taskRunnerFactory.create({
+      taskInstance: mockedTaskInstance,
+      abortController,
+    });
+
+    mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
+    spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '3',
+      type: 'action_task_params',
+      attributes: {
+        actionId: '2',
+        params: { baz: true },
+        executionId: '123abc',
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+
+    await taskRunner.run();
+
+    const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+    expect(executeParams.signal).toBe(abortController.signal);
+  });
+
   test('cleans up action_task_params object through the cleanup runner method', async () => {
     const taskRunner = taskRunnerFactory.create({
       taskInstance: mockedTaskInstance,
+      abortController: new AbortController(),
     });
 
     await taskRunner.cleanup();
@@ -461,6 +508,7 @@ describe('Task Runner Factory', () => {
     });
     const taskRunner = taskRunnerFactory.create({
       taskInstance: mockedTaskInstance,
+      abortController: new AbortController(),
     });
 
     await taskRunner.cancel();
@@ -476,6 +524,7 @@ describe('Task Runner Factory', () => {
   test('cleanup runs successfully when action_task_params cleanup fails and logs the error', async () => {
     const taskRunner = taskRunnerFactory.create({
       taskInstance: mockedTaskInstance,
+      abortController: new AbortController(),
     });
 
     taskRunnerFactoryInitializerParams.savedObjectsRepository.delete.mockRejectedValueOnce(
@@ -497,6 +546,7 @@ describe('Task Runner Factory', () => {
   test('throws an error with suggested retry logic when return status is error', async () => {
     const taskRunner = taskRunnerFactory.create({
       taskInstance: mockedTaskInstance,
+      abortController: new AbortController(),
     });
 
     mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
@@ -536,6 +586,7 @@ describe('Task Runner Factory', () => {
   test('uses API key when provided', async () => {
     const taskRunner = taskRunnerFactory.create({
       taskInstance: mockedTaskInstance,
+      abortController: new AbortController(),
     });
 
     mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
@@ -587,6 +638,7 @@ describe('Task Runner Factory', () => {
   test('uses relatedSavedObjects merged with references when provided', async () => {
     const taskRunner = taskRunnerFactory.create({
       taskInstance: mockedTaskInstance,
+      abortController: new AbortController(),
     });
 
     mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
@@ -644,6 +696,7 @@ describe('Task Runner Factory', () => {
   test('uses relatedSavedObjects as is when references are empty', async () => {
     const taskRunner = taskRunnerFactory.create({
       taskInstance: mockedTaskInstance,
+      abortController: new AbortController(),
     });
 
     mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
@@ -697,6 +750,7 @@ describe('Task Runner Factory', () => {
   test('sanitizes invalid relatedSavedObjects when provided', async () => {
     const taskRunner = taskRunnerFactory.create({
       taskInstance: mockedTaskInstance,
+      abortController: new AbortController(),
     });
 
     mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
@@ -749,7 +803,10 @@ describe('Task Runner Factory', () => {
   test(`doesn't use API key when not provided`, async () => {
     const factory = new TaskRunnerFactory(mockedActionExecutor, inMemoryMetrics);
     factory.initialize(taskRunnerFactoryInitializerParams);
-    const taskRunner = factory.create({ taskInstance: mockedTaskInstance });
+    const taskRunner = factory.create({
+      taskInstance: mockedTaskInstance,
+      abortController: new AbortController(),
+    });
 
     mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
     spaceIdToNamespace.mockReturnValueOnce('namespace-test');
@@ -799,6 +856,7 @@ describe('Task Runner Factory', () => {
         ...mockedTaskInstance,
         attempts: 1,
       },
+      abortController: new AbortController(),
     });
 
     mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
@@ -837,6 +895,7 @@ describe('Task Runner Factory', () => {
         ...mockedTaskInstance,
         attempts: 0,
       },
+      abortController: new AbortController(),
     });
 
     mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
@@ -886,6 +945,7 @@ describe('Task Runner Factory', () => {
         ...mockedTaskInstance,
         attempts: 0,
       },
+      abortController: new AbortController(),
     });
 
     mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
@@ -935,6 +995,7 @@ describe('Task Runner Factory', () => {
         ...mockedTaskInstance,
         attempts: 0,
       },
+      abortController: new AbortController(),
     });
 
     mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
@@ -975,6 +1036,7 @@ describe('Task Runner Factory', () => {
         ...mockedTaskInstance,
         attempts: 0,
       },
+      abortController: new AbortController(),
     });
 
     mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValue(
@@ -994,6 +1056,7 @@ describe('Task Runner Factory', () => {
         ...mockedTaskInstance,
         attempts: 0,
       },
+      abortController: new AbortController(),
     });
 
     mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
@@ -1034,6 +1097,7 @@ describe('Task Runner Factory', () => {
   test('increments monitoring metrics after execution', async () => {
     const taskRunner = taskRunnerFactory.create({
       taskInstance: mockedTaskInstance,
+      abortController: new AbortController(),
     });
 
     mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
@@ -1059,6 +1123,7 @@ describe('Task Runner Factory', () => {
   test('increments monitoring metrics after a failed execution', async () => {
     const taskRunner = taskRunnerFactory.create({
       taskInstance: mockedTaskInstance,
+      abortController: new AbortController(),
     });
 
     mockedActionExecutor.execute.mockResolvedValueOnce({
@@ -1098,6 +1163,7 @@ describe('Task Runner Factory', () => {
   test('increments monitoring metrics after a timeout', async () => {
     const taskRunner = taskRunnerFactory.create({
       taskInstance: mockedTaskInstance,
+      abortController: new AbortController(),
     });
 
     mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
@@ -1127,6 +1193,7 @@ describe('Task Runner Factory', () => {
 
     const taskRunner = taskRunnerFactory.create({
       taskInstance: mockedTaskInstance,
+      abortController: new AbortController(),
     });
     spaceIdToNamespace.mockReturnValueOnce('namespace-test');
 

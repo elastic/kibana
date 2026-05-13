@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiFormRow } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -47,25 +47,31 @@ const ConnectorComponent: React.FC<Props> = ({ connectors, isLoading, isLoadingC
 
   return (
     <EuiFormRow fullWidth>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <UseField
-            path="connectorId"
-            config={connectorIdConfig}
-            component={ConnectorSelector}
-            componentProps={{
-              connectors,
-              dataTestSubj: 'caseConnectors',
-              disabled: isLoading || isLoadingConnectors,
-              idAria: 'caseConnectors',
-              isLoading: isLoading || isLoadingConnectors,
-            }}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <ConnectorFieldsForm connector={connector} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={1}>
+            <UseField
+              path="connectorId"
+              config={connectorIdConfig}
+              component={ConnectorSelector}
+              componentProps={{
+                connectors,
+                dataTestSubj: 'caseConnectors',
+                disabled: isLoading || isLoadingConnectors,
+                idAria: 'caseConnectors',
+                isLoading: isLoading || isLoadingConnectors,
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={1} />
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup>
+          <EuiFlexItem grow={1}>
+            <ConnectorFieldsForm connector={connector} isInSidebarForm={false} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
     </EuiFormRow>
   );
 };

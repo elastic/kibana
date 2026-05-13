@@ -7,7 +7,7 @@
 
 import { handleError } from '../../../../../lib/errors';
 import { getLogstashPipelineIds } from '../../../../../lib/logstash/get_pipeline_ids';
-import { MonitoringCore } from '../../../../../types';
+import type { MonitoringCore } from '../../../../../types';
 import { createValidationFunction } from '../../../../../lib/create_route_validation_function';
 import {
   postLogstashPipelineClusterIdsRequestParamsRT,
@@ -21,6 +21,12 @@ export function logstashClusterPipelineIdsRoute(server: MonitoringCore) {
   server.route({
     method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/logstash/pipeline_ids',
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'This route delegates authorization to the scoped ES cluster client',
+      },
+    },
     validate: {
       params: validateParams,
       body: validateBody,

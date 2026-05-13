@@ -22,7 +22,7 @@ import { EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   getFormattedSeverityScore,
-  getSeverityColor,
+  getThemeResolvedSeverityColor,
   getSeverityWithLow,
 } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
@@ -32,6 +32,8 @@ import { getTableItemClosestToTimestamp } from '../../../../common/util/anomalie
 
 import { LinksMenuUI } from '../../components/anomalies_table/links_menu';
 import { RuleEditorFlyout } from '../../components/rule_editor';
+import { MlAnomalyAlertFlyout } from '../../../alerting/ml_alerting_flyout';
+import { buildAlertParamsFromAnomaly } from '../../components/anomalies_table/build_alert_params_from_anomaly';
 import { formatValue } from '../../formatters/format_value';
 import {
   LINE_CHART_ANOMALY_RADIUS,
@@ -64,7 +66,7 @@ export class ExplorerChartSingleMetric extends React.Component {
   static propTypes = {
     tooManyBuckets: PropTypes.bool,
     seriesConfig: PropTypes.object,
-    severity: PropTypes.number.isRequired,
+    severity: PropTypes.array.isRequired,
     tableData: PropTypes.object,
     tooltipService: PropTypes.object.isRequired,
     timeBuckets: PropTypes.object.isRequired,
@@ -72,12 +74,20 @@ export class ExplorerChartSingleMetric extends React.Component {
     chartTheme: PropTypes.object.isRequired,
     cursor$: PropTypes.object,
     id: PropTypes.string.isRequired,
+    euiTheme: PropTypes.object.isRequired,
+    isEmbeddable: PropTypes.bool,
   };
 
   constructor(props) {
     super(props);
     this.chartScales = undefined;
-    this.state = { popoverData: null, popoverCoords: [0, 0], showRuleEditorFlyout: () => {} };
+    this.state = {
+      popoverData: null,
+      popoverCoords: [0, 0],
+      showRuleEditorFlyout: () => {},
+      alertFlyoutVisible: false,
+      alertFlyoutParams: undefined,
+    };
   }
 
   componentDidMount() {
@@ -118,6 +128,7 @@ export class ExplorerChartSingleMetric extends React.Component {
     const element = this.rootNode;
     const config = this.props.seriesConfig;
     const severity = this.props.severity;
+    const euiTheme = this.props.euiTheme;
 
     if (typeof config === 'undefined' || Array.isArray(config.chartData) === false) {
       // just return so the empty directive renders without an error later on
@@ -228,7 +239,7 @@ export class ExplorerChartSingleMetric extends React.Component {
         .attr('y', 0)
         .attr('height', CHART_HEIGHT)
         .attr('width', vizWidth)
-        .style('stroke', '#cccccc')
+        .style('stroke', euiTheme.colors.lightestShade)
         .style('fill', 'none')
         .style('stroke-width', 1);
 
@@ -410,8 +421,13 @@ export class ExplorerChartSingleMetric extends React.Component {
         })
         .on('mouseout', () => tooltipService.hide());
 
-      const isAnomalyVisible = (d) =>
-        d.anomalyScore !== undefined && Number(d.anomalyScore) >= severity;
+      const isAnomalyVisible = (d) => {
+        if (d.anomalyScore === undefined) return false;
+        const anomalyScore = Number(d.anomalyScore);
+        return severity.some((s) => {
+          return anomalyScore >= s.min && (s.max === undefined || anomalyScore <= s.max);
+        });
+      };
 
       // Update all dots to new positions.
       dots
@@ -537,7 +553,7 @@ export class ExplorerChartSingleMetric extends React.Component {
             defaultMessage: 'anomaly score',
           }),
           value: getFormattedSeverityScore(score),
-          color: getSeverityColor(score),
+          color: getThemeResolvedSeverityColor(score, euiTheme),
           seriesIdentifier: {
             key: seriesKey,
           },
@@ -679,8 +695,16 @@ export class ExplorerChartSingleMetric extends React.Component {
     });
   };
 
+  handleShowAnomalyAlertFlyout = (anomaly) => {
+    const initialParams = buildAlertParamsFromAnomaly(anomaly);
+    this.setState({
+      alertFlyoutParams: initialParams,
+      alertFlyoutVisible: true,
+    });
+  };
+
   render() {
-    const { seriesConfig } = this.props;
+    const { seriesConfig, isEmbeddable } = this.props;
 
     if (typeof seriesConfig === 'undefined') {
       // just return so the empty directive renders without an error later on
@@ -689,13 +713,23 @@ export class ExplorerChartSingleMetric extends React.Component {
 
     // create a chart loading placeholder
     const isLoading = seriesConfig.loading;
+    const telemetrySource = isEmbeddable
+      ? 'embeddable_single_metric_chart'
+      : 'explorer_single_metric_chart';
 
     return (
       <>
         <RuleEditorFlyout
           setShowFunction={this.setShowRuleEditorFlyoutFunction}
           unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
+          telemetrySource={telemetrySource}
         />
+        {this.state.alertFlyoutVisible && this.state.alertFlyoutParams && (
+          <MlAnomalyAlertFlyout
+            onCloseFlyout={() => this.setState({ alertFlyoutVisible: false })}
+            initialParams={this.state.alertFlyoutParams}
+          />
+        )}
         {this.state.popoverData !== null && (
           <div
             style={{
@@ -705,6 +739,9 @@ export class ExplorerChartSingleMetric extends React.Component {
             }}
           >
             <EuiPopover
+              aria-label={i18n.translate('xpack.ml.explorerChart.anomalyActionsPopoverAriaLabel', {
+                defaultMessage: 'Anomaly actions',
+              })}
               isOpen={true}
               closePopover={() => this.closePopover()}
               panelPaddingSize="none"
@@ -721,6 +758,7 @@ export class ExplorerChartSingleMetric extends React.Component {
                 isAggregatedData={this.props.tableData.interval !== 'second'}
                 interval={this.props.tableData.interval}
                 showRuleEditorFlyout={this.state.showRuleEditorFlyout}
+                showAnomalyAlertFlyout={this.handleShowAnomalyAlertFlyout}
                 onItemClick={() => this.closePopover()}
                 sourceIndicesWithGeoFields={this.props.sourceIndicesWithGeoFields}
               />

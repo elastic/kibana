@@ -17,11 +17,11 @@ import {
   EuiLoadingLogo,
 } from '@elastic/eui';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { EmptyDashboards } from './empty_dashboards';
 import { GotoDashboard, LinkDashboard } from './actions';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
@@ -37,8 +37,6 @@ import { useDashboardFetcher } from '../../../hooks/use_dashboards_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { APM_APP_LOCATOR_ID } from '../../../locator/service_detail_locator';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { isLogsOnlySignal } from '../../../utils/get_signal_type';
 
 export interface MergedServiceDashboard extends SavedApmCustomDashboard {
   title: string;
@@ -52,10 +50,6 @@ export function ServiceDashboards() {
     '/services/{serviceName}/dashboards',
     '/mobile-services/{serviceName}/dashboards'
   );
-  const { serviceEntitySummary, serviceEntitySummaryStatus } = useApmServiceContext();
-  const checkForEntities = serviceEntitySummary?.dataStreamTypes
-    ? isLogsOnlySignal(serviceEntitySummary.dataStreamTypes)
-    : false;
   const [dashboard, setDashboard] = useState<DashboardApi | undefined>();
   const [serviceDashboards, setServiceDashboards] = useState<MergedServiceDashboard[]>([]);
   const [currentDashboard, setCurrentDashboard] = useState<MergedServiceDashboard>();
@@ -71,23 +65,23 @@ export function ServiceDashboards() {
           isCachable: false,
           params: {
             path: { serviceName },
-            query: { start, end, checkFor: checkForEntities ? 'entities' : 'services' },
+            query: { start, end },
           },
         });
       }
     },
-    [serviceName, start, end, checkForEntities]
+    [serviceName, start, end]
   );
 
   useEffect(() => {
     const filteredServiceDashboards = (data?.serviceDashboards ?? []).reduce(
       (result: MergedServiceDashboard[], serviceDashboard: SavedApmCustomDashboard) => {
-        const matchedDashboard = allAvailableDashboards.find(
+        const matchedDashboard = allAvailableDashboards?.find(
           ({ id }) => id === serviceDashboard.dashboardSavedObjectId
         );
         if (matchedDashboard) {
           result.push({
-            title: matchedDashboard.attributes.title,
+            title: matchedDashboard.data.title,
             ...serviceDashboard,
           });
         }
@@ -101,7 +95,7 @@ export function ServiceDashboards() {
 
   const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
     const getInitialInput = () => ({
-      viewMode: ViewMode.VIEW,
+      viewMode: 'view' as ViewMode,
       timeRange: { from: rangeFrom, to: rangeTo },
     });
     return Promise.resolve<DashboardCreationOptions>({
@@ -140,7 +134,7 @@ export function ServiceDashboards() {
   );
 
   const locator = useMemo(() => {
-    const baseLocator = share.url.locators.get(APM_APP_LOCATOR_ID);
+    const baseLocator = share?.url?.locators?.get(APM_APP_LOCATOR_ID);
     if (!baseLocator) return;
 
     return {
@@ -153,7 +147,7 @@ export function ServiceDashboards() {
 
   return (
     <EuiPanel hasBorder={true}>
-      {status === FETCH_STATUS.LOADING || serviceEntitySummaryStatus === FETCH_STATUS.LOADING ? (
+      {status === FETCH_STATUS.LOADING ? (
         <EuiEmptyPrompt
           icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
           title={

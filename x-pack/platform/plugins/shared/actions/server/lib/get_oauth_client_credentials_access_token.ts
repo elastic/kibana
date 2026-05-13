@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Logger } from '@kbn/core/server';
-import { ActionsConfigurationUtilities } from '../actions_config';
-import { ConnectorToken, ConnectorTokenClientContract } from '../types';
+import type { Logger } from '@kbn/core/server';
+import type { ActionsConfigurationUtilities } from '../actions_config';
+import type { ConnectorToken, ConnectorTokenClientContract } from '../types';
 import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
 
 export interface GetOAuthClientCredentialsConfig {
   clientId: string;
-  tenantId: string;
+  additionalFields?: Record<string, unknown>;
 }
 
 export interface GetOAuthClientCredentialsSecrets {
@@ -21,7 +21,7 @@ export interface GetOAuthClientCredentialsSecrets {
 interface GetOAuthClientCredentialsAccessTokenOpts {
   connectorId?: string;
   tokenUrl: string;
-  oAuthScope: string;
+  oAuthScope?: string;
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
   credentials: {
@@ -29,6 +29,7 @@ interface GetOAuthClientCredentialsAccessTokenOpts {
     secrets: GetOAuthClientCredentialsSecrets;
   };
   connectorTokenClient?: ConnectorTokenClientContract;
+  tokenEndpointAuthMethod?: 'client_secret_post' | 'client_secret_basic';
 }
 
 export const getOAuthClientCredentialsAccessToken = async ({
@@ -39,18 +40,19 @@ export const getOAuthClientCredentialsAccessToken = async ({
   configurationUtilities,
   credentials,
   connectorTokenClient,
+  tokenEndpointAuthMethod,
 }: GetOAuthClientCredentialsAccessTokenOpts) => {
-  const { clientId, tenantId } = credentials.config;
+  const { clientId, additionalFields } = credentials.config;
   const { clientSecret } = credentials.secrets;
 
-  if (!clientId || !clientSecret || !tenantId) {
+  if (!clientId || !clientSecret) {
     logger.warn(`Missing required fields for requesting OAuth Client Credentials access token`);
     return null;
   }
 
   let accessToken: string;
   let connectorToken: ConnectorToken | null = null;
-  let hasErrors: boolean = false;
+  let hasErrors = false;
 
   if (connectorId && connectorTokenClient) {
     // Check if there is a token stored for this connector
@@ -61,11 +63,13 @@ export const getOAuthClientCredentialsAccessToken = async ({
     hasErrors = errors;
   }
 
-  if (connectorToken === null || Date.parse(connectorToken.expiresAt) <= Date.now()) {
+  if (
+    connectorToken === null ||
+    (connectorToken.expiresAt ? Date.parse(connectorToken.expiresAt) <= Date.now() : false)
+  ) {
     // Save the time before requesting token so we can use it to calculate expiration
     const requestTokenStart = Date.now();
 
-    // request access token with jwt assertion
     const tokenResult = await requestOAuthClientCredentialsToken(
       tokenUrl,
       logger,
@@ -73,8 +77,10 @@ export const getOAuthClientCredentialsAccessToken = async ({
         scope: oAuthScope,
         clientId,
         clientSecret,
+        ...additionalFields,
       },
-      configurationUtilities
+      configurationUtilities,
+      tokenEndpointAuthMethod
     );
     accessToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;
 

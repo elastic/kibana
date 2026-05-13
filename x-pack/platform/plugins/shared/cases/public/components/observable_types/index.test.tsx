@@ -8,8 +8,7 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, noCasesPermissions } from '../../common/mock';
+import { noCasesPermissions, renderWithTestingProviders } from '../../common/mock';
 import type { ObservableTypesProps } from '.';
 import { ObservableTypes } from '.';
 import { observableTypesMock } from '../../containers/mock';
@@ -17,8 +16,6 @@ import * as i18n from './translations';
 import { MAX_CUSTOM_OBSERVABLE_TYPES } from '../../../common/constants';
 
 describe('ObservableTypes', () => {
-  let appMock: AppMockRenderer;
-
   const props: ObservableTypesProps = {
     disabled: false,
     isLoading: false,
@@ -30,18 +27,19 @@ describe('ObservableTypes', () => {
 
   describe('with sufficient permissions', () => {
     beforeEach(() => {
-      appMock = createAppMockRenderer();
       jest.clearAllMocks();
     });
 
     it('renders correctly when there are no observable types', async () => {
-      appMock.render(<ObservableTypes {...props} />);
+      renderWithTestingProviders(<ObservableTypes {...props} />);
       expect(await screen.findByTestId('observable-types-form-group')).toBeInTheDocument();
       expect(screen.queryByTestId('observable-types-list')).not.toBeInTheDocument();
     });
 
     it('renders correctly when there are observable types', async () => {
-      appMock.render(<ObservableTypes {...{ ...props, observableTypes: observableTypesMock }} />);
+      renderWithTestingProviders(
+        <ObservableTypes {...{ ...props, observableTypes: observableTypesMock }} />
+      );
       expect(await screen.findByTestId('observable-types-form-group')).toBeInTheDocument();
       expect(await screen.findByTestId('observable-types-list')).toBeInTheDocument();
     });
@@ -58,7 +56,7 @@ describe('ObservableTypes', () => {
 
       const observableTypes = [...generatedMockCustomFields];
 
-      appMock.render(<ObservableTypes {...{ ...props, observableTypes }} />);
+      renderWithTestingProviders(<ObservableTypes {...{ ...props, observableTypes }} />);
 
       expect(await screen.findByText(i18n.MAX_OBSERVABLE_TYPES_LIMIT(MAX_CUSTOM_OBSERVABLE_TYPES)));
       expect(screen.queryByTestId('add-observable-type')).not.toBeInTheDocument();
@@ -67,12 +65,13 @@ describe('ObservableTypes', () => {
 
   describe('with insufficient permissions', () => {
     beforeEach(() => {
-      appMock = createAppMockRenderer({ permissions: noCasesPermissions() });
       jest.clearAllMocks();
     });
 
     it('renders correctly when there are no observable types', async () => {
-      appMock.render(<ObservableTypes {...props} />);
+      renderWithTestingProviders(<ObservableTypes {...props} />, {
+        wrapperProps: { permissions: noCasesPermissions() },
+      });
       expect(screen.queryByTestId('observable-types-form-group')).not.toBeInTheDocument();
     });
   });

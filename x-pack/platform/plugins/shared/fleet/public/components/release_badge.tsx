@@ -23,9 +23,12 @@ const RELEASE_BADGE_LABEL: { [key in Exclude<IntegrationCardReleaseLabel, 'ga'>]
   }),
 };
 
-const RELEASE_BADGE_DESCRIPTION: { [key in Exclude<IntegrationCardReleaseLabel, 'ga'>]: string } = {
+export const RELEASE_BADGE_DESCRIPTION: {
+  [key in Exclude<IntegrationCardReleaseLabel, 'ga'>]: string;
+} = {
   beta: i18n.translate('xpack.fleet.epm.releaseBadge.betaDescription', {
-    defaultMessage: 'This integration is not recommended for use in production environments.',
+    defaultMessage:
+      'This integration is not recommended for use in production environments. Beta features are not subject to the support SLA of official GA features.',
   }),
   preview: i18n.translate('xpack.fleet.epm.releaseBadge.technicalPreviewDescription', {
     defaultMessage:
@@ -44,7 +47,7 @@ export const HeaderReleaseBadge: React.FC<{ release: IntegrationCardReleaseLabel
   const releaseLabel = RELEASE_BADGE_LABEL[release];
   return (
     <EuiToolTip position="bottom" content={RELEASE_BADGE_DESCRIPTION[release]} title={releaseLabel}>
-      <EuiBadge>{releaseLabel}</EuiBadge>
+      <EuiBadge tabIndex={0}>{releaseLabel}</EuiBadge>
     </EuiToolTip>
   );
 };
@@ -62,7 +65,9 @@ export const InlineReleaseBadge: React.FC<{ release: IntegrationCardReleaseLabel
       content={RELEASE_BADGE_DESCRIPTION[release]}
       title={releaseLabel}
     >
-      <EuiBadge color="hollow">{releaseLabel}</EuiBadge>
+      <EuiBadge color="hollow" tabIndex={0}>
+        {releaseLabel}
+      </EuiBadge>
     </EuiToolTip>
   );
 };

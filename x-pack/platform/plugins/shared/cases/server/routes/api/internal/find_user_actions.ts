@@ -8,10 +8,11 @@
 import { schema } from '@kbn/config-schema';
 
 import { isCommentUserAction } from '../../../../common/utils/user_actions';
-import type { attachmentApiV1, userActionApiV1 } from '../../../../common/types/api';
+import type { attachmentApiV2, userActionApiV1 } from '../../../../common/types/api';
 import { INTERNAL_CASE_FIND_USER_ACTIONS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
+import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 const params = {
   params: schema.object({
@@ -22,11 +23,10 @@ const params = {
 export const findUserActionsRoute = createCasesRoute({
   method: 'get',
   path: INTERNAL_CASE_FIND_USER_ACTIONS_URL,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
   params,
   routerOptions: {
-    access: 'public',
-    summary: 'Get user actions by case',
-    tags: ['oas-tag:cases'],
+    access: 'internal',
   },
   handler: async ({ context, request, response }) => {
     try {
@@ -49,7 +49,7 @@ export const findUserActionsRoute = createCasesRoute({
       }
       const commentIds = Array.from(uniqueCommentIds);
 
-      let attachmentRes: attachmentApiV1.BulkGetAttachmentsResponse = {
+      let attachmentRes: attachmentApiV2.BulkGetAttachmentsResponseV2 = {
         attachments: [],
         errors: [],
       };
@@ -57,7 +57,8 @@ export const findUserActionsRoute = createCasesRoute({
       if (commentIds.length > 0) {
         attachmentRes = await casesClient.attachments.bulkGet({
           caseID: caseId,
-          attachmentIDs: commentIds,
+          savedObjectIds: commentIds,
+          mode: 'unified',
         });
       }
 

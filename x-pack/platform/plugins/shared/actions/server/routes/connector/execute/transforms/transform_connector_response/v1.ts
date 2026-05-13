@@ -5,17 +5,21 @@
  * 2.0.
  */
 
-import { ConnectorExecuteResponseV1 } from '../../../../../../common/routes/connector/response';
-import { ActionTypeExecutorResult } from '../../../../../types';
+import type { ConnectorExecuteResponseV1 } from '../../../../../../common/routes/connector/response';
+import type { ActionTypeExecutorResult } from '../../../../../types';
 
 export const transformExecuteConnectorResponse = ({
   actionId,
   retry,
   serviceMessage,
+  errorName,
+  errorMeta,
   ...res
 }: ActionTypeExecutorResult<unknown>): ConnectorExecuteResponseV1 => ({
   ...res,
   connector_id: actionId,
   ...(retry && retry instanceof Date ? { retry: retry.toISOString() } : { retry }),
   ...(serviceMessage ? { service_message: serviceMessage } : {}),
+  ...(errorName ? { error_name: errorName } : {}),
+  ...(errorMeta ? { error_meta: errorMeta } : {}),
 });

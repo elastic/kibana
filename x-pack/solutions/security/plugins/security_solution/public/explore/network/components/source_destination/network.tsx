@@ -11,7 +11,8 @@ import React from 'react';
 import styled from '@emotion/styled';
 
 import { DirectionBadge } from '../direction';
-import { DefaultDraggable, DraggableBadge } from '../../../../common/components/draggables';
+import { CellActionsRenderer } from '../../../../common/components/cell_actions/cell_actions_renderer';
+import { DraggableBadge } from '../../../../common/components/draggables';
 
 import * as i18n from './translations';
 import {
@@ -48,98 +49,111 @@ export const Network = React.memo<{
   packets?: string[] | null;
   protocol?: string[] | null;
   transport?: string[] | null;
-}>(({ bytes, communityId, contextId, direction, eventId, packets, protocol, transport }) => (
-  <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none">
-    {direction != null
-      ? uniq(direction).map((dir) => (
-          <EuiFlexItemMarginRight grow={false} key={dir}>
-            <DirectionBadge contextId={contextId} direction={dir} eventId={eventId} />
-          </EuiFlexItemMarginRight>
-        ))
-      : null}
-
-    {protocol != null
-      ? uniq(protocol).map((proto) => (
-          <EuiFlexItemMarginRight grow={false} key={proto}>
-            <DraggableBadge
-              contextId={contextId}
-              eventId={eventId}
-              field={NETWORK_PROTOCOL_FIELD_NAME}
-              value={proto}
-              isAggregatable={true}
-              fieldType="keyword"
-            />
-          </EuiFlexItemMarginRight>
-        ))
-      : null}
-
-    {bytes != null
-      ? uniq(bytes).map((b) =>
-          !isNaN(Number(b)) ? (
-            <EuiFlexItemMarginRight grow={false} key={b}>
-              <DefaultDraggable
-                field={NETWORK_BYTES_FIELD_NAME}
-                id={`network-default-draggable-${contextId}-${eventId}-${NETWORK_BYTES_FIELD_NAME}-${b}`}
-                value={b}
-              >
-                <Stats size="xs">
-                  <span>
-                    <PreferenceFormattedBytes value={b} />
-                  </span>
-                </Stats>
-              </DefaultDraggable>
+  scopeId: string;
+}>(
+  ({
+    bytes,
+    communityId,
+    contextId,
+    direction,
+    eventId,
+    packets,
+    protocol,
+    transport,
+    scopeId,
+  }) => (
+    <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none">
+      {direction != null
+        ? uniq(direction).map((dir) => (
+            <EuiFlexItemMarginRight grow={false} key={dir}>
+              <DirectionBadge
+                scopeId={scopeId}
+                contextId={contextId}
+                direction={dir}
+                eventId={eventId}
+              />
             </EuiFlexItemMarginRight>
-          ) : null
-        )
-      : null}
+          ))
+        : null}
 
-    {packets != null
-      ? uniq(packets).map((p) => (
-          <EuiFlexItemMarginRight grow={false} key={p}>
-            <DefaultDraggable
-              field={NETWORK_PACKETS_FIELD_NAME}
-              id={`network-default-draggable-${contextId}-${eventId}-${NETWORK_PACKETS_FIELD_NAME}-${p}`}
-              value={p}
-            >
-              <Stats size="xs">
-                <span>{`${p} ${i18n.PACKETS}`}</span>
-              </Stats>
-            </DefaultDraggable>
-          </EuiFlexItemMarginRight>
-        ))
-      : null}
+      {protocol != null
+        ? uniq(protocol).map((proto) => (
+            <EuiFlexItemMarginRight grow={false} key={proto}>
+              <DraggableBadge
+                contextId={contextId}
+                scopeId={scopeId}
+                eventId={eventId}
+                field={NETWORK_PROTOCOL_FIELD_NAME}
+                value={proto}
+                isAggregatable={true}
+                fieldType="keyword"
+              />
+            </EuiFlexItemMarginRight>
+          ))
+        : null}
 
-    {transport != null
-      ? uniq(transport).map((trans) => (
-          <EuiFlexItemMarginRight grow={false} key={trans}>
-            <DraggableBadge
-              contextId={contextId}
-              data-test-subj="network-transport"
-              eventId={eventId}
-              field={NETWORK_TRANSPORT_FIELD_NAME}
-              value={trans}
-              isAggregatable={true}
-              fieldType="keyword"
-            />
-          </EuiFlexItemMarginRight>
-        ))
-      : null}
+      {bytes != null
+        ? uniq(bytes).map((b) =>
+            !isNaN(Number(b)) ? (
+              <EuiFlexItemMarginRight grow={false} key={b}>
+                <CellActionsRenderer scopeId={scopeId} field={NETWORK_BYTES_FIELD_NAME} value={b}>
+                  <Stats size="xs">
+                    <span>
+                      <PreferenceFormattedBytes value={b} />
+                    </span>
+                  </Stats>
+                </CellActionsRenderer>
+              </EuiFlexItemMarginRight>
+            ) : null
+          )
+        : null}
 
-    {communityId != null
-      ? uniq(communityId).map((trans) => (
-          <EuiFlexItem grow={false} key={trans}>
-            <DraggableBadge
-              contextId={contextId}
-              eventId={eventId}
-              field={NETWORK_COMMUNITY_ID_FIELD_NAME}
-              value={trans}
-              isAggregatable={true}
-              fieldType="keyword"
-            />
-          </EuiFlexItem>
-        ))
-      : null}
-  </EuiFlexGroup>
-));
+      {packets != null
+        ? uniq(packets).map((p) => (
+            <EuiFlexItemMarginRight grow={false} key={p}>
+              <CellActionsRenderer scopeId={scopeId} field={NETWORK_PACKETS_FIELD_NAME} value={p}>
+                <Stats size="xs">
+                  <span>{`${p} ${i18n.PACKETS}`}</span>
+                </Stats>
+              </CellActionsRenderer>
+            </EuiFlexItemMarginRight>
+          ))
+        : null}
+
+      {transport != null
+        ? uniq(transport).map((trans) => (
+            <EuiFlexItemMarginRight grow={false} key={trans}>
+              <DraggableBadge
+                scopeId={scopeId}
+                contextId={contextId}
+                data-test-subj="network-transport"
+                eventId={eventId}
+                field={NETWORK_TRANSPORT_FIELD_NAME}
+                value={trans}
+                isAggregatable={true}
+                fieldType="keyword"
+              />
+            </EuiFlexItemMarginRight>
+          ))
+        : null}
+
+      {communityId != null
+        ? uniq(communityId).map((trans) => (
+            <EuiFlexItem grow={false} key={trans}>
+              <DraggableBadge
+                scopeId={scopeId}
+                contextId={contextId}
+                eventId={eventId}
+                field={NETWORK_COMMUNITY_ID_FIELD_NAME}
+                value={trans}
+                isAggregatable={true}
+                fieldType="keyword"
+              />
+            </EuiFlexItem>
+          ))
+        : null}
+    </EuiFlexGroup>
+  )
+);
 
 Network.displayName = 'Network';

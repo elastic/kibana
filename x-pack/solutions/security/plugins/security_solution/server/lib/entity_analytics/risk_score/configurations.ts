@@ -22,6 +22,16 @@ const commonRiskFields: FieldMap = {
     array: false,
     required: false,
   },
+  score_type: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  calculation_run_id: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   calculated_level: {
     type: 'keyword',
     array: false,
@@ -47,9 +57,56 @@ const commonRiskFields: FieldMap = {
     array: false,
     required: false,
   },
+  // Modifiers applied to the score calculation
+  modifiers: {
+    type: 'object',
+    array: true,
+    required: false,
+  },
+  'modifiers.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'modifiers.subtype': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'modifiers.modifier_value': {
+    type: 'float',
+    array: false,
+    required: false,
+  },
+  'modifiers.contribution': {
+    type: 'float',
+    array: false,
+    required: false,
+  },
+  // Metadata shape is dynamic per modifier type; use flattened for flexibility
+  'modifiers.metadata': {
+    type: 'flattened',
+    array: false,
+    required: false,
+  },
   inputs: {
     type: 'object',
     array: true,
+    required: false,
+  },
+  related_entities: {
+    type: 'object',
+    array: true,
+    required: false,
+  },
+  'related_entities.entity_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'related_entities.relationship_type': {
+    type: 'keyword',
+    array: false,
     required: false,
   },
   'inputs.id': {
@@ -153,6 +210,11 @@ export const getIndexPatternDataStream = (namespace: string): IIndexPatternStrin
   alias: `${riskScoreBaseIndexName}.${riskScoreBaseIndexName}-${namespace}`,
 });
 
+export const getIndexPatternLookup = (namespace: string): IIndexPatternString => ({
+  template: `.entity_analytics.risk_score.lookup-${namespace}-index-template`,
+  alias: `.entity_analytics.risk_score.lookup-${namespace}`,
+});
+
 export type TransformOptions = Omit<TransformPutTransformRequest, 'transform_id'>;
 
 /**
@@ -164,9 +226,11 @@ export type TransformOptions = Omit<TransformPutTransformRequest, 'transform_id'
 export const getTransformOptions = ({
   dest,
   source,
+  namespace,
 }: {
   dest: string;
   source: string[];
+  namespace: string;
 }): Omit<TransformPutTransformRequest, 'transform_id'> => ({
   dest: {
     index: dest,
@@ -206,5 +270,6 @@ export const getTransformOptions = ({
     version: 3, // When this field is updated we automatically update the transform
     managed: true, // Metadata that identifies the transform. It has no functionality
     managed_by: 'security-entity-analytics', // Metadata that identifies the transform. It has no functionality
+    space_id: namespace, // Metadata that identifies the space where the transform is running. Helps in debugging as the original transformid could be hashed if longer than 64 characters
   },
 });

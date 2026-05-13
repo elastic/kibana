@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -14,8 +14,12 @@ export const UnsavedChangesConfirmModal = React.memo<{
   onConfirm: () => void;
   onCancel: () => void;
 }>(({ onCancel, onConfirm }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       data-test-subj="policyDetailsUnsavedChangesModal"
       title={i18n.translate('xpack.securitySolution.endpoint.policy.details.unsavedChanges.title', {
         defaultMessage: 'Unsaved changes',

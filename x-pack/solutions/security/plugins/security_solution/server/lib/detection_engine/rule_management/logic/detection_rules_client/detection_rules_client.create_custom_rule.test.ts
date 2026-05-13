@@ -22,8 +22,8 @@ import { throwAuthzError } from '../../../../machine_learning/validation';
 import { createDetectionRulesClient } from './detection_rules_client';
 import type { IDetectionRulesClient } from './detection_rules_client_interface';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
-import type { ExperimentalFeatures } from '../../../../../../common';
 import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
+import { getMockRulesAuthz } from '../../__mocks__/authz';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
@@ -33,6 +33,7 @@ describe('DetectionRulesClient.createCustomRule', () => {
   let detectionRulesClient: IDetectionRulesClient;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
+  const rulesAuthz = getMockRulesAuthz();
   let actionsClient = {
     isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
   } as unknown as jest.Mocked<ActionsClient>;
@@ -51,9 +52,9 @@ describe('DetectionRulesClient.createCustomRule', () => {
       actionsClient,
       rulesClient,
       mlAuthz,
+      rulesAuthz,
       savedObjectsClient,
       license: licenseMock.createLicenseMock(),
-      experimentalFeatures: { prebuiltRulesCustomizationEnabled: true } as ExperimentalFeatures,
       productFeaturesService: createProductFeaturesServiceMock(),
     });
   });

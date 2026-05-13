@@ -8,17 +8,22 @@
  */
 
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
-import { ManagementSection, RegisterManagementSectionArgs } from './utils';
+import type { RegisterManagementSectionArgs } from './utils';
+import { ManagementSection } from './utils';
 import {
   IngestSection,
   DataSection,
   InsightsAndAlertingSection,
+  MachineLearningSection,
+  ModelManagementSection,
   SecuritySection,
   KibanaSection,
   StackSection,
+  AISection,
+  ClusterPerformanceSection,
 } from './components/management_sections';
 
-import {
+import type {
   ManagementSectionId,
   SectionsServiceSetup,
   SectionsServiceStartDeps,
@@ -41,14 +46,18 @@ export class ManagementSectionsService {
       ingest: this.registerSection(IngestSection),
       data: this.registerSection(DataSection),
       insightsAndAlerting: this.registerSection(InsightsAndAlertingSection),
+      machineLearning: this.registerSection(MachineLearningSection),
+      modelManagement: this.registerSection(ModelManagementSection),
       security: this.registerSection(SecuritySection),
       kibana: this.registerSection(KibanaSection),
+      ai: this.registerSection(AISection),
       stack: this.registerSection(StackSection),
+      clusterPerformance: this.registerSection(ClusterPerformanceSection),
     };
   }
   private sections: Map<ManagementSectionId | string, ManagementSection> = new Map();
 
-  private getAllSections = () => [...this.sections.values()];
+  getAllSections = () => [...this.sections.values()];
 
   private registerSection = (section: RegisterManagementSectionArgs) => {
     if (this.sections.has(section.id)) {

@@ -18,10 +18,6 @@ interface AddMetadataPinToRowProps {
   onPinned: Dispatch<React.SetStateAction<Array<Field['name']> | undefined>>;
 }
 
-const PIN_FIELD = i18n.translate('xpack.infra.metadataEmbeddable.pinField', {
-  defaultMessage: 'Pin Field',
-});
-
 export const AddMetadataPinToRow = ({
   fieldName,
   pinnedItems,
@@ -29,43 +25,20 @@ export const AddMetadataPinToRow = ({
 }: AddMetadataPinToRowProps) => {
   const { euiTheme } = useEuiTheme();
 
-  const handleAddPin = () => {
-    onPinned([...pinnedItems, fieldName]);
-  };
+  const isPinned = pinnedItems?.includes(fieldName);
 
-  const handleRemovePin = () => {
-    if (pinnedItems && pinnedItems.includes(fieldName)) {
+  const handleClick = () => {
+    if (isPinned) {
       onPinned((pinnedItems ?? []).filter((pinName: string) => fieldName !== pinName));
+    } else {
+      onPinned([...pinnedItems, fieldName]);
     }
   };
-
-  if (pinnedItems?.includes(fieldName)) {
-    return (
-      <span>
-        <EuiToolTip
-          content={i18n.translate('xpack.infra.metadataEmbeddable.unpinField', {
-            defaultMessage: 'Unpin field',
-          })}
-        >
-          <EuiButtonIcon
-            size="s"
-            color="primary"
-            iconType="pinFilled"
-            data-test-subj="infraAssetDetailsMetadataRemovePin"
-            aria-label={i18n.translate('xpack.infra.metadata.pinAriaLabel', {
-              defaultMessage: 'Pinned field',
-            })}
-            onClick={handleRemovePin}
-          />
-        </EuiToolTip>
-      </span>
-    );
-  }
 
   // Custom table show on hover CSS, since this button is not technically in an action column
   // Potential EUI TODO - multiple action columns and `align`ed actions are not currently supported
   const showOnRowHoverCss = css`
-    opacity: 0;
+    opacity: ${isPinned ? 1 : 0};
     ${euiCanAnimate} {
       transition: opacity ${euiTheme.animation.normal} ${euiTheme.animation.resistance};
     }
@@ -76,16 +49,36 @@ export const AddMetadataPinToRow = ({
     }
   `;
 
+  const tooltipContent = isPinned
+    ? i18n.translate('xpack.infra.metadataEmbeddable.unpinField', {
+        defaultMessage: 'Unpin field',
+      })
+    : i18n.translate('xpack.infra.metadataEmbeddable.pinField', {
+        defaultMessage: 'Pin field',
+      });
+
+  const ariaLabel = isPinned
+    ? i18n.translate('xpack.infra.metadata.pinnedAriaLabel', {
+        defaultMessage: 'Pinned {fieldName}',
+        values: { fieldName },
+      })
+    : i18n.translate('xpack.infra.metadataEmbeddable.pinField.ariaLabel', {
+        defaultMessage: 'Pin {fieldName}',
+        values: { fieldName },
+      });
+
   return (
     <span className={showOnRowHoverCss}>
-      <EuiToolTip content={PIN_FIELD}>
+      <EuiToolTip content={tooltipContent}>
         <EuiButtonIcon
-          color="primary"
           size="s"
-          iconType="pin"
-          data-test-subj="infraAssetDetailsMetadataAddPin"
-          aria-label={PIN_FIELD}
-          onClick={handleAddPin}
+          color="primary"
+          iconType={isPinned ? 'pinFill' : 'pin'}
+          data-test-subj={
+            isPinned ? 'infraAssetDetailsMetadataRemovePin' : 'infraAssetDetailsMetadataAddPin'
+          }
+          aria-label={ariaLabel}
+          onClick={handleClick}
         />
       </EuiToolTip>
     </span>

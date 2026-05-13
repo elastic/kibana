@@ -29,7 +29,7 @@ import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useProfilingKuery } from '../../hooks/use_profiling_kuery';
 import { useRequestObservable } from '../../hooks/use_request_observable';
 
-export function Profiling() {
+export function Profiling({ showSearchBar = true }: { showSearchBar?: boolean }) {
   const { isActiveTab } = useTabSwitcherContext();
   const { dateRange, setDateRange } = useDatePickerContext();
   const { fullKuery, customKuery, setCustomKuery } = useProfilingKuery();
@@ -72,7 +72,7 @@ export function Profiling() {
         </>
       ),
       append: (
-        <Popover iconSize="s" iconColor="subdued" icon="questionInCircle">
+        <Popover iconSize="s" iconColor="subdued" icon="question">
           <EuiText size="xs">
             <FormattedMessage
               id="xpack.infra.profiling.flamegraphInfoPopoverBody"
@@ -108,7 +108,7 @@ export function Profiling() {
         </>
       ),
       append: (
-        <Popover iconSize="s" iconColor="subdued" icon="questionInCircle">
+        <Popover iconSize="s" iconColor="subdued" icon="question">
           <EuiText size="xs">
             <FormattedMessage
               id="xpack.infra.profiling.functionsInfoPopoverBody"
@@ -144,7 +144,7 @@ export function Profiling() {
         </>
       ),
       append: (
-        <Popover iconSize="s" iconColor="subdued" icon="questionInCircle">
+        <Popover iconSize="s" iconColor="subdued" icon="question">
           <EuiText size="xs">
             <FormattedMessage
               id="xpack.infra.profiling.threadsInfoPopoverBody"
@@ -179,14 +179,18 @@ export function Profiling() {
         <ProfilingEmptyState />
       ) : (
         <>
-          <EmbeddableProfilingSearchBar
-            kuery={customKuery}
-            rangeFrom={dateRange.from}
-            rangeTo={dateRange.to}
-            onQuerySubmit={onSearchSubmit}
-            onRefresh={onSearchRefresh}
-          />
-          <EuiSpacer />
+          {showSearchBar && (
+            <>
+              <EmbeddableProfilingSearchBar
+                kuery={customKuery}
+                rangeFrom={dateRange.from}
+                rangeTo={dateRange.to}
+                onQuerySubmit={onSearchSubmit}
+                onRefresh={onSearchRefresh}
+              />
+              <EuiSpacer />
+            </>
+          )}
           <DescriptionCallout />
           <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
         </>

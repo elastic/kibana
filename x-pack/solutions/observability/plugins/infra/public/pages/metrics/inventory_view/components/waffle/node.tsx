@@ -57,7 +57,7 @@ export const Node = ({
 
   const toggleAssetPopover = () => {
     if (isFlyoutMode) {
-      setFlyoutUrlState({ detailsItemId: node.id, assetType: nodeType });
+      setFlyoutUrlState({ detailsItemId: node.id, entityType: nodeType });
     } else {
       togglePopover();
     }
@@ -65,16 +65,16 @@ export const Node = ({
 
   const nodeSquare = (
     <EuiToolTip
-      delay="regular"
       position="right"
       content={<ConditionalToolTip currentTime={currentTime} node={node} nodeType={nodeType} />}
     >
-      <div>
+      <div role="listitem" tabIndex={0}>
         <NodeSquare
           squareSize={squareSize}
           togglePopover={toggleAssetPopover}
           color={color}
           nodeName={node.name}
+          nodeMetric={metric ? metric.name : ''}
           value={value}
           showBorder={detailsItemId === node.id || isPopoverOpen}
         />
@@ -82,22 +82,22 @@ export const Node = ({
     </EuiToolTip>
   );
 
-  return !isFlyoutMode ? (
+  return (
     <EuiPopover
       button={nodeSquare}
-      isOpen={isPopoverOpen}
+      isOpen={!isFlyoutMode && isPopoverOpen}
       closePopover={closePopover}
       anchorPosition="downCenter"
       zIndex={0}
     >
-      <NodeContextMenu
-        node={node}
-        nodeType={nodeType}
-        options={options}
-        currentTime={currentTime}
-      />
+      {!isFlyoutMode && isPopoverOpen && (
+        <NodeContextMenu
+          node={node}
+          nodeType={nodeType}
+          options={options}
+          currentTime={currentTime}
+        />
+      )}
     </EuiPopover>
-  ) : (
-    nodeSquare
   );
 };

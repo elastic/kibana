@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { merge, of, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { merge, of } from 'rxjs';
 import { map, scan } from 'rxjs';
 import { set } from '@kbn/safer-lodash-set';
-import { Logger } from '@kbn/core/server';
-import { TaskLifecycleEvent, TaskPollingLifecycle } from '../polling_lifecycle';
-import { TaskManagerConfig } from '../config';
-import { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
+import type { Logger } from '@kbn/core/server';
+import type { TaskLifecycleEvent, TaskPollingLifecycle } from '../polling_lifecycle';
+import type { TaskManagerConfig } from '../config';
+import type { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import { createWrappedLogger } from '../lib/wrapped_logger';
 import {
   isTaskManagerStatEvent,
@@ -19,11 +20,14 @@ import {
   isTaskPollingCycleEvent,
   isTaskRunEvent,
 } from '../task_events';
-import { TaskClaimMetric, TaskClaimMetricsAggregator } from './task_claim_metrics_aggregator';
+import type { TaskClaimMetric } from './task_claim_metrics_aggregator';
+import { TaskClaimMetricsAggregator } from './task_claim_metrics_aggregator';
 import { createAggregator } from './create_aggregator';
-import { TaskRunMetric, TaskRunMetricsAggregator } from './task_run_metrics_aggregator';
-import { TaskOverdueMetric, TaskOverdueMetricsAggregator } from './task_overdue_metrics_aggregator';
-import { TaskManagerMetricsCollector } from './task_metrics_collector';
+import type { TaskRunMetric } from './task_run_metrics_aggregator';
+import { TaskRunMetricsAggregator } from './task_run_metrics_aggregator';
+import type { TaskOverdueMetric } from './task_overdue_metrics_aggregator';
+import { TaskOverdueMetricsAggregator } from './task_overdue_metrics_aggregator';
+import type { TaskManagerMetricsCollector } from './task_metrics_collector';
 export interface Metrics {
   last_update: string;
   metrics: {

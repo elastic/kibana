@@ -5,19 +5,21 @@
  * 2.0.
  */
 import { isEmpty } from 'lodash';
-import { Logger } from '@kbn/core/server';
-import { SavedObjectReference } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import type { SavedObjectReference } from '@kbn/core/server';
+import { migrateLegacyLastRunOutcomeMsg } from '../../../rules_client/lib';
 import { ruleExecutionStatusValues } from '../constants';
 import { getRuleSnoozeEndTime } from '../../../lib';
-import { RuleDomain, Monitoring, RuleParams } from '../types';
-import { PartialRule, RawRule, RawRuleExecutionStatus, SanitizedRule } from '../../../types';
-import { UntypedNormalizedRuleType } from '../../../rule_type_registry';
+import type { RuleDomain, Monitoring, RuleParams } from '../types';
+import type { PartialRule, RawRule, RawRuleExecutionStatus, SanitizedRule } from '../../../types';
+import type { UntypedNormalizedRuleType } from '../../../rule_type_registry';
 import { injectReferencesIntoParams } from '../../../rules_client/common';
 import { getActiveScheduledSnoozes } from '../../../lib/is_rule_snoozed';
 import {
   transformRawActionsToDomainActions,
   transformRawActionsToDomainSystemActions,
 } from './transform_raw_actions_to_domain_actions';
+import { transformRawArtifactsToDomainArtifacts } from './transform_raw_artifacts_to_domain_artifacts';
 
 const INITIAL_LAST_RUN_METRICS = {
   duration: 0,
@@ -169,6 +171,11 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
       omitGeneratedValues,
     });
 
+  const ruleDomainArtifacts = transformRawArtifactsToDomainArtifacts(
+    id,
+    esRule.artifacts,
+    references
+  );
   const params = injectReferencesIntoParams<Params, RuleParams>(
     id,
     ruleType,
@@ -201,10 +208,12 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     apiKey: esRule.apiKey,
     apiKeyOwner: esRule.apiKeyOwner,
     apiKeyCreatedByUser: esRule.apiKeyCreatedByUser,
+    ...(esRule.uiamApiKey !== undefined ? { uiamApiKey: esRule.uiamApiKey } : {}),
     throttle: esRule.throttle,
     muteAll: esRule.muteAll,
     notifyWhen: esRule.notifyWhen,
     mutedInstanceIds: esRule.mutedInstanceIds,
+    ...(esRule.snoozedInstances !== undefined ? { snoozedInstances: esRule.snoozedInstances } : {}),
     ...(executionStatus
       ? { executionStatus: transformEsExecutionStatus(logger, id, executionStatus) }
       : {}),
@@ -218,22 +227,15 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
             : {}),
         }
       : {}),
-    ...(lastRun
-      ? {
-          lastRun: {
-            ...lastRun,
-            ...(lastRun.outcomeMsg && !Array.isArray(lastRun.outcomeMsg)
-              ? { outcomeMsg: lastRun.outcomeMsg ? [lastRun.outcomeMsg] : null }
-              : { outcomeMsg: lastRun.outcomeMsg }),
-          },
-        }
-      : {}),
+    ...(lastRun ? { lastRun: migrateLegacyLastRunOutcomeMsg(lastRun) } : {}),
     ...(esRule.nextRun ? { nextRun: new Date(esRule.nextRun) } : {}),
+    ...(esRule.lastEnabledAt ? { lastEnabledAt: new Date(esRule.lastEnabledAt) } : {}),
     revision: esRule.revision,
     running: esRule.running,
     ...(esRule.alertDelay ? { alertDelay: esRule.alertDelay } : {}),
     ...(esRule.legacyId !== undefined ? { legacyId: esRule.legacyId } : {}),
     ...(esRule.flapping !== undefined ? { flapping: esRule.flapping } : {}),
+    artifacts: ruleDomainArtifacts,
   };
 
   // Bad casts, but will fix once we fix all rule types

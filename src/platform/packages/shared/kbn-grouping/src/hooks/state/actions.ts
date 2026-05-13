@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ActionType, GroupOption, UpdateActiveGroups, UpdateGroupOptions } from '../types';
+import type {
+  GroupOption,
+  UpdateActiveGroups,
+  UpdateGroupOptions,
+  GroupSettings,
+  UpdateGroupSettings,
+} from '../types';
+import { ActionType } from '../types';
 
 const updateActiveGroups = ({
   activeGroups,
@@ -37,7 +44,19 @@ const updateGroupOptions = ({
   type: ActionType.updateGroupOptions,
 });
 
+const updateGroupSettings = ({
+  settings,
+  id,
+}: {
+  settings?: GroupSettings;
+  id: string;
+}): UpdateGroupSettings => ({
+  payload: { settings, id },
+  type: ActionType.updateGroupSettings,
+});
+
 export const groupActions = {
   updateActiveGroups,
   updateGroupOptions,
+  updateGroupSettings,
 };

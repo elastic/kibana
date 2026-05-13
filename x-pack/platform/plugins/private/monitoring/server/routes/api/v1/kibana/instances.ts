@@ -8,7 +8,7 @@
 import { getKibanaClusterStatus } from './_get_kibana_cluster_status';
 import { getKibanas } from '../../../../lib/kibana/get_kibanas';
 import { handleError } from '../../../../lib/errors';
-import { MonitoringCore } from '../../../../types';
+import type { MonitoringCore } from '../../../../types';
 import {
   postKibanaInstancesRequestParamsRT,
   postKibanaInstancesRequestPayloadRT,
@@ -23,6 +23,12 @@ export function kibanaInstancesRoute(server: MonitoringCore) {
   server.route({
     method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/kibana/instances',
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'This route delegates authorization to the scoped ES cluster client',
+      },
+    },
     validate: {
       params: validateParams,
       body: validateBody,

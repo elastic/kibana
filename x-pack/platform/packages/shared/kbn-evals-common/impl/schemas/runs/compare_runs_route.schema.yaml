@@ -1,0 +1,92 @@
+openapi: 3.0.0
+info:
+  title: Compare Evaluation Runs API endpoint
+  version: '1'
+paths:
+  /internal/evals/runs/compare:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: CompareRuns
+      description: Compare two evaluation runs using paired t-tests
+      summary: Compare two evaluation runs
+      tags:
+        - Evals API
+      parameters:
+        - name: run_id_a
+          in: query
+          required: true
+          schema:
+            type: string
+          description: First run ID
+        - name: run_id_b
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Second run ID
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PairedTTestResult'
+                  pairing:
+                    type: object
+                    properties:
+                      totalPairs:
+                        type: integer
+                      skippedMissingPairs:
+                        type: integer
+                      skippedNullScores:
+                        type: integer
+                      truncatedA:
+                        type: boolean
+                        description: Whether Run A scores were truncated due to size limits
+                      truncatedB:
+                        type: boolean
+                        description: Whether Run B scores were truncated due to size limits
+                    required:
+                      - totalPairs
+                      - skippedMissingPairs
+                      - skippedNullScores
+                      - truncatedA
+                      - truncatedB
+                required:
+                  - results
+                  - pairing
+
+components:
+  schemas:
+    PairedTTestResult:
+      type: object
+      properties:
+        datasetId:
+          type: string
+        datasetName:
+          type: string
+        evaluatorName:
+          type: string
+        sampleSize:
+          type: integer
+        meanA:
+          type: number
+        meanB:
+          type: number
+        pValue:
+          type: number
+          nullable: true
+      required:
+        - datasetId
+        - datasetName
+        - evaluatorName
+        - sampleSize
+        - meanA
+        - meanB
+        - pValue

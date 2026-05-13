@@ -66,7 +66,6 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
     elasticsearch: {
       shardTimeout: duration('30s'),
       requestTimeout: duration('30s'),
-      pingTimeout: duration('30s'),
     },
     path: { data: '/tmp' },
     savedObjects: {
@@ -112,6 +111,7 @@ function pluginInitializerContextMock<T>(config: T = {} as T) {
       },
       instanceUuid: 'instance-uuid',
       configs: ['/some/path/to/config/kibana.yml'],
+      airgapped: false,
     },
     config: pluginInitializerContextConfigMock<T>(config),
     node: nodeServiceMock.createInternalPrebootContract(),

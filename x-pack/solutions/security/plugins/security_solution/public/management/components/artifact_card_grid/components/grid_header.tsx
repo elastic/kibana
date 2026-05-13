@@ -34,15 +34,13 @@ export const GridHeader = memo<GridHeaderProps>(
           aria-label={i18n.translate(
             'xpack.securitySolution.artifactCardGrid.expandCollapseLabel',
             {
-              defaultMessage: '{action} all cards',
-              values: {
-                action: 'unfold' ? 'Expand' : 'Collapse',
-              },
+              defaultMessage: 'Toggle all cards',
             }
           )}
+          aria-expanded={expandAllIconType === 'fold'}
           iconType={expandAllIconType}
           onClick={() => onExpandCollapseAll()}
-          style={{ marginLeft: '-5px' }}
+          css={{ marginLeft: '-5px' }}
         />
       ),
       [getTestId, expandAllIconType, onExpandCollapseAll]

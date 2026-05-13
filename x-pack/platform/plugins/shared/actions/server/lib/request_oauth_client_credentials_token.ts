@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Logger } from '@kbn/core/server';
-import { ActionsConfigurationUtilities } from '../actions_config';
-import { OAuthTokenResponse, requestOAuthToken } from './request_oauth_token';
-import { RewriteResponseCase } from '../../common';
+import type { Logger } from '@kbn/core/server';
+import type { ActionsConfigurationUtilities } from '../actions_config';
+import type { OAuthTokenResponse } from './request_oauth_token';
+import { requestOAuthToken } from './request_oauth_token';
+import type { RewriteResponseCase } from '../../common';
 
 export const OAUTH_CLIENT_CREDENTIALS_GRANT_TYPE = 'client_credentials';
 
@@ -15,6 +16,8 @@ export interface ClientCredentialsOAuthRequestParams {
   scope?: string;
   clientId?: string;
   clientSecret?: string;
+  // Additional fields
+  [key: string]: unknown;
 }
 
 const rewriteBodyRequest: RewriteResponseCase<ClientCredentialsOAuthRequestParams> = ({
@@ -31,8 +34,22 @@ export async function requestOAuthClientCredentialsToken(
   tokenUrl: string,
   logger: Logger,
   params: ClientCredentialsOAuthRequestParams,
-  configurationUtilities: ActionsConfigurationUtilities
+  configurationUtilities: ActionsConfigurationUtilities,
+  tokenEndpointAuthMethod?: 'client_secret_post' | 'client_secret_basic'
 ): Promise<OAuthTokenResponse> {
+  if (tokenEndpointAuthMethod === 'client_secret_basic') {
+    return await requestOAuthToken<
+      Omit<ClientCredentialsOAuthRequestParams, 'clientId' | 'clientSecret'>
+    >(
+      tokenUrl,
+      OAUTH_CLIENT_CREDENTIALS_GRANT_TYPE,
+      configurationUtilities,
+      logger,
+      rewriteBodyRequest(params),
+      true
+    );
+  }
+
   return await requestOAuthToken<ClientCredentialsOAuthRequestParams>(
     tokenUrl,
     OAUTH_CLIENT_CREDENTIALS_GRANT_TYPE,

@@ -40,7 +40,7 @@ export function ExceptionStacktraceTitle({
   }
 
   return (
-    <EuiTitle size="xxs">
+    <EuiTitle size="xxs" data-test-subj="exception-stacktrace-title">
       <h4>{title}</h4>
     </EuiTitle>
   );

@@ -16,11 +16,13 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { get } from 'lodash';
 import type { FC, ReactElement } from 'react';
 import React, { Fragment, useCallback, useState } from 'react';
-import styled from 'styled-components';
 
 import type { EcsSecurityExtension } from '@kbn/securitysolution-ecs';
 import { ENRICHMENT_DESTINATION_PATH } from '../../../../../../../common/constants';
@@ -35,10 +37,6 @@ import {
   SHOW_ALL_INDICATOR_MATCHES,
 } from '../translations';
 
-const SpacedContainer = styled.div`
-  margin: ${({ theme }) => theme.eui.euiSizeS} 0;
-`;
-
 export const renderThreatMatchRows: RowRenderer['renderRow'] = ({ data, scopeId }) => {
   return <ThreatMatchRowWrapper data={data} scopeId={scopeId} />;
 };
@@ -51,6 +49,7 @@ interface ThreatMatchRowProps {
 const MAX_INDICATOR_VISIBLE = 2;
 
 const ThreatMatchRowWrapper: FC<ThreatMatchRowProps> = ({ data, scopeId }) => {
+  const { euiTheme } = useEuiTheme();
   const indicators = get(data, ENRICHMENT_DESTINATION_PATH) as Fields[];
   const eventId = get(data, ID_FIELD_NAME);
 
@@ -61,21 +60,30 @@ const ThreatMatchRowWrapper: FC<ThreatMatchRowProps> = ({ data, scopeId }) => {
 
       return (
         <RowRendererContainer data-test-subj="threat-match-row-renderer">
-          <SpacedContainer>
+          <div
+            css={css`
+              margin: ${euiTheme.size.s} 0;
+            `}
+          >
             {allIndicators.map((indicator, index) => {
               const contextId = `threat-match-row-${scopeId}-${eventId}-${index}`;
               return (
                 <Fragment key={contextId}>
-                  <ThreatMatchRow contextId={contextId} data={indicator} eventId={eventId} />
+                  <ThreatMatchRow
+                    scopeId={scopeId}
+                    contextId={contextId}
+                    data={indicator}
+                    eventId={eventId}
+                  />
                   {index < indicators.length - 1 && <EuiHorizontalRule margin="s" />}
                 </Fragment>
               );
             })}
-          </SpacedContainer>
+          </div>
         </RowRendererContainer>
       );
     },
-    [indicators, eventId, scopeId]
+    [euiTheme.size.s, indicators, eventId, scopeId]
   );
 
   const renderModalChildren = useCallback(() => getThreatMatchRows('all'), [getThreatMatchRows]);
@@ -104,13 +112,18 @@ const ThreatMatchRowModal: FC<ThreatMatchRowModalProps> = ({ title, renderChildr
   const [isModalVisible, setShowModal] = useState(false);
   const closeModal = () => setShowModal(false);
   const showModal = () => setShowModal(true);
+
+  const modalTitleId = useGeneratedHtmlId();
+
   let modal;
 
   if (isModalVisible) {
     modal = (
-      <EuiModal onClose={closeModal}>
+      <EuiModal onClose={closeModal} aria-labelledby={modalTitleId}>
         <EuiModalHeader data-test-subj="threat-match-row-modal">
-          <EuiModalHeaderTitle>{ALL_INDICATOR_MATCHES_MODAL_HEADER}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>
+            {ALL_INDICATOR_MATCHES_MODAL_HEADER}
+          </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>{renderChildren()}</EuiModalBody>
         <EuiModalFooter>
@@ -126,7 +139,7 @@ const ThreatMatchRowModal: FC<ThreatMatchRowModalProps> = ({ title, renderChildr
     <div>
       <EuiButtonEmpty
         data-test-subj="threat-match-row-show-all"
-        iconType="popout"
+        iconType="external"
         color="primary"
         onClick={showModal}
       >

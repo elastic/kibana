@@ -5,25 +5,39 @@
  * 2.0.
  */
 
-import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  PluginConfigDescriptor,
+  PluginInitializer,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import type { InferenceConfig } from './config';
+import { configSchema } from './config';
 import type {
   InferenceServerSetup,
   InferenceServerStart,
   InferenceSetupDependencies,
   InferenceStartDependencies,
 } from './types';
-import { InferencePlugin } from './plugin';
 
-export type { InferenceClient, BoundInferenceClient } from './inference_client';
 export type { InferenceServerSetup, InferenceServerStart };
+export type { InferenceEndpoint } from './util/get_inference_endpoints';
 
-export { naturalLanguageToEsql } from './tasks/nl_to_esql';
+export {
+  naturalLanguageToEsql,
+  EsqlDocumentBase,
+  runAndValidateEsqlQuery,
+} from './tasks/nl_to_esql';
 
 export const plugin: PluginInitializer<
   InferenceServerSetup,
   InferenceServerStart,
   InferenceSetupDependencies,
   InferenceStartDependencies
-> = async (pluginInitializerContext: PluginInitializerContext<InferenceConfig>) =>
-  new InferencePlugin(pluginInitializerContext);
+> = async (pluginInitializerContext: PluginInitializerContext<InferenceConfig>) => {
+  const { InferencePlugin } = await import('./plugin');
+  return new InferencePlugin(pluginInitializerContext);
+};
+
+export const config: PluginConfigDescriptor<InferenceConfig> = {
+  schema: configSchema,
+};

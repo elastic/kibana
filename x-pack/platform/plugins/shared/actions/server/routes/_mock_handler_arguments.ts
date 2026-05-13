@@ -5,24 +5,33 @@
  * 2.0.
  */
 
-import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { identity } from 'lodash';
 import type { MethodKeysOf } from '@kbn/utility-types';
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { ActionsRequestHandlerContext } from '../types';
+import type { ActionsRequestHandlerContext } from '../types';
 import { actionsClientMock } from '../mocks';
-import { ActionsClientMock } from '../actions_client/actions_client.mock';
-import { ConnectorType } from '../application/connector/types';
+import type { ActionsClientMock } from '../actions_client/actions_client.mock';
+import type { ConnectorType } from '../application/connector/types';
 
 export function mockHandlerArguments(
   {
     actionsClient = actionsClientMock.create(),
     listTypes: listTypesRes = [],
-  }: { actionsClient?: ActionsClientMock; listTypes?: ConnectorType[] },
+    getCurrentUser,
+    getSkippedPreconfiguredConnectorIds = () => new Set<string>(),
+  }: {
+    actionsClient?: ActionsClientMock;
+    listTypes?: ConnectorType[];
+    getCurrentUser?: jest.Mock;
+    getSkippedPreconfiguredConnectorIds?: () => Set<string>;
+  },
   request: unknown,
   response?: Array<MethodKeysOf<KibanaResponseFactory>>
 ): [ActionsRequestHandlerContext, KibanaRequest<unknown, unknown, unknown>, KibanaResponseFactory] {
   const listTypes = jest.fn(() => listTypesRes);
+  const getUser = getCurrentUser ?? jest.fn().mockReturnValue(null);
+  const getCurrentProfile = jest.fn().mockResolvedValue(null);
   return [
     {
       actions: {
@@ -38,7 +47,18 @@ export function mockHandlerArguments(
             }
           );
         },
+        getSkippedPreconfiguredConnectorIds,
       },
+      core: Promise.resolve({
+        security: {
+          authc: {
+            getCurrentUser: getUser,
+          },
+        },
+        userProfile: {
+          getCurrent: getCurrentProfile,
+        },
+      }),
     } as unknown as ActionsRequestHandlerContext,
     request as KibanaRequest<unknown, unknown, unknown>,
     mockResponseFactory(response),

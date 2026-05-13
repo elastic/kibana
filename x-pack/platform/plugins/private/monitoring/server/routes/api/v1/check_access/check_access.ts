@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { verifyMonitoringAuth } from '../../../../lib/elasticsearch/verify_monitoring_auth';
 import { handleError } from '../../../../lib/errors';
-import { LegacyRequest, MonitoringCore } from '../../../../types';
+import type { LegacyRequest, MonitoringCore } from '../../../../types';
 
 /*
  * API for checking read privilege on Monitoring Data
@@ -20,6 +20,12 @@ export function checkAccessRoute(server: MonitoringCore) {
   server.route({
     method: 'get',
     path: '/api/monitoring/v1/check_access',
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'This route delegates authorization to the scoped ES cluster client',
+      },
+    },
     validate: {},
     options: {
       access: 'internal',

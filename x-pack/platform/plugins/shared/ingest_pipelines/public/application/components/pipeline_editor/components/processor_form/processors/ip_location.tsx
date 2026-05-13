@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
@@ -21,14 +22,19 @@ import {
 import { useKibana } from '../../../../../../shared_imports';
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
-import { FieldsConfig, from, to } from './shared';
+import type { FieldsConfig } from './shared';
+import { from, to } from './shared';
 import { TargetField } from './common_fields/target_field';
 import { PropertiesField } from './common_fields/properties_field';
 import type { GeoipDatabase } from '../../../../../../../common/types';
-import { getDatabaseText, getDatabaseValue } from '../../../../../sections/manage_processors/utils';
+import {
+  getDatabaseOptionLabel,
+  getDatabaseText,
+  getDatabaseValue,
+  normalizeMmdbFilename,
+  MMDB_EXTENSION,
+} from '../../../../../sections/manage_processors/utils';
 import { getTypeLabel } from '../../../../../sections/manage_processors/constants';
-
-const extension = '.mmdb';
 
 const fieldsConfig: FieldsConfig = {
   /* Optional field config */
@@ -36,15 +42,23 @@ const fieldsConfig: FieldsConfig = {
     type: FIELD_TYPES.COMBO_BOX,
     deserializer: (v: unknown) =>
       to.arrayOfStrings(v).map((str) => {
-        const databaseName = str?.split(extension)[0];
-        // Use the translated text for this database, if it exists
-        return getDatabaseText(databaseName) ?? databaseName;
+        const databaseName = str.split(MMDB_EXTENSION)[0];
+        const knownDatabaseText = getDatabaseText(databaseName);
+        // Known managed DB → return display text (e.g. "ASN" for standard_asn)
+        // Local DB → return full filename (e.g. "ASN.mmdb") to match the combo box label
+        return knownDatabaseText ?? str;
       }),
     serializer: (v: any[]) => {
       if (v.length) {
         const databaseName = v[0];
+        // Local databases have the extension already in the label
+        if (typeof databaseName === 'string' && databaseName.endsWith(MMDB_EXTENSION)) {
+          return normalizeMmdbFilename(databaseName);
+        }
         const databaseValue = getDatabaseValue(databaseName);
-        return databaseValue ? `${databaseValue}${extension}` : `${databaseName}${extension}`;
+        return databaseValue
+          ? `${databaseValue}${MMDB_EXTENSION}`
+          : `${databaseName}${MMDB_EXTENSION}`;
       }
       return undefined;
     },
@@ -90,8 +104,8 @@ export const IpLocation: FunctionComponent = () => {
   const dataAsOptions = (data || []).map((item) => ({
     id: item.id,
     type: item.type,
-    // Use the translated text for this database, if it exists
-    label: getDatabaseText(item.name) ?? item.name,
+    // Use the name of the database file for local databases and the translated text for others, if it exists
+    label: getDatabaseOptionLabel(item),
   }));
   const optionsByGroup = groupBy(dataAsOptions, 'type');
   const groupedOptions = map(optionsByGroup, (items, groupName) => ({

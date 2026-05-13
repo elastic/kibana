@@ -6,18 +6,17 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiFieldNumber, EuiRange, EuiButtonEmpty, EuiLink, EuiText } from '@elastic/eui';
-import { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import type { FormBasedLayer } from '../../../types';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
+import { mountWithProviders } from '../../../../../test_utils/test_utils';
+import type { FormBasedLayer, RangeIndexPatternColumn, IndexPattern } from '@kbn/lens-common';
 import { rangeOperation } from '..';
-import { RangeIndexPatternColumn } from './ranges';
 import {
   MODES,
   DEFAULT_INTERVAL,
@@ -28,7 +27,6 @@ import {
 import { RangePopover } from './advanced_editor';
 import { DragDropBuckets } from '@kbn/visualization-ui-components';
 import { getFieldByNameFactory } from '../../../pure_helpers';
-import { IndexPattern } from '../../../../../types';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {
@@ -55,7 +53,7 @@ jest.mock('lodash', () => {
 });
 
 const dataPluginMockValue = dataPluginMock.createStartContract();
-const unifiedSearchPluginMockValue = unifiedSearchPluginMock.createStartContract();
+const kqlPluginMockValue = kqlPluginMock.createStartContract();
 const fieldFormatsPluginMockValue = fieldFormatsServiceMock.createStartContract();
 const dataViewsPluginMockValue = dataViewPluginMocks.createStartContract();
 // need to overwrite the formatter field first
@@ -91,7 +89,7 @@ const defaultOptions = {
   },
   data: dataPluginMockValue,
   fieldFormats: fieldFormatsPluginMockValue,
-  unifiedSearch: unifiedSearchPluginMockValue,
+  kql: kqlPluginMockValue,
   dataViews: dataViewsPluginMockValue,
   http: {} as HttpSetup,
   indexPattern: {
@@ -137,14 +135,12 @@ describe('ranges', () => {
   function setToHistogramMode() {
     const column = layer.columns.col1 as RangeIndexPatternColumn;
     column.dataType = 'number';
-    column.scale = 'interval';
     column.params.type = MODES.Histogram;
   }
 
   function setToRangeMode() {
     const column = layer.columns.col1 as RangeIndexPatternColumn;
     column.dataType = 'string';
-    column.scale = 'ordinal';
     column.params.type = MODES.Range;
   }
 
@@ -158,7 +154,6 @@ describe('ranges', () => {
           label: sourceField,
           dataType: 'number',
           operationType: 'range',
-          scale: 'interval',
           isBucketed: true,
           sourceField,
           params: {
@@ -376,7 +371,7 @@ describe('ranges', () => {
 
       it('should start update the state with the default maxBars value', () => {
         const updateLayerSpy = jest.fn();
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -392,7 +387,7 @@ describe('ranges', () => {
       it('should update state when changing Max bars number', () => {
         const updateLayerSpy = jest.fn();
 
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -435,7 +430,7 @@ describe('ranges', () => {
       it('should update the state using the plus or minus buttons by the step amount', () => {
         const updateLayerSpy = jest.fn();
 
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -505,7 +500,7 @@ describe('ranges', () => {
       it('should show one range interval to start with', () => {
         const updateLayerSpy = jest.fn();
 
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -521,7 +516,7 @@ describe('ranges', () => {
       it('should use the parentFormat to create the trigger label', () => {
         const updateLayerSpy = jest.fn();
 
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -532,7 +527,7 @@ describe('ranges', () => {
         );
 
         expect(
-          instance.find('[data-test-subj="indexPattern-ranges-popover-trigger"]').first().text()
+          instance.find('[data-test-subj="dataView-ranges-popover-trigger"]').first().text()
         ).toBe('0 - 1000');
       });
 
@@ -541,7 +536,7 @@ describe('ranges', () => {
         // we intercept the formatter without an id assigned an print "Error"
         const updateLayerSpy = jest.fn();
 
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -560,14 +555,14 @@ describe('ranges', () => {
         );
 
         expect(
-          instance.find('[data-test-subj="indexPattern-ranges-popover-trigger"]').first().text()
+          instance.find('[data-test-subj="dataView-ranges-popover-trigger"]').first().text()
         ).not.toBe('Error');
       });
 
       it('should add a new range', () => {
         const updateLayerSpy = jest.fn();
 
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -621,7 +616,7 @@ describe('ranges', () => {
       it('should add a new range with custom label', () => {
         const updateLayerSpy = jest.fn();
 
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -674,7 +669,7 @@ describe('ranges', () => {
       it('should open a popover to edit an existing range', () => {
         const updateLayerSpy = jest.fn();
 
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -721,7 +716,7 @@ describe('ranges', () => {
       it('should not accept invalid ranges', () => {
         const updateLayerSpy = jest.fn();
 
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -771,7 +766,7 @@ describe('ranges', () => {
           label: '',
         });
 
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -809,7 +804,7 @@ describe('ranges', () => {
           label: '',
         });
 
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -841,7 +836,7 @@ describe('ranges', () => {
       it('should correctly handle the default formatter for the field', () => {
         const updateLayerSpy = jest.fn();
 
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -871,7 +866,7 @@ describe('ranges', () => {
           params: { decimals: 0 },
         };
 
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -895,7 +890,7 @@ describe('ranges', () => {
       it('should not update the state on mount', () => {
         const updateLayerSpy = jest.fn();
 
-        mount(
+        mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}
@@ -915,7 +910,7 @@ describe('ranges', () => {
           params: { decimals: 3 },
         };
 
-        const instance = mount(
+        const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
             layer={layer}

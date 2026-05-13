@@ -7,7 +7,6 @@
 
 import { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../hooks/use_tracked_promise';
@@ -34,15 +33,16 @@ const errorMessages: Record<ActionType, string> = {
   }),
 };
 export const useUpdateCustomDashboard = () => {
-  const { services } = useKibanaContextForPlugin();
-  const { notifications } = useKibana();
+  const {
+    services: { http, notifications },
+  } = useKibanaContextForPlugin();
 
   const onError = useCallback(
     (errorMessage: string) => {
       if (errorMessage) {
-        notifications.toasts.danger({
+        notifications.toasts.addDanger({
           title: errorMessages.update,
-          body: errorMessage,
+          text: errorMessage,
         });
       }
     },
@@ -58,17 +58,14 @@ export const useUpdateCustomDashboard = () => {
         dashboardSavedObjectId,
         dashboardFilterAssetIdEnabled,
       }: InfraSavedCustomDashboard) => {
-        const rawResponse = await services.http.fetch(
-          `/api/infra/${assetType}/custom-dashboards/${id}`,
-          {
-            method: 'PUT',
-            body: JSON.stringify({
-              assetType,
-              dashboardSavedObjectId,
-              dashboardFilterAssetIdEnabled,
-            }),
-          }
-        );
+        const rawResponse = await http.fetch(`/api/infra/${assetType}/custom-dashboards/${id}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            assetType,
+            dashboardSavedObjectId,
+            dashboardFilterAssetIdEnabled,
+          }),
+        });
 
         return decodeOrThrow(InfraCustomDashboardRT)(rawResponse);
       },
@@ -90,15 +87,16 @@ export const useUpdateCustomDashboard = () => {
 };
 
 export const useDeleteCustomDashboard = () => {
-  const { services } = useKibanaContextForPlugin();
-  const { notifications } = useKibana();
+  const {
+    services: { http, notifications },
+  } = useKibanaContextForPlugin();
 
   const onError = useCallback(
     (errorMessage: string) => {
       if (errorMessage) {
-        notifications.toasts.danger({
+        notifications.toasts.addDanger({
           title: errorMessages.delete,
-          body: errorMessage,
+          text: errorMessage,
         });
       }
     },
@@ -115,12 +113,9 @@ export const useDeleteCustomDashboard = () => {
         assetType: InfraCustomDashboardAssetType;
         id: string;
       }) => {
-        const rawResponse = await services.http.fetch(
-          `/api/infra/${assetType}/custom-dashboards/${id}`,
-          {
-            method: 'DELETE',
-          }
-        );
+        const rawResponse = await http.fetch(`/api/infra/${assetType}/custom-dashboards/${id}`, {
+          method: 'DELETE',
+        });
 
         return decodeOrThrow(InfraDeleteCustomDashboardsResponseBodyRT)(rawResponse);
       },
@@ -142,15 +137,16 @@ export const useDeleteCustomDashboard = () => {
 };
 
 export const useCreateCustomDashboard = () => {
-  const { services } = useKibanaContextForPlugin();
-  const { notifications } = useKibana();
+  const {
+    services: { http, notifications },
+  } = useKibanaContextForPlugin();
 
   const onError = useCallback(
     (errorMessage: string) => {
       if (errorMessage) {
-        notifications.toasts.danger({
+        notifications.toasts.addDanger({
           title: errorMessages.delete,
-          body: errorMessage,
+          text: errorMessage,
         });
       }
     },
@@ -165,7 +161,7 @@ export const useCreateCustomDashboard = () => {
         dashboardSavedObjectId,
         dashboardFilterAssetIdEnabled,
       }: InfraCustomDashboard) => {
-        const rawResponse = await services.http.fetch(`/api/infra/${assetType}/custom-dashboards`, {
+        const rawResponse = await http.fetch(`/api/infra/${assetType}/custom-dashboards`, {
           method: 'POST',
           body: JSON.stringify({
             dashboardSavedObjectId,

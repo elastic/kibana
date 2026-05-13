@@ -97,7 +97,11 @@ export const registerContentInsights = (
               },
             },
           }
-        : {}),
+        : {
+            security: {
+              authz: { enabled: false, reason: 'Route delegates authorization to the SO Client' },
+            },
+          }),
     },
     async (context, req, res) => {
       const { id, eventType } = req.params;
@@ -122,7 +126,11 @@ export const registerContentInsights = (
               },
             },
           }
-        : {}),
+        : {
+            security: {
+              authz: { enabled: false, reason: 'Route delegates authorization to the SO Client' },
+            },
+          }),
     },
     async (context, req, res) => {
       const { id, eventType } = req.params;

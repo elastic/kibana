@@ -34,8 +34,11 @@ export function useInput(
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
       const newValue = e.target.value;
       setValue(newValue);
-      if (errors && validate && validate(newValue) === undefined) {
-        setErrors(undefined);
+      if (errors && validate) {
+        const newErrors = validate(newValue);
+        if (newErrors?.join() !== errors.join()) {
+          setErrors(newErrors);
+        }
       }
     },
     [errors, validate]
@@ -78,6 +81,7 @@ export function useInput(
       return true;
     },
     setValue,
+    setErrors,
     hasChanged,
   };
 }
@@ -97,8 +101,11 @@ export function useSecretInput(
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
       const newValue = e.target.value;
       setValue(newValue);
-      if (errors && validate && validate(newValue) === undefined) {
-        setErrors(undefined);
+      if (errors && validate) {
+        const newErrors = validate(newValue);
+        if (newErrors?.join() !== errors.join()) {
+          setErrors(newErrors);
+        }
       }
     },
     [errors, validate]
@@ -133,9 +140,10 @@ export function useSecretInput(
         setValue('');
       },
     },
-    cancelEdit: () => {
+    cancelEdit: useCallback(() => {
       setValue(initialValue || '');
-    },
+      setErrors(undefined);
+    }, [initialValue]),
     validate: () => {
       if (validate) {
         const newErrors = validate(value);
@@ -146,6 +154,7 @@ export function useSecretInput(
       return true;
     },
     setValue,
+    setErrors,
     hasChanged,
   };
 }
@@ -173,6 +182,7 @@ export function useRadioInput(defaultValue: string, disabled = false) {
     setValue,
     value,
     hasChanged,
+    validate: () => true,
   };
 }
 

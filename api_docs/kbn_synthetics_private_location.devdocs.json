@@ -38,6 +38,8 @@
           " | undefined) => Promise<void>"
         ],
         "path": "x-pack/packages/kbn-synthetics-private-location/src/cli.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -59,7 +61,10 @@
               " | undefined"
             ],
             "path": "x-pack/packages/kbn-synthetics-private-location/src/cli.ts",
+            "lineNumber": 13,
+            "columnNumber": 27,
             "deprecated": false,
+            "docsReferencedTypeName": "CliOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -94,6 +99,8 @@
           ") => Promise<void>"
         ],
         "path": "x-pack/packages/kbn-synthetics-private-location/src/run.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -114,7 +121,10 @@
               }
             ],
             "path": "x-pack/packages/kbn-synthetics-private-location/src/run.ts",
+            "lineNumber": 16,
+            "columnNumber": 27,
             "deprecated": false,
+            "docsReferencedTypeName": "CliOptions",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -135,7 +145,10 @@
               }
             ],
             "path": "x-pack/packages/kbn-synthetics-private-location/src/run.ts",
+            "lineNumber": 16,
+            "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -153,6 +166,8 @@
         "label": "CliOptions",
         "description": [],
         "path": "x-pack/packages/kbn-synthetics-private-location/src/types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -164,6 +179,8 @@
             "label": "locationName",
             "description": [],
             "path": "x-pack/packages/kbn-synthetics-private-location/src/types.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -175,6 +192,8 @@
             "label": "agentPolicyName",
             "description": [],
             "path": "x-pack/packages/kbn-synthetics-private-location/src/types.ts",
+            "lineNumber": 10,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -186,6 +205,8 @@
             "label": "kibanaUrl",
             "description": [],
             "path": "x-pack/packages/kbn-synthetics-private-location/src/types.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -197,6 +218,8 @@
             "label": "kibanaUsername",
             "description": [],
             "path": "x-pack/packages/kbn-synthetics-private-location/src/types.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -208,6 +231,8 @@
             "label": "kibanaPassword",
             "description": [],
             "path": "x-pack/packages/kbn-synthetics-private-location/src/types.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -219,6 +244,8 @@
             "label": "elasticsearchHost",
             "description": [],
             "path": "x-pack/packages/kbn-synthetics-private-location/src/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -237,6 +264,8 @@
         "label": "DEFAULTS",
         "description": [],
         "path": "x-pack/packages/kbn-synthetics-private-location/src/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -248,6 +277,8 @@
             "label": "LOCATION_NAME",
             "description": [],
             "path": "x-pack/packages/kbn-synthetics-private-location/src/constants.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -259,6 +290,8 @@
             "label": "AGENT_POLICY_NAME",
             "description": [],
             "path": "x-pack/packages/kbn-synthetics-private-location/src/constants.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -270,6 +303,8 @@
             "label": "ELASTICSEARCH_HOST",
             "description": [],
             "path": "x-pack/packages/kbn-synthetics-private-location/src/constants.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -281,6 +316,8 @@
             "label": "KIBANA_URL",
             "description": [],
             "path": "x-pack/packages/kbn-synthetics-private-location/src/constants.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -292,6 +329,8 @@
             "label": "KIBANA_USERNAME",
             "description": [],
             "path": "x-pack/packages/kbn-synthetics-private-location/src/constants.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -303,6 +342,8 @@
             "label": "KIBANA_PASSWORD",
             "description": [],
             "path": "x-pack/packages/kbn-synthetics-private-location/src/constants.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

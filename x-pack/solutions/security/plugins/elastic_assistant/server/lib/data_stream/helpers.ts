@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import { IIndexPatternString } from '../../types';
+import type { IIndexPatternString } from '../../types';
 
 export const getIndexTemplateAndPattern = (
   context: string,

@@ -9,7 +9,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { LABEL_POSITIONS } from '../../../../../../common/constants';
 import { LabelPositionEditor } from './label_position_editor';
-import { LabelPositionProperty } from '../../properties/label_position_property';
+import type { LabelPositionProperty } from '../../properties/label_position_property';
 
 const defaultProps = {
   handlePropertyChange: () => {},

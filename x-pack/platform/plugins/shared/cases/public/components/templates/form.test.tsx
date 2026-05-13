@@ -8,8 +8,8 @@
 import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, mockedTestProvidersOwner } from '../../common/mock';
+
+import { mockedTestProvidersOwner, renderWithTestingProviders } from '../../common/mock';
 import {
   MAX_TAGS_PER_TEMPLATE,
   MAX_TEMPLATE_DESCRIPTION_LENGTH,
@@ -40,7 +40,7 @@ const SubmitButtonMock = ({ submit }: { submit: FormState<TemplateFormProps>['su
 
 describe('TemplateForm', () => {
   let user: UserEvent;
-  let appMockRenderer: AppMockRenderer;
+
   const defaultProps = {
     connectors: connectorsMock,
     currentConfiguration: {
@@ -75,18 +75,18 @@ describe('TemplateForm', () => {
     jest.clearAllMocks();
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    appMockRenderer = createAppMockRenderer();
+
     useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
   });
 
   it('renders correctly', async () => {
-    appMockRenderer.render(<TemplateForm {...defaultProps} />);
+    renderWithTestingProviders(<TemplateForm {...defaultProps} />);
 
     expect(await screen.findByTestId('template-creation-form-steps')).toBeInTheDocument();
   });
 
   it('renders all default fields', async () => {
-    appMockRenderer.render(<TemplateForm {...defaultProps} />);
+    renderWithTestingProviders(<TemplateForm {...defaultProps} />);
 
     expect(await screen.findByTestId('template-name-input')).toBeInTheDocument();
     expect(await screen.findByTestId('template-description-input')).toBeInTheDocument();
@@ -109,7 +109,7 @@ describe('TemplateForm', () => {
         caseFields: null,
       },
     };
-    appMockRenderer.render(<TemplateForm {...newProps} />);
+    renderWithTestingProviders(<TemplateForm {...newProps} />);
 
     expect(await screen.findByTestId('template-name-input')).toHaveValue('Template 1');
     expect(await screen.findByTestId('template-description-input')).toHaveValue(
@@ -137,7 +137,7 @@ describe('TemplateForm', () => {
         },
       },
     };
-    appMockRenderer.render(<TemplateForm {...newProps} />);
+    renderWithTestingProviders(<TemplateForm {...newProps} />);
 
     expect(await within(await screen.findByTestId('caseTitle')).findByTestId('input')).toHaveValue(
       'Case with template 1'
@@ -150,7 +150,7 @@ describe('TemplateForm', () => {
   });
 
   it('renders case fields as optional', async () => {
-    appMockRenderer.render(<TemplateForm {...defaultProps} />);
+    renderWithTestingProviders(<TemplateForm {...defaultProps} />);
 
     const title = await screen.findByTestId('caseTitle');
     const tags = await screen.findByTestId('caseTags');
@@ -165,12 +165,12 @@ describe('TemplateForm', () => {
 
   // TODO: This test needs revisiting, it likely times out because of slow user events after
   // the upgrade to user-event v14 (https://github.com/elastic/kibana/pull/189949)
-  it.skip('serializes the template field data correctly', async () => {
+  it('serializes the template field data correctly', async () => {
     let formState: FormState<TemplateFormProps>;
 
     const onChangeState = (state: FormState<TemplateFormProps>) => (formState = state);
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <>
         <TemplateForm {...{ ...defaultProps, onChange: onChangeState }} />
         <SubmitButtonMock submit={() => formState!.submit()} />
@@ -238,7 +238,7 @@ describe('TemplateForm', () => {
       isEditMode: true,
     };
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <>
         <TemplateForm {...newProps} />
         <SubmitButtonMock submit={() => formState!.submit()} />
@@ -284,7 +284,7 @@ describe('TemplateForm', () => {
 
     const onChangeState = (state: FormState<TemplateFormProps>) => (formState = state);
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <>
         <TemplateForm
           {...{
@@ -365,7 +365,7 @@ describe('TemplateForm', () => {
       isEditMode: true,
     };
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <>
         <TemplateForm {...newProps} />
         <SubmitButtonMock submit={() => formState!.submit()} />
@@ -415,7 +415,7 @@ describe('TemplateForm', () => {
 
     const onChangeState = (state: FormState<TemplateFormProps>) => (formState = state);
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <>
         <TemplateForm
           {...{
@@ -437,10 +437,9 @@ describe('TemplateForm', () => {
       </>
     );
 
-    await waitFor(async () => {
-      expect(await screen.findByTestId('caseConnectors')).toBeInTheDocument();
-      expect(formState).not.toBeUndefined();
-    });
+    expect(await screen.findByTestId('caseConnectors')).toBeInTheDocument();
+
+    expect(formState!).not.toBeUndefined();
 
     const submitSpy = jest.spyOn(formState!, 'submit');
     await user.click(screen.getByText('testSubmit'));
@@ -505,7 +504,7 @@ describe('TemplateForm', () => {
       isEditMode: true,
     };
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <>
         <TemplateForm {...newProps} />
         <SubmitButtonMock submit={() => formState!.submit()} />
@@ -561,7 +560,7 @@ describe('TemplateForm', () => {
 
     const onChangeState = (state: FormState<TemplateFormProps>) => (formState = state);
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <>
         <TemplateForm
           {...{
@@ -714,7 +713,7 @@ describe('TemplateForm', () => {
         customFields: customFieldsConfigurationMock,
       },
     };
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <>
         <TemplateForm {...newProps} />
         <SubmitButtonMock submit={() => formState!.submit()} />
@@ -787,7 +786,7 @@ describe('TemplateForm', () => {
 
     const onChangeState = (state: FormState<TemplateFormProps>) => (formState = state);
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <>
         <TemplateForm {...{ ...defaultProps, onChange: onChangeState }} />
         <SubmitButtonMock submit={() => formState!.submit()} />
@@ -819,7 +818,7 @@ describe('TemplateForm', () => {
 
     const onChangeState = (state: FormState<TemplateFormProps>) => (formState = state);
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <>
         <TemplateForm {...{ ...defaultProps, onChange: onChangeState }} />
         <SubmitButtonMock submit={() => formState!.submit()} />
@@ -853,7 +852,7 @@ describe('TemplateForm', () => {
 
     const onChangeState = (state: FormState<TemplateFormProps>) => (formState = state);
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <>
         <TemplateForm {...{ ...defaultProps, onChange: onChangeState }} />
         <SubmitButtonMock submit={() => formState!.submit()} />
@@ -887,7 +886,7 @@ describe('TemplateForm', () => {
 
     const onChangeState = (state: FormState<TemplateFormProps>) => (formState = state);
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <>
         <TemplateForm {...{ ...defaultProps, onChange: onChangeState }} />
         <SubmitButtonMock submit={() => formState!.submit()} />
@@ -926,7 +925,7 @@ describe('TemplateForm', () => {
 
     const onChangeState = (state: FormState<TemplateFormProps>) => (formState = state);
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <>
         <TemplateForm {...{ ...defaultProps, onChange: onChangeState }} />
         <SubmitButtonMock submit={() => formState!.submit()} />

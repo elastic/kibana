@@ -7,12 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RouteDependencies } from './types';
+import type { RouteDependencies } from './types';
 import { BASE_API_ROUTE } from '../common';
 
 export const registerRoutes = ({ router, log, screenshotMode }: RouteDependencies) => {
   router.get(
-    { path: `${BASE_API_ROUTE}/check_is_screenshot`, validate: false },
+    {
+      path: `${BASE_API_ROUTE}/check_is_screenshot`,
+      validate: false,
+      security: {
+        authz: { enabled: false, reason: 'Screenshot api is public' },
+      },
+    },
     async (ctx, req, res) => {
       log.info(`Reading screenshot mode from a request: ${screenshotMode.isScreenshotMode(req)}`);
       log.info(`Reading is screenshot mode from ctx: ${(await ctx.screenshotMode).isScreenshot}`);

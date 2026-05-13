@@ -18,11 +18,11 @@ import type {
   TimeSeriesExplorerAppState,
   TimeSeriesExplorerGlobalState,
   TimeSeriesExplorerUrlState,
-} from '../../../common/types/locator';
-import { ML_PAGES } from '../../../common/constants/locator';
+} from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import type { AppPageState } from '@kbn/ml-common-types/common';
 import { formatGenericMlUrl } from './common';
 import { getGroupQueryText, getJobQueryText } from '../../../common/util/string_utils';
-import type { AppPageState } from '../../../common/types/common';
 
 /**
  * Creates URL to the Anomaly Detection Job management page
@@ -31,7 +31,7 @@ export function formatAnomalyDetectionJobManagementUrl(
   appBasePath: string,
   params: AnomalyDetectionUrlState['pageState']
 ): string {
-  let url = `${appBasePath}/${ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE}`;
+  let url = `${appBasePath}`;
   if (!params || isEmpty(params)) {
     return url;
   }
@@ -49,7 +49,7 @@ export function formatAnomalyDetectionJobManagementUrl(
     };
 
     const queryState: AppPageState<ListingPageUrlState> = {
-      [ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE]: jobsListState,
+      [ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE_FOR_URL]: jobsListState,
     };
 
     url = setStateToKbnUrl<AppPageState<ListingPageUrlState>>(

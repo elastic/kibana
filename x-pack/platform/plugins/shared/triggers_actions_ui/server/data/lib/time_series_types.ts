@@ -9,7 +9,8 @@
 // and associated HTTP endpoint.
 
 import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import {
@@ -42,6 +43,8 @@ export const TimeSeriesQuerySchema = schema.object(
     // this value indicates the amount of time between time series dates
     // that will be calculated.
     interval: schema.maybe(schema.string({ validate: validateDuration })),
+    // Cross-project search (serverless): aligns ES scope with the CPS picker / _indices route.
+    project_routing: schema.maybe(schema.string()),
   },
   {
     validate: validateBody,

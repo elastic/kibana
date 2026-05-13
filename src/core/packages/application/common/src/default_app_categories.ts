@@ -44,6 +44,14 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     order: 4000,
     euiIconType: 'logoSecurity',
   },
+  workplaceAI: {
+    id: 'workplaceAI',
+    label: i18n.translate('core.ui.workplaceAINavList.label', {
+      defaultMessage: 'Workplace AI',
+    }),
+    order: 4500,
+    euiIconType: 'logoElasticsearch',
+  },
   management: {
     id: 'management',
     label: i18n.translate('core.ui.managementNavList.label', {

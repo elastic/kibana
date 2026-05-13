@@ -10,8 +10,9 @@
 
 const MAX_INDICES = 20;
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import {
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type {
   IRouter,
   RequestHandlerContext,
   KibanaRequest,
@@ -19,10 +20,11 @@ import {
   KibanaResponseFactory,
   ElasticsearchClient,
 } from '@kbn/core/server';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 
 const bodySchema = schema.object({
   pattern: schema.string(),
+  project_routing: schema.maybe(schema.string()),
 });
 
 type RequestBody = TypeOf<typeof bodySchema>;
@@ -55,6 +57,7 @@ export function createIndicesRoute(logger: Logger, router: IRouter, baseRoute: s
     res: KibanaResponseFactory
   ): Promise<IKibanaResponse> {
     const pattern = req.body.pattern;
+    const projectRouting = req.body.project_routing;
     const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
     logger.debug(() => `route ${path} request: ${JSON.stringify(req.body)}`);
 
@@ -71,7 +74,7 @@ export function createIndicesRoute(logger: Logger, router: IRouter, baseRoute: s
 
     let indices: string[] = [];
     try {
-      indices = await getIndicesFromPattern(esClient, pattern);
+      indices = await getIndicesFromPattern(esClient, pattern, projectRouting);
     } catch (err) {
       logger.warn(`route ${path} error getting indices from pattern "${pattern}": ${err.message}`);
     }
@@ -101,12 +104,14 @@ function uniqueCombined(list1: string[], list2: string[], list3: string[], limit
 
 async function getIndicesFromPattern(
   esClient: ElasticsearchClient,
-  pattern: string
+  pattern: string,
+  projectRouting?: string
 ): Promise<string[]> {
   const params = {
     index: pattern,
     ignore_unavailable: true,
-    size: 0, // no hits
+    size: 0,
+    ...(projectRouting ? { project_routing: projectRouting } : {}),
     aggs: {
       indices: {
         terms: {

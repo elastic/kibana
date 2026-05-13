@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { IEventLogClient } from '@kbn/event-log-plugin/server';
+import type { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import type { IEventLogClient } from '@kbn/event-log-plugin/server';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
-import { ConstructorOptions } from '../rules_client';
-import { RuleTypeRegistry } from '../../rule_type_registry';
+import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
+import type { ConstructorOptions } from '../rules_client';
+import type { RuleTypeRegistry } from '../../rule_type_registry';
 import { RecoveredActionGroup } from '../../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
@@ -56,7 +57,7 @@ export function getBeforeSetup(
     uiSettingsServiceMock.createStartContract().asScopedToClient;
   rulesClientParams.createAPIKey.mockResolvedValue({ apiKeysEnabled: false });
   rulesClientParams.getUserName.mockResolvedValue('elastic');
-  taskManager.runSoon.mockResolvedValue({ id: '' });
+  taskManager.runSoon.mockResolvedValue({ id: '', forced: false });
   taskManager.get.mockResolvedValue({
     id: 'task-123',
     taskType: 'alerting:123',
@@ -79,36 +80,28 @@ export function getBeforeSetup(
   const actionsClient = actionsClientMock.create();
 
   actionsClient.getBulk.mockResolvedValueOnce([
-    {
+    createMockConnector({
       id: '1',
-      isPreconfigured: false,
-      isSystemAction: false,
-      isDeprecated: false,
       actionTypeId: 'test',
       name: 'test',
       config: {
         foo: 'bar',
       },
-    },
-    {
+    }),
+    createMockConnector({
       id: '2',
-      isPreconfigured: false,
-      isSystemAction: false,
-      isDeprecated: false,
       actionTypeId: 'test2',
       name: 'test2',
       config: {
         foo: 'bar',
       },
-    },
-    {
+    }),
+    createMockConnector({
       id: 'testPreconfigured',
       actionTypeId: '.slack',
       isPreconfigured: true,
-      isSystemAction: false,
-      isDeprecated: false,
       name: 'test',
-    },
+    }),
   ]);
   rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);
 
@@ -125,6 +118,7 @@ export function getBeforeSetup(
     },
     category: 'test',
     producer: 'alerts',
+    solution: 'stack',
     validate: {
       params: { validate: (params) => params },
     },
@@ -135,4 +129,6 @@ export function getBeforeSetup(
   );
 
   rulesClientParams.isSystemAction.mockImplementation((id) => id === 'system_action-id');
+
+  ruleTypeRegistry.list.mockReturnValue(new Map());
 }

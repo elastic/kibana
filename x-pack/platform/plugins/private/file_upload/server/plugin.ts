@@ -6,13 +6,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { UI_SETTING_MAX_FILE_SIZE, MAX_FILE_SIZE } from '@kbn/file-upload-common/src/constants';
 import { fileUploadRoutes } from './routes';
 import { initFileUploadTelemetry } from './telemetry';
-import { MAX_FILE_SIZE, UI_SETTING_MAX_FILE_SIZE } from '../common/constants';
 import { setupCapabilities } from './capabilities';
-import { StartDeps, SetupDeps } from './types';
+import type { StartDeps, SetupDeps } from './types';
 
 export class FileUploadPlugin implements Plugin {
   private readonly _logger: Logger;

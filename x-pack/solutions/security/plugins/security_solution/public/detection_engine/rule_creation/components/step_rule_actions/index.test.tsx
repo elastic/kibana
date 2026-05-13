@@ -6,41 +6,43 @@
  */
 
 import React from 'react';
-import { mount, type ComponentType as EnzymeComponentType } from 'enzyme';
+import { type ComponentType as EnzymeComponentType, mount } from 'enzyme';
 import { render } from '@testing-library/react';
 
 import { TestProviders } from '../../../../common/mock';
 
-import { StepRuleActions, stepActionsDefaultValue } from '.';
+import { stepActionsDefaultValue, StepRuleActions } from '.';
 import {
   defaultSchedule,
   stepAboutDefaultValue,
   stepDefineDefaultValue,
-} from '../../../../detections/pages/detection_engine/rules/utils';
+} from '../../../common/utils';
 import { useRuleForms } from '../../../rule_creation_ui/pages/form';
 import type { FormHook } from '../../../../shared_imports';
-import type { ActionsStepRule } from '../../../../detections/pages/detection_engine/rules/types';
+import type { ActionsStepRule } from '../../../common/types';
 import { FrequencyDescription } from './notification_action';
+import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      application: {
-        getUrlForApp: jest.fn(),
-        capabilities: {
-          siemV2: {
-            crud: true,
-          },
-          actions: {
-            read: true,
-          },
+const mockUseKibana = jest.fn().mockReturnValue({
+  services: {
+    application: {
+      getUrlForApp: jest.fn(),
+      capabilities: {
+        [SECURITY_FEATURE_ID]: {
+          crud: true,
+        },
+        actions: {
+          read: true,
         },
       },
-      triggersActionsUi: {
-        actionTypeRegistry: jest.fn(),
-      },
     },
-  }),
+    triggersActionsUi: {
+      actionTypeRegistry: jest.fn(),
+    },
+  },
+});
+jest.mock('../../../../common/lib/kibana', () => ({
+  useKibana: () => mockUseKibana(),
 }));
 
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
@@ -74,6 +76,7 @@ describe('StepRuleActions', () => {
         summaryActionMessageParams={actionMessageParams}
         isLoading={false}
         form={actionsStepForm}
+        ruleInterval="5m"
       />
     );
   };

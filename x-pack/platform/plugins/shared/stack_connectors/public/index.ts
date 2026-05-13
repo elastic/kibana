@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { StackConnectorsPublicPlugin } from './plugin';
 
 export const plugin = (context: PluginInitializerContext) =>

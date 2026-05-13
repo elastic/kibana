@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { UseMutationResult, UseQueryResult } from '@kbn/react-query';
+import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
-import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics';
+import type {
+  EntityAnalyticsPrivileges,
+  FindAssetCriticalityRecordsResponse,
+} from '../../../../common/api/entity_analytics';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import { useHasSecurityCapability } from '../../../helper_hooks';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics/asset_criticality';
@@ -18,6 +22,7 @@ import type { AssetCriticality, DeleteAssetCriticalityResponse } from '../../api
 import { useEntityAnalyticsRoutes } from '../../api/api';
 
 const ASSET_CRITICALITY_KEY = 'ASSET_CRITICALITY';
+const ASSET_CRITICALITY_LIST_KEY = 'ASSET_CRITICALITY_LIST';
 const PRIVILEGES_KEY = 'PRIVILEGES';
 
 const nonAuthorizedResponse: Promise<EntityAnalyticsPrivileges> = Promise.resolve({
@@ -32,14 +37,35 @@ const nonAuthorizedResponse: Promise<EntityAnalyticsPrivileges> = Promise.resolv
 export const useAssetCriticalityPrivileges = (
   queryKey: string
 ): UseQueryResult<EntityAnalyticsPrivileges, SecurityAppError> => {
-  const { fetchAssetCriticalityPrivileges } = useEntityAnalyticsRoutes();
+  const [entityStoreV2Enabled] = useUiSetting$<boolean>('securitySolution:entityStoreEnableV2');
+  const { fetchEntityStoreV2Privileges, fetchAssetCriticalityPrivileges } =
+    useEntityAnalyticsRoutes();
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
 
   return useQuery({
     queryKey: [ASSET_CRITICALITY_KEY, PRIVILEGES_KEY, queryKey, hasEntityAnalyticsCapability],
     queryFn: hasEntityAnalyticsCapability
-      ? fetchAssetCriticalityPrivileges
+      ? entityStoreV2Enabled
+        ? fetchEntityStoreV2Privileges
+        : fetchAssetCriticalityPrivileges
       : () => nonAuthorizedResponse,
+  });
+};
+
+export const useAssetCriticalityFetchList = ({
+  idField,
+  idValues,
+  skip = false,
+}: {
+  idField: string;
+  idValues: string[];
+  skip?: boolean;
+}) => {
+  const { fetchAssetCriticalityList } = useEntityAnalyticsRoutes();
+  return useQuery<FindAssetCriticalityRecordsResponse>({
+    queryKey: [ASSET_CRITICALITY_LIST_KEY],
+    queryFn: () => fetchAssetCriticalityList({ idField, idValues }),
+    enabled: !skip && idValues.length > 0,
   });
 };
 

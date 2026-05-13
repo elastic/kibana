@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { APIRoutes } from '../common/api_routes';
@@ -401,7 +401,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
           ruleId: schema.string(),
         }),
         body: schema.object({
-          synonyms: schema.string(),
+          synonyms: schema.string({ maxLength: 4096 }),
         }),
       },
     },

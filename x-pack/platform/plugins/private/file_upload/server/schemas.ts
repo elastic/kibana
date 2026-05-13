@@ -24,28 +24,29 @@ export const analyzeFileQuerySchema = schema.object({
   timeout: schema.maybe(schema.string()),
   timestamp_field: schema.maybe(schema.string()),
   timestamp_format: schema.maybe(schema.string()),
+  includePreview: schema.maybe(schema.boolean()),
 });
 
-export const importFileQuerySchema = schema.object({
-  id: schema.maybe(schema.string()),
+const ingestPipeline = schema.object({
+  id: schema.string(),
+  pipeline: schema.maybe(schema.any()),
 });
 
-const ingestPipeline = schema.maybe(
-  schema.object({
-    id: schema.maybe(schema.string()),
-    pipeline: schema.maybe(schema.any()),
-  })
-);
-
-export const importFileBodySchema = schema.object({
+export const initializeImportFileBodySchema = schema.object({
   index: schema.string(),
-  data: schema.arrayOf(schema.any()),
+  /* Index settings */
   settings: schema.maybe(schema.any()),
   /** Mappings */
   mappings: schema.any(),
   /** Ingest pipeline definition */
-  ingestPipeline,
-  createPipelines: schema.maybe(schema.arrayOf(ingestPipeline)),
+  ingestPipelines: schema.arrayOf(ingestPipeline, { maxSize: 50000 }),
+  existingIndex: schema.maybe(schema.boolean()),
+});
+
+export const importFileBodySchema = schema.object({
+  index: schema.string(),
+  data: schema.arrayOf(schema.any(), { maxSize: 10000 }),
+  ingestPipelineId: schema.maybe(schema.string()),
 });
 
 export const runtimeMappingsSchema = schema.object(

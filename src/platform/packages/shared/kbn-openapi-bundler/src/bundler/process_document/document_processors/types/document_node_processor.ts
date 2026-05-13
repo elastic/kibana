@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ResolvedRef } from '../../../ref_resolver/resolved_ref';
-import { DocumentNode, RefNode } from '../../types/node';
-import { TraverseDocumentNodeContext } from './traverse_document_node_context';
+import type { ResolvedRef } from '../../../ref_resolver/resolved_ref';
+import type { DocumentNode, RefNode } from '../../types/node';
+import type { TraverseDocumentNodeContext } from './traverse_document_node_context';
 
 /**
  * OpenAPI tree is traversed in two phases

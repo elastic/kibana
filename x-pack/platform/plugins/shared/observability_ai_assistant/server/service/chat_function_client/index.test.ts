@@ -5,10 +5,10 @@
  * 2.0.
  */
 import dedent from 'dedent';
-import { ChatFunctionClient, GET_DATA_ON_SCREEN_FUNCTION_NAME } from '.';
-import { FunctionVisibility } from '../../../common/functions/types';
-import { AdHocInstruction } from '../../../common/types';
-import { Logger } from '@kbn/logging';
+import { ChatFunctionClient } from '.';
+import type { Logger } from '@kbn/logging';
+import { GET_DATA_ON_SCREEN_FUNCTION_NAME } from '../../../common';
+import type { RegisterInstructionCallback } from '../types';
 
 describe('chatFunctionClient', () => {
   describe('when executing a function with invalid arguments', () => {
@@ -54,9 +54,155 @@ describe('chatFunctionClient', () => {
           connectorId: 'foo',
           simulateFunctionCalling: false,
         });
-      }).rejects.toThrowError(`Function arguments are invalid`);
+      }).rejects.toThrowError('Tool call arguments for myFunction were invalid');
 
       expect(respondFn).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when executing a function with valid arguments', () => {
+    it('does not throw and calls the respond function', async () => {
+      const respondFn = jest.fn().mockResolvedValue({ content: 'ok' });
+      const client = new ChatFunctionClient([]);
+
+      client.registerFunction(
+        {
+          description: '',
+          name: 'myFunction',
+          parameters: {
+            properties: {
+              foo: { type: 'string' },
+            },
+            required: ['foo'],
+          },
+        },
+        respondFn
+      );
+
+      const result = await client.executeFunction({
+        chat: jest.fn(),
+        name: 'myFunction',
+        args: JSON.stringify({ foo: 'valid_string' }),
+        messages: [],
+        signal: new AbortController().signal,
+        logger: getLoggerMock(),
+        connectorId: 'foo',
+        simulateFunctionCalling: false,
+      });
+
+      expect(respondFn).toHaveBeenCalled();
+      expect(result).toEqual({ content: 'ok' });
+    });
+  });
+
+  describe('when a required property is missing', () => {
+    it('throws a validation error', async () => {
+      const respondFn = jest.fn().mockResolvedValue({});
+      const client = new ChatFunctionClient([]);
+
+      client.registerFunction(
+        {
+          description: '',
+          name: 'myFunction',
+          parameters: {
+            properties: {
+              foo: { type: 'string' },
+            },
+            required: ['foo'],
+          },
+        },
+        respondFn
+      );
+
+      await expect(async () => {
+        await client.executeFunction({
+          chat: jest.fn(),
+          name: 'myFunction',
+          args: JSON.stringify({}),
+          messages: [],
+          signal: new AbortController().signal,
+          logger: getLoggerMock(),
+          connectorId: 'foo',
+          simulateFunctionCalling: false,
+        });
+      }).rejects.toThrowError('Tool call arguments for myFunction were invalid');
+
+      expect(respondFn).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when parameters schema has no explicit type field', () => {
+    it('validates correctly via toZodSchema normalization', async () => {
+      const respondFn = jest.fn().mockResolvedValue({ content: 'ok' });
+      const client = new ChatFunctionClient([]);
+
+      client.registerFunction(
+        {
+          description: '',
+          name: 'noTypeFunction',
+          parameters: {
+            properties: {
+              bar: { type: 'number' },
+            },
+            required: ['bar'],
+          },
+        },
+        respondFn
+      );
+
+      await expect(async () => {
+        await client.executeFunction({
+          chat: jest.fn(),
+          name: 'noTypeFunction',
+          args: JSON.stringify({ bar: 'not_a_number' }),
+          messages: [],
+          signal: new AbortController().signal,
+          logger: getLoggerMock(),
+          connectorId: 'foo',
+          simulateFunctionCalling: false,
+        });
+      }).rejects.toThrowError('Tool call arguments for noTypeFunction were invalid');
+
+      const result = await client.executeFunction({
+        chat: jest.fn(),
+        name: 'noTypeFunction',
+        args: JSON.stringify({ bar: 42 }),
+        messages: [],
+        signal: new AbortController().signal,
+        logger: getLoggerMock(),
+        connectorId: 'foo',
+        simulateFunctionCalling: false,
+      });
+
+      expect(result).toEqual({ content: 'ok' });
+    });
+  });
+
+  describe('when actions have parameter schemas', () => {
+    it('validates action parameters via constructor-compiled schemas', () => {
+      const client = new ChatFunctionClient([
+        {
+          actions: [
+            {
+              name: 'myAction',
+              description: 'An action',
+              parameters: {
+                type: 'object' as const,
+                properties: {
+                  count: { type: 'number' as const },
+                },
+                required: ['count'] as string[],
+              },
+            },
+          ],
+        },
+      ]);
+
+      expect(() => client.validate('myAction', { count: 'not_a_number' })).toThrowError(
+        'Tool call arguments for myAction were invalid'
+      );
+
+      expect(() => client.validate('myAction', { count: 5 })).not.toThrow();
     });
   });
 
@@ -89,19 +235,22 @@ describe('chatFunctionClient', () => {
       ]);
 
       const functions = client.getFunctions();
-      const adHocInstructions = client.getAdhocInstructions();
+      const instructions = client.getInstructions();
 
       expect(functions[0]).toEqual({
         definition: {
           description: expect.any(String),
           name: GET_DATA_ON_SCREEN_FUNCTION_NAME,
           parameters: expect.any(Object),
-          visibility: FunctionVisibility.AssistantOnly,
         },
         respond: expect.any(Function),
       });
 
-      expect(adHocInstructions[0].text).toContain(
+      expect(
+        (instructions[0] as RegisterInstructionCallback)({
+          availableFunctionNames: [GET_DATA_ON_SCREEN_FUNCTION_NAME],
+        })
+      ).toContain(
         dedent(`my_dummy_data: My dummy data
         my_other_dummy_data: My other dummy data
         `)
@@ -134,48 +283,39 @@ describe('chatFunctionClient', () => {
     });
   });
 
-  describe('when adhoc instructions are provided', () => {
+  describe('when instructions are provided', () => {
     let client: ChatFunctionClient;
 
     beforeEach(() => {
       client = new ChatFunctionClient([]);
     });
 
-    describe('register an adhoc Instruction', () => {
-      it('should register a new adhoc instruction', () => {
-        const adhocInstruction: AdHocInstruction = {
-          text: 'Test adhoc instruction',
-          instruction_type: 'application_instruction',
-        };
+    describe('register an Instruction', () => {
+      it('should register a new  instruction', () => {
+        const instruction = 'Test instruction';
 
-        client.registerAdhocInstruction(adhocInstruction);
+        client.registerInstruction(instruction);
 
-        expect(client.getAdhocInstructions()).toContainEqual(adhocInstruction);
+        expect(client.getInstructions()).toContainEqual(instruction);
       });
     });
 
-    describe('retrieve adHoc instructions', () => {
-      it('should return all registered adhoc instructions', () => {
-        const firstAdhocInstruction: AdHocInstruction = {
-          text: 'First adhoc instruction',
-          instruction_type: 'application_instruction',
-        };
+    describe('retrieve instructions', () => {
+      it('should return all registered instructions', () => {
+        const firstInstruction = 'First instruction';
 
-        const secondAdhocInstruction: AdHocInstruction = {
-          text: 'Second adhoc instruction',
-          instruction_type: 'application_instruction',
-        };
+        const secondInstruction = 'Second instruction';
 
-        client.registerAdhocInstruction(firstAdhocInstruction);
-        client.registerAdhocInstruction(secondAdhocInstruction);
+        client.registerInstruction(firstInstruction);
+        client.registerInstruction(secondInstruction);
 
-        const adhocInstructions = client.getAdhocInstructions();
+        const instructions = client.getInstructions();
 
-        expect(adhocInstructions).toEqual([firstAdhocInstruction, secondAdhocInstruction]);
+        expect(instructions).toEqual([firstInstruction, secondInstruction]);
       });
 
-      it('should return an empty array if no adhoc instructions are registered', () => {
-        const adhocInstructions = client.getAdhocInstructions();
+      it('should return an empty array if no instructions are registered', () => {
+        const adhocInstructions = client.getInstructions();
 
         expect(adhocInstructions).toEqual([]);
       });

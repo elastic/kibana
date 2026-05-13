@@ -7,26 +7,34 @@
 
 import type { FC } from 'react';
 import React, { useState, useContext, useEffect } from 'react';
-import { EuiTextArea } from '@elastic/eui';
+import { EuiTextArea, useGeneratedHtmlId } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 
 export const JobDescriptionInput: FC = () => {
-  const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
+  const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const [jobDescription, setJobDescription] = useState(jobCreator.description);
-
+  const titleId = useGeneratedHtmlId({ prefix: 'jobDescriptionInput' });
   useEffect(() => {
     jobCreator.description = jobDescription;
     jobCreatorUpdate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobDescription]);
 
+  useEffect(() => {
+    if (jobCreator.description !== jobDescription) {
+      setJobDescription(jobCreator.description);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobCreatorUpdated]);
+
   return (
-    <Description>
+    <Description titleId={titleId}>
       <EuiTextArea
         value={jobDescription}
         onChange={(e) => setJobDescription(e.target.value)}
         data-test-subj="mlJobWizardInputJobDescription"
+        aria-labelledby={titleId}
       />
     </Description>
   );

@@ -6,7 +6,7 @@
  */
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiPopover, EuiListGroup } from '@elastic/eui';
-import { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
+import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { DatasetQualityLink } from './dataset_quality_link';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 import { LegendActionItem } from './legend_action_item';
@@ -57,7 +57,7 @@ export const LegendAction: React.FC<LegendActionProps> = React.memo(
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
-                  iconType="boxesHorizontal"
+                  iconType="boxesVertical"
                   aria-label={UX_LABELS.dataQualityPopup.open}
                   onClick={() => togglePopover(uniqueStreamName)}
                   data-test-subj="legendActionButton"

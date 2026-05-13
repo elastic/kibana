@@ -2,21 +2,14 @@
 
 exports[`<ExitFullScreenButton /> with kibana services is rendered 1`] = `
 <div>
-  <p
+  <div
+    aria-atomic="true"
     aria-live="polite"
     class="emotion-euiScreenReaderOnly"
-  >
-    In full screen mode, press ESC to exit.
-  </p>
+    role="status"
+  />
   <button
-    class="exitFullScreenButton"
-    css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop).,You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop).,
-box-shadow:
-  0 1px 5px rgba(0,0,0,0.1),
-  0 3.6px 13px rgba(0,0,0,0.07),
-  0 8.4px 23px rgba(0,0,0,0.06),
-  0 23px 35px rgba(0,0,0,0.05);
-,You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+    class="exitFullScreenButton emotion-euiButtonDisplay-buttonCSS-buttonCSS"
     data-test-subj="exitFullScreenModeButton"
   >
     <span
@@ -26,6 +19,7 @@ box-shadow:
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="logoElastic"
         />
       </span>
@@ -39,6 +33,7 @@ box-shadow:
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="fullScreenExit"
         />
       </span>
@@ -49,21 +44,14 @@ box-shadow:
 
 exports[`<ExitFullScreenButton /> with kibana services renders custom logo 1`] = `
 <div>
-  <p
+  <div
+    aria-atomic="true"
     aria-live="polite"
     class="emotion-euiScreenReaderOnly"
-  >
-    In full screen mode, press ESC to exit.
-  </p>
+    role="status"
+  />
   <button
-    class="exitFullScreenButton"
-    css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop).,You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop).,
-box-shadow:
-  0 1px 5px rgba(0,0,0,0.1),
-  0 3.6px 13px rgba(0,0,0,0.07),
-  0 8.4px 23px rgba(0,0,0,0.06),
-  0 23px 35px rgba(0,0,0,0.05);
-,You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+    class="exitFullScreenButton emotion-euiButtonDisplay-buttonCSS-buttonCSS"
     data-test-subj="exitFullScreenModeButton"
   >
     <span
@@ -93,6 +81,7 @@ box-shadow:
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="fullScreenExit"
         />
       </span>
@@ -103,21 +92,14 @@ box-shadow:
 
 exports[`<ExitFullScreenButton /> with manual services is rendered 1`] = `
 <div>
-  <p
+  <div
+    aria-atomic="true"
     aria-live="polite"
     class="emotion-euiScreenReaderOnly"
-  >
-    In full screen mode, press ESC to exit.
-  </p>
+    role="status"
+  />
   <button
-    class="exitFullScreenButton"
-    css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop).,You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop).,
-box-shadow:
-  0 1px 5px rgba(0,0,0,0.1),
-  0 3.6px 13px rgba(0,0,0,0.07),
-  0 8.4px 23px rgba(0,0,0,0.06),
-  0 23px 35px rgba(0,0,0,0.05);
-,You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+    class="exitFullScreenButton emotion-euiButtonDisplay-buttonCSS-buttonCSS"
     data-test-subj="exitFullScreenModeButton"
   >
     <span
@@ -127,6 +109,7 @@ box-shadow:
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="logoElastic"
         />
       </span>
@@ -140,6 +123,7 @@ box-shadow:
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="fullScreenExit"
         />
       </span>

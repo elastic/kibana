@@ -14,7 +14,7 @@ import {
 } from '../../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { authz } from '../util/authz';
-import { withLicense } from '../util/with_license';
+import { withLicense } from '../../../common/api/util/with_license';
 
 export const registerSiemRuleMigrationsGetMissingPrivilegesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -38,13 +38,14 @@ export const registerSiemRuleMigrationsGetMissingPrivilegesRoute = (
             const core = await context.core;
             const securitySolution = await context.securitySolution;
             const siemClient = securitySolution?.getAppClient();
+            const spaceId = securitySolution?.getSpaceId();
             const esClient = core.elasticsearch.client.asCurrentUser;
 
             if (!siemClient) {
               return response.notFound();
             }
 
-            const lookupsIndexPattern = `${LOOKUPS_INDEX_PREFIX}*`;
+            const lookupsIndexPattern = `${LOOKUPS_INDEX_PREFIX}${spaceId}*`;
             const privileges = await readIndexPrivileges(esClient, lookupsIndexPattern);
 
             const missingPrivileges = [];

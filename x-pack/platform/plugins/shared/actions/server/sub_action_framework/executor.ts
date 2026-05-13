@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import { z } from '@kbn/zod/v4';
+import type { Logger } from '@kbn/core/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { ActionsConfigurationUtilities } from '../actions_config';
-import { ExecutorType } from '../types';
-import { ExecutorParams, SubActionConnectorType } from './types';
+import type { ActionsConfigurationUtilities } from '../actions_config';
+import type { ExecutorType } from '../types';
+import type { ExecutorParams, SubActionConnectorType } from './types';
 
 const isFunction = (v: unknown): v is Function => {
   return typeof v === 'function';
@@ -85,18 +86,24 @@ export const buildExecutor = <
       );
     }
 
+    let _subActionParams = subActionParams ?? {};
+
     if (action.schema) {
       try {
-        action.schema.validate(subActionParams);
+        _subActionParams = action.schema.parse(subActionParams) as typeof subActionParams;
       } catch (reqValidationError) {
+        let errMessage = reqValidationError.message;
+        if (reqValidationError instanceof z.ZodError) {
+          errMessage = z.prettifyError(reqValidationError);
+        }
         throw createTaskRunError(
-          new Error(`Request validation failed (${reqValidationError})`),
+          new Error(`Request validation failed (${errMessage})`),
           TaskErrorSource.USER
         );
       }
     }
 
-    const data = await func.call(service, subActionParams, connectorUsageCollector);
+    const data = await func.call(service, _subActionParams, connectorUsageCollector);
     return { status: 'ok', data: data ?? {}, actionId };
   };
 };

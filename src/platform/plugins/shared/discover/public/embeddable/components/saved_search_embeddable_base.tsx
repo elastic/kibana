@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import {
   type SearchResponseWarning,
   SearchResponseWarningsBadge,
 } from '@kbn/search-response-warnings';
+import type { InlineEditing } from './saved_search_grid';
 import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
+import { InlineEditFooter } from './inline_edit_footer';
 
 const containerStyles = css`
   width: 100%;
@@ -26,8 +29,8 @@ export interface SavedSearchEmbeddableBaseProps {
   totalHitCount?: number;
   prepend?: React.ReactElement;
   append?: React.ReactElement;
-  dataTestSubj?: string;
   interceptedWarnings?: SearchResponseWarning[];
+  inlineEditing?: InlineEditing;
 }
 
 export const SavedSearchEmbeddableBase: FC<PropsWithChildren<SavedSearchEmbeddableBaseProps>> = ({
@@ -35,8 +38,8 @@ export const SavedSearchEmbeddableBase: FC<PropsWithChildren<SavedSearchEmbeddab
   totalHitCount,
   prepend,
   append,
-  dataTestSubj,
   interceptedWarnings,
+  inlineEditing,
   children,
 }) => {
   return (
@@ -45,7 +48,7 @@ export const SavedSearchEmbeddableBase: FC<PropsWithChildren<SavedSearchEmbeddab
       direction="column"
       gutterSize="xs"
       responsive={false}
-      data-test-subj={dataTestSubj}
+      data-test-subj="embeddedSavedSearchDocTable"
     >
       {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
 
@@ -69,9 +72,16 @@ export const SavedSearchEmbeddableBase: FC<PropsWithChildren<SavedSearchEmbeddab
         </EuiFlexItem>
       )}
 
-      <EuiFlexItem css={{ minHeight: 0 }}>{children}</EuiFlexItem>
+      <EuiFlexGroup css={{ minHeight: 0 }} responsive={false} direction="column" gutterSize="none">
+        <EuiFlexItem css={{ minHeight: 0 }}>{children}</EuiFlexItem>
 
-      {Boolean(append) && <EuiFlexItem grow={false}>{append}</EuiFlexItem>}
+        {Boolean(append) && <EuiFlexItem grow={false}>{append}</EuiFlexItem>}
+        {inlineEditing?.isActive && (
+          <EuiFlexItem grow={false}>
+            <InlineEditFooter inlineEditing={inlineEditing} />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
 
       <SearchResponseWarningsBadge warnings={interceptedWarnings ?? []} />
     </EuiFlexGroup>

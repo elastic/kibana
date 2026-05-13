@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { type TypeOf, schema } from '@kbn/config-schema';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import type { PackageSpecIcon } from '../models/package_spec';
@@ -21,6 +21,7 @@ import type {
   AssetSOObject,
   InstallResultStatus,
   PackageMetadata,
+  InstallationInfo,
 } from '../models/epm';
 
 export interface GetCategoriesRequest {
@@ -39,6 +40,10 @@ export interface GetPackagesRequest {
     category?: string;
     prerelease?: boolean;
     excludeInstallStatus?: boolean;
+    withPackagePoliciesCount?: boolean;
+    type?: string;
+    package?: string;
+    all?: boolean;
   };
 }
 
@@ -89,7 +94,7 @@ export interface GetInfoRequest {
 }
 
 export interface GetInfoResponse {
-  item: PackageInfo;
+  item: PackageInfo & { installationInfo?: InstallationInfo };
   metadata?: PackageMetadata;
 }
 
@@ -100,11 +105,16 @@ export interface UpdatePackageRequest {
   };
   body: {
     keepPoliciesUpToDate?: boolean;
+    namespace_customization_enabled_for?: string[];
   };
 }
 
 export interface UpdatePackageResponse {
   item: PackageInfo;
+}
+
+export interface ReviewUpgradeResponse {
+  success: boolean;
 }
 
 export interface GetStatsRequest {
@@ -115,6 +125,10 @@ export interface GetStatsRequest {
 
 export interface GetStatsResponse {
   response: PackageUsageStats;
+}
+
+export interface GetDependenciesResponse {
+  items: Array<{ name: string; version: string; title: string }>;
 }
 
 export interface InstallPackageRequest {
@@ -128,6 +142,7 @@ export interface InstallPackageResponse {
   items: AssetReference[];
   _meta: {
     install_source: InstallSource;
+    name: string;
   };
 }
 
@@ -143,16 +158,43 @@ export interface InstallResult {
   error?: Error;
   installType: InstallType;
   installSource?: InstallSource;
+  pkgName: string;
 }
 
 export interface BulkInstallPackageInfo {
   name: string;
   version: string;
-  result: InstallResult;
+  result: Omit<InstallResult, 'pkgName'>;
 }
 
 export interface BulkInstallPackagesResponse {
   items: Array<BulkInstallPackageInfo | IBulkInstallPackageHTTPError>;
+}
+
+export interface BulkUpgradePackagesRequest {
+  packages: Array<{ name: string; version?: string }>;
+  upgrade_package_policies?: boolean;
+  force?: boolean;
+  prerelease?: boolean;
+}
+
+export interface BulkUninstallPackagesRequest {
+  packages: Array<{ name: string; version: string }>;
+  force?: boolean;
+}
+
+export interface BulkRollbackPackagesRequest {
+  packages: Array<{ name: string }>;
+}
+
+export interface BulkOperationPackagesResponse {
+  taskId: string;
+}
+
+export interface GetOneBulkOperationPackagesResponse {
+  status: string;
+  error?: { message: string };
+  results?: Array<{ name: string; success?: boolean; error?: { message: string } }>;
 }
 
 export interface BulkInstallPackagesRequest {
@@ -208,3 +250,43 @@ export type GetInputsTemplatesResponse =
   | {
       inputs: any;
     };
+
+export interface DeletePackageDatastreamAssetsRequest {
+  params: {
+    pkgName: string;
+    pkgVersion: string;
+  };
+  query: {
+    packagePolicyId: string;
+  };
+}
+
+export interface DeletePackageDatastreamAssetsResponse {
+  success: boolean;
+}
+
+export interface RollbackPackageRequest {
+  params: {
+    pkgname: string;
+  };
+}
+
+export interface RollbackPackageResponse {
+  success: boolean;
+  version: string;
+}
+export const RollbackAvailableCheckResponseSchema = schema.object({
+  reason: schema.maybe(schema.string()),
+  isAvailable: schema.boolean(),
+});
+
+export type RollbackAvailableCheckResponse = TypeOf<typeof RollbackAvailableCheckResponseSchema>;
+
+export const BulkRollbackAvailableCheckResponseSchema = schema.recordOf(
+  schema.string(),
+  RollbackAvailableCheckResponseSchema
+);
+
+export type BulkRollbackAvailableCheckResponse = TypeOf<
+  typeof BulkRollbackAvailableCheckResponseSchema
+>;

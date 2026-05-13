@@ -7,12 +7,12 @@
 
 import Boom from '@hapi/boom';
 
-import { IKibanaResponse, kibanaResponseFactory } from '@kbn/core/server';
-import { JobId, ReportApiJSON } from '@kbn/reporting-common/types';
+import type { IKibanaResponse, kibanaResponseFactory } from '@kbn/core/server';
+import type { JobId, ReportApiJSON } from '@kbn/reporting-common/types';
 import { i18n } from '@kbn/i18n';
-import { Counters } from '..';
-import { ReportingCore } from '../../..';
-import { ReportingUser } from '../../../types';
+import type { Counters } from '..';
+import type { ReportingCore } from '../../..';
+import type { ReportingUser } from '../../../types';
 import { jobsQueryFactory } from './jobs_query';
 
 /**

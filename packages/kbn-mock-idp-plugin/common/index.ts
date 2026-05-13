@@ -7,4 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
+export {
+  MOCK_IDP_KIBANA_BASE_PATH,
+  MOCK_IDP_KIBANA_URL,
+  MOCK_IDP_REALM_NAME,
+  MOCK_IDP_UIAM_SERVICE_INTERNAL_URL,
+  MOCK_IDP_UIAM_SERVICE_URL,
+  MOCK_IDP_UIAM_SHARED_SECRET,
+  MOCK_IDP_UIAM_ORGANIZATION_ID,
+  MOCK_IDP_UIAM_PROJECT_ID,
+} from '@kbn/mock-idp-utils';

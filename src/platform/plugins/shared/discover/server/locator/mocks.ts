@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KibanaRequest } from '@kbn/core/server';
-import { Query, SearchSource } from '@kbn/data-plugin/common';
-import { AggregateQuery, Filter } from '@kbn/es-query';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { Query, SearchSource } from '@kbn/data-plugin/common';
+import type { AggregateQuery, Filter } from '@kbn/es-query';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { DiscoverServerPluginLocatorService, LocatorServiceScopedClient } from '..';
-import { DiscoverAppLocatorParams } from '../../common';
+import type { DiscoverServerPluginLocatorService, LocatorServiceScopedClient } from '..';
+import type { DiscoverAppLocatorParams } from '../../common';
 
 export const createLocatorServiceMock = (): DiscoverServerPluginLocatorService => {
   const mockFields = ['@timestamp', 'mock-message'];
@@ -37,6 +37,10 @@ export const createLocatorServiceMock = (): DiscoverServerPluginLocatorService =
     .fn<Promise<Filter[]>, [DiscoverAppLocatorParams]>()
     .mockResolvedValue([]);
 
+  const timeFieldNameFromLocatorMock = jest
+    .fn<Promise<string | undefined>, [DiscoverAppLocatorParams]>()
+    .mockResolvedValue('@timestamp');
+
   return {
     asScopedClient: jest
       .fn<Promise<LocatorServiceScopedClient>, [req: KibanaRequest]>()
@@ -47,6 +51,7 @@ export const createLocatorServiceMock = (): DiscoverServerPluginLocatorService =
           titleFromLocator: titleFromLocatorMock,
           queryFromLocator: queryFromLocatorMock,
           filtersFromLocator: filtersFromLocatorMock,
+          timeFieldNameFromLocator: timeFieldNameFromLocatorMock,
         } as LocatorServiceScopedClient);
       }),
   };

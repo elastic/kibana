@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiComboBox,
@@ -24,14 +24,19 @@ import {
   EuiLink,
   EuiSwitch,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { DownloadSource, FleetProxy } from '../../../../types';
 import { MAX_FLYOUT_WIDTH } from '../../../../constants';
-import { useBreadcrumbs, useStartServices } from '../../../../hooks';
+import { useBreadcrumbs, useFleetStatus, useStartServices } from '../../../../hooks';
 import { ProxyWarning } from '../fleet_proxies_table/proxy_warning';
+import { ExperimentalFeaturesService } from '../../../../services';
 
+import { SSLFormSection } from '../edit_output_flyout/ssl_form_section';
+
+import { AuthenticationFormSection } from './authentication_form_section';
 import { useDowloadSourceFlyoutForm } from './use_download_source_flyout_form';
 
 export interface EditDownloadSourceFlyoutProps {
@@ -53,11 +58,110 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
     () => proxies.map((proxy) => ({ value: proxy.id, label: proxy.name })),
     [proxies]
   );
+
+  const [isFirstLoad, setIsFirstLoad] = React.useState(true);
+  const [secretsToggleState, setSecretsToggleState] = useState<'disabled' | true | false>(
+    'disabled'
+  );
+  const useSecretsStorage = secretsToggleState === true;
+  const [isConvertedToSecret, setIsConvertedToSecret] = React.useState({
+    sslKey: false,
+    password: false,
+    apiKey: false,
+  });
+  const { enableSSLSecrets } = ExperimentalFeaturesService.get();
+
+  const fleetStatus = useFleetStatus();
+  if (fleetStatus.isSSLSecretsStorageEnabled !== undefined && secretsToggleState === 'disabled') {
+    setSecretsToggleState(fleetStatus.isSSLSecretsStorageEnabled);
+  }
+
+  const onToggleSecretStorage = (secretEnabled: boolean) => {
+    if (secretsToggleState === 'disabled') {
+      return;
+    }
+
+    setSecretsToggleState(secretEnabled);
+  };
+
+  useEffect(() => {
+    if (!isFirstLoad) return;
+    setIsFirstLoad(false);
+    // populate the secret input with the value of the plain input in order to re-save the download source with secret storage
+    if (useSecretsStorage && enableSSLSecrets) {
+      const newConvertedState = { ...isConvertedToSecret };
+
+      if (inputs.sslKeyInput.value && !inputs.sslKeySecretInput.value) {
+        inputs.sslKeySecretInput.setValue(inputs.sslKeyInput.value);
+        inputs.sslKeyInput.clear();
+        newConvertedState.sslKey = true;
+      }
+
+      if (inputs.passwordInput.value && !inputs.passwordSecretInput.value) {
+        inputs.passwordSecretInput.setValue(inputs.passwordInput.value);
+        inputs.passwordInput.clear();
+        newConvertedState.password = true;
+      }
+
+      if (inputs.apiKeyInput.value && !inputs.apiKeySecretInput.value) {
+        inputs.apiKeySecretInput.setValue(inputs.apiKeyInput.value);
+        inputs.apiKeyInput.clear();
+        newConvertedState.apiKey = true;
+      }
+
+      setIsConvertedToSecret(newConvertedState);
+    }
+  }, [
+    useSecretsStorage,
+    inputs.sslKeyInput,
+    inputs.sslKeySecretInput,
+    inputs.passwordInput,
+    inputs.passwordSecretInput,
+    inputs.apiKeyInput,
+    inputs.apiKeySecretInput,
+    isFirstLoad,
+    setIsFirstLoad,
+    isConvertedToSecret,
+    enableSSLSecrets,
+  ]);
+
+  const onToggleSecretAndClearValue = (secretEnabled: boolean) => {
+    if (secretEnabled) {
+      inputs.sslKeyInput.clear();
+    } else {
+      inputs.sslKeySecretInput.setValue('');
+    }
+    setIsConvertedToSecret((prev) => ({ ...prev, sslKey: false }));
+    onToggleSecretStorage(secretEnabled);
+  };
+
+  const onToggleSecretAndClearValuePassword = (secretEnabled: boolean) => {
+    if (secretEnabled) {
+      inputs.passwordInput.clear();
+    } else {
+      inputs.passwordSecretInput.setValue('');
+    }
+    setIsConvertedToSecret((prev) => ({ ...prev, password: false }));
+    onToggleSecretStorage(secretEnabled);
+  };
+
+  const onToggleSecretAndClearValueApiKey = (secretEnabled: boolean) => {
+    if (secretEnabled) {
+      inputs.apiKeyInput.clear();
+    } else {
+      inputs.apiKeySecretInput.setValue('');
+    }
+    setIsConvertedToSecret((prev) => ({ ...prev, apiKey: false }));
+    onToggleSecretStorage(secretEnabled);
+  };
+
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH}>
+    <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder={true}>
         <EuiTitle size="m">
-          <h2 id="FleetEditDownloadSourcesFlyoutTitle">
+          <h2 id={flyoutTitleId}>
             {!downloadSource ? (
               <FormattedMessage
                 id="xpack.fleet.settings.editDownloadSourcesFlyout.createTitle"
@@ -132,6 +236,15 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
               placeholder="https://artifacts.elastic.co/downloads"
             />
           </EuiFormRow>
+          <EuiSpacer size="m" />
+          <AuthenticationFormSection
+            inputs={inputs}
+            useSecretsStorage={enableSSLSecrets && useSecretsStorage}
+            isConvertedToSecretPassword={isConvertedToSecret.password}
+            isConvertedToSecretApiKey={isConvertedToSecret.apiKey}
+            onToggleSecretAndClearValuePassword={onToggleSecretAndClearValuePassword}
+            onToggleSecretAndClearValueApiKey={onToggleSecretAndClearValueApiKey}
+          />
           <EuiFormRow
             fullWidth
             label={
@@ -143,13 +256,13 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
             helpText={
               <FormattedMessage
                 id="xpack.fleet.settings.editDownloadSourcesFlyout.proxyInputDescription"
-                defaultMessage="Proxy used for accessing the download source. Currently only the proxy URL is used, headers and certificates are not supported."
+                defaultMessage="Proxy used for accessing the download source. When selected, the SSL settings and headers from the proxy will be used."
               />
             }
           >
             <EuiComboBox
               fullWidth
-              data-test-subj="settingsOutputsFlyout.proxyIdInput"
+              data-test-subj="editDownloadSourcesFlyout.proxyIdInput"
               {...inputs.proxyIdInput.props}
               onChange={(options) => inputs.proxyIdInput.setValue(options?.[0]?.value ?? '')}
               selectedOptions={
@@ -184,6 +297,14 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
               }
             />
           </EuiFormRow>
+          <EuiSpacer size="m" />
+          <SSLFormSection
+            inputs={inputs}
+            useSecretsStorage={enableSSLSecrets && useSecretsStorage}
+            isConvertedToSecret={isConvertedToSecret.sslKey}
+            onToggleSecretAndClearValue={onToggleSecretAndClearValue}
+            type="download_source"
+          />
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

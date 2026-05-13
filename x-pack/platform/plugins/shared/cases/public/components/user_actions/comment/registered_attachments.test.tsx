@@ -95,11 +95,27 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
     createRegisteredAttachmentUserActionBuilder(userActionBuilderArgs).build();
 
     expect(getAttachmentViewProps).toHaveBeenCalled();
-    expect(getAttachmentViewObject).toBeCalledWith({
-      ...viewProps,
-      attachmentId: attachment.id,
-      caseData: { id: builderArgs.caseData.id, title: builderArgs.caseData.title },
-    });
+    expect(getAttachmentViewObject).toBeCalledWith(
+      expect.objectContaining({
+        ...viewProps,
+        savedObjectId: attachment.id,
+        caseData: { id: builderArgs.caseData.id, title: builderArgs.caseData.title },
+      })
+    );
+  });
+
+  it('preserves attachmentId from viewProps for reference attachments (events, alerts)', async () => {
+    const refAttachmentId = 'event-id-123';
+    getAttachmentViewProps.mockReturnValue({ ...viewProps, attachmentId: refAttachmentId });
+
+    createRegisteredAttachmentUserActionBuilder(userActionBuilderArgs).build();
+
+    expect(getAttachmentViewObject).toBeCalledWith(
+      expect.objectContaining({
+        savedObjectId: attachment.id,
+        attachmentId: refAttachmentId,
+      })
+    );
   });
 
   it('builds the buttons correctly', async () => {
@@ -156,6 +172,7 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
     const userAction =
       createRegisteredAttachmentUserActionBuilder(userActionBuilderArgs).build()[0];
 
+    // eslint-disable-next-line testing-library/no-node-access
     render(userAction.children);
 
     expect(await screen.findByText('My component')).toBeInTheDocument();

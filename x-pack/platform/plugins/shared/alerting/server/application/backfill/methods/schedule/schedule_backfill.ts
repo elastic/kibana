@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import pMap from 'p-map';
 import Boom from '@hapi/boom';
-import { KueryNode, nodeBuilder } from '@kbn/es-query';
-import { SavedObjectsFindResult } from '@kbn/core/server';
+import type { KueryNode } from '@kbn/es-query';
+import { nodeBuilder } from '@kbn/es-query';
+import type { SavedObjectsFindResult } from '@kbn/core/server';
+import type { Gap } from '../../../../lib/rule_gaps/gap';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { findRulesSo } from '../../../../data/rule';
-import {
-  alertingAuthorizationFilterOpts,
-  RULE_TYPE_CHECKS_CONCURRENCY,
-} from '../../../../rules_client/common/constants';
+import { alertingAuthorizationFilterOpts } from '../../../../rules_client/common/constants';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
-import { RuleBulkOperationAggregation, RulesClientContext } from '../../../../rules_client';
+import type { RuleBulkOperationAggregation, RulesClientContext } from '../../../../rules_client';
 import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import type {
@@ -26,11 +24,12 @@ import type {
 } from './types';
 import { scheduleBackfillParamsSchema } from './schemas';
 import { transformRuleAttributesToRuleDomain } from '../../../rule/transforms';
-import { RawRule } from '../../../../types';
+import type { RawRule } from '../../../../types';
 
 export async function scheduleBackfill(
   context: RulesClientContext,
-  params: ScheduleBackfillParams
+  params: ScheduleBackfillParams,
+  gaps?: Gap[]
 ): Promise<ScheduleBackfillResults> {
   try {
     scheduleBackfillParamsSchema.validate(params);
@@ -90,30 +89,31 @@ export async function scheduleBackfill(
     throw Boom.badRequest(`No rules matching ids ${ruleIds} found to schedule backfill`);
   }
 
-  await pMap(
-    buckets,
-    async ({ key: [ruleType, consumer] }) => {
-      context.ruleTypeRegistry.ensureRuleTypeEnabled(ruleType);
+  const ruleTypeIdConsumersPairs = buckets.map(({ key: [ruleTypeId, consumer] }) => ({
+    ruleTypeId,
+    consumers: [consumer],
+  }));
 
-      try {
-        await context.authorization.ensureAuthorized({
-          ruleTypeId: ruleType,
-          consumer,
-          operation: WriteOperations.ScheduleBackfill,
-          entity: AlertingAuthorizationEntity.Rule,
-        });
-      } catch (error) {
-        context.auditLogger?.log(
-          ruleAuditEvent({
-            action: RuleAuditAction.SCHEDULE_BACKFILL,
-            error,
-          })
-        );
-        throw error;
-      }
-    },
-    { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
-  );
+  const uniqueRuleTypeIds = [...new Set(ruleTypeIdConsumersPairs.map((p) => p.ruleTypeId))];
+  for (const ruleTypeId of uniqueRuleTypeIds) {
+    context.ruleTypeRegistry.ensureRuleTypeEnabled(ruleTypeId);
+  }
+
+  try {
+    await context.authorization.bulkEnsureAuthorized({
+      ruleTypeIdConsumersPairs,
+      operation: WriteOperations.ScheduleBackfill,
+      entity: AlertingAuthorizationEntity.Rule,
+    });
+  } catch (error) {
+    context.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.SCHEDULE_BACKFILL,
+        error,
+      })
+    );
+    throw error;
+  }
 
   const rulesFinder =
     await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
@@ -162,6 +162,7 @@ export async function scheduleBackfill(
         (connectorId: string) => actionsClient.isSystemAction(connectorId)
       );
     }),
+    gaps,
     ruleTypeRegistry: context.ruleTypeRegistry,
     spaceId: context.spaceId,
     unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,

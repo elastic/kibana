@@ -6,16 +6,22 @@
  */
 import { render } from '@testing-library/react';
 import React from 'react';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { DashboardRenderer as DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
+import {
+  DashboardRenderer as DashboardContainerRenderer,
+  type DashboardApi,
+} from '@kbn/dashboard-plugin/public';
 
 import { TestProviders } from '../../common/mock';
 import { DashboardRenderer } from './dashboard_renderer';
 
-jest.mock('@kbn/dashboard-plugin/public', () => ({
-  DashboardRenderer: jest.fn().mockReturnValue(<div data-test-subj="dashboardRenderer" />),
-  DashboardTopNav: jest.fn().mockReturnValue(<span data-test-subj="dashboardTopNav" />),
-}));
+jest.mock('@kbn/dashboard-plugin/public', () => {
+  const actual = jest.requireActual('@kbn/dashboard-plugin/public');
+  return {
+    ...actual,
+    DashboardRenderer: jest.fn(() => <div data-test-subj="dashboardRenderer" />),
+    DashboardTopNav: jest.fn(() => <span data-test-subj="dashboardTopNav" />),
+  };
+});
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -29,12 +35,16 @@ jest.mock('react-router-dom', () => {
 
 describe('DashboardRenderer', () => {
   const props = {
-    canReadDashboard: true,
     id: 'dashboard-savedObjectId',
+    query: { query: '*', language: 'kql' },
+    filters: [],
+    canReadDashboard: true,
     savedObjectId: 'savedObjectId',
     timeRange: {
-      from: '2023-03-10T00:00:00.000Z',
-      to: '2023-03-10T23:59:59.999Z',
+      from: '2025-01-21T23:00:00.000Z',
+      to: '2025-04-22T11:15:11.349Z',
+      fromStr: 'now-90d/d',
+      toStr: 'now',
     },
   };
 
@@ -56,10 +66,13 @@ describe('DashboardRenderer', () => {
 
     expect(input).toEqual(
       expect.objectContaining({
-        timeRange: props.timeRange,
-        viewMode: ViewMode.VIEW,
-        query: undefined,
-        filters: undefined,
+        viewMode: 'view',
+        time_range: props.timeRange,
+        query: {
+          expression: props.query.query,
+          language: 'kql',
+        },
+        filters: props.filters,
       })
     );
   });
@@ -73,5 +86,40 @@ describe('DashboardRenderer', () => {
       wrapper: TestProviders,
     });
     expect(DashboardContainerRenderer).not.toHaveBeenCalled();
+  });
+
+  describe('dashboardContainer', () => {
+    const dashboardContainer = {
+      setFilters: jest.fn(),
+      setQuery: jest.fn(),
+      setTimeRange: jest.fn(),
+    } as unknown as jest.Mocked<DashboardApi>;
+
+    it('should initialize filters', () => {
+      render(<DashboardRenderer {...{ ...props, dashboardContainer }} />, {
+        wrapper: TestProviders,
+      });
+
+      expect(dashboardContainer.setFilters).toHaveBeenCalledWith(props.filters);
+    });
+
+    it('should initialize query', () => {
+      render(<DashboardRenderer {...{ ...props, dashboardContainer }} />, {
+        wrapper: TestProviders,
+      });
+
+      expect(dashboardContainer.setQuery).toHaveBeenCalledWith(props.query);
+    });
+
+    it('should initialize time range', () => {
+      render(<DashboardRenderer {...{ ...props, dashboardContainer }} />, {
+        wrapper: TestProviders,
+      });
+
+      expect(dashboardContainer.setTimeRange).toHaveBeenCalledWith({
+        from: props.timeRange.from,
+        to: props.timeRange.to,
+      });
+    });
   });
 });

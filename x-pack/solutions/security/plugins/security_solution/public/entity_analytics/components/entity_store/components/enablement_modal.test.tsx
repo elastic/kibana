@@ -6,24 +6,23 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { EntityStoreEnablementModal } from './enablement_modal';
-import { TestProviders } from '../../../../common/mock';
-import type { EntityAnalyticsPrivileges } from '../../../../../common/api/entity_analytics';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { RiskEngineMissingPrivilegesResponse } from '../../../hooks/use_missing_risk_engine_privileges';
+import type { EntityAnalyticsPrivileges } from '../../../../../common/api/entity_analytics';
+import { EnablementConfirmationModal } from './enablement_modal';
 
-const mockToggle = jest.fn();
-const mockEnableStore = jest.fn(() => jest.fn());
-
-const mockUseEntityEnginePrivileges = jest.fn();
-jest.mock('../hooks/use_entity_engine_privileges', () => ({
-  useEntityEnginePrivileges: () => mockUseEntityEnginePrivileges(),
-}));
+const mockOnClose = jest.fn();
+const mockOnConfirm = jest.fn();
 
 const mockUseMissingRiskEnginePrivileges = jest.fn();
 jest.mock('../../../hooks/use_missing_risk_engine_privileges', () => ({
   useMissingRiskEnginePrivileges: () => mockUseMissingRiskEnginePrivileges(),
+}));
+
+const mockUseEntityEnginePrivileges = jest.fn();
+jest.mock('../hooks/use_entity_engine_privileges', () => ({
+  useEntityEnginePrivileges: () => mockUseEntityEnginePrivileges(),
 }));
 
 const mockUseContractComponents = jest.fn(() => ({}));
@@ -31,26 +30,32 @@ jest.mock('../../../../common/hooks/use_contract_component', () => ({
   useContractComponents: () => mockUseContractComponents(),
 }));
 
+jest.mock('../../risk_engine_privileges_callout', () => ({
+  RiskEnginePrivilegesCallOut: () => (
+    <div data-test-subj="callout-missing-risk-engine-privileges" />
+  ),
+}));
+
+jest.mock('./entity_store_missing_privileges_callout', () => ({
+  EntityStoreMissingPrivilegesCallout: () => (
+    <div data-test-subj="callout-missing-privileges-callout" />
+  ),
+}));
+
 const defaultProps = {
   visible: true,
-  toggle: mockToggle,
-  enableStore: mockEnableStore,
-  riskScore: { disabled: false, checked: false },
-  entityStore: { disabled: false, checked: false },
+  onClose: mockOnClose,
+  onConfirm: mockOnConfirm,
 };
 
 const allEntityEnginePrivileges: EntityAnalyticsPrivileges = {
   has_all_required: true,
   privileges: {
     elasticsearch: {
-      cluster: {
-        manage_enrich: true,
-      },
+      cluster: { manage_enrich: true },
       index: { 'logs-*': { read: false, view_index_metadata: true } },
     },
-    kibana: {
-      'saved_object:entity-engine-status/all': true,
-    },
+    kibana: { 'saved_object:entity-engine-status/all': true },
   },
 };
 
@@ -58,14 +63,10 @@ const missingEntityEnginePrivileges: EntityAnalyticsPrivileges = {
   has_all_required: false,
   privileges: {
     elasticsearch: {
-      cluster: {
-        manage_enrich: false,
-      },
+      cluster: { manage_enrich: false },
       index: { 'logs-*': { read: false, view_index_metadata: false } },
     },
-    kibana: {
-      'saved_object:entity-engine-status/all': false,
-    },
+    kibana: { 'saved_object:entity-engine-status/all': false },
   },
 };
 
@@ -78,18 +79,16 @@ const missingRiskEnginePrivileges: RiskEngineMissingPrivilegesResponse = {
   isLoading: false,
   hasAllRequiredPrivileges: false,
   missingPrivileges: {
-    clusterPrivileges: [],
+    clusterPrivileges: { enable: [], run: [] },
     indexPrivileges: [],
   },
 };
 
-const renderComponent = async (props = defaultProps) => {
-  await act(async () => {
-    return render(<EntityStoreEnablementModal {...props} />, { wrapper: TestProviders });
-  });
-};
+const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <IntlProvider locale="en">{children}</IntlProvider>
+);
 
-describe('EntityStoreEnablementModal', () => {
+describe('EnablementConfirmationModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -100,79 +99,36 @@ describe('EntityStoreEnablementModal', () => {
         data: allEntityEnginePrivileges,
         isLoading: false,
       });
-
       mockUseMissingRiskEnginePrivileges.mockReturnValue(allRiskEnginePrivileges);
     });
 
-    it('should render the modal when visible is true', () => {
-      renderComponent();
-      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    it('renders the modal when visible is true', () => {
+      render(<EnablementConfirmationModal {...defaultProps} />, { wrapper: Wrapper });
+      expect(screen.getByTestId('entityAnalyticsEnablementModal')).toBeInTheDocument();
     });
 
-    it('should not render the modal when visible is false', () => {
-      renderComponent({ ...defaultProps, visible: false });
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    it('does not render the modal when visible is false', () => {
+      render(<EnablementConfirmationModal {...defaultProps} visible={false} />, {
+        wrapper: Wrapper,
+      });
+      expect(screen.queryByTestId('entityAnalyticsEnablementModal')).not.toBeInTheDocument();
     });
 
-    it('should call toggle function when cancel button is clicked', () => {
-      renderComponent();
+    it('calls onClose when cancel button is clicked', () => {
+      render(<EnablementConfirmationModal {...defaultProps} />, { wrapper: Wrapper });
       fireEvent.click(screen.getByText('Cancel'));
-      expect(mockToggle).toHaveBeenCalledWith(false);
+      expect(mockOnClose).toHaveBeenCalledTimes(1);
     });
 
-    it('should call enableStore function when enable button is clicked', () => {
-      renderComponent({
-        ...defaultProps,
-        riskScore: { ...defaultProps.riskScore, checked: true },
-        entityStore: { ...defaultProps.entityStore, checked: true },
-      });
-      fireEvent.click(screen.getByText('Enable'));
-      expect(mockEnableStore).toHaveBeenCalledWith({ riskScore: true, entityStore: true });
+    it('calls onConfirm when enable button is clicked', () => {
+      render(<EnablementConfirmationModal {...defaultProps} />, { wrapper: Wrapper });
+      fireEvent.click(screen.getByTestId('entityAnalyticsEnablementConfirmButton'));
+      expect(mockOnConfirm).toHaveBeenCalledTimes(1);
     });
 
-    it('should display proceed warning when no enablement options are selected', () => {
-      renderComponent();
-      expect(screen.getByText('Please enable at least one option to proceed.')).toBeInTheDocument();
-    });
-
-    it('should disable the enable button when enablementOptions are false', () => {
-      renderComponent({
-        ...defaultProps,
-        riskScore: { ...defaultProps.riskScore, checked: false },
-        entityStore: { ...defaultProps.entityStore, checked: false },
-      });
-
-      const enableButton = screen.getByRole('button', { name: /Enable/i });
-      expect(enableButton).toBeDisabled();
-    });
-
-    it('should show proceed warning when riskScore is enabled but entityStore is disabled and unchecked', () => {
-      renderComponent({
-        ...defaultProps,
-        riskScore: { disabled: false, checked: false }, // Enabled & Checked
-        entityStore: { disabled: true, checked: false }, // Disabled & Unchecked
-      });
-      expect(screen.getByText('Please enable at least one option to proceed.')).toBeInTheDocument();
-    });
-
-    it('should show proceed warning when entityStore is enabled but riskScore is disabled and unchecked', () => {
-      renderComponent({
-        ...defaultProps,
-        entityStore: { disabled: false, checked: false }, // Enabled & Checked
-        riskScore: { disabled: true, checked: false }, // Disabled & Unchecked
-      });
-      expect(screen.getByText('Please enable at least one option to proceed.')).toBeInTheDocument();
-    });
-
-    it('should not show entity engine missing privileges warning when no missing privileges', () => {
-      renderComponent();
-      expect(
-        screen.queryByTestId('callout-missing-entity-store-privileges')
-      ).not.toBeInTheDocument();
-    });
-
-    it('should not show risk engine missing privileges warning when no missing privileges', () => {
-      renderComponent();
+    it('does not show privilege callouts when privileges are present', () => {
+      render(<EnablementConfirmationModal {...defaultProps} />, { wrapper: Wrapper });
+      expect(screen.queryByTestId('callout-missing-privileges-callout')).not.toBeInTheDocument();
       expect(
         screen.queryByTestId('callout-missing-risk-engine-privileges')
       ).not.toBeInTheDocument();
@@ -185,28 +141,32 @@ describe('EntityStoreEnablementModal', () => {
         data: missingEntityEnginePrivileges,
         isLoading: false,
       });
-
       mockUseMissingRiskEnginePrivileges.mockReturnValue(missingRiskEnginePrivileges);
     });
 
-    it('should show entity engine missing privileges warning when missing privileges', () => {
-      renderComponent();
-      expect(screen.getByTestId('callout-missing-entity-store-privileges')).toBeInTheDocument();
+    it('shows entity engine missing privileges callout', () => {
+      render(<EnablementConfirmationModal {...defaultProps} />, { wrapper: Wrapper });
+      expect(screen.getByTestId('callout-missing-privileges-callout')).toBeInTheDocument();
     });
 
-    it('should show risk engine missing privileges warning when missing privileges', () => {
-      renderComponent();
+    it('shows risk engine missing privileges callout', () => {
+      render(<EnablementConfirmationModal {...defaultProps} />, { wrapper: Wrapper });
       expect(screen.getByTestId('callout-missing-risk-engine-privileges')).toBeInTheDocument();
     });
 
-    it('should render additional charges message when available', async () => {
+    it('disables the enable button when all privileges are missing', () => {
+      render(<EnablementConfirmationModal {...defaultProps} />, { wrapper: Wrapper });
+      const enableButton = screen.getByTestId('entityAnalyticsEnablementConfirmButton');
+      expect(enableButton).toBeDisabled();
+    });
+
+    it('renders additional charges message when available', () => {
       const AdditionalChargesMessageMock = () => <span data-test-subj="enablement-modal-test" />;
       mockUseContractComponents.mockReturnValue({
         AdditionalChargesMessage: AdditionalChargesMessageMock,
       });
 
-      await renderComponent();
-
+      render(<EnablementConfirmationModal {...defaultProps} />, { wrapper: Wrapper });
       expect(screen.queryByTestId('enablement-modal-test')).toBeInTheDocument();
     });
   });

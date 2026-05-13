@@ -7,7 +7,7 @@
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { FC, PropsWithChildren } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -15,15 +15,18 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { NavigationWarningPromptProvider } from '@kbn/observability-shared-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme/hooks';
 import {
   type KibanaEnvContext,
   useKibanaContextForPluginProvider,
   useKibanaEnvironmentContextProvider,
 } from '../hooks/use_kibana';
+import { ReloadRequestTimeProvider } from '../hooks/use_reload_request_time';
 import type { InfraClientStartDeps, InfraClientStartExports } from '../types';
+import { CpsProjectRoutingSync } from '../components/cps_project_routing_sync';
 import { HeaderActionMenuProvider } from '../containers/header_action_menu_provider';
 import { TriggersActionsProvider } from '../containers/triggers_actions_context';
-import { useIsDarkMode } from '../hooks/use_is_dark_mode';
+import { wrapHttpWithProjectRouting } from '../utils/wrap_http_with_project_routing';
 
 export const CommonInfraProviders: FC<
   PropsWithChildren<{
@@ -34,7 +37,7 @@ export const CommonInfraProviders: FC<
     theme$: AppMountParameters['theme$'];
   }>
 > = ({ children, triggersActionsUI, setHeaderActionMenu, appName, storage, theme$ }) => {
-  const darkMode = useIsDarkMode();
+  const darkMode = useKibanaIsDarkMode();
 
   return (
     <TriggersActionsProvider triggersActionsUI={triggersActionsUI}>
@@ -55,6 +58,8 @@ export interface CoreProvidersProps {
   plugins: InfraClientStartDeps;
   theme$: AppMountParameters['theme$'];
   kibanaEnvironment?: KibanaEnvContext;
+  /** When true, attach `x-project-routing` to Infra HTTP calls and refresh on CPS changes. */
+  infraCPSEnabled?: boolean;
 }
 
 export const CoreProviders: FC<PropsWithChildren<CoreProvidersProps>> = ({
@@ -63,25 +68,41 @@ export const CoreProviders: FC<PropsWithChildren<CoreProvidersProps>> = ({
   pluginStart,
   plugins,
   kibanaEnvironment,
+  infraCPSEnabled = false,
 }) => {
+  const coreForCps = useMemo(() => {
+    if (!infraCPSEnabled || !plugins.cps?.cpsManager) {
+      return core;
+    }
+    return {
+      ...core,
+      http: wrapHttpWithProjectRouting(core.http, () => plugins.cps?.cpsManager),
+    };
+  }, [core, plugins, infraCPSEnabled]);
+
   const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(
-    core,
+    coreForCps,
     plugins,
     pluginStart
   );
 
   const KibanaEnvContextForPluginProvider = useKibanaEnvironmentContextProvider(kibanaEnvironment);
 
+  const shouldSyncCpsRouting = infraCPSEnabled && Boolean(plugins.cps?.cpsManager);
+
   return (
-    <KibanaRenderContextProvider {...core}>
+    <KibanaRenderContextProvider {...coreForCps}>
       <RedirectAppLinks
         coreStart={{
-          application: core.application,
+          application: coreForCps.application,
         }}
       >
-        <KibanaContextProviderForPlugin services={{ ...core, ...plugins, ...pluginStart }}>
+        <KibanaContextProviderForPlugin services={{ ...coreForCps, ...plugins, ...pluginStart }}>
           <KibanaEnvContextForPluginProvider kibanaEnv={kibanaEnvironment}>
-            {children}
+            <ReloadRequestTimeProvider>
+              {shouldSyncCpsRouting ? <CpsProjectRoutingSync /> : null}
+              {children}
+            </ReloadRequestTimeProvider>
           </KibanaEnvContextForPluginProvider>
         </KibanaContextProviderForPlugin>
       </RedirectAppLinks>

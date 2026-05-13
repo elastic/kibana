@@ -15,7 +15,7 @@ import type {
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
-import { hasArtifactOwnerSpaceId } from '../../../../common/endpoint/service/artifacts/utils';
+import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
 import { BaseValidator } from './base_validator';
 import type { ExceptionItemLikeOptions } from '../types';
 import { isValidHash } from '../../../../common/endpoint/service/artifacts/validations';
@@ -67,7 +67,7 @@ const CommonEntrySchema = {
         validate: (hash: string) =>
           isValidHash(hash) ? undefined : `invalid hash value [${hash}]`,
       }),
-      { minSize: 1 }
+      { minSize: 1, maxSize: 2000 }
     ),
     schema.conditional(
       schema.siblingRef('field'),
@@ -77,14 +77,14 @@ const CommonEntrySchema = {
           validate: (pathValue: string) =>
             pathValue.length > 0 ? undefined : `invalid path value [${pathValue}]`,
         }),
-        { minSize: 1 }
+        { minSize: 1, maxSize: 2000 }
       ),
       schema.arrayOf(
         schema.string({
           validate: (signerValue: string) =>
             signerValue.length > 0 ? undefined : `invalid signer value [${signerValue}]`,
         }),
-        { minSize: 1 }
+        { minSize: 1, maxSize: 2000 }
       )
     )
   ),
@@ -102,12 +102,12 @@ const WindowsSignerEntrySchema = schema.object({
         schema.siblingRef('type'),
         schema.literal('match'),
         schema.string({ minLength: 1 }),
-        schema.arrayOf(schema.string({ minLength: 1 }))
+        schema.arrayOf(schema.string({ minLength: 1 }), { maxSize: 2000 })
       ),
       type: schema.oneOf([schema.literal('match'), schema.literal('match_any')]),
       operator: schema.literal('included'),
     }),
-    { minSize: 1 }
+    { minSize: 1, maxSize: 250 }
   ),
 });
 
@@ -156,6 +156,7 @@ const hashEntriesValidation = (entries: BlocklistConditionEntry[]) => {
 // Validate there is only one entry when signer or path and the allowed entries for hashes
 const entriesSchemaOptions = {
   minSize: 1,
+  maxSize: 250,
   validate(entries: BlocklistConditionEntry[]) {
     if (allowedHashes.includes(entries[0].field)) {
       return hashEntriesValidation(entries);
@@ -231,6 +232,24 @@ export class BlocklistValidator extends BaseValidator {
     return super.validateHasPrivilege('canReadBlocklist');
   }
 
+  async validatePreImport(items: PromiseFromStreams): Promise<void> {
+    await this.validateHasWritePrivilege();
+
+    await this.validatePreImportItems(items, async (item) => {
+      // import specific validations
+      await this.validateImportOwnerSpaceIds(item); // instead of validateCreateOwnerSpaceIds
+      await this.validateCanImportGlobalArtifacts(item); // instead of validateCanCreateGlobalArtifacts
+      await this.removeInvalidPolicyIds(item); // instead of validateByPolicyItem
+
+      // usual validators from pre-create
+      (item.entries as BlocklistConditionEntry[]) = removeDuplicateEntryValues(
+        item.entries as BlocklistConditionEntry[]
+      );
+      await this.validateBlocklistData(item);
+      await this.validateCanCreateByPolicyArtifacts(item);
+    });
+  }
+
   async validatePreCreateItem(
     item: CreateExceptionListItemOptions
   ): Promise<CreateExceptionListItemOptions> {
@@ -243,18 +262,20 @@ export class BlocklistValidator extends BaseValidator {
     await this.validateBlocklistData(item);
     await this.validateCanCreateByPolicyArtifacts(item);
     await this.validateByPolicyItem(item);
-
-    await this.setOwnerSpaceId(item);
+    await this.validateCanCreateGlobalArtifacts(item);
+    await this.validateCreateOwnerSpaceIds(item);
 
     return item;
   }
 
-  async validatePreDeleteItem(): Promise<void> {
+  async validatePreDeleteItem(currentItem: ExceptionListItemSchema): Promise<void> {
     await this.validateHasWritePrivilege();
+    await this.validateCanDeleteItemInActiveSpace(currentItem);
   }
 
-  async validatePreGetOneItem(): Promise<void> {
+  async validatePreGetOneItem(currentItem: ExceptionListItemSchema): Promise<void> {
     await this.validateHasReadPrivilege();
+    await this.validateCanReadItemInActiveSpace(currentItem);
   }
 
   async validatePreMultiListFind(): Promise<void> {
@@ -298,11 +319,9 @@ export class BlocklistValidator extends BaseValidator {
       }
     }
 
-    await this.validateByPolicyItem(updatedItem);
-
-    if (!hasArtifactOwnerSpaceId(_updatedItem)) {
-      await this.setOwnerSpaceId(_updatedItem);
-    }
+    await this.validateByPolicyItem(updatedItem, currentItem);
+    await this.validateUpdateOwnerSpaceIds(updatedItem, currentItem);
+    await this.validateCanUpdateItemInActiveSpace(_updatedItem, currentItem);
 
     return _updatedItem;
   }

@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -19,13 +19,14 @@ import {
   EuiCallOut,
   EuiButton,
   EuiLink,
+  EuiScreenReaderLive,
 } from '@elastic/eui';
-import { ScopedHistory } from '@kbn/core/public';
+import type { ScopedHistory } from '@kbn/core/public';
 
+import type { Error } from '../../../../shared_imports';
 import {
   PageLoading,
   PageError,
-  Error,
   reactRouterNavigate,
   extractQueryParams,
   attemptToURIDecode,
@@ -40,7 +41,7 @@ import { documentationService } from '../../../services/documentation';
 import { DataStreamTable } from './data_stream_table';
 import { DataStreamDetailPanel } from './data_stream_detail_panel';
 import { filterDataStreams, isSelectedDataStreamHidden } from '../../../lib/data_streams';
-import { Filters } from '../components';
+import type { Filters } from '../components';
 import { useStateWithLocalStorage } from '../../../hooks/use_state_with_localstorage';
 
 const SHOW_PROJECT_LEVEL_RETENTION = 'showProjectLevelRetention';
@@ -75,8 +76,24 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   }, []);
 
   const [isIncludeStatsChecked, setIsIncludeStatsChecked] = useState(false);
+  const [includeStatsAnnouncement, setIncludeStatsAnnouncement] = useState('');
+
+  const handleIncludeStatsChange = (nextChecked: boolean) => {
+    setIsIncludeStatsChecked(nextChecked);
+    setIncludeStatsAnnouncement(
+      nextChecked
+        ? i18n.translate('xpack.idxMgmt.dataStreamListControls.includeStatsSwitchOn', {
+            defaultMessage: 'Include stats on',
+          })
+        : i18n.translate('xpack.idxMgmt.dataStreamListControls.includeStatsSwitchOff', {
+            defaultMessage: 'Include stats off',
+          })
+    );
+  };
+
   const {
     error,
+    isInitialRequest,
     isLoading,
     data: dataStreams,
     resendRequest: reload,
@@ -154,7 +171,11 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
 
         {enableProjectLevelRetentionChecks && (
           <EuiFlexItem grow={false}>
-            <EuiLink href={cloud?.deploymentUrl} target="_blank">
+            <EuiLink
+              href={cloud?.deploymentUrl}
+              target="_blank"
+              data-test-subj="projectLevelRetentionLink"
+            >
               <FormattedMessage
                 id="xpack.idxMgmt.dataStreamList.projectlevelRetention.linkText"
                 defaultMessage="Project data retention"
@@ -168,7 +189,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   let content;
 
-  if (isLoading) {
+  if (isLoading && isInitialRequest) {
     content = (
       <PageLoading>
         <FormattedMessage
@@ -263,6 +284,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
         {enableProjectLevelRetentionChecks && projectLevelRetentionCallout && (
           <>
             <EuiCallOut
+              announceOnMount
               onDismiss={() => setprojectLevelRetentionCallout(false)}
               data-test-subj="projectLevelRetentionCallout"
               title={i18n.translate(
@@ -301,12 +323,13 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
               : ''
           }
           dataStreams={filteredDataStreams}
+          isLoading={isLoading}
           reload={reload}
           viewFilters={filters}
           onViewFilterChange={setFilters}
           history={history as ScopedHistory}
           includeStats={isIncludeStatsChecked}
-          setIncludeStats={setIsIncludeStatsChecked}
+          setIncludeStats={handleIncludeStatsChange}
         />
       </EuiPageSection>
     );
@@ -314,6 +337,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   return (
     <div className={APP_WRAPPER_CLASS}>
+      <EuiScreenReaderLive>{includeStatsAnnouncement}</EuiScreenReaderLive>
       {content}
 
       {/*

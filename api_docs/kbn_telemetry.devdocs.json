@@ -1,0 +1,259 @@
+{
+  "id": "@kbn/telemetry",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/telemetry",
+        "id": "def-server.buildOtelResources",
+        "type": "Function",
+        "tags": [],
+        "label": "buildOtelResources",
+        "description": [
+          "\nUnified function to build the OpenTelemetry resource for all services."
+        ],
+        "signature": [
+          "(serviceName: string) => ",
+          "Resource"
+        ],
+        "path": "src/platform/packages/shared/kbn-telemetry/src/build_otel_resources.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/telemetry",
+            "id": "def-server.buildOtelResources.$1",
+            "type": "string",
+            "tags": [],
+            "label": "serviceName",
+            "description": [
+              "The service name used to look up APM config (defaults to 'kibana')."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-telemetry/src/build_otel_resources.ts",
+            "lineNumber": 23,
+            "columnNumber": 36,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The OpenTelemetry resource"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/telemetry",
+        "id": "def-server.initTelemetry",
+        "type": "Function",
+        "tags": [],
+        "label": "initTelemetry",
+        "description": [
+          "\n\nInitializes OpenTelemetry (currently only tracing)\n"
+        ],
+        "signature": [
+          "(argv: string[], rootDir: string, isDistributable: boolean, serviceName: string) => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/telemetry",
+            "id": "def-server.initTelemetry.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "argv",
+            "description": [
+              "Process arguments"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/telemetry",
+            "id": "def-server.initTelemetry.$2",
+            "type": "string",
+            "tags": [],
+            "label": "rootDir",
+            "description": [
+              "Root dir of Kibana repo"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/telemetry",
+            "id": "def-server.initTelemetry.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDistributable",
+            "description": [
+              "Whether this is a distributable build"
+            ],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/telemetry",
+            "id": "def-server.initTelemetry.$4",
+            "type": "string",
+            "tags": [],
+            "label": "serviceName",
+            "description": [
+              "The service name used in resource attributes"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "A function that can be called on shutdown and allows exporters to flush their queue."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/telemetry",
+        "id": "def-server.setDiagLogger",
+        "type": "Function",
+        "tags": [],
+        "label": "setDiagLogger",
+        "description": [
+          "\nHelper to make it easier to configure OTel's ",
+          {
+            "pluginId": "@kbn/telemetry",
+            "scope": "server",
+            "docId": "kibKbnTelemetryPluginApi",
+            "section": "def-server.DiagLogger",
+            "text": "DiagLogger"
+          },
+          "."
+        ],
+        "signature": [
+          "(logger: ",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          ", logLevel: ",
+          "LogLevelId",
+          " | undefined) => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-telemetry/src/set_diag_logger.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/telemetry",
+            "id": "def-server.setDiagLogger.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [
+              "{@link Logger}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-telemetry/src/set_diag_logger.ts",
+            "lineNumber": 20,
+            "columnNumber": 31,
+            "deprecated": false,
+            "docsReferencedTypeName": "Logger",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/telemetry",
+            "id": "def-server.setDiagLogger.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "logLevel",
+            "description": [
+              "The {@link LogLevelId} to set the Diag logger to."
+            ],
+            "signature": [
+              "LogLevelId",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-telemetry/src/set_diag_logger.ts",
+            "lineNumber": 20,
+            "columnNumber": 47,
+            "deprecated": false,
+            "docsReferencedTypeName": "LogLevelId",
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

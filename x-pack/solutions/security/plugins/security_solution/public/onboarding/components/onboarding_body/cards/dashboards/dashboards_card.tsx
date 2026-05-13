@@ -80,13 +80,14 @@ export const DashboardsCard: OnboardingCardComponent = ({
             items={DASHBOARDS_CARD_ITEMS}
             onSelect={onSelectCard}
             selectedItem={selectedCardItem}
+            cardId={OnboardingCardId.dashboards}
           />
           {isIntegrationsCardAvailable && !isIntegrationsCardComplete && (
             <>
               <EuiSpacer size="m" />
               <CardCallOut
                 color="primary"
-                icon="iInCircle"
+                icon="info"
                 text={i18n.DASHBOARDS_CARD_CALLOUT_INTEGRATIONS_TEXT}
                 action={
                   <EuiLink
@@ -96,7 +97,7 @@ export const DashboardsCard: OnboardingCardComponent = ({
                     <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
                       <EuiFlexItem>{i18n.DASHBOARDS_CARD_CALLOUT_INTEGRATIONS_BUTTON}</EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiIcon type="arrowRight" color="primary" size="s" />
+                        <EuiIcon type="chevronSingleRight" color="primary" size="s" />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiLink>

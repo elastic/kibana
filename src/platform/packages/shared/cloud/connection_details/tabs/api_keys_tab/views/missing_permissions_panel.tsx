@@ -17,7 +17,7 @@ export const MissingPermissionsPanel: React.FC = () => {
     <>
       <EuiCallOut
         color={'warning'}
-        iconType={'iInCircle'}
+        iconType={'info'}
         title={i18n.translate('cloud.connectionDetails.tabs.apiKeys.missingPermPanel.title', {
           defaultMessage: 'Missing permissions',
         })}

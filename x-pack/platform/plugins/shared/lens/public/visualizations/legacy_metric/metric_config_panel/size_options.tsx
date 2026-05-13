@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiSuperSelect } from '@elastic/eui';
-import type { LegacyMetricState } from '../../../../common/types';
+import { EuiFormAppend, EuiFormPrepend, EuiSuperSelect } from '@elastic/eui';
+import type { LegacyMetricState } from '@kbn/lens-common';
 
 export interface TitlePositionProps {
   state: LegacyMetricState;
@@ -68,17 +68,23 @@ export const SizeOptions: React.FC<TitlePositionProps> = ({ state, setState }) =
   return (
     <EuiSuperSelect
       append={
-        <EuiButtonIcon
-          iconType="plus"
+        <EuiFormAppend
+          iconLeft="plus"
           onClick={() => changeSize(1)}
           isDisabled={currSizeIndex === titleSizes.length - 1}
+          aria-label={i18n.translate('xpack.lens.legacyMetric.sizeOptions.increaseSizeAriaLabel', {
+            defaultMessage: 'Increase title size',
+          })}
         />
       }
       prepend={
-        <EuiButtonIcon
-          iconType="minus"
+        <EuiFormPrepend
+          iconLeft="minus"
           onClick={() => changeSize(-1)}
           isDisabled={currSizeIndex === 0}
+          aria-label={i18n.translate('xpack.lens.legacyMetric.sizeOptions.decreaseSizeAriaLabel', {
+            defaultMessage: 'Decrease title size',
+          })}
         />
       }
       data-test-subj="lnsLegacyMetricSizeSelect"
@@ -97,6 +103,9 @@ export const SizeOptions: React.FC<TitlePositionProps> = ({ state, setState }) =
       itemLayoutAlign="top"
       hasDividers
       fullWidth
+      aria-label={i18n.translate('xpack.lens.legacyMetric.sizeOptions.titleSizeAriaLabel', {
+        defaultMessage: 'Title size',
+      })}
     />
   );
 };

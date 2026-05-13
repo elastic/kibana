@@ -10,12 +10,6 @@
     "list_id": {
       "type": "keyword"
     },
-    "deserializer": {
-      "type": "keyword"
-    },
-    "serializer": {
-      "type": "keyword"
-    },
     "meta": {
       "enabled": "false",
       "type": "object"

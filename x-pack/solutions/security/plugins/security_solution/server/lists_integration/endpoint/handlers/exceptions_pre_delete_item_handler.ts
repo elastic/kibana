@@ -14,12 +14,12 @@ import {
   EventFilterValidator,
   HostIsolationExceptionsValidator,
   TrustedAppValidator,
+  TrustedDeviceValidator,
 } from '../validators';
 
-type ValidatorCallback = ExceptionsListPreDeleteItemServerExtension['callback'];
 export const getExceptionsPreDeleteItemHandler = (
   endpointAppContextService: EndpointAppContextService
-): ValidatorCallback => {
+): ExceptionsListPreDeleteItemServerExtension['callback'] => {
   return async function ({ data, context: { request, exceptionListClient } }) {
     if (data.namespaceType !== 'agnostic') {
       return data;
@@ -40,7 +40,17 @@ export const getExceptionsPreDeleteItemHandler = (
 
     // Validate Trusted Applications
     if (TrustedAppValidator.isTrustedApp({ listId })) {
-      await new TrustedAppValidator(endpointAppContextService, request).validatePreDeleteItem();
+      await new TrustedAppValidator(endpointAppContextService, request).validatePreDeleteItem(
+        exceptionItem
+      );
+      return data;
+    }
+
+    // Validate Trusted Devices
+    if (TrustedDeviceValidator.isTrustedDevice({ listId })) {
+      await new TrustedDeviceValidator(endpointAppContextService, request).validatePreDeleteItem(
+        exceptionItem
+      );
       return data;
     }
 
@@ -49,19 +59,23 @@ export const getExceptionsPreDeleteItemHandler = (
       await new HostIsolationExceptionsValidator(
         endpointAppContextService,
         request
-      ).validatePreDeleteItem();
+      ).validatePreDeleteItem(exceptionItem);
       return data;
     }
 
     // Event Filter validation
     if (EventFilterValidator.isEventFilter({ listId })) {
-      await new EventFilterValidator(endpointAppContextService, request).validatePreDeleteItem();
+      await new EventFilterValidator(endpointAppContextService, request).validatePreDeleteItem(
+        exceptionItem
+      );
       return data;
     }
 
     // Validate Blocklists
     if (BlocklistValidator.isBlocklist({ listId })) {
-      await new BlocklistValidator(endpointAppContextService, request).validatePreDeleteItem();
+      await new BlocklistValidator(endpointAppContextService, request).validatePreDeleteItem(
+        exceptionItem
+      );
       return data;
     }
 
@@ -70,7 +84,7 @@ export const getExceptionsPreDeleteItemHandler = (
       await new EndpointExceptionsValidator(
         endpointAppContextService,
         request
-      ).validatePreDeleteItem();
+      ).validatePreDeleteItem(exceptionItem);
       return data;
     }
 

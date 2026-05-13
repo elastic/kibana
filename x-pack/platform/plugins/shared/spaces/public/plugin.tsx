@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import { combineLatest, type Subscription } from 'rxjs';
+
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
@@ -32,6 +35,7 @@ export interface PluginsStart {
   features: FeaturesPluginStart;
   management?: ManagementStart;
   cloud?: CloudStart;
+  cps?: CPSPluginStart;
 }
 
 /**
@@ -52,6 +56,8 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
   private managementService?: ManagementService;
   private config: ConfigType;
   private readonly isServerless: boolean;
+
+  private spaceAndExecutionContextSyncSubscription?: Subscription;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ConfigType>();
@@ -157,6 +163,16 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       });
     }
 
+    // Ensures the space property in the execution context is always in sync with the active space.
+    this.spaceAndExecutionContextSyncSubscription = combineLatest([
+      this.spacesManager.onActiveSpaceChange$,
+      core.executionContext.context$,
+    ]).subscribe(([latestSpace, latestContext]) => {
+      if (latestContext.space !== latestSpace.id) {
+        core.executionContext.set({ space: latestSpace.id });
+      }
+    });
+
     registerAnalyticsContext(core.analytics, this.spacesManager.onActiveSpaceChange$);
 
     return { hasOnlyDefaultSpace, isSolutionViewEnabled: this.config.allowSolutionVisibility };
@@ -176,5 +192,6 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       this.managementService.stop();
       this.managementService = undefined;
     }
+    this.spaceAndExecutionContextSyncSubscription?.unsubscribe();
   }
 }

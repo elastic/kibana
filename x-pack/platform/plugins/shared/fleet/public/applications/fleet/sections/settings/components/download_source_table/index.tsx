@@ -79,7 +79,16 @@ export const DownloadSourceTable: React.FunctionComponent<DownloadSourceTablePro
       {
         render: (downloadSource: DownloadSource) =>
           downloadSource.is_default ? (
-            <EuiIcon type="check" data-test-subj="editDownloadSourceTable.defaultIcon" />
+            <EuiIcon
+              type="check"
+              data-test-subj="editDownloadSourceTable.defaultIcon"
+              aria-label={i18n.translate(
+                'xpack.fleet.settings.downloadSourcesTable.defaultIconLabel',
+                {
+                  defaultMessage: 'Default download source',
+                }
+              )}
+            />
           ) : null,
         width: '200px',
         name: i18n.translate('xpack.fleet.settings.downloadSourcesTable.defaultColumnTitle', {
@@ -90,38 +99,42 @@ export const DownloadSourceTable: React.FunctionComponent<DownloadSourceTablePro
         width: '68px',
         render: (downloadSource: DownloadSource) => {
           const isDeleteVisible = !downloadSource.is_default && hasAllSettingsPrivileges;
+          const deleteDownloadSourceLabel = i18n.translate(
+            'xpack.fleet.settings.downloadSourceSection.deleteButtonTitle',
+            {
+              defaultMessage: 'Delete',
+            }
+          );
+          const editDownloadSourceLabel = i18n.translate(
+            'xpack.fleet.settings.downloadSourceSection.editButtonTitle',
+            {
+              defaultMessage: 'Edit',
+            }
+          );
 
           return (
             <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
                 {isDeleteVisible && (
                   <EuiButtonIcon
+                    aria-label={deleteDownloadSourceLabel}
                     color="text"
                     iconType="trash"
                     onClick={() => deleteDownloadSource(downloadSource)}
-                    title={i18n.translate(
-                      'xpack.fleet.settings.downloadSourceSection.deleteButtonTitle',
-                      {
-                        defaultMessage: 'Delete',
-                      }
-                    )}
+                    title={deleteDownloadSourceLabel}
                     data-test-subj="editDownloadSourceTable.delete.btn"
                   />
                 )}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
+                  aria-label={editDownloadSourceLabel}
                   color="text"
                   iconType="pencil"
                   href={getHref('settings_edit_download_sources', {
                     downloadSourceId: downloadSource.id,
                   })}
-                  title={i18n.translate(
-                    'xpack.fleet.settings.downloadSourceSection.editButtonTitle',
-                    {
-                      defaultMessage: 'Edit',
-                    }
-                  )}
+                  title={editDownloadSourceLabel}
                   data-test-subj="editDownloadSourceTable.edit.btn"
                 />
               </EuiFlexItem>
@@ -140,6 +153,7 @@ export const DownloadSourceTable: React.FunctionComponent<DownloadSourceTablePro
       columns={columns}
       items={downloadSources}
       data-test-subj="AgentDownloadSourcesTable"
+      tableCaption="Download sources"
     />
   );
 };

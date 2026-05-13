@@ -6,19 +6,21 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 import type { GetCasesColumn } from './use_cases_columns';
 import { ExternalServiceColumn, useCasesColumns } from './use_cases_columns';
 import { useGetCasesMockState } from '../../containers/mock';
 import { connectors, useCaseConfigureResponse } from '../configure_cases/__mock__';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, readCasesPermissions, TestProviders } from '../../common/mock';
-import { renderHook } from '@testing-library/react';
+
+import { readCasesPermissions, renderWithTestingProviders, TestProviders } from '../../common/mock';
+import { KibanaServices } from '../../common/lib/kibana';
+import { renderHook, screen } from '@testing-library/react';
 import { CaseStatuses, CustomFieldTypes } from '../../../common/types/domain';
 import { userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { coreMock } from '@kbn/core/public/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 jest.mock('../../containers/configure/use_get_case_configuration');
 
@@ -40,7 +42,6 @@ const DEFAULT_SELECTED_COLUMNS = [
 ];
 
 describe('useCasesColumns ', () => {
-  let appMockRender: AppMockRenderer;
   const useCasesColumnsProps: GetCasesColumn = {
     filterStatus: [CaseStatuses.open],
     userProfiles: userProfilesMap,
@@ -50,7 +51,7 @@ describe('useCasesColumns ', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
+
     useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
   });
 
@@ -58,8 +59,6 @@ describe('useCasesColumns ', () => {
     const license = licensingMock.createLicense({
       license: { type: 'platinum' },
     });
-
-    appMockRender = createAppMockRenderer({ license });
 
     const { result } = renderHook(
       () =>
@@ -71,7 +70,7 @@ describe('useCasesColumns ', () => {
           })),
         }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: (props) => <TestProviders {...props} license={license} />,
       }
     );
 
@@ -80,89 +79,105 @@ describe('useCasesColumns ', () => {
         "columns": Array [
           Object {
             "field": "title",
+            "minWidth": "16em",
             "name": "Name",
             "render": [Function],
             "sortable": true,
-            "width": "17%",
           },
           Object {
             "field": "assignees",
+            "minWidth": "2em",
             "name": "Assignees",
             "render": [Function],
-            "width": "10%",
+            "width": "6em",
           },
           Object {
             "field": "tags",
+            "minWidth": "4em",
             "name": "Tags",
             "render": [Function],
-            "width": "12%",
+            "width": "10em",
           },
           Object {
             "align": "right",
             "field": "totalAlerts",
+            "minWidth": "4em",
             "name": "Alerts",
             "render": [Function],
-            "width": "70px",
+            "width": "4em",
           },
           Object {
             "align": "right",
             "field": "totalComment",
+            "minWidth": "6em",
             "name": "Comments",
             "render": [Function],
-            "width": "75px",
+            "width": "6em",
           },
           Object {
             "field": "category",
+            "minWidth": "6.5em",
             "name": "Category",
             "render": [Function],
             "sortable": true,
-            "width": "12%",
+            "width": "10em",
           },
           Object {
+            "data-test-subj": "case-table-column-createdAt",
             "field": "createdAt",
+            "minWidth": "9em",
             "name": "Created on",
             "render": [Function],
             "sortable": true,
-            "width": "15%",
+            "width": "9em",
           },
           Object {
+            "data-test-subj": "case-table-column-updatedAt",
             "field": "updatedAt",
+            "minWidth": "9em",
             "name": "Updated on",
             "render": [Function],
             "sortable": true,
-            "width": "15%",
+            "width": "9em",
           },
           Object {
+            "data-test-subj": "case-table-column-closedAt",
             "field": "closedAt",
+            "minWidth": "9.5em",
             "name": "Closed on",
             "render": [Function],
             "sortable": true,
-            "width": "10%",
+            "width": "9.5em",
           },
           Object {
             "name": "External incident",
             "render": [Function],
-            "width": "10%",
+            "width": "8.5em",
           },
           Object {
+            "className": "eui-textNoWrap",
             "field": "status",
+            "minWidth": "6.5em",
             "name": "Status",
             "render": [Function],
             "sortable": true,
-            "width": "100px",
+            "width": "6.5em",
           },
           Object {
+            "className": "eui-textNoWrap",
             "field": "severity",
+            "minWidth": "6em",
             "name": "Severity",
             "render": [Function],
             "sortable": true,
-            "width": "90px",
+            "width": "6em",
           },
           Object {
             "align": "right",
+            "minWidth": "4.5em",
             "name": "Actions",
             "render": [Function],
-            "width": "100px",
+            "width": "4.5em",
           },
         ],
         "isLoadingColumns": false,
@@ -176,10 +191,8 @@ describe('useCasesColumns ', () => {
       license: { type: 'platinum' },
     });
 
-    appMockRender = createAppMockRenderer({ license });
-
     const { result } = renderHook(() => useCasesColumns(useCasesColumnsProps), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} license={license} />,
     });
 
     expect(result.current).toMatchInlineSnapshot(`
@@ -187,82 +200,96 @@ describe('useCasesColumns ', () => {
         "columns": Array [
           Object {
             "field": "title",
+            "minWidth": "16em",
             "name": "Name",
             "render": [Function],
             "sortable": true,
-            "width": "17%",
           },
           Object {
             "field": "assignees",
+            "minWidth": "2em",
             "name": "Assignees",
             "render": [Function],
-            "width": "10%",
+            "width": "6em",
           },
           Object {
             "field": "tags",
+            "minWidth": "4em",
             "name": "Tags",
             "render": [Function],
-            "width": "12%",
+            "width": "10em",
           },
           Object {
             "align": "right",
             "field": "totalAlerts",
+            "minWidth": "4em",
             "name": "Alerts",
             "render": [Function],
-            "width": "70px",
+            "width": "4em",
           },
           Object {
             "align": "right",
             "field": "totalComment",
+            "minWidth": "6em",
             "name": "Comments",
             "render": [Function],
-            "width": "75px",
+            "width": "6em",
           },
           Object {
             "field": "category",
+            "minWidth": "6.5em",
             "name": "Category",
             "render": [Function],
             "sortable": true,
-            "width": "12%",
+            "width": "10em",
           },
           Object {
+            "data-test-subj": "case-table-column-createdAt",
             "field": "createdAt",
+            "minWidth": "9em",
             "name": "Created on",
             "render": [Function],
             "sortable": true,
-            "width": "15%",
+            "width": "9em",
           },
           Object {
+            "data-test-subj": "case-table-column-updatedAt",
             "field": "updatedAt",
+            "minWidth": "9em",
             "name": "Updated on",
             "render": [Function],
             "sortable": true,
-            "width": "15%",
+            "width": "9em",
           },
           Object {
             "name": "External incident",
             "render": [Function],
-            "width": "10%",
+            "width": "8.5em",
           },
           Object {
+            "className": "eui-textNoWrap",
             "field": "status",
+            "minWidth": "6.5em",
             "name": "Status",
             "render": [Function],
             "sortable": true,
-            "width": "100px",
+            "width": "6.5em",
           },
           Object {
+            "className": "eui-textNoWrap",
             "field": "severity",
+            "minWidth": "6em",
             "name": "Severity",
             "render": [Function],
             "sortable": true,
-            "width": "90px",
+            "width": "6em",
           },
           Object {
             "align": "right",
+            "minWidth": "4.5em",
             "name": "Actions",
             "render": [Function],
-            "width": "100px",
+            "width": "4.5em",
           },
         ],
         "isLoadingColumns": false,
@@ -276,12 +303,10 @@ describe('useCasesColumns ', () => {
       license: { type: 'platinum' },
     });
 
-    appMockRender = createAppMockRenderer({ license });
-
     const { result } = renderHook(
       () => useCasesColumns({ ...useCasesColumnsProps, isSelectorView: true }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: (props) => <TestProviders {...props} license={license} />,
       }
     );
 
@@ -290,36 +315,50 @@ describe('useCasesColumns ', () => {
         "columns": Array [
           Object {
             "field": "title",
+            "minWidth": "16em",
             "name": "Name",
             "render": [Function],
             "sortable": true,
-            "width": "55%",
           },
           Object {
             "field": "category",
+            "minWidth": "6.5em",
             "name": "Category",
             "render": [Function],
             "sortable": true,
-            "width": "12%",
+            "width": "10em",
           },
           Object {
+            "data-test-subj": "case-table-column-createdAt",
             "field": "createdAt",
+            "minWidth": "9em",
             "name": "Created on",
             "render": [Function],
             "sortable": true,
-            "width": "15%",
+            "width": "9em",
           },
           Object {
+            "className": "eui-textNoWrap",
+            "field": "status",
+            "minWidth": "6.5em",
+            "name": "Status",
+            "render": [Function],
+            "sortable": true,
+            "width": "6.5em",
+          },
+          Object {
+            "className": "eui-textNoWrap",
             "field": "severity",
+            "minWidth": "6em",
             "name": "Severity",
             "render": [Function],
             "sortable": true,
-            "width": "90px",
+            "width": "6em",
           },
           Object {
             "align": "right",
             "render": [Function],
-            "width": "70px",
+            "width": "8em",
           },
         ],
         "isLoadingColumns": false,
@@ -332,7 +371,7 @@ describe('useCasesColumns ', () => {
     const { result } = renderHook(
       () => useCasesColumns({ ...useCasesColumnsProps, isSelectorView: true }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       }
     );
 
@@ -341,36 +380,50 @@ describe('useCasesColumns ', () => {
         "columns": Array [
           Object {
             "field": "title",
+            "minWidth": "16em",
             "name": "Name",
             "render": [Function],
             "sortable": true,
-            "width": "55%",
           },
           Object {
             "field": "category",
+            "minWidth": "6.5em",
             "name": "Category",
             "render": [Function],
             "sortable": true,
-            "width": "12%",
+            "width": "10em",
           },
           Object {
+            "data-test-subj": "case-table-column-createdAt",
             "field": "createdAt",
+            "minWidth": "9em",
             "name": "Created on",
             "render": [Function],
             "sortable": true,
-            "width": "15%",
+            "width": "9em",
           },
           Object {
+            "className": "eui-textNoWrap",
+            "field": "status",
+            "minWidth": "6.5em",
+            "name": "Status",
+            "render": [Function],
+            "sortable": true,
+            "width": "6.5em",
+          },
+          Object {
+            "className": "eui-textNoWrap",
             "field": "severity",
+            "minWidth": "6em",
             "name": "Severity",
             "render": [Function],
             "sortable": true,
-            "width": "90px",
+            "width": "6em",
           },
           Object {
             "align": "right",
             "render": [Function],
-            "width": "70px",
+            "width": "8em",
           },
         ],
         "isLoadingColumns": false,
@@ -383,7 +436,7 @@ describe('useCasesColumns ', () => {
     const { result } = renderHook(
       () => useCasesColumns({ ...useCasesColumnsProps, isSelectorView: true }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       }
     );
 
@@ -392,36 +445,50 @@ describe('useCasesColumns ', () => {
         "columns": Array [
           Object {
             "field": "title",
+            "minWidth": "16em",
             "name": "Name",
             "render": [Function],
             "sortable": true,
-            "width": "55%",
           },
           Object {
             "field": "category",
+            "minWidth": "6.5em",
             "name": "Category",
             "render": [Function],
             "sortable": true,
-            "width": "12%",
+            "width": "10em",
           },
           Object {
+            "data-test-subj": "case-table-column-createdAt",
             "field": "createdAt",
+            "minWidth": "9em",
             "name": "Created on",
             "render": [Function],
             "sortable": true,
-            "width": "15%",
+            "width": "9em",
           },
           Object {
+            "className": "eui-textNoWrap",
+            "field": "status",
+            "minWidth": "6.5em",
+            "name": "Status",
+            "render": [Function],
+            "sortable": true,
+            "width": "6.5em",
+          },
+          Object {
+            "className": "eui-textNoWrap",
             "field": "severity",
+            "minWidth": "6em",
             "name": "Severity",
             "render": [Function],
             "sortable": true,
-            "width": "90px",
+            "width": "6em",
           },
           Object {
             "align": "right",
             "render": [Function],
-            "width": "70px",
+            "width": "8em",
           },
         ],
         "isLoadingColumns": false,
@@ -430,11 +497,32 @@ describe('useCasesColumns ', () => {
     `);
   });
 
-  it('does not shows the actions if the user does not have the right permissions', async () => {
-    appMockRender = createAppMockRenderer({ permissions: readCasesPermissions() });
+  it('keeps the selector action column for closed status filtering', async () => {
+    const { result } = renderHook(
+      () =>
+        useCasesColumns({
+          ...useCasesColumnsProps,
+          isSelectorView: true,
+          filterStatus: [CaseStatuses.closed],
+        }),
+      {
+        wrapper: TestProviders,
+      }
+    );
 
+    const assignActionColumn = result.current.columns[result.current.columns.length - 1];
+    expect(assignActionColumn).toMatchInlineSnapshot(`
+      Object {
+        "align": "right",
+        "render": [Function],
+        "width": "8em",
+      }
+    `);
+  });
+
+  it('does not shows the actions if the user does not have the right permissions', async () => {
     const { result } = renderHook(() => useCasesColumns(useCasesColumnsProps), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} permissions={readCasesPermissions()} />,
     });
 
     expect(result.current).toMatchInlineSnapshot(`
@@ -442,70 +530,82 @@ describe('useCasesColumns ', () => {
         "columns": Array [
           Object {
             "field": "title",
+            "minWidth": "16em",
             "name": "Name",
             "render": [Function],
             "sortable": true,
-            "width": "17%",
           },
           Object {
             "field": "tags",
+            "minWidth": "4em",
             "name": "Tags",
             "render": [Function],
-            "width": "12%",
+            "width": "10em",
           },
           Object {
             "align": "right",
             "field": "totalAlerts",
+            "minWidth": "4em",
             "name": "Alerts",
             "render": [Function],
-            "width": "70px",
+            "width": "4em",
           },
           Object {
             "align": "right",
             "field": "totalComment",
+            "minWidth": "6em",
             "name": "Comments",
             "render": [Function],
-            "width": "75px",
+            "width": "6em",
           },
           Object {
             "field": "category",
+            "minWidth": "6.5em",
             "name": "Category",
             "render": [Function],
             "sortable": true,
-            "width": "12%",
+            "width": "10em",
           },
           Object {
+            "data-test-subj": "case-table-column-createdAt",
             "field": "createdAt",
+            "minWidth": "9em",
             "name": "Created on",
             "render": [Function],
             "sortable": true,
-            "width": "15%",
+            "width": "9em",
           },
           Object {
+            "data-test-subj": "case-table-column-updatedAt",
             "field": "updatedAt",
+            "minWidth": "9em",
             "name": "Updated on",
             "render": [Function],
             "sortable": true,
-            "width": "15%",
+            "width": "9em",
           },
           Object {
             "name": "External incident",
             "render": [Function],
-            "width": "10%",
+            "width": "8.5em",
           },
           Object {
+            "className": "eui-textNoWrap",
             "field": "status",
+            "minWidth": "6.5em",
             "name": "Status",
             "render": [Function],
             "sortable": true,
-            "width": "100px",
+            "width": "6.5em",
           },
           Object {
+            "className": "eui-textNoWrap",
             "field": "severity",
+            "minWidth": "6em",
             "name": "Severity",
             "render": [Function],
             "sortable": true,
-            "width": "90px",
+            "width": "6em",
           },
         ],
         "isLoadingColumns": false,
@@ -521,7 +621,6 @@ describe('useCasesColumns ', () => {
     const textLabel = 'Text Label';
     const toggleLabel = 'Toggle Label';
 
-    appMockRender = createAppMockRenderer({ permissions: readCasesPermissions() });
     useGetCaseConfigurationMock.mockImplementation(() => ({
       data: {
         ...useCaseConfigureResponse.data,
@@ -544,7 +643,7 @@ describe('useCasesColumns ', () => {
           ],
         }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: (props) => <TestProviders {...props} permissions={readCasesPermissions()} />,
       }
     );
 
@@ -553,82 +652,97 @@ describe('useCasesColumns ', () => {
         "columns": Array [
           Object {
             "field": "title",
+            "minWidth": "16em",
             "name": "Name",
             "render": [Function],
             "sortable": true,
-            "width": "17%",
           },
           Object {
             "field": "tags",
+            "minWidth": "4em",
             "name": "Tags",
             "render": [Function],
-            "width": "12%",
+            "width": "10em",
           },
           Object {
             "align": "right",
             "field": "totalAlerts",
+            "minWidth": "4em",
             "name": "Alerts",
             "render": [Function],
-            "width": "70px",
+            "width": "4em",
           },
           Object {
             "align": "right",
             "field": "totalComment",
+            "minWidth": "6em",
             "name": "Comments",
             "render": [Function],
-            "width": "75px",
+            "width": "6em",
           },
           Object {
             "field": "category",
+            "minWidth": "6.5em",
             "name": "Category",
             "render": [Function],
             "sortable": true,
-            "width": "12%",
+            "width": "10em",
           },
           Object {
+            "data-test-subj": "case-table-column-createdAt",
             "field": "createdAt",
+            "minWidth": "9em",
             "name": "Created on",
             "render": [Function],
             "sortable": true,
-            "width": "15%",
+            "width": "9em",
           },
           Object {
+            "data-test-subj": "case-table-column-updatedAt",
             "field": "updatedAt",
+            "minWidth": "9em",
             "name": "Updated on",
             "render": [Function],
             "sortable": true,
-            "width": "15%",
+            "width": "9em",
           },
           Object {
             "name": "External incident",
             "render": [Function],
-            "width": "10%",
+            "width": "8.5em",
           },
           Object {
+            "className": "eui-textNoWrap",
             "field": "status",
+            "minWidth": "6.5em",
             "name": "Status",
             "render": [Function],
             "sortable": true,
-            "width": "100px",
+            "width": "6.5em",
           },
           Object {
+            "className": "eui-textNoWrap",
             "field": "severity",
+            "minWidth": "6em",
             "name": "Severity",
             "render": [Function],
             "sortable": true,
-            "width": "90px",
+            "width": "6em",
           },
           Object {
             "data-test-subj": "text-custom-field-column",
+            "maxWidth": "18em",
+            "minWidth": "6em",
             "name": "Text Label",
             "render": [Function],
-            "width": "250px",
           },
           Object {
+            "align": "center",
             "data-test-subj": "toggle-custom-field-column",
+            "maxWidth": "7em",
+            "minWidth": "2.5em",
             "name": "Toggle Label",
             "render": [Function],
-            "width": "100px",
           },
         ],
         "isLoadingColumns": false,
@@ -637,101 +751,122 @@ describe('useCasesColumns ', () => {
     `);
   });
 
-  describe('ExternalServiceColumn ', () => {
-    it('Not pushed render', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <ExternalServiceColumn
-            theCase={useGetCasesMockState.data.cases[0]}
-            connectors={connectors}
-          />
-        </TestProviders>
+  describe('extended fields column', () => {
+    const license = licensingMock.createLicense({
+      license: { type: 'platinum' },
+    });
+
+    beforeEach(() => {
+      jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+        templates: { enabled: true },
+      } as ReturnType<typeof KibanaServices.getConfig>);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('includes the extended fields column when selected and templates are enabled', () => {
+      const { result } = renderHook(
+        () =>
+          useCasesColumns({
+            ...useCasesColumnsProps,
+            selectedColumns: [
+              ...DEFAULT_SELECTED_COLUMNS,
+              { field: 'extendedFields', name: 'Extended fields', isChecked: true },
+            ],
+          }),
+        {
+          wrapper: (props) => <TestProviders {...props} license={license} />,
+        }
       );
 
-      expect(
-        wrapper.find(`[data-test-subj="case-table-column-external-notPushed"]`).last().exists()
-      ).toBeTruthy();
+      const extendedColumn = result.current.columns.find((col) => col.name === 'Extended fields');
+
+      expect(extendedColumn).toBeDefined();
+      expect(extendedColumn?.name).toBe('Extended fields');
+    });
+  });
+
+  describe('ExternalServiceColumn ', () => {
+    it('Not pushed render', () => {
+      renderWithTestingProviders(
+        <ExternalServiceColumn
+          theCase={useGetCasesMockState.data.cases[0]}
+          connectors={connectors}
+        />
+      );
+
+      expect(screen.getByTestId('case-table-column-external-notPushed')).toBeInTheDocument();
     });
 
     it('Up to date', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <ExternalServiceColumn
-            theCase={useGetCasesMockState.data.cases[1]}
-            connectors={connectors}
-          />
-        </TestProviders>
+      renderWithTestingProviders(
+        <ExternalServiceColumn
+          theCase={useGetCasesMockState.data.cases[1]}
+          connectors={connectors}
+        />
       );
 
-      expect(
-        wrapper.find(`[data-test-subj="case-table-column-external-upToDate"]`).last().exists()
-      ).toBeTruthy();
+      expect(screen.getByTestId('case-table-column-external-upToDate')).toBeInTheDocument();
     });
 
     it('Needs update', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <ExternalServiceColumn
-            theCase={useGetCasesMockState.data.cases[2]}
-            connectors={connectors}
-          />
-        </TestProviders>
+      renderWithTestingProviders(
+        <ExternalServiceColumn
+          theCase={useGetCasesMockState.data.cases[2]}
+          connectors={connectors}
+        />
       );
 
-      expect(
-        wrapper.find(`[data-test-subj="case-table-column-external-requiresUpdate"]`).last().exists()
-      ).toBeTruthy();
+      expect(screen.getByTestId('case-table-column-external-requiresUpdate')).toBeInTheDocument();
     });
 
     it('it does not throw when accessing the icon if the connector type is not registered', () => {
       // If the component throws the test will fail
       expect(() =>
-        mount(
-          <TestProviders>
-            <ExternalServiceColumn
-              theCase={useGetCasesMockState.data.cases[2]}
-              connectors={[
-                {
-                  id: 'none',
-                  actionTypeId: '.none',
-                  name: 'None',
-                  config: {},
-                  isPreconfigured: false,
-                  isSystemAction: false,
-                  isDeprecated: false,
-                },
-              ]}
-            />
-          </TestProviders>
+        renderWithTestingProviders(
+          <ExternalServiceColumn
+            theCase={useGetCasesMockState.data.cases[2]}
+            connectors={[
+              createMockActionConnector({
+                id: 'none',
+                actionTypeId: '.none',
+                name: 'None',
+              }),
+            ]}
+          />
         )
       ).not.toThrowError();
     });
 
     it('shows the connectors icon if the user has read access to actions', async () => {
-      const result = appMockRender.render(
+      renderWithTestingProviders(
         <ExternalServiceColumn
           theCase={useGetCasesMockState.data.cases[1]}
           connectors={connectors}
         />
       );
 
-      expect(result.getByTestId('cases-table-connector-icon')).toBeInTheDocument();
+      expect(screen.getByTestId('cases-table-connector-icon')).toBeInTheDocument();
     });
 
     it('hides the connectors icon if the user does not have read access to actions', async () => {
-      appMockRender.coreStart.application.capabilities = {
-        ...appMockRender.coreStart.application.capabilities,
+      const coreStart = coreMock.createStart();
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
         actions: { save: false, show: false },
       };
 
-      const result = appMockRender.render(
+      renderWithTestingProviders(
         <ExternalServiceColumn
           theCase={useGetCasesMockState.data.cases[1]}
           connectors={connectors}
-        />
+        />,
+        { wrapperProps: { coreStart } }
       );
 
-      expect(result.queryByTestId('cases-table-connector-icon')).toBe(null);
+      expect(screen.queryByTestId('cases-table-connector-icon')).toBe(null);
     });
   });
 });

@@ -32,6 +32,7 @@ EuiFlexItemMarginRight.displayName = 'EuiFlexItemMarginRight';
 export const NetflowColumns = React.memo<NetflowColumnsProps>(
   ({
     contextId,
+    scopeId,
     destinationBytes,
     destinationGeoContinentName,
     destinationGeoCountryName,
@@ -71,6 +72,7 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
     >
       <EuiFlexItemMarginRight grow={false}>
         <UserProcess
+          scopeId={scopeId}
           contextId={contextId}
           eventId={eventId}
           processName={processName}
@@ -80,9 +82,8 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
 
       <EuiFlexItemMarginRight grow={false}>
         <DurationEventStartEnd
-          contextId={contextId}
+          scopeId={scopeId}
           eventDuration={eventDuration}
-          eventId={eventId}
           eventEnd={eventEnd}
           eventStart={eventStart}
         />
@@ -90,6 +91,7 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
 
       <EuiFlexItem grow={false}>
         <SourceDestination
+          scopeId={scopeId}
           contextId={contextId}
           destinationBytes={destinationBytes}
           destinationGeoContinentName={destinationGeoContinentName}

@@ -8,7 +8,7 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useState } from 'react';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 
 export function useCreateSLO({
   configId,
@@ -23,7 +23,7 @@ export function useCreateSLO({
 
   const [isSLOFlyoutOpen, setIsSLOFlyoutOpen] = useState(false);
 
-  const CreateSLOFlyout = slo?.getCreateSLOFlyout({
+  const CreateSLOFlyout = slo?.getCreateSLOFormFlyout({
     initialValues: {
       name: `SLO for monitor ${label}`,
       indicator: {

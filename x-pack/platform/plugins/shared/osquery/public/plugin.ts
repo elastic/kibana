@@ -19,6 +19,7 @@ import { getLazyOsqueryResponseActionTypeForm } from './shared_components/lazy_o
 import { useFetchStatus } from './fleet_integration/use_fetch_status';
 import { getLazyOsqueryResult } from './shared_components/lazy_osquery_result';
 import { getLazyOsqueryResults } from './shared_components/lazy_osquery_results';
+import { OsqueryIcon } from './components/osquery_icon';
 import type {
   OsqueryPluginSetup,
   OsqueryPluginStart,
@@ -39,13 +40,27 @@ import {
   getExternalReferenceAttachmentRegular,
 } from './shared_components';
 import type { ServicesWrapperProps } from './shared_components/services_wrapper';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
+import type { ExperimentalFeatures } from '../common/experimental_features';
+import { ExperimentalFeaturesService } from './common/experimental_features_service';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private kibanaVersion: string;
   private storage = new Storage(localStorage);
+  private experimentalFeatures: ExperimentalFeatures;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaVersion = this.initializerContext.env.packageInfo.version;
+
+    // Parse experimental features from config
+    const config = this.initializerContext.config.get<{
+      actionEnabled: boolean;
+      enableExperimental?: string[];
+    }>();
+
+    this.experimentalFeatures = parseExperimentalConfigValue(
+      config.enableExperimental || []
+    ).features;
   }
 
   public setup(core: CoreSetup, plugins: SetupPlugins): OsqueryPluginSetup {
@@ -92,6 +107,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   }
 
   public start(core: CoreStart, plugins: StartPlugins): OsqueryPluginStart {
+    ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
+
     if (plugins.fleet) {
       const { registerExtension } = plugins.fleet;
 
@@ -116,12 +133,16 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     return {
       OsqueryAction: getLazyOsqueryAction({
-        ...core,
-        ...plugins,
+        services: {
+          ...core,
+          ...plugins,
+        },
       }),
       LiveQueryField: getLazyLiveQueryField({
-        ...core,
-        ...plugins,
+        services: {
+          ...core,
+          ...plugins,
+        },
       }),
       OsqueryResult: getLazyOsqueryResult({
         ...core,
@@ -135,6 +156,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         storage: this.storage,
         kibanaVersion: this.kibanaVersion,
       }),
+      OsqueryIcon,
       OsqueryResponseActionTypeForm: getLazyOsqueryResponseActionTypeForm(),
       fetchAllLiveQueries: useAllLiveQueries,
       fetchInstallationStatus: useFetchStatus,
@@ -142,6 +164,5 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   public stop() {}
 }

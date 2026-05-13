@@ -7,15 +7,15 @@
 
 import React from 'react';
 
-import { FramePublicAPI } from '../../../types';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import type { FramePublicAPI } from '@kbn/lens-common';
 import { LayerHeader } from './layer_header';
-import {
+import type {
   XYByReferenceAnnotationLayerConfig,
   XYByValueAnnotationLayerConfig,
   XYLayerConfig,
-  XYState,
+  XYVisualizationState,
 } from '../types';
+import { mountWithProviders } from '../../../test_utils/test_utils';
 
 describe('layer header', () => {
   describe('annotation layer header', () => {
@@ -47,7 +47,7 @@ describe('layer header', () => {
         ignoreGlobalFilters: false,
       };
 
-      const getStateWithLayers = (layers: XYLayerConfig[]): XYState => ({
+      const getStateWithLayers = (layers: XYLayerConfig[]): XYVisualizationState => ({
         preferredSeriesType: 'area',
         legend: { isVisible: false, position: 'left' },
         layers,
@@ -61,20 +61,20 @@ describe('layer header', () => {
       };
 
       expect(
-        mountWithIntl(<LayerHeader {...props} state={getStateWithLayers([byValueLayer])} />)
+        mountWithProviders(<LayerHeader {...props} state={getStateWithLayers([byValueLayer])} />)
           .text()
           .trim()
       ).toBe('Annotations');
 
       expect(
-        mountWithIntl(<LayerHeader {...props} state={getStateWithLayers([byRefLayer])} />)
+        mountWithProviders(<LayerHeader {...props} state={getStateWithLayers([byRefLayer])} />)
           .text()
           .trim()
       ).toBe(byRefGroupTitle);
 
       const cachedMetadata = { title: 'A cached title', description: '', tags: [] };
       expect(
-        mountWithIntl(
+        mountWithProviders(
           <LayerHeader {...props} state={getStateWithLayers([{ ...byRefLayer, cachedMetadata }])} />
         )
           .text()

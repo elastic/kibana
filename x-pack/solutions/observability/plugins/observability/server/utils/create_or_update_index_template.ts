@@ -5,8 +5,8 @@
  * 2.0.
  */
 import pRetry from 'p-retry';
-import { Logger, ElasticsearchClient } from '@kbn/core/server';
-import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 
 export async function createOrUpdateIndexTemplate({
   indexTemplate,
@@ -44,12 +44,15 @@ export async function createOrUpdateIndexTemplate({
       },
       {
         onFailedAttempt: (e) => {
-          logger.warn(`Could not create index template: '${indexTemplate.name}'. Retrying...`);
-          logger.warn(e);
+          logger.warn(`Could not create index template: '${indexTemplate.name}'. Retrying...`, {
+            error: e,
+          });
         },
       }
     );
   } catch (e) {
-    logger.error(`Could not create index template: '${indexTemplate.name}'. Error: ${e.message}.`);
+    logger.error(`Could not create index template: '${indexTemplate.name}'. Error: ${e.message}.`, {
+      error: e,
+    });
   }
 }

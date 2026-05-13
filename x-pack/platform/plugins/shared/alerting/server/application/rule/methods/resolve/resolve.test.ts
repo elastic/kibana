@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import { ConstructorOptions, RulesClient } from '../../../../rules_client/rules_client';
+import type { ConstructorOptions } from '../../../../rules_client/rules_client';
+import { RulesClient } from '../../../../rules_client/rules_client';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
+  coreFeatureFlagsMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
+import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
@@ -51,6 +53,7 @@ describe('resolve', () => {
     namespace: 'default',
     getUserName: jest.fn(),
     createAPIKey: createAPIKeyMock,
+    cloneAPIKey: jest.fn(),
     logger: loggingSystemMock.create().get(),
     internalSavedObjectsRepository,
     encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -68,6 +71,8 @@ describe('resolve', () => {
     getAlertIndicesAlias: jest.fn(),
     alertsService: null,
     uiSettings: uiSettingsServiceMock.createStartContract(),
+    featureFlags: coreFeatureFlagsMock.createStart(),
+    isServerless: false,
   };
 
   let rulesClient: RulesClient;

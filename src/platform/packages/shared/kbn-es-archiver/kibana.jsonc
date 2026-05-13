@@ -2,7 +2,6 @@
   "type": "test-helper",
   "id": "@kbn/es-archiver",
   "owner": [
-    "@elastic/kibana-operations",
     "@elastic/appex-qa"
   ],
   "group": "platform",

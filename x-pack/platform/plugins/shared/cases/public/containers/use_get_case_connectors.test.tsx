@@ -7,10 +7,9 @@
 
 import { waitFor, renderHook } from '@testing-library/react';
 import * as api from './api';
-import type { AppMockRenderer } from '../common/mock';
-import { createAppMockRenderer } from '../common/mock';
 import { useToasts } from '../common/lib/kibana';
 import { useGetCaseConnectors } from './use_get_case_connectors';
+import { TestProviders } from '../common/mock';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -21,17 +20,14 @@ describe('useGetCaseConnectors', () => {
   const addSuccess = jest.fn();
   (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError: jest.fn() });
 
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('calls getCaseConnectors with correct arguments', async () => {
     const spyOnGetCases = jest.spyOn(api, 'getCaseConnectors');
     renderHook(() => useGetCaseConnectors(caseId), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     await waitFor(() => {
@@ -51,7 +47,7 @@ describe('useGetCaseConnectors', () => {
     (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
     renderHook(() => useGetCaseConnectors(caseId), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     await waitFor(() => {

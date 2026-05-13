@@ -8,129 +8,175 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
-import { mockTopNavMenu } from './__mocks__/top_nav_menu';
-import { ContextAppContent } from './context_app_content';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { ContextApp } from './context_app';
-import { DiscoverServices } from '../../build_services';
-import { dataViewsMock } from '../../__mocks__/data_views';
-import { act } from 'react-dom/test-utils';
-import { uiSettingsMock } from '../../__mocks__/ui_settings';
-import { themeServiceMock } from '@kbn/core/public/mocks';
-import { LocalStorageMock } from '../../__mocks__/local_storage_mock';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { HistoryLocationState } from '../../build_services';
-import { createSearchSessionMock } from '../../__mocks__/search_session';
+import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/plugin';
+import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/__mocks__';
+import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import { ContextApp, type ContextAppProps } from './context_app';
 import { createDiscoverServicesMock } from '../../__mocks__/services';
+import { DiscoverTestProvider } from '../../__mocks__/test_provider';
+import { LoadingStatus } from './services/context_query_state';
+import { useContextAppFetch } from './hooks/use_context_app_fetch';
+import { useContextAppState } from './hooks/use_context_app_state';
+import type { AppState, GetStateReturn, GlobalState } from './services/context_state';
+import { createStateContainer } from '@kbn/kibana-utils-plugin/public';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 
-const mockFilterManager = createFilterManagerMock();
-const mockNavigationPlugin = {
-  ui: { TopNavMenu: mockTopNavMenu, AggregateQueryTopNavMenu: mockTopNavMenu },
+jest.mock('./hooks/use_context_app_fetch');
+jest.mock('./hooks/use_context_app_state');
+
+const services = createDiscoverServicesMock();
+const addFiltersMock = jest.spyOn(services.filterManager, 'addFilters');
+const updateSavedObjectMock = jest.spyOn(services.dataViews, 'updateSavedObject');
+const mockUseContextAppFetch = jest.mocked(useContextAppFetch);
+const mockUseContextAppState = jest.mocked(useContextAppState);
+
+const appState: AppState = {
+  columns: ['message'],
+  filters: [],
+  grid: {},
+  predecessorCount: 5,
+  sort: [['@timestamp', 'desc']],
+  successorCount: 5,
 };
-const discoverServices = createDiscoverServicesMock();
+
+const globalState: GlobalState = {
+  filters: [],
+};
+
+const stateContainer: GetStateReturn = {
+  appState: createStateContainer<AppState>(appState),
+  globalState: createStateContainer<GlobalState>(globalState),
+  flushToUrl: jest.fn(),
+  getFilters: jest.fn(() => []),
+  setAppState: jest.fn(),
+  setFilters: jest.fn(),
+  startSync: jest.fn(),
+  stopSync: jest.fn(),
+};
+
+const anchorRecord = buildDataTableRecord(
+  {
+    _id: 'anchor-record',
+    _index: 'the-index',
+    _score: 1,
+    _source: { extension: 'jpg', message: 'anchor' },
+  },
+  dataViewMock
+);
+
+const settledVoidResults: [PromiseSettledResult<void>, PromiseSettledResult<void>] = [
+  { status: 'fulfilled', value: undefined },
+  { status: 'fulfilled', value: undefined },
+];
+
+const setDocViewerRegistry = (render: (props: DocViewRenderProps) => React.ReactElement) => {
+  const registry = new DocViewsRegistry();
+
+  registry.add({
+    id: 'doc_view_table',
+    title: 'Table',
+    order: 10,
+    render,
+  });
+
+  setUnifiedDocViewerServices({
+    ...mockUnifiedDocViewerServices,
+    unifiedDocViewer: { registry },
+  });
+};
 
 describe('ContextApp test', () => {
-  const { history } = createSearchSessionMock();
-  const services = {
-    data: discoverServices.data,
-    capabilities: {
-      discover: {
-        save: true,
-      },
-      indexPatterns: {
-        save: true,
-      },
-    },
-    dataViews: dataViewsMock,
-    toastNotifications: { addDanger: () => {} },
-    navigation: mockNavigationPlugin,
-    core: {
-      ...discoverServices.core,
-      executionContext: {
-        set: jest.fn(),
-      },
-      notifications: { toasts: [] },
-      theme: { theme$: themeServiceMock.createStartContract().theme$ },
-    },
-    history,
-    fieldFormats: {
-      getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
-      getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
-    },
-    filterManager: mockFilterManager,
-    uiSettings: uiSettingsMock,
-    storage: new LocalStorageMock({}),
-    chrome: { setBreadcrumbs: jest.fn() },
-    locator: {
-      useUrl: jest.fn(() => ''),
-      navigate: jest.fn(),
-      getUrl: jest.fn(() => Promise.resolve('mock-url')),
-    },
-    contextLocator: { getRedirectUrl: jest.fn(() => '') },
-    singleDocLocator: { getRedirectUrl: jest.fn(() => '') },
-    profilesManager: discoverServices.profilesManager,
-    ebtManager: discoverServices.ebtManager,
-    timefilter: discoverServices.timefilter,
-    uiActions: discoverServices.uiActions,
-  } as unknown as DiscoverServices;
-
-  const defaultProps = {
+  const defaultProps: ContextAppProps = {
     dataView: dataViewMock,
     anchorId: 'mocked_anchor_id',
-    locationState: {} as HistoryLocationState,
   };
 
-  const topNavProps = {
-    appName: 'context',
-    showSearchBar: true,
-    showQueryInput: false,
-    showFilterBar: true,
-    showDatePicker: false,
-    indexPatterns: [dataViewMock],
-    useDefaultBehaviors: true,
-  };
-
-  const mountComponent = () => {
-    return mountWithIntl(
-      <KibanaContextProvider services={services}>
+  const renderComponent = () => {
+    renderWithKibanaRenderContext(
+      <DiscoverTestProvider services={services}>
         <ContextApp {...defaultProps} />
-      </KibanaContextProvider>
+      </DiscoverTestProvider>
     );
   };
 
-  it('renders correctly', async () => {
-    const component = mountComponent();
-    await waitFor(() => {
-      expect(component.find(ContextAppContent).length).toBe(1);
-      const topNavMenu = component.find(mockTopNavMenu);
-      expect(topNavMenu.length).toBe(1);
-      expect(topNavMenu.props()).toStrictEqual(topNavProps);
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    setDocViewerRegistry(() => <div data-test-subj="docViewTableMock" />);
+
+    mockUseContextAppState.mockReturnValue({
+      appState,
+      globalState,
+      stateContainer,
+    });
+
+    mockUseContextAppFetch.mockReturnValue({
+      fetchedState: {
+        anchor: anchorRecord,
+        anchorInterceptedWarnings: [],
+        anchorStatus: { value: LoadingStatus.LOADED },
+        predecessors: [],
+        predecessorsInterceptedWarnings: [],
+        predecessorsStatus: { value: LoadingStatus.LOADED },
+        successors: [],
+        successorsInterceptedWarnings: [],
+        successorsStatus: { value: LoadingStatus.LOADED },
+      },
+      fetchAllRows: jest.fn(async () => settledVoidResults),
+      fetchContextRows: jest.fn(async () => settledVoidResults),
+      fetchSurroundingRows: jest.fn(async () => undefined),
+      resetFetchedState: jest.fn(),
     });
   });
 
+  it('renders correctly', async () => {
+    renderComponent();
+
+    expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+    expect(screen.getByTestId('discoverContextAppTitle')).toBeVisible();
+    expect(screen.getByTestId('contextDocumentSurroundingHeader')).toBeVisible();
+    expect(screen.getByTestId('discoverContextAppTitle')).toHaveTextContent(
+      'Documents surrounding #mocked_anchor_id'
+    );
+    expect(screen.getByTestId('contextDocumentSurroundingHeader')).toHaveTextContent(
+      'Documents surrounding #mocked_anchor_id'
+    );
+  });
+
   it('should set filters correctly', async () => {
-    const component = mountComponent();
+    const user = userEvent.setup();
 
-    await act(async () => {
-      component.find(ContextAppContent).invoke('addFilter')(
-        'message',
-        '2021-06-08T07:52:19.000Z',
-        '+'
-      );
-    });
+    setDocViewerRegistry(({ filter }) => (
+      <button
+        data-test-subj="docViewFilterButton"
+        onClick={() => void filter?.('extension', 'jpg', '+')}
+      >
+        Add filter
+      </button>
+    ));
 
-    expect(mockFilterManager.addFilters.mock.calls.length).toBe(1);
-    expect(mockFilterManager.addFilters.mock.calls[0][0]).toEqual([
+    renderComponent();
+
+    await user.click(screen.getByTestId('docTableExpandToggleColumn'));
+
+    expect(await screen.findByTestId('docViewerFlyout')).toBeVisible();
+
+    await user.click(await screen.findByTestId('docViewFilterButton'));
+
+    expect(addFiltersMock).toHaveBeenCalledTimes(1);
+    expect(addFiltersMock).toHaveBeenCalledWith([
       {
         $state: { store: 'appState' },
         meta: { alias: null, disabled: false, index: 'the-data-view-id', negate: false },
-        query: { match_phrase: { message: '2021-06-08T07:52:19.000Z' } },
+        query: { match_phrase: { extension: 'jpg' } },
       },
     ]);
-    expect(dataViewsMock.updateSavedObject.mock.calls.length).toBe(1);
-    expect(dataViewsMock.updateSavedObject.mock.calls[0]).toEqual([dataViewMock, 0, true]);
+    expect(updateSavedObjectMock).toHaveBeenCalledTimes(1);
+    expect(updateSavedObjectMock).toHaveBeenCalledWith(dataViewMock, 0, true);
   });
 });

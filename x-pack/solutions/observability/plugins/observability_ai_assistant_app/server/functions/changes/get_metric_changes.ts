@@ -107,7 +107,7 @@ export async function getMetricChanges({
     over_time: {
       auto_date_histogram: dateHistogram,
       aggs: {
-        metric: metricAgg,
+        metric: metricAgg as AggregationsAggregationContainer,
         value: {
           bucket_script: {
             buckets_path: {
@@ -122,8 +122,7 @@ export async function getMetricChanges({
       change_point: {
         buckets_path: 'over_time>value',
       },
-      // elasticsearch@9.0.0 change_point aggregation is missing in the types: https://github.com/elastic/elasticsearch-specification/issues/3671
-    } as AggregationsAggregationContainer,
+    },
   };
 
   const response = await client.search('get_metric_changes', {
@@ -157,9 +156,9 @@ export async function getMetricChanges({
 
     return {
       key,
-      over_time: group.over_time.buckets.map((bucket) => {
+      over_time: group.over_time?.buckets?.map((bucket) => {
         return {
-          x: new Date(bucket.key_as_string).getTime(),
+          x: new Date(bucket.key_as_string!).getTime(),
           y: bucket.value?.value as number | null,
         };
       }),

@@ -12,7 +12,7 @@ import { waitFor } from '@testing-library/react';
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 import { createIntegrationsTestRendererMock } from '../mock';
 
-import { useMultipleAgentPolicies, useLink } from '../hooks';
+import { useMultipleAgentPolicies, useLink, useGetOneAgentPolicy } from '../hooks';
 
 import { PackagePolicyActionsMenu } from './package_policy_actions_menu';
 
@@ -20,6 +20,7 @@ jest.mock('../hooks', () => {
   return {
     ...jest.requireActual('../hooks'),
     useMultipleAgentPolicies: jest.fn(),
+    useGetOneAgentPolicy: jest.fn().mockReturnValue({ data: undefined, isLoading: false }),
     useStartServices: jest.fn().mockReturnValue({
       application: {
         navigateToApp: jest.fn(),
@@ -27,17 +28,57 @@ jest.mock('../hooks', () => {
       notifications: {
         toasts: { addSuccess: jest.fn() },
       },
+      cloud: {
+        isCloudEnabled: true,
+        isServerlessEnabled: false,
+        deploymentId: 'abc123def456',
+      },
     }),
     useLink: jest.fn().mockReturnValue({
-      getHref: jest
-        .fn()
-        .mockReturnValue('/mock/app/fleet/policies/some-uuid1/edit-integration/some-uuid2'),
+      getHref: jest.fn().mockImplementation((page) => {
+        if (page === 'edit_integration') {
+          return '/mock/app/fleet/policies/some-uuid1/edit-integration/some-uuid2';
+        } else if (page === 'integration_policy_edit') {
+          return '/mock/app/integrations/edit-integration/some-uuid2';
+        } else {
+          return '/mock/app';
+        }
+      }),
     }),
+  };
+});
+jest.mock('../applications/integrations/sections/epm/screens/detail/policies/package_policies');
+jest.mock(
+  '../applications/integrations/sections/epm/screens/installed_integrations/components/pending_upgrade_review_status',
+  () => ({
+    scheduleAutoOpenModal: jest.fn(),
+  })
+);
+
+// Capture the textToCopy prop passed to EuiCopy so tests can assert the bundle text
+let capturedCopyText: string | undefined;
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    EuiCopy: ({
+      textToCopy,
+      children,
+    }: {
+      textToCopy: string;
+      children: (fn: () => void) => React.ReactNode;
+    }) => {
+      capturedCopyText = textToCopy;
+      return <>{children(() => {})}</>;
+    },
   };
 });
 
 const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as jest.MockedFunction<
   typeof useMultipleAgentPolicies
+>;
+const useGetOneAgentPolicyMock = useGetOneAgentPolicy as jest.MockedFunction<
+  typeof useGetOneAgentPolicy
 >;
 
 function renderMenu({
@@ -113,6 +154,7 @@ function createMockPackagePolicy(
 describe('PackagePolicyActionsMenu', () => {
   beforeAll(() => {
     useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
+    jest.mocked(useLink().getHref).mockClear();
   });
 
   it('Should not have upgrade button if package does not have upgrade', async () => {
@@ -133,17 +175,6 @@ describe('PackagePolicyActionsMenu', () => {
     await waitFor(() => {
       const upgradeButton = utils.getByTestId('PackagePolicyActionsUpgradeItem');
       expect(upgradeButton).not.toBeDisabled();
-    });
-  });
-
-  it('Should not enable upgrade button if package has upgrade and agentless policy is enabled', async () => {
-    const agentPolicies = createMockAgentPolicies({ supports_agentless: true });
-    const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
-    const { utils } = renderMenu({ agentPolicies, packagePolicy });
-
-    await waitFor(() => {
-      const upgradeButton = utils.getByTestId('PackagePolicyActionsUpgradeItem');
-      expect(upgradeButton).toBeDisabled();
     });
   });
 
@@ -220,6 +251,26 @@ describe('PackagePolicyActionsMenu', () => {
     });
   });
 
+  it('Should show Edit integration with correct href when an agentless agentPolicy is defined', async () => {
+    const agentPolicies = createMockAgentPolicies({});
+    const packagePolicy = createMockPackagePolicy({
+      supports_agentless: true,
+    });
+    const { utils } = renderMenu({ agentPolicies, packagePolicy });
+    await waitFor(() => {
+      const editButton = utils.getByTestId('PackagePolicyActionsEditItem');
+      expect(editButton).not.toHaveAttribute('disabled');
+      expect(editButton).toHaveAttribute('href');
+      expect(jest.mocked(useLink().getHref)).toHaveBeenCalledWith('integration_policy_edit', {
+        packagePolicyId: 'some-uuid2',
+      });
+      expect(editButton).toHaveAttribute(
+        'href',
+        '/mock/app/integrations/edit-integration/some-uuid2'
+      );
+    });
+  });
+
   it('Should show Edit integration with correct href when there is no agent policy', async () => {
     const packagePolicy = createMockPackagePolicy({
       policy_ids: [],
@@ -234,6 +285,224 @@ describe('PackagePolicyActionsMenu', () => {
       expect(editButton).toHaveAttribute('href');
       expect(useLink().getHref as jest.Mock).toHaveBeenCalledWith('integration_policy_edit', {
         packagePolicyId: 'some-uuid2',
+      });
+    });
+  });
+
+  it('Should disable Copy integration for excluded packages', async () => {
+    const agentPolicies = createMockAgentPolicies();
+    const packagePolicy = createMockPackagePolicy({
+      package: {
+        name: 'endpoint',
+        version: '1.0.0',
+        title: 'Elastic Defend',
+      },
+    });
+    const { utils } = renderMenu({ agentPolicies, packagePolicy });
+    await waitFor(() => {
+      const copyButton = utils.getByTestId('PackagePolicyActionsCopyItem');
+      expect(copyButton).toBeDisabled();
+    });
+  });
+
+  it('Should enable Copy integration for non-excluded packages', async () => {
+    const agentPolicies = createMockAgentPolicies();
+    const packagePolicy = createMockPackagePolicy({
+      package: {
+        name: 'some-other-package',
+        version: '1.0.0',
+        title: 'Some Other Package',
+      },
+    });
+    const { utils } = renderMenu({ agentPolicies, packagePolicy });
+    await waitFor(() => {
+      const copyButton = utils.getByTestId('PackagePolicyActionsCopyItem');
+      expect(copyButton).not.toBeDisabled();
+    });
+  });
+
+  it('Should show "Review policy upgrade" when hasUpgrade, keepPoliciesUpToDate, and review is declined', async () => {
+    const agentPolicies = createMockAgentPolicies();
+    const packagePolicy = createMockPackagePolicy({
+      hasUpgrade: true,
+      keepPoliciesUpToDate: true,
+      pendingUpgradeReview: {
+        target_version: '2.0.0',
+        reason: 'deprecated',
+        created_at: '2026-01-01T00:00:00.000Z',
+        action: 'declined',
+      },
+      package: { name: 'test-pkg', version: '1.0.0', title: 'Test Package' },
+    });
+    const { utils } = renderMenu({ agentPolicies, packagePolicy });
+    await waitFor(() => {
+      expect(utils.getByTestId('PackagePolicyActionsDeclinedUpgradeItem')).not.toBeNull();
+      expect(utils.queryByTestId('PackagePolicyActionsUpgradeItem')).toBeNull();
+    });
+  });
+
+  it('Should show "Review policy upgrade" when hasUpgrade, keepPoliciesUpToDate, and review is pending', async () => {
+    const agentPolicies = createMockAgentPolicies();
+    const packagePolicy = createMockPackagePolicy({
+      hasUpgrade: true,
+      keepPoliciesUpToDate: true,
+      pendingUpgradeReview: {
+        target_version: '2.0.0',
+        reason: 'deprecated',
+        created_at: '2026-01-01T00:00:00.000Z',
+        action: 'pending',
+      },
+      package: { name: 'test-pkg', version: '1.0.0', title: 'Test Package' },
+    });
+    const { utils } = renderMenu({ agentPolicies, packagePolicy });
+    await waitFor(() => {
+      expect(utils.getByTestId('PackagePolicyActionsDeclinedUpgradeItem')).not.toBeNull();
+      expect(utils.queryByTestId('PackagePolicyActionsUpgradeItem')).toBeNull();
+    });
+  });
+
+  it('Should show standard upgrade button when hasUpgrade but keepPoliciesUpToDate is false', async () => {
+    const agentPolicies = createMockAgentPolicies();
+    const packagePolicy = createMockPackagePolicy({
+      hasUpgrade: true,
+      keepPoliciesUpToDate: false,
+      pendingUpgradeReview: {
+        target_version: '2.0.0',
+        reason: 'deprecated',
+        created_at: '2026-01-01T00:00:00.000Z',
+        action: 'declined',
+      },
+      package: { name: 'test-pkg', version: '1.0.0', title: 'Test Package' },
+    });
+    const { utils } = renderMenu({ agentPolicies, packagePolicy });
+    await waitFor(() => {
+      expect(utils.getByTestId('PackagePolicyActionsUpgradeItem')).not.toBeNull();
+      expect(utils.queryByTestId('PackagePolicyActionsDeclinedUpgradeItem')).toBeNull();
+    });
+  });
+
+  describe('"Copy support info" button', () => {
+    beforeEach(() => {
+      capturedCopyText = undefined;
+      useGetOneAgentPolicyMock.mockReturnValue({ data: undefined, isLoading: false } as any);
+    });
+
+    it('should not render for non-agentless policies', async () => {
+      const agentPolicies = createMockAgentPolicies();
+      const packagePolicy = createMockPackagePolicy({ supports_agentless: false });
+      const { utils } = renderMenu({ agentPolicies, packagePolicy });
+      await waitFor(() => {
+        expect(utils.queryByTestId('PackagePolicyActionsCopySupportInfoItem')).toBeNull();
+      });
+    });
+
+    it('should render for agentless policies', async () => {
+      const agentPolicies = createMockAgentPolicies({ supports_agentless: true });
+      const packagePolicy = createMockPackagePolicy({ supports_agentless: true });
+      const { utils } = renderMenu({ agentPolicies, packagePolicy });
+      await waitFor(() => {
+        expect(utils.getByTestId('PackagePolicyActionsCopySupportInfoItem')).not.toBeNull();
+      });
+    });
+
+    it('should include deployment_id and policy_id from agentPolicy on ECH', async () => {
+      const agentPolicies = createMockAgentPolicies({
+        id: 'policy-uuid',
+        supports_agentless: true,
+        agentless: {},
+      } as any);
+      const packagePolicy = createMockPackagePolicy({
+        supports_agentless: true,
+        policy_ids: ['policy-uuid'],
+        package: { name: 'cloud_security_posture', version: '1.0.0', title: 'CSPM' },
+      });
+      renderMenu({ agentPolicies, packagePolicy });
+      await waitFor(() => {
+        expect(capturedCopyText).toEqual(
+          'elastic-support-bundle\ndeployment_id=abc123def456\npolicy_id=policy-uuid\nintegration=cloud_security_posture'
+        );
+      });
+    });
+
+    it('should include cluster_id when present on agentPolicy', async () => {
+      const agentPolicies = createMockAgentPolicies({
+        id: 'policy-uuid',
+        supports_agentless: true,
+        agentless: { cluster_id: 'my-cluster' },
+      } as any);
+      const packagePolicy = createMockPackagePolicy({
+        supports_agentless: true,
+        policy_ids: ['policy-uuid'],
+        package: { name: 'cloud_security_posture', version: '1.0.0', title: 'CSPM' },
+      });
+      renderMenu({ agentPolicies, packagePolicy });
+      await waitFor(() => {
+        expect(capturedCopyText).toEqual(
+          'elastic-support-bundle\ndeployment_id=abc123def456\ncluster_id=my-cluster\npolicy_id=policy-uuid\nintegration=cloud_security_posture'
+        );
+      });
+    });
+
+    it('should fall back to useGetOneAgentPolicy for cluster_id when agentPolicies is empty', async () => {
+      useGetOneAgentPolicyMock.mockReturnValue({
+        data: {
+          item: {
+            id: 'policy-uuid',
+            agentless: { cluster_id: 'fetched-cluster' },
+          },
+        },
+        isLoading: false,
+      } as any);
+      const packagePolicy = createMockPackagePolicy({
+        supports_agentless: true,
+        policy_ids: ['policy-uuid'],
+        package: { name: 'cloud_security_posture', version: '1.0.0', title: 'CSPM' },
+      });
+      renderMenu({ agentPolicies: [], packagePolicy });
+      await waitFor(() => {
+        expect(capturedCopyText).toEqual(
+          'elastic-support-bundle\ndeployment_id=abc123def456\ncluster_id=fetched-cluster\npolicy_id=policy-uuid\nintegration=cloud_security_posture'
+        );
+      });
+    });
+
+    it('should use project_id instead of deployment_id on serverless', async () => {
+      const { useStartServices } = jest.requireMock('../hooks');
+      const serverlessReturnValue = {
+        application: { navigateToApp: jest.fn() },
+        notifications: { toasts: { addSuccess: jest.fn() } },
+        cloud: {
+          isCloudEnabled: true,
+          isServerlessEnabled: true,
+          serverless: { projectId: 'my-project-id' },
+        },
+      };
+      useStartServices.mockReturnValue(serverlessReturnValue);
+      const agentPolicies = createMockAgentPolicies({
+        id: 'policy-uuid',
+        supports_agentless: true,
+        agentless: {},
+      } as any);
+      const packagePolicy = createMockPackagePolicy({
+        supports_agentless: true,
+        policy_ids: ['policy-uuid'],
+        package: { name: 'cloud_security_posture', version: '1.0.0', title: 'CSPM' },
+      });
+      renderMenu({ agentPolicies, packagePolicy });
+      await waitFor(() => {
+        expect(capturedCopyText).toEqual(
+          'elastic-support-bundle\nproject_id=my-project-id\npolicy_id=policy-uuid\nintegration=cloud_security_posture'
+        );
+      });
+      // Restore default mock for subsequent tests
+      useStartServices.mockReturnValue({
+        application: { navigateToApp: jest.fn() },
+        notifications: { toasts: { addSuccess: jest.fn() } },
+        cloud: {
+          isCloudEnabled: true,
+          isServerlessEnabled: false,
+          deploymentId: 'abc123def456',
+        },
       });
     });
   });

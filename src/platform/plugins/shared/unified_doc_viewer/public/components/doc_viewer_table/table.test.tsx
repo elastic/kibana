@@ -8,15 +8,17 @@
  */
 
 import React from 'react';
-import { render, screen, act, fireEvent } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { render } from '@elastic/eui/lib/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { generateEsHits } from '@kbn/discover-utils/src/__mocks__';
-import { DocViewerTable, SHOW_ONLY_SELECTED_FIELDS } from './table';
+import { DocViewerTable, SHOW_ONLY_SELECTED_FIELDS, HIDE_NULL_VALUES } from './table';
 import { mockUnifiedDocViewerServices } from '../../__mocks__';
 import { setUnifiedDocViewerServices } from '../../plugin';
+import { userEvent } from '@testing-library/user-event';
 
 const storage = new Storage(window.localStorage);
 
@@ -80,6 +82,18 @@ const dataView = createStubDataView({
 });
 const hit = buildDataTableRecord(generateEsHits(dataView, 1)[0], dataView);
 
+const setupComponent = (props: Partial<React.ComponentProps<typeof DocViewerTable>> = {}) => {
+  const user = userEvent.setup();
+
+  render(
+    <IntlProvider locale="en">
+      <DocViewerTable dataView={dataView} hit={hit} columns={[]} {...props} />
+    </IntlProvider>
+  );
+
+  return { user };
+};
+
 describe('DocViewerTable', () => {
   afterEach(() => {
     storage.clear();
@@ -87,11 +101,7 @@ describe('DocViewerTable', () => {
 
   describe('table cells', () => {
     it('should render cells', async () => {
-      render(
-        <IntlProvider locale="en">
-          <DocViewerTable dataView={dataView} hit={hit} columns={[]} />
-        </IntlProvider>
-      );
+      setupComponent();
 
       expect(screen.getByText('@timestamp')).toBeInTheDocument();
       expect(screen.getByText(hit.flattened['@timestamp'] as string)).toBeInTheDocument();
@@ -108,21 +118,14 @@ describe('DocViewerTable', () => {
     });
 
     it('should find by field name', async () => {
-      render(
-        <IntlProvider locale="en">
-          <DocViewerTable dataView={dataView} hit={hit} columns={[]} />
-        </IntlProvider>
-      );
+      const { user } = setupComponent();
 
       expect(screen.getByText('@timestamp')).toBeInTheDocument();
       expect(screen.getByText('bytes')).toBeInTheDocument();
       expect(screen.getByText('extension.keyword')).toBeInTheDocument();
 
-      act(() => {
-        fireEvent.change(screen.getByTestId('unifiedDocViewerFieldsSearchInput'), {
-          target: { value: 'bytes' },
-        });
-      });
+      await user.click(screen.getByTestId('unifiedDocViewerFieldsSearchInput'));
+      await user.paste('bytes');
 
       expect(screen.queryByText('@timestamp')).toBeNull();
       expect(screen.queryByText('bytes')).toBeInTheDocument();
@@ -130,21 +133,14 @@ describe('DocViewerTable', () => {
     });
 
     it('should find by field value', async () => {
-      render(
-        <IntlProvider locale="en">
-          <DocViewerTable dataView={dataView} hit={hit} columns={[]} />
-        </IntlProvider>
-      );
+      const { user } = setupComponent();
 
       expect(screen.getByText('@timestamp')).toBeInTheDocument();
       expect(screen.getByText('bytes')).toBeInTheDocument();
       expect(screen.getByText('extension.keyword')).toBeInTheDocument();
 
-      act(() => {
-        fireEvent.change(screen.getByTestId('unifiedDocViewerFieldsSearchInput'), {
-          target: { value: hit.flattened['extension.keyword'] as string },
-        });
-      });
+      await user.click(screen.getByTestId('unifiedDocViewerFieldsSearchInput'));
+      await user.paste(String(hit.flattened['extension.keyword']));
 
       expect(screen.queryByText('@timestamp')).toBeNull();
       expect(screen.queryByText('bytes')).toBeNull();
@@ -153,83 +149,227 @@ describe('DocViewerTable', () => {
   });
 
   describe('switch - show only selected fields', () => {
-    it('should disable the switch if columns is empty', async () => {
-      render(
-        <IntlProvider locale="en">
-          <DocViewerTable dataView={dataView} hit={hit} columns={[]} />
-        </IntlProvider>
-      );
+    describe('when there is a filter function', () => {
+      it('should disable the switch if columns is empty', async () => {
+        setupComponent({ filter: jest.fn() });
 
-      expect(screen.getByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')).toBeDisabled();
-      expect(screen.getByText('@timestamp')).toBeInTheDocument();
-      expect(screen.getByText('bytes')).toBeInTheDocument();
-      expect(screen.getByText('extension.keyword')).toBeInTheDocument();
-    });
-
-    it('should disable the switch even if it was previously switched on', async () => {
-      storage.set(SHOW_ONLY_SELECTED_FIELDS, true);
-
-      render(
-        <IntlProvider locale="en">
-          <DocViewerTable dataView={dataView} hit={hit} columns={[]} />
-        </IntlProvider>
-      );
-
-      expect(screen.getByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')).toBeDisabled();
-      expect(screen.getByText('@timestamp')).toBeInTheDocument();
-      expect(screen.getByText('bytes')).toBeInTheDocument();
-      expect(screen.getByText('extension.keyword')).toBeInTheDocument();
-    });
-
-    it('should show only selected fields if it was previously switched on', async () => {
-      storage.set(SHOW_ONLY_SELECTED_FIELDS, true);
-
-      render(
-        <IntlProvider locale="en">
-          <DocViewerTable dataView={dataView} hit={hit} columns={['extension.keyword']} />
-        </IntlProvider>
-      );
-
-      expect(screen.getByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')).toBeEnabled();
-      expect(screen.getByText('@timestamp')).toBeInTheDocument();
-      expect(screen.queryByText('bytes')).toBeNull();
-      expect(screen.getByText('extension.keyword')).toBeInTheDocument();
-    });
-
-    it('should allow toggling the switch', async () => {
-      render(
-        <IntlProvider locale="en">
-          <DocViewerTable dataView={dataView} hit={hit} columns={['bytes']} />
-        </IntlProvider>
-      );
-
-      const showOnlySelectedFieldsSwitch = screen.getByTestId(
-        'unifiedDocViewerShowOnlySelectedFieldsSwitch'
-      );
-
-      expect(showOnlySelectedFieldsSwitch).toBeEnabled();
-      expect(showOnlySelectedFieldsSwitch).toHaveValue('');
-      expect(screen.getByText('@timestamp')).toBeInTheDocument();
-      expect(screen.getByText('bytes')).toBeInTheDocument();
-      expect(screen.getByText('extension.keyword')).toBeInTheDocument();
-
-      act(() => {
-        showOnlySelectedFieldsSwitch.click();
+        expect(screen.getByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')).toBeDisabled();
+        expect(screen.getByText('@timestamp')).toBeInTheDocument();
+        expect(screen.getByText('bytes')).toBeInTheDocument();
+        expect(screen.getByText('extension.keyword')).toBeInTheDocument();
       });
 
-      expect(screen.getByText('@timestamp')).toBeInTheDocument();
-      expect(screen.getByText('bytes')).toBeInTheDocument();
-      expect(screen.queryByText('extension.keyword')).toBeNull();
-      expect(storage.get(SHOW_ONLY_SELECTED_FIELDS)).toBe(true);
+      it('should disable the switch even if it was previously switched on', async () => {
+        storage.set(SHOW_ONLY_SELECTED_FIELDS, true);
 
-      act(() => {
-        showOnlySelectedFieldsSwitch.click();
+        setupComponent({ filter: jest.fn() });
+
+        expect(screen.getByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')).toBeDisabled();
+        expect(screen.getByText('@timestamp')).toBeInTheDocument();
+        expect(screen.getByText('bytes')).toBeInTheDocument();
+        expect(screen.getByText('extension.keyword')).toBeInTheDocument();
       });
 
+      it('should show only selected fields if it was previously switched on', async () => {
+        storage.set(SHOW_ONLY_SELECTED_FIELDS, true);
+
+        setupComponent({ columns: ['extension.keyword'], filter: jest.fn() });
+
+        expect(screen.getByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')).toBeEnabled();
+        expect(screen.getByText('@timestamp')).toBeInTheDocument();
+        expect(screen.queryByText('bytes')).toBeNull();
+        expect(screen.getByText('extension.keyword')).toBeInTheDocument();
+      });
+
+      it('should allow toggling the switch', async () => {
+        const { user } = setupComponent({ columns: ['bytes'], filter: jest.fn() });
+
+        const showOnlySelectedFieldsSwitch = screen.getByTestId(
+          'unifiedDocViewerShowOnlySelectedFieldsSwitch'
+        );
+
+        expect(showOnlySelectedFieldsSwitch).toBeEnabled();
+        expect(showOnlySelectedFieldsSwitch).toHaveValue('');
+        expect(screen.getByText('@timestamp')).toBeInTheDocument();
+        expect(screen.getByText('bytes')).toBeInTheDocument();
+        expect(screen.getByText('extension.keyword')).toBeInTheDocument();
+
+        await user.click(showOnlySelectedFieldsSwitch);
+
+        expect(screen.getByText('@timestamp')).toBeInTheDocument();
+        expect(screen.getByText('bytes')).toBeInTheDocument();
+        expect(screen.queryByText('extension.keyword')).toBeNull();
+        expect(storage.get(SHOW_ONLY_SELECTED_FIELDS)).toBe(true);
+
+        await user.click(showOnlySelectedFieldsSwitch);
+
+        expect(screen.getByText('@timestamp')).toBeInTheDocument();
+        expect(screen.getByText('bytes')).toBeInTheDocument();
+        expect(screen.getByText('extension.keyword')).toBeInTheDocument();
+        expect(storage.get(SHOW_ONLY_SELECTED_FIELDS)).toBe(false);
+      });
+    });
+
+    describe('when there is no filter function', () => {
+      it('should not render the switch', () => {
+        setupComponent({ columns: ['bytes'] });
+
+        expect(
+          screen.queryByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')
+        ).not.toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('switch - hide null values', () => {
+    const dataViewWithNullableFields = createStubDataView({
+      spec: {
+        id: 'test-nullable',
+        title: 'test-nullable',
+        timeFieldName: '@timestamp',
+        fields: {
+          '@timestamp': {
+            name: '@timestamp',
+            type: 'date',
+            esTypes: ['date'],
+            aggregatable: true,
+            searchable: true,
+            count: 30,
+            readFromDocValues: true,
+            scripted: false,
+            isMapped: true,
+          },
+          message: {
+            name: 'message',
+            type: 'string',
+            esTypes: ['text'],
+            aggregatable: false,
+            searchable: true,
+            count: 10,
+            readFromDocValues: false,
+            scripted: false,
+            isMapped: true,
+          },
+          'optional.field': {
+            name: 'optional.field',
+            type: 'string',
+            esTypes: ['keyword'],
+            aggregatable: true,
+            searchable: true,
+            count: 0,
+            readFromDocValues: true,
+            scripted: false,
+            isMapped: true,
+          },
+          'another.nullable': {
+            name: 'another.nullable',
+            type: 'number',
+            esTypes: ['long'],
+            aggregatable: true,
+            searchable: true,
+            count: 0,
+            readFromDocValues: true,
+            scripted: false,
+            isMapped: true,
+          },
+        },
+      },
+    });
+
+    const hitWithNullValues = buildDataTableRecord(
+      {
+        _index: 'test-nullable',
+        _id: '1',
+        _score: 1,
+        _source: {
+          '@timestamp': '2024-01-01T00:00:00.000Z',
+          message: 'test message',
+          'optional.field': null,
+          'another.nullable': null,
+        },
+      },
+      dataViewWithNullableFields
+    );
+
+    const setupNullableComponent = (
+      props: Partial<React.ComponentProps<typeof DocViewerTable>> = {}
+    ) => {
+      const user = userEvent.setup();
+
+      render(
+        <IntlProvider locale="en">
+          <DocViewerTable
+            dataView={dataViewWithNullableFields}
+            hit={hitWithNullValues}
+            columns={[]}
+            {...props}
+          />
+        </IntlProvider>
+      );
+
+      return { user };
+    };
+
+    beforeEach(() => {
+      storage.clear();
+    });
+
+    it('should render the switch', () => {
+      setupNullableComponent();
+
+      expect(screen.getByTestId('unifiedDocViewerHideNullValuesSwitch')).toBeInTheDocument();
+    });
+
+    it('should show all fields including those with null values by default', () => {
+      setupNullableComponent();
+
       expect(screen.getByText('@timestamp')).toBeInTheDocument();
-      expect(screen.getByText('bytes')).toBeInTheDocument();
-      expect(screen.getByText('extension.keyword')).toBeInTheDocument();
-      expect(storage.get(SHOW_ONLY_SELECTED_FIELDS)).toBe(false);
+      expect(screen.getByText('message')).toBeInTheDocument();
+      expect(screen.getByText('optional.field')).toBeInTheDocument();
+      expect(screen.getByText('another.nullable')).toBeInTheDocument();
+    });
+
+    it('should hide fields with null values when toggled on', async () => {
+      const { user } = setupNullableComponent();
+
+      expect(screen.getByText('@timestamp')).toBeInTheDocument();
+      expect(screen.getByText('message')).toBeInTheDocument();
+      expect(screen.getByText('optional.field')).toBeInTheDocument();
+      expect(screen.getByText('another.nullable')).toBeInTheDocument();
+
+      const hideNullValuesSwitch = screen.getByTestId('unifiedDocViewerHideNullValuesSwitch');
+      await user.click(hideNullValuesSwitch);
+
+      expect(screen.getByText('@timestamp')).toBeInTheDocument();
+      expect(screen.getByText('message')).toBeInTheDocument();
+      expect(screen.queryByText('optional.field')).toBeNull();
+      expect(screen.queryByText('another.nullable')).toBeNull();
+    });
+
+    it('should persist state to localStorage', async () => {
+      const { user } = setupNullableComponent();
+
+      expect(storage.get(HIDE_NULL_VALUES)).toBeFalsy();
+
+      const hideNullValuesSwitch = screen.getByTestId('unifiedDocViewerHideNullValuesSwitch');
+      await user.click(hideNullValuesSwitch);
+
+      expect(storage.get(HIDE_NULL_VALUES)).toBe(true);
+
+      await user.click(hideNullValuesSwitch);
+
+      expect(storage.get(HIDE_NULL_VALUES)).toBe(false);
+    });
+
+    it('should hide fields with null values if it was previously switched on', () => {
+      storage.set(HIDE_NULL_VALUES, true);
+
+      setupNullableComponent();
+
+      expect(screen.getByText('@timestamp')).toBeInTheDocument();
+      expect(screen.getByText('message')).toBeInTheDocument();
+      expect(screen.queryByText('optional.field')).toBeNull();
+      expect(screen.queryByText('another.nullable')).toBeNull();
     });
   });
 });

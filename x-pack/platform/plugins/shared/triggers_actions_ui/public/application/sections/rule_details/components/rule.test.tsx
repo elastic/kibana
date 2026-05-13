@@ -7,32 +7,40 @@
 
 import * as React from 'react';
 import { Suspense } from 'react';
-import { shallow } from 'enzyme';
-import { waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
+import { BehaviorSubject } from 'rxjs';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { Capabilities } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { RuleComponent, alertToListItem, RuleComponentProps } from './rule';
-import { AlertListItem } from './types';
-import { RuleAlertList } from './rule_alert_list';
-import { RuleSummary, AlertStatus, RuleType, RuleTypeModel } from '../../../../types';
+import { RuleComponent, alertToListItem } from './rule';
+import type { RuleSummary, AlertStatus, RuleType, RuleTypeModel } from '../../../../types';
+import type { AlertStatusValues } from '@kbn/alerting-plugin/common';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import { RULE_DETAILS_FILTER_CONTROLS } from '../../alerts_search_bar/constants';
 import { mockRule, mockLogResponse } from './test_helpers';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useBulkGetMaintenanceWindowsQuery } from '@kbn/response-ops-alerts-table/hooks/use_bulk_get_maintenance_windows';
 import { getMaintenanceWindowsMock } from '@kbn/response-ops-alerts-table/mocks/maintenance_windows.mock';
-import { loadRuleTypes } from '../../../lib/rule_api/rule_types';
+import { getRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_rule_types';
 
-jest.mock('../../../lib/rule_api/rule_types');
-jest.mocked(loadRuleTypes).mockResolvedValue([]);
+jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types');
+jest.mocked(getRuleTypes).mockResolvedValue([]);
 
 const mockUseKibanaReturnValue = createStartServicesMock();
 jest.mock('../../../../common/lib/kibana', () => ({
   __esModule: true,
   useKibana: jest.fn(() => ({
     services: mockUseKibanaReturnValue,
+  })),
+  useSpacesData: jest.fn(() => ({
+    spaces: [],
+    spacesMap: new Map(),
+    isLoading: false,
+    activeSpaceId: 'default',
   })),
 }));
 jest.mock('../../../../common/get_experimental_features', () => ({
@@ -41,6 +49,27 @@ jest.mock('../../../../common/get_experimental_features', () => ({
 jest.mock('@kbn/response-ops-alerts-table/hooks/use_bulk_get_maintenance_windows');
 jest.mock('../../../lib/rule_api/load_execution_log_aggregations', () => ({
   loadExecutionLogAggregations: jest.fn(),
+}));
+
+jest.mock('../../../hooks/use_multiple_spaces', () => ({
+  useMultipleSpaces: jest.fn(() => ({
+    onShowAllSpacesChange: jest.fn(),
+    canAccessMultipleSpaces: false,
+    namespaces: undefined,
+    activeSpace: undefined,
+  })),
+}));
+
+const mockAlertSummaryWidget = jest.fn((_props: Record<string, unknown>) => (
+  <div data-test-subj="alertSummaryWidget" />
+));
+jest.mock('../../alert_summary_widget', () => ({
+  AlertSummaryWidget: (props: Record<string, unknown>) => mockAlertSummaryWidget(props),
+}));
+
+jest.mock('@kbn/kibana-utils-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-utils-plugin/public'),
+  setStateToKbnUrl: jest.fn(() => '/mocked-path'),
 }));
 
 const mockAlertsTable = jest.fn(() => {
@@ -73,6 +102,7 @@ const ruleTypeR: RuleTypeModel = {
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useBulkGetMaintenanceWindowsMock = useBulkGetMaintenanceWindowsQuery as jest.Mock;
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
+const solutionNavId$ = new BehaviorSubject<string | null>(null);
 
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
@@ -95,6 +125,9 @@ beforeAll(async () => {
   jest.clearAllMocks();
   ruleTypeRegistry.get.mockReturnValue(ruleTypeR);
   useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
+  useKibanaMock().services.chrome.getActiveSolutionNavId$ = jest
+    .fn()
+    .mockReturnValue(solutionNavId$);
 
   const services = await mocks.getStartServices();
   capabilities = services[0].application.capabilities;
@@ -130,20 +163,24 @@ const queryClient = new QueryClient({
   },
 });
 
-const RuleComponentWithProvider = (props: RuleComponentProps) => {
-  return (
-    <Suspense fallback={null}>
-      <QueryClientProvider client={queryClient}>
-        <RuleComponent {...props} />
-      </QueryClientProvider>
-    </Suspense>
+const renderWithProviders = (ui: React.ReactElement, initialEntries?: string[]) => {
+  return render(
+    <MemoryRouter initialEntries={initialEntries}>
+      <IntlProvider locale="en" messages={{}}>
+        <Suspense fallback={null}>
+          <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+        </Suspense>
+      </IntlProvider>
+    </MemoryRouter>
   );
 };
 
 describe('rules', () => {
   it('render a list of rules', async () => {
     const rule = mockRule();
-    const ruleType = mockRuleType();
+    const ruleType = mockRuleType({
+      hasAlertsMappings: true,
+    });
     const ruleSummary = mockRuleSummary({
       alerts: {
         first_rule: {
@@ -163,15 +200,8 @@ describe('rules', () => {
       },
     });
 
-    const rules: AlertListItem[] = [
-      // active first
-      alertToListItem(fakeNow.getTime(), 'second_rule', ruleSummary.alerts.second_rule),
-      // ok second
-      alertToListItem(fakeNow.getTime(), 'first_rule', ruleSummary.alerts.first_rule),
-    ];
-
-    const wrapper = mountWithIntl(
-      <RuleComponentWithProvider
+    renderWithProviders(
+      <RuleComponent
         {...mockAPIs}
         rule={rule}
         ruleType={ruleType}
@@ -180,12 +210,18 @@ describe('rules', () => {
       />
     );
 
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve));
-      wrapper.update();
-    });
+    expect(await screen.findByTestId('ruleStatusPanel')).toBeInTheDocument();
+    expect(await screen.findByTestId('alertsTable')).toBeInTheDocument();
 
-    expect(wrapper.find(RuleAlertList).prop('items')).toEqual(rules);
+    expect(mockAlertsTable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'rule-detail-alerts-table',
+        ruleTypeIds: [ruleType.id],
+        showAlertStatusWithFlapping: true,
+        query: expect.any(Object),
+      }),
+      expect.anything()
+    );
   });
 
   it('render a hidden field with duration epoch', () => {
@@ -193,25 +229,26 @@ describe('rules', () => {
     const ruleType = mockRuleType();
     const ruleSummary = mockRuleSummary();
 
-    expect(
-      shallow(
-        <RuleComponent
-          durationEpoch={fake2MinutesAgo.getTime()}
-          {...mockAPIs}
-          rule={rule}
-          ruleType={ruleType}
-          readOnly={false}
-          ruleSummary={ruleSummary}
-        />
-      )
-        .find('[name="alertsDurationEpoch"]')
-        .prop('value')
-    ).toEqual(fake2MinutesAgo.getTime());
+    renderWithProviders(
+      <RuleComponent
+        durationEpoch={fake2MinutesAgo.getTime()}
+        {...mockAPIs}
+        rule={rule}
+        ruleType={ruleType}
+        readOnly={false}
+        ruleSummary={ruleSummary}
+      />
+    );
+
+    const hiddenInput = screen.getByTestId('alertsDurationEpoch') as HTMLInputElement;
+    expect(hiddenInput.value).toEqual(fake2MinutesAgo.getTime().toString());
   });
 
   it('render all active rules', async () => {
     const rule = mockRule();
-    const ruleType = mockRuleType();
+    const ruleType = mockRuleType({
+      hasAlertsMappings: true,
+    });
     const alerts: Record<string, AlertStatus> = {
       ['us-central']: {
         status: 'OK',
@@ -227,8 +264,8 @@ describe('rules', () => {
       },
     };
 
-    const wrapper = mountWithIntl(
-      <RuleComponentWithProvider
+    renderWithProviders(
+      <RuleComponent
         {...mockAPIs}
         rule={rule}
         ruleType={ruleType}
@@ -239,59 +276,66 @@ describe('rules', () => {
       />
     );
 
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve));
-      wrapper.update();
-    });
+    expect(await screen.findByTestId('ruleStatusPanel')).toBeInTheDocument();
+    expect(await screen.findByTestId('alertsTable')).toBeInTheDocument();
 
-    expect(wrapper.find(RuleAlertList).prop('items')).toEqual([
-      alertToListItem(fakeNow.getTime(), 'us-central', alerts['us-central']),
-      alertToListItem(fakeNow.getTime(), 'us-east', alerts['us-east']),
-    ]);
+    expect(mockAlertsTable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'rule-detail-alerts-table',
+        ruleTypeIds: [ruleType.id],
+        showAlertStatusWithFlapping: true,
+        query: expect.any(Object),
+      }),
+      expect.anything()
+    );
   });
 
   it('render all inactive rules', async () => {
     const rule = mockRule({
       mutedInstanceIds: ['us-west', 'us-east'],
     });
-    const ruleType = mockRuleType();
-    const ruleUsWest: AlertStatus = { status: 'OK', muted: false, flapping: false, tracked: true };
-    const ruleUsEast: AlertStatus = { status: 'OK', muted: false, flapping: false, tracked: true };
+    const ruleType = mockRuleType({
+      hasAlertsMappings: true,
+    });
+    const alerts: Record<string, AlertStatus> = {
+      'us-west': {
+        status: 'OK' as AlertStatusValues,
+        muted: false,
+        flapping: false,
+        tracked: true,
+      },
+      'us-east': {
+        status: 'OK' as AlertStatusValues,
+        muted: false,
+        flapping: false,
+        tracked: true,
+      },
+    };
 
-    const wrapper = mountWithIntl(
-      <RuleComponentWithProvider
+    renderWithProviders(
+      <RuleComponent
         {...mockAPIs}
         rule={rule}
         ruleType={ruleType}
         readOnly={false}
         ruleSummary={mockRuleSummary({
-          alerts: {
-            'us-west': {
-              status: 'OK',
-              muted: false,
-              flapping: false,
-              tracked: true,
-            },
-            'us-east': {
-              status: 'OK',
-              muted: false,
-              flapping: false,
-              tracked: true,
-            },
-          },
+          alerts,
         })}
       />
     );
 
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve));
-      wrapper.update();
-    });
+    expect(await screen.findByTestId('ruleStatusPanel')).toBeInTheDocument();
+    expect(await screen.findByTestId('alertsTable')).toBeInTheDocument();
 
-    expect(wrapper.find(RuleAlertList).prop('items')).toEqual([
-      alertToListItem(fakeNow.getTime(), 'us-west', ruleUsWest),
-      alertToListItem(fakeNow.getTime(), 'us-east', ruleUsEast),
-    ]);
+    expect(mockAlertsTable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'rule-detail-alerts-table',
+        ruleTypeIds: [ruleType.id],
+        showAlertStatusWithFlapping: true,
+        query: expect.any(Object),
+      }),
+      expect.anything()
+    );
   });
 
   it('requests a table refresh when the refresh token changes', async () => {
@@ -300,13 +344,13 @@ describe('rules', () => {
       enabled: false,
     });
     const ruleType = mockRuleType({
-      hasFieldsForAAD: true,
+      hasAlertsMappings: true,
     });
     const ruleSummary = mockRuleSummary();
     jest.setSystemTime(fake2MinutesAgo);
 
-    const wrapper = mountWithIntl(
-      <RuleComponentWithProvider
+    const { rerender } = renderWithProviders(
+      <RuleComponent
         {...mockAPIs}
         rule={rule}
         ruleType={ruleType}
@@ -315,16 +359,31 @@ describe('rules', () => {
       />
     );
 
-    await waitFor(() => wrapper.find('[data-test-subj="alertsTable"]'));
+    expect(await screen.findByTestId('alertsTable')).toBeInTheDocument();
 
     jest.setSystemTime(fakeNow);
 
-    wrapper.setProps({
-      refreshToken: {
-        resolve: () => undefined,
-        reject: () => undefined,
-      },
-    });
+    rerender(
+      <MemoryRouter>
+        <IntlProvider locale="en" messages={{}}>
+          <Suspense fallback={null}>
+            <QueryClientProvider client={queryClient}>
+              <RuleComponent
+                {...mockAPIs}
+                rule={rule}
+                ruleType={ruleType}
+                ruleSummary={ruleSummary}
+                readOnly={false}
+                refreshToken={{
+                  resolve: () => undefined,
+                  reject: () => undefined,
+                }}
+              />
+            </QueryClientProvider>
+          </Suspense>
+        </IntlProvider>
+      </MemoryRouter>
+    );
 
     expect(mockAlertsTable).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -458,8 +517,8 @@ describe('execution duration overview', () => {
     const ruleType = mockRuleType();
     const ruleSummary = mockRuleSummary();
 
-    const wrapper = mountWithIntl(
-      <RuleComponentWithProvider
+    renderWithProviders(
+      <RuleComponent
         {...mockAPIs}
         rule={rule}
         ruleType={ruleType}
@@ -468,15 +527,12 @@ describe('execution duration overview', () => {
       />
     );
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    expect(await screen.findAllByTestId('ruleStatus-ok')).toHaveLength(2);
 
-    const ruleExecutionStatusStat = wrapper.find('[data-test-subj="ruleStatus-ok"]');
-    expect(ruleExecutionStatusStat.exists()).toBeTruthy();
-    expect(ruleExecutionStatusStat.first().prop('description')).toEqual('Last response');
-    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-ok"]').text()).toEqual('Ok');
+    const ruleExecutionStatusStats = screen.getAllByTestId('ruleStatus-ok');
+    expect(ruleExecutionStatusStats[0]).toBeInTheDocument();
+    expect(ruleExecutionStatusStats[0]).toHaveTextContent('Last response');
+    expect(ruleExecutionStatusStats[1]).toHaveTextContent('Ok');
   });
 });
 
@@ -485,8 +541,9 @@ describe('disable/enable functionality', () => {
     const rule = mockRule();
     const ruleType = mockRuleType();
     const ruleSummary = mockRuleSummary();
-    const wrapper = mountWithIntl(
-      <RuleComponentWithProvider
+
+    renderWithProviders(
+      <RuleComponent
         {...mockAPIs}
         rule={rule}
         ruleType={ruleType}
@@ -494,11 +551,10 @@ describe('disable/enable functionality', () => {
         readOnly={false}
       />
     );
-    const actionsElem = await waitFor(() =>
-      wrapper.find('[data-test-subj="statusDropdown"]').first()
-    );
 
-    expect(actionsElem.text()).toEqual('Enabled');
+    const actionsElem = await screen.findByTestId('statusDropdown');
+
+    expect(actionsElem).toHaveTextContent('Enabled');
   });
 
   it('should show that the rule is disabled', async () => {
@@ -507,8 +563,9 @@ describe('disable/enable functionality', () => {
     });
     const ruleType = mockRuleType();
     const ruleSummary = mockRuleSummary();
-    const wrapper = mountWithIntl(
-      <RuleComponentWithProvider
+
+    renderWithProviders(
+      <RuleComponent
         {...mockAPIs}
         rule={rule}
         ruleType={ruleType}
@@ -516,18 +573,81 @@ describe('disable/enable functionality', () => {
         readOnly={false}
       />
     );
-    const actionsElem = await waitFor(() =>
-      wrapper.find('[data-test-subj="statusDropdown"]').first()
-    );
 
-    expect(actionsElem.text()).toEqual('Disabled');
+    const actionsElem = await screen.findByTestId('statusDropdown');
+
+    expect(actionsElem).toHaveTextContent('Disabled');
   });
 });
 
 describe('tabbed content', () => {
+  it('defaults to alerts tab when no tabId is in the URL', async () => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(
+      (feature: string) => {
+        if (feature === 'rulesDetailLogs') {
+          return true;
+        }
+        return false;
+      }
+    );
+
+    const rule = mockRule();
+    const ruleType = mockRuleType();
+    const ruleSummary = mockRuleSummary();
+
+    renderWithProviders(
+      <RuleComponent
+        {...mockAPIs}
+        rule={rule}
+        ruleType={ruleType}
+        ruleSummary={ruleSummary}
+        readOnly={false}
+      />,
+      ['/rule/123']
+    );
+
+    const alertListTab = await screen.findByRole('tab', { name: /alerts/i });
+    expect(alertListTab).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('defaults to history tab when tabId=history is in the URL', async () => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(
+      (feature: string) => {
+        if (feature === 'rulesDetailLogs') {
+          return true;
+        }
+        return false;
+      }
+    );
+
+    const rule = mockRule();
+    const ruleType = mockRuleType();
+    const ruleSummary = mockRuleSummary();
+
+    renderWithProviders(
+      <RuleComponent
+        {...mockAPIs}
+        rule={rule}
+        ruleType={ruleType}
+        ruleSummary={ruleSummary}
+        readOnly={false}
+      />,
+      ['/rule/123?tabId=history']
+    );
+
+    const historyTab = await screen.findByRole('tab', { name: /history/i });
+    expect(historyTab).toHaveAttribute('aria-selected', 'true');
+  });
+
   it('tabbed content renders when the event log experiment is on', async () => {
-    // Enable the event log experiment
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(
+      (feature: string) => {
+        if (feature === 'rulesDetailLogs') {
+          return true;
+        }
+        return false;
+      }
+    );
 
     const rule = mockRule();
     const ruleType = mockRuleType();
@@ -550,7 +670,7 @@ describe('tabbed content', () => {
       },
     });
 
-    const wrapper = shallow(
+    renderWithProviders(
       <RuleComponent
         {...mockAPIs}
         rule={rule}
@@ -560,29 +680,119 @@ describe('tabbed content', () => {
       />
     );
 
-    const tabbedContent = wrapper.find('[data-test-subj="ruleDetailsTabbedContent"]').dive();
+    expect(await screen.findByRole('tablist')).toBeInTheDocument();
 
-    // Need to mock this function
-    (tabbedContent.instance() as any).focusTab = jest.fn();
-    tabbedContent.update();
+    expect(screen.getByRole('tab', { name: /alerts/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /history/i })).toBeInTheDocument();
 
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve));
-      tabbedContent.update();
-    });
+    const eventLogTab = await screen.findByRole('tab', { name: /history/i });
+    await userEvent.click(eventLogTab);
 
-    expect(tabbedContent.find('[aria-labelledby="rule_event_log_list"]').exists()).toBeFalsy();
-    expect(tabbedContent.find('[aria-labelledby="rule_alert_list"]').exists()).toBeTruthy();
+    expect(eventLogTab).toHaveAttribute('aria-selected', 'true');
 
-    tabbedContent.find('[data-test-subj="eventLogListTab"]').simulate('click');
+    const alertListTab = await screen.findByRole('tab', { name: /alerts/i });
+    await userEvent.click(alertListTab);
 
-    expect(tabbedContent.find('[aria-labelledby="rule_event_log_list"]').exists()).toBeTruthy();
-    expect(tabbedContent.find('[aria-labelledby="rule_alert_list"]').exists()).toBeFalsy();
+    expect(alertListTab).toHaveAttribute('aria-selected', 'true');
+  });
+});
 
-    tabbedContent.find('[data-test-subj="ruleAlertListTab"]').simulate('click');
+describe('cases ownership based on solution context', () => {
+  const renderWithSolution = async (navId: string | null) => {
+    solutionNavId$.next(navId);
 
-    expect(tabbedContent.find('[aria-labelledby="rule_event_log_list"]').exists()).toBeFalsy();
-    expect(tabbedContent.find('[aria-labelledby="rule_alert_list"]').exists()).toBeTruthy();
+    const rule = mockRule();
+    const ruleType = mockRuleType({ hasAlertsMappings: true });
+    const ruleSummary = mockRuleSummary();
+
+    renderWithProviders(
+      <RuleComponent
+        {...mockAPIs}
+        rule={rule}
+        ruleType={ruleType}
+        ruleSummary={ruleSummary}
+        readOnly={false}
+      />
+    );
+
+    await screen.findByTestId('alertsTable');
+  };
+
+  afterEach(() => {
+    solutionNavId$.next(null);
+  });
+
+  it('sets cases owner to "observability" when solution is oblt', async () => {
+    await renderWithSolution('oblt');
+    expect(mockAlertsTable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        casesConfiguration: expect.objectContaining({ owner: ['observability'] }),
+      }),
+      expect.anything()
+    );
+  });
+
+  it('sets cases owner to "securitySolution" when solution is security', async () => {
+    await renderWithSolution('security');
+    expect(mockAlertsTable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        casesConfiguration: expect.objectContaining({ owner: ['securitySolution'] }),
+      }),
+      expect.anything()
+    );
+  });
+
+  it('sets cases owner to "cases" when solution is es (search)', async () => {
+    await renderWithSolution('es');
+    expect(mockAlertsTable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        casesConfiguration: expect.objectContaining({ owner: ['cases'] }),
+      }),
+      expect.anything()
+    );
+  });
+
+  it('sets cases owner to "cases" when no solution is active (classic)', async () => {
+    await renderWithSolution(null);
+    expect(mockAlertsTable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        casesConfiguration: expect.objectContaining({ owner: ['cases'] }),
+      }),
+      expect.anything()
+    );
+  });
+});
+
+describe('scrollAlertsIntoView', () => {
+  it('uses RULE_DETAILS_FILTER_CONTROLS for controlConfigs written to the URL', async () => {
+    const rule = mockRule();
+    const ruleType = mockRuleType({ hasAlertsMappings: true });
+    const ruleSummary = mockRuleSummary();
+
+    renderWithProviders(
+      <RuleComponent
+        {...mockAPIs}
+        rule={rule}
+        ruleType={ruleType}
+        ruleSummary={ruleSummary}
+        readOnly={false}
+      />
+    );
+
+    await screen.findByTestId('alertSummaryWidget');
+    Element.prototype.scrollIntoView = jest.fn();
+
+    const { onClick } = mockAlertSummaryWidget.mock.calls[0][0] as unknown as {
+      onClick: (status?: string) => void;
+    };
+    onClick('active');
+
+    const { controlConfigs } = (setStateToKbnUrl as jest.Mock).mock.calls[0][1] as {
+      controlConfigs: Array<{ field_name: string }>;
+    };
+    const controlFields = controlConfigs.map((c) => c.field_name);
+    const expectedFields = RULE_DETAILS_FILTER_CONTROLS.map((c) => c.field_name);
+    expect(controlFields).toEqual(expectedFields);
   });
 });
 
@@ -603,6 +813,8 @@ function mockRuleType(overloads: Partial<RuleType> = {}): RuleType {
     minimumLicenseRequired: 'basic',
     enabledInLicense: true,
     category: 'my-category',
+    isExportable: true,
+    isInternallyManaged: false,
     ...overloads,
   };
 }

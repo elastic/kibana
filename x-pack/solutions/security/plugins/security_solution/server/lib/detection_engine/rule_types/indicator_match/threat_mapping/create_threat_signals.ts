@@ -32,50 +32,41 @@ import {
 } from './utils';
 import { getAllowedFieldsForTermQuery } from './get_allowed_fields_for_terms_query';
 
-import { getEventCount, getEventList } from './get_event_count';
+import { MAX_PER_PAGE, getEventCount, getEventList } from './get_event_count';
 import { getMappingFilters } from './get_mapping_filters';
 import { THREAT_PIT_KEEP_ALIVE } from '../../../../../../common/cti/constants';
 import { getMaxSignalsWarning, getSafeSortIds } from '../../utils/utils';
 import { getDataTierFilter } from '../../utils/get_data_tier_filter';
+import { getDataStreamNamespaceFilter } from '../../utils/get_data_stream_namespace_filter';
 import { getQueryFields } from '../../utils/get_query_fields';
 
 export const createThreatSignals = async ({
-  alertId,
-  bulkCreate,
-  completeRule,
-  concurrentSearches,
+  sharedParams,
   eventsTelemetry,
-  filters,
-  inputIndex,
-  itemsPerSearch,
-  language,
-  listClient,
-  outputIndex,
-  query,
-  ruleExecutionLogger,
-  savedId,
-  searchAfterSize,
   services,
-  threatFilters,
-  threatIndex,
-  threatIndicatorPath,
-  threatLanguage,
-  threatMapping,
-  threatQuery,
-  tuple,
-  type,
-  wrapHits,
   wrapSuppressedHits,
-  runOpts,
-  runtimeMappings,
-  primaryTimestamp,
-  secondaryTimestamp,
-  exceptionFilter,
-  unprocessedExceptions,
   licensing,
-  experimentalFeatures,
   scheduleNotificationResponseActionsService,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
+  const {
+    inputIndex,
+    primaryTimestamp,
+    secondaryTimestamp,
+    exceptionFilter,
+    completeRule,
+    tuple,
+    ruleExecutionLogger,
+  } = sharedParams;
+
+  const {
+    alertId,
+    ruleParams: { language, query, threatIndex, threatLanguage, threatMapping, threatQuery },
+  } = completeRule;
+  const itemsPerSearch = completeRule.ruleParams.itemsPerSearch ?? MAX_PER_PAGE;
+  const concurrentSearches = completeRule.ruleParams.concurrentSearches ?? 1;
+  const filters = completeRule.ruleParams.filters ?? [];
+  const threatFilters = completeRule.ruleParams.threatFilters ?? [];
+
   const threatMatchedFields = getMatchedFields(threatMapping);
   const threatFieldsLength = threatMatchedFields.threat.length;
   const allowedFieldsForTermsQuery = await getAllowedFieldsForTermQuery({
@@ -87,7 +78,7 @@ export const createThreatSignals = async ({
   });
 
   const params = completeRule.ruleParams;
-  ruleExecutionLogger.debug('Indicator matching rule starting');
+  ruleExecutionLogger.trace('Indicator matching rule starting');
   const perPage = concurrentSearches * itemsPerSearch;
   const verifyExecutionCanProceed = buildExecutionIntervalValidator(
     completeRule.ruleConfig.schedule.interval
@@ -99,7 +90,6 @@ export const createThreatSignals = async ({
     enrichmentTimes: [],
     bulkCreateTimes: [],
     searchAfterTimes: [],
-    lastLookBackDate: null,
     createdSignalsCount: 0,
     suppressedAlertsCount: 0,
     createdSignals: [],
@@ -111,9 +101,23 @@ export const createThreatSignals = async ({
     uiSettingsClient: services.uiSettingsClient,
   });
 
+  const dataStreamNamespaceFilters = await getDataStreamNamespaceFilter({
+    uiSettingsClient: services.uiSettingsClient,
+  });
+
   const { eventMappingFilter, indicatorMappingFilter } = getMappingFilters(threatMapping);
-  const allEventFilters = [...filters, eventMappingFilter, ...dataTiersFilters];
-  const allThreatFilters = [...threatFilters, indicatorMappingFilter, ...dataTiersFilters];
+  const allEventFilters = [
+    ...filters,
+    eventMappingFilter,
+    ...dataTiersFilters,
+    ...dataStreamNamespaceFilters,
+  ];
+  const allThreatFilters = [
+    ...threatFilters,
+    indicatorMappingFilter,
+    ...dataTiersFilters,
+    ...dataStreamNamespaceFilters,
+  ];
 
   const dataViews = await services.getDataViews();
   const inputIndexFields = await getQueryFields({
@@ -137,6 +141,7 @@ export const createThreatSignals = async ({
   });
 
   ruleExecutionLogger.debug(`Total event count: ${eventCount}`);
+  results.totalEventsFound = eventCount;
 
   let threatPitId: OpenPointInTimeResponse['id'] = (
     await services.scopedClusterClient.asCurrentUser.openPointInTime({
@@ -166,7 +171,7 @@ export const createThreatSignals = async ({
     indexFields: threatIndexFields,
   });
 
-  ruleExecutionLogger.debug(`Total indicator items: ${threatListCount}`);
+  ruleExecutionLogger.info(`Found threat indicators: ${threatListCount}`);
 
   const threatListConfig = {
     fields: threatMapping.map((mapping) => mapping.entries.map((item) => item.value)).flat(),
@@ -196,7 +201,7 @@ export const createThreatSignals = async ({
     while (list.hits.hits.length !== 0) {
       verifyExecutionCanProceed();
       const chunks = chunk(chunkPage, list.hits.hits);
-      ruleExecutionLogger.debug(`${chunks.length} concurrent indicator searches are starting.`);
+      ruleExecutionLogger.trace(`${chunks.length} concurrent indicator searches are starting.`);
       const concurrentSearchesPerformed =
         chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(createSignal);
       const searchesPerformed = await Promise.all(concurrentSearchesPerformed);
@@ -216,8 +221,8 @@ export const createThreatSignals = async ({
         // allowed by elasticsearch. The sliced chunk is used in createSignal to generate
         // threat filters.
         chunkPage = maxClauseCountValue;
-        ruleExecutionLogger.warn(
-          `maxClauseCount error received from elasticsearch, setting IM rule page size to ${maxClauseCountValue}`
+        ruleExecutionLogger.debug(
+          `Max clause count error received from Elasticsearch. Setting rule page size to ${maxClauseCountValue}.`
         );
 
         // only store results + errors that are not related to maxClauseCount
@@ -242,11 +247,8 @@ export const createThreatSignals = async ({
         results = combineConcurrentResults(results, searchesPerformed);
       }
       documentCount -= list.hits.hits.length;
-      ruleExecutionLogger.debug(
-        `Concurrent indicator match searches completed with ${results.createdSignalsCount} signals found`,
-        `search times of ${results.searchAfterTimes}ms,`,
-        `bulk create times ${results.bulkCreateTimes}ms,`,
-        `all successes are ${results.success}`
+      ruleExecutionLogger.trace(
+        `Alert candidates found: ${results.createdSignalsCount}.\nConcurrent indicator match searches completed. Search took: ${results.searchAfterTimes}ms. Bulk create times (ms): ${results.bulkCreateTimes}. Are all operations successful: ${results.success}.`
       );
 
       // if alerts suppressed it means suppression enabled, so suppression alert limit should be applied (5 * max_signals)
@@ -257,7 +259,7 @@ export const createThreatSignals = async ({
           results.warningMessages.push(getMaxSignalsWarning());
         }
         ruleExecutionLogger.debug(
-          `Indicator match has reached its max signals count ${params.maxSignals}. Additional documents not checked are ${documentCount}`
+          `Max alerts per run reached\n${params.maxSignals}. Additional ${documentCount} documents are not checked.`
         );
         break;
       } else if (
@@ -268,15 +270,15 @@ export const createThreatSignals = async ({
       ) {
         // warning should be already set
         ruleExecutionLogger.debug(
-          `Indicator match has reached its max signals count ${
+          `Max alerts per run reached\nIndicator match has reached its max alerts count ${
             MAX_SIGNALS_SUPPRESSION_MULTIPLIER * params.maxSignals
-          }. Additional documents not checked are ${documentCount}`
+          }. Additional ${documentCount} documents are not checked.`
         );
         break;
       }
-      ruleExecutionLogger.debug(`Documents items left to check are ${documentCount}`);
+      ruleExecutionLogger.trace(`Documents items left to check: ${documentCount}`);
       if (maxClauseCountValue > Number.NEGATIVE_INFINITY) {
-        ruleExecutionLogger.debug(`Re-running search since we hit max clause count error`);
+        ruleExecutionLogger.trace(`Re-running search due to max clause count error`);
 
         // re-run search with smaller max clause count;
         list = await getDocumentList({ searchAfter: undefined });
@@ -288,11 +290,11 @@ export const createThreatSignals = async ({
         // this could happen when event has empty sort field
         // https://github.com/elastic/kibana/issues/174573 (happens to IM rule only since it uses desc order for events search)
         // when negative sort id used in subsequent request it fails, so when negative sort value found we don't do next request
-        const hasNegativeDateSort = sortIds?.some((val) => val < 0);
+        const hasNegativeDateSort = sortIds?.some((val) => Number(val) < 0);
 
         if (hasNegativeDateSort) {
-          ruleExecutionLogger.debug(
-            `Negative date sort id value encountered: ${sortIds}. Threat search stopped.`
+          ruleExecutionLogger.trace(
+            `Negative date sort ID encountered\nValue: ${sortIds}. Threat search stopped.`
           );
 
           break;
@@ -323,19 +325,11 @@ export const createThreatSignals = async ({
       totalDocumentCount: eventCount,
       getDocumentList: async ({ searchAfter }) =>
         getEventList({
+          sharedParams,
           services,
-          ruleExecutionLogger,
           filters: allEventFilters,
-          query,
-          language,
-          index: inputIndex,
           searchAfter,
           perPage,
-          tuple,
-          runtimeMappings,
-          primaryTimestamp,
-          secondaryTimestamp,
-          exceptionFilter,
           eventListConfig,
           indexFields: inputIndexFields,
           sortOrder,
@@ -343,47 +337,20 @@ export const createThreatSignals = async ({
 
       createSignal: (slicedChunk) =>
         createEventSignal({
-          alertId,
-          bulkCreate,
-          completeRule,
+          sharedParams,
           currentEventList: slicedChunk,
-          currentResult: results,
           eventsTelemetry,
           filters: allEventFilters,
-          inputIndex,
-          language,
-          listClient,
-          outputIndex,
-          query,
           reassignThreatPitId,
-          ruleExecutionLogger,
-          savedId,
-          searchAfterSize,
           services,
           threatFilters: allThreatFilters,
-          threatIndex,
-          threatIndicatorPath,
-          threatLanguage,
-          threatMapping,
           threatPitId,
-          threatQuery,
-          tuple,
-          type,
-          wrapHits,
           wrapSuppressedHits,
-          runtimeMappings,
-          primaryTimestamp,
-          secondaryTimestamp,
-          exceptionFilter,
-          unprocessedExceptions,
           allowedFieldsForTermsQuery,
-          threatMatchedFields,
           inputIndexFields,
           threatIndexFields,
-          runOpts,
           sortOrder,
           isAlertSuppressionActive,
-          experimentalFeatures,
         }),
     });
   } else {
@@ -391,65 +358,33 @@ export const createThreatSignals = async ({
       totalDocumentCount: threatListCount,
       getDocumentList: async ({ searchAfter }) =>
         getThreatList({
+          sharedParams,
           esClient: services.scopedClusterClient.asCurrentUser,
           threatFilters: allThreatFilters,
-          query: threatQuery,
-          language: threatLanguage,
-          index: threatIndex,
           searchAfter,
-          ruleExecutionLogger,
           perPage,
           threatListConfig,
           pitId: threatPitId,
           reassignPitId: reassignThreatPitId,
-          runtimeMappings,
-          listClient,
-          exceptionFilter,
           indexFields: threatIndexFields,
         }),
 
       createSignal: (slicedChunk) =>
         createThreatSignal({
-          alertId,
-          bulkCreate,
-          completeRule,
-          currentResult: results,
+          sharedParams,
           currentThreatList: slicedChunk,
           eventsTelemetry,
           filters: allEventFilters,
-          inputIndex,
-          language,
-          listClient,
-          outputIndex,
-          query,
-          ruleExecutionLogger,
-          savedId,
-          searchAfterSize,
           services,
-          threatMapping,
-          tuple,
-          type,
-          wrapHits,
           wrapSuppressedHits,
-          runtimeMappings,
-          primaryTimestamp,
-          secondaryTimestamp,
-          exceptionFilter,
-          unprocessedExceptions,
           threatFilters: allThreatFilters,
-          threatIndex,
-          threatIndicatorPath,
-          threatLanguage,
           threatPitId,
-          threatQuery,
           reassignThreatPitId,
           allowedFieldsForTermsQuery,
           inputIndexFields,
           threatIndexFields,
-          runOpts,
           sortOrder,
           isAlertSuppressionActive,
-          experimentalFeatures,
         }),
     });
   }
@@ -458,8 +393,8 @@ export const createThreatSignals = async ({
     await services.scopedClusterClient.asCurrentUser.closePointInTime({ id: threatPitId });
   } catch (error) {
     // Don't fail due to a bad point in time closure. We have seen failures in e2e tests during nominal operations.
-    ruleExecutionLogger.warn(
-      `Error trying to close point in time: "${threatPitId}", it will expire within "${THREAT_PIT_KEEP_ALIVE}". Error is: "${error}"`
+    ruleExecutionLogger.debug(
+      `Error trying to close point in time\nPIT ID: "${threatPitId}". It will expire within "${THREAT_PIT_KEEP_ALIVE}". Error: "${error}".`
     );
   }
   scheduleNotificationResponseActionsService({
@@ -467,6 +402,9 @@ export const createThreatSignals = async ({
     signalsCount: results.createdSignalsCount,
     responseActions: completeRule.ruleParams.responseActions,
   });
-  ruleExecutionLogger.debug('Indicator matching rule has completed');
+  // Restore totalEventsFound since combineConcurrentResults doesn't carry it through
+  results.totalEventsFound = eventCount;
+
+  ruleExecutionLogger.trace('Indicator matching rule has completed');
   return results;
 };

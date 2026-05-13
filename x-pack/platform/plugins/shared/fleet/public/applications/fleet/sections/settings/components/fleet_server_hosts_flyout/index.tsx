@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -26,15 +26,19 @@ import {
   EuiSwitch,
   EuiComboBox,
   EuiCallOut,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { MultiRowInput } from '../multi_row_input';
 import { MAX_FLYOUT_WIDTH } from '../../../../constants';
-import { useStartServices } from '../../../../hooks';
+import { useFleetStatus, useStartServices } from '../../../../hooks';
 import type { FleetServerHost, FleetProxy } from '../../../../types';
 import { TextInput } from '../form';
 import { ProxyWarning } from '../fleet_proxies_table/proxy_warning';
 
+import { ExperimentalFeaturesService } from '../../../../services';
+
+import { SSLFormSection } from './ssl_form_section';
 import { useFleetServerHostsForm } from './use_fleet_server_host_form';
 
 export interface FleetServerHostsFlyoutProps {
@@ -50,6 +54,8 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
   defaultFleetServerHost,
   proxies,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const { docLinks, cloud } = useStartServices();
 
   const form = useFleetServerHostsForm(fleetServerHost, onClose, defaultFleetServerHost);
@@ -60,12 +66,59 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
     [proxies]
   );
 
+  const { enableSSLSecrets } = ExperimentalFeaturesService.get();
+  const [isConvertedToSecret, setIsConvertedToSecret] = React.useState({
+    sslKey: false,
+    sslESKey: false,
+    sslAgentKey: false,
+  });
+
+  const fleetStatus = useFleetStatus();
+  const useOutputSecretsStorage = fleetStatus.isSecretsStorageEnabled ?? false;
+  const useSSLSecretsStorage = enableSSLSecrets
+    ? fleetStatus.isSSLSecretsStorageEnabled ?? false
+    : false;
+
+  useEffect(() => {
+    // populate the secret input with the value of the plain input in order to re-save the key with secret storage
+    if (useSSLSecretsStorage && enableSSLSecrets) {
+      if (inputs.sslKeyInput.value && !inputs.sslKeySecretInput.value) {
+        inputs.sslKeySecretInput.setValue(inputs.sslKeyInput.value);
+        inputs.sslKeyInput.clear();
+        setIsConvertedToSecret({ ...isConvertedToSecret, sslKey: true });
+      }
+      if (inputs.sslAgentKeyInput.value && !inputs.sslAgentKeySecretInput.value) {
+        inputs.sslAgentKeySecretInput.setValue(inputs.sslAgentKeyInput.value);
+        inputs.sslAgentKeyInput.clear();
+        setIsConvertedToSecret({ ...isConvertedToSecret, sslAgentKey: true });
+      }
+    }
+    if (useOutputSecretsStorage) {
+      if (inputs.sslESKeyInput.value && !inputs.sslESKeySecretInput.value) {
+        inputs.sslESKeySecretInput.setValue(inputs.sslESKeyInput.value);
+        inputs.sslESKeyInput.clear();
+        setIsConvertedToSecret({ ...isConvertedToSecret, sslESKey: true });
+      }
+    }
+  }, [
+    inputs.sslKeyInput,
+    inputs.sslKeySecretInput,
+    isConvertedToSecret,
+    inputs.sslESKeyInput,
+    inputs.sslESKeySecretInput,
+    inputs.sslAgentKeyInput,
+    inputs.sslAgentKeySecretInput,
+    useSSLSecretsStorage,
+    useOutputSecretsStorage,
+    enableSSLSecrets,
+  ]);
+
   return (
-    <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH}>
+    <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH} aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader hasBorder={true}>
         <>
           <EuiTitle size="m">
-            <h2>
+            <h2 id={modalTitleId}>
               {fleetServerHost ? (
                 <FormattedMessage
                   id="xpack.fleet.settings.fleetServerHostsFlyout.editTitle"
@@ -95,6 +148,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
       <EuiFlyoutBody>
         {fleetServerHost && (
           <EuiCallOut
+            announceOnMount
             size="m"
             color="warning"
             iconType="warning"
@@ -196,16 +250,16 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
               <EuiComboBox
                 fullWidth
                 data-test-subj="fleetServerHostsFlyout.proxyIdInput"
-                {...inputs.proxyIdInput.props}
-                onChange={(options) => inputs.proxyIdInput.setValue(options?.[0]?.value ?? '')}
+                {...inputs.proxyIdInput?.props}
+                onChange={(options) => inputs?.proxyIdInput?.setValue(options?.[0]?.value ?? '')}
                 selectedOptions={
-                  inputs.proxyIdInput.value !== ''
-                    ? proxiesOptions.filter((option) => option.value === inputs.proxyIdInput.value)
+                  inputs?.proxyIdInput?.value !== ''
+                    ? proxiesOptions.filter((option) => option.value === inputs.proxyIdInput?.value)
                     : []
                 }
                 options={proxiesOptions}
                 singleSelection={{ asPlainText: true }}
-                isDisabled={inputs.proxyIdInput.props.disabled}
+                isDisabled={inputs.proxyIdInput?.props.disabled}
                 isClearable={true}
                 placeholder={i18n.translate(
                   'xpack.fleet.settings.fleetServerHostsFlyout.proxyIdPlaceholder',
@@ -230,6 +284,13 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
               }
             />
           </EuiFormRow>
+          <EuiSpacer size="l" />
+          <SSLFormSection
+            inputs={inputs}
+            useSSLSecretsStorage={enableSSLSecrets && useSSLSecretsStorage}
+            useOutputSecretsStorage={useOutputSecretsStorage}
+            isConvertedToSecret={isConvertedToSecret}
+          />
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -249,6 +310,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
               isDisabled={form.isDisabled}
               onClick={form.submit}
               data-test-subj="saveApplySettingsBtn"
+              aria-label="Save and apply settings"
             >
               <FormattedMessage
                 id="xpack.fleet.settings.fleetServerHostsFlyout.saveButton"

@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
-import { SloEditForm as Component, Props } from './slo_edit_form';
+import type { Props } from './slo_edit_form';
+import { SloEditForm as Component } from './slo_edit_form';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 
 export default {
@@ -19,7 +20,7 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: Props) => {
+const Template: StoryFn<typeof Component> = (props: Props) => {
   const methods = useForm({ defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES });
   return (
     <FormProvider {...methods}>
@@ -30,5 +31,7 @@ const Template: ComponentStory<typeof Component> = (props: Props) => {
 
 const defaultProps = {};
 
-export const SloEditForm = Template.bind({});
-SloEditForm.args = defaultProps;
+export const SloEditForm = {
+  render: Template,
+  args: defaultProps,
+};

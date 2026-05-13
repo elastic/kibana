@@ -8,7 +8,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import * as Either from 'fp-ts/lib/Either';
+import * as Either from 'fp-ts/Either';
 import { delayRetryState } from '../../../model/retry_state';
 import { throwBadResponse } from '../../../model/helpers';
 import { CLUSTER_SHARD_LIMIT_EXCEEDED_REASON } from '../../../common/constants';

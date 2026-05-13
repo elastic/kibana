@@ -11,7 +11,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import userEvent from '@testing-library/user-event';
 import { TestProvider } from '../../test/test_provider';
 import { ControlGeneralViewSelector } from '.';
-import { Selector } from '../../../common';
+import type { Selector } from '../../../common';
 import { getSelectorConditions } from '../../common/utils';
 import * as i18n from '../control_general_view/translations';
 
@@ -667,12 +667,11 @@ describe('<ControlGeneralViewSelector />', () => {
     const selector = getByTestId('cloud-defend-selector');
 
     // should start as closed.
-    // there are two mock selectors, and the last one will auto open
     expect(
       await within(selector).findAllByRole('button', {
         expanded: false,
       })
-    ).toHaveLength(2);
+    ).toHaveLength(1);
     expect(
       within(selector).queryByRole('button', {
         expanded: true,
@@ -696,7 +695,7 @@ describe('<ControlGeneralViewSelector />', () => {
       await within(selector).findAllByRole('button', {
         expanded: true,
       })
-    ).toHaveLength(2);
+    ).toHaveLength(1);
 
     expect(queryByTestId('cloud-defend-conditions-count')).not.toBeInTheDocument();
   });

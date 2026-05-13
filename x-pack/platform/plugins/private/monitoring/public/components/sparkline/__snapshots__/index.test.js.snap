@@ -3,23 +3,15 @@
 exports[`Sparkline component does not show tooltip initially 1`] = `
 <div>
   <div
-    css={
-      Object {
-        "height": "2em",
-      }
-    }
+    className="css-9ufo15-Sparkline"
   />
 </div>
 `;
 
-exports[`Sparkline component shows tooltip on hover 1`] = `
+exports[`Sparkline component with EuiProvider shows tooltip on hover 1`] = `
 <div>
   <div
-    css={
-      Object {
-        "height": "2em",
-      }
-    }
+    css="unknown styles"
   />
   <div
     className="monSparklineTooltip__container"
@@ -40,7 +32,7 @@ exports[`Sparkline component shows tooltip on hover 1`] = `
       }
     />
     <div
-      css={[Function]}
+      css="unknown styles"
       style={
         Object {
           "height": 56,
@@ -49,12 +41,12 @@ exports[`Sparkline component shows tooltip on hover 1`] = `
       }
     >
       <div
-        css={[Function]}
+        css="unknown styles"
       >
         1513814914
       </div>
       <div
-        css={[Function]}
+        css="unknown styles"
       >
         25
       </div>

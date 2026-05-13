@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { GenericIndexPatternColumn } from '@kbn/lens-common';
 import type { GenericOperationDefinition } from '../..';
-import type { GenericIndexPatternColumn } from '../../column_types';
 import { getFilter } from '../../helpers';
 
 interface PartialColumnParams {
@@ -42,7 +42,6 @@ export function createOperationDefinitionMock<T extends GenericIndexPatternColum
     dataType,
     operationType: operation,
     isBucketed,
-    scale,
     timeScale,
   };
   const sharedDefinitionParams = {

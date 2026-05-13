@@ -6,8 +6,9 @@
  */
 
 // import { get } from 'lodash';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
 import { isHexColor } from './utils';
 
 const configSchema = schema.object({
@@ -22,6 +23,14 @@ const configSchema = schema.object({
       }
     },
     defaultValue: '#8A6A0A',
+  }),
+  linkColor: schema.string({
+    validate: (color) => {
+      if (!isHexColor(color)) {
+        return `must be an hex color`;
+      }
+    },
+    defaultValue: '#0B64DD',
   }),
   backgroundColor: schema.string({
     validate: (color) => {

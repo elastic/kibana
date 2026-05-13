@@ -20,7 +20,7 @@ import { getIndexSummary } from '../../../../lib/elasticsearch/indices';
 import { getShardAllocation, getShardStats } from '../../../../lib/elasticsearch/shards';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { getLogs } from '../../../../lib/logs/get_logs';
-import { MonitoringCore } from '../../../../types';
+import type { MonitoringCore } from '../../../../types';
 import { metricSets } from './metric_set_index_detail';
 
 const { advanced: metricSetAdvanced, overview: metricSetOverview } = metricSets;
@@ -32,6 +32,12 @@ export function esIndexRoute(server: MonitoringCore) {
   server.route({
     method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/elasticsearch/indices/{id}',
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'This route delegates authorization to the scoped ES cluster client',
+      },
+    },
     validate: {
       params: validateParams,
       body: validateBody,

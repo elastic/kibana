@@ -10,6 +10,7 @@ import { every, map, mapKeys, pick, reduce } from 'lodash';
 import type { Observable } from 'rxjs';
 import { lastValueFrom, zip } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import type {
   GetLiveQueryDetailsRequestParamsSchema,
   GetLiveQueryDetailsRequestQuerySchema,
@@ -28,15 +29,20 @@ import {
   getLiveQueryDetailsRequestParamsSchema,
   getLiveQueryDetailsRequestQuerySchema,
 } from '../../../common/api';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { getLiveQueryDetailsResponseSchema } from './response_schemas';
 
-export const getLiveQueryDetailsRoute = (router: IRouter<DataRequestHandlerContext>) => {
+export const getLiveQueryDetailsRoute = (
+  router: IRouter<DataRequestHandlerContext>,
+  osqueryContext: OsqueryAppContext
+) => {
   router.versioned
     .get({
       access: 'public',
       path: '/api/osquery/live_queries/{id}',
       security: {
         authz: {
-          requiredPrivileges: [`${PLUGIN_ID}-read`],
+          requiredPrivileges: [`${PLUGIN_ID}-readLiveQueries`],
         },
       },
     })
@@ -54,25 +60,35 @@ export const getLiveQueryDetailsRoute = (router: IRouter<DataRequestHandlerConte
               GetLiveQueryDetailsRequestQuerySchema
             >(getLiveQueryDetailsRequestQuerySchema),
           },
+          response: {
+            200: {
+              body: () => getLiveQueryDetailsResponseSchema,
+            },
+          },
         },
       },
       async (context, request, response) => {
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
         try {
+          const spaceId = osqueryContext?.service?.getActiveSpace
+            ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
+            : DEFAULT_SPACE_ID;
+
           const search = await context.search;
           const { actionDetails } = await lastValueFrom(
             search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
               {
                 actionId: request.params.id,
                 factoryQueryType: OsqueryQueries.actionDetails,
+                spaceId,
               },
               { abortSignal, strategy: 'osquerySearchStrategy' }
             )
           );
 
           const queries = actionDetails?._source?.queries;
-          const expirationDate = actionDetails?.fields?.expiration[0];
+          const expirationDate = actionDetails?.fields?.expiration?.[0];
 
           const expired = !expirationDate ? true : new Date(expirationDate) < new Date();
 
@@ -98,9 +114,11 @@ export const getLiveQueryDetailsRoute = (router: IRouter<DataRequestHandlerConte
                   'agent_selection',
                   'agents',
                   'user_id',
+                  'user_profile_uid',
                   'pack_id',
                   'pack_name',
-                  'prebuilt_pack'
+                  'prebuilt_pack',
+                  'tags'
                 ),
                 queries: reduce<
                   {

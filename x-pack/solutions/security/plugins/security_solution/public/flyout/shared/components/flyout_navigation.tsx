@@ -8,27 +8,23 @@
 import type { FC, SyntheticEvent } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
 import {
-  EuiFlyoutHeader,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyoutHeader,
   useEuiTheme,
-  EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import {
-  useExpandableFlyoutApi,
-  useExpandableFlyoutState,
-  useExpandableFlyoutHistory,
-} from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi, useExpandableFlyoutHistory } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { FlyoutHistory } from './flyout_history';
 import { getProcessedHistory } from '../utils/history_utils';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useStableExpandableFlyoutState } from '../hooks/use_stable_expandable_flyout_state';
 import {
-  HEADER_ACTIONS_TEST_ID,
   COLLAPSE_DETAILS_BUTTON_TEST_ID,
   EXPAND_DETAILS_BUTTON_TEST_ID,
+  HEADER_ACTIONS_TEST_ID,
 } from './test_ids';
 
 export interface FlyoutNavigationProps {
@@ -49,9 +45,9 @@ export interface FlyoutNavigationProps {
    */
   isPreviewMode?: boolean;
   /**
-   * Boolean indicating the panel is shown in rule preview
+   * Boolean indicating whether to show the history button
    */
-  isPreview?: boolean;
+  isRulePreview?: boolean;
 }
 
 /**
@@ -59,18 +55,13 @@ export interface FlyoutNavigationProps {
  * pass in a list of actions to be displayed on top.
  */
 export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
-  ({ flyoutIsExpandable = false, expandDetails, actions, isPreviewMode, isPreview }) => {
+  ({ flyoutIsExpandable = false, expandDetails, actions, isPreviewMode, isRulePreview }) => {
     const { euiTheme } = useEuiTheme();
 
     const history = useExpandableFlyoutHistory();
-    const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
-      'newExpandableFlyoutNavigationDisabled'
-    );
     const historyArray = useMemo(() => getProcessedHistory({ history, maxCount: 10 }), [history]);
-    // Don't show history in rule preview
-    const hasHistory = !isPreview && isNewNavigationEnabled;
 
-    const panels = useExpandableFlyoutState();
+    const panels = useStableExpandableFlyoutState();
     const isExpanded: boolean = !!panels.left;
 
     const { closeLeftPanel } = useExpandableFlyoutApi();
@@ -81,7 +72,7 @@ export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
         <EuiButtonEmpty
           iconSide="left"
           onClick={collapseDetails}
-          iconType="arrowEnd"
+          iconType="chevronLimitRight"
           size="s"
           data-test-subj={COLLAPSE_DETAILS_BUTTON_TEST_ID}
           aria-label={i18n.translate(
@@ -105,7 +96,7 @@ export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
         <EuiButtonEmpty
           iconSide="left"
           onClick={expandDetails}
-          iconType="arrowStart"
+          iconType="chevronLimitLeft"
           size="s"
           data-test-subj={EXPAND_DETAILS_BUTTON_TEST_ID}
           aria-label={i18n.translate(
@@ -129,7 +120,7 @@ export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
       return null;
     }
 
-    return flyoutIsExpandable || actions || hasHistory ? (
+    return flyoutIsExpandable || actions || !isRulePreview ? (
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup
           direction="row"
@@ -162,7 +153,7 @@ export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
                   {isExpanded ? collapseButton : expandButton}
                 </EuiFlexItem>
               )}
-              {hasHistory && (
+              {!isRulePreview && (
                 <EuiFlexItem>
                   <FlyoutHistory history={historyArray} />
                 </EuiFlexItem>

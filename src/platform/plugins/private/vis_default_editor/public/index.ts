@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { DefaultEditorController } from './default_editor_controller';
 import { VisDefaultEditorPlugin } from './plugin';
 
@@ -39,3 +39,5 @@ export { DefaultEditorSize } from './editor_size';
 export const plugin = (context: PluginInitializerContext) => {
   return new VisDefaultEditorPlugin();
 };
+
+export { visEditorSidebarStyles } from './_sidebar.styles';

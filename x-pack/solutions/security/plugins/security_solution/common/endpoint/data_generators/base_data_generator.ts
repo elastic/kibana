@@ -8,8 +8,9 @@
 import seedrandom from 'seedrandom';
 import { v4 as uuidv4 } from 'uuid';
 import type { estypes } from '@elastic/elasticsearch';
+import { SUPPORTED_HOST_OS_TYPE } from '../constants';
 
-const OS_FAMILY = ['windows', 'macos', 'linux'];
+const OS_FAMILY = SUPPORTED_HOST_OS_TYPE;
 /** Array of 14 day offsets */
 const DAY_OFFSETS = Array.from({ length: 14 }, (_, i) => 8.64e7 * (i + 1));
 
@@ -155,7 +156,7 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
   }
 
   /** generate random OS family value */
-  public randomOSFamily(): string {
+  public randomOSFamily(): (typeof OS_FAMILY)[number] {
     return this.randomChoice(OS_FAMILY);
   }
 
@@ -166,7 +167,7 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
 
   /** generate a seeded random UUID v4 */
   protected seededUUIDv4(): string {
-    return uuidv4({ random: [...this.randomNGenerator(255, 16)] });
+    return uuidv4({ random: new Uint8Array([...this.randomNGenerator(255, 16)]) });
   }
 
   /** Generate a random number up to the max provided */

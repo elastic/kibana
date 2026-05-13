@@ -7,31 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './field_list_sidebar.scss';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import classnames from 'classnames';
+import type { EuiButtonProps, EuiPageSidebarProps } from '@elastic/eui';
 import {
   EuiButton,
-  EuiButtonProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHideFor,
   EuiPageSidebar,
-  EuiPageSidebarProps,
-  useEuiTheme,
+  euiBreakpoint,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { DataViewField, type FieldSpec } from '@kbn/data-views-plugin/common';
 import { getDataViewFieldSubtypeMulti } from '@kbn/es-query/src/utils';
 import { FIELDS_LIMIT_SETTING } from '@kbn/discover-utils';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { FieldList } from '../../components/field_list';
 import { FieldListFilters } from '../../components/field_list_filters';
 import { FieldListGrouped, type FieldListGroupedProps } from '../../components/field_list_grouped';
 import { FieldsGroupNames } from '../../types';
 import type { ButtonAddFieldVariant, AdditionalFieldGroups } from '../../types';
-import { GroupedFieldsParams, useGroupedFields } from '../../hooks/use_grouped_fields';
+import type { GroupedFieldsParams } from '../../hooks/use_grouped_fields';
+import { useGroupedFields } from '../../hooks/use_grouped_fields';
 import { UnifiedFieldListItem, type UnifiedFieldListItemProps } from '../unified_field_list_item';
 import { SidebarToggleButton, type SidebarToggleButtonProps } from './sidebar_toggle_button';
 import {
@@ -52,6 +52,7 @@ export type UnifiedFieldListSidebarCustomizableProps = Pick<
   | 'onAddFieldToWorkspace'
   | 'onRemoveFieldFromWorkspace'
   | 'additionalFilters'
+  | 'streamNames'
 > & {
   /**
    * All fields: fields from data view and unmapped fields or columns from text-based search
@@ -77,11 +78,10 @@ export type UnifiedFieldListSidebarCustomizableProps = Pick<
    * Custom logic for determining which field is selected
    */
   onSelectedFieldFilter?: GroupedFieldsParams<DataViewField>['onSelectedFieldFilter'];
-
   /**
    * Prop to pass additional field groups to the field list
    */
-  additionalFieldGroups?: AdditionalFieldGroups<DataViewField>;
+  additionalFieldGroups?: AdditionalFieldGroups;
 };
 
 interface UnifiedFieldListSidebarInternalProps {
@@ -170,9 +170,12 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   onEditField,
   onDeleteField,
   onToggleSidebar,
-  additionalFieldGroups,
   additionalFilters,
+  additionalFieldGroups,
+  streamNames,
 }) => {
+  const styles = useMemoCss(componentStyles);
+
   const { dataViews, core } = services;
 
   const [selectedFieldsState, setSelectedFieldsState] = useState<SelectedFieldsResult>(
@@ -181,6 +184,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   const [multiFieldsMap, setMultiFieldsMap] = useState<
     Map<string, Array<{ field: DataViewField; isSelected: boolean }>> | undefined
   >(undefined);
+  const [isFieldNameSearchFocused, setIsFieldNameSearchFocused] = useState(false);
 
   useEffect(() => {
     const result = getSelectedFields({
@@ -285,6 +289,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
           stateService={stateService}
           trackUiMetric={trackUiMetric}
           workspaceSelectedFieldNames={workspaceSelectedFieldNames}
+          streamNames={streamNames}
         />
       </li>
     ),
@@ -306,20 +311,16 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       workspaceSelectedFieldNames,
       selectedFieldsState.selectedFieldsMap,
       additionalFilters,
+      streamNames,
     ]
   );
-
-  const { euiTheme } = useEuiTheme();
 
   if (!dataView) {
     return null;
   }
 
   const pageSidebarProps: Partial<EuiPageSidebarProps> = {
-    className: classnames('unifiedFieldListSidebar', {
-      'unifiedFieldListSidebar--collapsed': isSidebarCollapsed,
-      ['unifiedFieldListSidebar--fullWidth']: fullWidth,
-    }),
+    className: 'unifiedFieldListSidebar',
     'aria-label': i18n.translate('unifiedFieldList.fieldListSidebar.fieldsSidebarAriaLabel', {
       defaultMessage: 'Fields',
     }),
@@ -329,6 +330,11 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
     'data-test-subj':
       stateService.creationOptions.dataTestSubj?.fieldListSidebarDataTestSubj ??
       'unifiedFieldListSidebarId',
+    css: [
+      styles.sidebar,
+      isSidebarCollapsed && styles.sidebarCollapsed,
+      fullWidth ? styles.sidebarListFullWidth : styles.sidebarFixedWidth,
+    ],
   };
 
   const sidebarToggleButton =
@@ -341,12 +347,15 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       />
     ) : null;
 
-  if (isSidebarCollapsed && sidebarToggleButton) {
-    return (
-      <EuiHideFor sizes={['xs', 's']}>
-        <div {...pageSidebarProps}>{sidebarToggleButton}</div>
-      </EuiHideFor>
-    );
+  if (isSidebarCollapsed) {
+    if (sidebarToggleButton) {
+      return (
+        <EuiHideFor sizes={['xs', 's']}>
+          <div {...pageSidebarProps}>{sidebarToggleButton}</div>
+        </EuiHideFor>
+      );
+    }
+    return null;
   }
 
   const hasButtonAddFieldToolbarStyle = buttonAddFieldVariant === 'toolbar';
@@ -369,18 +378,14 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
     <EuiPageSidebar {...pageSidebarProps}>
       <EuiFlexGroup
         className="unifiedFieldListSidebar__group"
+        css={styles.sidebarGroup}
         direction="column"
         alignItems="stretch"
         gutterSize="none"
         responsive={false}
       >
         {Boolean(prepend) && (
-          <EuiFlexItem
-            grow={false}
-            css={css`
-              margin-bottom: ${euiTheme.size.s};
-            `}
-          >
+          <EuiFlexItem grow={false} css={styles.sidebarPrependedItem}>
             {prepend}
           </EuiFlexItem>
         )}
@@ -393,17 +398,23 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
                   <EuiFlexItem grow={false}>{sidebarToggleButton}</EuiFlexItem>
                 )}
                 <EuiFlexItem>
-                  <FieldListFilters {...fieldListFiltersProps} compressed={compressed} />
+                  <FieldListFilters
+                    {...fieldListFiltersProps}
+                    compressed={compressed}
+                    onFieldNameSearchBlur={() => setIsFieldNameSearchFocused(false)}
+                    onFieldNameSearchFocus={() => setIsFieldNameSearchFocused(true)}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
-            className="unifiedFieldListSidebar__list"
+            css={styles.sidebarList}
           >
             {showFieldList ? (
               <FieldListGrouped
                 {...fieldListGroupedProps}
                 renderFieldItem={renderFieldItem}
                 localStorageKeyPrefix={stateService.creationOptions.localStorageKeyPrefix}
+                muteScreenReader={!isFieldNameSearchFocused}
               />
             ) : (
               <EuiFlexItem grow />
@@ -413,14 +424,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
         {!!onEditField && (
           <EuiFlexItem
             grow={false}
-            css={
-              hasButtonAddFieldToolbarStyle
-                ? css`
-                    padding: ${euiTheme.size.s};
-                    border-top: ${euiTheme.border.thin};
-                  `
-                : undefined
-            }
+            css={hasButtonAddFieldToolbarStyle ? styles.sidebarEditField : undefined}
           >
             {hasButtonAddFieldToolbarStyle ? (
               <ToolbarButton
@@ -474,3 +478,84 @@ function calculateMultiFields(
 function getNewFieldsBySpec(fieldSpecArr: FieldSpec[]): DataViewField[] {
   return fieldSpecArr.map((fieldSpec) => new DataViewField(fieldSpec));
 }
+
+const componentStyles = {
+  sidebar: (themeContext: UseEuiTheme) => {
+    const { euiTheme } = themeContext;
+
+    return css({
+      overflow: 'hidden',
+      margin: '0 !important',
+      flexGrow: 1,
+      padding: 0,
+      height: '100%',
+
+      '.unifiedFieldListItemButton.kbnFieldButton': {
+        marginBottom: `calc(${euiTheme.size.xs} / 2)`,
+        background: 'none',
+        boxShadow: 'none',
+      },
+
+      '.unifiedFieldListItemButton__dragging': {
+        background: euiTheme.colors.emptyShade,
+      },
+
+      [euiBreakpoint(themeContext, ['xs', 's'])]: {
+        width: '100%',
+        padding: euiTheme.size.base,
+        backgroundColor: euiTheme.colors.backgroundBasePlain,
+      },
+    });
+  },
+  sidebarCollapsed: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: 'auto',
+      padding: `${euiTheme.size.s} ${euiTheme.size.s} 0`,
+    }),
+  sidebarFixedWidth: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: euiTheme.base * 19,
+    }),
+  sidebarListFullWidth: css({
+    minWidth: `0 !important`,
+  }),
+  sidebarList: (themeContext: UseEuiTheme) => {
+    const { euiTheme } = themeContext;
+
+    return css({
+      padding: `${euiTheme.size.s} ${euiTheme.size.xs} 0 ${euiTheme.size.xs}`,
+
+      '> *, .euiAccordion__triggerWrapper, .euiAccordion__children, .unifiedFieldListItemButton': {
+        paddingLeft: euiTheme.size.xs,
+        paddingRight: euiTheme.size.xs,
+      },
+
+      '.unifiedFieldListSidebar__accordionContainer': {
+        paddingLeft: 0,
+        paddingRight: 0,
+      },
+
+      [euiBreakpoint(themeContext, ['xs', 's'])]: {
+        padding: `${euiTheme.size.s} 0 0 0`,
+
+        '> *, .euiAccordion__triggerWrapper, .unifiedFieldListSidebar__accordionContainer, .unifiedFieldListItemButton':
+          {
+            paddingLeft: 0,
+            paddingRight: 0,
+          },
+      },
+    });
+  },
+  sidebarGroup: css({
+    height: '100%',
+  }),
+  sidebarPrependedItem: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      marginBottom: euiTheme.size.s,
+    }),
+  sidebarEditField: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.s,
+      borderTop: euiTheme.border.thin,
+    }),
+};

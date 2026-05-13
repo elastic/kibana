@@ -7,7 +7,7 @@
 
 import { stringify } from 'query-string';
 import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../common/constants/synthetics/client_defaults';
-import { SyntheticsUrlParams } from './get_supported_url_params';
+import type { SyntheticsUrlParams } from './get_supported_url_params';
 import { CLIENT_DEFAULTS } from '../../../../../common/constants';
 
 const { FOCUS_CONNECTOR_FIELD } = CLIENT_DEFAULTS;

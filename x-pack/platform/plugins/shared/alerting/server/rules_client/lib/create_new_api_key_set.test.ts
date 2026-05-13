@@ -10,18 +10,19 @@ import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
+  coreFeatureFlagsMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../authorization/alerting_authorization';
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { RawRule } from '../../types';
+import type { AlertingAuthorization } from '../../authorization/alerting_authorization';
+import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import type { RawRule } from '../../types';
 import { getBeforeSetup, mockedDateString } from '../tests/lib';
 import { createNewAPIKeySet } from './create_new_api_key_set';
-import { RulesClientContext } from '../types';
+import type { RulesClientContext } from '../types';
 import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
 
@@ -55,12 +56,16 @@ const rulesClientParams: jest.Mocked<RulesClientContext> = {
   fieldsToExcludeFromPublicApi: [],
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  cloneAPIKey: jest.fn(),
+  cloneApiKeysOnCreate: false,
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   isSystemAction: jest.fn(),
+  featureFlags: coreFeatureFlagsMock.createStart(),
+  isServerless: false,
 };
 
 const username = 'test';
@@ -111,7 +116,7 @@ describe('createNewAPIKeySet', () => {
     });
     expect(apiKey).toEqual({
       apiKey: 'MTIzOmFiYw==',
-      apiKeyCreatedByUser: undefined,
+      apiKeyCreatedByUser: false,
       apiKeyOwner: 'test',
     });
     expect(rulesClientParams.createAPIKey).toHaveBeenCalledTimes(1);

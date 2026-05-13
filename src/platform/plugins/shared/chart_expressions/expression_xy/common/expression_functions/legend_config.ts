@@ -9,9 +9,9 @@
 
 import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { LegendLayout, LegendSize } from '@kbn/visualizations-plugin/common/constants';
+import { LegendLayout, LegendSize } from '@kbn/chart-expressions-common';
 import { LEGEND_CONFIG } from '../constants';
-import { LegendConfigFn } from '../types';
+import type { LegendConfigFn } from '../types';
 
 export const legendConfigFunction: LegendConfigFn = {
   name: LEGEND_CONFIG,
@@ -124,12 +124,12 @@ export const legendConfigFunction: LegendConfigFn = {
       help: i18n.translate('expressionXY.legendConfig.legendLayout.help', {
         defaultMessage: 'Specifies the legend layout.',
       }),
-      options: [LegendLayout.Table, LegendLayout.List],
+      options: [LegendLayout.List],
       strict: true,
     },
   },
   async fn(input, args, handlers) {
-    const { legendConfigFn } = await import('./legend_config_fn');
+    const { legendConfigFn } = await import('./expression_module');
     return await legendConfigFn(input, args, handlers);
   },
 };

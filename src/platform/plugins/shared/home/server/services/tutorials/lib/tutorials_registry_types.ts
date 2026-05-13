@@ -16,7 +16,7 @@ export type {
   ArtifactsSchema,
   DashboardSchema,
   InstructionsSchema,
-  ParamsSchema,
+  StatusCheckSchema,
   InstructionSetSchema,
   InstructionVariant,
   Instruction,
@@ -27,6 +27,7 @@ export type Platform = 'WINDOWS' | 'OSX' | 'DEB' | 'RPM';
 export interface TutorialContext {
   kibanaBranch: string;
   staticAssets: IStaticAssets;
+  isServerless?: boolean;
   [key: string]: unknown;
 }
 export type TutorialProvider = (context: TutorialContext) => TutorialSchema;

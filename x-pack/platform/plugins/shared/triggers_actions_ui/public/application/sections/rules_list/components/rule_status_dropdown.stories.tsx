@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { ComponentProps } from 'react';
-import { Story } from '@storybook/react';
+import type { ComponentProps } from 'react';
+import React from 'react';
+import type { StoryFn } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { RuleStatusDropdown } from './rule_status_dropdown';
 import { mockRule } from '../../rule_details/components/test_helpers';
@@ -59,14 +60,18 @@ export default {
   },
 };
 
-const Template: Story<Args> = (args) => {
+const Template: StoryFn<Args> = (args) => {
   return <RuleStatusDropdown {...args} />;
 };
 
-export const EnabledRule = Template.bind({});
+export const EnabledRule = {
+  render: Template,
+};
 
-export const DisabledRule = Template.bind({});
+export const DisabledRule = {
+  render: Template,
 
-DisabledRule.args = {
-  rule: mockRule({ enabled: false }),
+  args: {
+    rule: mockRule({ enabled: false }),
+  },
 };

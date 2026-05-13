@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { Redirect } from 'react-router-dom';
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -15,28 +15,30 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { NotesContainer } from './notes';
 import { ManagementEmptyStateWrapper } from '../components/management_empty_state_wrapper';
 import {
+  MANAGEMENT_ROUTING_BLOCKLIST_PATH,
+  MANAGEMENT_ROUTING_ENDPOINT_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH,
-  MANAGEMENT_ROUTING_POLICIES_PATH,
-  MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
-  MANAGEMENT_ROUTING_BLOCKLIST_PATH,
-  MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH,
   MANAGEMENT_ROUTING_NOTES_PATH,
+  MANAGEMENT_ROUTING_POLICIES_PATH,
+  MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH,
+  MANAGEMENT_ROUTING_SCRIPT_LIBRARY_PATH,
+  MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
+  MANAGEMENT_ROUTING_TRUSTED_DEVICES_PATH,
 } from '../common/constants';
 import { NotFoundPage } from '../../app/404';
 import { EndpointsContainer } from './endpoint_hosts';
 import { PolicyContainer } from './policy';
-import { TrustedAppsContainer } from './trusted_apps';
 import { MANAGEMENT_PATH, SecurityPageName } from '../../../common/constants';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { EventFiltersContainer } from './event_filters';
 import { getEndpointListPath } from '../common/routing';
 import { useUserPrivileges } from '../../common/components/user_privileges';
-import { HostIsolationExceptionsContainer } from './host_isolation_exceptions';
-import { BlocklistContainer } from './blocklist';
 import { ResponseActionsContainer } from './response_actions';
 import { PrivilegedRoute } from '../components/privileged_route';
+import { SecurityRoutePageWrapper } from '../../common/components/security_route_page_wrapper';
+import { ArtifactsPage } from './artifacts';
+import { ScriptLibraryContainer } from './script_library';
 
 const EndpointTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.endpoints}>
@@ -52,27 +54,6 @@ const PolicyTelemetry = () => (
   </TrackApplicationView>
 );
 
-const TrustedAppTelemetry = () => (
-  <TrackApplicationView viewId={SecurityPageName.trustedApps}>
-    <TrustedAppsContainer />
-    <SpyRoute pageName={SecurityPageName.trustedApps} />
-  </TrackApplicationView>
-);
-
-const EventFilterTelemetry = () => (
-  <TrackApplicationView viewId={SecurityPageName.eventFilters}>
-    <EventFiltersContainer />
-    <SpyRoute pageName={SecurityPageName.eventFilters} />
-  </TrackApplicationView>
-);
-
-const HostIsolationExceptionsTelemetry = () => (
-  <TrackApplicationView viewId={SecurityPageName.hostIsolationExceptions}>
-    <HostIsolationExceptionsContainer />
-    <SpyRoute pageName={SecurityPageName.hostIsolationExceptions} />
-  </TrackApplicationView>
-);
-
 const ResponseActionsTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.responseActionsHistory}>
     <ResponseActionsContainer />
@@ -80,16 +61,26 @@ const ResponseActionsTelemetry = () => (
   </TrackApplicationView>
 );
 
-const NotesTelemetry = () => (
-  <TrackApplicationView viewId={SecurityPageName.notes}>
-    <NotesContainer />
-    <SpyRoute pageName={SecurityPageName.notes} />
+const ScriptLibraryTelemetry = () => (
+  <TrackApplicationView viewId={SecurityPageName.scriptLibrary}>
+    <ScriptLibraryContainer />
+    <SpyRoute pageName={SecurityPageName.scriptLibrary} />
   </TrackApplicationView>
 );
 
+const Notes = () => (
+  <SecurityRoutePageWrapper pageName={SecurityPageName.notes}>
+    <NotesContainer />
+  </SecurityRoutePageWrapper>
+);
+
 export const ManagementContainer = memo(() => {
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
+  const trustedDevicesEnabled = useIsExperimentalFeatureEnabled('trustedDevices');
+  const endpointExceptionsMovedUnderManagement = useIsExperimentalFeatureEnabled(
+    'endpointExceptionsMovedUnderManagement'
+  );
+  const showScriptsLibrary = useIsExperimentalFeatureEnabled(
+    'responseActionsScriptLibraryManagement'
   );
 
   const {
@@ -97,10 +88,13 @@ export const ManagementContainer = memo(() => {
     canReadPolicyManagement,
     canReadBlocklist,
     canReadTrustedApplications,
+    canReadTrustedDevices,
     canReadEventFilters,
     canReadActionsLogManagement,
     canReadEndpointList,
     canReadHostIsolationExceptions,
+    canReadEndpointExceptions,
+    canReadScriptsLibrary,
   } = useUserPrivileges().endpointPrivileges;
 
   // Lets wait until we can verify permissions
@@ -136,25 +130,45 @@ export const ManagementContainer = memo(() => {
         component={PolicyTelemetry}
         hasPrivilege={canReadPolicyManagement}
       />
+      {endpointExceptionsMovedUnderManagement && (
+        <PrivilegedRoute
+          path={MANAGEMENT_ROUTING_ENDPOINT_EXCEPTIONS_PATH}
+          component={ArtifactsPage}
+          hasPrivilege={canReadEndpointExceptions}
+          exact
+        />
+      )}
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH}
-        component={TrustedAppTelemetry}
+        component={ArtifactsPage}
         hasPrivilege={canReadTrustedApplications}
+        exact
       />
+      {trustedDevicesEnabled && (
+        <PrivilegedRoute
+          path={MANAGEMENT_ROUTING_TRUSTED_DEVICES_PATH}
+          component={ArtifactsPage}
+          hasPrivilege={canReadTrustedDevices}
+          exact
+        />
+      )}
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH}
-        component={EventFilterTelemetry}
+        component={ArtifactsPage}
         hasPrivilege={canReadEventFilters}
+        exact
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH}
-        component={HostIsolationExceptionsTelemetry}
+        component={ArtifactsPage}
         hasPrivilege={canReadHostIsolationExceptions}
+        exact
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_BLOCKLIST_PATH}
-        component={BlocklistContainer}
+        component={ArtifactsPage}
         hasPrivilege={canReadBlocklist}
+        exact
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH}
@@ -162,9 +176,15 @@ export const ManagementContainer = memo(() => {
         hasPrivilege={canReadActionsLogManagement}
       />
 
-      {!securitySolutionNotesDisabled && (
-        <Route path={MANAGEMENT_ROUTING_NOTES_PATH} component={NotesTelemetry} />
+      {showScriptsLibrary && (
+        <PrivilegedRoute
+          path={MANAGEMENT_ROUTING_SCRIPT_LIBRARY_PATH}
+          component={ScriptLibraryTelemetry}
+          hasPrivilege={canReadScriptsLibrary}
+        />
       )}
+
+      <Route path={MANAGEMENT_ROUTING_NOTES_PATH} component={Notes} />
 
       {canReadEndpointList && (
         <Route path={MANAGEMENT_PATH} exact>

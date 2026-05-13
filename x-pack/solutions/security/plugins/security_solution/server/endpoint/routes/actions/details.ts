@@ -37,7 +37,6 @@ export const registerActionDetailsRoutes = (
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -47,7 +46,7 @@ export const registerActionDetailsRoutes = (
         },
       },
       withEndpointAuthz(
-        { all: ['canReadSecuritySolution'] },
+        { all: ['canAccessEndpointActionsLogManagement'] },
         endpointContext.logFactory.get('hostIsolationDetails'),
         getActionDetailsRequestHandler(endpointContext)
       )
@@ -64,13 +63,12 @@ export const getActionDetailsRequestHandler = (
 > => {
   return async (context, req, res) => {
     try {
+      const activeSpaceId = (await context.securitySolution).getSpaceId();
       return res.ok({
         body: {
           data: await getActionDetailsById(
-            (
-              await context.core
-            ).elasticsearch.client.asInternalUser,
-            endpointContext.service.getEndpointMetadataService(),
+            endpointContext.service,
+            activeSpaceId,
             req.params.action_id
           ),
         },

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBreakpointSize, EuiHeaderLinks, useIsWithinBreakpoints } from '@elastic/eui';
+import type { EuiBreakpointSize } from '@elastic/eui';
+import { EuiHeaderLinks, useIsWithinBreakpoints, type EuiHeaderLinksProps } from '@elastic/eui';
 import React from 'react';
 import type { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
@@ -18,12 +19,17 @@ interface TopNavMenuItemsProps {
   config: TopNavMenuData[] | undefined;
   className?: string;
   popoverBreakpoints?: EuiBreakpointSize[];
+  gutterSize?: EuiHeaderLinksProps['gutterSize'];
 }
 
+/**
+ * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+ */
 export const TopNavMenuItems = ({
   config,
   className,
   popoverBreakpoints = POPOVER_BREAKPOINTS,
+  gutterSize = 'xs',
 }: TopNavMenuItemsProps) => {
   const isMobileMenu = useIsWithinBreakpoints(popoverBreakpoints);
 
@@ -31,7 +37,7 @@ export const TopNavMenuItems = ({
   return (
     <EuiHeaderLinks
       data-test-subj="top-nav"
-      gutterSize="xs"
+      gutterSize={gutterSize}
       className={className}
       popoverBreakpoints={popoverBreakpoints}
     >

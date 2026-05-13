@@ -8,17 +8,20 @@
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { Filter, Query } from '@kbn/es-query';
+import { PageScope } from '../../../data_view_manager/constants';
+import { useSelectDataView } from '../../../data_view_manager/hooks/use_select_data_view';
 import { useCreateTimeline } from '../../../timelines/hooks/use_create_timeline';
-import { updateProviders, setFilters, applyKqlFilterQuery } from '../../../timelines/store/actions';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { applyKqlFilterQuery, setFilters, updateProviders } from '../../../timelines/store/actions';
 import type { DataProvider } from '../../../../common/types';
+import type { State } from '../../store/types';
 import { sourcererSelectors } from '../../store';
-import { sourcererActions } from '../../store/actions';
 import { inputsActions } from '../../store/inputs';
 import { InputsModelId } from '../../store/inputs/constants';
 import type { TimeRange } from '../../store/inputs/model';
 import { TimelineId } from '../../../../common/types/timeline';
 import { TimelineTypeEnum } from '../../../../common/api/timeline';
+import { sourcererActions } from '../../store/actions';
+import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 
 interface InvestigateInTimelineArgs {
   /**
@@ -45,6 +48,10 @@ interface InvestigateInTimelineArgs {
    * Whether to keep the current data view or reset it to the default.
    */
   keepDataView?: boolean;
+  /**
+   * Optional data view id to use for the timeline.
+   */
+  dataViewId?: string;
 }
 
 /**
@@ -57,6 +64,10 @@ export const useInvestigateInTimeline = () => {
 
   const signalIndexName = useSelector(sourcererSelectors.signalIndexName);
   const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
+  const timelineSelectedPatterns = useSelector((state: State) =>
+    sourcererSelectors.sourcererScopeSelectedPatterns(state, PageScope.timeline)
+  );
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const clearTimelineTemplate = useCreateTimeline({
     timelineId: TimelineId.active,
@@ -68,6 +79,8 @@ export const useInvestigateInTimeline = () => {
     timelineType: TimelineTypeEnum.default,
   });
 
+  const setSelectedDataView = useSelectDataView();
+
   const investigateInTimeline = useCallback(
     async ({
       query,
@@ -75,6 +88,7 @@ export const useInvestigateInTimeline = () => {
       filters,
       timeRange,
       keepDataView,
+      dataViewId,
     }: InvestigateInTimelineArgs) => {
       const hasTemplateProviders =
         dataProviders && dataProviders.find((provider) => provider.type === 'template');
@@ -123,20 +137,56 @@ export const useInvestigateInTimeline = () => {
         }
         // Only show detection alerts
         // (This is required so the timeline event count matches the prevalence count)
-        if (!keepDataView) {
-          dispatch(
-            sourcererActions.setSelectedDataView({
-              id: SourcererScopeName.timeline,
-              selectedDataViewId: defaultDataView.id,
-              selectedPatterns: [signalIndexName || ''],
-            })
-          );
+        if (dataViewId) {
+          const fallbackPatterns = timelineSelectedPatterns.length
+            ? timelineSelectedPatterns
+            : [signalIndexName || ''];
+          if (newDataViewPickerEnabled) {
+            setSelectedDataView({
+              scope: PageScope.timeline,
+              id: dataViewId,
+              fallbackPatterns,
+            });
+          } else {
+            dispatch(
+              sourcererActions.setSelectedDataView({
+                id: PageScope.timeline,
+                selectedDataViewId: dataViewId,
+                selectedPatterns: fallbackPatterns,
+              })
+            );
+          }
+        } else if (!keepDataView) {
+          if (newDataViewPickerEnabled) {
+            setSelectedDataView({
+              scope: PageScope.timeline,
+              id: defaultDataView.id,
+              fallbackPatterns: [signalIndexName || ''],
+            });
+          } else {
+            dispatch(
+              sourcererActions.setSelectedDataView({
+                id: PageScope.timeline,
+                selectedDataViewId: defaultDataView.id,
+                selectedPatterns: [signalIndexName || ''],
+              })
+            );
+          }
         }
         // Unlock the time range from the global time range
         dispatch(inputsActions.removeLinkTo([InputsModelId.timeline, InputsModelId.global]));
       }
     },
-    [clearTimelineTemplate, clearTimelineDefault, dispatch, defaultDataView.id, signalIndexName]
+    [
+      clearTimelineTemplate,
+      clearTimelineDefault,
+      dispatch,
+      newDataViewPickerEnabled,
+      setSelectedDataView,
+      defaultDataView.id,
+      signalIndexName,
+      timelineSelectedPatterns,
+    ]
   );
 
   return { investigateInTimeline };

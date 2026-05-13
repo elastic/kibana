@@ -6,9 +6,9 @@
  */
 
 import { isObject, transform, snakeCase, isEmpty } from 'lodash';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/Either';
+import { identity, pipe as v2Pipe } from 'fp-ts/function';
+import { pipe } from 'fp-ts/pipeable';
 
 import type { ToastInputFields } from '@kbn/core/public';
 import { builderMap as customFieldsBuilder } from '../components/custom_fields/builder';
@@ -23,12 +23,16 @@ import {
 import type {
   CasePatchRequest,
   CaseResolveResponse,
+  CasesPatchResponse,
   CaseUserActionStatsResponse,
+  FindCasesContainingAllAlertsResponse,
   SingleCaseMetricsResponse,
 } from '../../common/types/api';
 import {
   CaseResolveResponseRt,
+  PatchCasesResponseRt,
   CaseUserActionStatsResponseRt,
+  FindCasesContainingAllAlertsResponseRt,
   SingleCaseMetricsResponseRt,
 } from '../../common/types/api';
 import type {
@@ -41,7 +45,7 @@ import type {
 } from '../../common/types/domain';
 import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
 import { throwErrors } from '../../common/api';
-import type { CaseUI, FilterOptions, UpdateByKey } from './types';
+import type { CaseUI, ExtendedFieldFilter, FilterOptions, UpdateByKey } from './types';
 import * as i18n from './translations';
 import type { CustomFieldFactoryFilterOption } from '../components/custom_fields/types';
 
@@ -73,6 +77,9 @@ export const decodeSingleCaseMetricsResponse = (respCase?: SingleCaseMetricsResp
 export const decodeCasesResponse = (respCase?: Cases) =>
   pipe(CasesRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
 
+export const decodeCasesWithUpdateSummaryResponse = (response?: CasesPatchResponse) =>
+  pipe(PatchCasesResponseRt.decode(response), fold(throwErrors(createToasterPlainError), identity));
+
 export const decodeCaseConfigurationsResponse = (respCase?: Configurations) => {
   return pipe(
     ConfigurationsRt.decode(respCase),
@@ -91,6 +98,14 @@ export const decodeCaseUserActionStatsResponse = (
 ) =>
   pipe(
     CaseUserActionStatsResponseRt.decode(caseUserActionsStats),
+    fold(throwErrors(createToasterPlainError), identity)
+  );
+
+export const decodeFindAllAttachedAlertsResponse = (
+  respCase?: FindCasesContainingAllAlertsResponse
+) =>
+  v2Pipe(
+    FindCasesContainingAllAlertsResponseRt.decode(respCase),
     fold(throwErrors(createToasterPlainError), identity)
   );
 
@@ -128,10 +143,25 @@ export const createUpdateSuccessToaster = (
     className: 'eui-textBreakWord',
   };
 
-  if (valueToUpdateIsSettings(key, value) && value?.syncAlerts && caseHasAlerts) {
+  if (
+    valueToUpdateIsSettings(key, value) &&
+    value?.syncAlerts &&
+    caseHasAlerts &&
+    caseBeforeUpdate.settings.syncAlerts !== value?.syncAlerts
+  ) {
     return {
       ...toast,
       title: i18n.SYNC_CASE(caseAfterUpdate.title),
+    };
+  }
+
+  if (
+    valueToUpdateIsSettings(key, value) &&
+    caseBeforeUpdate.settings.extractObservables !== value?.extractObservables
+  ) {
+    return {
+      ...toast,
+      title: i18n.EXTRACT_OBSERVABLES(caseAfterUpdate.title),
     };
   }
 
@@ -207,4 +237,73 @@ export const constructCustomFieldsFilter = (
         customFields: valuesByCustomFieldKey,
       }
     : {};
+};
+
+export interface ParsedExtendedFieldSearch {
+  extendedFieldFilters: ExtendedFieldFilter[];
+  freeText: string;
+}
+
+/**
+ * Parses a search string to extract field:value pairs for extended field filtering.
+ *
+ * Label syntax:
+ * - Single-word label:  `priority:high`
+ * - Multi-word label:   `"Effort Level":high`  (quoted label)
+ *
+ * Value syntax:
+ * - Unquoted value:     `priority:high`
+ * - Quoted value:       `notes:"value:with:colons"` (colons inside quotes are not separators)
+ *
+ * Multiple pairs: `priority:high region:emea` -> AND semantics
+ * Mixed with free text: `priority:high some text` -> filter + free text "some text"
+ */
+export const parseExtendedFieldSearch = (search: string): ParsedExtendedFieldSearch => {
+  const extendedFieldFilters: ExtendedFieldFilter[] = [];
+  // Matches:
+  //   "quoted label":value
+  //   "quoted label":"quoted value"
+  //   unquoted_label:value
+  //   unquoted_label:"quoted value"
+  const FIELD_VALUE_REGEX = /(?:"([^"]+)"|(\w+)):\s*(?:"([^"]*)"|([\S]+))/g;
+
+  const freeText = search
+    .replace(
+      FIELD_VALUE_REGEX,
+      (
+        _match,
+        quotedLabel?: string,
+        rawLabel?: string,
+        quotedValue?: string,
+        rawValue?: string
+      ) => {
+        const label = quotedLabel ?? rawLabel ?? '';
+        const value = quotedValue ?? rawValue ?? '';
+        extendedFieldFilters.push({ label, value });
+        return '';
+      }
+    )
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  return { extendedFieldFilters, freeText };
+};
+
+export const getIncrementalIdSearchOverrides = (search: string) => {
+  const incrementalIdRegEx = /^#(\d{1,50})\s*$/;
+  // overrides for incremental_id search
+  let overrides: Partial<FilterOptions> = {};
+  let trimmedSearch = search?.trim();
+  const isIncrementalIdSearch = incrementalIdRegEx.test(trimmedSearch ?? '');
+  if (trimmedSearch && isIncrementalIdSearch) {
+    // extract the number portion of the inc id search: #123 -> 123
+    trimmedSearch = incrementalIdRegEx.exec(trimmedSearch)?.[1] ?? trimmedSearch;
+    // search only in `incremental_id` since types with `title`
+    // and `description` don't overlap
+    overrides = {
+      searchFields: ['cases.incremental_id.text'],
+      search: trimmedSearch,
+    };
+  }
+  return overrides;
 };

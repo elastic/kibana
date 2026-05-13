@@ -18,6 +18,7 @@ import exitHook from 'exit-hook';
 
 import { readConfigFile, EsVersion } from '../lib';
 import { FunctionalTestRunner } from '../functional_test_runner';
+import { applyFipsOverrides, fipsIsEnabled } from '../../functional_tests/lib/fips';
 
 export function runFtrCli() {
   const runStartTime = Date.now();
@@ -61,7 +62,13 @@ export function runFtrCli() {
         updateSnapshots: flagsReader.boolean('updateSnapshots') || flagsReader.boolean('u'),
       };
 
-      const config = await readConfigFile(log, esVersion, configPaths[0], settingOverrides);
+      const config = await readConfigFile(
+        log,
+        esVersion,
+        configPaths[0],
+        settingOverrides,
+        fipsIsEnabled() ? applyFipsOverrides : undefined
+      );
 
       const functionalTestRunner = new FunctionalTestRunner(log, config, esVersion);
 
@@ -145,6 +152,7 @@ export function runFtrCli() {
           'throttle',
           'headless',
           'dry-run',
+          'pauseOnError',
         ],
         help: `
           --config=path      path to a config file (either this or --journey is required)
@@ -170,6 +178,7 @@ export function runFtrCli() {
           --throttle         enable network throttling in Chrome browser
           --headless         run browser in headless mode
           --dry-run          report tests without executing them
+          --pauseOnError     pause test runner on error
         `,
       },
     }

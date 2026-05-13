@@ -10,19 +10,21 @@
 import {
   renderTemplateMock,
   getPluginsBundlePathsMock,
-  getThemeTagMock,
   getJsDependencyPathsMock,
+  getRspackDependencyPathsMock,
 } from './bootstrap_renderer.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
-import { PackageInfo } from '@kbn/config';
-import { AuthStatus } from '@kbn/core-http-server';
+import type { PackageInfo } from '@kbn/config';
+import type { AuthStatus } from '@kbn/core-http-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
-import { bootstrapRendererFactory, BootstrapRenderer } from './bootstrap_renderer';
+import type { BootstrapRenderer } from './bootstrap_renderer';
+import { bootstrapRendererFactory } from './bootstrap_renderer';
 import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
-import { DEFAULT_THEME_NAME, ThemeName } from '@kbn/core-ui-settings-common';
+import type { ThemeName } from '@kbn/core-ui-settings-common';
+import { DEFAULT_THEME_NAME } from '@kbn/core-ui-settings-common';
 
 const createPackageInfo = (parts: Partial<PackageInfo> = {}): PackageInfo => ({
   branch: 'master',
@@ -59,19 +61,24 @@ describe('bootstrapRenderer', () => {
   let uiPlugins: UiPlugins;
   let packageInfo: PackageInfo;
   let userSettingsService: ReturnType<typeof userSettingsServiceMock.createSetupContract>;
-  const themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
+  let themeName$: BehaviorSubject<ThemeName>;
+  let kbnUseRspackBeforeEach: string | undefined;
 
   beforeEach(() => {
+    kbnUseRspackBeforeEach = process.env.KBN_USE_RSPACK;
+    delete process.env.KBN_USE_RSPACK;
+
+    themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
     auth = httpServiceMock.createAuth();
     uiSettingsClient = uiSettingsServiceMock.createClient();
     uiPlugins = createUiPlugins();
     packageInfo = createPackageInfo();
     userSettingsService = userSettingsServiceMock.createSetupContract();
 
-    getThemeTagMock.mockReturnValue('borealislight');
     getPluginsBundlePathsMock.mockReturnValue(new Map());
     renderTemplateMock.mockReturnValue('__rendered__');
     getJsDependencyPathsMock.mockReturnValue([]);
+    getRspackDependencyPathsMock.mockReturnValue([]);
     uiSettingsClient.get.mockImplementation(getClientGetMockImplementation());
 
     renderer = bootstrapRendererFactory({
@@ -84,10 +91,17 @@ describe('bootstrapRenderer', () => {
   });
 
   afterEach(() => {
-    getThemeTagMock.mockReset();
+    if (kbnUseRspackBeforeEach === undefined) {
+      delete process.env.KBN_USE_RSPACK;
+    } else {
+      process.env.KBN_USE_RSPACK = kbnUseRspackBeforeEach;
+    }
+
     getPluginsBundlePathsMock.mockReset();
     renderTemplateMock.mockReset();
     getJsDependencyPathsMock.mockReset();
+    getRspackDependencyPathsMock.mockReset();
+    themeName$.complete();
   });
 
   describe('when the auth status is `authenticated`', () => {
@@ -110,7 +124,7 @@ describe('bootstrapRenderer', () => {
       expect(uiSettingsClient.get).toHaveBeenCalledWith('theme:darkMode');
     });
 
-    it('calls getThemeTag with the values from the UiSettingsClient (true/dark) when the UserSettingsService is not provided', async () => {
+    it('calls renderTemplate with the values from the UiSettingsClient (true/dark) when the UserSettingsService is not provided', async () => {
       uiSettingsClient.get.mockImplementation(
         getClientGetMockImplementation({
           darkMode: true,
@@ -123,14 +137,16 @@ describe('bootstrapRenderer', () => {
         uiSettingsClient,
       });
 
-      expect(getThemeTagMock).toHaveBeenCalledTimes(1);
-      expect(getThemeTagMock).toHaveBeenCalledWith({
-        name: 'borealis',
-        darkMode: true,
-      });
+      expect(renderTemplateMock).toHaveBeenCalledTimes(1);
+      expect(renderTemplateMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          themeTagName: 'borealis',
+          colorMode: 'dark',
+        })
+      );
     });
 
-    it('calls getThemeTag with the values from the UiSettingsClient (false/light) when the UserSettingsService is not provided', async () => {
+    it('calls renderTemplate with the values from the UiSettingsClient (false/light) when the UserSettingsService is not provided', async () => {
       uiSettingsClient.get.mockImplementation(getClientGetMockImplementation({}));
 
       const request = httpServerMock.createKibanaRequest();
@@ -140,14 +156,16 @@ describe('bootstrapRenderer', () => {
         uiSettingsClient,
       });
 
-      expect(getThemeTagMock).toHaveBeenCalledTimes(1);
-      expect(getThemeTagMock).toHaveBeenCalledWith({
-        name: 'borealis',
-        darkMode: false,
-      });
+      expect(renderTemplateMock).toHaveBeenCalledTimes(1);
+      expect(renderTemplateMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          themeTagName: 'borealis',
+          colorMode: 'light',
+        })
+      );
     });
 
-    it('calls getThemeTag with values (true/dark) from the UserSettingsService when provided', async () => {
+    it('calls renderTemplate with values (true/dark) from the UserSettingsService when provided', async () => {
       userSettingsService.getUserSettingDarkMode.mockResolvedValueOnce(true);
 
       renderer = bootstrapRendererFactory({
@@ -167,14 +185,16 @@ describe('bootstrapRenderer', () => {
         uiSettingsClient,
       });
 
-      expect(getThemeTagMock).toHaveBeenCalledTimes(1);
-      expect(getThemeTagMock).toHaveBeenCalledWith({
-        name: 'borealis',
-        darkMode: true,
-      });
+      expect(renderTemplateMock).toHaveBeenCalledTimes(1);
+      expect(renderTemplateMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          themeTagName: 'borealis',
+          colorMode: 'dark',
+        })
+      );
     });
 
-    it('calls getThemeTag with values (false/light) from the UserSettingsService when provided', async () => {
+    it('calls renderTemplate with values (false/light) from the UserSettingsService when provided', async () => {
       userSettingsService.getUserSettingDarkMode.mockResolvedValueOnce(false);
 
       renderer = bootstrapRendererFactory({
@@ -193,14 +213,16 @@ describe('bootstrapRenderer', () => {
         uiSettingsClient,
       });
 
-      expect(getThemeTagMock).toHaveBeenCalledTimes(1);
-      expect(getThemeTagMock).toHaveBeenCalledWith({
-        name: 'borealis',
-        darkMode: false,
-      });
+      expect(renderTemplateMock).toHaveBeenCalledTimes(1);
+      expect(renderTemplateMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          themeTagName: 'borealis',
+          colorMode: 'light',
+        })
+      );
     });
 
-    it('calls getThemeTag with values from the UiSettingsClient when values (false/light) from UserSettingsService are `undefined`', async () => {
+    it('calls renderTemplate with values from the UiSettingsClient when values (false/light) from UserSettingsService are `undefined`', async () => {
       userSettingsService.getUserSettingDarkMode.mockResolvedValueOnce(undefined);
 
       renderer = bootstrapRendererFactory({
@@ -219,14 +241,16 @@ describe('bootstrapRenderer', () => {
         uiSettingsClient,
       });
 
-      expect(getThemeTagMock).toHaveBeenCalledTimes(1);
-      expect(getThemeTagMock).toHaveBeenCalledWith({
-        name: 'borealis',
-        darkMode: false,
-      });
+      expect(renderTemplateMock).toHaveBeenCalledTimes(1);
+      expect(renderTemplateMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          themeTagName: 'borealis',
+          colorMode: 'light',
+        })
+      );
     });
 
-    it('calls getThemeTag with values from the UiSettingsClient when values (true/dark) from UserSettingsService are `undefined`', async () => {
+    it('calls renderTemplate with values from the UiSettingsClient when values (true/dark) from UserSettingsService are `undefined`', async () => {
       userSettingsService.getUserSettingDarkMode.mockResolvedValueOnce(undefined);
 
       renderer = bootstrapRendererFactory({
@@ -250,11 +274,13 @@ describe('bootstrapRenderer', () => {
         uiSettingsClient,
       });
 
-      expect(getThemeTagMock).toHaveBeenCalledTimes(1);
-      expect(getThemeTagMock).toHaveBeenCalledWith({
-        name: 'borealis',
-        darkMode: true,
-      });
+      expect(renderTemplateMock).toHaveBeenCalledTimes(1);
+      expect(renderTemplateMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          themeTagName: 'borealis',
+          colorMode: 'dark',
+        })
+      );
     });
   });
 
@@ -278,7 +304,7 @@ describe('bootstrapRenderer', () => {
       expect(uiSettingsClient.get).toHaveBeenCalledWith('theme:darkMode');
     });
 
-    it('calls getThemeTag with the correct parameters', async () => {
+    it('calls renderTemplate with the correct parameters', async () => {
       uiSettingsClient.get.mockImplementation(
         getClientGetMockImplementation({
           darkMode: true,
@@ -292,14 +318,16 @@ describe('bootstrapRenderer', () => {
         uiSettingsClient,
       });
 
-      expect(getThemeTagMock).toHaveBeenCalledTimes(1);
-      expect(getThemeTagMock).toHaveBeenCalledWith({
-        name: 'borealis',
-        darkMode: true,
-      });
+      expect(renderTemplateMock).toHaveBeenCalledTimes(1);
+      expect(renderTemplateMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          themeTagName: 'borealis',
+          colorMode: 'dark',
+        })
+      );
     });
 
-    it('calls getThemeTag with the correct parameters when darkMode is `system`', async () => {
+    it('calls renderTemplate with the correct parameters when darkMode is `system`', async () => {
       uiSettingsClient.get.mockImplementation(
         getClientGetMockImplementation({
           darkMode: 'system',
@@ -313,11 +341,13 @@ describe('bootstrapRenderer', () => {
         uiSettingsClient,
       });
 
-      expect(getThemeTagMock).toHaveBeenCalledTimes(1);
-      expect(getThemeTagMock).toHaveBeenCalledWith({
-        name: 'borealis',
-        darkMode: false,
-      });
+      expect(renderTemplateMock).toHaveBeenCalledTimes(1);
+      expect(renderTemplateMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          themeTagName: 'borealis',
+          colorMode: 'system',
+        })
+      );
     });
   });
 
@@ -340,7 +370,7 @@ describe('bootstrapRenderer', () => {
       expect(uiSettingsClient.get).not.toHaveBeenCalledWith('theme:darkMode');
     });
 
-    it('calls getThemeTag with the default parameters', async () => {
+    it('calls renderTemplate with the default parameters', async () => {
       const request = httpServerMock.createKibanaRequest();
 
       await renderer({
@@ -348,15 +378,17 @@ describe('bootstrapRenderer', () => {
         uiSettingsClient,
       });
 
-      expect(getThemeTagMock).toHaveBeenCalledTimes(1);
-      expect(getThemeTagMock).toHaveBeenCalledWith({
-        name: 'borealis',
-        darkMode: false,
-      });
+      expect(renderTemplateMock).toHaveBeenCalledTimes(1);
+      expect(renderTemplateMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          themeTagName: 'borealis',
+          colorMode: 'light',
+        })
+      );
     });
   });
 
-  it('calls getThemeTag with the correct theme name', async () => {
+  it('calls renderTemplate with the correct theme name', async () => {
     uiSettingsClient.get.mockImplementation(
       getClientGetMockImplementation({
         darkMode: true,
@@ -369,23 +401,22 @@ describe('bootstrapRenderer', () => {
       uiSettingsClient,
     });
 
-    expect(getThemeTagMock).toHaveBeenCalledTimes(1);
-    expect(getThemeTagMock).toHaveBeenCalledWith(
+    expect(renderTemplateMock).toHaveBeenCalledTimes(1);
+    expect(renderTemplateMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: themeName$.getValue(),
+        themeTagName: themeName$.getValue(),
       })
     );
 
-    themeName$.next('amsterdam');
+    themeName$.next('borealis');
     await renderer({
       request,
       uiSettingsClient,
     });
 
-    expect(getThemeTagMock).toHaveBeenLastCalledWith(
+    expect(renderTemplateMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        // 'amsterdam' is mapped to 'v8' for backwards compatibility
-        name: 'v8',
+        themeTagName: 'borealis',
       })
     );
   });
@@ -409,7 +440,6 @@ describe('bootstrapRenderer', () => {
     });
   });
 
-  // here
   it('calls getJsDependencyPaths with the correct parameters', async () => {
     const pluginsBundlePaths = new Map<string, unknown>();
 
@@ -429,7 +459,6 @@ describe('bootstrapRenderer', () => {
   });
 
   it('calls renderTemplate with the correct parameters', async () => {
-    getThemeTagMock.mockReturnValue('customThemeTag');
     getJsDependencyPathsMock.mockReturnValue(['path-1', 'path-2']);
 
     const request = httpServerMock.createKibanaRequest();
@@ -441,9 +470,51 @@ describe('bootstrapRenderer', () => {
 
     expect(renderTemplateMock).toHaveBeenCalledTimes(1);
     expect(renderTemplateMock).toHaveBeenCalledWith({
-      themeTag: 'customThemeTag',
+      themeTagName: 'borealis',
+      colorMode: 'light',
       jsDependencyPaths: ['path-1', 'path-2'],
       publicPathMap: expect.any(String),
+    });
+  });
+
+  describe('when KBN_USE_RSPACK is enabled', () => {
+    beforeEach(() => {
+      process.env.KBN_USE_RSPACK = 'true';
+      getRspackDependencyPathsMock.mockReturnValue(['rspack-dep-a', 'rspack-dep-b']);
+      auth.get.mockReturnValue({
+        status: 'unauthenticated' as AuthStatus,
+        state: {},
+      });
+
+      renderer = bootstrapRendererFactory({
+        auth,
+        packageInfo,
+        uiPlugins,
+        baseHref: `/base-path/${packageInfo.buildShaShort}`,
+        themeName$,
+      });
+    });
+
+    afterEach(() => {
+      delete process.env.KBN_USE_RSPACK;
+    });
+
+    it('calls getRspackDependencyPaths and renderTemplate with useRspack', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      await renderer({
+        request,
+        uiSettingsClient,
+      });
+
+      expect(getRspackDependencyPathsMock).toHaveBeenCalled();
+      expect(getJsDependencyPathsMock).not.toHaveBeenCalled();
+      expect(renderTemplateMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          useRspack: true,
+          jsDependencyPaths: ['rspack-dep-a', 'rspack-dep-b'],
+        })
+      );
     });
   });
 });

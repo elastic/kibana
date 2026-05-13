@@ -9,8 +9,8 @@ import type { FC } from 'react';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { parse } from 'query-string';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useMlKibana } from '../../../contexts/kibana';
-import { ML_PAGES } from '../../../../locator';
 import type { MlRoute, PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
@@ -37,10 +37,10 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
           timefilter: { timefilter: timeFilter },
         },
       },
-      dashboard: dashboardService,
       uiSettings: kibanaConfig,
       mlServices: { mlApi },
       lens,
+      share,
     },
   } = useMlKibana();
 
@@ -53,7 +53,7 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
           mlApi,
           timeFilter,
           kibanaConfig,
-          dashboardService,
+          share,
         },
         vis,
         from,

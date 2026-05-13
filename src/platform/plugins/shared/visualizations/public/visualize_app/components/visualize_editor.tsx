@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './visualize_editor.scss';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { EventEmitter } from 'events';
 
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
+import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
+import { VisualizeConstants } from '@kbn/visualizations-common';
 import {
   useChromeVisibility,
   useSavedVisInstance,
@@ -21,16 +22,19 @@ import {
   useLinkedSearchUpdates,
   useDataViewUpdates,
 } from '../utils';
-import { VisualizeServices } from '../types';
+import { useProjectRouting } from '../utils/use/use_project_routing';
+import type { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
-import { VisualizeAppProps } from '../app';
-import { VisualizeConstants } from '../../../common/constants';
+import type { VisualizeAppProps } from '../app';
 import type { VisualizeInput } from '../..';
 
 export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const { id: visualizationIdFromUrl } = useParams<{ id: string }>();
   const [originatingApp, setOriginatingApp] = useState<string>();
   const [originatingPath, setOriginatingPath] = useState<string>();
+  const [incomingBreadcrumbs, setIncomingBreadcrumbs] = useState<
+    EmbeddableEditorBreadcrumb[] | undefined
+  >();
   const [embeddableIdValue, setEmbeddableId] = useState<string>();
   const [embeddableInput, setEmbeddableInput] = useState<VisualizeInput>();
   const { services } = useKibana<VisualizeServices>();
@@ -45,6 +49,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
       searchSessionId,
       embeddableId,
       originatingPath: pathValue,
+      breadcrumbs: breadcrumbsValue,
       valueInput: valueInputValue,
     } = stateTransferService.getIncomingEditorState(VisualizeConstants.APP_ID) || {};
 
@@ -57,6 +62,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     setEmbeddableId(embeddableId);
     setOriginatingApp(value);
     setOriginatingPath(pathValue);
+    setIncomingBreadcrumbs(breadcrumbsValue);
   }, [services]);
   const { savedVisInstance, visEditorRef, visEditorController } = useSavedVisInstance(
     services,
@@ -64,7 +70,9 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     isChromeVisible,
     originatingApp,
     visualizationIdFromUrl,
-    embeddableInput
+    embeddableInput,
+    originatingPath,
+    incomingBreadcrumbs
   );
 
   const editorName = savedVisInstance?.vis.type.title.toLowerCase().replace(' ', '_') || '';
@@ -79,13 +87,18 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     eventEmitter,
     savedVisInstance
   );
+
+  // Initialize CPS project routing manager for Vega
+  const projectRoutingManager = useProjectRouting(services);
+
   const { isEmbeddableRendered, currentAppState } = useEditorUpdates(
     services,
     eventEmitter,
     setHasUnsavedChanges,
     appState,
     savedVisInstance,
-    visEditorController
+    visEditorController,
+    projectRoutingManager
   );
   useLinkedSearchUpdates(services, eventEmitter, appState, savedVisInstance);
   useDataViewUpdates(services, eventEmitter, appState, savedVisInstance);
@@ -109,6 +122,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
       originatingApp={originatingApp}
       setOriginatingApp={setOriginatingApp}
       originatingPath={originatingPath}
+      incomingBreadcrumbs={incomingBreadcrumbs}
       visualizationIdFromUrl={visualizationIdFromUrl}
       setHasUnsavedChanges={setHasUnsavedChanges}
       visEditorRef={visEditorRef}

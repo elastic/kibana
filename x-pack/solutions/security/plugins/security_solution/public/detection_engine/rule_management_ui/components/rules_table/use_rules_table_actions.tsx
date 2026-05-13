@@ -14,7 +14,7 @@ import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useKibana } from '../../../../common/lib/kibana';
 import { canEditRuleWithActions } from '../../../../common/utils/privileges';
-import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from '../../../common/translations';
 import type { Rule } from '../../../rule_management/logic';
 import { useBulkExport } from '../../../rule_management/logic/bulk_actions/use_bulk_export';
 import {
@@ -22,10 +22,10 @@ import {
   useExecuteBulkAction,
 } from '../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
 import { useDownloadExportedRules } from '../../../rule_management/logic/bulk_actions/use_download_exported_rules';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useHasActionsPrivileges } from './use_has_actions_privileges';
 import type { TimeRange } from '../../../rule_gaps/types';
 import { useScheduleRuleRun } from '../../../rule_gaps/logic/use_schedule_rule_run';
-import { usePrebuiltRulesCustomizationStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
 import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry';
 
 export const useRulesTableActions = ({
@@ -42,12 +42,17 @@ export const useRulesTableActions = ({
     telemetry,
   } = useKibana().services;
   const hasActionsPrivileges = useHasActionsPrivileges();
+  const {
+    rulesPrivileges: {
+      manualRun: { edit: canManualRunRules },
+      rules: { edit: canEditRules },
+    },
+  } = useUserPrivileges();
   const { startTransaction } = useStartTransaction();
   const { executeBulkAction } = useExecuteBulkAction();
   const { bulkExport } = useBulkExport();
   const downloadExportedRules = useDownloadExportedRules();
   const { scheduleRuleRun } = useScheduleRuleRun();
-  const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
 
   return [
     {
@@ -61,9 +66,9 @@ export const useRulesTableActions = ({
       ) : (
         i18n.EDIT_RULE_SETTINGS
       ),
-      icon: 'controlsHorizontal',
+      icon: 'controls',
       onClick: (rule: Rule) => goToRuleEditPage(rule.id, navigateToApp),
-      enabled: (rule: Rule) => canEditRuleWithActions(rule, hasActionsPrivileges),
+      enabled: (rule: Rule) => canEditRules && canEditRuleWithActions(rule, hasActionsPrivileges),
     },
     {
       type: 'icon',
@@ -77,7 +82,7 @@ export const useRulesTableActions = ({
       ) : (
         i18n.DUPLICATE_RULE
       ),
-      enabled: (rule: Rule) => canEditRuleWithActions(rule, hasActionsPrivileges),
+      enabled: (rule: Rule) => canEditRules && canEditRuleWithActions(rule, hasActionsPrivileges),
       // TODO extract those handlers to hooks, like useDuplicateRule
       onClick: async (rule: Rule) => {
         startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
@@ -109,7 +114,7 @@ export const useRulesTableActions = ({
       type: 'icon',
       'data-test-subj': 'exportRuleAction',
       description: i18n.EXPORT_RULE,
-      icon: 'exportAction',
+      icon: 'upload',
       name: i18n.EXPORT_RULE,
       onClick: async (rule: Rule) => {
         startTransaction({ name: SINGLE_RULE_ACTIONS.EXPORT });
@@ -118,12 +123,16 @@ export const useRulesTableActions = ({
           await downloadExportedRules(response);
         }
       },
-      enabled: (rule: Rule) => isRulesCustomizationEnabled || !rule.immutable,
     },
     {
       type: 'icon',
       'data-test-subj': 'manualRuleRunAction',
-      description: (rule) => (!rule.enabled ? i18n.MANUAL_RULE_RUN_TOOLTIP : i18n.MANUAL_RULE_RUN),
+      description: (rule) =>
+        !canManualRunRules
+          ? i18n.MANUAL_RULE_RUN_PERMISSIONS_TOOLTIP
+          : !rule.enabled
+          ? i18n.MANUAL_RULE_RUN_TOOLTIP
+          : i18n.MANUAL_RULE_RUN,
       icon: 'play',
       name: i18n.MANUAL_RULE_RUN,
       onClick: async (rule: Rule) => {
@@ -140,7 +149,7 @@ export const useRulesTableActions = ({
           timeRange: modalManualRuleRunConfirmationResult,
         });
       },
-      enabled: (rule: Rule) => rule.enabled,
+      enabled: (rule: Rule) => canManualRunRules && rule.enabled,
     },
     {
       type: 'icon',
@@ -160,6 +169,7 @@ export const useRulesTableActions = ({
           ids: [rule.id],
         });
       },
+      enabled: () => canEditRules,
     },
   ];
 };

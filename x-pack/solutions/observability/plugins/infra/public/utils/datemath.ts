@@ -8,8 +8,8 @@
 import type { Unit } from '@kbn/datemath';
 import dateMath from '@kbn/datemath';
 import type { TimeRange } from '@kbn/es-query';
-import { chain } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { chain } from 'fp-ts/Either';
+import { pipe } from 'fp-ts/pipeable';
 import * as rt from 'io-ts';
 
 const JS_MAX_DATE = 8640000000000000;

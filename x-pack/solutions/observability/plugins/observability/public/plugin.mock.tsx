@@ -8,12 +8,17 @@
 import React from 'react';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
+import { logsDataAccessPluginMock } from '@kbn/logs-data-access-plugin/public/mocks';
 
 const triggersActionsUiStartMock = {
   createStart() {
@@ -26,10 +31,6 @@ const triggersActionsUiStartMock = {
       )),
       getAlertsStateTable: jest.fn(() => (
         <div data-test-subj="alerts-state-table">mocked component</div>
-      )),
-      getAddRuleFlyout: jest.fn(() => <div data-test-subj="add-rule-flyout">mocked component</div>),
-      getEditRuleFlyout: jest.fn(() => (
-        <div data-test-subj="edit-rule-flyout">mocked component</div>
       )),
       getRuleAlertsSummary: jest.fn(() => (
         <div data-test-subj="rule-alerts-summary">mocked component</div>
@@ -81,20 +82,6 @@ const dataViewEditor = {
   },
 };
 
-const dataViews = {
-  createStart() {
-    return {
-      getIds: jest.fn().mockImplementation(() => []),
-      get: jest.fn(),
-      create: jest.fn().mockImplementation(() => ({
-        fields: {
-          getByName: jest.fn(),
-        },
-      })),
-    };
-  },
-};
-
 export const observabilityPublicPluginsStartMock = {
   createStart() {
     return {
@@ -103,13 +90,17 @@ export const observabilityPublicPluginsStartMock = {
       contentManagement: contentManagementMock.createStartContract(),
       data: dataPluginMock.createStartContract(),
       dataViewEditor: dataViewEditor.createStart(),
-      dataViews: dataViews.createStart(),
+      dataViews: dataViewPluginMocks.createStartContract(),
       discover: null,
       lens: lensPluginMock.createStartContract(),
+      licensing: licensingMock.createStart(),
+      logsDataAccess: logsDataAccessPluginMock.createStartContract(),
       observabilityAIAssistant: observabilityAIAssistantPluginMock.createStartContract(),
       share: sharePluginMock.createStartContract(),
+      spaces: spacesPluginMock.createStartContract(),
       triggersActionsUi: triggersActionsUiStartMock.createStart(),
       unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+      kql: kqlPluginMock.createStartContract(),
     };
   },
 };

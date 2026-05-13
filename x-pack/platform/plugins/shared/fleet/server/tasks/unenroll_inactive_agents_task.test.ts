@@ -24,12 +24,7 @@ import { unenrollBatch } from '../services/agents/unenroll_action_runner';
 
 import type { AgentPolicy } from '../types';
 
-import {
-  UnenrollInactiveAgentsTask,
-  TYPE,
-  VERSION,
-  POLICIES_BATCHSIZE,
-} from './unenroll_inactive_agents_task';
+import { UnenrollInactiveAgentsTask, TYPE, VERSION } from './unenroll_inactive_agents_task';
 
 jest.mock('../services');
 jest.mock('../services/agents');
@@ -62,6 +57,7 @@ describe('UnenrollInactiveAgentsTask', () => {
   let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
   const mockedUnenrollBatch = jest.mocked(unenrollBatch);
 
+  const unenrollBatchSize = 3;
   const agents = [
     {
       id: 'agent-1',
@@ -96,6 +92,8 @@ describe('UnenrollInactiveAgentsTask', () => {
       core: mockCore,
       taskManager: mockTaskManagerSetup,
       logFactory: loggingSystemMock.create(),
+      unenrollBatchSize,
+      config: { taskInterval: '10m' },
     });
   });
 
@@ -125,7 +123,7 @@ describe('UnenrollInactiveAgentsTask', () => {
       await mockTask.start({ taskManager: mockTaskManagerStart });
       const createTaskRunner =
         mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0][TYPE].createTaskRunner;
-      const taskRunner = createTaskRunner({ taskInstance });
+      const taskRunner = createTaskRunner({ taskInstance, abortController: new AbortController() });
       return taskRunner.run();
     };
 
@@ -147,16 +145,11 @@ describe('UnenrollInactiveAgentsTask', () => {
     it('Should unenroll eligible agents', async () => {
       mockedUnenrollBatch.mockResolvedValueOnce({ actionId: 'actionid-01' });
       await runTask();
-      expect(mockedUnenrollBatch).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
-        agents,
-        {
-          force: true,
-          revoke: true,
-          actionId: expect.stringContaining('UnenrollInactiveAgentsTask-'),
-        }
-      );
+      expect(mockedUnenrollBatch).toHaveBeenCalledWith(undefined, expect.anything(), agents, {
+        force: true,
+        revoke: true,
+        actionId: expect.stringContaining('UnenrollInactiveAgentsTask-'),
+      });
     });
 
     it('Should not run if task is outdated', async () => {
@@ -180,16 +173,9 @@ describe('UnenrollInactiveAgentsTask', () => {
       expect(mockedUnenrollBatch).not.toHaveBeenCalled();
     });
 
-    it('Should process large numbers of policies in batches', async () => {
-      const firstAgentPoliciesBatch = Array.from({ length: POLICIES_BATCHSIZE }, (_, i) =>
-        createAgentPolicyMock({ id: `agent-policy-${i + 1}` })
-      );
-      const secondAgentPoliciesBatch = Array.from({ length: 3 }, (_, i) =>
-        createAgentPolicyMock({
-          id: `agent-policy-${POLICIES_BATCHSIZE + 1}`,
-          unenroll_timeout: 1000,
-        })
-      );
+    it('Should process agent policies in batches', async () => {
+      const firstAgentPoliciesBatch = [createAgentPolicyMock({ id: 'agent-policy-1' })];
+      const secondAgentPoliciesBatch = [createAgentPolicyMock({ id: 'agent-policy-2' })];
       mockAgentPolicyService.fetchAllAgentPolicies = jest.fn().mockResolvedValue(
         jest.fn(async function* () {
           yield firstAgentPoliciesBatch;
@@ -198,18 +184,18 @@ describe('UnenrollInactiveAgentsTask', () => {
       );
       const secondAgentPoliciesBatchAgents = [
         {
-          id: 'agent-501',
-          policy_id: 'agent-policy-501',
+          id: 'agent-21',
+          policy_id: 'agent-policy-2',
           status: 'inactive',
         },
         {
-          id: 'agent-502',
-          policy_id: 'agent-policy-502',
+          id: 'agent-22',
+          policy_id: 'agent-policy-2',
           status: 'inactive',
         },
         {
-          id: 'agent-503',
-          policy_id: 'agent-policy-503',
+          id: 'agent-23',
+          policy_id: 'agent-policy-2',
           status: 'active',
         },
       ];
@@ -223,7 +209,7 @@ describe('UnenrollInactiveAgentsTask', () => {
 
       await runTask();
       expect(mockedUnenrollBatch).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         secondAgentPoliciesBatchAgents,
         {
@@ -231,6 +217,33 @@ describe('UnenrollInactiveAgentsTask', () => {
           revoke: true,
           actionId: expect.stringContaining('UnenrollInactiveAgentsTask-'),
         }
+      );
+    });
+  });
+
+  describe('getAgentQuery', () => {
+    const policy1 = createAgentPolicyMock({ id: 'agent-policy-1', unenroll_timeout: 1000 });
+    const policy2 = createAgentPolicyMock({ id: 'agent-policy-2', unenroll_timeout: 300 });
+
+    beforeEach(() => {
+      jest.useFakeTimers().setSystemTime(new Date('2025-06-01'));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('Should get a query that only gets agents that have been inactive for longer than the unenroll_timeout', async () => {
+      const policies = [policy1];
+      expect(mockTask.getAgentsQuery(policies as any)).toEqual(
+        `(fleet-agents.policy_id:\"agent-policy-1\" and (fleet-agents.last_checkin < 1748735000000)) and fleet-agents.status: inactive`
+      );
+    });
+
+    it('Should get a query for multiple agent policies that only gets agents inactive for longer than the unenroll_timeout', async () => {
+      const policies = [policy1, policy2];
+      expect(mockTask.getAgentsQuery(policies as any)).toEqual(
+        `(fleet-agents.policy_id:\"agent-policy-1\" and (fleet-agents.last_checkin < 1748735000000) or \"agent-policy-2\" and (fleet-agents.last_checkin < 1748735700000)) and fleet-agents.status: inactive`
       );
     });
   });

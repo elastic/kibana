@@ -10,7 +10,7 @@ import type {
   IUiSettingsClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,

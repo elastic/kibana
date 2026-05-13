@@ -22,7 +22,7 @@ function VegaHelpMenu() {
 
   const button = (
     <EuiButtonIcon
-      iconType="questionInCircle"
+      iconType="question"
       onClick={onButtonClick}
       aria-label={i18n.translate('visTypeVega.editor.vegaHelpButtonAriaLabel', {
         defaultMessage: 'Vega help',
@@ -68,6 +68,9 @@ function VegaHelpMenu() {
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('visTypeVega.editor.vegaHelpPopoverAriaLabel', {
+        defaultMessage: 'Vega help',
+      })}
       id="helpMenu"
       button={button}
       isOpen={isPopoverOpen}

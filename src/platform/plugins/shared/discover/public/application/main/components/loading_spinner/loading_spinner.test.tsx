@@ -8,17 +8,19 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ReactWrapper } from 'enzyme';
+import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 import { LoadingSpinner } from './loading_spinner';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { render, screen } from '@testing-library/react';
 
-describe('loading spinner', function () {
-  let component: ReactWrapper;
+describe('Loading spinner', function () {
+  it('renders "Searching" text and a spinner', () => {
+    render(
+      <DiscoverTestProvider>
+        <LoadingSpinner />
+      </DiscoverTestProvider>
+    );
 
-  it('LoadingSpinner renders a Searching text and a spinner', () => {
-    component = mountWithIntl(<LoadingSpinner />);
-    expect(findTestSubject(component, 'loadingSpinnerText').text()).toBe('Searching');
-    expect(findTestSubject(component, 'loadingSpinner').length).toBe(1);
+    expect(screen.getByText(/searching/i)).toBeVisible();
+    expect(screen.getByRole('progressbar')).toBeVisible();
   });
 });

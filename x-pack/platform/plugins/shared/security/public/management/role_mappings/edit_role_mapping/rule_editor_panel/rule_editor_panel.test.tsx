@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
+import { EuiErrorBoundary, EuiProvider } from '@elastic/eui';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
@@ -24,7 +24,9 @@ describe('RuleEditorPanel', () => {
     const viewProps = { ...props, docLinks: coreStart.docLinks };
     return mountWithIntl(
       <KibanaContextProvider services={coreStart}>
-        <RuleEditorPanel {...viewProps} />
+        <EuiProvider>
+          <RuleEditorPanel {...viewProps} />
+        </EuiProvider>
       </KibanaContextProvider>
     );
   };
@@ -108,6 +110,11 @@ describe('RuleEditorPanel', () => {
   });
 
   it('catches errors thrown by child components', () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(VisualRuleEditor.prototype, 'render').mockImplementationOnce(() => {
+      throw new Error('Something awful happened here.');
+    });
+
     const props = {
       rawRules: {},
       onChange: jest.fn(),
@@ -115,8 +122,6 @@ describe('RuleEditorPanel', () => {
       validateForm: false,
     };
     const wrapper = renderView(props);
-
-    wrapper.find(VisualRuleEditor).simulateError(new Error('Something awful happened here.'));
 
     expect(wrapper.find(VisualRuleEditor)).toHaveLength(0);
     expect(wrapper.find(EuiErrorBoundary)).toHaveLength(1);

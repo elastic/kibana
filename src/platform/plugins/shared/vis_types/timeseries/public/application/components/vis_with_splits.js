@@ -7,15 +7,61 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import classNames from 'classnames';
-import { getDisplayName } from './lib/get_display_name';
 import { findIndex, first } from 'lodash';
+
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
+
+import { getDisplayName } from './lib/get_display_name';
 import { getValueOrEmpty } from '../../../common/empty_label';
 import { getSplitByTermsColor } from '../lib/get_split_by_terms_color';
 import { SERIES_SEPARATOR } from '../../../common/constants';
 
-import './_vis_with_splits.scss';
+const splitVisStyle = css`
+  width: 100%;
+  display: flex;
+  /* Allow wrapping beyond 4 in a row */
+  flex-wrap: wrap;
+  /* Space out each vis instead of clumping in the center to utilize more horizontal space */
+  justify-content: space-around;
+  /* Stretch all the heights so that prior to wrapping the vis' take up the full panel height */
+  align-items: stretch;
+`;
+
+const splitVisOneStyle = css`
+  flex: 1;
+
+  .tvbSplitVis__split {
+    min-width: 0;
+
+    > .tvbVis {
+      min-height: 0;
+    }
+  }
+`;
+
+const useSplitVisItemStyle = () => {
+  const { euiTheme } = useEuiTheme();
+  const styles = useMemo(() => {
+    return css`
+      /* This maintains that each vis will be at least 1/4 of the panel's width
+        but it will also grow to fill the space if there are less than 4 in a row */
+      flex: 1 0 25%;
+      /* Ensure a minimum width is achieved on smaller width panels */
+      min-width: calc(${euiTheme.size.base} * 12);
+      display: flex;
+
+      > .tvbVis {
+        /* Apply the minimum height on the vis itself so it doesn't interfere with flex calculations
+          Gauges are not completely square, so the height is just slightly less than the width */
+        min-height: calc(${euiTheme.size.base} * 12 / 1.25);
+      }
+    `;
+  }, [euiTheme]);
+  return styles;
+};
 
 export function visWithSplits(WrappedComponent) {
   function SplitVisComponent(props) {
@@ -44,6 +90,8 @@ export function visWithSplits(WrappedComponent) {
       },
       [fieldFormatMap, model.id, model.series, palettesService, syncColors, visData]
     );
+
+    const splitVisItemStyle = useSplitVisItemStyle();
 
     if (!model || !visData || !visData[model.id]) return <WrappedComponent {...props} />;
     if (visData[model.id].series.every((s) => s.id.split(SERIES_SEPARATOR).length === 1)) {
@@ -106,7 +154,7 @@ export function visWithSplits(WrappedComponent) {
         },
       };
       return (
-        <div key={key} className="tvbSplitVis__split">
+        <div key={key} className="tvbSplitVis__split" css={splitVisItemStyle}>
           <WrappedComponent
             model={model}
             visData={newVisData}
@@ -125,7 +173,12 @@ export function visWithSplits(WrappedComponent) {
     const hasOneVis = visData[model.id].series.length === 1;
 
     return (
-      <div className={classNames('tvbSplitVis', { 'tvbSplitVis--one': hasOneVis })}>{rows}</div>
+      <div
+        className={classNames('tvbSplitVis', { 'tvbSplitVis--one': hasOneVis })}
+        css={[splitVisStyle, hasOneVis && splitVisOneStyle]}
+      >
+        {rows}
+      </div>
     );
   }
 

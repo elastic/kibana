@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode, useCallback, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import {
   TableListViewTable,
@@ -23,7 +24,6 @@ export type TableListViewProps<T extends UserContentCommonSchema = UserContentCo
   | 'initialFilter'
   | 'headingId'
   | 'initialPageSize'
-  | 'listingLimit'
   | 'urlStateEnabled'
   | 'customTableColumn'
   | 'emptyPrompt'
@@ -59,7 +59,6 @@ export const TableListView = <T extends UserContentCommonSchema>({
   initialFilter,
   headingId,
   initialPageSize,
-  listingLimit,
   urlStateEnabled = true,
   customTableColumn,
   emptyPrompt,
@@ -109,7 +108,6 @@ export const TableListView = <T extends UserContentCommonSchema>({
           initialFilter={initialFilter}
           headingId={headingId}
           initialPageSize={initialPageSize}
-          listingLimit={listingLimit}
           urlStateEnabled={urlStateEnabled}
           customTableColumn={customTableColumn}
           emptyPrompt={emptyPrompt}

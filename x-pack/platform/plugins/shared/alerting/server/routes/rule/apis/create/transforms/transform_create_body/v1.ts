@@ -73,6 +73,7 @@ const transformCreateBodyFlapping = <Params extends RuleParams = never>(
     return flapping;
   }
   return {
+    enabled: flapping.enabled,
     lookBackWindow: flapping.look_back_window,
     statusChangeThreshold: flapping.status_change_threshold,
   };
@@ -103,5 +104,6 @@ export const transformCreateBody = <Params extends RuleParams = never>({
     ...(createBody.flapping !== undefined
       ? { flapping: transformCreateBodyFlapping(createBody.flapping) }
       : {}),
+    ...(createBody.artifacts ? { artifacts: createBody.artifacts } : {}),
   };
 };

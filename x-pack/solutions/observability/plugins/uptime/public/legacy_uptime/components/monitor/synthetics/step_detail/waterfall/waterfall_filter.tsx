@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiCheckbox,
@@ -158,6 +159,8 @@ export const WaterfallFilter = ({
           <EuiFilterGroup>
             {MIME_FILTERS.map(({ label, mimeType }) => (
               <EuiFilterButton
+                isToggle
+                isSelected={activeFilters.includes(mimeType)}
                 hasActiveFilters={activeFilters.includes(mimeType)}
                 onClick={() => toggleFilters(mimeType)}
                 key={label}

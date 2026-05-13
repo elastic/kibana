@@ -31,8 +31,6 @@ exports[`renderLegendDetailRow categorical Should render categorical legend with
     >
       <EuiToolTip
         content="foobar_label"
-        delay="regular"
-        display="inlineBlock"
         position="top"
         title="Border color"
       >
@@ -44,6 +42,7 @@ exports[`renderLegendDetailRow categorical Should render categorical legend with
               "maxWidth": "180px",
             }
           }
+          tabIndex={0}
         >
           <small>
             <strong>
@@ -97,8 +96,6 @@ exports[`renderLegendDetailRow ordinal Should render custom ordinal legend with 
     >
       <EuiToolTip
         content="foobar_label"
-        delay="regular"
-        display="inlineBlock"
         position="top"
         title="Border color"
       >
@@ -110,6 +107,7 @@ exports[`renderLegendDetailRow ordinal Should render custom ordinal legend with 
               "maxWidth": "180px",
             }
           }
+          tabIndex={0}
         >
           <small>
             <strong>
@@ -161,8 +159,6 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
     >
       <EuiToolTip
         content="foobar_label"
-        delay="regular"
-        display="inlineBlock"
         position="top"
         title="Border color"
       >
@@ -174,6 +170,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
               "maxWidth": "180px",
             }
           }
+          tabIndex={0}
         >
           <small>
             <strong>
@@ -192,7 +189,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
       key="0"
     >
       <Category
-        color="#e4eefd"
+        color="#e0ecff"
         isLinesOnly={false}
         isPointsOnly={true}
         label="< 13_format"
@@ -203,7 +200,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
       key="1"
     >
       <Category
-        color="#d3e3fe"
+        color="#cfe1ff"
         isLinesOnly={false}
         isPointsOnly={true}
         label="13_format up to 25_format"
@@ -214,7 +211,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
       key="2"
     >
       <Category
-        color="#c1d8fe"
+        color="#bed7ff"
         isLinesOnly={false}
         isPointsOnly={true}
         label="25_format up to 38_format"
@@ -225,7 +222,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
       key="3"
     >
       <Category
-        color="#afceff"
+        color="#adccff"
         isLinesOnly={false}
         isPointsOnly={true}
         label="38_format up to 50_format"
@@ -236,7 +233,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
       key="4"
     >
       <Category
-        color="#9dc3ff"
+        color="#9bc2ff"
         isLinesOnly={false}
         isPointsOnly={true}
         label="50_format up to 63_format"
@@ -247,7 +244,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
       key="5"
     >
       <Category
-        color="#8bb8ff"
+        color="#89b7ff"
         isLinesOnly={false}
         isPointsOnly={true}
         label="63_format up to 75_format"
@@ -258,7 +255,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
       key="6"
     >
       <Category
-        color="#77adff"
+        color="#76adff"
         isLinesOnly={false}
         isPointsOnly={true}
         label="75_format up to 88_format"
@@ -291,8 +288,6 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
     >
       <EuiToolTip
         content="foobar_label"
-        delay="regular"
-        display="inlineBlock"
         position="top"
         title="Border color"
       >
@@ -304,6 +299,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
               "maxWidth": "180px",
             }
           }
+          tabIndex={0}
         >
           <small>
             <strong>
@@ -322,7 +318,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
       key="0"
     >
       <Category
-        color="#dfebfd"
+        color="#dae8ff"
         isLinesOnly={false}
         isPointsOnly={true}
         label="< 50th: 5572_format"
@@ -333,7 +329,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
       key="1"
     >
       <Category
-        color="#c7dcfe"
+        color="#c4daff"
         isLinesOnly={false}
         isPointsOnly={true}
         label="50th: 5572_format up to 75th: 8079_format"
@@ -344,7 +340,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
       key="2"
     >
       <Category
-        color="#afceff"
+        color="#adccff"
         isLinesOnly={false}
         isPointsOnly={true}
         label="75th: 8079_format up to 90th: 9607_format"
@@ -355,7 +351,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
       key="3"
     >
       <Category
-        color="#97bfff"
+        color="#95beff"
         isLinesOnly={false}
         isPointsOnly={true}
         label="90th: 9607_format up to 95th: 10439_format"
@@ -366,7 +362,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
       key="4"
     >
       <Category
-        color="#7eb1ff"
+        color="#7db0ff"
         isLinesOnly={false}
         isPointsOnly={true}
         label="95th: 10439_format up to 99th: 16857_format"
@@ -399,8 +395,6 @@ exports[`renderLegendDetailRow ordinal Should render single band when interpolat
     >
       <EuiToolTip
         content="foobar_label"
-        delay="regular"
-        display="inlineBlock"
         position="top"
         title="Border color"
       >
@@ -412,6 +406,7 @@ exports[`renderLegendDetailRow ordinal Should render single band when interpolat
               "maxWidth": "180px",
             }
           }
+          tabIndex={0}
         >
           <small>
             <strong>

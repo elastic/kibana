@@ -7,21 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ChangeEvent, useState, useMemo } from 'react';
+import type { ChangeEvent, ReactNode } from 'react';
+import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
-import { MatchedItem } from '@kbn/data-views-plugin/public';
-import {
-  UseField,
-  getFieldValidityAndErrorMessage,
-  ValidationConfig,
-  FieldConfig,
-} from '../../shared_imports';
+import type { MatchedItem } from '@kbn/data-views-plugin/public';
+import type { ValidationConfig, FieldConfig } from '../../shared_imports';
+import { UseField, getFieldValidityAndErrorMessage } from '../../shared_imports';
 import { canAppendWildcard } from '../../lib';
 import { schema } from '../form_schema';
-import { RollupIndicesCapsResponse, IndexPatternConfig, MatchedIndicesSet } from '../../types';
+import type { RollupIndicesCapsResponse, IndexPatternConfig, MatchedIndicesSet } from '../../types';
 import { matchedIndiciesDefault } from '../../data_view_editor_service';
 import { TitleDocsPopover } from './title_docs_popover';
 
@@ -33,6 +30,8 @@ interface TitleFieldProps {
     matchedIndices: MatchedIndicesSet;
     rollupIndex: string | null | undefined;
   }>;
+  disabled?: boolean;
+  titleHelpText?: ReactNode | string;
 }
 
 const rollupIndexPatternNoMatchError = {
@@ -80,8 +79,15 @@ const createMatchesIndicesValidator = ({
     }
 
     // A rollup index pattern needs to match one and only one rollup index.
-    const rollupIndexMatches = matchedIndices.exactMatchedIndices.filter((matchedIndex) =>
-      rollupIndices.includes(matchedIndex.name)
+    const rollupIndexMatches = matchedIndices.exactMatchedIndices.filter(
+      (matchedIndex) =>
+        rollupIndices.includes(matchedIndex.name) ||
+        // matched item is alias
+        (matchedIndex.item.indices?.length === 1 &&
+          rollupIndices.includes(matchedIndex.item.indices[0])) ||
+        // matched item is an index referenced by an alias
+        (matchedIndex.item.aliases?.length === 1 &&
+          rollupIndices.includes(matchedIndex.item.aliases[0]))
     );
 
     if (!rollupIndexMatches.length) {
@@ -110,11 +116,13 @@ interface GetTitleConfigArgs {
   isRollup: boolean;
   matchedIndices: MatchedItem[];
   rollupIndicesCapabilities: RollupIndicesCapsResponse;
+  titleHelpText?: ReactNode | string;
 }
 
 const getTitleConfig = ({
   isRollup,
   rollupIndicesCapabilities,
+  titleHelpText,
 }: GetTitleConfigArgs): FieldConfig<string> => {
   const titleFieldConfig = schema.title;
 
@@ -130,6 +138,7 @@ const getTitleConfig = ({
   return {
     ...titleFieldConfig!,
     validations,
+    helpText: titleHelpText,
   };
 };
 
@@ -138,6 +147,8 @@ export const TitleField = ({
   matchedIndices$,
   rollupIndicesCapabilities,
   indexPatternValidationProvider,
+  disabled,
+  titleHelpText,
 }: TitleFieldProps) => {
   const [appendedWildcard, setAppendedWildcard] = useState<boolean>(false);
   const matchedIndices = useObservable(matchedIndices$, matchedIndiciesDefault).exactMatchedIndices;
@@ -148,8 +159,9 @@ export const TitleField = ({
         isRollup,
         matchedIndices,
         rollupIndicesCapabilities,
+        titleHelpText,
       }),
-    [isRollup, matchedIndices, rollupIndicesCapabilities]
+    [isRollup, matchedIndices, rollupIndicesCapabilities, titleHelpText]
   );
 
   return (
@@ -178,6 +190,7 @@ export const TitleField = ({
           >
             <EuiFieldText
               isInvalid={isInvalid}
+              disabled={disabled}
               value={field.value}
               onChange={(e: ChangeEvent<HTMLInputElement>) => {
                 let query = e.target.value;
