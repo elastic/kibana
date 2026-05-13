@@ -55,6 +55,8 @@ export const AGENT_BUILDER_UI_EBT = {
     MANAGE_AGENT_OVERVIEW: 'agentBuilder.manage.agent.overview',
     MANAGE_AGENT_FORM: 'agentBuilder.manage.agent.form',
     MANAGE_AGENT_EDIT_DETAILS: 'agentBuilder.manage.agent.editDetailsFlyout',
+    MANAGE_AGENTS: 'agentBuilder.manage.agents',
+    MANAGE_AGENTS_TABLE: 'agentBuilder.manage.agents.table',
     MANAGE_SKILLS: 'agentBuilder.manage.skills',
     MANAGE_SKILLS_TABLE: 'agentBuilder.manage.skills.table',
     MANAGE_SKILLS_AGENT_FLYOUT: 'agentBuilder.manage.skills.agentFlyout',
@@ -216,6 +218,13 @@ export const AGENT_BUILDER_UI_EBT = {
       FORM_ERROR_BACK_TO_LIST: 'manage_agent_form_error_back_to_list',
       EDIT_DETAILS_SAVE: 'manage_agent_edit_details_save',
       EDIT_DETAILS_CANCEL: 'manage_agent_edit_details_cancel',
+    },
+    /** Global agents library (`/manage/agents`) */
+    manageAgents: {
+      NEW_AGENT: 'manage_agents_new_agent',
+      DOCS_LEARN_MORE: 'manage_agents_docs_learn_more',
+      TABLE_ROW_EDIT_OPEN: 'manage_agents_table_row_edit_open',
+      TABLE_ACTION_DELETE: 'manage_agents_table_action_delete',
     },
     /** Global skills library and per-agent skill flyouts */
     manageSkills: {

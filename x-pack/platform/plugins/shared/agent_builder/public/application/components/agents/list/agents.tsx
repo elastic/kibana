@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiButton, EuiLink, useEuiTheme } from '@elastic/eui';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
@@ -36,6 +37,8 @@ export const AgentBuilderAgents = () => {
         iconSide="left"
         href={createAgentBuilderUrl(appPaths.agents.new)}
         data-test-subj="agentBuilderNewAgentButton"
+        data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENTS}
+        data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageAgents.NEW_AGENT}
       >
         {i18n.translate('xpack.agentBuilder.agents.newAgentButton', {
           defaultMessage: 'New agent',
@@ -73,6 +76,8 @@ export const AgentBuilderAgents = () => {
                         defaultMessage: 'Learn more about agents in the documentation',
                       }
                     )}
+                    data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENTS}
+                    data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageAgents.DOCS_LEARN_MORE}
                   >
                     {i18n.translate('xpack.agentBuilder.agents.agentsDocumentation', {
                       defaultMessage: 'Learn more',

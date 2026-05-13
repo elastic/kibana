@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { canCurrentUserEditAgent, type AgentDefinition } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { countBy } from 'lodash';
 import React, { useMemo } from 'react';
 import { useDeleteAgent } from '../../../context/delete_agent_context';
@@ -106,6 +107,9 @@ export const AgentsList: React.FC = () => {
           <EuiLink
             data-test-subj="agentBuilderAgentsListName"
             href={createAgentBuilderUrl(appPaths.agents.edit({ agentId: agent.id }))}
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENTS_TABLE}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageAgents.TABLE_ROW_EDIT_OPEN}
+            data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.AGENT}
           >
             <EuiText size="m">{name}</EuiText>
           </EuiLink>
@@ -203,6 +207,9 @@ export const AgentsList: React.FC = () => {
                       deleteAgent({ agent });
                     }}
                     color="danger"
+                    data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENTS_TABLE}
+                    data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageAgents.TABLE_ACTION_DELETE}
+                    data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.AGENT}
                   >
                     {actionLabels.delete}
                   </EuiLink>
