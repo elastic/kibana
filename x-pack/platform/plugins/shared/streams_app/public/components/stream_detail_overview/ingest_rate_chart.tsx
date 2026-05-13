@@ -206,7 +206,6 @@ function IngestRateChartContent({ definition }: { definition: Streams.all.GetRes
                   xDomain={{ min: timeState.start, max: timeState.end, minInterval }}
                   locale={i18n.getLocale()}
                   baseTheme={chartBaseTheme}
-                  theme={{ barSeriesStyle: { rect: { widthRatio: 0.6 } } }}
                   onBrushEnd={onBrushEnd}
                   allowBrushingLastHistogramBin
                 />
