@@ -291,6 +291,37 @@ describe('runRefineExtractedFieldFlow', () => {
     }
   });
 
+  it('truncates prefix-mismatch example values longer than 60 chars and annotates the original length', async () => {
+    const { deps, streamsClient, scopedClusterClient } = buildDeps();
+    streamsClient.getStream.mockResolvedValue(buildIngestStreamDef() as never);
+    const longValue = `session=${'x'.repeat(500)}`;
+    arrangeStreamSamples(scopedClusterClient, [
+      { 'attributes.user.id': 'user=u-1' },
+      { 'attributes.user.id': 'user=u-2' },
+      { 'attributes.user.id': longValue },
+      { 'attributes.user.id': 'user=u-4' },
+      { 'attributes.user.id': 'user=u-5' },
+    ]);
+
+    const outcome = await runRefineExtractedFieldFlow(
+      {
+        stream_name: STREAM_NAME,
+        field: 'attributes.user.id',
+        action: 'drop_prefix',
+        prefix: 'user',
+      },
+      deps
+    );
+
+    expect(outcome.kind).toBe('rejected');
+    if (outcome.kind === 'rejected') {
+      expect(outcome.reason).toBe('prefix_mismatch');
+      expect(outcome.message).toContain('"session=xxxxxxxxxx');
+      expect(outcome.message).toContain(`(truncated, original length ${longValue.length})`);
+      expect(outcome.message).not.toContain(longValue);
+    }
+  });
+
   it('appends a single `replace` step and returns success when all values match the prefix', async () => {
     const { deps, streamsClient, scopedClusterClient } = buildDeps();
     streamsClient.getStream.mockResolvedValue(buildIngestStreamDef() as never);

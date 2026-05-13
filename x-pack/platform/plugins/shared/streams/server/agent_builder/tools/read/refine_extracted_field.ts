@@ -54,6 +54,34 @@ const MIN_SAMPLE_VALUES = 5;
  */
 const PREFIX_MAX_LENGTH = 64;
 
+/**
+ * Per-value cap when echoing sampled field values back to the agent in
+ * rejection messages. The tool's rejection text travels three places that
+ * are NOT the user's own browser:
+ *  - The agent transcript (and from there the LLM provider's prompt logs).
+ *  - Server logs, which may be shipped to a SIEM.
+ *  - Any future UI component that surfaces tool errors verbatim.
+ * Customers may have PII / secrets in their log fields, so unbounded raw
+ * values are an exfiltration risk. We still need *some* of the value to
+ * be useful for debugging ("oh, it's `session=...` not `user=...`"), so we
+ * truncate per-value rather than redact entirely.
+ */
+const MISMATCH_EXAMPLE_MAX_LENGTH = 60;
+
+/**
+ * Render a sampled value as a JSON string for inclusion in a rejection
+ * message, truncating values longer than {@link MISMATCH_EXAMPLE_MAX_LENGTH}
+ * and annotating the original length so the caller still has a signal.
+ */
+const formatMismatchExample = (value: string): string => {
+  if (value.length <= MISMATCH_EXAMPLE_MAX_LENGTH) {
+    return JSON.stringify(value);
+  }
+  return `${JSON.stringify(
+    value.slice(0, MISMATCH_EXAMPLE_MAX_LENGTH)
+  )} (truncated, original length ${value.length})`;
+};
+
 const samplesSchema = z
   .union([
     z.object({
@@ -316,7 +344,7 @@ export const runRefineExtractedFieldFlow = async (
         `Only ${Math.round(matchRate * 100)}% of "${field}" values start with "${literalPrefix}" ` +
         `(${matched.length} of ${observedValues.length}). Refinement requires 100% to avoid silent ` +
         `half-transforms. Examples that don't match: ${examplesOfMismatch
-          .map((value) => JSON.stringify(value))
+          .map(formatMismatchExample)
           .join(', ')}.`,
     };
   }
