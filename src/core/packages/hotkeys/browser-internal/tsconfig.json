@@ -13,7 +13,8 @@
     "@kbn/use-observable",
     "@kbn/core-chrome-browser-mocks",
     "@kbn/core-application-browser-mocks",
-    "@kbn/core-lifecycle-browser"
+    "@kbn/core-lifecycle-browser",
+    "@kbn/zod"
   ],
   "exclude": ["target/**/*"]
 }

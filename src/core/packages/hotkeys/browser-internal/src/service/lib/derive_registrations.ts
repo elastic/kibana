@@ -35,6 +35,7 @@ const projectRegistrations = (manager: HotkeyManager): ReadonlyArray<HotkeyDefin
       description: kibana.description,
       scope: kibana.scope,
       appId: kibana.appId,
+      featureId: kibana.featureId,
       group: kibana.group,
       enabled: reg.options.enabled !== false,
     });
@@ -55,9 +56,9 @@ const signature = (regs: ReadonlyArray<HotkeyDefinition>): string =>
       (r) =>
         `${r.id}\u241F${JSON.stringify(r.keys)}\u241F${JSON.stringify(r.defaultKeys)}\u241F${
           r.scope
-        }\u241F${r.appId ?? ''}\u241F${r.label}\u241F${r.description ?? ''}\u241F${
-          r.group ?? ''
-        }\u241F${r.enabled === false ? '0' : '1'}`
+        }\u241F${r.appId ?? ''}\u241F${r.featureId ?? ''}\u241F${r.label}\u241F${
+          r.description ?? ''
+        }\u241F${r.group ?? ''}\u241F${r.enabled === false ? '0' : '1'}`
     )
     .join('\u241E');
 

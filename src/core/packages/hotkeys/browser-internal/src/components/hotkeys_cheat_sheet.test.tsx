@@ -11,7 +11,11 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BehaviorSubject, of } from 'rxjs';
-import type { HotkeyDefinition } from '@kbn/core-hotkeys-browser';
+import type {
+  HotkeyDefinition,
+  HotkeysSidebarActions,
+  HotkeysSidebarState,
+} from '@kbn/core-hotkeys-browser';
 import { HotkeysCheatSheet } from './hotkeys_cheat_sheet';
 
 const globalRegistration: HotkeyDefinition = {
@@ -37,20 +41,34 @@ const contextRegistration: HotkeyDefinition = {
   scope: 'context',
 };
 
+const defaultSidebarState: HotkeysSidebarState = {};
+const defaultSidebarActions: HotkeysSidebarActions = {
+  openToFeature: jest.fn(),
+  clearPendingFeatureFocus: jest.fn(),
+};
+
 const renderModal = ({
   registrations,
   currentAppId,
+  state = defaultSidebarState,
+  actions = defaultSidebarActions,
 }: {
   registrations: HotkeyDefinition[];
   currentAppId?: string;
+  state?: HotkeysSidebarState;
+  actions?: HotkeysSidebarActions;
 }) => {
-  const getRegistrations$ = () =>
-    new BehaviorSubject<ReadonlyArray<HotkeyDefinition>>(registrations);
+  const registrations$ = new BehaviorSubject<ReadonlyArray<HotkeyDefinition>>(registrations);
+  const getRegistrations$ = () => registrations$;
+  const currentAppId$ = of(currentAppId);
+  const getCurrentAppId$ = () => currentAppId$;
 
   const onClose = jest.fn();
   render(
     <HotkeysCheatSheet
       onClose={onClose}
+      state={state}
+      actions={actions}
       getRegistrations$={getRegistrations$}
       getCurrentAppId$={() => of(currentAppId)}
     />
@@ -99,6 +117,50 @@ describe('HotkeysCheatSheetModal', () => {
 
     expect(screen.queryByText('Open keyboard shortcuts')).not.toBeInTheDocument();
     expect(screen.getByText('Close flyout')).toBeInTheDocument();
+  });
+
+  it('filters entries by featureId via the search field', async () => {
+    const user = userEvent.setup();
+    const withFeature: HotkeyDefinition = {
+      ...globalRegistration,
+      id: 'discover:featureShortcut',
+      label: 'Do thing',
+      featureId: 'discover:documentTable',
+    };
+    renderModal({
+      registrations: [globalRegistration, withFeature],
+    });
+
+    await user.type(screen.getByTestId('hotkeysCheatSheetSearch'), 'discover:documentTable');
+
+    expect(screen.queryByText('Open keyboard shortcuts')).not.toBeInTheDocument();
+    expect(screen.getByText('Do thing')).toBeInTheDocument();
+  });
+
+  it('prefills search from pendingFeatureFocus and clears intent', () => {
+    const clearPendingFeatureFocus = jest.fn();
+    const actions: HotkeysSidebarActions = {
+      openToFeature: jest.fn(),
+      clearPendingFeatureFocus,
+    };
+    const state: HotkeysSidebarState = { pendingFeatureFocus: 'discover:documentTable' };
+    const filteredRegistration: HotkeyDefinition = {
+      id: 'discover:only',
+      keys: 'Mod+x',
+      label: 'Only row',
+      scope: 'global',
+      featureId: 'discover:documentTable',
+    };
+    renderModal({
+      registrations: [globalRegistration, filteredRegistration],
+      state,
+      actions,
+    });
+
+    expect(screen.getByTestId('hotkeysCheatSheetSearch')).toHaveValue('discover:documentTable');
+    expect(screen.getByText('Only row')).toBeInTheDocument();
+    expect(screen.queryByText('Open keyboard shortcuts')).not.toBeInTheDocument();
+    expect(clearPendingFeatureFocus).toHaveBeenCalledTimes(1);
   });
 
   it('renders the empty state when no registrations match', async () => {

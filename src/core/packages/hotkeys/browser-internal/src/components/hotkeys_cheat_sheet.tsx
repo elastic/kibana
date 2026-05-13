@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiEmptyPrompt,
   EuiFieldSearch,
@@ -26,7 +26,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
-import type { HotkeyDefinition } from '@kbn/core-hotkeys-browser';
+import type {
+  HotkeyDefinition,
+  HotkeysSidebarActions,
+  HotkeysSidebarState,
+} from '@kbn/core-hotkeys-browser';
 
 import { useObservable } from '@kbn/use-observable';
 import type { Observable } from 'rxjs';
@@ -56,7 +60,9 @@ const SECTION_TITLES: Record<Section, string> = {
 
 const matches = (def: HotkeyDefinition, query: string): boolean => {
   if (!query) return true;
-  const haystack = [def.label, def.description, def.group, def.keys].filter(Boolean).join(' ');
+  const haystack = [def.label, def.description, def.group, def.featureId, def.keys]
+    .filter(Boolean)
+    .join(' ');
   return haystack.toLowerCase().includes(query.toLowerCase());
 };
 
@@ -135,25 +141,40 @@ const Section = ({ title, entries }: { title: string; entries: HotkeyDefinition[
   );
 };
 
-export interface HotkeysCheatSheetModalProps {
-  onClose: () => void;
+interface HotkeysCheatSheetProps
+  extends SidebarComponentProps<HotkeysSidebarState, HotkeysSidebarActions> {
+  getRegistrations$: () => Observable<ReadonlyArray<HotkeyDefinition>>;
+  getCurrentAppId$: () => Observable<string | undefined>;
 }
 
 /**
- * Modal that lists every currently-registered Kibana hotkey, grouped by scope
- * and filterable by label/description/chord.
+ * Sidebar panel that lists Kibana hotkeys: grouped by scope and filterable.
+ * When the sidebar store sets `pendingFeatureFocus`, the search field is seeded and the intent cleared.
  */
 export const HotkeysCheatSheet = ({
   onClose,
+  state,
+  actions,
   getRegistrations$,
   getCurrentAppId$,
-}: SidebarComponentProps & {
-  getRegistrations$: () => Observable<ReadonlyArray<HotkeyDefinition>>;
-  getCurrentAppId$: () => Observable<string | undefined>;
-}) => {
-  const currentAppId = useObservable(getCurrentAppId$());
-  const registrations = useObservable(getRegistrations$(), EMPTY_REGISTRATIONS);
+}: HotkeysCheatSheetProps) => {
+  const registrationsObsRef = useRef<Observable<ReadonlyArray<HotkeyDefinition>>>(
+    getRegistrations$()
+  );
+  const currentAppIdObsRef = useRef<Observable<string | undefined>>(getCurrentAppId$());
+
+  const currentAppId = useObservable(currentAppIdObsRef.current);
+  const registrations = useObservable(registrationsObsRef.current, EMPTY_REGISTRATIONS);
   const [query, setQuery] = useState('');
+
+  useEffect(() => {
+    const pending = state.pendingFeatureFocus;
+    if (pending == null || pending === '') {
+      return;
+    }
+    setQuery(pending);
+    actions.clearPendingFeatureFocus();
+  }, [state.pendingFeatureFocus, actions]);
 
   const grouped = useMemo(
     () => group(registrations, currentAppId, query),
