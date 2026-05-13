@@ -1,0 +1,44 @@
+# Code Researcher
+# AI-powered code research assistant using semantic search, symbol analysis, and code mapping
+# Part of the Semantic Code Search (SCS) Workflow Suite
+
+id: scs.code_researcher
+name: Code Researcher
+description: AI-powered assistant for deep code research and analysis. Uses semantic search, symbol analysis, code mapping, and file reading to understand code structure, discover implementations, analyze impact, and view complete file contents.
+labels:
+  - research
+  - analysis
+  - discovery
+  - code-search
+  - scs-suite
+
+configuration:
+  # General instructions for the agent
+  instructions_file: ./instructions.md
+
+  # Tools available to the agent
+  tools:
+    - tool_ids:
+        - scs.discover_directories # Find significant directories in codebase
+        - scs.semantic_search # Find code by meaning
+        - scs.symbol_analysis # Analyze symbols and impact
+        - scs.map_symbols # View code structure
+        - scs.read_file_from_chunks # Read complete file implementations
+        - platform.core.list_indices # List available Elasticsearch indices
+
+  # Skills available to the agent
+  skill_ids:
+    - scs-semantic-code-search
+
+  # Optional: Research step configuration
+  # These will be supported in future versions of Kibana
+  research:
+    instructions_file: ./research.md
+    max_iterations: 5
+    timeout_ms: 300000
+
+  # Optional: Answer step configuration
+  # These will be supported in future versions of Kibana
+  answer:
+    instructions_file: ./answer.md
+    format: markdown

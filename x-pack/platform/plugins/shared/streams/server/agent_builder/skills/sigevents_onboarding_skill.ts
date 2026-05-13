@@ -30,6 +30,9 @@ export const createSigEventsOnboardingSkill = (options: MemoryToolsOptions) =>
     6. How the team normally checks system health (dashboards, runbooks, on-call procedures)
     7. Known failure modes, past incidents, or recurring issues
     8. Any MCP tools or external integrations that can query system state (e.g. deployment status APIs, feature flag services, CMDB)
+    9. Where code lives (repositories, monorepo vs polyrepo, branching strategy, ownership)
+    10. How data and requests flow through the system (end-to-end request paths, async flows, queues, event buses)
+    11. Where things can be accessed (dashboards, admin UIs, runbooks, internal docs, wikis, status pages, on-call portals)
     </goal>
 
     <workflow>
@@ -37,7 +40,7 @@ export const createSigEventsOnboardingSkill = (options: MemoryToolsOptions) =>
 
     Start by reviewing what is already known about the system:
     - Use memory_list to browse the category tree
-    - Use memory_search to look for entries about "system", "architecture", "deployment", "infrastructure", "services"
+    - Use memory_search to look for entries about "system", "architecture", "deployment", "infrastructure", "services", "repositories", "flow", "access"
     - Use memory_recent_changes to see what was recently updated
 
     Then present a concise summary of what the system currently knows. Be specific about services, infrastructure components, and any deployment context that was found. Clearly indicate what is present, what seems incomplete, and what is missing entirely.
@@ -48,6 +51,9 @@ export const createSigEventsOnboardingSkill = (options: MemoryToolsOptions) =>
     > - Infrastructure: [list or "not documented yet"]
     > - Deployment: [summary or "not documented yet"]
     > - Observability: [summary or "not documented yet"]
+    > - Code repositories: [list or "not documented yet"]
+    > - System flows: [summary or "not documented yet"]
+    > - Access & resources: [list or "not documented yet"]
     > - Operational context: [summary or "not documented yet"]
 
     Then ask: **"Is this accurate? Is anything missing or wrong?"**
@@ -64,6 +70,27 @@ export const createSigEventsOnboardingSkill = (options: MemoryToolsOptions) =>
     - How are rollbacks triggered? (automatic on error rate, manual, feature flags)
     - Are there deployment freeze windows or change advisory boards (CAB)?
     - What signals confirm a deployment succeeded or failed?
+
+    ### Code & repositories
+    - Where is the code stored? (GitHub, GitLab, Bitbucket — org/repo names or URLs if known)
+    - Monorepo or polyrepo? How are services organised across repos?
+    - How does the branching strategy work? (trunk-based, gitflow, feature branches)
+    - Who owns what — are there team or service ownership files (CODEOWNERS, team manifests)?
+    - Are there any internal package registries or shared libraries worth knowing about?
+
+    ### System flows & architecture
+    - How does a typical request flow end-to-end? (e.g. user → CDN → API gateway → service A → service B → DB)
+    - Are there async flows, event queues, or message buses? (Kafka, SQS, Pub/Sub, etc.)
+    - Are there batch jobs or cron-style processes that affect system state?
+    - How does data move between services — REST, gRPC, GraphQL, events?
+    - Are there any critical external dependencies (third-party APIs, payment providers, auth providers)?
+
+    ### Access & resources
+    - Where are the main dashboards and admin UIs? (URLs or tool names)
+    - Where do runbooks, post-mortems, or operational docs live? (Confluence, Notion, GitHub wiki, etc.)
+    - Is there an internal status page or health check portal?
+    - Where are alerts managed and routed? (PagerDuty, Opsgenie, Slack channels — which ones?)
+    - Where are deployment logs or audit trails visible?
 
     ### Infrastructure & topology
     - What cloud providers and regions are used?
@@ -93,8 +120,8 @@ export const createSigEventsOnboardingSkill = (options: MemoryToolsOptions) =>
     As the user answers, write findings to memory incrementally. Do not wait until the end. After each significant answer:
     - Search memory to check if a relevant page already exists
     - Update it with memory_patch (for additions to existing pages) or memory_write (for new pages)
-    - Use categories like: "architecture", "services", "infrastructure", "operations", "deployment"
-    - Tag pages with relevant terms (e.g. "deployment", "kubernetes", "ci-cd", "runbook")
+    - Use categories like: "architecture", "services", "infrastructure", "operations", "deployment", "repositories", "access"
+    - Tag pages with relevant terms (e.g. "deployment", "kubernetes", "ci-cd", "runbook", "github", "flow", "dashboard")
     - Reference related pages (e.g. a service page should reference its infrastructure page)
 
     ## Step 4 — Confirm and close
@@ -107,6 +134,9 @@ export const createSigEventsOnboardingSkill = (options: MemoryToolsOptions) =>
     <memory_writing_guidelines>
     - Write separate pages per service, per infrastructure component, and per operational domain
     - Deployment infrastructure deserves its own page (e.g. "deployment-pipeline-overview")
+    - Code repositories and ownership deserve their own page (e.g. "repositories-overview")
+    - System flows deserve their own page (e.g. "request-flow-overview", "async-event-flow")
+    - Access resources (dashboards, wikis, portals) deserve their own page (e.g. "team-access-resources")
     - Runbooks and failure patterns belong in the "operations" category
     - Keep content factual and concise — focus on what helps with RCA and remediation
     - Always search before writing to avoid duplicates

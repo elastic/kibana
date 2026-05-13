@@ -1,0 +1,216 @@
+# Read File from Chunks Workflow
+# Reconstructs file content from indexed code chunks
+# Provides a view of the original file structure with gap indicators
+#
+# Split-index model:
+# 1. Query <index>_locations for filePath -> get (chunk_id, startLine, endLine) sorted
+# 2. Fetch chunk content from <index> using ids query
+# 3. Reconstruct file with deduplication and gap indicators
+
+name: Read File from Chunks
+description: Reconstructs file content from indexed code chunks, providing a view of the original file structure. Reads one or more files from the semantic code search index and assembles them from their indexed chunks.
+enabled: true
+tags:
+  - code-search
+  - file-reading
+  - reconstruction
+  - scs
+
+inputs:
+  - name: file_paths
+    type: string
+    description: Comma-separated list of file paths to read (e.g., "src/utils/api.ts,src/components/Button.tsx"). File paths should be relative to the repository root.
+    required: true
+
+  - name: index
+    type: string
+    description: Elasticsearch index to search (e.g. "code-elastic_kibana").
+    required: true
+
+triggers:
+  - type: manual
+
+steps:
+  - name: log_read_start
+    type: console
+    with:
+      message: |
+        Starting File Reconstruction
+        File Paths: {{ inputs.file_paths }}
+        Index: {{ inputs.index }}
+
+  # Step 1: Query _locations index for file paths
+  # Gets chunk_id, filePath, startLine, endLine for each matching location
+  # Sorted for proper reconstruction order
+  - name: fetch_locations
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: '/{{ inputs.index }}_locations/_search'
+      body:
+        size: 10000
+        _source:
+          includes:
+            - chunk_id
+            - filePath
+            - startLine
+            - endLine
+        query:
+          terms:
+            filePath: '${{ inputs.file_paths | split: "," }}'
+        sort:
+          - filePath:
+              order: asc
+          - startLine:
+              order: asc
+          - endLine:
+              order: desc
+
+  # Step 2: Fetch chunk content from the chunks index
+  # Uses ids query with all chunk_ids found in step 1
+  - name: fetch_chunk_content
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: '/{{ inputs.index }}/_search'
+      body:
+        size: 10000
+        _source:
+          includes:
+            - content
+        query:
+          ids:
+            values: '${{ steps.fetch_locations.output.hits.hits | map: "_source" | map: "chunk_id" | uniq }}'
+
+  # Step 3: Reconstruct files by joining locations with chunk content
+  - name: reconstruct_files
+    type: console
+    with:
+      message: |
+        {%- assign loc_hits = steps.fetch_locations.output.hits.hits -%}
+        {%- assign chunk_hits = steps.fetch_chunk_content.output.hits.hits -%}
+
+        {%- if loc_hits.size == 0 -%}
+        No chunks found for the specified file paths.
+
+        **Requested Files**:
+        {%- assign paths = inputs.file_paths | split: "," %}
+        {%- for file_path_item in paths %}
+        - `{{ file_path_item | strip }}`
+        {%- endfor %}
+
+        **Troubleshooting**:
+        - Verify the file paths are relative to the repository root
+        - Check that the files exist in the index
+        - Try using a different index with the `index` parameter
+        {%- else -%}
+
+        Found {{ loc_hits | size }} location records, {{ chunk_hits | size }} chunks
+
+        {%- comment -%}
+        Build list of unique file paths from location hits
+        {%- endcomment -%}
+        {%- assign file_paths_list = "" | split: "" -%}
+        {%- for hit in loc_hits -%}
+          {%- assign loc_src = hit._source -%}
+          {%- assign current_file_path = loc_src.filePath -%}
+          {%- unless file_paths_list contains current_file_path -%}
+            {%- assign file_paths_list = file_paths_list | push: current_file_path -%}
+          {%- endunless -%}
+        {%- endfor -%}
+
+        {%- for file_path_item in file_paths_list -%}
+
+        ---
+
+        ## File: `{{ file_path_item }}`
+
+        {%- comment -%}
+        Collect location entries for this file, join with chunk content
+        {%- endcomment -%}
+        {%- assign file_chunks = "" | split: "" -%}
+
+        {%- for hit in loc_hits -%}
+          {%- assign loc_src = hit._source -%}
+          {%- if loc_src.filePath == file_path_item -%}
+            {%- assign chunk_id = loc_src.chunk_id -%}
+            {%- assign chunk_content = "" -%}
+
+            {%- comment -%} Find matching chunk content {%- endcomment -%}
+            {%- for ch in chunk_hits -%}
+              {%- if ch._id == chunk_id -%}
+                {%- assign ch_source = ch._source -%}
+                {%- assign chunk_content = ch_source.content -%}
+                {%- break -%}
+              {%- endif -%}
+            {%- endfor -%}
+
+            {%- if chunk_content != "" -%}
+              {%- assign entry = chunk_content | prepend: "|||" | prepend: loc_src.endLine | prepend: "|||" | prepend: loc_src.startLine | prepend: "|||" | prepend: chunk_id -%}
+              {%- assign file_chunks = file_chunks | push: entry -%}
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+
+        {%- if file_chunks.size == 0 -%}
+
+        _File not found in index... try a relative path._
+
+        {%- else -%}
+
+        {%- comment -%}
+        Deduplicate overlapping chunks.
+        Location hits are sorted by startLine ASC, endLine DESC.
+        Keep chunks where endLine > lastEndLine.
+        {%- endcomment -%}
+        {%- assign deduped = "" | split: "" -%}
+        {%- assign last_end_line = -1 -%}
+
+        {%- for entry in file_chunks -%}
+          {%- assign parts = entry | split: "|||" -%}
+          {%- assign entry_end_line = parts[2] | plus: 0 -%}
+          {%- if entry_end_line > last_end_line -%}
+            {%- assign deduped = deduped | push: entry -%}
+            {%- assign last_end_line = entry_end_line -%}
+          {%- endif -%}
+        {%- endfor -%}
+
+        {%- comment -%}
+        Reconstruct file content with gap indicators
+        {%- endcomment -%}
+        {%- assign current_line = 1 -%}
+        {%- assign is_first_chunk = true -%}
+
+        ```
+        {%- for entry in deduped -%}
+          {%- assign parts = entry | split: "|||" -%}
+          {%- assign chunk_start = parts[1] | plus: 0 -%}
+          {%- assign chunk_end = parts[2] | plus: 0 -%}
+          {%- assign chunk_text = parts[3] -%}
+          {%- assign line_gap = chunk_start | minus: current_line -%}
+
+          {%- if is_first_chunk -%}
+            {%- if line_gap > 0 -%}
+        // ({{ line_gap }} lines omitted)
+            {%- endif -%}
+            {%- assign is_first_chunk = false -%}
+          {%- else -%}
+            {%- if line_gap > 0 -%}
+
+        // ({{ line_gap }} lines omitted)
+            {%- elsif line_gap == 0 -%}
+
+            {%- endif -%}
+          {%- endif -%}
+        {{ chunk_text }}
+          {%- assign current_line = chunk_end | plus: 1 -%}
+        {%- endfor -%}
+        ```
+
+        **Reconstruction Details**:
+        - Location records: {{ file_chunks | size }}
+        - Deduped chunks: {{ deduped | size }}
+
+        {%- endif -%}
+        {%- endfor -%}
+        {%- endif %}

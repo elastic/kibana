@@ -1,0 +1,173 @@
+# Map Symbols by Directory Workflow
+# Maps symbols across files in a directory with structural analysis
+# Returns a structured file-by-file view showing all symbols and their locations
+#
+# Split-index model:
+# 1. Query <index>_locations for filePath prefix to get chunk IDs grouped by file
+# 2. Enrich from <index> (chunks) for symbols, imports, exports via aggregation
+
+name: Map Symbols by Directory
+description: Creates a structured map of code symbols organized by file and type. Explore code organization, understand architecture, and find related code by specifying a directory path.
+enabled: true
+tags:
+  - code-search
+  - symbols
+  - mapping
+  - scs
+  - architecture
+
+inputs:
+  - name: directory
+    type: string
+    description: Directory path to explore (e.g., "src/platform/packages/kbn-esql-utils" or "src/api"). Shows all code in that directory and subdirectories.
+    required: true
+
+  - name: index
+    type: string
+    description: Elasticsearch index to search (e.g. "code-elastic_kibana").
+    required: true
+
+  - name: size
+    type: number
+    description: Maximum number of files to return (default 1000). Limits result set size for performance.
+    required: false
+
+triggers:
+  - type: manual
+
+steps:
+  - name: log_mapping_start
+    type: console
+    with:
+      message: |
+        Starting Symbol Map Generation
+        Directory: {{ inputs.directory }}
+        Max Files: {{ inputs.size | default: 1000 }}
+        Index: {{ inputs.index }}
+
+  # Step 1: Query _locations index for files in the directory
+  # Get chunk_ids grouped by filePath, plus a flat list of all chunk_ids
+  - name: search_locations
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: '/{{ inputs.index }}_locations/_search'
+      body:
+        size: 0
+        query:
+          prefix:
+            filePath:
+              value: '{{ inputs.directory }}'
+        aggs:
+          files:
+            terms:
+              field: filePath
+              size: '${{ inputs.size | default: 1000 }}'
+            aggs:
+              chunks:
+                terms:
+                  field: chunk_id
+                  size: 2000
+          all_chunk_ids:
+            terms:
+              field: chunk_id
+              size: 10000
+
+  # Step 2: Enrich from the chunks index
+  # Fetch actual chunk documents (not aggregated) since _id field doesn't support aggregation
+  - name: enrich_chunks
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: '/{{ inputs.index }}/_search'
+      body:
+        size: 10000
+        _source:
+          includes:
+            - symbols
+            - imports
+            - exports
+        query:
+          ids:
+            values: '${{ steps.search_locations.output.aggregations.all_chunk_ids.buckets | map: "key" }}'
+
+  # Step 3: Format combined results
+  # Join location file buckets with chunk documents
+  - name: format_symbol_map
+    type: console
+    with:
+      message: |
+        {%- assign files = steps.search_locations.output.aggregations.files.buckets -%}
+        {%- assign chunks = steps.enrich_chunks.output.hits.hits -%}
+        Found {{ files | size }} files
+
+        {%- for file in files %}
+
+        ---
+
+        ## {{ file.key }}
+
+        {% assign file_chunk_ids = "" | split: "" -%}
+        {%- for chunk in file.chunks.buckets -%}
+          {%- assign file_chunk_ids = file_chunk_ids | push: chunk.key -%}
+        {%- endfor -%}
+
+        {%- comment -%} Collect symbols, imports, exports from all chunks belonging to this file {%- endcomment -%}
+        {%- assign file_symbols = "" | split: "" -%}
+        {%- assign file_imports = "" | split: "" -%}
+        {%- assign file_exports = "" | split: "" -%}
+
+        {%- for chunk_hit in chunks -%}
+          {%- if file_chunk_ids contains chunk_hit._id -%}
+            {%- assign chunk_source = chunk_hit._source -%}
+            {%- if chunk_source.symbols -%}
+              {%- for sym in chunk_source.symbols -%}
+                {%- assign file_symbols = file_symbols | push: sym -%}
+              {%- endfor -%}
+            {%- endif -%}
+            {%- if chunk_source.imports -%}
+              {%- for imp in chunk_source.imports -%}
+                {%- assign file_imports = file_imports | push: imp -%}
+              {%- endfor -%}
+            {%- endif -%}
+            {%- if chunk_source.exports -%}
+              {%- for exp in chunk_source.exports -%}
+                {%- assign file_exports = file_exports | push: exp -%}
+              {%- endfor -%}
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+
+        ### Symbols ({{ file_symbols | size }})
+
+        {%- if file_symbols.size > 0 %}
+        {% for symbol in file_symbols -%}
+        - `{{ symbol.name }}` ({{ symbol.kind }}) - Line {{ symbol.line }}
+        {% endfor -%}
+        {%- else %}
+        _No symbols found_
+        {%- endif %}
+
+        ### Imports ({{ file_imports | size }})
+
+        {%- if file_imports.size > 0 %}
+        {% for import in file_imports -%}
+        - **{{ import.path }}** ({{ import.type }})
+          {%- if import.symbols -%}
+          - Symbols: {% for sym in import.symbols %}`{{ sym }}`{% unless forloop.last %}, {% endunless %}{% endfor %}
+          {%- endif %}
+        {% endfor -%}
+        {%- else %}
+        _No imports found_
+        {%- endif %}
+
+        ### Exports ({{ file_exports | size }})
+
+        {%- if file_exports.size > 0 %}
+        {% for export in file_exports -%}
+        - `{{ export.name }}` ({{ export.type }}){% if export.target %} -> `{{ export.target }}`{% endif %}
+        {% endfor -%}
+        {%- else %}
+        _No exports found_
+        {%- endif %}
+        {%- endfor %}

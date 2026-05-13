@@ -1,0 +1,139 @@
+# Discover Directories Workflow
+# Discovers significant directories in a codebase to identify where important packages,
+# modules, or components are located. First step in codebase exploration.
+#
+# Split-index model:
+# 1. Semantic search on <index> (chunks) to get candidate chunk IDs
+# 2. Aggregate on <index>_locations by directoryPath, scoped to those chunk IDs
+# 3. Enrich from chunks index for languages, kinds, and symbol counts
+
+name: Discover Directories
+description: Discovers significant directories in a codebase to identify where important packages, modules, or components are located. Use as the first step when exploring an unfamiliar codebase - find significant areas, then use map_symbols to explore discovered directories.
+enabled: true
+tags:
+  - code-search
+  - discovery
+  - navigation
+  - scs
+  - architecture
+
+inputs:
+  - name: query
+    type: string
+    description: Semantic search query to find directories related to a concept (e.g., "authentication", "data visualization").
+    required: true
+
+  - name: min_files
+    type: number
+    description: Minimum number of files required in a directory to be considered significant (default is 3). Increase to filter out small directories.
+    required: false
+
+  - name: max_results
+    type: number
+    description: Maximum number of directories to return (default is 20). Increase for broader discovery.
+    required: false
+
+  - name: index
+    type: string
+    description: Elasticsearch index to search (e.g. "code-elastic_kibana").
+    required: true
+
+triggers:
+  - type: manual
+
+steps:
+  - name: log_discovery_start
+    type: console
+    with:
+      message: |
+        Starting Directory Discovery
+        Query: {{ inputs.query }}
+        Min Files: {{ inputs.min_files | default: 3 }}
+        Max Results: {{ inputs.max_results | default: 20 }}
+        Index: {{ inputs.index }}
+
+  # Step 1: Semantic search on chunks index to get candidate chunk IDs
+  - name: semantic_search_chunks
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: '/{{ inputs.index }}/_search'
+      body:
+        size: 5000
+        _source: false
+        query:
+          semantic:
+            field: semantic_text
+            query: '${{ inputs.query }}'
+
+  # Step 2: Aggregate on _locations by directoryPath, scoped to chunk IDs
+  # Also collects top chunk_ids per directory for enrichment
+  - name: aggregate_directories
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: '/{{ inputs.index }}_locations/_search'
+      body:
+        size: 0
+        query:
+          terms:
+            chunk_id: '${{ steps.semantic_search_chunks.output.hits.hits | map: "_id" }}'
+        aggs:
+          directories:
+            terms:
+              field: directoryPath
+              size: '${{ inputs.max_results | default: 20 }}'
+              min_doc_count: '${{ inputs.min_files | default: 3 }}'
+              order:
+                _count: desc
+            aggs:
+              file_count:
+                cardinality:
+                  field: filePath
+              top_chunks:
+                terms:
+                  field: chunk_id
+                  size: 200
+
+  # Step 3: Format results
+  # Directory info comes from _locations aggregation
+  # Language/kind/symbol enrichment would require a separate mget call,
+  # but workflow engine doesn't support that pattern easily, so we output
+  # the core directory metrics from locations
+  - name: format_results
+    type: console
+    with:
+      message: |
+        {%- assign dirs = steps.aggregate_directories.output.aggregations.directories.buckets -%}
+        {%- if dirs.size == 0 -%}
+        No significant directories found matching your criteria.
+
+        **Tips**:
+        - Try a broader search query
+        - Reduce `min_files` threshold
+        - Verify the index contains data
+        {%- else -%}
+        Found {{ dirs | size }} significant directories
+
+        **Query**: `{{ inputs.query }}`
+
+        {%- for dir in dirs %}
+
+        ---
+
+        ## {{ dir.key }}
+
+        - **Files**: {{ dir.file_count.value }}
+        - **Chunks**: {{ dir.doc_count }}
+        - **Top Chunk IDs**: {{ dir.top_chunks.buckets | size }}
+        {%- endfor %}
+
+        ---
+
+        ## Next Steps
+
+        Use `map_symbols` to explore discovered directories:
+        ```json
+        { "directory": "{{ dirs[0].key }}" }
+        ```
+        {%- endif %}
