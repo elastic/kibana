@@ -27,6 +27,12 @@ export interface DetectionEmulationFeatureFlags {
    * Default: false (no real execution).
    */
   realExecution: boolean;
+  /**
+   * Controls whether the log-injection dispatch path is enabled.
+   * When false, `validate_rule` returns 403 for `mode: 'log_injection'` requests.
+   * Default: false.
+   */
+  logInjection: boolean;
 }
 
 /**
@@ -41,6 +47,7 @@ export function getDetectionEmulationFeatureFlags(
 ): DetectionEmulationFeatureFlags {
   return {
     realExecution: experimentalFeatures.detectionEmulationRealExecution,
+    logInjection: experimentalFeatures.detectionEmulationLogInjection,
   };
 }
 

@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { ConfigType } from '../../../config';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { runEmulationCommandRoute } from './run_command/route';
+import { validateRuleRoute } from './validate_rule/route';
 
 export const registerDetectionEmulationRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -16,4 +17,5 @@ export const registerDetectionEmulationRoutes = (
   logger: Logger
 ) => {
   runEmulationCommandRoute(router, config, logger);
+  validateRuleRoute(router, config, logger);
 };
