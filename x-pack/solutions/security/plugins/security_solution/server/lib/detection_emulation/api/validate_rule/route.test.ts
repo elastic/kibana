@@ -35,6 +35,21 @@ const FEATURE_ENABLED_CONFIG = {
 } as unknown as ConfigType;
 
 /**
+ * PROD-6: static feature flag is ON, but the operator has flipped the
+ * runtime kill switch (`xpack.securitySolution.detectionEmulation.realExecutionEnabled`
+ * = false). Validate-rule must still 403 `real_execution` requests and
+ * the body must surface the kill-switch reason so operators flip the
+ * right knob — not restart Kibana.
+ */
+const RUNTIME_KILL_SWITCH_CONFIG = {
+  experimentalFeatures: {
+    detectionEmulationRealExecution: true,
+    detectionEmulationLogInjection: true,
+  },
+  detectionEmulation: { realExecutionEnabled: false },
+} as unknown as ConfigType;
+
+/**
  * Validate-rule's auth gate (Step 2) refuses to dispatch when no
  * authenticated user is present. Tests targeting later gates must opt in
  * to an authenticated identity.
@@ -68,6 +83,67 @@ const buildLogInjectionRequest = () =>
       mode: 'log_injection',
     },
   });
+
+// ─── PROD-6: runtime kill switch ─────────────────────────────────────────────
+
+describe('validateRuleRoute — PROD-6 runtime kill switch', () => {
+  let server: ReturnType<typeof serverMock.create>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+    server = serverMock.create();
+    (generateScenario as jest.Mock).mockReset();
+  });
+
+  it('returns 403 with kill-switch likely_cause when realExecutionEnabled is false at runtime', async () => {
+    validateRuleRoute(server.router, RUNTIME_KILL_SWITCH_CONFIG, logger);
+
+    const { context } = requestContextMock.createTools();
+    stubAuthenticatedUser(context);
+    context.securitySolution.getEndpointAuthz.mockResolvedValue(
+      getEndpointAuthzInitialStateMock({ canWriteExecuteOperations: true })
+    );
+
+    const response = await server.inject(
+      buildRealExecutionRequest(),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toBe(403);
+    expect((response.body as { message: string }).message).toMatch(/realExecutionEnabled/);
+    // The kill-switch path must NOT direct operators to restart Kibana
+    // — that would be the response if the static feature flag were the
+    // cause, not the runtime knob.
+    expect((response.body as { message: string }).message).not.toMatch(
+      /detectionEmulationRealExecution/
+    );
+    // Gate fires BEFORE scenario generation — wasted work matters at scale.
+    expect(generateScenario as jest.Mock).not.toHaveBeenCalled();
+  });
+
+  it('does NOT block log_injection with the kill-switch reason — the runtime knob only gates real_execution', async () => {
+    validateRuleRoute(server.router, RUNTIME_KILL_SWITCH_CONFIG, logger);
+
+    const { context } = requestContextMock.createTools();
+    stubAuthenticatedUser(context);
+
+    const response = await server.inject(
+      buildLogInjectionRequest(),
+      requestContextMock.convertContext(context)
+    );
+
+    // The log_injection request may still 403 for other reasons (e.g.
+    // default-deny allowlist), but the kill-switch text must NEVER
+    // appear in the body — that would mislead the operator into
+    // thinking the runtime knob is the cause.
+    const bodyMessage =
+      typeof response.body === 'object' && response.body !== null && 'message' in response.body
+        ? String((response.body as { message: unknown }).message)
+        : JSON.stringify(response.body);
+    expect(bodyMessage).not.toMatch(/realExecutionEnabled/);
+  });
+});
 
 // ─── Allowlist gate ──────────────────────────────────────────────────────────
 

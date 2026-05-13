@@ -18,7 +18,11 @@ import type { RunEmulationCommandInput } from '../../../../common/detection_emul
 import type { ConfigType } from '../../../config';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
-import { getDetectionEmulationFeatureFlags } from '../../../lib/detection_emulation/feature_flag';
+import {
+  getDetectionEmulationFeatureFlags,
+  getRealExecutionDisableReason,
+  REAL_EXECUTION_DISABLE_REASON_TEXT,
+} from '../../../lib/detection_emulation/feature_flag';
 import {
   generateScenario,
   type GenerateScenarioFailureReason,
@@ -221,7 +225,10 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
       let concurrencyToken: ReturnType<typeof concurrencyGate.acquire>['token'];
       try {
         // Step 1: Feature flag gate — each mode is independently gated.
-        const featureFlags = getDetectionEmulationFeatureFlags(config.experimentalFeatures);
+        // `real_execution` is two-keyed (static feature flag AND runtime kill
+        // switch); the precise blocking reason flows into `likely_cause` so
+        // operators flip the right knob without grepping logs.
+        const featureFlags = getDetectionEmulationFeatureFlags(config);
         if (mode === 'log_injection' && !featureFlags.logInjection) {
           return {
             results: [
@@ -238,7 +245,11 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
             ],
           };
         }
-        if (mode === 'real_execution' && !featureFlags.realExecution) {
+        if (
+          mode === 'real_execution' &&
+          (!featureFlags.realExecution || !featureFlags.realExecutionRuntimeEnabled)
+        ) {
+          const disableReason = getRealExecutionDisableReason(featureFlags);
           return {
             results: [
               {
@@ -248,7 +259,10 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
                   message: 'Detection emulation real execution is disabled.',
                   mode,
                   status_code: 403,
-                  likely_cause: 'Feature flag detectionEmulationRealExecution is not enabled.',
+                  likely_cause: disableReason
+                    ? REAL_EXECUTION_DISABLE_REASON_TEXT[disableReason]
+                    : 'Real-execution dispatch is disabled.',
+                  disable_reason: disableReason ?? undefined,
                 },
               },
             ],

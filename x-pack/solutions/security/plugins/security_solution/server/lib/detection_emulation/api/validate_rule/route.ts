@@ -20,7 +20,11 @@ import { ValidateRuleInputSchema } from '../../../../../common/detection_emulati
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import type { ConfigType } from '../../../../config';
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
-import { getDetectionEmulationFeatureFlags } from '../../feature_flag';
+import {
+  getDetectionEmulationFeatureFlags,
+  getRealExecutionDisableReason,
+  REAL_EXECUTION_DISABLE_REASON_TEXT,
+} from '../../feature_flag';
 import { generateScenario } from '../../scenario_generator';
 import type { GenerateScenarioFailureReason } from '../../scenario_generator';
 import { generateDocs } from '../../log_injection/generator';
@@ -224,12 +228,27 @@ export const validateRuleRoute = (
           );
 
           // Step 1: Flag gate — each mode is independently gated.
-          const featureFlags = getDetectionEmulationFeatureFlags(config.experimentalFeatures);
+          // `real_execution` is two-keyed (static feature flag AND runtime kill
+          // switch); the precise blocking reason flows into the response body
+          // so operators flip the right knob.
+          const featureFlags = getDetectionEmulationFeatureFlags(config);
           if (mode === 'log_injection' && !featureFlags.logInjection) {
             return siemResponse.error({ statusCode: 403, body: MESSAGES.featureDisabled });
           }
-          if (mode === 'real_execution' && !featureFlags.realExecution) {
-            return siemResponse.error({ statusCode: 403, body: MESSAGES.featureDisabled });
+          if (
+            mode === 'real_execution' &&
+            (!featureFlags.realExecution || !featureFlags.realExecutionRuntimeEnabled)
+          ) {
+            const disableReason = getRealExecutionDisableReason(featureFlags);
+            const likelyCause = disableReason
+              ? REAL_EXECUTION_DISABLE_REASON_TEXT[disableReason]
+              : undefined;
+            return siemResponse.error({
+              statusCode: 403,
+              body: likelyCause
+                ? `${MESSAGES.featureDisabled} ${likelyCause}.`
+                : MESSAGES.featureDisabled,
+            });
           }
 
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);

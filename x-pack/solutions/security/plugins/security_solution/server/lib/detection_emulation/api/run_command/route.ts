@@ -20,7 +20,12 @@ import {
   MissingConnectorActionsError,
 } from '../../execution/runner';
 import type { ConfigType } from '../../../../config';
-import { getDetectionEmulationFeatureFlags, isRealExecutionEnabled } from '../../feature_flag';
+import {
+  getDetectionEmulationFeatureFlags,
+  getRealExecutionDisableReason,
+  isRealExecutionEnabled,
+  REAL_EXECUTION_DISABLE_REASON_TEXT,
+} from '../../feature_flag';
 import { EmulationAllowlist, createAllowlistFromConfig } from '../../execution/allowlist';
 import { EmulationRateLimiter, createDefaultRateLimiterConfig } from '../../execution/rate_limiter';
 import {
@@ -151,13 +156,29 @@ export const runEmulationCommandRoute = (
         try {
           const { emulationId, command, endpointIds } = request.body;
 
-          // Gate 1: feature flag (sourced from `experimentalFeatures` so it ships dark by default).
-          const featureFlags = getDetectionEmulationFeatureFlags(config.experimentalFeatures);
+          // Gate 1: feature flag (static `experimentalFeatures` flag — ships dark
+          // by default) AND runtime kill switch (`detectionEmulation.realExecutionEnabled`
+          // — defaults to true; operators flip it to halt new dispatches without
+          // a Kibana restart). Both must resolve true; the precise blocking
+          // reason flows into the `likely_cause` body so operators fix the
+          // right knob.
+          const featureFlags = getDetectionEmulationFeatureFlags(config);
           if (!isRealExecutionEnabled(featureFlags)) {
+            const disableReason = getRealExecutionDisableReason(featureFlags);
+            const likelyCause = disableReason
+              ? REAL_EXECUTION_DISABLE_REASON_TEXT[disableReason]
+              : undefined;
             logger.warn(
-              `Emulation command [${command}] for emulation [${emulationId}] blocked: real execution is disabled`
+              `Emulation command [${command}] for emulation [${emulationId}] blocked: real execution is disabled (${
+                disableReason ?? 'unknown'
+              })`
             );
-            return siemResponse.error({ statusCode: 403, body: MESSAGES.featureDisabled });
+            return siemResponse.error({
+              statusCode: 403,
+              body: likelyCause
+                ? `${MESSAGES.featureDisabled} ${likelyCause}.`
+                : MESSAGES.featureDisabled,
+            });
           }
 
           const coreContext = await context.core;

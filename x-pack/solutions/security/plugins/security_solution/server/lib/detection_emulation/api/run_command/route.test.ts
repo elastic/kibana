@@ -27,6 +27,17 @@ const FEATURE_DISABLED_CONFIG = {
 } as unknown as ConfigType;
 
 /**
+ * PROD-6: static feature flag is ON, but the operator has flipped the
+ * runtime kill switch (`xpack.securitySolution.detectionEmulation.realExecutionEnabled`
+ * = false). The route must still 403 the request and the body must
+ * surface the kill-switch reason so operators flip the right knob.
+ */
+const RUNTIME_KILL_SWITCH_CONFIG = {
+  experimentalFeatures: { detectionEmulationRealExecution: true },
+  detectionEmulation: { realExecutionEnabled: false },
+} as unknown as ConfigType;
+
+/**
  * The route's N5 gate (added with this PR) refuses to dispatch when no
  * authenticated user is present. The default `requestContextMock` does
  * not stub `getCurrentUser`, so tests targeting later gates (RBAC,
@@ -73,6 +84,43 @@ describe('runEmulationCommandRoute — feature-flag gate', () => {
 
     expect(response.status).toBe(403);
     expect(response.body).toMatchObject({ status_code: 403 });
+    // PROD-6: error body must surface which knob blocked so operators
+    // do not have to grep logs to know whether the static flag or the
+    // runtime kill switch is the cause.
+    expect((response.body as { message: string }).message).toMatch(
+      /detectionEmulationRealExecution/
+    );
+  });
+
+  it('PROD-6: returns 403 with kill-switch likely_cause when realExecutionEnabled is false at runtime', async () => {
+    runEmulationCommandRoute(server.router, RUNTIME_KILL_SWITCH_CONFIG, logger);
+    const { context } = requestContextMock.createTools();
+    stubAuthenticatedUser(context);
+    context.securitySolution.getEndpointAuthz.mockResolvedValue(getEndpointAuthzInitialStateMock());
+
+    const response = await server.inject(
+      requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_EMULATION_RUN_COMMAND_URL,
+        body: {
+          emulationId: 'emu-killswitch-test',
+          agentType: 'endpoint',
+          endpointIds: ['agent-1'],
+          command: 'isolate',
+        },
+      }),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toBe(403);
+    expect(response.body).toMatchObject({ status_code: 403 });
+    expect((response.body as { message: string }).message).toMatch(/realExecutionEnabled/);
+    // The kill-switch path must NOT mention the static flag — that would
+    // mislead operators into restarting Kibana when a config reload is
+    // all that's needed.
+    expect((response.body as { message: string }).message).not.toMatch(
+      /detectionEmulationRealExecution/
+    );
   });
 });
 

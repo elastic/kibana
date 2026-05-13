@@ -26,7 +26,9 @@ import type { EmulationRateLimiter } from '../../../lib/detection_emulation/exec
 import type { ActorContext } from '../../../lib/detection_emulation/execution/audit_context';
 import {
   getDetectionEmulationFeatureFlags,
+  getRealExecutionDisableReason,
   isRealExecutionEnabled,
+  REAL_EXECUTION_DISABLE_REASON_TEXT,
 } from '../../../lib/detection_emulation/feature_flag';
 import { createSavedObjectRuleBindingLookup } from '../../../lib/detection_emulation/rule_binding_lookup';
 import { emulationRuleBindingTypeName } from '../../../lib/detection_emulation/rule_binding';
@@ -128,11 +130,23 @@ export const withCommandGates = async (
   let rateLimitToken: ReturnType<typeof rateLimiter.acquire>['token'];
 
   try {
-    // ── Gate 1: Feature flag ────────────────────────────────────────────────
-    const featureFlags = getDetectionEmulationFeatureFlags(config.experimentalFeatures);
+    // ── Gate 1: Feature flag + runtime kill switch ─────────────────────────
+    // Two knobs gate real execution: the static `experimentalFeatures` flag
+    // (ships dark; restart to flip) and the runtime
+    // `detectionEmulation.realExecutionEnabled` kill switch (defaults to true;
+    // operators flip via `kibana.yml` reload to halt new dispatches without
+    // a restart). The disable-reason helper picks whichever knob actually
+    // closed so the error response steers operators to the right config key.
+    const featureFlags = getDetectionEmulationFeatureFlags(config);
     if (!isRealExecutionEnabled(featureFlags)) {
+      const disableReason = getRealExecutionDisableReason(featureFlags);
+      const likelyCause = disableReason
+        ? REAL_EXECUTION_DISABLE_REASON_TEXT[disableReason]
+        : 'Real-execution dispatch is disabled';
       logger.warn(
-        `Emulation command [${command}] for emulation [${emulationId}] blocked: real execution is disabled`
+        `Emulation command [${command}] for emulation [${emulationId}] blocked: real execution is disabled (${
+          disableReason ?? 'unknown'
+        })`
       );
       return errorResult({
         error_type: 'feature_disabled',
@@ -141,7 +155,8 @@ export const withCommandGates = async (
         agent_type: agentType,
         command,
         status_code: 403,
-        likely_cause: 'Feature flag is disabled for real execution',
+        likely_cause: likelyCause,
+        disable_reason: disableReason ?? undefined,
       });
     }
 

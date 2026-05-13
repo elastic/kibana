@@ -187,7 +187,8 @@ Guards applied by each tool (in order; first failure short-circuits). The four
 
 | Guard | \`validateRule\` | \`getEmulationHistory\` | \`run*Command\` (all four) |
 |---|---|---|---|
-| Feature flag | ✓ (per-mode) | — | ✓ (realExecution) |
+| Feature flag (static) | ✓ (per-mode) | — | ✓ (realExecution) |
+| **Runtime kill switch (PROD-6)** | ✓ (real_execution) | — | ✓ |
 | Auth required | ✓ | — | ✓ |
 | RBAC | ✓ (real_execution) | — | ✓ (per-command) |
 | Allowlist | ✓ (real_execution) | — | ✓ |
@@ -199,7 +200,17 @@ Guards applied by each tool (in order; first failure short-circuits). The four
 
 Feature flags: \`detectionEmulationLogInjection\` gates log_injection;
 \`detectionEmulationRealExecution\` gates real_execution and all four
-\`run*Command\` tools.
+\`run*Command\` tools. Both ship dark by default and require a Kibana
+restart to flip.
+
+**Runtime kill switch (PROD-6):**
+\`xpack.securitySolution.detectionEmulation.realExecutionEnabled\` defaults
+to \`true\`. Operators flip it to \`false\` via \`kibana.yml\` reload (no
+restart) to halt new \`real_execution\` dispatches in response to anomalous
+behaviour. When the kill switch is engaged, \`validateRule\` and the four
+\`run*Command\` tools return a 403 whose \`likely_cause\` reports
+\`runtime_kill_switch_engaged\` so operators know to flip the runtime
+knob — not restart Kibana.
 
 **HITL behaviour** is enforced by the agent-builder framework, not by skill
 prose. \`validateRule\` uses an on-demand prompt so the safe \`log_injection\`

@@ -243,6 +243,17 @@ export const configSchema = schema.object({
    */
   detectionEmulation: schema.maybe(
     schema.object({
+      /**
+       * Runtime kill switch for `real_execution` dispatch. Defaults to `true`
+       * so the existing static feature flag (`xpack.securitySolution.enableExperimental:
+       * detectionEmulationRealExecution`) remains the primary gate. When set
+       * to `false` while the feature flag is on, the route, agent-builder
+       * tool, and shared `withCommandGates` helper all short-circuit with a
+       * 403 `feature_disabled` whose `likely_cause` reports
+       * `runtime_kill_switch_engaged`. Designed for fast operator response
+       * to anomalous behaviour without a Kibana restart.
+       */
+      realExecutionEnabled: schema.boolean({ defaultValue: true }),
       allowlist: schema.maybe(
         schema.object({
           /**
