@@ -183,7 +183,7 @@ export const useListDetailsView = (exceptionListId: string) => {
   const onEditListDetails = useCallback(
     async (listDetails: ListDetails) => {
       try {
-        if (list)
+        if (list) {
           await updateList({
             http,
             list: {
@@ -195,11 +195,13 @@ export const useListDetailsView = (exceptionListId: string) => {
               namespace_type: list.namespace_type,
             },
           });
+          await initializeList();
+        }
       } catch (error) {
         handleErrorStatus(error);
       }
     },
-    [exceptionListId, handleErrorStatus, http, list]
+    [exceptionListId, handleErrorStatus, http, initializeList, list]
   );
   const onExportList = useCallback(
     async (includeExpiredExceptions: boolean) => {
