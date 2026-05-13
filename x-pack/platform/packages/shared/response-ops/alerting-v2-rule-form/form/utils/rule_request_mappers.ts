@@ -45,7 +45,7 @@ const mapMetadata = (metadata: FormValues['metadata']) => ({
   name: metadata.name,
   description: metadata.description,
   owner: metadata.owner,
-  tags: metadata.tags,
+  ...(metadata.tags?.length ? { tags: metadata.tags } : {}),
 });
 
 const mapSchedule = (schedule: FormValues['schedule']) => ({

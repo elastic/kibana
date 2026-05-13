@@ -13,13 +13,13 @@ import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
-import { EventKind } from '../../document/constants/event_kinds';
-import { getDocumentTitle } from '../../document/utils/get_header_title';
+import { EventKind } from '../../document/main/constants/event_kinds';
+import { getDocumentTitle } from '../../document/main/utils/get_header_title';
 import { useKibana } from '../../../common/lib/kibana';
 import type { CellActionRenderer } from './cell_actions';
 import { noopCellActionRenderer } from './cell_actions';
 import { flyoutProviders } from './flyout_provider';
-import { DocumentFlyout } from '../../document';
+import { DocumentFlyout } from '../../document/main';
 import { useDefaultDocumentFlyoutProperties } from '../hooks/use_default_flyout_properties';
 import { TOOLS_FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
 
