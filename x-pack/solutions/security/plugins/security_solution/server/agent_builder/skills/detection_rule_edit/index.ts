@@ -32,7 +32,7 @@ const SKILL_CONTENT = `# Detection Rule Creation and Editing
 Use this skill when the user asks to:
 - Create a detection rule (e.g., "create a rule that detects ...", "build a SIEM rule for ...", "create a security detection rule to find ...", "create a security detection rule that ...")
 - Edit an existing rule's fields (e.g., "change the severity to high", "update the query", "set the interval to 10m", "add tags to the rule")
-- Modify rule logic or metadata (e.g., "add MITRE ATT&CK mappings", "change the index patterns", "update the description", "add new terms to the query")
+- Modify rule logic or metadata (e.g., "add MITRE ATT&CK mappings", "update the description", "update the query")
 
 Do NOT use this skill when the user:
 - Asks about alerts or alert triage (use the alert analysis skill instead)
@@ -71,7 +71,7 @@ Before creating or editing a rule, use the available research tools to ensure ac
 
 This is especially important when:
 - Creating a new rule from scratch (search for similar detections or threat context).
-- Editing queries or detection logic (verify correct syntax for the rule's language: ES|QL, EQL, KQL, Lucene).
+- Editing queries or detection logic (verify correct ES|QL syntax).
 - Adding MITRE ATT&CK mappings (confirm correct tactic/technique IDs and names).
 - Working with unfamiliar rule types or fields.
 
@@ -274,15 +274,6 @@ The lookback should be at least as long as the interval. A common pattern is int
 \`query\` (string): The ES|QL detection query.
 \`language\` (string): Always \`"esql"\`.
 \`type\` (string): Always \`"esql"\`.
-
-### Index Patterns
-
-\`index\` (string array): Elasticsearch index patterns to search. Not used for ES|QL rules.
-
-**Example**:
-\`\`\`json
-{ "index": ["logs-endpoint.events.*", "winlogbeat-*", "filebeat-*"], ... }
-\`\`\`
 
 ### Enabled
 
