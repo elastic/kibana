@@ -69,6 +69,10 @@ Before saving the draft to `.agents/tmp/`, review every scenario in the test pla
 - [ ] Every claim in Known Limitations about a scenario being included or excluded matches reality — verify the referenced scenario exists by name
 - [ ] No optional section (RBAC, upgrade, CCS, multi-space, multi-tenant) is included without a clear justification from the issue content
 - [ ] Test Execution Notes lists every scenario by name under its priority level — not just generic descriptions
+- [ ] **Test Coverage Summary — sum checks.** Three mechanical checks (do not skip — eyeballing produced a multi-scenario undercount in dry-run validation):
+  - For each feature-area row: `P0 + P1 + P2 = Scenarios` **and** `Automated + Manual only = Scenarios`.
+  - For each column: the **Total** cell equals the column-wise sum of all feature-area rows (Scenarios, P0, P1, P2, Automated, Manual only).
+  - **Total Scenarios** equals the actual number of `#### Scenario:` headings rendered in the document — count them.
 - [ ] Footer is present at the end of the file with the correct model identifier and today's date
 
 If any item fails, fix the scenario before saving. If fixing requires information that is not available, apply the Core rule: stop and ask the user.
