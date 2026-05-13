@@ -10,6 +10,7 @@ import { useFormContext } from 'react-hook-form';
 import { Parser, isColumn } from '@elastic/esql';
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getEsqlColumns } from '@kbn/esql-utils';
 import {
   EuiBadge,
@@ -103,6 +104,21 @@ const noRecoveryComingSoonBadgeLabel = i18n.translate(
   }
 );
 
+const recoveryFormRowLabel = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.composeDiscover.recoveryConditionStep.recoveryLabel',
+  { defaultMessage: 'Recovery' }
+);
+
+const baseQuerySectionLabel = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.composeDiscover.shared.baseQueryLabel',
+  { defaultMessage: 'Base query' }
+);
+
+const optionalFieldLabel = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.composeDiscover.detailsStep.optionalLabel',
+  { defaultMessage: 'Optional' }
+);
+
 const RECOVERY_TYPE_OPTIONS: Array<{
   value: RecoveryType;
   inputDisplay: string;
@@ -161,7 +177,7 @@ interface RecoveryTypeSelectorProps {
 }
 
 const RecoveryTypeSelector: React.FC<RecoveryTypeSelectorProps> = ({ state, dispatch }) => (
-  <EuiFormRow label="Recovery" fullWidth>
+  <EuiFormRow label={recoveryFormRowLabel} fullWidth>
     <EuiSuperSelect
       options={RECOVERY_TYPE_OPTIONS}
       valueOfSelected={state.recoveryType}
@@ -267,7 +283,12 @@ function AlertConditionStep({
   return (
     <>
       <EuiTitle size="xs">
-        <h3>ES|QL query</h3>
+        <h3>
+          <FormattedMessage
+            id="xpack.responseOps.alertingV2RuleForm.composeDiscover.alertConditionStep.esqlQueryTitle"
+            defaultMessage="ES|QL query"
+          />
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
 
@@ -275,7 +296,10 @@ function AlertConditionStep({
         <>
           <EuiPanel color="subdued" paddingSize="m">
             <EuiText size="s" color="subdued">
-              No query defined yet
+              <FormattedMessage
+                id="xpack.responseOps.alertingV2RuleForm.composeDiscover.alertConditionStep.noQueryDefinedLabel"
+                defaultMessage="No query defined yet"
+              />
             </EuiText>
           </EuiPanel>
           <EuiSpacer size="s" />
@@ -285,7 +309,10 @@ function AlertConditionStep({
             onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step })}
             data-test-subj="composeDiscoverOpenEditor"
           >
-            Open query editor
+            <FormattedMessage
+              id="xpack.responseOps.alertingV2RuleForm.composeDiscover.alertConditionStep.openQueryEditorButtonLabel"
+              defaultMessage="Open query editor"
+            />
           </EuiButton>
         </>
       ) : !state.tracking ? (
@@ -299,7 +326,10 @@ function AlertConditionStep({
             onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step })}
             data-test-subj="composeDiscoverEditQuery"
           >
-            Edit query
+            <FormattedMessage
+              id="xpack.responseOps.alertingV2RuleForm.composeDiscover.alertConditionStep.editQueryButtonLabel"
+              defaultMessage="Edit query"
+            />
           </EuiButton>
         </>
       ) : (
@@ -311,19 +341,30 @@ function AlertConditionStep({
                 size="s"
                 color="primary"
                 iconType="iInCircle"
-                title="Couldn't automatically separate base query from alert condition. Adjust the split in the query editor."
+                title={i18n.translate(
+                  'xpack.responseOps.alertingV2RuleForm.composeDiscover.alertConditionStep.splitFailedCalloutTitle',
+                  {
+                    defaultMessage:
+                      "Couldn't automatically separate base query from alert condition. Adjust the split in the query editor.",
+                  }
+                )}
               />
               <EuiSpacer size="s" />
             </>
           )}
           <EuiText size="xs" color="subdued">
-            <strong>Base query</strong>
+            <strong>{baseQuerySectionLabel}</strong>
           </EuiText>
           <EuiSpacer size="xs" />
           <QuerySummary query={state.baseQuery} label="base query" />
           <EuiSpacer size="m" />
           <EuiText size="xs" color="subdued">
-            <strong>Alert condition</strong>
+            <strong>
+              <FormattedMessage
+                id="xpack.responseOps.alertingV2RuleForm.composeDiscover.alertConditionStep.alertConditionLabel"
+                defaultMessage="Alert condition"
+              />
+            </strong>
           </EuiText>
           <EuiSpacer size="xs" />
           <QuerySummary query={state.alertBlock} label="alert condition" />
@@ -335,13 +376,22 @@ function AlertConditionStep({
             onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step })}
             data-test-subj="composeDiscoverEditQueries"
           >
-            Edit queries
+            <FormattedMessage
+              id="xpack.responseOps.alertingV2RuleForm.composeDiscover.alertConditionStep.editQueriesButtonLabel"
+              defaultMessage="Edit queries"
+            />
           </EuiButton>
         </>
       )}
 
       <EuiSpacer size="m" />
-      <EuiFormRow label="Time field" fullWidth>
+      <EuiFormRow
+        label={i18n.translate(
+          'xpack.responseOps.alertingV2RuleForm.composeDiscover.alertConditionStep.timeFieldLabel',
+          { defaultMessage: 'Time field' }
+        )}
+        fullWidth
+      >
         <EuiSelect
           fullWidth
           options={timeFieldOptions}
@@ -352,7 +402,13 @@ function AlertConditionStep({
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
-      <EuiFormRow label="Group fields" fullWidth>
+      <EuiFormRow
+        label={i18n.translate(
+          'xpack.responseOps.alertingV2RuleForm.composeDiscover.alertConditionStep.groupFieldsLabel',
+          { defaultMessage: 'Group fields' }
+        )}
+        fullWidth
+      >
         <EuiComboBox
           fullWidth
           options={outputColumns.map((name) => ({ label: name }))}
@@ -361,14 +417,20 @@ function AlertConditionStep({
             setValue('grouping', opts.length ? { fields: opts.map((o) => o.label) } : undefined)
           }
           onCreateOption={(val) => setValue('grouping', { fields: [...groupFields, val] })}
-          placeholder="Add group fields"
+          placeholder={i18n.translate(
+            'xpack.responseOps.alertingV2RuleForm.composeDiscover.alertConditionStep.groupFieldsPlaceholder',
+            { defaultMessage: 'Add group fields' }
+          )}
           data-test-subj="composeDiscoverGroupFields"
         />
       </EuiFormRow>
 
       <EuiSpacer size="m" />
       <EuiSwitch
-        label="Track active and recovered state over time"
+        label={i18n.translate(
+          'xpack.responseOps.alertingV2RuleForm.composeDiscover.alertConditionStep.trackingToggleLabel',
+          { defaultMessage: 'Track active and recovered state over time' }
+        )}
         checked={state.tracking}
         onChange={handleTrackingToggle}
         disabled={!state.queryCommitted}
@@ -401,13 +463,18 @@ function RecoveryConditionStep({
           <EuiHorizontalRule margin="none" />
           <EuiSpacer size="m" />
           <EuiText size="xs" color="subdued">
-            <strong>Base query</strong>
+            <strong>{baseQuerySectionLabel}</strong>
           </EuiText>
           <EuiSpacer size="xs" />
           <QuerySummary query={state.baseQuery} label="base query" />
           <EuiSpacer size="m" />
           <EuiText size="xs" color="subdued">
-            <strong>Recovery condition</strong>
+            <strong>
+              <FormattedMessage
+                id="xpack.responseOps.alertingV2RuleForm.composeDiscover.recoveryConditionStep.recoveryConditionLabel"
+                defaultMessage="Recovery condition"
+              />
+            </strong>
           </EuiText>
           <EuiSpacer size="xs" />
           <QuerySummary query={state.recoveryBlock} label="recovery condition" />
@@ -421,12 +488,20 @@ function RecoveryConditionStep({
                 onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step })}
                 data-test-subj="composeDiscoverEditRecovery"
               >
-                Edit recovery query
+                <FormattedMessage
+                  id="xpack.responseOps.alertingV2RuleForm.composeDiscover.recoveryConditionStep.editRecoveryQueryButtonLabel"
+                  defaultMessage="Edit recovery query"
+                />
               </EuiButton>
             </EuiFlexItem>
             {state.recoveryBlock && (
               <EuiFlexItem grow={false}>
-                <EuiBadge color="success">Custom condition set</EuiBadge>
+                <EuiBadge color="success">
+                  <FormattedMessage
+                    id="xpack.responseOps.alertingV2RuleForm.composeDiscover.recoveryConditionStep.customConditionSetBadgeLabel"
+                    defaultMessage="Custom condition set"
+                  />
+                </EuiBadge>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -448,21 +523,36 @@ function DetailsAndArtifactsStep() {
       <EuiHorizontalRule margin="m" />
 
       <EuiTitle size="xs">
-        <h3>Artifacts</h3>
+        <h3>
+          <FormattedMessage
+            id="xpack.responseOps.alertingV2RuleForm.composeDiscover.detailsStep.artifactsTitle"
+            defaultMessage="Artifacts"
+          />
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
 
       {/* TODO (#268770): wire runbook URL and dashboard link to FormValues.artifacts */}
-      <EuiFormRow label="Runbook URL" fullWidth labelAppend={<EuiText size="xs">Optional</EuiText>}>
+      <EuiFormRow
+        label={i18n.translate(
+          'xpack.responseOps.alertingV2RuleForm.composeDiscover.detailsStep.runbookUrlLabel',
+          { defaultMessage: 'Runbook URL' }
+        )}
+        fullWidth
+        labelAppend={<EuiText size="xs">{optionalFieldLabel}</EuiText>}
+      >
         <EuiFieldText fullWidth placeholder="https://..." disabled />
       </EuiFormRow>
 
       <EuiSpacer size="m" />
 
       <EuiFormRow
-        label="Dashboard link"
+        label={i18n.translate(
+          'xpack.responseOps.alertingV2RuleForm.composeDiscover.detailsStep.dashboardLinkLabel',
+          { defaultMessage: 'Dashboard link' }
+        )}
         fullWidth
-        labelAppend={<EuiText size="xs">Optional</EuiText>}
+        labelAppend={<EuiText size="xs">{optionalFieldLabel}</EuiText>}
       >
         <EuiFieldText fullWidth placeholder="https://..." disabled />
       </EuiFormRow>
@@ -475,14 +565,22 @@ function DetailsAndArtifactsStep() {
 function NotificationsStep() {
   return (
     <EuiCallOut
-      title="Notifications configuration coming soon"
+      title={i18n.translate(
+        'xpack.responseOps.alertingV2RuleForm.composeDiscover.notificationsStep.comingSoonCalloutTitle',
+        { defaultMessage: 'Notifications configuration coming soon' }
+      )}
       iconType="clock"
       color="primary"
       size="s"
     >
       <p>
-        Notification policies will be configurable here. Rules are created without notifications
-        until this step is wired.
+        {i18n.translate(
+          'xpack.responseOps.alertingV2RuleForm.composeDiscover.notificationsStep.comingSoonCalloutDescription',
+          {
+            defaultMessage:
+              'Notification policies will be configurable here. Rules are created without notifications until this step is wired.',
+          }
+        )}
       </p>
     </EuiCallOut>
   );
@@ -493,24 +591,36 @@ function NotificationsStep() {
 const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
   alertCondition: {
     id: 'alertCondition',
-    title: 'Alert Condition',
+    title: i18n.translate(
+      'xpack.responseOps.alertingV2RuleForm.composeDiscover.stepRegistry.alertConditionTitle',
+      { defaultMessage: 'Alert Condition' }
+    ),
     render: (props) => <AlertConditionStep {...props} />,
     validate: (_methods, s) => s.queryCommitted,
   },
   recoveryCondition: {
     id: 'recoveryCondition',
-    title: 'Recovery Condition',
+    title: i18n.translate(
+      'xpack.responseOps.alertingV2RuleForm.composeDiscover.stepRegistry.recoveryConditionTitle',
+      { defaultMessage: 'Recovery Condition' }
+    ),
     render: (props) => <RecoveryConditionStep state={props.state} dispatch={props.dispatch} />,
   },
   details: {
     id: 'details',
-    title: 'Details & Artifacts',
+    title: i18n.translate(
+      'xpack.responseOps.alertingV2RuleForm.composeDiscover.stepRegistry.detailsTitle',
+      { defaultMessage: 'Details & Artifacts' }
+    ),
     render: () => <DetailsAndArtifactsStep />,
     validate: async (methods) => methods.trigger(['metadata.name']),
   },
   notifications: {
     id: 'notifications',
-    title: 'Notifications',
+    title: i18n.translate(
+      'xpack.responseOps.alertingV2RuleForm.composeDiscover.stepRegistry.notificationsTitle',
+      { defaultMessage: 'Notifications' }
+    ),
     render: () => <NotificationsStep />,
   },
 };

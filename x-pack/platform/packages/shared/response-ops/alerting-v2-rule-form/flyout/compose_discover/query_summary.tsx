@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiPanel, EuiText } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { ESQL_LANG_ID } from '@kbn/code-editor';
@@ -21,10 +22,19 @@ export const QuerySummary: React.FC<QuerySummaryProps> = ({ query, label, maxLin
   const height = lineCount * 19 + 16;
 
   if (!query.trim()) {
+    const emptyMessage = label
+      ? i18n.translate(
+          'xpack.responseOps.alertingV2RuleForm.composeDiscover.querySummary.noLabeledQueryDefinedLabel',
+          { defaultMessage: 'No {label} defined', values: { label: label.toLowerCase() } }
+        )
+      : i18n.translate(
+          'xpack.responseOps.alertingV2RuleForm.composeDiscover.querySummary.noQueryDefinedLabel',
+          { defaultMessage: 'No query defined' }
+        );
     return (
       <EuiPanel color="subdued" paddingSize="s">
         <EuiText size="s" color="subdued">
-          {label ? `No ${label.toLowerCase()} defined` : 'No query defined'}
+          {emptyMessage}
         </EuiText>
       </EuiPanel>
     );
