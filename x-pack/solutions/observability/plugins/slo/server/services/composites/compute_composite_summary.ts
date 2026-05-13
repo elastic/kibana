@@ -11,10 +11,10 @@ import {
   computeWeightedSli,
   NO_DATA,
   toErrorBudget,
-} from '../domain/services';
-import { toHighPrecision } from '../utils/number';
-import type { CompositeSLODefinition } from '../domain/models';
-import type { BurnRateWindow } from './summary_client';
+} from '../../domain/services';
+import { toHighPrecision } from '../../utils/number';
+import type { CompositeSLODefinition } from '../../domain/models';
+import type { BurnRateWindow } from '../summary_client';
 
 export interface MemberSummaryData {
   member: { sloId: string; weight: number; instanceId?: string };
@@ -114,7 +114,7 @@ function buildMemberSummary(
   };
 }
 
-function buildNoDataSummary(): CompositeSLOSummary {
+export function buildNoDataSummary(): CompositeSLOSummary {
   return {
     sliValue: NO_DATA,
     errorBudget: toErrorBudget(0, 0),

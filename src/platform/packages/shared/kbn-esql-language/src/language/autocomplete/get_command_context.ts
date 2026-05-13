@@ -157,6 +157,7 @@ export const enhanceWithFunctionsContext = async (
 
   // If the hint needs new data to build the suggestions, we add that data to the context
   for (const hint of uniqueHints) {
+    if (!hint.entityType) continue;
     const parameterHandler = parametersFromHintsResolvers[hint.entityType];
     if (parameterHandler?.contextResolver) {
       const resolvedContext = await parameterHandler.contextResolver(

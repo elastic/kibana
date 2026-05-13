@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { SO_SLO_COMPOSITE_TYPE } from '../saved_objects';
+import { SO_SLO_COMPOSITE_TYPE } from '../../saved_objects';
 
 type Buckets = Array<{
   key: string;
