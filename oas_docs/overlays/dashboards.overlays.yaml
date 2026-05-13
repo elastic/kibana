@@ -249,7 +249,7 @@ actions:
                             w: 24
                             h: 15
                           config:
-                            content: "## Web logs overview
+                            content: "## Web logs overview"
                           id: a1b2c3d4-0001-4000-8000-000000000001
                           type: markdown
                         - grid:
