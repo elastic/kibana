@@ -15,7 +15,7 @@ import {
 } from '@kbn/discover-utils';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { FLYOUT_STORAGE_KEYS } from '../../../../flyout_v2/document/constants/local_storage';
+import { FLYOUT_STORAGE_KEYS } from '../../../../flyout_v2/document/main/constants/local_storage';
 import { ExpandableSection } from '../../../../flyout_v2/shared/components/expandable_section';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { RULE_PREVIEW_BANNER, RulePreviewPanelKey } from '../../../rule_details/right';
@@ -23,24 +23,24 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { DocumentDetailsAlertReasonPanelKey } from '../../shared/constants/panel_keys';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
-import { EventKind } from '../../../../flyout_v2/document/constants/event_kinds';
+import { EventKind } from '../../../../flyout_v2/document/main/constants/event_kinds';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { isEcsAllowedValue } from '../../../../flyout_v2/document/utils/event_utils';
-import { EventCategoryDescription } from '../../../../flyout_v2/document/components/event_category_description';
-import { EventKindDescription } from '../../../../flyout_v2/document/components/event_kind_description';
-import { EventRenderer } from '../../../../flyout_v2/document/components/event_renderer';
+import { isEcsAllowedValue } from '../../../../flyout_v2/document/main/utils/event_utils';
+import { EventCategoryDescription } from '../../../../flyout_v2/document/main/components/event_category_description';
+import { EventKindDescription } from '../../../../flyout_v2/document/main/components/event_kind_description';
+import { EventRenderer } from '../../../../flyout_v2/document/main/components/event_renderer';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
-import { AlertDescription } from '../../../../flyout_v2/document/components/alert_description';
+import { AlertDescription } from '../../../../flyout_v2/document/main/components/alert_description';
 import {
   ABOUT_SECTION_TEST_ID,
   ABOUT_SECTION_TITLE,
-} from '../../../../flyout_v2/document/components/about_section';
-import { AlertStatus } from '../../../../flyout_v2/document/components/alert_status';
+} from '../../../../flyout_v2/document/main/components/about_section';
+import { AlertStatus } from '../../../../flyout_v2/document/main/components/alert_status';
 import {
   ALERT_REASON_BANNER,
   AlertReason,
-} from '../../../../flyout_v2/document/components/alert_reason';
-import { MitreAttack } from '../../../../flyout_v2/document/components/mitre_attack';
+} from '../../../../flyout_v2/document/main/components/alert_reason';
+import { MitreAttack } from '../../../../flyout_v2/document/main/components/mitre_attack';
 
 const KEY = 'about';
 
