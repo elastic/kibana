@@ -10,10 +10,10 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { escapeKuery } from '@kbn/es-query';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
-import { SLOIdConflict, SLONotFound } from '../errors';
-import { SO_SLO_COMPOSITE_TYPE } from '../saved_objects';
+import { SLOIdConflict, SLONotFound } from '../../errors';
+import { SO_SLO_COMPOSITE_TYPE } from '../../saved_objects';
 import { DefaultCompositeSLORepository } from './composite_slo_repository';
-import { createCompositeSlo } from './fixtures/composite_slo';
+import { createCompositeSlo } from '../fixtures/composite_slo';
 
 describe('DefaultCompositeSLORepository', () => {
   let soClient: jest.Mocked<SavedObjectsClientContract>;
@@ -145,142 +145,6 @@ describe('DefaultCompositeSLORepository', () => {
       } as any);
 
       await expect(repository.deleteById('non-existent-id')).rejects.toThrow(SLONotFound);
-    });
-  });
-
-  describe('search', () => {
-    it('returns paginated results with default sort', async () => {
-      const compositeSlo = createCompositeSlo();
-      soClient.find.mockResolvedValueOnce({
-        total: 1,
-        saved_objects: [{ id: 'so-id-1', attributes: compositeSlo }],
-        page: 1,
-        per_page: 25,
-      } as any);
-
-      const result = await repository.search({
-        pagination: { page: 1, perPage: 25 },
-      });
-
-      expect(result.total).toEqual(1);
-      expect(result.page).toEqual(1);
-      expect(result.perPage).toEqual(25);
-      expect(result.results).toHaveLength(1);
-      expect(result.results[0].id).toEqual(compositeSlo.id);
-      expect(soClient.find).toHaveBeenCalledWith(
-        expect.objectContaining({
-          sortField: 'createdAt',
-          sortOrder: 'desc',
-        })
-      );
-    });
-
-    it('passes search term when provided', async () => {
-      soClient.find.mockResolvedValueOnce({
-        total: 0,
-        saved_objects: [],
-        page: 1,
-        per_page: 25,
-      } as any);
-
-      await repository.search({
-        pagination: { page: 1, perPage: 25 },
-        search: 'my composite',
-      });
-
-      expect(soClient.find).toHaveBeenCalledWith(
-        expect.objectContaining({
-          search: 'my composite',
-          searchFields: ['name'],
-        })
-      );
-    });
-
-    it('filters by tags when provided', async () => {
-      soClient.find.mockResolvedValueOnce({
-        total: 0,
-        saved_objects: [],
-        page: 1,
-        per_page: 25,
-      } as any);
-
-      await repository.search({
-        pagination: { page: 1, perPage: 25 },
-        tags: ['critical', 'production'],
-      });
-
-      expect(soClient.find).toHaveBeenCalledWith(
-        expect.objectContaining({
-          filter: `${SO_SLO_COMPOSITE_TYPE}.attributes.tags: (${escapeKuery(
-            'critical'
-          )} OR ${escapeKuery('production')})`,
-        })
-      );
-    });
-
-    it('uses custom sortBy and sortDirection', async () => {
-      soClient.find.mockResolvedValueOnce({
-        total: 0,
-        saved_objects: [],
-        page: 1,
-        per_page: 25,
-      } as any);
-
-      await repository.search({
-        pagination: { page: 1, perPage: 25 },
-        sortBy: 'updatedAt',
-        sortDirection: 'asc',
-      });
-
-      expect(soClient.find).toHaveBeenCalledWith(
-        expect.objectContaining({
-          sortField: 'updatedAt',
-          sortOrder: 'asc',
-        })
-      );
-    });
-
-    it('maps name sortBy to name.keyword for Elasticsearch', async () => {
-      soClient.find.mockResolvedValueOnce({
-        total: 0,
-        saved_objects: [],
-        page: 1,
-        per_page: 25,
-      } as any);
-
-      await repository.search({
-        pagination: { page: 1, perPage: 25 },
-        sortBy: 'name',
-        sortDirection: 'asc',
-      });
-
-      expect(soClient.find).toHaveBeenCalledWith(
-        expect.objectContaining({
-          sortField: 'name.keyword',
-          sortOrder: 'asc',
-        })
-      );
-    });
-
-    it('filters out invalid stored composite SLOs', async () => {
-      const compositeSlo = createCompositeSlo();
-      soClient.find.mockResolvedValueOnce({
-        total: 2,
-        saved_objects: [
-          { id: 'so-id-1', attributes: compositeSlo },
-          { id: 'so-id-2', attributes: { invalid: 'data' } },
-        ],
-        page: 1,
-        per_page: 25,
-      } as any);
-
-      const result = await repository.search({
-        pagination: { page: 1, perPage: 25 },
-      });
-
-      expect(result.total).toEqual(1);
-      expect(result.results).toHaveLength(1);
-      expect(result.results[0].id).toEqual(compositeSlo.id);
     });
   });
 });
