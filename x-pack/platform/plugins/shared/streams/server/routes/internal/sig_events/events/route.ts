@@ -69,14 +69,16 @@ const eventsBulkCreateRoute = createServerRoute({
     },
   },
   params: z.object({
-    body: z.array(sigEventSchema),
+    body: z.object({
+      events: z.array(sigEventSchema),
+    }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
     const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    return getEventClient().bulkCreate(params.body);
+    return getEventClient().bulkCreate(params.body.events);
   },
 });
 

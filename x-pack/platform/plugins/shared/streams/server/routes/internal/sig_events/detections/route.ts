@@ -75,14 +75,16 @@ const detectionsBulkCreateRoute = createServerRoute({
     },
   },
   params: z.object({
-    body: z.array(detectionSchema),
+    body: z.object({
+      detections: z.array(detectionSchema),
+    }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
     const { getDetectionClient, licensing, uiSettingsClient } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    return getDetectionClient().bulkCreate(params.body);
+    return getDetectionClient().bulkCreate(params.body.detections);
   },
 });
 

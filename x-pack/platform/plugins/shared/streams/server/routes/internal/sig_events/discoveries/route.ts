@@ -101,14 +101,16 @@ const discoveriesBulkCreateRoute = createServerRoute({
     },
   },
   params: z.object({
-    body: z.array(discoverySchema),
+    body: z.object({
+      discoveries: z.array(discoverySchema),
+    }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
     const { getDiscoveryClient, licensing, uiSettingsClient } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    return getDiscoveryClient().bulkCreate(params.body);
+    return getDiscoveryClient().bulkCreate(params.body.discoveries);
   },
 });
 

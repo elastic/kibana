@@ -118,14 +118,16 @@ const verdictsBulkCreateRoute = createServerRoute({
     },
   },
   params: z.object({
-    body: z.array(verdictSchema),
+    body: z.object({
+      verdicts: z.array(verdictSchema),
+    }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
     const { getVerdictClient, licensing, uiSettingsClient } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    return getVerdictClient().bulkCreate(params.body);
+    return getVerdictClient().bulkCreate(params.body.verdicts);
   },
 });
 
