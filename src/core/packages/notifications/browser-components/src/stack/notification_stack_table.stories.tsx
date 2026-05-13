@@ -11,10 +11,11 @@
  * Storybook file for src/core/packages/notifications/browser-components/src/stack/notification_stack_table.tsx
  */
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { Meta, StoryFn } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
+import type { ContentListItemConfig } from '@kbn/content-list';
 import { ContentList, ContentListProvider, ContentListFooter } from '@kbn/content-list';
 import {
   NotificationStackTable,
@@ -68,6 +69,27 @@ const ITEMS: NotificationStackItem[] = [
     isRead: false,
     isPinned: false,
   },
+  {
+    id: '2',
+    eventName: 'server_error',
+    severity: 'error',
+    title: 'Server error',
+    description: 'An error occurred on the server.',
+    timestamp: Date.now() - 1000 * 60 * 60, // 1 hour ago
+    isRead: false,
+    isPinned: true,
+  },
+  {
+    id: '3',
+    eventName: 'payment_failed',
+    severity: 'warning',
+    title: 'Payment failed',
+    spaceId: 'Marketing',
+    description: 'A payment attempt has failed.',
+    timestamp: Date.now() - 1000 * 60 * 60 * 24, // 1 day ago
+    isRead: true,
+    isPinned: false,
+  },
 ];
 
 const Template: StoryFn<StoryArgs> = (args) => {
@@ -78,19 +100,29 @@ const Template: StoryFn<StoryArgs> = (args) => {
     debounceMs: 0,
   };
 
-  const handleMarkAsRead = (item: NotificationStackItem) => {
-    action('markAsRead')(item);
-  };
+  const itemConfig: ContentListItemConfig = useMemo(
+    () => ({
+      onDelete: async (items) => {
+        action('delete')(items);
+      },
+    }),
+    []
+  );
 
-  const handleTogglePin = (item: NotificationStackItem) => {
+  const handleMarkAsRead = useCallback((item: NotificationStackItem) => {
+    action('markAsRead')(item);
+  }, []);
+
+  const handleTogglePin = useCallback((item: NotificationStackItem) => {
     action('togglePin')(item);
-  };
+  }, []);
 
   return (
     <ContentListProvider
       id="notification-stack"
       queryKeyScope="notification-stack-storybook"
       dataSource={dataSource}
+      item={itemConfig}
       features={FEATURES}
       labels={LABELS}
     >
