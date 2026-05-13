@@ -8,6 +8,7 @@
 import type {
   CoreSetup,
   ElasticsearchClient,
+  KibanaRequest,
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
@@ -53,18 +54,30 @@ interface CasesAnalyticsV2StartDeps {
   taskManager: TaskManagerStartContract;
   /** Internal (no request) SO client used by the reconciliation runner. */
   internalSavedObjectsClient: SavedObjectsClientContract;
-  /** Data views plugin start contract — needed to create + update the managed Cases data view. */
+  /** Data views plugin start contract — needed to create managed Cases data views. */
   dataViewsService: DataViewsServerPluginStart;
+}
+
+/**
+ * Per-request inputs for the data view ensure hook. The request-scoped SO
+ * client lands the data view in the request's space without manual namespace
+ * juggling — for "create a data view in space X" we just hand the data
+ * views API a client that's already scoped to X.
+ */
+interface EnsureDataViewForSpaceDeps {
+  spaceId: string;
+  request: KibanaRequest;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 /**
  * Top-level orchestrator for cases-analytics v2.
  *
  * Owns the lifecycle of the v2 analytics subsystem: index bootstrap, writer
- * construction, reconciliation task registration, data-view sync (added in a
- * later commit), and operator route registration (later commit). Constructed
- * once in plugin `setup()`; lifecycle hooks (`setup`, `start`, `stop`) fire
- * from the plugin's matching lifecycle hooks.
+ * construction, reconciliation task registration, per-space data-view
+ * ensure, and operator route registration. Constructed once in plugin
+ * `setup()`; lifecycle hooks (`setup`, `start`, `stop`) fire from the
+ * plugin's matching lifecycle hooks.
  *
  * v2 is gated by the `xpack.cases.analyticsV2.enabled` config. When disabled
  * (the default) every method is a no-op — nothing is registered, nothing is
@@ -80,6 +93,11 @@ interface CasesAnalyticsV2StartDeps {
  *      writer when start runs.
  * The getter returns a stable proxy that delegates to whichever writer is
  * current — see `writerProxy` below.
+ *
+ * **Data view bootstrap is lazy + per-space.** See
+ * `data_view/service.ts` — the request handler context fires
+ * `ensureDataViewForSpace` on every request; it short-circuits on already-
+ * bootstrapped spaces via an in-memory cache.
  */
 export class CasesAnalyticsV2Service {
   private readonly logger: Logger;
@@ -101,14 +119,19 @@ export class CasesAnalyticsV2Service {
   };
   /**
    * Internal SO client captured at start, used by the reconciliation task
-   * runner. The runner needs an SO client without a request context (it runs
-   * on a Task Manager timer, not a user request).
+   * runner. The runner needs an SO client without a request context (it
+   * runs on a Task Manager timer, not a user request).
    */
   private internalSavedObjectsClient: SavedObjectsClientContract | undefined;
   /**
-   * Data view sub-service. Constructed at start (after we have the data
-   * views plugin contract); orchestrates the managed Cases data view + its
-   * runtime field map.
+   * Captured at start so the per-space data view ensure can pass the right
+   * ES client to the data views service factory.
+   */
+  private esClient: ElasticsearchClient | undefined;
+  /**
+   * Data view sub-service. Constructed at start; orchestrates per-space
+   * Cases data views and their runtime field maps. `undefined` until start
+   * runs (or forever if v2 is disabled).
    */
   private dataViewService: CasesAnalyticsV2DataViewService | undefined;
   /**
@@ -165,11 +188,14 @@ export class CasesAnalyticsV2Service {
 
     // Register operator routes. The Task Manager start contract isn't
     // available yet — routes close over a `getTaskManager()` callback that
-    // returns `this.taskManager` once `start()` runs.
+    // returns `this.taskManager` once `start()` runs. The reset route also
+    // closes over `clearDataViewBootstrapCache()` so it can wipe the
+    // in-memory ensure cache after deleting per-space data views.
     registerCasesAnalyticsV2Routes({
       core: deps.core,
       logger: this.logger,
       getTaskManager: () => this.taskManager ?? null,
+      clearDataViewBootstrapCache: () => this.dataViewService?.clearBootstrapCache(),
       enabled: this.enabled,
     });
   }
@@ -180,13 +206,14 @@ export class CasesAnalyticsV2Service {
    * When the feature flag is off, returns immediately at debug log level so an
    * operator who turned the flag off can still confirm the wiring is in place.
    *
-   * When on, today: bootstraps the `.cases` index, constructs the real
-   * writer, captures the internal SO client for the reconciliation task, and
-   * schedules the reconciliation task instance. Future commits add data-view
-   * sync and operator route registration.
+   * When on: bootstraps the `.cases` index, constructs the real writer,
+   * captures lifecycle references (SO client, ES client, Task Manager start,
+   * data views service), and schedules the singleton reconciliation task.
    *
    * Failures during bootstrap are logged inside `ensureCaseIndex` and never
-   * thrown — the cases plugin must keep starting even if analytics has trouble.
+   * thrown — the cases plugin must keep starting even if analytics has
+   * trouble. Per-space data view bootstrap is lazy (per-request) — see
+   * `ensureDataViewForSpace`.
    */
   public async start(deps: CasesAnalyticsV2StartDeps): Promise<void> {
     if (!this.enabled) {
@@ -207,23 +234,20 @@ export class CasesAnalyticsV2Service {
       logger: this.logger,
     });
 
-    // Capture the SO client for the reconciliation task — the runner uses it
-    // to walk cases since the last cursor.
+    // Capture lifecycle deps for use after start by the reconciliation task,
+    // the operator routes, and the per-request data-view ensure hook.
     this.internalSavedObjectsClient = deps.internalSavedObjectsClient;
-    // Capture the Task Manager start contract so the operator routes (which
-    // were registered in setup() but need the start contract) can resolve it.
+    this.esClient = deps.esClient;
     this.taskManager = deps.taskManager;
 
-    // Bootstrap the managed Cases data view + apply runtime fields from every
-    // template's declared extended fields. Idempotent; safe under concurrent
-    // node starts.
+    // Construct the per-space data view sub-service. No actual data views
+    // are created here — bootstrap is lazy per-request via
+    // `ensureDataViewForSpace` below.
     this.dataViewService = new CasesAnalyticsV2DataViewService({
       logger: this.logger,
-      esClient: deps.esClient,
-      internalSavedObjectsClient: deps.internalSavedObjectsClient,
       dataViewsService: deps.dataViewsService,
+      internalSavedObjectsClient: deps.internalSavedObjectsClient,
     });
-    await this.dataViewService.start();
 
     // Schedule the singleton reconciliation task. Idempotent; safe under
     // concurrent node starts (Task Manager dedupes by id).
@@ -247,5 +271,26 @@ export class CasesAnalyticsV2Service {
    */
   public getWriter(): CasesAnalyticsV2WriterContract {
     return this.writerProxy;
+  }
+
+  /**
+   * Fire-and-forget hook invoked by the cases request handler context — on
+   * every cases request, the v2 service ensures a Cases data view exists in
+   * the request's space. Idempotent + cached in-process; the cost is a
+   * single `Set.has()` check after the first successful ensure per space.
+   *
+   * Safe to call when v2 is disabled or before start completes — the
+   * underlying service is `undefined` and we short-circuit. Errors are
+   * swallowed inside the data view service; nothing here propagates to the
+   * request handler.
+   */
+  public ensureDataViewForSpace(deps: EnsureDataViewForSpaceDeps): void {
+    if (!this.enabled || this.dataViewService == null || this.esClient == null) return;
+    void this.dataViewService.ensureForSpace({
+      spaceId: deps.spaceId,
+      savedObjectsClient: deps.savedObjectsClient,
+      esClient: this.esClient,
+      request: deps.request,
+    });
   }
 }

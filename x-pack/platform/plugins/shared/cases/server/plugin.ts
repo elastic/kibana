@@ -21,7 +21,7 @@ import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
-import { APP_ID, CASE_SAVED_OBJECT } from '../common/constants';
+import { APP_ID, CASE_SAVED_OBJECT, CASE_TEMPLATE_SAVED_OBJECT } from '../common/constants';
 
 import type { CasesClient } from './client';
 import type {
@@ -161,6 +161,7 @@ export class CasePlugin
       APP_ID,
       this.createRouteHandlerContext({
         core,
+        spaces: plugins.spaces,
       })
     );
 
@@ -289,7 +290,15 @@ export class CasePlugin
     // service for use by the reconciliation runner (which scans cases on a
     // timer, with no request context).
     if (this.casesAnalyticsV2Service) {
-      const v2InternalRepository = core.savedObjects.createInternalRepository([CASE_SAVED_OBJECT]);
+      // The internal repo serves two consumers:
+      //  - The reconciliation runner walks `cases` SOs.
+      //  - The data view sub-service reads `cases-templates` SOs per-space to
+      //    derive runtime fields.
+      // Both types are hidden, so they must be opted in explicitly here.
+      const v2InternalRepository = core.savedObjects.createInternalRepository([
+        CASE_SAVED_OBJECT,
+        CASE_TEMPLATE_SAVED_OBJECT,
+      ]);
       const v2InternalSavedObjectsClient = new SavedObjectsClient(v2InternalRepository);
       void this.casesAnalyticsV2Service.start({
         esClient: core.elasticsearch.client.asInternalUser,
@@ -378,14 +387,29 @@ export class CasePlugin
 
   private createRouteHandlerContext = ({
     core,
+    spaces,
   }: {
     core: CoreSetup;
+    spaces?: CasesServerSetupDependencies['spaces'];
   }): IContextProvider<CasesRequestHandlerContext, 'cases'> => {
     return async (context, request, response) => {
+      // Cases-as-data v2 — lazy bootstrap of the per-space `Cases` data view.
+      // Fires on every cases request; idempotent + cached in-process so the
+      // cost after the first ensure per space is a single `Set.has()` check.
+      // No-op when v2 is disabled or before start has completed. Errors are
+      // swallowed inside the data view service so the request handler is
+      // unaffected.
+      const coreContext = await context.core;
+      const spaceId = spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+      this.casesAnalyticsV2Service?.ensureDataViewForSpace({
+        spaceId,
+        request,
+        savedObjectsClient: coreContext.savedObjects.client,
+      });
+
       return {
         getCasesClient: async () => {
           const [{ savedObjects }] = await core.getStartServices();
-          const coreContext = await context.core;
 
           return this.clientFactory.create({
             request,

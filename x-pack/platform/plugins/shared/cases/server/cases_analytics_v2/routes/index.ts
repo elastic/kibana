@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { CoreSetup, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
   CASES_ANALYTICS_V2_RECONCILE_RUN_SOON_URL,
@@ -13,12 +13,15 @@ import {
   CASES_ANALYTICS_V2_STATE_URL,
   CASE_INDEX_NAME,
 } from '../constants';
+import { CASE_DATA_VIEW_ID_PREFIX } from '../data_view/data_view_specs';
 import {
   RECONCILIATION_TASK_ID,
   RECONCILIATION_TASK_TYPE,
   resetReconciliationTask,
 } from '../reconciliation';
 import { ensureCaseIndex } from '../ensure_indices/case';
+
+const DATA_VIEW_SO_TYPE = 'index-pattern';
 
 interface RegisterArgs {
   core: CoreSetup;
@@ -29,6 +32,14 @@ interface RegisterArgs {
    * registration site can pass a closure that resolves once start runs.
    */
   getTaskManager: () => TaskManagerStartContract | null;
+  /**
+   * Wipes the data view service's in-memory "bootstrapped spaces" cache.
+   * `/reset` deletes per-space data views directly via the SO API, so the
+   * data view sub-service's process-local cache must be cleared too —
+   * otherwise it would still believe those spaces had been bootstrapped
+   * and skip re-creation on the next request. No-op if v2 hasn't started.
+   */
+  clearDataViewBootstrapCache: () => void;
   /**
    * Resolved config value for `xpack.cases.analyticsV2.enabled` — surfaced
    * through `/state` so operators can confirm whether v2 is active.
@@ -54,6 +65,7 @@ export const registerCasesAnalyticsV2Routes = ({
   core,
   logger,
   getTaskManager,
+  clearDataViewBootstrapCache,
   enabled,
 }: RegisterArgs): void => {
   const router = core.http.createRouter();
@@ -163,10 +175,16 @@ export const registerCasesAnalyticsV2Routes = ({
 
   // POST /internal/cases/_analyticsV2/reset
   //
-  // Drops the .cases index and rebuilds it from scratch, then triggers a
-  // reconciliation tick. Useful for: mapping migrations, recovering from
-  // sustained writer failures that left the index inconsistent, or
-  // operator-initiated full backfills.
+  // Full subsystem reset: drops `.cases`, deletes every per-space `Cases`
+  // data view, clears reconciliation task state, and triggers a full
+  // reconciliation that will repopulate the index from the SO source of
+  // truth. The next request in each space will lazily re-create that
+  // space's data view (with current template runtime fields).
+  //
+  // Useful for: mapping migrations, recovering from sustained writer
+  // failures that left the index inconsistent, operator-initiated full
+  // backfills, or refreshing data view runtime fields after templates
+  // change.
   router.post(
     {
       path: CASES_ANALYTICS_V2_RESET_URL,
@@ -180,9 +198,10 @@ export const registerCasesAnalyticsV2Routes = ({
       const taskManager = getTaskManager();
       const coreContext = await context.core;
       const esClient = coreContext.elasticsearch.client.asInternalUser;
+      const soClient = coreContext.savedObjects.client;
 
       try {
-        // Drop existing index. 404 is fine — reset on an empty cluster.
+        // 1. Drop existing index. 404 is fine — reset on an empty cluster.
         await esClient.indices
           .delete({ index: CASE_INDEX_NAME })
           .catch((err: { meta?: { statusCode?: number }; statusCode?: number }) => {
@@ -191,22 +210,33 @@ export const registerCasesAnalyticsV2Routes = ({
             throw err;
           });
 
-        // Recreate via the same bootstrap used at plugin start.
+        // 2. Recreate `.cases` via the same bootstrap used at plugin start.
         await ensureCaseIndex({ esClient, logger: log });
 
-        // Kick off a follow-up reconciliation to repopulate the freshly
-        // emptied index from the SO source of truth.
+        // 3. Delete every per-space data view. Each lives in a single space
+        //    (it's a namespaced SO), so we walk every namespace and delete
+        //    each match.
+        const deletedDataViews = await deleteAllPerSpaceCasesDataViews(soClient, log);
+
+        // 4. Clear the data view sub-service's in-memory bootstrapped-spaces
+        //    cache. Without this, the next request in a previously-bootstrapped
+        //    space would skip the ensure check and the user would see no
+        //    data view until process restart.
+        clearDataViewBootstrapCache();
+
+        // 5. Reset reconciliation task state + trigger an immediate tick.
         //
-        // **Critical**: we must clear the task's persisted state first.
-        // Without this step, the next tick uses the existing `last_run_at`
-        // cursor and only walks cases updated since that timestamp — every
-        // case older than the cursor stays missing from the new index. The
-        // reset helper removes the task SO and re-schedules a fresh one with
-        // empty state, so the next tick sees no cursor and walks every case.
+        // **Critical**: we must clear the task's persisted state before
+        // running. Without this step, the next tick uses the existing
+        // `last_run_at` cursor and only walks cases updated since that
+        // timestamp — every case older than the cursor stays missing from
+        // the new index. The reset helper removes the task SO and
+        // re-schedules a fresh one with empty state, so the next tick sees
+        // no cursor and walks every case.
         //
-        // If Task Manager isn't available (analyticsV2 disabled), we still
-        // report the reset succeeded — the index exists, ready for writes
-        // once the flag flips on.
+        // If Task Manager isn't available (v2 disabled), we still report
+        // the reset succeeded — the index exists, ready for writes once
+        // the flag flips on.
         let reconcileResult: string | null = null;
         if (taskManager != null) {
           try {
@@ -225,6 +255,7 @@ export const registerCasesAnalyticsV2Routes = ({
         return response.ok({
           body: {
             reset: CASE_INDEX_NAME,
+            data_views_deleted: deletedDataViews,
             reconciliation_scheduled: reconcileResult,
           },
         });
@@ -239,3 +270,55 @@ export const registerCasesAnalyticsV2Routes = ({
     }
   );
 };
+
+/**
+ * Page through every data view SO across every space and delete the ones
+ * whose id begins with `CASE_DATA_VIEW_ID_PREFIX`. Returns the count of
+ * deletions for the response body. Per-item errors log at WARN and the
+ * walk continues — best-effort cleanup is preferred over aborting on a
+ * single failure.
+ *
+ * Note: `index-pattern` SOs are namespaced (one space per SO). We pass
+ * the SO's `namespaces[0]` explicitly on delete because the request-scoped
+ * client we use is scoped to the route's space, not necessarily the data
+ * view's. With `namespace` set, the SO API deletes from the right space.
+ */
+async function deleteAllPerSpaceCasesDataViews(
+  soClient: SavedObjectsClientContract,
+  logger: Logger
+): Promise<number> {
+  const PAGE_SIZE = 100;
+  let page = 1;
+  let deleted = 0;
+
+  while (true) {
+    const result = await soClient.find({
+      type: DATA_VIEW_SO_TYPE,
+      namespaces: ['*'],
+      perPage: PAGE_SIZE,
+      page,
+    });
+
+    for (const so of result.saved_objects) {
+      // Only act on data views we manage; everything else is left untouched.
+      if (so.id.startsWith(CASE_DATA_VIEW_ID_PREFIX)) {
+        const namespace = so.namespaces?.[0];
+        try {
+          await soClient.delete(DATA_VIEW_SO_TYPE, so.id, { namespace });
+          deleted++;
+        } catch (err) {
+          logger.warn(
+            `reset: failed to delete data view ${so.id} (space=${namespace ?? 'unknown'}): ${
+              err instanceof Error ? err.message : String(err)
+            }`
+          );
+        }
+      }
+    }
+
+    if (result.saved_objects.length < PAGE_SIZE) break;
+    page++;
+  }
+
+  return deleted;
+}

@@ -5,37 +5,61 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
 import { CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
-import { buildBaseCaseDataViewSpec, CASE_DATA_VIEW_ID } from './data_view_specs';
+import { buildCaseDataViewSpec, getCaseDataViewId } from './data_view_specs';
 import { buildRuntimeFieldEntry } from './runtime_fields';
 
 const TEMPLATES_PAGE_SIZE = 100;
 
 interface CasesAnalyticsV2DataViewServiceDeps {
   logger: Logger;
-  esClient: ElasticsearchClient;
+  dataViewsService: DataViewsServerPluginStart;
   /**
-   * Internal SO client. Used to walk every template SO across every space —
-   * the data view's runtime fields are a function of every extended-field
-   * declaration in the cluster.
+   * Internal (no-request) SO client used for template reads. Templates are a
+   * hidden SO type; the request-scoped client passed at ensure time may not
+   * include them in its `includedHiddenTypes`. The internal client is opted
+   * in to both `cases` and `cases-templates` at plugin start.
+   *
+   * The `namespaces: [spaceId]` filter on the find call scopes results to a
+   * single space even though the client itself is unscoped.
    */
   internalSavedObjectsClient: SavedObjectsClientContract;
-  dataViewsService: DataViewsServerPluginStart;
+}
+
+/**
+ * Per-call dependencies for `ensureForSpace`. Sourced from the request that
+ * triggered the ensure — the request-scoped SO client lands the data view in
+ * the request's space automatically, no manual namespace juggling required.
+ *
+ * Templates are read via the internal SO client (held by the service from
+ * construction time) because they're a hidden SO type the request-scoped
+ * client may not opt into.
+ */
+interface EnsureForSpaceDeps {
+  spaceId: string;
+  /** Request-scoped SO client. Used for data view writes via the data-views service factory. */
+  savedObjectsClient: SavedObjectsClientContract;
+  /** Internal Elasticsearch client — data view runtime mappings are validated against it. */
+  esClient: ElasticsearchClient;
+  /** The originating request, required by the data views service factory. */
+  request: KibanaRequest;
 }
 
 /**
  * Shape of the relevant subset of a template SO. Templates store a richer
  * `definition` blob — we only need the `fields` portion (with `name` and
- * `type`) to build runtime field entries.
- *
- * Note: we type this loosely (`unknown` for the blob) and pluck fields
- * defensively rather than depending on the full template type. Templates'
- * schema can evolve independently of cases-analytics, and a strict
- * dependency would force us to update v2 every time a template field gains
- * a new property.
+ * `type`) to build runtime field entries. Typed loosely to avoid a strict
+ * dependency on the full template schema; templates evolve independently
+ * and we shouldn't need a v2 update every time a template field gains a
+ * new property.
  */
 interface TemplateAttributesLike {
   definition?: {
@@ -44,30 +68,50 @@ interface TemplateAttributesLike {
 }
 
 /**
- * Manages the lifecycle of the managed `Cases` data view: ensures it exists
- * at start, and keeps its `runtimeFieldMap` in sync with every extended-field
- * declaration found across all templates.
+ * Manages per-space `Cases` data views. One data view per space, each with a
+ * runtime field map derived from THAT space's templates only.
+ *
+ * **Bootstrap model — lazy, per-request.** A space's data view is created
+ * the first time a Cases request fires in that space (`ensureForSpace`
+ * called from the request handler context). We skip subsequent calls within
+ * the same Kibana process via an in-memory `Set` of bootstrapped space ids.
+ * Process restart re-checks each space on first visit (idempotent — a doc
+ * `get` returns the existing view).
+ *
+ * Why lazy rather than enumerating at start? Tenants with thousands of
+ * spaces would pay heavy bootstrap cost even for spaces nobody visits.
+ * Lazy spreads the cost across actual usage; spaces never visited via
+ * Cases pay nothing.
  *
  * **Why runtime fields and not mapped fields?** Templates declare extended
  * fields at runtime; the cases plugin can't know at index-template-creation
- * time what users will declare. Instead, every extended-field value lands as
- * a keyword under `cases.extended_fields.<snake>`, and we publish a typed
- * runtime field at `cases.<snake>` that parses the keyword at query time.
- * See `runtime_fields.ts` for the snake-key → painless transformation.
+ * time what users will declare. Instead, every extended-field value lands
+ * as a keyword under `cases.extended_fields.<snake>`, and we publish a
+ * typed runtime field at `cases.<snake>` that parses the keyword at query
+ * time. See `runtime_fields.ts` for the snake-key → painless transform.
  *
- * **Trigger model**: `reconcile()` walks every template SO and applies the
- * derived runtime field set. Called on plugin start and from the
- * reconciliation task — same cadence as case-data reconciliation, so
- * template additions / removals propagate within one tick.
+ * **Template-change latency.** A new template's extended fields don't
+ * appear in the data view until either:
+ *   1. A Kibana process restart in this space (Set is empty, re-check
+ *      finds the data view, runtime fields are refreshed during ensure).
+ *   2. The operator calls `/reset` (drops all data views, in-memory Set
+ *      is cleared, next request bootstraps fresh).
+ * This is acceptable for PR 1; a follow-up can hook into the template SO
+ * lifecycle for instant propagation.
  *
- * **Failure policy**: never throws past the service boundary. Bootstrap or
- * sync failures log at WARN; the cases plugin continues. Users who depend
- * on a missing extended field will see it as missing in Lens — operators
- * are expected to investigate via logs.
+ * **Failure policy.** Never throws past the service boundary. Bootstrap or
+ * sync failures log at WARN; the cases plugin's request handlers continue.
+ * Users in a space whose data view failed to bootstrap will see "no data
+ * view found" in Lens — operators inspect logs.
  */
 export class CasesAnalyticsV2DataViewService {
   private readonly logger: Logger;
   private readonly deps: CasesAnalyticsV2DataViewServiceDeps;
+  /**
+   * Process-local cache of spaces we've already bootstrapped this run.
+   * Cleared on plugin start (new process); /reset also clears it explicitly.
+   */
+  private readonly bootstrappedSpaces = new Set<string>();
 
   constructor(deps: CasesAnalyticsV2DataViewServiceDeps) {
     this.logger = deps.logger.get('dataView');
@@ -75,20 +119,58 @@ export class CasesAnalyticsV2DataViewService {
   }
 
   /**
-   * Idempotent bootstrap + initial reconcile. Safe to call from multiple
-   * Kibana nodes concurrently — the data view SO is keyed on a deterministic
-   * id so concurrent creates converge on the same object.
+   * Ensures the Cases data view exists in the given space, populating its
+   * runtime field map from that space's templates. Idempotent — repeated
+   * calls in the same process hit the in-memory cache and return immediately.
+   *
+   * Fire-and-forget by contract from the caller's perspective: errors are
+   * caught internally and logged at WARN. The request handler context
+   * invokes this without awaiting.
    */
-  public async start(): Promise<void> {
+  public async ensureForSpace(deps: EnsureForSpaceDeps): Promise<void> {
+    if (this.bootstrappedSpaces.has(deps.spaceId)) return;
+
     try {
-      await this.ensureDataView();
-      await this.reconcile();
-      this.logger.info(
-        'cases-analyticsV2: data view ensured + extended-field runtime fields synced'
+      const dvService = await this.deps.dataViewsService.dataViewsServiceFactory(
+        deps.savedObjectsClient,
+        deps.esClient,
+        deps.request,
+        true /* byPassCapabilities */
       );
+
+      const dataViewId = getCaseDataViewId(deps.spaceId);
+
+      let exists = false;
+      try {
+        await dvService.get(dataViewId);
+        exists = true;
+      } catch {
+        // Not found — fall through to create. Other errors propagate to the
+        // outer try/catch.
+      }
+
+      if (!exists) {
+        const snakeKeys = await this.collectSnakeKeysForSpace(deps.spaceId);
+        const runtimeFieldMap = this.buildRuntimeFieldMap(snakeKeys);
+
+        const spec = buildCaseDataViewSpec(deps.spaceId);
+        spec.runtimeFieldMap = runtimeFieldMap;
+
+        // `overwrite: false` — the deterministic id means a second concurrent
+        // create from another node hits a conflict error rather than racing.
+        // Caught and logged as the data view already exists at that point.
+        await dvService.createAndSave(spec, false, true);
+        this.logger.info(
+          `bootstrapped data view ${dataViewId} (space=${deps.spaceId}, runtime_fields=${
+            Object.keys(runtimeFieldMap).length
+          })`
+        );
+      }
+
+      this.bootstrappedSpaces.add(deps.spaceId);
     } catch (err) {
       this.logger.warn(
-        `cases-analyticsV2: data view bootstrap failed: ${
+        `cases-analyticsV2: data view ensure failed for space=${deps.spaceId}: ${
           err instanceof Error ? err.message : String(err)
         }`
       );
@@ -96,47 +178,26 @@ export class CasesAnalyticsV2DataViewService {
   }
 
   /**
-   * Walk every template SO, derive runtime fields from every
-   * `<name>_as_<type>` declared field, and overwrite the data view's
-   * `runtimeFieldMap`. Idempotent — replaces the map wholesale rather than
-   * diffing, which keeps the logic boring and predictable.
+   * Clears the in-memory bootstrapped-spaces cache so the next request in
+   * each space re-checks (and recreates if missing). Called from the
+   * `/reset` route after the operator has deleted the underlying data view
+   * SOs out-of-band — without this, the Set would still claim "bootstrapped"
+   * for every space and the data views would stay missing until process
+   * restart.
    */
-  public async reconcile(): Promise<void> {
-    const snakeKeys = await this.collectSnakeKeysFromAllTemplates();
-    const runtimeFieldMap = this.buildRuntimeFieldMap(snakeKeys);
-    await this.applyRuntimeFieldMap(runtimeFieldMap);
+  public clearBootstrapCache(): void {
+    this.bootstrappedSpaces.clear();
   }
 
   // ----- Internals -----
 
-  private async ensureDataView(): Promise<void> {
-    const dvService = await this.deps.dataViewsService.dataViewsServiceFactory(
-      this.deps.internalSavedObjectsClient,
-      this.deps.esClient,
-      undefined,
-      true /* byPassCapabilities */
-    );
-
-    try {
-      await dvService.get(CASE_DATA_VIEW_ID);
-      this.logger.debug(`data view ${CASE_DATA_VIEW_ID} already exists`);
-      return;
-    } catch {
-      // Not found — create. Any other error gets caught by the outer start()
-      // try/catch and surfaces as WARN.
-    }
-
-    // `overwrite: false` — the deterministic id means a second concurrent
-    // create attempt fails fast with a conflict error rather than racing.
-    await dvService.createAndSave(buildBaseCaseDataViewSpec(), false, true);
-    this.logger.info(`bootstrapped data view ${CASE_DATA_VIEW_ID}`);
-  }
-
   /**
-   * Page through every template SO and extract `<name>_as_<type>` snake-keys
-   * from each one's declared fields.
+   * Page through every template SO in the given space and extract
+   * `<name>_as_<type>` snake-keys from each one's declared fields. Uses the
+   * internal SO client (held since construction) — templates are hidden and
+   * the request-scoped client may not include them.
    */
-  private async collectSnakeKeysFromAllTemplates(): Promise<string[]> {
+  private async collectSnakeKeysForSpace(spaceId: string): Promise<string[]> {
     const out: string[] = [];
     let page = 1;
 
@@ -145,9 +206,9 @@ export class CasesAnalyticsV2DataViewService {
         type: CASE_TEMPLATE_SAVED_OBJECT,
         perPage: TEMPLATES_PAGE_SIZE,
         page,
-        // Walk every space — extended fields apply cluster-wide once
-        // declared by any template.
-        namespaces: ['*'],
+        // Single-space scope — runtime fields for this view are derived
+        // only from templates in this space.
+        namespaces: [spaceId],
       });
 
       for (const tpl of response.saved_objects) {
@@ -172,45 +233,18 @@ export class CasesAnalyticsV2DataViewService {
     const map: Record<string, RuntimeFieldSpec> = {};
     for (const snakeKey of snakeKeys) {
       const entry = buildRuntimeFieldEntry(snakeKey);
-      // Last write wins on collisions across templates — two templates
-      // declaring the same `<name>_as_<type>` produce the same entry, so
-      // there's nothing to merge. Two templates declaring `<name>_as_<type1>`
-      // and `<name>_as_<type2>` would produce different entries: we pick
+      // Last write wins on collisions WITHIN a space — two templates in the
+      // same space declaring the same `<name>_as_<type>` produce the same
+      // entry, so there's nothing to merge. Two templates declaring
+      // `<name>_as_<type1>` and `<name>_as_<type2>` would conflict; we pick
       // whichever appears last. Templates aren't supposed to disagree on
-      // type for a given name, but this keeps the runtime resilient.
+      // type for a given name within a space, but this keeps the runtime
+      // resilient. Cross-space collisions don't happen at all — each space
+      // has its own map.
       if (entry != null) {
         map[entry.fieldName] = entry.spec;
       }
     }
     return map;
-  }
-
-  private async applyRuntimeFieldMap(
-    runtimeFieldMap: Record<string, RuntimeFieldSpec>
-  ): Promise<void> {
-    const dvService = await this.deps.dataViewsService.dataViewsServiceFactory(
-      this.deps.internalSavedObjectsClient,
-      this.deps.esClient,
-      undefined,
-      true /* byPassCapabilities */
-    );
-
-    const dataView = await dvService.get(CASE_DATA_VIEW_ID);
-
-    // Clear existing runtime fields before applying the fresh set. The
-    // data view API doesn't offer a "replace map" primitive — we
-    // remove-then-add. Errors per-field are caught and continued so a
-    // single bad field doesn't block the rest.
-    for (const fieldName of Object.keys(dataView.getRuntimeMappings())) {
-      dataView.removeRuntimeField(fieldName);
-    }
-    for (const [fieldName, spec] of Object.entries(runtimeFieldMap)) {
-      dataView.addRuntimeField(fieldName, spec);
-    }
-
-    await dvService.updateSavedObject(dataView);
-    this.logger.debug(
-      `cases-analyticsV2: applied ${Object.keys(runtimeFieldMap).length} runtime fields`
-    );
   }
 }

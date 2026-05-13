@@ -59,9 +59,9 @@ export interface RunReconciliationResult {
  * but the first run from an empty cursor (backfill scenario) can sweep
  * everything — PIT + searchAfter has no such cap.
  *
- * **Watermark advancement.** On successful drain, the watermark advances to
- * the tick start time. Any case updated *during* the tick will land in the
- * next tick's window (since its `updated_at` > tickStartedAt). Caller is
+ * **Cursor advancement.** On successful drain, `last_run_at` advances to the
+ * tick start time. Any case updated *during* the tick will land in the next
+ * tick's window (since its `updated_at` > tickStartedAt). Caller is
  * responsible for persisting the result.
  */
 export async function runReconciliation({

@@ -96,18 +96,52 @@ A future PR will introduce document-level security (DLS) on `cases.owner` +
 `kibana.space_ids` so end users only see cases they're entitled to. Until that
 ships, role-granted access is **unrestricted across cases** — apply with care.
 
-## Data view
+## Data views (per-space)
 
-A managed data view named `Cases` is bootstrapped at plugin start with
-`namespaces: ['*']` (visible in every space). Runtime fields lift each
-template-declared extended field from its keyword index path
-(`cases.extended_fields.<name>_as_<type>`) to a typed runtime field at
-`cases.<name>_as_<type>` — so Lens and Discover get numeric / date / boolean
-filter operators instead of string-contains. The runtime field reads from
-`doc[...]` (doc_values) at query time.
+A managed data view named `Cases` is bootstrapped **per space**, lazily, on
+the first Cases request in that space. The id is
+`cases-analytics-managed-<spaceId>`, scoped to `namespaces: [<spaceId>]`.
 
-The data view is reconciled on plugin start; template additions / removals
-propagate within one reconciliation tick (default 30 min).
+**Why per-space, not global.** The runtime field map is derived from template
+SOs — which are themselves space-scoped. A global data view would merge every
+space's runtime fields into one view, with three problems on tenants with
+many spaces:
+
+- field-picker bloat for analysts (they see thousands of fields, most
+  irrelevant to their space),
+- cross-space naming collisions (two spaces declaring the same
+  `riskScore_as_long` for different concepts; last-write-wins resolution is
+  non-deterministic),
+- info leakage of field names across space boundaries.
+
+Per-space scoping fixes all three. The underlying `.cases` index stays
+cluster-level — only the view is scoped.
+
+**Bootstrap timing.** First Cases request in a space triggers the ensure.
+After that, subsequent requests skip via an in-memory cache. A new template
+in a space won't appear in that space's runtime fields until either a Kibana
+process restart or an operator `/reset`.
+
+**Cross-space analytics.** No global data view is shipped. An operator who
+needs a cross-space dashboard can duplicate the per-space view (saving it
+without the `managed` flag), edit it to use `namespaces: ['*']`, and curate
+the runtime fields they want to keep. Out of scope for the managed feature.
+
+**DLS interaction.** Once the implicit-privileges Kibana provider for cases
+lands ([elastic/elasticsearch#148331](https://github.com/elastic/elasticsearch/pull/148331)),
+DLS will scope which case documents a user can read inside `.cases` (on
+`cases.owner` + `kibana.space_ids`). The per-space data view is orthogonal —
+it scopes the *runtime field set*, not the document set. The two compose
+cleanly: a user in space A sees only space-A runtime fields **and** only
+space-A cases.
+
+## Runtime field lift
+
+Each template-declared extended field is keyword-indexed under
+`cases.extended_fields.<name>_as_<type>`, with a typed runtime field
+published at `cases.<name>_as_<type>` — Lens and Discover get numeric / date
+/ boolean filter operators instead of string-contains. The runtime field
+reads from `doc[...]` (doc_values) at query time.
 
 ## Schema
 

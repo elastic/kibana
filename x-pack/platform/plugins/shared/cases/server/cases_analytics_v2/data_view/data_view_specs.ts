@@ -9,43 +9,66 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { CASE_INDEX_NAME } from '../constants';
 
 /**
- * Deterministic data view id. Same across every Kibana node, every space,
- * every restart — so concurrent bootstrap calls converge on the same SO and
- * we never accidentally create duplicates.
+ * Shared prefix for every managed Cases data view id. One data view exists
+ * per space; the id is suffixed with the space id so they're independently
+ * addressable. The prefix is exported so the operator `/reset` route can
+ * enumerate every per-space view via a prefix match.
  */
-export const CASE_DATA_VIEW_ID = 'cases-analyticsV2-case';
+export const CASE_DATA_VIEW_ID_PREFIX = 'cases-analytics-managed-';
 
 /**
- * Display name shown in the Lens / Discover data view dropdown. No `(v2)`
- * suffix because v1 creates no data view — there's nothing to disambiguate
- * against.
+ * Deterministic data view id for the given space. Same id across every
+ * Kibana node + every restart for the same space, so concurrent bootstrap
+ * calls converge on the same saved object and we never accidentally create
+ * duplicates.
+ */
+export const getCaseDataViewId = (spaceId: string): string =>
+  `${CASE_DATA_VIEW_ID_PREFIX}${spaceId}`;
+
+/**
+ * Display name shown in the Lens / Discover data view dropdown. Plain
+ * `Cases` (no v2 suffix) — v1 doesn't create a managed data view, so
+ * there's nothing to disambiguate against.
  */
 const CASE_DATA_VIEW_NAME = 'Cases';
 
 /**
- * Base spec for the managed Cases data view. Runtime fields are added on top
- * via the data-view service as templates declare new extended fields.
+ * Base spec for the managed Cases data view in a single space. Runtime
+ * fields are added on top via the data-view service from that same space's
+ * declared templates.
  *
- * - `managed: true`         — UI flags this as Kibana-owned; operator edits
- *                             get a "managed by application" hint.
- * - `allowNoIndex: true`    — view is creatable before the `.cases` index is
- *                             bootstrapped (avoids start-order coupling).
- * - `namespaces: ['*']`     — visible in every space, not just the one whose
- *                             context bootstrapped it. The cases-data
- *                             indices are cluster-level; the data view SO is
- *                             per-space — without this flag, users in other
- *                             spaces would see "no data view" until someone
- *                             re-bootstrapped under their context.
- * - `timeFieldName`         — `@timestamp` (set to last activity at write
- *                             time) makes Discover's time picker meaningful.
+ * **Per-space scoping.** Data views are space-scoped saved objects. We
+ * deliberately create one per space rather than a single global view with
+ * `namespaces: ['*']` because:
+ *   1. The runtime field map is derived from template SOs — also
+ *      space-scoped. A space-A analyst shouldn't see fields declared by
+ *      templates in space B.
+ *   2. The global map would balloon with N × M fields on tenants with
+ *      thousands of spaces.
+ *   3. Cross-space naming collisions (two spaces declaring the same
+ *      `riskScore_as_long` for different purposes) are impossible per-space.
+ *
+ * Indices remain cluster-level — `.cases` is a single shared index. Only
+ * the *view* into it is per-space. DLS (when the implicit-privileges
+ * provider lands) layers on top, scoping which documents in `.cases` each
+ * user can read.
+ *
+ * Other settings:
+ *   - `managed: true`         — UI flags this as Kibana-owned; operator
+ *                               edits get a "managed by application" hint.
+ *   - `allowNoIndex: true`    — view is creatable before any docs land in
+ *                               `.cases`. Avoids start-order coupling.
+ *   - `timeFieldName`         — `@timestamp` (set to last activity at
+ *                               write time) makes Discover's time picker
+ *                               meaningful.
  */
-export const buildBaseCaseDataViewSpec = (): DataViewSpec => ({
-  id: CASE_DATA_VIEW_ID,
+export const buildCaseDataViewSpec = (spaceId: string): DataViewSpec => ({
+  id: getCaseDataViewId(spaceId),
   name: CASE_DATA_VIEW_NAME,
   title: CASE_INDEX_NAME,
   timeFieldName: '@timestamp',
   allowNoIndex: true,
   managed: true,
-  namespaces: ['*'],
+  namespaces: [spaceId],
   runtimeFieldMap: {},
 });
