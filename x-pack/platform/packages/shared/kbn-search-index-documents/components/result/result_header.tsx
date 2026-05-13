@@ -70,7 +70,12 @@ const MetadataPopover: React.FC<MetaDataProps> = ({ id, onDocumentDelete }) => {
   );
 
   return (
-    <EuiPopover button={metaDataIcon} isOpen={popoverIsOpen} closePopover={closePopover} aria-labelledby={popoverTitleId}>
+    <EuiPopover
+      button={metaDataIcon}
+      isOpen={popoverIsOpen}
+      closePopover={closePopover}
+      aria-labelledby={popoverTitleId}
+    >
       <EuiPopoverTitle id={popoverTitleId}>
         {i18n.translate('xpack.searchIndexDocuments.result.header.metadata.title', {
           defaultMessage: 'Document metadata',

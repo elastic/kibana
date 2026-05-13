@@ -44,7 +44,12 @@ export const PlatinumLicensePopover: React.FC<PlatinumLicensePopoverProps> = ({
   const { euiTheme } = useEuiTheme();
   const popoverTitleId = useGeneratedHtmlId();
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover} aria-labelledby={popoverTitleId}>
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      aria-labelledby={popoverTitleId}
+    >
       <EuiPopoverTitle id={popoverTitleId}>
         {i18n.translate('searchConnectors.connectors.upgradeTitle', {
           defaultMessage: 'Upgrade to Elastic Platinum',
