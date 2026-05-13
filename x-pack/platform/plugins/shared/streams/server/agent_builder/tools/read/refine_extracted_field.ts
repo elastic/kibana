@@ -70,16 +70,23 @@ const MISMATCH_EXAMPLE_MAX_LENGTH = 60;
 
 /**
  * Render a sampled value as a JSON string for inclusion in a rejection
- * message, truncating values longer than {@link MISMATCH_EXAMPLE_MAX_LENGTH}
- * and annotating the original length so the caller still has a signal.
+ * message, head-truncating values longer than {@link MISMATCH_EXAMPLE_MAX_LENGTH}
+ * and appending a `(truncated)` marker so the caller knows the snippet is
+ * partial. We deliberately do NOT annotate the original length here: stream-
+ * sourced samples reach this layer already capped to ~200 chars by
+ * `flattenAndTruncateDocs`, so any length we report would be the post-upstream
+ * length, not the true original — i.e. dishonest. Inline samples preserve
+ * length, but treating them differently would make the annotation
+ * inconsistent across the two sample sources, which is worse than just
+ * dropping it. The 60-char head is enough for the agent to recognize the
+ * value's prefix shape, which is the only thing prefix validation cares
+ * about.
  */
 const formatMismatchExample = (value: string): string => {
   if (value.length <= MISMATCH_EXAMPLE_MAX_LENGTH) {
     return JSON.stringify(value);
   }
-  return `${JSON.stringify(
-    value.slice(0, MISMATCH_EXAMPLE_MAX_LENGTH)
-  )} (truncated, original length ${value.length})`;
+  return `${JSON.stringify(value.slice(0, MISMATCH_EXAMPLE_MAX_LENGTH))} (truncated)`;
 };
 
 const samplesSchema = z

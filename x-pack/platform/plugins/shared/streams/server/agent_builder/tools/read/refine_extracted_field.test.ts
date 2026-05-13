@@ -291,7 +291,7 @@ describe('runRefineExtractedFieldFlow', () => {
     }
   });
 
-  it('truncates prefix-mismatch example values longer than 60 chars and annotates the original length', async () => {
+  it('head-truncates prefix-mismatch example values longer than 60 chars and marks them as truncated', async () => {
     const { deps, streamsClient, scopedClusterClient } = buildDeps();
     streamsClient.getStream.mockResolvedValue(buildIngestStreamDef() as never);
     const longValue = `session=${'x'.repeat(500)}`;
@@ -317,7 +317,7 @@ describe('runRefineExtractedFieldFlow', () => {
     if (outcome.kind === 'rejected') {
       expect(outcome.reason).toBe('prefix_mismatch');
       expect(outcome.message).toContain('"session=xxxxxxxxxx');
-      expect(outcome.message).toContain(`(truncated, original length ${longValue.length})`);
+      expect(outcome.message).toContain('(truncated)');
       expect(outcome.message).not.toContain(longValue);
     }
   });
