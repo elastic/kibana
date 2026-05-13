@@ -8,18 +8,30 @@
  */
 
 import React from 'react';
+import type { Observable } from 'rxjs';
 import { EuiHeaderSectionItemButton, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { useSidebar, useSidebarApp } from '@kbn/core-chrome-sidebar-components';
 import { useUnreadNotificationCount } from '@kbn/core-notifications-browser-hooks';
+import { useObservable } from '@kbn/use-observable';
 import { notificationCenterAppId } from './notification_center_app';
+import { notificationStackManagementAppId } from './stack_management';
 
-export function HeaderNotificationButton() {
+interface HeaderNotificationButtonProps {
+  currentAppId$: Observable<string | undefined>;
+}
+
+export function HeaderNotificationButton({ currentAppId$ }: HeaderNotificationButtonProps) {
   const unreadCount = useUnreadNotificationCount();
   const center = useSidebarApp(notificationCenterAppId);
-  const { isOpen, currentAppId } = useSidebar();
+  const { isOpen, currentAppId: sidebarAppId } = useSidebar();
   const { euiTheme } = useEuiTheme();
+  const currentAppId = useObservable(currentAppId$, undefined);
 
-  const isActive = isOpen && currentAppId === notificationCenterAppId;
+  if (currentAppId === notificationStackManagementAppId) {
+    return null;
+  }
+
+  const isActive = isOpen && sidebarAppId === notificationCenterAppId;
 
   const handleClick = () => {
     if (isActive) {
