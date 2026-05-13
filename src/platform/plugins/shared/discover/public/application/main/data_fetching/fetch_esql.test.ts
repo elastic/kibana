@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsHitRecord } from '@kbn/discover-utils';
+import { getDocId, type EsHitRecord } from '@kbn/discover-utils';
 import type { ExecutionContract } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import moment from 'moment';
 import { of } from 'rxjs';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { discoverServiceMock } from '../../../__mocks__/services';
@@ -35,11 +36,11 @@ describe('fetchEsql', () => {
 
   it('resolves with returned records', async () => {
     const hits = [
-      { _id: '1', foo: 'bar' },
-      { _id: '2', foo: 'baz' },
+      { _index: 'i', _id: '1', foo: 'bar' },
+      { _index: 'i', _id: '2', foo: 'baz' },
     ] as unknown as EsHitRecord[];
-    const records = hits.map((hit, i) => ({
-      id: String(i),
+    const records = hits.map((hit) => ({
+      id: getDocId(hit),
       raw: hit,
       flattened: hit,
     }));
@@ -65,6 +66,51 @@ describe('fetchEsql', () => {
     expect(resolveDocumentProfileSpy).toHaveBeenCalledTimes(2);
     expect(resolveDocumentProfileSpy).toHaveBeenCalledWith({ record: records[0] });
     expect(resolveDocumentProfileSpy).toHaveBeenCalledWith({ record: records[1] });
+  });
+
+  it('falls back to generated ids when row metadata is missing', async () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date(2026, 4, 7, 22, 34, 46));
+
+    try {
+      const hits = [
+        { _id: '1', foo: 'bar' },
+        { _id: '2', foo: 'baz' },
+      ] as unknown as EsHitRecord[];
+      const responseTime = moment().format('YYYY-MM-DD_HH_mm_ss');
+      const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
+      expressionsExecuteSpy.mockReturnValueOnce({
+        cancel: jest.fn(),
+        getData: jest.fn(() =>
+          of({
+            result: {
+              columns: ['_id', 'foo'],
+              rows: hits,
+            },
+          })
+        ),
+      } as unknown as ExecutionContract);
+
+      await expect(fetchEsql(fetchEsqlMockProps)).resolves.toEqual({
+        records: [
+          {
+            id: `1@${responseTime}`,
+            raw: hits[0],
+            flattened: hits[0],
+          },
+          {
+            id: `2@${responseTime}`,
+            raw: hits[1],
+            flattened: hits[1],
+          },
+        ],
+        esqlQueryColumns: ['_id', 'foo'],
+        esqlHeaderWarning: undefined,
+        interceptedWarnings: [],
+      });
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('should use inputTimeRange if provided', () => {

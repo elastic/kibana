@@ -8,12 +8,26 @@
 import { schema } from '@kbn/config-schema';
 import { searchOptionsSchemas } from '@kbn/content-management-utils';
 
-import { lensCMSearchOptionsSchema } from '../../../../content_management';
 import { lensResponseItemSchema } from './common';
 
 export const lensSearchRequestQuerySchema = schema.object({
-  fields: lensCMSearchOptionsSchema.getPropSchemas().fields,
-  search_fields: lensCMSearchOptionsSchema.getPropSchemas().searchFields,
+  fields: schema.maybe(
+    schema.arrayOf(schema.string(), {
+      meta: {
+        description:
+          'The saved object fields to include in each result. When omitted, all fields are returned.',
+      },
+      maxSize: 100,
+    })
+  ),
+  search_fields: schema.maybe(
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
+      meta: {
+        description:
+          'The fields to match the `query` text against. Defaults to `title` when omitted.',
+      },
+    })
+  ),
   query: schema.maybe(
     schema.string({
       meta: {
@@ -51,7 +65,7 @@ const lensSearchResponseMetaSchema = schema.object(
 
 export const lensSearchResponseBodySchema = schema.object(
   {
-    data: schema.arrayOf(lensResponseItemSchema, { maxSize: 100 }),
+    data: schema.arrayOf(lensResponseItemSchema, { maxSize: 1000 }),
     meta: lensSearchResponseMetaSchema,
   },
   { unknowns: 'forbid' }
