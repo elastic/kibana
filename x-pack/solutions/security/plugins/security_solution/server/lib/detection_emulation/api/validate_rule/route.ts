@@ -35,11 +35,7 @@ import {
   type EmulationReportPhase,
 } from '../../emulation_report_type';
 import { EmulationRunner } from '../../execution/runner';
-import {
-  EmulationAllowlist,
-  createDefaultAllowlistConfig,
-  createRestrictiveAllowlistConfig,
-} from '../../execution/allowlist';
+import { EmulationAllowlist, createAllowlistFromConfig } from '../../execution/allowlist';
 import { EmulationRateLimiter, createDefaultRateLimiterConfig } from '../../execution/rate_limiter';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -138,20 +134,19 @@ export const validateRuleRoute = (
   // config-loading pipeline. Mirrors run_command/route.ts wiring.
   const emulationConfig = config.detectionEmulation;
 
+  // PROD-1: route now defaults to deny when no operator config is supplied.
+  // The wiring is delegated to `createAllowlistFromConfig` so the route, the
+  // run_command route, and the five Agent Builder tools all interpret the
+  // operator config the same way — drift between them would mean some
+  // surfaces default-allow while others default-deny.
+  if (!allowlistOverride && !emulationConfig?.allowlist) {
+    logger.warn(
+      '[detection-emulation] validateRule route registered with NO operator allowlist (`xpack.securitySolution.detectionEmulation.allowlist`); default-deny is in effect — every real_execution request will be blocked until the allowlist is configured.'
+    );
+  }
   const allowlist =
     allowlistOverride ??
-    (() => {
-      const cfg = emulationConfig?.allowlist;
-      if (!cfg) {
-        return new EmulationAllowlist(createDefaultAllowlistConfig(), logger);
-      }
-      return new EmulationAllowlist(
-        cfg.allowAll
-          ? { allowAll: true, allowedHosts: new Set() }
-          : createRestrictiveAllowlistConfig(cfg.endpointIds),
-        logger
-      );
-    })();
+    new EmulationAllowlist(createAllowlistFromConfig(emulationConfig?.allowlist), logger);
 
   const rateLimiter =
     rateLimiterOverride ??

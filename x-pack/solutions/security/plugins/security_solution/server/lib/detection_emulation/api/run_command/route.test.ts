@@ -294,14 +294,26 @@ describe('runEmulationCommandRoute — rate limiter gate', () => {
   const makeExhaustedRateLimiter = () =>
     new EmulationRateLimiter({ maxCommands: 0, windowMs: 60_000, disabled: false }, logger);
 
+  // PROD-1: the route now defaults to deny when no operator allowlist is
+  // supplied, so the rate-limit branch must opt out of the allowlist gate
+  // explicitly. This factory injects a permissive allowlist alongside the
+  // exhausted rate limiter so the rate-limit branch is reachable from tests
+  // whose intent is to exercise that gate (not the allowlist).
+  const makePermissiveAllowlist = () =>
+    new EmulationAllowlist(createRestrictiveAllowlistConfig(['agent-1']), logger);
+
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     server = serverMock.create();
   });
 
   it('returns 429 when the rate limit is exceeded', async () => {
+    const allowlist = makePermissiveAllowlist();
     const rateLimiter = makeExhaustedRateLimiter();
-    runEmulationCommandRoute(server.router, FEATURE_ENABLED_CONFIG, logger, { rateLimiter });
+    runEmulationCommandRoute(server.router, FEATURE_ENABLED_CONFIG, logger, {
+      allowlist,
+      rateLimiter,
+    });
 
     const { context } = requestContextMock.createTools();
     stubAuthenticatedUser(context);
@@ -316,8 +328,12 @@ describe('runEmulationCommandRoute — rate limiter gate', () => {
   });
 
   it('response body includes current_count and max_commands when rate-limited', async () => {
+    const allowlist = makePermissiveAllowlist();
     const rateLimiter = makeExhaustedRateLimiter();
-    runEmulationCommandRoute(server.router, FEATURE_ENABLED_CONFIG, logger, { rateLimiter });
+    runEmulationCommandRoute(server.router, FEATURE_ENABLED_CONFIG, logger, {
+      allowlist,
+      rateLimiter,
+    });
 
     const { context } = requestContextMock.createTools();
     stubAuthenticatedUser(context);
@@ -336,8 +352,12 @@ describe('runEmulationCommandRoute — rate limiter gate', () => {
   });
 
   it('logs a warning naming the space when the rate limit gate blocks', async () => {
+    const allowlist = makePermissiveAllowlist();
     const rateLimiter = makeExhaustedRateLimiter();
-    runEmulationCommandRoute(server.router, FEATURE_ENABLED_CONFIG, logger, { rateLimiter });
+    runEmulationCommandRoute(server.router, FEATURE_ENABLED_CONFIG, logger, {
+      allowlist,
+      rateLimiter,
+    });
 
     const { context } = requestContextMock.createTools();
     stubAuthenticatedUser(context);

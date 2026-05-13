@@ -205,6 +205,15 @@ mode never asks; the four \`run*Command\` tools use declarative
 Both surfaces honour \`executionMode === 'standalone'\` (sub-agent / eval / A2A
 runs) by skipping the prompt — RBAC + allowlist remain in force.
 
+**Allowlist is default-deny.** When no operator config is supplied
+(\`xpack.securitySolution.detectionEmulation.allowlist\`), every endpoint is
+blocked from \`real_execution\` — the tool will return an
+\`authorization_error\` naming the blocked hosts. Operators must opt
+endpoints into the allowlist explicitly. The previous experimental default
+(\`allowAll: true\`) is still available for test fixtures via
+\`createTestAllowlistConfig()\` but is intentionally absent from production
+construction paths.
+
 ## Response Format
 
 Always include in your response to the user:

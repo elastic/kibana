@@ -81,20 +81,71 @@ export class EmulationAllowlist {
 }
 
 /**
- * Default config: permit any endpoint. The route falls back to this
- * when no override is supplied. Intended for local dev / tests; once
- * the feature graduates from experimental this should be replaced with
- * a config-driven `createRestrictiveAllowlistConfig` (see N7).
+ * Default config: deny ALL endpoints. This is the safe default — any
+ * caller (tool or route) that constructs an allowlist without an
+ * operator-supplied config gets a config that blocks every endpoint
+ * until the operator opts hosts in via
+ * `xpack.securitySolution.detectionEmulation.allowlist`.
+ *
+ * This is a deliberate breaking change relative to the experimental
+ * default, which was `allowAll: true`. The previous default meant a
+ * misconfigured deployment (no operator config + LLM tool registered)
+ * could dispatch live response actions to ANY endpoint — exactly the
+ * footgun this safety layer exists to prevent.
+ *
+ * For test fixtures that need a permissive allowlist, use
+ * `createTestAllowlistConfig()` (clearly named so it doesn't get
+ * mistaken for production wiring).
  */
 export function createDefaultAllowlistConfig(): EmulationAllowlistConfig {
-  return { allowAll: true, allowedHosts: new Set() };
+  return { allowAll: false, allowedHosts: new Set() };
 }
 
 /**
  * Restrictive config: only permit the supplied endpoint IDs. Used by
- * tests to assert the blocking branch and (eventually) by config
- * wiring once the user-supplied allowlist lands.
+ * `createAllowlistFromConfig` to translate operator-supplied
+ * `endpointIds: [...]` into runtime config, and by tests asserting the
+ * blocking branch.
  */
 export function createRestrictiveAllowlistConfig(endpointIds: string[]): EmulationAllowlistConfig {
   return { allowAll: false, allowedHosts: new Set(endpointIds) };
+}
+
+/**
+ * Permissive config for TEST FIXTURES ONLY. Returns `allowAll: true`
+ * so unit/integration tests focused on a downstream gate (rate limiter,
+ * idempotency cache, runner) don't have to enumerate every endpoint
+ * they happen to use.
+ *
+ * **DO NOT** use this in production code paths. `createDefaultAllowlistConfig`
+ * is now default-deny precisely so a missing operator config cannot
+ * silently degrade to "allow everything"; test fixtures opt back into
+ * the permissive shape via this name so the intent is obvious to
+ * reviewers.
+ */
+export function createTestAllowlistConfig(): EmulationAllowlistConfig {
+  return { allowAll: true, allowedHosts: new Set() };
+}
+
+/**
+ * Translate operator-supplied config (`xpack.securitySolution.detectionEmulation.allowlist`)
+ * into a runtime `EmulationAllowlistConfig`. Centralised so the two
+ * routes and the five Agent Builder tools consume the operator config
+ * the same way — a drift between them would mean some surfaces
+ * default-allow while others default-deny.
+ *
+ * - Operator config undefined → default-deny (`createDefaultAllowlistConfig`)
+ * - Operator config with `allowAll: true` → permit any endpoint
+ * - Operator config with `allowAll: false` → restrict to `endpointIds`
+ */
+export function createAllowlistFromConfig(
+  operatorConfig: { allowAll: boolean; endpointIds: string[] } | undefined
+): EmulationAllowlistConfig {
+  if (!operatorConfig) {
+    return createDefaultAllowlistConfig();
+  }
+  if (operatorConfig.allowAll) {
+    return { allowAll: true, allowedHosts: new Set() };
+  }
+  return createRestrictiveAllowlistConfig(operatorConfig.endpointIds);
 }

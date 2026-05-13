@@ -20,7 +20,7 @@ import {
 import { buildEmulationComment } from './execution/audit_logger';
 import {
   EmulationAllowlist,
-  createDefaultAllowlistConfig,
+  createTestAllowlistConfig,
   createRestrictiveAllowlistConfig,
 } from './execution/allowlist';
 import { EmulationRateLimiter, createDefaultRateLimiterConfig } from './execution/rate_limiter';
@@ -250,7 +250,11 @@ describe('detection_emulation — guard chain (allowlist + rate limiter)', () =>
   });
 
   it('blocks when the rate limit is exceeded even though all endpoints are allowed', () => {
-    const allowlist = new EmulationAllowlist(createDefaultAllowlistConfig(), makeLogger());
+    // Test fixture: the allowlist isn't the focus of this assertion;
+    // we want it permissive so the rate-limit gate is reached. Using
+    // the explicitly-named test config keeps the intent obvious and
+    // avoids regressing if `createDefaultAllowlistConfig` flips again.
+    const allowlist = new EmulationAllowlist(createTestAllowlistConfig(), makeLogger());
     const rateLimiter = new EmulationRateLimiter(
       { maxCommands: 2, windowMs: 60_000, disabled: false },
       makeLogger()
@@ -299,7 +303,10 @@ describe('detection_emulation — guard chain (allowlist + rate limiter)', () =>
   });
 
   it('a command passing all guards leaves rate limiter count incremented', () => {
-    const allowlist = new EmulationAllowlist(createDefaultAllowlistConfig(), makeLogger());
+    // Test fixture (see comment on the previous test) — using
+    // `createTestAllowlistConfig` makes "allowlist is permissive on
+    // purpose" obvious without leaning on the production default.
+    const allowlist = new EmulationAllowlist(createTestAllowlistConfig(), makeLogger());
     const rateLimiter = new EmulationRateLimiter(
       { maxCommands: 10, windowMs: 60_000, disabled: false },
       makeLogger()

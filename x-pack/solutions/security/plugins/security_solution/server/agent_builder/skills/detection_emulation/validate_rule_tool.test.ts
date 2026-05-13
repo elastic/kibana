@@ -32,10 +32,20 @@ jest.mock('../../../lib/detection_emulation/scenario_generator', () => ({
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
+// `detectionEmulation.allowlist` opts every test endpoint into the host
+// allowlist explicitly. PROD-1 flipped the default to deny when no
+// operator config is supplied, so a test that wants to exercise paths
+// past the allowlist gate must populate this.
 const FEATURE_ENABLED_CONFIG = {
   experimentalFeatures: {
     detectionEmulationRealExecution: true,
     detectionEmulationLogInjection: true,
+  },
+  detectionEmulation: {
+    allowlist: {
+      allowAll: false,
+      endpointIds: ['agent-1', 'agent-2'],
+    },
   },
 } as unknown as ConfigType;
 

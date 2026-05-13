@@ -16,7 +16,7 @@ import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_c
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import {
   EmulationAllowlist,
-  createDefaultAllowlistConfig,
+  createAllowlistFromConfig,
 } from '../../../lib/detection_emulation/execution/allowlist';
 import {
   EmulationRateLimiter,
@@ -94,7 +94,16 @@ export const createRunProcessCommandTool = (
 ): BuiltinSkillBoundedTool<typeof runProcessCommandSchema> => {
   const { core, endpointService, config, logger } = deps;
 
-  const allowlist = new EmulationAllowlist(createDefaultAllowlistConfig(), logger);
+  // PROD-1: default-deny when no operator allowlist is supplied, with a
+  // registration-time warning so operators see immediately that
+  // real_execution is locked out until the allowlist is configured.
+  const operatorAllowlist = config.detectionEmulation?.allowlist;
+  if (!operatorAllowlist) {
+    logger.warn(
+      '[detection-emulation] runProcessCommand tool registered with NO operator allowlist (`xpack.securitySolution.detectionEmulation.allowlist`); default-deny is in effect — every call will be blocked until the allowlist is configured.'
+    );
+  }
+  const allowlist = new EmulationAllowlist(createAllowlistFromConfig(operatorAllowlist), logger);
   const rateLimiter = new EmulationRateLimiter(createDefaultRateLimiterConfig(), logger);
 
   return {

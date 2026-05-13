@@ -125,8 +125,13 @@ describe('validateRuleRoute — rate limiter gate', () => {
   });
 
   it('returns 429 when real_execution exceeds the per-space rate limit', async () => {
+    // PROD-1: the route now defaults to deny when no operator allowlist is
+    // supplied, so the rate-limit branch must opt out of the allowlist gate
+    // explicitly. Inject a permissive allowlist alongside the exhausted
+    // rate limiter so the rate-limit branch is reachable.
+    const allowlist = new EmulationAllowlist(createRestrictiveAllowlistConfig(['agent-1']), logger);
     const rateLimiter = makeExhaustedRateLimiter();
-    validateRuleRoute(server.router, FEATURE_ENABLED_CONFIG, logger, { rateLimiter });
+    validateRuleRoute(server.router, FEATURE_ENABLED_CONFIG, logger, { allowlist, rateLimiter });
 
     const { context } = requestContextMock.createTools();
     stubAuthenticatedUser(context);

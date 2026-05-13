@@ -39,7 +39,7 @@ import {
 import { EmulationRunner } from '../../../lib/detection_emulation/execution/runner';
 import {
   EmulationAllowlist,
-  createDefaultAllowlistConfig,
+  createAllowlistFromConfig,
 } from '../../../lib/detection_emulation/execution/allowlist';
 import {
   EmulationRateLimiter,
@@ -132,8 +132,18 @@ export const createValidateRuleTool = (
   // Constructed once at registration so the rate-limit window and
   // allowlist set are shared across all invocations of the tool. Per-call
   // construction would defeat the per-space rate window. Mirrors the
-  // pattern in run_emulation_command_tool.ts and validate_rule/route.ts.
-  const allowlist = new EmulationAllowlist(createDefaultAllowlistConfig(), logger);
+  // pattern in the per-family run*Command tools and validate_rule/route.ts.
+  //
+  // PROD-1: the allowlist now defaults to deny when no operator config is
+  // supplied — log a warning at registration so operators see immediately
+  // that real_execution is locked out until they populate the allowlist.
+  const operatorAllowlist = config.detectionEmulation?.allowlist;
+  if (!operatorAllowlist) {
+    logger.warn(
+      '[detection-emulation] validateRule tool registered with NO operator allowlist (`xpack.securitySolution.detectionEmulation.allowlist`); default-deny is in effect — every real_execution call will be blocked until the allowlist is configured.'
+    );
+  }
+  const allowlist = new EmulationAllowlist(createAllowlistFromConfig(operatorAllowlist), logger);
   const rateLimiter = new EmulationRateLimiter(createDefaultRateLimiterConfig(), logger);
 
   return {
