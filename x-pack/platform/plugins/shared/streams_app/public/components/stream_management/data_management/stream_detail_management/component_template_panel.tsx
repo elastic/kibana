@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiInMemoryTable, EuiIcon, EuiText, EuiCard, EuiLink, useEuiTheme } from '@elastic/eui';
+import { EuiInMemoryTable, EuiIcon, EuiCard, EuiLink, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   UnmanagedComponentTemplateDetails,
@@ -98,14 +98,14 @@ export function ComponentTemplatePanel({
         },
       }}
       title={
-        <EuiText size="m" css={{ fontWeight: euiTheme.font.weight.semiBold }} color="inherit">
+        <span css={{ fontWeight: euiTheme.font.weight.semiBold }}>
           {i18n.translate('xpack.streams.componentTemplatePanel.title', {
             defaultMessage: 'Component templates',
           })}
-        </EuiText>
+        </span>
       }
       description={
-        <EuiText size="s" color="subdued">
+        <span css={{ color: euiTheme.colors.subduedText, fontSize: euiTheme.size.m }}>
           {i18n.translate('xpack.streams.componentTemplatePanel.description', {
             defaultMessage:
               'Reuse settings, mappings, and aliases configurations in multiple index templates.',
@@ -121,7 +121,7 @@ export function ComponentTemplatePanel({
               defaultMessage: 'Learn more.',
             })}
           </EuiLink>
-        </EuiText>
+        </span>
       }
     >
       {componentTemplates && (
