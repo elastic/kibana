@@ -225,6 +225,16 @@ export enum SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM {
   ContinueWindow = 'continue-until-window-ends',
 }
 
+/**
+ * This Kibana Advanced Setting controls the batch size used when chunking rules during
+ * the detection rules import flow. Larger batches reduce the number of round-trips at the
+ * cost of higher per-request memory and longer single-batch processing time.
+ */
+export const RULE_IMPORT_BATCH_SIZE_SETTING = 'securitySolution:ruleImportBatchSize' as const;
+
+/** Default batch size for chunking parsed rules during rule import. */
+export const DEFAULT_RULE_IMPORT_BATCH_SIZE = 100 as const;
+
 /** This Kibana Advanced Setting sets the auto refresh interval for the detections all rules table */
 export const DEFAULT_RULES_TABLE_REFRESH_SETTING = 'securitySolution:rulesTableRefresh' as const;
 

@@ -17,7 +17,11 @@ import {
   ImportRulesRequestQuery,
   ImportRulesResponse,
 } from '../../../../../../../common/api/detection_engine/rule_management';
-import { DETECTION_ENGINE_RULES_IMPORT_URL } from '../../../../../../../common/constants';
+import {
+  DEFAULT_RULE_IMPORT_BATCH_SIZE,
+  DETECTION_ENGINE_RULES_IMPORT_URL,
+  RULE_IMPORT_BATCH_SIZE_SETTING,
+} from '../../../../../../../common/constants';
 import type { ConfigType } from '../../../../../../config';
 import type { HapiReadableStream, SecuritySolutionPluginRouter } from '../../../../../../types';
 import {
@@ -41,8 +45,6 @@ import {
 } from '../../../utils/utils';
 import { RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS } from '../../timeouts';
 import { createPrebuiltRuleObjectsClient } from '../../../../prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
-
-const CHUNK_PARSED_OBJECT_SIZE = 50;
 
 export const importRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -187,8 +189,10 @@ export const importRulesRoute = (
                 ctx.securitySolution.getCheckOsqueryResponseActionAuthz(),
             });
 
-          const ruleChunks = chunk(CHUNK_PARSED_OBJECT_SIZE, validatedResponseActionsRules);
-
+          const ruleImportBatchSize =
+            (await ctx.core.uiSettings.client.get<number>(RULE_IMPORT_BATCH_SIZE_SETTING)) ||
+            DEFAULT_RULE_IMPORT_BATCH_SIZE;
+          const ruleChunks = chunk(ruleImportBatchSize, validatedResponseActionsRules);
           const experimentalFeatures = ctx.securitySolution.getConfig().experimentalFeatures;
 
           const importRuleResponse = await importRules({

@@ -34,6 +34,7 @@ import {
   DEFAULT_INTERVAL_VALUE,
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
+  DEFAULT_RULE_IMPORT_BATCH_SIZE,
   DEFAULT_RULES_TABLE_REFRESH_SETTING,
   DEFAULT_THREAT_INDEX_KEY,
   DEFAULT_THREAT_INDEX_VALUE,
@@ -53,6 +54,7 @@ import {
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
+  RULE_IMPORT_BATCH_SIZE_SETTING,
   SHOW_RELATED_INTEGRATIONS_SETTING,
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING,
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM,
@@ -285,6 +287,26 @@ export const initUiSettings = (
         on: schema.boolean(),
       }),
       solutionViews: ['classic', 'security'],
+    },
+    [RULE_IMPORT_BATCH_SIZE_SETTING]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.ruleImportBatchSizeLabel', {
+        defaultMessage: 'Rule import batch size',
+      }),
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.ruleImportBatchSizeDescription',
+        {
+          defaultMessage:
+            '<p>Maximum number of rules processed per batch when importing detection rules. Larger values reduce round-trips at the cost of higher per-request memory and longer single-batch processing time.</p>',
+          values: { p: (chunks) => `<p>${chunks}</p>` },
+        }
+      ),
+      type: 'number',
+      value: DEFAULT_RULE_IMPORT_BATCH_SIZE,
+      category: [APP_ID],
+      requiresPageReload: false,
+      schema: schema.number({ min: 1 }),
+      solutionViews: ['classic', 'security'],
+      technicalPreview: true,
     },
     ...(experimentalFeatures.deHealthUIEnabled && {
       [ENABLE_DE_HEALTH_UI_SETTING]: {
