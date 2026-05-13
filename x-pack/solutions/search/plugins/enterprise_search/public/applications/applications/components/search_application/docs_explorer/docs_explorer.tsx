@@ -153,7 +153,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             {hasSchemaConflicts && (
               <>
                 <EuiFlexItem>
-                  <EuiIcon type="warning" color="danger" />
+                  <EuiIcon aria-hidden={true} type="warning" color="danger" />
                 </EuiFlexItem>
                 {!isTourClosed && <EuiSpacer size="xs" />}
               </>
@@ -249,7 +249,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
           </EuiContextMenuItem>
           <EuiContextMenuItem
             key="Schema"
-            icon={hasSchemaConflicts ? <EuiIcon type="warning" color="danger" /> : 'queryField'}
+            icon={hasSchemaConflicts ? <EuiIcon aria-hidden={true} type="warning" color="danger" /> : 'queryField'}
             onClick={() =>
               navigateToUrl(
                 generateEncodedPath(SEARCH_APPLICATION_CONTENT_PATH, {
@@ -323,7 +323,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
           <EuiHorizontalRule margin="none" />
           <EuiContextMenuItem
             key="delete"
-            icon={<EuiIcon type="trash" color="danger" />}
+            icon={<EuiIcon aria-hidden={true} type="trash" color="danger" />}
             onClick={() => {
               if (searchApplicationData) {
                 openDeleteSearchApplicationModal();

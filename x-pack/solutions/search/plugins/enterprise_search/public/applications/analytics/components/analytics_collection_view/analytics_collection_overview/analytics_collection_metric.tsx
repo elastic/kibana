@@ -122,7 +122,7 @@ export const AnalyticsCollectionViewMetric: React.FC<
                 })
               ) : (
                 <>
-                  <EuiIcon type={icon} />
+                  <EuiIcon aria-hidden={true} type={icon} />
                   {displaySecondaryMetric + '%'}
                 </>
               )}
