@@ -242,14 +242,15 @@ export class WorkflowRepository {
     const MAX_PAGES = 50;
     const keepAlive = '1m';
     const sort: estypes.Sort = [{ updated_at: { order: 'desc' } }, '_shard_doc'];
+    const spaceFilter = buildWorkflowSpaceFilter(spaceId, { includeGlobal: true });
     const query = {
       bool: {
         must: [
-          { term: { spaceId } },
+          ...spaceFilter.must,
           { term: { enabled: true } },
           { term: { triggerTypes: triggerId } },
         ],
-        must_not: [{ exists: { field: 'deleted_at' } }],
+        must_not: spaceFilter.must_not,
       },
     };
     const _source = [
@@ -263,6 +264,9 @@ export class WorkflowRepository {
       'valid',
       'created_at',
       'updated_at',
+      'managed',
+      'managedBy',
+      'originManagedWorkflowId',
     ];
 
     const pitResponse = await this.options.esClient.openPointInTime({
@@ -330,6 +334,11 @@ export class WorkflowRepository {
         valid: source.valid as boolean,
         createdAt: source.created_at as string,
         lastUpdatedAt: source.updated_at as string,
+        ...(source.managed === true ? { managed: true } : {}),
+        ...(typeof source.managedBy === 'string' ? { managedBy: source.managedBy } : {}),
+        ...(typeof source.originManagedWorkflowId === 'string'
+          ? { originManagedWorkflowId: source.originManagedWorkflowId }
+          : {}),
       }));
     } finally {
       try {
