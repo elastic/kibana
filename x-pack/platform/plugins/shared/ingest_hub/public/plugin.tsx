@@ -25,7 +25,8 @@ import type {
   IngestHubStartDependencies,
   IngestFlow,
 } from './types';
-import { INGEST_HUB_ENABLED_FLAG, INGEST_HUB_ONBOARDING_ENABLED_FLAG } from '../common/constants';
+import { INGEST_HUB_ENABLED_FLAG } from '../common/constants';
+import { registerOnboardingApp } from './onboarding';
 
 const IngestHubApp = dynamic(() =>
   import('./application').then((mod) => ({ default: mod.IngestHubApp }))
@@ -108,43 +109,7 @@ export class IngestHubPlugin
       },
     });
 
-    coreSetup.application.register({
-      id: 'onboarding',
-      title: i18n.translate('xpack.ingestHub.onboardingAppTitle', {
-        defaultMessage: 'Onboarding',
-      }),
-      appRoute: '/app/onboarding',
-      visibleIn: [],
-      chromeless: true,
-      updater$: from(startServicesPromise).pipe(
-        switchMap(([coreStart]) =>
-          coreStart.featureFlags.getBooleanValue$(INGEST_HUB_ONBOARDING_ENABLED_FLAG, false).pipe(
-            map(
-              (enabled): AppUpdater =>
-                () => ({ visibleIn: enabled ? ['globalSearch'] : [] })
-            )
-          )
-        )
-      ),
-      mount: async (params: AppMountParameters) => {
-        const [coreStart] = await startServicesPromise;
-        const isEnabled = coreStart.featureFlags.getBooleanValue(
-          INGEST_HUB_ONBOARDING_ENABLED_FLAG,
-          false
-        );
-
-        if (!isEnabled) {
-          coreStart.application.navigateToApp('discover');
-          return () => {};
-        }
-
-        const root = createRoot(params.element);
-        root.render(
-          coreStart.rendering.addContext(<div data-test-subj="onboardingApp">Onboarding</div>)
-        );
-        return () => root.unmount();
-      },
-    });
+    registerOnboardingApp(coreSetup, startServicesPromise);
 
     return {};
   }
