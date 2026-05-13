@@ -1,0 +1,17 @@
+prs:
+- https://github.com/elastic/kibana/pull/256102
+issues:
+- https://github.com/elastic/kibana/issues/269101
+type: enhancement
+products:
+- product: kibana
+- product: cloud-serverless
+areas:
+- Dashboards and visualizations
+title: Dashboard panel limits enforced
+description: >-
+  Dashboards now enforce limits on the number of panels. Each dashboard supports
+  up to 100 top-level items (panels, unpinned controls, and sections combined),
+  up to 100 panels inside each section, and up to 100 pinned controls. These
+  limits apply to both the UI and the Dashboards API. For details, refer to
+  [Panel limits](https://www.elastic.co/docs/explore-analyze/dashboards/arrange-panels#dashboard-panel-limits).
