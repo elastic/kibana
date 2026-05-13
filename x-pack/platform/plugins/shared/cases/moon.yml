@@ -103,7 +103,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/zod'
   - '@kbn/securitysolution-es-utils'
-  - '@kbn/openapi-generator'
+  - '@kbn/lens-embeddable-utils'
 tags:
   - plugin
   - prod
