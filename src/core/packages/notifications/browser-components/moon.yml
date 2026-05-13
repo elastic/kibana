@@ -18,7 +18,9 @@ project:
   sourceRoot: src/core/packages/notifications/browser-components
 dependsOn:
   - '@kbn/i18n'
-  - '@kbn/core-notifications-browser'
+  - '@kbn/content-list-table'
+  - '@kbn/content-list-provider'
+  - '@kbn/content-list'
 tags:
   - shared-browser
   - package
