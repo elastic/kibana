@@ -6,7 +6,7 @@
  */
 
 import type { z, ZodType } from '@kbn/zod/v4';
-import { getMeta } from '@kbn/connector-specs/src/lib';
+import { getMeta } from '@kbn/connector-specs/src/connector_spec_ui';
 
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 

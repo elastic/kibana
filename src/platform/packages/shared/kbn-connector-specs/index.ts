@@ -19,16 +19,5 @@ export { normalizeAuthorizationHeaderValue } from './src/auth_types/oauth_authz_
 
 export { ConnectorAuthorizationError, isConnectorAuthorizationError } from './src/errors';
 export type { ConnectorAuthorizationReason } from './src/errors';
-export {
-  getSchemaForAuthType,
-  AUTH_TYPE_DISCRIMINATOR,
-  generateSecretsSchemaFromSpec,
-  configureAxiosInstanceWithSsl,
-  getMeta,
-  serializeConnectorSpec,
-  fromConnectorSpecSchema,
-  type SerializeConnectorSpecOptions,
-  type ConnectorZodSchema,
-} from './src/lib';
-export { setMeta, addMeta } from './src/connector_spec_ui';
+export { getMeta, setMeta, addMeta } from './src/connector_spec_ui';
 export type { BaseMetadata } from './src/connector_spec_ui';
