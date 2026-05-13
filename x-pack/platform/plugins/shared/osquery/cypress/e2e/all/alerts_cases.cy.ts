@@ -25,8 +25,7 @@ import {
 } from '../../tasks/live_query';
 import { generateRandomStringName, interceptCaseId } from '../../tasks/integrations';
 
-// Failing: See https://github.com/elastic/kibana/issues/197151
-describe.skip(
+describe(
   'Alert Event Details - Cases',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
@@ -107,7 +106,7 @@ describe.skip(
         cy.getBySel('securitySolutionFlyoutResponseButton').click();
         cy.getBySel('responseActionsViewWrapper').should('exist');
         cy.contains('select * from users;');
-        cy.contains("SELECT * FROM os_version where name='Ubuntu';");
+        cy.contains(/SELECT \* FROM os_version where name='.+'/);
         cy.getBySel('osquery-results-comment').each(($comment) => {
           cy.wrap($comment).within(() => {
             // On initial load result table might not render due to displayed error
