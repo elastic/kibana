@@ -63,6 +63,13 @@ const migrationSchema = schema.object({
    * Skip logging migration progress unless there are any errors.
    */
   useCumulativeLogger: schema.boolean({ defaultValue: true }),
+  /**
+   * List of WIP (work-in-progress) saved object type names that Kibana is explicitly allowed to
+   * start with. Kibana will refuse to start if any type listed in `wip_types.json` is registered
+   * but absent from this list. Intended for development environments only; do not use in production.
+   */
+  // codeql[js/kibana/unbounded-array-in-schema] Config from kibana.yml, not user HTTP input
+  allowWipTypes: schema.arrayOf(schema.string(), { defaultValue: [] }),
 });
 
 export type SavedObjectsMigrationConfigType = TypeOf<typeof migrationSchema>;
