@@ -31,16 +31,12 @@ test.beforeEach(async ({ page, onboardingHomePage }) => {
 const INSTRUMENTED_APP_CONTAINER_NAMESPACE = 'java';
 const INSTRUMENTED_APP_NAME = 'java-app';
 
-/**
- * Kubernetes onboarding with OTel can be slow — increase test timeout to 10 minutes.
- */
 test('Otel Kubernetes', async ({
   page,
   onboardingHomePage,
   otelKubernetesFlowPage,
   wiredStreamsSelector,
 }) => {
-  test.setTimeout(10 * 60 * 1000);
   assertEnv(process.env.ARTIFACTS_FOLDER, 'ARTIFACTS_FOLDER is not defined.');
 
   const isLogsEssentialsMode = process.env.LOGS_ESSENTIALS_MODE === 'true';
