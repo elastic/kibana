@@ -24,6 +24,7 @@ import type {
   UnifiedDataTableRestorableState,
 } from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState, DataGridDensity } from '@kbn/unified-data-table';
+import { IndexPatternSource } from '@kbn/data-source';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -167,6 +168,10 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   }, [toasts, startServices]);
 
   const { dataView, isLoading: isDataViewLoading } = useOsqueryDataView();
+  const dataSource = useMemo(
+    () => (dataView ? new IndexPatternSource(dataView) : undefined),
+    [dataView]
+  );
 
   const [filteredDataView, setFilteredDataView] = useState(dataView);
   const [persistedPageSize, setPersistedPageSize] = usePersistedPageSize(
@@ -591,7 +596,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
                 <UnifiedDataTable
                   key={gridKey}
                   ariaLabelledBy="osquery-results"
-                  dataView={dataView}
+                  dataSource={dataSource}
                   columns={visibleColumns}
                   rows={rows}
                   loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}

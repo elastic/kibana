@@ -13,7 +13,7 @@ import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
+import type { DataSource } from '@kbn/data-source';
 import type { DocViewerProps, DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { UnifiedDocViewerFlyoutProps } from '@kbn/unified-doc-viewer-plugin/public';
@@ -35,10 +35,10 @@ export interface DiscoverGridFlyoutProps
   filters?: Filter[];
   query?: Query | AggregateQuery;
   columns: string[];
-  columnsMeta?: DataTableColumnsMeta;
+  dataSource?: DataSource;
   hit: DataTableRecord;
   hits?: DataTableRecord[];
-  dataView: DataView;
+  dataView?: DataView;
   initialTabId?: string;
   docViewerRef?: DocViewerProps['ref'];
   docViewerExtensionActions?: DocViewerExtensionParams['actions'];
@@ -61,7 +61,7 @@ export function DiscoverGridFlyout({
   hits,
   dataView,
   columns,
-  columnsMeta,
+  dataSource,
   savedSearchId,
   filters,
   query,
@@ -78,6 +78,59 @@ export function DiscoverGridFlyout({
   onUpdateSelectedTabId,
   hideFilteringOnComputedColumns,
 }: DiscoverGridFlyoutProps) {
+  if (!dataView) {
+    // DataView is required by the doc viewer; ES|QL paths always supply an ad-hoc one.
+    return null;
+  }
+
+  return (
+    <DiscoverGridFlyoutContent
+      hit={hit}
+      hits={hits}
+      dataView={dataView}
+      columns={columns}
+      dataSource={dataSource}
+      savedSearchId={savedSearchId}
+      filters={filters}
+      query={query}
+      initialTabId={initialTabId}
+      docViewerRef={docViewerRef}
+      docViewerExtensionActions={docViewerExtensionActions}
+      onFilter={onFilter}
+      onClose={onClose}
+      onRemoveColumn={onRemoveColumn}
+      onAddColumn={onAddColumn}
+      setExpandedDoc={setExpandedDoc}
+      initialDocViewerState={initialDocViewerState}
+      onInitialDocViewerStateChange={onInitialDocViewerStateChange}
+      onUpdateSelectedTabId={onUpdateSelectedTabId}
+      hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}
+    />
+  );
+}
+
+function DiscoverGridFlyoutContent({
+  hit,
+  hits,
+  dataView,
+  columns,
+  dataSource,
+  savedSearchId,
+  filters,
+  query,
+  initialTabId,
+  docViewerRef,
+  docViewerExtensionActions,
+  onFilter,
+  onClose,
+  onRemoveColumn,
+  onAddColumn,
+  setExpandedDoc,
+  initialDocViewerState,
+  onInitialDocViewerStateChange,
+  onUpdateSelectedTabId,
+  hideFilteringOnComputedColumns,
+}: DiscoverGridFlyoutProps & { dataView: DataView }) {
   const services = useDiscoverServices();
   const isESQLQuery = isOfAggregateQueryType(query);
   // Get actual hit with updated highlighted searches
@@ -126,7 +179,7 @@ export function DiscoverGridFlyout({
       hits={hits}
       dataView={dataView}
       columns={columns}
-      columnsMeta={columnsMeta}
+      dataSource={dataSource}
       onAddColumn={onAddColumn}
       onRemoveColumn={onRemoveColumn}
       onClose={onClose}

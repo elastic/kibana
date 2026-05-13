@@ -33,7 +33,7 @@ import {
 } from './use_comparison_css';
 
 export interface UseComparisonCellValueProps {
-  dataView: DataView;
+  dataView?: DataView;
   comparisonFields: string[];
   fieldColumnId: string;
   selectedDocIds: string[];
@@ -96,7 +96,10 @@ const EMPTY_VALUE = '-';
 const CellValue = (props: CellValueProps) => {
   const { dataView, comparisonFields, fieldColumnId, rowIndex, columnId, getDocById } = props;
   const fieldName = comparisonFields[rowIndex];
-  const field = useMemo(() => dataView.fields.getByName(fieldName), [dataView.fields, fieldName]);
+  const field = useMemo(
+    () => dataView?.fields.getByName(fieldName),
+    [dataView?.fields, fieldName]
+  );
   const comparisonDoc = useMemo(() => getDocById(columnId), [columnId, getDocById]);
   if (columnId === fieldColumnId) {
     return <FieldCellValue field={field} fieldName={fieldName} />;

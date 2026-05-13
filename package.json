@@ -564,6 +564,7 @@
     "@kbn/data-search-plugin": "link:src/platform/test/plugin_functional/plugins/data_search",
     "@kbn/data-service": "link:src/platform/packages/shared/kbn-data-service",
     "@kbn/data-service-server": "link:src/platform/packages/shared/kbn-data-service-server",
+    "@kbn/data-source": "link:src/platform/packages/shared/kbn-data-source",
     "@kbn/data-stream-adapter": "link:x-pack/solutions/security/packages/data-stream-adapter",
     "@kbn/data-streams": "link:src/platform/packages/private/kbn-data-streams",
     "@kbn/data-streams-example-plugin": "link:examples/data_streams_example",

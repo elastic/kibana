@@ -217,7 +217,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             payload: {
               dataView: selectedDataViewRef.current,
               fieldCounts: isEsqlMode ? EMPTY_FIELD_COUNTS : calcFieldCounts(documentState.result),
-              esqlQueryColumns: documentState.esqlQueryColumns,
+              dataSource: documentState.dataSource,
               isEsqlMode,
             },
           });

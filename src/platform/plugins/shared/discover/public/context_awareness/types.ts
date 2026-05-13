@@ -339,9 +339,9 @@ export interface CellRenderersExtensionParams {
     addFilter?: DocViewFilterFn;
   };
   /**
-   * The current data view
+   * The current data view. Optional because ES|QL mode may not carry a persisted DataView.
    */
-  dataView: DataView;
+  dataView?: DataView;
   /**
    * The current density applied to the data grid component
    */

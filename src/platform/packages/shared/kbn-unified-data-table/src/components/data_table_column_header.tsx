@@ -15,14 +15,13 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldIcon, getFieldIconProps, getTextBasedColumnIconType } from '@kbn/field-utils';
 import { isNestedFieldParent } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
-import type { DataTableColumnsMeta } from '../types';
+import { type DataSource, EsqlSource, IndexPatternSource } from '@kbn/data-source';
 import ColumnHeaderTruncateContainer from './column_header_truncate_container';
 
 interface DataTableColumnHeaderProps {
-  dataView: DataView;
+  dataSource: DataSource | undefined;
   columnName: string | null;
   columnDisplayName: string;
-  columnsMeta?: DataTableColumnsMeta;
   headerRowHeight?: number;
   showColumnTokens?: boolean;
 }
@@ -31,18 +30,13 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = ({
   columnDisplayName,
   showColumnTokens,
   columnName,
-  columnsMeta,
-  dataView,
+  dataSource,
   headerRowHeight,
 }) => {
   return (
     <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
       {showColumnTokens && (
-        <DataTableColumnToken
-          columnName={columnName}
-          columnsMeta={columnsMeta}
-          dataView={dataView}
-        />
+        <DataTableColumnToken columnName={columnName} dataSource={dataSource} />
       )}
       <DataTableColumnTitle columnDisplayName={columnDisplayName} />
     </ColumnHeaderTruncateContainer>
@@ -50,13 +44,13 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = ({
 };
 
 const DataTableColumnToken: React.FC<
-  Pick<DataTableColumnHeaderProps, 'columnName' | 'columnsMeta' | 'dataView'>
+  Pick<DataTableColumnHeaderProps, 'columnName' | 'dataSource'>
 > = (props) => {
   const { euiTheme } = useEuiTheme();
-  const { columnName, columnsMeta, dataView } = props;
+  const { columnName, dataSource } = props;
   const columnToken = useMemo(
-    () => getRenderedToken({ columnName, columnsMeta, dataView }),
-    [columnName, columnsMeta, dataView]
+    () => getRenderedToken({ columnName, dataSource }),
+    [columnName, dataSource]
   );
 
   return columnToken ? <span css={{ paddingRight: euiTheme.size.xs }}>{columnToken}</span> : null;
@@ -71,22 +65,26 @@ const DataTableColumnTitle: React.FC<Pick<DataTableColumnHeaderProps, 'columnDis
 const fieldIconCss: CSSObject = { verticalAlign: 'bottom' };
 
 function getRenderedToken({
-  dataView,
+  dataSource,
   columnName,
-  columnsMeta,
-}: Pick<DataTableColumnHeaderProps, 'dataView' | 'columnName' | 'columnsMeta'>) {
+}: Pick<DataTableColumnHeaderProps, 'dataSource' | 'columnName'>) {
   if (!columnName || columnName === '_source') {
     return null;
   }
 
-  // for text-based searches
-  if (columnsMeta) {
-    const columnMeta = columnsMeta[columnName];
-    const columnIconType = getTextBasedColumnIconType(columnMeta);
-    return columnIconType && columnIconType !== 'unknown' ? ( // renders an icon or nothing
+  // ES|QL: derive icon from result column metadata
+  if (dataSource instanceof EsqlSource) {
+    const column = dataSource.resultColumns.find((c) => c.name === columnName);
+    if (!column) return null;
+    const columnIconType = getTextBasedColumnIconType(column.meta);
+    return columnIconType && columnIconType !== 'unknown' ? (
       <FieldIcon type={columnIconType} css={fieldIconCss} />
     ) : null;
   }
+
+  // DSL: derive icon from the underlying DataView field
+  if (!(dataSource instanceof IndexPatternSource)) return null;
+  const dataView = dataSource.getDataView();
 
   const dataViewField = dataView.getFieldByName(columnName);
 
@@ -142,8 +140,7 @@ export const DataTableScoreColumnHeader = ({
   isSorted,
   showColumnTokens,
   columnName,
-  columnsMeta,
-  dataView,
+  dataSource,
   headerRowHeight,
   columnDisplayName,
 }: DataTableColumnHeaderProps & { isSorted?: boolean }) => {
@@ -155,11 +152,7 @@ export const DataTableScoreColumnHeader = ({
   return (
     <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
       {showColumnTokens && isSorted && (
-        <DataTableColumnToken
-          columnName={columnName}
-          columnsMeta={columnsMeta}
-          dataView={dataView}
-        />
+        <DataTableColumnToken columnName={columnName} dataSource={dataSource} />
       )}
       {!isSorted && (
         <span css={{ paddingRight: euiTheme.size.xs }}>

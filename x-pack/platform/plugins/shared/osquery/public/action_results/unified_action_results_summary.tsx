@@ -12,6 +12,7 @@ import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UnifiedDataTable, DataLoadingState, DataGridDensity } from '@kbn/unified-data-table';
+import { IndexPatternSource } from '@kbn/data-source';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { useActionResults } from './use_action_results';
 import { Direction } from '../../common/search_strategy';
@@ -55,10 +56,6 @@ const COLUMN_DISPLAY_SETTINGS = {
       }),
     },
   },
-};
-
-const STATUS_COLUMNS_META = {
-  'action_response.osquery.count': { type: 'number' as const },
 };
 
 let storageInstance: Storage;
@@ -164,6 +161,10 @@ const UnifiedActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> 
   );
 
   const dataView = useActionResultsDataView();
+  const dataSource = useMemo(
+    () => (dataView ? new IndexPatternSource(dataView) : undefined),
+    [dataView]
+  );
   const unifiedDataTableServices = useMemo(
     () => ({
       theme,
@@ -251,7 +252,7 @@ const UnifiedActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> 
             <UnifiedDataTable
               key={gridKey}
               ariaLabelledBy="osquery-status-results"
-              dataView={dataView}
+              dataSource={dataSource}
               columns={DEFAULT_COLUMNS}
               rows={rows}
               loadingState={isLive ? DataLoadingState.loading : DataLoadingState.loaded}
@@ -267,7 +268,6 @@ const UnifiedActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> 
               totalHits={totalItemCount}
               services={unifiedDataTableServices}
               consumer="osquery"
-              columnsMeta={STATUS_COLUMNS_META}
               showColumnTokens={false}
               settings={COLUMN_DISPLAY_SETTINGS}
               onSetColumns={noop}

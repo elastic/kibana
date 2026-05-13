@@ -15,7 +15,7 @@ import { useMemo } from 'react';
 export const MAX_COMPARISON_FIELDS = 250;
 
 export interface UseComparisonFieldsProps {
-  dataView: DataView;
+  dataView?: DataView;
   selectedFieldNames: string[];
   selectedDocIds: string[];
   showAllFields: boolean;
@@ -45,7 +45,7 @@ export const useComparisonFields = ({
   return useMemo(() => {
     let comparisonFields = selectedFieldNames;
 
-    if (showAllFields) {
+    if (showAllFields && dataView) {
       const sortedFields = dataView.fields
         .filter((field) => {
           if (field.name === dataView.timeFieldName) {

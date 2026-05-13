@@ -172,6 +172,7 @@
     "@kbn/react-kibana-context-styled",
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/unified-data-table",
+    "@kbn/data-source",
     "@kbn/unified-doc-viewer",
     "@kbn/dom-drag-drop",
     "@kbn/unified-field-list",

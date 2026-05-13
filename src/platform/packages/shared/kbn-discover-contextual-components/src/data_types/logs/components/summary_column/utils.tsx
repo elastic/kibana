@@ -147,7 +147,7 @@ interface ResourceFieldsProps {
   row: DataTableRecord;
   fields: readonly FieldKey[];
   getAvailableFields: (doc: Readonly<Record<FieldKey, FieldValue>>) => FieldKey[];
-  dataView: DataView;
+  dataView?: DataView;
   core: CoreStart;
   share?: SharePluginStart;
   fieldFormats: FieldFormatsStart;
@@ -166,7 +166,7 @@ export const createResourceFields = ({
   const availableResourceFields = getAvailableFields(resourceDoc);
 
   return availableResourceFields.map((name) => {
-    const property = dataView.getFieldByName(name);
+    const property = dataView?.getFieldByName(name);
     const rawValue = resourceDoc[name];
     const formattedValue = formatFieldValueReact({
       value: rawValue,
@@ -205,7 +205,7 @@ export const createResourceFieldsWithOtelFallback = ({
   const availableFields = getAvailableResourceFields(row.flattened);
 
   return availableFields.map((name) => {
-    const property = dataView.getFieldByName(name);
+    const property = dataView?.getFieldByName(name);
     const rawValue = row.flattened[name];
     const formattedValue = formatFieldValueReact({
       value: rawValue,

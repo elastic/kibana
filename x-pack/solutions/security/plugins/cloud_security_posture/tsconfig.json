@@ -50,6 +50,7 @@
     "@kbn/core-http-browser",
     "@kbn/discover-utils",
     "@kbn/unified-data-table",
+    "@kbn/data-source",
     "@kbn/cell-actions",
     "@kbn/unified-field-list",
     "@kbn/unified-doc-viewer",

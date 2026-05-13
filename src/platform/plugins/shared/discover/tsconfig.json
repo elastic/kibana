@@ -80,6 +80,7 @@
     "@kbn/deeplinks-analytics",
     "@kbn/shared-ux-markdown",
     "@kbn/data-view-utils",
+    "@kbn/data-source",
     "@kbn/presentation-publishing",
     "@kbn/aiops-log-pattern-analysis",
     "@kbn/elastic-agent-utils",
