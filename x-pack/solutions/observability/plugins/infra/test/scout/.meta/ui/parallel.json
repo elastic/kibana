@@ -1,5 +1,5 @@
 {
-  "sha1": "cb68db5314febee4df89826039148aeb07e01cbc",
+  "sha1": "59ca65ba6e0751c16cf1946cf916707fd9e2ba14",
   "tests": [
     {
       "id": "50b3a018a3d8e65-f2cd2d3cdc77643",
@@ -338,6 +338,38 @@
       }
     },
     {
+      "id": "980bc31656c0913-53b83a080853869",
+      "title": "Hosts Page - Time Drift KPIs never show N/A when clock drifts past the data window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_time_drift.spec.ts",
+        "line": 22,
+        "column": 9
+      }
+    },
+    {
+      "id": "980bc31656c0913-9919678377c0d77",
+      "title": "Hosts Page - Time Drift KPIs remain stable through incremental clock drift with repeated refreshes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_time_drift.spec.ts",
+        "line": 66,
+        "column": 9
+      }
+    },
+    {
       "id": "82828921c5db931-a4f5b2b343279e6",
       "title": "Infrastructure Inventory - Alerts Flyout Should open inventory rule flyout",
       "expectedStatus": "passed",
@@ -667,7 +699,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 9
       }
     },
@@ -683,7 +715,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 69,
+        "line": 70,
         "column": 9
       }
     },
@@ -699,7 +731,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 79,
+        "line": 80,
         "column": 9
       }
     },
@@ -715,7 +747,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 99,
+        "line": 100,
         "column": 9
       }
     },
@@ -731,7 +763,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 132,
+        "line": 133,
         "column": 9
       }
     },
@@ -747,7 +779,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 165,
+        "line": 166,
         "column": 9
       }
     },
@@ -763,7 +795,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 205,
+        "line": 206,
         "column": 9
       }
     },
@@ -779,7 +811,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 214,
+        "line": 215,
         "column": 9
       }
     },
@@ -795,7 +827,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 237,
+        "line": 252,
         "column": 9
       }
     },
@@ -811,7 +843,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 254,
+        "line": 286,
         "column": 9
       }
     },
