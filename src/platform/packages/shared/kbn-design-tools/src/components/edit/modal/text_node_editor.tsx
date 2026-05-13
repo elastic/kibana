@@ -27,9 +27,10 @@ export interface TextNodeEntry {
 interface Props {
   entries: TextNodeEntry[];
   onChange: (index: number, updates: { text?: string; color?: string }) => void;
+  onFocus?: (index: number) => void;
 }
 
-export const TextNodeEditor = ({ entries, onChange }: Props) => {
+export const TextNodeEditor = ({ entries, onChange, onFocus }: Props) => {
   const handleTextChange = useCallback(
     (index: number, value: string) => {
       onChange(index, { text: value });
@@ -61,6 +62,7 @@ export const TextNodeEditor = ({ entries, onChange }: Props) => {
               <EuiFieldText
                 value={entry.text}
                 onChange={(e) => handleTextChange(idx, e.target.value)}
+                onFocus={() => onFocus?.(idx)}
                 compressed
               />
             </EuiFlexItem>

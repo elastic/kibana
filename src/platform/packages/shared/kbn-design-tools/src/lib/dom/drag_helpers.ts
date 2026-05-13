@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEVTOOL_MANAGED_ATTR, DEVTOOL_HIDDEN_ATTR } from '../../lib/constants';
-import { cloneClean, setImportant } from '../../lib/dom/clone_element';
-import { snapToGrid } from '../../lib/dom/snap_to_grid';
-import type { LayoutConfig } from '../../lib/layout/layout_config';
+import { DEVTOOL_MANAGED_ATTR, DEVTOOL_HIDDEN_ATTR } from '../constants';
+import { cloneClean, setImportant } from './clone_element';
+import { snapToGrid } from './snap_to_grid';
+import type { LayoutConfig } from '../layout/layout_config';
 import type { ElementSession, ElementRegistry } from './element_registry';
 import type { DragState } from './interaction_state';
 import { buildTransform } from './resize_helpers';

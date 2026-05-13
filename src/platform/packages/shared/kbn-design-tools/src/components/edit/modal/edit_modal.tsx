@@ -26,17 +26,13 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import {
-  DEVTOOL_IGNORE_ATTR,
-  DEVTOOL_HIDDEN_ATTR,
-  DEVTOOL_MANAGED_ATTR,
-  EDIT_MODAL_ID,
-} from '../../../lib/constants';
-import { copyStylesDeep } from '../../../lib/dom/clone_element';
-import { useOverlayZIndex, usePortalZIndex } from '../../../hooks';
+import { DEVTOOL_IGNORE_ATTR, EDIT_MODAL_ID } from '../../../lib/constants';
+import { collectAllTextNodes } from '../../../lib/dom/collect_text_nodes';
+import { useOverlayZIndex, usePortalZIndex, useElementSelection } from '../../../hooks';
 import { ElementTree } from './element_tree';
 import { TextNodeEditor } from './text_node_editor';
 import type { TextNodeEntry } from './text_node_editor';
+import { createPreviewClone } from '../../../lib/dom/create_preview_clone';
 
 export interface StyleChange {
   element: HTMLElement;
@@ -50,25 +46,6 @@ export interface TextNodeChange {
   color?: string;
 }
 
-/**
- * Recursively collect all non-empty Text nodes within the given element tree.
- */
-const collectAllTextNodes = (el: Element): Text[] => {
-  const nodes: Text[] = [];
-  const walk = (node: Node) => {
-    for (let i = 0; i < node.childNodes.length; i++) {
-      const child = node.childNodes[i];
-      if (child.nodeType === Node.TEXT_NODE && child.textContent?.trim()) {
-        nodes.push(child as Text);
-      } else if (child.nodeType === Node.ELEMENT_NODE) {
-        walk(child);
-      }
-    }
-  };
-  walk(el);
-  return nodes;
-};
-
 interface Props {
   target: HTMLElement;
   onClose: () => void;
@@ -79,15 +56,15 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
   const { euiTheme } = useEuiTheme();
   const zIndex = useOverlayZIndex();
   usePortalZIndex(EDIT_MODAL_ID, zIndex.modal, true);
-  const [selectedElement, setSelectedElement] = useState<Element | null>(null);
-  const [color, setColor] = useState('');
   const [styleChanges, setStyleChanges] = useState<StyleChange[]>([]);
   const [textChanges, setTextChanges] = useState<Map<Text, TextNodeChange>>(new Map());
   const [cloneRoot, setCloneRoot] = useState<HTMLElement | null>(null);
-  const elementMap = useRef(new Map<Element, Element>());
+  const elementMapRef = useRef(new Map<Element, Element>());
   const cloneRef = useRef<HTMLElement | null>(null);
   const textNodeMap = useRef<Array<{ original: Text; clone: Text }>>([]);
   const [textEntries, setTextEntries] = useState<TextNodeEntry[]>([]);
+
+  const { selectedElement, color, setColor, handleSelect } = useElementSelection(elementMapRef);
 
   const previewCallbackRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -96,43 +73,8 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
         cloneRef.current.remove();
       }
 
-      const clone = target.cloneNode(true) as HTMLElement;
-      copyStylesDeep(target, clone);
-
-      clone.style.position = 'relative';
-      clone.style.left = '';
-      clone.style.top = '';
-      clone.style.width = '';
-      clone.style.height = '';
-      clone.style.margin = '';
-      clone.style.zIndex = '';
-      clone.style.transform = 'none';
-      clone.style.transition = 'none';
-      clone.style.pointerEvents = 'none';
-      clone.style.maxWidth = '100%';
-      clone.style.maxHeight = '100%';
-      clone.style.overflow = 'auto';
-
-      // Strip devtool markers and force visibility on the entire clone tree
-      clone.removeAttribute(DEVTOOL_HIDDEN_ATTR);
-      clone.removeAttribute(DEVTOOL_MANAGED_ATTR);
-      clone.style.visibility = 'visible';
-      clone.style.opacity = '1';
-      for (const child of clone.querySelectorAll<HTMLElement>('*')) {
-        child.removeAttribute(DEVTOOL_HIDDEN_ATTR);
-        child.removeAttribute(DEVTOOL_MANAGED_ATTR);
-        if (child.style.visibility === 'hidden') child.style.visibility = 'visible';
-        if (child.style.opacity === '0') child.style.opacity = '1';
-      }
-
-      const map = new Map<Element, Element>();
-      const originals = target.querySelectorAll('*');
-      const clones = clone.querySelectorAll('*');
-      map.set(target, clone);
-      for (let i = 0; i < originals.length && i < clones.length; i++) {
-        map.set(originals[i], clones[i]);
-      }
-      elementMap.current = map;
+      const { clone, elementMap } = createPreviewClone(target);
+      elementMapRef.current = elementMap;
       cloneRef.current = clone;
 
       // Append clone to DOM first so getComputedStyle works
@@ -164,43 +106,12 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
     [target]
   );
 
-  const handleSelect = useCallback(
-    (element: Element) => {
-      // Remove previous highlight
-      if (selectedElement) {
-        const prevClone = elementMap.current.get(selectedElement);
-        if (prevClone instanceof HTMLElement) {
-          prevClone.style.outline = '';
-        }
-      }
-
-      setSelectedElement(element);
-
-      // Highlight in preview
-      const cloneEl = elementMap.current.get(element);
-      if (cloneEl instanceof HTMLElement) {
-        cloneEl.style.outline = `2px solid ${euiTheme.colors.primary}`;
-      }
-
-      // Show current background color
-      if (element instanceof HTMLElement) {
-        const cloneCounterpart = elementMap.current.get(element);
-        const bg =
-          cloneCounterpart instanceof HTMLElement
-            ? cloneCounterpart.style.backgroundColor
-            : element.style.backgroundColor;
-        setColor(bg || '');
-      }
-    },
-    [selectedElement, euiTheme.colors.primary]
-  );
-
   const handleColorChange = useCallback(
     (newColor: string) => {
       setColor(newColor);
       if (!(selectedElement instanceof HTMLElement)) return;
 
-      const cloneEl = elementMap.current.get(selectedElement);
+      const cloneEl = elementMapRef.current.get(selectedElement);
       if (cloneEl instanceof HTMLElement) {
         cloneEl.style.backgroundColor = newColor;
       }
@@ -215,7 +126,7 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
         ];
       });
     },
-    [selectedElement]
+    [selectedElement, setColor]
   );
 
   const handleSave = useCallback(() => {
@@ -253,6 +164,18 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
       });
     },
     []
+  );
+
+  const handleTextNodeFocus = useCallback(
+    (index: number) => {
+      const entry = textEntries[index];
+      if (!entry) return;
+      const parentEl = entry.node.parentElement;
+      if (parentEl) {
+        handleSelect(parentEl);
+      }
+    },
+    [textEntries, handleSelect]
   );
 
   const previewCss = useMemo(
@@ -295,7 +218,6 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
           </EuiFlexGroup>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
-
       <EuiModalBody>
         <EuiFlexGroup gutterSize="m" style={{ minHeight: '300px' }}>
           <EuiFlexItem grow={1}>
@@ -311,7 +233,11 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
-        <TextNodeEditor entries={textEntries} onChange={handleTextNodeChange} />
+        <TextNodeEditor
+          entries={textEntries}
+          onChange={handleTextNodeChange}
+          onFocus={handleTextNodeFocus}
+        />
         {selectedElement && (
           <EuiFormRow
             label={i18n.translate('kbnDesignTools.edit.modal.backgroundColor', {
@@ -319,7 +245,7 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
             })}
             style={{ marginTop: euiTheme.size.m }}
           >
-            <EuiColorPicker color={color} onChange={handleColorChange} />
+            <EuiColorPicker color={color || '#ffffff'} onChange={handleColorChange} isClearable />
           </EuiFormRow>
         )}
       </EuiModalBody>

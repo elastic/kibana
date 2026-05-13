@@ -10,15 +10,15 @@
 export { EditOverlay } from './edit_overlay';
 export { EditOutline, OutlineControls, EditButton, DeleteButton, DuplicateButton } from './outline';
 export { EditModal, ElementTree } from './modal';
-export { ElementRegistry } from './element_registry';
-export { IDLE } from './interaction_state';
+export { ElementRegistry } from '../../lib/dom/element_registry';
+export { IDLE } from '../../lib/dom/interaction_state';
 export {
   startDragFromElement,
   findManagedSession,
   startDragFromSession,
   applyDragMove,
-} from './drag_helpers';
-export { createDuplicate } from './duplicate_helpers';
+} from '../../lib/dom/drag_helpers';
+export { createDuplicate } from '../../lib/dom/duplicate_helpers';
 export {
   startResize,
   calcResizeDeltas,
@@ -27,14 +27,14 @@ export {
   getHandleMode,
   applyResizeMove,
   getHandlePositions,
-} from './resize_helpers';
+} from '../../lib/dom/resize_helpers';
 
-export type { ElementSession } from './element_registry';
+export type { ElementSession } from '../../lib/dom/element_registry';
 export type {
   InteractionState,
   IdleState,
   HoverState,
   DragState,
   ResizeState,
-} from './interaction_state';
+} from '../../lib/dom/interaction_state';
 export type { EditOverlayHandle } from './edit_overlay';

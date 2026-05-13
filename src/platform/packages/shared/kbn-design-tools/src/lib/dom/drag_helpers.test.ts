@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEVTOOL_MANAGED_ATTR } from '../../lib/constants';
-import type { LayoutConfig } from '../../lib/layout/layout_config';
+import { DEVTOOL_MANAGED_ATTR } from '../constants';
+import type { LayoutConfig } from '../layout/layout_config';
 import type { ElementSession } from './element_registry';
 import type { DragState } from './interaction_state';
 import { startDragFromSession, findManagedSession, applyDragMove } from './drag_helpers';

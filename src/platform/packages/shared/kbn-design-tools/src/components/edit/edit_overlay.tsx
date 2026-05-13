@@ -24,17 +24,17 @@ import { isEscapeKey, isDeleteKey } from '../../lib/keyboard_shortcuts';
 import { getElementUnder } from '../../lib/dom/get_element_under';
 import type { LayoutConfig } from '../../lib/layout/layout_config';
 import { GlobalCursorOverride } from '../global_cursor_override';
-import { ElementRegistry } from './element_registry';
+import { ElementRegistry } from '../../lib/dom/element_registry';
 import {
   findManagedSession,
   startDragFromSession,
   startDragFromElement,
   applyDragMove,
-} from './drag_helpers';
-import { createDuplicate } from './duplicate_helpers';
-import { findNearHandle, startResize, applyResizeMove } from './resize_helpers';
-import type { InteractionState } from './interaction_state';
-import { IDLE, deriveCursor } from './interaction_state';
+} from '../../lib/dom/drag_helpers';
+import { createDuplicate } from '../../lib/dom/duplicate_helpers';
+import { findNearHandle, startResize, applyResizeMove } from '../../lib/dom/resize_helpers';
+import type { InteractionState } from '../../lib/dom/interaction_state';
+import { IDLE, deriveCursor } from '../../lib/dom/interaction_state';
 import { EditOutline } from './outline';
 import { EditModal } from './modal/edit_modal';
 import type { StyleChange, TextNodeChange } from './modal/edit_modal';

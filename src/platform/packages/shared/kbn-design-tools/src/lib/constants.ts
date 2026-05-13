@@ -138,3 +138,91 @@ export const SVG_INTERNALS = new Set([
   'fetile',
   'feturbulence',
 ]);
+
+/** Pattern matching transparent rgba(0,0,0,0) color values from getComputedStyle. */
+export const TRANSPARENT_COLOR_RE = /rgba?\(\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*\)/;
+
+/**
+ * Inherited CSS properties lost when a clone is reparented to document.body,
+ * because they no longer cascade from the original ancestors.
+ */
+export const INHERITED_CSS_PROPS = [
+  'color',
+  'direction',
+  'font',
+  'font-family',
+  'font-feature-settings',
+  'font-kerning',
+  'font-size',
+  'font-size-adjust',
+  'font-stretch',
+  'font-style',
+  'font-variant',
+  'font-variation-settings',
+  'font-weight',
+  'letter-spacing',
+  'line-height',
+  'text-align',
+  'text-indent',
+  'text-transform',
+  'visibility',
+  'white-space',
+  'white-space-collapse',
+  'word-break',
+  'word-spacing',
+  'writing-mode',
+  '-webkit-font-smoothing',
+  '-webkit-text-fill-color',
+  '-webkit-text-stroke',
+  'text-rendering',
+];
+
+/**
+ * Non-inherited visual properties that can be lost when the clone leaves
+ * the original style scope (e.g. contextual selectors or CSS variable
+ * chains that no longer resolve).
+ */
+export const NON_INHERITED_VISUAL_CSS_PROPS = ['border-radius'];
+
+/**
+ * Background CSS properties copied only for non-hovered elements.
+ * For hovered elements the CSS classes on the clone already provide the
+ * correct resting-state background.
+ */
+export const BACKGROUND_CSS_PROPS = new Set([
+  'background',
+  'background-color',
+  'background-image',
+  'background-size',
+  'background-position',
+  'background-repeat',
+  'background-attachment',
+  'background-clip',
+  'background-origin',
+  'background-blend-mode',
+]);
+
+/** Selector for managed element containers (edit clones). */
+export const MANAGED_ELEMENT_SELECTOR = `[${DEVTOOL_MANAGED_ATTR}]`;
+
+/** Selector for elements marked with the devtool ignore attribute. */
+export const DEVTOOL_IGNORE_SELECTOR = `[${DEVTOOL_IGNORE_ATTR}]`;
+
+/** Selector for resize handle elements. */
+export const DEVTOOL_RESIZE_SELECTOR = `[${DEVTOOL_RESIZE_HANDLE_ATTR}]`;
+
+/** Set of element IDs belonging to tool overlays. */
+export const IGNORED_ELEMENT_IDS = new Set([
+  MEASURE_OVERLAY_ID,
+  EDIT_OVERLAY_ID,
+  LAYOUT_OVERLAY_ID,
+  LAYOUT_SETTINGS_FLYOUT_ID,
+  DEVELOPER_TOOLBAR_ID,
+]);
+
+/** Combined selector matching all ignored tool UI elements. */
+export const IGNORED_SELECTOR = [
+  ...Array.from(IGNORED_ELEMENT_IDS).map((id) => `#${id}`),
+  DEVTOOL_IGNORE_SELECTOR,
+  DEVTOOL_RESIZE_SELECTOR,
+].join(',');

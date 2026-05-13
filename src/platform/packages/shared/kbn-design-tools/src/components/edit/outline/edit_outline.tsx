@@ -17,7 +17,7 @@ import {
   RESIZE_HANDLE_SIZE,
 } from '../../../lib/constants';
 import { useOverlayZIndex } from '../../../hooks';
-import { getHandleMode, getHandlePositions } from '../resize_helpers';
+import { getHandleMode, getHandlePositions } from '../../../lib/dom/resize_helpers';
 import { OutlineControls } from './controls';
 
 interface Props {

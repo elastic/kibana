@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEVTOOL_MANAGED_ATTR, DEVTOOL_HIDDEN_ATTR } from '../constants';
-
-const ATOMIC_SELECTOR = `[${DEVTOOL_MANAGED_ATTR}]`;
+import { MANAGED_ELEMENT_SELECTOR, DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR } from '../constants';
 import { isIgnoredElement } from './is_ignored_element';
 
 /**
@@ -25,12 +23,12 @@ export const getElementUnder = (x: number, y: number): HTMLElement | null => {
     if (el.hasAttribute(DEVTOOL_HIDDEN_ATTR) || el.closest(`[${DEVTOOL_HIDDEN_ATTR}]`)) continue;
     if (el.style.visibility === 'hidden') continue;
     if (isIgnoredElement(el)) {
-      const isInsideAtomic = el.closest(ATOMIC_SELECTOR);
+      const isInsideAtomic = el.closest(MANAGED_ELEMENT_SELECTOR);
       if (!isInsideAtomic) return null;
       continue;
     }
     if (el.hasAttribute(DEVTOOL_MANAGED_ATTR)) return el;
-    const atomicAncestor = el.closest(ATOMIC_SELECTOR) as HTMLElement | null;
+    const atomicAncestor = el.closest(MANAGED_ELEMENT_SELECTOR) as HTMLElement | null;
     if (atomicAncestor) return atomicAncestor;
     return el;
   }

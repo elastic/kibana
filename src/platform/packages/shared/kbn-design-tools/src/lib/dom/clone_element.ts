@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR, TRUNCATION_CLASSES } from '../constants';
+import {
+  DEVTOOL_HIDDEN_ATTR,
+  DEVTOOL_MANAGED_ATTR,
+  TRUNCATION_CLASSES,
+  INHERITED_CSS_PROPS,
+  NON_INHERITED_VISUAL_CSS_PROPS,
+  BACKGROUND_CSS_PROPS,
+} from '../constants';
 
 /**
  * Set a CSS property with `!important` priority.
@@ -47,74 +54,15 @@ const copyCanvasContent = (original: HTMLElement, clone: HTMLElement): void => {
   }
 };
 
-// Inherited CSS properties that are lost when the clone is reparented to
-// document.body, because they no longer cascade from the original ancestors.
-const INHERITED_PROPS = [
-  'color',
-  'direction',
-  'font',
-  'font-family',
-  'font-feature-settings',
-  'font-kerning',
-  'font-size',
-  'font-size-adjust',
-  'font-stretch',
-  'font-style',
-  'font-variant',
-  'font-variation-settings',
-  'font-weight',
-  'letter-spacing',
-  'line-height',
-  'text-align',
-  'text-indent',
-  'text-transform',
-  'visibility',
-  'white-space',
-  'white-space-collapse',
-  'word-break',
-  'word-spacing',
-  'writing-mode',
-  '-webkit-font-smoothing',
-  '-webkit-text-fill-color',
-  '-webkit-text-stroke',
-  'text-rendering',
-];
-
-// Non-inherited visual properties that can be lost when the clone leaves
-// the original style scope (e.g. contextual selectors or CSS variable
-// chains that no longer resolve).
-const NON_INHERITED_VISUAL_PROPS = ['border-radius'];
-
-// Background properties are copied only for non-hovered elements.
-// For hovered elements the CSS classes on the clone already provide the
-// correct resting-state background; baking the computed (hovered) value
-// as an inline style would override it.
-const BACKGROUND_PROPS = new Set([
-  'background',
-  'background-color',
-  'background-image',
-  'background-size',
-  'background-position',
-  'background-repeat',
-  'background-attachment',
-  'background-clip',
-  'background-origin',
-  'background-blend-mode',
-]);
-
-/**
- * Copy inherited CSS properties, non-inherited visual properties, and CSS
- * custom properties from the original element's computed style to the clone.
- */
 const copyInheritedStyles = (target: HTMLElement, clone: HTMLElement): void => {
   const computed = getComputedStyle(target);
 
-  for (const prop of INHERITED_PROPS) {
+  for (const prop of INHERITED_CSS_PROPS) {
     clone.style.setProperty(prop, computed.getPropertyValue(prop));
   }
 
   // Preserve non-inherited visual styles
-  for (const prop of NON_INHERITED_VISUAL_PROPS) {
+  for (const prop of NON_INHERITED_VISUAL_CSS_PROPS) {
     clone.style.setProperty(prop, computed.getPropertyValue(prop));
   }
 
@@ -125,7 +73,7 @@ const copyInheritedStyles = (target: HTMLElement, clone: HTMLElement): void => {
   // a fill behind semi-transparent content (e.g. SVG icons).
   const isReplacedElement = /^(IMG|SVG|VIDEO|CANVAS|PICTURE)$/.test(target.tagName);
   if (isReplacedElement || !target.matches(':hover, :focus, :active')) {
-    for (const prop of BACKGROUND_PROPS) {
+    for (const prop of BACKGROUND_CSS_PROPS) {
       clone.style.setProperty(prop, computed.getPropertyValue(prop));
     }
   }
@@ -166,7 +114,7 @@ const applyPseudoStyle = (
     if (prop === 'content') continue;
     // Skip background props for hovered elements — the CSS class on the
     // clone provides the correct resting-state appearance.
-    if (isInteractive && BACKGROUND_PROPS.has(prop)) continue;
+    if (isInteractive && BACKGROUND_CSS_PROPS.has(prop)) continue;
     rules.push(`${prop}: ${computed.getPropertyValue(prop)};`);
   }
 

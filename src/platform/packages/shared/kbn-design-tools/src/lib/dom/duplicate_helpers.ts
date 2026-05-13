@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DUPLICATE_OFFSET } from '../../lib/constants';
-import { cloneClean, setImportant } from '../../lib/dom/clone_element';
+import { DUPLICATE_OFFSET } from '../constants';
+import { cloneClean, setImportant } from './clone_element';
 import type { ElementSession, ElementRegistry } from './element_registry';
 import { buildTransform } from './resize_helpers';
 

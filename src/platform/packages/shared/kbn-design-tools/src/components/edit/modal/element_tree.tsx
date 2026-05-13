@@ -10,42 +10,7 @@
 import React, { useMemo } from 'react';
 import { css } from '@emotion/css';
 import { useEuiTheme } from '@elastic/eui';
-import { SVG_INTERNALS } from '../../../lib/constants';
-import { resolveTag } from '../../../lib/fiber';
-
-interface TreeNode {
-  tag: string;
-  depth: number;
-  element: Element;
-  hasChildren: boolean;
-  isClosing?: boolean;
-}
-
-const flatten = (el: Element, depth: number): TreeNode[] => {
-  const tag = resolveTag(el);
-  const children = Array.from(el.children);
-  const nodes: TreeNode[] = [];
-
-  // Treat SVG containers as leaf nodes — don't recurse into path/g/circle etc.
-  const isSvg = el.tagName.toLowerCase() === 'svg';
-  const isSvgInternal = SVG_INTERNALS.has(el.tagName.toLowerCase());
-
-  if (isSvgInternal) {
-    return nodes;
-  }
-
-  if (children.length === 0 || isSvg) {
-    nodes.push({ tag, depth, element: el, hasChildren: false });
-    return nodes;
-  }
-
-  nodes.push({ tag, depth, element: el, hasChildren: true });
-  for (const child of children) {
-    nodes.push(...flatten(child, depth + 1));
-  }
-  nodes.push({ tag, depth, element: el, hasChildren: true, isClosing: true });
-  return nodes;
-};
+import { flattenElementTree } from '../../../lib/dom/flatten_element_tree';
 
 interface Props {
   root: Element;
@@ -55,7 +20,7 @@ interface Props {
 
 export const ElementTree = ({ root, selectedElement, onSelect }: Props) => {
   const { euiTheme } = useEuiTheme();
-  const nodes = useMemo(() => flatten(root, 0), [root]);
+  const nodes = useMemo(() => flattenElementTree(root, 0), [root]);
 
   const containerCss = useMemo(
     () =>

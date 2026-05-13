@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FULL_HANDLE_DIM, MIN_HANDLE_DIM, RESIZE_HANDLE_SIZE } from '../../lib/constants';
-import type { ResizeHandle } from '../../lib/constants';
-import { setImportant } from '../../lib/dom/clone_element';
+import { FULL_HANDLE_DIM, MIN_HANDLE_DIM, RESIZE_HANDLE_SIZE } from '../constants';
+import type { ResizeHandle } from '../constants';
+import { setImportant } from './clone_element';
 import type { ElementSession } from './element_registry';
 import type { ResizeState } from './interaction_state';
 

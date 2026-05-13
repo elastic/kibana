@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEVTOOL_HIDDEN_ATTR } from '../../lib/constants';
+import { DEVTOOL_HIDDEN_ATTR } from '../constants';
 
 /**
  * Tracks the editing state of a single managed element.

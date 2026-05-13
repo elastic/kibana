@@ -9,7 +9,7 @@
 
 import type { MutableRefObject } from 'react';
 import { useCallback, useEffect, useRef } from 'react';
-import type { ElementRegistry } from '../components/edit/element_registry';
+import type { ElementRegistry } from '../components';
 
 /**
  * Keeps managed element positions in sync during scroll using
