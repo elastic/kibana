@@ -6,11 +6,11 @@
  */
 
 import expect from '@kbn/expect';
+import type { SnoozeBody } from '@kbn/alerting-plugin/common/routes/rule/apis/snooze';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { Spaces } from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
-  AlertUtils,
   checkAAD,
   getUrlPrefix,
   getTestRuleData,
@@ -33,7 +33,6 @@ const snoozeSchedule = {
 
 export default function createSnoozeRuleTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
   const retry = getService('retry');
 
@@ -42,7 +41,12 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
     after(() => objectRemover.removeAll());
 
-    const alertUtils = new AlertUtils({ space: Spaces.space1, supertestWithoutAuth });
+    const postSnoozeSchedule = (ruleId: string, body: SnoozeBody) =>
+      supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}/snooze_schedule`)
+        .set('kbn-xsrf', 'foo')
+        .set('content-type', 'application/json')
+        .send(body);
 
     describe('handle snooze rule request appropriately', function () {
       this.tags('skipFIPS');
@@ -77,7 +81,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
           .expect(200);
         objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send(snoozeSchedule);
+        const response = await postSnoozeSchedule(createdRule.id, snoozeSchedule);
 
         expect(response.statusCode).to.eql(200);
         expect(response.body).to.eql({
@@ -91,7 +95,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
             },
           },
         });
-        const { body: updatedAlert } = await supertestWithoutAuth
+        const { body: updatedAlert } = await supertest
           .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
           .set('kbn-xsrf', 'foo')
           .expect(200);
@@ -153,23 +157,26 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
       log.info('wait for rule to trigger an action');
       await getRuleEvents(createdRule.id);
 
+      // Start snooze a few seconds in the future so rule runs that already
+      // loaded the pre-snooze rule can finish; otherwise execute-action events
+      // can still land inside the snooze window.
+      const snoozeStartIso = new Date(Date.now() + 5000).toISOString();
       log.info('start snoozing');
-      await alertUtils.getSnoozeRequest(createdRule.id).send({
+      await postSnoozeSchedule(createdRule.id, {
         schedule: {
           custom: {
             duration: '10s',
-            start: new Date().toISOString(),
+            start: snoozeStartIso,
             recurring: {
               occurrences: 1,
             },
           },
         },
-      });
+      }).expect(200);
 
-      // This test was failing, we now use the persisted schedule so the time
-      // boundaries match the server. Client Date.now() vs server side value
-      // might be a possible cause of the flakiness here.
-      const { body: ruleWithSnooze } = await supertestWithoutAuth
+      // Use the persisted schedule so boundaries match the server (and match
+      // get_active_snooze_if_exist: active for [start, end), not inclusive of end).
+      const { body: ruleWithSnooze } = await supertest
         .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
         .set('kbn-xsrf', 'foo')
         .expect(200);
@@ -227,65 +234,53 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
         // Creating 5 snooze schedules, using Promise.all is very flaky, therefore
         // the schedules are being created 1 at a time
-        await alertUtils.getSnoozeRequest(createdRule.id).send(snoozeSchedule).expect(200);
-        await alertUtils
-          .getSnoozeRequest(createdRule.id)
-          .send({
-            schedule: {
-              custom: {
-                duration: '20h',
-                start: NOW,
-                recurring: {
-                  every: '1d',
-                },
+        await postSnoozeSchedule(createdRule.id, snoozeSchedule).expect(200);
+        await postSnoozeSchedule(createdRule.id, {
+          schedule: {
+            custom: {
+              duration: '20h',
+              start: NOW,
+              recurring: {
+                every: '1d',
               },
             },
-          })
-          .expect(200);
-        await alertUtils
-          .getSnoozeRequest(createdRule.id)
-          .send({
-            schedule: {
-              custom: {
-                duration: '24h',
-                start: NOW,
-                recurring: {
-                  every: '1w',
-                },
+          },
+        }).expect(200);
+        await postSnoozeSchedule(createdRule.id, {
+          schedule: {
+            custom: {
+              duration: '24h',
+              start: NOW,
+              recurring: {
+                every: '1w',
               },
             },
-          })
-          .expect(200);
-        await alertUtils
-          .getSnoozeRequest(createdRule.id)
-          .send({
-            schedule: {
-              custom: {
-                duration: '20h',
-                start: NOW,
-                recurring: {
-                  every: '1M',
-                },
+          },
+        }).expect(200);
+        await postSnoozeSchedule(createdRule.id, {
+          schedule: {
+            custom: {
+              duration: '20h',
+              start: NOW,
+              recurring: {
+                every: '1M',
               },
             },
-          })
-          .expect(200);
-        await alertUtils
-          .getSnoozeRequest(createdRule.id)
-          .send({
-            schedule: {
-              custom: {
-                duration: '24h',
-                start: NOW,
-                recurring: {
-                  every: '1y',
-                },
+          },
+        }).expect(200);
+        await postSnoozeSchedule(createdRule.id, {
+          schedule: {
+            custom: {
+              duration: '24h',
+              start: NOW,
+              recurring: {
+                every: '1y',
               },
             },
-          })
-          .expect(200);
+          },
+        }).expect(200);
         // Adding the 6th snooze schedule, should fail
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+        const response = await postSnoozeSchedule(createdRule.id, {
           schedule: {
             custom: {
               duration: '20h',
@@ -316,7 +311,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
         objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+        const response = await postSnoozeSchedule(createdRule.id, {
           schedule: {
             custom: {
               start: 'invalid',
@@ -344,7 +339,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
         objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+        const response = await postSnoozeSchedule(createdRule.id, {
           schedule: {
             custom: {
               start: snoozeSchedule.schedule.custom.start,
@@ -372,7 +367,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
         objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+        const response = await postSnoozeSchedule(createdRule.id, {
           schedule: {
             custom: {
               start: snoozeSchedule.schedule.custom.start,
@@ -400,7 +395,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
         objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+        const response = await postSnoozeSchedule(createdRule.id, {
           schedule: {
             custom: {
               ...snoozeSchedule.schedule.custom,
@@ -430,7 +425,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
         objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+        const response = await postSnoozeSchedule(createdRule.id, {
           schedule: {
             custom: {
               ...snoozeSchedule.schedule.custom,
@@ -458,7 +453,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
         objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+        const response = await postSnoozeSchedule(createdRule.id, {
           schedule: {
             custom: {
               ...snoozeSchedule.schedule.custom,
@@ -486,7 +481,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
         objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+        const response = await postSnoozeSchedule(createdRule.id, {
           schedule: {
             custom: {
               ...snoozeSchedule.schedule.custom,
@@ -514,7 +509,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
         objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+        const response = await postSnoozeSchedule(createdRule.id, {
           schedule: {
             custom: {
               ...snoozeSchedule.schedule.custom,
@@ -542,7 +537,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
         objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+        const response = await postSnoozeSchedule(createdRule.id, {
           schedule: {
             custom: {
               ...snoozeSchedule.schedule.custom,
