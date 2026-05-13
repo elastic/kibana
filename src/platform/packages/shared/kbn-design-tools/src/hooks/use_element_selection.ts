@@ -8,9 +8,10 @@
  */
 
 import type React from 'react';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { rgbToHex, useEuiTheme } from '@elastic/eui';
 import { isTransparentColor } from '../lib/dom/is_transparent_color';
+import { useOverlayZIndex } from './use_overlay_z_index';
 
 interface UseElementSelectionResult {
   selectedElement: Element | null;
@@ -27,28 +28,65 @@ export const useElementSelection = (
   elementMap: React.RefObject<Map<Element, Element>>
 ): UseElementSelectionResult => {
   const { euiTheme } = useEuiTheme();
+  const zIndex = useOverlayZIndex();
   const [selectedElement, setSelectedElement] = useState<Element | null>(null);
   const [color, setColor] = useState('');
+  const overlayRef = useRef<HTMLElement | null>(null);
 
   const handleSelect = useCallback(
     (element: Element) => {
       const map = elementMap.current;
       if (!map) return;
 
-      // Remove previous highlight
-      if (selectedElement) {
-        const prevClone = map.get(selectedElement);
-        if (prevClone instanceof HTMLElement) {
-          prevClone.style.outline = '';
-        }
+      // Remove previous overlay
+      if (overlayRef.current) {
+        overlayRef.current.remove();
+        overlayRef.current = null;
       }
 
       setSelectedElement(element);
 
-      // Highlight in preview
+      // Highlight the clone in the preview by placing an overlay on the
+      // parent element, positioned over the clone via getBoundingClientRect.
+      // We always use the parent rather than appending inside the clone
+      // because void elements (img, svg) can't have children, and elements
+      // with border-radius + overflow:hidden would clip the overlay.
       const cloneEl = map.get(element);
-      if (cloneEl instanceof HTMLElement) {
-        cloneEl.style.outline = `2px solid ${euiTheme.colors.primary}`;
+      if (cloneEl instanceof HTMLElement || cloneEl instanceof SVGElement) {
+        const parent = cloneEl.parentElement;
+        if (parent) {
+          const prevPos = parent.style.position;
+          if (!prevPos || prevPos === 'static') {
+            parent.style.position = 'relative';
+          }
+
+          const overlay = document.createElement('div');
+          overlay.style.position = 'absolute';
+          overlay.style.pointerEvents = 'none';
+          overlay.style.zIndex = String(zIndex.highlight);
+          overlay.style.boxSizing = 'border-box';
+
+          // getBoundingClientRect() returns screen-space (post-transform)
+          // coordinates, but absolute positioning uses the parent's layout
+          // coordinate space (pre-transform). When the parent has a scale()
+          // transform, we must divide by the scale factor to convert.
+          // The border width is also compensated so it appears as 2px
+          // visually regardless of the parent's scale.
+          const parentRect = parent.getBoundingClientRect();
+          const cloneRect = cloneEl.getBoundingClientRect();
+          const scaleX = parentRect.width ? parentRect.width / parent.offsetWidth : 1;
+          const scaleY = parentRect.height ? parentRect.height / parent.offsetHeight : 1;
+          const borderWidth = 2 / Math.max(scaleX, scaleY);
+
+          overlay.style.border = `${borderWidth}px solid ${euiTheme.colors.primary}`;
+          overlay.style.left = `${(cloneRect.left - parentRect.left) / scaleX}px`;
+          overlay.style.top = `${(cloneRect.top - parentRect.top) / scaleY}px`;
+          overlay.style.width = `${cloneRect.width / scaleX}px`;
+          overlay.style.height = `${cloneRect.height / scaleY}px`;
+
+          parent.appendChild(overlay);
+          overlayRef.current = overlay;
+        }
       }
 
       // Show current background color
@@ -61,7 +99,7 @@ export const useElementSelection = (
         setColor(isTransparentColor(bg) ? '' : rgbToHex(bg) || bg);
       }
     },
-    [selectedElement, euiTheme.colors.primary, elementMap, setColor]
+    [euiTheme.colors.primary, zIndex.highlight, elementMap, setColor]
   );
 
   return { selectedElement, color, setColor, handleSelect };

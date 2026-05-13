@@ -13,9 +13,24 @@ import { i18n } from '@kbn/i18n';
 import type { LayoutConfig, LayoutType } from '../../../lib/layout';
 
 const layoutTypeOptions: Array<{ value: LayoutType; text: string }> = [
-  { value: 'columns', text: 'Columns' },
-  { value: 'rows', text: 'Rows' },
-  { value: 'grid', text: 'Grid' },
+  {
+    value: 'columns',
+    text: i18n.translate('kbnDesignTools.layout.settings.layoutType.columns', {
+      defaultMessage: 'Columns',
+    }),
+  },
+  {
+    value: 'rows',
+    text: i18n.translate('kbnDesignTools.layout.settings.layoutType.rows', {
+      defaultMessage: 'Rows',
+    }),
+  },
+  {
+    value: 'grid',
+    text: i18n.translate('kbnDesignTools.layout.settings.layoutType.grid', {
+      defaultMessage: 'Grid',
+    }),
+  },
 ];
 
 interface Props {

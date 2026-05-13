@@ -7,5 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { MeasureButton } from './src/components';
-export { DesignToolsButton } from './src/components';
+/**
+ * Returns the page's actual color mode ('light' or 'dark') by reading
+ * `window.__kbnThemeTag__`. The design tools toolbar is always rendered in
+ * dark mode via its own `EuiThemeProvider`, so `useEuiTheme().colorMode`
+ * cannot be trusted for page-level color matching.
+ */
+export const usePageColorMode = (): 'light' | 'dark' => {
+  const tag = (window as any)?.__kbnThemeTag__ as string | undefined;
+  return tag?.endsWith('dark') ? 'dark' : 'light';
+};

@@ -8,7 +8,10 @@
  */
 
 export { EditModal } from './edit_modal';
-export type { StyleChange, TextNodeChange } from './edit_modal';
+export type { StyleChange, TextNodeChange, SourceChange } from './edit_modal';
 export { ElementTree } from './element_tree';
 export { TextNodeEditor } from './text_node_editor';
 export type { TextNodeEntry } from './text_node_editor';
+export { SourceEditor } from './source_editor';
+export type { SourceEditorEntry } from './source_editor';
+export { HtmlAttributesEditor } from './html_attributes_editor';

@@ -150,10 +150,15 @@ export const findNearHandle = (
  * Uses transform-origin: 0 0 so scale grows from top-left.
  */
 export const buildTransform = (dx: number, dy: number, scaleX: number, scaleY: number): string => {
+  // Round translate values to whole pixels to keep the element on the pixel
+  // grid. Subpixel translations cause the browser to anti-alias text,
+  // resulting in blurry rendering.
+  const rdx = Math.round(dx);
+  const rdy = Math.round(dy);
   if (scaleX === 1 && scaleY === 1) {
-    return `translate(${dx}px, ${dy}px)`;
+    return `translate(${rdx}px, ${rdy}px)`;
   }
-  return `translate(${dx}px, ${dy}px) scale(${scaleX}, ${scaleY})`;
+  return `translate(${rdx}px, ${rdy}px) scale(${scaleX}, ${scaleY})`;
 };
 
 /**
@@ -177,7 +182,8 @@ export const applyResizeMove = (state: ResizeState, clientX: number, clientY: nu
 
   const scaleX = width / originalRect.width;
   const scaleY = height / originalRect.height;
-  setImportant(el, 'transform', buildTransform(dx, dy, scaleX, scaleY));
+  const newTransform = buildTransform(dx, dy, scaleX, scaleY);
+  setImportant(el, 'transform', newTransform);
 
   session.dx = dx;
   session.dy = dy;

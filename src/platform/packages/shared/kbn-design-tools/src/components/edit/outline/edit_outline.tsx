@@ -16,7 +16,7 @@ import {
   HANDLE_CURSORS,
   RESIZE_HANDLE_SIZE,
 } from '../../../lib/constants';
-import { useOverlayZIndex } from '../../../hooks';
+import { useOverlayZIndex, useElementRect } from '../../../hooks';
 import { getHandleMode, getHandlePositions } from '../../../lib/dom/resize_helpers';
 import { OutlineControls } from './controls';
 
@@ -55,7 +55,7 @@ export const EditOutline = ({ target, onDelete, onDuplicate, onEdit }: Props) =>
     });
   }, [euiTheme.colors.primary]);
 
-  const rect = target.getBoundingClientRect();
+  const rect = useElementRect(target);
   const mode = getHandleMode(rect);
   const visibleHandles =
     mode === 'none'

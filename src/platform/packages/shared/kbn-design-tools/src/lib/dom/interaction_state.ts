@@ -15,7 +15,7 @@ import type { ElementSession } from './element_registry';
  * Discriminated union representing the current editor interaction.
  * Only one interaction can be active at a time.
  */
-export type InteractionState = IdleState | HoverState | DragState | ResizeState;
+export type InteractionState = IdleState | HoverState | PendingDragState | DragState | ResizeState;
 
 export interface IdleState {
   readonly type: 'idle';
@@ -27,6 +27,20 @@ export interface HoverState {
   readonly target: HTMLElement;
   /** The resize handle under the pointer, if any. */
   readonly handle: ResizeHandle | null;
+}
+
+/**
+ * Pointer is down but hasn't moved enough to commit to a drag.
+ * If the pointer is released before exceeding the threshold, no drag occurs.
+ */
+export interface PendingDragState {
+  readonly type: 'pending-drag';
+  /** The element the user pressed on. */
+  readonly target: HTMLElement;
+  /** Pointer X at press. */
+  readonly startX: number;
+  /** Pointer Y at press. */
+  readonly startY: number;
 }
 
 export interface DragState {
@@ -76,6 +90,8 @@ export const deriveCursor = (state: InteractionState, target: HTMLElement | null
       return HANDLE_CURSORS[state.handle];
     case 'hover':
       return state.handle ? HANDLE_CURSORS[state.handle] : 'grab';
+    case 'pending-drag':
+      return 'grab';
     default:
       return target ? 'grab' : '';
   }

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SVG_INTERNALS } from '../constants';
+import { DEVTOOL_HIDDEN_ATTR, SVG_INTERNALS } from '../constants';
 import { resolveTag } from '../fiber';
 
 export interface TreeNode {
@@ -18,7 +18,14 @@ export interface TreeNode {
   isClosing?: boolean;
 }
 
+const MAX_DEPTH = 50;
+
 export const flattenElementTree = (el: Element, depth: number): TreeNode[] => {
+  if (depth > MAX_DEPTH) return [];
+
+  // Skip elements hidden by the edit overlay (soft-deleted) and all their children.
+  if (el.hasAttribute(DEVTOOL_HIDDEN_ATTR)) return [];
+
   const tag = resolveTag(el);
   const children = Array.from(el.children);
   const nodes: TreeNode[] = [];
@@ -36,10 +43,19 @@ export const flattenElementTree = (el: Element, depth: number): TreeNode[] => {
     return nodes;
   }
 
-  nodes.push({ tag, depth, element: el, hasChildren: true });
+  const childNodes: TreeNode[] = [];
   for (const child of children) {
-    nodes.push(...flattenElementTree(child, depth + 1));
+    childNodes.push(...flattenElementTree(child, depth + 1));
   }
+
+  // If all children were filtered out (e.g. hidden), render as self-closing.
+  if (childNodes.length === 0) {
+    nodes.push({ tag, depth, element: el, hasChildren: false });
+    return nodes;
+  }
+
+  nodes.push({ tag, depth, element: el, hasChildren: true });
+  nodes.push(...childNodes);
   nodes.push({ tag, depth, element: el, hasChildren: true, isClosing: true });
   return nodes;
 };

@@ -24,7 +24,6 @@ export { ElementRegistry } from './element_registry';
 export { flattenElementTree } from './flatten_element_tree';
 export { getElementFromPoint } from './get_element_from_point';
 export { getElementUnder } from './get_element_under';
-export { handleEventPropagation } from './handle_event_propagation';
 export { IDLE, deriveCursor } from './interaction_state';
 export { isIgnoredElement } from './is_ignored_element';
 export { isTransparentColor } from './is_transparent_color';
@@ -38,6 +37,7 @@ export {
   getHandlePositions,
 } from './resize_helpers';
 export { hasSignificantRounding, isInRoundedDeadZone } from './rounded_dead_zone';
+export { resolveHoverTarget } from './resolve_hover_target';
 export { snapToGrid } from './snap_to_grid';
 
 export type { SpacingLine } from './calculate_spacing';

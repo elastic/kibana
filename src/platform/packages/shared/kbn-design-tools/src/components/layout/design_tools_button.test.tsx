@@ -11,39 +11,39 @@ import React from 'react';
 import { screen, fireEvent, cleanup, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { LayoutButton } from './layout_button';
+import { DesignToolsButton } from './design_tools_button';
 
-describe('LayoutButton', () => {
+describe('DesignToolsButton', () => {
   afterEach(() => {
     cleanup();
   });
 
   it('should render the button', () => {
-    renderWithI18n(<LayoutButton />);
+    renderWithI18n(<DesignToolsButton />);
 
-    expect(screen.getByTestId('layoutOverlayButton')).toBeInTheDocument();
+    expect(screen.getByTestId('designToolsButton')).toBeInTheDocument();
   });
 
   it('should open context menu when clicked', async () => {
-    renderWithI18n(<LayoutButton />);
+    renderWithI18n(<DesignToolsButton />);
 
-    await userEvent.click(screen.getByTestId('layoutOverlayButton'));
+    await userEvent.click(screen.getByTestId('designToolsButton'));
 
     expect(screen.getByText('Show layout')).toBeInTheDocument();
     expect(screen.getByText('Layout settings')).toBeInTheDocument();
   });
 
   it('should toggle layout visibility when Toggle layout is clicked', async () => {
-    renderWithI18n(<LayoutButton />);
+    renderWithI18n(<DesignToolsButton />);
 
-    await userEvent.click(screen.getByTestId('layoutOverlayButton'));
+    await userEvent.click(screen.getByTestId('designToolsButton'));
     await act(async () => {
       fireEvent.click(screen.getByText('Show layout'));
     });
 
     expect(screen.getByTestId('layoutOverlayContainer')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByTestId('layoutOverlayButton'));
+    await userEvent.click(screen.getByTestId('designToolsButton'));
     await act(async () => {
       fireEvent.click(screen.getByText('Hide layout'));
     });
@@ -52,9 +52,9 @@ describe('LayoutButton', () => {
   });
 
   it('should open flyout when Layout settings is clicked', async () => {
-    renderWithI18n(<LayoutButton />);
+    renderWithI18n(<DesignToolsButton />);
 
-    await userEvent.click(screen.getByTestId('layoutOverlayButton'));
+    await userEvent.click(screen.getByTestId('designToolsButton'));
     await act(async () => {
       fireEvent.click(screen.getByText('Layout settings'));
     });
@@ -63,9 +63,9 @@ describe('LayoutButton', () => {
   });
 
   it('should close flyout via the flyout close button', async () => {
-    renderWithI18n(<LayoutButton />);
+    renderWithI18n(<DesignToolsButton />);
 
-    await userEvent.click(screen.getByTestId('layoutOverlayButton'));
+    await userEvent.click(screen.getByTestId('designToolsButton'));
     await act(async () => {
       fireEvent.click(screen.getByText('Layout settings'));
     });
@@ -78,9 +78,9 @@ describe('LayoutButton', () => {
   });
 
   it('should prevent target from losing focus on mouse down', () => {
-    renderWithI18n(<LayoutButton />);
+    renderWithI18n(<DesignToolsButton />);
 
-    const button = screen.getByTestId('layoutOverlayButton');
+    const button = screen.getByTestId('designToolsButton');
     const mouseDownEvent = new MouseEvent('mousedown', { bubbles: true });
     const preventDefaultSpy = jest.spyOn(mouseDownEvent, 'preventDefault');
 

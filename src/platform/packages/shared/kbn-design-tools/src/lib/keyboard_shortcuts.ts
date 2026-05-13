@@ -25,3 +25,15 @@ const isDot = (event: KeyboardEvent): boolean => event.code === 'Period' || even
  */
 export const isMeasureShortcut = (event: KeyboardEvent) =>
   (event.metaKey || event.ctrlKey) && isDot(event);
+
+/**
+ * Check if the keyboard event corresponds to the duplicate shortcut (Meta/Ctrl + D).
+ */
+export const isDuplicateShortcut = (event: KeyboardEvent): boolean =>
+  (event.metaKey || event.ctrlKey) && event.key === 'd';
+
+/**
+ * Check if Enter was pressed without modifiers to open the edit modal.
+ */
+export const isEditShortcut = (event: KeyboardEvent): boolean =>
+  event.key === 'Enter' && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;

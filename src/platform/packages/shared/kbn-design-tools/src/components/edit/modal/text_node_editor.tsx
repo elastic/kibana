@@ -8,15 +8,13 @@
  */
 
 import React, { useCallback } from 'react';
-import {
-  EuiFieldText,
-  EuiColorPicker,
-  EuiColorPickerSwatch,
-  EuiFormRow,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
+import { EuiColorTokenSelect } from '../../eui_color_token_select';
+import { ExpandableTextInput } from './expandable_text_input';
+
+const colorColumnCss = css({ minWidth: 140 });
 
 export interface TextNodeEntry {
   node: Text;
@@ -59,27 +57,22 @@ export const TextNodeEditor = ({ entries, onChange, onFocus }: Props) => {
         >
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem>
-              <EuiFieldText
+              <ExpandableTextInput
                 value={entry.text}
-                onChange={(e) => handleTextChange(idx, e.target.value)}
+                onChange={(value) => handleTextChange(idx, value)}
                 onFocus={() => onFocus?.(idx)}
-                compressed
+                rows={4}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiColorPicker
-                onChange={(value) => handleColorChange(idx, value)}
+            <EuiFlexItem grow={false} className={colorColumnCss}>
+              <EuiColorTokenSelect
                 color={entry.color}
-                secondaryInputDisplay="top"
-                button={
-                  <EuiColorPickerSwatch
-                    color={entry.color || undefined}
-                    aria-label={i18n.translate('kbnDesignTools.edit.modal.textColor', {
-                      defaultMessage: 'Text color',
-                    })}
-                  />
-                }
-                isClearable
+                onChange={(value) => handleColorChange(idx, value)}
+                onFocus={() => onFocus?.(idx)}
+                preferText
+                colorPickerLabel={i18n.translate('kbnDesignTools.edit.modal.textColor', {
+                  defaultMessage: 'Text color',
+                })}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

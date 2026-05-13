@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { LayoutButton } from './layout_button';
+export { DesignToolsButton } from './design_tools_button';
 export { LayoutOverlay, GridPattern, RowPattern, ColumnPattern } from './overlay';
 
 export {

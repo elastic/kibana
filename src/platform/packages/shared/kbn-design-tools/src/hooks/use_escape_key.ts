@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useEffect } from 'react';
-import { isEscapeKey } from '../lib';
+import { isEscapeKey } from '../lib/keyboard_shortcuts';
 
 /**
  * Registers a capture-phase keydown listener that calls `onEscape`

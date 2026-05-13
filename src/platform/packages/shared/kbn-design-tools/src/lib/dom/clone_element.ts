@@ -30,10 +30,35 @@ export const setImportant = (el: HTMLElement, prop: string, value: string): void
 };
 
 /**
+ * Round a DOMRect's position and size to whole pixels.
+ * Subpixel values from getBoundingClientRect() place elements between pixel
+ * boundaries, forcing the browser to anti-alias text and causing blur.
+ * Position (left/top) uses Math.round; dimensions (width/height) use
+ * Math.ceil so content never gets clipped by rounding down.
+ */
+export const roundRect = (rect: DOMRect): DOMRect => {
+  const x = Math.round(rect.left);
+  const y = Math.round(rect.top);
+  const w = Math.ceil(rect.width);
+  const h = Math.ceil(rect.height);
+  return {
+    x,
+    y,
+    left: x,
+    top: y,
+    width: w,
+    height: h,
+    right: x + w,
+    bottom: y + h,
+    toJSON() {},
+  } as DOMRect;
+};
+
+/**
  * Copy pixel data from all canvas elements in the original tree to their
  * corresponding clones. cloneNode does not preserve canvas content.
  */
-const copyCanvasContent = (original: HTMLElement, clone: HTMLElement): void => {
+export const copyCanvasContent = (original: HTMLElement, clone: HTMLElement): void => {
   const origCanvases =
     original.tagName === 'CANVAS'
       ? [original as HTMLCanvasElement]
@@ -54,11 +79,26 @@ const copyCanvasContent = (original: HTMLElement, clone: HTMLElement): void => {
   }
 };
 
+/**
+ * Round a CSS pixel value to a whole number to prevent subpixel text rendering.
+ * Non-px values (e.g. "normal", "inherit") are returned unchanged.
+ */
+const roundPx = (value: string): string => {
+  if (value.endsWith('px')) {
+    return `${Math.round(parseFloat(value))}px`;
+  }
+  return value;
+};
+
+/** Properties whose subpixel computed values cause blurry text rendering. */
+const ROUND_PX_PROPS = new Set(['font-size', 'line-height', 'letter-spacing', 'word-spacing']);
+
 const copyInheritedStyles = (target: HTMLElement, clone: HTMLElement): void => {
   const computed = getComputedStyle(target);
 
   for (const prop of INHERITED_CSS_PROPS) {
-    clone.style.setProperty(prop, computed.getPropertyValue(prop));
+    const value = computed.getPropertyValue(prop);
+    clone.style.setProperty(prop, ROUND_PX_PROPS.has(prop) ? roundPx(value) : value);
   }
 
   // Preserve non-inherited visual styles
@@ -127,7 +167,13 @@ const applyPseudoStyle = (
  * Recursively copy inherited styles, pseudo-elements, and freeze layout
  * dimensions from the original tree to the clone tree in a single pass.
  */
-export const copyStylesDeep = (original: HTMLElement, clone: HTMLElement, isRoot = true): void => {
+export const copyStylesDeep = (
+  original: HTMLElement,
+  clone: HTMLElement,
+  isRoot = true,
+  depth = 0
+): void => {
+  if (depth > MAX_DEPTH) return;
   copyInheritedStyles(original, clone);
   applyPseudoStyle(original, clone, '::before');
   applyPseudoStyle(original, clone, '::after');
@@ -141,9 +187,9 @@ export const copyStylesDeep = (original: HTMLElement, clone: HTMLElement, isRoot
   }
 
   if (!isRoot && !hadTruncationClass) {
-    const rect = original.getBoundingClientRect();
-    clone.style.width = `${rect.width}px`;
-    clone.style.height = `${rect.height}px`;
+    const rounded = roundRect(original.getBoundingClientRect());
+    clone.style.width = `${rounded.width}px`;
+    clone.style.height = `${rounded.height}px`;
     clone.style.boxSizing = 'border-box';
   }
 
@@ -154,7 +200,7 @@ export const copyStylesDeep = (original: HTMLElement, clone: HTMLElement, isRoot
     const origChild = origChildren[i];
     const cloneChild = cloneChildren[i];
     if (origChild instanceof HTMLElement && cloneChild instanceof HTMLElement) {
-      copyStylesDeep(origChild, cloneChild, false);
+      copyStylesDeep(origChild, cloneChild, false, depth + 1);
     }
   }
 };
@@ -168,7 +214,7 @@ export const cloneElement = (
   target: HTMLElement,
   zIndex: number
 ): { clone: HTMLElement; rect: DOMRect } => {
-  const rect = target.getBoundingClientRect();
+  const rect = roundRect(target.getBoundingClientRect());
   const clone = target.cloneNode(true) as HTMLElement;
 
   copyCanvasContent(target, clone);
@@ -199,17 +245,20 @@ export const cloneElement = (
   return { clone, rect };
 };
 
+const MAX_DEPTH = 50;
+
 /**
  * Fix visibility/pointerEvents that may have been baked into the clone tree
  * by copyInheritedStylesDeep when the source element was hidden.
  */
-const fixCloneVisibility = (el: HTMLElement): void => {
+const fixCloneVisibility = (el: HTMLElement, depth = 0): void => {
+  if (depth > MAX_DEPTH) return;
   if ('cloneHidden' in el.dataset) return;
   if (el.style.visibility === 'hidden') el.style.visibility = 'visible';
   if (el.style.pointerEvents === 'none') el.style.pointerEvents = '';
   for (let i = 0; i < el.children.length; i++) {
     const child = el.children[i];
-    if (child instanceof HTMLElement) fixCloneVisibility(child);
+    if (child instanceof HTMLElement) fixCloneVisibility(child, depth + 1);
   }
 };
 

@@ -8,7 +8,24 @@
  */
 
 /**
- * Recursively collect all non-empty Text nodes within the given element tree.
+ * Returns true if the element is visually hidden and should be skipped
+ * when collecting editable text nodes.
+ */
+const isHiddenElement = (el: Element): boolean => {
+  if (!(el instanceof HTMLElement)) return false;
+  if (el.getAttribute('aria-hidden') === 'true') return true;
+  if (el.hasAttribute('hidden')) return true;
+  const { display, visibility, opacity } = el.style;
+  if (display === 'none' || visibility === 'hidden' || opacity === '0') return true;
+  // Screen-reader-only patterns (e.g. EUI's .euiScreenReaderOnly)
+  if (el.classList.contains('euiScreenReaderOnly')) return true;
+  if (el.offsetWidth === 0 && el.offsetHeight === 0) return true;
+  return false;
+};
+
+/**
+ * Recursively collect all non-empty Text nodes within the given element tree,
+ * skipping hidden elements, aria-hidden subtrees, and screen-reader-only content.
  */
 export const collectAllTextNodes = (el: Element): Text[] => {
   const nodes: Text[] = [];
@@ -18,7 +35,9 @@ export const collectAllTextNodes = (el: Element): Text[] => {
       if (child.nodeType === Node.TEXT_NODE && child.textContent?.trim()) {
         nodes.push(child as Text);
       } else if (child.nodeType === Node.ELEMENT_NODE) {
-        walk(child);
+        if (!isHiddenElement(child as Element)) {
+          walk(child);
+        }
       }
     }
   };

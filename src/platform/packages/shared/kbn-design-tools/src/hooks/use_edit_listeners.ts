@@ -9,15 +9,6 @@
 
 import { type MutableRefObject, useEffect, useRef } from 'react';
 
-interface Handlers {
-  onPointerMove: (event: PointerEvent) => void;
-  onPointerDown: (event: PointerEvent) => void;
-  onPointerUp: (event: PointerEvent) => void;
-  onClick: (event: MouseEvent) => void;
-  onKeydown: (event: KeyboardEvent) => void;
-  onAbort: () => void;
-}
-
 /**
  * Registers capture-phase document listeners for the edit overlay when active.
  * Handles blur/visibilitychange to abort in-progress gestures.
@@ -25,7 +16,12 @@ interface Handlers {
  */
 export const useEditListeners = (
   isActive: boolean,
-  handlers: Handlers,
+  onPointerMove: (event: PointerEvent) => void,
+  onPointerDown: (event: PointerEvent) => void,
+  onPointerUp: (event: PointerEvent) => void,
+  onClick: (event: MouseEvent) => void,
+  onKeydown: (event: KeyboardEvent) => void,
+  onAbort: () => void,
   rafId?: MutableRefObject<number>
 ) => {
   const internalRafId = useRef<number>(0);
@@ -33,8 +29,6 @@ export const useEditListeners = (
 
   useEffect(() => {
     if (!isActive) return;
-
-    const { onPointerMove, onPointerDown, onPointerUp, onClick, onKeydown, onAbort } = handlers;
 
     const handleBlur = () => onAbort();
     const handleVisibilityChange = () => {
@@ -65,17 +59,7 @@ export const useEditListeners = (
       window.removeEventListener('blur', handleBlur);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-    // handlers is a new object each render but its properties are stable useCallbacks
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    isActive,
-    handlers.onPointerMove,
-    handlers.onPointerDown,
-    handlers.onPointerUp,
-    handlers.onClick,
-    handlers.onKeydown,
-    handlers.onAbort,
-  ]);
+  }, [isActive, onPointerMove, onPointerDown, onPointerUp, onClick, onKeydown, onAbort, raf]);
 
   return raf;
 };

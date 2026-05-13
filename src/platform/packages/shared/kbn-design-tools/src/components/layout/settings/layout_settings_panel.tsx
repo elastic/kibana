@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { EuiButton, EuiForm, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -59,6 +59,30 @@ export const LayoutSettingsPanel = ({ config, defaultConfig, setConfig }: Props)
     }
   }, [config, defaultConfig, setConfig]);
 
+  const isDefault = useMemo(() => {
+    const d = defaultConfig;
+    if (config.color !== d.color) return false;
+    if (config.layoutType === 'grid') {
+      return config.cellSize === d.cellSize;
+    }
+    if (config.layoutType === 'rows') {
+      return (
+        config.count === d.count &&
+        config.rowAlignType === d.rowAlignType &&
+        config.height === d.height &&
+        config.gutterSize === d.gutterSize &&
+        config.marginSize === d.marginSize
+      );
+    }
+    return (
+      config.count === d.count &&
+      config.alignType === d.alignType &&
+      config.width === d.width &&
+      config.gutterSize === d.gutterSize &&
+      config.marginSize === d.marginSize
+    );
+  }, [config, defaultConfig]);
+
   return (
     <EuiForm component="div">
       <LayoutTypeSelector layoutType={config.layoutType} onChange={updateConfig} />
@@ -70,7 +94,12 @@ export const LayoutSettingsPanel = ({ config, defaultConfig, setConfig }: Props)
       {config.layoutType === 'rows' && <RowSettings config={config} onChange={updateConfig} />}
       <ColorSetting color={config.color} onChange={updateConfig} />
       <EuiSpacer size="m" />
-      <EuiButton size="s" onClick={resetLayoutDefaults} data-test-subj="layoutSettingsResetButton">
+      <EuiButton
+        size="s"
+        onClick={resetLayoutDefaults}
+        disabled={isDefault}
+        data-test-subj="layoutSettingsResetButton"
+      >
         {i18n.translate('kbnDesignTools.layout.settings.reset', {
           defaultMessage: 'Reset to default',
         })}

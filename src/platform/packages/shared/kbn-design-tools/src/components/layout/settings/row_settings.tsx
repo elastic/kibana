@@ -13,10 +13,30 @@ import { i18n } from '@kbn/i18n';
 import type { LayoutConfig, LayoutRowAlignType } from '../../../lib/layout';
 
 const alignOptions: Array<{ value: LayoutRowAlignType; text: string }> = [
-  { value: 'stretch', text: 'Stretch' },
-  { value: 'center', text: 'Center' },
-  { value: 'top', text: 'Top' },
-  { value: 'bottom', text: 'Bottom' },
+  {
+    value: 'stretch',
+    text: i18n.translate('kbnDesignTools.layout.settings.rowAlignType.stretch', {
+      defaultMessage: 'Stretch',
+    }),
+  },
+  {
+    value: 'center',
+    text: i18n.translate('kbnDesignTools.layout.settings.rowAlignType.center', {
+      defaultMessage: 'Center',
+    }),
+  },
+  {
+    value: 'top',
+    text: i18n.translate('kbnDesignTools.layout.settings.rowAlignType.top', {
+      defaultMessage: 'Top',
+    }),
+  },
+  {
+    value: 'bottom',
+    text: i18n.translate('kbnDesignTools.layout.settings.rowAlignType.bottom', {
+      defaultMessage: 'Bottom',
+    }),
+  },
 ];
 
 interface Props {

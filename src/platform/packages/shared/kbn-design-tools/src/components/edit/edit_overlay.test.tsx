@@ -205,6 +205,11 @@ describe('EditOverlay', () => {
       firePointerDown(75, 60);
     });
 
+    // Move pointer beyond threshold to promote pending-drag to real drag
+    act(() => {
+      firePointerMove(80, 65);
+    });
+
     // Original should be hidden, clone should exist
     expect(target.style.visibility).toBe('hidden');
     const clone = getClone();
@@ -471,6 +476,11 @@ describe('EditOverlay', () => {
 
     act(() => {
       firePointerDown(75, 60);
+    });
+
+    // Move pointer beyond threshold to promote pending-drag to real drag
+    act(() => {
+      firePointerMove(80, 65);
     });
 
     expect(target.style.visibility).toBe('hidden');

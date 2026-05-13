@@ -8,7 +8,7 @@
  */
 
 import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR } from '../constants';
-import { copyStylesDeep } from './clone_element';
+import { copyCanvasContent, copyStylesDeep, setImportant, roundRect } from './clone_element';
 
 export interface PreviewCloneResult {
   clone: HTMLElement;
@@ -16,38 +16,82 @@ export interface PreviewCloneResult {
 }
 
 /**
- * Create a styled clone of the target element suitable for use in a preview panel.
- * Copies computed styles, strips devtool markers, and builds an original→clone element map.
+ * Strip the translate() from a transform string, keeping everything else (e.g. scale()).
+ */
+const stripTranslate = (transform: string): string => {
+  if (!transform || transform === 'none') return 'none';
+  const stripped = transform.replace(/translate\([^)]*\)\s*/g, '').trim();
+  return stripped || 'none';
+};
+
+/**
+ * Create a clone of the target element for the preview panel.
+ *
+ * If the target is a managed clone (has DEVTOOL_MANAGED_ATTR), it already has
+ * all computed styles inlined — a plain cloneNode(true) is enough.
+ * If it's an original DOM element, we run copyStylesDeep to capture computed styles.
  */
 export const createPreviewClone = (target: HTMLElement): PreviewCloneResult => {
+  const isManaged = target.hasAttribute(DEVTOOL_MANAGED_ATTR);
+  // Visual dimensions (post-transform) — what the user actually sees
+  const visualRect = roundRect(target.getBoundingClientRect());
+
   const clone = target.cloneNode(true) as HTMLElement;
-  copyStylesDeep(target, clone);
+  copyCanvasContent(target, clone);
 
-  clone.style.position = 'relative';
-  clone.style.left = '';
-  clone.style.top = '';
-  clone.style.width = '';
-  clone.style.height = '';
-  clone.style.margin = '';
-  clone.style.zIndex = '';
-  clone.style.transform = 'none';
-  clone.style.transition = 'none';
-  clone.style.pointerEvents = 'none';
-  clone.style.maxWidth = '100%';
-  clone.style.maxHeight = '100%';
-  clone.style.overflow = 'auto';
+  if (!isManaged) {
+    copyStylesDeep(target, clone);
+    // Original elements may have relative sizing (width:100% etc.) — pin to actual size
+    setImportant(clone, 'width', `${visualRect.width}px`);
+    setImportant(clone, 'height', `${visualRect.height}px`);
+    setImportant(clone, 'box-sizing', 'border-box');
+  }
 
-  // Strip devtool markers and force visibility on the entire clone tree
+  // Fix positioning for preview layout — setImportant to override any
+  // !important inline styles from drag/resize
+  const scale = stripTranslate(target.style.getPropertyValue('transform'));
+  setImportant(clone, 'position', 'relative');
+  setImportant(clone, 'left', '0');
+  setImportant(clone, 'top', '0');
+  setImportant(clone, 'right', 'auto');
+  setImportant(clone, 'bottom', 'auto');
+  setImportant(clone, 'margin', '0');
+  setImportant(clone, 'z-index', 'auto');
+  setImportant(clone, 'transform-origin', '0 0');
+  setImportant(clone, 'transform', scale);
+  setImportant(clone, 'transition', 'none');
+  setImportant(clone, 'pointer-events', 'none');
+  setImportant(clone, 'visibility', 'visible');
+  setImportant(clone, 'opacity', '1');
+
+  // Strip devtool markers from the clone root.
+  // Children with DEVTOOL_HIDDEN_ATTR remain hidden — they were soft-deleted
+  // by the user and the preview should reflect the current editing state.
   clone.removeAttribute(DEVTOOL_HIDDEN_ATTR);
   clone.removeAttribute(DEVTOOL_MANAGED_ATTR);
-  clone.style.visibility = 'visible';
-  clone.style.opacity = '1';
   for (const child of clone.querySelectorAll<HTMLElement>('*')) {
-    child.removeAttribute(DEVTOOL_HIDDEN_ATTR);
+    const isHidden = child.hasAttribute(DEVTOOL_HIDDEN_ATTR);
     child.removeAttribute(DEVTOOL_MANAGED_ATTR);
-    if (child.style.visibility === 'hidden') child.style.visibility = 'visible';
-    if (child.style.opacity === '0') child.style.opacity = '1';
+    if (isHidden) {
+      // Keep hidden children invisible — only strip the marker attribute
+      child.removeAttribute(DEVTOOL_HIDDEN_ATTR);
+    } else {
+      if (child.style.visibility === 'hidden') child.style.visibility = 'visible';
+      if (child.style.opacity === '0') child.style.opacity = '1';
+    }
   }
+
+  // CSS transform: scale() doesn't change the element's layout box — the
+  // scaled visual overflows the layout dimensions. Wrap in a container sized
+  // to the visual (post-scale) dimensions so the preview layout accounts
+  // for the actual rendered size.
+  const wrapper = document.createElement('div');
+  wrapper.style.width = `${visualRect.width}px`;
+  wrapper.style.height = `${visualRect.height}px`;
+  wrapper.style.position = 'relative';
+  wrapper.style.margin = '0 auto';
+  wrapper.style.overflow = 'hidden';
+  wrapper.appendChild(clone);
 
   const elementMap = new Map<Element, Element>();
   const originals = target.querySelectorAll('*');
@@ -57,5 +101,5 @@ export const createPreviewClone = (target: HTMLElement): PreviewCloneResult => {
     elementMap.set(originals[i], clones[i]);
   }
 
-  return { clone, elementMap };
+  return { clone: wrapper, elementMap };
 };

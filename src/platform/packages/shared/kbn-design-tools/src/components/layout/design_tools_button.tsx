@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LayoutOverlay } from './overlay/layout_overlay';
-import { getDefaultLayoutConfig, type LayoutConfig } from '../../lib';
+import { getDefaultLayoutConfig, type LayoutConfig } from '../../lib/layout/layout_config';
 import { LayoutSettingsPanel } from './settings/layout_settings_panel';
 import { EditOverlay } from '../edit/edit_overlay';
 import type { EditOverlayHandle } from '../edit/edit_overlay';
@@ -37,7 +37,7 @@ import { useOverlayZIndex, usePortalZIndex } from '../../hooks';
 /**
  * Toggles a column layout overlay and provides layout settings.
  */
-export const LayoutButton = () => {
+export const DesignToolsButton = () => {
   const { euiTheme } = useEuiTheme();
   const [isLayoutVisible, setIsLayoutVisible] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -143,8 +143,8 @@ export const LayoutButton = () => {
             content={
               isPopoverOpen
                 ? ''
-                : i18n.translate('kbnDesignTools.layoutButton.tooltip', {
-                    defaultMessage: 'Layout overlay',
+                : i18n.translate('kbnDesignTools.designToolsButton.tooltip', {
+                    defaultMessage: 'Design tools',
                   })
             }
             position="bottom"
@@ -155,14 +155,14 @@ export const LayoutButton = () => {
                 setIsFlyoutOpen(false);
               }}
               onMouseDown={preventTargetFromLosingFocus}
-              iconType="grid"
+              iconType="vectorSquare"
               isSelected={isLayoutVisible}
               aria-pressed={isLayoutVisible}
-              aria-label={i18n.translate('kbnDesignTools.layout.toggle.ariaLabel', {
-                defaultMessage: 'Layout overlay',
+              aria-label={i18n.translate('kbnDesignTools.designToolsButton.ariaLabel', {
+                defaultMessage: 'Design tools',
               })}
               color="text"
-              data-test-subj="layoutOverlayButton"
+              data-test-subj="designToolsButton"
             />
           </EuiToolTip>
         }

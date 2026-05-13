@@ -27,6 +27,8 @@ export interface ElementSession {
   originalRect: DOMRect;
   /** True when this is a duplicate (no hidden original to restore on reset). */
   isDuplicate: boolean;
+  /** The in-flow element whose layout position the clone tracks on resize. */
+  referenceEl?: HTMLElement;
 }
 
 /**
@@ -74,8 +76,8 @@ export class ElementRegistry {
     const hidden = document.querySelectorAll<HTMLElement>(`[${DEVTOOL_HIDDEN_ATTR}]`);
     for (const el of hidden) {
       el.style.transform = el.getAttribute(DEVTOOL_HIDDEN_ATTR) ?? '';
-      el.style.visibility = '';
-      el.style.pointerEvents = '';
+      el.style.removeProperty('visibility');
+      el.style.removeProperty('pointer-events');
       el.removeAttribute(DEVTOOL_HIDDEN_ATTR);
     }
   }

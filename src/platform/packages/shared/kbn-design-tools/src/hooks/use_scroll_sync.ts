@@ -9,11 +9,12 @@
 
 import type { MutableRefObject } from 'react';
 import { useCallback, useEffect, useRef } from 'react';
-import type { ElementRegistry } from '../components';
+import type { ElementRegistry } from '../lib/dom/element_registry';
+import { IGNORED_SELECTOR } from '../lib/constants';
 
 /**
  * Keeps managed element positions in sync during scroll using
- * delta tracking. No reference to original elements is needed.
+ * delta tracking. Ignores scroll events from tool overlays (e.g. the edit modal).
  */
 export const useScrollSync = (registry: MutableRefObject<ElementRegistry>) => {
   const scrollPositions = useRef(new WeakMap<EventTarget, { x: number; y: number }>());
@@ -23,6 +24,9 @@ export const useScrollSync = (registry: MutableRefObject<ElementRegistry>) => {
       const target = event.target;
       if (!target) return;
 
+      // Ignore scroll events from within tool overlays (edit modal, toolbar, etc.)
+      if (target instanceof Element && target.closest(IGNORED_SELECTOR)) return;
+
       const el = target === document ? document.documentElement : (target as HTMLElement);
       const currentX = el.scrollLeft ?? 0;
       const currentY = el.scrollTop ?? 0;
@@ -31,7 +35,21 @@ export const useScrollSync = (registry: MutableRefObject<ElementRegistry>) => {
       const scrollDy = prev ? currentY - prev.y : 0;
       scrollPositions.current.set(target, { x: currentX, y: currentY });
 
+      const isDocumentScroll = target === document || target === document.documentElement;
+
       for (const session of registry.current.values()) {
+        // Only adjust clones whose reference element lives inside the
+        // scrolled container.  This prevents unrelated scroll sources
+        // (e.g. EuiComboBox dropdown portals) from shifting clones.
+        if (
+          !isDocumentScroll &&
+          (!session.referenceEl ||
+            !(target instanceof Element) ||
+            !target.contains(session.referenceEl))
+        ) {
+          continue;
+        }
+
         const left = parseFloat(session.el.style.left) - scrollDx;
         const top = parseFloat(session.el.style.top) - scrollDy;
         session.el.style.left = `${left}px`;
@@ -42,7 +60,30 @@ export const useScrollSync = (registry: MutableRefObject<ElementRegistry>) => {
   );
 
   useEffect(() => {
+    // When the window resizes, page content reflows. Reposition each clone
+    // so it stays aligned with its reference element's new layout position.
+    const handleResize = () => {
+      scrollPositions.current = new WeakMap();
+
+      for (const session of registry.current.values()) {
+        if (!session.referenceEl) continue;
+        const refRect = session.referenceEl.getBoundingClientRect();
+        session.el.style.left = `${refRect.left}px`;
+        session.el.style.top = `${refRect.top}px`;
+        session.originalRect = new DOMRect(
+          refRect.left,
+          refRect.top,
+          session.originalRect.width,
+          session.originalRect.height
+        );
+      }
+    };
+
     document.addEventListener('scroll', handleScroll, true);
-    return () => document.removeEventListener('scroll', handleScroll, true);
-  }, [handleScroll]);
+    window.addEventListener('resize', handleResize);
+    return () => {
+      document.removeEventListener('scroll', handleScroll, true);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [handleScroll, registry]);
 };

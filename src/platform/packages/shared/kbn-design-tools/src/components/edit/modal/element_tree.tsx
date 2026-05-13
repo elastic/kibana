@@ -35,6 +35,7 @@ export const ElementTree = ({ root, selectedElement, onSelect }: Props) => {
         borderRadius: euiTheme.border.radius.small,
         flex: 1,
         minHeight: 0,
+        height: '100%',
       }),
     [euiTheme]
   );

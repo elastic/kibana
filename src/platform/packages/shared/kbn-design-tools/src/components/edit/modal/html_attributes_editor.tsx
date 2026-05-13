@@ -10,20 +10,27 @@
 import React from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { LayoutConfig } from '../../../lib/layout/layout_config';
 import { EuiColorTokenSelect } from '../../eui_color_token_select';
 
 interface Props {
   color: string;
-  onChange: (partial: Partial<LayoutConfig>) => void;
+  onChange: (color: string) => void;
 }
 
-export const ColorSetting = ({ color, onChange }: Props) => (
-  <EuiFormRow
-    label={i18n.translate('kbnDesignTools.layout.settings.color', {
-      defaultMessage: 'Color',
-    })}
-  >
-    <EuiColorTokenSelect color={color} onChange={(newColor) => onChange({ color: newColor })} />
-  </EuiFormRow>
-);
+export const HtmlAttributesEditor = ({ color, onChange }: Props) => {
+  return (
+    <EuiFormRow
+      label={i18n.translate('kbnDesignTools.edit.modal.backgroundColor', {
+        defaultMessage: 'Background color',
+      })}
+    >
+      <EuiColorTokenSelect
+        color={color || '#ffffff'}
+        onChange={onChange}
+        colorPickerLabel={i18n.translate('kbnDesignTools.edit.modal.backgroundColor', {
+          defaultMessage: 'Background color',
+        })}
+      />
+    </EuiFormRow>
+  );
+};

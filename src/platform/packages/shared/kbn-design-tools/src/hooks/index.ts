@@ -18,4 +18,8 @@ export type { OverlayZIndex } from './use_overlay_z_index';
 export { usePortalZIndex } from './use_portal_z_index';
 export { useScrollSync } from './use_scroll_sync';
 export { useLockedTarget } from './use_locked_target';
+export { useElementRect } from './use_element_rect';
 export { useElementSelection } from './use_element_selection';
+export { useEuiColorTokens } from './use_eui_color_tokens';
+export type { EuiColorToken } from './use_eui_color_tokens';
+export { usePageColorMode } from './use_page_color_mode';

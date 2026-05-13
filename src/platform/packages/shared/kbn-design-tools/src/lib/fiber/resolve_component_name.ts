@@ -57,7 +57,7 @@ export const resolveReactComponentName = (el: Element): string | null => {
   let fiber = hostFiber.return as typeof hostFiber | null;
   while (fiber) {
     const { type } = fiber;
-    if (typeof type === 'function' || typeof type === 'object') {
+    if (type != null && (typeof type === 'function' || typeof type === 'object')) {
       const name =
         (type as { displayName?: string }).displayName ?? (type as { name?: string }).name;
       if (name && isUsableComponentName(name)) {
@@ -102,9 +102,8 @@ const isUsableComponentName = (name: string): boolean => {
   if (name === 'Fragment') return false;
   if (/^(ForwardRef|Memo|Context|Provider|Consumer|Suspense|Lazy)$/i.test(name)) return false;
   if (name.startsWith('_')) return false;
-  if (/^Eui[A-Z]/.test(name)) return EUI_COMPONENTS.has(name);
-  if (/(Wrapper|Inner|Internal)$/.test(name)) return false;
-  return true;
+  // Only accept names that are real EUI exports
+  return EUI_COMPONENTS.has(name);
 };
 
 /**

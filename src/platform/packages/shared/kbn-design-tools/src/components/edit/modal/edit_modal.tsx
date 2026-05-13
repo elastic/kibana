@@ -18,8 +18,8 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiColorPicker,
-  EuiFormRow,
+  EuiSpacer,
+  EuiTitle,
   useEuiTheme,
   EuiBadge,
   rgbToHex,
@@ -28,10 +28,20 @@ import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { DEVTOOL_IGNORE_ATTR, EDIT_MODAL_ID } from '../../../lib/constants';
 import { collectAllTextNodes } from '../../../lib/dom/collect_text_nodes';
-import { useOverlayZIndex, usePortalZIndex, useElementSelection } from '../../../hooks';
+import { collectSourceElements } from '../../../lib/dom/collect_source_elements';
+import { setImportant } from '../../../lib/dom/clone_element';
+import {
+  useOverlayZIndex,
+  usePortalZIndex,
+  useElementSelection,
+  usePageColorMode,
+} from '../../../hooks';
 import { ElementTree } from './element_tree';
 import { TextNodeEditor } from './text_node_editor';
 import type { TextNodeEntry } from './text_node_editor';
+import { SourceEditor } from './source_editor';
+import type { SourceEditorEntry } from './source_editor';
+import { HtmlAttributesEditor } from './html_attributes_editor';
 import { createPreviewClone } from '../../../lib/dom/create_preview_clone';
 
 export interface StyleChange {
@@ -46,10 +56,20 @@ export interface TextNodeChange {
   color?: string;
 }
 
+export interface SourceChange {
+  element: Element;
+  attribute: string;
+  value: string;
+}
+
 interface Props {
   target: HTMLElement;
   onClose: () => void;
-  onSave: (styleChanges: StyleChange[], textChanges: TextNodeChange[]) => void;
+  onSave: (
+    styleChanges: StyleChange[],
+    textChanges: TextNodeChange[],
+    sourceChanges: SourceChange[]
+  ) => void;
 }
 
 export const EditModal = ({ target, onClose, onSave }: Props) => {
@@ -63,8 +83,14 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
   const cloneRef = useRef<HTMLElement | null>(null);
   const textNodeMap = useRef<Array<{ original: Text; clone: Text }>>([]);
   const [textEntries, setTextEntries] = useState<TextNodeEntry[]>([]);
+  const sourceMap = useRef<Array<{ original: Element; clone: Element; attribute: string }>>([]);
+  const [sourceEntries, setSourceEntries] = useState<SourceEditorEntry[]>([]);
+  const [sourceChanges, setSourceChanges] = useState<Map<Element, SourceChange>>(new Map());
 
   const { selectedElement, color, setColor, handleSelect } = useElementSelection(elementMapRef);
+
+  const handleSelectRef = useRef(handleSelect);
+  handleSelectRef.current = handleSelect;
 
   const previewCallbackRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -101,7 +127,33 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
       textNodeMap.current = mapping;
       setTextEntries(entries);
 
+      // Collect source elements (img, video, svg image/use, etc.)
+      const origSources = collectSourceElements(target);
+      const cloneSources = collectSourceElements(clone);
+      const srcEntries: SourceEditorEntry[] = [];
+      const srcMapping: Array<{ original: Element; clone: Element; attribute: string }> = [];
+      for (let idx2 = 0; idx2 < origSources.length; idx2++) {
+        const orig = origSources[idx2];
+        const cl = cloneSources[idx2];
+        if (!cl) continue;
+        srcEntries.push({
+          element: orig.element,
+          attribute: orig.attribute,
+          value: orig.value,
+          originalValue: orig.value,
+          label: orig.label,
+        });
+        srcMapping.push({ original: orig.element, clone: cl.element, attribute: orig.attribute });
+      }
+      sourceMap.current = srcMapping;
+      setSourceEntries(srcEntries);
+
       setCloneRoot(clone);
+
+      // Select the outermost element by default now that the preview is ready.
+      // Called here instead of in a separate useEffect to avoid an extra render
+      // cycle and to guarantee elementMapRef is populated.
+      handleSelectRef.current(target);
     },
     [target]
   );
@@ -130,8 +182,8 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
   );
 
   const handleSave = useCallback(() => {
-    onSave(styleChanges, [...textChanges.values()]);
-  }, [styleChanges, textChanges, onSave]);
+    onSave(styleChanges, [...textChanges.values()], [...sourceChanges.values()]);
+  }, [styleChanges, textChanges, sourceChanges, onSave]);
 
   const handleTextNodeChange = useCallback(
     (index: number, updates: { text?: string; color?: string }) => {
@@ -145,8 +197,8 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
       if (updates.color !== undefined) {
         const parent = entry.clone.parentElement;
         if (parent) {
-          parent.style.setProperty('color', updates.color, 'important');
-          parent.style.setProperty('-webkit-text-fill-color', updates.color, 'important');
+          setImportant(parent, 'color', updates.color);
+          setImportant(parent, '-webkit-text-fill-color', updates.color);
         }
       }
 
@@ -178,6 +230,41 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
     [textEntries, handleSelect]
   );
 
+  const handleSourceChange = useCallback((index: number, value: string) => {
+    const entry = sourceMap.current[index];
+    if (!entry) return;
+
+    // Update clone preview
+    entry.clone.setAttribute(entry.attribute, value);
+
+    // Update entries state
+    setSourceEntries((prev) => prev.map((e, i) => (i === index ? { ...e, value } : e)));
+
+    // Track changes keyed by original element
+    setSourceChanges((prev) => {
+      const next = new Map(prev);
+      next.set(entry.original, {
+        element: entry.original,
+        attribute: entry.attribute,
+        value,
+      });
+      return next;
+    });
+  }, []);
+
+  const handleSourceFocus = useCallback(
+    (index: number) => {
+      const entry = sourceEntries[index];
+      if (!entry) return;
+      if (entry.element instanceof HTMLElement) {
+        handleSelect(entry.element);
+      }
+    },
+    [sourceEntries, handleSelect]
+  );
+
+  const pageColorMode = usePageColorMode();
+
   const previewCss = useMemo(
     () =>
       css({
@@ -185,26 +272,47 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
         borderRadius: euiTheme.border.radius.small,
         padding: euiTheme.size.m,
         overflow: 'auto',
-        background: euiTheme.colors.backgroundBasePlain,
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'center',
-        minHeight: '200px',
-        maxHeight: '400px',
+        background: pageColorMode === 'dark' ? '#0B1628' : '#FFFFFF',
+        height: 400,
       }),
-    [euiTheme]
+    [euiTheme, pageColorMode]
   );
+
+  const treeCss = useMemo(
+    () =>
+      css({
+        overflow: 'auto',
+        height: 400,
+      }),
+    []
+  );
+
+  const modalCss = useMemo(
+    () =>
+      css({
+        width: '90vw',
+        maxWidth: 1200,
+        minHeight: 800,
+      }),
+    []
+  );
+
+  const rowCss = useMemo(() => css({ minHeight: 400 }), []);
+  const previewItemCss = useMemo(() => css({ flex: '1 1 0', minWidth: 0, overflow: 'hidden' }), []);
+  const treeItemCss = useMemo(() => css({ flex: '0 0 300px', minWidth: 200 }), []);
+  const columnCss = useMemo(() => css({ flex: '1 1 0', minWidth: 250 }), []);
 
   return (
     <EuiModal
       onClose={onClose}
-      maxWidth="900px"
+      maxWidth="90vw"
+      className={modalCss}
       id={EDIT_MODAL_ID}
       {...{ [DEVTOOL_IGNORE_ATTR]: '' }}
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <h3>
                 {i18n.translate('kbnDesignTools.edit.modal.title', {
@@ -219,34 +327,79 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiFlexGroup gutterSize="m" style={{ minHeight: '300px' }}>
-          <EuiFlexItem grow={1}>
-            <div ref={previewCallbackRef} className={previewCss} />
+        <EuiFlexGroup gutterSize="m" className={rowCss}>
+          <EuiFlexItem className={previewItemCss}>
+            <div
+              ref={previewCallbackRef}
+              className={previewCss}
+              onWheel={(e) => e.stopPropagation()}
+            />
           </EuiFlexItem>
-          <EuiFlexItem grow={1} style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+          <EuiFlexItem className={treeItemCss}>
             {cloneRoot && (
-              <ElementTree
-                root={target}
-                selectedElement={selectedElement}
-                onSelect={handleSelect}
-              />
+              <div className={treeCss}>
+                <ElementTree
+                  root={target}
+                  selectedElement={selectedElement}
+                  onSelect={handleSelect}
+                />
+              </div>
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
-        <TextNodeEditor
-          entries={textEntries}
-          onChange={handleTextNodeChange}
-          onFocus={handleTextNodeFocus}
-        />
-        {selectedElement && (
-          <EuiFormRow
-            label={i18n.translate('kbnDesignTools.edit.modal.backgroundColor', {
-              defaultMessage: 'Background color',
-            })}
-            style={{ marginTop: euiTheme.size.m }}
-          >
-            <EuiColorPicker color={color || '#ffffff'} onChange={handleColorChange} isClearable />
-          </EuiFormRow>
+        {(textEntries.length > 0 || sourceEntries.length > 0 || selectedElement) && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup gutterSize="l">
+              {textEntries.length > 0 && (
+                <EuiFlexItem className={columnCss}>
+                  <EuiTitle size="xxs">
+                    <h4>
+                      {i18n.translate('kbnDesignTools.edit.modal.textColumnTitle', {
+                        defaultMessage: 'Text',
+                      })}
+                    </h4>
+                  </EuiTitle>
+                  <EuiSpacer size="s" />
+                  <TextNodeEditor
+                    entries={textEntries}
+                    onChange={handleTextNodeChange}
+                    onFocus={handleTextNodeFocus}
+                  />
+                </EuiFlexItem>
+              )}
+              {sourceEntries.length > 0 && (
+                <EuiFlexItem className={columnCss}>
+                  <EuiTitle size="xxs">
+                    <h4>
+                      {i18n.translate('kbnDesignTools.edit.modal.sourceColumnTitle', {
+                        defaultMessage: 'Sources',
+                      })}
+                    </h4>
+                  </EuiTitle>
+                  <EuiSpacer size="s" />
+                  <SourceEditor
+                    entries={sourceEntries}
+                    onChange={handleSourceChange}
+                    onFocus={handleSourceFocus}
+                  />
+                </EuiFlexItem>
+              )}
+              {selectedElement && (
+                <EuiFlexItem className={columnCss}>
+                  <EuiTitle size="xxs">
+                    <h4>
+                      {i18n.translate('kbnDesignTools.edit.modal.attributesColumnTitle', {
+                        defaultMessage: 'Attributes',
+                      })}
+                    </h4>
+                  </EuiTitle>
+                  <EuiSpacer size="s" />
+                  <HtmlAttributesEditor color={color || '#FFFFFF'} onChange={handleColorChange} />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </>
         )}
       </EuiModalBody>
       <EuiModalFooter>
@@ -258,7 +411,7 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
         <EuiButton
           onClick={handleSave}
           fill
-          disabled={styleChanges.length === 0 && textChanges.size === 0}
+          disabled={styleChanges.length === 0 && textChanges.size === 0 && sourceChanges.size === 0}
         >
           {i18n.translate('kbnDesignTools.edit.modal.save', {
             defaultMessage: 'Save',

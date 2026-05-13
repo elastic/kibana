@@ -9,6 +9,7 @@
 
 import { useCallback, useRef } from 'react';
 import { DEVELOPER_TOOLBAR_ID, DEVTOOL_HIDDEN_ATTR, NON_DELETABLE_TAGS } from '../lib/constants';
+import { setImportant } from '../lib/dom/clone_element';
 
 /**
  * Manages soft-deletion of elements: fades them out, hides them with
@@ -27,13 +28,13 @@ export const useDeleteElement = (onDelete?: () => void) => {
   const deleteElement = useCallback(
     (el: HTMLElement) => {
       if (!isDeletable(el)) return;
-      el.style.pointerEvents = 'none';
+      setImportant(el, 'pointer-events', 'none');
       el.setAttribute(DEVTOOL_HIDDEN_ATTR, el.style.transform || '');
       deletedElements.current.add(el);
       el.style.transition = 'opacity 120ms ease';
       el.style.opacity = '0';
       setTimeout(() => {
-        el.style.visibility = 'hidden';
+        setImportant(el, 'visibility', 'hidden');
         el.style.transition = '';
         el.style.opacity = '';
       }, 120);

@@ -53,8 +53,8 @@ export const startDragFromElement = (
 
   const originalTransform = target.style.transform || '';
   target.setAttribute(DEVTOOL_HIDDEN_ATTR, originalTransform);
-  target.style.visibility = 'hidden';
-  target.style.pointerEvents = 'none';
+  setImportant(target, 'visibility', 'hidden');
+  setImportant(target, 'pointer-events', 'none');
 
   const session: ElementSession = {
     el: clone,
@@ -64,6 +64,7 @@ export const startDragFromElement = (
     dh: 0,
     originalRect: rect,
     isDuplicate: false,
+    referenceEl: target,
   };
   registry.set(session);
 

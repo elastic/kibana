@@ -12,8 +12,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import { css } from '@emotion/css';
 import { EuiBadge, EuiPortal, EuiWindowEvent, transparentize, useEuiTheme } from '@elastic/eui';
 import { SpacingMeasurement } from './spacing_measurement';
-import { getElementFromPoint } from '../../lib';
-import { handleEventPropagation } from '../../lib/dom/handle_event_propagation';
+import { getElementFromPoint } from '../../lib/dom/get_element_from_point';
 import { clampToViewport } from '../../lib/dom/clamp_to_viewport';
 import { buildHighlightCss } from '../../lib/dom/build_highlight_css';
 import { calculateSpacingLines } from '../../lib/dom/calculate_spacing';
@@ -109,7 +108,13 @@ export const MeasureOverlay = ({ setIsMeasuring }: Props) => {
 
   const handleMouseEvent = useCallback(
     (event: MouseEvent) => {
-      handleEventPropagation({ event, callback: handleClick });
+      event.stopPropagation();
+      event.preventDefault();
+      const eventTarget = event.target as HTMLElement;
+      const isTargetDisabled = eventTarget?.hasAttribute?.('disabled');
+      if (event.type === 'click' || isTargetDisabled) {
+        handleClick(event);
+      }
     },
     [handleClick]
   );

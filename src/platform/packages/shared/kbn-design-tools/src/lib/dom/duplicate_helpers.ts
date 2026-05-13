@@ -8,7 +8,7 @@
  */
 
 import { DUPLICATE_OFFSET } from '../constants';
-import { cloneClean, setImportant } from './clone_element';
+import { cloneClean, setImportant, roundRect } from './clone_element';
 import type { ElementSession, ElementRegistry } from './element_registry';
 import { buildTransform } from './resize_helpers';
 
@@ -37,7 +37,8 @@ export const createDuplicate = (
   // because cloneClean strips the transform before measuring.  Position
   // the duplicate at the visual location and use a corrected rect so
   // session.originalRect matches the actual left/top we set.
-  const sourceRect = sourceEl.getBoundingClientRect();
+  const sourceRect = roundRect(sourceEl.getBoundingClientRect());
+  // Position the duplicate at the rounded visual location.
   duplicate.style.left = `${sourceRect.left}px`;
   duplicate.style.top = `${sourceRect.top}px`;
 
@@ -56,6 +57,7 @@ export const createDuplicate = (
     dh: sourceDh,
     originalRect: correctedRect,
     isDuplicate: true,
+    referenceEl: existingSession?.referenceEl ?? hoverTarget,
   };
   registry.set(session);
 

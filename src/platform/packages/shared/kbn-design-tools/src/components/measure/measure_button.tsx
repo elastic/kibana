@@ -13,7 +13,7 @@ import { EuiButtonIcon, EuiToolTip, EuiWindowEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
 import { MeasureOverlay } from './measure_overlay';
-import { isMeasureShortcut } from '../../lib';
+import { isMeasureShortcut } from '../../lib/keyboard_shortcuts';
 
 /**
  * Toggles measure mode from the developer toolbar.
