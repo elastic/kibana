@@ -29,6 +29,6 @@ export function anyChildrenChanges$<Api extends unknown = unknown>(
       return childrenThatPublishChanges.length === 0
         ? of()
         : merge(...childrenThatPublishChanges.map((child) => child.anyStateChange$));
-    }),
+    })
   );
 }

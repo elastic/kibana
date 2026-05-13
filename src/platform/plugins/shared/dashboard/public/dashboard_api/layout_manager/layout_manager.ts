@@ -19,6 +19,7 @@ import {
   map,
   merge,
   mergeMap,
+  skip,
   startWith,
   tap,
   type Observable,
@@ -502,8 +503,16 @@ export function initializeLayoutManager(
 
   return {
     internalApi: {
-      anyStateChange$: merge(layout$, children$, anyChildrenChanges$(children$)).pipe(
-        map(() => undefined)
+      anyStateChange$: merge(
+        layout$.pipe(
+          skip(1),
+          map(() => undefined)
+        ),
+        children$.pipe(
+          skip(1),
+          map(() => undefined)
+        ),
+        anyChildrenChanges$(children$)
       ),
       getSerializedStateForPanel: (panelId: string) => currentChildState[panelId],
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
