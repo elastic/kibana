@@ -124,6 +124,8 @@ const logMaxContentLengthError = ({
   const responseHeaders = axiosError.response?.headers;
   const requestResponseHeaders = axiosError.request?.res?.headers;
 
+  // Debug-level only; header values may contain non-sensitive but verbose data.
+  // Sensitive headers (auth, cookies) are redacted by getSanitizedHeaders.
   logger.debug(
     `Actions Axios request exceeded maxContentLength: ${errorMessage}; metadata: ${JSON.stringify({
       connectorId,
