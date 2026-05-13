@@ -91,6 +91,7 @@ dependsOn:
   - '@kbn/core-logging-server-mocks'
   - '@kbn/core-http-request-handler-context-server'
   - '@kbn/core-security-server'
+  - '@kbn/core-http-browser'
   - '@kbn/es'
   - '@kbn/dev-utils'
 tags:
@@ -106,10 +107,8 @@ fileGroups:
     - scripts/**/*
     - scripts/**/*.json
     - server/**/*
-    - test/scout/**/*
-    - common/schemas/*/*.json
     - test/scout_osquery/**/*
-    - public/common/schemas/*/*.json
+    - common/schemas/*/*.json
     - '!target/**/*'
   jest-config:
     - jest.config.js
