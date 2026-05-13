@@ -79,12 +79,17 @@ export async function setupEsqlFixtures({
 
 /**
  * Delete every concrete or aliased index that any fixture file could have
- * created during this run. Uses wildcards (`logs-production.evaluations.*`,
- * `traces-apm-*`, …) so any drift in the concrete names — local or
- * cross-PR — is still swept.
+ * created during this run. Resolves the configured wildcard patterns
+ * (`logs-production.evaluations.*`, `traces-apm-*`, …) to concrete index
+ * and data-stream names first, then deletes by exact name. Scout clusters
+ * boot with `action.destructive_requires_name=true`, which rejects
+ * wildcard deletes outright, so the resolve-then-delete pattern is
+ * required — mirrors the legacy `PrepareIndicesForAssistantGraphEvaluations.cleanup`
+ * loop.
  *
- * Tolerates "index_not_found" so a partially-completed setup doesn't
- * cascade into a fixture leak on the next run.
+ * Tolerates missing indices (`ignore_unavailable: true` on resolve) so a
+ * partially-completed setup doesn't cascade into a fixture leak on the
+ * next run.
  */
 export async function cleanupEsqlFixtures({
   esClient,
@@ -95,19 +100,71 @@ export async function cleanupEsqlFixtures({
 }): Promise<void> {
   log.info('[esql-regression] cleaning up fixture indices');
 
-  for (const pattern of esqlFixtureIndexWildcards) {
+  const resolveResponses = await Promise.all(
+    esqlFixtureIndexWildcards.map(async (pattern) => {
+      try {
+        return await esClient.indices.resolveIndex({
+          name: pattern,
+          expand_wildcards: 'open',
+          ignore_unavailable: true,
+          allow_no_indices: true,
+        });
+      } catch (err) {
+        log.warning(
+          new Error(
+            `[esql-regression] cleanup resolve failed for pattern "${pattern}" — skipping`,
+            {
+              cause: err instanceof Error ? err : new Error(String(err)),
+            }
+          )
+        );
+        return undefined;
+      }
+    })
+  );
+
+  const indicesToDelete = Array.from(
+    new Set(
+      resolveResponses.flatMap((response) => response?.indices ?? []).map((index) => index.name)
+    )
+  );
+
+  const dataStreamsToDelete = Array.from(
+    new Set(
+      resolveResponses
+        .flatMap((response) => response?.data_streams ?? [])
+        .map((dataStream) => dataStream.name)
+    )
+  );
+
+  if (indicesToDelete.length > 0) {
     try {
-      await esClient.indices.delete({
-        index: pattern,
-        ignore_unavailable: true,
-        allow_no_indices: true,
-        expand_wildcards: ['open', 'closed', 'hidden'],
-      });
+      await esClient.indices.delete({ index: indicesToDelete });
+      log.debug(`[esql-regression] deleted indices: ${indicesToDelete.join(', ')}`);
     } catch (err) {
       log.warning(
-        new Error(`[esql-regression] cleanup failed for pattern "${pattern}" — continuing`, {
-          cause: err instanceof Error ? err : new Error(String(err)),
-        })
+        new Error(
+          `[esql-regression] cleanup failed to delete indices ${indicesToDelete.join(
+            ', '
+          )} — continuing`,
+          { cause: err instanceof Error ? err : new Error(String(err)) }
+        )
+      );
+    }
+  }
+
+  if (dataStreamsToDelete.length > 0) {
+    try {
+      await esClient.indices.deleteDataStream({ name: dataStreamsToDelete });
+      log.debug(`[esql-regression] deleted data streams: ${dataStreamsToDelete.join(', ')}`);
+    } catch (err) {
+      log.warning(
+        new Error(
+          `[esql-regression] cleanup failed to delete data streams ${dataStreamsToDelete.join(
+            ', '
+          )} — continuing`,
+          { cause: err instanceof Error ? err : new Error(String(err)) }
+        )
       );
     }
   }

@@ -53,6 +53,14 @@ Each task captures the active span's `traceId` via `getCurrentTraceId()` and the
 | **Output tokens** | `CODE` | count | `@kbn/evals` (`evaluators.traceBasedEvaluators.outputTokens`) | Completion tokens summed across LLM spans. |
 | **Cached tokens** | `CODE` | count | `@kbn/evals` (`evaluators.traceBasedEvaluators.cachedTokens`) | Cached-prompt tokens summed across LLM spans (when the provider reports them). |
 
+In CI the trace-based evaluators query the `tracingEs` cluster declared in `kbn-evals` config (the same cluster Kibana exports traces to via `tracingExporters`). Locally, by default Kibana exports traces through the EDOT collector to ES on `host.docker.internal:9200`, while Scout serves the suite on port `9220`; the trace-based evaluators query Scout's local cluster and find no traces. Override with `TRACING_ES_URL=http://elastic:changeme@localhost:9200` (or whichever port your EDOT collector targets) to point the trace client at the cluster that actually holds the spans. Without the override the trace columns render as `-` in the score table — the four ES|QL evaluators are unaffected.
+
+---
+
+## LangSmith parity
+
+This suite replaces the legacy LangSmith-based `DefaultAssistantGraph` evaluation. The four ES|QL evaluators above are the parity baseline (LangSmith covered the same dimensions: query validity, execution success, result equivalence, functional equivalence). End-to-end verification with the live Agent Builder `converse` loop against `pmeClaudeV45SonnetUsEast1` / `pmeClaudeV46OpusUsEast1` reproduces the perfect-score behaviour the legacy suite delivered for well-formed examples (all four metrics report `1`), confirming the agent loop, ES|QL extractor, and fixture indices all pull their weight end-to-end. The five trace-based observability evaluators are additive — LangSmith did not expose those metrics as scored evaluators and they require no parity-equivalent in the prior suite.
+
 ---
 
 ## Dataset
