@@ -163,7 +163,7 @@ export const AgentsSelectionStatus: React.FunctionComponent<{
             <EuiFlexItem grow={false}>
               <Button
                 size="xs"
-                flush="left"
+                flush="both"
                 data-test-subj="clearAgentSelectionButton"
                 onClick={() => {
                   setSelectionMode('manual');
