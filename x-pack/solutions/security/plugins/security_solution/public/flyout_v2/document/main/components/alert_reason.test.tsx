@@ -75,7 +75,7 @@ describe('<AlertReason />', () => {
       <span data-test-subj="full-reason-renderer">{'Full reason renderer'}</span>
     );
     mockGetRowRenderer.mockReturnValue({
-      id: 'test-row-renderer',
+      id: 'plain',
       isInstance: () => true,
       renderRow: mockRenderRow,
     });
