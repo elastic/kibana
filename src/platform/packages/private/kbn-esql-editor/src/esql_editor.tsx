@@ -1011,8 +1011,8 @@ const ESQLEditorInternal = function ESQLEditor({
             onClose={() => {
               setIsDataSourceBrowserOpen(false);
               suppressSuggestionsRef.current = true;
-              editorRef.current?.focus();
             }}
+            onCloseComplete={() => editorRef.current?.focus()}
           />,
           document.body
         )}
@@ -1026,7 +1026,11 @@ const ESQLEditorInternal = function ESQLEditor({
             activeSolutionId={activeSolutionId ?? undefined}
             position={fieldsBrowserPosition}
             onSelect={handleFieldsBrowserSelect}
-            onClose={() => setIsFieldsBrowserOpen(false)}
+            onClose={() => {
+              setIsFieldsBrowserOpen(false);
+              suppressSuggestionsRef.current = true;
+            }}
+            onCloseComplete={() => editorRef.current?.focus()}
           />,
           document.body
         )}
