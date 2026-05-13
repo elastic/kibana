@@ -7,14 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 
-<<<<<<< HEAD
 import {
   asCodePaginationParamsSchema,
   asCodePaginationResponseMetaSchema,
 } from '@kbn/as-code-shared-schemas';
-import { lensCMSearchOptionsSchema } from '../../../../content_management';
-=======
->>>>>>> a5a7bbc1ba1371aa998cebadd4e0e2790d628a2c
 import { lensResponseItemSchema } from './common';
 
 export const lensSearchRequestQuerySchema = schema.object({
