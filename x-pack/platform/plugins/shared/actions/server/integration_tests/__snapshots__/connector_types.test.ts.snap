@@ -1941,7 +1941,6 @@ Object {
                       "type": "null",
                     },
                   ],
-                  "default": null,
                 },
                 "summary": Object {
                   "type": "string",
@@ -3056,7 +3055,6 @@ Object {
                       "type": "null",
                     },
                   ],
-                  "default": null,
                 },
               },
               "required": Array [
@@ -3895,7 +3893,6 @@ Object {
                       "type": "null",
                     },
                   ],
-                  "default": null,
                 },
               },
               "required": Array [
