@@ -388,6 +388,12 @@ export const addEditorKeyBindings = (
         label: i18n.translate('esqlEditor.query.generateFromCommentKeyboardShortcutsLabel', {
           defaultMessage: 'Generate ES|QL from comment',
         }),
+        description: i18n.translate(
+          'esqlEditor.query.generateFromCommentKeyboardShortcutsDescription',
+          {
+            defaultMessage: 'Use AI to generate a query from a comment in the editor',
+          }
+        ),
       })
     );
   }

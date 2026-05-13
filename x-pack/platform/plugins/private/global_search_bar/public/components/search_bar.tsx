@@ -341,8 +341,9 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         id: 'platform:globalSearch.open',
         keys: 'Mod+/',
         scope: 'global',
-        group: 'Navigation',
-        label: i18nStrings.keyboardShortcutTooltip.prefix,
+        group: 'Actions',
+        label: i18nStrings.keyboardShortcutLabel,
+        description: i18nStrings.keyboardShortcutDescription,
       },
       onShortcut
     );
