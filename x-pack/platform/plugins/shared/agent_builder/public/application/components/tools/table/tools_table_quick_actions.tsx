@@ -8,6 +8,7 @@
 import { EuiButtonIcon, EuiFlexGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ToolDefinition } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import React from 'react';
 import { useToolsActions } from '../../../context/tools_provider';
 import { labels } from '../../../utils/i18n';
@@ -42,6 +43,9 @@ export const ToolQuickActions = ({ tool }: ToolQuickActionsProps) => {
           editTool(tool.id);
         }}
         aria-label={labels.tools.editToolButtonLabel}
+        data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_TABLE}
+        data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.TABLE_ROW_EDIT}
+        data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.TOOL}
       />
       <EuiButtonIcon
         data-test-subj="agentBuilderToolsRowDeleteButton"
@@ -51,6 +55,9 @@ export const ToolQuickActions = ({ tool }: ToolQuickActionsProps) => {
           deleteTool(tool.id);
         }}
         aria-label={labels.tools.deleteToolButtonLabel}
+        data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_TABLE}
+        data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.TABLE_ROW_DELETE}
+        data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.TOOL}
       />
     </EuiFlexGroup>
   );

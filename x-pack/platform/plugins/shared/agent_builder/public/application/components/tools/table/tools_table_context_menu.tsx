@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ToolDefinition } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import React, { useState } from 'react';
 import { labels } from '../../../utils/i18n';
 import { useToolsActions } from '../../../context/tools_provider';
@@ -38,6 +39,9 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
         editTool(tool.id);
         setIsOpen(false);
       }}
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_TABLE}
+      data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.TABLE_CONTEXT_EDIT}
+      data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.TOOL}
     >
       {labels.tools.editToolButtonLabel}
     </EuiContextMenuItem>
@@ -55,6 +59,9 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
         deleteTool(tool.id);
         setIsOpen(false);
       }}
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_TABLE}
+      data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.TABLE_CONTEXT_DELETE}
+      data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.TOOL}
     >
       {labels.tools.deleteToolButtonLabel}
     </EuiContextMenuItem>
@@ -69,6 +76,9 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
         testTool(tool.id);
         setIsOpen(false);
       }}
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_TABLE}
+      data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.TABLE_CONTEXT_TEST}
+      data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.TOOL}
     >
       {labels.tools.testToolButtonLabel}
     </EuiContextMenuItem>
@@ -83,6 +93,9 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
         cloneTool(tool.id);
         setIsOpen(false);
       }}
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_TABLE}
+      data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.TABLE_CONTEXT_CLONE}
+      data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.TOOL}
     >
       {labels.tools.cloneToolButtonLabel}
     </EuiContextMenuItem>
@@ -97,6 +110,9 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
         viewTool(tool.id);
         setIsOpen(false);
       }}
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_TABLE}
+      data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.TABLE_CONTEXT_VIEW}
+      data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.TOOL}
     >
       {labels.tools.viewToolButtonLabel}
     </EuiContextMenuItem>
@@ -116,6 +132,9 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
           iconType="boxesVertical"
           onClick={() => setIsOpen((openState) => !openState)}
           aria-label={labels.tools.toolContextMenuButtonLabel}
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_TABLE}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.TABLE_CONTEXT_OPEN}
+          data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.TOOL}
         />
       }
       isOpen={isOpen}

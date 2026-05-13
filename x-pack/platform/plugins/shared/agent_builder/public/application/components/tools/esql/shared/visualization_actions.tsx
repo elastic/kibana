@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ActionButtonType, type ActionButton } from '@kbn/agent-builder-browser/attachments';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { actionsContainerStyles, visualizationActionsClassName } from './styles';
 
 export const renderActionButton = (button: ActionButton) => {
@@ -22,6 +23,8 @@ export const renderActionButton = (button: ActionButton) => {
       css={button.type === ActionButtonType.PRIMARY ? css({ marginLeft: '-1px' }) : undefined}
       isDisabled={button.disabled}
       onClick={button.handler}
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_ESQL_VISUALIZATION}
+      data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.VISUALIZATION_ACTION}
     />
   );
   const tooltipContent = button.disabled ? button.disabledReason ?? button.label : button.label;

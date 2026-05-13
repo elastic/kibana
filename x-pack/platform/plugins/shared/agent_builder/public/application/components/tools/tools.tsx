@@ -8,6 +8,7 @@
 import { EuiButton, EuiText, EuiLink, useEuiTheme, EuiButtonEmpty } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ToolType } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -52,6 +53,8 @@ export const AgentBuilderTools = () => {
                       defaultMessage: 'Learn more about tools in the documentation',
                     }
                   )}
+                  data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS}
+                  data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.DOCS_LEARN_MORE_TOOLS}
                 >
                   {i18n.translate('xpack.agentBuilder.tools.toolsDocumentation', {
                     defaultMessage: 'Learn more',
@@ -72,6 +75,8 @@ export const AgentBuilderTools = () => {
               fill
               iconType="plus"
               onClick={() => createTool(ToolType.esql)}
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS}
+              data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.NEW_TOOL_ESQL}
             >
               <EuiText size="s">{labels.tools.newToolButton}</EuiText>
             </EuiButton>
@@ -80,6 +85,8 @@ export const AgentBuilderTools = () => {
             key="agents-button"
             href={createAgentBuilderUrl(appPaths.agents.list)}
             aria-label={manageAgentsLabel}
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.NAV_AGENTS}
           >
             <EuiText size="s">{manageAgentsLabel}</EuiText>
           </EuiButtonEmpty>,

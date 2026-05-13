@@ -22,6 +22,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { defer } from 'lodash';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { pushFlyoutPaddingStyles } from '../../../../common.styles';
 import { labels } from '../../../utils/i18n';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -156,6 +157,8 @@ export const BulkImportMcpTools: React.FC = () => {
         isLoading={isSubmitting}
         disabled={isSubmitDisabled}
         data-test-subj={testSubj}
+        data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_BULK_IMPORT}
+        data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.BULK_IMPORT_SUBMIT}
       >
         {labels.tools.bulkImportMcp.importToolsButton}
       </EuiButton>
@@ -204,6 +207,8 @@ export const BulkImportMcpTools: React.FC = () => {
                 color="text"
                 onClick={handleCancel}
                 data-test-subj="bulkImportMcpToolsCancelButton"
+                data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_BULK_IMPORT}
+                data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.BULK_IMPORT_CANCEL}
               >
                 {labels.tools.bulkImportMcp.cancelButton}
               </EuiButtonEmpty>

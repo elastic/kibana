@@ -15,6 +15,7 @@ import {
   EuiContextMenuPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import useToggle from 'react-use/lib/useToggle';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
@@ -44,6 +45,8 @@ export const McpConnectionButton = () => {
           iconSide="right"
           onClick={toggleContextOpen}
           data-test-subj="agentBuilderManageMcpButton"
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.MCP_MENU_OPEN}
         >
           <EuiText size="s">
             {i18n.translate('xpack.agentBuilder.tools.mcpServerConnectionButton', {
@@ -65,7 +68,13 @@ export const McpConnectionButton = () => {
             tooltipProps={{ anchorClassName: 'eui-fullWidth' }}
           >
             {(copy) => (
-              <EuiContextMenuItem key="copy" icon="copy" onClick={copy}>
+              <EuiContextMenuItem
+                key="copy"
+                icon="copy"
+                onClick={copy}
+                data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS}
+                data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.MCP_COPY_SERVER_URL}
+              >
                 {i18n.translate('xpack.agentBuilder.tools.copyMcpServerUrlButton', {
                   defaultMessage: 'Copy MCP Server URL',
                 })}
@@ -77,6 +86,8 @@ export const McpConnectionButton = () => {
             icon="plus"
             href={createAgentBuilderUrl(appPaths.tools.bulkImportMcp)}
             data-test-subj="agentBuilderBulkImportMcpMenuItem"
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.MCP_NAV_BULK_IMPORT}
           >
             {i18n.translate('xpack.agentBuilder.tools.bulkImportMcpToolsButton', {
               defaultMessage: 'Bulk import MCP tools',
@@ -89,6 +100,8 @@ export const McpConnectionButton = () => {
                   icon="gear"
                   href={createAgentBuilderUrl(appPaths.manage.mcpClients)}
                   data-test-subj="agentBuilderManageMcpClientsMenuItem"
+                  data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS}
+                  data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.MCP_NAV_CLIENTS}
                 >
                   {i18n.translate('xpack.agentBuilder.tools.manageMcpClientsButton', {
                     defaultMessage: 'Manage MCP clients (OAuth)',
@@ -101,6 +114,8 @@ export const McpConnectionButton = () => {
             icon="documentation"
             href={docLinksService.mcpServer}
             target="_blank"
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.MCP_DOCS_EXTERNAL}
           >
             {i18n.translate('xpack.agentBuilder.tools.aboutMcpServerDocumentationButton', {
               defaultMessage: 'Documentation',

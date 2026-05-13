@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ToolDefinitionWithSchema, ToolType } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { defer } from 'lodash';
@@ -235,6 +236,9 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
           isLoading={submittingButtonId === BUTTON_IDS.SAVE}
           minWidth="112px"
           data-test-subj={testSubj}
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_FORM}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.FORM_SAVE}
+          data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.TOOL}
         >
           {labels.tools.saveButtonLabel}
         </EuiButton>
@@ -265,6 +269,9 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
           isLoading={submittingButtonId === BUTTON_IDS.SAVE_AND_TEST}
           minWidth="124px"
           data-test-subj={testSubj}
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_FORM}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.FORM_SAVE_AND_TEST}
+          data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.TOOL}
         >
           {labels.tools.saveAndTestButtonLabel}
         </EuiButton>
@@ -274,6 +281,9 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
           onClick={handleTestTool}
           minWidth="112px"
           data-test-subj={testSubj}
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_FORM}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.FORM_TEST}
+          data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.TOOL}
         >
           {labels.tools.testButtonLabel}
         </EuiButton>
@@ -341,6 +351,10 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
                             defaultMessage: 'Learn more about creating tools in the documentation',
                           }
                         )}
+                        data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_FORM}
+                        data-ebt-action={
+                          AGENT_BUILDER_UI_EBT.action.manageTools.DOCS_LEARN_MORE_CREATE
+                        }
                       >
                         {i18n.translate('xpack.agentBuilder.tools.createToolDocumentation', {
                           defaultMessage: 'Learn more',
@@ -402,6 +416,9 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
                     iconType="cross"
                     color="text"
                     onClick={handleCancel}
+                    data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_FORM}
+                    data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.FORM_CANCEL}
+                    data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.TOOL}
                   >
                     {labels.tools.cancelButtonLabel}
                   </EuiButtonEmpty>

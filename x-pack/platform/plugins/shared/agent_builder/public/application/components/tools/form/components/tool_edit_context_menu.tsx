@@ -15,6 +15,7 @@ import {
 import { css } from '@emotion/react';
 import React, { useState } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { useNavigation } from '../../../../hooks/use_navigation';
 import { useToolsActions } from '../../../../context/tools_provider';
 import { labels } from '../../../../utils/i18n';
@@ -41,6 +42,9 @@ export const ToolEditContextMenu = () => {
           iconType="boxesVertical"
           onClick={() => setIsOpen((openState) => !openState)}
           aria-label={labels.tools.editToolContextMenuButtonLabel}
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_FORM}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.FORM_HEADER_CONTEXT_OPEN}
+          data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.TOOL}
         />
       }
     >
@@ -55,6 +59,9 @@ export const ToolEditContextMenu = () => {
             onClick={() => {
               cloneTool(toolId);
             }}
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_FORM}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.FORM_HEADER_CLONE}
+            data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.TOOL}
           >
             {labels.tools.cloneToolButtonLabel}
           </EuiContextMenuItem>,
@@ -72,6 +79,9 @@ export const ToolEditContextMenu = () => {
                 onConfirm: () => navigateToAgentBuilderUrl(appPaths.tools.list),
               });
             }}
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_FORM}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.FORM_HEADER_DELETE}
+            data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.TOOL}
           >
             {labels.tools.deleteToolButtonLabel}
           </EuiContextMenuItem>,

@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import React, { memo, useCallback } from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { labels } from '../../../utils/i18n';
@@ -108,6 +109,10 @@ export const McpToolsSelectionTableHeader = memo<McpToolsSelectionTableHeaderPro
                           onClick={togglePopover}
                           data-test-subj="bulkImportMcpToolsSelectionPopoverButton"
                           css={tableHeaderButtonStyles}
+                          data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_BULK_IMPORT}
+                          data-ebt-action={
+                            AGENT_BUILDER_UI_EBT.action.manageTools.BULK_IMPORT_SELECTION_MENU_OPEN
+                          }
                         >
                           {labels.tools.bulkImportMcp.sourceSection.selectedCount(selectedCount)}
                         </EuiButtonEmpty>
@@ -125,6 +130,10 @@ export const McpToolsSelectionTableHeader = memo<McpToolsSelectionTableHeaderPro
                             icon="pagesSelect"
                             onClick={handleSelectAll}
                             data-test-subj="bulkImportMcpToolsSelectAllButton"
+                            data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_BULK_IMPORT}
+                            data-ebt-action={
+                              AGENT_BUILDER_UI_EBT.action.manageTools.BULK_IMPORT_SELECT_ALL
+                            }
                           >
                             {labels.tools.selectAllToolsButtonLabel}
                           </EuiContextMenuItem>,
@@ -141,6 +150,10 @@ export const McpToolsSelectionTableHeader = memo<McpToolsSelectionTableHeaderPro
                       onClick={onClearSelection}
                       data-test-subj="bulkImportMcpToolsClearSelectionButton"
                       css={tableHeaderButtonStyles}
+                      data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_BULK_IMPORT}
+                      data-ebt-action={
+                        AGENT_BUILDER_UI_EBT.action.manageTools.BULK_IMPORT_CLEAR_SELECTION
+                      }
                     >
                       {labels.tools.bulkImportMcp.sourceSection.clearSelection}
                     </EuiButtonEmpty>

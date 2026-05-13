@@ -15,6 +15,7 @@ import {
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ToolDefinition } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import React, { useCallback } from 'react';
 import { useToolsActions } from '../../../context/tools_provider';
 import { labels } from '../../../utils/i18n';
@@ -97,6 +98,9 @@ export const ToolsTableHeader = ({
                   size="xs"
                   color="danger"
                   onClick={deleteSelection}
+                  data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_TABLE}
+                  data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.TABLE_BULK_DELETE}
+                  data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.TOOL}
                 >
                   <EuiText
                     size="xs"
@@ -115,6 +119,9 @@ export const ToolsTableHeader = ({
                 iconSize="m"
                 size="xs"
                 onClick={selectAll}
+                data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_TABLE}
+                data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.TABLE_SELECT_ALL}
+                data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.TOOL}
               >
                 <EuiText
                   size="xs"
@@ -132,6 +139,9 @@ export const ToolsTableHeader = ({
                 iconSize="m"
                 size="xs"
                 onClick={clearSelection}
+                data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_TABLE}
+                data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.TABLE_CLEAR_SELECTION}
+                data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.TOOL}
               >
                 <EuiText
                   size="xs"
