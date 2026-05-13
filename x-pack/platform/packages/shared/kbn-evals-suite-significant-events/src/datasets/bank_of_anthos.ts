@@ -508,13 +508,8 @@ export const bankOfAnthosDataset: DatasetConfig = {
             ],
           },
           {
-            id: 'feature-grounded',
-            text: 'Queries must be grounded in features from the input (entities, dependencies, dataset_analysis, error_logs) rather than being speculative or based solely on the stream name/description',
-            score: 2,
-          },
-          {
             id: 'stats-aggregate-monitoring',
-            text: 'Should generate at least one STATS query for aggregate monitoring (e.g., transaction throughput per service, request volume across ledgerwriter/balancereader/transactionhistory) with calibrated thresholds documented in descriptions.',
+            text: 'Should generate at least one STATS query for aggregate monitoring (e.g., transaction throughput per service, request volume across ledgerwriter and loadgenerator) with calibrated thresholds documented in descriptions.',
             score: 1,
           },
         ],

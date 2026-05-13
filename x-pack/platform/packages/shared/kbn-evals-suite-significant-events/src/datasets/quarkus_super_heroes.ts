@@ -868,7 +868,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
           },
           {
             id: 'affected-services-query',
-            text: 'Should generate queries detecting Kafka failures in rest-fights and event-statistics — separate queries per service are acceptable',
+            text: 'Should generate queries detecting Kafka failures in rest-fights (SRMSG18206 unable to write, SRMSG18212 message nacked)',
             score: 2,
             sampling_filters: [
               {
@@ -1027,7 +1027,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
         criteria: [
           {
             id: 'reactive-db-error-query',
-            text: 'Must generate an ES|QL query that catches Vert.x reactive pool timeout errors from rest-heroes (NoStackTraceThrowable or HR000021 — either signature is sufficient)',
+            text: 'Must generate an ES|QL query that catches Vert.x reactive pool timeout errors from rest-heroes (HR000021: DDL command failed or HTTP Request to /api/heroes/random failed — either signature is sufficient)',
             score: 3,
             sampling_filters: [
               {
