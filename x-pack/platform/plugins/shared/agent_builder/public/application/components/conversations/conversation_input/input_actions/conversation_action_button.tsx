@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useSendMessage } from '../../../../context/send_message/send_message_context';
+import { useConversationStream } from '../../../../hooks/use_conversation_stream';
 
 interface ConversationActionButtonProps {
   onSubmit: () => void;
@@ -31,7 +31,7 @@ export const ConversationActionButton: React.FC<ConversationActionButtonProps> =
   isSubmitDisabled,
   resetToPendingMessage,
 }) => {
-  const { canCancel, cancel } = useSendMessage();
+  const { canCancel, cancel } = useConversationStream();
   const { euiTheme } = useEuiTheme();
 
   const cancelButtonStyles = css`
