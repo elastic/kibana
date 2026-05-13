@@ -172,7 +172,11 @@ export const withCommandGates = async (
     const requiredRbacFeature = rbacMap[consoleCommand];
 
     if (requiredRbacFeature) {
-      const endpointAuthz = await endpointService.getEndpointAuthz(request);
+      // Pass the request-scoped ES client so `getEndpointAuthz` can fall back
+      // to ES `_security/_authenticate` for `roles` when the request is a
+      // Task-Manager-dispatched `fakeRequest`. Same fakeRequest mitigation as
+      // `resolve_current_user.ts`.
+      const endpointAuthz = await endpointService.getEndpointAuthz(request, esClient.asCurrentUser);
       const hasPrivilege = (endpointAuthz as unknown as Record<string, boolean | undefined>)[
         requiredRbacFeature
       ];
