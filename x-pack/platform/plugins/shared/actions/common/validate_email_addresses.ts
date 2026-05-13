@@ -86,9 +86,9 @@ function validateEmailAddress(
 }
 
 function hasValidDomainLabels(domain: string): boolean {
-  return domain.split('.').every(
-    (label) => label.length > 0 && !label.startsWith('-') && !label.endsWith('-')
-  );
+  return domain
+    .split('.')
+    .every((label) => label.length > 0 && !label.startsWith('-') && !label.endsWith('-'));
 }
 
 function hasValidLocalPart(local: string, tokens: string): boolean {
