@@ -151,15 +151,18 @@ export const ControlPanel = ({
         tabIndex={enableIndicateRelatedPanels ? 0 : undefined}
       >
         <span css={styles.prependWrapperStyles} ref={prependWrapperRef}>
-          {panelLabel}{' '}
+          {panelLabel}
           {canIndicateRelatedPanels && numberOfRelatedPanels === 0 && (
-            <EuiIcon
-              size="s"
-              aria-label={i18n.translate('controls.controlGroup.warningNoRelatedPanels', {
-                defaultMessage: 'Warning: No related panels',
-              })}
-              type="warning"
-            />
+            <>
+              {' '}
+              <EuiIcon
+                size="s"
+                aria-label={i18n.translate('controls.controlGroup.warningNoRelatedPanels', {
+                  defaultMessage: 'Warning: No related panels',
+                })}
+                type="warning"
+              />
+            </>
           )}
         </span>
       </EuiFormLabel>

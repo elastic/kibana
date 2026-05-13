@@ -81,15 +81,18 @@ export const ConditionalLabelWrapper = ({
             tabIndex={0}
             ref={linkTextRef}
           >
-            {label}{' '}
+            {label}
             {canIndicateRelatedPanels && numberOfRelatedPanels === 0 && (
-              <EuiIcon
-                size="s"
-                aria-label={i18n.translate('controls.controlGroup.warningNoRelatedPanels', {
-                  defaultMessage: 'Warning: No related panels',
-                })}
-                type="warning"
-              />
+              <>
+                {' '}
+                <EuiIcon
+                  size="s"
+                  aria-label={i18n.translate('controls.controlGroup.warningNoRelatedPanels', {
+                    defaultMessage: 'Warning: No related panels',
+                  })}
+                  type="warning"
+                />
+              </>
             )}
           </span>
         </ControlLabelTooltip>
