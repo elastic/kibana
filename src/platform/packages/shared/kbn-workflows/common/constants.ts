@@ -26,6 +26,13 @@ export const WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID = 'workflows:ui:showExecutor:
 export const WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID = 'workflows:executionStatsBar:enabled';
 
 /**
+ * Advanced setting / UI settings key for the global workflow executions list (`/app/workflows/executions`).
+ * Configure via `uiSettings.overrides` in `kibana.yml` (same as other `workflows:*` settings).
+ */
+export const WORKFLOW_GLOBAL_EXECUTIONS_VIEW_FEATURE_FLAG_ID =
+  'workflows:globalExecutionsView:enabled';
+
+/**
  * Map of regular (saved object) connector types -> their system connector equivalents.
  * Use this map to make the `connector-id` step config property optional for a given connector step type, allowing it to be executed via its linked system connector.
  * Pre-requisite for this to work:

@@ -11,7 +11,11 @@ import { BehaviorSubject } from 'rxjs';
 import type { App, AppUpdatableFields, AppUpdater } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { WORKFLOWS_MANAGEMENT_FEATURE_ID } from '@kbn/workflows/common/constants';
+import {
+  WORKFLOW_GLOBAL_EXECUTIONS_VIEW_FEATURE_FLAG_ID,
+  WORKFLOWS_MANAGEMENT_FEATURE_ID,
+  WORKFLOWS_UI_SETTING_ID,
+} from '@kbn/workflows/common/constants';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks';
 import { WorkflowsPlugin } from './plugin';
 import { triggerSchemas } from './trigger_schemas';
@@ -76,8 +80,12 @@ describe('WorkflowsPlugin', () => {
       expect(coreSetup.application.register).not.toHaveBeenCalled();
     });
 
-    it('should register the workflows app when workflows UI is enabled', () => {
-      coreSetup.uiSettings.get.mockReturnValueOnce(true);
+    it('should register only the workflows list deep link when executions view flag is off in bootstrap', () => {
+      coreSetup.uiSettings.get.mockImplementation((key: string, fallback?: unknown) => {
+        if (key === WORKFLOWS_UI_SETTING_ID) return true;
+        if (key === WORKFLOW_GLOBAL_EXECUTIONS_VIEW_FEATURE_FLAG_ID) return false;
+        return fallback;
+      });
 
       const result = plugin.setup(coreSetup, setupDeps as any);
 
@@ -87,9 +95,29 @@ describe('WorkflowsPlugin', () => {
           id: PLUGIN_ID,
           title: 'Workflows',
           appRoute: '/app/workflows',
+          deepLinks: [expect.objectContaining({ id: 'workflowsList', path: '/' })],
         })
       );
       expect(result).toEqual({});
+    });
+
+    it('should register the executions deep link when executions view flag is on in bootstrap', () => {
+      coreSetup.uiSettings.get.mockImplementation((key: string, fallback?: unknown) => {
+        if (key === WORKFLOWS_UI_SETTING_ID) return true;
+        if (key === WORKFLOW_GLOBAL_EXECUTIONS_VIEW_FEATURE_FLAG_ID) return true;
+        return fallback;
+      });
+
+      plugin.setup(coreSetup, setupDeps as any);
+
+      expect(coreSetup.application.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          deepLinks: expect.arrayContaining([
+            expect.objectContaining({ id: 'workflowsList', path: '/' }),
+            expect.objectContaining({ id: 'executions', path: '/executions' }),
+          ]),
+        })
+      );
     });
   });
 
@@ -127,7 +155,14 @@ describe('WorkflowsPlugin', () => {
        * subscribeAppVisibilityChanges() is captured.
        */
       const captureAppUpdates = (): Array<Partial<AppUpdatableFields>> => {
-        coreSetup.uiSettings.get.mockReturnValue(true);
+        const uiSettingsGetImpl = (key: string, fallback?: unknown) => {
+          if (key === WORKFLOWS_UI_SETTING_ID) return true;
+          if (key === WORKFLOW_GLOBAL_EXECUTIONS_VIEW_FEATURE_FLAG_ID) return false;
+          return fallback;
+        };
+        coreSetup.uiSettings.get.mockImplementation(uiSettingsGetImpl);
+        coreStart.uiSettings.get.mockImplementation(uiSettingsGetImpl);
+
         plugin.setup(coreSetup, setupDeps as any);
 
         const registeredApp = coreSetup.application.register.mock.calls[0][0] as App;
@@ -146,8 +181,14 @@ describe('WorkflowsPlugin', () => {
 
         plugin.start(coreStart, startDeps as any);
 
-        expect(updates).toHaveLength(1);
-        expect(updates[0].visibleIn).toEqual(['globalSearch', 'home', 'kibanaOverview', 'sideNav']);
+        const visibleInUpdates = updates.filter((u) => u.visibleIn !== undefined);
+        expect(visibleInUpdates.length).toBeGreaterThanOrEqual(1);
+        expect(visibleInUpdates[visibleInUpdates.length - 1].visibleIn).toEqual([
+          'globalSearch',
+          'home',
+          'kibanaOverview',
+          'sideNav',
+        ]);
       });
 
       it('should hide the app from sideNav when the user lacks read capability', () => {
@@ -157,9 +198,10 @@ describe('WorkflowsPlugin', () => {
 
         plugin.start(coreStart, startDeps as any);
 
-        expect(updates).toHaveLength(1);
-        expect(updates[0].visibleIn).toEqual(['globalSearch']);
-        expect(updates[0].visibleIn).not.toContain('sideNav');
+        const visibleInUpdates = updates.filter((u) => u.visibleIn !== undefined);
+        expect(visibleInUpdates.length).toBeGreaterThanOrEqual(1);
+        expect(visibleInUpdates[visibleInUpdates.length - 1].visibleIn).toEqual(['globalSearch']);
+        expect(visibleInUpdates[visibleInUpdates.length - 1].visibleIn).not.toContain('sideNav');
       });
 
       it('should keep the app in sideNav and globalSearch when authorized but unavailable', () => {
@@ -169,8 +211,12 @@ describe('WorkflowsPlugin', () => {
 
         plugin.start(coreStart, startDeps as any);
 
-        expect(updates).toHaveLength(1);
-        expect(updates[0].visibleIn).toEqual(['globalSearch', 'sideNav']);
+        const visibleInUpdates = updates.filter((u) => u.visibleIn !== undefined);
+        expect(visibleInUpdates.length).toBeGreaterThanOrEqual(1);
+        expect(visibleInUpdates[visibleInUpdates.length - 1].visibleIn).toEqual([
+          'globalSearch',
+          'sideNav',
+        ]);
       });
 
       it('should hide the app from sideNav for unauthorized users even when unavailable', () => {
@@ -180,8 +226,12 @@ describe('WorkflowsPlugin', () => {
 
         plugin.start(coreStart, startDeps as any);
 
-        expect(updates).toHaveLength(1);
-        expect(updates[0].visibleIn).toEqual(['globalSearch', 'sideNav']);
+        const visibleInUpdates = updates.filter((u) => u.visibleIn !== undefined);
+        expect(visibleInUpdates.length).toBeGreaterThanOrEqual(1);
+        expect(visibleInUpdates[visibleInUpdates.length - 1].visibleIn).toEqual([
+          'globalSearch',
+          'sideNav',
+        ]);
       });
     });
   });

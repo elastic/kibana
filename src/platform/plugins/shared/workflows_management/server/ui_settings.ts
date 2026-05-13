@@ -10,7 +10,10 @@
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
+import {
+  WORKFLOW_GLOBAL_EXECUTIONS_VIEW_FEATURE_FLAG_ID,
+  WORKFLOWS_UI_SETTING_ID,
+} from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetupDeps } from './types';
 import { WORKFLOWS_DOCUMENTATION_URL } from '../common';
 
@@ -47,6 +50,23 @@ export const registerUISettings = (
       value: true,
       readonly: false,
       requiresPageReload: true,
+      category: ['general'],
+    },
+    [WORKFLOW_GLOBAL_EXECUTIONS_VIEW_FEATURE_FLAG_ID]: {
+      name: i18n.translate('workflowsManagement.uiSettings.globalExecutionsView.name', {
+        defaultMessage: 'Workflows: global executions view',
+      }),
+      description: i18n.translate(
+        'workflowsManagement.uiSettings.globalExecutionsView.description',
+        {
+          defaultMessage:
+            'Shows the global executions list in the Workflows app (navigation entry and /executions route).',
+        }
+      ),
+      schema: schema.boolean(),
+      value: false,
+      readonly: false,
+      requiresPageReload: false,
       category: ['general'],
     },
   });
