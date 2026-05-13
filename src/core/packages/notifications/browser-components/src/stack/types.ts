@@ -21,7 +21,7 @@ export type NotificationStackItem = ContentListItem<{
   isPinned: boolean;
   severity: string;
   badgeColor?: EuiBadgeProps['color'];
-  iconType?: string;
+  iconType?: string; // FIXME unused
   eventName: string;
   typeId?: string;
   spaceId?: string;
