@@ -1,5 +1,5 @@
 {
-  "sha1": "66990f52a7ef980d02e46959a62c0ecdc13900f3",
+  "sha1": "46232040b21eff1880a418f18421a80a1c8731ed",
   "tests": [
     {
       "id": "6a1a7d28753a6bb-37b3571f127ad93",
@@ -1089,7 +1089,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/default_data_view.spec.ts",
-        "line": 42,
+        "line": 70,
         "column": 12
       }
     },
@@ -1115,7 +1115,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/default_data_view.spec.ts",
-        "line": 72,
+        "line": 91,
         "column": 12
       }
     },
@@ -1141,7 +1141,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/default_data_view.spec.ts",
-        "line": 112,
+        "line": 122,
         "column": 12
       }
     },
@@ -4201,7 +4201,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/default_index_pattern.spec.ts",
-        "line": 42,
+        "line": 72,
         "column": 12
       }
     },
@@ -4227,7 +4227,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/default_index_pattern.spec.ts",
-        "line": 72,
+        "line": 93,
         "column": 12
       }
     },
@@ -4253,7 +4253,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/default_index_pattern.spec.ts",
-        "line": 112,
+        "line": 127,
         "column": 12
       }
     },
