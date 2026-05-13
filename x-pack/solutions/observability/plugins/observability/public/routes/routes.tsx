@@ -8,6 +8,7 @@
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { AnnotationsPage } from '../pages/annotations/annotations';
+import { SigeventsOverviewPage } from '../pages/sigevents_overview/sigevents_overview';
 import { DatePickerContextProvider } from '../context/date_picker_context/date_picker_context';
 import { useKibana } from '../utils/kibana_react';
 import { AlertsPage } from '../pages/alerts/alerts';
@@ -38,6 +39,7 @@ import {
   RULE_DETAIL_PATH,
   RULES_LOGS_PATH,
   RULES_PATH,
+  SIGEVENTS_OVERVIEW_PATH,
 } from '../../common/locators/paths';
 import { HasDataContextProvider } from '../context/has_data_context/has_data_context';
 
@@ -116,6 +118,13 @@ const completeRoutes: Record<RoutePath, RouteDefinition> = {
 };
 
 const routes: Record<RoutePath, RouteDefinition> = {
+  [SIGEVENTS_OVERVIEW_PATH]: {
+    handler: () => {
+      return <SigeventsOverviewPage />;
+    },
+    params: {},
+    exact: true,
+  },
   [LANDING_PATH]: {
     handler: () => {
       return (

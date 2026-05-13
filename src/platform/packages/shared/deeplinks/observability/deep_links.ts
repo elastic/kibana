@@ -70,7 +70,8 @@ export type ObservabilityOverviewLinkId =
   | 'cases'
   | 'cases_configure'
   | 'cases_create'
-  | 'rules';
+  | 'rules'
+  | 'sigevents_overview';
 
 export type MetricsLinkId =
   | 'inventory'
