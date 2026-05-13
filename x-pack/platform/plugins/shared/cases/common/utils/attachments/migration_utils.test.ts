@@ -9,8 +9,6 @@ import {
   FILE_ATTACHMENT_TYPE,
   LEGACY_LENS_ATTACHMENT_TYPE,
   LENS_ATTACHMENT_TYPE,
-  OWNER_TO_PREFIX_MAP,
-  UNIFIED_ATTACHMENT_TYPES,
 } from '../../constants/attachments';
 import { AttachmentType } from '../../types/domain';
 import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER, GENERAL_CASES_OWNER } from '../../constants';

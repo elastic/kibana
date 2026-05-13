@@ -17,4 +17,5 @@ export const registerInternalAttachments = (unifiedRegistry: UnifiedAttachmentTy
   unifiedRegistry.register(fileAttachmentType);
   unifiedRegistry.register(lensAttachmentType);
   unifiedRegistry.register(commentAttachmentType);
+  unifiedRegistry.register(stackAlertAttachmentType);
 };
