@@ -68,8 +68,7 @@ const migrationSchema = schema.object({
    * start with. Kibana will refuse to start if any type listed in `wip_types.json` is registered
    * but absent from this list. Intended for development environments only; do not use in production.
    */
-  // codeql[js/kibana/unbounded-array-in-schema] Config from kibana.yml, not user HTTP input
-  allowWipTypes: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  allowWipTypes: schema.arrayOf(schema.string(), { defaultValue: [], maxSize: 50 }),
 });
 
 export type SavedObjectsMigrationConfigType = TypeOf<typeof migrationSchema>;
