@@ -17,10 +17,11 @@ export const lensSearchRequestQuerySchema = schema.object({
         description:
           'The saved object fields to include in each result. When omitted, all fields are returned.',
       },
+      maxSize: 100,
     })
   ),
   search_fields: schema.maybe(
-    schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string()), { maxSize: 100 }], {
       meta: {
         description:
           'The fields to match the `query` text against. Defaults to `title` when omitted.',
@@ -64,7 +65,7 @@ const lensSearchResponseMetaSchema = schema.object(
 
 export const lensSearchResponseBodySchema = schema.object(
   {
-    data: schema.arrayOf(lensResponseItemSchema, { maxSize: 100 }),
+    data: schema.arrayOf(lensResponseItemSchema, { maxSize: 1000 }),
     meta: lensSearchResponseMetaSchema,
   },
   { unknowns: 'forbid' }
