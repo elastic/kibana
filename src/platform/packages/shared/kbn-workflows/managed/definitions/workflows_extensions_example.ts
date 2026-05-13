@@ -22,7 +22,10 @@ export const EXAMPLE_MANAGED_WORKFLOW = {
   yamlTemplate: ({ recipient }) => `name: Example Greeting - ${recipient}
 enabled: true
 triggers:
-  - type: manual
+  - type: workflows.failed
+    on:
+      # Filter the subscription by using KQL, use event.* to target event properties
+      condition: not event.workflow.isErrorHandler:true
 steps:
   - name: greet
     type: console
