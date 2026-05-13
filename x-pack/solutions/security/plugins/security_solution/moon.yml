@@ -318,4 +318,5 @@ fileGroups:
     - '!target/**/*'
     - '!**/cypress/**'
     - '!public/management/cypress.config.ts'
+    - '!server/agent_builder/skills/detection_emulation/evals/*.spec.ts'
 tasks: {}
