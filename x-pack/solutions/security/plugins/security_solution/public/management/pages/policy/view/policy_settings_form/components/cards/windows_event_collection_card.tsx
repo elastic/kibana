@@ -50,6 +50,15 @@ export const WINDOWS_EVENT_COLLECTION_OPTIONS: ReadonlyArray<
   },
   {
     name: i18n.translate(
+      'xpack.securitySolution.endpoint.policyDetailsConfig.windows.events.security',
+      {
+        defaultMessage: 'Security',
+      }
+    ),
+    protectionField: 'security',
+  },
+  {
+    name: i18n.translate(
       'xpack.securitySolution.endpoint.policyDetailsConfig.windows.events.credentialAccess',
       {
         defaultMessage: 'API',
@@ -74,15 +83,6 @@ export const WINDOWS_EVENT_COLLECTION_OPTIONS: ReadonlyArray<
       }
     ),
     protectionField: 'registry',
-  },
-  {
-    name: i18n.translate(
-      'xpack.securitySolution.endpoint.policyDetailsConfig.windows.events.security',
-      {
-        defaultMessage: 'Security',
-      }
-    ),
-    protectionField: 'security',
   },
 ];
 

@@ -125,7 +125,7 @@ describe.skip('Policy Details', { tags: ['@ess', '@serverless'] }, () => {
 
       cy.getByTestSubj(malwareTestSubj.osValuesContainer).should(
         'contain.text',
-        'Configure how Elastic Defend protects your endpoints.'
+        'Set malware detection and prevention levels for your endpoints.'
       );
 
       cy.getByTestSubj(malwareTestSubj.enableDisableSwitch).click();

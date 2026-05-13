@@ -12,7 +12,7 @@ export const MALWARE_POLICY_SECTION_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.sectionDescription.malware',
   {
     defaultMessage:
-      'Configure how Elastic Defend protects your endpoints. Changes apply to all hosts assigned to this policy.',
+      'Set malware detection and prevention levels for your endpoints. Changes apply to all hosts assigned to this policy.',
   }
 );
 
@@ -21,7 +21,7 @@ export const BEHAVIOR_POLICY_SECTION_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.sectionDescription.behavior',
   {
     defaultMessage:
-      'Control how Elastic Defend detects and responds to malicious files, behaviors, and exploits on your endpoints.',
+      'Control how Elastic Defend responds to malicious behavior on your endpoints. Choose between detection only or full prevention, and configure user notification behavior.',
   }
 );
 
@@ -57,7 +57,7 @@ export const DEVICE_CONTROL_POLICY_SECTION_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.sectionDescription.deviceControl',
   {
     defaultMessage:
-      'Manage how external devices such as USB drives can be used on hosts using this policy.',
+      'Control which external devices — such as USB drives and removable media — can interact with your endpoints. Set read, write, and execute permissions per OS.',
   }
 );
 
@@ -74,6 +74,6 @@ export const EVENT_COLLECTION_POLICY_SECTION_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.sectionDescription.eventCollection',
   {
     defaultMessage:
-      'Choose which system events Elastic Defend collects from hosts using this policy.',
+      'Select which system events to collect for monitoring and analysis. Selecting more event types increases visibility but may impact performance — enable only what you use and require.',
   }
 );
