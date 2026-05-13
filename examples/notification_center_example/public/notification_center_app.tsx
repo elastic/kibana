@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import moment from 'moment';
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -20,6 +21,7 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { useObservable } from '@kbn/use-observable';
 import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
 import { SidebarHeader, SidebarBody } from '@kbn/core-chrome-sidebar-components';
@@ -41,7 +43,10 @@ import { alertTypeId, cloudTypeId, reportTypeId } from './event_types';
 
 export const notificationCenterAppId = 'sidebarExampleNotificationCenter';
 
-type NotificationCenterAppProps = SidebarComponentProps;
+interface NotificationCenterAppProps extends SidebarComponentProps {
+  uiSettings: IUiSettingsClient;
+  onOpenStackManagement?: () => void;
+}
 
 const TYPE_LABELS: Readonly<Record<string, string>> = {
   [reportTypeId]: 'Report',
@@ -49,16 +54,39 @@ const TYPE_LABELS: Readonly<Record<string, string>> = {
   [cloudTypeId]: 'Cloud',
 };
 
-const formatTime = (timestamp: number) => {
+const ONE_MINUTE_MS = 60_000;
+const ONE_HOUR_MS = 60 * ONE_MINUTE_MS;
+
+function isRelativeTime(timestamp: number): boolean {
+  return Date.now() - timestamp < ONE_HOUR_MS;
+}
+
+function formatTime(timestamp: number, uiSettings: IUiSettingsClient): string {
   const diff = Date.now() - timestamp;
-  const seconds = Math.floor(diff / 1000);
-  if (seconds < 60) return `${seconds}s ago`;
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return new Date(timestamp).toLocaleString();
-};
+  if (diff < ONE_MINUTE_MS) return 'Now';
+  if (diff < ONE_HOUR_MS) return `${Math.floor(diff / ONE_MINUTE_MS)} minutes ago`;
+  return moment(timestamp).format(uiSettings.get('dateFormat:scaled'));
+}
+
+function NotificationTime({
+  timestamp,
+  uiSettings,
+}: {
+  timestamp: number;
+  uiSettings: IUiSettingsClient;
+}) {
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    if (!isRelativeTime(timestamp)) return;
+    const id = setInterval(() => {
+      setTick((t) => t + 1);
+    }, ONE_MINUTE_MS);
+    return () => clearInterval(id);
+  }, [timestamp]);
+
+  return <>{formatTime(timestamp, uiSettings)}</>;
+}
 
 /**
  * Collect distinct typeIds present in the events stream (preserving insertion
@@ -80,7 +108,11 @@ function deriveTypeIdMeta(events: readonly NotificationEventType[]) {
   return { typeIds, labels };
 }
 
-export function NotificationCenterApp({ onClose }: NotificationCenterAppProps) {
+export function NotificationCenterApp({
+  onClose,
+  uiSettings,
+  onOpenStackManagement,
+}: NotificationCenterAppProps) {
   const events = useNotificationEventsService();
   const { activeSpaceId$, spacesEnabled } = useNotificationSpaces();
   const all = useNotifications();
@@ -230,7 +262,7 @@ export function NotificationCenterApp({ onClose }: NotificationCenterAppProps) {
               badgeColor={event.badgeColor}
               iconType={event.iconType}
               iconAriaLabel={event.eventName}
-              time={formatTime(event.timestamp)}
+              time={<NotificationTime timestamp={event.timestamp} uiSettings={uiSettings} />}
               title={event.title}
               messages={Array.isArray(event.message) ? event.message : [event.message]}
               isRead={event.isRead}
