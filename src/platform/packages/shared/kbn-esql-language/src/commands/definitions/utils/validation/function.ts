@@ -8,7 +8,7 @@
  */
 import type { LicenseType } from '@kbn/licensing-types';
 import { isColumn, isFunctionExpression, isIdentifier, isParamLiteral } from '@elastic/esql';
-import type { ESQLAst, ESQLAstAllCommands, ESQLFunction } from '@elastic/esql/types';
+import type { ESQLAst, ESQLAstAllCommands, ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
 import type { PromQLFunction } from '@elastic/esql';
 import { errors, getFunctionDefinition } from '..';
 import { FunctionDefinitionTypes } from '../../../../..';
@@ -27,7 +27,6 @@ import type {
 import { resolveArgumentTypes } from '../expressions';
 import { getMatchingSignatures, getMaxMinNumberOfParams } from '../signatures';
 import { ColumnValidator } from './column';
-import { kindBasedValidators, type KindBasedValidator } from './parameters_from_hints';
 import { removeInlineCasts } from './utils';
 
 export function validateFunction({
@@ -129,10 +128,31 @@ class FunctionValidator {
     return undefined;
   }
 
-  /** Looks up a `KindBasedValidator` for a position based on its `hint.kind`. */
-  private getKindValidatorForPosition(position: number): KindBasedValidator | undefined {
-    const kind = this.hintKindAt(position);
-    return kind !== undefined ? kindBasedValidators[kind] : undefined;
+  private expectsAggregationAt(position: number): boolean {
+    return this.hintKindAt(position) === 'aggregation';
+  }
+
+  private validateAggregationArg(arg: ESQLAstItem, position: number): void {
+    const isAggCall =
+      isFunctionExpression(arg) &&
+      getFunctionDefinition(arg.name)?.type === FunctionDefinitionTypes.AGG;
+
+    if (!isAggCall) {
+      const paramName = this.paramNameAt(position) ?? `argument ${position + 1}`;
+      this.report(errors.expectedAggregationArgument(this.fn, paramName));
+    }
+
+    if (isFunctionExpression(arg)) {
+      const child = new FunctionValidator(
+        arg,
+        this.parentCommand,
+        this.ast,
+        this.context,
+        this.callbacks
+      );
+      child.validate();
+      this.report(...child.messages);
+    }
   }
 
   private paramNameAt(position: number): string | undefined {
@@ -208,11 +228,10 @@ class FunctionValidator {
   /**
    * Validates the nested functions within the current function.
    *
-   * Positions whose param defines a `hint.kind` are delegated to the matching
-   * entry in `kindBasedValidators`. The kind entry owns whether and how to
-   * invoke the default recursive validation (via the `runStandardChildValidation`
-   * helper). Errors it produces are reported inline so the parent's subsequent
-   * validation (license / allowedHere / arity / arguments) is not short-circuited.
+   * Positions marked `hint.kind === 'aggregation'` are handled by
+   * `validateAggregationArg` and reported inline (no short-circuit on the
+   * parent). All other positions use the legacy path where nested-agg / license
+   * errors collect in `nestedErrors` and short-circuit further parent validation.
    */
   private validateNestedFunctions(): ESQLMessage[] {
     const nestedErrors: ESQLMessage[] = [];
@@ -226,34 +245,9 @@ class FunctionValidator {
     const flatArgs = this.fn.args.flat();
     for (let i = 0; i < flatArgs.length; i++) {
       const arg = removeInlineCasts(flatArgs[i]);
-      const kindValidator = this.getKindValidatorForPosition(i);
 
-      if (kindValidator) {
-        const paramName = this.paramNameAt(i) ?? `argument ${i + 1}`;
-
-        const runStandardChildValidation = (
-          options?: { inheritsParentContext?: boolean }
-        ): ESQLMessage[] => {
-          if (!isFunctionExpression(arg)) return [];
-          const inherits = options?.inheritsParentContext ?? true;
-          const childParentContext = inherits ? parentAggFunction : undefined;
-          const child = new FunctionValidator(
-            arg,
-            this.parentCommand,
-            this.ast,
-            this.context,
-            this.callbacks,
-            childParentContext
-          );
-          child.validate();
-          return child.messages;
-        };
-
-        this.report(
-          ...kindValidator.validateChild(arg, this.fn, paramName, {
-            runStandardChildValidation,
-          })
-        );
+      if (this.expectsAggregationAt(i)) {
+        this.validateAggregationArg(arg, i);
         continue;
       }
 
