@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import {
   EuiBadge,
@@ -59,6 +59,9 @@ const EDIT_MODE_OPTIONS = [
   },
 ];
 
+// These hooks live in the plugin, not the package — imported via the plugin's hook layer
+// when this flyout is rendered in the rules list page.
+// For now they are passed as props to keep the package boundary clean.
 export interface ComposeDiscoverFlyoutProps {
   historyKey: symbol;
   mode?: ComposeDiscoverMode;
@@ -156,37 +159,33 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   const isLastStep = uiState.step === stepTitles.length - 1;
 
   // ── YAML mode state ──────────────────────────────────────────────────────
-  // Lifted to the parent so yamlText survives the YAML editor unmounting
-  // when toggling back to Form mode.
   const [yamlText, setYamlText] = useState('');
+  const preYamlFormSnapshotRef = useRef<FormValues | null>(null);
 
   const handleToggleYamlMode = useCallback(
     (enabled: boolean) => {
       if (enabled) {
+        preYamlFormSnapshotRef.current = methods.getValues();
         setYamlText(serializeFormToYaml(methods.getValues()));
       } else {
-        // Lenient parse so partially-filled YAML (e.g. name set but no
-        // query yet) still flushes back into form state.
         const result = parseYamlToFormValues(yamlText, { strict: false });
         if (result.values) {
           methods.reset(result.values);
         }
+        preYamlFormSnapshotRef.current = null;
       }
       dispatch({ type: 'SET_YAML_MODE', enabled });
     },
     [methods, yamlText, dispatch]
   );
 
-  // Form → YAML: regenerate YAML when form values change from external
-  // sources (e.g. Sandbox "Apply changes"). Uses the callback variant of
-  // watch() so the parent does not re-render on every form keystroke.
-  useEffect(() => {
-    if (!uiState.yamlMode) return;
-    const { unsubscribe } = methods.watch(() => {
-      setYamlText(serializeFormToYaml(methods.getValues()));
-    });
-    return unsubscribe;
-  }, [uiState.yamlMode, methods]);
+  const handleCancelYaml = useCallback(() => {
+    if (preYamlFormSnapshotRef.current) {
+      methods.reset(preYamlFormSnapshotRef.current);
+      preYamlFormSnapshotRef.current = null;
+    }
+    dispatch({ type: 'SET_YAML_MODE', enabled: false });
+  }, [methods, dispatch]);
 
   // YAML submit handler — parses YAML and submits directly.
   const handleYamlSubmit = useCallback(
@@ -203,10 +202,19 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   // Sync the committed query into RHF whenever the user applies changes from the Sandbox.
   // timeField and grouping are written directly to RHF by the form components via useFormContext.
   useEffect(() => {
-    if (uiState.queryCommitted && uiState.sandbox.query) {
+    if (uiState.queryCommitted) {
       methods.setValue('evaluation', { query: { base: uiState.sandbox.query } });
     }
   }, [uiState.sandbox.query, uiState.queryCommitted, methods]);
+
+  // Form → YAML: regenerate YAML when the Sandbox commits a new query.
+  // Runs after the bridge effect above (declaration order) so getValues()
+  // already reflects the updated query. Only targets sandbox.query — the
+  // sole external source that changes form values while YAML mode is active.
+  useEffect(() => {
+    if (!uiState.yamlMode || !uiState.queryCommitted) return;
+    setYamlText(serializeFormToYaml(methods.getValues()));
+  }, [uiState.yamlMode, uiState.sandbox.query, uiState.queryCommitted, methods]);
 
   const handleSubmit = methods.handleSubmit((values) => {
     if (isCreate) {
@@ -252,7 +260,9 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
               <EuiFlexItem grow={false}>
                 {uiState.yamlMode ? (
                   <EuiBadge color="hollow" data-test-subj="composeDiscoverYamlBadge">
-                    YAML MODE
+                    {i18n.translate('xpack.alertingV2.composeDiscover.yamlMode.badge', {
+                      defaultMessage: 'YAML MODE',
+                    })}
                   </EuiBadge>
                 ) : (
                   <>{/* Step indicator coming in PR A — HorizontalMinimalStepper */}</>
@@ -295,10 +305,12 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    onClick={() => handleToggleYamlMode(false)}
+                    onClick={handleCancelYaml}
                     data-test-subj="composeDiscoverYamlCancel"
                   >
-                    Cancel YAML
+                    {i18n.translate('xpack.alertingV2.composeDiscover.yamlMode.cancelButton', {
+                      defaultMessage: 'Cancel YAML',
+                    })}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
