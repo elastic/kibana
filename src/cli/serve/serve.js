@@ -565,8 +565,7 @@ function tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions) {
   // Ensure the plugin is loaded in dynamically to exclude from production build
   const {
     MOCK_IDP_KIBANA_BASE_PATH,
-    MOCK_IDP_REALM_NAME,
-    MOCK_IDP_UIAM_ORGANIZATION_ID, // eslint-disable-next-line import/no-dynamic-require
+    MOCK_IDP_REALM_NAME, // eslint-disable-next-line import/no-dynamic-require
   } = require(MOCK_IDP_PLUGIN_PATH);
 
   // Check if there are any custom authentication providers already configured with the order `0` reserved for the
