@@ -9,10 +9,21 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { SpacesServiceSetup } from '@kbn/spaces-plugin/server';
+import type { WorkflowDetailDto } from '@kbn/workflows';
 import type { WorkflowsClientProvider } from '@kbn/workflows/server/types';
 import { REQUIRED_LICENSE_TYPE } from '../api/constants';
 import type { WorkflowsService } from '../api/workflows_management_service';
 import type { WorkflowsManagementConfig } from '../config';
+
+const parseTimeoutMs = (timeout: string): number => {
+  const match = timeout.match(/^(\d+)(ms|s|m)$/);
+  if (!match)
+    throw new Error(`Invalid maxTimeout format: "${timeout}". Expected e.g. '15s', '500ms', '2m'.`);
+  const value = parseInt(match[1], 10);
+  if (match[2] === 'ms') return value;
+  if (match[2] === 's') return value * 1_000;
+  return value * 60_000;
+};
 
 export const createWorkflowsClientProvider = (
   workflowsService: WorkflowsService,
@@ -50,15 +61,59 @@ export const createWorkflowsClientProvider = (
           triggerId,
           spaceId
         );
-        const hasEnabledWorkflows = subscribedWorkflows.some((w) => w.enabled);
-        if (!hasEnabledWorkflows) {
+
+        type WorkflowWithDefinition = WorkflowDetailDto & {
+          definition: NonNullable<WorkflowDetailDto['definition']>;
+        };
+        const enabledWorkflows = subscribedWorkflows.filter(
+          (w): w is WorkflowWithDefinition => w.enabled && w.definition != null
+        );
+
+        const triggerDef = workflowsExtensions.getTriggerDefinition(triggerId);
+
+        if (!enabledWorkflows.length || !triggerDef?.sync?.inlineExecution) {
           logger.debug(
-            `No enabled workflows for trigger "${triggerId}" in space "${spaceId}". Hook invocation is a pass-through.`
+            `No enabled workflows or trigger "${triggerId}" does not opt in to inline execution. Delegating to in-memory handlers.`
           );
-          return { status: 'pass_through', output: payload };
+          return workflowsExtensions.invokeHook(triggerId, payload, capabilities);
         }
 
-        return workflowsExtensions.invokeHook(triggerId, payload, capabilities);
+        const { chained, failurePolicy, maxTimeout } = triggerDef.sync;
+        const timeoutMs = parseTimeoutMs(maxTimeout);
+        const sessionId = typeof payload.sessionId === 'string' ? payload.sessionId : undefined;
+
+        if (sessionId && capabilities) {
+          workflowsExtensions.setSessionCapabilities(sessionId, capabilities);
+        }
+
+        const { workflowsExecutionEngine } = await workflowsService.getPluginsStart();
+
+        let current = payload;
+        try {
+          for (const workflow of enabledWorkflows) {
+            const result = await workflowsExecutionEngine.executeWorkflowSync({
+              workflowDefinition: workflow.definition,
+              payload: current,
+              maxTimeoutMs: timeoutMs,
+            });
+
+            if (result.status === 'failed') {
+              if (failurePolicy === 'closed') {
+                return { status: 'failed', output: current, error: result.error };
+              }
+              logger.warn(
+                `[invokeHook] workflow "${workflow.name}" failed (open policy): ${result.error}`
+              );
+            } else if (chained) {
+              current = result.output;
+            }
+          }
+          return { status: 'completed', output: current };
+        } finally {
+          if (sessionId) {
+            workflowsExtensions.clearSessionCapabilities(sessionId);
+          }
+        }
       },
     };
   };

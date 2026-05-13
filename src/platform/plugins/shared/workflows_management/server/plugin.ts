@@ -25,6 +25,8 @@ import {
 } from './connectors/workflows';
 import { WorkflowsManagementFeatureConfig } from './features';
 import { createWorkflowsInboxProvider } from './inbox/workflows_inbox_provider';
+import { migrateLegacyAnonymizationSettings } from './seeding/migrate_anonymization_settings';
+import { seedDefaultWorkflows } from './seeding/seed_default_workflows';
 import type {
   WorkflowsRequestHandlerContext,
   WorkflowsServerPluginSetup,
@@ -48,6 +50,7 @@ export class WorkflowsPlugin
   private config: WorkflowsManagementConfig;
   private availabilityUpdater: AvailabilityUpdater | null = null;
   private api: WorkflowsManagementApi | null = null;
+  private workflowsService: WorkflowsService | null = null;
 
   constructor(initializerContext: PluginInitializerContext<WorkflowsManagementConfig>) {
     this.logger = initializerContext.logger.get();
@@ -67,6 +70,7 @@ export class WorkflowsPlugin
     this.logger.debug('Workflows Management: Creating workflows service');
 
     const workflowsService = new WorkflowsService(core.getStartServices, this.logger);
+    this.workflowsService = workflowsService;
 
     const api = new WorkflowsManagementApi(workflowsService, this.config.available);
     this.api = api;
@@ -112,6 +116,25 @@ export class WorkflowsPlugin
         api: this.api,
         logger: this.logger,
       });
+    }
+
+    if (plugins.inferenceWorkflows && this.workflowsService) {
+      const defaultWorkflows = plugins.inferenceWorkflows.getDefaultWorkflows();
+      const service = this.workflowsService;
+      const logger = this.logger;
+      void (async () => {
+        try {
+          const storage = await service.getWorkflowStorage();
+          await seedDefaultWorkflows(storage, defaultWorkflows, logger);
+          await migrateLegacyAnonymizationSettings(core, storage, logger);
+        } catch (err) {
+          logger.warn(
+            `Failed during default workflow seeding or migration: ${
+              err instanceof Error ? err.message : String(err)
+            }`
+          );
+        }
+      })();
     }
 
     this.logger.debug('Workflows Management: Started');

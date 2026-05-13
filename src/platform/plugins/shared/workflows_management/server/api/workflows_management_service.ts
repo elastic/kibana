@@ -177,6 +177,11 @@ export class WorkflowsService {
     return this.pluginsStart;
   }
 
+  public async getWorkflowStorage(): Promise<WorkflowStorage> {
+    await this.ensureInitialized();
+    return this.workflowStorage;
+  }
+
   public async getWorkflow(
     id: string,
     spaceId: string,
