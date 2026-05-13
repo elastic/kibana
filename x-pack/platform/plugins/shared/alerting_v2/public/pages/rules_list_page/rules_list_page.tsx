@@ -239,9 +239,7 @@ export const RulesListPage = () => {
           <EuiSpacer />
         </>
       ) : null}
-      {showEmptyState ? (
-        <RuleCreateOptionsPanel onCreateEsqlRule={() => setFlyoutOpen(true)} />
-      ) : null}
+      {showEmptyState ? <RuleCreateOptionsPanel /> : null}
       {hasRules || hasActiveFilters ? (
         <>
           <EuiFlexGroup gutterSize="s">

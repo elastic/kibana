@@ -243,21 +243,6 @@ describe('RulesListPage', () => {
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 
-  it('opens the create rule flyout from the empty state ES|QL rule tile', () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: [], total: 0, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
-    renderPage();
-
-    fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
-
-    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
-  });
-
   it('shows correct "Showing" range when rules exist', () => {
     mockUseFetchRules.mockReturnValue({
       data: { items: mockRules, total: 2, page: 1, perPage: 20 },

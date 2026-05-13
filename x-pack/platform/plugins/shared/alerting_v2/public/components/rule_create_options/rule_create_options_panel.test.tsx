@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RuleCreateOptionsPanel } from './rule_create_options_panel';
 
@@ -20,10 +20,10 @@ jest.mock('@kbn/core-di-browser', () => ({
   CoreStart: (key: string) => key,
 }));
 
-const renderPanel = (props?: React.ComponentProps<typeof RuleCreateOptionsPanel>) =>
+const renderPanel = () =>
   render(
     <I18nProvider>
-      <RuleCreateOptionsPanel {...props} />
+      <RuleCreateOptionsPanel />
     </I18nProvider>
   );
 
@@ -48,19 +48,6 @@ describe('RuleCreateOptionsPanel', () => {
     const card = screen.getByRole('link', { name: /create es\|ql rule/i });
     expect(card).toBeInTheDocument();
     expect(card).toHaveAttribute('href', '/app/management/alertingV2/rules/create');
-  });
-
-  it('calls onCreateEsqlRule instead of rendering a link when provided', () => {
-    const onCreateEsqlRule = jest.fn();
-
-    renderPanel({ onCreateEsqlRule });
-
-    const card = screen.getByRole('button', { name: /create es\|ql rule/i });
-    expect(card).not.toHaveAttribute('href');
-
-    fireEvent.click(card);
-
-    expect(onCreateEsqlRule).toHaveBeenCalled();
   });
 
   it('renders the "Create with AI Agent" card as disabled and non-interactive', () => {
