@@ -142,9 +142,7 @@ const getDocumentationSection = ({
 }): string => {
   const isTsdb = resource.isTsdb || tsDocRequested;
 
-  return `## Documentation
-
-Below are the ES|QL syntax and some examples from the official ES|QL documentation.
+  return `## ES|QL Documentation
 
 <syntax-overview>
 ${documentation.getDocContent(EsqlDocEntry.syntax)}
