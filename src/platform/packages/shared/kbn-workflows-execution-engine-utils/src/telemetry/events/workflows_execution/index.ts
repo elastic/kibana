@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RootSchema } from '@kbn/core/server';
+import type { RootSchema } from '@elastic/ebt/client';
 import type { WellKnownWorkflowTriggerSource } from '@kbn/workflows';
 import {
   type EventDrivenExecutionSuppressedParams,

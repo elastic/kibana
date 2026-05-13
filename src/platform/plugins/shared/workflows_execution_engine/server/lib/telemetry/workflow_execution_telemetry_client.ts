@@ -19,29 +19,23 @@ import {
   isWellKnownWorkflowTriggerSource,
 } from '@kbn/workflows';
 import {
-  workflowExecutionEventNames,
-  workflowExecutionEventSchemas,
-} from './events/workflows_execution';
-import {
   type EventDrivenExecutionSuppressedParams,
+  extractExecutionMetadata,
+  extractWorkflowMetadata,
   type TriggerEventDispatchedParams,
+  type TriggerEventScheduleStats,
+  type TriggerResolutionStats,
   type WorkflowExecutionCancelledParams,
   type WorkflowExecutionCompletedParams,
+  workflowExecutionEventNames,
+  workflowExecutionEventSchemas,
   type WorkflowExecutionFailedParams,
   type WorkflowExecutionTelemetryEventsMap,
   WorkflowExecutionTelemetryEventTypes,
-} from './events/workflows_execution/types';
-import {
-  extractExecutionMetadata,
   type WorkflowExecutionTelemetryMetadata,
-} from './utils/extract_execution_metadata';
-import { extractWorkflowMetadata } from './utils/extract_workflow_metadata';
+} from '@kbn/workflows-execution-engine-utils';
 import type { EventTriggersConfig } from '../../config';
 import type { EventChainContext } from '../../trigger_events/event_context/event_chain_context';
-import type {
-  TriggerEventScheduleStats,
-  TriggerResolutionStats,
-} from '../../trigger_events/trigger_event_stats';
 
 function resolveExecutionTriggerTelemetry(triggeredBy: string | undefined): {
   triggerType: WellKnownWorkflowTriggerSource | 'event';

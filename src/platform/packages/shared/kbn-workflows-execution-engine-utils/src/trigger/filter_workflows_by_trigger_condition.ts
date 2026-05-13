@@ -7,9 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger } from '@kbn/core/server';
 import { evaluateKql } from '@kbn/eval-kql';
 import type { WorkflowDetailDto } from '@kbn/workflows';
+
+/**
+ * Minimal structural logger contract — the only level this module emits is
+ * `warn` on KQL evaluation errors. Any concrete Kibana `Logger` satisfies it.
+ */
+export interface TriggerFilterLogger {
+  warn(message: string): void;
+}
 
 /**
  * Why a subscribed workflow did or did not match an emitted trigger event (for funnel telemetry).
@@ -23,7 +30,7 @@ export function classifyWorkflowTriggerMatch(
   workflow: WorkflowDetailDto,
   triggerId: string,
   payload: Record<string, unknown>,
-  logger?: Logger
+  logger?: TriggerFilterLogger
 ): WorkflowTriggerMatchOutcome {
   if (!workflow.enabled) {
     return 'disabled';
@@ -77,7 +84,7 @@ export function workflowMatchesTriggerCondition(
   workflow: WorkflowDetailDto,
   triggerId: string,
   payload: Record<string, unknown>,
-  logger?: Logger
+  logger?: TriggerFilterLogger
 ): boolean {
   return classifyWorkflowTriggerMatch(workflow, triggerId, payload, logger) === 'matched';
 }

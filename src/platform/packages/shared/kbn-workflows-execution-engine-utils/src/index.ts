@@ -22,3 +22,12 @@ export { isTemplateExpression } from './templates';
 export { isTextContentType, readResponseStream } from './http_response';
 export type { ReadStreamResult } from './http_response';
 export { isSerializedError } from './errors';
+
+// Trigger-condition matching and event-mode resolution. Prefer the
+// `@kbn/workflows-execution-engine-utils/trigger` subpath in callers that
+// only need this concern.
+export * from './trigger';
+
+// Telemetry event schemas + pure extractors. Stateful telemetry client lives
+// in the plugin and wraps these.
+export * from './telemetry';

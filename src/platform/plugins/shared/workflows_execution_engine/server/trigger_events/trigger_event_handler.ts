@@ -18,6 +18,17 @@ import type {
   WorkflowExecutionEngineModel,
 } from '@kbn/workflows';
 import { validateWorkflowForExecution, type WorkflowRepository } from '@kbn/workflows/server';
+import {
+  classifyWorkflowTriggerMatch,
+  createEmptyTriggerResolutionStats,
+  createEmptyTriggerScheduleStats,
+  extractEventChainDepthFromExecution,
+  extractEventChainVisitedWorkflowIdsFromExecution,
+  mergeEmitterWorkflowIntoEventChainVisited,
+  normalizeEventChainVisitedWorkflowIds,
+  resolveWorkflowEventsModeFromOn,
+  type TriggerEventScheduleStats,
+} from '@kbn/workflows-execution-engine-utils';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import {
   type EventChainContext,
@@ -26,20 +37,7 @@ import {
   getEventChainDepthFromHeaders,
 } from './event_context/event_chain_context';
 import { initializeTriggerEventsClient, writeTriggerEvent } from './event_logs';
-import { classifyWorkflowTriggerMatch } from './filter_workflows_by_trigger_condition';
-import { resolveWorkflowEventsModeFromOn } from './lib/resolve_workflow_events_mode_from_on';
-import {
-  createEmptyTriggerResolutionStats,
-  createEmptyTriggerScheduleStats,
-  type TriggerEventScheduleStats,
-} from './trigger_event_stats';
 import type { EventTriggersConfig } from '../config';
-import {
-  extractEventChainDepthFromExecution,
-  extractEventChainVisitedWorkflowIdsFromExecution,
-  mergeEmitterWorkflowIntoEventChainVisited,
-  normalizeEventChainVisitedWorkflowIds,
-} from '../lib/telemetry/utils/extract_execution_metadata';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { ScheduleWorkflow } from '../types';

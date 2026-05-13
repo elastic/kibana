@@ -11,14 +11,14 @@ import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/serve
 import type { EsWorkflowExecution, WorkflowSettings } from '@kbn/workflows';
 import { WorkflowRepository } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
-import type { WorkflowsExecutionEngineConfig } from '../config';
-
-import { ConnectorExecutor } from '../connector_executor';
 import {
   extractEventChainDepthFromExecution,
   extractEventChainVisitedWorkflowIdsFromExecution,
   mergeEmitterWorkflowIntoEventChainVisited,
-} from '../lib/telemetry/utils/extract_execution_metadata';
+} from '@kbn/workflows-execution-engine-utils';
+import type { WorkflowsExecutionEngineConfig } from '../config';
+
+import { ConnectorExecutor } from '../connector_executor';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
