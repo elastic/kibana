@@ -24,6 +24,7 @@ describe('deleteCompositeSummaryDoc', () => {
     expect(esClient.delete).toHaveBeenCalledWith({
       index: COMPOSITE_SUMMARY_INDEX_NAME,
       id: docId,
+      refresh: true,
     });
     expect(logger.error).not.toHaveBeenCalled();
   });
@@ -37,14 +38,14 @@ describe('deleteCompositeSummaryDoc', () => {
     expect(logger.error).not.toHaveBeenCalled();
   });
 
-  it('logs an error for non-404 failures without rethrowing', async () => {
+  it('logs a debug message for non-404 failures without rethrowing', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     const logger = loggerMock.create();
     const err = { statusCode: 503, message: 'service unavailable' };
     esClient.delete.mockRejectedValueOnce(err);
 
     await expect(deleteCompositeSummaryDoc(esClient, spaceId, id, logger)).resolves.toBeUndefined();
-    expect(logger.error).toHaveBeenCalledWith(
+    expect(logger.debug).toHaveBeenCalledWith(
       expect.stringContaining(`Failed to delete composite summary doc [${docId}]`)
     );
   });

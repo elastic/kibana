@@ -75,17 +75,14 @@ export const ActionPolicyDetailsFlyout = ({
   };
 
   const handleClone = (p: ActionPolicyResponse) => {
-    onClose();
     onClone(p);
   };
 
   const handleDelete = (p: ActionPolicyResponse) => {
-    onClose();
     onDelete(p);
   };
 
   const handleUpdateApiKey = (id: string) => {
-    onClose();
     onUpdateApiKey(id);
   };
 
@@ -185,6 +182,23 @@ export const ActionPolicyDetailsFlyout = ({
             <EuiFlexItem grow={false}>
               <ActionPolicyStateBadge policy={policy} isLoading={false} />
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {policy.type === 'single_rule' ? (
+                <EuiBadge color="hollow" iconType="link">
+                  <FormattedMessage
+                    id="xpack.alertingV2.actionPolicy.detailsFlyout.singleRuleBadge"
+                    defaultMessage="Single rule"
+                  />
+                </EuiBadge>
+              ) : (
+                <EuiBadge color="hollow">
+                  <FormattedMessage
+                    id="xpack.alertingV2.actionPolicy.detailsFlyout.globalBadge"
+                    defaultMessage="Global"
+                  />
+                </EuiBadge>
+              )}
+            </EuiFlexItem>
             {snoozedActive && policy.snoozedUntil && (
               <EuiFlexItem grow={false}>
                 <EuiBadge color="accent" iconType="bellSlash">
@@ -217,6 +231,8 @@ export const ActionPolicyDetailsFlyout = ({
           <EuiSpacer size="s" />
           <ActionPolicyDefinitionList
             description={policy.description ?? undefined}
+            policyType={policy.type}
+            ruleId={policy.ruleId}
             tags={policy.tags ?? undefined}
             matcher={policy.matcher}
             groupingMode={policy.groupingMode ?? undefined}
