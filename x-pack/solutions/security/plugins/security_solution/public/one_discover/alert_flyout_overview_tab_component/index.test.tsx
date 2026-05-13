@@ -13,6 +13,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 import { createStore } from 'redux';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 import { AlertFlyoutOverviewTab } from '.';
 import type { StartServices } from '../../types';
 import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
@@ -72,6 +73,7 @@ describe('AlertFlyoutOverviewTab', () => {
         securitySolution: { show: true, crud: true },
       },
     },
+    theme: themeServiceMock.createSetupContract({ darkMode: false, name: 'borealis' }),
     upselling: {},
   } as unknown as StartServices;
 

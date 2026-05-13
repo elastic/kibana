@@ -114,6 +114,7 @@ describe('take action dropdown', () => {
       handleOnEventClosed: jest.fn(),
       isHostIsolationPanelOpen: false,
       onAddEventFilterClick: jest.fn(),
+      onAddExceptionTypeClick: jest.fn(),
       onAddIsolationStatusClick: jest.fn(),
       refetch: jest.fn(),
       refetchFlyoutData: jest.fn(),

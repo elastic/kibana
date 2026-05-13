@@ -12,6 +12,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useLocation } from 'react-router-dom';
 import { createStore } from 'redux';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 import type { StartServices } from '../../../types';
 import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 import { flyoutProviders } from './flyout_provider';
@@ -36,6 +37,7 @@ const services = {
     getTriggerCompatibleActions: jest.fn().mockResolvedValue([]),
   },
   upselling: new UpsellingService(),
+  theme: themeServiceMock.createSetupContract({ darkMode: false, name: 'borealis' }),
   application: {
     capabilities: {
       [SECURITY_FEATURE_ID]: {

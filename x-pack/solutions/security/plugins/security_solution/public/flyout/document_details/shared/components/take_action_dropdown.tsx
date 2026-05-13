@@ -16,8 +16,6 @@ import { buildDataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import type { SearchHit } from '../../../../../common/search_strategy';
-import { isActiveTimeline } from '../../../../helpers';
-import { useOpenAddRuleException } from '../../../../flyout_v2/document/tools/add_rule_exception/hooks/use_open_add_rule_exception';
 import { useRunAlertWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
@@ -90,6 +88,10 @@ export interface TakeActionDropdownProps {
    */
   onAddEventFilterClick: () => void;
   /**
+   * Callback to let parent know when the user interacts with the exception panel
+   */
+  onAddExceptionTypeClick: (type?: ExceptionListTypeEnum) => void;
+  /**
    * Callback to let parent know when the user interacts with the osquery panel
    */
   onOsqueryClick: (id: string) => void;
@@ -121,6 +123,7 @@ export const TakeActionDropdown = memo(
     handleOnEventClosed,
     isHostIsolationPanelOpen,
     onAddEventFilterClick,
+    onAddExceptionTypeClick,
     onAddIsolationStatusClick,
     refetch,
     refetchFlyoutData,
@@ -205,26 +208,13 @@ export const TakeActionDropdown = memo(
       isHostIsolationPanelOpen,
     });
 
-    // exception interaction — reuse the Flyout v2 view so the legacy in-flyout menu
-    // opens the same form as the alerts-table row context menu.
-    const onAddRuleExceptionConfirm = useCallback(
-      (_didRuleChange: boolean, _didCloseAlert: boolean, didBulkCloseAlert: boolean) => {
-        if (refetch && (!isActiveTimeline(scopeId ?? '') || didBulkCloseAlert)) {
-          refetch();
-        }
-      },
-      [refetch, scopeId]
-    );
-    const openAddRuleException = useOpenAddRuleException({
-      hit,
-      onConfirm: onAddRuleExceptionConfirm,
-    });
+    // exception interaction
     const handleOnAddExceptionTypeClick = useCallback(
       (type?: ExceptionListTypeEnum) => {
+        onAddExceptionTypeClick(type);
         setIsPopoverOpen(false);
-        openAddRuleException(type ?? null);
       },
-      [openAddRuleException]
+      [onAddExceptionTypeClick]
     );
     const { exceptionActionItems } = useAlertExceptionActions({
       isEndpointAlert: isAlertSourceEndpoint,

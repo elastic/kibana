@@ -7,11 +7,13 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { of } from 'rxjs';
 import { TakeActionButton } from './take_action_button';
 import { TestProviders } from '../../../../common/mock';
 import { mockContextValue } from '../mocks/mock_context';
 import { DocumentDetailsContext } from '../context';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
+import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useAddToCaseActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
@@ -37,6 +39,14 @@ describe('TakeActionButton', () => {
       services: {
         osquery: { isOsqueryAvailable: jest.fn() },
         cases: { hooks: { useIsAddToCaseOpen: jest.fn().mockReturnValue(false) } },
+        application: {
+          capabilities: {
+            [SECURITY_FEATURE_ID]: {
+              crudEndpointExceptions: true,
+            },
+          },
+          currentAppId$: of(undefined),
+        },
       },
     });
     (useInvestigateInTimeline as jest.Mock).mockReturnValue({
