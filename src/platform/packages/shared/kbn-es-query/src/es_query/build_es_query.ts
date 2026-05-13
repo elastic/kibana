@@ -42,6 +42,7 @@ function removeMatchAll<T>(filters: T[]) {
  * @param config - an objects with query:allowLeadingWildcards and query:queryString:options UI
  * settings in form of { allowLeadingWildcards, queryStringOptions }
  * config contains dateformat:tz
+ * @throws throws an exception if it receives malformed input from queries (such as user queries)
  *
  * @public
  */
