@@ -249,7 +249,7 @@ actions:
                             w: 24
                             h: 15
                           config:
-                            content: "## Web logs overview\n\n&nbsp;\n\nCreated with the [Dashboards API](https://www.elastic.co/docs/api/doc/kibana) using the Kibana sample web logs dataset (`kibana_sample_data_logs`). Contains:\n- This markdown panel\n- 2 metrics, showing request count and average response size\n- A line chart based on an ES|QL query\n\n&nbsp;\n\n&nbsp;\n\n[Learn more about dashboards](https://www.elastic.co/docs/explore-analyze/dashboards)"
+                            content: "## Web logs overview
                           id: a1b2c3d4-0001-4000-8000-000000000001
                           type: markdown
                         - grid:
@@ -405,7 +405,7 @@ actions:
                   },
                   "type": "markdown",
                   "config": {
-                    "content": "## Web logs overview\n\n&nbsp;\n\nCreated with the [Dashboards API](https://www.elastic.co/docs/api/doc/kibana) using the Kibana sample web logs dataset (`kibana_sample_data_logs`). Contains:\n- This markdown panel\n- 2 metrics, showing request count and average response size\n- A line chart based on an ES|QL query\n\n&nbsp;\n\n&nbsp;\n\n[Learn more about dashboards](https://www.elastic.co/docs/explore-analyze/dashboards)"
+                    "content": "## Web logs overview
                   }
                 },
                 {
@@ -510,7 +510,7 @@ actions:
                   },
                   "type": "markdown",
                   "config": {
-                    "content": "## Web logs overview\n\n&nbsp;\n\nCreated with the [Dashboards API](https://www.elastic.co/docs/api/doc/kibana) using the Kibana sample web logs dataset (`kibana_sample_data_logs`). Contains:\n- This markdown panel\n- 2 metrics, showing request count and average response size\n- A line chart based on an ES|QL query\n\n&nbsp;\n\n&nbsp;\n\n[Learn more about dashboards](https://www.elastic.co/docs/explore-analyze/dashboards)"
+                    "content": "## Web logs overview
                   }
                 },
                 {
@@ -1201,7 +1201,7 @@ actions:
                             w: 24
                             h: 15
                           config:
-                            content: "## Web logs overview\n\n&nbsp;\n\nCreated with the [Dashboards API](https://www.elastic.co/docs/api/doc/kibana) using the Kibana sample web logs dataset (`kibana_sample_data_logs`). Contains:\n- This markdown panel\n- 2 metrics, showing request count and average response size\n- A line chart based on an ES|QL query\n\n&nbsp;\n\n&nbsp;\n\n[Learn more about dashboards](https://www.elastic.co/docs/explore-analyze/dashboards)"
+                            content: "## Web logs overview
                           id: a1b2c3d4-0001-4000-8000-000000000001
                           type: markdown
                         - grid:
@@ -1620,7 +1620,7 @@ actions:
                   h: 15
                 type: markdown
                 config:
-                  content: '## Web logs overview'
+                  content: "## Web logs overview
               - grid:
                   x: 24
                   y: 0
@@ -1636,6 +1636,147 @@ actions:
                   metrics:
                     - type: primary
                       operation: count
+              - grid:
+                  x: 36
+                  y: 0
+                  w: 12
+                  h: 5
+                type: vis
+                config:
+                  type: metric
+                  data_source:
+                    type: data_view_spec
+                    index_pattern: kibana_sample_data_logs
+                    time_field: timestamp
+                  metrics:
+                    - type: primary
+                      operation: average
+                      field: bytes
+              - grid:
+                  x: 24
+                  y: 5
+                  w: 24
+                  h: 10
+                type: vis
+                config:
+                  type: xy
+                  title: Requests over time
+                  layers:
+                    - type: line
+                      data_source:
+                        type: esql
+                        query: 'FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)'
+                      x:
+                        column: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)'
+                      y:
+                        - column: count
+                  axis:
+                    x:
+                      title:
+                        visible: false
+        createDashboardWithSectionsAndControls:
+          summary: Create a dashboard with sections and controls
+          value:
+            title: Operations overview
+            time_range:
+              from: now-7d
+              to: now
+            pinned_panels:
+              - type: options_list_control
+                width: medium
+                grow: true
+                config:
+                  title: Response code
+                  data_view_id: 90943e30-9a47-11e8-b64d-95841ca0b247
+                  field_name: response.keyword
+            panels:
+              - title: Key metrics
+                collapsed: false
+                grid:
+                  y: 0
+                panels:
+                  - grid:
+                      x: 0
+                      y: 0
+                      w: 12
+                      h: 5
+                    type: vis
+                    config:
+                      type: metric
+                      data_source:
+                        type: data_view_spec
+                        index_pattern: kibana_sample_data_logs
+                        time_field: timestamp
+                      metrics:
+                        - type: primary
+                          operation: count
+                  - grid:
+                      x: 12
+                      y: 0
+                      w: 12
+                      h: 5
+                    type: vis
+                    config:
+                      type: metric
+                      data_source:
+                        type: data_view_spec
+                        index_pattern: kibana_sample_data_logs
+                        time_field: timestamp
+                      metrics:
+                        - type: primary
+                          operation: average
+                          field: bytes
+              - title: Traffic trends
+                collapsed: false
+                grid:
+                  y: 8
+                panels:
+                  - grid:
+                      x: 0
+                      y: 0
+                      w: 24
+                      h: 10
+                    type: vis
+                    config:
+                      type: xy
+                      title: Requests over time
+                      layers:
+                        - type: line
+                          data_source:
+                            type: data_view_spec
+                            index_pattern: kibana_sample_data_logs
+                            time_field: timestamp
+                          x:
+                            operation: date_histogram
+                            field: timestamp
+                          y:
+                            - operation: count
+                      axis:
+                        x:
+                          title:
+                            visible: false
+                  - grid:
+                      x: 24
+                      y: 0
+                      w: 24
+                      h: 10
+                    type: vis
+                    config:
+                      type: xy
+                      title: Requests over time (ES|QL)
+                      layers:
+                        - type: line
+                          data_source:
+                            type: esql
+                            query: 'FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)'
+                          x:
+                            column: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)'
+                          y:
+                            - column: count
+                      axis:
+                        x:
+                          title:
+                            visible: false
 
   # ──────────────────────────────────────────────
   # PUT /api/dashboards/{id} — id parameter description
@@ -1672,6 +1813,60 @@ actions:
                   metrics:
                     - type: primary
                       operation: count
+              - grid:
+                  x: 12
+                  y: 0
+                  w: 12
+                  h: 5
+                type: vis
+                config:
+                  type: metric
+                  data_source:
+                    type: data_view_spec
+                    index_pattern: kibana_sample_data_logs
+                    time_field: timestamp
+                  metrics:
+                    - type: primary
+                      operation: average
+                      field: bytes
+              - grid:
+                  x: 0
+                  y: 8
+                  w: 24
+                  h: 10
+                type: vis
+                config:
+                  type: xy
+                  title: Requests over time
+                  layers:
+                    - type: line
+                      data_source:
+                        type: esql
+                        query: 'FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)'
+                      x:
+                        column: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)'
+                      y:
+                        - column: count
+                  axis:
+                    x:
+                      title:
+                        visible: false
+              - grid:
+                  x: 24
+                  y: 8
+                  w: 12
+                  h: 5
+                type: vis
+                config:
+                  type: metric
+                  data_source:
+                    type: data_view_spec
+                    index_pattern: kibana_sample_data_logs
+                    time_field: timestamp
+                  metrics:
+                    - type: primary
+                      operation: unique_count
+                      field: clientip
 
   # ──────────────────────────────────────────────
   # PUT /api/dashboards/{id} — 201 response example

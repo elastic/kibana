@@ -322,6 +322,82 @@ actions:
                       managed: false
                       updated_at: "2026-04-13T10:20:00.000Z"
                       version: Wzc5LDFd
+      requestBody:
+        content:
+          application/json:
+            examples:
+              createMetricVisualization:
+                summary: Create a metric visualization
+                value:
+                  type: metric
+                  title: Total requests
+                  data_source:
+                    type: data_view_spec
+                    index_pattern: kibana_sample_data_logs
+                    time_field: timestamp
+                  metrics:
+                    - type: primary
+                      operation: count
+              createXYVisualization:
+                summary: Create an XY line chart
+                value:
+                  type: xy
+                  title: Log entries over time
+                  layers:
+                    - type: line
+                      data_source:
+                        type: data_view_spec
+                        index_pattern: kibana_sample_data_logs
+                        time_field: timestamp
+                      x:
+                        operation: date_histogram
+                        field: timestamp
+                      y:
+                        - operation: count
+              createPieVisualization:
+                summary: Create a pie/donut chart
+                value:
+                  type: pie
+                  title: Requests by response code
+                  donut_hole: m
+                  data_source:
+                    type: data_view_spec
+                    index_pattern: kibana_sample_data_logs
+                    time_field: timestamp
+                  metrics:
+                    - operation: count
+                  group_by:
+                    - operation: terms
+                      fields:
+                        - response.keyword
+                      limit: 5
+              createDataTableVisualization:
+                summary: Create a data table
+                value:
+                  type: data_table
+                  title: Top response codes
+                  data_source:
+                    type: data_view_spec
+                    index_pattern: kibana_sample_data_logs
+                    time_field: timestamp
+                  metrics:
+                    - operation: count
+                  rows:
+                    - operation: terms
+                      fields:
+                        - response.keyword
+                      limit: 5
+              createDataViewReferenceVisualization:
+                summary: Create a visualization using a library data view
+                value:
+                  type: metric
+                  title: Total requests (library data view)
+                  data_source:
+                    type: data_view_reference
+                    ref_id: 90943e30-9a47-11e8-b64d-95841ca0b247
+                  metrics:
+                    - type: primary
+                      operation: count
       x-codeSamples:
         - lang: cURL
           label: Create a metric visualization - cURL
@@ -846,6 +922,22 @@ actions:
                       managed: false
                       updated_at: '2026-04-13T11:00:00.000Z'
                       version: WzYxLDFd
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateVisualization:
+                summary: Update a visualization
+                value:
+                  type: metric
+                  title: Total requests (updated)
+                  data_source:
+                    type: data_view_spec
+                    index_pattern: kibana_sample_data_logs
+                    time_field: timestamp
+                  metrics:
+                    - type: primary
+                      operation: count
       x-codeSamples:
         - lang: cURL
           label: Update a visualization - cURL
