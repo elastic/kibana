@@ -93,7 +93,10 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         metadata: { name: 'executor-shape-one-event-per-row' },
         time_field: '@timestamp',
         schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-        query: { format: 'standalone', breach: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-breach-1", "host-breach-2") | STATS count = COUNT(*) BY host.name` },
+        query: {
+          format: 'standalone',
+          breach: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-breach-1", "host-breach-2") | STATS count = COUNT(*) BY host.name`,
+        },
         grouping: { fields: ['host.name'] },
         state_transition: { pending_count: 0, recovering_count: 0 },
       })
@@ -134,7 +137,10 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
           metadata: { name: 'executor-shape-data-field' },
           time_field: '@timestamp',
           schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-          query: { format: 'standalone', breach: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-data-1", "host-data-2") | STATS count = COUNT(*) BY host.name` },
+          query: {
+            format: 'standalone',
+            breach: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-data-1", "host-data-2") | STATS count = COUNT(*) BY host.name`,
+          },
           grouping: { fields: ['host.name'] },
           state_transition: { pending_count: 0, recovering_count: 0 },
         })
@@ -180,7 +186,10 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
           metadata: { name: 'executor-shape-rule-fields' },
           time_field: '@timestamp',
           schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-          query: { format: 'standalone', breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-shape-fields" | STATS count = COUNT(*) BY host.name | WHERE count >= 1` },
+          query: {
+            format: 'standalone',
+            breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-shape-fields" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          },
           grouping: { fields: ['host.name'] },
           state_transition: { pending_count: 0, recovering_count: 0 },
         })
@@ -237,7 +246,10 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         metadata: { name: 'executor-grouping-one-per-group' },
         time_field: '@timestamp',
         schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-        query: { format: 'standalone', breach: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-grouping-a", "host-grouping-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1` },
+        query: {
+          format: 'standalone',
+          breach: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-grouping-a", "host-grouping-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+        },
         grouping: { fields: ['host.name'] },
         state_transition: { pending_count: 0, recovering_count: 0 },
       })
@@ -294,7 +306,10 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         metadata: { name: 'executor-grouping-multiple-docs-per-group' },
         time_field: '@timestamp',
         schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-        query: { format: 'standalone', breach: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-multi-1", "host-multi-2") | STATS count = COUNT(*) BY host.name` },
+        query: {
+          format: 'standalone',
+          breach: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-multi-1", "host-multi-2") | STATS count = COUNT(*) BY host.name`,
+        },
         grouping: { fields: ['host.name'] },
         state_transition: { pending_count: 0, recovering_count: 0 },
       })
@@ -341,7 +356,10 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
           metadata: { name: 'executor-grouping-stable-hash' },
           time_field: '@timestamp',
           schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-          query: { format: 'standalone', breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-grouping-stable" | STATS count = COUNT(*) BY host.name | WHERE count >= 1` },
+          query: {
+            format: 'standalone',
+            breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-grouping-stable" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          },
           grouping: { fields: ['host.name'] },
           state_transition: { pending_count: 0, recovering_count: 0 },
         })
@@ -401,7 +419,10 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
           metadata: { name: 'executor-grouping-fallback' },
           time_field: '@timestamp',
           schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-          query: { format: 'standalone', breach: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-grouping-fallback-a", "host-grouping-fallback-b") | KEEP host.name, severity, value` },
+          query: {
+            format: 'standalone',
+            breach: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-grouping-fallback-a", "host-grouping-fallback-b") | KEEP host.name, severity, value`,
+          },
           state_transition: { pending_count: 0, recovering_count: 0 },
         })
       );
@@ -453,7 +474,10 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
           metadata: { name: 'executor-lookback-included' },
           time_field: '@timestamp',
           schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-          query: { format: 'standalone', breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-lookback-included" | STATS count = COUNT(*) BY host.name | WHERE count >= 1` },
+          query: {
+            format: 'standalone',
+            breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-lookback-included" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          },
           grouping: { fields: ['host.name'] },
           state_transition: { pending_count: 0, recovering_count: 0 },
         })
@@ -491,7 +515,10 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         metadata: { name: 'executor-lookback-excluded' },
         time_field: '@timestamp',
         schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-        query: { format: 'standalone', breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-lookback-excluded" | STATS count = COUNT(*) BY host.name | WHERE count >= 1` },
+        query: {
+          format: 'standalone',
+          breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-lookback-excluded" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+        },
         grouping: { fields: ['host.name'] },
         state_transition: { pending_count: 0, recovering_count: 0 },
       })
@@ -531,7 +558,10 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
           metadata: { name: 'executor-lookback-default' },
           time_field: '@timestamp',
           schedule: { every: SCHEDULE_INTERVAL },
-          query: { format: 'standalone', breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-lookback-default" | STATS count = COUNT(*) BY host.name | WHERE count >= 1` },
+          query: {
+            format: 'standalone',
+            breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-lookback-default" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          },
           grouping: { fields: ['host.name'] },
           state_transition: { pending_count: 0, recovering_count: 0 },
         })
@@ -582,7 +612,10 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
           metadata: { name: 'executor-time-field-custom' },
           time_field: 'event.created',
           schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-          query: { format: 'standalone', breach: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-time-field-in", "host-time-field-out") | STATS count = COUNT(*) BY host.name | WHERE count >= 1` },
+          query: {
+            format: 'standalone',
+            breach: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-time-field-in", "host-time-field-out") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          },
           grouping: { fields: ['host.name'] },
           state_transition: { pending_count: 0, recovering_count: 0 },
         })
@@ -628,7 +661,10 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
           metadata: { name: 'executor-esql-reserved-params' },
           time_field: '@timestamp',
           schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-          query: { format: 'standalone', breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-esql-reserved-params" AND @timestamp >= ?_tstart AND @timestamp <= ?_tend | STATS count = COUNT(*) BY host.name | WHERE count >= 1` },
+          query: {
+            format: 'standalone',
+            breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-esql-reserved-params" AND @timestamp >= ?_tstart AND @timestamp <= ?_tend | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          },
           grouping: { fields: ['host.name'] },
           state_transition: { pending_count: 0, recovering_count: 0 },
         })
@@ -668,7 +704,10 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
           metadata: { name: 'executor-recovery-no-breach' },
           time_field: '@timestamp',
           schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-          query: { format: 'standalone', breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-no-breach" | STATS count = COUNT(*) BY host.name | WHERE count >= 1` },
+          query: {
+            format: 'standalone',
+            breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-no-breach" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          },
           grouping: { fields: ['host.name'] },
           state_transition: { pending_count: 0, recovering_count: 0 },
         })
@@ -1077,7 +1116,10 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
           metadata: { name: 'executor-partial-recovery' },
           time_field: '@timestamp',
           schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-          query: { format: 'standalone', breach: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-partial-recovery-a", "host-partial-recovery-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1` },
+          query: {
+            format: 'standalone',
+            breach: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-partial-recovery-a", "host-partial-recovery-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          },
           grouping: { fields: ['host.name'] },
           state_transition: { pending_count: 0, recovering_count: 0 },
         })
@@ -1181,7 +1223,10 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
           metadata: { name: 'executor-mixed-execution' },
           time_field: '@timestamp',
           schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-          query: { format: 'standalone', breach: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-mixed-execution-a", "host-mixed-execution-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1` },
+          query: {
+            format: 'standalone',
+            breach: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-mixed-execution-a", "host-mixed-execution-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          },
           grouping: { fields: ['host.name'] },
           state_transition: { pending_count: 0, recovering_count: 0 },
         })
@@ -1248,7 +1293,10 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         metadata: { name: 'executor-no-breach-empty-query' },
         time_field: '@timestamp',
         schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-        query: { format: 'standalone', breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-no-breach-never-indexed" | STATS count = COUNT(*) BY host.name | WHERE count >= 1` },
+        query: {
+          format: 'standalone',
+          breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-no-breach-never-indexed" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+        },
         grouping: { fields: ['host.name'] },
         state_transition: { pending_count: 0, recovering_count: 0 },
       })
@@ -1281,7 +1329,10 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         metadata: { name: 'executor-halt-disabled' },
         time_field: '@timestamp',
         schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-        query: { format: 'standalone', breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-halt-disabled" | STATS count = COUNT(*) BY host.name | WHERE count >= 1` },
+        query: {
+          format: 'standalone',
+          breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-halt-disabled" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+        },
         grouping: { fields: ['host.name'] },
         state_transition: { pending_count: 0, recovering_count: 0 },
       })
@@ -1340,7 +1391,10 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
           metadata: { name: 'executor-resume-reenabled' },
           time_field: '@timestamp',
           schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-          query: { format: 'standalone', breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-reenabled" | STATS count = COUNT(*) BY host.name | WHERE count >= 1` },
+          query: {
+            format: 'standalone',
+            breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-reenabled" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          },
           grouping: { fields: ['host.name'] },
           state_transition: { pending_count: 0, recovering_count: 0 },
         })
@@ -1414,7 +1468,10 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         metadata: { name: 'executor-halt-deleted' },
         time_field: '@timestamp',
         schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-        query: { format: 'standalone', breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-halt-deleted" | STATS count = COUNT(*) BY host.name | WHERE count >= 1` },
+        query: {
+          format: 'standalone',
+          breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-halt-deleted" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+        },
         grouping: { fields: ['host.name'] },
         state_transition: { pending_count: 0, recovering_count: 0 },
       })
@@ -1461,7 +1518,11 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         metadata: { name: 'executor-invalid-query' },
         time_field: '@timestamp',
         schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-        query: { format: 'standalone', breach: 'FROM nonexistent-index-rule-executor-spec-zzz | STATS count = COUNT(*) | WHERE count >= 1' },
+        query: {
+          format: 'standalone',
+          breach:
+            'FROM nonexistent-index-rule-executor-spec-zzz | STATS count = COUNT(*) | WHERE count >= 1',
+        },
         state_transition: { pending_count: 0, recovering_count: 0 },
       })
     );

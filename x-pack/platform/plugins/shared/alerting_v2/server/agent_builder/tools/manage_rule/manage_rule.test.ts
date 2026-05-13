@@ -47,7 +47,10 @@ describe('manageRuleTool', () => {
             { operation: 'set_kind', kind: 'alert' },
             {
               operation: 'set_query',
-              base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name',
+              query: {
+                format: 'standalone',
+                breach: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name',
+              },
             },
           ],
         },
@@ -73,7 +76,10 @@ describe('manageRuleTool', () => {
         {
           operations: [
             { operation: 'set_metadata', name: 'Test' },
-            { operation: 'set_query', base: 'FROM logs-* | STATS COUNT(*)' },
+            {
+              operation: 'set_query',
+              query: { format: 'standalone', breach: 'FROM logs-* | STATS COUNT(*)' },
+            },
           ],
         },
         ctx
@@ -93,7 +99,10 @@ describe('manageRuleTool', () => {
         {
           operations: [
             { operation: 'set_metadata', name: 'Bad Query Rule' },
-            { operation: 'set_query', base: 'FROM bad-index-* | STATS COUNT(*)' },
+            {
+              operation: 'set_query',
+              query: { format: 'standalone', breach: 'FROM bad-index-* | STATS COUNT(*)' },
+            },
           ],
         },
         ctx
