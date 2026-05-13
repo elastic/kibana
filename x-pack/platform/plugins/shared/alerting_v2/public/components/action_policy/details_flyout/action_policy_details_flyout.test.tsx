@@ -220,26 +220,26 @@ describe('ActionPolicyDetailsFlyout', () => {
       expect(screen.getByTestId(TEST_SUBJ.actionsMenuButton)).toBeInTheDocument();
     });
 
-    it('calls onClone and closes the flyout when Clone is selected', async () => {
+    it('calls onClone without closing the flyout', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
       const { handlers, policy } = renderFlyout();
 
       await user.click(screen.getByTestId(TEST_SUBJ.actionsMenuButton));
       await user.click(screen.getByText('Clone'));
 
-      expect(handlers.onClose).toHaveBeenCalledTimes(1);
       expect(handlers.onClone).toHaveBeenCalledWith(policy);
+      expect(handlers.onClose).not.toHaveBeenCalled();
     });
 
-    it('calls onDelete and closes the flyout when Delete is selected', async () => {
+    it('calls onDelete without closing the flyout', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
       const { handlers, policy } = renderFlyout();
 
       await user.click(screen.getByTestId(TEST_SUBJ.actionsMenuButton));
       await user.click(screen.getByText('Delete'));
 
-      expect(handlers.onClose).toHaveBeenCalledTimes(1);
       expect(handlers.onDelete).toHaveBeenCalledWith(policy);
+      expect(handlers.onClose).not.toHaveBeenCalled();
     });
 
     it('calls onDisable without closing the flyout when Disable is selected on an enabled policy', async () => {
@@ -264,15 +264,15 @@ describe('ActionPolicyDetailsFlyout', () => {
       expect(handlers.onClose).not.toHaveBeenCalled();
     });
 
-    it('calls onUpdateApiKey and closes the flyout when Update API key is selected', async () => {
+    it('calls onUpdateApiKey without closing the flyout', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
       const { handlers, policy } = renderFlyout();
 
       await user.click(screen.getByTestId(TEST_SUBJ.actionsMenuButton));
       await user.click(screen.getByText('Update API key'));
 
-      expect(handlers.onClose).toHaveBeenCalledTimes(1);
       expect(handlers.onUpdateApiKey).toHaveBeenCalledWith(policy.id);
+      expect(handlers.onClose).not.toHaveBeenCalled();
     });
   });
 });

@@ -46,3 +46,9 @@ export {
   runSearchTool,
   type TopSnippetsConfig,
 } from './tools';
+export {
+  resolveResourceForEsqlWithSamplingStats,
+  type ResolvedResourceWithSampling,
+  formatResourceWithSampledValues,
+} from './tools/utils/resources';
+export { type MappingFieldWithStats } from './tools/utils/sampling';

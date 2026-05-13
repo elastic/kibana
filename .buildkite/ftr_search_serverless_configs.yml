@@ -36,4 +36,3 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/search/config.group19.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group20.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.feature_flags.ts
-  - x-pack/platform/test/agent_builder_api_integration/configs/config.serverless.ts
