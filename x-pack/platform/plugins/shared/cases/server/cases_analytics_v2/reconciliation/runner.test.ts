@@ -76,6 +76,9 @@ const stubFindWithPage = (
 const makeWriter = (): jest.Mocked<CasesAnalyticsV2WriterContract> => ({
   upsertCase: jest.fn(),
   deleteCase: jest.fn(),
+  bulkUpsertCases: jest.fn(),
+  bulkDeleteCases: jest.fn(),
+  bulkUpsertCasesAwait: jest.fn().mockResolvedValue(undefined),
 });
 
 describe('runReconciliation', () => {
@@ -99,8 +102,10 @@ describe('runReconciliation', () => {
       lastRunAt: '2026-05-04T00:00:00.000Z',
     });
 
-    expect(writer.upsertCase).toHaveBeenCalledTimes(1);
-    expect(writer.upsertCase).toHaveBeenCalledWith(expect.objectContaining({ id: 'case-B' }));
+    expect(writer.bulkUpsertCasesAwait).toHaveBeenCalledTimes(1);
+    expect(writer.bulkUpsertCasesAwait).toHaveBeenCalledWith(
+      expect.arrayContaining([expect.objectContaining({ id: 'case-B' })])
+    );
     expect(result.processed).toBe(1);
   });
 
@@ -120,8 +125,10 @@ describe('runReconciliation', () => {
       lastRunAt: '2026-05-04T00:00:00.000Z',
     });
 
-    expect(writer.upsertCase).toHaveBeenCalledTimes(1);
-    expect(writer.upsertCase).toHaveBeenCalledWith(expect.objectContaining({ id: 'case-A' }));
+    expect(writer.bulkUpsertCasesAwait).toHaveBeenCalledTimes(1);
+    expect(writer.bulkUpsertCasesAwait).toHaveBeenCalledWith(
+      expect.arrayContaining([expect.objectContaining({ id: 'case-A' })])
+    );
     expect(result.processed).toBe(1);
   });
 
@@ -143,7 +150,14 @@ describe('runReconciliation', () => {
 
     // No filter passed when lastRunAt is undefined.
     expect(client.find).toHaveBeenCalledWith(expect.objectContaining({ filter: undefined }));
-    expect(writer.upsertCase).toHaveBeenCalledTimes(2);
+    // Both cases land in a single bulk dispatch (one page → one bulk).
+    expect(writer.bulkUpsertCasesAwait).toHaveBeenCalledTimes(1);
+    expect(writer.bulkUpsertCasesAwait).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ id: 'case-A' }),
+        expect.objectContaining({ id: 'case-B' }),
+      ])
+    );
     expect(result.processed).toBe(2);
   });
 

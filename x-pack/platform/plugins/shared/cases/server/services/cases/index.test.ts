@@ -3620,6 +3620,9 @@ describe('CasesService', () => {
       const analyticsV2Writer = {
         upsertCase: jest.fn(),
         deleteCase: jest.fn(),
+        bulkUpsertCases: jest.fn(),
+        bulkDeleteCases: jest.fn(),
+        bulkUpsertCasesAwait: jest.fn().mockResolvedValue(undefined),
       };
       const svc = new CasesService({
         log: mockLogger,
@@ -3656,8 +3659,11 @@ describe('CasesService', () => {
           ],
         });
 
-        expect(analyticsV2Writer.deleteCase).toHaveBeenCalledTimes(1);
-        expect(analyticsV2Writer.deleteCase).toHaveBeenCalledWith('case-A');
+        // Single bulk dispatch with only the successful case id — the
+        // individual `deleteCase` path is unused on bulk operations now.
+        expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledTimes(1);
+        expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledWith(['case-A']);
+        expect(analyticsV2Writer.deleteCase).not.toHaveBeenCalled();
       });
 
       it('skips analytics writes for non-case entity types', async () => {
@@ -3679,8 +3685,9 @@ describe('CasesService', () => {
           ],
         });
 
-        expect(analyticsV2Writer.deleteCase).toHaveBeenCalledTimes(1);
-        expect(analyticsV2Writer.deleteCase).toHaveBeenCalledWith('case-A');
+        expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledTimes(1);
+        expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledWith(['case-A']);
+        expect(analyticsV2Writer.deleteCase).not.toHaveBeenCalled();
       });
     });
   });

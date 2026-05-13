@@ -134,10 +134,23 @@ export async function runReconciliation({
         break;
       }
 
+      // Dispatch the entire page as a single `_bulk` request and **await**
+      // its completion before fetching the next page. Two reasons:
+      //   1. Bulk dispatch collapses N ES `index` requests into 1, keeping
+      //      the connection pool from saturating on cold-start / post-reset
+      //      walks that can span tens of thousands of cases.
+      //   2. Awaiting between pages bounds concurrency to one in-flight
+      //      bulk at a time. The previous per-item fire-and-forget loop
+      //      could fan thousands of writes into ES while the runner kept
+      //      paging — ES indexing-queue overflow → 429s → writer's retry
+      //      budget exhausts → reconciliation drops docs the next tick
+      //      then has to repair. Serializing pages avoids the failure
+      //      mode entirely.
+      // The awaited variant never throws — bulk-level + per-item failures
+      // are logged inside the writer; the page count still advances.
+      await writer.bulkUpsertCasesAwait(page.saved_objects);
+
       for (const so of page.saved_objects) {
-        // Fire-and-forget — `upsertCase` doesn't throw, the writer logs its
-        // own errors. The runner counts attempts, not successes.
-        writer.upsertCase(so);
         processed++;
         // Bucket by space for the summary log. Cases SOs are
         // namespace-scoped (`multiple-isolated`); `namespaces` is always a
