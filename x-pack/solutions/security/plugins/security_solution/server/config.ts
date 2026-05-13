@@ -269,6 +269,41 @@ export const configSchema = schema.object({
           disabled: schema.boolean({ defaultValue: false }),
         })
       ),
+      logInjection: schema.maybe(
+        schema.object({
+          /**
+           * Base name of the ILM-managed index template used to store
+           * synthesised ECS documents during log-injection emulation.
+           * The runtime appends `<spaceId>-*` to form the full index pattern.
+           */
+          indexTemplateName: schema.string({
+            defaultValue: '.kibana-security-emulation-logs',
+          }),
+          /**
+           * Number of days before log-injection index data is deleted by ILM.
+           * Must be ≥ 1. Default 7 days balances storage cost against the
+           * investigation window analysts need to review results.
+           */
+          retentionDays: schema.number({ defaultValue: 7, min: 1 }),
+        })
+      ),
+      validation: schema.maybe(
+        schema.object({
+          /**
+           * Default wall-clock budget in milliseconds for a single
+           * `validateRule` run before the telemetry collector times out.
+           * Default 60 000 ms (60 s) — enough for most detection rules to
+           * fire on injected or real-execution signals.
+           */
+          wallBudgetMsDefault: schema.number({ defaultValue: 60_000, min: 1_000 }),
+          /**
+           * Hard ceiling on the wall-clock budget accepted from API callers.
+           * Requests that ask for a budget above this value are clamped.
+           * Default 300 000 ms (5 min) prevents runaway long-poll connections.
+           */
+          wallBudgetMsMax: schema.number({ defaultValue: 300_000, min: 1_000 }),
+        })
+      ),
     })
   ),
 });
