@@ -106,7 +106,7 @@ test.describe('Dev Tools feature controls', { tag: tags.stateful.classic }, () =
         })
       );
       await expect(pageObjects.devTools.appContainer(readySubject)).toBeHidden();
-      await expect(pageObjects.devTools.appNotFoundPageContent).toBeVisible();
+      await expect(page.testSubj.locator('homeApp')).toBeVisible();
     }
   });
 });
