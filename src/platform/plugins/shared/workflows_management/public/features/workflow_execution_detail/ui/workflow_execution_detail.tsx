@@ -10,7 +10,7 @@
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTab, EuiTabs } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -20,6 +20,7 @@ import { ExecutionStatus, isCancelableStatus, isTerminalStatus } from '@kbn/work
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { CancelExecutionButton } from './cancel_execution_button';
 import { ResumeExecutionButton } from './resume_execution_button';
+import { StepExecutionInlineBody } from './step_execution_inline_body';
 import { WorkflowExecutionTopBar } from './workflow_execution_header';
 import { WorkflowExecutionStepList } from './workflow_execution_step_list';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
@@ -34,6 +35,10 @@ import { useStepExecution } from '../model/use_step_execution';
 
 const PSEUDO_STEP_OVERVIEW = '__overview';
 const PSEUDO_STEP_TRIGGER = 'trigger';
+
+// Width threshold (px) at which the Table view switches from inline expansion
+// to a two-column layout (step list on the left, step details on the right).
+const SIDE_PANEL_BREAKPOINT_PX = 720;
 
 type ExecutionViewTab = 'table' | 'tracers' | 'json';
 
@@ -52,6 +57,9 @@ const i18nTexts = {
   }),
   tabJson: i18n.translate('workflowsManagement.executionDetail.tabJson', {
     defaultMessage: 'JSON',
+  }),
+  sidePanelEmpty: i18n.translate('workflowsManagement.executionDetail.sidePanelEmpty', {
+    defaultMessage: 'Select a step to see its details.',
   }),
 };
 
@@ -85,6 +93,20 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
     const showBackButton = activeTab === 'executions';
 
     const [activeViewTab, setActiveViewTab] = useState<ExecutionViewTab>('table');
+
+    const outerRef = useRef<HTMLDivElement>(null);
+    const [containerWidth, setContainerWidth] = useState(0);
+    useEffect(() => {
+      const node = outerRef.current;
+      if (!node) return;
+      const observer = new ResizeObserver((entries) => {
+        const entry = entries[0];
+        if (entry) setContainerWidth(entry.contentRect.width);
+      });
+      observer.observe(node);
+      return () => observer.disconnect();
+    }, []);
+    const useSidePanel = containerWidth >= SIDE_PANEL_BREAKPOINT_PX && activeViewTab === 'table';
 
     // Clear cached step I/O data when switching to a different execution
     useEffect(() => {
@@ -222,14 +244,16 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
         color="plain"
         hasShadow={false}
         css={styles.outer}
+        panelRef={outerRef}
         data-test-subj="workflowExecutionDetail"
         data-execution-status={workflowExecution?.status}
       >
         <EuiFlexGroup direction="column" gutterSize="none" css={styles.column}>
-          {/* Whole panel scrolls together: top bar, tabs, content. */}
-          <EuiFlexItem css={styles.scroll}>
+          {/* Header + tabs anchored at the top in both modes so the step list
+              keeps the same JSX position and React preserves its state across
+              breakpoint changes. */}
+          <EuiFlexItem grow={false}>
             <WorkflowExecutionTopBar showBackButton={showBackButton} onClose={onClose} />
-
             <div css={styles.tabsBar}>
               <EuiTabs size="s">
                 {tabs.map((tab) => (
@@ -244,26 +268,45 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
                 ))}
               </EuiTabs>
             </div>
-
-            {activeViewTab === 'table' && (
-              <WorkflowExecutionStepList
-                execution={workflowExecution ?? null}
-                definition={workflowExecution?.workflowDefinition ?? null}
-                error={error}
-                expandedStepExecutionId={expandedStepExecutionId}
-                expandedStepData={expandedStepData}
-                isExpandedStepDataLoading={isLoadingStepData}
-                onToggleStepExpansion={handleToggleStepExpansion}
-                childExecutionsMap={childExecutions}
-                isLoadingChildExecutions={isLoadingChildExecutions}
-              />
-            )}
-            {activeViewTab === 'tracers' && (
-              <div css={styles.placeholder}>{i18nTexts.tracersComingSoon}</div>
-            )}
-            {activeViewTab === 'json' && workflowExecution && (
-              <div css={styles.jsonContainer}>
-                <JsonDataCode json={JSON.parse(JSON.stringify(workflowExecution))} />
+          </EuiFlexItem>
+          <EuiFlexItem
+            css={useSidePanel ? styles.splitContainer : styles.scroll}
+            data-test-subj={useSidePanel ? 'workflowExecutionDetailSidePanel' : undefined}
+          >
+            <div css={useSidePanel ? styles.leftCol : undefined}>
+              {activeViewTab === 'table' && (
+                <WorkflowExecutionStepList
+                  execution={workflowExecution ?? null}
+                  definition={workflowExecution?.workflowDefinition ?? null}
+                  error={error}
+                  expandedStepExecutionId={expandedStepExecutionId}
+                  expandedStepData={expandedStepData}
+                  isExpandedStepDataLoading={isLoadingStepData}
+                  onToggleStepExpansion={handleToggleStepExpansion}
+                  childExecutionsMap={childExecutions}
+                  isLoadingChildExecutions={isLoadingChildExecutions}
+                  useSidePanel={useSidePanel}
+                />
+              )}
+              {activeViewTab === 'tracers' && (
+                <div css={styles.placeholder}>{i18nTexts.tracersComingSoon}</div>
+              )}
+              {activeViewTab === 'json' && workflowExecution && (
+                <div css={styles.jsonContainer}>
+                  <JsonDataCode json={JSON.parse(JSON.stringify(workflowExecution))} />
+                </div>
+              )}
+            </div>
+            {useSidePanel && (
+              <div css={styles.rightCol}>
+                {expandedStepExecutionId ? (
+                  <StepExecutionInlineBody
+                    stepExecution={expandedStepData}
+                    isLoading={isLoadingStepData}
+                  />
+                ) : (
+                  <div css={styles.sidePanelEmpty}>{i18nTexts.sidePanelEmpty}</div>
+                )}
               </div>
             )}
           </EuiFlexItem>
@@ -347,5 +390,33 @@ const componentStyles = {
       display: 'flex',
       gap: euiTheme.size.s,
       justifyContent: 'flex-end',
+    }),
+  splitContainer: () =>
+    css({
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'stretch',
+      minHeight: 0,
+      overflow: 'hidden',
+    }),
+  leftCol: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flex: '0 0 40%',
+      minWidth: 0,
+      borderRight: euiTheme.border.thin,
+      overflowY: 'auto',
+    }),
+  rightCol: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flex: '1 1 60%',
+      minWidth: 0,
+      padding: euiTheme.size.base,
+      overflowY: 'auto',
+    }),
+  sidePanelEmpty: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.xl,
+      textAlign: 'center',
+      color: euiTheme.colors.textSubdued,
     }),
 };
