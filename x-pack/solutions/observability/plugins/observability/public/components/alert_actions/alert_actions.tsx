@@ -7,6 +7,7 @@
 
 import {
   EuiButtonIcon,
+  EuiContextMenuItem,
   EuiFlexItem,
   EuiContextMenuPanel,
   EuiPopover,
@@ -19,7 +20,12 @@ import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { getRulesAppDetailsRoute, rulesAppRoute } from '@kbn/rule-data-utils';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
-import { useCaseAlertActionItems } from '@kbn/response-ops-alerts-table/hooks/use_case_alert_action_items';
+import { useCaseActions } from '@kbn/response-ops-alerts-table/hooks/use_case_actions';
+import {
+  ADD_TO_EXISTING_CASE,
+  ADD_TO_NEW_CASE,
+} from '@kbn/response-ops-alerts-table/translations';
+import { useKibana } from '../../utils/kibana_react';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { SLO_DETAIL_PATH } from '../../../common/locators/paths';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
@@ -45,6 +51,7 @@ export function AlertActions(
     },
     cases,
   } = services;
+  const { telemetryClient } = useKibana().services;
   const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
 
   const isInApp = Boolean(tableId === SLO_ALERTS_TABLE_ID && isSLODetailsPage);
@@ -59,6 +66,8 @@ export function AlertActions(
 
   const observabilityAlert = parseObservabilityAlert(alert);
 
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
   const closeActionsPopover = useCallback(() => {
     setIsPopoverOpen(false);
   }, []);
@@ -67,12 +76,22 @@ export function AlertActions(
     setIsPopoverOpen((open) => !open);
   }, []);
 
-  const caseAlertActionItems = useCaseAlertActionItems({
-    alert,
+  const onAddToCase = useCallback(
+    ({ isNewCase }: { isNewCase: boolean }) => {
+      telemetryClient.reportAlertAddedToCase(
+        isNewCase,
+        tableId || 'unknown',
+        observabilityAlert.fields['kibana.alert.rule.rule_type_id']
+      );
+      refresh?.();
+    },
+    [telemetryClient, tableId, observabilityAlert.fields, refresh]
+  );
+
+  const { handleAddToExistingCaseClick, handleAddToNewCaseClick } = useCaseActions({
+    alerts: [alert],
     cases,
-    refresh,
-    onActionExecuted: closeActionsPopover,
-    owner: [observabilityFeatureId],
+    onAddToCase,
   });
 
   useEffect(() => {
@@ -94,12 +113,44 @@ export function AlertActions(
     }
   }, [observabilityAlert.link, observabilityAlert.hasBasePath, prepend]);
 
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const caseAlertActionItems = useMemo(() => {
+    if (!userCasesPermissions?.createComment || !userCasesPermissions?.read) {
+      return [];
+    }
+    return [
+      <EuiContextMenuItem
+        data-test-subj="add-to-existing-case-action"
+        key="addToExistingCase"
+        onClick={() => {
+          handleAddToExistingCaseClick();
+          closeActionsPopover();
+        }}
+        size="s"
+      >
+        {ADD_TO_EXISTING_CASE}
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        data-test-subj="add-to-new-case-action"
+        key="addToNewCase"
+        onClick={() => {
+          handleAddToNewCaseClick();
+          closeActionsPopover();
+        }}
+        size="s"
+      >
+        {ADD_TO_NEW_CASE}
+      </EuiContextMenuItem>,
+    ];
+  }, [
+    userCasesPermissions?.createComment,
+    userCasesPermissions?.read,
+    handleAddToExistingCaseClick,
+    handleAddToNewCaseClick,
+    closeActionsPopover,
+  ]);
 
   const actionsMenuItems = [
-    ...(userCasesPermissions?.createComment && userCasesPermissions?.read
-      ? caseAlertActionItems
-      : []),
+    ...caseAlertActionItems,
 
     useMemo(
       () => (
