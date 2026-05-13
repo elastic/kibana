@@ -83,7 +83,6 @@ export const ActionPolicyCanvasContent = ({
     setDependenciesReady(null);
 
     Promise.all(checks).then((results) => {
-      console.log('results', results);
       if (!abortController.signal.aborted) {
         setDependenciesReady(results.every((result) => result.workflow || result.rule));
       }
@@ -95,9 +94,6 @@ export const ActionPolicyCanvasContent = ({
   }, [workflowsApi, rulesApi, data.destinations, data.matcher]);
 
   const hasDraftDependencies = dependenciesReady !== true;
-
-  console.log('hasDraftDependencies', hasDraftDependencies);
-  console.log('dependenciesReady', dependenciesReady);
 
   useEffect(() => {
     setMounted(true);
