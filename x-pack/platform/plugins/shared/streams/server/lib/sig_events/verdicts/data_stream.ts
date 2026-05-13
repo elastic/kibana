@@ -6,9 +6,9 @@
  */
 
 import type { DataStreamDefinition } from '@kbn/data-streams';
-import type { GetFieldsOf, MappingsDefinition, ToPrimitives } from '@kbn/es-mappings';
+import type { Verdict } from '@kbn/streams-schema';
+import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
-import type { Overwrite } from 'utility-types';
 
 export const VERDICTS_DATA_STREAM = '.significant_events-verdicts';
 
@@ -37,18 +37,7 @@ export const verdictsMappings = {
 } satisfies MappingsDefinition;
 
 export type StoredVerdict = GetFieldsOf<typeof verdictsMappings>;
-
-export type Verdict = Overwrite<
-  ToPrimitives<{
-    type: 'object';
-    properties: (typeof verdictsMappings)['properties'];
-  }>,
-  {
-    '@timestamp': string;
-    rule_names: string[];
-    stream_names: string[];
-  }
->;
+export type { Verdict };
 
 export const verdictsDataStream: DataStreamDefinition<typeof verdictsMappings, StoredVerdict> = {
   name: VERDICTS_DATA_STREAM,
