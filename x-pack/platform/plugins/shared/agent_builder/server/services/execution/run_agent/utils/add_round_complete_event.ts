@@ -57,6 +57,8 @@ import type {
   ModelProviderStats,
 } from '@kbn/agent-builder-server/runner';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import type { Context } from '@opentelemetry/api';
+import { getCurrentTraceId } from '../../../../tracing';
 import type { ConvertedEvents } from '../convert_graph_events';
 import { isFinalStateEvent } from '../events';
 import type { CompactedConversation } from './conversation_compactor';
@@ -82,7 +84,7 @@ export const addRoundCompleteEvent = ({
   compactionResult,
   roundId: providedRoundId,
   initialTodos,
-  traceId,
+  otelContext,
 }: {
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
@@ -96,8 +98,9 @@ export const addRoundCompleteEvent = ({
   compactionResult?: CompactedConversation;
   roundId?: string;
   initialTodos?: TodoItem[];
-  traceId?: string;
+  otelContext?: Context;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
+  const traceId = otelContext ? getCurrentTraceId(otelContext) : undefined;
   return (events$) => {
     const shared$ = events$.pipe(share());
     return merge(

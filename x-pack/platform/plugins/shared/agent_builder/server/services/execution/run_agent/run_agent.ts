@@ -16,6 +16,7 @@ import type {
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server';
+import type { Context } from '@opentelemetry/api';
 import { runDefaultAgentMode } from './run_chat_agent';
 
 export interface RunAgentParams {
@@ -74,9 +75,9 @@ export interface RunAgentParams {
    */
   executionId?: string;
   /**
-   * OTel trace ID from the agent builder span.
+   * OTel context from the parent agent/converse span.
    */
-  traceId?: string;
+  otelContext?: Context;
 }
 
 export interface RunAgentResponse {

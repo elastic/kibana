@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { merge, of, filter, tap, catchError, throwError, EMPTY, finalize } from 'rxjs';
+import { merge, of, filter, tap, catchError, throwError, EMPTY } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -23,6 +23,7 @@ import {
   createInternalError,
 } from '@kbn/agent-builder-common';
 import { ROOT_CONTEXT } from '@opentelemetry/api';
+import type { Context } from '@opentelemetry/api';
 import { getConnectorProvider } from '@kbn/inference-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SerializedExecutionError } from '@kbn/agent-builder-common';
@@ -47,11 +48,7 @@ import {
 } from './utils';
 import { createConversationIdSetEvent } from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
-import {
-  withConverseSpan,
-  setExecutionOtelContext,
-  clearExecutionOtelContext,
-} from '../../tracing';
+import { withConverseSpan } from '../../tracing';
 import type { MeteringService } from '../metering';
 import type { AgentExecutionClient } from './persistence';
 
@@ -151,7 +148,11 @@ const handleConversationExecution = async ({
       ? of(createConversationIdSetEvent(conversation.id))
       : EMPTY;
 
-  // Execute agent
+  // Execute agent — created before the span but lazy; otelContext is injected
+  // via a mutable ref that gets set inside withConverseSpan's synchronous callback.
+  let converseOtelCtx: Context | undefined;
+  const getOtelContext = () => converseOtelCtx;
+
   const agentEvents$ = executeAgent$({
     agentId,
     executionId: execution.executionId,
@@ -167,6 +168,7 @@ const handleConversationExecution = async ({
     browserApiTools,
     configurationOverrides,
     action,
+    getOtelContext,
   });
 
   // Generate title (for CREATE) or use existing title (for UPDATE)
@@ -176,7 +178,7 @@ const handleConversationExecution = async ({
           chatModel: (await modelProvider.selectModel({ effortLevel: 'low' })).chatModel,
           conversation,
           nextInput,
-          executionId: execution.executionId,
+          getOtelContext,
         })
       : of(conversation.title);
 
@@ -212,7 +214,7 @@ const handleConversationExecution = async ({
     { agentId, conversationId: effectiveConversationId, opikHeaders },
     ROOT_CONTEXT,
     (_converseSpan, _converseCtx) => {
-      setExecutionOtelContext(execution.executionId, _converseCtx);
+      converseOtelCtx = _converseCtx;
       return merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
         handleCancellation(abortSignal),
         tap((event) => {
@@ -265,8 +267,7 @@ const handleConversationExecution = async ({
           conversationId: effectiveConversationId,
           executionId: execution.executionId,
           ctx: _converseCtx,
-        }),
-        finalize(() => clearExecutionOtelContext(execution.executionId))
+        })
       );
     }
   );

@@ -36,7 +36,6 @@ import type {
 import { isToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents';
-import { getExecutionOtelContext } from '../../../tracing';
 import { getCurrentSpaceId } from '../../../utils/spaces';
 import { ToolCallSource } from '../../../telemetry';
 import {
@@ -165,14 +164,9 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     manager,
   });
 
-  const agentExecCtx = getAgentFromRunContext(parentManager.context);
-  const parentContext = agentExecCtx?.executionId
-    ? getExecutionOtelContext(agentExecCtx.executionId)
-    : undefined;
-
   const toolReturn = await withExecuteToolSpan(
     tool.id,
-    { tool: { input: toolParams }, parentContext },
+    { tool: { input: toolParams }, parentContext: parentManager.deps.otelContext },
     async (): Promise<ToolHandlerReturn> => {
       const schema = await tool.getSchema();
       const validation = schema.safeParse(toolParams);

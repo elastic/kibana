@@ -18,6 +18,7 @@ import type {
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { RunAgentFn } from '@kbn/agent-builder-server';
+import type { Context } from '@opentelemetry/api';
 
 export const executeAgent$ = ({
   agentId,
@@ -35,6 +36,7 @@ export const executeAgent$ = ({
   configurationOverrides,
   action,
   executionMode,
+  getOtelContext,
 }: {
   agentId: string;
   executionId: string;
@@ -51,6 +53,7 @@ export const executeAgent$ = ({
   configurationOverrides?: AgentConfigurationOverrides;
   action?: ConversationAction;
   executionMode?: AgentExecutionMode;
+  getOtelContext?: () => Context | undefined;
 }): Observable<ChatAgentEvent> => {
   return new Observable<ChatAgentEvent>((observer) => {
     runAgent({
@@ -60,6 +63,7 @@ export const executeAgent$ = ({
       abortSignal,
       defaultConnectorId,
       executionMode,
+      otelContext: getOtelContext?.(),
       agentParams: {
         nextInput,
         conversation,

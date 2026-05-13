@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ChatAgentEvent, AgentExecutionMode } from '@kbn/agent-builder-common';
+import type { Context } from '@opentelemetry/api';
 import type { AgentParams, AgentResponse } from './provider';
 
 export interface RunAgentReturn {
@@ -51,6 +52,11 @@ export interface RunAgentParams {
    * If unspecified, will use internal logic to use the default connector
    */
   defaultConnectorId?: string;
+  /**
+   * OpenTelemetry context for the current execution scope.
+   * Used to parent spans from agent/tool execution under the converse span.
+   */
+  otelContext?: Context;
 }
 
 export type RunAgentOnEventFn = (event: ChatAgentEvent) => void;

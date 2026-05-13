@@ -46,6 +46,7 @@ import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachme
 import type { TodoStateManager } from '@kbn/agent-builder-server/runner';
 import { createTodoStateManager } from '@kbn/agent-builder-server/runner';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
+import type { Context } from '@opentelemetry/api';
 import type { ToolsServiceStart } from '../../tools';
 import type { AgentsServiceStart } from '../../agents';
 import type { AttachmentServiceStart } from '../../attachments';
@@ -60,7 +61,6 @@ import {
 import { createPromptManager, getAgentPromptStorageState } from './utils/prompts';
 import { runInternalTool, runTool } from './run_tool';
 import { runAgent } from './run_agent';
-import { getExecutionOtelContext } from '../../../tracing';
 import { createStore } from './store';
 import type { SkillServiceStart } from '../../skills';
 import type { PluginsServiceStart } from '../../plugins/plugin_service';
@@ -108,6 +108,8 @@ export interface CreateScopedRunnerDeps {
   subAgentExecutor: SubAgentExecutor;
   /** The effective agent configuration for the current run (with overrides applied). */
   agentConfiguration?: AgentConfiguration;
+  /** Current OTel context for this execution scope. Updated by span wrappers. */
+  otelContext?: Context;
 }
 
 export type CreateRunnerDeps = Omit<
@@ -204,7 +206,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     promptState,
     abortSignal,
     executionMode,
-    executionId,
+    otelContext,
   }: {
     request: KibanaRequest;
     defaultConnectorId?: string;
@@ -213,7 +215,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     promptState?: PromptStorageState;
     abortSignal?: AbortSignal;
     executionMode: AgentExecutionMode;
-    executionId?: string;
+    otelContext?: Context;
   }): Promise<ScopedRunner> => {
     const { resultStore, filestore, skillsStore } = createStore({ conversation });
 
@@ -227,17 +229,10 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     const promptManager = createPromptManager({ state: promptState });
     const toolManager = createToolManager();
 
-    const modelProvider = modelProviderFactory({
-      request,
-      defaultConnectorId,
-      getParentContext: executionId ? () => getExecutionOtelContext(executionId) : undefined,
-    });
-
-    const subAgentExecutor = createSubAgentExecutor({ request, getExecutionService });
-
-    const allDeps = {
+    const allDeps: CreateScopedRunnerDeps = {
       ...runnerDeps,
-      modelProvider,
+      // modelProvider is set below after allDeps is created
+      modelProvider: undefined!,
       request,
       defaultConnectorId,
       abortSignal,
@@ -250,8 +245,16 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       filestore,
       toolManager,
       executionMode,
-      subAgentExecutor,
+      subAgentExecutor: createSubAgentExecutor({ request, getExecutionService }),
+      otelContext,
     };
+
+    allDeps.modelProvider = modelProviderFactory({
+      request,
+      defaultConnectorId,
+      getParentContext: () => allDeps.otelContext,
+    });
+
     return createScopedRunner(allDeps);
   };
 
@@ -287,7 +290,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         request,
         defaultConnectorId,
         abortSignal,
-        executionId,
+        otelContext,
         executionMode = AgentExecutionMode.conversation,
         ...otherParams
       } = params;
@@ -299,13 +302,13 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         nextInput,
         abortSignal,
         executionMode,
-        executionId,
+        otelContext,
         promptState: getAgentPromptStorageState({
           input: nextInput,
           conversation,
         }),
       });
-      return runner.runAgent({ ...otherParams, executionId });
+      return runner.runAgent(otherParams);
     },
   };
 };

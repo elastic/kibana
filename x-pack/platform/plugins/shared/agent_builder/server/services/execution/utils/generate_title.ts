@@ -14,8 +14,7 @@ import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-
 import type { Conversation, ConversationRound, ConverseInput } from '@kbn/agent-builder-common';
 import { createUserMessage } from '@kbn/agent-builder-genai-utils/langchain';
 import { trace } from '@opentelemetry/api';
-import type { Context } from '@opentelemetry/api';
-import { getExecutionOtelContext } from '../../../tracing';
+import type { Context, Span } from '@opentelemetry/api';
 
 /**
  * Generates a title for a conversation
@@ -24,12 +23,12 @@ export const generateTitle = ({
   nextInput,
   conversation,
   chatModel,
-  executionId,
+  getOtelContext,
 }: {
   nextInput: ConverseInput;
   conversation: Conversation;
   chatModel: InferenceChatModel;
-  executionId?: string;
+  getOtelContext?: () => Context | undefined;
 }): Observable<string> => {
   return defer(async () => {
     try {
@@ -37,7 +36,7 @@ export const generateTitle = ({
         previousRounds: conversation.rounds,
         nextInput,
         chatModel,
-        executionId,
+        getOtelContext,
       });
     } catch (e) {
       return conversation.title;
@@ -49,20 +48,20 @@ const generateConversationTitle = async ({
   previousRounds,
   nextInput,
   chatModel,
-  executionId,
+  getOtelContext,
 }: {
   previousRounds: ConversationRound[];
   nextInput: ConverseInput;
   chatModel: InferenceChatModel;
-  executionId?: string;
+  getOtelContext?: () => Context | undefined;
 }) => {
-  const parentCtx = executionId ? getExecutionOtelContext(executionId) : undefined;
+  const parentCtx = getOtelContext?.();
   const spanArgs = [
     'GenerateTitle',
     { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
   ] as const;
 
-  const spanCb = async (span?: import('@opentelemetry/api').Span) => {
+  const spanCb = async (span?: Span) => {
     // Build a context that includes the GenerateTitle span so the
     // chatModel's ChatComplete span becomes a child of GenerateTitle.
     let titleCtx: Context | undefined;

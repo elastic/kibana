@@ -7,6 +7,7 @@
 
 import type { AgentConfiguration } from '@kbn/agent-builder-common';
 import type { AgentHandlerFn } from '@kbn/agent-builder-server';
+import type { Context } from '@opentelemetry/api';
 import type { InternalAgentDefinition } from '../../agents/agent_registry';
 import { runAgent } from './run_agent';
 
@@ -16,11 +17,11 @@ import { runAgent } from './run_agent';
 export const createAgentHandler = ({
   agent,
   effectiveConfiguration,
-  traceId,
+  otelContext,
 }: {
   agent: InternalAgentDefinition;
   effectiveConfiguration: AgentConfiguration;
-  traceId?: string;
+  otelContext?: Context;
 }): AgentHandlerFn => {
   return async (
     {
@@ -55,7 +56,7 @@ export const createAgentHandler = ({
         configurationOverrides,
         action,
         executionId,
-        traceId,
+        otelContext,
       },
       context
     );
