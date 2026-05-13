@@ -30,6 +30,15 @@ export interface StepExecutionRowProps {
   expandedContent?: React.ReactNode;
   /** Number of direct child rows nested under this row (shown as a count badge). */
   childCount?: number;
+  /**
+   * Configured `retry.max-attempts` for this step's YAML definition (if any).
+   * Surfaced as a small red retry badge after the name slot only when the
+   * step is in a dangerous (failed/timed-out/cancelled) state — see Figma
+   * https://www.figma.com/design/bVapoDOKB46hm0pSQXp9nA/?node-id=10735-23813.
+   */
+  maxAttempts?: number;
+  /** 1-based run number shown before the step name (foreach iteration or retry attempt). */
+  runNumber?: number;
 }
 
 const ROW_PADDING_X = 16;
@@ -46,6 +55,8 @@ export const StepExecutionRow = React.memo<StepExecutionRowProps>(
     onToggle,
     expandedContent,
     childCount,
+    maxAttempts,
+    runNumber,
   }) => {
     const styles = useMemoCss(componentStyles);
     const { euiTheme } = useEuiTheme();
@@ -104,6 +115,11 @@ export const StepExecutionRow = React.memo<StepExecutionRowProps>(
           </div>
 
           <div css={styles.nameSlot}>
+            {runNumber != null && (
+              <EuiText size="s" css={styles.runNumber} aria-label={`run ${runNumber}`}>
+                #{runNumber}
+              </EuiText>
+            )}
             <EuiText
               size="s"
               data-test-subj="workflowStepName"
@@ -118,6 +134,24 @@ export const StepExecutionRow = React.memo<StepExecutionRowProps>(
               {stepId}
             </EuiText>
           </div>
+
+          {/* Retry-on-failure badge: configured max-attempts from the YAML
+              (either `step.retry` or `step['on-failure'].retry`). Always
+              shown when configured — the badge represents the retry policy,
+              not the current execution state. See Figma node 10735-23813. */}
+          {maxAttempts != null ? (
+            <div
+              css={styles.retryBadge}
+              data-test-subj="workflowStepRetryBadge"
+              aria-label={i18n.translate('workflowsManagement.stepExecutionRow.retryBadgeAria', {
+                defaultMessage: '{count, plural, one {# retry} other {# retries}} on failure',
+                values: { count: maxAttempts },
+              })}
+            >
+              <EuiIcon type="refresh" size="s" aria-hidden />
+              <span>{maxAttempts}</span>
+            </div>
+          ) : null}
 
           {/* Right-side meta: child count and/or duration. Both can be present
               simultaneously for container steps that themselves took time to run. */}
@@ -269,6 +303,9 @@ const componentStyles = {
       flex: 1,
       minWidth: 0,
       overflow: 'hidden',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 4,
     }),
   stepName: ({ euiTheme }: UseEuiTheme) =>
     css({
@@ -277,6 +314,13 @@ const componentStyles = {
       textOverflow: 'ellipsis',
       color: euiTheme.colors.textParagraph,
       fontWeight: euiTheme.font.weight.regular,
+    }),
+  runNumber: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flexShrink: 0,
+      color: euiTheme.colors.textDisabled,
+      fontWeight: euiTheme.font.weight.regular,
+      fontSize: '11px',
     }),
   metaSlot: ({ euiTheme }: UseEuiTheme) =>
     css({
@@ -287,6 +331,25 @@ const componentStyles = {
       paddingLeft: euiTheme.size.s,
       color: euiTheme.colors.textSubdued,
       fontSize: '12px',
+      fontVariantNumeric: 'tabular-nums',
+    }),
+  retryBadge: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: euiTheme.size.xs,
+      flexShrink: 0,
+      paddingLeft: euiTheme.size.s,
+      paddingRight: euiTheme.size.s,
+      paddingTop: 2,
+      paddingBottom: 2,
+      borderRadius: 999,
+      backgroundColor: transparentize(euiTheme.colors.backgroundBaseDanger, 0.55),
+      border: `1px solid ${transparentize(euiTheme.colors.danger, 0.7)}`,
+      color: euiTheme.colors.danger,
+      fontSize: '12px',
+      fontWeight: euiTheme.font.weight.regular,
+      lineHeight: 1,
       fontVariantNumeric: 'tabular-nums',
     }),
   metaSeparator: ({ euiTheme }: UseEuiTheme) =>
