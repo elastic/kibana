@@ -13,6 +13,7 @@ import type { verdictEnum } from '@kbn/streams-schema';
 import {
   type CommonSearchOptions,
   type TimestampSort,
+  applyFilter,
   applyTimeWindow,
   collapseToLatest,
   inList,
@@ -71,21 +72,15 @@ export class EventClient {
 
     query = applyTimeWindow(query, options);
 
-    if (options.slug?.length) {
-      query = query.where`${inList('discovery_slug', options.slug)}`;
-    }
+    query = applyFilter({ query, options, key: 'slug', column: 'discovery_slug' });
     if (options.exclude_slug?.length) {
       query = query.where`NOT (${inList('discovery_slug', options.exclude_slug)})`;
     }
 
     query = collapseToLatest(query, 'event_id');
 
-    if (options.verdict?.length) {
-      query = query.where`${inList('verdict', options.verdict)}`;
-    }
-    if (options.discovery_id?.length) {
-      query = query.where`${inList('discovery_id', options.discovery_id)}`;
-    }
+    query = applyFilter({ query, options, key: 'verdict' });
+    query = applyFilter({ query, options, key: 'discovery_id' });
     if (options.exclude_grouped) {
       query = query.where`${esql.col('grouped_into')} IS NULL`;
     }

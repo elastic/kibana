@@ -64,8 +64,8 @@ export class DiscoveryClient {
 
     query = applyTimeWindow(query, options);
 
-    query = applyFilter(query, 'kind', options.kind);
-    query = applyFilter(query, 'discovery_id', options.discovery_id);
+    query = applyFilter({ query, options, key: 'kind' });
+    query = applyFilter({ query, options, key: 'discovery_id' });
     if (options.exclude_discovery_id?.length) {
       query = query.where`NOT (${inList('discovery_id', options.exclude_discovery_id)})`;
     }
@@ -94,8 +94,8 @@ export class DiscoveryClient {
 
     query = collapseToLatest(query, 'discovery_slug');
 
-    query = applyFilter(query, 'kind', options.kind);
-    query = applyFilter(query, 'discovery_id', options.discovery_id);
+    query = applyFilter({ query, options, key: 'kind' });
+    query = applyFilter({ query, options, key: 'discovery_id' });
     if (options.exclude_discovery_id?.length) {
       query = query.where`NOT (${inList('discovery_id', options.exclude_discovery_id)})`;
     }

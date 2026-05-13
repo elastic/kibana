@@ -64,22 +64,36 @@ export const collapseToLatest = (query: ComposerQuery, groupBy: string): Compose
     groupBy
   )}`.where`_id == tiebreaker_id`;
 
-export const applyFilter = (
-  query: ComposerQuery,
-  column: string,
-  value: string | string[] | boolean | undefined | null
-): ComposerQuery => {
+interface FilterArgs<T, K extends keyof T & string> {
+  query: ComposerQuery;
+  options: T;
+  key: K;
+  /** ES|QL column name; defaults to `key` when omitted. */
+  column?: string;
+}
+
+export const applyFilter = <T, K extends keyof T & string>({
+  query,
+  options,
+  key,
+  column,
+}: FilterArgs<T, K>): ComposerQuery => {
+  const value = options[key];
   if (value === undefined || value === null) {
     return query;
   }
+  const col = column ?? key;
   if (Array.isArray(value)) {
     if (value.length === 0) {
       return query;
     }
-    return query.where`${inList(column, value)}`;
+    return query.where`${inList(col, value)}`;
   }
   if (typeof value === 'string') {
-    return query.where`${esql.col(column)} == ${esql.str(value)}`;
+    return query.where`${esql.col(col)} == ${esql.str(value)}`;
   }
-  return query.where`${esql.col(column)} == ${value}`;
+  if (typeof value === 'boolean') {
+    return query.where`${esql.col(col)} == ${value}`;
+  }
+  return query;
 };

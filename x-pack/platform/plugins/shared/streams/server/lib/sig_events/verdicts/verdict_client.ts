@@ -68,8 +68,8 @@ export class VerdictClient {
     let query = baseSpaceScopedQuery(VERDICTS_DATA_STREAM, this.clients.space);
     query = applyTimeWindow(query, options);
 
-    query = applyFilter(query, 'verdict', options.verdict);
-    query = applyFilter(query, 'discovery_id', options.discovery_id);
+    query = applyFilter({ query, options, key: 'verdict' });
+    query = applyFilter({ query, options, key: 'discovery_id' });
 
     query = this.applySlugPriorityEval(query, options);
     query = collapseToLatest(query, 'verdict_id');
@@ -92,8 +92,8 @@ export class VerdictClient {
 
     query = collapseToLatest(query, 'discovery_slug');
 
-    query = applyFilter(query, 'verdict', options.verdict);
-    query = applyFilter(query, 'discovery_id', options.discovery_id);
+    query = applyFilter({ query, options, key: 'verdict' });
+    query = applyFilter({ query, options, key: 'discovery_id' });
 
     query = this.applySort(query, options);
     query = query.keep('_source');

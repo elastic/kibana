@@ -54,9 +54,9 @@ const applyIdentityFilters = (
   query: ComposerQuery,
   options: DetectionsSearchOptions
 ): ComposerQuery => {
-  let next = applyFilter(query, 'rule_uuid', options.rule_uuid);
-  next = applyFilter(next, 'rule_name', options.rule_name);
-  next = applyFilter(next, 'stream', options.stream_name);
+  let next = applyFilter({ query, options, key: 'rule_uuid' });
+  next = applyFilter({ query: next, options, key: 'rule_name' });
+  next = applyFilter({ query: next, options, key: 'stream_name', column: 'stream' });
   return next;
 };
 
@@ -64,8 +64,8 @@ const applyStateFilters = (
   query: ComposerQuery,
   options: DetectionsSearchOptions
 ): ComposerQuery => {
-  let next = applyFilter(query, 'silent', options.silent);
-  next = applyFilter(next, 'superseded', options.superseded);
+  let next = applyFilter({ query, options, key: 'silent' });
+  next = applyFilter({ query: next, options, key: 'superseded' });
   if (options.superseded_at?.from) {
     next = next.where`${esql.col('superseded_at')} >= TO_DATETIME(${esql.str(
       options.superseded_at.from
