@@ -78,13 +78,19 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
     });
   });
 
-  test('should display a metric visualization for an ES|QL STATS query', async ({
+  test('should display a metric visualization for ES|QL STATS queries (count and sum)', async ({
     page,
     pageObjects,
   }) => {
-    await pageObjects.discover.writeAndSubmitEsqlQuery(STATS_QUERY);
+    await test.step('renders a metric viz for a STATS count() query', async () => {
+      await pageObjects.discover.writeAndSubmitEsqlQuery(STATS_QUERY);
+      await expect(page.testSubj.locator(METRIC_VIS)).toBeVisible();
+    });
 
-    await expect(page.testSubj.locator(METRIC_VIS)).toBeVisible();
+    await test.step('renders a metric viz for a STATS sum() query', async () => {
+      await pageObjects.discover.writeAndSubmitEsqlQuery(SUM_QUERY);
+      await expect(page.testSubj.locator(METRIC_VIS)).toBeVisible();
+    });
   });
 
   test('should open the inline edit visualization flyout for an ES|QL chart', async ({
@@ -181,15 +187,6 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
     });
   });
 
-  test('should display a metric visualization for a sum() ES|QL query on sample data', async ({
-    page,
-    pageObjects,
-  }) => {
-    await pageObjects.discover.writeAndSubmitEsqlQuery(SUM_QUERY);
-
-    await expect(page.testSubj.locator(METRIC_VIS)).toBeVisible();
-  });
-
   test('should restrict sidebar fields and grid columns to KEEP-listed fields', async ({
     pageObjects,
   }) => {
@@ -207,6 +204,48 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
       for (const field of DROPPED_FIELDS) {
         expect(headerText).not.toContain(field);
       }
+    });
+  });
+
+  test('should embed a saved ES|QL Discover session on a dashboard and interact with its table', async ({
+    page,
+    pageObjects,
+  }) => {
+    const savedSearchName = 'ES|QL Saved Search';
+    tracker.track({ type: 'search', title: savedSearchName });
+
+    await test.step('write a KEEP ES|QL query and save the Discover session', async () => {
+      await pageObjects.discover.writeAndSubmitEsqlQuery(KEEP_QUERY);
+      await pageObjects.discover.expectSelectedSidebarFieldsToEqual(KEPT_FIELDS);
+      await pageObjects.discover.saveSearch(savedSearchName);
+    });
+
+    await test.step('add the saved ES|QL session as a panel on a new dashboard', async () => {
+      await pageObjects.dashboard.openNewDashboard();
+      await pageObjects.dashboard.addPanelFromLibrary(savedSearchName);
+      await pageObjects.dashboard.waitForRenderComplete();
+      expect(await pageObjects.dashboard.getPanelCount()).toBe(1);
+    });
+
+    await test.step('verify the embedded panel renders the KEEP-listed columns', async () => {
+      // `addPanelFromLibrary` strips spaces/dashes when waiting for the heading.
+      const panelHeading = page.testSubj.locator(
+        `embeddablePanelHeading-${savedSearchName.replace(/[- ]/g, '')}`
+      );
+      await expect(panelHeading).toBeVisible();
+
+      const headerText = await pageObjects.discover.getDocHeader();
+      for (const field of KEPT_FIELDS) {
+        expect(headerText).toContain(field);
+      }
+    });
+
+    await test.step('interact with the embedded table by opening the first-row doc viewer', async () => {
+      // Expanding a row proves the embedded saved-search grid is fully
+      // interactive end-to-end: rows are rendered, the expand action
+      // surfaces, and the document-viewer flyout opens for the row.
+      await pageObjects.discover.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
+      await pageObjects.discover.closeDocViewerFlyout();
     });
   });
 
