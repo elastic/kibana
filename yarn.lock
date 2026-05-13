@@ -4588,6 +4588,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/agent-builder-workflow-gen@link:x-pack/platform/packages/shared/agent-builder/agent-builder-workflow-gen":
+  version "0.0.0"
+  uid ""
+
 "@kbn/agent-builder-workflows-plugin@link:x-pack/platform/plugins/shared/agent_builder_workflows":
   version "0.0.0"
   uid ""

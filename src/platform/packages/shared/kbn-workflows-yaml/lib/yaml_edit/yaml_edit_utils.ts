@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { isEqual } from 'lodash';
 import { Document, isMap, isPair, isScalar, isSeq, parseDocument, stringify } from 'yaml';
 import type { Node, YAMLMap, YAMLSeq } from 'yaml';
-import { WORKFLOW_DEFINITION_KEYS_ORDER } from '@kbn/workflows-yaml';
-import { getStepNode } from '@kbn/workflows-management-plugin/common/lib/yaml/get_step_node';
+import { WORKFLOW_DEFINITION_KEYS_ORDER } from '../../common/yaml/stringify_workflow_definition';
+import { getStepNode } from './get_step_node';
 
 const FIX_SPLICE_INDENTATION = true;
 const ENABLE_DOT_NOTATION_PATHS = true;
