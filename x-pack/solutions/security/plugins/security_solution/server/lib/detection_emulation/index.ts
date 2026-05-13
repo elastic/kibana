@@ -6,6 +6,7 @@
  */
 
 export * from './alert_tagging';
+export * from './confidence_scorer';
 export * from './emulation_report_type';
 export * from './execution';
 export * from './feature_flag';
