@@ -120,11 +120,14 @@ export const YamlRuleForm = ({
   );
 
   const handleBlur = useCallback(() => {
-    const values = parseAndStoreError();
-    if (values) {
-      applyYamlValuesToForm(values);
+    // Use lenient parsing so partial edits (e.g. query changed but name
+    // still empty) flush to form state. Strict validation only runs on submit.
+    const result = parseYamlToFormValues(yamlText, { strict: false });
+    if (result.values) {
+      setError(null);
+      applyYamlValuesToForm(result.values);
     }
-  }, [parseAndStoreError, applyYamlValuesToForm]);
+  }, [yamlText, applyYamlValuesToForm]);
 
   const handleYamlChange = useCallback(
     (newYaml: string) => {

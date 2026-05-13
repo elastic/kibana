@@ -171,6 +171,10 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
         const result = parseYamlToFormValues(yamlText, { strict: false });
         if (result.values) {
           methods.reset(result.values);
+          // Keep sandbox.query in sync so the bridge effect doesn't
+          // overwrite the form reset with the stale pre-YAML query.
+          const parsedQuery = result.values.evaluation?.query?.base ?? '';
+          dispatch({ type: 'COMMIT_SANDBOX_QUERY', query: parsedQuery });
         }
         preYamlFormSnapshotRef.current = null;
       }
@@ -199,22 +203,24 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
     [isCreate, onCreateRule, ruleId, onUpdateRule]
   );
 
-  // Sync the committed query into RHF whenever the user applies changes from the Sandbox.
-  // timeField and grouping are written directly to RHF by the form components via useFormContext.
+  // Bridge: sync the committed Sandbox query into RHF on every Apply click.
+  // Keyed on sandboxCommitVersion so it fires even when the query value hasn't
+  // changed (e.g. user clicks Apply without editing the Sandbox).
   useEffect(() => {
-    if (uiState.queryCommitted) {
-      methods.setValue('evaluation', { query: { base: uiState.sandbox.query } });
-    }
-  }, [uiState.sandbox.query, uiState.queryCommitted, methods]);
+    if (!uiState.queryCommitted) return;
+    methods.setValue('evaluation', { query: { base: uiState.sandbox.query } });
+  }, [uiState.sandboxCommitVersion, uiState.queryCommitted, uiState.sandbox.query, methods]);
 
-  // Form → YAML: regenerate YAML when the Sandbox commits a new query.
-  // Runs after the bridge effect above (declaration order) so getValues()
-  // already reflects the updated query. Only targets sandbox.query — the
-  // sole external source that changes form values while YAML mode is active.
+  // Form → YAML: watch(callback) regenerates YAML on any form value change
+  // while YAML mode is active. The Sandbox path flows through here:
+  // Apply → bridge writes sandbox.query to form → watch fires → YAML updates.
   useEffect(() => {
-    if (!uiState.yamlMode || !uiState.queryCommitted) return;
-    setYamlText(serializeFormToYaml(methods.getValues()));
-  }, [uiState.yamlMode, uiState.sandbox.query, uiState.queryCommitted, methods]);
+    if (!uiState.yamlMode) return;
+    const subscription = methods.watch(() => {
+      setYamlText(serializeFormToYaml(methods.getValues()));
+    });
+    return () => subscription.unsubscribe();
+  }, [uiState.yamlMode, methods, setYamlText]);
 
   const handleSubmit = methods.handleSubmit((values) => {
     if (isCreate) {
