@@ -28,7 +28,7 @@ import {
   mapVariableToColumn,
   isComputedColumn,
   getQuerySummary,
-  resolveRenamedSourceField,
+  buildRenameSourceFieldMap,
 } from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
 import type { Observable } from 'rxjs';
@@ -370,6 +370,11 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           // Get query summary to identify computed columns
           const querySummary = getQuerySummary(query);
 
+          const renameSourceFieldMap: Map<string, string> | null = querySummary.renamedColumnsPairs
+            ?.size
+            ? buildRenameSourceFieldMap(query)
+            : null;
+
           const allColumns =
             (body.all_columns ?? body.columns)?.map(({ name, type, original_types }) => {
               const originalTypes = original_types ?? [];
@@ -378,10 +383,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                 ? KBN_FIELD_TYPES.CONFLICT
                 : esFieldTypeToKibanaFieldType(type);
 
-              const sourceField =
-                querySummary.renamedColumnsPairs && querySummary.renamedColumnsPairs.size > 0
-                  ? resolveRenamedSourceField(name, query)
-                  : name;
+              const sourceField = renameSourceFieldMap?.get(name) ?? name;
 
               return {
                 id: name,
