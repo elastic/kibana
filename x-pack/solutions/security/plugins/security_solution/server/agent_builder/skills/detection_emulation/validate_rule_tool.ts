@@ -54,6 +54,7 @@ import {
   createDefaultConcurrencyGateConfig,
 } from '../../../lib/detection_emulation/execution/concurrency_gate';
 import { buildAgentBuilderActor } from '../../../lib/detection_emulation/execution/audit_context';
+import { resolveCurrentUsername } from './resolve_current_user';
 import { validateRuleSchema } from './validate_rule_input';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -272,8 +273,22 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
         const [coreStart, startPlugins] = await core.getStartServices();
 
         // Step 2: Authenticated caller required — emulation must be attributable.
-        const currentUser = await coreStart.security?.authc.getCurrentUser(request);
-        if (!currentUser?.username) {
+        //
+        // `coreStart.security?.authc.getCurrentUser(request)` reads
+        // `http.auth.get(request).state`, which is only populated by Kibana's
+        // HTTP auth middleware on real requests. When Agent Builder dispatches
+        // the agent run on Task Manager (the default async path), the runtime
+        // hands tools a fake `KibanaRequest` whose `.state` is empty, so
+        // `getCurrentUser` returns `null` even though the chat endpoint already
+        // authenticated the operator. The shared helper falls back to ES
+        // `_security/_authenticate` for that case, matching the canonical
+        // `getUserFromRequest` pattern in the agent_builder plugin.
+        const username = await resolveCurrentUsername({
+          request,
+          security: coreStart.security,
+          esClient: esClient.asCurrentUser,
+        });
+        if (!username) {
           return {
             results: [
               {
@@ -548,7 +563,7 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
             payloads: scenarioResult.selectedPayloads,
             hostId: endpointIds[0],
             hostName: endpointIds[0],
-            userName: currentUser.username,
+            userName: username,
           });
 
           await executeLogInjection(
@@ -584,7 +599,7 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
             esClient: esClient.asCurrentUser,
             spaceId,
             casesClient,
-            username: currentUser.username,
+            username,
             logger,
             actorContext,
           });
@@ -685,7 +700,7 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
             fp: score.fp,
           },
           perPhase,
-          operator: currentUser.username,
+          operator: username,
           spaceId,
           // PROD-2: persist the same attribution we put on the audit
           // comment. Auditors can `actor.kind:"agent-builder"` filter

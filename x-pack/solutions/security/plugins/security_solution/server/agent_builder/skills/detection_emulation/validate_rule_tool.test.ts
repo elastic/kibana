@@ -56,6 +56,18 @@ interface MockContextOptions {
   runId?: string;
   conversationId?: string;
   executionId?: string;
+  /**
+   * When true, simulates the Task Manager dispatch path: the request
+   * carries `isFakeRequest: true` so `resolveCurrentUsername` skips
+   * `security.authc.getCurrentUser` and falls back to ES
+   * `_security/_authenticate` for the API key owner.
+   */
+  isFakeRequest?: boolean;
+  /**
+   * Username returned by the ES `_security/_authenticate` fallback. Use
+   * `null` to simulate an authenticate failure.
+   */
+  esAuthenticateUsername?: string | null;
 }
 
 const createMockContext = (options: MockContextOptions = {}) => {
@@ -68,10 +80,21 @@ const createMockContext = (options: MockContextOptions = {}) => {
     status: options.promptStatus ?? ConfirmationStatus.unprompted,
   });
 
+  const authenticateUsername =
+    options.esAuthenticateUsername === undefined
+      ? 'task-manager-user'
+      : options.esAuthenticateUsername;
+  const authenticate =
+    authenticateUsername === null
+      ? jest.fn().mockRejectedValue(new Error('authenticate failed'))
+      : jest.fn().mockResolvedValue({ username: authenticateUsername });
+
   return {
     spaceId: 'default',
-    request: { headers: {} },
-    esClient: { asCurrentUser: {} },
+    request: { headers: {}, isFakeRequest: options.isFakeRequest ?? false },
+    esClient: {
+      asCurrentUser: { security: { authenticate } },
+    },
     executionMode: options.executionMode,
     callContext: {
       toolId: 'security.detection-emulation.validate-rule',
@@ -100,13 +123,16 @@ const createMockContext = (options: MockContextOptions = {}) => {
   };
 };
 
+// Kibana's `security.authc.getCurrentUser` is synchronous (returns
+// `AuthenticatedUser | null` directly). The mock matches that contract so
+// `resolveCurrentUsername` reads the real-request branch correctly.
 const createMockCore = (username: string | null = 'test-user') =>
   ({
     getStartServices: jest.fn().mockResolvedValue([
       {
         security: {
           authc: {
-            getCurrentUser: jest.fn().mockResolvedValue(username ? { username } : null),
+            getCurrentUser: jest.fn().mockReturnValue(username ? { username } : null),
           },
         },
         savedObjects: { getScopedClient: jest.fn() },
@@ -288,6 +314,67 @@ describe('createValidateRuleTool', () => {
       // Pipeline proceeded normally past where HITL would have lived.
       expect(generateScenario as jest.Mock).toHaveBeenCalledTimes(1);
       expect('results' in result).toBe(true);
+    });
+  });
+
+  describe('Step 2 — operator resolution (fakeRequest fallback)', () => {
+    it('falls back to ES _security/_authenticate when the request is a fake KibanaRequest (TM dispatch)', async () => {
+      // Reproduces the failure surfaced by Agent Builder dispatch on Task
+      // Manager: the runtime hands the tool a synthetic KibanaRequest whose
+      // `http.auth.get(request).state` is empty, so `getCurrentUser` returns
+      // null. The skill must fall back to the API key owner reported by
+      // ES `_security/_authenticate`. Without the fallback, every
+      // chat-driven validate_rule call returned 401.
+      (generateScenario as jest.Mock).mockResolvedValueOnce({
+        ok: false,
+        reason: 'no_mitre_tags',
+      });
+
+      const tool = createTool();
+      const context = createMockContext({
+        executionMode: AgentExecutionMode.standalone,
+        isFakeRequest: true,
+        esAuthenticateUsername: 'tm-key-owner',
+      });
+
+      const result = await invokeHandler(tool, REAL_EXECUTION_INPUT, context);
+
+      // Must have probed ES exactly once for the API key owner.
+      expect(context.esClient.asCurrentUser.security.authenticate).toHaveBeenCalledTimes(1);
+
+      // Pipeline proceeded past Step 2 and reached scenario generation
+      // (which we stubbed) — proving the auth gate accepted the fallback
+      // username and did not return 401.
+      expect(generateScenario as jest.Mock).toHaveBeenCalledTimes(1);
+      expect('results' in result).toBe(true);
+      if (!('results' in result)) return;
+      expect(result.results[0].data).toMatchObject({
+        error_type: 'no_mitre_tags',
+        rule_id: 'rule-under-test',
+      });
+    });
+
+    it('returns 401 only when both getCurrentUser and ES authenticate fail', async () => {
+      const tool = createTool({ core: createMockCore(null) });
+      const context = createMockContext({
+        // Real-request shape, but getCurrentUser returns null AND ES
+        // authenticate rejects — there is genuinely no operator to attribute.
+        esAuthenticateUsername: null,
+      });
+
+      const result = await invokeHandler(tool, LOG_INJECTION_INPUT, context);
+
+      expect('results' in result).toBe(true);
+      if (!('results' in result)) return;
+      expect(result.results[0].data).toMatchObject({
+        error_type: 'authorization_error',
+        message: 'Authentication is required to run a rule validation.',
+        status_code: 401,
+      });
+
+      // Must not have proceeded to scenario generation when no operator
+      // could be resolved.
+      expect(generateScenario as jest.Mock).not.toHaveBeenCalled();
     });
   });
 

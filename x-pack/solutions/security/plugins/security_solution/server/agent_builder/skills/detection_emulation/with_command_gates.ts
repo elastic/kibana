@@ -32,6 +32,7 @@ import {
 } from '../../../lib/detection_emulation/feature_flag';
 import { createSavedObjectRuleBindingLookup } from '../../../lib/detection_emulation/rule_binding_lookup';
 import { emulationRuleBindingTypeName } from '../../../lib/detection_emulation/rule_binding';
+import { resolveCurrentUsername } from './resolve_current_user';
 
 /**
  * Shared per-call dependencies the four per-family runEmulationCommand
@@ -267,8 +268,19 @@ export const withCommandGates = async (
       );
       casesClient = undefined;
     }
-    const currentUser = await coreStart.security?.authc.getCurrentUser(request);
-    if (!currentUser?.username) {
+    // Inside Agent Builder the request can be a fake KibanaRequest (Task
+    // Manager dispatches the agent loop with a synthetic request whose
+    // `http.auth.get(request).state` is empty), so `getCurrentUser` returns
+    // null even though the chat endpoint already authenticated the operator.
+    // The shared helper falls back to ES `_security/_authenticate` for that
+    // case, matching the canonical `getUserFromRequest` pattern in the
+    // agent_builder plugin.
+    const username = await resolveCurrentUsername({
+      request,
+      security: coreStart.security,
+      esClient: esClient.asCurrentUser,
+    });
+    if (!username) {
       rateLimiter.release(rateLimitToken);
       logger.warn(
         `Emulation command [${command}] for emulation [${emulationId}] blocked: no authenticated user`
@@ -307,7 +319,7 @@ export const withCommandGates = async (
       esClient: esClient.asCurrentUser,
       spaceId,
       casesClient,
-      username: currentUser.username,
+      username,
       logger,
       ruleBindingLookup,
       actorContext,
