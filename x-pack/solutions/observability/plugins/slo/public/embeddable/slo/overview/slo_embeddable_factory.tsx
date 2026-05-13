@@ -21,7 +21,7 @@ import {
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useEffect, useMemo } from 'react';
-import { BehaviorSubject, Subject, map, merge } from 'rxjs';
+import { BehaviorSubject, Subject, map, merge, skip } from 'rxjs';
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { rewriteFiltersForSloSummary } from '../../../../common/rewrite_slo_filters';
 import { PluginContext } from '../../../context/plugin_context';
@@ -123,7 +123,10 @@ export const getOverviewEmbeddableFactory = ({
       anyStateChange$: merge(
         drilldownsManager.anyStateChange$,
         titleManager.anyStateChange$,
-        overviewMode$.pipe(map(() => undefined)),
+        overviewMode$.pipe(
+                skip(1),
+                map(() => undefined)
+              ),
         singleSloManager.anyStateChange$,
         groupSloManager.anyStateChange$
       ),
