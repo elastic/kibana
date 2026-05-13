@@ -11,13 +11,7 @@ It groups samples by time series before aggregating, which enables functions lik
 TS index_pattern [METADATA fields]
 ```
 
-**Key differences from `FROM`:**
-
-- `FROM` treats every document as an independent row. That is right for events, but metric aggregations often need the time series that each row belongs to.
-- `TS` adds that time series context: it groups and aggregates data points by time series before any other aggregation runs, and enables functions like `RATE`, `AVG_OVER_TIME`, and LAST_OVER_TIME.
-- A `TS | STATS` query normally has two aggregation phases - The inner phase reduces samples inside each time series; the outer phase groups and combines those per-series results.
-- The default inner aggregation is `LAST_OVER_TIME`, which is why `TS metrics | STATS AVG(cpu_usage)` and `FROM metrics | STATS AVG(cpu_usage)` can return different numbers.
-- Use `TS` to query a time series data stream. Use `FROM` for events and raw document inspection.
+Use `TS` for metric aggregations on TSDB indices. Use `FROM` for raw document inspection.
 
 ## Inner/Outer aggregation phases
 
@@ -55,12 +49,10 @@ For fields with `time_series_metric: counter`.
 // Average rate per host per hour
 // host is a dimension of the TSDS index metrics
 TS metrics
-| WHERE TRANGE(1 hour)
+| WHERE TRANGE(?_tstart, ?_tend)
 | STATS SUM(RATE(search_requests)) BY TBUCKET(1 hour), host
 
 // Instant rate (last two points only) per cluster and 10 minutes
-// k8s is an example of a TSDS index, to showcase that time series indexes do not have to be called metrics
-// cluster is a dimension of the TSDS index k8s
 TS k8s
 | STATS SUM(IRATE(network.total_bytes_in)) BY cluster, TBUCKET(10 minute)
 
@@ -94,12 +86,10 @@ For gauge metrics and general numeric fields (`double`, `integer`, `long`, `aggr
 // Average memory per cluster per 5 minutes
 // cluster is a dimension of the TSDS index metrics
 TS metrics
-| WHERE TRANGE(1 day)
+| WHERE TRANGE(?_tstart, ?_tend)
 | STATS AVG(AVG_OVER_TIME(memory_usage)) BY cluster, TBUCKET(5 minute)
 
 // P95 network cost per cluster per minute
-// k8s is an example of a TSDS index, to showcase that time series indexes do not have to be called metrics
-// cluster is a dimension of the TSDS index k8s
 TS k8s
 | STATS MAX(PERCENTILE_OVER_TIME(network.cost, 95)) BY cluster, TBUCKET(1 minute)
 
@@ -137,7 +127,7 @@ interval. The window must be a multiple of the `TBUCKET` interval.
 // Average rate per host over a 10-minute sliding window, bucketed by 1 minute
 // host is a dimension of the TSDS index metrics
 TS metrics
-| WHERE TRANGE(1 hour)
+| WHERE TRANGE(?_tstart, ?_tend)
 | STATS AVG(RATE(requests, 10m)) BY TBUCKET(1m), host
 ```
 
@@ -167,27 +157,6 @@ TS metrics
 | STATS AVG(AVG_OVER_TIME(cpu_percent)) BY TBUCKET(5 minute), service
 ```
 
-## CLAMP Functions
-
-Bound metric values to a range. Useful for capping outliers or enforcing value limits in time series analysis.
-
-| Function    | Description                                         | Syntax                   |
-| ----------- | --------------------------------------------------- | ------------------------ |
-| `CLAMP`     | Clamp values to `[min, max]` range                  | `CLAMP(field, min, max)` |
-| `CLAMP_MIN` | Set a lower bound; values below `min` become `min`  | `CLAMP_MIN(field, min)`  |
-| `CLAMP_MAX` | Set an upper bound; values above `max` become `max` | `CLAMP_MAX(field, max)`  |
-
-```esql
-// Clamp network cost between 1 and 10
-TS k8s
-| EVAL clamped_cost = CLAMP(network.cost, 1, 10)
-| STATS SUM(clamped_cost) BY TBUCKET(1 minute)
-
-// Aggregate with clamped values
-TS k8s
-| STATS total = SUM(CLAMP_MAX(network.cost, 1)) BY TBUCKET(1 minute)
-```
-
 ## Post-process TS results with ES|QL
 
 The first `STATS` command is the boundary between time series processing and regular ES|QL processing.
@@ -195,11 +164,13 @@ Before that first `STATS`, `TS` needs to keep the data grouped by `_tsid`, so co
 After that first `STATS`, the output is a regular ES|QL table.
 You can sort it, limit it, join lookup data, enrich it, or compute derived columns.
 
+`INLINE STATS` is particularly powerful here: unlike `STATS`, it preserves all input columns while appending per-group aggregate columns. This means you can annotate every row with group-level context (e.g. the maximum bucketed average across all time buckets for a given host) without collapsing rows — ideal for computing normalized ratios or flagging anomalies in time series output.
+
 For example, this query calculates average CPU per host and bucket, finds the maximum bucketed average for each host, and returns the ratio:
 
 ```esql
 TS metrics-*
-| WHERE TRANGE(1h)
+| WHERE TRANGE(?_tstart, ?_tend)
 | STATS avg_cpu = AVG(AVG_OVER_TIME(cpu_usage)) BY host.name, time_bucket = TBUCKET(5m)
 | INLINE STATS max_avg_cpu = MAX(avg_cpu) BY host.name
 | EVAL cpu_ratio = avg_cpu / max_avg_cpu
@@ -209,28 +180,12 @@ TS metrics-*
 
 ## Common Query Patterns
 
-### Rate of a Counter per Host per Hour
-
-```esql
-TS metrics
-| WHERE TRANGE(1 hour)
-| STATS SUM(RATE(search_requests)) BY TBUCKET(1 hour), host
-```
-
 ### Total Rate per Host (No Time Bucketing)
 
 ```esql
 TS metrics
-| WHERE TRANGE(1 hour)
+| WHERE TRANGE(?_tstart, ?_tend)
 | STATS SUM(RATE(search_requests)) BY host
-```
-
-### Average Gauge per Cluster Over Time
-
-```esql
-TS metrics
-| WHERE TRANGE(1 day)
-| STATS AVG(AVG_OVER_TIME(memory_usage)) BY TBUCKET(5 minute), cluster
 ```
 
 ### Per-Time-Series Averages vs Global Average
@@ -241,40 +196,6 @@ TS metrics | STATS AVG(AVG_OVER_TIME(memory_usage))
 
 // Average of last values per time series (default behavior)
 TS metrics | STATS AVG(memory_usage)
-```
-
-### Detect Missing Data
-
-```esql
-// k8s is an example of a TSDS index, to showcase that time series indexes do not have to be called metrics
-// pod is a dimension of the TSDS index k8s
-TS k8s
-| WHERE TRANGE(1 hour)
-| STATS missing = MAX(ABSENT_OVER_TIME(events_received)) BY pod, TBUCKET(2 minute)
-```
-
-### Counter Increase Totals
-
-```esql
-TS k8s
-| WHERE TRANGE(1 hour)
-| STATS SUM(INCREASE(network.total_bytes_in)) BY cluster, TBUCKET(10 minute)
-```
-
-### Instant Rate (Last Two Points)
-
-```esql
-TS k8s
-| WHERE TRANGE(1 hour)
-| STATS SUM(IRATE(network.total_bytes_in)) BY cluster, TBUCKET(10 minute)
-```
-
-### Sliding Window Rate
-
-```esql
-TS metrics
-| WHERE TRANGE(1 hour)
-| STATS AVG(RATE(requests, 10m)) BY TBUCKET(1m), host
 ```
 
 ### COUNT(*) equivalent
@@ -288,7 +209,7 @@ TS logs
 
 ## Guidelines
 
-- **Use `TS` for all aggregations on TSDS indices.** `FROM` is still available for listing raw documents, but use `TS` for metrics aggregations.
+- **Use `TS` for all aggregations on TSDB indices.** `FROM` is still available for listing raw documents, but use `TS` for metrics aggregations.
 - **Use `SUM` as the outer function for counters.** Rates and increases are additive across time series that share a
   dimension (e.g. host). Use `AVG` or `MAX` for gauges.
 - **Always add a time range filter** with `TRANGE` (or `WHERE @timestamp`) to limit scan volume, except in Kibana where
@@ -297,6 +218,7 @@ TS logs
   outer function.
 - **Avoid mixing metrics with different dimensions** in one query. If `foo` and `bar` have different dimension values,
   `SUM(RATE(foo)) + SUM(RATE(bar))` may produce nulls for mismatched dimensions.
+- **Use CLAMP functions to bound gauge values.** `CLAMP`, `CLAMP_MIN`, and `CLAMP_MAX` are useful for filtering outliers before aggregation (e.g. `CLAMP_MAX(cpu_pct, 100)` to cap values before computing averages).
 - `COUNT()` and `COUNT(*)` is not supported with TS
 - Cannot combine with `FORK` before `STATS` is applied
 - For `TS`, prefer `TRANGE` over manual `WHERE @timestamp > NOW() - ...` filters.

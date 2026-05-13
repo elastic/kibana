@@ -152,3 +152,25 @@ FROM sales
 | SORT date
 ```
 
+```esql
+// What is the HTTP request rate per host over the selected time range? (time series index)
+TS metrics
+| WHERE TRANGE(?_tstart, ?_tend)
+| STATS requests_per_sec = SUM(RATE(http.requests)) BY host, TBUCKET(5 minute)
+```
+
+```esql
+// What is the average CPU usage per cluster over time? (time series index)
+TS metrics
+| WHERE TRANGE(?_tstart, ?_tend)
+| STATS avg_cpu = AVG(AVG_OVER_TIME(system.cpu.pct)) BY cluster, TBUCKET(5 minute)
+```
+
+```esql
+// Which pods had missing telemetry over the selected time range? (time series index)
+TS k8s
+| WHERE TRANGE(?_tstart, ?_tend)
+| STATS missing = MAX(ABSENT_OVER_TIME(events_received)) BY pod, TBUCKET(2 minute)
+| WHERE missing == true
+```
+
