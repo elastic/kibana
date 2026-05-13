@@ -567,14 +567,8 @@ export class DataViewsService {
    * Get default index pattern id
    */
   getDefaultId = async (): Promise<string | null> => {
-    const allDataViews = await this.getIdsWithTitle();
-    if (allDataViews.length === 0) {
-      return null;
-    }
-    const firstId = allDataViews[0].id;
     const defaultId = await this.config.get<string | null>(DEFAULT_DATA_VIEW_ID);
-    const exists = defaultId ? allDataViews.some((pattern) => pattern.id === defaultId) : false;
-    return exists && defaultId ? defaultId : firstId;
+    return defaultId ?? null;
   };
 
   /**
@@ -1429,7 +1423,21 @@ export class DataViewsService {
   }
 
   private async getDefaultDataViewId() {
-    return this.getDefaultId();
+    if (!this.savedObjectsCache) {
+      await this.refreshSavedObjectsCache();
+    }
+    if (!this.savedObjectsCache || this.savedObjectsCache.length === 0) {
+      return null;
+    }
+    const configuredDefaultId = await this.getDefaultId();
+    if (configuredDefaultId) {
+      const exists = this.savedObjectsCache.some((obj) => obj.id === configuredDefaultId);
+      if (exists) return configuredDefaultId;
+    }
+    const sorted = [...this.savedObjectsCache].sort(
+      (a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime()
+    );
+    return sorted[0]?.id ?? null;
   }
 
   /**
