@@ -25,6 +25,11 @@ import type { ServerlessType } from '../../../common/serverless';
 import { getServerlessTypeFromCloudData } from '../../../common/serverless';
 import { maybe } from '../../../common/utils/maybe';
 
+export interface IngestionTimeRange {
+  from: number;
+  to: number;
+}
+
 export interface ServiceAgentResponse {
   agentName?: string;
   runtimeName?: string;
@@ -32,6 +37,11 @@ export interface ServiceAgentResponse {
   telemetrySdkName?: string;
   telemetrySdkLanguage?: string;
   serverlessType?: ServerlessType;
+  hasMultipleAgentTypes?: boolean;
+  ingestionTimeRanges?: {
+    classicApm: IngestionTimeRange;
+    otelNative: IngestionTimeRange;
+  };
 }
 
 export async function getServiceAgent({
@@ -101,6 +111,35 @@ export async function getServiceAgent({
     },
     fields,
     sort: { '@timestamp': { order: 'desc' as const }, _score: { order: 'desc' as const } },
+    aggs: {
+      ingestion_type: {
+        filters: {
+          filters: {
+            otel_native: {
+              bool: {
+                should: [
+                  { exists: { field: TELEMETRY_SDK_NAME } },
+                  { exists: { field: TELEMETRY_SDK_LANGUAGE } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+            classic_apm: {
+              bool: {
+                must_not: [
+                  { exists: { field: TELEMETRY_SDK_NAME } },
+                  { exists: { field: TELEMETRY_SDK_LANGUAGE } },
+                ],
+              },
+            },
+          },
+        },
+        aggs: {
+          min_timestamp: { min: { field: '@timestamp' } },
+          max_timestamp: { max: { field: '@timestamp' } },
+        },
+      },
+    },
   };
 
   const response = await apmEventClient.search('get_service_agent_name', params);
@@ -120,6 +159,27 @@ export async function getServiceAgent({
     event[SERVICE_RUNTIME_VERSION] ??
     (hit.fields?.[PROCESS_RUNTIME_VERSION]?.[0] as string | undefined);
 
+  const ingestionBuckets = response.aggregations?.ingestion_type?.buckets;
+  const otelCount = ingestionBuckets?.otel_native?.doc_count ?? 0;
+  const classicCount = ingestionBuckets?.classic_apm?.doc_count ?? 0;
+  const hasMultipleAgentTypes = otelCount > 0 && classicCount > 0;
+
+  const classicBucket = ingestionBuckets?.classic_apm;
+  const otelBucket = ingestionBuckets?.otel_native;
+
+  const ingestionTimeRanges = hasMultipleAgentTypes
+    ? {
+        classicApm: {
+          from: classicBucket?.min_timestamp?.value ?? start,
+          to: classicBucket?.max_timestamp?.value ?? end,
+        },
+        otelNative: {
+          from: otelBucket?.min_timestamp?.value ?? start,
+          to: otelBucket?.max_timestamp?.value ?? end,
+        },
+      }
+    : undefined;
+
   return {
     agentName: event[AGENT_NAME],
     telemetrySdkName: event[TELEMETRY_SDK_NAME],
@@ -127,5 +187,7 @@ export async function getServiceAgent({
     runtimeName: event[SERVICE_RUNTIME_NAME],
     runtimeVersion,
     serverlessType,
+    hasMultipleAgentTypes,
+    ingestionTimeRanges,
   };
 }

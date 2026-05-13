@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
+import moment from 'moment';
 import { isElasticAgentName, isJRubyAgentName } from '@kbn/elastic-agent-utils/src/agent_guards';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isAWSLambdaAgentName } from '../../../../common/agent_name';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -28,6 +29,8 @@ export function Metrics() {
     telemetrySdkName,
     telemetrySdkLanguage,
     serviceAgentStatus,
+    hasMultipleAgentTypes,
+    ingestionTimeRanges,
   } = useApmServiceContext();
   const isAWSLambda = isAWSLambdaAgentName(serverlessType);
   const { dataView, apmIndices } = useAdHocApmDataView();
@@ -71,24 +74,122 @@ export function Metrics() {
     );
   }
 
+  const dateFormat = 'MMM D, YYYY HH:mm';
+  const formatRange = (range: { from: number; to: number }) =>
+    `${moment(range.from).format(dateFormat)} – ${moment(range.to).format(dateFormat)}`;
+
+  const hasOverlap =
+    ingestionTimeRanges &&
+    ingestionTimeRanges.classicApm.from < ingestionTimeRanges.otelNative.to &&
+    ingestionTimeRanges.otelNative.from < ingestionTimeRanges.classicApm.to;
+
+  const mixedAgentCallout = (() => {
+    if (!hasMultipleAgentTypes || !ingestionTimeRanges) {
+      return null;
+    }
+
+    if (hasOverlap) {
+      return (
+        <>
+          <EuiCallOut
+            announceOnMount
+            title={i18n.translate('xpack.apm.metrics.mixedAgentTypes.overlapping.title', {
+              defaultMessage:
+                'This service has overlapping data from multiple instrumentation types. Only metrics from the most recent instrumentation are shown.',
+            })}
+            iconType="warning"
+            color="warning"
+            data-test-subj="apmMetricsMixedAgentTypesOverlap"
+          >
+            <p>
+              {i18n.translate('xpack.apm.metrics.mixedAgentTypes.classicRange', {
+                defaultMessage: 'Classic APM metrics: {range}',
+                values: { range: formatRange(ingestionTimeRanges.classicApm) },
+              })}
+              <br />
+              {i18n.translate('xpack.apm.metrics.mixedAgentTypes.otelRange', {
+                defaultMessage: 'OpenTelemetry metrics: {range}',
+                values: { range: formatRange(ingestionTimeRanges.otelNative) },
+              })}
+            </p>
+            <p>
+              {i18n.translate('xpack.apm.metrics.mixedAgentTypes.overlapping.description', {
+                defaultMessage:
+                  'Both instrumentation types are sending data simultaneously. Metrics from the other type are not displayed in this view.',
+              })}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      );
+    }
+
+    return (
+      <>
+        <EuiCallOut
+          announceOnMount
+          title={i18n.translate('xpack.apm.metrics.mixedAgentTypes.sequential.title', {
+            defaultMessage:
+              'The selected time range contains data from multiple instrumentation types. Only metrics from the most recent instrumentation are shown.',
+          })}
+          iconType="info"
+          color="primary"
+          data-test-subj="apmMetricsMixedAgentTypes"
+        >
+          <p>
+            {i18n.translate('xpack.apm.metrics.mixedAgentTypes.classicRange', {
+              defaultMessage: 'Classic APM metrics: {range}',
+              values: { range: formatRange(ingestionTimeRanges.classicApm) },
+            })}
+            <br />
+            {i18n.translate('xpack.apm.metrics.mixedAgentTypes.otelRange', {
+              defaultMessage: 'OpenTelemetry metrics: {range}',
+              values: { range: formatRange(ingestionTimeRanges.otelNative) },
+            })}
+          </p>
+          <p>
+            {i18n.translate('xpack.apm.metrics.mixedAgentTypes.sequential.description', {
+              defaultMessage:
+                'Adjust the time range to view metrics from a specific instrumentation type.',
+            })}
+          </p>
+        </EuiCallOut>
+        <EuiSpacer size="m" />
+      </>
+    );
+  })();
+
   if (hasDashboardFile && dataView) {
     return (
-      <JsonMetricsDashboard
-        agentName={agentName}
-        telemetrySdkName={telemetrySdkName}
-        telemetrySdkLanguage={telemetrySdkLanguage}
-        runtimeName={runtimeName}
-        runtimeVersion={runtimeVersion}
-        serverlessType={serverlessType}
-        dataView={dataView}
-        apmIndices={apmIndices}
-      />
+      <>
+        {mixedAgentCallout}
+        <JsonMetricsDashboard
+          agentName={agentName}
+          telemetrySdkName={telemetrySdkName}
+          telemetrySdkLanguage={telemetrySdkLanguage}
+          runtimeName={runtimeName}
+          runtimeVersion={runtimeVersion}
+          serverlessType={serverlessType}
+          dataView={dataView}
+          apmIndices={apmIndices}
+        />
+      </>
     );
   }
 
   if (!isAWSLambda && isJRubyAgentName(agentName, runtimeName)) {
-    return <JvmMetricsOverview />;
+    return (
+      <>
+        {mixedAgentCallout}
+        <JvmMetricsOverview />
+      </>
+    );
   }
 
-  return <ServiceMetrics />;
+  return (
+    <>
+      {mixedAgentCallout}
+      <ServiceMetrics />
+    </>
+  );
 }
