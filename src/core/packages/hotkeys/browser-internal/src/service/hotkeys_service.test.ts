@@ -69,8 +69,89 @@ describe('HotkeysService', () => {
       const start = bootstrapHotkeys(service);
       expect(typeof start.register).toBe('function');
       expect(typeof start.registerMany).toBe('function');
+      expect(typeof start.registerForDiscovery).toBe('function');
       expect(typeof start.forApp).toBe('function');
       expect(service.derived.registrations$.subscribe).toEqual(expect.any(Function));
+    });
+  });
+
+  describe('registerForDiscovery()', () => {
+    it('projects discovery rows onto registrations$ without registering TanStack listeners', async () => {
+      const start = bootstrapHotkeys(service);
+      start.registerForDiscovery({
+        id: 'discovery:a',
+        keys: 'Mod+X',
+        label: 'Discovery only',
+        scope: 'context',
+      });
+
+      const regs = await takeRegistrations(service);
+      expect(regs.find((r) => r.id === 'discovery:a')).toMatchObject({
+        id: 'discovery:a',
+        keys: 'Mod+X',
+        label: 'Discovery only',
+      });
+    });
+
+    it('throws when the same id is registered via register()', () => {
+      const start = bootstrapHotkeys(service);
+      start.register({ id: 'shared:a', keys: 'Mod+S', label: 'Save' }, jest.fn());
+      expect(() =>
+        start.registerForDiscovery({
+          id: 'shared:a',
+          keys: 'Mod+T',
+          label: 'Dup',
+        })
+      ).toThrow(/already registered/);
+    });
+
+    it('throws when the same id is registered twice as discovery', () => {
+      const start = bootstrapHotkeys(service);
+      start.registerForDiscovery({ id: 'disc:dup', keys: 'Mod+1', label: 'One' });
+      expect(() =>
+        start.registerForDiscovery({ id: 'disc:dup', keys: 'Mod+2', label: 'Two' })
+      ).toThrow(/already registered/);
+    });
+
+    it('throws when register() collides with discovery id', () => {
+      const start = bootstrapHotkeys(service);
+      start.registerForDiscovery({ id: 'collision:a', keys: 'Mod+Y', label: 'Discovery' });
+      expect(() =>
+        start.register({ id: 'collision:a', keys: 'Mod+Z', label: 'TanStack' }, jest.fn())
+      ).toThrow(/already registered/);
+    });
+
+    it('removes discovery rows on unregister', async () => {
+      const start = bootstrapHotkeys(service);
+      const handle = start.registerForDiscovery({
+        id: 'discovery:b',
+        keys: 'Mod+M',
+        label: 'Temp',
+      });
+      expect((await takeRegistrations(service)).find((r) => r.id === 'discovery:b')).toBeDefined();
+      handle.unregister();
+      expect(
+        (await takeRegistrations(service)).find((r) => r.id === 'discovery:b')
+      ).toBeUndefined();
+    });
+
+    it('applies overrides to discovery rows for cheat-sheet projection', async () => {
+      const overrides = createOverridesSource();
+      const start = bootstrapHotkeys(service, { overrides });
+      start.registerForDiscovery({
+        id: 'discovery:ov',
+        keys: 'Mod+Enter',
+        label: 'Submit',
+        scope: 'context',
+      });
+
+      overrides.next(new Map([['discovery:ov', { keys: 'Mod+Shift+Enter' }]]));
+
+      const regs = await takeRegistrations(service);
+      expect(regs.find((r) => r.id === 'discovery:ov')).toMatchObject({
+        keys: 'Mod+Shift+Enter',
+        defaultKeys: 'Mod+Enter',
+      });
     });
   });
 

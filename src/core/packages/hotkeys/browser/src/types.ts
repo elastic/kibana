@@ -85,7 +85,9 @@ export interface HotkeyHandle {
    * Update a subset of the definition without re-registering.
    * Useful to toggle `enabled` in response to capability/permission changes.
    */
-  update(partial: Partial<Pick<HotkeyDefinition, 'enabled' | 'label' | 'description'>>): void;
+  update(
+    partial: Partial<Pick<HotkeyDefinition, 'enabled' | 'label' | 'description' | 'keys'>>
+  ): void;
   /** Unregister this hotkey. Safe to call multiple times. */
   unregister(): void;
 }

@@ -40,6 +40,12 @@ export interface HotkeysStart {
   ): () => void;
 
   /**
+   * Register metadata-only hotkey rows for discovery UIs (cheat sheet). Unlike {@link HotkeysStart.register},
+   * this does not attach a listener to the DOM for keyboard events — execution stays with the owning surface (e.g. Monaco).
+   */
+  registerForDiscovery(def: HotkeyDefinition): HotkeyHandle;
+
+  /**
    * Create an app-scoped registrar.
    *
    * When `appId` is omitted, the service snapshots

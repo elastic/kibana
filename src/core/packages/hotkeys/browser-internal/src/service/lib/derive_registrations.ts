@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, type Observable } from 'rxjs';
+import { BehaviorSubject, Subscription, type Observable } from 'rxjs';
 import type { HotkeyManager } from '@tanstack/hotkeys';
 import type { HotkeyDefinition } from '@kbn/core-hotkeys-browser';
+import type { HotkeyOverride } from './overrides_source';
 
 /**
  * Projects a live `HotkeyManager.registrations` store into the
@@ -43,6 +44,39 @@ const projectRegistrations = (manager: HotkeyManager): ReadonlyArray<HotkeyDefin
   return out;
 };
 
+const projectDiscoveryRows = (
+  rows: ReadonlyArray<HotkeyDefinition>,
+  overrides: ReadonlyMap<string, HotkeyOverride>
+): HotkeyDefinition[] =>
+  rows.map((def) => {
+    const override = overrides.get(def.id);
+    return {
+      ...def,
+      keys: override?.keys ?? def.keys,
+      enabled: override?.enabled ?? def.enabled !== false,
+    };
+  });
+
+/**
+ * Merges TanStack-backed registrations with discovery-only rows. When ids collide,
+ * TanStack-backed rows win (callers must avoid duplicate ids across paths).
+ *
+ * @internal
+ */
+export const mergeHotkeyProjections = (
+  managerDefs: ReadonlyArray<HotkeyDefinition>,
+  discoveryDefs: ReadonlyArray<HotkeyDefinition>
+): HotkeyDefinition[] => {
+  const byId = new Map<string, HotkeyDefinition>();
+  for (const def of discoveryDefs) {
+    byId.set(def.id, def);
+  }
+  for (const def of managerDefs) {
+    byId.set(def.id, def);
+  }
+  return Array.from(byId.values()).sort((a, b) => a.id.localeCompare(b.id));
+};
+
 /**
  * Cheap content signature used to suppress `registrations` emissions that
  * don't meaningfully change the projected view. `HotkeyManager.registrations`
@@ -68,20 +102,39 @@ export interface DerivedRegistrations {
   dispose(): void;
 }
 
+/** @internal */
+export interface MergedDerivedRegistrationsDeps {
+  readonly manager: HotkeyManager;
+  readonly getDiscoveryRows: () => ReadonlyArray<HotkeyDefinition>;
+  readonly discoveryUpdates$: Observable<void>;
+  readonly getOverrides: () => ReadonlyMap<string, HotkeyOverride>;
+}
+
 /**
- * Wraps a `HotkeyManager.registrations` TanStack store into a
- * Kibana-flavored RxJS observable. Emits the current projection on
- * subscribe, re-emits on every meaningful state change, and completes
- * when {@link DerivedRegistrations.dispose} is called.
+ * Wraps TanStack `HotkeyManager.registrations` together with optional discovery-only rows into a
+ * single Kibana-flavored RxJS observable. Emits the merged projection on subscribe, re-emits on
+ * every meaningful state change, and completes when {@link DerivedRegistrations.dispose} is called.
  *
  * @internal
  */
-export const createDerivedRegistrations = (manager: HotkeyManager): DerivedRegistrations => {
-  let lastProjection = projectRegistrations(manager);
+export const createDerivedRegistrations = ({
+  manager,
+  getDiscoveryRows,
+  discoveryUpdates$,
+  getOverrides,
+}: MergedDerivedRegistrationsDeps): DerivedRegistrations => {
+  const projectMerged = (): ReadonlyArray<HotkeyDefinition> => {
+    const fromManager = projectRegistrations(manager);
+    const discoveryProjected = projectDiscoveryRows(getDiscoveryRows(), getOverrides());
+    return mergeHotkeyProjections(fromManager, discoveryProjected);
+  };
+
+  let lastProjection = projectMerged();
   let lastSignature = signature(lastProjection);
   const subject = new BehaviorSubject<ReadonlyArray<HotkeyDefinition>>(lastProjection);
-  const subscription = manager.registrations.subscribe(() => {
-    const nextProjection = projectRegistrations(manager);
+
+  const emitIfChanged = () => {
+    const nextProjection = projectMerged();
     const nextSignature = signature(nextProjection);
     if (nextSignature === lastSignature) {
       return;
@@ -89,7 +142,11 @@ export const createDerivedRegistrations = (manager: HotkeyManager): DerivedRegis
     lastProjection = nextProjection;
     lastSignature = nextSignature;
     subject.next(nextProjection);
-  });
+  };
+
+  const subscription = new Subscription();
+  subscription.add(manager.registrations.subscribe(() => emitIfChanged()));
+  subscription.add(discoveryUpdates$.subscribe(() => emitIfChanged()));
 
   return {
     registrations$: subject.asObservable(),
