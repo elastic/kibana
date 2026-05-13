@@ -21,9 +21,26 @@ jest.mock('../../../../hooks/use_apm_params', () => ({
   }),
 }));
 
+// Captured `apmRouter.link` calls so individual tests can inspect the URL the
+// component built (path + query). Name MUST stay `mock*` because `jest.mock`
+// factories run before module-level code; only `mock`-prefixed identifiers are
+// allowed to be referenced from them.
+const mockApmRouterLink = jest.fn(
+  (path: string, opts?: { query?: Record<string, unknown> }) => {
+    const params = new URLSearchParams();
+    Object.entries(opts?.query ?? {}).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        params.set(key, String(value));
+      }
+    });
+    const qs = params.toString();
+    return `/app/apm${path}${qs ? `?${qs}` : ''}`;
+  }
+);
+
 jest.mock('../../../../hooks/use_apm_router', () => ({
   useApmRouter: () => ({
-    link: jest.fn((path: string) => `/app/apm${path}`),
+    link: mockApmRouterLink,
   }),
 }));
 
@@ -111,6 +128,59 @@ describe('ServiceContents', () => {
     it('does not render when showFocusMap is false even if isEmbedded is false', () => {
       render(<ServiceContents {...defaultProps} isEmbedded={false} showFocusMap={false} />);
       expect(screen.queryByTestId('apmServiceContentsFocusMapButton')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('navigation URL kuery handling', () => {
+    // Helper: pull the query object passed to `apmRouter.link(path, …)` for the
+    // given destination path. Avoids parsing URLSearchParams strings in every assert.
+    function getQueryFor(path: string): Record<string, unknown> | undefined {
+      const call = mockApmRouterLink.mock.calls.find(([p]) => p === path);
+      return call?.[1]?.query as Record<string, unknown> | undefined;
+    }
+
+    it('keeps the caller-provided kuery on both Service Details and Focus URLs by default', () => {
+      // Regression guard for dashboard / standalone callers — the default must
+      // *not* silently strip a user's KQL out of the destination tab.
+      render(
+        <ServiceContents
+          {...defaultProps}
+          kuery='service.name:"opbeans-go" and transaction.name:"GET /api/products"'
+          isEmbedded
+          showFocusMap
+        />
+      );
+      expect(getQueryFor('/services/{serviceName}')).toMatchObject({
+        kuery: 'service.name:"opbeans-go" and transaction.name:"GET /api/products"',
+        environment: 'production',
+      });
+      expect(getQueryFor('/services/{serviceName}/service-map')).toMatchObject({
+        kuery: 'service.name:"opbeans-go" and transaction.name:"GET /api/products"',
+        environment: 'production',
+      });
+    });
+
+    it('clears kuery (and keeps environment) on both URLs when clearKueryOnNavigation is true', () => {
+      // The alert details preview opts into this so the alert's context-specific
+      // filter (e.g. `transaction.name:"GET /api/products"`) doesn't follow the
+      // user into the destination tab and hide the very service they just clicked.
+      render(
+        <ServiceContents
+          {...defaultProps}
+          kuery='service.name:"opbeans-go" and transaction.name:"GET /api/products"'
+          isEmbedded
+          showFocusMap
+          clearKueryOnNavigation
+        />
+      );
+      expect(getQueryFor('/services/{serviceName}')).toMatchObject({
+        kuery: '',
+        environment: 'production',
+      });
+      expect(getQueryFor('/services/{serviceName}/service-map')).toMatchObject({
+        kuery: '',
+        environment: 'production',
+      });
     });
   });
 });

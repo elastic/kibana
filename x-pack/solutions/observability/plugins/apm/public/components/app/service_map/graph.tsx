@@ -95,6 +95,18 @@ interface GraphProps {
    */
   showFocusMap?: boolean;
   /**
+   * Propagated to the popover. When true, the Focus button always navigates to the
+   * standalone APM service map (including for the currently focused service). See
+   * `MapPopoverProps` for the full rationale.
+   */
+  alwaysNavigateOnPopoverFocus?: boolean;
+  /**
+   * Propagated to the popover. When true, Service Details / Focus map URLs drop
+   * `kuery`. Used by the alert details preview so the embedded context-specific
+   * filter doesn't follow users into the destination tab. See `ContentsProps`.
+   */
+  clearKueryOnPopoverNavigation?: boolean;
+  /**
    * When set to a service name that exists on the map, that node gets context highlight
    * (frame, fill, primary node ring). Blue edges/markers remain tied to explicit selection only.
    */
@@ -115,6 +127,8 @@ function GraphInner({
   fullMapHref,
   isEmbedded = false,
   showFocusMap,
+  alwaysNavigateOnPopoverFocus,
+  clearKueryOnPopoverNavigation,
   highlightedServiceName,
 }: GraphProps) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
@@ -649,6 +663,8 @@ function GraphInner({
           onClose={handlePopoverClose}
           isEmbedded={isEmbedded}
           showFocusMap={showFocusMap}
+          alwaysNavigateOnFocus={alwaysNavigateOnPopoverFocus}
+          clearKueryOnNavigation={clearKueryOnPopoverNavigation}
         />
       </div>
     </ServiceMapSearchProvider>

@@ -156,6 +156,24 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
                 // can drill into a focused map for any node they click. Embedded
                 // contexts hide it by default (kept for dashboards).
                 showFocusMapInPopover
+                // From the preview, both popover buttons (Service Details / Focus
+                // map) act as plain exits into standalone APM:
+                //  - Drop `kuery`: the alert-scoped filter (e.g. `transaction.name:"..."`)
+                //    would otherwise hide the very service the user just clicked in
+                //    the destination tab. Env still flows through so destination tab
+                //    stays env-scoped.
+                //  - Always navigate on Focus: even when the clicked service *is*
+                //    the alerting service, exit into the standalone APM map so the
+                //    user can leave the embedded preview entirely (default behaviour
+                //    is to re-center the node in-map, which is a no-op for the
+                //    preview's drill-in workflow).
+                clearKueryOnPopoverNavigation
+                alwaysNavigateOnPopoverFocus
+                // Alerts are env-scoped, so the preview must be too. Without this,
+                // cross-env trace fan-out can pull services from other envs into the
+                // map even though no env-scoped data exists for them — see
+                // `strictEnvironmentScope` on the embeddable for the full rationale.
+                strictEnvironmentScope
                 serviceName={serviceName}
                 core={embeddableDeps.coreStart}
                 // Drives the parent panel's hide-when-empty behaviour. The backend

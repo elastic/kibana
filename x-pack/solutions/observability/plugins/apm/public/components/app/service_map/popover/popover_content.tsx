@@ -51,6 +51,14 @@ export interface ContentsProps {
    * sets this to `true` to show "Focus map" inside an embedded context.
    */
   showFocusMap?: boolean;
+  /**
+   * When true, strip `kuery` from URLs built by the "Service Details" and "Focus
+   * map" buttons (env still flows through). Default behavior (`false`) preserves
+   * the user's KQL into the destination tab. The alert details preview sets this
+   * so the embeddable's context-specific filter (e.g. `transaction.name:"..."`)
+   * doesn't follow the user out and hide the service they clicked.
+   */
+  clearKueryOnNavigation?: boolean;
 }
 
 export const ServiceContentsWithDiagnose = withDiagnoseButton(ServiceContents);
@@ -101,6 +109,8 @@ interface PopoverContentProps {
   isEmbedded?: boolean;
   /** Optional override for the Focus map button visibility. Defaults to `!isEmbedded`. */
   showFocusMap?: boolean;
+  /** When true, popover-built URLs (Service Details / Focus map) drop `kuery`. See `ContentsProps`. */
+  clearKueryOnNavigation?: boolean;
 }
 
 /**
@@ -117,6 +127,7 @@ export function PopoverContent({
   onOpenDiagnostic,
   isEmbedded,
   showFocusMap,
+  clearKueryOnNavigation,
 }: PopoverContentProps) {
   const { core } = useApmPluginContext();
   const isDiagnosticModeEnabled = core?.uiSettings?.get(enableDiagnosticMode);
@@ -175,6 +186,7 @@ export function PopoverContent({
         onDiagnoseClick={onOpenDiagnostic}
         isEmbedded={isEmbedded}
         showFocusMap={showFocusMap}
+        clearKueryOnNavigation={clearKueryOnNavigation}
       />
     </EuiFlexGroup>
   );

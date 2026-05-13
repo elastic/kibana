@@ -66,6 +66,35 @@ export interface ServiceMapEmbeddableProps {
    */
   showFocusMapInPopover?: boolean;
   /**
+   * When true, popover-built URLs ("Service Details" / "Focus map") drop `kuery` so the
+   * embedded context-specific filter (e.g. `transaction.name:"..."` for the alert preview)
+   * doesn't follow the user into the destination tab and hide the service they clicked.
+   * `environment` always flows through. Default `false` preserves dashboard behavior of
+   * carrying the dashboard's KQL into the destination tab.
+   */
+  clearKueryOnPopoverNavigation?: boolean;
+  /**
+   * When true, the popover's "Focus map" button always navigates to the standalone APM
+   * service map — including clicks on the currently focused service (where the default
+   * is to just re-center the node in-map). The alert details preview wants every click to
+   * exit into APM so users can leave the embedded preview entirely.
+   */
+  alwaysNavigateOnPopoverFocus?: boolean;
+  /**
+   * When true, the embeddable drops cross-environment spans before rendering. Background:
+   * the backend's `getTraceSampleIds` filters traces by env, but
+   * `fetchExitSpanSamplesFromTraceIds` then pulls *every* span from those traces —
+   * including spans from services in different envs that share a trace.id. This means a
+   * trace where opbeans-go (env: opbeans) calls opbeans-dotnet (env: production) will
+   * surface opbeans-dotnet in an opbeans-scoped preview, even though no opbeans-env doc
+   * for opbeans-dotnet exists.
+   *
+   * Default `false` keeps the existing cross-env trace-topology behaviour (useful for
+   * debugging cross-env traffic on the standalone map). The alert details preview opts in
+   * because the user has an env-scoped alert and expects strict env scoping.
+   */
+  strictEnvironmentScope?: boolean;
+  /**
    * Fires whenever the embeddable transitions between "has data" and "definitively empty"
    * (i.e. `status === SUCCESS && nodes.length === 0`). Loading and error states do NOT
    * fire — they don't tell us whether the result will be empty. Used by the alert details
@@ -98,6 +127,9 @@ export function ServiceMapEmbeddable({
   badgesRangeTo,
   badgesKuery,
   showFocusMapInPopover,
+  clearKueryOnPopoverNavigation,
+  alwaysNavigateOnPopoverFocus,
+  strictEnvironmentScope,
   onEmptyStateChange,
 }: ServiceMapEmbeddableProps) {
   const license = useLicenseContext();
@@ -150,6 +182,7 @@ export function ServiceMapEmbeddable({
     end,
     serviceGroupId,
     serviceName,
+    strictEnvironmentScope,
   });
 
   // Notify the host whenever we transition to a known empty/non-empty topology.
@@ -293,6 +326,8 @@ export function ServiceMapEmbeddable({
           fullMapHref={fullMapHref}
           isEmbedded
           showFocusMap={showFocusMapInPopover}
+          alwaysNavigateOnPopoverFocus={alwaysNavigateOnPopoverFocus}
+          clearKueryOnPopoverNavigation={clearKueryOnPopoverNavigation}
         />
       </div>
       {sloOverviewFlyout && (

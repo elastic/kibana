@@ -15,7 +15,9 @@ import { useLicenseContext } from '../../../context/license/use_license_context'
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import type { Environment } from '../../../../common/environment_rt';
 import { transformToReactFlow } from '../../../../common/service_map';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { filterServiceMapSpansByEnvironment } from './filter_service_map_spans_by_environment';
 
 const INITIAL_STATE: ReactFlowServiceMapResponse = {
   nodes: [],
@@ -48,6 +50,7 @@ export const useServiceMap = ({
   serviceName,
   serviceGroupId,
   kuery,
+  strictEnvironmentScope,
 }: {
   environment: Environment;
   kuery: string;
@@ -55,6 +58,15 @@ export const useServiceMap = ({
   end: string;
   serviceGroupId?: string;
   serviceName?: string;
+  /**
+   * When true and `environment` is a specific env (not `ENVIRONMENT_ALL`), drop spans
+   * whose source or destination service env doesn't match before transforming. Fixes
+   * the trace-fan-out leak: a cross-env trace (e.g. opbeans-go in `opbeans` calling
+   * opbeans-dotnet in `production`) would otherwise pull the other env's services into
+   * the node list via `fetchExitSpanSamplesFromTraceIds`. Default `false` preserves
+   * the existing cross-env trace-topology behaviour on the standalone map.
+   */
+  strictEnvironmentScope?: boolean;
 }): UseServiceMapResult => {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
@@ -109,7 +121,18 @@ export const useServiceMap = ({
     const raw = getRawResponse(data);
     if (raw && typeof raw === 'object' && 'spans' in raw) {
       try {
-        const reactFlowData = transformToReactFlow(raw as ServiceMapResponse);
+        const response = raw as ServiceMapResponse;
+        // See `strictEnvironmentScope` docs above — the backend filters trace IDs by env
+        // but then pulls every span in those traces (including ones from sibling-env
+        // services). Strip those here when the caller opts in.
+        const scopedResponse =
+          strictEnvironmentScope && environment !== ENVIRONMENT_ALL.value
+            ? {
+                ...response,
+                spans: filterServiceMapSpansByEnvironment(response.spans, environment),
+              }
+            : response;
+        const reactFlowData = transformToReactFlow(scopedResponse);
         return {
           data: reactFlowData,
           status: FETCH_STATUS.SUCCESS,
@@ -124,5 +147,5 @@ export const useServiceMap = ({
     }
 
     return { data: INITIAL_STATE, status: FETCH_STATUS.SUCCESS };
-  }, [data, status, error]);
+  }, [data, status, error, environment, strictEnvironmentScope]);
 };

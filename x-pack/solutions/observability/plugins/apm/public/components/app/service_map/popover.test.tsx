@@ -369,4 +369,70 @@ describe('MapPopover', () => {
       expect(heading).toHaveTextContent('postgresql');
     });
   });
+
+  describe('Focus map button click behaviour', () => {
+    // Helper: build a focused service node so `selectedNodeId === focusedServiceName`,
+    // which is the only state where the popover's default click handler diverges
+    // (re-center in-map) from the simple "close and let the href navigate" flow.
+    function focusedServiceNode(name: string): ServiceMapNode {
+      return {
+        id: name,
+        type: 'service',
+        position: { x: 100, y: 100 },
+        data: {
+          id: name,
+          label: name,
+          isService: true,
+        } as ServiceNodeData,
+      };
+    }
+
+    function clickFocusButton() {
+      const button = screen.getByTestId('apmServiceContentsFocusMapButton');
+      // Tests run without a real router; preventDefault() is what differentiates
+      // "stay in map (centerSelectedNode)" from "let href navigate (just close)".
+      const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+      button.dispatchEvent(event);
+      return event;
+    }
+
+    it('re-centers the node (and prevents navigation) on the focused service by default', () => {
+      // Default flow: clicking the focused service's "Focus map" button should
+      // re-center the existing in-map node rather than reload the route — the
+      // user is already on that focused map. `centerSelectedNode` calls
+      // event.preventDefault(), so the anchor's href is suppressed.
+      const onClose = jest.fn();
+      renderPopover({
+        selectedNode: focusedServiceNode('opbeans-go'),
+        focusedServiceName: 'opbeans-go',
+        onClose,
+        showFocusMap: true,
+      });
+
+      const event = clickFocusButton();
+      expect(event.defaultPrevented).toBe(true);
+      expect(mockSetCenter).toHaveBeenCalledTimes(1);
+      // Close is for the non-focused branch only.
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it('navigates (closes popover, no preventDefault, no recentre) when alwaysNavigateOnFocus is set', () => {
+      // Alert-preview flow: every click should exit the embedded preview into
+      // the standalone APM map, even for the alert's own service. The handler
+      // becomes the simple "close popover and let the anchor href fire" branch.
+      const onClose = jest.fn();
+      renderPopover({
+        selectedNode: focusedServiceNode('opbeans-go'),
+        focusedServiceName: 'opbeans-go',
+        onClose,
+        showFocusMap: true,
+        alwaysNavigateOnFocus: true,
+      });
+
+      const event = clickFocusButton();
+      expect(event.defaultPrevented).toBe(false);
+      expect(mockSetCenter).not.toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+  });
 });
