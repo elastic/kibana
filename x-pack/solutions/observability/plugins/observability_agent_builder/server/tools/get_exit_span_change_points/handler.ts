@@ -34,9 +34,7 @@ import {
   getSpanThroughputAggregation,
 } from '../../utils/trace_metrics_aggregations';
 
-const EXIT_SPAN_GROUP_BY = SPAN_DESTINATION_SERVICE_RESOURCE;
 const EXIT_SPAN_LATENCY_TYPE = 'avg' as const;
-
 interface Bucket {
   key: string | number;
   key_as_string?: string;
@@ -135,7 +133,7 @@ export async function getExitSpanChangePoints({
   if (kqlFilter) {
     kueryParts.push(kqlFilter);
   }
-  kueryParts.push(`${EXIT_SPAN_GROUP_BY}: *`);
+  kueryParts.push(`${SPAN_DESTINATION_SERVICE_RESOURCE}: *`);
   const kuery = kueryParts.join(' AND ');
 
   const documentSources = await getServiceDestinationMetricSources({
@@ -184,7 +182,7 @@ export async function getExitSpanChangePoints({
     aggs: {
       groups: {
         terms: {
-          field: EXIT_SPAN_GROUP_BY,
+          field: SPAN_DESTINATION_SERVICE_RESOURCE,
         },
         aggs: {
           time_series: {
