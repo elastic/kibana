@@ -299,6 +299,7 @@ export {
   type Verdict,
   sigEventSchema,
   type SigEvent,
+  verdictEnum,
 } from './src/sig_events';
 export type { OnboardingResult } from './src/onboarding';
 export { OnboardingStep } from './src/onboarding';

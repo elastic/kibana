@@ -8,13 +8,16 @@
 import type { IDataStreamClient } from '@kbn/data-streams';
 import { esql } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { type CommonSearchOptions, inList, parseSort } from '../query_utils';
 import {
+  type CommonSearchOptions,
+  type TimestampSort,
+  applyFilter,
   applyTimeWindow,
-  baseSpaceScopedQuery,
   collapseToLatest,
-  executeSourceQuery,
-} from '../latest_source_query';
+  inList,
+  parseSort,
+} from '../query_utils';
+import { baseSpaceScopedQuery, executeSourceQuery } from '../latest_source_query';
 import {
   DISCOVERIES_DATA_STREAM,
   type Discovery,
@@ -27,14 +30,12 @@ export type DiscoveryDataStreamClient = IDataStreamClient<
   StoredDiscovery
 >;
 
-export type DiscoverySort =
-  | '@timestamp:asc'
-  | '@timestamp:desc'
-  | 'criticality:asc'
-  | 'criticality:desc';
+export type DiscoverySort = TimestampSort | 'criticality:asc' | 'criticality:desc';
+
+export type DiscoveryKind = Discovery['kind'];
 
 export interface DiscoveriesSearchOptions extends CommonSearchOptions {
-  kind?: string;
+  kind?: DiscoveryKind;
   discovery_id?: string[];
   exclude_discovery_id?: string[];
   exclude_grouped?: boolean;
@@ -63,12 +64,8 @@ export class DiscoveryClient {
 
     query = applyTimeWindow(query, options);
 
-    if (options.kind) {
-      query = query.where`${esql.col('kind')} == ${esql.str(options.kind)}`;
-    }
-    if (options.discovery_id?.length) {
-      query = query.where`${inList('discovery_id', options.discovery_id)}`;
-    }
+    query = applyFilter(query, 'kind', options.kind);
+    query = applyFilter(query, 'discovery_id', options.discovery_id);
     if (options.exclude_discovery_id?.length) {
       query = query.where`NOT (${inList('discovery_id', options.exclude_discovery_id)})`;
     }
@@ -97,12 +94,8 @@ export class DiscoveryClient {
 
     query = collapseToLatest(query, 'discovery_slug');
 
-    if (options.kind) {
-      query = query.where`${esql.col('kind')} == ${esql.str(options.kind)}`;
-    }
-    if (options.discovery_id?.length) {
-      query = query.where`${inList('discovery_id', options.discovery_id)}`;
-    }
+    query = applyFilter(query, 'kind', options.kind);
+    query = applyFilter(query, 'discovery_id', options.discovery_id);
     if (options.exclude_discovery_id?.length) {
       query = query.where`NOT (${inList('discovery_id', options.exclude_discovery_id)})`;
     }

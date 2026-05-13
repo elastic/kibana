@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { sigEventSchema, type SigEvent } from '@kbn/streams-schema';
+import { sigEventSchema, verdictEnum, type SigEvent } from '@kbn/streams-schema';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -14,6 +14,10 @@ import { assertSignificantEventsAccess } from '../../../utils/assert_significant
 
 const stringArrayFromQuery = z
   .union([z.string().transform((value) => [value]), z.array(z.string())])
+  .optional();
+
+const verdictArrayFromQuery = z
+  .union([verdictEnum.transform((value) => [value]), z.array(verdictEnum)])
   .optional();
 
 const eventSortEnum = z.enum([
@@ -29,7 +33,7 @@ const eventSortFromQuery = z
 const eventsSearchQuery = z.object({
   from: z.iso.datetime().optional(),
   to: z.iso.datetime().optional(),
-  verdict: stringArrayFromQuery,
+  verdict: verdictArrayFromQuery,
   slug: stringArrayFromQuery,
   exclude_slug: stringArrayFromQuery,
   discovery_id: stringArrayFromQuery,

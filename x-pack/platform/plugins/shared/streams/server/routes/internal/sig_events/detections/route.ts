@@ -37,6 +37,7 @@ const detectionsSearchQuery = z.object({
     .optional(),
   size: z.coerce.number().int().positive().optional(),
   sort: detectionSortFromQuery,
+  group_by: z.enum(['detection_id', 'rule_uuid']).optional(),
 });
 
 const detectionsSearchRoute = createServerRoute({
@@ -44,7 +45,8 @@ const detectionsSearchRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Get latest detections',
-    description: 'Search detection entities using their latest derived state.',
+    description:
+      'Search detection entities using their latest derived state. Pass `group_by=rule_uuid` to return the latest detection per rule instead of per detection_id.',
   },
   security: {
     authz: {
@@ -65,36 +67,6 @@ const detectionsSearchRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     return getDetectionClient().findLatest(params.query);
-  },
-});
-
-const detectionsLatestPerRuleRoute = createServerRoute({
-  endpoint: 'GET /internal/sig_events/detections/_latest_per_rule',
-  options: {
-    access: 'internal',
-    summary: 'Get latest detection per rule_uuid',
-    description:
-      'Search detection entities returning the latest derived state per rule_uuid (instead of per detection_id).',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({
-    query: detectionsSearchQuery,
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-  }): Promise<{ hits: Detection[] }> => {
-    const { getDetectionClient, licensing, uiSettingsClient } = await getScopedClients({ request });
-
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    return getDetectionClient().findLatestPerRule(params.query);
   },
 });
 
@@ -124,6 +96,5 @@ const detectionsBulkCreateRoute = createServerRoute({
 
 export const internalSigEventsDetectionsRoutes = {
   ...detectionsSearchRoute,
-  ...detectionsLatestPerRuleRoute,
   ...detectionsBulkCreateRoute,
 };

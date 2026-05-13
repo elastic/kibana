@@ -8,13 +8,17 @@
 import type { IDataStreamClient } from '@kbn/data-streams';
 import { esql } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { type CommonSearchOptions, inList, parseSort } from '../query_utils';
+import type { z } from '@kbn/zod/v4';
+import type { verdictEnum } from '@kbn/streams-schema';
 import {
+  type CommonSearchOptions,
+  type TimestampSort,
   applyTimeWindow,
-  baseSpaceScopedQuery,
   collapseToLatest,
-  executeSourceQuery,
-} from '../latest_source_query';
+  inList,
+  parseSort,
+} from '../query_utils';
+import { baseSpaceScopedQuery, executeSourceQuery } from '../latest_source_query';
 import {
   EVENTS_DATA_STREAM,
   type SigEvent,
@@ -24,14 +28,12 @@ import {
 
 export type EventDataStreamClient = IDataStreamClient<typeof eventsMappings, StoredEvent>;
 
-export type EventSort =
-  | '@timestamp:asc'
-  | '@timestamp:desc'
-  | 'last_reviewed_at:asc'
-  | 'last_reviewed_at:desc';
+export type EventSort = TimestampSort | 'last_reviewed_at:asc' | 'last_reviewed_at:desc';
+
+export type EventVerdictValue = z.infer<typeof verdictEnum>;
 
 export interface EventsSearchOptions extends CommonSearchOptions {
-  verdict?: string[];
+  verdict?: EventVerdictValue[];
   slug?: string[];
   exclude_slug?: string[];
   discovery_id?: string[];

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { verdictSchema, type Verdict } from '@kbn/streams-schema';
+import { verdictEnum, verdictSchema, type Verdict } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
@@ -13,6 +13,10 @@ import { assertSignificantEventsAccess } from '../../../utils/assert_significant
 
 const stringArrayFromQuery = z
   .union([z.string().transform((value) => [value]), z.array(z.string())])
+  .optional();
+
+const verdictArrayFromQuery = z
+  .union([verdictEnum.transform((value) => [value]), z.array(verdictEnum)])
   .optional();
 
 const verdictSortEnum = z.enum(['@timestamp:asc', '@timestamp:desc']);
@@ -23,7 +27,7 @@ const verdictSortFromQuery = z
 const verdictsSearchQuery = z.object({
   from: z.iso.datetime().optional(),
   to: z.iso.datetime().optional(),
-  verdict: stringArrayFromQuery,
+  verdict: verdictArrayFromQuery,
   discovery_id: stringArrayFromQuery,
   prioritize_slug: stringArrayFromQuery,
   size: z.coerce.number().int().positive().optional(),

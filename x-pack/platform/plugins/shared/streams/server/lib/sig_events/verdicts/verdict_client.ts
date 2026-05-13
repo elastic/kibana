@@ -9,13 +9,17 @@ import type { IDataStreamClient } from '@kbn/data-streams';
 import { esql, type ComposerQuery, type ComposerSortShorthand } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { type CommonSearchOptions, inList, parseSort } from '../query_utils';
+import type { z } from '@kbn/zod/v4';
+import type { verdictEnum } from '@kbn/streams-schema';
 import {
+  type CommonSearchOptions,
+  type TimestampSort,
+  applyFilter,
   applyTimeWindow,
-  baseSpaceScopedQuery,
   collapseToLatest,
-  executeSourceQuery,
-} from '../latest_source_query';
+  parseSort,
+} from '../query_utils';
+import { baseSpaceScopedQuery, executeSourceQuery } from '../latest_source_query';
 import {
   VERDICTS_DATA_STREAM,
   type StoredVerdict,
@@ -25,10 +29,12 @@ import {
 
 export type VerdictDataStreamClient = IDataStreamClient<typeof verdictsMappings, StoredVerdict>;
 
-export type VerdictSort = '@timestamp:asc' | '@timestamp:desc';
+export type VerdictSort = TimestampSort;
+
+export type VerdictValue = z.infer<typeof verdictEnum>;
 
 export interface VerdictsSearchOptions extends CommonSearchOptions {
-  verdict?: string[];
+  verdict?: VerdictValue[];
   discovery_id?: string[];
   /**
    * Soft ranking boost on `discovery_slug` — matching verdicts are returned
@@ -62,13 +68,8 @@ export class VerdictClient {
     let query = baseSpaceScopedQuery(VERDICTS_DATA_STREAM, this.clients.space);
     query = applyTimeWindow(query, options);
 
-    if (options.verdict?.length) {
-      query = query.where`${inList('verdict', options.verdict)}`;
-    }
-
-    if (options.discovery_id?.length) {
-      query = query.where`${inList('discovery_id', options.discovery_id)}`;
-    }
+    query = applyFilter(query, 'verdict', options.verdict);
+    query = applyFilter(query, 'discovery_id', options.discovery_id);
 
     query = this.applySlugPriorityEval(query, options);
     query = collapseToLatest(query, 'verdict_id');
@@ -91,12 +92,8 @@ export class VerdictClient {
 
     query = collapseToLatest(query, 'discovery_slug');
 
-    if (options.verdict?.length) {
-      query = query.where`${inList('verdict', options.verdict)}`;
-    }
-    if (options.discovery_id?.length) {
-      query = query.where`${inList('discovery_id', options.discovery_id)}`;
-    }
+    query = applyFilter(query, 'verdict', options.verdict);
+    query = applyFilter(query, 'discovery_id', options.discovery_id);
 
     query = this.applySort(query, options);
     query = query.keep('_source');
@@ -113,13 +110,7 @@ export class VerdictClient {
     let query = esql.from([VERDICTS_DATA_STREAM])
       .where`\`kibana.space_ids\` == ${this.clients.space}`;
 
-    if (options.from !== undefined) {
-      query = query.where`@timestamp >= TO_DATETIME(${esql.str(options.from)})`;
-    }
-
-    if (options.to !== undefined) {
-      query = query.where`@timestamp <= TO_DATETIME(${esql.str(options.to)})`;
-    }
+    query = applyTimeWindow(query, options);
 
     query = query.pipe`STATS reviewed_discovery_ids = VALUES(${esql.col(
       'discovery_id'
