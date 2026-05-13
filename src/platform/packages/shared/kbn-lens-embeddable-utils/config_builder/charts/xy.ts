@@ -20,6 +20,7 @@ import type {
 } from '@kbn/lens-common';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 import { addLayerColumn, buildDatasourceStates, extractReferences, mapToFormula } from '../utils';
+import { legendSizeCompat } from '../transforms/charts/legend_sizes';
 import type {
   BuildDependencies,
   LensAnnotationLayer,
@@ -49,6 +50,7 @@ function buildVisualizationState(config: LensXYConfig): XYVisualizationState {
       isVisible: config.legend?.show ?? true,
       position: config.legend?.position ?? 'left',
       ...(config.legend?.legendStats ? { legendStats: config.legend.legendStats } : {}),
+      ...(config.legend?.size ? { legendSize: legendSizeCompat.toState(config.legend.size) } : {}),
     },
     hideEndzones: true,
     preferredSeriesType: 'line',

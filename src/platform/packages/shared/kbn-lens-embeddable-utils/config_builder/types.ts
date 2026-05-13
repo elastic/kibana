@@ -124,6 +124,8 @@ export interface LensLegendConfig {
   show?: boolean;
   position?: 'top' | 'left' | 'bottom' | 'right';
   legendStats?: XYLegendValue[];
+  /** Controls the width of left/right positioned legends. */
+  size?: 'auto' | 's' | 'm' | 'l' | 'xl';
 }
 
 export interface LensBreakdownDateHistogramConfig {
