@@ -36,7 +36,6 @@ import { internalQueriesRoutes } from './internal/sig_events/queries/route';
 import { internalEligibleStreamsRoutes } from './internal/sig_events/extraction/eligible_streams_route';
 import { internalSignificantEventsSettingsRoutes } from './internal/sig_events/significant_events_settings/route';
 import { internalEventsListRoutes } from './internal/sig_events/events_list/route';
-import { internalLifecycleRoutes as internalSigEventsLifecycleRoutes } from './internal/sig_events/events_list/lifecycle_route';
 import { timeSeriesRoutes } from './internal/streams/time_series/route';
 import { internalMemoryRoutes } from './internal/memory/route';
 import { internalSigEventsDetectionsRoutes } from './internal/sig_events/detections/route';
@@ -68,7 +67,6 @@ export const streamsRouteRepository = {
   ...internalEligibleStreamsRoutes,
   ...internalSignificantEventsSettingsRoutes,
   ...internalEventsListRoutes,
-  ...internalSigEventsLifecycleRoutes,
   ...internalMemoryRoutes,
   ...internalSigEventsDetectionsRoutes,
   ...internalSigEventsDiscoveriesRoutes,
