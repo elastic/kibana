@@ -7,10 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiEmptyPrompt, EuiIcon, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiEmptyPrompt,
+  EuiFieldSearch,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import {
   isDangerousStatus,
@@ -29,6 +38,92 @@ import {
 import type { ChildWorkflowExecutionsMap } from '../model/use_child_workflow_executions';
 
 const emptyPromptCommonProps = { titleSize: 'xs', paddingSize: 's' } as const;
+
+interface RenderableTreeItem extends StepExecutionTreeItem {
+  runNumber?: number;
+  children: RenderableTreeItem[];
+}
+
+/**
+ * Transforms the raw step execution tree for display:
+ * - foreach/while containers: flattens iteration children directly under the
+ *   container, annotating each with a 1-based `runNumber`.
+ * - retry containers (phantom node whose children are all "attempt-N" nodes):
+ *   removes the phantom wrapper and the attempt- intermediates, promoting the
+ *   actual step execution rows up with a `runNumber` equal to the attempt index.
+ * When `lastOnly` is true only the last iteration/attempt is kept per container.
+ */
+function applyRunFilter(
+  items: StepExecutionTreeItem[],
+  lastOnly: boolean,
+  inheritedRunNumber?: number
+): RenderableTreeItem[] {
+  return items.flatMap((node) => {
+    const iterationKids = node.children.filter(
+      (c) => c.stepType === 'foreach-iteration' || c.stepType === 'while-iteration'
+    );
+    const otherKids = node.children.filter(
+      (c) => c.stepType !== 'foreach-iteration' && c.stepType !== 'while-iteration'
+    );
+
+    if (iterationKids.length > 0) {
+      // foreach-iteration nodes are phantom (no stepExecution), so executionIndex
+      // is always 0. The real iteration index lives in the node's stepId, which
+      // is the 0-based scopeId string ("0", "1", "2", …) from the scope stack.
+      const iterRunNumber = (iter: StepExecutionTreeItem) => {
+        const n = parseInt(iter.stepId, 10);
+        return isNaN(n) ? 1 : n + 1;
+      };
+
+      const visible = lastOnly
+        ? [iterationKids.reduce((max, c) => (iterRunNumber(c) > iterRunNumber(max) ? c : max))]
+        : iterationKids;
+
+      const flatKids: RenderableTreeItem[] = visible.flatMap((iter) =>
+        applyRunFilter(iter.children, lastOnly, iterRunNumber(iter))
+      );
+
+      return [
+        {
+          ...node,
+          runNumber: inheritedRunNumber,
+          children: [
+            ...flatKids,
+            ...applyRunFilter(otherKids, lastOnly, inheritedRunNumber),
+          ],
+        },
+      ];
+    }
+
+    // Retry container: phantom node (no stepExecutionId) whose children are all
+    // named "attempt-N". Remove the wrapper and promote actual step rows.
+    const isRetryContainer =
+      !node.stepExecutionId &&
+      node.children.length > 0 &&
+      node.children.every((c) => /^attempt-\d+$/.test(c.stepId));
+
+    if (isRetryContainer) {
+      const sorted = [...node.children].sort((a, b) => {
+        const n = (s: string) => parseInt(s.replace('attempt-', ''), 10);
+        return n(a.stepId) - n(b.stepId);
+      });
+      const visible = lastOnly ? [sorted[sorted.length - 1]] : sorted;
+
+      return visible.flatMap((attempt) => {
+        const attemptRunNumber = parseInt(attempt.stepId.replace('attempt-', ''), 10);
+        return applyRunFilter(attempt.children, lastOnly, attemptRunNumber);
+      });
+    }
+
+    return [
+      {
+        ...node,
+        runNumber: inheritedRunNumber,
+        children: applyRunFilter(node.children, lastOnly, inheritedRunNumber),
+      },
+    ];
+  });
+}
 
 export interface WorkflowExecutionStepListProps {
   execution: WorkflowExecutionDto | null;
@@ -58,6 +153,14 @@ export const WorkflowExecutionStepList = React.memo<WorkflowExecutionStepListPro
     isLoadingChildExecutions,
     useSidePanel = false,
   }) => {
+    const [showLastRunOnly, setShowLastRunOnly] = useState(true);
+    const handleToggleLastRunOnly = useCallback(() => setShowLastRunOnly((v) => !v), []);
+
+    const [searchQuery, setSearchQuery] = useState('');
+    const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchQuery(e.target.value);
+    }, []);
+
     const failedBeforeSteps =
       execution != null && isFailedBeforeSteps(execution.status, execution.stepExecutions);
 
@@ -139,6 +242,24 @@ export const WorkflowExecutionStepList = React.memo<WorkflowExecutionStepListPro
       stepExecutionMap.set(stepExecution.id, stepExecution);
     }
 
+    // Map of stepId (== step.name in the YAML definition) to its configured
+    // retry-on-failure max-attempts, so leaf rows can show the retry badge
+    // without each one walking the workflow definition itself. Retry can be
+    // declared either as `step.retry` or under `step.on-failure.retry`.
+    const stepMaxAttemptsMap = new Map<string, number>();
+    for (const step of definition.steps) {
+      const stepWithRetry = step as {
+        retry?: { 'max-attempts'?: number };
+        'on-failure'?: { retry?: { 'max-attempts'?: number } };
+      };
+      const maxAttempts =
+        stepWithRetry.retry?.['max-attempts'] ??
+        stepWithRetry['on-failure']?.retry?.['max-attempts'];
+      if (typeof maxAttempts === 'number' && maxAttempts > 0) {
+        stepMaxAttemptsMap.set(step.name, maxAttempts);
+      }
+    }
+
     if (!isTerminalStatus(execution.status) || failedBeforeSteps) {
       definition.steps
         .filter((step) => !stepExecutionNameMap.has(step.name))
@@ -201,15 +322,64 @@ export const WorkflowExecutionStepList = React.memo<WorkflowExecutionStepListPro
 
     // The mockup-style header now shows the overview info, so we omit the
     // overview pseudo-step from the inline list.
-    const renderableTree = stepExecutionsTree.filter((item) => item.stepType !== '__overview');
+    const baseTree = stepExecutionsTree.filter((item) => item.stepType !== '__overview');
+    const filteredTree = applyRunFilter(baseTree, showLastRunOnly);
+    const lowerSearch = searchQuery.toLowerCase().trim();
+    const renderableTree = lowerSearch
+      ? filteredTree.filter((item) => item.stepId.toLowerCase().includes(lowerSearch))
+      : filteredTree;
 
     return (
       <div data-test-subj="workflowExecutionStepList">
+        <div css={toolbarStyles}>
+          <div css={searchFieldStyles}>
+            <EuiFieldSearch
+              compressed
+              fullWidth
+              placeholder={i18n.translate(
+                'workflowsManagement.executionStepList.searchPlaceholder',
+                { defaultMessage: 'Search steps' }
+              )}
+              value={searchQuery}
+              onChange={handleSearchChange}
+              aria-label={i18n.translate(
+                'workflowsManagement.executionStepList.searchAriaLabel',
+                { defaultMessage: 'Search steps' }
+              )}
+              data-test-subj="workflowExecutionStepSearch"
+            />
+          </div>
+          <EuiToolTip css={css({ lineHeight: 0 })}
+            content={i18n.translate(
+              'workflowsManagement.executionStepList.hideNoiseTooltip',
+              {
+                defaultMessage: showLastRunOnly
+                  ? 'Showing last run only — click to show all runs'
+                  : 'Showing all runs — click to hide noise',
+              }
+            )}
+          >
+            <EuiButtonIcon
+              iconType={showLastRunOnly ? 'eyeClosed' : 'eye'}
+              color="text"
+              size="xs"
+              aria-label={i18n.translate(
+                'workflowsManagement.executionStepList.hideNoiseAriaLabel',
+                { defaultMessage: 'Toggle hide noise' }
+              )}
+              aria-pressed={showLastRunOnly}
+              onClick={handleToggleLastRunOnly}
+              data-test-subj="workflowExecutionLastRunOnlyToggle"
+              css={css({ margin: 0, padding: 0 })}
+            />
+          </EuiToolTip>
+        </div>
         {renderableTree.map((item, idx) => (
           <StepListItem
             key={`${item.stepId}-${item.executionIndex}-${idx}`}
             item={item}
             stepExecutionMap={stepExecutionMap}
+            stepMaxAttemptsMap={stepMaxAttemptsMap}
             depth={0}
             expandedStepExecutionId={expandedStepExecutionId}
             expandedStepData={expandedStepData}
@@ -225,8 +395,9 @@ export const WorkflowExecutionStepList = React.memo<WorkflowExecutionStepListPro
 WorkflowExecutionStepList.displayName = 'WorkflowExecutionStepList';
 
 interface StepListItemProps {
-  item: StepExecutionTreeItem;
+  item: RenderableTreeItem;
   stepExecutionMap: Map<string, WorkflowStepExecutionDto>;
+  stepMaxAttemptsMap: Map<string, number>;
   depth: number;
   expandedStepExecutionId: string | null;
   expandedStepData: WorkflowStepExecutionDto | undefined;
@@ -239,6 +410,7 @@ const StepListItem = React.memo<StepListItemProps>(
   ({
     item,
     stepExecutionMap,
+    stepMaxAttemptsMap,
     depth,
     expandedStepExecutionId,
     expandedStepData,
@@ -290,6 +462,8 @@ const StepListItem = React.memo<StepListItemProps>(
           isExpandable={isExpandable}
           onToggle={handleToggle}
           childCount={hasChildren ? item.children.length : undefined}
+          maxAttempts={stepMaxAttemptsMap.get(stepId)}
+          runNumber={item.runNumber}
           expandedContent={
             // Container rows toggle children visibility (rendered below); leaf rows
             // render their input/output inside the row's own collapsible body —
@@ -313,11 +487,12 @@ const StepListItem = React.memo<StepListItemProps>(
                 isContainerOpen && childrenStyles.collapsibleInnerOpen,
               ]}
             >
-              {item.children.map((child, idx) => (
+              {(item.children as RenderableTreeItem[]).map((child, idx) => (
                 <StepListItem
                   key={`${child.stepId}-${child.executionIndex}-${idx}`}
                   item={child}
                   stepExecutionMap={stepExecutionMap}
+                  stepMaxAttemptsMap={stepMaxAttemptsMap}
                   depth={depth + 1}
                   expandedStepExecutionId={expandedStepExecutionId}
                   expandedStepData={expandedStepData}
@@ -356,6 +531,19 @@ function hasNotableDescendant(
   }
   return false;
 }
+
+const toolbarStyles = css({
+  display: 'flex',
+  alignItems: 'center',
+  gap: 8,
+  padding: '6px 16px',
+  borderBottom: '1px solid var(--euiBorderColor, #d3dae6)',
+});
+
+const searchFieldStyles = css({
+  flex: '1 1 0',
+  minWidth: 0,
+});
 
 // Match the per-row collapsible motion so container expansion feels identical
 // to leaf expansion.
