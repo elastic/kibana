@@ -21,7 +21,10 @@ Object {
 `;
 
 exports[`transpile - Streamlang DSL to ES|QL) should transpile a variety of processor steps and where blocks 1`] = `
-"  | WHERE NOT(source_ip IS NULL) AND NOT(destination_ip IS NULL)
+"  | REGISTERED_DOMAIN __streamlang_registered_domain = expression
+  | EVAL \`prefix.domain\` = COALESCE(\`__streamlang_registered_domain.domain\`, \`prefix.domain\`), \`prefix.registered_domain\` = COALESCE(\`__streamlang_registered_domain.registered_domain\`, \`prefix.registered_domain\`), \`prefix.subdomain\` = COALESCE(\`__streamlang_registered_domain.subdomain\`, \`prefix.subdomain\`), \`prefix.top_level_domain\` = COALESCE(\`__streamlang_registered_domain.top_level_domain\`, \`prefix.top_level_domain\`)
+  | DROP \`__streamlang_registered_domain.domain\`, \`__streamlang_registered_domain.registered_domain\`, \`__streamlang_registered_domain.subdomain\`, \`__streamlang_registered_domain.top_level_domain\`
+  | WHERE NOT(source_ip IS NULL) AND NOT(destination_ip IS NULL)
   | EVAL \`network.direction\` = NETWORK_DIRECTION(TO_IP(source_ip), TO_IP(destination_ip), [\\"private\\"])
   | EVAL my_joined_field = CONCAT(field1, \\", \\", field2, \\", \\", field3)
   | EVAL full_name = CASE(first_name IS NULL OR last_name IS NULL, NULL, CONCAT(first_name, \\" \\", last_name))
