@@ -78,6 +78,10 @@ const configSchema = schema.object(
       defaultValue: [],
       validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
     }),
+    form_action: schema.arrayOf(schema.string(), {
+      defaultValue: [],
+      validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
+    }),
     frame_ancestors: schema.arrayOf(schema.string(), {
       defaultValue: [],
       validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
@@ -147,6 +151,7 @@ export const cspConfig: ServiceConfigDescriptor<CspConfigType> = {
   path: 'csp',
   schema: configSchema,
   deprecations: ({ unusedFromRoot, deprecateFromRoot }) => [
+    unusedFromRoot('csp.report_only.form_action', { level: 'warning' }),
     unusedFromRoot('csp.report_only.object_src', { level: 'warning' }),
     deprecateFromRoot('csp.disableUnsafeEval', '10.0.0', {
       level: 'warning',
