@@ -37,7 +37,6 @@ export {
   createDegradedDocsControl,
   createStacktraceControl,
   fieldConstants,
-  formatFieldValue,
   formatFieldValueReact,
   formatFieldValueText,
   formatFieldStringValueWithHighlights,

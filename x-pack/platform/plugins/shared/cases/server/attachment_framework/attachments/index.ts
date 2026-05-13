@@ -6,3 +6,4 @@
  */
 
 export { commentAttachmentType } from './comment';
+export { lensAttachmentType } from './lens';

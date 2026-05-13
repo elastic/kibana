@@ -79,6 +79,9 @@ describe('runNode', () => {
       node: mockNode,
       scopeStack,
       abortController: new AbortController(),
+      contextManager: {
+        ensureContextReady: jest.fn().mockResolvedValue(undefined),
+      },
     } as unknown as jest.Mocked<StepExecutionRuntime>;
 
     mockNodeImplementation = {
@@ -104,6 +107,9 @@ describe('runNode', () => {
       workflowExecutionState: {
         getWorkflowExecution: jest.fn().mockReturnValue(workflowExecution),
       } as unknown as jest.Mocked<WorkflowExecutionState>,
+      stepIoService: {
+        releaseTransientlyRehydratedOutputs: jest.fn(),
+      },
     } as unknown as jest.Mocked<WorkflowExecutionLoopParams>;
   });
 
