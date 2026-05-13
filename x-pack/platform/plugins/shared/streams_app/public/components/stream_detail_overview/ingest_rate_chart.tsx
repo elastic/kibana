@@ -230,10 +230,10 @@ function IngestRateChartContent({ definition }: { definition: Streams.all.GetRes
                     return String(value);
                   }}
                 />
-                {allTimeseries.map((serie) => (
+                {allTimeseries.map((series) => (
                   <BarSeries
-                    key={serie.id}
-                    id={serie.id}
+                    key={series.id}
+                    id={series.id}
                     timeZone={barSeriesTimeZone}
                     name={documentsSeriesName}
                     color={euiTheme.colors.vis.euiColorVis0}
@@ -241,7 +241,7 @@ function IngestRateChartContent({ definition }: { definition: Streams.all.GetRes
                     yScaleType={ScaleType.Linear}
                     xAccessor="x"
                     yAccessors={['doc_count']}
-                    data={serie.data}
+                    data={series.data}
                     enableHistogramMode
                   />
                 ))}

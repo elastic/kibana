@@ -66,20 +66,6 @@ export function OverviewTimeFilter() {
           onTimeChange={({ start, end }) => updateTimeRange({ from: start, to: end })}
         />
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiButtonIcon
-          iconType="productDiscover"
-          href={discoverHref}
-          isDisabled={!discoverHref}
-          display="base"
-          color="text"
-          size="s"
-          aria-label={i18n.translate(
-            'xpack.streams.overviewTimeFilter.euiButtonIcon.viewInDiscoverLabel',
-            { defaultMessage: 'View in Discover' }
-          )}
-        />
-      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
