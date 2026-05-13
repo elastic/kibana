@@ -8,7 +8,7 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 export interface HasSerializableState<SerializedState extends object = object> {
   /**
