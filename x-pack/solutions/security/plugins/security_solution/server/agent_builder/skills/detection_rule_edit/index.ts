@@ -48,13 +48,16 @@ This covers the rule type ES|QL. Do not create a rule with a rule type other tha
 
 ## Core Workflow
 
-### Determine the path
+### Pre-check: ensure you have what you need
 
-Before doing anything, determine the user's intent and whether a rule attachment exists in the conversation context:
+Before entering either branch, determine intent and resolve prerequisites:
 
-- **Attachment exists in context** → edit path: proceed to Step 1.
-- **No attachment, creation intent** (user wants to build a new rule) → creation path: skip Step 1, go directly to Step 2 then Step 3 (create).
-- **No attachment, edit intent** (user references an existing rule they want to modify) → call \`attachment_list\` to check whether a rule attachment exists in the session but wasn't yet referenced. If one is found, proceed with the edit path. If nothing is found, tell the user that the rule needs to be open as an attachment before it can be edited, and ask them to open it first.
+1. **User wants to create a new rule** → proceed to Step 2 then Step 3 (creation path). No attachment needed.
+2. **User wants to edit an existing rule and an attachment is already in context** → proceed to the edit branch (Step 1 → Step 2 → Step 3, edit path).
+3. **User wants to edit an existing rule but no attachment is in context** → call \`attachment_list\` to check whether a rule attachment exists in the session but wasn't yet referenced.
+   - If one is found → proceed to the edit branch.
+   - If nothing is found → call \`find_rules\` to search for rules matching the user's description. Present any matches to the user and ask them to confirm which rule they mean. Once confirmed, load it as an attachment and proceed to the edit branch.
+   - If no matching rules are found → tell the user no matching rule was found and ask them to clarify the rule name or open it manually.
 
 ### Step 1: Read the Attachment (edit path only)
 
@@ -91,7 +94,7 @@ After the tool returns, render the attachment inline.
 
 ---
 
-#### Edit path (attachment in context, or found via attachment_list)
+#### Edit path
 
 When the user says "add to the rule", "edit the rule", "change the rule", "update the rule", or any variation — they ALWAYS mean the **rule attachment**. The rule lives inside the attachment's \`text\` field as stringified JSON. There is no other rule object.
 
@@ -289,7 +292,11 @@ The lookback should be at least as long as the interval. A common pattern is int
 
 ## Complete Example: Updating Tags Step by Step
 
+_This example assumes the edit path — a rule attachment is already in context._
+
 User says: "Add the tags Network and Lateral Movement to the rule"
+
+Pre-check: attachment exists in context → edit path → proceed to Step 1.
 
 1. Call \`attachment_read\` with the rule attachment ID.
 2. The attachment \`text\` field contains:
