@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { WorkflowGraphCanvas, type WorkflowGraphCanvasProps } from './workflow_graph_canvas';
+export {
+  WorkflowGraphCanvas,
+  WorkflowGraphCanvasWithoutProvider,
+  type WorkflowGraphCanvasProps,
+} from './workflow_graph_canvas';
+export { ReactFlowProvider } from '@xyflow/react';
+export { WorkflowGraphPreview, type WorkflowGraphPreviewProps } from './workflow_graph_preview';
 export {
   WorkflowDetailBottomBar,
   type WorkflowDetailBottomBarView,

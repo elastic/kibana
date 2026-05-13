@@ -13,8 +13,8 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { stringify as stringifyYaml } from 'yaml';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { transformWorkflowToGraph, type WorkflowYaml } from '@kbn/workflows';
-import { useWorkflowsCapabilities, WorkflowGraphCanvas } from '@kbn/workflows-ui';
+import { type LayoutDirection, transformWorkflowToGraph, type WorkflowYaml } from '@kbn/workflows';
+import { useWorkflowsCapabilities, WorkflowGraphCanvasWithoutProvider } from '@kbn/workflows-ui';
 import { type FlyoutTarget, WorkflowVisualEditorFlyout } from './workflow_visual_editor_flyout';
 import {
   selectEditorWorkflowDefinition,
@@ -29,15 +29,17 @@ import {
   setCursorPosition,
   setHighlightedStepId,
 } from '../../../entities/workflows/store/workflow_detail/slice';
+import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import {
   CopyDevToolsOption,
   CopyWorkflowStepJsonOption,
   CopyWorkflowStepOption,
 } from '../../../widgets/workflow_yaml_editor/ui/step_action_options';
-import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 
 interface WorkflowVisualEditorStatefulProps {
   onStepRun?: (params: { stepId: string; actionType: string }) => void;
+  /** Dagre rank direction for the graph layout. Defaults to `'TB'`. */
+  direction?: LayoutDirection;
 }
 
 const TRIGGER_LABEL: Record<string, string> = {
@@ -57,6 +59,7 @@ const TRIGGER_LABEL: Record<string, string> = {
  */
 export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStatefulProps> = ({
   onStepRun,
+  direction = 'TB',
 }) => {
   const { colorMode } = useEuiTheme();
 
@@ -169,7 +172,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
 
   return (
     <div css={{ position: 'relative', width: '100%', height: '100%', minHeight: 0 }}>
-      <WorkflowGraphCanvas
+      <WorkflowGraphCanvasWithoutProvider
         workflow={workflow}
         stepExecutions={stepExecutions}
         isYamlValid={isYamlValid}
@@ -177,6 +180,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         onStepSelect={(id) => setSelectedStep(id ?? null)}
         colorMode={colorMode.toLowerCase() as ColorMode}
         focusStepId={highlightedStepId}
+        direction={direction}
         onStepRun={(stepName) => onStepRun?.({ stepId: stepName, actionType: 'run' })}
         canRunSteps={Boolean(canExecuteWorkflow) && isYamlValid}
         onOpenStepMenu={(stepName) => {

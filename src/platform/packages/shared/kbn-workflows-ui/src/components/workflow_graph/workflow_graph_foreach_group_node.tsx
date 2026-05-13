@@ -7,11 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { transparentize, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import type { Node, NodeProps } from '@xyflow/react';
 import { Handle, Position } from '@xyflow/react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+
+// Matches the blue palette used by step nodes so the foreach container
+// feels like a natural extension of the same visual language.
+const FOREACH_BORDER = '#bfdbff';
+const FOREACH_LABEL_BG = '#f1f6ff';
+const FOREACH_LABEL_COLOR = '#006bb8';
 
 interface ForeachGroupNodeData extends Record<string, unknown> {
   label: string;
@@ -20,15 +26,17 @@ interface ForeachGroupNodeData extends Record<string, unknown> {
 
 export function WorkflowGraphForeachGroupNode(node: NodeProps<Node<ForeachGroupNodeData>>) {
   const { euiTheme } = useEuiTheme();
+  const targetHandlePos = node.targetPosition ?? Position.Top;
+  const sourceHandlePos = node.sourcePosition ?? Position.Bottom;
   return (
     <>
-      <Handle type="target" position={Position.Top} style={{ opacity: 0 }} />
+      <Handle type="target" position={targetHandlePos} style={{ opacity: 0 }} />
       <div
         css={{
           width: '100%',
           height: '100%',
-          background: transparentize(euiTheme.colors.warning, 0.04),
-          border: `1px dashed ${euiTheme.colors.warning}`,
+          background: euiTheme.colors.backgroundBasePlain,
+          border: `1px dashed ${FOREACH_BORDER}`,
           borderRadius: 12,
           padding: '24px 12px 12px',
           position: 'relative',
@@ -39,11 +47,13 @@ export function WorkflowGraphForeachGroupNode(node: NodeProps<Node<ForeachGroupN
             position: 'absolute',
             top: -10,
             left: 12,
-            background: euiTheme.colors.backgroundBasePlain,
+            background: FOREACH_LABEL_BG,
+            border: `1px solid ${FOREACH_BORDER}`,
+            borderRadius: 4,
             padding: '0 6px',
             fontSize: 12,
             fontWeight: 600,
-            color: euiTheme.colors.warning,
+            color: FOREACH_LABEL_COLOR,
           }}
         >
           {`${node.data.label} · ${i18n.translate('workflowsUi.graph.foreachLabel', {
@@ -51,7 +61,7 @@ export function WorkflowGraphForeachGroupNode(node: NodeProps<Node<ForeachGroupN
           })}`}
         </div>
       </div>
-      <Handle type="source" position={Position.Bottom} style={{ opacity: 0 }} />
+      <Handle type="source" position={sourceHandlePos} style={{ opacity: 0 }} />
     </>
   );
 }

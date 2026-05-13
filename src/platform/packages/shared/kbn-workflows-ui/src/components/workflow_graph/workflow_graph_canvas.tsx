@@ -15,12 +15,12 @@ import {
   MiniMap,
   type NodeTypes,
   ReactFlow,
-  ReactFlowProvider,
   type ReactFlowInstance,
+  ReactFlowProvider,
 } from '@xyflow/react';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
+import type { LayoutDirection, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import '@xyflow/react/dist/style.css';
 import { useWorkflowLayout } from './use_workflow_layout';
 import { WorkflowGraphActionsContext } from './workflow_graph_actions_context';
@@ -69,6 +69,13 @@ export interface WorkflowGraphCanvasProps {
   onOpenStepMenu?: (stepName: string) => void;
   /** Renders the menu items for a node's "More" popover. */
   renderStepMenuItems?: (close: () => void) => React.ReactNode;
+  /** Dagre rank direction (default `'TB'`). */
+  direction?: LayoutDirection;
+  /**
+   * Compact static-preview mode: icon-only nodes, no minimap, no banner, no
+   * interaction. Used by the workflow-list hover preview.
+   */
+  previewMode?: boolean;
 }
 
 function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
@@ -87,6 +94,8 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     canRunSteps,
     onOpenStepMenu,
     renderStepMenuItems,
+    direction = 'TB',
+    previewMode = false,
   } = props;
   const actions = useMemo(
     () => ({ onStepRun, canRunSteps, onOpenStepMenu, renderStepMenuItems }),
@@ -98,6 +107,8 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     workflow,
     stepExecutions,
     searchTerm: '',
+    direction,
+    preview: previewMode,
     onPerfMark,
     onLayoutFailed,
   });
@@ -200,99 +211,108 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
 
   return (
     <WorkflowGraphActionsContext.Provider value={actions}>
-    <div
-      ref={wrapperRef}
-      css={{
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-        background: euiTheme.colors.backgroundBaseSubdued,
-      }}
-      data-test-subj="workflowGraphCanvas"
-    >
-      {dimmed && (
-        <div
-          css={{
-            position: 'absolute',
-            top: 8,
-            left: 8,
-            right: 8,
-            zIndex: 10,
-          }}
-        >
-          <EuiCallOut
-            size="s"
-            iconType="warning"
-            title={i18n.translate('workflowsUi.graph.invalidYaml', {
-              defaultMessage: 'YAML has errors — fix to update graph',
-            })}
-            color="warning"
-          />
-        </div>
-      )}
       <div
+        ref={wrapperRef}
         css={{
+          position: 'relative',
           width: '100%',
           height: '100%',
-          opacity: dimmed ? 0.5 : 1,
-          pointerEvents: dimmed ? 'none' : 'auto',
-          transition: 'opacity 200ms ease',
+          background: euiTheme.colors.backgroundBaseSubdued,
         }}
+        data-test-subj="workflowGraphCanvas"
       >
-        <ReactFlow
-          nodes={decoratedNodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          nodeTypes={NODE_TYPES}
-          edgeTypes={EDGE_TYPES}
-          defaultEdgeOptions={DEFAULT_EDGE_OPTIONS}
-          proOptions={PRO_OPTIONS}
-          colorMode={colorMode}
-          onInit={handleInit}
-          onNodeClick={handleNodeClick}
-          onPaneClick={handlePaneClick}
-          nodesDraggable={false}
-          nodesConnectable={false}
-          elementsSelectable={true}
-          panOnScroll
-          zoomOnScroll={false}
-          zoomOnPinch={false}
-          zoomOnDoubleClick={false}
-          translateExtent={translateExtent}
+        {dimmed && !previewMode && (
+          <div
+            css={{
+              position: 'absolute',
+              top: 8,
+              left: 8,
+              right: 8,
+              zIndex: 10,
+            }}
+          >
+            <EuiCallOut
+              size="s"
+              iconType="warning"
+              title={i18n.translate('workflowsUi.graph.invalidYaml', {
+                defaultMessage: 'YAML has errors — fix to update graph',
+              })}
+              color="warning"
+            />
+          </div>
+        )}
+        <div
+          css={{
+            width: '100%',
+            height: '100%',
+            opacity: dimmed && !previewMode ? 0.5 : 1,
+            pointerEvents: dimmed && !previewMode ? 'none' : 'auto',
+            transition: 'opacity 200ms ease',
+          }}
         >
-          <Background
-            bgColor={euiTheme.colors.backgroundBaseSubdued}
-            color={euiTheme.colors.textSubdued}
-          />
-          <MiniMap
-            pannable
-            zoomable
-            position="bottom-left"
-            bgColor="#ffffff"
-            maskColor="rgba(227, 232, 242, 0.55)"
-            nodeColor={(n) => {
-              const status = (n.data as { stepExecution?: { status?: string } } | undefined)
-                ?.stepExecution?.status;
-              return status === 'failed' ? '#c61e25' : '#0b64dd';
-            }}
-            nodeStrokeWidth={0}
-            nodeBorderRadius={1}
-            style={{
-              width: 160,
-              height: 120,
-              background: '#f2f6fb',
-              border: '1px solid #e3e8f2',
-              borderRadius: 6,
-              overflow: 'hidden',
-            }}
-          />
-        </ReactFlow>
+          <ReactFlow
+            nodes={decoratedNodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            nodeTypes={NODE_TYPES}
+            edgeTypes={EDGE_TYPES}
+            defaultEdgeOptions={DEFAULT_EDGE_OPTIONS}
+            proOptions={PRO_OPTIONS}
+            colorMode={colorMode}
+            onInit={previewMode ? undefined : handleInit}
+            fitView={previewMode}
+            fitViewOptions={previewMode ? { padding: 0.08, minZoom: 0.2, maxZoom: 2 } : undefined}
+            onNodeClick={previewMode ? undefined : handleNodeClick}
+            onPaneClick={previewMode ? undefined : handlePaneClick}
+            nodesDraggable={false}
+            nodesConnectable={false}
+            elementsSelectable={!previewMode}
+            panOnScroll={!previewMode}
+            panOnDrag={!previewMode}
+            zoomOnScroll={false}
+            zoomOnPinch={false}
+            zoomOnDoubleClick={false}
+            translateExtent={previewMode ? undefined : translateExtent}
+          >
+            <Background
+              bgColor={euiTheme.colors.backgroundBaseSubdued}
+              color={euiTheme.colors.textSubdued}
+            />
+            {!previewMode && (
+              <MiniMap
+                pannable
+                zoomable
+                position="bottom-left"
+                bgColor="#ffffff"
+                maskColor="rgba(227, 232, 242, 0.55)"
+                nodeColor={(n) => {
+                  const status = (n.data as { stepExecution?: { status?: string } } | undefined)
+                    ?.stepExecution?.status;
+                  return status === 'failed' ? '#c61e25' : '#0b64dd';
+                }}
+                nodeStrokeWidth={0}
+                nodeBorderRadius={1}
+                style={{
+                  width: 160,
+                  height: 120,
+                  background: '#f2f6fb',
+                  border: '1px solid #e3e8f2',
+                  borderRadius: 6,
+                  overflow: 'hidden',
+                }}
+              />
+            )}
+          </ReactFlow>
+        </div>
       </div>
-    </div>
     </WorkflowGraphActionsContext.Provider>
   );
 }
 
+/**
+ * Standalone canvas that owns its own ReactFlowProvider. Use when the canvas
+ * is rendered without an outer provider (e.g. the list-page preview popover).
+ */
 export function WorkflowGraphCanvas(props: WorkflowGraphCanvasProps) {
   return (
     <ReactFlowProvider>
@@ -300,3 +320,10 @@ export function WorkflowGraphCanvas(props: WorkflowGraphCanvasProps) {
     </ReactFlowProvider>
   );
 }
+
+/**
+ * Inner version of the canvas — does NOT wrap itself in a `ReactFlowProvider`.
+ * Use when a parent provides the provider (e.g. so sibling components like
+ * the floating bottom bar can `useReactFlow()` against the same flow).
+ */
+export const WorkflowGraphCanvasWithoutProvider = WorkflowGraphCanvasInner;

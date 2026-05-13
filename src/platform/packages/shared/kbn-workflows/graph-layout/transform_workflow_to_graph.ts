@@ -11,6 +11,7 @@ import { IdAllocator } from './id_allocator';
 import type {
   ForeachGroup,
   GraphEdge,
+  PreLayoutForeachGroupNode,
   PreLayoutNode,
   PreLayoutStepNode,
   PreLayoutTriggerNode,
@@ -121,14 +122,6 @@ function transformInternal(
       }
     }
 
-    const stepNode: PreLayoutStepNode = {
-      id,
-      type: 'step',
-      data: { label: step.name, stepType: step.type, step },
-      style: { ...DEFAULT_NODE_STYLE },
-    };
-    nodes.push(stepNode);
-
     // Default exit point for this step is itself; control structures override
     // this with the leaves of their branches.
     let exitIds: string[] = [id];
@@ -138,6 +131,16 @@ function transformInternal(
       step.type === 'foreach' && 'steps' in step && Array.isArray(step.steps) && depth === 0;
 
     if (isTopLevelForeach) {
+      // Render the container as a `foreachGroup` node (dashed wrapper).
+      // The regular step node would overlap with the inner children.
+      const groupNode: PreLayoutForeachGroupNode = {
+        id,
+        type: 'foreachGroup',
+        data: { label: step.name, stepType: 'foreach', step },
+        style: { ...DEFAULT_NODE_STYLE },
+      };
+      nodes.push(groupNode);
+
       const childSteps = getStepProp<Step[]>(step, 'steps') ?? [];
       const inner = transformInternal([], childSteps, depth + 1, ids);
       foreachGroups.push({
@@ -161,7 +164,17 @@ function transformInternal(
       }
       // The foreach group is rendered as a contained body, so the next sibling
       // joins from the foreach step itself (not from the inner leaves).
-    } else if (step.type === 'if' && 'steps' in step && Array.isArray(step.steps)) {
+    } else {
+      const stepNode: PreLayoutStepNode = {
+        id,
+        type: 'step',
+        data: { label: step.name, stepType: step.type, step },
+        style: { ...DEFAULT_NODE_STYLE },
+      };
+      nodes.push(stepNode);
+    }
+
+    if (step.type === 'if' && 'steps' in step && Array.isArray(step.steps)) {
       const thenSteps = getStepProp<Step[]>(step, 'steps') ?? [];
       const rawElse = getStepProp<unknown>(step, 'else');
       const elseSteps: Step[] = Array.isArray(rawElse) ? (rawElse as Step[]) : [];
@@ -211,7 +224,12 @@ function transformInternal(
       }
 
       exitIds = branchExits;
-    } else if (step.type === 'foreach' && 'steps' in step && Array.isArray(step.steps)) {
+    } else if (
+      !isTopLevelForeach &&
+      step.type === 'foreach' &&
+      'steps' in step &&
+      Array.isArray(step.steps)
+    ) {
       // Nested foreach renders flat
       const childSteps = getStepProp<Step[]>(step, 'steps') ?? [];
       const inner = transformInternal([], childSteps, depth + 1, ids);

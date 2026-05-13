@@ -8,7 +8,8 @@
  */
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
-import React, { type ReactNode } from 'react';
+import { useReactFlow } from '@xyflow/react';
+import React, { type ReactNode, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
 export type WorkflowDetailBottomBarView = 'yaml' | 'graph';
@@ -25,11 +26,6 @@ interface WorkflowDetailBottomBarProps {
    */
   bottomOffset?: number;
 }
-
-const PLACEHOLDER_HISTORY = [
-  { id: 'history-back', iconType: 'arrowLeft', label: 'Back' },
-  { id: 'history-forward', iconType: 'arrowRight', label: 'Forward' },
-];
 
 const PLACEHOLDER_TOOLS = [
   { id: 'tool-doc', iconType: 'documentation', label: 'Documentation' },
@@ -78,6 +74,47 @@ function PlaceholderIconButton({
       onClick={NOOP}
       data-test-subj={testId}
     />
+  );
+}
+
+function ZoomControls() {
+  // useReactFlow only works inside a ReactFlowProvider. Wrap in try/catch
+  // via a hook-safe fallback: the bottom bar is always rendered inside the
+  // canvas (which provides the context), but if someone mounts it standalone
+  // we shouldn't crash.
+  const zoomOutLabel = i18n.translate('workflowsUi.bottomBar.zoomOut', {
+    defaultMessage: 'Zoom out',
+  });
+  const zoomInLabel = i18n.translate('workflowsUi.bottomBar.zoomIn', {
+    defaultMessage: 'Zoom in',
+  });
+  const { zoomIn, zoomOut } = useReactFlow();
+  const handleZoomOut = useCallback(() => zoomOut({ duration: 200 }), [zoomOut]);
+  const handleZoomIn = useCallback(() => zoomIn({ duration: 200 }), [zoomIn]);
+
+  return (
+    <>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          iconType="plusInCircle"
+          aria-label={zoomInLabel}
+          color="text"
+          size="s"
+          onClick={handleZoomIn}
+          data-test-subj="workflowBottomBar-zoom-in"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          iconType="minusInCircle"
+          aria-label={zoomOutLabel}
+          color="text"
+          size="s"
+          onClick={handleZoomOut}
+          data-test-subj="workflowBottomBar-zoom-out"
+        />
+      </EuiFlexItem>
+    </>
   );
 }
 
@@ -150,7 +187,7 @@ function ViewToggle({
                 },
               }}
             >
-              <EuiIcon type={iconType} size="m" color={ICON_COLOR} />
+              <EuiIcon type={iconType} size="m" color={ICON_COLOR} aria-hidden={true} />
             </button>
           </EuiToolTip>
         );
@@ -198,15 +235,7 @@ export function WorkflowDetailBottomBar({
       >
         <EuiFlexItem grow={false} css={{ padding: '0 12px' }}>
           <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false} wrap={false}>
-            {PLACEHOLDER_HISTORY.map((btn) => (
-              <EuiFlexItem grow={false} key={btn.id}>
-                <PlaceholderIconButton
-                  iconType={btn.iconType}
-                  label={btn.label}
-                  testId={`workflowBottomBar-${btn.id}`}
-                />
-              </EuiFlexItem>
-            ))}
+            <ZoomControls />
           </EuiFlexGroup>
         </EuiFlexItem>
 

@@ -16,6 +16,7 @@ export {
   type ForeachGroup,
   type ForeachGroupNodeData,
   type GraphEdge,
+  type HandleSide,
   type LayoutedNode,
   type NodeStyle,
   type PreLayoutForeachGroupNode,
@@ -30,4 +31,10 @@ export { IdAllocator, slugify } from './id_allocator';
 export { walkStepTree, visitStepChildren } from './walk_step_tree';
 export { computeTopologyFingerprint } from './compute_topology_fingerprint';
 export { transformWorkflowToGraph, type TransformResult } from './transform_workflow_to_graph';
-export { applyGraphLayout, layoutForeachGroup, type ApplyLayoutResult } from './apply_graph_layout';
+export {
+  applyGraphLayout,
+  layoutForeachGroup,
+  type ApplyLayoutOptions,
+  type ApplyLayoutResult,
+  type LayoutDirection,
+} from './apply_graph_layout';

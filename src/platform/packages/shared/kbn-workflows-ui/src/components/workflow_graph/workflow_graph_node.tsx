@@ -30,6 +30,8 @@ export interface WorkflowGraphNodeData extends Record<string, unknown> {
   stepExecution?: WorkflowStepExecutionDto;
   matchesSearch?: boolean;
   searchActive?: boolean;
+  /** Icon-only compact render (workflow-list popover). */
+  preview?: boolean;
 }
 
 const STEP_TYPE_ICON: Record<string, string> = {
@@ -95,14 +97,17 @@ function getPalette(stepType: string, isTrigger: boolean | undefined) {
 }
 
 export function WorkflowGraphNode(node: NodeProps<Node<WorkflowGraphNodeData>>) {
-  const { stepType, label, isTrigger, stepExecution, matchesSearch, searchActive } = node.data;
+  const { stepType, label, isTrigger, stepExecution, matchesSearch, searchActive, preview } =
+    node.data;
   const palette = getPalette(stepType, isTrigger);
   const dimmed = searchActive && !matchesSearch;
   const iconType = getNodeIcon(stepType);
+  const targetHandlePos = node.targetPosition ?? Position.Top;
+  const sourceHandlePos = node.sourcePosition ?? Position.Bottom;
+
   const isActive = node.selected;
   const [isHovered, setIsHovered] = useState(false);
-  const { onStepRun, canRunSteps, onOpenStepMenu, renderStepMenuItems } =
-    useWorkflowGraphActions();
+  const { onStepRun, canRunSteps, onOpenStepMenu, renderStepMenuItems } = useWorkflowGraphActions();
   const execStatus = stepExecution?.status;
   const isRunning =
     execStatus === ExecutionStatus.RUNNING ||
@@ -151,9 +156,39 @@ export function WorkflowGraphNode(node: NodeProps<Node<WorkflowGraphNodeData>>) 
     defaultMessage: 'More actions',
   });
 
+  // Compact icon-only render for the workflow-list hover preview. All hooks
+  // above are still called every render, so the early return is safe.
+  if (preview) {
+    return (
+      <>
+        {!isTrigger && <Handle type="target" position={targetHandlePos} style={{ opacity: 0 }} />}
+        <div
+          aria-label={`${stepType}: ${label}`}
+          css={{
+            width: '100%',
+            height: '100%',
+            background: palette.iconAreaBg,
+            border: `1px solid ${palette.outerBorder}`,
+            borderRadius: 6,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <EuiIcon
+            type={iconType}
+            size="m"
+            color={LOGO_ICONS.has(iconType) ? undefined : palette.iconColor}
+          />
+        </div>
+        <Handle type="source" position={sourceHandlePos} style={{ opacity: 0 }} />
+      </>
+    );
+  }
+
   return (
     <>
-      {!isTrigger && <Handle type="target" position={Position.Top} style={{ opacity: 0 }} />}
+      {!isTrigger && <Handle type="target" position={targetHandlePos} style={{ opacity: 0 }} />}
       <div
         aria-label={`${stepType} step: ${label}${
           stepExecution?.status ? `, status: ${stepExecution.status}` : ''
@@ -274,9 +309,12 @@ export function WorkflowGraphNode(node: NodeProps<Node<WorkflowGraphNodeData>>) 
               marginLeft: 4,
             }}
             // Stop clicks/mousedowns on the icons from bubbling to the node
-            // selection / pane handlers in React Flow.
+            // selection / pane handlers in React Flow. The inner buttons own
+            // keyboard activation; this wrapper is just a layout/grouping div.
             onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+            role="presentation"
           >
             <EuiToolTip content={runLabel} disableScreenReaderOutput>
               <EuiButtonIcon
@@ -284,7 +322,7 @@ export function WorkflowGraphNode(node: NodeProps<Node<WorkflowGraphNodeData>>) 
                 size="s"
                 color="success"
                 aria-label={runLabel}
-                onClick={(e) => {
+                onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
                   onStepRun?.(label);
                 }}
@@ -304,9 +342,10 @@ export function WorkflowGraphNode(node: NodeProps<Node<WorkflowGraphNodeData>>) 
                     size="s"
                     color="text"
                     aria-label={moreLabel}
-                    onClick={(e) => {
+                    onClick={(e: React.MouseEvent) => {
                       e.stopPropagation();
-                      isMenuOpen ? closeMenu() : openMenu();
+                      if (isMenuOpen) closeMenu();
+                      else openMenu();
                     }}
                     isDisabled={!renderStepMenuItems}
                     data-test-subj="workflowGraphNodeMore"
@@ -323,7 +362,7 @@ export function WorkflowGraphNode(node: NodeProps<Node<WorkflowGraphNodeData>>) 
           </div>
         )}
       </div>
-      <Handle type="source" position={Position.Bottom} style={{ opacity: 0 }} />
+      <Handle type="source" position={sourceHandlePos} style={{ opacity: 0 }} />
     </>
   );
 }

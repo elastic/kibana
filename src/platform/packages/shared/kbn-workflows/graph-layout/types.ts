@@ -98,9 +98,16 @@ export interface ForeachGroup {
   innerEdges: GraphEdge[];
 }
 
+/** Side a node anchors its source/target handle on. Maps to `@xyflow/react`'s `Position`. */
+export type HandleSide = 'top' | 'right' | 'bottom' | 'left';
+
 export interface LayoutedNode extends PreLayoutNodeBase {
   data: StepNodeData | TriggerNodeData | ForeachGroupNodeData;
   position: { x: number; y: number };
+  /** Where the incoming-edge handle should attach (set by `applyGraphLayout`). */
+  targetPosition?: HandleSide;
+  /** Where the outgoing-edge handle should attach (set by `applyGraphLayout`). */
+  sourcePosition?: HandleSide;
 }
 
 export function isStep(value: unknown): value is Step {

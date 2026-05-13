@@ -19,14 +19,18 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { isMac } from '@kbn/shared-ux-utility';
 import { useDispatch, useSelector } from 'react-redux';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { monaco } from '@kbn/monaco';
+import { isMac } from '@kbn/shared-ux-utility';
 import { WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID } from '@kbn/workflows';
-import { useWorkflowsCapabilities, WorkflowDetailBottomBar } from '@kbn/workflows-ui';
+import {
+  ReactFlowProvider,
+  useWorkflowsCapabilities,
+  WorkflowDetailBottomBar,
+} from '@kbn/workflows-ui';
 import { useContextOverrideData } from './use_context_override_data';
 import { WorkflowDetailConnectorFlyout } from './workflow_detail_connector_flyout';
 import { WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
@@ -159,7 +163,17 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
         const line = pos?.lineNumber;
         if (line != null) {
           const tStart = workflowLookup.triggersLineStart;
-          const tEnd = workflowLookup.triggersLineEnd;
+          // `triggersLineEnd` isn't tracked by WorkflowLookup; treat any line
+          // that falls before the first step (or at/past the trigger start)
+          // as being inside the triggers block.
+          const firstStepLine = Object.values(workflowLookup.steps).reduce<number | undefined>(
+            (min, info) => {
+              const ls = (info as { lineStart: number }).lineStart;
+              return min == null || ls < min ? ls : min;
+            },
+            undefined
+          );
+          const tEnd = firstStepLine != null ? firstStepLine - 1 : undefined;
           if (tStart != null && tEnd != null && line >= tStart && line <= tEnd) {
             dispatch(setHighlightedStepId({ stepId: HIGHLIGHTED_STEP_TRIGGER }));
           } else {
@@ -181,6 +195,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
 
   const [showRunConfirmation, setShowRunConfirmation] = useState(false);
   const [isValidationOpen, setIsValidationOpen] = useState(false);
+  const [graphDirection, setGraphDirection] = useState<'TB' | 'LR'>('TB');
   // Keep the graph mounted for a moment after switching to YAML so the
   // cross-fade animation can play out before unmounting it.
   const [renderGraph, setRenderGraph] = useState(showGraph);
@@ -255,7 +270,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
   const toolsSlot = (
     <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false} wrap={false}>
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={documentationLabel}>
+        <EuiToolTip content={documentationLabel} disableScreenReaderOutput>
           <EuiButtonIcon
             iconType="documentation"
             href={WORKFLOWS_DOCUMENTATION_URL}
@@ -283,13 +298,17 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
         <KeyboardShortcutsPopover />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EditorSettingsPopover editorRef={editorRef} />
+        <EditorSettingsPopover
+          editorRef={editorRef}
+          graphDirection={graphDirection}
+          onGraphDirectionChange={setGraphDirection}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 
   return (
-    <>
+    <ReactFlowProvider>
       <EuiFlexGroup gutterSize="none" style={{ height: '100%' }}>
         <EuiFlexItem css={styles.yamlEditor}>
           {/*
@@ -306,10 +325,11 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
               hideEditorBody={showGraph}
               openActionsRef={openActionsRef}
               onValidationOpenChange={setIsValidationOpen}
+              onToggleEditorMode={() => handleEditorViewChange(showGraph ? 'yaml' : 'graph')}
               bodyOverride={
                 renderGraph ? (
                   <React.Suspense fallback={<EuiLoadingSpinner />}>
-                    <WorkflowVisualEditor onStepRun={handleStepRun} />
+                    <WorkflowVisualEditor onStepRun={handleStepRun} direction={graphDirection} />
                   </React.Suspense>
                 ) : null
               }
@@ -358,7 +378,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
           </p>
         </EuiConfirmModal>
       )}
-    </>
+    </ReactFlowProvider>
   );
 });
 WorkflowDetailEditor.displayName = 'WorkflowDetailEditor';

@@ -181,6 +181,12 @@ export interface WorkflowYAMLEditorProps {
    * doesn't get covered by the expanded accordion.
    */
   onValidationOpenChange?: (isOpen: boolean) => void;
+  /**
+   * If provided, the actions menu palette exposes a "Toggle editor mode"
+   * command that calls this handler. Lets the parent switch between YAML
+   * and graph views from the keyboard-driven palette.
+   */
+  onToggleEditorMode?: () => void;
 }
 
 export const WorkflowYAMLEditor = ({
@@ -191,6 +197,7 @@ export const WorkflowYAMLEditor = ({
   bodyOverride,
   openActionsRef,
   onValidationOpenChange,
+  onToggleEditorMode,
 }: WorkflowYAMLEditorProps) => {
   const { notifications, http } = useKibana().services;
 
@@ -644,8 +651,8 @@ export const WorkflowYAMLEditor = ({
     [closeActionsPopover]
   );
 
-  const editorCommands: EditorCommand[] = useMemo(
-    () => [
+  const editorCommands: EditorCommand[] = useMemo(() => {
+    const cmds: EditorCommand[] = [
       {
         id: 'foldAll',
         label: i18n.translate('workflows.yamlEditor.commands.collapseAll', {
@@ -667,9 +674,18 @@ export const WorkflowYAMLEditor = ({
         }),
         iconType: 'search',
       },
-    ],
-    []
-  );
+    ];
+    if (onToggleEditorMode) {
+      cmds.push({
+        id: 'toggleEditorMode',
+        label: i18n.translate('workflows.yamlEditor.commands.toggleEditorMode', {
+          defaultMessage: 'Toggle editor mode',
+        }),
+        iconType: 'visGraph',
+      });
+    }
+    return cmds;
+  }, [onToggleEditorMode]);
 
   const jumpToStepEntries: JumpToStepEntry[] = useMemo(() => {
     if (!workflowLookup) return [];
@@ -682,6 +698,13 @@ export const WorkflowYAMLEditor = ({
 
   const handleCommandSelected = useCallback(
     (commandId: string) => {
+      // The toggle-editor-mode command works even when Monaco isn't focused
+      // (e.g. the palette was opened while the graph view is active).
+      if (commandId === 'toggleEditorMode') {
+        closeActionsPopover();
+        onToggleEditorMode?.();
+        return;
+      }
       const editor = editorRef.current;
       if (!editor) return;
       switch (commandId) {
@@ -698,7 +721,7 @@ export const WorkflowYAMLEditor = ({
       closeActionsPopover();
       editor.focus();
     },
-    [closeActionsPopover]
+    [closeActionsPopover, onToggleEditorMode]
   );
 
   const handleJumpToStep = useCallback(

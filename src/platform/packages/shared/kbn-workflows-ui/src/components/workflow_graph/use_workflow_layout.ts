@@ -8,7 +8,7 @@
  */
 
 import type { Edge, Node, OnNodesChange } from '@xyflow/react';
-import { applyNodeChanges } from '@xyflow/react';
+import { applyNodeChanges, Position } from '@xyflow/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   applyGraphLayout,
@@ -17,18 +17,34 @@ import {
 } from '@kbn/workflows';
 import type {
   ExecutionStatus,
+  HandleSide,
+  LayoutDirection,
   LayoutedNode,
   WorkflowStepExecutionDto,
   WorkflowYaml,
 } from '@kbn/workflows';
 
+const HANDLE_SIDE_TO_POSITION: Record<HandleSide, Position> = {
+  top: Position.Top,
+  right: Position.Right,
+  bottom: Position.Bottom,
+  left: Position.Left,
+};
+
 interface UseWorkflowLayoutParams {
   workflow: WorkflowYaml | undefined;
   stepExecutions?: WorkflowStepExecutionDto[];
   searchTerm?: string;
+  /** Dagre rank direction: `'TB'` (default) or `'LR'`. */
+  direction?: LayoutDirection;
+  /** Render nodes in preview mode (icon-only, smaller dimensions). */
+  preview?: boolean;
   onPerfMark?: (name: 'transform_ms' | 'layout_ms', ms: number) => void;
   onLayoutFailed?: (reason: string) => void;
 }
+
+const PREVIEW_NODE_WIDTH = 48;
+const PREVIEW_NODE_HEIGHT = 48;
 
 interface UseWorkflowLayoutResult {
   nodes: Node[];
@@ -51,6 +67,8 @@ export function useWorkflowLayout({
   workflow,
   stepExecutions,
   searchTerm,
+  direction = 'TB',
+  preview = false,
   onPerfMark,
   onLayoutFailed,
 }: UseWorkflowLayoutParams): UseWorkflowLayoutResult {
@@ -71,12 +89,33 @@ export function useWorkflowLayout({
       const transformed = transformWorkflowToGraph(workflowRef.current);
       onPerfMark?.('transform_ms', performance.now() - t0);
 
+      // In preview mode, shrink each node to a small icon-sized square so the
+      // dagre layout produces a compact result fit for a popover.
+      const sizedNodes = preview
+        ? transformed.nodes.map((n) =>
+            n.type === 'foreachGroup'
+              ? n
+              : {
+                  ...n,
+                  style: { width: PREVIEW_NODE_WIDTH, height: PREVIEW_NODE_HEIGHT },
+                }
+          )
+        : transformed.nodes;
+      const sizedForeachGroups = preview
+        ? transformed.foreachGroups.map((g) => ({
+            ...g,
+            innerNodes: g.innerNodes.map((n) => ({
+              ...n,
+              style: { width: PREVIEW_NODE_WIDTH, height: PREVIEW_NODE_HEIGHT },
+            })),
+          }))
+        : transformed.foreachGroups;
+
       const t1 = performance.now();
-      const laid = applyGraphLayout(
-        transformed.nodes,
-        transformed.edges,
-        transformed.foreachGroups
-      );
+      const laid = applyGraphLayout(sizedNodes, transformed.edges, sizedForeachGroups, {
+        direction,
+        compact: preview,
+      });
       onPerfMark?.('layout_ms', performance.now() - t1);
 
       // Compute trigger and leaf ids from the transform output (cheap)
@@ -99,8 +138,8 @@ export function useWorkflowLayout({
         triggerNodeIds: [] as string[],
       };
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed on topology only
-  }, [topologyFingerprint]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed on topology + direction + preview
+  }, [topologyFingerprint, direction, preview]);
 
   const stepExecutionMap = useMemo(() => {
     if (!stepExecutions) return null;
@@ -123,6 +162,8 @@ export function useWorkflowLayout({
         (label?.toLowerCase().includes(lowerSearch) ?? false) ||
         (stepType?.toLowerCase().includes(lowerSearch) ?? false);
       const exec = stepExecutionMap?.[label ?? n.id] ?? stepExecutionMap?.[n.id];
+      const targetPosition = HANDLE_SIDE_TO_POSITION[n.targetPosition ?? 'top'];
+      const sourcePosition = HANDLE_SIDE_TO_POSITION[n.sourcePosition ?? 'bottom'];
       return {
         id: n.id,
         type: n.type,
@@ -130,15 +171,18 @@ export function useWorkflowLayout({
         parentId: n.parentId,
         extent: n.extent,
         style: { width: n.style.width, height: n.style.height },
+        targetPosition,
+        sourcePosition,
         data: {
           ...(n.data as Record<string, unknown>),
           stepExecution: exec,
           matchesSearch,
           searchActive,
+          preview,
         },
       } as Node;
     });
-  }, [layoutResult.nodes, stepExecutionMap, searchActive, lowerSearch]);
+  }, [layoutResult.nodes, stepExecutionMap, searchActive, lowerSearch, preview]);
 
   const derivedEdges = useMemo<Edge[]>(() => {
     return layoutResult.edges.map((e) => {
