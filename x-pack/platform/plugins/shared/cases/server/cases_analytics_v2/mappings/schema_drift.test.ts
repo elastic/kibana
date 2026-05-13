@@ -7,32 +7,109 @@
 
 import type { MappingProperty, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObject } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
+import { createCaseSavedObjectType } from '../../saved_object_types/cases/cases';
 import { ALL_TEMPLATE_TYPE_SUFFIXES } from '../data_view/runtime_fields';
 import { buildCaseDoc } from '../writer/case_doc_builder';
 import { CASE_INDEX_MAPPING } from './case';
 
 /**
- * Schema drift guard.
+ * Schema drift guards — three complementary layers.
  *
- * The `.cases` index is mapped `dynamic: 'strict'` — any field a doc builder
- * emits that isn't in the mapping fails the write with `mapper_parsing_exception`.
- * The writer's `.catch` swallow means that failure is silent: the API
- * response succeeds, no doc lands, and the only signal is an ERROR log.
+ * **Layer 1 (buildCaseDoc output ⊆ CASE_INDEX_MAPPING).** The `.cases`
+ * index is mapped `dynamic: 'strict'` — any field a doc builder emits that
+ * isn't in the mapping fails the write with `mapper_parsing_exception`. The
+ * writer's `.catch` swallow means that failure is silent: the API response
+ * succeeds, no doc lands, and the only signal is an ERROR log. This layer
+ * round-trips a maximally-populated synthetic case through `buildCaseDoc`
+ * and asserts every emitted dotted path resolves in `CASE_INDEX_MAPPING`.
+ * Catches: engineer added a field to the doc-builder without updating the
+ * mapping.
  *
- * This test round-trips a maximally-populated synthetic case through
- * `buildCaseDoc` and asserts every emitted dotted path resolves to a
- * property in `CASE_INDEX_MAPPING`. Catches the foot-gun where a future SO
- * field gets added to the doc builder and the mapping update is forgotten.
+ * **Layer 2 (SO mapping ⊆ CASE_INDEX_MAPPING via `cases.<path>`).** Every
+ * field present in the cases SO mapping at
+ * `server/saved_object_types/cases/cases.ts` has a corresponding entry in
+ * `CASE_INDEX_MAPPING` under `cases.<path>` (or is explicitly allowlisted
+ * as an intentional divergence). Catches: engineer added an indexed field
+ * to the SO mapping without mirroring it in v2.
  *
- * Excluded paths:
+ * **Layer 3 (`Required<CasePersistedAttributes>` fixture).** The synthetic
+ * case's attribute object is typed as
+ * `Record<keyof Required<CasePersistedAttributes>, unknown>` — a mapped type
+ * that enumerates every key, including optional ones. Missing a key from
+ * the fixture is a TypeScript compile error. Catches: engineer added a
+ * persisted-attribute key to `CasePersistedAttributes` but never decided
+ * what (or whether) `buildCaseDoc` should emit for it. The fixture forces
+ * the decision.
+ *
+ * Excluded from Layer 1:
  *   - `cases.extended_fields.*`: lands via the dynamic_template, not static
  *     properties.
  *   - `cases.observables.*`: lands via the dynamic_template (denormalized
  *     per-typeKey keys are dynamic).
  */
+
+// ----- Layer 3 fixture (`Required<CasePersistedAttributes>`-keyed) -----
+//
+// Keys are enumerated via a mapped type over `Required<...>`. If
+// `CasePersistedAttributes` gains a new property — even an optional one —
+// TypeScript fails this file at compile time: "Property 'newField' is
+// missing in type ...". The engineer is forced to populate the fixture
+// with a representative value, which then surfaces whether `buildCaseDoc`
+// should emit the new attribute (Layer 1 verifies the round-trip).
+//
+// Values are typed as `unknown` because some attribute types use branded
+// shapes (`ConnectorPersisted`, `ExternalServicePersisted`, etc.) that
+// aren't worth importing for this test's purpose. The structural drift
+// checks (Layers 1 + 2) and the doc-builder's own typed compile-time
+// checks catch shape problems elsewhere.
+const buildFullAttributes = (): {
+  [K in keyof Required<CasePersistedAttributes>]: unknown;
+} => ({
+  owner: 'securitySolution',
+  title: 'A title',
+  description: 'A description',
+  tags: ['tag1'],
+  category: 'malware',
+  assignees: [{ uid: 'u-1' }],
+  severity: CasePersistedSeverity.HIGH,
+  status: CasePersistedStatus.CLOSED,
+  created_at: '2026-05-01T00:00:00.000Z',
+  updated_at: '2026-05-02T00:00:00.000Z',
+  closed_at: '2026-05-03T00:00:00.000Z',
+  in_progress_at: '2026-05-01T01:00:00.000Z',
+  created_by: { username: 'jane', full_name: 'J', email: 'j@e.com', profile_uid: 'p-1' },
+  closed_by: { username: 'jane', full_name: 'J', email: 'j@e.com', profile_uid: 'p-1' },
+  updated_by: { username: 'jane', full_name: 'J', email: 'j@e.com', profile_uid: 'p-1' },
+  duration: 12345,
+  total_alerts: 3,
+  total_comments: 5,
+  total_events: 1,
+  total_observables: 2,
+  time_to_acknowledge: 60000,
+  time_to_investigate: 120000,
+  time_to_resolve: 300000,
+  incremental_id: 42,
+  template: { id: 't-1', version: 1 },
+  connector: { name: 'jira', type: '.jira', fields: { key: 'k', value: 'v' } },
+  external_service: {
+    pushed_at: '2026-05-02T00:00:00.000Z',
+    pushed_by: { username: 'jane', full_name: 'J', email: 'j@e.com', profile_uid: 'p-1' },
+    connector_name: 'jira',
+    external_id: 'JIRA-1',
+    external_title: 'Title',
+    external_url: 'http://jira',
+  },
+  settings: { syncAlerts: false },
+  observables: [{ typeKey: 'url', value: 'http://x.com', description: '' }],
+  customFields: [{ key: 'cf', type: 'text', value: 'x' }],
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  extended_fields: { riskScore_as_long: '42' },
+});
 
 const fullCaseSO = (): SavedObject<CasePersistedAttributes> =>
   ({
@@ -40,48 +117,10 @@ const fullCaseSO = (): SavedObject<CasePersistedAttributes> =>
     id: 'case-1',
     namespaces: ['default'],
     references: [],
-    attributes: {
-      owner: 'securitySolution',
-      title: 'A title',
-      description: 'A description',
-      tags: ['tag1'],
-      category: 'malware',
-      assignees: [{ uid: 'u-1' }],
-      severity: CasePersistedSeverity.HIGH,
-      status: CasePersistedStatus.CLOSED,
-      created_at: '2026-05-01T00:00:00.000Z',
-      updated_at: '2026-05-02T00:00:00.000Z',
-      closed_at: '2026-05-03T00:00:00.000Z',
-      in_progress_at: '2026-05-01T01:00:00.000Z',
-      created_by: { username: 'jane', full_name: 'J', email: 'j@e.com', profile_uid: 'p-1' },
-      closed_by: { username: 'jane', full_name: 'J', email: 'j@e.com', profile_uid: 'p-1' },
-      updated_by: { username: 'jane', full_name: 'J', email: 'j@e.com', profile_uid: 'p-1' },
-      duration: 12345,
-      total_alerts: 3,
-      total_comments: 5,
-      total_events: 1,
-      total_observables: 2,
-      time_to_acknowledge: 60000,
-      time_to_investigate: 120000,
-      time_to_resolve: 300000,
-      incremental_id: 42,
-      template: { id: 't-1', version: 1 },
-      connector: { name: 'jira', type: '.jira', fields: { key: 'k', value: 'v' } } as never,
-      external_service: {
-        pushed_at: '2026-05-02T00:00:00.000Z',
-        pushed_by: { username: 'jane', full_name: 'J', email: 'j@e.com', profile_uid: 'p-1' },
-        connector_name: 'jira',
-        external_id: 'JIRA-1',
-        external_title: 'Title',
-        external_url: 'http://jira',
-      } as never,
-      settings: { syncAlerts: false },
-      observables: [{ typeKey: 'url', value: 'http://x.com', description: '' }] as never,
-      customFields: [{ key: 'cf', type: 'text', value: 'x' }] as never,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      extended_fields: { riskScore_as_long: '42' },
-    } as CasePersistedAttributes,
+    attributes: buildFullAttributes() as CasePersistedAttributes,
   } as SavedObject<CasePersistedAttributes>);
+
+// ----- Helpers -----
 
 /** Produce dotted paths for every leaf field of a parsed doc. */
 const flatten = (doc: unknown, prefix = ''): string[] => {
@@ -136,6 +175,8 @@ const isCovered = (path: string, mappedPaths: Set<string>): boolean => {
   return false;
 };
 
+// ----- Layer 1: doc-builder output ⊆ v2 mapping -----
+
 describe('case mapping covers every doc-builder field', () => {
   it('every path emitted by buildCaseDoc resolves to a mapping property', () => {
     const doc = buildCaseDoc(fullCaseSO());
@@ -145,9 +186,54 @@ describe('case mapping covers every doc-builder field', () => {
   });
 });
 
+// ----- Layer 2: SO mapping ⊆ v2 mapping (via `cases.<path>` prefix rule) -----
+
 /**
- * Snake-key collision guard.
+ * Fields present in the cases SO mapping that intentionally don't appear at
+ * the parallel `cases.<path>` location in v2 *and* aren't covered by an
+ * `enabled: false` / `dynamic: true` ancestor (which `isCovered` handles
+ * naturally — see below).
  *
+ * Document the rationale next to each entry. The failure mode of an
+ * unexplained allowlist entry is "engineer silently skips a new SO field,"
+ * which is exactly what this layer exists to prevent.
+ */
+const OMITTED_FROM_V2_MIRROR: ReadonlyMap<string, string> = new Map([
+  // Empty today. The handful of intentional divergences are all covered by
+  // an opaque (`enabled: false`) or `dynamic: true` parent in v2 and are
+  // caught by the `isCovered` rule:
+  //  - cases.settings.{syncAlerts,extractObservables} → v2 cases.settings
+  //    is `enabled: false` (per-case config, not an analytics dimension).
+  //  - cases.observables.{typeKey,value,description}  → v2 cases.observables
+  //    is `dynamic: true` (denormalized to `cases.observables.<typeKey>`
+  //    via dynamic_template; description dropped).
+]);
+
+describe('cases SO mapping is mirrored in CASE_INDEX_MAPPING', () => {
+  const soMapping = createCaseSavedObjectType(coreMock.createSetup(), loggerMock.create())
+    .mappings as MappingTypeMapping;
+  const soPaths = collectMappedPaths(soMapping);
+  const v2Paths = collectMappedPaths(CASE_INDEX_MAPPING);
+
+  it('every SO mapping field exists at cases.<path> in v2 (or is covered / allowlisted)', () => {
+    // Mechanical rule: SO field `foo.bar` is expected at `cases.foo.bar` in
+    // v2. `isCovered` also accepts a match on any prefix — so SO subfields
+    // of an opaque (`enabled: false`) or `dynamic: true` v2 parent are
+    // implicitly covered without needing an allowlist entry. Anything that
+    // still doesn't match must appear in `OMITTED_FROM_V2_MIRROR` with a
+    // documented reason.
+    const missing = [...soPaths].filter((soPath) => {
+      if (OMITTED_FROM_V2_MIRROR.has(soPath)) return false;
+      const expected = `cases.${soPath}`;
+      return !isCovered(expected, v2Paths);
+    });
+    expect(missing).toEqual([]);
+  });
+});
+
+// ----- Snake-key collision guard (runtime field naming invariant) -----
+
+/**
  * Typed runtime fields are published at `cases.<snakeKey>` (e.g.
  * `cases.score_as_long`) — direct children of `cases`. The strict collision
  * is at the exact full path `cases.<snake>`; checking the leaf segment
