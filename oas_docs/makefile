@@ -95,6 +95,11 @@ api-docs-overlay: ## Apply all overlays (including bump-slim placeholder for Das
 #
 # Note: space-aware-api-docs is intentionally NOT applied here — that step
 # injects Bump-specific HTML and would render incorrectly in other tools.
+#
+# Note: kibana.overlays.strip_request_examples.yaml IS applied here to remove
+# requestBody.examples from Dashboards & Visualizations operations.  The
+# external renderer relies on x-codeSamples exclusively; requestBody.examples
+# are kept only in the Bump pipeline output (kibana.yaml / kibana.serverless.yaml).
 # ──────────────────────────────────────────────────────────────────────────────
 .PHONY: api-docs-overlay-external
 api-docs-overlay-external: merge-api-docs-stateful api-docs-fix-required ## Apply all overlays except bump-slim — output is kibana.external.yaml (full Dashboards & Visualizations for external hosting)
@@ -106,7 +111,8 @@ api-docs-overlay-external: merge-api-docs-stateful api-docs-fix-required ## Appl
 	@./node_modules/.bin/bump overlay "output/kibana.tmp4.yaml" "overlays/streams.overlays.yaml" > "output/kibana.tmp5.yaml"
 	@./node_modules/.bin/bump overlay "output/kibana.tmp5.yaml" "overlays/dashboards.overlays.yaml" > "output/kibana.tmp6.yaml"
 	@./node_modules/.bin/bump overlay "output/kibana.tmp6.yaml" "overlays/visualizations.overlays.yaml" > "output/kibana.tmp7.yaml"
-	@./node_modules/.bin/redocly bundle output/kibana.tmp7.yaml --ext yaml -o output/kibana.external.yaml
+	@./node_modules/.bin/bump overlay "output/kibana.tmp7.yaml" "overlays/kibana.overlays.strip_request_examples.yaml" > "output/kibana.tmp8.yaml"
+	@./node_modules/.bin/redocly bundle output/kibana.tmp8.yaml --ext yaml -o output/kibana.external.yaml
 	rm -f output/kibana.tmp*.yaml
 
 .PHONY: api-docs-preview
