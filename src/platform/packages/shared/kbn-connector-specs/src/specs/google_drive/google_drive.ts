@@ -8,7 +8,11 @@
  */
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
-import { setConnectorActionErrorMeta } from '../../connector_spec';
+import {
+  setConnectorActionErrorMeta,
+  getFinitePositiveNumber,
+  getEstimatedBase64OutputBytes,
+} from '../../connector_spec';
 import type { ConnectorSpec } from '../../connector_spec';
 // Google Drive API constants
 const GOOGLE_DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3';
@@ -19,10 +23,6 @@ const GOOGLE_WORKSPACE_MIME_PREFIX = 'application/vnd.google-apps.';
 const DEFAULT_EXPORT_MIME_TYPE = 'application/pdf';
 // XLSX preserves tabular structure better than PDF for spreadsheets
 const SHEETS_EXPORT_MIME_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-// Safe upper bound for the JSON envelope (status, headers, key names, etc.)
-// that wraps the base64 content in step output. Actual envelope is a few hundred bytes.
-const ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES = 1024;
-
 interface GoogleDriveFileMetadata {
   id: string;
   name: string;
@@ -39,18 +39,6 @@ function escapeQueryValue(value: string): string {
   // Escape backslashes first, then single quotes
   return value.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }
-
-const getFinitePositiveNumber = (value: unknown): number | undefined => {
-  const numericValue = typeof value === 'string' ? Number(value) : value;
-  if (typeof numericValue !== 'number' || !Number.isFinite(numericValue) || numericValue < 0) {
-    return undefined;
-  }
-
-  return numericValue;
-};
-
-const getEstimatedBase64OutputBytes = (rawBytes: number): number =>
-  Math.ceil(rawBytes / 3) * 4 + ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES;
 
 /**
  * Extracts and throws a meaningful error from Google Drive API responses.

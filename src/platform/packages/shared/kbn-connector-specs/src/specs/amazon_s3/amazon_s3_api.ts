@@ -9,7 +9,11 @@
 
 import { Parser } from 'xml2js';
 import type { ActionContext } from '../../connector_spec';
-import { setConnectorActionErrorMeta } from '../../connector_spec';
+import {
+  setConnectorActionErrorMeta,
+  getEstimatedBase64OutputBytes,
+  getResponseContentLengthBytes,
+} from '../../connector_spec';
 import { calculateAWSA4Signature, sha256Hash } from '../../auth_types/aws_crypto_helpers';
 import type {
   AmazonS3BucketObjectListing,
@@ -18,51 +22,6 @@ import type {
   AmazonS3ObjectMetadata,
   AmazonS3Object,
 } from './amazon_s3_types';
-
-const ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES = 1024;
-
-const getFinitePositiveNumber = (value: unknown): number | undefined => {
-  const numericValue = typeof value === 'string' ? Number(value) : value;
-  if (typeof numericValue !== 'number' || !Number.isFinite(numericValue) || numericValue < 0) {
-    return undefined;
-  }
-  return numericValue;
-};
-
-const getHeaderValue = ({
-  headers,
-  headerName,
-}: {
-  headers: unknown;
-  headerName: string;
-}): unknown => {
-  if (!headers || typeof headers !== 'object') {
-    return undefined;
-  }
-
-  const normalizedHeaderName = headerName.toLowerCase();
-  const headersRecord = headers as Record<string, unknown>;
-  const matchingHeaderName = Object.keys(headersRecord).find(
-    (key) => key.toLowerCase() === normalizedHeaderName
-  );
-
-  return matchingHeaderName ? headersRecord[matchingHeaderName] : undefined;
-};
-
-const getEstimatedBase64OutputBytes = (rawBytes: number): number =>
-  Math.ceil(rawBytes / 3) * 4 + ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES;
-
-const getResponseContentLengthBytes = (error: unknown): number | undefined => {
-  const axiosError = error as {
-    response?: { headers?: unknown };
-    request?: { res?: { headers?: unknown } };
-  };
-  const headerValue =
-    getHeaderValue({ headers: axiosError.response?.headers, headerName: 'content-length' }) ??
-    getHeaderValue({ headers: axiosError.request?.res?.headers, headerName: 'content-length' });
-
-  return getFinitePositiveNumber(Array.isArray(headerValue) ? headerValue[0] : headerValue);
-};
 
 function createQueryString(params: Record<string, string | undefined>): string {
   const queryParams: Record<string, string> = {};

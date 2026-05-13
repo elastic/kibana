@@ -19,6 +19,11 @@ export {
   getConnectorActionErrorMeta,
   isToolAction,
   setConnectorActionErrorMeta,
+  getFinitePositiveNumber,
+  getEstimatedBase64OutputBytes,
+  getHeaderValue,
+  getResponseContentLengthBytes,
+  ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES,
 } from './src/connector_spec';
 export { normalizeAuthorizationHeaderValue } from './src/auth_types/oauth_authz_code_and_ears_helpers';
 

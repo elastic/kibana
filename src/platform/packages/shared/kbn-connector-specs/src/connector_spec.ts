@@ -207,12 +207,52 @@ export interface ConnectorActionErrorMeta {
 
 const connectorActionErrorMeta = new WeakMap<object, ConnectorActionErrorMeta>();
 
-const getFinitePositiveNumber = (value: unknown): number | undefined => {
+export const getFinitePositiveNumber = (value: unknown): number | undefined => {
   const numericValue = typeof value === 'string' ? Number(value) : value;
   if (typeof numericValue !== 'number' || !Number.isFinite(numericValue) || numericValue < 0) {
     return undefined;
   }
   return numericValue;
+};
+
+// Safe upper bound for the JSON envelope (status, headers, key names, etc.)
+// that wraps content in step output. Actual envelope is a few hundred bytes.
+export const ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES = 1024;
+
+// Base64 expands 3 raw bytes into 4 encoded characters, plus JSON envelope overhead.
+export const getEstimatedBase64OutputBytes = (rawBytes: number): number =>
+  Math.ceil(rawBytes / 3) * 4 + ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES;
+
+export const getHeaderValue = ({
+  headers,
+  headerName,
+}: {
+  headers: unknown;
+  headerName: string;
+}): unknown => {
+  if (!headers || typeof headers !== 'object') {
+    return undefined;
+  }
+
+  const normalizedHeaderName = headerName.toLowerCase();
+  const headersRecord = headers as Record<string, unknown>;
+  const matchingHeaderName = Object.keys(headersRecord).find(
+    (key) => key.toLowerCase() === normalizedHeaderName
+  );
+
+  return matchingHeaderName ? headersRecord[matchingHeaderName] : undefined;
+};
+
+export const getResponseContentLengthBytes = (error: unknown): number | undefined => {
+  const axiosError = error as {
+    response?: { headers?: unknown };
+    request?: { res?: { headers?: unknown } };
+  };
+  const headerValue =
+    getHeaderValue({ headers: axiosError.response?.headers, headerName: 'content-length' }) ??
+    getHeaderValue({ headers: axiosError.request?.res?.headers, headerName: 'content-length' });
+
+  return getFinitePositiveNumber(Array.isArray(headerValue) ? headerValue[0] : headerValue);
 };
 
 export const setConnectorActionErrorMeta = (

@@ -29,6 +29,8 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
  */
 const CONNECTOR_TYPES_WITH_LAYER_1 = new Set<string>(['http']);
 
+// Axios internal error message format — no typed error code is exposed for this case,
+// so regex matching is the only reliable detection method.
 const ACTIONS_MAX_CONTENT_LENGTH_ERROR_PATTERN = /maxContentLength size of (\d+) exceeded/;
 
 const getActionsMaxContentLengthLimit = (errorMessage: string): number | undefined => {

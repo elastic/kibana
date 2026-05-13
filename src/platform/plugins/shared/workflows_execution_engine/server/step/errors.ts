@@ -106,14 +106,10 @@ export class ResponseSizeLimitError extends ExecutionError {
     } = {}
   ) {
     const { actualBytes, contentLengthBytes, estimatedOutputBytes } = options;
-    const suggestedLimitBytes =
-      actualBytes && actualBytes > limitBytes
-        ? actualBytes
-        : estimatedOutputBytes && estimatedOutputBytes > limitBytes
-        ? estimatedOutputBytes
-        : contentLengthBytes && contentLengthBytes > limitBytes
-        ? contentLengthBytes
-        : undefined;
+    const candidates = [actualBytes, estimatedOutputBytes, contentLengthBytes];
+    const suggestedLimitBytes = candidates.find(
+      (n): n is number => typeof n === 'number' && n > limitBytes
+    );
     const actualSizeMessage = actualBytes
       ? `Actual serialized output size was ${formatBytes(actualBytes)}. `
       : '';
