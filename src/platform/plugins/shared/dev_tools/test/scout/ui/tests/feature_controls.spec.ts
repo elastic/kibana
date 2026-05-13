@@ -45,19 +45,21 @@ test.describe('Dev Tools feature controls', { tag: tags.stateful.classic }, () =
     browserAuth,
     kbnUrl,
     page,
-    pageObjects,
+    pageObjects: { collapsibleNav },
   }) => {
     await browserAuth.loginAsNoDevToolsPrivileges();
     await page.gotoApp('discover');
 
-    const navLinks = await pageObjects.collapsibleNav.getNavLinks();
+    const navLinks = await collapsibleNav.getNavLinks();
     expect(navLinks).toContain('Discover');
     expect(navLinks).not.toContain('Dev Tools');
 
-    for (const { hash, readySubject } of testData.DEV_TOOL_APPS) {
+    for (const { hash } of testData.DEV_TOOL_APPS) {
       await page.goto(kbnUrl.app('dev_tools', { pathOptions: { hash } }));
-      await expect(pageObjects.devTools.appContainer(readySubject)).toBeHidden();
-      await expect(page.testSubj.locator('appNotFoundPageContent')).toBeVisible();
+      // The security plugin intercepts at the server level and redirects to
+      // /security/reset_session when the session lacks the dev_tools feature.
+      await page.waitForURL(/\/security\/reset_session/);
+      await expect(page.testSubj.locator('promptPage')).toBeVisible();
     }
   });
 
@@ -105,8 +107,9 @@ test.describe('Dev Tools feature controls', { tag: tags.stateful.classic }, () =
           pathOptions: { hash },
         })
       );
+      // The spaces middleware blocks the request at the server level and returns
+      // a raw JSON 404 — the SPA never loads, so the app containers are absent.
       await expect(pageObjects.devTools.appContainer(readySubject)).toBeHidden();
-      await expect(page.testSubj.locator('appNotFoundPageContent')).toBeVisible();
     }
   });
 });
