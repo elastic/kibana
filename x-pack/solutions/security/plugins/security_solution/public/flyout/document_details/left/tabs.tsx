@@ -23,7 +23,7 @@ import {
   VISUALIZE_TAB_TEST_ID,
 } from './test_ids';
 import { RESPONSE_TAB_CONTENT_TEST_ID } from './tabs/test_ids';
-import { ResponseDetailsContent } from '../../../flyout_v2/response/components/response_details';
+import { ResponseDetailsContent } from '../../../flyout_v2/document/tools/response/components/response_details';
 import { useDocumentDetailsContext } from '../shared/context';
 
 export interface LeftPanelTabType {

@@ -10,7 +10,7 @@ import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { LeftPanelResponseTab } from '../../left';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
-import { ResponseSectionContent } from '../../../../flyout_v2/document/components/response_section_content';
+import { ResponseSectionContent } from '../../../../flyout_v2/document/main/components/response_section_content';
 
 /**
  * Response section adapter for the legacy expandable flyout overview tab.

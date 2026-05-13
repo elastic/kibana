@@ -38,6 +38,7 @@ export * from './specs/amazon_s3/amazon_s3';
 export * from './specs/google_cloud_storage/google_cloud_storage';
 export * from './specs/sharepoint_server/sharepoint_server';
 export * from './specs/microsoft_teams/microsoft_teams';
+export * from './specs/outlook/outlook';
 export * from './specs/tavily/tavily';
 export * from './specs/pagerduty/pagerduty';
 export * from './specs/snowflake/snowflake';

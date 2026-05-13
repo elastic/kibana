@@ -11,7 +11,7 @@ import {
   mockFinalAnswer,
   mockHandoverToAnswer,
   mockTitleGeneration,
-} from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/proxy_scenario/calls';
+} from '../../../scout_agent_builder_shared/lib/proxy_scenario/calls';
 
 /**
  * Answer agent calls an invalid tool on first call and then responds on the second call.
