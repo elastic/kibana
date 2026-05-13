@@ -98,9 +98,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
     z-index: ${euiTheme.levels.content};
   `;
 
-  if (!actionButtons || actionButtons.length === 0) {
-    return null;
-  }
+  const hasActionButtons = actionButtons && actionButtons.length > 0;
 
   return (
     <EuiSplitPanel.Inner color="subdued" css={headerStyles} paddingSize="m">
@@ -159,7 +157,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        {previewBadgeState !== 'previewing' && (
+        {previewBadgeState !== 'previewing' && hasActionButtons && (
           <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
             <AttachmentActions buttons={actionButtons} />
           </EuiFlexItem>
