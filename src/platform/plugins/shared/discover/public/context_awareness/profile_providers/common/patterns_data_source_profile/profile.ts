@@ -21,7 +21,7 @@ import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
 import { getPatternCellRenderer } from './pattern_cell_renderer';
 import type { ProfileProviderServices } from '../../profile_provider_services';
-import { getSparklineCellRenderer } from './sparkline_cell_renderer';
+import { getSparklineCellRenderer } from '../sparkline_data_source_profile/sparkline_cell_renderer';
 
 const DOC_LIMIT = 10000;
 

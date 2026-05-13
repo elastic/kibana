@@ -14,7 +14,7 @@ import { DataSourceType, isDataSourceType } from '../../../../../common/data_sou
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
-import { getSparklineCellRenderer } from '../patterns_data_source_profile/sparkline_cell_renderer';
+import { getSparklineCellRenderer } from './sparkline_cell_renderer';
 
 export const SPARKLINE_DATA_SOURCE_PROFILE_ID = 'sparkline-data-source-profile';
 
