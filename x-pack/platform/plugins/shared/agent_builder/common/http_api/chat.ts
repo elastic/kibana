@@ -31,6 +31,13 @@ export interface ChatRequestBodyPayload {
   browser_api_tools?: BrowserApiToolMetadata[];
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
   action?: ConversationAction;
+  /**
+   * When `false`, the conversation is not persisted to storage: no document is
+   * written, no `conversation_id` is returned in the response, and the round is
+   * executed in a one-shot fashion. Mutually exclusive with `conversation_id`
+   * and `action: 'regenerate'`. Defaults to `true`.
+   */
+  persist?: boolean;
   /** Force a specific execution mode. When omitted, the server auto-detects. */
   _execution_mode?: 'local' | 'task_manager';
 }

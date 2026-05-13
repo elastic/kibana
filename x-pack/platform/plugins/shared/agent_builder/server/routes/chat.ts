@@ -214,6 +214,14 @@ export function registerChatRoutes({
         },
       })
     ),
+    persist: schema.maybe(
+      schema.boolean({
+        meta: {
+          description:
+            'When false, the conversation is not persisted. No document is written and no conversation_id is returned. Mutually exclusive with `conversation_id` and `action`.',
+        },
+      })
+    ),
     _execution_mode: schema.maybe(
       schema.oneOf([schema.literal('local'), schema.literal('task_manager')], {
         meta: {
@@ -227,6 +235,19 @@ export function registerChatRoutes({
   const validateAction = (payload: ChatRequestBodyPayload) => {
     if (payload.action === 'regenerate' && !payload.conversation_id) {
       throw createBadRequestError('conversation_id is required when action is regenerate');
+    }
+  };
+
+  const validatePersist = (payload: ChatRequestBodyPayload) => {
+    if (payload.persist === false) {
+      if (payload.conversation_id) {
+        throw createBadRequestError(
+          'persist=false cannot be combined with conversation_id (one-shot runs do not write or continue a stored conversation).'
+        );
+      }
+      if (payload.action) {
+        throw createBadRequestError('persist=false cannot be combined with action.');
+      }
     }
   };
 
@@ -286,6 +307,7 @@ export function registerChatRoutes({
       browser_api_tools: browserApiTools,
       configuration_overrides: configurationOverrides,
       action,
+      persist,
       _execution_mode: executionMode,
     } = payload;
 
@@ -293,6 +315,11 @@ export function registerChatRoutes({
 
     const useTaskManager =
       executionMode === 'task_manager' ? true : executionMode === 'local' ? false : undefined;
+
+    // When persist=false, no conversation document is written and no
+    // auto-create-by-id happens. The agent still executes a single round and
+    // emits a RoundComplete event.
+    const storeConversation = persist !== false;
 
     const { events$ } = await executionService.executeAgent({
       mode: AgentExecutionMode.conversation,
@@ -303,7 +330,8 @@ export function registerChatRoutes({
         agentId,
         connectorId,
         conversationId,
-        autoCreateConversationWithId: true,
+        autoCreateConversationWithId: storeConversation,
+        storeConversation,
         capabilities,
         browserApiTools,
         configurationOverrides,
@@ -355,6 +383,7 @@ export function registerChatRoutes({
 
         await validateConfigurationOverrides({ payload, request });
         validateAction(payload);
+        validatePersist(payload);
 
         const abortController = new AbortController();
         request.events.aborted$.subscribe(() => {
@@ -372,12 +401,12 @@ export function registerChatRoutes({
         const {
           data: { round },
         } = events.find(isRoundCompleteEvent)!;
-        const {
-          data: { conversation_id: convId },
-        } = events.find(
+        // ConversationUpdated/Created events are only emitted when persisting.
+        const convEvent = events.find(
           (e): e is ConversationUpdatedEvent | ConversationCreatedEvent =>
             isConversationUpdatedEvent(e) || isConversationCreatedEvent(e)
-        )!;
+        );
+        const convId = convEvent?.data.conversation_id ?? '';
         return response.ok<ChatResponse>({
           body: {
             conversation_id: convId,
@@ -428,6 +457,7 @@ export function registerChatRoutes({
 
         await validateConfigurationOverrides({ payload, request });
         validateAction(payload);
+        validatePersist(payload);
 
         const abortController = new AbortController();
         request.events.aborted$.subscribe(() => {
