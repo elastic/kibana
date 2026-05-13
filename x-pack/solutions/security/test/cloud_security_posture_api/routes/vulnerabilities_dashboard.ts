@@ -124,14 +124,21 @@ export default function (providerContext: FtrProviderContext) {
       await vulnerabilitiesIndex.deleteAll();
       await scoresIndex.deleteAll();
       await waitForPluginInitialized({ retry, logger, supertest });
-      // Stamp the mock with yesterday so it lands in a separate daily bucket from any
-      // trend doc findings_stats_task writes today on a fresh Kibana boot.
+      // The scores data stream has a default ingest pipeline that overwrites @timestamp with
+      // `_ingest.timestamp`. We bypass it (pipeline: '_none') and stamp the mock with yesterday
+      // so it lands in a separate daily bucket from any trend doc findings_stats_task writes
+      // today on a fresh Kibana boot.
       const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      const yesterdayScores = scoresVulnerabilitiesMock.map((doc) => ({
-        ...doc,
-        '@timestamp': yesterday,
-      }));
-      await scoresIndex.addBulk(yesterdayScores, false);
+      const scoresBulkResp = await es.bulk({
+        index: BENCHMARK_SCORES_INDEX,
+        pipeline: '_none',
+        refresh: 'wait_for',
+        operations: scoresVulnerabilitiesMock.flatMap((doc) => [
+          { create: { _index: BENCHMARK_SCORES_INDEX } },
+          { ...doc, '@timestamp': yesterday },
+        ]),
+      });
+      expect(scoresBulkResp.errors).to.be(false);
       await vulnerabilitiesIndex.addBulk(vulnerabilitiesLatestMock, false);
     });
 
