@@ -8,13 +8,26 @@
 /**
  * Eval spec for the detection-emulation skill's validateRule tool.
  *
- * Three evaluators per example:
- *  - toolSelection      : verifies the detection-emulation skill was activated
- *                         (APM trace contains the SKILL.md filestore.read span)
- *  - schemaCompliance   : verifies that any validateRule tool call in the trace
- *                         includes `ruleId` and `endpointIds` in its parameters;
- *                         vacuously passes when the tool is correctly NOT called
- *  - criteria           : per-example LLM criteria scoring from output.criteria
+ * Per-example evaluators:
+ *  - skillActivation       : verifies the detection-emulation skill was
+ *                            activated (APM trace contains the SKILL.md
+ *                            filestore.read span). Renamed from
+ *                            `toolSelection` (N6) — the underlying check is
+ *                            skill firing, not which tool was chosen.
+ *  - schemaCompliance      : verifies that any validateRule tool call in the
+ *                            trace includes `ruleId` and `endpointIds` in
+ *                            its parameters; vacuously passes when the tool
+ *                            is correctly NOT called.
+ *  - trajectory            : verifies the actual tool-call sequence aligns
+ *                            with each example's `output.tool_sequence`
+ *                            golden path (LCS-based, code evaluator,
+ *                            zero LLM cost).
+ *  - criteria              : per-example LLM criteria scoring from
+ *                            `output.criteria`.
+ *  - traceBasedEvaluators  : the @kbn/evals stock five (toolCalls, latency,
+ *                            inputTokens, outputTokens, cachedTokens) —
+ *                            pre-instantiated on the worker fixture, zero
+ *                            additional cost per example.
  *
  * NOT a Jest test — run via the @kbn/evals Playwright eval runner.
  * Excluded from the plugin's main tsconfig; requires @kbn/evals (devOnly).
@@ -25,6 +38,7 @@ import {
   evaluate as base,
   createSkillInvocationEvaluator,
   createTraceBasedEvaluator,
+  createTrajectoryEvaluator,
   tags,
 } from '@kbn/evals';
 import type {
@@ -145,12 +159,17 @@ const evaluate = base.extend<{}, { chatClient: DetectionEmulationChatClient }>({
 // ─── Evaluator factories ──────────────────────────────────────────────────────
 
 /**
- * toolSelection — verifies the detection-emulation skill was activated by
+ * skillActivation — verifies the detection-emulation skill was activated by
  * checking for the SKILL.md `filestore.read` span in the APM trace.
  * For distractor examples the skill should NOT appear; the evaluator scores
  * based on presence (success/failure examples) or absence (distractors).
+ *
+ * Renamed from `createToolSelectionEvaluator` (N6) — `createSkillInvocationEvaluator`
+ * checks whether the skill's content blob was loaded, not which tool the LLM
+ * subsequently picked. Tool selection is now covered by the trajectory
+ * evaluator below, which scores against `output.tool_sequence`.
  */
-function createToolSelectionEvaluator({
+function createSkillActivationEvaluator({
   traceEsClient,
   log,
 }: {
@@ -249,6 +268,36 @@ function createCriteriaEvaluator({ evaluators }: { evaluators: DefaultEvaluators
   };
 }
 
+/**
+ * trajectory — code evaluator (zero LLM cost) that compares the actual
+ * tool-call sequence against the example's `output.tool_sequence` golden
+ * path using LCS for order + set intersection for coverage.
+ *
+ * - `extractToolCalls` reads `steps[].tool_id` from the live agent task
+ *   output (each `tool_call` step carries the canonical tool id, e.g.
+ *   `security.detection-emulation.validate-rule`).
+ * - `goldenPathExtractor` reads `tool_sequence` from the dataset
+ *   example's `output` field. Distractor examples set
+ *   `tool_sequence: []` so the evaluator returns 1.0 when no tools were
+ *   called and 0.0 if any tool fired.
+ *
+ * Order weight 0.7 reflects that for this skill the BEFORE-relationship
+ * (history before validate) carries most of the signal; coverage is still
+ * 0.3 so missing the validate tool entirely is penalised.
+ */
+function createValidateRuleTrajectoryEvaluator(): Evaluator {
+  return createTrajectoryEvaluator({
+    extractToolCalls: (output: unknown) => {
+      const steps = (output as { steps?: Array<{ type?: string; tool_id?: string }> })?.steps ?? [];
+      return steps.filter((step) => step.type === 'tool_call').map((step) => step.tool_id ?? '');
+    },
+    goldenPathExtractor: (expected: unknown) =>
+      (expected as { tool_sequence?: string[] })?.tool_sequence ?? [],
+    orderWeight: 0.7,
+    coverageWeight: 0.3,
+  });
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 type DatasetExample = (typeof validateRuleDataset.examples)[number];
@@ -292,9 +341,19 @@ function runScenario({
       },
     },
     [
-      createToolSelectionEvaluator({ traceEsClient, log }),
+      createSkillActivationEvaluator({ traceEsClient, log }),
       createSchemaComplianceEvaluator({ traceEsClient, log }),
       createCriteriaEvaluator({ evaluators }),
+      createValidateRuleTrajectoryEvaluator(),
+      // Stock @kbn/evals trace-based metrics — pre-instantiated on the
+      // worker fixture so adding them here costs nothing per example. They
+      // surface tool-call counts, span latency, and token usage in the
+      // evaluator output for trend tracking.
+      evaluators.traceBasedEvaluators.toolCalls,
+      evaluators.traceBasedEvaluators.latency,
+      evaluators.traceBasedEvaluators.inputTokens,
+      evaluators.traceBasedEvaluators.outputTokens,
+      evaluators.traceBasedEvaluators.cachedTokens,
     ]
   );
 }

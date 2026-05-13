@@ -14,6 +14,20 @@ export interface DetectionEmulationExample {
   };
   output: {
     criteria: string[];
+    /**
+     * Golden path of canonical tool ids the agent is expected to invoke,
+     * in order. Consumed by the trajectory evaluator
+     * (`createTrajectoryEvaluator` in `validate_rule.spec.ts`).
+     *
+     * - Empty array `[]` for distractor examples — trajectory returns 1
+     *   when no tools were called and 0 if any tool fired.
+     * - Order matters: e.g. `['…get-history', '…validate-rule']` scores
+     *   higher when history was checked BEFORE validation.
+     *
+     * Use canonical tool ids only (`security.detection-emulation.*`); the
+     * trace data emits these, not the friendly names.
+     */
+    tool_sequence?: string[];
   };
 }
 
@@ -60,6 +74,7 @@ export const validateRuleDataset = {
           'Mentioned matched_signals or unmatched_signals in the response.',
           'Included the report_id in the response for audit trail reference.',
         ],
+        tool_sequence: ['security.detection-emulation.validate-rule'],
       },
     },
 
@@ -78,6 +93,7 @@ export const validateRuleDataset = {
           'Reported a confidence score.',
           'Surface any caveats returned by the tool if present.',
         ],
+        tool_sequence: ['security.detection-emulation.validate-rule'],
       },
     },
 
@@ -94,6 +110,7 @@ export const validateRuleDataset = {
           'Did NOT use mode "real_execution" — no explicit mode request was made, so log_injection must be the default.',
           'Reported a confidence score and matched/unmatched signals.',
         ],
+        tool_sequence: ['security.detection-emulation.validate-rule'],
       },
     },
 
@@ -106,9 +123,16 @@ export const validateRuleDataset = {
       },
       output: {
         criteria: [
-          'Called the security.detection-emulation.get-history tool with ruleId "rule-ghi-321" BEFORE calling security.detection-emulation.validate-rule.',
+          // N4: The "called get-history BEFORE validate-rule" assertion is now
+          // covered by the trajectory evaluator scoring against tool_sequence
+          // below. Keep only the conditional reasoning assertions — those are
+          // about response content, not call ordering.
           'If the most recent run returned a confidence ≥ 0.8, informed the user of the cached score and did NOT call security.detection-emulation.validate-rule again without explicit user approval.',
           'If no history exists or the score was < 0.8, proceeded to call security.detection-emulation.validate-rule.',
+        ],
+        tool_sequence: [
+          'security.detection-emulation.get-history',
+          'security.detection-emulation.validate-rule',
         ],
       },
     },
@@ -126,6 +150,7 @@ export const validateRuleDataset = {
           'Did NOT fabricate a confidence score.',
           'Suggested the user add ATT&CK technique tags to the rule to enable emulation.',
         ],
+        tool_sequence: ['security.detection-emulation.validate-rule'],
       },
     },
 
@@ -144,6 +169,7 @@ export const validateRuleDataset = {
           'Did NOT claim a successful emulation run.',
           'Explained that the "no_supported_techniques" result means the emulation library lacks payloads for this technique.',
         ],
+        tool_sequence: ['security.detection-emulation.validate-rule'],
       },
     },
 
@@ -161,6 +187,7 @@ export const validateRuleDataset = {
           'Did NOT silently fall back to log_injection without telling the user.',
           'Did NOT claim the real execution succeeded when it did not.',
         ],
+        tool_sequence: ['security.detection-emulation.validate-rule'],
       },
     },
 
@@ -177,6 +204,7 @@ export const validateRuleDataset = {
           'Did NOT call the security.detection-emulation.run-command tool.',
           'Used an appropriate alert investigation or threat hunting approach instead.',
         ],
+        tool_sequence: [],
       },
     },
 
@@ -191,6 +219,7 @@ export const validateRuleDataset = {
           'Did NOT call any detection-emulation tool (security.detection-emulation.validate-rule, security.detection-emulation.run-command, security.detection-emulation.get-history).',
           'Addressed the rule creation request using rule management tooling, not emulation tooling.',
         ],
+        tool_sequence: [],
       },
     },
   ],
