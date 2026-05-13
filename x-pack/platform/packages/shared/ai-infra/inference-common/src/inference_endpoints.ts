@@ -51,4 +51,3 @@ export type EisInferenceEndpointMetadata = {
     model_creator?: string;
   } & Record<string, unknown>;
 } & Record<string, unknown>;
-
