@@ -52,10 +52,7 @@ describe('propose_skill tool', () => {
     const tool = createProposeSkillTool();
     const { context, attachments } = createTestContext();
 
-    const result = (await tool.handler(
-      validProposeInput,
-      context
-    )) as ToolHandlerStandardReturn;
+    const result = (await tool.handler(validProposeInput, context)) as ToolHandlerStandardReturn;
 
     expect(result.results).toHaveLength(1);
     const [first] = result.results;

@@ -66,9 +66,7 @@ describe('skill_draft attachment type', () => {
     it('rejects a referenced file with a path outside ./', () => {
       const result = definition.validate({
         ...validDraft,
-        referenced_content: [
-          { name: 'examples', relativePath: '/examples', content: 'x' },
-        ],
+        referenced_content: [{ name: 'examples', relativePath: '/examples', content: 'x' }],
       });
       expect(result.valid).toBe(false);
     });

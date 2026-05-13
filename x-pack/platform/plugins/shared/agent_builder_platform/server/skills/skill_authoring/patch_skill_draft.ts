@@ -22,9 +22,7 @@ const contentPatchSchema = z.object({
     .describe(
       'Exact substring to find in the current `content`. Must match exactly once; include enough surrounding context to make it unique.'
     ),
-  replace: z
-    .string()
-    .describe('Replacement text. Use an empty string to delete the matched text.'),
+  replace: z.string().describe('Replacement text. Use an empty string to delete the matched text.'),
 });
 
 const referencedFilePatchSchema = z.object({
@@ -35,7 +33,9 @@ const referencedFilePatchSchema = z.object({
     .describe(
       'Optional `relativePath` to disambiguate when multiple referenced files share the same `name`. Defaults to matching by `name` alone.'
     ),
-  find: z.string().describe('Exact substring to find in the file content (must match exactly once).'),
+  find: z
+    .string()
+    .describe('Exact substring to find in the file content (must match exactly once).'),
   replace: z.string().describe('Replacement text. Empty string deletes the matched text.'),
 });
 
