@@ -565,8 +565,7 @@ function tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions) {
   // Ensure the plugin is loaded in dynamically to exclude from production build
   const {
     MOCK_IDP_KIBANA_BASE_PATH,
-    MOCK_IDP_REALM_NAME,
-    MOCK_IDP_UIAM_ORGANIZATION_ID, // eslint-disable-next-line import/no-dynamic-require
+    MOCK_IDP_REALM_NAME, // eslint-disable-next-line import/no-dynamic-require
   } = require(MOCK_IDP_PLUGIN_PATH);
 
   // Check if there are any custom authentication providers already configured with the order `0` reserved for the
@@ -607,15 +606,6 @@ function tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions) {
     lodashSet(rawConfig, 'xpack.security.authc.providers.basic.basic', {
       order: Number.MAX_SAFE_INTEGER,
     });
-  }
-
-  // Set a fake cloud.id so that the cloud plugin is activated (required by the mockIdpPlugin).
-  if (!_.has(rawConfig, 'xpack.cloud.id')) {
-    lodashSet(rawConfig, 'xpack.cloud.id', 'ftr_fake_cloud_id');
-  }
-
-  if (!_.has(rawConfig, 'xpack.cloud.organization_id')) {
-    lodashSet(rawConfig, 'xpack.cloud.organization_id', MOCK_IDP_UIAM_ORGANIZATION_ID);
   }
 
   // Pin a stable base path so SP/ACS endpoints stay aligned with the SAML realm across restarts.
