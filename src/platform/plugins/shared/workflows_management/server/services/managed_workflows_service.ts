@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createHash } from 'node:crypto';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import {
   getManagedWorkflowDefinition,
@@ -23,7 +24,6 @@ import type {
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { updateYamlField } from '@kbn/workflows-yaml';
 import type { WorkflowCrudService } from './workflow_crud_service';
-import { computeDefinitionHash } from '../api/lib/workflow_prepare';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
 const MANAGED_WORKFLOW_SYSTEM_USER = 'elastic/kibana';
@@ -34,6 +34,10 @@ const isVersionConflictError = (error: unknown): boolean => {
   if (!error || typeof error !== 'object') return false;
   const e = error as { statusCode?: number; meta?: { statusCode?: number } };
   return e.statusCode === VERSION_CONFLICT_STATUS || e.meta?.statusCode === VERSION_CONFLICT_STATUS;
+};
+
+const computeDefinitionHash = (yaml: string): string => {
+  return createHash('sha256').update(yaml.trim()).digest('hex');
 };
 
 interface ManagedWorkflowsServiceDeps {
