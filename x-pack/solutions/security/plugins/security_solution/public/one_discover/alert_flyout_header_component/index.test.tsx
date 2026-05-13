@@ -19,6 +19,7 @@ import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { documentFlyoutHistoryKey } from '../../flyout_v2/shared/constants/flyout_history';
 import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
+import { of } from 'rxjs';
 
 const mockDocumentHeader = jest.fn((props: unknown) => {
   const { onShowNotes } = props as { onShowNotes?: () => void };
@@ -82,6 +83,10 @@ describe('AlertFlyoutHeader', () => {
       },
     },
     upselling: {},
+    theme: {
+      getTheme: jest.fn().mockReturnValue({ darkMode: false }),
+      theme$: of({ darkMode: false }),
+    },
   } as unknown as StartServices;
 
   it('wraps the header in KibanaContextProvider and ReactQueryClientProvider', async () => {

@@ -12,6 +12,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useLocation } from 'react-router-dom';
 import { createStore } from 'redux';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
+import { of } from 'rxjs';
 import type { StartServices } from '../../../types';
 import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 import { useConsoleManager } from '../../../management/components/console/components/console_manager';
@@ -61,6 +62,10 @@ const services = {
       addInfo: jest.fn(),
       remove: jest.fn(),
     },
+  },
+  theme: {
+    getTheme: jest.fn().mockReturnValue({ darkMode: false }),
+    theme$: of({ darkMode: false }),
   },
   http: {},
 } as unknown as StartServices;
