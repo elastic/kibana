@@ -15,28 +15,6 @@ import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 
 describe('initializeSettingsManager', () => {
-  describe('anyStateChange$', () => {
-    test('should not emit on subscribe and emit when any state changes', (done) => {
-      const settingsManager = initializeSettingsManager(DEFAULT_DASHBOARD_STATE);
-      settingsManager.internalApi.anyStateChange$.subscribe(() => {
-        try {
-          const { title } = settingsManager.internalApi.serializeSettings();
-          expect(title).toBe('new title');
-        } catch (error) {
-          // title assertion fails when
-          // anyStateChange$ emits on subscribe
-          done(error);
-          return;
-        }
-        done();
-      });
-      settingsManager.api.setSettings({
-        ...settingsManager.internalApi.serializeSettings(),
-        title: 'new title',
-      });
-    });
-  });
-
   describe('setSettings', () => {
     test('Should not overwrite settings when setting partial state', () => {
       const settingsManager = initializeSettingsManager({

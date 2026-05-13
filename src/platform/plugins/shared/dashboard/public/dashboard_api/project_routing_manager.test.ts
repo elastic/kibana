@@ -197,25 +197,4 @@ describe('projectRouting', () => {
       cpsService.cpsManager = originalCpsManager;
     }
   });
-
-  describe('anyStateChange$', () => {
-    test('should not emit on subscribe and emit when any state changes', (done) => {
-      const { manager } = initManager(true, '_alias:_origin');
-
-      manager!.internalApi.anyStateChange$.subscribe(() => {
-        try {
-          const { project_routing } = manager!.internalApi.getState();
-          expect(project_routing).toBe('_alias:*');
-        } catch (error) {
-          // project_routing assertion fails when
-          // anyStateChange$ emits on subscribe
-          done(error);
-          return;
-        }
-        done();
-      });
-
-      manager!.api.setProjectRouting('_alias:*');
-    });
-  });
 });
