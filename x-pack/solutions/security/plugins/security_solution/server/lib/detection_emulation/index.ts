@@ -10,5 +10,6 @@ export * from './emulation_report_type';
 export * from './execution';
 export * from './feature_flag';
 export * from './rule_binding';
+export * from './scenario_generator';
 export { createSavedObjectRuleBindingLookup } from './rule_binding_lookup';
 export { registerDetectionEmulationRoutes } from './api/register_routes';
