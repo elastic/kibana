@@ -103,6 +103,10 @@ const configSchema = schema.object(
           defaultValue: [],
           validate: getDirectiveValidator({ allowNone: true, allowNonce: false }),
         }),
+        connect_src: schema.arrayOf(schema.string(), {
+          defaultValue: [],
+          validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
+        }),
       })
     ),
     strict: schema.boolean({ defaultValue: true }),
