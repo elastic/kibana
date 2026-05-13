@@ -12,14 +12,16 @@
 # Usage: import this YAML via the Workflow Management UI → "Import workflow".
 
 version: '1'
-name: Default PII Anonymization (before prompt)
+name: Default PII Anonymization (before completion)
 triggers:
   - type: inference.beforeCompletion
 
 steps:
+  # evaluateCondition wraps the expression in {{ }}, so write the bare expression here.
+  # Writing '{{ event.system }}' would produce {{ {{ event.system }} }} and always fail.
   - name: anonymize_system
     type: ai.pii
-    if: '{{ event.system }}'
+    if: 'event.system'
     with:
       sessionId: '{{ event.sessionId }}'
       input: '{{ event.system }}'
@@ -32,7 +34,9 @@ steps:
     type: ai.pii
     with:
       sessionId: '{{ event.sessionId }}'
-      input: '{{ event.messages }}'
+      # ${{ }} calls evalValueSync which preserves the array type.
+      # {{ }} calls renderSync which coerces arrays to a string.
+      input: '${{ event.messages }}'
       entities:
         - IP
         - EMAIL
@@ -41,5 +45,9 @@ steps:
   - name: emit_output
     type: workflow.output
     with:
-      system: '{{ steps.anonymize_system.output.output }}'
-      messages: '{{ steps.anonymize_messages.output.output }}'
+      # Pass sessionId through so chained workflows can look up the same AnonymizationContext.
+      sessionId: '{{ event.sessionId }}'
+      # ${{ }} returns null (not "") when anonymize_system was skipped,
+      # so invoke_before_completion.ts can fall back to the original system via `?? system`.
+      system: '${{ steps.anonymize_system.output.output }}'
+      messages: '${{ steps.anonymize_messages.output.output }}'
