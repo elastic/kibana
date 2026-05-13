@@ -19,7 +19,7 @@ test.describe('Visualize integration', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ kbnClient, browserAuth }) => {
     await kbnClient.savedObjects.cleanStandardList();
     await kbnClient.importExport.load(KBN_ARCHIVES.VISUALIZE);
-    await browserAuth.loginAsPrivilegedUser();
+    await browserAuth.loginAsAdmin();
   });
 
   test.afterAll(async ({ kbnClient }) => {

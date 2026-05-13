@@ -20,7 +20,7 @@ test.describe('Dashboard integration', { tag: tags.stateful.classic }, () => {
     await kbnClient.savedObjects.cleanStandardList();
     await kbnClient.importExport.load(KBN_ARCHIVES.DASHBOARD);
 
-    await browserAuth.loginAsPrivilegedUser();
+    await browserAuth.loginAsAdmin();
     await pageObjects.dashboard.goto();
     await new SavedObjectsListingPage(page).waitForLoaded();
   });
