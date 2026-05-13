@@ -11,6 +11,7 @@ import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../common/endpoint/service/response_actions/constants';
 import { RunEmulationCommandInputSchema } from '../../../../common/detection_emulation/schemas/run_emulation_command_input';
+import { MAX_ENDPOINT_FANOUT } from '../../../../common/detection_emulation/schemas/constants';
 import type { ConfigType } from '../../../config';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
@@ -44,7 +45,12 @@ const runNetworkCommandSchema = z.object({
   endpointIds: z
     .array(z.string().min(1))
     .min(1)
-    .describe('Endpoint agent IDs to dispatch the action against (1+).'),
+    .max(MAX_ENDPOINT_FANOUT, {
+      message: `endpointIds must contain at most ${MAX_ENDPOINT_FANOUT} entries (MAX_ENDPOINT_FANOUT)`,
+    })
+    .describe(
+      `Endpoint agent IDs to dispatch the action against (1–${MAX_ENDPOINT_FANOUT}). The fanout cap exists so a single call cannot N-multiply the per-host EDR rate budget by accident; if a user asks to dispatch against more than ${MAX_ENDPOINT_FANOUT} endpoints, split the request into sequential calls.`
+    ),
   command: z.enum(NETWORK_FAMILY_COMMANDS).describe(
     `Network-family command:
 - \`isolate\` — block inbound/outbound traffic on the endpoint(s) (Elastic Defend management connection still allowed)

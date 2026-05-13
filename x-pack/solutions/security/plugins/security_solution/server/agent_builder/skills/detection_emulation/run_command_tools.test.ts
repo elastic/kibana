@@ -10,6 +10,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ConfigType } from '../../../config';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
+import { MAX_ENDPOINT_FANOUT } from '../../../../common/detection_emulation/schemas/constants';
 import { createRunProcessCommandTool } from './run_process_command_tool';
 import { createRunFileCommandTool } from './run_file_command_tool';
 import { createRunNetworkCommandTool } from './run_network_command_tool';
@@ -181,6 +182,85 @@ describe('per-family runEmulationCommand tools', () => {
           }).success
         ).toBe(true);
       });
+    });
+  });
+
+  // ─── PROD-3: endpoint fanout cap ───────────────────────────────────────────
+  //
+  // The four per-family tools share `endpointIds` shape via their boundary
+  // schemas; the cap is enforced from `MAX_ENDPOINT_FANOUT` so all four
+  // surfaces stay in lockstep with the central route schema.
+  describe('PROD-3 endpoint fanout cap', () => {
+    const generateAgentIds = (count: number): string[] =>
+      Array.from({ length: count }, (_, i) => `agent-${i + 1}`);
+
+    const tools = [
+      {
+        name: 'runProcessCommand',
+        schema: createRunProcessCommandTool(createMockDeps()).schema,
+        command: 'kill-process',
+        parameters: { pid: 1 },
+      },
+      {
+        name: 'runFileCommand',
+        schema: createRunFileCommandTool(createMockDeps()).schema,
+        command: 'get-file',
+        parameters: { path: '/tmp/x' },
+      },
+      {
+        name: 'runNetworkCommand',
+        schema: createRunNetworkCommandTool(createMockDeps()).schema,
+        command: 'isolate',
+      },
+      {
+        name: 'runExecutionCommand',
+        schema: createRunExecutionCommandTool(createMockDeps()).schema,
+        command: 'execute',
+        parameters: { command: 'whoami' },
+      },
+    ] as const;
+
+    it.each(tools)(
+      '$name accepts exactly MAX_ENDPOINT_FANOUT endpointIds',
+      ({ schema, command, parameters }) => {
+        const result = schema.safeParse({
+          emulationId: 'em-1',
+          agentType: 'endpoint',
+          endpointIds: generateAgentIds(MAX_ENDPOINT_FANOUT),
+          command,
+          parameters,
+        });
+        expect(result.success).toBe(true);
+      }
+    );
+
+    it.each(tools)(
+      '$name rejects MAX_ENDPOINT_FANOUT + 1 endpointIds with a message naming the constant',
+      ({ schema, command, parameters }) => {
+        const result = schema.safeParse({
+          emulationId: 'em-1',
+          agentType: 'endpoint',
+          endpointIds: generateAgentIds(MAX_ENDPOINT_FANOUT + 1),
+          command,
+          parameters,
+        });
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.error.message).toContain('MAX_ENDPOINT_FANOUT');
+          expect(result.error.message).toContain(String(MAX_ENDPOINT_FANOUT));
+        }
+      }
+    );
+
+    it.each(tools)('$name rejects empty endpointIds', ({ schema, command, parameters }) => {
+      const result = schema.safeParse({
+        emulationId: 'em-1',
+        agentType: 'endpoint',
+        endpointIds: [],
+        command,
+        parameters,
+      });
+      expect(result.success).toBe(false);
     });
   });
 

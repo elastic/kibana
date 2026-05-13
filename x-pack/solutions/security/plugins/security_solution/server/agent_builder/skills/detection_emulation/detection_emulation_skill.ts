@@ -191,6 +191,7 @@ Guards applied by each tool (in order; first failure short-circuits). The four
 | Auth required | ✓ | — | ✓ |
 | RBAC | ✓ (real_execution) | — | ✓ (per-command) |
 | Allowlist | ✓ (real_execution) | — | ✓ |
+| **Endpoint fanout cap (5/call)** | ✓ (schema-enforced, both modes) | — | ✓ (schema-enforced) |
 | **HITL prompt** | ✓ (real_execution; on-demand, skipped in standalone mode) | — | ✓ (declarative, once per conversation) |
 | Rate limit | ✓ (real_execution, 1 slot/scenario) | — | ✓ (1 slot/command) |
 
@@ -224,6 +225,20 @@ in the response action's audit comment as a \`[via=agent-builder ...]\`
 suffix, so an auditor can pivot from a single response action back to the
 exact conversation and tool call that produced it. Legacy v1 reports are
 backfilled to \`actor: { kind: 'user' }\` on first read.
+
+**Endpoint fanout cap (PROD-3).** A single \`validateRule\` or
+\`run*Command\` call may target at most **5** endpoints
+(\`MAX_ENDPOINT_FANOUT\`). The cap is enforced by the central Zod schema
+shared between the tool boundary and the REST routes, so an oversized
+\`endpointIds\` array is rejected at request-validation time (HTTP 400 from
+the route, \`invalid_input\` from the tool) before any downstream gate
+runs. The bound exists because a single \`validateRule\` already fans out
+to N (payloads) × M (endpoints) response-action dispatches; capping M
+keeps a single call from N-multiplying the per-host rate budget. If a
+user asks to validate against more endpoints, suggest splitting the
+request, or use \`mode: 'log_injection'\` (which writes synthetic ECS
+docs and doesn't dispatch real response actions — but is still subject
+to the same cap to keep behaviour predictable across modes).
 
 ## Response Format
 

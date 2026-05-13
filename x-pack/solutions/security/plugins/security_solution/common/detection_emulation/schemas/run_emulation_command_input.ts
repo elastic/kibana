@@ -10,6 +10,7 @@ import {
   RESPONSE_ACTION_AGENT_TYPE,
   RESPONSE_ACTION_API_COMMANDS_NAMES,
 } from '../../endpoint/service/response_actions/constants';
+import { MAX_ENDPOINT_FANOUT } from './constants';
 
 /**
  * Common fields shared by every emulation command request.
@@ -22,8 +23,17 @@ export const commonFields = {
   emulationId: z.string().min(1),
   /** EDR agent type — must be one of the supported types. */
   agentType: z.enum(RESPONSE_ACTION_AGENT_TYPE),
-  /** Endpoint agent IDs the command applies to (1+). */
-  endpointIds: z.array(z.string().min(1)).min(1),
+  /**
+   * Endpoint agent IDs the command applies to (1+). Capped at
+   * {@link MAX_ENDPOINT_FANOUT} so a single call cannot N-multiply the
+   * per-host EDR rate budget by accident.
+   */
+  endpointIds: z
+    .array(z.string().min(1))
+    .min(1)
+    .max(MAX_ENDPOINT_FANOUT, {
+      message: `endpointIds must contain at most ${MAX_ENDPOINT_FANOUT} entries (MAX_ENDPOINT_FANOUT)`,
+    }),
 } as const;
 
 /** Optional human-readable comment recorded against the response action. */

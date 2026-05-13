@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../common/endpoint/service/response_actions/constants';
+import { MAX_ENDPOINT_FANOUT } from '../../../../common/detection_emulation/schemas/constants';
 
 /**
  * Tool-boundary schema for the `validateRule` Agent Builder skill.
@@ -29,8 +30,11 @@ export const validateRuleSchema = z.object({
   endpointIds: z
     .array(z.string().min(1))
     .min(1)
+    .max(MAX_ENDPOINT_FANOUT, {
+      message: `endpointIds must contain at most ${MAX_ENDPOINT_FANOUT} entries (MAX_ENDPOINT_FANOUT)`,
+    })
     .describe(
-      'One or more target Elastic Agent IDs. For `real_execution` these must be enrolled, reachable endpoint agents — the pipeline dispatches live response actions against them. For `log_injection` they are used as synthetic host identifiers in the injected ECS documents and do not need to correspond to real agents.'
+      `One or more target Elastic Agent IDs (capped at ${MAX_ENDPOINT_FANOUT}). For \`real_execution\` these must be enrolled, reachable endpoint agents — the pipeline dispatches live response actions against them. For \`log_injection\` they are used as synthetic host identifiers in the injected ECS documents and do not need to correspond to real agents. The fanout cap exists so a single call cannot N-multiply the per-host EDR rate budget by accident; if a user asks to validate against more than ${MAX_ENDPOINT_FANOUT} endpoints, suggest splitting the request or using \`log_injection\` mode (which doesn't dispatch real response actions).`
     ),
   mode: z
     .enum(['log_injection', 'real_execution'])

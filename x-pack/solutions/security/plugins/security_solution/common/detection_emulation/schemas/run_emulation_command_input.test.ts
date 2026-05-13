@@ -6,6 +6,7 @@
  */
 
 import { RunEmulationCommandInputSchema } from './run_emulation_command_input';
+import { MAX_ENDPOINT_FANOUT } from './constants';
 import {
   RESPONSE_ACTION_AGENT_TYPE,
   RESPONSE_ACTION_API_COMMANDS_NAMES,
@@ -153,6 +154,36 @@ describe('RunEmulationCommandInputSchema', () => {
       command: 'isolate',
     });
     expect(result.success).toBe(false);
+  });
+
+  // ─── PROD-3: endpoint fanout cap ───────────────────────────────────────────
+  describe('endpoint fanout cap (PROD-3)', () => {
+    const generateAgentIds = (count: number): string[] =>
+      Array.from({ length: count }, (_, i) => `endpoint-${i + 1}`);
+
+    it('accepts exactly MAX_ENDPOINT_FANOUT endpointIds', () => {
+      const result = RunEmulationCommandInputSchema.safeParse({
+        emulationId: 'em-1',
+        agentType: 'endpoint',
+        endpointIds: generateAgentIds(MAX_ENDPOINT_FANOUT),
+        command: 'isolate',
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects MAX_ENDPOINT_FANOUT + 1 endpointIds with a message naming the constant', () => {
+      const result = RunEmulationCommandInputSchema.safeParse({
+        emulationId: 'em-1',
+        agentType: 'endpoint',
+        endpointIds: generateAgentIds(MAX_ENDPOINT_FANOUT + 1),
+        command: 'isolate',
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.message).toContain('MAX_ENDPOINT_FANOUT');
+        expect(result.error.message).toContain(String(MAX_ENDPOINT_FANOUT));
+      }
+    });
   });
 
   it('rejects missing required common fields', () => {

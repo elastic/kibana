@@ -7,12 +7,22 @@
 
 import { z } from '@kbn/zod/v4';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../endpoint/service/response_actions/constants';
+import { MAX_ENDPOINT_FANOUT } from './constants';
 
 export const ValidateRuleInputSchema = z.object({
   /** Detection rule ID (UUID) to validate. */
   ruleId: z.string().min(1),
-  /** Endpoint agent IDs to use as dispatch targets (real_execution) or synthetic host IDs (log_injection). */
-  endpointIds: z.array(z.string().min(1)).min(1),
+  /**
+   * Endpoint agent IDs to use as dispatch targets (real_execution) or synthetic
+   * host IDs (log_injection). Capped at {@link MAX_ENDPOINT_FANOUT} so a single
+   * call cannot N-multiply the per-host EDR rate budget by accident.
+   */
+  endpointIds: z
+    .array(z.string().min(1))
+    .min(1)
+    .max(MAX_ENDPOINT_FANOUT, {
+      message: `endpointIds must contain at most ${MAX_ENDPOINT_FANOUT} entries (MAX_ENDPOINT_FANOUT)`,
+    }),
   /** Dispatch mode. Defaults to `log_injection`. */
   mode: z.enum(['log_injection', 'real_execution']).optional(),
   /**

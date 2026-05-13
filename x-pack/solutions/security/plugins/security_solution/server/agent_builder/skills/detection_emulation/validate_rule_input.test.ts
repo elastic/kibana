@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ValidateRuleInputSchema } from '../../../../common/detection_emulation/schemas';
+import {
+  MAX_ENDPOINT_FANOUT,
+  ValidateRuleInputSchema,
+} from '../../../../common/detection_emulation/schemas';
 import { validateRuleSchema } from './validate_rule_input';
 
 /**
@@ -110,5 +113,54 @@ describe('validate_rule schemas — drift round-trip', () => {
 
     expect(ValidateRuleInputSchema.safeParse(invalid).success).toBe(false);
     expect(validateRuleSchema.safeParse(invalid).success).toBe(false);
+  });
+
+  // ─── PROD-3: endpoint fanout cap drift ─────────────────────────────────────
+  //
+  // The cap MUST be applied identically to the tool and route schemas so the
+  // LLM and the REST surface enforce the same limit. If a future PR loosens
+  // one schema but not the other, the round-trip below catches it before it
+  // ships.
+  describe('PROD-3 endpoint fanout cap', () => {
+    const generateAgentIds = (count: number): string[] =>
+      Array.from({ length: count }, (_, i) => `ws-${i + 1}`);
+
+    it('accepts exactly MAX_ENDPOINT_FANOUT endpointIds on BOTH schemas', () => {
+      const input = {
+        ruleId: 'rule-abc-123',
+        endpointIds: generateAgentIds(MAX_ENDPOINT_FANOUT),
+      };
+      expect(ValidateRuleInputSchema.safeParse(input).success).toBe(true);
+      expect(validateRuleSchema.safeParse(input).success).toBe(true);
+    });
+
+    it('rejects MAX_ENDPOINT_FANOUT + 1 endpointIds on BOTH schemas with the named error', () => {
+      const input = {
+        ruleId: 'rule-abc-123',
+        endpointIds: generateAgentIds(MAX_ENDPOINT_FANOUT + 1),
+      };
+
+      const routeResult = ValidateRuleInputSchema.safeParse(input);
+      const toolResult = validateRuleSchema.safeParse(input);
+
+      expect(routeResult.success).toBe(false);
+      expect(toolResult.success).toBe(false);
+
+      if (!routeResult.success) {
+        expect(routeResult.error.message).toContain('MAX_ENDPOINT_FANOUT');
+      }
+      if (!toolResult.success) {
+        expect(toolResult.error.message).toContain('MAX_ENDPOINT_FANOUT');
+      }
+    });
+
+    it('rejects empty endpointIds on BOTH schemas', () => {
+      const input = {
+        ruleId: 'rule-abc-123',
+        endpointIds: [],
+      };
+      expect(ValidateRuleInputSchema.safeParse(input).success).toBe(false);
+      expect(validateRuleSchema.safeParse(input).success).toBe(false);
+    });
   });
 });

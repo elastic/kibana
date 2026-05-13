@@ -16,6 +16,7 @@ import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint
 import { EmulationAllowlist, createRestrictiveAllowlistConfig } from '../../execution/allowlist';
 import { EmulationRateLimiter } from '../../execution/rate_limiter';
 import { generateScenario } from '../../scenario_generator';
+import { MAX_ENDPOINT_FANOUT } from '../../../../../common/detection_emulation/schemas/constants';
 
 // Stub the scenario generator so log_injection requests that pass the safety
 // gates short-circuit at scenario generation instead of dragging in the full
@@ -208,5 +209,103 @@ describe('validateRuleRoute — log_injection mode', () => {
       expect.anything()
     );
     expect(response.status).toBe(404);
+  });
+});
+
+// ─── PROD-3: endpoint fanout cap ─────────────────────────────────────────────
+//
+// The cap is enforced by the central Zod schema (`ValidateRuleInputSchema`)
+// via `buildRouteValidationWithZod`, so an oversized fanout is rejected at
+// the request-validation layer BEFORE any handler logic runs — before flag
+// checks, before auth, before allowlist. The local mock server raises on
+// `badRequest` (instead of returning a 400 Kibana response), so we assert
+// the throw + that the message names the constant. The test covers both
+// modes to prove the cap is mode-agnostic (log_injection cannot be used
+// to escape the limit).
+describe('validateRuleRoute — endpoint fanout cap (PROD-3)', () => {
+  let server: ReturnType<typeof serverMock.create>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  const generateAgentIds = (count: number): string[] =>
+    Array.from({ length: count }, (_, i) => `agent-${i + 1}`);
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+    server = serverMock.create();
+    (generateScenario as jest.Mock).mockReset();
+  });
+
+  it.each([{ mode: 'real_execution' as const }, { mode: 'log_injection' as const }])(
+    'rejects at the validation layer when $mode targets MAX_ENDPOINT_FANOUT + 1 endpoints',
+    async ({ mode }) => {
+      // Inject a permissive allowlist so a 403 can't shadow the validation
+      // rejection; the cap must fire at the request-validation layer,
+      // before any gate runs.
+      const allowlist = new EmulationAllowlist(
+        createRestrictiveAllowlistConfig(generateAgentIds(MAX_ENDPOINT_FANOUT + 1)),
+        logger
+      );
+      validateRuleRoute(server.router, FEATURE_ENABLED_CONFIG, logger, { allowlist });
+
+      const { context } = requestContextMock.createTools();
+      stubAuthenticatedUser(context);
+      context.securitySolution.getEndpointAuthz.mockResolvedValue(
+        getEndpointAuthzInitialStateMock({ canWriteExecuteOperations: true })
+      );
+
+      await expect(
+        server.inject(
+          requestMock.create({
+            method: 'post',
+            path: DETECTION_ENGINE_EMULATION_VALIDATE_RULE_URL,
+            body: {
+              ruleId: 'rule-under-test',
+              endpointIds: generateAgentIds(MAX_ENDPOINT_FANOUT + 1),
+              mode,
+            },
+          }),
+          requestContextMock.convertContext(context)
+        )
+      ).rejects.toThrow(/MAX_ENDPOINT_FANOUT/);
+
+      // The route handler must NOT have been entered: scenario generator
+      // is the first thing past the gates and is mocked to throw if hit.
+      expect(generateScenario as jest.Mock).not.toHaveBeenCalled();
+    }
+  );
+
+  it('accepts exactly MAX_ENDPOINT_FANOUT endpoints (boundary value)', async () => {
+    const allowlist = new EmulationAllowlist(
+      createRestrictiveAllowlistConfig(generateAgentIds(MAX_ENDPOINT_FANOUT)),
+      logger
+    );
+    // Short-circuit downstream so we only assert the validation layer
+    // doesn't fire — anything past it is fine for a boundary check.
+    (generateScenario as jest.Mock).mockResolvedValue({ ok: false, reason: 'rule_not_found' });
+    validateRuleRoute(server.router, FEATURE_ENABLED_CONFIG, logger, { allowlist });
+
+    const { context } = requestContextMock.createTools();
+    stubAuthenticatedUser(context);
+    context.securitySolution.getEndpointAuthz.mockResolvedValue(
+      getEndpointAuthzInitialStateMock({ canWriteExecuteOperations: true })
+    );
+
+    // Should NOT throw — exactly MAX_ENDPOINT_FANOUT is at the boundary
+    // and accepted by the schema. The downstream short-circuit returns
+    // a 404 from the scenario-failure path; that's fine.
+    await expect(
+      server.inject(
+        requestMock.create({
+          method: 'post',
+          path: DETECTION_ENGINE_EMULATION_VALIDATE_RULE_URL,
+          body: {
+            ruleId: 'rule-under-test',
+            endpointIds: generateAgentIds(MAX_ENDPOINT_FANOUT),
+            mode: 'real_execution',
+          },
+        }),
+        requestContextMock.convertContext(context)
+      )
+    ).resolves.toMatchObject({ status: 404 });
   });
 });

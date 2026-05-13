@@ -16,6 +16,7 @@ import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint
 import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
 import { EmulationAllowlist, createRestrictiveAllowlistConfig } from '../../execution/allowlist';
 import { EmulationRateLimiter } from '../../execution/rate_limiter';
+import { MAX_ENDPOINT_FANOUT } from '../../../../../common/detection_emulation/schemas/constants';
 
 const FEATURE_ENABLED_CONFIG = {
   experimentalFeatures: { detectionEmulationRealExecution: true },
@@ -403,5 +404,75 @@ describe('runEmulationCommandRoute — missing user gate', () => {
     );
 
     expect(response.status).toBe(401);
+  });
+});
+
+// ─── PROD-3: endpoint fanout cap ─────────────────────────────────────────────
+//
+// Mirrors the validate_rule cap regression. The schema is shared, so the cap
+// must fire here too — the test exists to catch a regression where the route
+// switches to a less-strict schema or pre-validates fields manually. The mock
+// server raises on `badRequest` rather than returning a 400 Kibana response,
+// so we assert the throw + that the message names the constant.
+describe('runEmulationCommandRoute — endpoint fanout cap (PROD-3)', () => {
+  let server: ReturnType<typeof serverMock.create>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  const generateAgentIds = (count: number): string[] =>
+    Array.from({ length: count }, (_, i) => `agent-${i + 1}`);
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+    server = serverMock.create();
+    runEmulationCommandRoute(server.router, FEATURE_ENABLED_CONFIG, logger);
+  });
+
+  it('rejects at the validation layer when endpointIds exceeds MAX_ENDPOINT_FANOUT', async () => {
+    const { context } = requestContextMock.createTools();
+    stubAuthenticatedUser(context);
+    context.securitySolution.getEndpointAuthz.mockResolvedValue(getEndpointAuthzInitialStateMock());
+
+    await expect(
+      server.inject(
+        requestMock.create({
+          method: 'post',
+          path: DETECTION_ENGINE_EMULATION_RUN_COMMAND_URL,
+          body: {
+            emulationId: 'emu-cap-test',
+            agentType: 'endpoint',
+            endpointIds: generateAgentIds(MAX_ENDPOINT_FANOUT + 1),
+            command: 'isolate',
+          },
+        }),
+        requestContextMock.convertContext(context)
+      )
+    ).rejects.toThrow(/MAX_ENDPOINT_FANOUT/);
+  });
+
+  it('accepts exactly MAX_ENDPOINT_FANOUT endpointIds (boundary value)', async () => {
+    const { context } = requestContextMock.createTools();
+    stubAuthenticatedUser(context);
+    context.securitySolution.getEndpointAuthz.mockResolvedValue(
+      getEndpointAuthzInitialStateMock({ canIsolateHost: true })
+    );
+
+    // Should NOT throw at the validation layer — exactly MAX_ENDPOINT_FANOUT
+    // is at the boundary and accepted. Downstream gates (default-deny
+    // allowlist) will surface a 403, which is the expected response shape.
+    await expect(
+      server.inject(
+        requestMock.create({
+          method: 'post',
+          path: DETECTION_ENGINE_EMULATION_RUN_COMMAND_URL,
+          body: {
+            emulationId: 'emu-cap-test',
+            agentType: 'endpoint',
+            endpointIds: generateAgentIds(MAX_ENDPOINT_FANOUT),
+            command: 'isolate',
+          },
+        }),
+        requestContextMock.convertContext(context)
+      )
+    ).resolves.toEqual(expect.objectContaining({ status: expect.any(Number) }));
   });
 });
