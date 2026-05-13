@@ -5,7 +5,8 @@
   },
   "include": [
     "common/**/*",
-    "public/**/*"
+    "public/**/*",
+    "server/**/*.ts"
   ],
   "exclude": [
     "target/**/*"
@@ -17,6 +18,8 @@
     "@kbn/shared-ux-router",
     "@kbn/spaces-plugin",
     "@kbn/cloud-plugin",
-    "@kbn/deeplinks-observability"
+    "@kbn/deeplinks-observability",
+    "@kbn/core-feature-flags-server",
+    "@kbn/fleet-plugin"
   ]
 }

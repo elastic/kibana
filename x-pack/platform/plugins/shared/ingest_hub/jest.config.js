@@ -13,6 +13,6 @@ module.exports = {
     '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/ingest_hub',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/platform/plugins/shared/ingest_hub/{common,public}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/platform/plugins/shared/ingest_hub/{common,server,public}/**/*.{ts,tsx}',
   ],
 };

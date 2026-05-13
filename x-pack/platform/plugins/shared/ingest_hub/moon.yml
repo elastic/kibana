@@ -24,6 +24,8 @@ dependsOn:
   - '@kbn/spaces-plugin'
   - '@kbn/cloud-plugin'
   - '@kbn/deeplinks-observability'
+  - '@kbn/core-feature-flags-server'
+  - '@kbn/fleet-plugin'
 tags:
   - plugin
   - prod
@@ -34,6 +36,7 @@ fileGroups:
   src:
     - common/**/*
     - public/**/*
+    - server/**/*.ts
     - '!target/**/*'
   jest-config:
     - jest.config.js
