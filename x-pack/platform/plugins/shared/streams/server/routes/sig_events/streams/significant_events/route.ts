@@ -18,6 +18,7 @@ import { PromptsConfigService } from '../../../../lib/sig_events/saved_objects/p
 import { generateSignificantEventDefinitions } from '../../../../lib/sig_events/generate_significant_events';
 import { previewSignificantEvents } from '../../../../lib/sig_events/preview_significant_events';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/sig_events/read_significant_events_from_alerts_indices';
+import { getSignificantEventsResponse } from '../../../../oas_examples';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { createConnectorSSEError } from '../../../utils/create_connector_sse_error';
@@ -34,8 +35,12 @@ const dateFromString = z.string().transform((input) => new Date(input));
 const previewSignificantEventsRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/significant_events/_preview 2023-10-31',
   params: z.object({
-    path: z.object({ name: z.string() }),
-    query: z.object({ from: dateFromString, to: dateFromString, bucketSize: z.string() }),
+    path: z.object({ name: z.string().describe('The name of the stream.') }),
+    query: z.object({
+      from: dateFromString.describe('Start of the time range as an ISO 8601 date string.'),
+      to: dateFromString.describe('End of the time range as an ISO 8601 date string.'),
+      bucketSize: z.string().describe('The bucket size for aggregating events (e.g. "1m", "1h").'),
+    }),
     body: z.object({
       query: z.object({
         esql: z.object({
@@ -52,6 +57,13 @@ const previewSignificantEventsRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      responses: {
+        200: {
+          description: 'Significant event preview results.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -97,11 +109,11 @@ const previewSignificantEventsRoute = createServerRoute({
 const readStreamSignificantEventsRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/significant_events 2023-10-31',
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().describe('The name of the stream.') }),
     query: z.object({
-      from: dateFromString,
-      to: dateFromString,
-      bucketSize: z.string(),
+      from: dateFromString.describe('Start of the time range as an ISO 8601 date string.'),
+      to: dateFromString.describe('End of the time range as an ISO 8601 date string.'),
+      bucketSize: z.string().describe('The bucket size for aggregating events (e.g. "1m", "1h").'),
       query: z
         .string()
         .optional()
@@ -118,6 +130,20 @@ const readStreamSignificantEventsRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      responses: {
+        200: {
+          description: 'Significant events for the stream.',
+          content: {
+            'application/json': {
+              examples: {
+                significantEvents: { value: getSignificantEventsResponse },
+              },
+            },
+          },
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -161,13 +187,21 @@ const readStreamSignificantEventsRoute = createServerRoute({
 const generateSignificantEventsRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/significant_events/_generate 2023-10-31',
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().describe('The name of the stream.') }),
     query: z.object({
       connectorId: z
         .string()
         .optional()
         .describe(
           'Optional connector ID. If not provided, the default AI connector from settings will be used.'
+        ),
+      from: dateFromString.describe('Start of the time range as an ISO 8601 date string.'),
+      to: dateFromString.describe('End of the time range as an ISO 8601 date string.'),
+      sampleDocsSize: z
+        .number()
+        .optional()
+        .describe(
+          'Number of sample documents to use for generation from the current data of stream'
         ),
     }),
   }),
@@ -179,6 +213,13 @@ const generateSignificantEventsRoute = createServerRoute({
       since: '9.2.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      responses: {
+        200: {
+          description: 'Generated significant event query definitions.',
+        },
+      },
+    }),
   },
   security: {
     authz: {

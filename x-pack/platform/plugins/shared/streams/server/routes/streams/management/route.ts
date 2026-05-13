@@ -33,6 +33,11 @@ export const forkStreamsRoute = createServerRoute({
           },
         },
       },
+      responses: {
+        200: {
+          description: 'The stream was forked successfully.',
+        },
+      },
     }),
   },
   security: {
@@ -42,7 +47,7 @@ export const forkStreamsRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the parent stream to fork from.'),
     }),
     body: z.object({
       stream: z.object({ name: z.string() }),
@@ -82,6 +87,13 @@ export const resyncStreamsRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      responses: {
+        200: {
+          description: 'Streams were resynced successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {

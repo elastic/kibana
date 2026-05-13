@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { AsyncComponent } from '../../../components/async_component';
@@ -12,13 +12,10 @@ import { useProfilingDependencies } from '../../../components/contexts/profiling
 import { FramesSummary } from '../../../components/frames_summary';
 import type { OnChangeSortParams } from '../../../components/differential_topn_functions_grid';
 import { DifferentialTopNFunctionsGrid } from '../../../components/differential_topn_functions_grid';
-import type { NormalizationOptions } from '../../../components/normalization_menu';
-import { NormalizationMenu, NormalizationMode } from '../../../components/normalization_menu';
-import { PrimaryAndComparisonSearchBar } from '../../../components/primary_and_comparison_search_bar';
+import { NormalizationMode } from '../../../components/normalization_menu';
 import { AsyncStatus } from '../../../hooks/use_async';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../../hooks/use_profiling_router';
-import { useProfilingRoutePath } from '../../../hooks/use_profiling_route_path';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
 
@@ -57,12 +54,6 @@ export function DifferentialTopNFunctionsView() {
   const comparisonTime = totalSeconds / totalComparisonSeconds;
 
   const baselineTime = 1;
-  const normalizationOptions: NormalizationOptions = {
-    baselineScale: baseline,
-    baselineTime,
-    comparisonScale: comparison,
-    comparisonTime,
-  };
 
   const {
     services: { fetchTopNFunctions },
@@ -99,33 +90,7 @@ export function DifferentialTopNFunctionsView() {
     [comparisonTimeRange.start, comparisonTimeRange.end, fetchTopNFunctions, comparisonKuery]
   );
 
-  const routePath = useProfilingRoutePath() as
-    | '/functions'
-    | '/functions/topn'
-    | '/functions/differential';
-
   const profilingRouter = useProfilingRouter();
-
-  function onChangeNormalizationMode(
-    nextNormalizationMode: NormalizationMode,
-    options: NormalizationOptions
-  ) {
-    profilingRouter.push(routePath, {
-      path: routePath,
-      query:
-        nextNormalizationMode === NormalizationMode.Scale
-          ? {
-              ...query,
-              baseline: options.baselineScale,
-              comparison: options.comparisonScale,
-              normalizationMode: nextNormalizationMode,
-            }
-          : {
-              ...query,
-              normalizationMode: nextNormalizationMode,
-            },
-    });
-  }
 
   const isNormalizedByTime = normalizationMode === NormalizationMode.Time;
 
@@ -184,14 +149,6 @@ export function DifferentialTopNFunctionsView() {
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
           <EuiPanel hasShadow={false} color="subdued">
-            <PrimaryAndComparisonSearchBar />
-            <EuiHorizontalRule />
-            <NormalizationMenu
-              mode={normalizationMode}
-              options={normalizationOptions}
-              onChange={onChangeNormalizationMode}
-            />
-            <EuiSpacer />
             <FramesSummary
               isLoading={
                 state.status === AsyncStatus.Loading ||

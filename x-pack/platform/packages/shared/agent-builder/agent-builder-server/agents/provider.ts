@@ -36,6 +36,7 @@ import type {
   SkillsService,
   PluginsService,
   ToolManager,
+  TodoStateManager,
 } from '../runner';
 import type { IFileStore } from '../runner/filestore';
 import type { AttachmentStateManager } from '../attachments';
@@ -100,6 +101,8 @@ export interface ExperimentalFeatures {
   skills: boolean;
   /** Whether the sub-agent execution feature is enabled */
   subagents: boolean;
+  /** Whether the todo list tool and task-management prompt are enabled */
+  todos: boolean;
 }
 
 export interface AgentHandlerContext {
@@ -172,6 +175,10 @@ export interface AgentHandlerContext {
    * Attachment state manager to manage conversation attachments during execution.
    */
   attachmentStateManager: AttachmentStateManager;
+  /**
+   * Manages the active todo list for this conversation execution.
+   */
+  todoStateManager: TodoStateManager;
   /**
    * Used to manage interruptions.
    */
