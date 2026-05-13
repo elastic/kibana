@@ -27,6 +27,14 @@ const KEEP_QUERY =
 const HISTOGRAM_QUERY = 'FROM kibana_sample_data_logs | LIMIT 1000';
 
 const KEPT_FIELDS = ['agent.keyword', 'tags.keyword', 'geo.coordinates'];
+const DROPPED_FIELDS = ['bytes', 'clientip', 'extension', 'response'];
+
+// Stable `data-test-subj` values reused across the suite.
+const ESQL_EDITOR = 'ESQLEditor';
+const METRIC_VIS = 'mtrVis';
+const EDIT_FLYOUT_HEADER = 'editFlyoutHeader';
+const CANCEL_FLYOUT_BUTTON = 'cancelFlyoutButton';
+const PANEL_ACTION_EDIT = 'embeddablePanelAction-editPanel';
 
 const tracker = new SavedObjectsTracker();
 
@@ -58,13 +66,14 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
     await pageObjects.discover.selectTextBaseLang();
 
     await test.step('verify ES|QL editor is active with a non-empty default query', async () => {
-      await expect(page.testSubj.locator('ESQLEditor')).toBeVisible();
+      await expect(page.testSubj.locator(ESQL_EDITOR)).toBeVisible();
       const defaultQuery = await pageObjects.discover.getEsqlQueryValue();
       expect(defaultQuery.trim().length).toBeGreaterThan(0);
     });
 
-    await test.step('verify document grid is rendered for the sample query', async () => {
+    await test.step('verify histogram and document grid are rendered for the sample query', async () => {
       await pageObjects.discover.waitUntilSearchingHasFinished();
+      await expect(page.testSubj.locator('unifiedHistogramRendered')).toBeVisible();
       await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();
     });
   });
@@ -75,7 +84,7 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
   }) => {
     await pageObjects.discover.writeAndSubmitEsqlQuery(STATS_QUERY);
 
-    await expect(page.testSubj.locator('mtrVis')).toBeVisible();
+    await expect(page.testSubj.locator(METRIC_VIS)).toBeVisible();
   });
 
   test('should open the inline edit visualization flyout for an ES|QL chart', async ({
@@ -86,7 +95,7 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
 
     await test.step('open the edit visualization flyout', async () => {
       await page.testSubj.click('unifiedHistogramEditFlyoutVisualization');
-      await expect(page.testSubj.locator('editFlyoutHeader')).toBeVisible();
+      await expect(page.testSubj.locator(EDIT_FLYOUT_HEADER)).toBeVisible();
     });
 
     await test.step('verify the inline configuration panel is interactive', async () => {
@@ -94,17 +103,15 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
       // `lns_colorEditing_trigger`; assert against stable controls in the
       // inline-edit flyout wrapper that are present for ES|QL panels.
       await expect(page.testSubj.locator('inlineEditingFlyoutLabel')).toBeVisible();
-      await expect(page.testSubj.locator('cancelFlyoutButton')).toBeEnabled();
     });
 
     await test.step('close the flyout', async () => {
-      await page.testSubj.click('cancelFlyoutButton');
-      await expect(page.testSubj.locator('editFlyoutHeader')).toBeHidden();
+      await page.testSubj.click(CANCEL_FLYOUT_BUTTON);
+      await expect(page.testSubj.locator(EDIT_FLYOUT_HEADER)).toBeHidden();
     });
   });
 
   test('should save an ES|QL visualization to a new dashboard from Discover', async ({
-    page,
     pageObjects,
   }) => {
     const visName = 'ES|QL Stats Vis - New Dashboard';
@@ -113,16 +120,8 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
 
     await pageObjects.discover.writeAndSubmitEsqlQuery(STATS_QUERY);
 
-    await test.step('open the save visualization modal', async () => {
-      await page.testSubj.click('unifiedHistogramSaveVisualization');
-      await expect(page.testSubj.locator('savedObjectSaveModal')).toBeVisible();
-    });
-
-    await test.step('save to a new dashboard', async () => {
-      await page.testSubj.fill('savedObjectTitle', visName);
-      await page.locator('label[for="new-dashboard-option"]').click();
-      await page.testSubj.click('confirmSaveSavedObjectButton');
-      await expect(page.testSubj.locator('savedObjectSaveModal')).toBeHidden();
+    await test.step('save the ES|QL visualization to a new dashboard', async () => {
+      await pageObjects.discover.saveVisualizationToNewDashboard(visName);
     });
 
     await test.step('verify Kibana navigated to the new dashboard with the panel', async () => {
@@ -142,12 +141,7 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
 
     await test.step('save an ES|QL chart to a new dashboard', async () => {
       await pageObjects.discover.writeAndSubmitEsqlQuery(STATS_QUERY);
-      await page.testSubj.click('unifiedHistogramSaveVisualization');
-      await expect(page.testSubj.locator('savedObjectSaveModal')).toBeVisible();
-      await page.testSubj.fill('savedObjectTitle', visName);
-      await page.locator('label[for="new-dashboard-option"]').click();
-      await page.testSubj.click('confirmSaveSavedObjectButton');
-      await expect(page.testSubj.locator('savedObjectSaveModal')).toBeHidden();
+      await pageObjects.discover.saveVisualizationToNewDashboard(visName);
       await pageObjects.dashboard.waitForRenderComplete();
       await pageObjects.dashboard.saveDashboard(dashboardName);
     });
@@ -156,10 +150,10 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
       // Saving an ES|QL viz from Discover lands the dashboard already in edit mode,
       // so only switch when the Edit button is actually present (view mode).
       await pageObjects.dashboard.ensureEditMode();
-      await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-editPanel', visName);
-      await expect(page.testSubj.locator('editFlyoutHeader')).toBeVisible();
-      await page.testSubj.click('cancelFlyoutButton');
-      await expect(page.testSubj.locator('editFlyoutHeader')).toBeHidden();
+      await pageObjects.dashboard.clickPanelAction(PANEL_ACTION_EDIT, visName);
+      await expect(page.testSubj.locator(EDIT_FLYOUT_HEADER)).toBeVisible();
+      await page.testSubj.click(CANCEL_FLYOUT_BUTTON);
+      await expect(page.testSubj.locator(EDIT_FLYOUT_HEADER)).toBeHidden();
     });
 
     await test.step('explore the panel in Discover and verify the ES|QL query is preserved', async () => {
@@ -170,10 +164,7 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
       );
       const discoverPage = await newPagePromise;
       await discoverPage.waitForLoadState();
-      await expect(discoverPage.locator('[data-test-subj="ESQLEditor"]')).toBeVisible();
-      await expect(discoverPage.locator('[data-test-subj="ESQLEditor"]')).toContainText(
-        'kibana_sample_data_logs'
-      );
+      await expect(discoverPage.getByTestId(ESQL_EDITOR)).toContainText('kibana_sample_data_logs');
       await discoverPage.close();
     });
 
@@ -202,35 +193,16 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
   }) => {
     await pageObjects.discover.writeAndSubmitEsqlQuery(SUM_QUERY);
 
-    await expect(page.testSubj.locator('mtrVis')).toBeVisible();
+    await expect(page.testSubj.locator(METRIC_VIS)).toBeVisible();
   });
 
   test('should restrict sidebar fields and grid columns to KEEP-listed fields', async ({
-    page,
     pageObjects,
   }) => {
     await pageObjects.discover.writeAndSubmitEsqlQuery(KEEP_QUERY);
 
     await test.step('verify only KEEP-listed fields are present in the sidebar', async () => {
-      await pageObjects.discover.waitUntilFieldListHasCountOfFields();
-      // KEEP-listed fields render under the "Selected fields" group as
-      // `dscFieldListPanelField-<field>` entries. Scope the assertions to that
-      // group so we only match selected (KEEP'd) fields.
-      const selectedFields = page.testSubj.locator('fieldListGroupedSelectedFields');
-      await expect(selectedFields).toBeVisible();
-
-      const selectedFieldEntries = selectedFields.getByTestId(/^dscFieldListPanelField-/);
-      await expect(selectedFieldEntries).toHaveCount(KEPT_FIELDS.length);
-
-      for (const field of KEPT_FIELDS) {
-        await expect(selectedFields.getByTestId(`dscFieldListPanelField-${field}`)).toBeVisible();
-      }
-
-      // Fields not present in the KEEP clause must be absent from the selected group.
-      const droppedFields = ['bytes', 'clientip', 'extension', 'response'];
-      for (const field of droppedFields) {
-        await expect(selectedFields.getByTestId(`dscFieldListPanelField-${field}`)).toHaveCount(0);
-      }
+      await pageObjects.discover.expectSelectedSidebarFieldsToEqual(KEPT_FIELDS);
     });
 
     await test.step('verify the data grid only renders KEEP-listed columns', async () => {
@@ -238,8 +210,9 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
       for (const field of KEPT_FIELDS) {
         expect(headerText).toContain(field);
       }
-      expect(headerText).not.toContain('bytes');
-      expect(headerText).not.toContain('clientip');
+      for (const field of DROPPED_FIELDS) {
+        expect(headerText).not.toContain(field);
+      }
     });
   });
 
@@ -259,12 +232,7 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('save the histogram to a new dashboard', async () => {
-      await page.testSubj.click('unifiedHistogramSaveVisualization');
-      await expect(page.testSubj.locator('savedObjectSaveModal')).toBeVisible();
-      await page.testSubj.fill('savedObjectTitle', visName);
-      await page.locator('label[for="new-dashboard-option"]').click();
-      await page.testSubj.click('confirmSaveSavedObjectButton');
-      await expect(page.testSubj.locator('savedObjectSaveModal')).toBeHidden();
+      await pageObjects.discover.saveVisualizationToNewDashboard(visName);
       await pageObjects.dashboard.waitForRenderComplete();
       await pageObjects.dashboard.saveDashboard(dashboardName);
     });
@@ -273,10 +241,10 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
       // Saving an ES|QL viz from Discover lands the dashboard already in edit mode,
       // so only switch when the Edit button is actually present (view mode).
       await pageObjects.dashboard.ensureEditMode();
-      await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-editPanel', visName);
-      await expect(page.testSubj.locator('editFlyoutHeader')).toBeVisible();
-      await page.testSubj.click('cancelFlyoutButton');
-      await expect(page.testSubj.locator('editFlyoutHeader')).toBeHidden();
+      await pageObjects.dashboard.clickPanelAction(PANEL_ACTION_EDIT, visName);
+      await expect(page.testSubj.locator(EDIT_FLYOUT_HEADER)).toBeVisible();
+      await page.testSubj.click(CANCEL_FLYOUT_BUTTON);
+      await expect(page.testSubj.locator(EDIT_FLYOUT_HEADER)).toBeHidden();
     });
   });
 });
