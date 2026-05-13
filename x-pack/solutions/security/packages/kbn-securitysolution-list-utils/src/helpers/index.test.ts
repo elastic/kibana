@@ -286,53 +286,140 @@ describe('Helpers', () => {
   });
 
   describe('hasEntryEscaping', () => {
-    test('returns true when a match value contains doubled backslashes', () => {
-      expect(
-        hasEntryEscaping({
-          type: 'match',
-          value: 'a\\\\b',
-          field: '',
-          operator: 'included',
-        })
-      ).toBe(true);
+    describe('backslash escaping', () => {
+      describe('windows', () => {
+        test('returns true when a match value contains doubled backslashes', () => {
+          expect(
+            hasEntryEscaping(
+              {
+                type: 'match',
+                value: 'a\\\\b',
+                field: 'any.field',
+                operator: 'included',
+              },
+              ['windows']
+            )
+          ).toBe(true);
+        });
+
+        test.each(['path', 'executable', 'directory'])(
+          'returns false when a match value is a valid network path in field %s',
+          (fieldPart: string) => {
+            expect(
+              hasEntryEscaping(
+                {
+                  type: 'match',
+                  value: '\\\\server\\share\\path',
+                  field: `file.${fieldPart}.caseless`,
+                  operator: 'included',
+                },
+                ['windows']
+              )
+            ).toBe(false);
+          }
+        );
+
+        test('returns true for valid network path if field is not a path field', () => {
+          expect(
+            hasEntryEscaping(
+              {
+                type: 'match',
+                value: '\\\\server\\share\\path',
+                field: 'some.random.field',
+                operator: 'included',
+              },
+              ['windows']
+            )
+          ).toBe(true);
+        });
+      });
+
+      describe('linux and macos', () => {
+        test('returns true when a match value contains doubled backslashes, even at start', () => {
+          expect(
+            hasEntryEscaping(
+              {
+                type: 'match',
+                value: '\\\\bcd',
+                field: 'any.field.even.path.field',
+                operator: 'included',
+              },
+              ['linux', 'macos']
+            )
+          ).toBe(true);
+        });
+      });
     });
 
-    test('returns true when a match value contains backslash followed by asterisk', () => {
-      expect(
-        hasEntryEscaping({
-          type: 'match',
-          value: 'prefix\\*suffix',
-          field: '',
-          operator: 'included',
-        })
-      ).toBe(true);
-    });
+    describe.each(['?', '*'])('%s escaping', (wildcard) => {
+      describe('windows', () => {
+        test(`return false on \\${wildcard} if it is a path field`, () => {
+          expect(
+            hasEntryEscaping(
+              {
+                type: 'match',
+                value: `prefix\\${wildcard}suffix`,
+                field: 'some.path.field',
+                operator: 'included',
+              },
+              ['windows']
+            )
+          ).toBe(false);
+        });
 
-    test('returns true when a match value contains backslash followed by question mark', () => {
-      expect(
-        hasEntryEscaping({
-          type: 'match',
-          value: 'prefix\\?suffix',
-          field: '',
-          operator: 'included',
-        })
-      ).toBe(true);
-    });
+        test(`return true on \\${wildcard} if it is not a path field`, () => {
+          expect(
+            hasEntryEscaping(
+              {
+                type: 'match',
+                value: `prefix\\${wildcard}suffix`,
+                field: 'some.random.field',
+                operator: 'included',
+              },
+              ['windows']
+            )
+          ).toBe(true);
+        });
+      });
 
-    test('returns false when a match value is a valid network path', () => {
-      expect(
-        hasEntryEscaping({
-          type: 'match',
-          value: '\\\\server\\share\\path',
-          field: '',
-          operator: 'included',
-        })
-      ).toBe(false);
+      describe('linux and macos', () => {
+        test(`return true on \\${wildcard} even if it is a path field`, () => {
+          expect(
+            hasEntryEscaping(
+              {
+                type: 'match',
+                value: `prefix\\${wildcard}suffix`,
+                field: 'some.path.field',
+                operator: 'included',
+              },
+              ['linux', 'macos']
+            )
+          ).toBe(true);
+        });
+
+        test(`return true on \\${wildcard} even if windows is also amongst the os types`, () => {
+          expect(
+            hasEntryEscaping(
+              {
+                type: 'match',
+                value: `prefix\\${wildcard}suffix`,
+                field: 'some.path.field',
+                operator: 'included',
+              },
+              ['linux', 'macos', 'windows']
+            )
+          ).toBe(true);
+        });
+      });
     });
 
     test('returns false when a match value does not contain backslash escapes', () => {
       expect(
-        hasEntryEscaping({ type: 'match', value: 'normal*?', field: '', operator: 'included' })
+        hasEntryEscaping({ type: 'match', value: 'normal*?', field: '', operator: 'included' }, [
+          'linux',
+          'macos',
+          'windows',
+        ])
       ).toBe(false);
     });
 

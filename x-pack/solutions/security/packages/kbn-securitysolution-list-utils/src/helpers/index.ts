@@ -1065,16 +1065,41 @@ export const hasEscaping = (items: Array<ExceptionsBuilderReturnExceptionItem>):
     return item;
   });
 
-  return allEntries.some(hasEntryEscaping);
+  return allEntries.some((builderEntry) => hasEntryEscaping(builderEntry, items[0]?.os_types));
 };
 
-export const hasEntryEscaping = (builderEntry: BuilderEntry): boolean =>
-  builderEntry.type !== 'list' &&
-  'value' in builderEntry &&
-  typeof builderEntry.value === 'string' &&
-  (builderEntry.value.includes('\\\\', 1) ||
+export const hasEntryEscaping = (
+  builderEntry: BuilderEntry,
+  osTypes: ExceptionsBuilderReturnExceptionItem['os_types'] = ['linux']
+): boolean => {
+  if (
+    builderEntry.type === 'list' ||
+    !('value' in builderEntry) ||
+    typeof builderEntry.value !== 'string'
+  ) {
+    return false;
+  }
+
+  const isOnlyWindows = osTypes.length === 1 && osTypes.includes('windows');
+  const isPathField =
+    (builderEntry.field?.includes('path') ||
+      builderEntry.field?.includes('executable') ||
+      builderEntry.field?.includes('directory')) ??
+    false;
+
+  const isWindowsPathField = isPathField && isOnlyWindows;
+  if (isWindowsPathField) {
+    // - allow escaped backslash on starting position: \\server\share\path
+    // - don't care about seemingly escaped wildcards, as they can be valid windows paths: abc\?\def\*\ghi
+    return builderEntry.value.includes('\\\\', 1);
+  }
+
+  return (
+    builderEntry.value.includes('\\\\') ||
     builderEntry.value.includes('\\*') ||
-    builderEntry.value.includes('\\?'));
+    builderEntry.value.includes('\\?')
+  );
+};
 
 /**
  * Event filters helper where given an exceptions list,

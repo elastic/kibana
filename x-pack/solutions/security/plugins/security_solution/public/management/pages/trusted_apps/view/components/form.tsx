@@ -241,7 +241,7 @@ export const validateValues = (values: ArtifactFormComponentProps['item']): Vali
         }
       }
 
-      if (entry.field === ConditionEntryField.PATH && hasEntryEscaping(entry)) {
+      if (entry.field === ConditionEntryField.PATH && hasEntryEscaping(entry, [os])) {
         validation.showUnnecessaryEscapingCalloutAndConfirmModal = true;
       }
 
