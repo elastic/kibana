@@ -342,6 +342,9 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
             closePopover={setIsMenuOpen.bind(null, false)}
             panelPaddingSize="none"
             anchorPosition="downLeft"
+            aria-label={i18n.translate('xpack.ml.explorer.anomalies.actionsPopoverAriaLabel', {
+              defaultMessage: 'Anomaly actions menu',
+            })}
           >
             <EuiContextMenu panels={panels} initialPanelId={'panelActions'} />
           </EuiPopover>
