@@ -92,6 +92,10 @@ if is_pr; then
   if is_pr_with_label "ci:security-genai-run-evals-local-prompts"; then
     export IS_SECURITY_AI_PROMPT_TEST=true
   fi
+
+  if is_pr_with_label "ci:ingest-test-logs"; then
+    export CI_STATS_INGEST_TEST_LOGS=true
+  fi
   
   export BUILD_URL="$BUILDKITE_BUILD_URL"
 
