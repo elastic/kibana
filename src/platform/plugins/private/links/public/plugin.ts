@@ -31,7 +31,7 @@ import {
   LINKS_SAVED_OBJECT_TYPE,
 } from '../common';
 import type { LinksCrudTypes } from '../common/content_management';
-import { getLinksClient } from './links_client/links_client';
+import { getLinksClient, linksClient } from './links_client/links_client';
 import { setKibanaServices } from './services/kibana_services';
 import { ADD_LINKS_PANEL_ACTION_ID } from './actions/constants';
 
@@ -81,6 +81,18 @@ export class LinksPlugin
       savedObjectType: LINKS_SAVED_OBJECT_TYPE,
       savedObjectName: APP_NAME,
       getIconForSavedObject: () => APP_ICON,
+      getSavedObjects: async (searchRequest) => {
+        const result = await linksClient.search({ ...searchRequest });
+        return result.data.map(({ id, data, meta }) => {
+          return {
+            type: LINKS_SAVED_OBJECT_TYPE,
+            id,
+            attributes: data,
+            ...meta,
+            references: [],
+          };
+        });
+      },
     });
 
     plugins.embeddable.registerEmbeddablePublicDefinition(LINKS_EMBEDDABLE_TYPE, async () => {
