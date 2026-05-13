@@ -57,7 +57,7 @@ export const getAlertingV2Breadcrumb = (
       };
     case 'rule_create_options':
       return {
-        text: i18n.translate('xpack.alertingV2.breadcrumbs.ruleMethodSelectorTitle', {
+        text: i18n.translate('xpack.alertingV2.breadcrumbs.ruleCreateOptionsTitle', {
           defaultMessage: 'Create rule',
         }),
       };

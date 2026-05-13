@@ -131,10 +131,10 @@ export const RuleCreateOptionsPanel: React.FC = () => {
             />
           </h3>
         </EuiTitle>
-        <EuiSpacer size="m" />
-        <EuiFlexGroup>
+        <EuiSpacer size="l" />
+        <EuiFlexGroup justifyContent="center">
           {/* TODO: Add the other rule builders here */}
-          <EuiFlexItem>
+          <EuiFlexItem css={{ width: '100%' }}>
             <EuiCard
               betaBadgeProps={{
                 label: i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.comingSoonLabel', {
@@ -163,6 +163,7 @@ export const RuleCreateOptionsPanel: React.FC = () => {
                 cursor: 'default',
                 pointerEvents: 'none',
                 width: '50%',
+                margin: '0 auto',
               }}
             />
           </EuiFlexItem>
