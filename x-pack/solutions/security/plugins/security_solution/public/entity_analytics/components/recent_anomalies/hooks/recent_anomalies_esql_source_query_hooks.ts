@@ -76,7 +76,7 @@ const getEntityStoreJoinBlock = (spaceId: string, watchlistId?: string) => {
   // Filter ensures only entities that exist in the entity store are shown.
   // For watchlists, the watchlist filter implicitly achieves this.
   const entityFilter = watchlistId
-    ? `| WHERE entity.attributes.watchlists == "${watchlistId}"`
+    ? `| WHERE MV_CONTAINS(entity.attributes.watchlists, "${watchlistId}")`
     : `| WHERE entity.name IS NOT NULL`;
 
   return `
