@@ -43,7 +43,7 @@ const typesTiedToFeatureFlags: Array<{
   soType: SavedObjectsType;
 }> = [{ feature: 'responseActionsScriptLibraryManagement', soType: scriptsLibrarySavedObjectType }];
 
-const types = [
+const types: SavedObjectsType[] = [
   noteType,
   pinnedEventType,
   legacyRuleActionsType,
