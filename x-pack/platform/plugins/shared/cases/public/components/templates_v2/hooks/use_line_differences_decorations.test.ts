@@ -6,13 +6,13 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import {
   useLineDifferencesDecorations,
   computeChangedLines,
 } from './use_line_differences_decorations';
 
-jest.mock('@kbn/monaco', () => ({
+jest.mock('@kbn/code-editor', () => ({
   monaco: {
     Range: jest.fn((startLine, startCol, endLine, endCol) => ({
       startLineNumber: startLine,
