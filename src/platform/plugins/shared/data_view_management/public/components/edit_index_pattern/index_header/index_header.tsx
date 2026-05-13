@@ -77,7 +77,7 @@ export const IndexHeader: FC<PropsWithChildren<IndexHeaderProps>> = ({
           setIsOpen(false);
           deleteIndexPatternClick();
         }}
-        icon={<EuiIcon color="danger" type="trash" />}
+        icon={<EuiIcon color="danger" type="trash" aria-hidden={true} />}
         aria-label={removeAriaLabel}
         data-test-subj="deleteIndexPatternButton"
       >
