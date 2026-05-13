@@ -7,14 +7,14 @@ description: >
   tests run in CI, Scout vs Cypress coverage by ownership; per-team or multi-team `@elastic/`
   visibility; auditing completeness of the three framework rows. Deliver markdown only under
   gitignored `.agents/tmp/`, never `docs/`. Do not use for CI Stats volume, flaky-test mining,
-  GitHub skipped-test triage, or repo-wide Jest unit counts unless explicitly requested.
+  GitHub skipped-test triage, or Jest unit tests — those are out of scope for this skill.
 ---
 
 # Elastic team testing / automation inventory
 
 ## Overview
 
-Structured inventory: **ownership paths that contain tests**, a fixed **FTR / Cypress / Scout** table (counts + skips), **where tests run** (Buildkite plus Elastic Cloud / Appex QA where relevant), and optional **Scout coverage** rows.
+Structured inventory: **ownership paths that contain FTR-, Cypress-, or Scout-style test source** (not Jest units), a fixed **FTR / Cypress / Scout** table (counts + skips), **where tests run** (Buildkite plus Elastic Cloud / Appex QA where relevant), and optional **Scout coverage** rows.
 
 YAML **`description`** carries **when / when-not triggers** for discovery. **Procedure** lives in the workflow checklist and §§1–6 below — read those sections to execute; **do not** infer operational steps from the YAML alone.
 
@@ -78,7 +78,7 @@ Navigation only — details are in the referenced sections.
 
 ### 1) Ownership — CODEOWNERS (prefixes with tests only)
 
-The **Ownership** table lists CODEOWNERS paths **only when that path’s subtree contains automated test source** (Scout / Cypress / FTR-style trees, Jest `*.test.ts`, etc.). Full product ownership stays in `.github/CODEOWNERS`.
+The **Ownership** table lists CODEOWNERS paths **only when that path’s subtree contains Scout, Cypress, or FTR-style automated test source** (for example `**/test/scout/**`, `*.cy.ts`, `test/api_integration/**`, `test/security_solution_api_integration/**`). **Jest unit files** (`*.test.ts` / `*.test.tsx` next to source) **do not** qualify a path for this table and **must not** appear in the report narrative as test inventory. Full product ownership stays in `.github/CODEOWNERS`.
 
 ```bash
 bash x-pack/solutions/security/plugins/security_solution/.agents/skills/team-auto-tests-stats/scripts/list_owned_paths_for_team.sh @elastic/<slug> \
@@ -150,9 +150,9 @@ Reference: Cypress runner / config excludes tags per environment; inventory reco
 
 Trees: `test/functional`, `test/api_integration`, `test/serverless/**`, `test/security_solution_api_integration/**`, etc. Count **leaf** tests with **`it(`** / **`specify(`** where those APIs appear (mirror Cypress §3 — **`context(`** groups suites, not TCs). **Other** FTR/Mocha patterns may exist — **flag** in the report if counts look inconsistent rather than inventing new heuristics here.
 
-**FTR row vs Jest units:** This row is for **FTR-style / integration paths** above. Ordinary **Jest unit** files (`*.test.ts`) under ownership are **not** mixed into the FTR **Test Cases** number unless you explicitly expand scope (see **Out of scope**).
+**FTR row vs Jest units:** This row is for **FTR-style / integration paths** above only. **Jest unit** files (`*.test.ts` / `*.test.tsx`) are **never** counted in the **Tests** table (**Out of scope**).
 
-**Skipped:** static markers only (`describe.skip`, `it.skip`, …). FTR/Jest does **not** use Cypress `@skipIn…` tags — no `(tags: …)` bullets on the FTR row.
+**Skipped:** static markers only (`describe.skip`, `it.skip`, …). FTR-style suites do **not** use Cypress `@skipIn…` tags — no `(tags: …)` bullets on the FTR row.
 
 The deliverable **Tests** table **always lists FTR**. If legacy suites remain on disk but the team relies on Scout only, still show **`-`** Test type with **0** **Test Cases** (unless owned FTR-style files are counted — then fill type / **Test Cases** / **Skipped** honestly).
 
@@ -184,7 +184,7 @@ Minimal output — repo-target links in the report use **`../../`** **from the r
 
 ## Ownership (CODEOWNERS)
 
-_Test-relevant paths only (subtree contains Scout, Cypress, FTR-style, or Jest test files)._
+_Test-relevant paths only (subtree contains Scout, Cypress, or FTR-style test source — not Jest unit files)._
 
 | Area | Path |
 |------|------|
@@ -231,4 +231,4 @@ Second argument = link prefix for markdown paths (**must** match **`.agents/tmp/
 ## Out of scope
 
 - CI Stats / GitHub flaky issue mining.
-- Repo-wide Jest unit inventory unless explicitly requested later.
+- **Jest unit tests** (`*.test.ts` / `*.test.tsx` and similar): not listed under **Ownership**, not counted in **Test Cases**, and no Jest skip inventory — this skill only covers the **FTR / Cypress / Scout** frameworks above.

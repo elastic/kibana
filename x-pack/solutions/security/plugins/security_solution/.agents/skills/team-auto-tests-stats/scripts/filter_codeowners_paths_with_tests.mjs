@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
  * Reads CODEOWNERS-style path prefixes (stdin, one per line) and prints only those whose
- * resolved repo subtree contains at least one test-relevant source file:
- *   - named like *.test.ts, *.spec.ts, *.cy.ts, …, or
+ * resolved repo subtree contains at least one test-relevant source file (team-auto-tests-stats
+ * excludes colocated Jest units — see skill §1):
+ *   - named like *.spec.ts, *.cy.ts, …, or
  *   - any *.ts / *.tsx under a directory segment `test`, `integration_tests`, `cypress`, `scout`, or `e2e`
  * Skips: node_modules, build, target, typings.
  *
@@ -22,8 +23,8 @@ const repoRoot =
   process.argv[2] ||
   execSync('git rev-parse --show-toplevel', { cwd: SCRIPT_DIR, encoding: 'utf8' }).trim();
 
-const TEST_FILE_RE =
-  /\.(test|spec)\.[cm]?[tj]sx?$|\.cy\.[tj]sx?$/;
+/** Matches Scout/Cypress-style filenames; excludes colocated Jest `*.test.ts` / `*.test.tsx`. */
+const TEST_FILE_RE = /\.spec\.[cm]?[tj]sx?$|\.cy\.[tj]sx?$/;
 
 /** Directory segments marking test trees (integration / FTR / Cypress / Scout / Playwright Scout). */
 const TEST_DIR_SEGMENT = new Set(['test', 'integration_tests', 'cypress', 'scout', 'e2e']);
