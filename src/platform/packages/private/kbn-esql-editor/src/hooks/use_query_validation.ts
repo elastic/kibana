@@ -22,6 +22,7 @@ import {
 } from '../helpers';
 import { createTimedCallbacks } from '../telemetry/timed_callbacks';
 import { addQueriesToCache } from '../history_local_storage';
+import { reportEsqlError } from '../report_error';
 import type { DataErrorsControl } from '../types';
 
 interface ValidationLatencyTracking {
@@ -276,7 +277,9 @@ export const useQueryValidation = ({
         return;
       }
       queryValidation(subscription)
-        .catch(() => {})
+        .catch((error) => {
+          reportEsqlError(error, { errorType: 'ValidationDebounced' });
+        })
         .finally(() => {
           subscription.active = false;
         });
