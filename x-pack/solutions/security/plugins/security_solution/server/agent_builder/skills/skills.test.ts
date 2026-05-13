@@ -137,12 +137,15 @@ describe('Security Skills', () => {
       expect(skill.description.length).toBeLessThanOrEqual(1024);
     });
 
-    it('has one inline tool (run-command)', async () => {
+    it('has three inline tools (run-command, validate-rule, get-history)', async () => {
       const skill = getDetectionEmulationSkill(createDetectionEmulationCtx());
       // getInlineTools may return a Promise<Tool[]> or a Tool[]; await covers both.
       const tools = await skill.getInlineTools!();
-      expect(tools).toHaveLength(1);
-      expect((tools[0] as { id: string }).id).toBe('security.detection-emulation.run-command');
+      expect(tools).toHaveLength(3);
+      const ids = (tools as Array<{ id: string }>).map((t) => t.id);
+      expect(ids).toContain('security.detection-emulation.run-command');
+      expect(ids).toContain('security.detection-emulation.validate-rule');
+      expect(ids).toContain('security.detection-emulation.get-history');
     });
 
     it('content describes the only currently-wired agent type (endpoint) and explicitly notes the other three as not-yet-supported', () => {

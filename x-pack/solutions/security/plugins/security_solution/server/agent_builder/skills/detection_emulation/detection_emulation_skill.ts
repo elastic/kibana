@@ -26,7 +26,7 @@ export const getDetectionEmulationSkill = (ctx: DetectionEmulationSkillContext) 
     id: 'detection-emulation',
     name: 'detection-emulation',
     basePath: 'skills/security/endpoint',
-    description: `Validate Elastic Security detection rules by running attack emulation scenarios and measuring whether the rules fire. Exposes three tools: \`validateRule\` (full 8-step pipeline — scenario generation, dispatch, telemetry collection, confidence scoring, history write), \`getEmulationHistory\` (retrieve past validation runs for a rule), and \`runEmulationCommand\` (dispatch a single low-level response action). Both log-injection (safe, no real endpoints) and real-execution modes are supported; each is gated by an independent feature flag.`,
+    description: `Validate Elastic Security detection rules by running attack emulation scenarios and measuring whether the rules fire. Exposes three tools: \`validateRule\` (full 8-step pipeline — scenario generation, dispatch, telemetry collection, confidence scoring, history write), \`getEmulationHistory\` (retrieve past validation runs for a rule), and \`runEmulationCommand\` (dispatch a single low-level response action against endpoint agents). Both log-injection (safe, no real endpoints) and real-execution modes are supported; each is gated by an independent feature flag (\`detectionEmulationLogInjection\` / \`detectionEmulationRealExecution\`).`,
     content: `# Detection Emulation Skill
 
 ## When to Use
@@ -119,6 +119,10 @@ Results are space-scoped — reports from other spaces are not visible.
 
 Dispatches a single Elastic Security response action to one or more Elastic Defend
 endpoints. Returns \`action_id\` and \`status\`; does **not** poll for results.
+
+Currently only the \`endpoint\` agent type is wired — \`sentinel_one\`, \`crowdstrike\`, and
+\`microsoft_defender_endpoint\` are not yet supported until external connector resolution lands.
+Do not attempt to dispatch against these agent types; the call will fail with 400.
 
 **Supported commands and required parameters:**
 
