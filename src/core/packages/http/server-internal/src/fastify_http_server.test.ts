@@ -13,7 +13,7 @@ import fs from 'fs';
 import os from 'os';
 import nodePath from 'path';
 import http from 'http';
-import type { Readable } from 'stream';
+import { Readable } from 'stream';
 import { gunzipSync } from 'zlib';
 import FormData from 'form-data';
 import { schema } from '@kbn/config-schema';
@@ -188,6 +188,19 @@ describe('FastifyHttpServer', () => {
         async (_context, _req, res) => res.badRequest({ body: 'nope' })
       );
 
+      router.get(
+        {
+          path: '/error-stream',
+          security: { authz: { enabled: false, reason: 'test' } },
+          validate: false,
+        },
+        async (_context, _req, res) =>
+          res.customError({
+            body: Readable.from(['error stream'], { objectMode: false }),
+            statusCode: 501,
+          })
+      );
+
       setup.registerRouter(router);
       await server.start();
 
@@ -220,6 +233,11 @@ describe('FastifyHttpServer', () => {
         error: 'Bad Request',
         message: 'nope',
       });
+
+      const errorStream = await httpRequest(listenPort, '/api/fastify-mvp/error-stream');
+      expect(errorStream.statusCode).toBe(501);
+      expect(errorStream.body).toBe('error stream');
+      expect(String(errorStream.headers['content-type'] ?? '')).not.toContain('application/json');
     }, 15000);
 
     it('returns 500 when the route handler throws without crashing the server', async () => {

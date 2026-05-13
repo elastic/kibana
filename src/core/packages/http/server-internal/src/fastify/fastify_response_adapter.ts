@@ -51,6 +51,38 @@ function isIncomingMessagePayload(payload: unknown): payload is IncomingMessage 
 }
 
 /**
+ * Detects bodies that must bypass Kibana's JSON error envelope and be forwarded as raw bytes/streams.
+ *
+ * Mirrors {@link HapiResponseAdapter.toError} plus {@link stream.isReadable} (see `isStreamOrBuffer` there)
+ * and aligns with Fastify's own stream detection (`typeof payload.pipe === 'function'` in `Reply#send`),
+ * so alternate `Readable` identities (e.g. duplicate `stream` module graphs) still stream correctly.
+ */
+function isOpaqueErrorBody(payload: unknown): boolean {
+  if (Buffer.isBuffer(payload)) {
+    return true;
+  }
+  if (isIncomingMessagePayload(payload)) {
+    return true;
+  }
+  if (payload instanceof stream.Readable) {
+    return true;
+  }
+  if (stream.isReadable(payload as stream.Readable) === true) {
+    return true;
+  }
+  if (typeof payload === 'object' && payload !== null) {
+    const candidate = payload as { pipe?: unknown; read?: unknown; readable?: unknown };
+    if (
+      typeof candidate.pipe === 'function' &&
+      (typeof candidate.read === 'function' || typeof candidate.readable === 'boolean')
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * Hapi copies {@link IncomingMessage} headers onto the outgoing response when the body is a proxied
  * Node client response; Fastify only streams bytes unless we set headers explicitly.
  */
@@ -86,6 +118,12 @@ export class FastifyResponseAdapter {
 
   private toFastifyReply(kibanaResponse: KibanaResponse, reply: FastifyReply): FastifyReply {
     if (kibanaResponse.options.bypassErrorFormat) {
+      return this.toSuccess(kibanaResponse, reply);
+    }
+    // Error responses whose body is already wire-format bytes/streams must not be wrapped in the
+    // Kibana JSON error envelope. Delegate to `toSuccess` so Fastify applies the same `Reply#send`
+    // stream detection as successful responses (see `HapiResponseAdapter.toError` opaque branch).
+    if (statusHelpers.isError(kibanaResponse.status) && isOpaqueErrorBody(kibanaResponse.payload)) {
       return this.toSuccess(kibanaResponse, reply);
     }
     if (statusHelpers.isError(kibanaResponse.status)) {
@@ -164,7 +202,7 @@ export class FastifyResponseAdapter {
     const { payload } = kibanaResponse;
 
     // Streaming/buffer errors are passed through opaquely (e.g. proxied responses).
-    if (Buffer.isBuffer(payload) || payload instanceof stream.Readable) {
+    if (isOpaqueErrorBody(payload)) {
       reply.code(kibanaResponse.status);
       this.applyHeaders(reply, kibanaResponse.options.headers);
       if (isIncomingMessagePayload(payload)) {
@@ -216,7 +254,7 @@ function getErrorMessage(payload?: ResponseError): string {
     throw new Error('expected error message to be provided');
   }
   if (typeof payload === 'string') return payload;
-  if (Buffer.isBuffer(payload) || stream.isReadable(payload as stream.Readable) === true) {
+  if (isOpaqueErrorBody(payload)) {
     throw new Error(`can't resolve error message from stream or buffer`);
   }
   if (isElasticsearchResponseError(payload)) {

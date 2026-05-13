@@ -54,4 +54,26 @@ describe('FastifyResponseAdapter', () => {
     expect(recordedHeaders.has('transfer-encoding')).toBe(false);
     expect(reply.send).toHaveBeenCalledWith(body);
   });
+
+  it('passes through duck-typed readable bodies on errors (Fastify stream detection parity)', async () => {
+    const recordedHeaders = new Map<string, string | number | string[]>();
+    const reply = {
+      code: jest.fn().mockReturnThis(),
+      header(this: void, name: string, value: string | number | string[]) {
+        recordedHeaders.set(name.toLowerCase(), value);
+      },
+      hasHeader(name: string) {
+        return recordedHeaders.has(name.toLowerCase());
+      },
+      send: jest.fn().mockReturnThis(),
+    } as unknown as FastifyReply;
+
+    const body = { readable: true, pipe: jest.fn() };
+
+    const adapter = new FastifyResponseAdapter();
+    await adapter.handle(new KibanaResponse(501, body as any, {}), reply);
+
+    expect(reply.code).toHaveBeenCalledWith(501);
+    expect(reply.send).toHaveBeenCalledWith(body);
+  });
 });
