@@ -8,8 +8,12 @@ source .buildkite/scripts/common/util.sh
 
 echo --- Check Types
 
-if [ -n "${WITH_ARCHIVE:-}" ]; then
-  node scripts/type_check --with-archive
-else
-  node scripts/type_check
+args=()
+if [ -n "${RESTORE_ARCHIVE:-}" ]; then
+  args+=(--restore-archive)
 fi
+if [ -n "${UPLOAD_ARCHIVE:-}" ]; then
+  args+=(--upload-archive)
+fi
+
+node scripts/type_check "${args[@]}"
