@@ -14,6 +14,7 @@ import type {
   NotificationsSetup,
   DocLinksStart,
   ApplicationStart,
+  CoreStart,
 } from '@kbn/core/public';
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
@@ -52,6 +53,7 @@ export interface BootDependencies extends ConsoleStartServices {
   docLinks: DocLinksStart['links'];
   autocompleteInfo: AutocompleteInfo;
   isDevMode: boolean;
+  hotkeys: CoreStart['hotkeys'];
 }
 
 export async function renderApp({
@@ -67,6 +69,7 @@ export async function renderApp({
   docLinks,
   autocompleteInfo,
   isDevMode,
+  hotkeys,
   ...startServices
 }: BootDependencies) {
   const trackUiMetric = createUsageTracker(usageCollection);
@@ -91,6 +94,7 @@ export async function renderApp({
       <ServicesContextProvider
         value={{
           ...startServices,
+          hotkeys,
           docLinkVersion,
           docLinks,
           services: {

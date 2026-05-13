@@ -114,6 +114,7 @@ export class ConsoleUIPlugin
             history,
             autocompleteInfo: this.autocompleteInfo,
             isDevMode: this.ctx.env.mode.dev,
+            hotkeys: core.hotkeys,
           });
         },
       });

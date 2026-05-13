@@ -11,7 +11,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
-import type { NotificationsStart } from '@kbn/core/public';
+import type { CoreStart, NotificationsStart } from '@kbn/core/public';
 import { ContextMenu } from './context_menu';
 import { ServicesContextProvider } from '../../../../contexts';
 import type { ContextValue } from '../../../../contexts/services_context';
@@ -65,6 +65,13 @@ const createMockContextValue = (isPackagedEnvironment?: boolean): ContextValue =
       isDevMode: false,
       isPackagedEnvironment,
     },
+    hotkeys: {
+      registerForDiscovery: jest.fn(() => ({
+        id: 'mock-discovery',
+        update: jest.fn(),
+        unregister: jest.fn(),
+      })),
+    } as CoreStart['hotkeys'],
     // Required properties from ConsoleStartServices
     analytics: {
       reportEvent: jest.fn(),

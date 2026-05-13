@@ -8,12 +8,12 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { useEuiTheme } from '@elastic/eui';
-import { CodeEditor } from '@kbn/code-editor';
+import { CodeEditor, monaco } from '@kbn/code-editor';
 
-import { monaco } from '@kbn/monaco';
-
+import { i18n } from '@kbn/i18n';
 import { initializeOsqueryEditor } from './osquery_highlight_rules';
 import { useOsqueryTables } from './osquery_tables';
+import { useKibana } from '../common/lib/kibana';
 
 interface OsqueryEditorProps {
   defaultValue: string;
@@ -34,6 +34,7 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
   commands,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { hotkeys } = useKibana().services;
   const { tableNames, tablesRecord } = useOsqueryTables();
   const [editorValue, setEditorValue] = useState(defaultValue ?? '');
   const [height, setHeight] = useState(MIN_HEIGHT);
@@ -81,7 +82,17 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
         if (command.name === 'submitOnCmdEnter') {
           // on CMD/CTRL + Enter submit the query
           // eslint-disable-next-line no-bitwise
-          editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, command.exec);
+          editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, command.exec, {
+            id: 'osqueryEditor:monaco.submitQuery',
+            label: i18n.translate('xpack.osquery.editor.submitQueryShortcutLabel', {
+              defaultMessage: 'Run query',
+            }),
+            featureId: 'osquery:editor',
+            group: i18n.translate('xpack.osquery.editor.shortcutsGroup', {
+              defaultMessage: 'Query editor',
+            }),
+            scope: 'context',
+          });
         }
       });
 
@@ -104,6 +115,7 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
         options={editorOptions}
         height={height + 'px'}
         width="100%"
+        hotkeys={hotkeys}
         editorDidMount={editorDidMount}
         overflowWidgetsContainerZIndexOverride={overflowWidgetsZIndex}
         transparentBackground
