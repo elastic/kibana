@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EMPTY } from 'rxjs';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type {
   AppScopedHotkeys,
@@ -38,8 +37,8 @@ const createStartContractMock = () => {
   const startContract: DeeplyMockedKeys<HotkeysStart> = lazyObject({
     register: jest.fn().mockImplementation(createHotkeyHandleMock),
     registerMany: jest.fn().mockReturnValue(jest.fn()),
+    registerForDiscovery: jest.fn().mockImplementation(createHotkeyHandleMock),
     forApp: jest.fn().mockImplementation(createAppScopedHotkeysMock),
-    getRegistrations$: jest.fn().mockReturnValue(EMPTY),
   });
   return startContract;
 };

@@ -8,7 +8,7 @@
  */
 
 import { createElement } from 'react';
-import { EMPTY, type Observable, Subscription } from 'rxjs';
+import { EMPTY, Subject, type Observable, Subscription } from 'rxjs';
 import {
   HotkeyManager,
   type HotkeyCallback,
@@ -101,12 +101,19 @@ const keysEqual = (a: HotkeyDefinition['keys'], b: HotkeyDefinition['keys']): bo
  */
 export class HotkeysService {
   private readonly manager: HotkeyManager = HotkeyManager.getInstance();
-  public readonly derived: DerivedRegistrations = createDerivedRegistrations(this.manager);
+  private readonly discoveryRevision$ = new Subject<void>();
+  private readonly discoveryInternal = new Map<string, HotkeyDefinition>();
+  private userOverrides: ReadonlyMap<string, HotkeyOverride> = new Map();
+  public readonly derived: DerivedRegistrations = createDerivedRegistrations({
+    manager: this.manager,
+    getDiscoveryRows: () => Array.from(this.discoveryInternal.values()),
+    discoveryUpdates$: this.discoveryRevision$.asObservable(),
+    getOverrides: () => this.userOverrides,
+  });
   private readonly internal = new Map<string, InternalEntry>();
   private readonly subscriptions = new Subscription();
   private latestAppId: string | undefined;
   private currentAppId$?: Observable<string | undefined>;
-  private userOverrides: ReadonlyMap<string, HotkeyOverride> = new Map();
 
   private hotkeysAppUpdater: SidebarAppUpdater | undefined;
 
@@ -168,19 +175,66 @@ export class HotkeysService {
         currentAppId$: application.currentAppId$,
       });
 
-    return { register: this.doRegister.bind(this), registerMany, forApp };
+    return {
+      register: this.doRegister.bind(this),
+      registerForDiscovery: this.doRegisterForDiscovery.bind(this),
+      registerMany,
+      forApp,
+    };
   }
 
   public stop() {
     this.subscriptions.unsubscribe();
+    this.discoveryInternal.clear();
     this.derived?.dispose();
     this.internal.clear();
     this.userOverrides = new Map();
     this.manager.destroy();
   }
 
+  /**
+   * Register a hotkey for discovery UIs (cheat sheet). Unlike {@link HotkeysStart.register},
+   * this does not attach a keyboard listener — execution stays with the owning surface (e.g. Monaco).
+   */
+  private doRegisterForDiscovery(def: HotkeyDefinition): HotkeyHandle {
+    if (this.internal.has(def.id) || this.discoveryInternal.has(def.id)) {
+      throw new Error(`HotkeysService: a hotkey with id "${def.id}" is already registered`);
+    }
+
+    const stored: HotkeyDefinition = {
+      ...def,
+      scope: def.scope ?? 'context',
+      defaultKeys: def.defaultKeys ?? def.keys,
+    };
+
+    this.discoveryInternal.set(stored.id, stored);
+    this.discoveryRevision$.next();
+
+    return {
+      id: stored.id,
+      update: (partial) => {
+        const current = this.discoveryInternal.get(stored.id);
+        if (!current) {
+          return;
+        }
+        const next: HotkeyDefinition = { ...current, ...partial };
+        if (partial.keys !== undefined) {
+          next.defaultKeys = current.defaultKeys;
+        }
+        this.discoveryInternal.set(stored.id, next);
+        this.discoveryRevision$.next();
+      },
+      unregister: () => {
+        if (!this.discoveryInternal.delete(stored.id)) {
+          return;
+        }
+        this.discoveryRevision$.next();
+      },
+    };
+  }
+
   private doRegister(def: HotkeyDefinition, handler: (event: KeyboardEvent) => void): HotkeyHandle {
-    if (this.internal.has(def.id)) {
+    if (this.internal.has(def.id) || this.discoveryInternal.has(def.id)) {
       throw new Error(`HotkeysService: a hotkey with id "${def.id}" is already registered`);
     }
 
@@ -233,16 +287,29 @@ export class HotkeysService {
   private applyOverrides(next: ReadonlyMap<string, HotkeyOverride>): void {
     const previous = this.userOverrides;
     this.userOverrides = next;
-    if (this.internal.size === 0) {
-      return;
-    }
-    for (const entry of this.internal.values()) {
-      const prev = previous.get(entry.def.id);
-      const curr = next.get(entry.def.id);
-      if (prev === curr) {
-        continue;
+    let discoveryAffected = false;
+    for (const id of this.discoveryInternal.keys()) {
+      const prev = previous.get(id);
+      const curr = next.get(id);
+      if (prev !== curr) {
+        discoveryAffected = true;
+        break;
       }
-      this.rebindEntry(entry);
+    }
+
+    if (this.internal.size > 0) {
+      for (const entry of this.internal.values()) {
+        const prev = previous.get(entry.def.id);
+        const curr = next.get(entry.def.id);
+        if (prev === curr) {
+          continue;
+        }
+        this.rebindEntry(entry);
+      }
+    }
+
+    if (discoveryAffected) {
+      this.discoveryRevision$.next();
     }
   }
 
