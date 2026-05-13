@@ -27,6 +27,19 @@ export function formatTriggerEventPayloadAsText(payload: unknown): string {
   return String(payload);
 }
 
+/**
+ * Unified data table builds cell actions with a trailing "copy cell value" action.
+ * Workflows replace it with {@link createTriggerEventSummaryCopyPayloadCellAction}.
+ */
+export function withoutTrailingDefaultCopyCellAction<T>(
+  cellActions: T[] | readonly T[] | undefined
+): T[] {
+  if (!cellActions?.length) {
+    return [];
+  }
+  return cellActions.slice(0, -1);
+}
+
 const copyFailedTitle = i18n.translate(
   'workflows.workflowExecuteEventTriggerForm.copyPayloadFailedTitle',
   {
@@ -48,6 +61,7 @@ const copiedTitle = i18n.translate(
  *
  * Assumes the unified table default cell actions keep "copy value" as the last entry in
  * {@link EuiDataGridColumn.cellActions} (see buildCellActions in default_cell_actions.tsx).
+ * Call sites should use {@link withoutTrailingDefaultCopyCellAction} before appending this action.
  */
 export function createTriggerEventSummaryCopyPayloadCellAction(
   toastNotifications: ToastsStart
@@ -67,7 +81,7 @@ export function createTriggerEventSummaryCopyPayloadCellAction(
     const ariaLabel = i18n.translate(
       'workflows.workflowExecuteEventTriggerForm.copyPayloadAriaLabel',
       {
-        defaultMessage: 'Copy event payload',
+        defaultMessage: 'Copy payload',
       }
     );
 
@@ -87,7 +101,7 @@ export function createTriggerEventSummaryCopyPayloadCellAction(
         }}
       >
         {i18n.translate('workflows.workflowExecuteEventTriggerForm.copyPayloadButtonLabel', {
-          defaultMessage: 'Copy value',
+          defaultMessage: 'Copy payload',
         })}
       </Component>
     );

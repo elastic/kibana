@@ -9,6 +9,7 @@
 
 import {
   EuiCallOut,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   euiFontSize,
@@ -35,7 +36,6 @@ import {
   DataLoadingState,
   type DataTableColumnsMeta,
   getRenderCustomToolbarWithElements,
-  JSONCodeEditorCommonMemoized,
   SELECT_ROW,
   type SortOrder,
   UnifiedDataTable,
@@ -54,6 +54,7 @@ import { TriggerEventLogSummaryCell, triggerSourceToGridRow } from './trigger_ev
 import {
   createTriggerEventSummaryCopyPayloadCellAction,
   formatTriggerEventPayloadAsText,
+  withoutTrailingDefaultCopyCellAction,
 } from './trigger_event_summary_copy_payload_cell_action';
 import { getWorkflowCustomTriggerTypeIds } from './workflow_execute_modal_helpers';
 import { WorkflowTriggerEventDataGridCellPopover } from './workflow_trigger_event_data_grid_cell_popover';
@@ -232,11 +233,7 @@ export const WorkflowExecuteEventForm = ({
 
   useEffect(() => {
     setPageIndex(0);
-  }, [definition]);
-
-  useEffect(() => {
-    setPageIndex(0);
-  }, [submittedQuery.query, timeRange.from, timeRange.to]);
+  }, [definition, submittedQuery.query, timeRange.from, timeRange.to]);
 
   useEffect(() => {
     const dataViews = services.dataViews;
@@ -405,12 +402,15 @@ export const WorkflowExecuteEventForm = ({
                 width: 'min(75vw, 640px)',
               })}
             >
-              <JSONCodeEditorCommonMemoized
-                jsonValue={jsonValue}
-                height={420}
-                hasLineNumbers
-                onEditorDidMount={() => {}}
-              />
+              <EuiCodeBlock
+                language="json"
+                fontSize="s"
+                paddingSize="m"
+                isCopyable
+                css={css({ maxHeight: 420, overflow: 'auto' })}
+              >
+                {jsonValue}
+              </EuiCodeBlock>
             </div>
           );
         }
@@ -432,7 +432,7 @@ export const WorkflowExecuteEventForm = ({
       summary: ({ column }) => {
         const defaultCellActions = column.cellActions ?? [];
         const cellActionsWithoutDefaultCopy =
-          defaultCellActions.length > 0 ? defaultCellActions.slice(0, -1) : [];
+          withoutTrailingDefaultCopyCellAction(defaultCellActions);
         return {
           ...column,
           display: (

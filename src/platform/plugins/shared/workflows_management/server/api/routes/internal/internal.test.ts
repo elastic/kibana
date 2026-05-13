@@ -7,16 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IRouter } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { KQLSyntaxError } from '@kbn/es-query';
+import type { SearchTriggerEventLogResult } from '@kbn/workflows-ui';
 import { registerInternalRoutes } from '.';
+import type { RouteDependencies } from '../types';
 
 describe('Internal Routes', () => {
-  let routeHandlers: Record<string, { handler: (...args: any[]) => Promise<any> }>;
-  let mockApi: { disableAllWorkflows: jest.Mock };
+  type MockRouteHandler = (
+    context: typeof mockContext,
+    request: ReturnType<typeof httpServerMock.createKibanaRequest>,
+    response: ReturnType<typeof httpServerMock.createResponseFactory>
+  ) => Promise<unknown>;
+
+  /** Matches {@link registerTriggerEventsLogRoutes} → execution engine `searchTriggerEventLog`. */
+  interface TriggerEventLogSearchCall {
+    spaceId: string;
+    triggerIds?: string[];
+    kql?: string;
+    from?: string;
+    to?: string;
+    page?: number;
+    size?: number;
+  }
+
+  let routeHandlers: Record<string, { handler: MockRouteHandler }>;
+  let mockApi: { disableAllWorkflows: jest.MockedFunction<(spaceId: string) => Promise<unknown>> };
   let mockTriggerEventsIsEnabled: boolean;
-  const mockSearchTriggerEventLog = jest.fn();
+  const mockSearchTriggerEventLog = jest.fn<
+    Promise<SearchTriggerEventLogResult>,
+    [TriggerEventLogSearchCall]
+  >();
 
   const mockContext = {
     workflows: Promise.resolve({
@@ -55,12 +77,10 @@ describe('Internal Routes', () => {
     };
 
     const createVersionedRoute = (method: string, path: string) => ({
-      addVersion: jest
-        .fn()
-        .mockImplementation((_config: unknown, handler: (...args: any[]) => Promise<any>) => {
-          routeHandlers[`${method}:${path}`] = { handler };
-          return { addVersion: jest.fn() };
-        }),
+      addVersion: jest.fn().mockImplementation((_config: unknown, handler: MockRouteHandler) => {
+        routeHandlers[`${method}:${path}`] = { handler };
+        return { addVersion: jest.fn() };
+      }),
     });
 
     const mockRouter = {
@@ -76,16 +96,25 @@ describe('Internal Routes', () => {
             createVersionedRoute('POST', config.path)
           ),
       },
-    } as unknown as jest.Mocked<IRouter>;
+    };
 
-    registerInternalRoutes({
-      router: mockRouter as any,
-      api: mockApi as any,
-      service: mockWorkflowsService as any,
-      logger: { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() } as any,
-      spaces: { getSpaceId: jest.fn().mockReturnValue('default') } as any,
-      audit: {} as any,
-    });
+    const logger: Logger = {
+      error: jest.fn(),
+      warn: jest.fn(),
+      info: jest.fn(),
+      debug: jest.fn(),
+    } as unknown as Logger;
+
+    const routeDependencies: RouteDependencies = {
+      router: mockRouter,
+      api: mockApi,
+      service: mockWorkflowsService,
+      logger,
+      spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
+      audit: {},
+    } as unknown as RouteDependencies;
+
+    registerInternalRoutes(routeDependencies);
   });
 
   it('should register the config route handler', () => {
