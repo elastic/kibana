@@ -83,6 +83,7 @@ describe('Update profile routes', () => {
           userSettings: {
             darkMode: 'dark',
             contrastMode: 'high',
+            labsInstalledLabIdsJson: '["labsHelloWorld"]',
             agentBuilderAnnouncementModalSeen: true,
             agentBuilderAnnouncementModalSeenBySpaceJson: '{}',
           },
@@ -92,6 +93,7 @@ describe('Update profile routes', () => {
         userSettings: {
           darkMode: 'dark',
           contrastMode: 'high',
+          labsInstalledLabIdsJson: '["labsHelloWorld"]',
           agentBuilderAnnouncementModalSeen: true,
           agentBuilderAnnouncementModalSeenBySpaceJson: '{}',
         },
@@ -306,6 +308,7 @@ describe('Update profile routes', () => {
         userSettings: {
           darkMode: 'dark',
           contrastMode: 'high',
+          labsInstalledLabIdsJson: '["labsHelloWorld"]',
         },
       };
 
@@ -388,6 +391,34 @@ describe('Update profile routes', () => {
       expect(userProfileService.update).toHaveBeenCalledWith('u_some_id', {
         userSettings: {
           agentBuilderAnnouncementModalSeen: true,
+        },
+      });
+    });
+
+    it('allows Elastic Cloud users to update labsInstalledLabIdsJson.', async () => {
+      session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: 'u_some_id' }),
+      });
+      authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser({ elastic_cloud_user: true }));
+
+      await expect(
+        routeHandler(
+          getMockContext(),
+          httpServerMock.createKibanaRequest({
+            body: {
+              userSettings: {
+                labsInstalledLabIdsJson: '["labsHelloWorld"]',
+              },
+            },
+          }),
+          kibanaResponseFactory
+        )
+      ).resolves.toEqual(expect.objectContaining({ status: 200, payload: undefined }));
+
+      expect(userProfileService.update).toHaveBeenCalledWith('u_some_id', {
+        userSettings: {
+          labsInstalledLabIdsJson: '["labsHelloWorld"]',
         },
       });
     });

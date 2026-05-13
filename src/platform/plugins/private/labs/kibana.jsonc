@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/labs-plugin",
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "labs",
+    "browser": true,
+    "server": true
+  }
+}

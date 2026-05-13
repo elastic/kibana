@@ -1522,6 +1522,8 @@
       "@kbn/kql/*": ["src/platform/plugins/shared/kql/*"],
       "@kbn/kubernetes-security-plugin": ["x-pack/solutions/security/plugins/kubernetes_security"],
       "@kbn/kubernetes-security-plugin/*": ["x-pack/solutions/security/plugins/kubernetes_security/*"],
+      "@kbn/labs-plugin": ["src/platform/plugins/private/labs"],
+      "@kbn/labs-plugin/*": ["src/platform/plugins/private/labs/*"],
       "@kbn/langchain": ["x-pack/platform/packages/shared/kbn-langchain"],
       "@kbn/langchain/*": ["x-pack/platform/packages/shared/kbn-langchain/*"],
       "@kbn/langgraph-checkpoint-saver": ["x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver"],

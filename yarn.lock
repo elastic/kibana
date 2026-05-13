@@ -7568,6 +7568,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/labs-plugin@link:src/platform/plugins/private/labs":
+  version "0.0.0"
+  uid ""
+
 "@kbn/langchain@link:x-pack/platform/packages/shared/kbn-langchain":
   version "0.0.0"
   uid ""
