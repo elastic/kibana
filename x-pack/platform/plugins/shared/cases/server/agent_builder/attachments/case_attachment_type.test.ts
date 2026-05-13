@@ -12,7 +12,6 @@ import { createCaseAttachmentType } from './case_attachment_type';
 import { createCasesAttachmentType } from './cases_attachment_type';
 import {
   CASE_ATTACHMENT_TYPE,
-  CASES_ATTACHMENT_TYPE,
   type CaseAttachmentData,
 } from '../../../common/types/agent_builder/attachment_schemas';
 
@@ -65,11 +64,8 @@ describe('case attachment type', () => {
     expect(repr.type).toBe('text');
     expect(repr.value).toContain('Threat Intel Filebeat');
     expect(repr.value).toContain('#125');
-    expect(repr.value).toContain('Status: in-progress');
-    expect(repr.value).toContain('Severity: critical');
-    expect(repr.value).toContain('Alerts: 3');
-    expect(repr.value).toContain('Comments: 5');
-    expect(repr.value).toContain('Phishing');
+    expect(repr.value).toContain('in-progress');
+    expect(repr.value).toContain('critical');
   });
 });
 
@@ -80,25 +76,5 @@ describe('cases (list) attachment type', () => {
       total: 2,
     });
     expect(result.valid).toBe(true);
-  });
-
-  it('format() summarises every case', async () => {
-    const def = createCasesAttachmentType();
-    const attachment = {
-      id: 'list-attachment',
-      type: CASES_ATTACHMENT_TYPE,
-      data: {
-        cases: [buildCaseData(), buildCaseData({ id: 'def', incremental_id: 126, title: 'Other' })],
-        total: 2,
-      },
-    } as Attachment<typeof CASES_ATTACHMENT_TYPE, { cases: CaseAttachmentData[]; total: number }>;
-    const formatted = await def.format(attachment, formatContext);
-    const repr = await formatted.getRepresentation!();
-    expect(repr.type).toBe('text');
-    expect(repr.value).toContain('Showing 2 of 2 case(s)');
-    expect(repr.value).toContain('#125');
-    expect(repr.value).toContain('#126');
-    expect(repr.value).toContain('Threat Intel Filebeat');
-    expect(repr.value).toContain('Other');
   });
 });

@@ -19,6 +19,9 @@ const validCase = {
   tags: ['Phishing', 'User Alert'],
   owner: 'securitySolution',
   assignees: [{ uid: 'u1' }],
+  created_at: '2020-02-19T23:06:33.798Z',
+  updated_at: '2020-02-19T23:06:33.798Z',
+  total_observables: 1,
 };
 
 describe('caseAttachmentDataSchema', () => {
