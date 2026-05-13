@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -133,6 +133,12 @@ export const ModelSettings: React.FC = () => {
 
   const showFeatureSections = enableAi && featureSpecificModels;
 
+  const { optOutSections, regularSections } = useMemo(() => {
+    const optOut = sections.filter((s) => s.children.every((f) => f.ignoreGlobalDefault));
+    const regular = sections.filter((s) => s.children.some((f) => !f.ignoreGlobalDefault));
+    return { optOutSections: optOut, regularSections: regular };
+  }, [sections]);
+
   if (connectorsLoading || isLoading) {
     return (
       <EuiPageTemplate.Section
@@ -196,6 +202,60 @@ export const ModelSettings: React.FC = () => {
           defaultModelSettings={defaultModelSettings}
           validation={defaultModelValidation}
         />
+        {enableAi && optOutSections.length > 0 && (
+          <>
+            {!featureSpecificModels && (
+              <>
+                <EuiSpacer size="l" />
+                <EuiCallOut
+                  data-test-subj="ignoreGlobalDefaultCallout"
+                  color="primary"
+                  iconType="iInCircle"
+                  title={i18n.translate(
+                    'xpack.searchInferenceEndpoints.settings.ignoreGlobalDefault.calloutTitle',
+                    {
+                      defaultMessage: 'These features manage their own model selection',
+                    }
+                  )}
+                >
+                  <p>
+                    {i18n.translate(
+                      'xpack.searchInferenceEndpoints.settings.ignoreGlobalDefault.calloutDescription',
+                      {
+                        defaultMessage:
+                          'The global default model setting does not apply to these features. You can still configure them individually below.',
+                      }
+                    )}
+                  </p>
+                </EuiCallOut>
+              </>
+            )}
+            <EuiSpacer size="xl" />
+            {optOutSections.map((section) => (
+              <React.Fragment key={section.featureId}>
+                <FeatureSection
+                  parentName={section.featureName}
+                  parentDescription={section.featureDescription}
+                  features={section.children.map((f) => ({
+                    endpointIds: assignments[f.featureId] ?? f.recommendedEndpoints,
+                    effectiveRecommendedEndpoints:
+                      effectiveRecommendedEndpoints[f.featureId] ?? f.recommendedEndpoints,
+                    feature: f,
+                    hasSavedObject: hasSavedObject[f.featureId] ?? false,
+                    isFeatureDirty: dirtyFeatureIds.has(f.featureId),
+                  }))}
+                  onEndpointsChange={updateEndpoints}
+                  invalidEndpointIds={invalidEndpointIds}
+                  isBeta={section.isBeta}
+                  isTechPreview={section.isTechPreview}
+                  globalDefaultId={undefined}
+                />
+                <EuiSpacer size="xl" />
+              </React.Fragment>
+            ))}
+          </>
+        )}
+
         {showFeatureSections && (
           <>
             {invalidEndpointIds.size > 0 && (
@@ -255,7 +315,7 @@ export const ModelSettings: React.FC = () => {
                 data-test-subj="settings-no-features"
               />
             ) : (
-              sections.map((section) => (
+              regularSections.map((section) => (
                 <React.Fragment key={section.featureId}>
                   <FeatureSection
                     parentName={section.featureName}

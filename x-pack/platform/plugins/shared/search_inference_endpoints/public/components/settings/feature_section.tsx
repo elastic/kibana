@@ -36,7 +36,7 @@ interface FeatureSectionProps {
   invalidEndpointIds: Set<string>;
   isTechPreview?: boolean;
   isBeta?: boolean;
-  globalDefaultId: string;
+  globalDefaultId: string | undefined;
 }
 
 export const FeatureSection: React.FC<FeatureSectionProps> = ({

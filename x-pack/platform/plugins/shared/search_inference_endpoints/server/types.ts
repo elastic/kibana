@@ -25,6 +25,13 @@ export interface InferenceFeatureConfig {
   recommendedEndpoints: string[];
   isTechPreview?: boolean;
   isBeta?: boolean;
+  /**
+   * When true, this feature is excluded from global-default-connector behaviour:
+   * the global default is never prepended to its model list, and the feature is
+   * shown in the Feature Settings UI even when "Only allow the default model" mode
+   * is active.  This is a developer-set flag and is not exposed to end users.
+   */
+  ignoreGlobalDefault?: boolean;
   visibilityCondition?: {
     key: string;
     value: string | number | boolean | null;

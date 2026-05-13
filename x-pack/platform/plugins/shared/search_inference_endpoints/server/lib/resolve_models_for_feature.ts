@@ -48,6 +48,7 @@ export const resolveModelsForFeature = async ({
   getConnectorById,
   uiSettingsClient,
   featureId,
+  ignoreGlobalDefault = false,
   logger,
 }: {
   getForFeature: (featureId: string) => Promise<ResolvedInferenceEndpoints>;
@@ -55,6 +56,7 @@ export const resolveModelsForFeature = async ({
   getConnectorById: (id: string) => Promise<InferenceConnector>;
   uiSettingsClient: IUiSettingsClient;
   featureId: string;
+  ignoreGlobalDefault?: boolean;
   logger: Logger;
 }): Promise<ResolvedConnectorsForFeature> => {
   const [defaultConnectorId, defaultConnectorOnly] = await Promise.all([
@@ -71,7 +73,7 @@ export const resolveModelsForFeature = async ({
     }
   };
 
-  if (defaultConnectorOnly) {
+  if (defaultConnectorOnly && !ignoreGlobalDefault) {
     if (!defaultConnectorId || defaultConnectorId === NO_DEFAULT_CONNECTOR) {
       return { connectors: [], warnings: [], soEntryFound: false };
     }
@@ -98,7 +100,12 @@ export const resolveModelsForFeature = async ({
   const merged = mergeConnectors(featureResult.endpoints, allConnectors, soEntryFound);
 
   let connectors: ApiInferenceConnector[] = merged;
-  if (!soEntryFound && defaultConnectorId && defaultConnectorId !== NO_DEFAULT_CONNECTOR) {
+  if (
+    !soEntryFound &&
+    !ignoreGlobalDefault &&
+    defaultConnectorId &&
+    defaultConnectorId !== NO_DEFAULT_CONNECTOR
+  ) {
     const defaultConnector = await fetchConnectorById(defaultConnectorId);
     if (defaultConnector) {
       connectors = [

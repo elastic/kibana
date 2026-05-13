@@ -140,7 +140,7 @@ describe('SubFeatureCard', () => {
     globalRowOverrides?: Partial<{
       hasSavedObject: boolean;
       isFeatureDirty: boolean;
-      globalDefaultId: string;
+      globalDefaultId: string | undefined;
     }>
   ) =>
     render(
@@ -543,6 +543,17 @@ describe('SubFeatureCard', () => {
       expect(
         screen.getByText('Inference endpoint Claude is no longer available')
       ).toBeInTheDocument();
+    });
+  });
+
+  describe('ignoreGlobalDefault — globalDefaultId undefined', () => {
+    it('does not render the global default locked row when globalDefaultId is undefined', () => {
+      renderCard(['ep-1'], undefined, new Set(), ['__different__'], {
+        hasSavedObject: false,
+        globalDefaultId: undefined,
+      });
+
+      expect(screen.queryByTestId('global-default-row-test_feature')).not.toBeInTheDocument();
     });
   });
 });

@@ -54,7 +54,7 @@ interface SubFeatureCardProps {
   invalidEndpointIds: Set<string>;
   hasSavedObject: boolean;
   isFeatureDirty: boolean;
-  globalDefaultId: string;
+  globalDefaultId: string | undefined;
 }
 
 export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
@@ -118,9 +118,10 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   const canAddMore =
     !feature.maxNumberOfEndpoints || endpointIds.length < feature.maxNumberOfEndpoints;
 
-  const showGlobalDefaultRow = !hasSavedObject && globalDefaultId !== NO_DEFAULT_MODEL;
+  const showGlobalDefaultRow =
+    !hasSavedObject && !!globalDefaultId && globalDefaultId !== NO_DEFAULT_MODEL;
   const { icon: globalDefaultIcon = 'compute', label: globalDefaultLabel = globalDefaultId } =
-    endpointDisplayMap.get(globalDefaultId) ?? {};
+    (globalDefaultId ? endpointDisplayMap.get(globalDefaultId) : undefined) ?? {};
 
   const handleRemove = useCallback(
     (index: number) => {
@@ -495,7 +496,7 @@ interface GlobalDefaultLockedRowProps {
   icon: string;
   label: string;
   showBadge: boolean;
-  globalDefaultId: string;
+  globalDefaultId: string | undefined;
 }
 
 const GlobalDefaultLockedRow: React.FC<GlobalDefaultLockedRowProps> = ({
@@ -526,7 +527,7 @@ const GlobalDefaultLockedRow: React.FC<GlobalDefaultLockedRowProps> = ({
             min-width: 0;
           `}
         >
-          <EuiToolTip title={label} content={globalDefaultId} position="top">
+          <EuiToolTip title={label} content={globalDefaultId ?? ''} position="top">
             <EuiText
               size="s"
               color="subdued"
@@ -565,7 +566,7 @@ interface RecommendedEndpointsListProps {
     icon: string;
     label: string;
     showBadge: boolean;
-    globalDefaultId: string;
+    globalDefaultId: string | undefined;
   };
 }
 
