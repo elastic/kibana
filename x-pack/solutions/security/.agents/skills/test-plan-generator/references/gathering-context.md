@@ -47,7 +47,7 @@ Parse the issue body and categorize all URLs:
 
 ## Images
 
-For each **image URL** in the issue body or comments: fetch and analyze. Do not skip — they frequently contain UI mockups, annotated screenshots, or acceptance criteria not described in text. Extract: UI layout, component names, states, labels, button names, error messages, and annotations. Use all of this when writing scenarios.
+For each **image URL** in the issue body, comments, or any PR body or PR review comment: fetch and analyze. Do not skip — they frequently contain UI mockups, annotated screenshots, or acceptance criteria not described in text. Extract: UI layout, component names, states, labels, button names, error messages, and annotations. Use all of this when writing scenarios.
 
 ---
 
@@ -136,7 +136,7 @@ Fall back to GitHub MCP if unavailable. Apply these limits to the diff:
 | Max files | 20 per PR |
 | Priority order | Test files → UI components → feature flags / permissions → feature-related files |
 | Skip if | File diff > 500 lines (note filename was skipped) |
-| Always skip | Binary files, generated files (`*.snap`, `*.lock`, `*.min.js`), translation files (`i18n`, `*.json`) |
+| Always skip | Binary files, generated files (`*.snap`, `*.lock`, `*.min.js`, `*.gen.ts`, `*.gen.tsx`), translation files (`i18n`, `*.json`) |
 
 **Build the test coverage catalog.** For each test file found, extract: the test type (unit `*.test.ts`, integration, API integration, or e2e Cypress `*.cy.ts` / Scout), the file path, and the describe blocks and test names. Store this catalog — it will be used in Step 3 to populate automation coverage lines.
 
