@@ -33,7 +33,11 @@ export const registerGetViewsRoute = (router: IRouter, { logger }: PluginInitial
           body: result,
         });
       } catch (error) {
-        logger.get().debug(error);
+        const message = error instanceof Error ? error.message : String(error);
+        logger.get().error(`Failed to fetch ES|QL views: ${message}`, {
+          tags: ['esql', 'views'],
+          error: { stack_trace: error instanceof Error ? error.stack : undefined },
+        });
         return response.ok({
           body: { views: [] },
         });

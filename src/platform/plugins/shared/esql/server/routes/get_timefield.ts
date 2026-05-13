@@ -20,9 +20,6 @@ const ES_TIMESTAMP_FIELD_NAME = '@timestamp';
 const hasTimestampInFieldCapsResponse = (result: FieldCapsResponse) =>
   Boolean(result.fields && result.fields['@timestamp']);
 
-const toDebugString = (error: unknown): string =>
-  error instanceof Error ? error.stack ?? error.message : String(error);
-
 const getEsqlColumnsForSource = async ({
   client,
   sourceName,
@@ -113,7 +110,19 @@ export const registerGetTimeFieldRoute = (
       const subqueryArgs = sourceCommand.args.filter(isSubQuery);
       const hasSubqueries = subqueryArgs.length > 0;
       const service = new EsqlService({ client: core.elasticsearch.client.asCurrentUser });
-      const { views } = await service.getViews().catch(() => ({ views: [] }));
+      const { views } = await service.getViews().catch((viewsError) => {
+        const message = viewsError instanceof Error ? viewsError.message : String(viewsError);
+        logger.get().error(
+          `Failed to fetch ES|QL views while resolving timefield: ${message}`,
+          {
+            tags: ['esql', 'timefield', 'views'],
+            error: {
+              stack_trace: viewsError instanceof Error ? viewsError.stack : undefined,
+            },
+          }
+        );
+        return { views: [] };
+      });
       const viewNames = new Set(views.map(({ name }) => name));
       const splitSources = sources
         .split(',')
@@ -142,7 +151,20 @@ export const registerGetTimeFieldRoute = (
               });
               return hasTimestampInFieldCapsResponse(fieldCapsResp);
             } catch (fieldCapsError) {
-              logger.get().debug(toDebugString(fieldCapsError));
+              const message =
+                fieldCapsError instanceof Error
+                  ? fieldCapsError.message
+                  : String(fieldCapsError);
+              logger.get().error(
+                `fieldCaps check failed for index "${index}" while resolving ES|QL timefield: ${message}`,
+                {
+                  tags: ['esql', 'timefield', 'fieldCaps'],
+                  error: {
+                    stack_trace:
+                      fieldCapsError instanceof Error ? fieldCapsError.stack : undefined,
+                  },
+                }
+              );
               return false;
             }
           })
@@ -176,7 +198,11 @@ export const registerGetTimeFieldRoute = (
           body: { timeField: undefined },
         });
       } catch (error) {
-        logger.get().debug(toDebugString(error));
+        const message = error instanceof Error ? error.message : String(error);
+        logger.get().error(`Failed to resolve ES|QL timefield: ${message}`, {
+          tags: ['esql', 'timefield'],
+          error: { stack_trace: error instanceof Error ? error.stack : undefined },
+        });
         throw error;
       }
     }
