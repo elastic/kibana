@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export {
-  environmentStringRt,
-  environmentRt,
-  type Environment,
-} from '@kbn/apm-types-shared/src/types/environment_rt';
+export { environmentStringRt, environmentRt, type Environment } from '@kbn/apm-types';

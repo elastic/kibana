@@ -8,4 +8,3 @@
  */
 
 export type * from './common';
-export * from './environment_rt';
