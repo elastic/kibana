@@ -16,7 +16,7 @@ describe('savedDataViewSpecSchema', () => {
       index_pattern: 'logs-*',
     };
 
-    expect(savedDataViewSpecSchema.validate(input)).toEqual(input);
+    expect(savedDataViewSpecSchema.parse(input)).toEqual(input);
   });
 
   it('accepts indexed field overrides with popularity', () => {
@@ -36,7 +36,7 @@ describe('savedDataViewSpecSchema', () => {
       },
     };
 
-    expect(savedDataViewSpecSchema.validate(input)).toEqual(input);
+    expect(savedDataViewSpecSchema.parse(input)).toEqual(input);
   });
 
   it('accepts primitive and composite runtime definitions with popularity', () => {
@@ -62,7 +62,7 @@ describe('savedDataViewSpecSchema', () => {
       },
     };
 
-    expect(savedDataViewSpecSchema.validate(input)).toEqual(input);
+    expect(savedDataViewSpecSchema.parse(input)).toEqual(input);
   });
 
   it('rejects popularity below 0 for indexed field overrides', () => {
@@ -75,9 +75,7 @@ describe('savedDataViewSpecSchema', () => {
       },
     };
 
-    expect(() => savedDataViewSpecSchema.validate(input)).toThrow(
-      /popularity\]: Value must be equal to or greater than \[0\]/i
-    );
+    expect(() => savedDataViewSpecSchema.parse(input)).toThrow(/popularity|Too small|>=0/i);
   });
 
   it('rejects an empty field_settings key', () => {
@@ -88,6 +86,8 @@ describe('savedDataViewSpecSchema', () => {
       },
     };
 
-    expect(() => savedDataViewSpecSchema.validate(input)).toThrow(/key\(""\)/);
+    expect(() => savedDataViewSpecSchema.parse(input)).toThrow(
+      /invalid_key|field_settings|""|Too small|key/i
+    );
   });
 });

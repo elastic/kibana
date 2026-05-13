@@ -8,7 +8,7 @@
 import { isBoom, boomify } from '@hapi/boom';
 
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 import {
   LENS_VIS_API_PATH,
@@ -16,7 +16,7 @@ import {
   LENS_API_ACCESS,
   LENS_API_TAG,
 } from '../../../../common/constants';
-import type { LensSearchIn, LensSavedObject } from '../../../content_management';
+import type { LensSearchIn, LensSavedObject } from '../../../content_management/zod';
 import type { RegisterAPIRouteFn } from '../../../types';
 import { lensSearchRequestQuerySchema, lensSearchResponseBodySchema } from './schema';
 import { getLensResponseItem } from './utils';
@@ -101,7 +101,7 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
             throw error;
           }
 
-          return res.ok<TypeOf<typeof lensSearchResponseBodySchema>>({
+          return res.ok<z.output<typeof lensSearchResponseBodySchema>>({
             body: {
               data: hits.map((item) => {
                 return getLensResponseItem(builder, item);

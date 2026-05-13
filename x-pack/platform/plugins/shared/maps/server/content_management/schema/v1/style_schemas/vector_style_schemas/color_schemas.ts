@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import {
   COLOR_MAP_TYPE,
   DATA_MAPPING_FUNCTION,
@@ -14,103 +14,100 @@ import {
 import { fieldMetaOptionsSchema } from './field_meta_options_schema';
 import { styleFieldSchema } from './style_field_schema';
 
-export const categoryColorStop = schema.object({
-  stop: schema.nullable(schema.string()),
-  color: schema.string(),
+export const categoryColorStop = z.object({
+  stop: z.string().nullable(),
+  color: z.string(),
 });
 
-export const ordinalColorStop = schema.object({
-  stop: schema.number(),
-  color: schema.string(),
+export const ordinalColorStop = z.object({
+  stop: z.number(),
+  color: z.string(),
 });
 
-export const colorDynamicOptions = schema.object({
+export const colorDynamicOptions = z.object({
   // ordinal color properties
-  color: schema.maybe(schema.string()),
-  customColorRamp: schema.maybe(schema.arrayOf(ordinalColorStop)),
-  useCustomColorRamp: schema.maybe(schema.boolean()),
-  dataMappingFunction: schema.maybe(
-    schema.oneOf([
-      schema.literal(DATA_MAPPING_FUNCTION.INTERPOLATE),
-      schema.literal(DATA_MAPPING_FUNCTION.PERCENTILES),
+  color: z.string().optional(),
+  customColorRamp: z.array(ordinalColorStop).optional(),
+  useCustomColorRamp: z.boolean().optional(),
+  dataMappingFunction: z
+    .union([
+      z.literal(DATA_MAPPING_FUNCTION.INTERPOLATE),
+      z.literal(DATA_MAPPING_FUNCTION.PERCENTILES),
     ])
-  ),
-  invert: schema.maybe(schema.boolean()),
+    .optional(),
+  invert: z.boolean().optional(),
 
   // category color properties
-  colorCategory: schema.maybe(schema.string()),
-  customColorPalette: schema.maybe(schema.arrayOf(categoryColorStop)),
-  useCustomColorPalette: schema.maybe(schema.boolean()),
-  otherCategoryColor: schema.maybe(schema.string()),
+  colorCategory: z.string().optional(),
+  customColorPalette: z.array(categoryColorStop).optional(),
+  useCustomColorPalette: z.boolean().optional(),
+  otherCategoryColor: z.string().optional(),
 
-  field: schema.maybe(styleFieldSchema),
+  field: styleFieldSchema.optional(),
   fieldMetaOptions: fieldMetaOptionsSchema,
 
-  type: schema.maybe(
-    schema.oneOf([
-      schema.literal(COLOR_MAP_TYPE.CATEGORICAL),
-      schema.literal(COLOR_MAP_TYPE.ORDINAL),
-    ])
-  ),
+  type: z
+    .union([z.literal(COLOR_MAP_TYPE.CATEGORICAL), z.literal(COLOR_MAP_TYPE.ORDINAL)])
+    .optional(),
 });
 
-export const colorStaticOptions = schema.object({
-  color: schema.string(),
+export const colorStaticOptions = z.object({
+  color: z.string(),
 });
 
-export const colorStaticSchema = schema.object({
-  type: schema.literal(STYLE_TYPE.STATIC),
+export const colorStaticSchema = z.object({
+  type: z.literal(STYLE_TYPE.STATIC),
   options: colorStaticOptions,
 });
 
-export const colorDynamicSchema = schema.object({
-  type: schema.literal(STYLE_TYPE.DYNAMIC),
+export const colorDynamicSchema = z.object({
+  type: z.literal(STYLE_TYPE.DYNAMIC),
   options: colorDynamicOptions,
 });
 
-export const colorSchema = schema.oneOf([colorStaticSchema, colorDynamicSchema]);
-export const fillColorSchema = schema.oneOf([colorStaticSchema, colorDynamicSchema], {
-  defaultValue: {
+export const colorSchema = z.union([colorStaticSchema, colorDynamicSchema]);
+export const fillColorSchema = z
+  .union([colorStaticSchema, colorDynamicSchema])
+  .default({
     type: STYLE_TYPE.STATIC,
     options: {
       color: '#16C5C0',
     },
-  },
-  meta: {
+  })
+  .meta({
     description:
       'Configure to set feature filled color. Line features do not have filled area and are not effected by this configuration.',
-  },
-});
-export const lineColorSchema = schema.oneOf([colorStaticSchema, colorDynamicSchema], {
-  defaultValue: {
+  });
+export const lineColorSchema = z
+  .union([colorStaticSchema, colorDynamicSchema])
+  .default({
     type: STYLE_TYPE.STATIC,
     options: {
       color: '#16C5C0',
     },
-  },
-  meta: {
+  })
+  .meta({
     description: 'Configure to set feature border color. Ignored when border size is 0',
-  },
-});
-export const labelColorSchema = schema.oneOf([colorStaticSchema, colorDynamicSchema], {
-  defaultValue: {
+  });
+export const labelColorSchema = z
+  .union([colorStaticSchema, colorDynamicSchema])
+  .default({
     type: STYLE_TYPE.STATIC,
     options: {
       color: '#000000',
     },
-  },
-  meta: {
+  })
+  .meta({
     description: 'Configure to set label text color',
-  },
-});
-export const labelBorderColorSchema = schema.oneOf([colorStaticSchema, colorDynamicSchema], {
-  defaultValue: {
+  });
+export const labelBorderColorSchema = z
+  .union([colorStaticSchema, colorDynamicSchema])
+  .default({
     type: STYLE_TYPE.STATIC,
     options: {
       color: '#FFFFFF',
     },
-  },
-  meta: {
+  })
+  .meta({
     description: 'Configure to set label border color',
-  },
-});
+  });

@@ -15,7 +15,7 @@ describe('Common Schemas', () => {
         value: 'prod',
       };
 
-      const validated = monitorOptionSchema.validate(input);
+      const validated = monitorOptionSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -24,7 +24,7 @@ describe('Common Schemas', () => {
         value: 'prod',
       };
 
-      expect(() => monitorOptionSchema.validate(input)).toThrow(
+      expect(() => monitorOptionSchema.parse(input)).toThrow(
         /\[label\]: expected value of type \[string\]/
       );
     });
@@ -34,7 +34,7 @@ describe('Common Schemas', () => {
         label: 'Production',
       };
 
-      expect(() => monitorOptionSchema.validate(input)).toThrow(
+      expect(() => monitorOptionSchema.parse(input)).toThrow(
         /\[value\]: expected value of type \[string\]/
       );
     });
@@ -45,7 +45,7 @@ describe('Common Schemas', () => {
         value: 'prod',
       };
 
-      expect(() => monitorOptionSchema.validate(input)).toThrow(
+      expect(() => monitorOptionSchema.parse(input)).toThrow(
         /\[label\]: expected value of type \[string\]/
       );
     });
@@ -56,7 +56,7 @@ describe('Common Schemas', () => {
         value: 123,
       };
 
-      expect(() => monitorOptionSchema.validate(input)).toThrow(
+      expect(() => monitorOptionSchema.parse(input)).toThrow(
         /\[value\]: expected value of type \[string\]/
       );
     });
@@ -75,7 +75,7 @@ describe('Common Schemas', () => {
         locations: [{ label: 'US East', value: 'us-east-1' }],
       };
 
-      const validated = monitorFiltersSchema.validate(input);
+      const validated = monitorFiltersSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -84,7 +84,7 @@ describe('Common Schemas', () => {
         projects: [{ label: 'Project 1', value: 'project-1' }],
       };
 
-      const validated = monitorFiltersSchema.validate(input);
+      const validated = monitorFiltersSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -93,7 +93,7 @@ describe('Common Schemas', () => {
         tags: [{ label: 'Tag 1', value: 'tag-1' }],
       };
 
-      const validated = monitorFiltersSchema.validate(input);
+      const validated = monitorFiltersSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -102,7 +102,7 @@ describe('Common Schemas', () => {
         monitor_ids: [{ label: 'Monitor A', value: 'monitor-a' }],
       };
 
-      const validated = monitorFiltersSchema.validate(input);
+      const validated = monitorFiltersSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -111,7 +111,7 @@ describe('Common Schemas', () => {
         monitor_types: [{ label: 'Browser', value: 'browser' }],
       };
 
-      const validated = monitorFiltersSchema.validate(input);
+      const validated = monitorFiltersSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -120,14 +120,14 @@ describe('Common Schemas', () => {
         locations: [{ label: 'EU West', value: 'eu-west-1' }],
       };
 
-      const validated = monitorFiltersSchema.validate(input);
+      const validated = monitorFiltersSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
     it('validates empty filters object', () => {
       const input = {};
 
-      const validated = monitorFiltersSchema.validate(input);
+      const validated = monitorFiltersSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -145,7 +145,7 @@ describe('Common Schemas', () => {
         monitor_ids: [{ label: 'Monitor A', value: 'monitor-a' }],
       };
 
-      const validated = monitorFiltersSchema.validate(input);
+      const validated = monitorFiltersSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -154,7 +154,7 @@ describe('Common Schemas', () => {
         projects: [{ label: 'Project 1' }], // missing 'value'
       };
 
-      expect(() => monitorFiltersSchema.validate(input)).toThrow(
+      expect(() => monitorFiltersSchema.parse(input)).toThrow(
         /\[projects.0.value\]: expected value of type \[string\]/
       );
     });
@@ -164,7 +164,7 @@ describe('Common Schemas', () => {
         tags: [{ value: 'tag-1' }], // missing 'label'
       };
 
-      expect(() => monitorFiltersSchema.validate(input)).toThrow(
+      expect(() => monitorFiltersSchema.parse(input)).toThrow(
         /\[tags.0.label\]: expected value of type \[string\]/
       );
     });
@@ -174,7 +174,7 @@ describe('Common Schemas', () => {
         monitor_ids: [{ label: 123, value: 'monitor-a' }], // invalid label type
       };
 
-      expect(() => monitorFiltersSchema.validate(input)).toThrow(
+      expect(() => monitorFiltersSchema.parse(input)).toThrow(
         /\[monitor_ids.0.label\]: expected value of type \[string\]/
       );
     });
@@ -184,7 +184,7 @@ describe('Common Schemas', () => {
         monitor_types: [{ label: 'HTTP', value: 123 }], // invalid value type
       };
 
-      expect(() => monitorFiltersSchema.validate(input)).toThrow(
+      expect(() => monitorFiltersSchema.parse(input)).toThrow(
         /\[monitor_types.0.value\]: expected value of type \[string\]/
       );
     });
@@ -194,7 +194,7 @@ describe('Common Schemas', () => {
         locations: ['invalid'], // should be array of objects, not strings
       };
 
-      expect(() => monitorFiltersSchema.validate(input)).toThrow();
+      expect(() => monitorFiltersSchema.parse(input)).toThrow();
     });
 
     it('throws on non-array projects value', () => {
@@ -202,7 +202,7 @@ describe('Common Schemas', () => {
         projects: { label: 'Project 1', value: 'project-1' }, // should be array
       };
 
-      expect(() => monitorFiltersSchema.validate(input)).toThrow(
+      expect(() => monitorFiltersSchema.parse(input)).toThrow(
         /\[projects\]: expected value of type \[array\]/
       );
     });
@@ -216,7 +216,7 @@ describe('Common Schemas', () => {
         locations: [],
       };
 
-      const validated = monitorFiltersSchema.validate(input);
+      const validated = monitorFiltersSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -227,7 +227,7 @@ describe('Common Schemas', () => {
         // tags, monitor_ids, and monitor_types are intentionally omitted
       };
 
-      const validated = monitorFiltersSchema.validate(input);
+      const validated = monitorFiltersSchema.parse(input);
       expect(validated).toEqual(input);
     });
   });

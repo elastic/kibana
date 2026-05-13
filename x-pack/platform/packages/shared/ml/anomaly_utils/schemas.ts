@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { ML_ENTITY_FIELD_OPERATIONS, ML_ENTITY_FIELD_TYPE } from './anomaly_utils';
 
-const mlEntityFieldTypeSchema = schema.oneOf([
-  schema.literal(ML_ENTITY_FIELD_TYPE.BY),
-  schema.literal(ML_ENTITY_FIELD_TYPE.OVER),
-  schema.literal(ML_ENTITY_FIELD_TYPE.PARTITION),
+const mlEntityFieldTypeSchema = z.union([
+  z.literal(ML_ENTITY_FIELD_TYPE.BY),
+  z.literal(ML_ENTITY_FIELD_TYPE.OVER),
+  z.literal(ML_ENTITY_FIELD_TYPE.PARTITION),
 ]);
 
-const mlEntityFieldOperationSchema = schema.oneOf([
-  schema.literal(ML_ENTITY_FIELD_OPERATIONS.ADD),
-  schema.literal(ML_ENTITY_FIELD_OPERATIONS.REMOVE),
+const mlEntityFieldOperationSchema = z.union([
+  z.literal(ML_ENTITY_FIELD_OPERATIONS.ADD),
+  z.literal(ML_ENTITY_FIELD_OPERATIONS.REMOVE),
 ]);
 
-export const influencerSchema = schema.object({
-  fieldName: schema.string(),
-  fieldValue: schema.any(),
+export const influencerSchema = z.object({
+  fieldName: z.string(),
+  fieldValue: z.any().optional(),
 });
 
-export const criteriaFieldSchema = schema.object({
-  fieldName: schema.string(),
-  fieldValue: schema.any(),
-  fieldType: schema.maybe(mlEntityFieldTypeSchema),
+export const criteriaFieldSchema = z.object({
+  fieldName: z.string(),
+  fieldValue: z.any().optional(),
+  fieldType: mlEntityFieldTypeSchema.optional(),
 });
 
-export const mlEntityFieldValueSchema = schema.oneOf([schema.string(), schema.number()]);
+export const mlEntityFieldValueSchema = z.union([z.string(), z.number()]);
 
-export const mlEntityFieldSchema = schema.object({
-  fieldName: schema.string(),
-  fieldValue: schema.maybe(mlEntityFieldValueSchema),
-  fieldType: schema.maybe(mlEntityFieldTypeSchema),
-  operation: schema.maybe(mlEntityFieldOperationSchema),
-  cardinality: schema.maybe(schema.number()),
+export const mlEntityFieldSchema = z.object({
+  fieldName: z.string(),
+  fieldValue: mlEntityFieldValueSchema.optional(),
+  fieldType: mlEntityFieldTypeSchema.optional(),
+  operation: mlEntityFieldOperationSchema.optional(),
+  cardinality: z.number().optional(),
 });

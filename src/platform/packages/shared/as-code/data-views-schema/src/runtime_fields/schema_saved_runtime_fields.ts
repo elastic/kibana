@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import {
   MAX_NAME_LENGTH,
   primitiveTypeSchema,
@@ -16,35 +16,28 @@ import {
 } from './common';
 import { fieldSettingsWithPopularitySchema } from '../schema_field_settings';
 
-export const savedRuntimeFieldBaseSchema = fieldSettingsWithPopularitySchema.extends({
+export const savedRuntimeFieldBaseSchema = fieldSettingsWithPopularitySchema.extend({
   type: primitiveTypeSchema,
 });
 
-export const savedPrimitiveRuntimeFieldSchema = savedRuntimeFieldBaseSchema.extends(
-  {
+export const savedPrimitiveRuntimeFieldSchema = savedRuntimeFieldBaseSchema
+  .extend({
     script: scriptSchema,
-  },
-  { meta: { id: 'kbn-saved-runtime-field-schema', title: 'Saved runtime field' } }
-);
+  })
+  .meta({ id: 'kbn-saved-runtime-field-schema', title: 'Saved runtime field' });
 
-export const savedCompositeRuntimeFieldSchema = schema.object(
-  {
-    type: schema.literal(RUNTIME_FIELD_COMPOSITE_TYPE),
-    fields: schema.recordOf(
-      schema.string({ minLength: 1, maxLength: MAX_NAME_LENGTH }),
-      savedRuntimeFieldBaseSchema
-    ),
+export const savedCompositeRuntimeFieldSchema = z
+  .object({
+    type: z.literal(RUNTIME_FIELD_COMPOSITE_TYPE),
+    fields: z.record(z.string().min(1).max(MAX_NAME_LENGTH), savedRuntimeFieldBaseSchema),
     script: scriptSchema,
-  },
-  {
-    meta: {
-      id: 'kbn-saved-composite-runtime-field-schema',
-      title: 'Saved composite runtime field',
-    },
-  }
-);
+  })
+  .meta({
+    id: 'kbn-saved-composite-runtime-field-schema',
+    title: 'Saved composite runtime field',
+  });
 
-export const savedRuntimeFieldSchema = schema.discriminatedUnion('type', [
+export const savedRuntimeFieldSchema = z.discriminatedUnion('type', [
   savedPrimitiveRuntimeFieldSchema,
   savedCompositeRuntimeFieldSchema,
 ]);

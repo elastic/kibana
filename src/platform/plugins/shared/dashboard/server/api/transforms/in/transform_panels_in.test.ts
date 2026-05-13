@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { transformPanelsIn } from './transform_panels_in';
 
 jest.mock('uuid', () => ({
@@ -104,10 +104,8 @@ describe('transformPanelsIn', () => {
 
   describe('validation', () => {
     const TEST_EMBEDDABLE_TYPE = 'test';
-    const TestEmbeddableSchema = schema.object({
-      lessThan10: schema.number({
-        max: 10,
-      }),
+    const TestEmbeddableSchema = z.object({
+      lessThan10: z.number().max(10),
     });
 
     beforeAll(() => {

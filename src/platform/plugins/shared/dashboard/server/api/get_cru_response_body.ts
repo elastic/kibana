@@ -50,7 +50,7 @@ export function getDashboardCRUResponseBody(
 
     // Route does not apply defaults to response
     // Instead, call validate to ensure defaults are applied to response
-    sanatizedDashboardState = dashboardStateSchema.validate(dashboardState);
+    sanatizedDashboardState = dashboardStateSchema.parse(dashboardState);
   } catch (transformOutError) {
     throw Boom.badRequest(`Invalid response. ${transformOutError.message}`);
   } finally {

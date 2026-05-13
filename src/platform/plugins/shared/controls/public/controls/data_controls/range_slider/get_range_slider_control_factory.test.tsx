@@ -255,7 +255,7 @@ describe('RangeSliderControlApi', () => {
 
   describe('unsaved changes', () => {
     test('should have unsaved changes when there are changes', async () => {
-      const lastSavedState = rangeSliderControlSchema.validate({
+      const lastSavedState = rangeSliderControlSchema.parse({
         data_view_id: 'oldDataViewId',
         field_name: 'myFieldName',
       });
@@ -278,7 +278,7 @@ describe('RangeSliderControlApi', () => {
     });
 
     test('should not have unsaved changes when there are no changes', async () => {
-      const initialState = rangeSliderControlSchema.validate({
+      const initialState = rangeSliderControlSchema.parse({
         data_view_id: 'myDataViewId',
         field_name: 'myFieldName',
       });

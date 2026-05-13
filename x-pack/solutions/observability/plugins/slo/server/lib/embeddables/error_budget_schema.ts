@@ -6,40 +6,35 @@
  */
 
 import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { SLO_ERROR_BUDGET_SUPPORTED_TRIGGERS } from '../../../common/embeddables/error_budget/constants';
 
-const ErrorBudgetCustomSchema = schema.object({
-  slo_id: schema.string({
-    meta: { description: 'The ID of the SLO to display the error budget for' },
+const ErrorBudgetCustomSchema = z.object({
+  slo_id: z.string().meta({
+    description: 'The ID of the SLO to display the error budget for',
   }),
-  slo_instance_id: schema.string({
-    defaultValue: ALL_VALUE,
-    meta: {
-      description:
-        'ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. Defaults to * (all instances).',
-    },
+  slo_instance_id: z.string().default(ALL_VALUE).meta({
+    description:
+      'ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. Defaults to * (all instances).',
   }),
 });
 
 export const getErrorBudgetEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
-  return schema.object(
-    {
-      ...ErrorBudgetCustomSchema.getPropSchemas(),
-      ...getDrilldownsSchema(SLO_ERROR_BUDGET_SUPPORTED_TRIGGERS).getPropSchemas(),
-      ...serializedTitlesSchema.getPropSchemas(),
-    },
-    {
-      meta: {
-        id: 'slo-error-budget-embeddable',
-        description: 'SLO Error Budget embeddable schema',
-      },
-    }
-  );
+  return z
+    .object({
+      ...ErrorBudgetCustomSchema.shape,
+      ...getDrilldownsSchema(SLO_ERROR_BUDGET_SUPPORTED_TRIGGERS).shape,
+      ...serializedTitlesSchema.shape,
+    })
+    .meta({
+      id: 'slo-error-budget-embeddable',
+      description: 'SLO Error Budget embeddable schema',
+    });
 };
 
-export type ErrorBudgetCustomState = TypeOf<typeof ErrorBudgetCustomSchema>;
-export type ErrorBudgetEmbeddableState = TypeOf<ReturnType<typeof getErrorBudgetEmbeddableSchema>>;
+export type ErrorBudgetCustomState = z.output<typeof ErrorBudgetCustomSchema>;
+export type ErrorBudgetEmbeddableState = z.output<
+  ReturnType<typeof getErrorBudgetEmbeddableSchema>
+>;

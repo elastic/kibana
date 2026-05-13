@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import type { TypeOf } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { storedFilterSchema, querySchema } from '@kbn/es-query-server';
 import {
@@ -14,118 +13,115 @@ import {
   serializedTitlesSchema,
 } from '@kbn/presentation-publishing-schemas';
 
-export const swimlaneTypeSchema = schema.oneOf([
-  schema.literal('overall'),
-  schema.literal('viewBy'),
-]);
+export const swimlaneTypeSchema = z.union([z.literal('overall'), z.literal('viewBy')]);
 
-export type SwimlaneType = TypeOf<typeof swimlaneTypeSchema>;
+export type SwimlaneType = z.output<typeof swimlaneTypeSchema>;
 
-const commonUserInputProps = schema.object({
-  jobIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
+const commonUserInputProps = z.object({
+  jobIds: z.array(z.string()).max(10000),
 });
 
-const anomalySwimlaneOverallSchema = schema.object({
-  swimlaneType: schema.literal('overall'),
-  ...commonUserInputProps.getPropSchemas(),
+const anomalySwimlaneOverallSchema = z.object({
+  swimlaneType: z.literal('overall'),
+  ...commonUserInputProps.shape,
 });
 
-const anomalySwimlaneViewBySchema = schema.object({
-  swimlaneType: schema.literal('viewBy'),
-  viewBy: schema.string(),
-  ...commonUserInputProps.getPropSchemas(),
+const anomalySwimlaneViewBySchema = z.object({
+  swimlaneType: z.literal('viewBy'),
+  viewBy: z.string(),
+  ...commonUserInputProps.shape,
 });
 
-const anomalySwimlaneEmbeddableCustomInputCommonSchema = schema.object({
-  ...serializedTimeRangeSchema.getPropSchemas(),
-  id: schema.maybe(schema.string()),
-  perPage: schema.maybe(schema.number()),
-  filters: schema.maybe(schema.arrayOf(storedFilterSchema, { maxSize: 10000 })),
-  query: schema.maybe(querySchema),
-  refreshConfig: schema.maybe(refreshIntervalSchema),
+const anomalySwimlaneEmbeddableCustomInputCommonSchema = z.object({
+  ...serializedTimeRangeSchema.shape,
+  id: z.string().optional(),
+  perPage: z.number().optional(),
+  filters: z.array(storedFilterSchema).max(10000).optional(),
+  query: querySchema.optional(),
+  refreshConfig: refreshIntervalSchema.optional(),
 });
 
-export const anomalySwimlaneEmbeddableCustomInputViewBySchema = schema.object({
-  ...anomalySwimlaneViewBySchema.getPropSchemas(),
-  ...anomalySwimlaneEmbeddableCustomInputCommonSchema.getPropSchemas(),
+export const anomalySwimlaneEmbeddableCustomInputViewBySchema = z.object({
+  ...anomalySwimlaneViewBySchema.shape,
+  ...anomalySwimlaneEmbeddableCustomInputCommonSchema.shape,
 });
 
-export type AnomalySwimlaneEmbeddableCustomInputViewBy = TypeOf<
+export type AnomalySwimlaneEmbeddableCustomInputViewBy = z.output<
   typeof anomalySwimlaneEmbeddableCustomInputViewBySchema
 >;
 
-export const anomalySwimlaneEmbeddableCustomInputOverallSchema = schema.object({
-  ...anomalySwimlaneOverallSchema.getPropSchemas(),
-  ...anomalySwimlaneEmbeddableCustomInputCommonSchema.getPropSchemas(),
+export const anomalySwimlaneEmbeddableCustomInputOverallSchema = z.object({
+  ...anomalySwimlaneOverallSchema.shape,
+  ...anomalySwimlaneEmbeddableCustomInputCommonSchema.shape,
 });
 
-export type AnomalySwimlaneEmbeddableCustomInputOverall = TypeOf<
+export type AnomalySwimlaneEmbeddableCustomInputOverall = z.output<
   typeof anomalySwimlaneEmbeddableCustomInputOverallSchema
 >;
 
-export const anomalySwimlaneEmbeddableCustomInputSchema = schema.oneOf([
+export const anomalySwimlaneEmbeddableCustomInputSchema = z.union([
   anomalySwimlaneEmbeddableCustomInputViewBySchema,
   anomalySwimlaneEmbeddableCustomInputOverallSchema,
 ]);
 
-export type AnomalySwimlaneEmbeddableCustomInput = TypeOf<
+export type AnomalySwimlaneEmbeddableCustomInput = z.output<
   typeof anomalySwimlaneEmbeddableCustomInputSchema
 >;
 
-export const anomalySwimlaneEmbeddableUserInputSchema = schema.object({
-  jobIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
+export const anomalySwimlaneEmbeddableUserInputSchema = z.object({
+  jobIds: z.array(z.string()).max(10000),
   swimlaneType: swimlaneTypeSchema,
-  viewBy: schema.maybe(schema.string()),
-  panelTitle: schema.maybe(schema.string()),
+  viewBy: z.string().optional(),
+  panelTitle: z.string().optional(),
 });
 
-export type AnomalySwimlaneEmbeddableUserInput = TypeOf<
+export type AnomalySwimlaneEmbeddableUserInput = z.output<
   typeof anomalySwimlaneEmbeddableUserInputSchema
 >;
 
-export const anomalySwimlanePropsSchema = schema.object({
-  ...anomalySwimlaneEmbeddableCustomInputCommonSchema.getPropSchemas(),
-  ...anomalySwimlaneEmbeddableUserInputSchema.getPropSchemas(),
+export const anomalySwimlanePropsSchema = z.object({
+  ...anomalySwimlaneEmbeddableCustomInputCommonSchema.shape,
+  ...anomalySwimlaneEmbeddableUserInputSchema.shape,
 });
 
-export type AnomalySwimlaneProps = TypeOf<typeof anomalySwimlanePropsSchema>;
+export type AnomalySwimlaneProps = z.output<typeof anomalySwimlanePropsSchema>;
 
-export const anomalySwimlaneInitialInputSchema = schema.object({
-  jobIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
-  swimlaneType: schema.maybe(swimlaneTypeSchema),
-  viewBy: schema.maybe(schema.string()),
-  title: schema.maybe(schema.string()),
-  perPage: schema.maybe(schema.number()),
+export const anomalySwimlaneInitialInputSchema = z.object({
+  jobIds: z.array(z.string()).max(10000).optional(),
+  swimlaneType: swimlaneTypeSchema.optional(),
+  viewBy: z.string().optional(),
+  title: z.string().optional(),
+  perPage: z.number().optional(),
 });
 
-export type AnomalySwimlaneInitialInput = TypeOf<typeof anomalySwimlaneInitialInputSchema>;
+export type AnomalySwimlaneInitialInput = z.output<typeof anomalySwimlaneInitialInputSchema>;
 
-export const anomalySwimLaneControlsStateSchema = schema.object({
-  jobIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
+export const anomalySwimLaneControlsStateSchema = z.object({
+  jobIds: z.array(z.string()).max(10000),
   swimlaneType: swimlaneTypeSchema,
-  viewBy: schema.maybe(schema.string()),
-  perPage: schema.maybe(schema.number()),
+  viewBy: z.string().optional(),
+  perPage: z.number().optional(),
 });
 
-export type AnomalySwimLaneControlsState = TypeOf<typeof anomalySwimLaneControlsStateSchema>;
+export type AnomalySwimLaneControlsState = z.output<typeof anomalySwimLaneControlsStateSchema>;
 
-export const anomalySwimlaneEmbeddableStateViewBySchema = schema.object({
-  ...serializedTitlesSchema.getPropSchemas(),
-  ...anomalySwimlaneEmbeddableCustomInputViewBySchema.getPropSchemas(),
+export const anomalySwimlaneEmbeddableStateViewBySchema = z.object({
+  ...serializedTitlesSchema.shape,
+  ...anomalySwimlaneEmbeddableCustomInputViewBySchema.shape,
 });
 
-export type AnomalySwimlaneEmbeddableStateViewBy = TypeOf<
+export type AnomalySwimlaneEmbeddableStateViewBy = z.output<
   typeof anomalySwimlaneEmbeddableStateViewBySchema
 >;
 
-const anomalySwimlaneEmbeddableStateOverallSchema = schema.object({
-  ...serializedTitlesSchema.getPropSchemas(),
-  ...anomalySwimlaneEmbeddableCustomInputOverallSchema.getPropSchemas(),
+const anomalySwimlaneEmbeddableStateOverallSchema = z.object({
+  ...serializedTitlesSchema.shape,
+  ...anomalySwimlaneEmbeddableCustomInputOverallSchema.shape,
 });
 
-export const anomalySwimLaneEmbeddableStateSchema = schema.oneOf([
+export const anomalySwimLaneEmbeddableStateSchema = z.union([
   anomalySwimlaneEmbeddableStateViewBySchema,
   anomalySwimlaneEmbeddableStateOverallSchema,
 ]);
 
-export type AnomalySwimLaneEmbeddableState = TypeOf<typeof anomalySwimLaneEmbeddableStateSchema>;
+export type AnomalySwimLaneEmbeddableState = z.output<typeof anomalySwimLaneEmbeddableStateSchema>;

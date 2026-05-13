@@ -42,7 +42,7 @@ describe('Mosaic Schema', () => {
         ],
       };
 
-      const validated = mosaicConfigSchema.validate(input);
+      const validated = mosaicConfigSchema.parse(input);
       expect(validated.type).toBe('mosaic');
       expect(validated.metric).toHaveProperty('operation', 'count');
       expect(validated.group_by).toHaveLength(1);
@@ -57,7 +57,7 @@ describe('Mosaic Schema', () => {
         },
       };
 
-      expect(() => mosaicConfigSchema.validate(input)).toThrow();
+      expect(() => mosaicConfigSchema.parse(input)).toThrow();
     });
 
     it('validates configuration with both outer and inner grouping', () => {
@@ -86,7 +86,7 @@ describe('Mosaic Schema', () => {
         ],
       };
 
-      const validated = mosaicConfigSchema.validate(input);
+      const validated = mosaicConfigSchema.parse(input);
       expect(validated.metric).toHaveProperty('operation', 'sum');
       expect(validated.group_by).toHaveLength(1);
       expect(validated.group_breakdown_by).toHaveLength(1);
@@ -124,7 +124,7 @@ describe('Mosaic Schema', () => {
         ],
       };
 
-      const validated = mosaicConfigSchema.validate(input);
+      const validated = mosaicConfigSchema.parse(input);
       expect(validated.group_by).toHaveLength(2);
       expect(validated.group_breakdown_by).toHaveLength(1);
     });
@@ -166,7 +166,7 @@ describe('Mosaic Schema', () => {
         },
       };
 
-      const validated = mosaicConfigSchema.validate(input);
+      const validated = mosaicConfigSchema.parse(input);
       expect(validated.title).toBe('Sales Mosaic');
       expect(validated.legend?.nested).toBe(true);
       expect(validated.styling?.values?.visible).toBe(false);
@@ -182,7 +182,7 @@ describe('Mosaic Schema', () => {
         group_by: [],
       };
 
-      expect(() => mosaicConfigSchema.validate(input)).toThrow();
+      expect(() => mosaicConfigSchema.parse(input)).toThrow();
     });
 
     it('throws on empty group_breakdown_by array', () => {
@@ -202,7 +202,7 @@ describe('Mosaic Schema', () => {
         group_breakdown_by: [],
       };
 
-      expect(() => mosaicConfigSchema.validate(input)).toThrow();
+      expect(() => mosaicConfigSchema.parse(input)).toThrow();
     });
 
     describe('Grouping Cardinality Validation', () => {
@@ -222,7 +222,7 @@ describe('Mosaic Schema', () => {
           ],
         };
 
-        expect(() => mosaicConfigSchema.validate(input)).not.toThrow();
+        expect(() => mosaicConfigSchema.parse(input)).not.toThrow();
       });
 
       it('allows multiple collapsed dimensions in group_by', () => {
@@ -253,7 +253,7 @@ describe('Mosaic Schema', () => {
           ],
         };
 
-        expect(() => mosaicConfigSchema.validate(input)).not.toThrow();
+        expect(() => mosaicConfigSchema.parse(input)).not.toThrow();
       });
 
       it('throws when group_by has multiple non-collapsed dimensions', () => {
@@ -277,7 +277,7 @@ describe('Mosaic Schema', () => {
           ],
         };
 
-        expect(() => mosaicConfigSchema.validate(input)).toThrow(
+        expect(() => mosaicConfigSchema.parse(input)).toThrow(
           /only a single non-collapsed dimension is allowed/i
         );
       });
@@ -309,7 +309,7 @@ describe('Mosaic Schema', () => {
           ],
         };
 
-        expect(() => mosaicConfigSchema.validate(input)).toThrow(
+        expect(() => mosaicConfigSchema.parse(input)).toThrow(
           /only a single non-collapsed dimension is allowed/i
         );
       });
@@ -339,7 +339,7 @@ describe('Mosaic Schema', () => {
           ],
         };
 
-        expect(() => mosaicConfigSchema.validate(input)).not.toThrow();
+        expect(() => mosaicConfigSchema.parse(input)).not.toThrow();
       });
 
       it('allows multiple collapsed dimensions in group_breakdown_by', () => {
@@ -380,7 +380,7 @@ describe('Mosaic Schema', () => {
           ],
         };
 
-        expect(() => mosaicConfigSchema.validate(input)).not.toThrow();
+        expect(() => mosaicConfigSchema.parse(input)).not.toThrow();
       });
 
       it('throws when group_breakdown_by has multiple non-collapsed dimensions', () => {
@@ -414,7 +414,7 @@ describe('Mosaic Schema', () => {
           ],
         };
 
-        expect(() => mosaicConfigSchema.validate(input)).toThrow(
+        expect(() => mosaicConfigSchema.parse(input)).toThrow(
           /only a single non-collapsed dimension is allowed/i
         );
       });
@@ -456,7 +456,7 @@ describe('Mosaic Schema', () => {
           ],
         };
 
-        expect(() => mosaicConfigSchema.validate(input)).toThrow(
+        expect(() => mosaicConfigSchema.parse(input)).toThrow(
           /only a single non-collapsed dimension is allowed/i
         );
       });
@@ -470,7 +470,7 @@ describe('Mosaic Schema', () => {
           },
         };
 
-        expect(() => mosaicConfigSchema.validate(input)).toThrow(
+        expect(() => mosaicConfigSchema.parse(input)).toThrow(
           /Either a group_by or a group_breakdown_by dimension must be specified/i
         );
       });
@@ -506,7 +506,7 @@ describe('Mosaic Schema', () => {
           ],
         };
 
-        expect(() => mosaicConfigSchema.validate(input)).not.toThrow();
+        expect(() => mosaicConfigSchema.parse(input)).not.toThrow();
       });
 
       it('allows valid combination with both outer and inner having multiple collapsed dimensions', () => {
@@ -560,7 +560,7 @@ describe('Mosaic Schema', () => {
           ],
         };
 
-        expect(() => mosaicConfigSchema.validate(input)).not.toThrow();
+        expect(() => mosaicConfigSchema.parse(input)).not.toThrow();
       });
     });
   });
@@ -587,7 +587,7 @@ describe('Mosaic Schema', () => {
         },
       };
 
-      expect(() => mosaicConfigSchema.validate(input)).toThrow(
+      expect(() => mosaicConfigSchema.parse(input)).toThrow(
         /Either a group_by or a group_breakdown_by dimension must be specified/i
       );
     });
@@ -613,7 +613,7 @@ describe('Mosaic Schema', () => {
         ],
       };
 
-      expect(() => mosaicConfigSchema.validate(input)).not.toThrow();
+      expect(() => mosaicConfigSchema.parse(input)).not.toThrow();
     });
   });
 });

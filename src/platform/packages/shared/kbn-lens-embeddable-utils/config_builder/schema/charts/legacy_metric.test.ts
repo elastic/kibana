@@ -39,7 +39,7 @@ describe('Legacy Metric Schema', () => {
         },
       } satisfies LegacyMetricInput;
 
-      const validated = legacyMetricConfigSchema.validate(input);
+      const validated = legacyMetricConfigSchema.parse(input);
       expect(validated.metric.size).toBeUndefined();
       expect(validated.metric.labels).toBeUndefined();
       expect(validated.metric.values).toBeUndefined();
@@ -64,8 +64,8 @@ describe('Legacy Metric Schema', () => {
         },
       } satisfies LegacyMetricInput;
 
-      const validated = legacyMetricConfigSchema.validate(input);
-      expect(validated).toEqual({ ...defaultValues, ...input });
+      const validated = legacyMetricConfigSchema.parse(input);
+      expect(validated).toMatchObject({ ...defaultValues, ...input });
     });
 
     it('validates metric with color configuration', () => {
@@ -89,8 +89,8 @@ describe('Legacy Metric Schema', () => {
         },
       } satisfies LegacyMetricInput;
 
-      const validated = legacyMetricConfigSchema.validate(input);
-      expect(validated).toEqual({ ...defaultValues, ...input });
+      const validated = legacyMetricConfigSchema.parse(input);
+      expect(validated).toMatchObject({ ...defaultValues, ...input });
     });
   });
 
@@ -104,7 +104,7 @@ describe('Legacy Metric Schema', () => {
         },
       } satisfies LegacyMetricInput;
 
-      expect(() => legacyMetricConfigSchema.validate(input)).toThrow();
+      expect(() => legacyMetricConfigSchema.parse(input)).toThrow();
     });
 
     it('throws on invalid alignment value', () => {
@@ -120,7 +120,7 @@ describe('Legacy Metric Schema', () => {
         },
       } satisfies LegacyMetricInput;
 
-      expect(() => legacyMetricConfigSchema.validate(input)).toThrow();
+      expect(() => legacyMetricConfigSchema.parse(input)).toThrow();
     });
 
     it('throws on invalid size value', () => {
@@ -133,7 +133,7 @@ describe('Legacy Metric Schema', () => {
         },
       };
 
-      expect(() => legacyMetricConfigSchema.validate(input)).toThrow();
+      expect(() => legacyMetricConfigSchema.parse(input)).toThrow();
     });
 
     it('throws on invalid apply_color_to value', () => {
@@ -155,7 +155,7 @@ describe('Legacy Metric Schema', () => {
         },
       } satisfies LegacyMetricInput;
 
-      expect(() => legacyMetricConfigSchema.validate(input)).toThrow();
+      expect(() => legacyMetricConfigSchema.parse(input)).toThrow();
     });
 
     it('throws when color by value is not absolute', () => {
@@ -177,7 +177,7 @@ describe('Legacy Metric Schema', () => {
         },
       } satisfies LegacyMetricInput;
 
-      expect(() => legacyMetricConfigSchema.validate(input)).toThrow();
+      expect(() => legacyMetricConfigSchema.parse(input)).toThrow();
     });
   });
 
@@ -208,7 +208,7 @@ describe('Legacy Metric Schema', () => {
         },
       } satisfies LegacyMetricInput;
 
-      const validated = legacyMetricConfigSchema.validate(input);
+      const validated = legacyMetricConfigSchema.parse(input);
       expect(validated).toEqual({
         ...defaultValues,
         ...input,
@@ -230,7 +230,7 @@ describe('Legacy Metric Schema', () => {
         },
       } satisfies Omit<LegacyMetricConfigESQL, keyof typeof defaultValues>;
 
-      expect(() => legacyMetricConfigSchema.validate(input)).toThrow();
+      expect(() => legacyMetricConfigSchema.parse(input)).toThrow();
     });
   });
 });

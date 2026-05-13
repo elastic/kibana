@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import {
   DISCOVER_DRILLDOWN_SUPPORTED_TRIGGERS,
   DISCOVER_DRILLDOWN_TYPE,
 } from '../../common/constants';
 
-export const discoverDrilldownSchema = schema.object({
-  open_in_new_tab: schema.boolean({
-    defaultValue: true,
-  }),
+export const discoverDrilldownSchema = z.object({
+  open_in_new_tab: z.boolean().default(true),
 });
 
 export function registerDiscoverDrilldown(embeddableSetup: EmbeddableSetup) {

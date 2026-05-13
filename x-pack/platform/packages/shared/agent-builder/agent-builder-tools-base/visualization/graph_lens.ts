@@ -36,7 +36,7 @@ const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
 const validateConfigForChartType = (
   chartType: SupportedChartType,
   config: unknown
-): VisualizationConfig => chartTypeRegistry[chartType].schema.validate(config);
+): VisualizationConfig => chartTypeRegistry[chartType].schema.parse(config);
 
 /**
  * Helper to extract ESQL queries from a visualization config.

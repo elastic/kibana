@@ -5,30 +5,33 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
 import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
+import { z } from '@kbn/zod';
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
 } from '@kbn/presentation-publishing-schemas';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
-export const serviceMapCustomStateSchema = schema.object({
-  environment: schema.string({ defaultValue: ENVIRONMENT_ALL.value }),
-  kuery: schema.maybe(schema.string()),
-  service_name: schema.maybe(schema.string()),
-  service_group_id: schema.maybe(schema.string()),
+export const serviceMapCustomStateSchema = z.object({
+  environment: z.string().default(ENVIRONMENT_ALL.value),
+  kuery: z.string().optional(),
+  service_name: z.string().optional(),
+  service_group_id: z.string().optional(),
 });
 
-export type ServiceMapCustomState = TypeOf<typeof serviceMapCustomStateSchema>;
+export type ServiceMapCustomState = z.output<typeof serviceMapCustomStateSchema>;
 
 export const getServiceMapEmbeddableSchema = (_getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
-  schema.allOf([serializedTitlesSchema, serializedTimeRangeSchema, serviceMapCustomStateSchema], {
-    meta: {
+  z
+    .object({
+      ...serializedTitlesSchema.shape,
+      ...serializedTimeRangeSchema.shape,
+      ...serviceMapCustomStateSchema.shape,
+    })
+    .meta({
       id: 'apm-service-map-embeddable',
       description: 'APM service map embeddable schema',
-    },
-  });
+    });
 
-export type ServiceMapEmbeddableState = TypeOf<ReturnType<typeof getServiceMapEmbeddableSchema>>;
+export type ServiceMapEmbeddableState = z.output<ReturnType<typeof getServiceMapEmbeddableSchema>>;

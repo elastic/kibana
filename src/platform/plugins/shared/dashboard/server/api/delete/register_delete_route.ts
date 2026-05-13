@@ -9,7 +9,7 @@
 
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { getRouteConfig } from '../get_route_config';
@@ -32,11 +32,9 @@ export function registerDeleteRoute(
       version: routeVersion,
       validate: {
         request: {
-          params: schema.object({
-            id: schema.string({
-              meta: {
-                description: 'The dashboard ID, as returned by the create or search endpoints.',
-              },
+          params: z.object({
+            id: z.string().meta({
+              description: 'The dashboard ID, as returned by the create or search endpoints.',
             }),
           }),
         },

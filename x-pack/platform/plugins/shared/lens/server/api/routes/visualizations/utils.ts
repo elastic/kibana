@@ -9,7 +9,7 @@ import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
 import { isLensDSLConfig, type LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import { getMeta, type AsCodeMeta } from '@kbn/as-code-shared-schemas';
 
-import type { LensSavedObject, LensUpdateIn } from '../../../content_management';
+import type { LensSavedObject, LensUpdateIn } from '../../../content_management/zod';
 import type { LensCreateRequestBody, LensResponseItem, LensUpdateRequestBody } from './types';
 
 /**

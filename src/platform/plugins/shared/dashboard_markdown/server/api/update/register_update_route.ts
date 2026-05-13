@@ -9,7 +9,7 @@
 
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import { INTERNAL_API_VERSION, commonRouteConfig } from '../constants';
 import { updateRequestBodySchema, updateResponseBodySchema } from './schemas';
@@ -28,7 +28,7 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
       version: INTERNAL_API_VERSION,
       validate: {
         request: {
-          params: schema.object({
+          params: z.object({
             id: asCodeIdSchema,
           }),
           body: updateRequestBodySchema,

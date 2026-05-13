@@ -34,7 +34,7 @@ export async function sanitize(
     transformedApiDashboardState as Partial<DashboardState>
   );
   warnings.push(...dashboardStateWarnings, ...scopeWarnings);
-  const sanitizedDashboardState = dashboardStateSchema.validate(scopedDashboardState);
+  const sanitizedDashboardState = dashboardStateSchema.parse(scopedDashboardState);
   // access_control is separate from the transforms and stripping logic since it is not part of the
   // dashboard saved object attributes but it should be preserved in the sanitized output if present
   // in the incoming dashboard state

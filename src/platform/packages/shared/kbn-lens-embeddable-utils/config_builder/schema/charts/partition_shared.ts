@@ -7,50 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type { AutoColorType, ColorMappingType, StaticColorType } from '../color';
 import { groupIsNotCollapsed } from '../../utils';
 
-export const valueDisplaySchema = schema.maybe(
-  schema.object(
-    {
-      visible: schema.maybe(
-        schema.boolean({
-          meta: { description: 'Show metric values on the chart' },
-        })
-      ),
-      mode: schema.maybe(
-        schema.oneOf([schema.literal('absolute'), schema.literal('percentage')], {
-          meta: {
-            description: 'How to format values when visible.',
-          },
-        })
-      ),
-      percent_decimals: schema.maybe(
-        schema.number({
-          defaultValue: 2,
-          min: 0,
-          max: 10,
-          meta: { description: 'Decimal places for percentage display (0-10)' },
-        })
-      ),
-    },
-    {
-      meta: {
-        id: 'valueDisplay',
-        description:
-          'Configure the visibility and the format of the values rendered on each chart partition section',
-      },
-    }
-  )
-);
-
-export const legendNestedSchema = schema.maybe(
-  schema.boolean({
-    defaultValue: false,
-    meta: { description: 'Show nested legend with hierarchical breakdown levels' },
+export const valueDisplaySchema = z
+  .object({
+    visible: z.boolean().optional().meta({ description: 'Show metric values on the chart' }),
+    mode: z
+      .union([z.literal('absolute'), z.literal('percentage')])
+      .optional()
+      .meta({
+        description: 'How to format values when visible.',
+      }),
+    percent_decimals: z
+      .number()
+      .min(0)
+      .max(10)
+      .default(2)
+      .optional()
+      .meta({ description: 'Decimal places for percentage display (0-10)' }),
   })
-);
+  .meta({
+    id: 'valueDisplay',
+    description:
+      'Configure the visibility and the format of the values rendered on each chart partition section',
+  })
+  .optional();
+
+export const legendNestedSchema = z
+  .boolean()
+  .default(false)
+  .optional()
+  .meta({ description: 'Show nested legend with hierarchical breakdown levels' });
 
 export type PartitionMetric =
   | {}

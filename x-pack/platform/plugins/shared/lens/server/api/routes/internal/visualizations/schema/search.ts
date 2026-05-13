@@ -5,54 +5,43 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { searchOptionsSchemas } from '@kbn/content-management-utils';
+import { z } from '@kbn/zod';
+import { searchOptionsSchema } from '@kbn/content-management-utils/zod';
 
-import { lensCMSearchOptionsSchema } from '../../../../../content_management';
-import { pickFromObjectSchema } from '../../../../../utils';
+import { lensCMSearchOptionsSchema } from '../../../../../content_management/zod';
 import { lensResponseItemSchema } from './common';
 
 // TODO cleanup and align search options types with client side options
 // TODO align defaults with cm and other schema definitions (i.e. searchOptionsSchemas)
 // TODO See if these should be in body or params?
-export const lensSearchRequestQuerySchema = schema.object({
-  ...lensCMSearchOptionsSchema.getPropSchemas(),
-  query: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'The text to search for visualizations',
-      },
-    })
-  ),
-  page: schema.number({
-    meta: {
+export const lensSearchRequestQuerySchema = lensCMSearchOptionsSchema
+  .extend({
+    query: z.string().optional().meta({
+      description: 'The text to search for visualizations',
+    }),
+    page: z.coerce.number().min(1).default(1).meta({
       description: 'Specifies the current page number of the paginated result.',
-    },
-    min: 1,
-    defaultValue: 1,
-  }),
-  perPage: schema.number({
-    meta: {
+    }),
+    perPage: z.coerce.number().min(1).max(1000).default(20).meta({
       description: 'Maximum number of visualizations included in a single response',
-    },
-    defaultValue: 20,
-    min: 1,
-    max: 1000,
-  }),
-});
+    }),
+  })
+  .strict();
 
-const lensSearchResponseMetaSchema = schema.object(
-  {
-    ...pickFromObjectSchema(searchOptionsSchemas, ['page', 'perPage']),
-    total: schema.number(), // TODO use shared definition
-  },
-  { unknowns: 'forbid' }
-);
+const lensSearchResponseMetaSchema = searchOptionsSchema
+  .pick({
+    page: true,
+    perPage: true,
+  })
+  .extend({
+    total: z.number(), // TODO use shared definition
+  })
+  .strict();
 
-export const lensSearchResponseBodySchema = schema.object(
-  {
-    data: schema.arrayOf(lensResponseItemSchema, { maxSize: 100 }),
+export const lensSearchResponseBodySchema = z
+  .object({
+    data: z.array(lensResponseItemSchema).max(100),
     meta: lensSearchResponseMetaSchema,
-  },
-  { unknowns: 'forbid', meta: { id: 'visualizationListResponse' } }
-);
+  })
+  .strict()
+  .meta({ id: 'visualizationListResponse' });

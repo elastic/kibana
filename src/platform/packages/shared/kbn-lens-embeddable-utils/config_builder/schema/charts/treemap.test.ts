@@ -34,7 +34,7 @@ describe('Treemap Schema', () => {
         ],
       };
 
-      const validated = treemapConfigSchema.validate(input);
+      const validated = treemapConfigSchema.parse(input);
       expect(validated.type).toBe('treemap');
       expect(validated.metrics).toHaveLength(1);
       expect(validated.metrics[0]).toHaveProperty('operation', 'count');
@@ -58,7 +58,7 @@ describe('Treemap Schema', () => {
         ],
       };
 
-      const validated = treemapConfigSchema.validate(input);
+      const validated = treemapConfigSchema.parse(input);
       expect(validated.metrics).toHaveLength(1);
       expect(validated.group_by).toHaveLength(1);
     });
@@ -101,7 +101,7 @@ describe('Treemap Schema', () => {
         },
       };
 
-      const validated = treemapConfigSchema.validate(input);
+      const validated = treemapConfigSchema.parse(input);
       expect(validated.title).toBe('Sales Treemap');
       expect(validated.legend?.nested).toBe(true);
       expect(validated.styling?.labels?.visible).toBe(true);
@@ -132,7 +132,7 @@ describe('Treemap Schema', () => {
         ],
       };
 
-      const validated = treemapConfigSchema.validate(input);
+      const validated = treemapConfigSchema.parse(input);
       expect(validated.group_by).toHaveLength(2);
     });
 
@@ -192,7 +192,7 @@ describe('Treemap Schema', () => {
         ],
       };
 
-      const validated = treemapConfigSchema.validate(input);
+      const validated = treemapConfigSchema.parse(input);
       expect(validated.group_by?.[0].color).toHaveProperty('mode', 'categorical');
     });
 
@@ -220,7 +220,7 @@ describe('Treemap Schema', () => {
         ],
       };
 
-      const validated = treemapConfigSchema.validate(input);
+      const validated = treemapConfigSchema.parse(input);
       expect(validated.group_by).toHaveLength(2);
       expect(validated.group_by?.[0].collapse_by).toBe('sum');
     });
@@ -231,7 +231,7 @@ describe('Treemap Schema', () => {
         metrics: [],
       };
 
-      expect(() => treemapConfigSchema.validate(input)).toThrow();
+      expect(() => treemapConfigSchema.parse(input)).toThrow();
     });
 
     it('throws on empty group_by array', () => {
@@ -246,7 +246,7 @@ describe('Treemap Schema', () => {
         group_by: [],
       };
 
-      expect(() => treemapConfigSchema.validate(input)).toThrow();
+      expect(() => treemapConfigSchema.parse(input)).toThrow();
     });
 
     describe('Grouping Validation', () => {
@@ -269,7 +269,7 @@ describe('Treemap Schema', () => {
             ],
           };
 
-          expect(() => treemapConfigSchema.validate(input)).not.toThrow();
+          expect(() => treemapConfigSchema.parse(input)).not.toThrow();
         });
 
         it('allows single metric with two non-collapsed breakdowns', () => {
@@ -295,7 +295,7 @@ describe('Treemap Schema', () => {
             ],
           };
 
-          expect(() => treemapConfigSchema.validate(input)).not.toThrow();
+          expect(() => treemapConfigSchema.parse(input)).not.toThrow();
         });
 
         it('allows single metric with multiple collapsed and two non-collapsed breakdowns', () => {
@@ -333,7 +333,7 @@ describe('Treemap Schema', () => {
             ],
           };
 
-          expect(() => treemapConfigSchema.validate(input)).not.toThrow();
+          expect(() => treemapConfigSchema.parse(input)).not.toThrow();
         });
 
         it('throws when single metric has more than two non-collapsed breakdowns', () => {
@@ -364,8 +364,8 @@ describe('Treemap Schema', () => {
             ],
           };
 
-          expect(() => treemapConfigSchema.validate(input)).toThrow(
-            / The number of non-collapsed group_by dimensions must not exceed 2/i
+          expect(() => treemapConfigSchema.parse(input)).toThrow(
+            /The number of non-collapsed group_by dimensions must not exceed 2/i
           );
         });
       });
@@ -387,7 +387,7 @@ describe('Treemap Schema', () => {
             ],
           };
 
-          expect(() => treemapConfigSchema.validate(input)).not.toThrow();
+          expect(() => treemapConfigSchema.parse(input)).not.toThrow();
         });
 
         it('allows multiple metrics with single non-collapsed breakdown', () => {
@@ -413,7 +413,7 @@ describe('Treemap Schema', () => {
             ],
           };
 
-          expect(() => treemapConfigSchema.validate(input)).not.toThrow();
+          expect(() => treemapConfigSchema.parse(input)).not.toThrow();
         });
 
         it('allows multiple metrics with multiple collapsed and one non-collapsed breakdown', () => {
@@ -453,7 +453,7 @@ describe('Treemap Schema', () => {
             ],
           };
 
-          expect(() => treemapConfigSchema.validate(input)).not.toThrow();
+          expect(() => treemapConfigSchema.parse(input)).not.toThrow();
         });
 
         it('throws when multiple metrics have two non-collapsed breakdowns', () => {
@@ -484,7 +484,7 @@ describe('Treemap Schema', () => {
             ],
           };
 
-          expect(() => treemapConfigSchema.validate(input)).toThrow(
+          expect(() => treemapConfigSchema.parse(input)).toThrow(
             /the number of non-collapsed group_by dimensions must not exceed 1/i
           );
         });
@@ -527,7 +527,7 @@ describe('Treemap Schema', () => {
             ],
           };
 
-          expect(() => treemapConfigSchema.validate(input)).toThrow(
+          expect(() => treemapConfigSchema.parse(input)).toThrow(
             /the number of non-collapsed group_by dimensions must not exceed 1/i
           );
         });
@@ -556,7 +556,7 @@ describe('Treemap Schema', () => {
         ],
       };
 
-      const validated = treemapConfigSchema.validate(input);
+      const validated = treemapConfigSchema.parse(input);
       expect(validated.data_source.type).toBe('esql');
       expect(validated.metrics[0]).toHaveProperty('column', 'count');
     });
@@ -576,7 +576,7 @@ describe('Treemap Schema', () => {
         ],
       };
 
-      const validated = treemapConfigSchema.validate(input);
+      const validated = treemapConfigSchema.parse(input);
       expect(validated.group_by?.[0]).toHaveProperty('column', 'category');
     });
 
@@ -645,7 +645,7 @@ describe('Treemap Schema', () => {
         },
       };
 
-      const validated = treemapConfigSchema.validate(input);
+      const validated = treemapConfigSchema.parse(input);
       expect(validated.title).toBe('Sales Treemap');
       expect(validated.styling?.labels?.visible).toBe(true);
     });

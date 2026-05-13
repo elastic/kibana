@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ObjectType, Type } from '@kbn/config-schema';
+import type { ZodObjectType } from '@kbn/zod';
 import type { Reference } from '@kbn/content-management-utils';
+import type { getDrilldownRegistry } from './registry';
 
 export type DrilldownState = { label: string; trigger: string; type: string };
 
@@ -23,7 +24,7 @@ export type DrilldownSetup<
   /**
    * Schema defining distinct state for the drilldown type
    */
-  schema: ObjectType;
+  schema: ZodObjectType;
   /**
    * List of triggers supported by this drilldown type
    * Used to
@@ -44,6 +45,4 @@ export type DrilldownSetup<
   };
 };
 
-export type GetDrilldownsSchemaFnType = (embeddableSupportedTriggers: string[]) => ObjectType<{
-  drilldowns: Type<DrilldownState[] | undefined>;
-}>;
+export type GetDrilldownsSchemaFnType = ReturnType<typeof getDrilldownRegistry>['getSchema'];

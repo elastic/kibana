@@ -7,49 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
 
 const MAX_PER_PAGE = 10000;
 
-export const searchRequestQuerySchema = schema.object({
-  query: schema.maybe(
-    schema.string({
-      meta: {
-        description:
-          'An Elasticsearch simple_query_string query that filters markdown library items by "title" and "description"',
-      },
-    })
-  ),
-  page: schema.maybe(
-    schema.number({
-      meta: {
-        description: 'The search page to return',
-      },
-    })
-  ),
-  per_page: schema.maybe(
-    schema.number({
-      meta: {
-        description: 'The number of items to return per page',
-      },
-      max: MAX_PER_PAGE,
-    })
-  ),
+export const searchRequestQuerySchema = z.object({
+  query: z.string().optional().meta({
+    description:
+      'An Elasticsearch simple_query_string query that filters markdown library items by "title" and "description"',
+  }),
+  page: z.coerce.number().optional().meta({
+    description: 'The search page to return',
+  }),
+  per_page: z.coerce.number().max(MAX_PER_PAGE).optional().meta({
+    description: 'The number of items to return per page',
+  }),
 });
 
-export const searchResponseBodySchema = schema.object({
-  markdowns: schema.arrayOf(
-    schema.object({
-      id: schema.string(),
-      data: schema.object({
-        description: schema.maybe(schema.string()),
-        title: schema.string(),
-      }),
-      meta: asCodeMetaSchema,
-    }),
-    { minSize: 0, maxSize: MAX_PER_PAGE }
-  ),
-  total: schema.number(),
-  page: schema.number(),
+export const searchResponseBodySchema = z.object({
+  markdowns: z
+    .array(
+      z.object({
+        id: z.string(),
+        data: z.object({
+          description: z.string().optional(),
+          title: z.string(),
+        }),
+        meta: asCodeMetaSchema,
+      })
+    )
+    .min(0)
+    .max(MAX_PER_PAGE),
+  total: z.number(),
+  page: z.number(),
 });

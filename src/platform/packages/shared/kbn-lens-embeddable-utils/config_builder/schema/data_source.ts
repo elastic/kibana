@@ -7,27 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, type TypeOf } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { dataViewSchema, esqlDataSourceSchema } from '@kbn/as-code-data-views-schema';
 
-const anyDataSourceSchema = schema.oneOf([dataViewSchema, esqlDataSourceSchema], {
-  meta: {
-    id: 'viz_data_source',
-    title: 'Data Source configuration',
-    description:
-      'Defines where the visualization reads its data. Choose a data view (by reference or ad hoc) for index-pattern-based queries, or an ES|QL dataset for query-driven results.',
-  },
+const anyDataSourceSchema = z.union([dataViewSchema, esqlDataSourceSchema]).meta({
+  id: 'viz_data_source',
+  title: 'Data Source configuration',
+  description:
+    'Defines where the visualization reads its data. Choose a data view (by reference or ad hoc) for index-pattern-based queries, or an ES|QL dataset for query-driven results.',
 });
 
-export const dataSourceSchema = {
+export const dataSourceSchema = z.object({
   data_source: dataViewSchema,
-};
+});
 
-export const dataSourceEsqlTableSchema = {
+export const dataSourceEsqlTableSchema = z.object({
   data_source: esqlDataSourceSchema,
-};
+});
 
-export type DataSourceTypeNoESQL = TypeOf<typeof dataViewSchema>;
-export type DataSourceTypeESQL = TypeOf<typeof esqlDataSourceSchema>;
+export type DataSourceTypeNoESQL = z.output<typeof dataViewSchema>;
+export type DataSourceTypeESQL = z.output<typeof esqlDataSourceSchema>;
 
-export type DataSourceType = TypeOf<typeof anyDataSourceSchema>;
+export type DataSourceType = z.output<typeof anyDataSourceSchema>;

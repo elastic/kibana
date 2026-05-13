@@ -35,7 +35,7 @@ dependsOn:
   - '@kbn/presentation-publishing'
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/presentation-util'
-  - '@kbn/config-schema'
+  - '@kbn/zod'
   - '@kbn/content-management-utils'
 tags:
   - plugin

@@ -5,23 +5,16 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { DEFAULT_ENCODE_URL, DEFAULT_OPEN_IN_NEW_TAB } from '../common/constants';
 
-export const urlDrilldownSchema = schema.object({
-  encode_url: schema.boolean({
-    defaultValue: DEFAULT_ENCODE_URL,
-    meta: {
-      description: 'When true, URL is escaped using percent encoding',
-    },
+export const urlDrilldownSchema = z.object({
+  encode_url: z.boolean().default(DEFAULT_ENCODE_URL).meta({
+    description: 'When true, URL is escaped using percent encoding',
   }),
-  open_in_new_tab: schema.boolean({
-    defaultValue: DEFAULT_OPEN_IN_NEW_TAB,
-  }),
-  url: schema.string({
-    meta: {
-      description:
-        'Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable',
-    },
+  open_in_new_tab: z.boolean().default(DEFAULT_OPEN_IN_NEW_TAB),
+  url: z.string().meta({
+    description:
+      'Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable',
   }),
 });

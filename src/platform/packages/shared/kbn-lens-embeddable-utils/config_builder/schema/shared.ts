@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import {
   LENS_SAMPLING_MIN_VALUE,
@@ -18,20 +17,16 @@ import {
 } from './constants';
 import { filterSchema } from './filter';
 
-export const labelSharedProp = {
+export const labelSharedSchema = z.object({
   /**
    * Label for the operation
    */
-  label: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'Label for the operation',
-      },
-    })
-  ),
-};
+  label: z.string().optional().meta({
+    description: 'Label for the operation',
+  }),
+});
 
-export const sharedPanelInfoSchema = {
+export const sharedPanelInfoSchema = z.object({
   /**
    * The title of the chart displayed in the panel.
    *
@@ -39,14 +34,10 @@ export const sharedPanelInfoSchema = {
    *
    * Possible values: Any string value, or undefined if omitted.
    */
-  title: schema.maybe(
-    schema.string({
-      meta: {
-        description:
-          'The title of the chart displayed in the panel. Optional. Any string value or undefined.',
-      },
-    })
-  ),
+  title: z.string().optional().meta({
+    description:
+      'The title of the chart displayed in the panel. Optional. Any string value or undefined.',
+  }),
   /**
    * The description of the chart, providing additional context or information.
    *
@@ -54,30 +45,21 @@ export const sharedPanelInfoSchema = {
    *
    * Possible values: Any string value, or undefined if omitted.
    */
-  description: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'The description of the chart. Optional. Any string value or undefined.',
-      },
-    })
-  ),
-  filters: schema.maybe(
-    schema.arrayOf(asCodeFilterSchema, {
-      maxSize: 100,
-      meta: {
-        id: 'lensPanelFilters',
-        description: 'Filters applied to the panel',
-      },
-    })
-  ),
-};
+  description: z.string().optional().meta({
+    description: 'The description of the chart. Optional. Any string value or undefined.',
+  }),
+  filters: z.array(asCodeFilterSchema).max(100).optional().meta({
+    id: 'lensPanelFilters',
+    description: 'Filters applied to the panel',
+  }),
+});
 
-export const dslOnlyPanelInfoSchema = {
+export const dslOnlyPanelInfoSchema = z.object({
   // ES|QL chart should not have the ability to define a KQL/Lucene query
-  query: schema.maybe(filterSchema),
-};
+  query: filterSchema.optional(),
+});
 
-export const ignoringGlobalFiltersSchemaRaw = {
+const ignoringGlobalFiltersShape = {
   /**
    * Whether to ignore global filters when fetching data for this layer.
    *
@@ -87,16 +69,15 @@ export const ignoringGlobalFiltersSchemaRaw = {
    * Default: false
    * Possible values: boolean (true or false)
    */
-  ignore_global_filters: schema.boolean({
-    defaultValue: LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
-    meta: {
-      description:
-        'When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.',
-    },
+  ignore_global_filters: z.boolean().default(LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE).meta({
+    description:
+      'When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.',
   }),
 };
 
-export const layerSettingsSchema = {
+export const ignoringGlobalFiltersSchema = z.object(ignoringGlobalFiltersShape);
+
+export const layerSettingsSchema = z.object({
   /**
    * The sampling factor for the data source.
    *
@@ -108,68 +89,51 @@ export const layerSettingsSchema = {
    * Default: 1
    * Possible values: number (0 <= value <= 1)
    */
-  sampling: schema.number({
-    min: LENS_SAMPLING_MIN_VALUE,
-    max: LENS_SAMPLING_MAX_VALUE,
-    defaultValue: LENS_SAMPLING_DEFAULT_VALUE,
-    meta: {
+  sampling: z
+    .number()
+    .min(LENS_SAMPLING_MIN_VALUE)
+    .max(LENS_SAMPLING_MAX_VALUE)
+    .default(LENS_SAMPLING_DEFAULT_VALUE)
+    .meta({
       description: 'Sampling factor between 0 (no sampling) and 1 (full sampling).',
-    },
-  }),
-  ...ignoringGlobalFiltersSchemaRaw,
-};
+    }),
+  ...ignoringGlobalFiltersShape,
+});
 
-export const collapseBySchema = schema.oneOf(
-  [
+export const collapseBySchema = z
+  .union([
     /**
      * Average collapsed by average function
      */
-    schema.literal('avg'),
+    z.literal('avg'),
     /**
      * Sum collapsed by sum function
      */
-    schema.literal('sum'),
+    z.literal('sum'),
     /**
      * Max collapsed by max function
      */
-    schema.literal('max'),
+    z.literal('max'),
     /**
      * Min collapsed by min function
      */
-    schema.literal('min'),
-  ],
-  {
-    meta: {
-      id: 'collapseBy',
-      description:
-        'Aggregation function used to collapse a breakdown dimension into a single value.',
-    },
-  }
-);
+    z.literal('min'),
+  ])
+  .meta({
+    id: 'collapseBy',
+    description: 'Aggregation function used to collapse a breakdown dimension into a single value.',
+  });
 
-export type CollapseBySchema = TypeOf<typeof collapseBySchema>;
+export type CollapseBySchema = z.output<typeof collapseBySchema>;
 
-const layerSettingsSchemaWrapped = schema.object(layerSettingsSchema);
+export type LayerSettingsSchema = z.output<typeof layerSettingsSchema>;
 
-export type LayerSettingsSchema = TypeOf<typeof layerSettingsSchemaWrapped>;
+export const axisTitleSchema = z.object({
+  text: z.string().default('').optional().meta({ description: 'Axis title text.' }),
+  visible: z.boolean().optional().meta({ description: 'When `true`, displays the title.' }),
+});
 
-export const axisTitleSchemaProps = {
-  text: schema.maybe(
-    schema.string({ defaultValue: '', meta: { description: 'Axis title text.' } })
-  ),
-  visible: schema.maybe(
-    schema.boolean({ meta: { description: 'When `true`, displays the title.' } })
-  ),
-};
-
-export const legendTruncateAfterLinesSchema = schema.maybe(
-  schema.number({
-    defaultValue: 1,
-    min: 1,
-    max: 10,
-    meta: {
-      description: 'Number of lines before legend items are truncated.',
-      id: 'legendTruncateAfterLines',
-    },
-  })
-);
+export const legendTruncateAfterLinesSchema = z.number().min(1).max(10).default(1).optional().meta({
+  description: 'Number of lines before legend items are truncated.',
+  id: 'legendTruncateAfterLines',
+});

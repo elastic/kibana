@@ -6,111 +6,93 @@
  */
 
 import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import { SLO_EMBEDDABLE_SUPPORTED_TRIGGERS } from '../../../common/embeddables/overview/constants';
 
-const SingleOverviewCustomSchema = schema.object({
-  slo_id: schema.string({
-    meta: { description: 'The ID of the SLO' },
+const SingleOverviewCustomSchema = z.object({
+  slo_id: z.string().meta({
+    description: 'The ID of the SLO',
   }),
-  slo_instance_id: schema.string({
-    defaultValue: ALL_VALUE,
-    meta: {
-      description:
-        'ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. Defaults to * (all instances).',
-    },
+  slo_instance_id: z.string().default(ALL_VALUE).meta({
+    description:
+      'ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. Defaults to * (all instances).',
   }),
-  remote_name: schema.maybe(
-    schema.string({
-      meta: { description: 'The name of the remote SLO' },
-    })
-  ),
-  overview_mode: schema.literal('single'),
+  remote_name: z.string().meta({ description: 'The name of the remote SLO' }).optional(),
+  overview_mode: z.literal('single'),
 });
 
-const groupBySchema = schema.oneOf(
-  [
-    schema.literal('slo.tags'),
-    schema.literal('status'),
-    schema.literal('slo.indicator.type'),
-    schema.literal('_index'), // remote cluster
-  ],
-  { defaultValue: 'status' }
-);
+const groupBySchema = z
+  .union([
+    z.literal('slo.tags'),
+    z.literal('status'),
+    z.literal('slo.indicator.type'),
+    z.literal('_index'), // remote cluster
+  ])
+  .default('status');
 
-const GroupOverviewCustomSchema = schema.object({
-  group_filters: schema.object(
-    {
+const GroupOverviewCustomSchema = z.object({
+  group_filters: z
+    .object({
       group_by: groupBySchema,
       // Bounded to avoid unbounded-array warnings; 100 aligns with other embeddable list limits.
-      groups: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+      groups: z.array(z.string()).max(100).optional(),
       // Bounded to avoid unbounded-array warnings; 500 matches dashboard filters limit.
-      filters: schema.maybe(schema.arrayOf(asCodeFilterSchema, { maxSize: 500 })),
-      kql_query: schema.maybe(schema.string()),
-    },
-    { defaultValue: { group_by: 'status' } }
-  ),
-  overview_mode: schema.literal('groups'),
+      filters: z.array(asCodeFilterSchema).max(500).optional(),
+      kql_query: z.string().optional(),
+    })
+    .default({ group_by: 'status' }),
+  overview_mode: z.literal('groups'),
 });
 
 function getSingleOverviewEmbeddableSchema(getDrilldownsSchema: GetDrilldownsSchemaFnType) {
-  return schema.object(
-    {
-      ...SingleOverviewCustomSchema.getPropSchemas(),
-      ...getDrilldownsSchema(SLO_EMBEDDABLE_SUPPORTED_TRIGGERS).getPropSchemas(),
-      ...serializedTitlesSchema.getPropSchemas(),
-    },
-    {
-      meta: {
-        id: 'slo-single-overview-embeddable',
-        description: 'SLO Single Overview embeddable schema',
-      },
-    }
-  );
+  return z
+    .object({
+      ...SingleOverviewCustomSchema.shape,
+      ...getDrilldownsSchema(SLO_EMBEDDABLE_SUPPORTED_TRIGGERS).shape,
+      ...serializedTitlesSchema.shape,
+    })
+    .meta({
+      id: 'slo-single-overview-embeddable',
+      description: 'SLO Single Overview embeddable schema',
+    });
 }
 
 function getGroupOverviewEmbeddableSchema(getDrilldownsSchema: GetDrilldownsSchemaFnType) {
-  return schema.object(
-    {
-      ...GroupOverviewCustomSchema.getPropSchemas(),
-      ...getDrilldownsSchema(SLO_EMBEDDABLE_SUPPORTED_TRIGGERS).getPropSchemas(),
-      ...serializedTitlesSchema.getPropSchemas(),
-    },
-    {
-      meta: {
-        id: 'slo-group-overview-embeddable',
-        description: 'SLO Group Overview embeddable schema',
-      },
-    }
-  );
+  return z
+    .object({
+      ...GroupOverviewCustomSchema.shape,
+      ...getDrilldownsSchema(SLO_EMBEDDABLE_SUPPORTED_TRIGGERS).shape,
+      ...serializedTitlesSchema.shape,
+    })
+    .meta({
+      id: 'slo-group-overview-embeddable',
+      description: 'SLO Group Overview embeddable schema',
+    });
 }
 
 export const getOverviewEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
-  return schema.discriminatedUnion(
-    'overview_mode',
-    [
+  return z
+    .discriminatedUnion('overview_mode', [
       getSingleOverviewEmbeddableSchema(getDrilldownsSchema),
       getGroupOverviewEmbeddableSchema(getDrilldownsSchema),
-    ],
-    { meta: { description: 'SLO Overview embeddable schema' } }
-  );
+    ])
+    .meta({ description: 'SLO Overview embeddable schema' });
 };
 
-export type GroupBy = TypeOf<typeof groupBySchema>;
-export type SingleOverviewCustomState = TypeOf<typeof SingleOverviewCustomSchema>;
-export type GroupOverviewCustomState = TypeOf<typeof GroupOverviewCustomSchema>;
+export type GroupBy = z.output<typeof groupBySchema>;
+export type SingleOverviewCustomState = z.output<typeof SingleOverviewCustomSchema>;
+export type GroupOverviewCustomState = z.output<typeof GroupOverviewCustomSchema>;
 export type OverviewMode =
   | SingleOverviewCustomState['overview_mode']
   | GroupOverviewCustomState['overview_mode'];
 export type GroupFilters = GroupOverviewCustomState['group_filters'];
-export type OverviewEmbeddableState = TypeOf<ReturnType<typeof getOverviewEmbeddableSchema>>;
-export type SingleOverviewEmbeddableState = TypeOf<
+export type OverviewEmbeddableState = z.output<ReturnType<typeof getOverviewEmbeddableSchema>>;
+export type SingleOverviewEmbeddableState = z.output<
   ReturnType<typeof getSingleOverviewEmbeddableSchema>
 >;
-export type GroupOverviewEmbeddableState = TypeOf<
+export type GroupOverviewEmbeddableState = z.output<
   ReturnType<typeof getGroupOverviewEmbeddableSchema>
 >;

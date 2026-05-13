@@ -10,7 +10,7 @@
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { once } from 'lodash';
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { getRouteConfig } from '../get_route_config';
@@ -43,10 +43,10 @@ export function registerUpdateRoute(
       version: routeVersion,
       validate: () => ({
         request: {
-          params: schema.object({
+          params: z.object({
             // Can not validate id at route level
             // existing dashboards may have invalid "as code" ids
-            id: schema.string(),
+            id: z.string(),
           }),
           body: getDashboardStateSchema(isDashboardAppRequest),
         },

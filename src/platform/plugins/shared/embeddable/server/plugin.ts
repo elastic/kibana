@@ -15,7 +15,7 @@ import type {
   MigrateFunctionsObject,
   PersistableState,
 } from '@kbn/kibana-utils-plugin/common';
-import type { ObjectType, Type } from '@kbn/config-schema';
+import type { ZodObjectType } from '@kbn/zod';
 import type { EmbeddableFactoryRegistry, EmbeddableRegistryDefinition } from './types';
 import type { EmbeddableStateWithType } from './persistable_state/types';
 import {
@@ -58,11 +58,11 @@ export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> &
   /**
    * Returns all embeddable schemas registered with registerEmbeddableServerDefinition.
    */
-  getAllEmbeddableSchemas: () => { [key: string]: { schema: ObjectType; title: string } };
+  getAllEmbeddableSchemas: () => { [key: string]: { schema: ZodObjectType; title: string } };
 
   getTransforms: (type: string) =>
     | (EmbeddableTransforms & {
-        schema?: Type<object>;
+        schema?: ZodObjectType;
         throwOnUnmappedPanel?: EmbeddableServerDefinition['throwOnUnmappedPanel'];
       })
     | undefined;

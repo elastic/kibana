@@ -24,7 +24,7 @@ describe('DataSource Schema', () => {
         ref_id: 'my-data-view',
       } satisfies DataSourceTypeNoESQL;
 
-      const validated = dataViewSchema.validate(input);
+      const validated = dataViewSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -34,9 +34,7 @@ describe('DataSource Schema', () => {
         // @ts-expect-error - ignore required name for test purposes
       } satisfies DataSourceTypeNoESQL;
 
-      expect(() => dataViewSchema.validate(input)).toThrow(
-        `[ref_id]: expected value of type [string] but got [undefined]`
-      );
+      expect(() => dataViewSchema.parse(input)).toThrow(/ref_id/);
     });
   });
 
@@ -48,7 +46,7 @@ describe('DataSource Schema', () => {
         time_field: '@timestamp',
       } satisfies DataSourceTypeNoESQL;
 
-      const validated = dataViewSchema.validate(input);
+      const validated = dataViewSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -68,7 +66,7 @@ describe('DataSource Schema', () => {
         },
       } satisfies DataSourceTypeNoESQL;
 
-      const validated = dataViewSchema.validate(input);
+      const validated = dataViewSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -79,9 +77,7 @@ describe('DataSource Schema', () => {
         // @ts-expect-error - ignore required fields for test purposes
       } satisfies DataSourceTypeNoESQL;
 
-      expect(() => dataViewSchema.validate(input)).toThrow(
-        '[index_pattern]: expected value of type [string] but got [undefined]'
-      );
+      expect(() => dataViewSchema.parse(input)).toThrow(/index_pattern/);
     });
   });
 
@@ -92,7 +88,7 @@ describe('DataSource Schema', () => {
         query: 'FROM my-index | LIMIT 100',
       } satisfies DataSourceTypeESQL;
 
-      const validated = esqlDataSourceSchema.validate(input);
+      const validated = esqlDataSourceSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -102,9 +98,7 @@ describe('DataSource Schema', () => {
         // @ts-expect-error - ignore query prop for test purposes
       } satisfies DataSourceTypeESQL;
 
-      expect(() => esqlDataSourceSchema.validate(input)).toThrow(
-        /\[query\]: expected value of type/
-      );
+      expect(() => esqlDataSourceSchema.parse(input)).toThrow(/query/);
     });
   });
 
@@ -115,7 +109,7 @@ describe('DataSource Schema', () => {
         ref_id: 'my-data-view',
       } satisfies DataSourceTypeNoESQL;
 
-      const validated = dataSourceSchema.data_source.validate(input);
+      const validated = dataSourceSchema.shape.data_source.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -125,7 +119,7 @@ describe('DataSource Schema', () => {
         id: 'my-data-view',
       };
 
-      expect(() => dataSourceSchema.data_source.validate(input)).toThrow();
+      expect(() => dataSourceSchema.shape.data_source.parse(input)).toThrow();
     });
   });
 
@@ -138,7 +132,7 @@ describe('DataSource Schema', () => {
         field_settings: {},
       } satisfies DataSourceTypeNoESQL;
 
-      const validated = dataViewSchema.validate(input);
+      const validated = dataViewSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -164,7 +158,7 @@ describe('DataSource Schema', () => {
         },
       } satisfies DataSourceTypeNoESQL;
 
-      const validated = dataViewSchema.validate(input);
+      const validated = dataViewSchema.parse(input);
       expect(validated).toEqual(input);
     });
   });

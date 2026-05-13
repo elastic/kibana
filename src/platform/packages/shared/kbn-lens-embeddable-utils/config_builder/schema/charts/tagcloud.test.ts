@@ -40,8 +40,8 @@ describe('Tagcloud Schema', () => {
         },
       };
 
-      const validated = tagcloudConfigSchema.validate(input);
-      expect(validated).toEqual({
+      const validated = tagcloudConfigSchema.parse(input);
+      expect(validated).toMatchObject({
         ...defaultValues,
         ...input,
         tag_by: { ...input.tag_by, limit: 5 },
@@ -66,8 +66,8 @@ describe('Tagcloud Schema', () => {
         },
       };
 
-      const validated = tagcloudConfigSchema.validate(input);
-      expect(validated).toEqual({
+      const validated = tagcloudConfigSchema.parse(input);
+      expect(validated).toMatchObject({
         ...defaultValues,
         ...input,
         tag_by: { ...input.tag_by, limit: 5 },
@@ -99,8 +99,8 @@ describe('Tagcloud Schema', () => {
         },
       };
 
-      const validated = tagcloudConfigSchema.validate(input);
-      expect(validated).toEqual({
+      const validated = tagcloudConfigSchema.parse(input);
+      expect(validated).toMatchObject({
         ...defaultValues,
         ...input,
         tag_by: { ...input.tag_by, limit: 5 },
@@ -126,8 +126,8 @@ describe('Tagcloud Schema', () => {
           },
         };
 
-        const validated = tagcloudConfigSchema.validate(input);
-        expect(validated).toEqual({
+        const validated = tagcloudConfigSchema.parse(input);
+        expect(validated).toMatchObject({
           ...defaultValues,
           ...input,
           tag_by: { ...input.tag_by, limit: 5 },
@@ -152,8 +152,8 @@ describe('Tagcloud Schema', () => {
           },
         };
 
-        const validated = tagcloudConfigSchema.validate(input);
-        expect(validated).toEqual({
+        const validated = tagcloudConfigSchema.parse(input);
+        expect(validated).toMatchObject({
           ...defaultValues,
           ...input,
           tag_by: { ...input.tag_by, limit: 5 },
@@ -178,8 +178,8 @@ describe('Tagcloud Schema', () => {
           },
         };
 
-        const validated = tagcloudConfigSchema.validate(input);
-        expect(validated).toEqual({
+        const validated = tagcloudConfigSchema.parse(input);
+        expect(validated).toMatchObject({
           ...defaultValues,
           ...input,
           tag_by: { ...input.tag_by, limit: 5 },
@@ -209,8 +209,8 @@ describe('Tagcloud Schema', () => {
           },
         };
 
-        const validated = tagcloudConfigSchema.validate(input);
-        expect(validated).toEqual({
+        const validated = tagcloudConfigSchema.parse(input);
+        expect(validated).toMatchObject({
           ...defaultValues,
           ...input,
           tag_by: { ...input.tag_by, limit: 5 },
@@ -235,8 +235,8 @@ describe('Tagcloud Schema', () => {
           },
         };
 
-        const validated = tagcloudConfigSchema.validate(input);
-        expect(validated).toEqual({
+        const validated = tagcloudConfigSchema.parse(input);
+        expect(validated).toMatchObject({
           ...defaultValues,
           ...input,
           styling: {
@@ -261,7 +261,7 @@ describe('Tagcloud Schema', () => {
           },
         };
 
-        expect(() => tagcloudConfigSchema.validate(input)).toThrow();
+        expect(() => tagcloudConfigSchema.parse(input)).toThrow();
       });
 
       it('throws on missing tag_by operation', () => {
@@ -273,7 +273,7 @@ describe('Tagcloud Schema', () => {
           },
         };
 
-        expect(() => tagcloudConfigSchema.validate(input)).toThrow();
+        expect(() => tagcloudConfigSchema.parse(input)).toThrow();
       });
 
       it('throws on invalid orientation value', () => {
@@ -293,7 +293,7 @@ describe('Tagcloud Schema', () => {
           },
         };
 
-        expect(() => tagcloudConfigSchema.validate(input)).toThrow();
+        expect(() => tagcloudConfigSchema.parse(input)).toThrow();
       });
 
       it('throws on invalid font size minimum', () => {
@@ -316,7 +316,7 @@ describe('Tagcloud Schema', () => {
           },
         };
 
-        expect(() => tagcloudConfigSchema.validate(input)).toThrow();
+        expect(() => tagcloudConfigSchema.parse(input)).toThrow();
       });
 
       it('throws on invalid font size maximum', () => {
@@ -338,7 +338,7 @@ describe('Tagcloud Schema', () => {
           },
         };
 
-        expect(() => tagcloudConfigSchema.validate(input)).toThrow();
+        expect(() => tagcloudConfigSchema.parse(input)).toThrow();
       });
 
       it('throw when missing DSL and esql operation in a configuration', () => {
@@ -357,7 +357,7 @@ describe('Tagcloud Schema', () => {
             limit: 5,
           },
         };
-        expect(() => tagcloudConfigSchema.validate(input)).toThrow();
+        expect(() => tagcloudConfigSchema.parse(input)).toThrow();
       });
 
       it('throws when tag_by color is not a palette mapping', () => {
@@ -381,7 +381,7 @@ describe('Tagcloud Schema', () => {
           },
         };
 
-        expect(() => tagcloudConfigSchema.validate(input)).toThrow();
+        expect(() => tagcloudConfigSchema.parse(input)).toThrow();
       });
     });
 
@@ -419,8 +419,8 @@ describe('Tagcloud Schema', () => {
           },
         };
 
-        const validated = tagcloudConfigSchema.validate(input);
-        expect(validated).toEqual({
+        const validated = tagcloudConfigSchema.parse(input);
+        expect(validated).toMatchObject({
           ...defaultValues,
           ...input,
           tag_by: { ...input.tag_by, limit: 5 },
@@ -455,8 +455,8 @@ describe('Tagcloud Schema', () => {
           },
         };
 
-        const validated = tagcloudConfigSchema.validate(input);
-        expect(validated).toEqual({ ...defaultValues, ...input });
+        const validated = tagcloudConfigSchema.parse(input);
+        expect(validated).toMatchObject({ ...defaultValues, ...input });
       });
     });
   });

@@ -307,10 +307,10 @@ describe('MarkdownEmbeddable', () => {
 
   describe('unsaved chnages', () => {
     it('should have unsaved changes when content has changed', async () => {
-      const lastSavedState = markdownEmbeddableSchema.validate({
+      const lastSavedState = markdownEmbeddableSchema.parse({
         content: 'hello',
       });
-      const initialState = markdownEmbeddableSchema.validate({
+      const initialState = markdownEmbeddableSchema.parse({
         content: 'goodbye',
       });
       const { embeddable } = await renderEmbeddable(initialState, lastSavedState);
@@ -319,7 +319,7 @@ describe('MarkdownEmbeddable', () => {
     });
 
     it('should not have unsaved changes for by value state when there are no changes', async () => {
-      const initialState = markdownEmbeddableSchema.validate({
+      const initialState = markdownEmbeddableSchema.parse({
         content: 'hello',
       });
       const { embeddable } = await renderEmbeddable(initialState);
@@ -328,7 +328,7 @@ describe('MarkdownEmbeddable', () => {
     });
 
     it('should not have unsaved changes for by reference state when there are no changes', async () => {
-      const initialState = markdownEmbeddableSchema.validate({
+      const initialState = markdownEmbeddableSchema.parse({
         ref_id: '1234',
       });
       const { embeddable } = await renderEmbeddable(initialState);

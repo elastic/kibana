@@ -50,7 +50,7 @@ describe('Region Map Schema', () => {
           },
         };
 
-      const validated = regionMapConfigSchema.validate(input);
+      const validated = regionMapConfigSchema.parse(input);
       expect(validated).toEqual({
         ...defaultValues,
         ...input,
@@ -79,7 +79,7 @@ describe('Region Map Schema', () => {
         },
       };
 
-      const validated = regionMapConfigSchema.validate(input);
+      const validated = regionMapConfigSchema.parse(input);
       expect(validated).toEqual({ ...defaultValues, ...input });
     });
   });
@@ -103,7 +103,7 @@ describe('Region Map Schema', () => {
         },
       };
 
-      const validated = regionMapConfigSchema.validate(input);
+      const validated = regionMapConfigSchema.parse(input);
       expect(validated).toEqual({ ...defaultValues, ...input });
     });
   });
@@ -131,7 +131,7 @@ describe('Region Map Schema', () => {
         },
       };
 
-      expect(() => regionMapConfigSchema.validate(input)).toThrow();
+      expect(() => regionMapConfigSchema.parse(input)).toThrow();
     });
 
     it('throws on missing region operation', () => {
@@ -148,7 +148,7 @@ describe('Region Map Schema', () => {
           fields: ['location'],
         },
       };
-      expect(() => regionMapConfigSchema.validate(input)).toThrow();
+      expect(() => regionMapConfigSchema.parse(input)).toThrow();
     });
 
     it('throws on missing ems join field', () => {
@@ -175,7 +175,7 @@ describe('Region Map Schema', () => {
         },
       };
 
-      expect(() => regionMapConfigSchema.validate(input)).toThrow();
+      expect(() => regionMapConfigSchema.parse(input)).toThrow();
     });
 
     it('throw when using term buckets operation in an esql configuration', () => {
@@ -194,7 +194,7 @@ describe('Region Map Schema', () => {
           limit: 5,
         },
       };
-      expect(() => regionMapConfigSchema.validate(input)).toThrow();
+      expect(() => regionMapConfigSchema.parse(input)).toThrow();
     });
   });
 
@@ -219,7 +219,7 @@ describe('Region Map Schema', () => {
         },
       };
 
-      const validated = regionMapConfigSchema.validate(input);
+      const validated = regionMapConfigSchema.parse(input);
       expect(validated).toEqual({ ...defaultValues, ...input });
     });
 
@@ -244,7 +244,7 @@ describe('Region Map Schema', () => {
         },
       };
 
-      const validated = regionMapConfigSchema.validate(input);
+      const validated = regionMapConfigSchema.parse(input);
       expect(validated).toEqual({ ...defaultValues, ...input });
     });
   });

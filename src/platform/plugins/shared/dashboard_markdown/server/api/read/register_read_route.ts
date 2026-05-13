@@ -9,7 +9,7 @@
 
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { commonRouteConfig, INTERNAL_API_VERSION } from '../constants';
 import { readResponseBodySchema } from './schemas';
 import { read } from './read';
@@ -27,11 +27,9 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
       version: INTERNAL_API_VERSION,
       validate: {
         request: {
-          params: schema.object({
-            id: schema.string({
-              meta: {
-                description: 'A unique identifier for the markdown library item.',
-              },
+          params: z.object({
+            id: z.string().meta({
+              description: 'A unique identifier for the markdown library item.',
             }),
           }),
         },

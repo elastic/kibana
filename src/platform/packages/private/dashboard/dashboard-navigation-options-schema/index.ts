@@ -7,32 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
 
-export const dashboardNavigationOptionsSchema = schema.object(
-  {
-    use_filters: schema.boolean({
-      defaultValue: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS.use_filters,
-      meta: {
-        description: 'When enabled, filters are passed to the opening dashboard.',
-      },
+export const dashboardNavigationOptionsSchema = z
+  .object({
+    use_filters: z.boolean().default(DEFAULT_DASHBOARD_NAVIGATION_OPTIONS.use_filters).meta({
+      description: 'When enabled, filters are passed to the opening dashboard.',
     }),
-    use_time_range: schema.boolean({
-      defaultValue: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS.use_time_range,
-      meta: {
-        description: 'When enabled, time range is passed to the opening dashboard.',
-      },
+    use_time_range: z.boolean().default(DEFAULT_DASHBOARD_NAVIGATION_OPTIONS.use_time_range).meta({
+      description: 'When enabled, time range is passed to the opening dashboard.',
     }),
-    open_in_new_tab: schema.boolean({
-      defaultValue: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS.open_in_new_tab,
-      meta: {
+    open_in_new_tab: z
+      .boolean()
+      .default(DEFAULT_DASHBOARD_NAVIGATION_OPTIONS.open_in_new_tab)
+      .meta({
         description: 'When enabled, the dashboard opens in a new browser tab.',
-      },
-    }),
-  },
-  { defaultValue: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS }
-);
+      }),
+  })
+  .default(DEFAULT_DASHBOARD_NAVIGATION_OPTIONS);
 
-export type DashboardNavigationOptions = TypeOf<typeof dashboardNavigationOptionsSchema>;
+export type DashboardNavigationOptions = z.output<typeof dashboardNavigationOptionsSchema>;

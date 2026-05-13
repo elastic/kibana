@@ -39,8 +39,8 @@ describe('Gauge Schema', () => {
       },
     } satisfies GaugeInput;
 
-    const validated = gaugeConfigSchema.validate(input);
-    expect(validated).toEqual({ ...defaultValues, ...input });
+    const validated = gaugeConfigSchema.parse(input);
+    expect(validated).toMatchObject({ ...defaultValues, ...input });
   });
 
   it('validates full configuration with bullet shape', () => {
@@ -96,8 +96,8 @@ describe('Gauge Schema', () => {
         },
       } satisfies GaugeInput;
 
-      const validated = gaugeConfigSchema.validate(input);
-      expect(validated).toEqual({ ...defaultValues, ...input });
+      const validated = gaugeConfigSchema.parse(input);
+      expect(validated).toMatchObject({ ...defaultValues, ...input });
     }
   });
 
@@ -116,8 +116,8 @@ describe('Gauge Schema', () => {
       },
     } satisfies GaugeInput;
 
-    const validated = gaugeConfigSchema.validate(input);
-    expect(validated).toEqual({ ...defaultValues, ...input });
+    const validated = gaugeConfigSchema.parse(input);
+    expect(validated).toMatchObject({ ...defaultValues, ...input });
   });
 
   it('validates default values are applied', () => {
@@ -136,7 +136,7 @@ describe('Gauge Schema', () => {
       },
     } satisfies GaugeInput;
 
-    const validated = gaugeConfigSchema.validate(input);
+    const validated = gaugeConfigSchema.parse(input);
     expect(validated.styling?.shape).toEqual({
       type: 'bullet',
       orientation: 'horizontal',
@@ -157,8 +157,8 @@ describe('Gauge Schema', () => {
       },
     } satisfies GaugeInput;
 
-    const validated = gaugeConfigSchema.validate(input);
-    expect(validated).toEqual({ ...defaultValues, ...input });
+    const validated = gaugeConfigSchema.parse(input);
+    expect(validated).toMatchObject({ ...defaultValues, ...input });
   });
 
   it('validates ES|QL full configuration with bullet shape', () => {
@@ -200,8 +200,8 @@ describe('Gauge Schema', () => {
       },
     } satisfies GaugeInput;
 
-    const validated = gaugeConfigSchema.validate(input);
-    expect(validated).toEqual({ ...defaultValues, ...input });
+    const validated = gaugeConfigSchema.parse(input);
+    expect(validated).toMatchObject({ ...defaultValues, ...input });
   });
 
   it('throws on mixed DSL and ES|QL configs', () => {
@@ -228,7 +228,7 @@ describe('Gauge Schema', () => {
       },
     } satisfies GaugeInput;
 
-    expect(() => gaugeConfigSchema.validate(input)).toThrow();
+    expect(() => gaugeConfigSchema.parse(input)).toThrow();
   });
 
   it('throws on invalid operations as metric', () => {
@@ -237,7 +237,7 @@ describe('Gauge Schema', () => {
       { operation: 'moving_average', window: 5, field: 'bytes' },
     ];
     for (const op of invalidOps) {
-      expect(() => gaugeConfigSchema.validate({ ...baseGaugeConfig, metric: op })).toThrow();
+      expect(() => gaugeConfigSchema.parse({ ...baseGaugeConfig, metric: op })).toThrow();
     }
   });
 
@@ -257,7 +257,7 @@ describe('Gauge Schema', () => {
       },
     } satisfies GaugeInput;
 
-    expect(() => gaugeConfigSchema.validate(input)).toThrow();
+    expect(() => gaugeConfigSchema.parse(input)).toThrow();
   });
 
   it('throws on invalid ticks value', () => {
@@ -273,7 +273,7 @@ describe('Gauge Schema', () => {
       },
     } satisfies GaugeInput;
 
-    expect(() => gaugeConfigSchema.validate(input)).toThrow();
+    expect(() => gaugeConfigSchema.parse(input)).toThrow();
   });
 
   it('throws on reference-based operations for min, max, and goal', () => {
@@ -300,7 +300,7 @@ describe('Gauge Schema', () => {
     for (const op of refBasedOps) {
       for (const dimension of ['min', 'max', 'goal']) {
         expect(() =>
-          gaugeConfigSchema.validate({
+          gaugeConfigSchema.parse({
             ...baseGaugeConfig,
             metric: { ...validMetric, [dimension]: op },
           })

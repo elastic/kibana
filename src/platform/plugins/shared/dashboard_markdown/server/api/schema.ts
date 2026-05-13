@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
-import { markdownAttributesSchema } from '../markdown_saved_object';
+import { z } from '@kbn/zod';
+
+import { markdownAttributesSchemaZod } from '../markdown_saved_object/schema/v1/v1';
 import { markdownByValueStateSchema } from '../embeddable/schemas';
 
-export const markdownLibraryItemSchema = schema.object({
-  ...markdownAttributesSchema.getPropSchemas(),
-  ...markdownByValueStateSchema.getPropSchemas(),
+export const markdownLibraryItemSchema = z.object({
+  ...markdownAttributesSchemaZod.shape,
+  ...markdownByValueStateSchema.shape,
 });

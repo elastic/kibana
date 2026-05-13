@@ -208,7 +208,7 @@ describe('ESQLControlApi', () => {
 
   describe('unsaved changes', () => {
     test('should have unsaved changes when there are changes', async () => {
-      const lastSavedState = optionsListESQLControlSchema.validate({
+      const lastSavedState = optionsListESQLControlSchema.parse({
         control_type: 'VALUES_FROM_QUERY',
         selected_options: ['osx'],
         variable_name: 'old name',
@@ -234,7 +234,7 @@ describe('ESQLControlApi', () => {
     });
 
     test('should not have unsaved changes when there are no changes', async () => {
-      const initialState = optionsListESQLControlSchema.validate({
+      const initialState = optionsListESQLControlSchema.parse({
         control_type: 'VALUES_FROM_QUERY',
         selected_options: ['osx'],
         variable_name: 'machineOs',

@@ -17,7 +17,7 @@ describe('Filter Schemas', () => {
         expression: 'status:active AND category:electronics',
       };
 
-      const validated = filterSchema.validate(input);
+      const validated = filterSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -27,7 +27,7 @@ describe('Filter Schemas', () => {
         expression: 'status:active AND category:electronics',
       };
 
-      const validated = filterSchema.validate(input);
+      const validated = filterSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -37,7 +37,7 @@ describe('Filter Schemas', () => {
         expression: 'status:active',
       };
 
-      expect(() => filterSchema.validate(input)).toThrow();
+      expect(() => filterSchema.parse(input)).toThrow();
     });
 
     it('throws on missing expression', () => {
@@ -45,7 +45,7 @@ describe('Filter Schemas', () => {
         language: 'kql',
       };
 
-      expect(() => filterSchema.validate(input)).toThrow(/\[expression\]: expected value of type/);
+      expect(() => filterSchema.parse(input)).toThrow(/expression/);
     });
   });
 
@@ -59,7 +59,7 @@ describe('Filter Schemas', () => {
         label: 'Active Status',
       };
 
-      const validated = filterWithLabelSchema.validate(input);
+      const validated = filterWithLabelSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -71,7 +71,7 @@ describe('Filter Schemas', () => {
         },
       };
 
-      const validated = filterWithLabelSchema.validate(input);
+      const validated = filterWithLabelSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -80,7 +80,7 @@ describe('Filter Schemas', () => {
         label: 'Active Status',
       };
 
-      expect(() => filterWithLabelSchema.validate(input)).toThrow();
+      expect(() => filterWithLabelSchema.parse(input)).toThrow();
     });
 
     it('throws on invalid filter', () => {
@@ -92,7 +92,7 @@ describe('Filter Schemas', () => {
         label: 'Active Status',
       };
 
-      expect(() => filterWithLabelSchema.validate(input)).toThrow();
+      expect(() => filterWithLabelSchema.parse(input)).toThrow();
     });
 
     it('validates complex KQL queries', () => {
@@ -104,7 +104,7 @@ describe('Filter Schemas', () => {
         label: 'Complex Filter',
       };
 
-      const validated = filterWithLabelSchema.validate(input);
+      const validated = filterWithLabelSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -117,7 +117,7 @@ describe('Filter Schemas', () => {
         label: 'Complex Filter',
       };
 
-      const validated = filterWithLabelSchema.validate(input);
+      const validated = filterWithLabelSchema.parse(input);
       expect(validated).toEqual(input);
     });
   });

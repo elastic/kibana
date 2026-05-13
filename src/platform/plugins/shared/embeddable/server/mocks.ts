@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Type } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { createEmbeddablePersistableStateServiceMock } from '../common/mocks';
 import type { EmbeddableSetup, EmbeddableStart } from './plugin';
+import type { GetDrilldownsSchemaFnType } from './drilldowns/types';
+import { getDrilldownRegistry } from './drilldowns/registry';
 
 export const createEmbeddableSetupMock = (): jest.Mocked<EmbeddableSetup> => ({
   ...createEmbeddablePersistableStateServiceMock(),
@@ -26,18 +27,14 @@ export const createEmbeddableStartMock = (): jest.Mocked<EmbeddableStart> => ({
   getTransforms: jest.fn(),
 });
 
-export function mockGetDrilldownsSchema(triggers: string[]) {
-  return schema.object({
-    drilldowns: schema.maybe(
-      schema.arrayOf(
-        schema.object({
-          label: schema.string(),
-          trigger: schema.oneOf(
-            triggers.map((trigger) => schema.literal(trigger)) as [Type<string>]
-          ),
-          type: schema.string(),
-        })
-      )
-    ),
+export const mockGetDrilldownsSchema: GetDrilldownsSchemaFnType = (supportedTriggers) => {
+  const registry = getDrilldownRegistry();
+  registry.registerDrilldown('test-drilldown', {
+    schema: z.object({
+      foo: z.string().optional(),
+    }),
+    supportedTriggers,
   });
-}
+
+  return registry.getSchema(supportedTriggers);
+};

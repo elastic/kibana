@@ -18,7 +18,7 @@ describe('schema_embedded_runtime_fields', () => {
           popularity: 0,
         };
 
-        expect(savedRuntimeFieldSchema.validate(runtimeField)).toEqual(runtimeField);
+        expect(savedRuntimeFieldSchema.parse(runtimeField)).toEqual(runtimeField);
       });
 
       it('accepts popularity above the lower bound (10)', () => {
@@ -28,7 +28,7 @@ describe('schema_embedded_runtime_fields', () => {
           popularity: 10,
         };
 
-        expect(savedRuntimeFieldSchema.validate(runtimeField)).toEqual(runtimeField);
+        expect(savedRuntimeFieldSchema.parse(runtimeField)).toEqual(runtimeField);
       });
 
       it('rejects popularity below the lower bound', () => {
@@ -38,7 +38,7 @@ describe('schema_embedded_runtime_fields', () => {
           popularity: -1,
         };
 
-        expect(() => savedRuntimeFieldSchema.validate(runtimeField)).toThrow(/\[popularity\]/i);
+        expect(() => savedRuntimeFieldSchema.parse(runtimeField)).toThrow(/popularity|Too small/i);
       });
     });
 
@@ -55,7 +55,7 @@ describe('schema_embedded_runtime_fields', () => {
           },
         };
 
-        expect(savedRuntimeFieldSchema.validate(runtimeField)).toEqual(runtimeField);
+        expect(savedRuntimeFieldSchema.parse(runtimeField)).toEqual(runtimeField);
       });
 
       it('accepts popularity above the lower bound (10) on a subfield', () => {
@@ -70,7 +70,7 @@ describe('schema_embedded_runtime_fields', () => {
           },
         };
 
-        expect(savedRuntimeFieldSchema.validate(runtimeField)).toEqual(runtimeField);
+        expect(savedRuntimeFieldSchema.parse(runtimeField)).toEqual(runtimeField);
       });
 
       it('rejects popularity below the lower bound on a subfield', () => {
@@ -85,8 +85,8 @@ describe('schema_embedded_runtime_fields', () => {
           },
         };
 
-        expect(() => savedRuntimeFieldSchema.validate(runtimeField)).toThrow(
-          /\[fields\.my_subfield\.popularity\]/i
+        expect(() => savedRuntimeFieldSchema.parse(runtimeField)).toThrow(
+          /my_subfield|popularity|Too small|fields/i
         );
       });
     });

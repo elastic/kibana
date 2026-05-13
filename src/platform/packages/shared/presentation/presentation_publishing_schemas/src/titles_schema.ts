@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 
-export const serializedTitlesSchema = schema.object({
-  description: schema.maybe(schema.string()),
-  hide_title: schema.maybe(schema.boolean()),
-  title: schema.maybe(schema.string()),
-  hide_border: schema.maybe(schema.boolean()),
+export const serializedTitlesSchema = z.object({
+  description: z.string().optional(),
+  hide_title: z.boolean().optional(),
+  title: z.string().optional(),
+  hide_border: z.boolean().optional(),
 });

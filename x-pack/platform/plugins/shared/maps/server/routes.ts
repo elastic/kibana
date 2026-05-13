@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import fs from 'fs';
 import path from 'path';
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
@@ -36,9 +36,9 @@ export function initRoutes(coreSetup: CoreSetup<StartDeps>, logger: Logger) {
         version: '1',
         validate: {
           request: {
-            params: schema.object({
-              fontstack: schema.string(),
-              range: schema.string(),
+            params: z.object({
+              fontstack: z.string(),
+              range: z.string(),
             }),
           },
         },
@@ -82,8 +82,8 @@ export function initRoutes(coreSetup: CoreSetup<StartDeps>, logger: Logger) {
         version: '1',
         validate: {
           request: {
-            query: schema.object({
-              indexPatternTitle: schema.string(),
+            query: z.object({
+              indexPatternTitle: z.string(),
             }),
           },
         },

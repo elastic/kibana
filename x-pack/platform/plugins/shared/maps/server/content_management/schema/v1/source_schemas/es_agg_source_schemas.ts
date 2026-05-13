@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 
 import { SOURCE_TYPES } from '../../../../../common';
 import {
@@ -16,159 +16,110 @@ import {
 } from '../../../../../common/constants';
 import { BaseESSourceSchema } from './es_source_schemas';
 
-const aggMaskSchema = schema.object(
-  {
-    operator: schema.oneOf([
-      schema.literal(MASK_OPERATOR.ABOVE),
-      schema.literal(MASK_OPERATOR.BELOW),
-    ]),
-    value: schema.number(),
-  },
-  {
-    meta: {
-      description: 'Hide cluster when metric value meets mask criteria.',
-    },
-  }
-);
+const aggMaskSchema = z
+  .object({
+    operator: z.union([z.literal(MASK_OPERATOR.ABOVE), z.literal(MASK_OPERATOR.BELOW)]),
+    value: z.number(),
+  })
+  .meta({
+    description: 'Hide cluster when metric value meets mask criteria.',
+  });
 
-export const countAggSchema = schema.object({
-  label: schema.maybe(schema.string()),
-  mask: schema.maybe(aggMaskSchema),
-  type: schema.literal(AGG_TYPE.COUNT),
+export const countAggSchema = z.object({
+  label: z.string().optional(),
+  mask: aggMaskSchema.optional(),
+  type: z.literal(AGG_TYPE.COUNT),
 });
 
-export const fieldedAggSchema = schema.object({
-  field: schema.maybe(schema.string()),
-  label: schema.maybe(schema.string()),
-  mask: schema.maybe(aggMaskSchema),
-  type: schema.oneOf([
-    schema.literal(AGG_TYPE.UNIQUE_COUNT),
-    schema.literal(AGG_TYPE.MAX),
-    schema.literal(AGG_TYPE.MIN),
-    schema.literal(AGG_TYPE.SUM),
-    schema.literal(AGG_TYPE.AVG),
-    schema.literal(AGG_TYPE.TERMS),
+export const fieldedAggSchema = z.object({
+  field: z.string().optional(),
+  label: z.string().optional(),
+  mask: aggMaskSchema.optional(),
+  type: z.union([
+    z.literal(AGG_TYPE.UNIQUE_COUNT),
+    z.literal(AGG_TYPE.MAX),
+    z.literal(AGG_TYPE.MIN),
+    z.literal(AGG_TYPE.SUM),
+    z.literal(AGG_TYPE.AVG),
+    z.literal(AGG_TYPE.TERMS),
   ]),
 });
 
-export const percentileAggSchema = schema.object({
-  field: schema.maybe(schema.string()),
-  label: schema.maybe(schema.string()),
-  mask: schema.maybe(aggMaskSchema),
-  percentile: schema.maybe(schema.number()),
-  type: schema.literal(AGG_TYPE.PERCENTILE),
+export const percentileAggSchema = z.object({
+  field: z.string().optional(),
+  label: z.string().optional(),
+  mask: aggMaskSchema.optional(),
+  percentile: z.number().optional(),
+  type: z.literal(AGG_TYPE.PERCENTILE),
 });
 
-export const AggSchema = schema.oneOf([countAggSchema, fieldedAggSchema, percentileAggSchema]);
+export const AggSchema = z.union([countAggSchema, fieldedAggSchema, percentileAggSchema]);
 
 // base schema for Elasticsearch DSL aggregation sources
-export const BaseESAggSourceSchema = BaseESSourceSchema.extends({
-  metrics: schema.maybe(
-    schema.arrayOf(AggSchema, {
-      defaultValue: [{ type: AGG_TYPE.COUNT }],
-    })
-  ),
+export const BaseESAggSourceSchema = BaseESSourceSchema.extend({
+  metrics: z
+    .array(AggSchema)
+    .default([{ type: AGG_TYPE.COUNT }])
+    .optional(),
+}).strict();
+
+export const ESGeoGridSourceSchema = BaseESAggSourceSchema.extend({
+  geoField: z.string().meta({
+    description: 'Field containing indexed geo-point or geo-shape values.',
+  }),
+  requestType: z.union([
+    z.literal(RENDER_AS.HEATMAP),
+    z.literal(RENDER_AS.POINT),
+    z.literal(RENDER_AS.GRID),
+    z.literal(RENDER_AS.HEX),
+  ]),
+  resolution: z.union([
+    z.literal(GRID_RESOLUTION.COARSE),
+    z.literal(GRID_RESOLUTION.FINE),
+    z.literal(GRID_RESOLUTION.MOST_FINE),
+    z.literal(GRID_RESOLUTION.SUPER_FINE),
+  ]),
+  type: z.literal(SOURCE_TYPES.ES_GEO_GRID),
+})
+  .meta({
+    description:
+      'Vector feature source returning points and polygons from Elasticsearch geotile_grid or geohex_grid aggregations. One feature is returned per bucket.',
+  })
+  .strict();
+
+export const ESGeoLineSourceSchema = BaseESAggSourceSchema.extend({
+  geoField: z.string().meta({
+    description: 'Field containing indexed geo-point values.',
+  }),
+  groupByTimeseries: z.boolean().default(false).optional().meta({
+    description: `When true, results are grouped by time_series aggregation, creating a line feature for each time_series group.`,
+  }),
+  lineSimplificationSize: z.number().min(1).max(10000).default(500).optional().meta({
+    description: `The maximum number of points for each line. Line is simplifed when threshold is exceeded. Use smaller values for better performance.`,
+  }),
+  splitField: z.string().optional().meta({
+    description: `Field used to group results by term aggregation, creating a line feature for each term. Required when groupByTimeseries is false. Ignored when groupByTimeseries is true.`,
+  }),
+  sortField: z.string().optional().meta({
+    description: `Numeric field used as the sort key for ordering the points. Required when groupByTimeseries is false. Ignored when groupByTimeseries is true.`,
+  }),
+  type: z.literal(SOURCE_TYPES.ES_GEO_LINE),
+}).meta({
+  description:
+    'Vector feature source returning lines from Elasticsearch geo_line aggregation. One feature is returned per group.',
 });
 
-export const ESGeoGridSourceSchema = BaseESAggSourceSchema.extends(
-  {
-    geoField: schema.string({
-      meta: {
-        description: 'Field containing indexed geo-point or geo-shape values.',
-      },
-    }),
-    requestType: schema.oneOf([
-      schema.literal(RENDER_AS.HEATMAP),
-      schema.literal(RENDER_AS.POINT),
-      schema.literal(RENDER_AS.GRID),
-      schema.literal(RENDER_AS.HEX),
-    ]),
-    resolution: schema.oneOf([
-      schema.literal(GRID_RESOLUTION.COARSE),
-      schema.literal(GRID_RESOLUTION.FINE),
-      schema.literal(GRID_RESOLUTION.MOST_FINE),
-      schema.literal(GRID_RESOLUTION.SUPER_FINE),
-    ]),
-    type: schema.literal(SOURCE_TYPES.ES_GEO_GRID),
-  },
-  {
-    meta: {
-      description:
-        'Vector feature source returning points and polygons from Elasticsearch geotile_grid or geohex_grid aggregations. One feature is returned per bucket.',
-    },
-    unknowns: 'forbid',
-  }
-);
-
-export const ESGeoLineSourceSchema = BaseESAggSourceSchema.extends(
-  {
-    geoField: schema.string({
-      meta: {
-        description: 'Field containing indexed geo-point values.',
-      },
-    }),
-    groupByTimeseries: schema.maybe(
-      schema.boolean({
-        defaultValue: false,
-        meta: {
-          description: `When true, results are grouped by time_series aggregation, creating a line feature for each time_series group.`,
-        },
-      })
-    ),
-    lineSimplificationSize: schema.maybe(
-      schema.number({
-        max: 10000,
-        min: 1,
-        defaultValue: 500,
-        meta: {
-          description: `The maximum number of points for each line. Line is simplifed when threshold is exceeded. Use smaller values for better performance.`,
-        },
-      })
-    ),
-    splitField: schema.maybe(
-      schema.string({
-        meta: {
-          description: `Field used to group results by term aggregation, creating a line feature for each term. Required when groupByTimeseries is false. Ignored when groupByTimeseries is true.`,
-        },
-      })
-    ),
-    sortField: schema.maybe(
-      schema.string({
-        meta: {
-          description: `Numeric field used as the sort key for ordering the points. Required when groupByTimeseries is false. Ignored when groupByTimeseries is true.`,
-        },
-      })
-    ),
-    type: schema.literal(SOURCE_TYPES.ES_GEO_LINE),
-  },
-  {
-    meta: {
-      description:
-        'Vector feature source returning lines from Elasticsearch geo_line aggregation. One feature is returned per group.',
-    },
-    unknowns: 'forbid',
-  }
-);
-
-export const ESPewPewSourceSchema = BaseESAggSourceSchema.extends(
-  {
-    destGeoField: schema.string({
-      meta: {
-        description: `Field containing indexed geo-point values.`,
-      },
-    }),
-    sourceGeoField: schema.string({
-      meta: {
-        description: `Field containing indexed geo-point values.`,
-      },
-    }),
-    type: schema.literal(SOURCE_TYPES.ES_PEW_PEW),
-  },
-  {
-    meta: {
-      description:
-        'Vector feature source returning lines from Elasticsearch nested geotile_grid aggregation. Results grouped by destintation point, creating one feature per destination point and source geotile_grid bucket.',
-    },
-    unknowns: 'forbid',
-  }
-);
+export const ESPewPewSourceSchema = BaseESAggSourceSchema.extend({
+  destGeoField: z.string().meta({
+    description: `Field containing indexed geo-point values.`,
+  }),
+  sourceGeoField: z.string().meta({
+    description: `Field containing indexed geo-point values.`,
+  }),
+  type: z.literal(SOURCE_TYPES.ES_PEW_PEW),
+})
+  .meta({
+    description:
+      'Vector feature source returning lines from Elasticsearch nested geotile_grid aggregation. Results grouped by destintation point, creating one feature per destination point and source geotile_grid bucket.',
+  })
+  .strict();

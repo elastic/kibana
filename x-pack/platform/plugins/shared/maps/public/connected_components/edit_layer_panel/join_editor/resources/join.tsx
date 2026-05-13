@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React, { Component } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -61,7 +60,8 @@ export class Join extends Component<Props, State> {
 
   componentDidMount() {
     this._isMounted = true;
-    this._loadRightFields(_.get(this.props.join, 'right.indexPatternId'));
+    const indexPatternId = this.props.join.right?.indexPatternId;
+    this._loadRightFields(typeof indexPatternId === 'string' ? indexPatternId : undefined);
   }
 
   componentWillUnmount() {

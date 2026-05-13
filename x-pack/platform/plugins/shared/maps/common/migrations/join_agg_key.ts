@@ -20,6 +20,13 @@ import type { StoredMapAttributes } from '../../server';
 
 const GROUP_BY_DELIMITER = '_groupby_';
 
+/** Serialized join `right` during map migrations (includes legacy fields like indexPatternTitle). */
+interface LegacySerializedJoinRight {
+  metrics?: AggDescriptor[];
+  indexPatternTitle?: string;
+  term?: string;
+}
+
 function getLegacyAggKey({
   aggType,
   aggFieldName,
@@ -82,12 +89,13 @@ export function migrateJoinAggKey({
 
       const legacyJoinFields = new Map<string, Partial<JoinDescriptor>>();
       vectorLayerDescriptor.joins.forEach((joinDescriptor: Partial<JoinDescriptor>) => {
-        _.get(joinDescriptor, 'right.metrics', []).forEach((aggDescriptor: AggDescriptor) => {
+        const right = joinDescriptor.right as LegacySerializedJoinRight | undefined;
+        (right?.metrics ?? []).forEach((aggDescriptor) => {
           const legacyAggKey = getLegacyAggKey({
             aggType: aggDescriptor.type,
             aggFieldName: 'field' in aggDescriptor ? aggDescriptor.field : undefined,
-            indexPatternTitle: _.get(joinDescriptor, 'right.indexPatternTitle', ''),
-            termFieldName: _.get(joinDescriptor, 'right.term', ''),
+            indexPatternTitle: right?.indexPatternTitle ?? '',
+            termFieldName: right?.term ?? '',
           });
           // The legacy getAggKey implemenation has a naming collision bug where
           // aggType, aggFieldName, indexPatternTitle, and termFieldName would result in the identical aggKey.

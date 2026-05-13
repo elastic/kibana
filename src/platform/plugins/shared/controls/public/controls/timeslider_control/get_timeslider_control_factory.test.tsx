@@ -282,7 +282,7 @@ describe('TimeSliderControlApi', () => {
 
   describe('unsaved changes', () => {
     test('should have unsaved changes when there are changes', async () => {
-      const lastSavedState = timeSliderControlSchema.validate({});
+      const lastSavedState = timeSliderControlSchema.parse({});
       const initialState = {
         ...lastSavedState,
         is_anchored: true,
@@ -302,7 +302,7 @@ describe('TimeSliderControlApi', () => {
     });
 
     test('should not have unsaved changes when there are no changes', async () => {
-      const initialState = timeSliderControlSchema.validate({});
+      const initialState = timeSliderControlSchema.parse({});
       const embeddable = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState,
