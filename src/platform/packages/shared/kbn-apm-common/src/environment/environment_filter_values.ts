@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { escapeKuery } from '@kbn/es-query';
-import type { Environment } from '@kbn/apm-types';
+import type { Environment } from '@kbn/apm-types-shared';
 import { SERVICE_ENVIRONMENT } from '@kbn/apm-types';
 
 export const ENVIRONMENT_ALL_VALUE = 'ENVIRONMENT_ALL' as const;
