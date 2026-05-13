@@ -60,6 +60,16 @@ describe('[Snapshot and Restore API Routes] Default repository', () => {
       });
     });
 
+    it('should return null when default repository is an empty string', async () => {
+      getSettingsFn.mockResolvedValue({
+        persistent: { repositories: { default_repository: '' } },
+      });
+
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({
+        body: { repositoryName: null },
+      });
+    });
+
     it('should throw if ES error', async () => {
       getSettingsFn.mockRejectedValue(new Error('boom'));
 

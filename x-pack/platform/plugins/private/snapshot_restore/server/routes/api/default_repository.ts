@@ -51,8 +51,14 @@ export function registerDefaultRepositoryRoutes({
         const { repositories }: DefaultRepositorySettings = (persistent ??
           {}) as DefaultRepositorySettings;
 
+        const repositoryName =
+          typeof repositories?.default_repository === 'string' &&
+          repositories.default_repository.trim().length > 0
+            ? repositories.default_repository
+            : null;
+
         return res.ok({
-          body: { repositoryName: repositories?.default_repository ?? null },
+          body: { repositoryName },
         });
       } catch (e) {
         return handleEsError({ error: e, response: res });

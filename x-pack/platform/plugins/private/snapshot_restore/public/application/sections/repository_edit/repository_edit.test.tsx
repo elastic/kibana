@@ -287,6 +287,48 @@ describe('<RepositoryEdit />', () => {
     expect(setDefaultRepository).not.toHaveBeenCalled();
   });
 
+  it('SHOULD not show confirm modal when default repository is an empty string', async () => {
+    mockEditRepository.mockResolvedValueOnce({ data: null, error: null });
+
+    const setDefaultRepository = jest.fn().mockResolvedValue({ data: null, error: null });
+    mockUseDefaultRepository.mockReturnValue({
+      defaultRepository: '',
+      isLoadingDefaultRepository: false,
+      defaultRepositoryStatus: 'loaded',
+      setDefaultRepository,
+    });
+
+    const history = createMemoryHistory({
+      initialEntries: [`/edit_repository/${mockDecodedRepositoryName}`],
+    });
+    render(
+      <I18nProvider>
+        <Router history={history}>
+          <RepositoryEdit
+            history={history}
+            location={history.location}
+            match={{
+              params: { name: mockDecodedRepositoryName },
+              isExact: true,
+              path: '',
+              url: '',
+            }}
+          />
+        </Router>
+      </I18nProvider>
+    );
+
+    fireEvent.click(screen.getByTestId('repositoryFormToggleDefault'));
+    fireEvent.click(screen.getByTestId('repositoryFormSave'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('confirmDefaultRepositoryModal')).not.toBeInTheDocument();
+      expect(mockEditRepository).toHaveBeenCalled();
+      expect(setDefaultRepository).toHaveBeenCalledWith(mockDecodedRepositoryName);
+      expect(history.location.pathname).toBe('/repositories');
+    });
+  });
+
   it('SHOULD save and set default after confirming default repository change', async () => {
     mockEditRepository.mockResolvedValueOnce({ data: null, error: null });
 

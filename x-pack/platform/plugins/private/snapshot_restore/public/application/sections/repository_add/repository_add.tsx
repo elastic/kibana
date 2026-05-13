@@ -51,6 +51,7 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
     defaultRepositoryStatus,
     setDefaultRepository: setDefaultRepositoryRequest,
   } = useDefaultRepository();
+  const normalizedDefaultRepository = defaultRepository?.trim() ? defaultRepository : null;
   const isDefaultRepositoryKnown = defaultRepositoryStatus === 'loaded';
   const defaultRepositoryLoadError = defaultRepositoryStatus === 'error';
   const canSetOrChangeDefaultRepository = canSetDefaultRepository && !defaultRepositoryLoadError;
@@ -89,7 +90,7 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
         canSetOrChangeDefaultRepository &&
         (isDefaultRepository ||
           isFirstRepository ||
-          (isDefaultRepositoryKnown && defaultRepository === null));
+          (isDefaultRepositoryKnown && normalizedDefaultRepository === null));
 
       if (shouldSetDefault) {
         const defaultResponse = await setDefaultRepositoryRequest(name);
@@ -123,12 +124,12 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
       canSetOrChangeDefaultRepository &&
       (isDefaultRepository ||
         isFirstRepository ||
-        (isDefaultRepositoryKnown && defaultRepository === null));
+        (isDefaultRepositoryKnown && normalizedDefaultRepository === null));
     const isChangingDefault =
       shouldSetDefault &&
       isDefaultRepositoryKnown &&
-      defaultRepository !== null &&
-      defaultRepository !== name;
+      normalizedDefaultRepository !== null &&
+      normalizedDefaultRepository !== name;
 
     if (isChangingDefault) {
       setPendingSave(newRepository);
@@ -165,9 +166,9 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
 
   return (
     <EuiPageSection restrictWidth style={{ width: '100%' }}>
-      {canSetOrChangeDefaultRepository && pendingSave && defaultRepository !== null && (
+      {canSetOrChangeDefaultRepository && pendingSave && normalizedDefaultRepository !== null && (
         <ConfirmDefaultRepositoryModal
-          currentDefaultRepository={defaultRepository}
+          currentDefaultRepository={normalizedDefaultRepository}
           newDefaultRepository={pendingSave.name}
           onCancel={() => setPendingSave(null)}
           onConfirm={() => {

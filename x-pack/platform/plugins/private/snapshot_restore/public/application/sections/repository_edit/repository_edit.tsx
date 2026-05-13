@@ -76,6 +76,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
     defaultRepositoryStatus,
     setDefaultRepository: setDefaultRepositoryRequest,
   } = useDefaultRepository();
+  const normalizedDefaultRepository = defaultRepository?.trim() ? defaultRepository : null;
   const defaultRepositoryLoadError = defaultRepositoryStatus === 'error';
   const canSetOrChangeDefaultRepository = canSetDefaultRepository && !defaultRepositoryLoadError;
   const isAlreadyDefaultRepository = defaultRepository === name;
@@ -124,8 +125,8 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
     const isChangingDefault =
       shouldSetDefault &&
       isDefaultRepositoryKnown &&
-      defaultRepository !== null &&
-      defaultRepository !== name;
+      normalizedDefaultRepository !== null &&
+      normalizedDefaultRepository !== name;
 
     if (isChangingDefault) {
       setPendingSave(editedRepository);
@@ -206,9 +207,9 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
 
   return (
     <EuiPageSection restrictWidth style={{ width: '100%' }}>
-      {canSetOrChangeDefaultRepository && pendingSave && defaultRepository !== null && (
+      {canSetOrChangeDefaultRepository && pendingSave && normalizedDefaultRepository !== null && (
         <ConfirmDefaultRepositoryModal
-          currentDefaultRepository={defaultRepository}
+          currentDefaultRepository={normalizedDefaultRepository}
           newDefaultRepository={name}
           onCancel={() => setPendingSave(null)}
           onConfirm={() => {

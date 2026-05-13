@@ -14,6 +14,14 @@ import {
 
 export type DefaultRepositoryStatus = 'loading' | 'loaded' | 'error';
 
+const normalizeRepositoryName = (repositoryName?: string | null): string | null => {
+  if (typeof repositoryName !== 'string') {
+    return null;
+  }
+  const trimmed = repositoryName.trim();
+  return trimmed.length > 0 ? trimmed : null;
+};
+
 export const useDefaultRepository = () => {
   const [defaultRepository, setDefaultRepositoryState] = useState<string | null>(null);
   const [defaultRepositoryStatus, setDefaultRepositoryStatus] =
@@ -30,7 +38,7 @@ export const useDefaultRepository = () => {
       setDefaultRepositoryError(error);
       return response;
     }
-    setDefaultRepositoryState(data?.repositoryName ?? null);
+    setDefaultRepositoryState(normalizeRepositoryName(data?.repositoryName));
     setDefaultRepositoryStatus('loaded');
     return response;
   }, []);

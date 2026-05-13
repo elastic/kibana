@@ -406,6 +406,48 @@ describe('<RepositoryAdd />', () => {
     expect(setDefaultRepository).not.toHaveBeenCalled();
   });
 
+  it('SHOULD not confirm when default repository is an empty string', async () => {
+    const { addRepository, useLoadRepositories } = await import('../../services/http');
+    jest.mocked(addRepository).mockResolvedValueOnce({ data: null, error: null });
+    jest.mocked(useLoadRepositories).mockReturnValue({
+      isLoading: false,
+      error: null,
+      data: { repositories: [{ name: 'existing', type: 'fs', settings: {} }] },
+      resendRequest: jest.fn(),
+    } as any);
+
+    const setDefaultRepository = jest.fn().mockResolvedValue({ data: null, error: null });
+    mockUseDefaultRepository.mockReturnValue({
+      defaultRepository: '',
+      isLoadingDefaultRepository: false,
+      defaultRepositoryStatus: 'loaded',
+      setDefaultRepository,
+    });
+
+    const history = createMemoryHistory({ initialEntries: ['/add_repository'] });
+    render(
+      <I18nProvider>
+        <Router history={history}>
+          <RepositoryAdd
+            history={history}
+            location={history.location}
+            match={{ params: {}, isExact: true, path: '', url: '' }}
+          />
+        </Router>
+      </I18nProvider>
+    );
+
+    fireEvent.click(screen.getByTestId('repositoryFormToggleDefault'));
+    fireEvent.click(screen.getByTestId('repositoryFormSave'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('confirmDefaultRepositoryModal')).not.toBeInTheDocument();
+      expect(jest.mocked(addRepository)).toHaveBeenCalled();
+      expect(setDefaultRepository).toHaveBeenCalledWith('my-repo');
+      expect(history.location.pathname).toBe('/repositories');
+    });
+  });
+
   it('SHOULD save and set default after confirming default repository change', async () => {
     const { addRepository, useLoadRepositories } = await import('../../services/http');
     jest.mocked(addRepository).mockResolvedValueOnce({ data: null, error: null });
