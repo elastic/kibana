@@ -15,8 +15,9 @@ export interface ThroughputChartsForDependencyResponse {
   comparisonTimeseries: Array<{ x: number; y: number | null }> | null;
 }
 
-export const dependencyThroughputChartsRoute =
-  defineRoute<ThroughputChartsForDependencyResponse>()({
+export const dependencyThroughputChartsRoute = defineRoute<ThroughputChartsForDependencyResponse>()(
+  {
     endpoint: 'GET /internal/apm/dependencies/charts/throughput',
     params: t.type({ query: dependencyChartQueryRt }),
-  });
+  }
+);

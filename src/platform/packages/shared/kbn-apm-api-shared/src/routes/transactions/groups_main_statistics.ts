@@ -8,7 +8,8 @@
  */
 import * as t from 'io-ts';
 import { toBooleanRt } from '@kbn/io-ts-utils';
-import { environmentRt, latencyAggregationTypeRt } from '@kbn/apm-types';
+import { latencyAggregationTypeRt } from '@kbn/apm-types';
+import { environmentRt } from '@kbn/apm-types-shared';
 import { defineRoute } from '../types';
 import { rangeRt, transactionDataSourceRt } from '../../default_api_types';
 

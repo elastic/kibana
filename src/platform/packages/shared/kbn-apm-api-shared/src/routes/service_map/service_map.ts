@@ -8,7 +8,7 @@
  */
 import * as t from 'io-ts';
 import type { ServiceMapResponse } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types';
+import { environmentRt } from '@kbn/apm-types-shared';
 import { defineRoute } from '../types';
 import { rangeRt, kueryRt } from '../../default_api_types';
 

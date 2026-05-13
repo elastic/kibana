@@ -9,7 +9,7 @@
 import * as t from 'io-ts';
 import { jsonRt } from '@kbn/io-ts-utils';
 import type { SloStatus } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types';
+import { environmentRt } from '@kbn/apm-types-shared';
 import type { ServiceAlertsResponse } from '../services/service_alerts_count';
 import { defineRoute } from '../types';
 import { rangeRt } from '../../default_api_types';

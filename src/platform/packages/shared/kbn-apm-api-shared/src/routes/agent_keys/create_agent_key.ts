@@ -19,9 +19,7 @@ export const createAgentKeyRoute = defineRoute<CreateAgentKeyResponse>()({
   params: t.type({
     body: t.type({
       name: t.string,
-      privileges: t.array(
-        t.union([t.literal('event:write'), t.literal('config_agent:read')])
-      ),
+      privileges: t.array(t.union([t.literal('event:write'), t.literal('config_agent:read')])),
     }),
   }),
 });

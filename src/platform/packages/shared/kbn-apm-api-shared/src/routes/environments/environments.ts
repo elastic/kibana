@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import * as t from 'io-ts';
-import type { Environment } from '@kbn/apm-types';
+import type { Environment } from '@kbn/apm-types-shared';
 import { defineRoute } from '../types';
 import { rangeRt } from '../../default_api_types';
 
@@ -18,9 +18,6 @@ export interface EnvironmentsResponse {
 export const environmentsRoute = defineRoute<EnvironmentsResponse>()({
   endpoint: 'GET /internal/apm/environments',
   params: t.type({
-    query: t.intersection([
-      t.partial({ serviceName: t.string }),
-      rangeRt,
-    ]),
+    query: t.intersection([t.partial({ serviceName: t.string }), rangeRt]),
   }),
 });

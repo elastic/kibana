@@ -16,11 +16,7 @@ export const alertsRouteDefinitions = {
   transactionDurationChartPreview: transactionDurationChartPreviewRoute,
 };
 
-export type {
-  AlertParams,
-  PreviewChartResponse,
-  PreviewChartResponseItem,
-} from './types';
+export type { AlertParams, PreviewChartResponse, PreviewChartResponseItem } from './types';
 export type { TransactionErrorRateChartPreviewResponse } from './transaction_error_rate_chart_preview';
 export type { ErrorCountChartPreviewResponse } from './error_count_chart_preview';
 export type { TransactionDurationChartPreviewResponse } from './transaction_duration_chart_preview';

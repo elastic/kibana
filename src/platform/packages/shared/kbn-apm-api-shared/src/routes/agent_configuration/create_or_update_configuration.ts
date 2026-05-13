@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import * as t from 'io-ts';
-import { toBooleanRt } from '@kbn/io-ts-utils';
 import { agentConfigurationIntakeRt } from '@kbn/apm-common';
+import { toBooleanRt } from '@kbn/io-ts-utils';
 import { defineRoute } from '../types';
 
 export const createOrUpdateAgentConfigurationRoute = defineRoute<void>()({
