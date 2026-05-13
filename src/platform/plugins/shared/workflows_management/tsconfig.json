@@ -99,7 +99,9 @@
     "@kbn/core-saved-objects-common",
     "@kbn/esql-types",
     "@kbn/esql-language",
-    "@kbn/esql-utils"
+    "@kbn/esql-utils",
+    "@kbn/inbox-plugin",
+    "@kbn/inbox-common"
   ],
   "exclude": ["target/**/*"]
 }

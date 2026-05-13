@@ -218,10 +218,11 @@ const artifactSchema = z
 /** Create rule API schema */
 
 /**
- * Base schema without refinements - used for extending in response schema.
+ * Base schema without refinements - used for extending in response schema and
+ * for introspection by the immutability classification meta-tests.
  * @internal
  */
-const createRuleDataBaseSchema = z
+export const createRuleDataBaseSchema = z
   .object({
     kind: ruleKindSchema,
     metadata: metadataSchema,
@@ -265,6 +266,27 @@ export const createRuleDataSchema = createRuleDataBaseSchema
   });
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
+
+/**
+ * Top-level fields of the create-rule schema that cannot be changed after the
+ * rule has been created. Every other field of {@link createRuleDataBaseSchema}
+ * is implicitly mutable.
+ *
+ * Consumers that implement PUT-style upsert must reject requests that try to
+ * mutate one of these. Consumers that implement PATCH-style update must
+ * preserve them from storage regardless of the body.
+ *
+ * Whenever a top-level field is added to {@link createRuleDataBaseSchema}, the
+ * snapshot test in `rule_data_schema.test.ts` will fail. Updating the
+ * snapshot surfaces the new field in the PR diff so reviewers can confirm
+ * whether it should be classified as immutable here instead of being silently
+ * mutable.
+ */
+export const IMMUTABLE_RULE_FIELDS = ['kind'] as const satisfies ReadonlyArray<
+  keyof CreateRuleData
+>;
+
+export type ImmutableRuleField = (typeof IMMUTABLE_RULE_FIELDS)[number];
 
 /** Update rule API schema — all fields optional for partial updates */
 
