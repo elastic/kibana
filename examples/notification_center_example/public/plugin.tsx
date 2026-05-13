@@ -32,14 +32,12 @@ export class NotificationCenterExamplePlugin implements Plugin<void, void, Setup
   public setup(core: CoreSetup<StartDeps>, deps: SetupDeps) {
     core.chrome.sidebar.registerApp({
       appId: notificationCenterAppId,
-      // Notification state lives on core.notifications.events, not in a sidebar store.
       restoreOnReload: false,
       loadComponent: async () => {
         const [coreStart, { spaces }] = await core.getStartServices();
         const { NotificationCenterApp } = await import('./notification_center_app');
         const events = coreStart.notifications.events;
 
-        // Wrap the sidebar app's render so the hooks have a provider in scope.
         return function NotificationCenterAppWithProvider(props: SidebarComponentProps) {
           return (
             <NotificationEventsProvider events={events} spaces={spaces}>
