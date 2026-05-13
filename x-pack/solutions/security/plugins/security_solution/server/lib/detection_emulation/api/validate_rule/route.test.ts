@@ -157,6 +157,88 @@ describe('validateRuleRoute — rate limiter gate', () => {
   });
 });
 
+// ─── PROD-4: per-host rate limiter on validateRule ───────────────────────────
+
+describe('validateRuleRoute — PROD-4 per-host rate limiter', () => {
+  let server: ReturnType<typeof serverMock.create>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  // Wide per-space cap so per-space never trips first; tight per-host cap so
+  // a single pre-existing slot saturates the bucket. This isolates the
+  // per-host rejection path from the per-space rejection path.
+  const makePerHostBoundedLimiter = () =>
+    new EmulationRateLimiter(
+      {
+        maxCommands: 100,
+        windowMs: 60_000,
+        disabled: false,
+        perHost: { capacity: 1, windowMs: 60_000 },
+      },
+      logger
+    );
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+    server = serverMock.create();
+    (generateScenario as jest.Mock).mockReset();
+  });
+
+  it('returns 429 with blocked_endpoints when validateRule targets a saturated host', async () => {
+    const allowlist = new EmulationAllowlist(createRestrictiveAllowlistConfig(['agent-1']), logger);
+    const rateLimiter = makePerHostBoundedLimiter();
+    // Pre-saturate agent-1 directly via the limiter — the route's normal
+    // dispatch-failure path would release the slot, so we seed it instead.
+    rateLimiter.acquire('default', 'pre-existing-rule', 'validate-rule', ['agent-1']);
+
+    validateRuleRoute(server.router, FEATURE_ENABLED_CONFIG, logger, { allowlist, rateLimiter });
+
+    const { context } = requestContextMock.createTools();
+    stubAuthenticatedUser(context);
+    context.securitySolution.getEndpointAuthz.mockResolvedValue(
+      getEndpointAuthzInitialStateMock({ canWriteExecuteOperations: true })
+    );
+
+    const response = await server.inject(
+      buildRealExecutionRequest({ endpointIds: ['agent-1'] }),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toBe(429);
+    expect(response.body.message).toMatchObject({
+      blocked_endpoints: ['agent-1'],
+    });
+    // The per-host rejection must fire BEFORE scenario generation just like
+    // the per-space rejection does — saturated hosts should not waste
+    // payload-library work either.
+    expect(generateScenario as jest.Mock).not.toHaveBeenCalled();
+  });
+
+  it("does not affect log_injection mode (which doesn't pass endpointIds to acquire)", async () => {
+    // Even with per-host capacity 0, log_injection should pass the gate
+    // because endpointIds is not forwarded to acquire() in that mode.
+    const allowlist = new EmulationAllowlist(createRestrictiveAllowlistConfig([]), logger);
+    const rateLimiter = makePerHostBoundedLimiter();
+    // Saturate every host the request would target — log_injection should
+    // still go through because the per-host bucket isn't engaged.
+    rateLimiter.acquire('default', 'pre-existing-rule', 'validate-rule', ['agent-1']);
+
+    (generateScenario as jest.Mock).mockResolvedValue({ ok: false, reason: 'rule_not_found' });
+
+    validateRuleRoute(server.router, FEATURE_ENABLED_CONFIG, logger, { allowlist, rateLimiter });
+
+    const { context } = requestContextMock.createTools();
+    stubAuthenticatedUser(context);
+    context.securitySolution.getEndpointAuthz.mockResolvedValue(getEndpointAuthzInitialStateMock());
+
+    const response = await server.inject(
+      buildLogInjectionRequest(),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).not.toBe(429);
+  });
+});
+
 // ─── log_injection bypasses the safety gates ─────────────────────────────────
 
 describe('validateRuleRoute — log_injection mode', () => {

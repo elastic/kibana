@@ -193,7 +193,8 @@ Guards applied by each tool (in order; first failure short-circuits). The four
 | Allowlist | ✓ (real_execution) | — | ✓ |
 | **Endpoint fanout cap (5/call)** | ✓ (schema-enforced, both modes) | — | ✓ (schema-enforced) |
 | **HITL prompt** | ✓ (real_execution; on-demand, skipped in standalone mode) | — | ✓ (declarative, once per conversation) |
-| Rate limit | ✓ (real_execution, 1 slot/scenario) | — | ✓ (1 slot/command) |
+| Rate limit (per-space) | ✓ (real_execution, 1 slot/scenario; 100/space/hour) | — | ✓ (1 slot/command; 100/space/hour) |
+| **Rate limit (per-host, PROD-4)** | ✓ (real_execution; 3/host/hour) | — | ✓ (3/host/hour) |
 
 Feature flags: \`detectionEmulationLogInjection\` gates log_injection;
 \`detectionEmulationRealExecution\` gates real_execution and all four
@@ -239,6 +240,21 @@ user asks to validate against more endpoints, suggest splitting the
 request, or use \`mode: 'log_injection'\` (which writes synthetic ECS
 docs and doesn't dispatch real response actions — but is still subject
 to the same cap to keep behaviour predictable across modes).
+
+**Per-host rate limit (PROD-4).** In addition to the per-space window
+(100/hour), each enrolled endpoint has its own bucket of **3
+real-execution dispatches per hour**. A call targeting endpoints whose
+buckets are saturated is rejected atomically (per-space slot rolled back
+before responding) with HTTP 429 + \`blocked_endpoints\` listing every
+host at capacity. The bound matches the lower end of major EDR vendors'
+documented response-action queue depth before host-side backpressure
+kicks in; raising it requires confirming the target vendor can absorb
+the load AND raising \`MAX_ENDPOINT_FANOUT\` (PROD-3) in lockstep, since
+the realistic ceiling on a single emulation is fanout × per-host. When
+a 429 names \`blocked_endpoints\`, suggest the user either (a) wait
+for the per-host window to roll, (b) target different hosts, or (c)
+switch to \`mode: 'log_injection'\` which is exempt from per-host
+limiting (it does not touch the host).
 
 ## Response Format
 

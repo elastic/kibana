@@ -94,7 +94,8 @@ const errorResult = (data: Record<string, unknown>): ToolResult => ({
  *   1. Real-execution feature flag
  *   2. Per-command RBAC (Endpoint Authz)
  *   3. Host allowlist (operator-controlled list of permitted endpoints)
- *   4. Atomic rate-limit acquire (per-space window; release on failure)
+ *   4. Atomic rate-limit acquire (per-space + per-host windows;
+ *      release on failure)
  *   5. Authenticated caller (defense-in-depth — emulation must be attributable)
  *
  * On any gate failure the helper returns a structured error result. On
@@ -199,7 +200,15 @@ export const withCommandGates = async (
     }
 
     // ── Gate 4: Atomic rate-limit acquire ───────────────────────────────────
-    const acquireResult = rateLimiter.acquire(spaceId, emulationId, command);
+    //
+    // PROD-4: endpointIds is forwarded so the limiter also enforces the
+    // per-host bucket. If any host is over capacity the call is rejected
+    // before any reservation lands and `blocked_endpoints` tells the
+    // LLM (and the operator reading the audit trail) which hosts are
+    // saturated. Because the per-family tools always target a non-empty
+    // endpointIds (it's required by their schema), per-host limiting
+    // always engages here.
+    const acquireResult = rateLimiter.acquire(spaceId, emulationId, command, endpointIds);
     if (!acquireResult.allowed) {
       logger.warn(
         `Emulation command [${command}] for emulation [${emulationId}] blocked by rate limiter: ${acquireResult.error}`
@@ -214,7 +223,13 @@ export const withCommandGates = async (
         agent_type: agentType,
         command,
         status_code: 429,
-        likely_cause: 'Rate limit exceeded for this space',
+        likely_cause:
+          acquireResult.blockedEndpoints && acquireResult.blockedEndpoints.length > 0
+            ? 'Per-host rate limit exceeded for one or more endpoints'
+            : 'Rate limit exceeded for this space',
+        ...(acquireResult.blockedEndpoints
+          ? { blocked_endpoints: acquireResult.blockedEndpoints }
+          : {}),
       });
     }
     rateLimitToken = acquireResult.token;

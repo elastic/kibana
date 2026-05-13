@@ -404,8 +404,14 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
         // Step 5 — a single rule validation must not consume N slots.
         // The token is released on any post-acquire failure via the
         // unified catch below.
+        //
+        // PROD-4: endpointIds is forwarded so the limiter also enforces
+        // the per-host bucket. If any host is over capacity the call is
+        // rejected with `blocked_endpoints` naming the saturated hosts
+        // so the LLM can suggest a different target set or a retry-after
+        // window.
         if (mode === 'real_execution') {
-          const acquireResult = rateLimiter.acquire(spaceId, ruleId, 'validate-rule');
+          const acquireResult = rateLimiter.acquire(spaceId, ruleId, 'validate-rule', endpointIds);
           if (!acquireResult.allowed) {
             logger.warn(
               `validate_rule tool blocked by rate limiter for rule [${ruleId}]: ${acquireResult.error}`
@@ -422,7 +428,13 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
                     reset_ms: acquireResult.resetMs,
                     rule_id: ruleId,
                     status_code: 429,
-                    likely_cause: 'Rate limit exceeded for this space.',
+                    likely_cause:
+                      acquireResult.blockedEndpoints && acquireResult.blockedEndpoints.length > 0
+                        ? 'Per-host rate limit exceeded for one or more endpoints.'
+                        : 'Rate limit exceeded for this space.',
+                    ...(acquireResult.blockedEndpoints
+                      ? { blocked_endpoints: acquireResult.blockedEndpoints }
+                      : {}),
                   },
                 },
               ],

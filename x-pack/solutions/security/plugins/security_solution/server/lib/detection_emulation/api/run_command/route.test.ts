@@ -370,6 +370,132 @@ describe('runEmulationCommandRoute — rate limiter gate', () => {
   });
 });
 
+// ─── PROD-4: per-host rate-limiter gate ──────────────────────────────────────
+
+describe('runEmulationCommandRoute — PROD-4 per-host rate limiter', () => {
+  let server: ReturnType<typeof serverMock.create>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  // Wide per-space cap (so the per-space bucket never trips first), tight
+  // per-host cap so a single prior call saturates it. This isolates the
+  // per-host rejection path from the per-space rejection path so the test
+  // unambiguously proves PROD-4 is wired.
+  const makePerHostBoundedLimiter = () =>
+    new EmulationRateLimiter(
+      {
+        maxCommands: 100,
+        windowMs: 60_000,
+        disabled: false,
+        perHost: { capacity: 1, windowMs: 60_000 },
+      },
+      logger
+    );
+
+  const makePermissiveAllowlist = () =>
+    new EmulationAllowlist(createRestrictiveAllowlistConfig(['agent-1', 'agent-2']), logger);
+
+  const buildIsolateRequest = (endpointIds: string[]) =>
+    requestMock.create({
+      method: 'post',
+      path: DETECTION_ENGINE_EMULATION_RUN_COMMAND_URL,
+      body: {
+        emulationId: 'emu-per-host',
+        agentType: 'endpoint',
+        endpointIds,
+        command: 'isolate',
+      },
+    });
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+    server = serverMock.create();
+  });
+
+  it('returns 429 with blocked_endpoints naming the saturated host', async () => {
+    const allowlist = makePermissiveAllowlist();
+    const rateLimiter = makePerHostBoundedLimiter();
+    // Pre-saturate ep-A's per-host bucket directly via the limiter — going
+    // through the route would trip the dispatch-failure rollback path,
+    // releasing the slot before the second call can observe it.
+    rateLimiter.acquire('default', 'pre-existing-emu', 'isolate', ['agent-1']);
+
+    runEmulationCommandRoute(server.router, FEATURE_ENABLED_CONFIG, logger, {
+      allowlist,
+      rateLimiter,
+    });
+
+    const { context } = requestContextMock.createTools();
+    stubAuthenticatedUser(context);
+    context.securitySolution.getEndpointAuthz.mockResolvedValue(getEndpointAuthzInitialStateMock());
+
+    const response = await server.inject(
+      buildIsolateRequest(['agent-1']),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toBe(429);
+    expect(response.body.message).toMatchObject({
+      blocked_endpoints: ['agent-1'],
+    });
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Per-host rate limit exceeded')
+    );
+  });
+
+  it('does not record a per-space slot when the per-host bucket rejects (atomic rollback)', async () => {
+    const allowlist = makePermissiveAllowlist();
+    const rateLimiter = makePerHostBoundedLimiter();
+    // Pre-saturate ep-A.
+    rateLimiter.acquire('default', 'pre-existing-emu', 'isolate', ['agent-1']);
+    const beforeRejected = rateLimiter.getCurrentCount('default');
+
+    runEmulationCommandRoute(server.router, FEATURE_ENABLED_CONFIG, logger, {
+      allowlist,
+      rateLimiter,
+    });
+
+    const { context } = requestContextMock.createTools();
+    stubAuthenticatedUser(context);
+    context.securitySolution.getEndpointAuthz.mockResolvedValue(getEndpointAuthzInitialStateMock());
+
+    const response = await server.inject(
+      buildIsolateRequest(['agent-1']),
+      requestContextMock.convertContext(context)
+    );
+    expect(response.status).toBe(429);
+
+    // Per-space count must NOT have advanced beyond the seed: the rejected
+    // call atomically rolled back its would-be reservation.
+    expect(rateLimiter.getCurrentCount('default')).toBe(beforeRejected);
+  });
+
+  it('still allows requests targeting different (non-saturated) endpoints', async () => {
+    const allowlist = makePermissiveAllowlist();
+    const rateLimiter = makePerHostBoundedLimiter();
+    // Saturate agent-1 only.
+    rateLimiter.acquire('default', 'pre-existing-emu', 'isolate', ['agent-1']);
+
+    runEmulationCommandRoute(server.router, FEATURE_ENABLED_CONFIG, logger, {
+      allowlist,
+      rateLimiter,
+    });
+
+    const { context } = requestContextMock.createTools();
+    stubAuthenticatedUser(context);
+    context.securitySolution.getEndpointAuthz.mockResolvedValue(getEndpointAuthzInitialStateMock());
+
+    // Targeting agent-2 (not saturated) should pass the rate-limit gate.
+    // Whatever happens downstream is fine — we just need to confirm the
+    // 429 wasn't returned. Status 502 (downstream dispatch fail) confirms
+    // we got past every gate including PROD-4 per-host.
+    const response = await server.inject(
+      buildIsolateRequest(['agent-2']),
+      requestContextMock.convertContext(context)
+    );
+    expect(response.status).not.toBe(429);
+  });
+});
+
 // ─── N5: missing user gate ────────────────────────────────────────────────────
 
 describe('runEmulationCommandRoute — missing user gate', () => {

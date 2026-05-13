@@ -266,8 +266,18 @@ export const validateRuleRoute = (
           // Step 5 — a single rule validation must not consume N slots.
           // The token is released on any post-acquire failure via the
           // unified catch below.
+          //
+          // PROD-4: endpointIds is forwarded so the limiter also enforces
+          // the per-host bucket. If any host is over capacity the call is
+          // rejected before any reservation lands and `blocked_endpoints`
+          // tells the operator which hosts are saturated.
           if (mode === 'real_execution') {
-            const acquireResult = rateLimiter.acquire(spaceId, ruleId, 'validate-rule');
+            const acquireResult = rateLimiter.acquire(
+              spaceId,
+              ruleId,
+              'validate-rule',
+              endpointIds
+            );
             if (!acquireResult.allowed) {
               logger.warn(
                 `[validate_rule] blocked by rate limiter for rule [${ruleId}]: ${acquireResult.error}`
@@ -279,6 +289,9 @@ export const validateRuleRoute = (
                   current_count: acquireResult.currentCount,
                   max_commands: acquireResult.maxCommands,
                   reset_ms: acquireResult.resetMs,
+                  ...(acquireResult.blockedEndpoints
+                    ? { blocked_endpoints: acquireResult.blockedEndpoints }
+                    : {}),
                 },
               });
             }

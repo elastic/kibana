@@ -257,7 +257,13 @@ export const runEmulationCommandRoute = (
           // a single synchronous call so concurrent requests in the same space cannot all
           // pass the gate before any of them records (B3). On dispatch failure below we
           // pass `acquireResult.token` to `release()` to roll the count back.
-          const acquireResult = rateLimiter.acquire(spaceId, emulationId, command);
+          //
+          // PROD-4: endpointIds is forwarded so the limiter can also enforce the
+          // per-host bucket. If any host is over capacity the call is rejected
+          // before any reservation is recorded, and the saturated host IDs are
+          // surfaced in `blocked_endpoints` so the operator knows which hosts
+          // need to drain before the command can be retried.
+          const acquireResult = rateLimiter.acquire(spaceId, emulationId, command, endpointIds);
           if (!acquireResult.allowed) {
             logger.warn(
               `Emulation command [${command}] for emulation [${emulationId}] blocked by rate limiter: ${acquireResult.error}`
@@ -269,6 +275,9 @@ export const runEmulationCommandRoute = (
                 current_count: acquireResult.currentCount,
                 max_commands: acquireResult.maxCommands,
                 reset_ms: acquireResult.resetMs,
+                ...(acquireResult.blockedEndpoints
+                  ? { blocked_endpoints: acquireResult.blockedEndpoints }
+                  : {}),
               },
             });
           }
