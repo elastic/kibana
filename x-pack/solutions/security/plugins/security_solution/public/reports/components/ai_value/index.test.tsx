@@ -51,6 +51,13 @@ jest.mock('../../providers/ai_value/export_provider', () => ({
   useAIValueExportContext: jest.fn(),
 }));
 
+jest.mock('../../../common/components/links', () => ({
+  useSecuritySolutionLinkProps: jest.fn(() => ({
+    href: '/mock-attack-discovery',
+    onClick: jest.fn(),
+  })),
+}));
+
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseValueMetrics = useValueMetrics as jest.MockedFunction<typeof useValueMetrics>;
 const mockUseHasEverUsedAttackDiscovery = useHasEverUsedAttackDiscovery as jest.MockedFunction<

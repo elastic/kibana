@@ -40,11 +40,10 @@ describe('utils', () => {
       expect(result).toEqual({
         percent: '+25.0%',
         color: 'success',
-        note: expect.any(Object),
+        note: 'Your test stat is up by 25.0% from 80',
       });
       const renderedNote = renderNote(result.note);
       expect(renderedNote.container.textContent).toBe('Your test stat is up by 25.0% from 80');
-      expect(renderedNote.container.querySelectorAll('strong')).toHaveLength(2);
     });
 
     it('returns correct percent info for negative change', () => {
@@ -55,11 +54,10 @@ describe('utils', () => {
       expect(result).toEqual({
         percent: '-20.0%',
         color: 'danger',
-        note: expect.any(Object),
+        note: 'Your test stat is down by 20.0% from 80',
       });
       const renderedNote = renderNote(result.note);
       expect(renderedNote.container.textContent).toBe('Your test stat is down by 20.0% from 80');
-      expect(renderedNote.container.querySelectorAll('strong')).toHaveLength(2);
     });
 
     it('returns correct percent info for zero change', () => {
