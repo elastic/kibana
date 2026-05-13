@@ -7,32 +7,42 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  EuiButton,
   EuiCallOut,
+  EuiContextMenu,
   EuiFieldSearch,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageHeader,
   EuiSpacer,
+  EuiSplitButton,
+  useGeneratedHtmlId,
   type Criteria,
 } from '@elastic/eui';
 import { CoreStart, useService } from '@kbn/core-di-browser';
+import { PluginStart } from '@kbn/core-di';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useDebouncedValue } from '@kbn/react-hooks';
+import { useBoolean, useDebouncedValue } from '@kbn/react-hooks';
 import type { FindRulesSortField } from '@kbn/alerting-v2-schemas';
+import { ComposeDiscoverFlyout } from '@kbn/alerting-v2-rule-form';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { useFetchRules } from '../../hooks/use_fetch_rules';
+import { useCreateRule } from '../../hooks/use_create_rule';
+import { useUpdateRule } from '../../hooks/use_update_rule';
 import { useFetchRuleTags } from '../../hooks/use_fetch_rule_tags';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { paths } from '../../constants';
+
 import { RulesListTableContainer } from './rules_list_table_container';
 import type { RulesListTableSortField } from './rules_list_table';
 import { ModeFilterPopover } from '../../components/rule/popovers/mode_filter_popover';
 import { StatusFilterPopover } from '../../components/rule/popovers/status_filter_popover';
 import { TagsFilterPopover } from '../../components/rule/popovers/tag_filter_popover';
 import { buildRulesListFilter } from './utils';
+import { paths } from '../../constants';
 
 const DEFAULT_PER_PAGE = 20;
 export const SEARCH_DEBOUNCE_MS = 300;
@@ -48,9 +58,25 @@ const TABLE_FIELD_TO_API_SORT_FIELD = Object.fromEntries(
 ) as Partial<Record<string, FindRulesSortField>>;
 
 export const RulesListPage = () => {
-  const { basePath } = useService(CoreStart('http'));
-
+  const http = useService(CoreStart('http'));
+  const notifications = useService(CoreStart('notifications'));
+  const application = useService(CoreStart('application'));
+  const data = useService(PluginStart('data')) as DataPublicPluginStart;
+  const dataViews = useService(PluginStart('dataViews')) as DataViewsPublicPluginStart;
+  const lens = useService(PluginStart('lens')) as LensPublicStart;
   useBreadcrumbs('rules_list');
+
+  const [flyoutOpen, setFlyoutOpen] = useState(false);
+  const [isCreateMenuOpen, { off: closeCreateMenu, toggle: toggleCreateMenu }] = useBoolean(false);
+  const createMenuId = useGeneratedHtmlId({ prefix: 'createRuleMenu' });
+  const [editRule, setEditRule] = useState<RuleApiResponse | null>(null);
+  const historyKey = useMemo(() => Symbol('ruleAuthoring'), []);
+  const createRuleMutation = useCreateRule();
+  const updateRuleMutation = useUpdateRule();
+  const ruleFormServices = useMemo(
+    () => ({ http, data, dataViews, notifications, application, lens }),
+    [http, data, dataViews, notifications, application, lens]
+  );
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
@@ -76,7 +102,12 @@ export const RulesListPage = () => {
     setPage(1);
   }, [debouncedSearch, filter]);
 
-  const { data, isLoading, isError, error } = useFetchRules({
+  const {
+    data: rulesData,
+    isLoading,
+    isError,
+    error,
+  } = useFetchRules({
     page,
     perPage,
     filter,
@@ -120,17 +151,61 @@ export const RulesListPage = () => {
           />
         }
         rightSideItems={[
-          <EuiButton
-            key="create-rule"
-            fill
-            href={basePath.prepend(paths.ruleCreate)}
-            data-test-subj="createRuleButton"
+          <EuiSplitButton
+            key="create-rule-split"
+            color="primary"
+            size="m"
+            data-test-subj="createRuleSplitButton"
           >
-            <FormattedMessage
-              id="xpack.alertingV2.rulesList.createRuleButton"
-              defaultMessage="Create rule"
+            <EuiSplitButton.ActionPrimary
+              onClick={() => application.navigateToUrl(http.basePath.prepend(paths.ruleCreate))}
+              data-test-subj="createRuleButton"
+            >
+              <FormattedMessage
+                id="xpack.alertingV2.rulesList.createRuleButton"
+                defaultMessage="Create rule"
+              />
+            </EuiSplitButton.ActionPrimary>
+            <EuiSplitButton.ActionSecondary
+              iconType="arrowDown"
+              aria-label={i18n.translate('xpack.alertingV2.rulesList.createRuleMoreOptions', {
+                defaultMessage: 'More create options',
+              })}
+              onClick={toggleCreateMenu}
+              data-test-subj="createRulePopoverButton"
+              popoverProps={{
+                id: createMenuId,
+                isOpen: isCreateMenuOpen,
+                closePopover: closeCreateMenu,
+                anchorPosition: 'downRight',
+                panelPaddingSize: 'none',
+                children: (
+                  <EuiContextMenu
+                    initialPanelId={0}
+                    panels={[
+                      {
+                        id: 0,
+                        items: [
+                          {
+                            name: i18n.translate(
+                              'xpack.alertingV2.rulesList.createRuleFlyoutButton',
+                              { defaultMessage: 'Create with flyout' }
+                            ),
+                            icon: 'popout',
+                            onClick: () => {
+                              closeCreateMenu();
+                              setFlyoutOpen(true);
+                            },
+                            'data-test-subj': 'createRuleFlyoutButton',
+                          },
+                        ],
+                      },
+                    ]}
+                  />
+                ),
+              }}
             />
-          </EuiButton>,
+          </EuiSplitButton>,
         ]}
       />
       <EuiSpacer size="m" />
@@ -181,8 +256,8 @@ export const RulesListPage = () => {
           </EuiFlexGroup>
           <EuiSpacer size="m" />
           <RulesListTableContainer
-            items={data?.items ?? []}
-            totalItemCount={data?.total ?? 0}
+            items={rulesData?.items ?? []}
+            totalItemCount={rulesData?.total ?? 0}
             page={page}
             perPage={perPage}
             search={debouncedSearch}
@@ -192,9 +267,45 @@ export const RulesListPage = () => {
             sortDirection={sortDirection}
             isLoading={isLoading}
             onTableChange={onTableChange}
+            onEditInFlyout={(rule) => {
+              setEditRule(rule);
+              setFlyoutOpen(true);
+            }}
           />
         </>
       ) : null}
+      {flyoutOpen && (
+        <ComposeDiscoverFlyout
+          historyKey={historyKey}
+          mode={editRule ? 'edit' : 'create'}
+          rule={editRule ?? undefined}
+          ruleId={editRule?.id}
+          onClose={() => {
+            setFlyoutOpen(false);
+            setEditRule(null);
+          }}
+          services={ruleFormServices}
+          onCreateRule={(payload) =>
+            createRuleMutation.mutate(payload, {
+              onSuccess: () => {
+                setFlyoutOpen(false);
+              },
+            })
+          }
+          onUpdateRule={(id, payload) =>
+            updateRuleMutation.mutate(
+              { id, payload },
+              {
+                onSuccess: () => {
+                  setFlyoutOpen(false);
+                  setEditRule(null);
+                },
+              }
+            )
+          }
+          isSaving={createRuleMutation.isLoading || updateRuleMutation.isLoading}
+        />
+      )}
     </div>
   );
 };
