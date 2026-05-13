@@ -111,6 +111,19 @@ export type WorkflowsExtensionsServerPluginStart =
      * Returns undefined if no capabilities are stored for the given session ID.
      */
     getSessionCapabilities(sessionId: string): Record<string, unknown> | undefined;
+
+    /**
+     * Store call-scoped capabilities keyed by session ID.
+     * Used when executing YAML workflows inline (bypassing invokeHookInternal) to make
+     * capabilities available to step executors.
+     */
+    setSessionCapabilities(sessionId: string, capabilities: Record<string, unknown>): void;
+
+    /**
+     * Remove call-scoped capabilities for the given session ID.
+     * Must be called in a finally block after inline YAML workflow execution completes.
+     */
+    clearSessionCapabilities(sessionId: string): void;
   };
 
 /**

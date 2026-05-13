@@ -36,6 +36,8 @@ const createStartMock: () => jest.Mocked<WorkflowsExtensionsServerPluginStart> =
     isReady: jest.fn(() => Promise.resolve()),
     invokeHook: jest.fn().mockResolvedValue({ status: 'pass_through', output: {} }),
     getSessionCapabilities: jest.fn().mockReturnValue(undefined),
+    setSessionCapabilities: jest.fn(),
+    clearSessionCapabilities: jest.fn(),
   };
 };
 

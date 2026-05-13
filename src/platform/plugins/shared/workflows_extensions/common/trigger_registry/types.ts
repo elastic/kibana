@@ -34,6 +34,12 @@ export interface TriggerSyncBlock<OutputSchema extends z.ZodObject = z.ZodObject
    * handler return values are ignored — use non-chained mode for side-effect-only handlers.
    */
   chained: boolean;
+  /**
+   * When true, `WorkflowsClient.invokeHook` will execute subscribed YAML workflows
+   * inline via `executeWorkflowSync` instead of delegating to in-memory handlers.
+   * Triggers that do not opt in retain existing in-memory handler behaviour.
+   */
+  inlineExecution?: boolean;
 }
 
 /**

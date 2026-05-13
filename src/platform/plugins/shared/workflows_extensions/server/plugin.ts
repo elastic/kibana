@@ -146,6 +146,12 @@ export class WorkflowsExtensionsServerPlugin
       getSessionCapabilities: (sessionId: string): Record<string, unknown> | undefined => {
         return this.sessionCapabilityCache.get(sessionId);
       },
+      setSessionCapabilities: (sessionId: string, capabilities: Record<string, unknown>): void => {
+        this.sessionCapabilityCache.set(sessionId, capabilities);
+      },
+      clearSessionCapabilities: (sessionId: string): void => {
+        this.sessionCapabilityCache.delete(sessionId);
+      },
     };
   }
 
