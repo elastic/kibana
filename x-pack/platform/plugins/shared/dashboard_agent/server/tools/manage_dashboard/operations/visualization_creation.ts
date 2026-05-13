@@ -5,24 +5,23 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import type { AttachmentPanel } from '@kbn/dashboard-agent-common';
 import type { ResolveVisualizationConfig } from '../inline_visualization';
-import type { VisualizationFailure } from '../utils';
 import type { DashboardOperation } from './registry';
-import type { VisualizationPanelInput } from './add_section';
-import type { CreateVisualizationPanelInput } from './create_visualization_panels';
+import type { AddPanelsItemInput } from './add_panels';
+import type { VisualizationPanelInput } from './panel_kinds';
 
 type ResolvedVisualizationPanel = Awaited<ReturnType<ResolveVisualizationConfig>>;
-export type VisualizationCreationOperationType = 'add_section' | 'create_visualization_panels';
+
 export type VisualizationCreationRequest =
   | {
       operationType: 'add_section';
       panelInput: VisualizationPanelInput;
+      panelInputIndex: number;
     }
   | {
-      operationType: 'create_visualization_panels';
-      panelInput: CreateVisualizationPanelInput;
+      operationType: 'add_panels';
+      panelInput: Extract<AddPanelsItemInput, { kind: 'visualization' }>;
+      panelInputIndex: number;
       sectionId?: string;
     };
 
@@ -47,24 +46,40 @@ const collectVisualizationCreationRequests = (
           break;
         }
 
-        requestsByOperationIndex.set(
-          operationIndex,
-          operation.panels.map((panelInput) => ({
-            operationType: operation.operation,
-            panelInput,
-          }))
+        const visualizationRequests = operation.panels.flatMap((panelInput, panelInputIndex) =>
+          panelInput.kind === 'visualization'
+            ? [
+                {
+                  operationType: operation.operation,
+                  panelInput,
+                  panelInputIndex,
+                },
+              ]
+            : []
         );
+
+        if (visualizationRequests.length > 0) {
+          requestsByOperationIndex.set(operationIndex, visualizationRequests);
+        }
         break;
       }
-      case 'create_visualization_panels': {
-        requestsByOperationIndex.set(
-          operationIndex,
-          operation.panels.map((panelInput) => ({
-            operationType: operation.operation,
-            panelInput,
-            sectionId: panelInput.sectionId,
-          }))
+      case 'add_panels': {
+        const visualizationRequests = operation.panels.flatMap((panelInput, panelInputIndex) =>
+          panelInput.kind === 'visualization'
+            ? [
+                {
+                  operationType: operation.operation,
+                  panelInput,
+                  panelInputIndex,
+                  sectionId: panelInput.sectionId,
+                },
+              ]
+            : []
         );
+
+        if (visualizationRequests.length > 0) {
+          requestsByOperationIndex.set(operationIndex, visualizationRequests);
+        }
         break;
       }
       default:
@@ -127,58 +142,13 @@ export const resolveVisualizationCreationRequests = async ({
 
 /**
  * Return the resolved create results for one operation during the apply phase.
- * Throw if an operation that should have resolved create results does not have them.
+ * Returns an empty array for operations with no visualization panels
  */
 export const getResolvedVisualizationCreationRequests = ({
   resolvedRequestsByOperationIndex,
   operationIndex,
-  operationType,
 }: {
   resolvedRequestsByOperationIndex: Map<number, ResolvedVisualizationCreationRequest[]>;
   operationIndex: number;
-  operationType: VisualizationCreationOperationType;
-}): ResolvedVisualizationCreationRequest[] => {
-  const resolvedRequests = resolvedRequestsByOperationIndex.get(operationIndex);
-
-  if (!resolvedRequests) {
-    throw new Error(
-      `Missing pre-resolved visualization requests for ${operationType} operation at index ${operationIndex}.`
-    );
-  }
-
-  return resolvedRequests;
-};
-
-/**
- * Turn resolved create results into dashboard panels and append any failures.
- * Successful panels are kept even when sibling requests fail.
- */
-export const materializeResolvedVisualizationPanels = ({
-  resolvedRequests,
-  failures,
-}: {
-  resolvedRequests: ResolvedVisualizationCreationRequest[];
-  failures: VisualizationFailure[];
-}): Array<{ request: VisualizationCreationRequest; panel: AttachmentPanel }> => {
-  const successfulPanels: Array<{ request: VisualizationCreationRequest; panel: AttachmentPanel }> =
-    [];
-
-  for (const { request, resolvedPanel } of resolvedRequests) {
-    if (resolvedPanel.type === 'failure') {
-      failures.push(resolvedPanel.failure);
-      continue;
-    }
-
-    successfulPanels.push({
-      request,
-      panel: {
-        id: uuidv4(),
-        type: resolvedPanel.visContent.type,
-        config: resolvedPanel.visContent.config,
-        grid: request.panelInput.grid,
-      },
-    });
-  }
-
-  return successfulPanels;
-};
+}): ResolvedVisualizationCreationRequest[] =>
+  resolvedRequestsByOperationIndex.get(operationIndex) ?? [];
