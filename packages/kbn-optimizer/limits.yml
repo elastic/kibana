@@ -1,5 +1,5 @@
 pageLoadAssetSize:
-  actions: 20000
+  actions: 20500
   advancedSettings: 6196
   agentBuilder: 52831
   agentBuilderPlatform: 8737
@@ -9,7 +9,7 @@ pageLoadAssetSize:
   aiops: 15227
   alerting: 22371
   alertingVTwo: 76778
-  apm: 27979
+  apm: 28027
   apmSourcesAccess: 2278
   automaticImport: 18629
   banners: 4006
@@ -44,7 +44,7 @@ pageLoadAssetSize:
   dataViewManagement: 6250
   dataViews: 66000
   dataVisualizer: 32727
-  developerToolbar: 4467
+  developerToolbar: 5000
   devTools: 8109
   discover: 30501
   discoverEnhanced: 5353
@@ -59,7 +59,7 @@ pageLoadAssetSize:
   esql: 21193
   esqlDataGrid: 10209
   esUiShared: 101220
-  evals: 5743
+  evals: 6375
   eventAnnotation: 22334
   eventAnnotationListing: 13164
   exploratoryView: 45042
@@ -211,6 +211,6 @@ pageLoadAssetSize:
   visualizationListing: 5148
   visualizations: 52210
   watcher: 10485
-  workflowsExtensions: 38894
+  workflowsExtensions: 38938
   workflowsManagement: 35010
   workplaceAIApp: 6234

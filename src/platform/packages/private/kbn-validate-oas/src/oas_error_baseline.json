@@ -1,4 +1,9 @@
 {
+<<<<<<< asCode/bumpSlimDashboardsViz-v2
   "./oas_docs/output/kibana.yaml": 111,
   "./oas_docs/output/kibana.serverless.yaml": 93
+=======
+  "./oas_docs/output/kibana.yaml": 46,
+  "./oas_docs/output/kibana.serverless.yaml": 43
+>>>>>>> main
 }

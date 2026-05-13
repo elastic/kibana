@@ -9,6 +9,9 @@ on:
     types:
       - opened
 
+permissions:
+  contents: read
+
 jobs:
   assign-reviewer:
     name: Find reviewer for manual backport

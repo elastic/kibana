@@ -11,6 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { RulesListPage, SEARCH_DEBOUNCE_MS } from './rules_list_page';
+import { paths } from '../../constants';
 
 const mockNavigateToUrl = jest.fn();
 const mockGetUrlForApp = jest.fn((appId: string, options?: { path?: string }) => {
@@ -37,6 +38,10 @@ jest.mock('@kbn/core-di-browser', () => ({
     return {};
   },
   CoreStart: (key: string) => key,
+}));
+
+jest.mock('@kbn/alerting-v2-rule-form', () => ({
+  ComposeDiscoverFlyout: () => <div data-test-subj="composeDiscoverFlyout" />,
 }));
 
 const mockUseFetchRules = jest.fn();
@@ -135,7 +140,8 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    expect(screen.getByRole('table')).toBeInTheDocument();
+    expect(screen.getByTestId('rulesListLoading')).toBeInTheDocument();
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 
   it('renders rules in the table', () => {
@@ -221,7 +227,7 @@ describe('RulesListPage', () => {
     expect(screen.getByText('Network error')).toBeInTheDocument();
   });
 
-  it('shows "Showing 0-0 of 0 Rules" when there are no rules', () => {
+  it('shows empty state when there are no rules and no active filters', () => {
     mockUseFetchRules.mockReturnValue({
       data: { items: [], total: 0, page: 1, perPage: 20 },
       isLoading: false,
@@ -231,8 +237,10 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    const showingLabel = screen.getByTestId('rulesListShowingLabel');
-    expect(showingLabel).toHaveTextContent('Showing 0-0 of 0 Rules');
+    expect(
+      screen.getByRole('heading', { level: 2, name: /welcome to the new alerting experience/i })
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 
   it('shows correct "Showing" range when rules exist', () => {
@@ -620,9 +628,9 @@ describe('RulesListPage', () => {
     });
   });
 
-  it('navigates to create page when create button is clicked', () => {
+  it('navigates to rule selector page when create button is clicked', () => {
     mockUseFetchRules.mockReturnValue({
-      data: { items: [], total: 0, page: 1, perPage: 20 },
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
       isLoading: false,
       isError: false,
       error: null,
@@ -630,10 +638,7 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    expect(screen.getByTestId('createRuleButton')).toHaveAttribute(
-      'href',
-      '/app/management/alertingV2/rules/create'
-    );
+    expect(screen.getByTestId('createRuleButton')).toHaveAttribute('href', paths.ruleCreateOptions);
   });
 
   it('shows delete confirmation modal when delete action is clicked', async () => {

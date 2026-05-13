@@ -190,15 +190,11 @@ function validateEmails(
   addresses: string[],
   options: ValidateEmailAddressesOptions
 ): string | undefined {
-  if (config.email?.domain_allowlist == null && config.email?.recipient_allowlist == null) {
-    return;
-  }
-
   const validated = validateEmailAddresses(
-    config.email.domain_allowlist,
+    config.email?.domain_allowlist ?? null,
     addresses,
     options,
-    config.email.recipient_allowlist
+    config.email?.recipient_allowlist ?? null
   );
   return invalidEmailsAsMessage(validated);
 }
