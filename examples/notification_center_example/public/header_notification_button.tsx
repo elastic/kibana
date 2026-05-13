@@ -8,20 +8,34 @@
  */
 
 import React from 'react';
-import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
-import { useSidebarApp } from '@kbn/core-chrome-sidebar-components';
+import { EuiHeaderSectionItemButton, EuiIcon, useEuiTheme } from '@elastic/eui';
+import { useSidebar, useSidebarApp } from '@kbn/core-chrome-sidebar-components';
 import { useUnreadNotificationCount } from '@kbn/core-notifications-browser-hooks';
 import { notificationCenterAppId } from './notification_center_app';
 
 export function HeaderNotificationButton() {
   const unreadCount = useUnreadNotificationCount();
   const center = useSidebarApp(notificationCenterAppId);
+  const { isOpen, currentAppId } = useSidebar();
+  const { euiTheme } = useEuiTheme();
+
+  const isActive = isOpen && currentAppId === notificationCenterAppId;
+
+  const handleClick = () => {
+    if (isActive) {
+      center.close();
+    } else {
+      center.open();
+    }
+  };
 
   return (
     <EuiHeaderSectionItemButton
-      aria-label={`Open notification center (${unreadCount} unread)`}
+      aria-label={`${isActive ? 'Close' : 'Open'} notification center (${unreadCount} unread)`}
       notification={unreadCount > 0}
-      onClick={() => center.open()}
+      isSelected={isActive}
+      style={isActive ? { backgroundColor: euiTheme.components.buttons.backgroundEmptyPrimaryActive } : undefined}
+      onClick={handleClick}
     >
       <EuiIcon type="bell" size="m" aria-hidden={true} />
     </EuiHeaderSectionItemButton>
