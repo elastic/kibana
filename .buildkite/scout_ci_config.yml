@@ -10,6 +10,7 @@ plugins:
     - banners
     - cloud_security_posture
     - console
+    - contentManagementExamples
     - custom_branding
     - dashboard
     - dashboard_markdown
@@ -26,7 +27,9 @@ plugins:
     - global_search
     - index_management
     - infra
+    - ingest_pipelines
     - intercepts
+    - kibana_overview
     - lens
     - logstash
     - maps
