@@ -152,6 +152,7 @@ export const ControlsRenderer = ({
 
 const controlsGroupStyles = {
   controlsGroup: css({
+    paddingInline: 8,
     '&.controlsGroup--editing .controlFrameFloatingActions': {
       visibility: 'hidden !important' as 'hidden',
     },

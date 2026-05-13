@@ -56,6 +56,17 @@ import type { DashboardLayout } from './layout_manager/types';
 import type { DashboardSettings } from './settings_manager';
 import type { ReadBodyWithResolve } from '../dashboard_client/dashboard_client';
 
+export interface DashboardLayoutTweakpaneValues {
+  marginGutterPx: number;
+  horizontalPaddingPx: number;
+  panelBorderRadiusPx: number;
+  /** Inset inside each dashboard panel (embeddable chrome), 0–30 px. */
+  panelPaddingVerticalPx: number;
+  /** Inset inside each dashboard panel (embeddable chrome), 0–30 px. */
+  panelPaddingHorizontalPx: number;
+  dashboardBackgroundToken: string;
+}
+
 /** The type identifier for dashboard APIs. */
 export const DASHBOARD_API_TYPE = 'dashboard';
 
@@ -244,6 +255,7 @@ export interface DashboardInternalApi {
   unpublishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
   publishVariables: () => void;
   arePanelsRelated$: BehaviorSubject<(a: string, b: string) => boolean>;
+  layoutTweak$: BehaviorSubject<DashboardLayoutTweakpaneValues>;
 }
 
 export interface DashboardUser {

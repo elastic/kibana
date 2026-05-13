@@ -20,6 +20,7 @@ import {
   EuiLink,
   EuiPopover,
   EuiScreenReaderOnly,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { MountPoint } from '@kbn/core/public';
@@ -30,6 +31,7 @@ import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import type { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
 
 import { AppMenu } from '@kbn/core-chrome-app-menu';
 import { UI_SETTINGS } from '../../common/constants';
@@ -47,6 +49,8 @@ import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount
 import { useDashboardMenuItems } from '../dashboard_app/top_nav/use_dashboard_menu_items';
 import type { DashboardEmbedSettings, DashboardRedirect } from '../dashboard_app/types';
 import { openSettingsFlyout } from '../dashboard_renderer/settings/open_settings_flyout';
+import { resolveDashboardBackgroundBaseColor } from '../dashboard_renderer/grid/dashboard_background_tokens';
+import { INITIAL_DASHBOARD_LAYOUT_TWEAK } from '../dashboard_renderer/grid/constants';
 import { getDashboardRecentlyAccessedService } from '../services/dashboard_recently_accessed_service';
 import {
   coreServices,
@@ -88,6 +92,11 @@ export function InternalDashboardTopNav({
 
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
+  const { euiTheme } = useEuiTheme();
+  const layoutTweak = useObservable(
+    dashboardInternalApi.layoutTweak$,
+    INITIAL_DASHBOARD_LAYOUT_TWEAK
+  );
 
   const [
     allDataViews,
@@ -137,6 +146,36 @@ export function InternalDashboardTopNav({
   }, [title, viewMode, lastSavedId]);
 
   const styles = useMemoCss(topNavStyles);
+
+  /**
+   * Tweakpane-driven bar chrome applies only to the pinned-controls row so the Unified Search Bar
+   * keeps default layout and appearance.
+   */
+  const dashboardControlsBarChromeStyles = useMemo(
+    () =>
+      css({
+        '.kbnBody &': {
+          background: resolveDashboardBackgroundBaseColor(
+            euiTheme.colors,
+            layoutTweak.dashboardBackgroundToken
+          ),
+          paddingLeft: `${layoutTweak.horizontalPaddingPx}px`,
+          paddingRight: `${layoutTweak.horizontalPaddingPx}px`,
+        },
+        '.controlGroup': {
+          paddingTop: 0,
+          paddingBottom: euiTheme.size.s,
+          paddingLeft: 0,
+          paddingRight: 0,
+        },
+      }),
+    [
+      euiTheme.colors,
+      euiTheme.size.s,
+      layoutTweak.dashboardBackgroundToken,
+      layoutTweak.horizontalPaddingPx,
+    ]
+  );
 
   /**
    * focus on the top header when title or view mode is changed
@@ -427,7 +466,11 @@ export function InternalDashboardTopNav({
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}
 
-      {viewMode !== 'print' ? <DashboardControlsRenderer /> : null}
+      {viewMode !== 'print' ? (
+        <div css={dashboardControlsBarChromeStyles} data-test-subj="dashboardControlsBarChrome">
+          <DashboardControlsRenderer />
+        </div>
+      ) : null}
 
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
     </div>
@@ -442,15 +485,10 @@ const topNavStyles = {
         position: 'sticky',
         zIndex: euiTheme.levels.mask,
         top: `var(--kbn-application--sticky-headers-offset, 0px)`,
-        background: euiTheme.colors.backgroundBasePlain,
 
         [`@media (max-width: ${euiTheme.breakpoint.m}px)`]: {
           position: 'unset', // on smaller screens, the top nav should not be sticky
         },
-      },
-      '.controlGroup': {
-        padding: euiTheme.size.s,
-        paddingTop: 0,
       },
     }),
   updateEditButton: ({ euiTheme }: UseEuiTheme) =>

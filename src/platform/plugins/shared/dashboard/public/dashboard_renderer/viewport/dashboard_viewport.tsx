@@ -14,12 +14,13 @@ import { EuiPortal, useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import useObservable from 'react-use/lib/useObservable';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { DashboardGrid } from '../grid';
+import { INITIAL_DASHBOARD_LAYOUT_TWEAK } from '../grid/constants';
 import { resolveDashboardBackgroundBaseColor } from '../grid/dashboard_background_tokens';
-import { useDashboardLayoutTweakpane } from '../grid/use_dashboard_layout_tweakpane';
 import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
 
 export const DashboardViewport = () => {
@@ -66,8 +67,18 @@ export const DashboardViewport = () => {
 
   const styles = useMemoCss(dashboardViewportStyles);
   const { euiTheme } = useEuiTheme();
-  const { marginGutterPx, horizontalPaddingPx, panelBorderRadiusPx, dashboardBackgroundToken } =
-    useDashboardLayoutTweakpane();
+  const layoutTweak = useObservable(
+    dashboardInternalApi.layoutTweak$,
+    INITIAL_DASHBOARD_LAYOUT_TWEAK
+  );
+  const {
+    marginGutterPx,
+    horizontalPaddingPx,
+    panelBorderRadiusPx,
+    panelPaddingVerticalPx,
+    panelPaddingHorizontalPx,
+    dashboardBackgroundToken,
+  } = layoutTweak;
 
   const dashboardWrapperBackgroundStyle = useMemo(
     () =>
@@ -100,6 +111,8 @@ export const DashboardViewport = () => {
       css({
         '.embPanel': {
           borderRadius: `${panelBorderRadiusPx}px !important`,
+          paddingBlock: `${panelPaddingVerticalPx}px`,
+          paddingInline: `${panelPaddingHorizontalPx}px`,
         },
         '.embPanel__content, .embPanel__header, .embPanel__hoverActionsAnchor, .lnsExpressionRenderer':
           {
@@ -109,7 +122,7 @@ export const DashboardViewport = () => {
           borderRadius: `${panelBorderRadiusPx}px !important`,
         },
       }),
-    [panelBorderRadiusPx]
+    [panelBorderRadiusPx, panelPaddingVerticalPx, panelPaddingHorizontalPx]
   );
 
   return (

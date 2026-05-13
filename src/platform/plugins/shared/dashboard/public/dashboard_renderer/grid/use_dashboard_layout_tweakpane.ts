@@ -10,6 +10,7 @@
 import { useEuiTheme } from '@elastic/eui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
+import type { DashboardLayoutTweakpaneValues } from '../../dashboard_api/types';
 import { DASHBOARD_HORIZONTAL_PADDING_PX, DASHBOARD_MARGIN_SIZE } from './constants';
 import {
   DASHBOARD_DEFAULT_BACKGROUND_TOKEN,
@@ -53,18 +54,11 @@ interface DashboardLayoutTweakpanePane {
   dispose(): void;
 }
 
-export interface DashboardLayoutTweakpaneValues {
-  marginGutterPx: number;
-  horizontalPaddingPx: number;
-  panelBorderRadiusPx: number;
-  dashboardBackgroundToken: DashboardBackgroundBaseToken;
-}
-
 /**
  * Live dashboard layout tuning via [Tweakpane](https://tweakpane.github.io/docs/): grid gutter
  * (when margins are on), viewport left/right padding, panel corner radius (defaults to the
- * active EUI theme `border.radius.medium` value), and dashboard canvas background using EUI
- * `backgroundBase*` tokens (see
+ * active EUI theme `border.radius.medium` value), per-panel inner padding (vertical and horizontal,
+ * 0–30 px), and dashboard canvas background using EUI `backgroundBase*` tokens (see
  * https://eui.elastic.co/docs/getting-started/theming/tokens/colors/#background-colors).
  * Pane is fixed bottom-right while the dashboard viewport is mounted.
  */
@@ -83,6 +77,8 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
   const [marginGutterPx, setMarginGutterPx] = useState(DASHBOARD_MARGIN_SIZE);
   const [horizontalPaddingPx, setHorizontalPaddingPx] = useState(DASHBOARD_HORIZONTAL_PADDING_PX);
   const [panelBorderRadiusPx, setPanelBorderRadiusPx] = useState(defaultPanelBorderRadiusPx);
+  const [panelPaddingVerticalPx, setPanelPaddingVerticalPx] = useState(0);
+  const [panelPaddingHorizontalPx, setPanelPaddingHorizontalPx] = useState(0);
   const [dashboardBackgroundToken, setDashboardBackgroundToken] =
     useState<DashboardBackgroundBaseToken>(DASHBOARD_DEFAULT_BACKGROUND_TOKEN);
 
@@ -112,6 +108,8 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
         marginGutterPx: DASHBOARD_MARGIN_SIZE,
         horizontalPaddingPx: DASHBOARD_HORIZONTAL_PADDING_PX,
         panelBorderRadiusPx: defaultPanelRadiusRef.current,
+        panelPaddingVerticalPx: 0,
+        panelPaddingHorizontalPx: 0,
         dashboardBackgroundToken: DASHBOARD_DEFAULT_BACKGROUND_TOKEN,
       };
 
@@ -169,6 +167,30 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
         });
 
       pane
+        .addBinding(params, 'panelPaddingVerticalPx', {
+          label: 'Panel vertical padding',
+          min: 0,
+          max: 30,
+          step: 1,
+        })
+        .on('change', (ev) => {
+          const next = readNumber(ev.value) ?? params.panelPaddingVerticalPx;
+          setPanelPaddingVerticalPx(Math.min(30, Math.max(0, next)));
+        });
+
+      pane
+        .addBinding(params, 'panelPaddingHorizontalPx', {
+          label: 'Panel horizontal padding',
+          min: 0,
+          max: 30,
+          step: 1,
+        })
+        .on('change', (ev) => {
+          const next = readNumber(ev.value) ?? params.panelPaddingHorizontalPx;
+          setPanelPaddingHorizontalPx(Math.min(30, Math.max(0, next)));
+        });
+
+      pane
         .addBinding(params, 'dashboardBackgroundToken', {
           label: 'Dashboard background',
           options:
@@ -184,6 +206,8 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
       setMarginGutterPx(params.marginGutterPx);
       setHorizontalPaddingPx(params.horizontalPaddingPx);
       setPanelBorderRadiusPx(params.panelBorderRadiusPx);
+      setPanelPaddingVerticalPx(params.panelPaddingVerticalPx);
+      setPanelPaddingHorizontalPx(params.panelPaddingHorizontalPx);
       setDashboardBackgroundToken(params.dashboardBackgroundToken);
 
       disposePane = () => {
@@ -202,6 +226,8 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
     marginGutterPx,
     horizontalPaddingPx,
     panelBorderRadiusPx,
+    panelPaddingVerticalPx,
+    panelPaddingHorizontalPx,
     dashboardBackgroundToken,
   };
 }

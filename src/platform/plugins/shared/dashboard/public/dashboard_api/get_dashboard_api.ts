@@ -32,6 +32,7 @@ import type {
   DashboardApi,
   DashboardCreationOptions,
   DashboardInternalApi,
+  DashboardLayoutTweakpaneValues,
   DashboardSaveEvent,
   DashboardUser,
 } from './types';
@@ -43,6 +44,7 @@ import { initializeViewModeManager } from './view_mode_manager';
 import type { DashboardReadResponseBody } from '../../server';
 import { initializePauseFetchManager } from './pause_fetch_manager';
 import { initializeRelatedPanelsManager } from './related_panels_manager';
+import { INITIAL_DASHBOARD_LAYOUT_TWEAK } from '../dashboard_renderer/grid/constants';
 
 export function getDashboardApi({
   creationOptions,
@@ -290,6 +292,10 @@ export function getDashboardApi({
     isAccessControlEnabled: Boolean(isAccessControlEnabled),
   } as Omit<DashboardApi, 'searchSessionId$'>;
 
+  const layoutTweak$ = new BehaviorSubject<DashboardLayoutTweakpaneValues>(
+    INITIAL_DASHBOARD_LAYOUT_TWEAK
+  );
+
   const internalApi: DashboardInternalApi = {
     ...layoutManager.internalApi,
     ...unifiedSearchManager.internalApi,
@@ -297,6 +303,7 @@ export function getDashboardApi({
     ...relatedPanelsManager.api,
     dashboardContainerRef$,
     setDashboardContainerRef: (ref: HTMLElement | null) => dashboardContainerRef$.next(ref),
+    layoutTweak$,
   };
 
   const searchSessionManager = initializeSearchSessionManager(
@@ -324,6 +331,7 @@ export function getDashboardApi({
       timesliceManager.cleanup();
       projectRoutingManager?.cleanup();
       pauseFetchManager.cleanup();
+      layoutTweak$.complete();
     },
   };
 }

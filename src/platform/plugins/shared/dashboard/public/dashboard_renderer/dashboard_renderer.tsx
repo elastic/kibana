@@ -10,13 +10,9 @@
 import classNames from 'classnames';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
-import {
-  EuiEmptyPrompt,
-  EuiLoadingElastic,
-  EuiLoadingSpinner,
-  useEuiPaddingSize,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
+import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
@@ -37,6 +33,19 @@ import { Dashboard404Page } from './dashboard_404';
 import { DashboardViewport } from './viewport/dashboard_viewport';
 import { GlobalPrintStyles } from './print_styles';
 import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
+import { DashboardLayoutTweakpaneSync } from './grid/dashboard_layout_tweakpane_sync';
+import { INITIAL_DASHBOARD_LAYOUT_TWEAK } from './grid/constants';
+
+const dashboardRendererBaseStyles = css({
+  display: 'flex',
+  flex: 'auto',
+  width: '100%',
+  flexDirection: 'column',
+  '&.dashboardViewport--loading': {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
 
 /**
  * Props for the {@link DashboardRenderer} component.
@@ -65,6 +74,61 @@ export interface DashboardRendererProps {
   onApiCleanup?: () => void;
 }
 
+function DashboardLoadedBody({
+  dashboardApi,
+  dashboardInternalApi,
+  showControlGroup,
+  containerRef,
+}: {
+  dashboardApi: DashboardApi;
+  dashboardInternalApi: DashboardInternalApi;
+  showControlGroup: boolean;
+  containerRef: React.MutableRefObject<HTMLElement | null>;
+}) {
+  const layoutTweak = useObservable(
+    dashboardInternalApi.layoutTweak$,
+    INITIAL_DASHBOARD_LAYOUT_TWEAK
+  );
+  const controlGroupPaddingStyle = useMemo(
+    () =>
+      css({
+        '& .controlGroup': {
+          padding: `0 ${layoutTweak.horizontalPaddingPx}px`,
+        },
+      }),
+    [layoutTweak.horizontalPaddingPx]
+  );
+
+  return (
+    <div
+      className="dashboardContainer"
+      data-test-subj="dashboardContainer"
+      css={[dashboardRendererBaseStyles, controlGroupPaddingStyle]}
+      ref={(e) => {
+        if (dashboardInternalApi.dashboardContainerRef$.value !== e) {
+          dashboardInternalApi.setDashboardContainerRef(e);
+        }
+        containerRef.current = e;
+      }}
+    >
+      <GlobalPrintStyles />
+      <ExitFullScreenButtonKibanaProvider
+        coreStart={{ chrome: coreServices.chrome, customBranding: coreServices.customBranding }}
+      >
+        <KibanaContextProvider services={{ uiActions: uiActionsService }}>
+          <DashboardContext.Provider value={dashboardApi}>
+            <DashboardInternalContext.Provider value={dashboardInternalApi}>
+              <DashboardLayoutTweakpaneSync />
+              {showControlGroup && <DashboardControlsRenderer />}
+              <DashboardViewport />
+            </DashboardInternalContext.Provider>
+          </DashboardContext.Provider>
+        </KibanaContextProvider>
+      </ExitFullScreenButtonKibanaProvider>
+    </div>
+  );
+}
+
 export function DashboardRenderer({
   locator,
   savedObjectId,
@@ -87,26 +151,6 @@ export function DashboardRenderer({
    *  `useControlsIntegration` to `false` in their `getCreationOptions` function
    */
   const [showControlGroup, setShowControlGroup] = useState<boolean>(true);
-
-  const euiPaddingS = useEuiPaddingSize('s');
-  const styles = useMemo(
-    () => ({
-      renderer: css({
-        display: 'flex',
-        flex: 'auto',
-        width: '100%',
-        flexDirection: 'column',
-        '&.dashboardViewport--loading': {
-          justifyContent: 'center',
-          alignItems: 'center',
-        },
-        '& .controlGroup': {
-          padding: `0 ${euiPaddingS}`,
-        },
-      }),
-    }),
-    [euiPaddingS]
-  );
 
   useEffect(() => {
     /* In case the locator prop changes, we need to reassign the value in the container */
@@ -191,38 +235,19 @@ export function DashboardRenderer({
     }
 
     return dashboardApi && dashboardInternalApi ? (
-      <div
-        className="dashboardContainer"
-        data-test-subj="dashboardContainer"
-        css={styles.renderer}
-        ref={(e) => {
-          if (dashboardInternalApi && dashboardInternalApi.dashboardContainerRef$.value !== e) {
-            dashboardInternalApi.setDashboardContainerRef(e);
-          }
-          dashboardContainerRef.current = e;
-        }}
-      >
-        <GlobalPrintStyles />
-        <ExitFullScreenButtonKibanaProvider
-          coreStart={{ chrome: coreServices.chrome, customBranding: coreServices.customBranding }}
-        >
-          <KibanaContextProvider services={{ uiActions: uiActionsService }}>
-            <DashboardContext.Provider value={dashboardApi}>
-              <DashboardInternalContext.Provider value={dashboardInternalApi}>
-                {showControlGroup && <DashboardControlsRenderer />}
-                <DashboardViewport />
-              </DashboardInternalContext.Provider>
-            </DashboardContext.Provider>
-          </KibanaContextProvider>
-        </ExitFullScreenButtonKibanaProvider>
-      </div>
+      <DashboardLoadedBody
+        dashboardApi={dashboardApi}
+        dashboardInternalApi={dashboardInternalApi}
+        showControlGroup={showControlGroup}
+        containerRef={dashboardContainerRef}
+      />
     ) : (
       loadingSpinner
     );
   };
 
   return (
-    <div ref={dashboardViewport} className={viewportClasses} css={styles.renderer}>
+    <div ref={dashboardViewport} className={viewportClasses} css={dashboardRendererBaseStyles}>
       {dashboardViewport?.current && dashboardApi && (
         <ParentClassController
           viewportRef={dashboardViewport.current}
