@@ -10,7 +10,7 @@ import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RESPONSE_DETAILS_TEST_ID } from './test_ids';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { useResponseActionsView } from '../../../../common/components/response_actions/use_response_actions_view';
+import { useResponseActionsView } from '../hooks/use_response_actions_view';
 
 /**
  * Automated response actions results, displayed in the document details expandable flyout left section under the Insights tab, Response tab

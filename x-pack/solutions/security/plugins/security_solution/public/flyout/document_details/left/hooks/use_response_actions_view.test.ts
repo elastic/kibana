@@ -6,43 +6,19 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import type { Ecs } from '@kbn/cases-plugin/common';
-import { ALERT_RULE_NAME, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { useResponseActionsView } from './use_response_actions_view';
-import type { SearchHit } from '../../../../common/search_strategy';
-import { useGetAutomatedActionList } from '../../../management/hooks/response_actions/use_get_automated_action_list';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import { useUserPrivileges } from '../user_privileges';
+import { mockSearchHit } from '../../shared/mocks/mock_search_hit';
+import { mockDataAsNestedObject } from '../../shared/mocks/mock_data_as_nested_object';
+import { useGetAutomatedActionList } from '../../../../management/hooks/response_actions/use_get_automated_action_list';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
-const ecsData = {
-  _id: 'testId',
-  agent: {
-    type: ['endpoint'],
-  },
-  host: {
-    name: ['host-name'],
-  },
-  user: {
-    name: ['user1'],
-  },
-} as Ecs;
+const ecsData = mockDataAsNestedObject;
+const rawEventData = mockSearchHit;
 
-const rawEventData = {
-  _index: 'index',
-  _id: 'id',
-  fields: {
-    [ALERT_RULE_NAME]: ['ruleName'],
-    [ALERT_RULE_PARAMETERS]: [
-      {
-        response_actions: [],
-      },
-    ],
-  },
-} as SearchHit;
-
-jest.mock('../../hooks/use_experimental_features');
-jest.mock('../user_privileges');
-jest.mock('../../../management/hooks/response_actions/use_get_automated_action_list');
+jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('../../../../common/components/user_privileges');
+jest.mock('../../../../management/hooks/response_actions/use_get_automated_action_list');
 
 const useGetAutomatedActionListMock = useGetAutomatedActionList as jest.Mock;
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
