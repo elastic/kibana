@@ -14,6 +14,13 @@
 
 import { z } from '@kbn/zod/v4';
 
+export const EmailAttachmentSchema = z.object({
+  filename: z.string().describe('Attachment file name'),
+  content: z.string().describe('Attachment body (plain text or base64 when encoding is set)'),
+  contentType: z.string().optional().describe('MIME type, e.g. text/csv'),
+  encoding: z.string().optional().describe('Optional encoding, e.g. base64'),
+});
+
 // Email connector parameter schema
 export const EmailParamsSchema = z.object({
   to: z.array(z.string()),
@@ -22,6 +29,7 @@ export const EmailParamsSchema = z.object({
   subject: z.string(),
   message: z.string(),
   messageHTML: z.string().optional(),
+  attachments: z.array(EmailAttachmentSchema).optional(),
 });
 
 // Email connector response schema

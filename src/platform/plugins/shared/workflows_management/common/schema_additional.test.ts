@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { StepCategory } from '@kbn/workflows';
+import { getWorkflowJsonSchema, StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import {
   createMockConnectorInstance,
@@ -21,10 +21,102 @@ import {
   getCachedAllConnectorsMap,
   getCachedDynamicConnectorTypes,
   getDeprecatedStepMetadataMap,
+  getWorkflowZodSchema,
 } from './schema';
+import { EmailParamsSchema } from './stack_connectors_schema/email';
 import { stepSchemas } from './step_schemas';
 
 describe('schema - additional coverage', () => {
+  describe('EmailParamsSchema attachments', () => {
+    const baseEmailParams = {
+      to: ['ops@example.com'],
+      subject: 'Daily CSV report',
+      message: 'Attached is the generated report.',
+    };
+
+    const createWorkflowWithEmailStep = (stepOverrides: Record<string, unknown> = {}) => ({
+      name: 'email attachments workflow',
+      triggers: [{ type: 'manual' }],
+      steps: [
+        {
+          name: 'send-report',
+          type: 'email',
+          'connector-id': 'stakeholder-email',
+          with: {
+            ...baseEmailParams,
+            attachments: [
+              {
+                filename: 'report.csv',
+                contentType: 'text/csv',
+                content: 'host,risk\nhost-1,high\n',
+              },
+            ],
+          },
+          ...stepOverrides,
+        },
+      ],
+    });
+
+    const createWorkflowEmailSchema = () =>
+      getWorkflowZodSchema({
+        '.email': createMockConnectorTypeInfo({
+          actionTypeId: '.email',
+          displayName: 'Email',
+        }),
+      });
+
+    it('accepts email params with typical attachment fields', () => {
+      expect(() =>
+        EmailParamsSchema.parse({
+          ...baseEmailParams,
+          attachments: [
+            {
+              filename: 'report.csv',
+              contentType: 'text/csv',
+              content: 'host,risk\nhost-1,high\n',
+            },
+          ],
+        })
+      ).not.toThrow();
+    });
+
+    it('keeps filename and content in JSON Schema required for attachment items (Monaco YAML templates)', () => {
+      const zodSchema = getWorkflowZodSchema({
+        '.email': createMockConnectorTypeInfo({
+          actionTypeId: '.email',
+          displayName: 'Email',
+        }),
+      });
+      const jsonSchema = getWorkflowJsonSchema(zodSchema);
+      expect(jsonSchema).not.toBeNull();
+
+      const hasAttachmentItemRequired = (node: unknown): boolean => {
+        if (!node || typeof node !== 'object') {
+          return false;
+        }
+        const o = node as Record<string, unknown>;
+        const req = o.required;
+        const props = o.properties as Record<string, unknown> | undefined;
+        if (
+          Array.isArray(req) &&
+          req.includes('filename') &&
+          req.includes('content') &&
+          props &&
+          typeof props.contentType !== 'undefined'
+        ) {
+          return true;
+        }
+        return Object.values(o).some(hasAttachmentItemRequired);
+      };
+
+      expect(hasAttachmentItemRequired(jsonSchema)).toBe(true);
+    });
+
+    it('accepts a workflow YAML email step with attachments', () => {
+      expect(() => createWorkflowEmailSchema().parse(createWorkflowWithEmailStep())).not.toThrow();
+    });
+  });
+
   describe('getAllConnectorsInternal', () => {
     it('should include the console connector', () => {
       const connectors = getAllConnectorsInternal();
@@ -49,6 +141,32 @@ describe('schema - additional coverage', () => {
       const first = getAllConnectorsInternal();
       const second = getAllConnectorsInternal();
       expect(first).toBe(second);
+    });
+
+    it('should expose email connector attachments in the dynamic params schema', () => {
+      const connectors = getAllConnectorsWithDynamic({
+        '.email': createMockConnectorTypeInfo({
+          actionTypeId: '.email',
+          displayName: 'Email',
+        }),
+      });
+      const emailConnector = connectors.find((c) => c.type === 'email');
+
+      expect(emailConnector).toBeDefined();
+      expect(() =>
+        emailConnector?.paramsSchema.parse({
+          to: ['ops@example.com'],
+          subject: 'Daily CSV report',
+          message: 'Attached is the generated report.',
+          attachments: [
+            {
+              filename: 'report.csv',
+              contentType: 'text/csv',
+              content: 'host,risk\nhost-1,high\n',
+            },
+          ],
+        })
+      ).not.toThrow();
     });
   });
 

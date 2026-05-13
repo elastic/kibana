@@ -25,7 +25,7 @@ export {
 export { SlackParamsSchema, SlackResponseSchema } from './slack';
 
 // Email connector schemas
-export { EmailParamsSchema, EmailResponseSchema } from './email';
+export { EmailAttachmentSchema, EmailParamsSchema, EmailResponseSchema } from './email';
 
 // HTTP connector schemas
 export { HttpParamsSchema, HttpResponseSchema } from './http';
