@@ -55,12 +55,17 @@ function toErrorMessage(error: unknown): string {
   }
 }
 
-function getStatusCode(error: any): number | undefined {
+export function getStatusCode(error: any): number | undefined {
+  // KbnClientRequesterError keeps the HTTP status on its `axiosError` after
+  // `clean()` strips `response`/top-level fields, so it must be checked
+  // alongside the more conventional shapes.
   return (
     error?.statusCode ??
     error?.status ??
     error?.response?.status ??
     error?.meta?.status ??
+    error?.axiosError?.status ??
+    error?.axiosError?.response?.status ??
     undefined
   );
 }
@@ -97,6 +102,8 @@ function computeDelayMs({
   return base + Math.floor(Math.random() * extra);
 }
 
+const RETRYABLE_SERVER_STATUSES = new Set<number>([502, 503, 504]);
+
 function isRetryable(error: any): { retry: boolean; retryAfterMs?: number } {
   const status = getStatusCode(error);
   const message = toErrorMessage(error);
@@ -105,6 +112,11 @@ function isRetryable(error: any): { retry: boolean; retryAfterMs?: number } {
   // Primary target: rate limiting
   if (status === 429) return { retry: true, retryAfterMs };
   if (/status code 429|too many requests|ratelimit|rate limit/i.test(message)) {
+    return { retry: true, retryAfterMs };
+  }
+
+  // Transient server-side failures (idempotent endpoints can safely retry).
+  if (status !== undefined && RETRYABLE_SERVER_STATUSES.has(status)) {
     return { retry: true, retryAfterMs };
   }
 
