@@ -23,10 +23,13 @@ interface WorkflowEdgeData extends Record<string, unknown> {
 
 const LABEL_TRUNCATE = 24;
 const CORNER_RADIUS = 4;
-// Vertical stub at each endpoint so multiple edges leaving (or entering)
-// the same node visually share a trunk before they split. Sized so the
-// horizontal turn sits right under the source step.
-const TRUNK_LENGTH = 14;
+// Vertical (TB) / horizontal (LR) stub at each endpoint so multiple edges
+// leaving (or entering) the same node visually share a trunk before they
+// split. The source stub is shorter than the target stub so branching edges
+// (`if` / `parallel`) bend tight under the source instead of leaving a
+// large gap to the divergence point.
+const TRUNK_LENGTH_FROM_SOURCE = 9;
+const TRUNK_LENGTH_TO_TARGET = 14;
 
 const EPS = 0.5;
 
@@ -161,8 +164,8 @@ export function WorkflowGraphEdge(props: EdgeProps) {
 
     if (isLR) {
       // LR layout: trunks are horizontal stubs off the left/right handle.
-      const trunkSourceX = sourceX + TRUNK_LENGTH;
-      const trunkTargetX = targetX - TRUNK_LENGTH;
+      const trunkSourceX = sourceX + TRUNK_LENGTH_FROM_SOURCE;
+      const trunkTargetX = targetX - TRUNK_LENGTH_TO_TARGET;
       // Find the FIRST vertical segment in the dagre middle and replace
       // everything before it with a horizontal stub at trunkSourceX.
       for (let i = 0; i < middle.length - 1; i++) {
@@ -192,11 +195,14 @@ export function WorkflowGraphEdge(props: EdgeProps) {
         }
       }
       const adjusted: Array<{ x: number; y: number }> = [
+        // Source overshoot 2 px back into the node (hidden by opaque body),
+        // target ends exactly on the border (no bleed through translucent
+        // headers). Same reasoning as the TB branch below.
         { x: sourceX - 2, y: sourceY },
         { x: trunkSourceX, y: sourceY },
         ...middle,
         { x: trunkTargetX, y: targetY },
-        { x: targetX + 2, y: targetY },
+        { x: targetX, y: targetY },
       ];
       const built = buildRoundedOrthogonalPath(adjusted, CORNER_RADIUS);
       edgePath = built.path;
@@ -204,8 +210,38 @@ export function WorkflowGraphEdge(props: EdgeProps) {
       labelY = targetY;
     } else {
       // TB layout: trunks are vertical stubs off the top/bottom handle.
-      const trunkSourceY = sourceY + TRUNK_LENGTH;
-      const trunkTargetY = targetY - TRUNK_LENGTH;
+      const trunkSourceY = sourceY + TRUNK_LENGTH_FROM_SOURCE;
+      const trunkTargetY = targetY - TRUNK_LENGTH_TO_TARGET;
+      // "Effectively straight" detection: source, target, and every dagre
+      // middle waypoint share an X within a generous tolerance. Without
+      // this, dagre's per-rank positioning drift (especially between a
+      // trigger node and the first regular step, or before/after a wide
+      // foreach group) gets materialised by the trunk-stub elbow logic
+      // as a small horizontal jog just below the source. A real branch
+      // diverges far more than this (a whole node width plus separation),
+      // so the threshold can safely sit well above any drift we observe.
+      const STRAIGHT_X_THRESHOLD = 100;
+      const allXs = [sourceX, targetX, ...middle.map((p) => p.x)];
+      const xSpread = Math.max(...allXs) - Math.min(...allXs);
+      if (xSpread < STRAIGHT_X_THRESHOLD) {
+        const straightX = sourceX;
+        const builtStraight = buildRoundedOrthogonalPath(
+          [
+            // Source: extend 2 px back into the node so the line meets the
+            // bottom border with no visible gap. (Hidden by the opaque
+            // source body.) Target: end exactly on the border so no
+            // overshoot can bleed through a translucent container header.
+            { x: straightX, y: sourceY - 2 },
+            { x: straightX, y: trunkSourceY },
+            { x: straightX, y: trunkTargetY },
+            { x: straightX, y: targetY },
+          ],
+          CORNER_RADIUS
+        );
+        edgePath = builtStraight.path;
+        labelX = straightX;
+        labelY = (sourceY + targetY) / 2;
+      } else {
       // Find the FIRST horizontal segment in the dagre middle. Replace any
       // points before it with a single endpoint at trunk-Y so the bend
       // happens right after the source instead of at the mid-edge (where
@@ -238,16 +274,21 @@ export function WorkflowGraphEdge(props: EdgeProps) {
         }
       }
       const adjusted: Array<{ x: number; y: number }> = [
+        // Source: extend 2 px back into the node (hidden by the opaque
+        // body) so the line meets the bottom border with no visible gap.
+        // Target: end exactly on the border so no overshoot can bleed
+        // through a translucent container header.
         { x: sourceX, y: sourceY - 2 },
         { x: sourceX, y: trunkSourceY },
         ...middle,
         { x: targetX, y: trunkTargetY },
-        { x: targetX, y: targetY + 2 },
+        { x: targetX, y: targetY },
       ];
       const built = buildRoundedOrthogonalPath(adjusted, CORNER_RADIUS);
       edgePath = built.path;
       labelX = targetX;
       labelY = (sourceY + targetY) / 2;
+      }
     }
   } else {
     [edgePath, labelX, labelY] = getSmoothStepPath({

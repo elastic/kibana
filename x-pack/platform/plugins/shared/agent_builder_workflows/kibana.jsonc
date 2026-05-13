@@ -10,7 +10,7 @@
     "browser": true,
     "configPath": ["xpack", "agentBuilderWorkflows"],
     "requiredPlugins": ["agentBuilder", "workflowsManagement", "agentContextLayer"],
-    "requiredBundles": ["kibanaReact"],
+    "requiredBundles": ["kibanaReact", "workflowsManagement"],
     "optionalPlugins": [],
     "extraPublicDirs": []
   }

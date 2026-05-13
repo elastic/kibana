@@ -12,9 +12,11 @@ import { Position } from '@xyflow/react';
 import type { ForeachGroup, GraphEdge, LayoutedNode, PreLayoutNode } from './types';
 import { DEFAULT_NODE_STYLE } from './types';
 
-const GROUP_PADDING_TOP = 48;
-const GROUP_PADDING_X = 24;
-const GROUP_PADDING_BOTTOM = 24;
+// Foreach group inner padding. `TOP` includes the height of the header row
+// (~38px) plus a 32px gap below it; sides and bottom are a flat 32px gutter.
+const GROUP_PADDING_TOP = 70;
+const GROUP_PADDING_X = 32;
+const GROUP_PADDING_BOTTOM = 32;
 
 export type LayoutDirection = 'TB' | 'LR';
 
@@ -39,7 +41,7 @@ function applyDagre(
     align: 'UL',
     ranker: 'tight-tree',
     nodesep: options.compact ? 8 : 50,
-    ranksep: options.compact ? 16 : 80,
+    ranksep: options.compact ? 16 : 70,
     edgesep: options.compact ? 8 : 40,
   });
 
@@ -168,14 +170,47 @@ export function applyGraphLayout(
   const direction = options.direction ?? 'TB';
   const compact = options.compact ?? false;
 
-  // 1. Lay out inner subgraphs and resize their group containers.
+  // 1. Lay out inner subgraphs and resize their group containers. Foreach
+  //    groups can be nested (a foreach inside another foreach), so we have
+  //    to size the innermost groups first — the outer group's dagre layout
+  //    needs each nested group's bounding box to position siblings.
   const groupSizing = new Map<string, { width: number; height: number }>();
   const groupInnerById = new Map<
     string,
     { layoutedInnerNodes: LayoutedNode[]; innerEdges: GraphEdge[] }
   >();
-  for (const group of foreachGroups) {
-    const r = layoutForeachGroup(group, direction, { compact });
+  const groupIds = new Set(foreachGroups.map((g) => g.id));
+  const groupById = new Map(foreachGroups.map((g) => [g.id, g]));
+  const visited = new Set<string>();
+  const sortedGroups: ForeachGroup[] = [];
+  const visit = (group: ForeachGroup) => {
+    if (visited.has(group.id)) return;
+    visited.add(group.id);
+    for (const node of group.innerNodes) {
+      if (groupIds.has(node.id)) {
+        const child = groupById.get(node.id);
+        if (child) visit(child);
+      }
+    }
+    sortedGroups.push(group);
+  };
+  for (const group of foreachGroups) visit(group);
+
+  for (const group of sortedGroups) {
+    // Replace any nested foreach group placeholder with its sized version so
+    // the parent's dagre layout reserves the correct width/height.
+    const sizedInnerNodes = group.innerNodes.map((n) => {
+      const childSize = groupSizing.get(n.id);
+      if (childSize) {
+        return { ...n, style: { width: childSize.width, height: childSize.height } };
+      }
+      return n;
+    });
+    const r = layoutForeachGroup(
+      { ...group, innerNodes: sizedInnerNodes },
+      direction,
+      { compact }
+    );
     groupSizing.set(group.id, { width: r.groupWidth, height: r.groupHeight });
     groupInnerById.set(group.id, {
       layoutedInnerNodes: r.layoutedInnerNodes,

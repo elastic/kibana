@@ -8,7 +8,7 @@
  */
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
-import { useReactFlow } from '@xyflow/react';
+import { useReactFlow, useStore } from '@xyflow/react';
 import React, { type ReactNode, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -77,6 +77,11 @@ function PlaceholderIconButton({
   );
 }
 
+// Treat any zoom within this tolerance of 1.0 as "default" so floating-point
+// drift from React Flow's zoom animations doesn't keep the reset button
+// visible after the user lands back at 100 %.
+const ZOOM_RESET_EPS = 0.01;
+
 function ZoomControls() {
   // useReactFlow only works inside a ReactFlowProvider. Wrap in try/catch
   // via a hook-safe fallback: the bottom bar is always rendered inside the
@@ -88,9 +93,20 @@ function ZoomControls() {
   const zoomInLabel = i18n.translate('workflowsUi.bottomBar.zoomIn', {
     defaultMessage: 'Zoom in',
   });
-  const { zoomIn, zoomOut } = useReactFlow();
+  const zoomResetLabel = i18n.translate('workflowsUi.bottomBar.zoomReset', {
+    defaultMessage: 'Reset zoom',
+  });
+  const { zoomIn, zoomOut, setViewport, getViewport } = useReactFlow();
+  // Subscribe to the live zoom (transform = [x, y, zoom]) so the reset
+  // button shows/hides reactively as the user zooms in or out.
+  const zoom = useStore((s) => s.transform[2]);
+  const isZoomed = Math.abs(zoom - 1) > ZOOM_RESET_EPS;
   const handleZoomOut = useCallback(() => zoomOut({ duration: 200 }), [zoomOut]);
   const handleZoomIn = useCallback(() => zoomIn({ duration: 200 }), [zoomIn]);
+  const handleZoomReset = useCallback(() => {
+    const { x, y } = getViewport();
+    setViewport({ x, y, zoom: 1 }, { duration: 200 });
+  }, [getViewport, setViewport]);
 
   return (
     <>
@@ -113,6 +129,36 @@ function ZoomControls() {
           onClick={handleZoomOut}
           data-test-subj="workflowBottomBar-zoom-out"
         />
+      </EuiFlexItem>
+      {/* Reset-zoom button — slides in from the left with a fade when the
+          current zoom drifts away from 1.0, slides back out (collapsing its
+          width too) when the user returns to default zoom. */}
+      <EuiFlexItem
+        grow={false}
+        css={{
+          display: 'flex',
+          overflow: 'hidden',
+          // Width animates from 0 to the button's intrinsic width via
+          // `max-width`; opacity/transform handle the fade-in feel.
+          maxWidth: isZoomed ? 40 : 0,
+          opacity: isZoomed ? 1 : 0,
+          transform: isZoomed ? 'translateX(0)' : 'translateX(-4px)',
+          pointerEvents: isZoomed ? 'auto' : 'none',
+          transition:
+            'max-width 200ms cubic-bezier(0.4, 0, 0.2, 1), opacity 160ms ease, transform 200ms cubic-bezier(0.4, 0, 0.2, 1)',
+        }}
+      >
+        <EuiToolTip content={zoomResetLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="bullseye"
+            aria-label={zoomResetLabel}
+            color="text"
+            size="s"
+            onClick={handleZoomReset}
+            isDisabled={!isZoomed}
+            data-test-subj="workflowBottomBar-zoom-reset"
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </>
   );

@@ -11,7 +11,7 @@ import type { WorkflowYaml } from '../spec/schema';
 
 export type Step = WorkflowYaml['steps'][number];
 
-export const DEFAULT_NODE_STYLE = { width: 280, height: 64 } as const;
+export const DEFAULT_NODE_STYLE = { width: 300, height: 64 } as const;
 
 export const FLOW_CONTROL_STEP_TYPES: ReadonlySet<string> = new Set([
   'if',

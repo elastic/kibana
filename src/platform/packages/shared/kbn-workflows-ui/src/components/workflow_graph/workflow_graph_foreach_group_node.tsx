@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import type { Node, NodeProps } from '@xyflow/react';
 import { Handle, Position } from '@xyflow/react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-// Matches the blue palette used by step nodes so the foreach container
-// feels like a natural extension of the same visual language.
+// Match the step row's blue palette so the foreach container reads as a
+// natural wrapper for the steps it contains.
 const FOREACH_BORDER = '#bfdbff';
-const FOREACH_LABEL_BG = '#f1f6ff';
+const FOREACH_HEADER_BG = '#f1f6ff';
 const FOREACH_LABEL_COLOR = '#006bb8';
 
 interface ForeachGroupNodeData extends Record<string, unknown> {
@@ -25,7 +25,6 @@ interface ForeachGroupNodeData extends Record<string, unknown> {
 }
 
 export function WorkflowGraphForeachGroupNode(node: NodeProps<Node<ForeachGroupNodeData>>) {
-  const { euiTheme } = useEuiTheme();
   const targetHandlePos = node.targetPosition ?? Position.Top;
   const sourceHandlePos = node.sourcePosition ?? Position.Bottom;
   return (
@@ -35,30 +34,39 @@ export function WorkflowGraphForeachGroupNode(node: NodeProps<Node<ForeachGroupN
         css={{
           width: '100%',
           height: '100%',
-          background: euiTheme.colors.backgroundBasePlain,
-          border: `1px dashed ${FOREACH_BORDER}`,
-          borderRadius: 12,
-          padding: '24px 12px 12px',
+          // 90% transparent white per design — barely tints the canvas so the
+          // foreach reads as a container without dominating the steps inside.
+          background: 'rgba(255, 255, 255, 0.1)',
+          border: `1px solid ${FOREACH_BORDER}`,
+          borderRadius: 8,
           position: 'relative',
+          overflow: 'hidden',
         }}
       >
+        {/* Full-width header — same blue palette as step rows so the container
+            visually owns the steps below it. Sized to match GROUP_PADDING_TOP
+            (apply_graph_layout.ts) so inner nodes sit just below the header. */}
         <div
           css={{
-            position: 'absolute',
-            top: -10,
-            left: 12,
-            background: FOREACH_LABEL_BG,
-            border: `1px solid ${FOREACH_BORDER}`,
-            borderRadius: 4,
-            padding: '0 6px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            padding: '8px 12px',
+            background: FOREACH_HEADER_BG,
+            borderBottom: `1px solid ${FOREACH_BORDER}`,
+            fontFamily: 'Inter, sans-serif',
             fontSize: 12,
-            fontWeight: 600,
+            fontWeight: 500,
             color: FOREACH_LABEL_COLOR,
+            lineHeight: '20px',
           }}
         >
-          {`${node.data.label} · ${i18n.translate('workflowsUi.graph.foreachLabel', {
-            defaultMessage: 'for each item',
-          })}`}
+          <EuiIcon type="refresh" size="s" color={FOREACH_LABEL_COLOR} aria-hidden />
+          <span>
+            {`${node.data.label} · ${i18n.translate('workflowsUi.graph.foreachLabel', {
+              defaultMessage: 'for each item',
+            })}`}
+          </span>
         </div>
       </div>
       <Handle type="source" position={sourceHandlePos} style={{ opacity: 0 }} />
