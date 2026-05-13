@@ -10,6 +10,35 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE,
 } from '@kbn/management-settings-ids';
 import type { KbnClient, EsClient, ApiServicesFixture, ScoutLogger } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+
+// The uiSettings server-side cache (NAMESPACED_CACHE_TTL = 10s) is in-process
+// and not invalidated across Kibana nodes, so a write on one node can be
+// unobservable on another until the stale entry TTLs out. Tests that flip a
+// flag and immediately drive a flag-gated request can hit the load balancer
+// on a node whose cache still holds the previous value.
+const STREAMS_FLAGS = [
+  OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
+  OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
+  OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE,
+] as const;
+
+const STREAMS_FLAGS_PROPAGATION_DELAY_MS = 12_000;
+const STREAMS_FLAGS_PROPAGATION_TIMEOUT_MS = 20_000;
+
+const waitForStreamsFlagsPropagation = async (kbnClient: KbnClient, expected: boolean) => {
+  const startedAt = Date.now();
+  await expect
+    .poll(
+      async () => {
+        if (Date.now() - startedAt < STREAMS_FLAGS_PROPAGATION_DELAY_MS) return false;
+        const values = await Promise.all(STREAMS_FLAGS.map((key) => kbnClient.uiSettings.get(key)));
+        return values.every((value) => value === expected);
+      },
+      { timeout: STREAMS_FLAGS_PROPAGATION_TIMEOUT_MS, intervals: [500] }
+    )
+    .toBe(true);
+};
 
 const ROOT_STREAMS = ['logs.ecs', 'logs.otel'];
 
@@ -46,6 +75,7 @@ export const enableQueryStreams = async (kbnClient: KbnClient) => {
   await kbnClient.uiSettings.update({
     [OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE]: true,
   });
+  await waitForStreamsFlagsPropagation(kbnClient, true);
 };
 
 export const disableQueryStreams = async (kbnClient: KbnClient) => {

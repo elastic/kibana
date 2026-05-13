@@ -7,7 +7,13 @@
 
 import { createPlaywrightConfig } from '@kbn/scout';
 
-export default createPlaywrightConfig({
-  testDir: './tests',
-  runGlobalSetup: true,
-});
+export default {
+  ...createPlaywrightConfig({
+    testDir: './tests',
+    runGlobalSetup: true,
+  }),
+  testMatch: [
+    '**/query_streams/query_stream_nesting_error.spec.ts',
+    '**/query_streams/delete_query_stream.spec.ts',
+  ],
+};
