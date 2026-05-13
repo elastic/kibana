@@ -53,7 +53,7 @@ describe('GridSectionHeader', () => {
   it('renders the panel count', async () => {
     const { component, gridLayoutStateManager } = renderGridSectionHeader();
     const initialCount = component.getByTestId('kbnGridSectionHeader-second--panelCount');
-    expect(initialCount.textContent).toBe('(1 panel)');
+    expect(initialCount.textContent).toBe('1 panel');
 
     const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
     act(() => {
@@ -69,7 +69,7 @@ describe('GridSectionHeader', () => {
 
     await waitFor(() => {
       const updatedCount = component.getByTestId('kbnGridSectionHeader-second--panelCount');
-      expect(updatedCount.textContent).toBe('(8 panels)');
+      expect(updatedCount.textContent).toBe('8 panels');
     });
   });
 

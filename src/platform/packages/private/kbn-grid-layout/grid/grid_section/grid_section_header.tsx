@@ -13,6 +13,7 @@ import { distinctUntilChanged, filter, map, pairwise } from 'rxjs';
 
 import { type UseEuiTheme, transparentize } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiButtonIcon,
   EuiIcon,
   EuiFlexGroup,
@@ -35,8 +36,33 @@ export interface GridSectionHeaderProps {
   sectionId: string;
 }
 
+type SectionStatusBadgeColor = 'success' | 'warning' | 'danger';
+
+const pickRandomBadgeColor = (): SectionStatusBadgeColor => {
+  const options: SectionStatusBadgeColor[] = ['success', 'warning', 'danger'];
+  return options[Math.floor(Math.random() * options.length)]!;
+};
+
+const getSectionBadgeLabel = (color: SectionStatusBadgeColor): string => {
+  switch (color) {
+    case 'success':
+      return i18n.translate('kbnGridLayout.section.statusBadgeAllFine', {
+        defaultMessage: 'All fine',
+      });
+    case 'warning':
+      return i18n.translate('kbnGridLayout.section.statusBadgeWarning', {
+        defaultMessage: 'Warning',
+      });
+    case 'danger':
+      return i18n.translate('kbnGridLayout.section.statusBadgeAlert', {
+        defaultMessage: 'Alert',
+      });
+  }
+};
+
 export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderProps) => {
   const collapseButtonRef = useRef<HTMLButtonElement | null>(null);
+  const [sectionStatusBadgeColor] = useState<SectionStatusBadgeColor>(pickRandomBadgeColor);
 
   const { gridLayoutStateManager } = useGridLayoutContext();
   const startDrag = useGridLayoutSectionEvents({ sectionId });
@@ -285,23 +311,58 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
           !editTitleOpen && (
             <>
               <EuiFlexItem
+                grow={true}
+                css={styles.sectionDescriptionColumn}
+                data-no-drag
+                onMouseDown={(event: React.MouseEvent) => {
+                  event.stopPropagation();
+                }}
+                onTouchStart={(event: React.TouchEvent) => {
+                  event.stopPropagation();
+                }}
+              >
+                <EuiFlexGroup
+                  gutterSize="s"
+                  responsive={false}
+                  alignItems="center"
+                  justifyContent="flexEnd"
+                >
+                  <EuiText
+                    color="subdued"
+                    size="xs"
+                    css={styles.sectionDescriptionText}
+                    data-test-subj={`kbnGridSectionHeader-${sectionId}--description`}
+                  >
+                    {i18n.translate('kbnGridLayout.section.placeholderDescription', {
+                      defaultMessage:
+                        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor',
+                    })}
+                  </EuiText>
+                  <EuiBadge
+                    color={sectionStatusBadgeColor}
+                    data-test-subj={`kbnGridSectionHeader-${sectionId}--statusBadge`}
+                  >
+                    {getSectionBadgeLabel(sectionStatusBadgeColor)}
+                  </EuiBadge>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem
                 grow={false}
                 css={readOnly ? styles.visibleOnlyWhenCollapsed : undefined}
               >
-                <EuiText
-                  color="subdued"
-                  size="s"
+                <EuiBadge
+                  color="hollow"
                   data-test-subj={`kbnGridSectionHeader-${sectionId}--panelCount`}
                   className={'kbnGridLayout--panelCount'}
                 >
                   {i18n.translate('kbnGridLayout.section.panelCount', {
                     defaultMessage:
-                      '({panelCount} {panelCount, plural, one {panel} other {panels}})',
+                      '{panelCount} {panelCount, plural, one {panel} other {panels}}',
                     values: {
                       panelCount,
                     },
                   })}
-                </EuiText>
+                </EuiBadge>
               </EuiFlexItem>
               {!readOnly && (
                 <>
@@ -350,6 +411,15 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
 });
 
 const styles = {
+  sectionDescriptionColumn: css({
+    minWidth: 0,
+  }),
+  sectionDescriptionText: css({
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    maxWidth: 'min(100%, 36rem)',
+  }),
   visibleOnlyWhenCollapsed: css({
     display: 'none',
     '.kbnGridSectionHeader--collapsed &': {
