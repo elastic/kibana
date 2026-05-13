@@ -428,17 +428,6 @@
       "enabled": {
         "type": "boolean"
       },
-      "evaluation": {
-        "properties": {
-          "query": {
-            "properties": {
-              "base": {
-                "type": "text"
-              }
-            }
-          }
-        }
-      },
       "grouping": {
         "properties": {
           "fields": {
@@ -470,27 +459,32 @@
           }
         }
       },
-      "no_data": {
+      "query": {
         "properties": {
-          "behavior": {
+          "format": {
             "type": "keyword"
           },
-          "timeframe": {
-            "type": "keyword"
-          }
-        }
-      },
-      "recovery_policy": {
-        "properties": {
-          "query": {
+          "base": {
+            "type": "text"
+          },
+          "blocks": {
             "properties": {
-              "base": {
+              "breach": {
+                "type": "text"
+              },
+              "recover": {
                 "type": "text"
               }
             }
           },
-          "type": {
-            "type": "keyword"
+          "no_data": {
+            "type": "text"
+          },
+          "breach": {
+            "type": "text"
+          },
+          "recover": {
+            "type": "text"
           }
         }
       },
