@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
 import { SYSTEM_USER_ID } from '@kbn/agent-builder-common/constants';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { css } from '@emotion/react';
 import { labels } from '../../../utils/i18n';
 import { AgentAvatar } from '../../common/agent_avatar';
@@ -89,6 +90,11 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
                             size="xs"
                             aria-label={overviewLabels.copyIdAriaLabel}
                             data-test-subj="agentOverviewCopyId"
+                            data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_OVERVIEW}
+                            data-ebt-action={
+                              AGENT_BUILDER_UI_EBT.action.manageAgent.OVERVIEW_COPY_ID
+                            }
+                            data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.AGENT}
                             css={textSubduedStyles}
                           />
                         )}
@@ -112,6 +118,9 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
                 iconType="question"
                 size="s"
                 data-test-subj="agentOverviewDocsLink"
+                data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_OVERVIEW}
+                data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageAgent.OVERVIEW_DOCS_LINK}
+                data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.AGENT}
               >
                 {overviewLabels.docsLink}
               </EuiButtonEmpty>
@@ -122,6 +131,9 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
                 size="s"
                 onClick={onEditDetails}
                 data-test-subj="agentOverviewEditDetailsButton"
+                data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_OVERVIEW}
+                data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageAgent.OVERVIEW_EDIT_DETAILS}
+                data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.AGENT}
               >
                 {overviewLabels.editDetailsButton}
               </EuiButtonEmpty>

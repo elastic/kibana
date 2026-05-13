@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenu,
+  EuiPopover,
+  type EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
 import type { PublicSkillSummary } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
+import type { ContextMenuRowWithEbt } from '../context_menu_row_with_ebt';
 
 interface SkillContextMenuProps {
   skill: PublicSkillSummary;
@@ -30,7 +37,7 @@ export const SkillContextMenu: React.FC<SkillContextMenuProps> = ({
   const togglePopover = useCallback(() => setIsOpen((prev) => !prev), []);
 
   const panels = useMemo(() => {
-    const items = [];
+    const items: ContextMenuRowWithEbt[] = [];
 
     if (skill.readonly) {
       items.push({
@@ -41,6 +48,9 @@ export const SkillContextMenu: React.FC<SkillContextMenuProps> = ({
           closePopover();
         },
         'data-test-subj': `agentBuilderSkillViewButton-${skill.id}`,
+        'data-ebt-element': AGENT_BUILDER_UI_EBT.element.MANAGE_SKILLS_TABLE,
+        'data-ebt-action': AGENT_BUILDER_UI_EBT.action.manageSkills.TABLE_CONTEXT_VIEW,
+        'data-ebt-detail': AGENT_BUILDER_UI_EBT.entity.SKILL,
       });
     } else {
       items.push({
@@ -51,6 +61,9 @@ export const SkillContextMenu: React.FC<SkillContextMenuProps> = ({
           closePopover();
         },
         'data-test-subj': `agentBuilderSkillEditButton-${skill.id}`,
+        'data-ebt-element': AGENT_BUILDER_UI_EBT.element.MANAGE_SKILLS_TABLE,
+        'data-ebt-action': AGENT_BUILDER_UI_EBT.action.manageSkills.TABLE_CONTEXT_EDIT,
+        'data-ebt-detail': AGENT_BUILDER_UI_EBT.entity.SKILL,
       });
 
       if (canManage) {
@@ -62,11 +75,15 @@ export const SkillContextMenu: React.FC<SkillContextMenuProps> = ({
             closePopover();
           },
           'data-test-subj': `agentBuilderSkillDeleteButton-${skill.id}`,
+          'data-ebt-element': AGENT_BUILDER_UI_EBT.element.MANAGE_SKILLS_TABLE,
+          'data-ebt-action': AGENT_BUILDER_UI_EBT.action.manageSkills.TABLE_CONTEXT_DELETE,
+          'data-ebt-detail': AGENT_BUILDER_UI_EBT.entity.SKILL,
         });
       }
     }
 
-    return [{ id: 0, items }];
+    // EUI `EuiContextMenuPanelItemDescriptor` omits `data-ebt-*` from typings; EUI forwards them to the item control at runtime.
+    return [{ id: 0, items: items as unknown as EuiContextMenuPanelItemDescriptor[] }];
   }, [skill, canManage, navigateToAgentBuilderUrl, closePopover, onDelete]);
 
   return (
@@ -77,6 +94,9 @@ export const SkillContextMenu: React.FC<SkillContextMenuProps> = ({
           aria-label={labels.skills.skillContextMenuButtonLabel}
           onClick={togglePopover}
           data-test-subj={`agentBuilderSkillContextMenuButton-${skill.id}`}
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_SKILLS_TABLE}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageSkills.TABLE_CONTEXT_OPEN}
+          data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.SKILL}
         />
       }
       isOpen={isOpen}

@@ -13,6 +13,7 @@ import {
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import useToggle from 'react-use/lib/useToggle';
 import { labels } from '../../utils/i18n';
 import { InstallFromUrlModal } from './install_from_url_modal';
@@ -50,6 +51,8 @@ export const InstallPluginButton: React.FC = () => {
             iconSide="left"
             onClick={togglePopover}
             data-test-subj="agentBuilderInstallPluginButton"
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_PLUGINS}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.managePlugins.INSTALL_MENU_OPEN}
           >
             <EuiText size="s">{labels.plugins.installPluginButton}</EuiText>
           </EuiButton>
@@ -66,6 +69,8 @@ export const InstallPluginButton: React.FC = () => {
               icon="link"
               onClick={handleOpenUrlModal}
               data-test-subj="agentBuilderInstallFromUrlMenuItem"
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_PLUGINS}
+              data-ebt-action={AGENT_BUILDER_UI_EBT.action.managePlugins.INSTALL_FROM_URL}
             >
               {labels.plugins.installFromUrlMenuItem}
             </EuiContextMenuItem>,
@@ -74,6 +79,8 @@ export const InstallPluginButton: React.FC = () => {
               icon="exportAction"
               onClick={handleOpenUploadModal}
               data-test-subj="agentBuilderUploadPluginMenuItem"
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_PLUGINS}
+              data-ebt-action={AGENT_BUILDER_UI_EBT.action.managePlugins.INSTALL_UPLOAD}
             >
               {labels.plugins.uploadMenuItem}
             </EuiContextMenuItem>,

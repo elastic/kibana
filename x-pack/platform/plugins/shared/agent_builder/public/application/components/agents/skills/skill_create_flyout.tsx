@@ -25,6 +25,7 @@ import {
 import { css } from '@emotion/react';
 import { FormProvider } from 'react-hook-form';
 import type { PublicSkillDefinition } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { labels } from '../../../utils/i18n';
 import { useCreateSkill } from '../../../hooks/skills/use_create_skill';
 import { useSkillForm } from '../../../hooks/skills/use_skill_form';
@@ -85,13 +86,25 @@ export const SkillCreateFlyout: React.FC<SkillCreateFlyoutProps> = ({
   const hasErrors = Object.keys(errors).length > 0;
 
   return (
-    <EuiFlyout onClose={onClose} size={FLYOUT_WIDTH} aria-labelledby="skillCreateFlyoutTitle">
+    <EuiFlyout
+      onClose={onClose}
+      size={FLYOUT_WIDTH}
+      aria-labelledby="skillCreateFlyoutTitle"
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_SKILLS_AGENT_FLYOUT}
+      data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.SKILL}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 id="skillCreateFlyoutTitle">{labels.agentSkills.createSkillFlyoutTitle}</h2>
         </EuiTitle>
         <EuiSpacer size="xs" />
-        <EuiLink href={skillLibraryUrl} target="_blank">
+        <EuiLink
+          href={skillLibraryUrl}
+          target="_blank"
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_SKILLS_AGENT_FLYOUT}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageSkills.FLYOUT_LIBRARY_LINK}
+          data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.SKILL}
+        >
           {labels.agentSkills.viewSkillLibraryLink}
         </EuiLink>
       </EuiFlyoutHeader>
@@ -114,7 +127,14 @@ export const SkillCreateFlyout: React.FC<SkillCreateFlyoutProps> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose}>{labels.skills.cancelButtonLabel}</EuiButtonEmpty>
+            <EuiButtonEmpty
+              onClick={onClose}
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_SKILLS_AGENT_FLYOUT}
+              data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageSkills.FLYOUT_CANCEL}
+              data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.SKILL}
+            >
+              {labels.skills.cancelButtonLabel}
+            </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -122,6 +142,9 @@ export const SkillCreateFlyout: React.FC<SkillCreateFlyoutProps> = ({
               onClick={handleSubmit(onSubmit)}
               isLoading={isSubmitting}
               disabled={hasErrors || isSubmitting}
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_SKILLS_AGENT_FLYOUT}
+              data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageSkills.FLYOUT_SAVE}
+              data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.SKILL}
             >
               {labels.skills.saveButtonLabel}
             </EuiButton>

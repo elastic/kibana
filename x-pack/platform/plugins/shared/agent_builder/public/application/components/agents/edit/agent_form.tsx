@@ -36,6 +36,7 @@ import {
   hasAgentWriteAccess,
   type AgentDefinition,
 } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -399,6 +400,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       const saveButton = (
         <EuiButton
           data-test-subj="agentFormSaveButton"
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_FORM}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageAgent.FORM_SAVE}
+          data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.AGENT}
           form={agentFormId}
           size={size}
           type="submit"
@@ -440,6 +444,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       return !isCreateMode ? (
         <EuiButton
           {...commonProps}
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_FORM}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageAgent.FORM_CHAT_NAV}
+          data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.AGENT}
           onClick={() =>
             navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId: editingAgentId }))
           }
@@ -451,6 +458,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       ) : (
         <EuiButton
           {...commonProps}
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_FORM}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageAgent.FORM_SAVE_AND_CHAT}
+          data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.AGENT}
           isLoading={submittingButtonId === BUTTON_IDS.SAVE_AND_CHAT}
           onClick={handleSubmit(handleSaveAndChat)}
         >
@@ -501,7 +511,12 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
           })}
         </p>
         <EuiSpacer size="m" />
-        <EuiButton onClick={() => navigateToAgentBuilderUrl(appPaths.agents.list)}>
+        <EuiButton
+          onClick={() => navigateToAgentBuilderUrl(appPaths.agents.list)}
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_FORM}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageAgent.FORM_ERROR_BACK_TO_LIST}
+          data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.AGENT}
+        >
           {i18n.translate('xpack.agentBuilder.agents.backToListButton', {
             defaultMessage: 'Back to agents list',
           })}
@@ -572,6 +587,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                         defaultMessage: 'Learn more about agents in the documentation',
                       }
                     )}
+                    data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_FORM}
+                    data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageAgent.FORM_CREATE_LEARN_MORE}
+                    data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.AGENT}
                   >
                     {i18n.translate(
                       'xpack.agentBuilder.agents.form.settings.systemReferencesLearnMore',
@@ -609,6 +627,11 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                         display="fill"
                         iconType="chevronSingleDown"
                         onClick={() => setAdditionalActionsMenuOpen((openState) => !openState)}
+                        data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_FORM}
+                        data-ebt-action={
+                          AGENT_BUILDER_UI_EBT.action.manageAgent.FORM_SAVE_OVERFLOW_OPEN
+                        }
+                        data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.AGENT}
                       />
                     }
                   >
@@ -620,6 +643,11 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                           size="s"
                           disabled={isSaveDisabled}
                           onClick={handleSubmit(handleSaveAndChat)}
+                          data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_FORM}
+                          data-ebt-action={
+                            AGENT_BUILDER_UI_EBT.action.manageAgent.FORM_SAVE_AND_CHAT
+                          }
+                          data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.AGENT}
                         >
                           {i18n.translate('xpack.agentBuilder.agents.form.saveAndChatButton', {
                             defaultMessage: 'Save and chat',
@@ -645,6 +673,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                       })}
                       iconType="boxesVertical"
                       onClick={() => setContextMenuOpen(!isContextMenuOpen)}
+                      data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_FORM}
+                      data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageAgent.FORM_MORE_MENU_OPEN}
+                      data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.AGENT}
                     />
                   }
                   isOpen={isContextMenuOpen}
@@ -665,6 +696,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                             [searchParamNames.sourceId]: editingAgentId,
                           });
                         }}
+                        data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_FORM}
+                        data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageAgent.FORM_CLONE}
+                        data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.AGENT}
                       >
                         {i18n.translate('xpack.agentBuilder.agents.form.cloneButton', {
                           defaultMessage: 'Clone',
@@ -680,6 +714,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                           setContextMenuOpen(false);
                           onDelete?.();
                         }}
+                        data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_FORM}
+                        data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageAgent.FORM_DELETE}
+                        data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.AGENT}
                       >
                         {i18n.translate('xpack.agentBuilder.agents.form.deleteButton', {
                           defaultMessage: 'Delete',
@@ -734,6 +771,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
               iconType="cross"
               color="text"
               onClick={handleCancel}
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_FORM}
+              data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageAgent.FORM_CANCEL}
+              data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.AGENT}
             >
               {labels.agents.settings.cancelButtonLabel}
             </EuiButtonEmpty>

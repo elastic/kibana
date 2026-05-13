@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { PublicSkillSummary } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { useDeleteSkill } from '../../hooks/skills/use_delete_skill';
 import { useSkillsService } from '../../hooks/skills/use_skills';
@@ -213,6 +214,9 @@ const useSkillsTableColumns = ({
               <EuiLink
                 onClick={() => handleSkillClick(skill.id)}
                 data-test-subj={`agentBuilderSkillLink-${skill.id}`}
+                data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_SKILLS_TABLE}
+                data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageSkills.TABLE_ROW_OPEN}
+                data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.SKILL}
               >
                 <EuiText size="s">
                   <strong>{skill.id}</strong>

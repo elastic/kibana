@@ -29,6 +29,7 @@ import {
   VISIBILITY_ICON,
   type AgentDefinition,
 } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
@@ -122,6 +123,8 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
         size={FLYOUT_WIDTH}
         aria-labelledby={flyoutTitleId}
         data-test-subj="editDetailsFlyout"
+        data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_EDIT_DETAILS}
+        data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.AGENT}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
@@ -173,7 +176,13 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onClose} data-test-subj="editDetailsCancelButton">
+              <EuiButtonEmpty
+                onClick={onClose}
+                data-test-subj="editDetailsCancelButton"
+                data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_EDIT_DETAILS}
+                data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageAgent.EDIT_DETAILS_CANCEL}
+                data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.AGENT}
+              >
                 {flyoutLabels.cancelButton}
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -184,6 +193,9 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
                 isLoading={updateMutation.isLoading}
                 isDisabled={!formState.isDirty}
                 data-test-subj="editDetailsSaveButton"
+                data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_EDIT_DETAILS}
+                data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageAgent.EDIT_DETAILS_SAVE}
+                data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.AGENT}
               >
                 {flyoutLabels.saveButton}
               </EuiButton>

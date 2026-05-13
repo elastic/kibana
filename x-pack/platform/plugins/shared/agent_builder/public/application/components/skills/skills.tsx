@@ -7,6 +7,7 @@
 
 import { EuiButton, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -41,6 +42,8 @@ export const AgentBuilderSkills = () => {
               iconType="plus"
               onClick={() => navigateToAgentBuilderUrl(appPaths.skills.new)}
               data-test-subj="agentBuilderNewSkillButton"
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_SKILLS}
+              data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageSkills.NEW_SKILL}
             >
               <EuiText size="s">{labels.skills.newSkillButton}</EuiText>
             </EuiButton>

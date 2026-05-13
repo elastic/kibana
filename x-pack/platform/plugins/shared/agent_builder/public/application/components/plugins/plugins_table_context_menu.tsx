@@ -7,10 +7,12 @@
 
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import type { PluginDefinition } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
+import type { ContextMenuRowWithEbt } from '../context_menu_row_with_ebt';
 
 interface PluginContextMenuProps {
   plugin: PluginDefinition;
@@ -34,7 +36,7 @@ export const PluginContextMenu: React.FC<PluginContextMenuProps> = ({
   const togglePopover = useCallback(() => setIsOpen((prev) => !prev), []);
 
   const panels = useMemo(() => {
-    const items = [
+    const items: ContextMenuRowWithEbt[] = [
       {
         name: labels.plugins.viewPluginButtonLabel,
         icon: 'eye',
@@ -43,6 +45,9 @@ export const PluginContextMenu: React.FC<PluginContextMenuProps> = ({
           closePopover();
         },
         'data-test-subj': `agentBuilderPluginViewButton-${plugin.id}`,
+        'data-ebt-element': AGENT_BUILDER_UI_EBT.element.MANAGE_PLUGINS_TABLE,
+        'data-ebt-action': AGENT_BUILDER_UI_EBT.action.managePlugins.TABLE_CONTEXT_VIEW,
+        'data-ebt-detail': AGENT_BUILDER_UI_EBT.entity.PLUGIN,
       },
     ];
 
@@ -55,6 +60,9 @@ export const PluginContextMenu: React.FC<PluginContextMenuProps> = ({
           closePopover();
         },
         'data-test-subj': `agentBuilderPluginDeleteButton-${plugin.id}`,
+        'data-ebt-element': AGENT_BUILDER_UI_EBT.element.MANAGE_PLUGINS_TABLE,
+        'data-ebt-action': AGENT_BUILDER_UI_EBT.action.managePlugins.TABLE_CONTEXT_DELETE,
+        'data-ebt-detail': AGENT_BUILDER_UI_EBT.entity.PLUGIN,
       });
     }
 
@@ -69,6 +77,9 @@ export const PluginContextMenu: React.FC<PluginContextMenuProps> = ({
           aria-label={labels.plugins.pluginContextMenuButtonLabel}
           onClick={togglePopover}
           data-test-subj={`agentBuilderPluginContextMenuButton-${plugin.id}`}
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_PLUGINS_TABLE}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.managePlugins.TABLE_CONTEXT_OPEN}
+          data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.PLUGIN}
         />
       }
       isOpen={isOpen}

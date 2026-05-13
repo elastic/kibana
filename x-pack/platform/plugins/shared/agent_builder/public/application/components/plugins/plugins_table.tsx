@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { PluginDefinition } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import React, { memo, useMemo, useState } from 'react';
 import type { PluginUsedByAgents } from '../../hooks/plugins/use_delete_plugin';
 import { useDeletePlugin } from '../../hooks/plugins/use_delete_plugin';
@@ -178,6 +179,9 @@ const usePluginsTableColumns = ({
           <EuiLink
             href={createAgentBuilderUrl(appPaths.plugins.details({ pluginId: plugin.id }))}
             data-test-subj={`agentBuilderPluginNameLink-${plugin.id}`}
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_PLUGINS_TABLE}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.managePlugins.TABLE_ROW_OPEN}
+            data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.PLUGIN}
           >
             <strong>{name}</strong>
           </EuiLink>
