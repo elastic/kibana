@@ -48,7 +48,26 @@ export interface MlADJobsApi {
   annotations: MlAnnotationsApi;
 }
 
+export interface MlCalendar {
+  calendar_id: string;
+  description: string;
+  events: estypes.MlCalendarEvent[];
+  job_ids: string[];
+  total_job_count?: number;
+}
+
 export interface MlCalendarsApi {
+  /** Create an ML calendar via the Elasticsearch API */
+  createCalendar: (
+    calendarId: string,
+    config?: { job_ids?: string[]; description?: string }
+  ) => Promise<void>;
+  /** Add events to an existing ML calendar via the Elasticsearch API */
+  createCalendarEvents: (calendarId: string, events: estypes.MlCalendarEvent[]) => Promise<void>;
+  /** Get all events for an ML calendar via the Elasticsearch API */
+  getCalendarEvents: (calendarId: string) => Promise<{ events: estypes.MlCalendarEvent[] }>;
+  /** Get an ML calendar by ID via the Kibana API (returns Kibana shape, including events) */
+  get: (calendarId: string) => Promise<MlCalendar>;
   /** Get all ML calendars via the Elasticsearch API */
   getAll: () => Promise<estypes.MlGetCalendarsCalendar[]>;
   /** Wait for a calendar to exist by polling the Elasticsearch API */
@@ -191,6 +210,55 @@ export const getMlApiHelper = (
   };
 
   const calendars: MlCalendarsApi = {
+    async createCalendar(
+      calendarId: string,
+      config: { job_ids?: string[]; description?: string } = {}
+    ): Promise<void> {
+      await measurePerformanceAsync(
+        log,
+        `mlApi.calendars.createCalendar [${calendarId}]`,
+        async () => {
+          await esClient.ml.putCalendar({ calendar_id: calendarId, ...config });
+          await this.waitForCalendarToExist(calendarId);
+        }
+      );
+    },
+
+    async createCalendarEvents(
+      calendarId: string,
+      events: estypes.MlCalendarEvent[]
+    ): Promise<void> {
+      await measurePerformanceAsync(
+        log,
+        `mlApi.calendars.createCalendarEvents [${calendarId}]`,
+        async () => {
+          await esClient.ml.postCalendarEvents({ calendar_id: calendarId, events });
+        }
+      );
+    },
+
+    async getCalendarEvents(calendarId: string): Promise<{ events: estypes.MlCalendarEvent[] }> {
+      return measurePerformanceAsync(
+        log,
+        `mlApi.calendars.getCalendarEvents [${calendarId}]`,
+        async () => {
+          const response = await esClient.ml.getCalendarEvents({ calendar_id: calendarId });
+          return { events: response.events };
+        }
+      );
+    },
+
+    async get(calendarId: string): Promise<MlCalendar> {
+      return measurePerformanceAsync(log, `mlApi.calendars.get [${calendarId}]`, async () => {
+        const { data } = await kbnClient.request<MlCalendar>({
+          method: 'GET',
+          path: `/internal/ml/calendars/${calendarId}`,
+          headers: ML_INTERNAL_HEADERS,
+        });
+        return data;
+      });
+    },
+
     async getAll(): Promise<estypes.MlGetCalendarsCalendar[]> {
       return measurePerformanceAsync(log, 'mlApi.calendars.getAll', async () => {
         const response = await esClient.ml.getCalendars();
@@ -216,11 +284,11 @@ export const getMlApiHelper = (
 
     async delete(calendarId: string): Promise<void> {
       await measurePerformanceAsync(log, `mlApi.calendars.delete [${calendarId}]`, async () => {
-        const response = await esClient.ml.deleteCalendar({ calendar_id: calendarId });
-        if (response.acknowledged !== true) {
-          throw new Error(`Failed to delete calendar ${calendarId}`);
-        }
-        await this.waitForCalendarNotToExist(calendarId);
+        await esClient.ml.deleteCalendar({ calendar_id: calendarId }).catch((err) => {
+          // ignore 404 errors because the calendar may not exist / has already been deleted
+          if (err?.statusCode === 404) return;
+          throw err;
+        });
       });
     },
 
