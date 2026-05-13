@@ -16,9 +16,11 @@ import { runAgent } from './run_agent';
 export const createAgentHandler = ({
   agent,
   effectiveConfiguration,
+  traceId,
 }: {
   agent: InternalAgentDefinition;
   effectiveConfiguration: AgentConfiguration;
+  traceId?: string;
 }): AgentHandlerFn => {
   return async (
     {
@@ -53,6 +55,7 @@ export const createAgentHandler = ({
         configurationOverrides,
         action,
         executionId,
+        traceId,
       },
       context
     );

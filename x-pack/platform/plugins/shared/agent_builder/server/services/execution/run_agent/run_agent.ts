@@ -73,6 +73,10 @@ export interface RunAgentParams {
    * The execution ID for this run. Used for sub-agent parent tracking.
    */
   executionId?: string;
+  /**
+   * OTel trace ID from the agent builder span.
+   */
+  traceId?: string;
 }
 
 export interface RunAgentResponse {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Span } from '@opentelemetry/api';
+import type { Context, Span } from '@opentelemetry/api';
 import { isPromise } from 'util/types';
 import { safeJsonStringify } from '@kbn/std';
 import type { WithActiveSpanOptions } from '@kbn/tracing-utils';
@@ -25,43 +25,47 @@ export function withExecuteToolSpan<T>(
       toolCallId?: string;
       input?: unknown;
     };
+    parentContext?: Context;
   },
   cb: (span?: Span) => T
 ): T {
   const { description, toolCallId, input } = options.tool;
+  const { parentContext } = options;
 
-  return withActiveInferenceSpan(
-    `Tool: ${toolName}`,
-    {
-      ...options,
-      attributes: {
-        ...options.attributes,
-        [GenAISemanticConventions.GenAIToolName]: toolName,
-        [GenAISemanticConventions.GenAIOperationName]: 'execute_tool',
-        [GenAISemanticConventions.GenAIToolCallId]: toolCallId,
-        [ElasticGenAIAttributes.InferenceSpanKind]: 'TOOL',
-        [ElasticGenAIAttributes.ToolDescription]: description,
-        [ElasticGenAIAttributes.ToolParameters]: safeJsonStringify(input),
-      },
+  const spanOpts = {
+    ...options,
+    attributes: {
+      ...options.attributes,
+      [GenAISemanticConventions.GenAIToolName]: toolName,
+      [GenAISemanticConventions.GenAIOperationName]: 'execute_tool',
+      [GenAISemanticConventions.GenAIToolCallId]: toolCallId,
+      [ElasticGenAIAttributes.InferenceSpanKind]: 'TOOL',
+      [ElasticGenAIAttributes.ToolDescription]: description,
+      [ElasticGenAIAttributes.ToolParameters]: safeJsonStringify(input),
     },
-    (span) => {
-      if (!span) {
-        return cb();
-      }
+  };
 
-      const res = cb(span);
-
-      if (isPromise(res)) {
-        return res.then((value) => {
-          const stringified = safeJsonStringify(value);
-          if (stringified) {
-            span.setAttribute('output.value', stringified);
-          }
-          return value;
-        }) as T;
-      }
-
-      return res;
+  const spanCb = (span: Span | undefined) => {
+    if (!span) {
+      return cb();
     }
-  );
+
+    const res = cb(span);
+
+    if (isPromise(res)) {
+      return res.then((value) => {
+        const stringified = safeJsonStringify(value);
+        if (stringified) {
+          span.setAttribute('output.value', stringified);
+        }
+        return value;
+      }) as T;
+    }
+
+    return res;
+  };
+
+  return parentContext
+    ? withActiveInferenceSpan(`Tool: ${toolName}`, spanOpts, parentContext, spanCb)
+    : withActiveInferenceSpan(`Tool: ${toolName}`, spanOpts, spanCb);
 }

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import type { Span } from '@opentelemetry/api';
+import type { Context, Span } from '@opentelemetry/api';
+import { propagation, trace } from '@opentelemetry/api';
 import type { Observable } from 'rxjs';
 import { tap } from 'rxjs';
 import { safeJsonStringify } from '@kbn/std';
 import {
-  withActiveInferenceSpan,
   ElasticGenAIAttributes,
   GenAISemanticConventions,
+  BAGGAGE_TRACKING_BEACON_KEY,
+  BAGGAGE_TRACKING_BEACON_VALUE,
 } from '@kbn/inference-tracing';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
@@ -20,6 +22,8 @@ import {
   attachOpikDistributedTrace,
   type OpikDistributedTraceHeaders,
 } from './opik_distributed_tracing';
+import { withExplicitSpan } from './with_explicit_span';
+import { getAgentBuilderTracer } from './register_tracing';
 
 interface WithConverseSpanOptions {
   agentId: string;
@@ -27,11 +31,40 @@ interface WithConverseSpanOptions {
   opikHeaders?: OpikDistributedTraceHeaders;
 }
 
+/**
+ * Sets the inference baggage beacon on the given context so that
+ * `InferencePreservingSampler` and `isInferenceSpan` recognise
+ * all child spans as inference work.
+ */
+function buildInferenceContext(parentCtx: Context): Context {
+  let baggage = propagation.getBaggage(parentCtx) ?? propagation.createBaggage({});
+  const isRoot =
+    baggage.getEntry(BAGGAGE_TRACKING_BEACON_KEY)?.value !== BAGGAGE_TRACKING_BEACON_VALUE;
+
+  if (isRoot) {
+    baggage = baggage.setEntry(BAGGAGE_TRACKING_BEACON_KEY, {
+      value: BAGGAGE_TRACKING_BEACON_VALUE,
+    });
+    return trace.deleteSpan(propagation.setBaggage(parentCtx, baggage));
+  }
+
+  return propagation.setBaggage(parentCtx, baggage);
+}
+
 export function withConverseSpan(
   { agentId, conversationId, opikHeaders }: WithConverseSpanOptions,
-  cb: (span?: Span) => Observable<ChatEvent>
+  parentCtx: Context,
+  cb: (span: Span | undefined, ctx: Context) => Observable<ChatEvent>
 ): Observable<ChatEvent> {
-  return withActiveInferenceSpan(
+  const tracer = getAgentBuilderTracer();
+  if (!tracer) {
+    return cb(undefined, parentCtx);
+  }
+
+  const inferenceCtx = buildInferenceContext(parentCtx);
+
+  return withExplicitSpan(
+    tracer,
     'Converse',
     {
       attributes: {
@@ -41,16 +74,13 @@ export function withConverseSpan(
         [GenAISemanticConventions.GenAIConversationId]: conversationId,
       },
     },
-    (span) => {
-      if (!span) {
-        return cb();
-      }
-
+    inferenceCtx,
+    (span, ctx) => {
       if (opikHeaders) {
         attachOpikDistributedTrace(span, opikHeaders);
       }
 
-      return cb(span).pipe(
+      return cb(span, ctx).pipe(
         tap({
           next: (event) => {
             if (isRoundCompleteEvent(event)) {

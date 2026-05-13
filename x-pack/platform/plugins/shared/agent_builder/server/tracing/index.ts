@@ -10,3 +10,10 @@ export { withAgentSpan } from './with_agent_span';
 export { withConverseSpan } from './with_converse_span';
 export { getCurrentTraceId } from './get_current_trace_id';
 export { OpikDistributedTracingSpanProcessor } from './opik_distributed_tracing';
+export { withExplicitSpan } from './with_explicit_span';
+export { getAgentBuilderTracer } from './register_tracing';
+export {
+  setExecutionOtelContext,
+  getExecutionOtelContext,
+  clearExecutionOtelContext,
+} from './execution_context_store';

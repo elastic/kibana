@@ -12,8 +12,9 @@ import type {
   ExperimentalFeatures,
 } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { ROOT_CONTEXT } from '@opentelemetry/api';
 import { getCurrentSpaceId } from '../../../utils/spaces';
-import { withAgentSpan } from '../../../tracing';
+import { withAgentSpan, getExecutionOtelContext, setExecutionOtelContext } from '../../../tracing';
 import { createAgentHandler } from '../run_agent/create_handler';
 import {
   createAgentEventEmitter,
@@ -146,8 +147,13 @@ export const runAgent = async ({
   };
   manager.deps.agentConfiguration = effectiveConfiguration;
 
-  const agentResult = await withAgentSpan({ agent }, async () => {
-    const agentHandler = createAgentHandler({ agent, effectiveConfiguration });
+  const parentOtelCtx = getExecutionOtelContext(executionId ?? '') ?? ROOT_CONTEXT;
+  const agentResult = await withAgentSpan({ agent }, parentOtelCtx, async (span, agentCtx) => {
+    const traceId = span?.spanContext().traceId;
+    if (executionId) {
+      setExecutionOtelContext(executionId, agentCtx);
+    }
+    const agentHandler = createAgentHandler({ agent, effectiveConfiguration, traceId });
     const agentHandlerContext = await createAgentHandlerContext({ agentExecutionParams, manager });
     return await agentHandler(
       {

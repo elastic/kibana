@@ -23,6 +23,7 @@ import { getConnectorProvider, getConnectorModel } from '@kbn/inference-common';
 import type { InferenceCompleteCallbackHandler } from '@kbn/inference-common/src/chat_complete';
 import { AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID } from '@kbn/agent-builder-common/constants';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import type { Context } from '@opentelemetry/api';
 import type { TrackingService } from '../../../telemetry';
 import { MODEL_TELEMETRY_METADATA } from '../../../telemetry';
 import { resolveSelectedConnectorId } from '../../../utils/resolve_selected_connector_id';
@@ -36,6 +37,7 @@ export interface CreateModelProviderOpts {
   savedObjects: SavedObjectsServiceStart;
   logger: Logger;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
+  getParentContext?: () => Context | undefined;
 }
 
 export type CreateModelProviderFactoryFn = (
@@ -43,7 +45,7 @@ export type CreateModelProviderFactoryFn = (
 ) => ModelProviderFactoryFn;
 
 export type ModelProviderFactoryFn = (
-  opts: Pick<CreateModelProviderOpts, 'request' | 'defaultConnectorId'>
+  opts: Pick<CreateModelProviderOpts, 'request' | 'defaultConnectorId' | 'getParentContext'>
 ) => ModelProvider;
 
 const memoizeAsync = <T>(fn: () => Promise<T>): (() => Promise<T>) => {
@@ -73,6 +75,7 @@ export const createModelProvider = ({
   savedObjects,
   searchInferenceEndpoints,
   logger,
+  getParentContext,
 }: CreateModelProviderOpts): ModelProvider => {
   const getDefaultConnectorId = memoizeAsync(async () => {
     const resolvedConnectorId = await resolveSelectedConnectorId({
@@ -176,6 +179,7 @@ export const createModelProvider = ({
       },
       chatModelOptions: {
         telemetryMetadata: MODEL_TELEMETRY_METADATA,
+        ...(getParentContext ? { getParentContext } : {}),
       },
     });
 

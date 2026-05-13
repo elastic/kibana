@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Attributes } from '@opentelemetry/api';
+import type { Attributes, Context } from '@opentelemetry/api';
 
 /**
  * Set of metadata that can be used then calling the inference APIs
@@ -16,6 +16,7 @@ export interface ChatCompleteMetadata {
   connectorTelemetry?: ConnectorTelemetryMetadata;
   anonymization?: ChatCompleteAnonymizationMetadata;
   attributes?: Attributes;
+  parentContext?: Context;
 }
 
 /**

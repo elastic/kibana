@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import type { Span } from '@opentelemetry/api';
+import type { Context, Span } from '@opentelemetry/api';
 import { safeJsonStringify } from '@kbn/std';
-import {
-  withActiveInferenceSpan,
-  ElasticGenAIAttributes,
-  GenAISemanticConventions,
-} from '@kbn/inference-tracing';
+import { ElasticGenAIAttributes, GenAISemanticConventions } from '@kbn/inference-tracing';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
 import type { AgentHandlerReturn } from '@kbn/agent-builder-server';
+import { withExplicitSpan } from './with_explicit_span';
+import { getAgentBuilderTracer } from './register_tracing';
 
 interface WithAgentSpanOptions {
   agent: AgentDefinition;
@@ -21,10 +19,16 @@ interface WithAgentSpanOptions {
 
 export function withAgentSpan(
   { agent }: WithAgentSpanOptions,
-  cb: (span?: Span) => Promise<AgentHandlerReturn>
+  parentCtx: Context,
+  cb: (span: Span | undefined, ctx: Context) => Promise<AgentHandlerReturn>
 ): Promise<AgentHandlerReturn> {
   const { id: agentId, configuration } = agent;
-  return withActiveInferenceSpan(
+  const tracer = getAgentBuilderTracer();
+  if (!tracer) {
+    return cb(undefined, parentCtx);
+  }
+  return withExplicitSpan(
+    tracer,
     'ExecuteAgent',
     {
       attributes: {
@@ -34,13 +38,9 @@ export function withAgentSpan(
         [ElasticGenAIAttributes.AgentConfig]: safeJsonStringify(configuration),
       },
     },
-    (span) => {
-      if (!span) {
-        return cb();
-      }
-
-      const res = cb(span);
-      return res.then((agentReturn) => {
+    parentCtx,
+    (span, ctx) => {
+      return cb(span, ctx).then((agentReturn) => {
         span.setAttribute('output.value', safeJsonStringify(agentReturn) ?? 'unknown');
         return agentReturn;
       });

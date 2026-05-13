@@ -89,6 +89,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     configurationOverrides,
     action,
     executionId,
+    traceId,
   },
   context
 ) => {
@@ -360,6 +361,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       compactionResult,
       roundId,
       initialTodos,
+      traceId,
     }),
     evictInternalEvents(),
     shareReplay()

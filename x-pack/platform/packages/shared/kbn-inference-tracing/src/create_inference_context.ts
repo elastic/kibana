@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import type { Context } from '@opentelemetry/api';
 import { context, propagation, trace } from '@opentelemetry/api';
 import { BAGGAGE_TRACKING_BEACON_KEY, BAGGAGE_TRACKING_BEACON_VALUE } from './baggage';
 
-export function createInferenceContext() {
-  const ctx = context.active();
+export function createInferenceContext(parentCtx?: Context) {
+  const ctx = parentCtx ?? context.active();
   let baggage = propagation.getBaggage(ctx);
 
   let isRoot = false;

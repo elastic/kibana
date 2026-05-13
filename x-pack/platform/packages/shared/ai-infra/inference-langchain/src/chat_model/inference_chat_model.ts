@@ -28,6 +28,7 @@ import { ChatGenerationChunk } from '@langchain/core/outputs';
 import { OutputParserException } from '@langchain/core/output_parsers';
 import type { Runnable } from '@langchain/core/runnables';
 import { RunnablePassthrough, RunnableSequence, RunnableLambda } from '@langchain/core/runnables';
+import type { Context } from '@opentelemetry/api';
 import type {
   InferenceConnector,
   ChatCompleteAPI,
@@ -65,6 +66,12 @@ export interface InferenceChatModelParams extends BaseChatModelParams {
   signal?: AbortSignal;
   timeout?: number;
   telemetryMetadata?: ConnectorTelemetryMetadata;
+  /**
+   * Optional callback to resolve the OTel parent context for each chatComplete call.
+   * When provided, the returned context is passed as `metadata.parentContext`
+   * so inference tracing spans are attached to the caller's trace.
+   */
+  getParentContext?: () => Context | undefined;
 }
 
 export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions {
@@ -98,6 +105,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   // @ts-ignore unused for now
   private readonly logger: Logger;
   private readonly telemetryMetadata?: ConnectorTelemetryMetadata;
+  private readonly getParentContext?: () => Context | undefined;
 
   protected temperature?: number;
   protected functionCallingMode?: FunctionCallingMode;
@@ -111,6 +119,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     this.chatComplete = args.chatComplete;
     this.connector = args.connector;
     this.telemetryMetadata = args.telemetryMetadata;
+    this.getParentContext = args.getParentContext;
 
     this.temperature = args.temperature;
     this.functionCallingMode = args.functionCallingMode;
@@ -137,6 +146,25 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
 
   getConnector() {
     return this.connector;
+  }
+
+  /**
+   * Returns a shallow copy of this model that resolves its OTel parent
+   * context via the given callback instead of the one set at construction.
+   */
+  withParentContext(getter: () => Context | undefined): InferenceChatModel {
+    return new InferenceChatModel({
+      chatComplete: this.chatComplete,
+      connector: this.connector,
+      telemetryMetadata: this.telemetryMetadata,
+      getParentContext: getter,
+      temperature: this.temperature,
+      functionCallingMode: this.functionCallingMode,
+      model: this.model,
+      signal: this.signal,
+      timeout: this.timeout,
+      maxRetries: this.maxRetries,
+    });
   }
 
   _llmType() {
@@ -202,7 +230,10 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       toolChoice: hasTools ? toolChoiceToInference(resolvedToolChoice) : undefined,
       abortSignal: options.signal ?? this.signal,
       maxRetries: this.maxRetries,
-      metadata: { connectorTelemetry: this.telemetryMetadata },
+      metadata: {
+        connectorTelemetry: this.telemetryMetadata,
+        ...(this.getParentContext ? { parentContext: this.getParentContext() } : {}),
+      },
       timeout: options.timeout ?? this.timeout,
     };
   }

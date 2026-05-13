@@ -254,6 +254,7 @@ function createChatCompletePipeline({
               toolChoice,
               ...(spanModel ? { model: spanModel } : {}),
               ...metadata?.attributes,
+              ...(metadata?.parentContext ? { parentContext: metadata.parentContext } : {}),
             },
             () => {
               return chatComplete({

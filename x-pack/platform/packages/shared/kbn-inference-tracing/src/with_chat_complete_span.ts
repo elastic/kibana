@@ -22,7 +22,7 @@ import {
   isChatCompletionMessageEvent,
   isChatCompletionTokenCountEvent,
 } from '@kbn/inference-common';
-import type { Span } from '@opentelemetry/api';
+import type { Context, Span } from '@opentelemetry/api';
 import { isObservable, tap } from 'rxjs';
 import { isPromise } from 'util/types';
 import { withActiveInferenceSpan } from './with_active_inference_span';
@@ -97,6 +97,7 @@ interface InferenceGenerationOptions {
   messages: Message[];
   tools?: Record<string, ToolDefinition>;
   toolChoice?: ToolChoice;
+  parentContext?: Context;
 }
 
 function getUserMessageEvent(message: UserMessage): UserMessageEvent {
@@ -172,94 +173,96 @@ export function withChatCompleteSpan(
   options: InferenceGenerationOptions,
   cb: (span?: Span) => ChatCompleteCompositeResponse
 ): ChatCompleteCompositeResponse {
-  const { system, messages, model, toolChoice, tools, ...attributes } = options;
+  const { system, messages, model, toolChoice, tools, parentContext, ...attributes } = options;
 
   const modelProvider = model?.provider ?? 'unknown';
   const modelId = model?.id ?? model?.family ?? 'unknown';
 
-  const next = withActiveInferenceSpan(
-    'ChatComplete',
-    {
-      attributes: {
-        ...attributes,
-        [GenAISemanticConventions.GenAIOperationName]: 'chat',
-        [GenAISemanticConventions.GenAIRequestModel]: modelId,
-        [GenAISemanticConventions.GenAISystem]: modelProvider,
-        [GenAISemanticConventions.GenAIProviderName]: modelProvider,
-        [ElasticGenAIAttributes.InferenceSpanKind]: 'LLM',
-        [ElasticGenAIAttributes.Tools]: tools ? JSON.stringify(tools) : undefined,
-        [ElasticGenAIAttributes.ToolChoice]: toolChoice ? JSON.stringify(toolChoice) : toolChoice,
-      },
+  const spanOpts = {
+    attributes: {
+      ...attributes,
+      [GenAISemanticConventions.GenAIOperationName]: 'chat',
+      [GenAISemanticConventions.GenAIRequestModel]: modelId,
+      [GenAISemanticConventions.GenAISystem]: modelProvider,
+      [GenAISemanticConventions.GenAIProviderName]: modelProvider,
+      [ElasticGenAIAttributes.InferenceSpanKind]: 'LLM',
+      [ElasticGenAIAttributes.Tools]: tools ? JSON.stringify(tools) : undefined,
+      [ElasticGenAIAttributes.ToolChoice]: toolChoice ? JSON.stringify(toolChoice) : toolChoice,
     },
-    (span) => {
-      if (!span) {
-        return cb();
-      }
+  };
 
-      if (system) {
-        addEvent(span, {
-          name: GenAISemanticConventions.GenAISystemMessage,
-          body: {
-            content: system,
-            role: 'system',
-          },
-        } satisfies SystemMessageEvent);
-      }
-
-      messages
-        .map((message) => {
-          switch (message.role) {
-            case MessageRole.User:
-              return getUserMessageEvent(message);
-
-            case MessageRole.Assistant:
-              return getAssistantMessageEvent(message);
-
-            case MessageRole.Tool:
-              return getToolMessageEvent(message);
-          }
-        })
-        .forEach((event) => {
-          addEvent(span, event);
-        });
-
-      const result = cb(span);
-
-      if (isObservable(result)) {
-        return result.pipe(
-          tap({
-            next: (value) => {
-              if (isChatCompletionMessageEvent(value)) {
-                setChoice(span, {
-                  content: value.content,
-                  toolCalls: value.toolCalls,
-                });
-              } else if (isChatCompletionTokenCountEvent(value)) {
-                setTokens(span, value.tokens);
-                setResponseModel(span, { modelName: value.model });
-              }
-            },
-          })
-        );
-      }
-
-      if (isPromise(result)) {
-        return result.then((value) => {
-          setChoice(span, {
-            content: value.content,
-            toolCalls: value.toolCalls,
-          });
-          if (value.tokens) {
-            setTokens(span, value.tokens);
-          }
-
-          return value;
-        });
-      }
-
-      return result;
+  const spanCb = (span: Span | undefined) => {
+    if (!span) {
+      return cb();
     }
-  );
+
+    if (system) {
+      addEvent(span, {
+        name: GenAISemanticConventions.GenAISystemMessage,
+        body: {
+          content: system,
+          role: 'system',
+        },
+      } satisfies SystemMessageEvent);
+    }
+
+    messages
+      .map((message) => {
+        switch (message.role) {
+          case MessageRole.User:
+            return getUserMessageEvent(message);
+
+          case MessageRole.Assistant:
+            return getAssistantMessageEvent(message);
+
+          case MessageRole.Tool:
+            return getToolMessageEvent(message);
+        }
+      })
+      .forEach((event) => {
+        addEvent(span, event);
+      });
+
+    const result = cb(span);
+
+    if (isObservable(result)) {
+      return result.pipe(
+        tap({
+          next: (value) => {
+            if (isChatCompletionMessageEvent(value)) {
+              setChoice(span, {
+                content: value.content,
+                toolCalls: value.toolCalls,
+              });
+            } else if (isChatCompletionTokenCountEvent(value)) {
+              setTokens(span, value.tokens);
+              setResponseModel(span, { modelName: value.model });
+            }
+          },
+        })
+      );
+    }
+
+    if (isPromise(result)) {
+      return result.then((value) => {
+        setChoice(span, {
+          content: value.content,
+          toolCalls: value.toolCalls,
+        });
+        if (value.tokens) {
+          setTokens(span, value.tokens);
+        }
+
+        return value;
+      });
+    }
+
+    return result;
+  };
+
+  const next = parentContext
+    ? withActiveInferenceSpan('ChatComplete', spanOpts, parentContext, spanCb)
+    : withActiveInferenceSpan('ChatComplete', spanOpts, spanCb);
 
   return next;
 }

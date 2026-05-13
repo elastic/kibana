@@ -5,13 +5,12 @@
  * 2.0.
  */
 
+import type { Context } from '@opentelemetry/api';
 import { trace } from '@opentelemetry/api';
 
 /**
- * Returns the current traceId (which can be used to check traces in phoenix.
- *
- * **MUST* be called from within an active trace
+ * Returns the traceId from the given OTel context.
  */
-export const getCurrentTraceId = (): string | undefined => {
-  return trace.getActiveSpan()?.spanContext().traceId;
+export const getCurrentTraceId = (ctx: Context): string | undefined => {
+  return trace.getSpan(ctx)?.spanContext().traceId;
 };

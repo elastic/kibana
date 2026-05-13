@@ -60,6 +60,7 @@ import {
 import { createPromptManager, getAgentPromptStorageState } from './utils/prompts';
 import { runInternalTool, runTool } from './run_tool';
 import { runAgent } from './run_agent';
+import { getExecutionOtelContext } from '../../../tracing';
 import { createStore } from './store';
 import type { SkillServiceStart } from '../../skills';
 import type { PluginsServiceStart } from '../../plugins/plugin_service';
@@ -203,6 +204,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     promptState,
     abortSignal,
     executionMode,
+    executionId,
   }: {
     request: KibanaRequest;
     defaultConnectorId?: string;
@@ -211,6 +213,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     promptState?: PromptStorageState;
     abortSignal?: AbortSignal;
     executionMode: AgentExecutionMode;
+    executionId?: string;
   }): Promise<ScopedRunner> => {
     const { resultStore, filestore, skillsStore } = createStore({ conversation });
 
@@ -224,7 +227,11 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     const promptManager = createPromptManager({ state: promptState });
     const toolManager = createToolManager();
 
-    const modelProvider = modelProviderFactory({ request, defaultConnectorId });
+    const modelProvider = modelProviderFactory({
+      request,
+      defaultConnectorId,
+      getParentContext: executionId ? () => getExecutionOtelContext(executionId) : undefined,
+    });
 
     const subAgentExecutor = createSubAgentExecutor({ request, getExecutionService });
 
@@ -280,6 +287,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         request,
         defaultConnectorId,
         abortSignal,
+        executionId,
         executionMode = AgentExecutionMode.conversation,
         ...otherParams
       } = params;
@@ -291,12 +299,13 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         nextInput,
         abortSignal,
         executionMode,
+        executionId,
         promptState: getAgentPromptStorageState({
           input: nextInput,
           conversation,
         }),
       });
-      return runner.runAgent(otherParams);
+      return runner.runAgent({ ...otherParams, executionId });
     },
   };
 };

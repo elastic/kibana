@@ -57,7 +57,6 @@ import type {
   ModelProviderStats,
 } from '@kbn/agent-builder-server/runner';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import { getCurrentTraceId } from '../../../../tracing';
 import type { ConvertedEvents } from '../convert_graph_events';
 import { isFinalStateEvent } from '../events';
 import type { CompactedConversation } from './conversation_compactor';
@@ -83,6 +82,7 @@ export const addRoundCompleteEvent = ({
   compactionResult,
   roundId: providedRoundId,
   initialTodos,
+  traceId,
 }: {
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
@@ -93,12 +93,10 @@ export const addRoundCompleteEvent = ({
   attachmentStateManager: AttachmentStateManager;
   endTime?: Date;
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
-  /** Result of the compaction pipeline; used to build the compaction step and audit trail */
   compactionResult?: CompactedConversation;
-  /** Optional pre-generated round ID. If not provided, a new UUID is generated. */
   roundId?: string;
-  /** Todo list at round start; used as fallback when the agent never called todoWrite this round */
   initialTodos?: TodoItem[];
+  traceId?: string;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
     const shared$ = events$.pipe(share());
@@ -119,6 +117,7 @@ export const addRoundCompleteEvent = ({
                 attachmentRefs,
                 configurationOverrides,
                 compactionResult,
+                traceId,
               })
             : createRound({
                 roundId: providedRoundId,
@@ -131,6 +130,7 @@ export const addRoundCompleteEvent = ({
                 configurationOverrides,
                 compactionResult,
                 initialTodos,
+                traceId,
               });
 
           round.state = buildRoundState({ round, events, stateManager });
@@ -162,6 +162,7 @@ const resumeRound = ({
   attachmentRefs,
   configurationOverrides,
   compactionResult,
+  traceId,
 }: {
   pendingRound: ConversationRound;
   events: SourceEvents[];
@@ -172,6 +173,7 @@ const resumeRound = ({
   attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
   compactionResult?: CompactedConversation;
+  traceId?: string;
 }): ConversationRound => {
   // Replay tool events for all pending steps (those with empty results)
   const pendingSteps = pendingRound.steps
@@ -200,6 +202,7 @@ const resumeRound = ({
     attachmentRefs,
     configurationOverrides,
     compactionResult,
+    traceId,
   });
 
   return mergeRounds(pendingRound, followUp);
@@ -279,6 +282,7 @@ const createRound = ({
   configurationOverrides,
   compactionResult,
   initialTodos,
+  traceId,
 }: {
   roundId?: string;
   events: SourceEvents[];
@@ -290,6 +294,7 @@ const createRound = ({
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
   compactionResult?: CompactedConversation;
   initialTodos?: TodoItem[];
+  traceId?: string;
 }): ConversationRound => {
   const toolResults = events.filter(isToolResultEvent);
   const toolProgressions = events.filter(isToolProgressEvent);
@@ -384,7 +389,7 @@ const createRound = ({
       ...(attachmentRefs.length > 0 ? { attachment_refs: attachmentRefs } : {}),
     },
     steps,
-    trace_id: getCurrentTraceId(),
+    trace_id: traceId,
     started_at: startTime.toISOString(),
     time_to_first_token: timeToFirstToken,
     time_to_last_token: timeToLastToken,

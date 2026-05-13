@@ -8,15 +8,44 @@
 import type { CoreStart } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { tracing } from '@elastic/opentelemetry-node/sdk';
+import { tracing as otelSdkTracing } from '@elastic/opentelemetry-node/sdk';
 import { SavedObjectsClient } from '@kbn/core/server';
-import { LateBindingSpanProcessor, ElasticsearchOtlpExporter } from '@kbn/tracing';
+import {
+  InferencePreservingSampler,
+  ElasticsearchOtlpExporter,
+  LateBindingSpanProcessor,
+} from '@kbn/tracing';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
+import type { Tracer } from '@opentelemetry/api';
+import { trace } from '@opentelemetry/api';
 import type { AgentBuilderConfig } from '../config';
 import { AgentBuilderSpanProcessor } from './agent_builder_span_processor';
 import { OpikDistributedTracingSpanProcessor } from './opik_distributed_tracing';
 
 const SETTING_CACHE_TTL_MS = 30_000;
+
+/**
+ * Detects whether a real global TracerProvider has been registered.
+ * When no provider is set, `trace.getTracerProvider()` returns a `ProxyTracerProvider`
+ * wrapping a `NoopTracerProvider`. When `initTracing` has run, it returns the
+ * `NodeTracerProvider`. We detect this by checking if the tracer's `startSpan`
+ * produces a recording span.
+ */
+const isGlobalProviderSet = (): boolean => {
+  const testSpan = trace.getTracer('__probe__').startSpan('__probe__');
+  const isRecording = testSpan.isRecording();
+  testSpan.end();
+  return isRecording;
+};
+
+let agentBuilderTracerInstance: Tracer | undefined;
+
+/**
+ * Returns the agent builder tracer. Only available after {@link registerTracingExporter}
+ * has been called successfully with at least one exporter configured.
+ */
+export const getAgentBuilderTracer = (): Tracer | undefined => agentBuilderTracerInstance;
 
 /**
  * Returns a synchronous `isEnabled()` function that polls the uiSettings value
@@ -38,7 +67,11 @@ const createCachedIsEnabled = async (
         .asScopedToClient(internalClient)
         .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
     } catch (error) {
-      logger.error(`Failed to fetch tracing settings: ${error.message}`);
+      logger.error(
+        `Failed to fetch tracing settings: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
   };
 
@@ -86,24 +119,55 @@ export const registerTracingExporter = async ({
 
   const { isEnabled, stopPolling } = await createCachedIsEnabled(core, logger);
 
-  // OpikDistributedTracingSpanProcessor must be registered before AgentBuilderSpanProcessor
-  // so that opik.* attributes are set on spans at onStart before the exporter reads them at onEnd.
-  const tearDowns = [
-    ...(tracingConfig.opik_distributed_tracing
-      ? [LateBindingSpanProcessor.register(new OpikDistributedTracingSpanProcessor())]
-      : []),
-    ...exporters.map((exporter) => {
-      const processor = new AgentBuilderSpanProcessor({
-        exporter,
-        scheduledDelayMillis: tracingConfig.scheduledDelay,
-        isEnabled,
-      });
-      return LateBindingSpanProcessor.register(processor);
-    }),
+  const spanProcessors = [
+    ...(tracingConfig.opik_distributed_tracing ? [new OpikDistributedTracingSpanProcessor()] : []),
+    ...exporters.map(
+      (exporter) =>
+        new AgentBuilderSpanProcessor({
+          exporter,
+          scheduledDelayMillis: tracingConfig.scheduledDelay,
+          isEnabled,
+        })
+    ),
   ];
+
+  const provider = new otelSdkTracing.BasicTracerProvider({
+    sampler: new InferencePreservingSampler(
+      new otelSdkTracing.ParentBasedSampler({ root: new otelSdkTracing.AlwaysOnSampler() })
+    ),
+    spanProcessors,
+  });
+
+  agentBuilderTracerInstance = provider.getTracer('agent-builder');
+
+  // Check if a global tracer provider was already set (i.e., telemetry.tracing.enabled is true).
+  // If so, register into LateBindingSpanProcessor for inference plugin spans.
+  // Otherwise, register our provider as the global one so the inference tracer
+  // (`trace.getTracer('inference')`) produces real spans processed by our pipeline.
+  const hasGlobalProvider = isGlobalProviderSet();
+  let globalTearDowns: Array<() => Promise<void>> = [];
+
+  if (hasGlobalProvider) {
+    globalTearDowns = [
+      ...(tracingConfig.opik_distributed_tracing
+        ? [LateBindingSpanProcessor.register(new OpikDistributedTracingSpanProcessor())]
+        : []),
+      ...exporters.map((exporter) => {
+        const processor = new AgentBuilderSpanProcessor({
+          exporter,
+          scheduledDelayMillis: tracingConfig.scheduledDelay,
+          isEnabled,
+        });
+        return LateBindingSpanProcessor.register(processor);
+      }),
+    ];
+  } else {
+    trace.setGlobalTracerProvider(provider);
+  }
 
   return async () => {
     stopPolling();
-    await Promise.all(tearDowns.map((teardown) => teardown()));
+    agentBuilderTracerInstance = undefined;
+    await Promise.all([provider.shutdown(), ...globalTearDowns.map((teardown) => teardown())]);
   };
 };

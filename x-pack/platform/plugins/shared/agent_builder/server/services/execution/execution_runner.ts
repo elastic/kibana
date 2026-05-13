@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { merge, of, filter, tap, catchError, throwError, EMPTY } from 'rxjs';
+import { merge, of, filter, tap, catchError, throwError, EMPTY, finalize } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -22,6 +22,7 @@ import {
   AgentExecutionMode,
   createInternalError,
 } from '@kbn/agent-builder-common';
+import { ROOT_CONTEXT } from '@opentelemetry/api';
 import { getConnectorProvider } from '@kbn/inference-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SerializedExecutionError } from '@kbn/agent-builder-common';
@@ -46,7 +47,11 @@ import {
 } from './utils';
 import { createConversationIdSetEvent } from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
-import { withConverseSpan } from '../../tracing';
+import {
+  withConverseSpan,
+  setExecutionOtelContext,
+  clearExecutionOtelContext,
+} from '../../tracing';
 import type { MeteringService } from '../metering';
 import type { AgentExecutionClient } from './persistence';
 
@@ -171,6 +176,7 @@ const handleConversationExecution = async ({
           chatModel: (await modelProvider.selectModel({ effortLevel: 'low' })).chatModel,
           conversation,
           nextInput,
+          executionId: execution.executionId,
         })
       : of(conversation.title);
 
@@ -202,60 +208,67 @@ const handleConversationExecution = async ({
       ? { opik_trace_id: opikTraceId, opik_parent_span_id: opikParentSpanId }
       : undefined;
 
-  return withConverseSpan({ agentId, conversationId: effectiveConversationId, opikHeaders }, () =>
-    merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
-      handleCancellation(abortSignal),
-      tap((event) => {
-        try {
-          if (isRoundCompleteEvent(event)) {
-            const isReplacingRound = action === 'regenerate' || event.data?.resumed === true;
-            const currentRoundCount = isReplacingRound
-              ? conversation.rounds.length
-              : (conversation.rounds?.length ?? 0) + 1;
+  return withConverseSpan(
+    { agentId, conversationId: effectiveConversationId, opikHeaders },
+    ROOT_CONTEXT,
+    (_converseSpan, _converseCtx) => {
+      setExecutionOtelContext(execution.executionId, _converseCtx);
+      return merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
+        handleCancellation(abortSignal),
+        tap((event) => {
+          try {
+            if (isRoundCompleteEvent(event)) {
+              const isReplacingRound = action === 'regenerate' || event.data?.resumed === true;
+              const currentRoundCount = isReplacingRound
+                ? conversation.rounds.length
+                : (conversation.rounds?.length ?? 0) + 1;
 
-            // metering
-            meteringService
-              .reportExecution({
+              // metering
+              meteringService
+                .reportExecution({
+                  conversationId: effectiveConversationId,
+                  executionId: execution.executionId,
+                  roundCount: currentRoundCount,
+                  agentId,
+                  round: event.data.round,
+                  modelProvider: connectorProvider,
+                })
+                .catch((err) => {
+                  logger.warn(`Failed to report execution metering: ${err}`);
+                });
+
+              // snapshot telemetry tracking
+              if (effectiveConversationId) {
+                trackingService?.trackConversationRound(effectiveConversationId, currentRoundCount);
+              }
+
+              // EBT tracking
+              analyticsService?.reportRoundComplete({
                 conversationId: effectiveConversationId,
                 executionId: execution.executionId,
                 roundCount: currentRoundCount,
                 agentId,
                 round: event.data.round,
                 modelProvider: connectorProvider,
-              })
-              .catch((err) => {
-                logger.warn(`Failed to report execution metering: ${err}`);
               });
-
-            // snapshot telemetry tracking
-            if (effectiveConversationId) {
-              trackingService?.trackConversationRound(effectiveConversationId, currentRoundCount);
             }
-
-            // EBT tracking
-            analyticsService?.reportRoundComplete({
-              conversationId: effectiveConversationId,
-              executionId: execution.executionId,
-              roundCount: currentRoundCount,
-              agentId,
-              round: event.data.round,
-              modelProvider: connectorProvider,
-            });
+          } catch (error) {
+            logger.error(`Failed to report round complete telemetry: ${error}`);
           }
-        } catch (error) {
-          logger.error(`Failed to report round complete telemetry: ${error}`);
-        }
-      }),
-      convertErrors({
-        agentId,
-        logger,
-        analyticsService,
-        trackingService,
-        modelProvider: connectorProvider,
-        conversationId: effectiveConversationId,
-        executionId: execution.executionId,
-      })
-    )
+        }),
+        convertErrors({
+          agentId,
+          logger,
+          analyticsService,
+          trackingService,
+          modelProvider: connectorProvider,
+          conversationId: effectiveConversationId,
+          executionId: execution.executionId,
+          ctx: _converseCtx,
+        }),
+        finalize(() => clearExecutionOtelContext(execution.executionId))
+      );
+    }
   );
 };
 

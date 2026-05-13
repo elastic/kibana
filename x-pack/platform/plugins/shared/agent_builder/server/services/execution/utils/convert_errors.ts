@@ -10,6 +10,7 @@ import { catchError, throwError } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import { createInternalError, isAgentBuilderError } from '@kbn/agent-builder-common';
 import type { ModelProvider } from '@kbn/inference-common';
+import type { Context } from '@opentelemetry/api';
 import { getCurrentTraceId } from '../../../tracing';
 import type { AnalyticsService, TrackingService } from '../../../telemetry';
 
@@ -21,6 +22,7 @@ export function convertErrors<T>({
   logger,
   modelProvider,
   trackingService,
+  ctx,
 }: {
   agentId: string;
   analyticsService?: AnalyticsService;
@@ -29,6 +31,7 @@ export function convertErrors<T>({
   logger: Logger;
   modelProvider: ModelProvider;
   trackingService?: TrackingService;
+  ctx: Context;
 }): OperatorFunction<T, T> {
   return ($source) => {
     return $source.pipe(
@@ -52,7 +55,7 @@ export function convertErrors<T>({
         });
 
         return throwError(() => {
-          const traceId = getCurrentTraceId();
+          const traceId = getCurrentTraceId(ctx);
           if (isAgentBuilderError(err)) {
             err.meta = {
               ...err.meta,
