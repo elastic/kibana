@@ -289,23 +289,42 @@ export class CasePlugin
     // The internal SO client is constructed once here and handed to the
     // service for use by the reconciliation runner (which scans cases on a
     // timer, with no request context).
+    //
+    // **dataViews is optional** — it's only consumed by the v2 service for
+    // managed data view bootstrap. If v2 is enabled but dataViews isn't
+    // installed, log loudly and skip v2 start. The flag-vs-dependency
+    // mismatch is an operator config error, not a runtime crash.
     if (this.casesAnalyticsV2Service) {
-      // The internal repo serves two consumers:
-      //  - The reconciliation runner walks `cases` SOs.
-      //  - The data view sub-service reads `cases-templates` SOs per-space to
-      //    derive runtime fields.
-      // Both types are hidden, so they must be opted in explicitly here.
-      const v2InternalRepository = core.savedObjects.createInternalRepository([
-        CASE_SAVED_OBJECT,
-        CASE_TEMPLATE_SAVED_OBJECT,
-      ]);
-      const v2InternalSavedObjectsClient = new SavedObjectsClient(v2InternalRepository);
-      void this.casesAnalyticsV2Service.start({
-        esClient: core.elasticsearch.client.asInternalUser,
-        taskManager: plugins.taskManager,
-        internalSavedObjectsClient: v2InternalSavedObjectsClient,
-        dataViewsService: plugins.dataViews,
-      });
+      if (this.caseConfig.analyticsV2.enabled && plugins.dataViews == null) {
+        this.logger.error(
+          'cases-analyticsV2 is enabled but the `dataViews` plugin is not installed. ' +
+            'Install the dataViews plugin or set `xpack.cases.analyticsV2.enabled: false`. ' +
+            'Skipping v2 start.'
+        );
+      } else if (plugins.dataViews != null) {
+        // The internal repo serves two consumers:
+        //  - The reconciliation runner walks `cases` SOs.
+        //  - The data view sub-service reads `cases-templates` SOs per-space
+        //    to derive runtime fields.
+        // Both types are hidden, so they must be opted in explicitly here.
+        const v2InternalRepository = core.savedObjects.createInternalRepository([
+          CASE_SAVED_OBJECT,
+          CASE_TEMPLATE_SAVED_OBJECT,
+        ]);
+        const v2InternalSavedObjectsClient = new SavedObjectsClient(v2InternalRepository);
+        void this.casesAnalyticsV2Service.start({
+          esClient: core.elasticsearch.client.asInternalUser,
+          taskManager: plugins.taskManager,
+          internalSavedObjectsClient: v2InternalSavedObjectsClient,
+          dataViewsService: plugins.dataViews,
+        });
+      }
+      // When the v2 flag is off AND dataViews is absent: nothing to do.
+      // Calling .start({...}) with a NO-OP service was the old behavior;
+      // we now only call .start() when dataViews is present, which is a
+      // strict improvement (avoids attempting bootstrap that can never
+      // succeed). The service's other lifecycle hooks (writer proxy,
+      // route registration in setup) remain wired regardless.
     }
 
     this.userProfileService.initialize({

@@ -14,7 +14,6 @@
       "alerting",
       "actions",
       "data",
-      "dataViews",
       "embeddable",
       "lens",
       "licensing",
@@ -30,7 +29,7 @@
       "uiActions",
       "workflowsExtensions"
     ],
-    "optionalPlugins": ["cloud", "home", "taskManager", "usageCollection", "spaces", "serverless"],
+    "optionalPlugins": ["cloud", "dataViews", "home", "taskManager", "usageCollection", "spaces", "serverless"],
     "requiredBundles": ["esUiShared", "kibanaReact", "kibanaUtils", "savedObjectsFinder"],
     "extraPublicDirs": ["common"]
   }
