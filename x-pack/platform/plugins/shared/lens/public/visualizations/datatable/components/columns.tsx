@@ -55,7 +55,8 @@ export const createGridColumns = (
   headerRowLines: number,
   columnCellValueActions: LensCellValueAction[][] | undefined,
   closeCellPopover?: Function,
-  columnFilterable?: boolean[]
+  columnFilterable?: boolean[],
+  panelHasConfiguredDrilldowns = false
 ) => {
   const columnsReverseLookup = buildColumnsMetaLookup(table);
 
