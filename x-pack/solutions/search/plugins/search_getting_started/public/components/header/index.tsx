@@ -38,7 +38,7 @@ export const SearchGettingStartedHeader: React.FC = () => {
           })}
         >
           <EuiFlexGroup alignItems="center" justifyContent={isTrial ? 'spaceBetween' : 'flexEnd'}>
-            {isTrial && (
+            {isTrial && cloud && (
               <EuiFlexItem grow={false}>
                 <TrialUsageBadge cloud={cloud} />
               </EuiFlexItem>

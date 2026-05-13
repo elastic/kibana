@@ -30,7 +30,7 @@ const createCloudMock = (
     isServerlessEnabled: overrides.isServerlessEnabled ?? false,
   } as unknown as CloudStart);
 
-const renderBadge = async (cloud?: CloudStart) => {
+const renderBadge = async (cloud: CloudStart) => {
   let result: ReturnType<typeof render>;
   await act(async () => {
     result = render(
@@ -48,18 +48,21 @@ describe('TrialUsageBadge', () => {
   });
 
   it('renders TRIAL badge', async () => {
-    const { container } = await renderBadge();
+    const cloud = createCloudMock();
+    const { container } = await renderBadge(cloud);
     expect(getByTestSubj(container, 'trialUsageBadge')).toHaveTextContent('TRIAL');
   });
 
-  describe('when no cloud data is available', () => {
+  describe('when no trial data and no billing url', () => {
     it('renders badge without popover', async () => {
-      const { container } = await renderBadge();
+      const cloud = createCloudMock();
+      const { container } = await renderBadge(cloud);
       expect(getByTestSubj(container, 'trialUsagePopover')).not.toBeInTheDocument();
     });
 
     it('does not open popover on click', async () => {
-      const { container } = await renderBadge();
+      const cloud = createCloudMock();
+      const { container } = await renderBadge(cloud);
       await userEvent.click(getByTestSubj(container, 'trialUsageBadge')!);
       expect(getByTestSubj(container, 'trialUsagePopover')).not.toBeInTheDocument();
     });
