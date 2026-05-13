@@ -32,7 +32,7 @@ export interface ResolveResourceResponse {
  */
 export const deriveIsTsdb = (fields: MappingField[]): boolean => {
   return fields.some((f) => f.tsDimension === true || typeof f.tsMetric === 'string');
-}
+};
 /**
  * Retrieve the field list and other relevant info from the given resource name (index, alias or datastream)
  * Note: this can target a single resource, the resource name must not be a pattern.
