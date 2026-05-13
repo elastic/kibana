@@ -392,64 +392,6 @@ function createRejectionEvaluator(): Evaluator<RuleExample, RuleGenerationTaskOu
 }
 
 // ---------------------------------------------------------------------------
-// LLM evaluators
-// ---------------------------------------------------------------------------
-
-/**
- * Checks that the generated rule name semantically matches the expected rule name —
- * they should convey the same threat detection intent even if worded differently.
- */
-export function createRuleNameEvaluator(
-  evaluators: DefaultEvaluators
-): Evaluator<RuleExample, RuleGenerationTaskOutput> {
-  return {
-    name: 'Rule Name',
-    kind: 'LLM',
-    evaluate: async ({ input, output, expected, metadata }) => {
-      const generatedName = output?.generatedRule?.name ?? '(no name generated)';
-      const expectedName = expected?.name ?? '(no expected name)';
-
-      const criteriaEval = evaluators.criteria([
-        `The generated rule name should semantically match the expected rule name — ` +
-          `both should describe the same threat or attack technique, ` +
-          `even if the wording, capitalisation, or phrasing differs. ` +
-          `Expected name: "${expectedName}" ` +
-          `Generated name: "${generatedName}"`,
-      ]);
-
-      return criteriaEval.evaluate({ input, output: output?.generatedRule, expected, metadata });
-    },
-  };
-}
-
-/**
- * Checks that the generated rule description functionally describes the same threat scenario
- * as the expected description, even if worded differently.
- */
-export function createRuleDescriptionEvaluator(
-  evaluators: DefaultEvaluators
-): Evaluator<RuleExample, RuleGenerationTaskOutput> {
-  return {
-    name: 'Rule Description',
-    kind: 'LLM',
-    evaluate: async ({ input, output, expected, metadata }) => {
-      const generatedDesc = output?.generatedRule?.description ?? '(no description generated)';
-      const expectedDesc = expected?.description ?? '(no expected description)';
-
-      const criteriaEval = evaluators.criteria([
-        `The generated rule description should functionally describe the same threat scenario ` +
-          `as the expected description — covering the same adversary behaviour, ` +
-          `attack technique, or detection goal, even if the exact wording differs. ` +
-          `Expected description: "${expectedDesc}" ` +
-          `Generated description: "${generatedDesc}"`,
-      ]);
-
-      return criteriaEval.evaluate({ input, output: output?.generatedRule, expected, metadata });
-    },
-  };
-}
-
-// ---------------------------------------------------------------------------
 // Trajectory evaluator — tool-call sequence vs. golden path
 // ---------------------------------------------------------------------------
 
@@ -548,10 +490,6 @@ export function createEvaluateDataset({
     skip(skipNegativeCases(createRiskScoreMatchEvaluator())),
     // LLM — ES|QL functional equivalence via @kbn/evals built-in evaluator
     skip(skipNonEsqlReferences(skipNegativeCases(esqlEquivalenceEvaluator))),
-    // Intentionally disabled for speed: these LLM evaluators add significant latency per example.
-    // Re-enable when running thorough multi-model comparisons.
-    // skip(skipNegativeCases(createRuleNameEvaluator(evaluators))),
-    // skip(skipNegativeCases(createRuleDescriptionEvaluator(evaluators))),
     // Rejection — scores 1 when model correctly refuses a negative case, N/A otherwise
     skip(createRejectionEvaluator()),
     // Tool Trajectory — tool-call coverage + order vs. the golden sequence the
@@ -625,9 +563,11 @@ export function createEvaluateDataset({
             }
 
             if (expected?.category === 'negative') {
-              // Negative-case prompts should not produce rules.
-              otherFailures++;
-              otherFailureReasons.push(truncate('Generated a rule for a negative-case prompt'));
+              // Negative-case prompts should not produce rules. This is a model-quality
+              // failure (the Rejection evaluator already scores it 0); it is NOT an
+              // agent/env error and must not inflate `otherFailures` — that bucket is
+              // reserved for infrastructure issues so operators can distinguish a noisy
+              // environment from a noisy model.
               log.warning(
                 '[Task] Negative case: model generated a rule (unexpected; rejection evaluator will fail)'
               );
