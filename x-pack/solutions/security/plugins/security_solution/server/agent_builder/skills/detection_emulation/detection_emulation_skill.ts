@@ -11,6 +11,8 @@ import type { ConfigType } from '../../../config';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { createRunEmulationCommandTool } from './run_emulation_command_tool';
+import { createValidateRuleTool } from './validate_rule_tool';
+import { createGetEmulationHistoryTool } from './get_emulation_history_tool';
 
 export interface DetectionEmulationSkillContext {
   core: SecuritySolutionPluginCoreSetupDependencies;
@@ -23,107 +25,150 @@ export const getDetectionEmulationSkill = (ctx: DetectionEmulationSkillContext) 
   defineSkillType({
     id: 'detection-emulation',
     name: 'detection-emulation',
-    // The skill lives under `endpoint/` because the only wired agent type today
-    // is `endpoint` — the runner dispatches Elastic Defend response actions.
-    // (Re-home if/when the route grows multi-EDR support.)
     basePath: 'skills/security/endpoint',
-    description: `Dispatch a single Elastic Security response action against one or more endpoints to validate that a detection rule fires as expected. Currently exposes one tool: \`runEmulationCommand\`. Real execution is gated behind a feature flag (\`xpack.securitySolution.enableExperimental.detectionEmulationRealExecution\`); when disabled the route returns 403. Only the \`endpoint\` agent type is wired up today; the other Response-Actions agent types will be added once external connector resolution lands.`,
+    description: `Validate Elastic Security detection rules by running attack emulation scenarios and measuring whether the rules fire. Exposes three tools: \`validateRule\` (full 8-step pipeline — scenario generation, dispatch, telemetry collection, confidence scoring, history write), \`getEmulationHistory\` (retrieve past validation runs for a rule), and \`runEmulationCommand\` (dispatch a single low-level response action). Both log-injection (safe, no real endpoints) and real-execution modes are supported; each is gated by an independent feature flag.`,
     content: `# Detection Emulation Skill
 
-## What this skill does
+## When to Use
 
-Calls a single, gated tool — \`runEmulationCommand\` — that dispatches one
-Elastic Security response action to one or more endpoints. Used for
-validating that a detection rule fires when a known technique runs.
+Use this skill when the user asks to:
+- Validate, test, or score a detection rule against a known attack technique
+- Check whether a rule fires on MITRE ATT\&CK techniques mapped to its tags
+- Review the history of past emulation runs for a rule ("has this rule improved?")
+- Run a specific low-level response action against an endpoint (advanced use)
 
-This is the *only* tool the skill exposes. There is no \`validateRule\`,
-no \`ValidationReport\`, no scenario generator, no phase orchestration.
-Those are roadmap items, not capabilities — do not invent calls to them.
+Do **not** use this skill for:
+- General alert investigation or threat hunting (no emulation involved)
+- Modifying or creating rules (use detection rule management tools)
+- Checking rule syntax or ES|QL correctness
 
-## Tool: \`runEmulationCommand\`
+## Process
 
-\`\`\`typescript
-runEmulationCommand({
-  emulationId: string,        // unique identifier for this emulation run
-  agentType: 'endpoint',      // only 'endpoint' is wired up today
-  endpointIds: string[],      // 1+ Elastic Defend agent IDs
-  command: ResponseActionApiCommand,
-  parameters?: Record<string, unknown>,  // command-specific (see table)
-}) -> {
-  action_id: string,
-  agent_type: 'endpoint',
-  command: string,
-  status: 'dispatched' | 'error',
-}
-\`\`\`
+### Standard flow: validate a rule
 
-### Supported commands and their parameters
+1. **Check history first** — Call \`getEmulationHistory\` with the \`ruleId\`. If recent
+   runs already show high confidence, tell the user and ask whether to re-run.
+2. **Run validation** — Call \`validateRule\` with \`mode: 'log_injection'\` (safe default;
+   no real endpoints touched). For \`endpointIds\`, log_injection accepts any non-empty
+   string — use the relevant host name or a synthetic ID like \`"emulation-host-1"\`.
+3. **Present results** — Report \`confidence\`, \`coverage\`, \`precision\`, \`tp\`, \`fp\`,
+   \`matched_signals\`, \`unmatched_signals\`, and link the \`report_id\` for audit.
 
-| \`command\` | Required \`parameters\` | Notes |
-|---|---|---|
-| \`isolate\` | (none) | Network-isolate the host |
-| \`unisolate\` | (none) | Lift network isolation |
-| \`kill-process\` | \`pid: number\` *or* \`entity_id: string\` | One of the two is required |
-| \`suspend-process\` | \`pid: number\` *or* \`entity_id: string\` | One of the two is required |
-| \`running-processes\` | (none) | List processes |
-| \`get-file\` | \`path: string\` | Absolute path on the host |
-| \`execute\` | \`command: string\`, \`timeout?: number\` | Shell command |
-| \`upload\` | \`file: File\`, \`overwrite?: boolean\` | Multipart |
-| \`scan\` | \`path: string\` | YARA scan path |
-| \`runscript\` | \`script: string\`, \`timeout?: number\` | Run a script |
-| \`cancel\` | (none) | Cancel a pending action |
-| \`memory-dump\` | \`pid: number\` *or* \`entity_id: string\` | One of the two is required |
+### When log_injection confidence is insufficient
 
-\`parameters.comment\` (optional, any command): a human-readable note
-attached to the response-actions audit comment.
+If \`confidence < 0.5\` and the user explicitly requests real execution:
+1. Confirm the user has the required privileges and understands the risks.
+2. Call \`validateRule\` with \`mode: 'real_execution'\` and real enrolled \`endpointIds\`.
+3. Report the same output fields.
 
-## Gating
+### Low-level command dispatch
 
-The route applies four gates in this order. If any fails the call
-short-circuits with the corresponding HTTP status:
+Use \`runEmulationCommand\` only when the user needs to fire a specific response action
+outside of a full \`validateRule\` flow (e.g. testing a single \`execute\` command by hand).
+Do not use it as a substitute for \`validateRule\` — it does not score, collect telemetry,
+or write history.
 
-1. **Feature flag** — \`xpack.securitySolution.enableExperimental.detectionEmulationRealExecution\`
-   must be \`true\`. Otherwise: 403.
-2. **RBAC** — the caller must hold the per-command Endpoint privilege
-   resolved via \`RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ\`. Otherwise: 403.
-3. **Allowlist** — \`endpointIds\` must be permitted by the configured
-   \`EmulationAllowlist\`. Otherwise: 403.
-4. **Rate limit** — per-space sliding window. Otherwise: 429.
+## Examples
 
-## What happens after dispatch
+**Validate a rule:**
+> "Test my PowerShell rule (ID: abc-123) against host ws-001"
+1. \`getEmulationHistory({ ruleId: 'abc-123' })\` — check prior runs
+2. \`validateRule({ ruleId: 'abc-123', endpointIds: ['ws-001'], mode: 'log_injection' })\`
+3. Report confidence score and which signals fired / missed
 
-The skill does **not** poll for action results. It returns the
-\`action_id\` from the underlying \`ResponseActionsClient.<command>(...)\`
-call and exits. Use the standard Response Actions APIs / UI to inspect
-results, or write a follow-up tool if you need polling here.
+**Show history:**
+> "Show me the last 10 emulation runs for rule abc-123"
+1. \`getEmulationHistory({ ruleId: 'abc-123', limit: 10 })\`
+2. Summarise: confidence range, trend, any regressions
 
-Generated alerts that you want to attribute to an emulation run can be
-tagged via the \`tagAlertsWithEmulation\` helper (server-side); the UI
-exposes a filter (\`Hide emulation alerts\`) on the alerts table so
-analysts can opt out.
+**Re-run with real execution:**
+> "Re-validate rule abc-123 with live endpoints"
+1. Confirm user intent + privilege
+2. \`validateRule({ ruleId: 'abc-123', endpointIds: ['<real-id>'], mode: 'real_execution' })\`
 
-## Things this skill does NOT do (yet)
+## Tools
 
-- Run \`sentinel_one\`, \`crowdstrike\`, or \`microsoft_defender_endpoint\` commands.
-  The schema accepts \`agentType: 'endpoint'\` only until the route
-  resolves the external \`connectorActions\` client.
-- Generate attack scenarios, walk a MITRE ATT&CK graph, or compute
-  confidence / TP / FP scores.
-- Persist an emulation history index. Use the \`emulationRuleBindingType\`
-  saved-object type if you need to associate a run with a rule.
-- Tag alerts automatically. Call \`tagAlertsWithEmulation\` from your own
-  code if you want emulation metadata on alerts.
+### \`validateRule\`
 
-## Notes for the agent
+Runs the full validation pipeline and returns a confidence score:
+1. Feature flag gate
+2. Auth check (emulation is always attributable)
+3. RBAC check (real_execution only)
+4. Scenario generation from MITRE ATT\&CK tags
+5. Dispatch (log_injection or real_execution)
+6. Telemetry collection (polls Detection Engine alerts up to \`wallBudgetMs\`)
+7. Confidence scoring: \`confidence = coverage × 0.6 + precision × 0.4\`, clamped [0, 1]
+8. History write
 
-- Default to **not** calling this skill unless the user explicitly asks
-  for "emulate" / "test rule against endpoint" / "run response action".
-- The schema is strict: an unknown \`command\` or a missing required
-  parameter returns 400.
-- Each call dispatches exactly one action. Loop on the caller side if
-  you need a multi-step scenario.
-- Always include a \`parameters.comment\` describing why this action is
-  being dispatched — it lands in the response-actions audit trail.
+**Output:** \`confidence\`, \`coverage\`, \`precision\`, \`tp\`, \`fp\`, \`caveats\`,
+\`matched_signals\`, \`unmatched_signals\`, \`report_id\`, \`poll_duration_ms\`.
+
+Returns \`no_mitre_tags\` (422) if the rule has no ATT\&CK technique tags, or
+\`no_supported_techniques\` (422) if none of the tags map to a library payload.
+
+### \`getEmulationHistory\`
+
+Returns past validation runs for a rule, newest-first.
+
+**Output:** \`items[].confidence\`, \`items[].mode\`, \`items[].payload_ids\`,
+\`items[].started_at\`, \`items[].operator\`, \`total\`.
+
+Results are space-scoped — reports from other spaces are not visible.
+
+### \`runEmulationCommand\`
+
+Dispatches a single Elastic Security response action to one or more Elastic Defend
+endpoints. Returns \`action_id\` and \`status\`; does **not** poll for results.
+
+**Supported commands and required parameters:**
+
+| \`command\` | Required \`parameters\` |
+|---|---|
+| \`isolate\` | (none) |
+| \`unisolate\` | (none) |
+| \`kill-process\` | \`pid: number\` *or* \`entity_id: string\` |
+| \`suspend-process\` | \`pid: number\` *or* \`entity_id: string\` |
+| \`running-processes\` | (none) |
+| \`get-file\` | \`path: string\` |
+| \`execute\` | \`command: string\`, \`timeout?: number\` |
+| \`upload\` | \`file: File\`, \`overwrite?: boolean\` |
+| \`scan\` | \`path: string\` |
+| \`runscript\` | \`script: string\`, \`timeout?: number\` |
+| \`cancel\` | (none) |
+| \`memory-dump\` | \`pid: number\` *or* \`entity_id: string\` |
+
+\`parameters.comment\` (optional, any command): attached to the response-actions audit trail.
+
+## Guardrails
+
+Guards applied by each tool (in order; first failure short-circuits):
+
+| Guard | \`validateRule\` | \`getEmulationHistory\` | \`runEmulationCommand\` |
+|---|---|---|---|
+| Feature flag | ✓ (per-mode) | — | ✓ (realExecution) |
+| Auth required | ✓ | — | ✓ |
+| RBAC (real_execution) | ✓ | — | ✓ (per-command) |
+| Allowlist | — | — | ✓ |
+| Rate limit | — | — | ✓ |
+
+Feature flags: \`detectionEmulationLogInjection\` gates log_injection;
+\`detectionEmulationRealExecution\` gates real_execution and \`runEmulationCommand\`.
+
+## Response Format
+
+Always include in your response to the user:
+- **Confidence score** (0–1) with a plain-English interpretation:
+  - ≥ 0.8 → rule fires reliably on covered techniques
+  - 0.5–0.79 → partial coverage — some expected signals did not fire
+  - < 0.5 → rule likely misses the attack; investigate \`unmatched_signals\`
+- **Matched signals** — rule names that fired as expected
+- **Unmatched signals** — expected rule names that did not fire (flag for investigation)
+- **Report ID** — for audit trail reference (\`report_id\`)
+- **Caveats** — surface any entries from the \`caveats\` array (scoring edge cases)
 `,
-    getInlineTools: () => [createRunEmulationCommandTool(ctx)],
+    getInlineTools: () => [
+      createRunEmulationCommandTool(ctx),
+      createValidateRuleTool(ctx),
+      createGetEmulationHistoryTool(ctx),
+    ],
   });
