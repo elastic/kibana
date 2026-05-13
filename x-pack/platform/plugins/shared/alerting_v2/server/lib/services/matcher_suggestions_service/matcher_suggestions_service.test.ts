@@ -6,20 +6,8 @@
  */
 
 import type { QueryDslQueryContainer, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { flattenObject } from '@kbn/object-utils';
 import { createMockEsClient, createMockSavedObjectsClient } from '../../test_utils';
 import { MatcherSuggestionsService } from './matcher_suggestions_service';
-
-// Mirrors how ES returns `fields: ['data.*']` for a `flattened` field:
-// every leaf path appears as a key in `hit.fields`, with the value wrapped in an array.
-const toFlattenedFields = (data: Record<string, unknown>): Record<string, unknown[]> => {
-  const flat = flattenObject(data, 'data');
-  const fields: Record<string, unknown[]> = {};
-  for (const [key, value] of Object.entries(flat)) {
-    fields[key] = [value];
-  }
-  return fields;
-};
 
 const buildSearchResponse = (
   hits: Array<{ data: Record<string, unknown> }>
@@ -30,11 +18,11 @@ const buildSearchResponse = (
   hits: {
     total: { value: hits.length, relation: 'eq' },
     max_score: null,
-    hits: hits.map(({ data }, i) => ({
+    hits: hits.map((source, i) => ({
       _index: '.internal.alerts-default',
       _id: String(i),
       _score: null,
-      fields: toFlattenedFields(data),
+      _source: source,
     })),
   },
 });

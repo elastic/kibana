@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { flattenObject } from '@kbn/object-utils';
 import { inject, injectable } from 'inversify';
 import {
   ALERT_EVENTS_DATA_STREAM,
@@ -114,8 +115,7 @@ export class MatcherSuggestionsService {
         size: DATA_FIELD_SAMPLE_SIZE,
         timeout: '10s',
         terminate_after: DATA_FIELD_SAMPLE_SIZE,
-        _source: false,
-        fields: ['data.*'],
+        _source: ['data'],
         query: {
           bool: {
             filter: [
@@ -132,8 +132,9 @@ export class MatcherSuggestionsService {
 
       const fieldNames = new Set<string>();
       for (const hit of result.hits.hits) {
-        if (hit.fields) {
-          for (const key of Object.keys(hit.fields)) {
+        const source = hit._source as { data?: Record<string, unknown> } | undefined;
+        if (source?.data && typeof source.data === 'object') {
+          for (const key of Object.keys(flattenObject(source.data, 'data'))) {
             fieldNames.add(key);
           }
         }
