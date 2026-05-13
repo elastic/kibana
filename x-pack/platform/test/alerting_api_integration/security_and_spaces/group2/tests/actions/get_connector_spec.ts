@@ -22,18 +22,27 @@ export default function getConnectorSpecTests({ getService }: FtrProviderContext
           .set('kbn-xsrf', 'foo')
           .expect(200);
 
-        // Verify metadata structure
-        expect(response.body).to.have.property('metadata');
         expect(response.body.metadata).to.have.property('id', '.alienvault-otx');
         expect(response.body.metadata).to.have.property('display_name');
         expect(response.body.metadata).to.have.property('description');
-        expect(response.body.metadata).to.have.property('minimum_license');
-        expect(response.body.metadata).to.have.property('supported_feature_ids');
-        expect(response.body.metadata.supported_feature_ids).to.be.an('array');
+        expect(response.body.metadata).to.have.property('minimum_license', 'gold');
+        expect(response.body.metadata.supported_feature_ids).to.contain('workflows');
+        expect(typeof response.body.metadata.display_name).to.eql('string');
+        expect(typeof response.body.metadata.description).to.eql('string');
+        expect(Array.isArray(response.body.metadata.supported_feature_ids)).to.eql(true);
 
-        // Verify schema structure
         expect(response.body).to.have.property('schema');
         expect(response.body.schema).to.be.an('object');
+        expect(response.body.schema).to.have.property('type');
+        expect(response.body.schema).to.have.property('properties');
+
+        const { properties } = response.body.schema;
+        expect(properties).to.have.property('secrets');
+
+        const secretsAuthTypes = properties.secrets.oneOf ?? properties.secrets.anyOf;
+        expect(secretsAuthTypes).to.have.length(1);
+        expect(secretsAuthTypes[0].properties.authType.const).to.eql('api_key_header');
+        expect(secretsAuthTypes[0].properties).to.have.property('X-OTX-API-KEY');
       });
 
       it('returns 404 for non-spec connector (.server-log)', async () => {
@@ -53,20 +62,6 @@ export default function getConnectorSpecTests({ getService }: FtrProviderContext
 
         expect(response.body).to.have.property('message');
         expect(response.body.message).to.contain('not found');
-      });
-
-      it('schema contains valid JSON Schema structure', async () => {
-        const response = await supertest
-          .get(`${getUrlPrefix('space1')}/internal/actions/connector_types/.alienvault-otx/spec`)
-          .set('kbn-xsrf', 'foo')
-          .expect(200);
-
-        const { schema } = response.body;
-
-        // JSON Schema should have type, typically 'object'
-        expect(schema).to.have.property('type');
-        // Should have properties for config and secrets
-        expect(schema).to.have.property('properties');
       });
     });
 
@@ -110,29 +105,6 @@ export default function getConnectorSpecTests({ getService }: FtrProviderContext
     });
 
     describe('response validation', () => {
-      it('metadata contains all required fields', async () => {
-        const response = await supertest
-          .get(`${getUrlPrefix('space1')}/internal/actions/connector_types/.alienvault-otx/spec`)
-          .set('kbn-xsrf', 'foo')
-          .expect(200);
-
-        const { metadata } = response.body;
-
-        // Required fields per the route schema
-        expect(metadata).to.have.property('id');
-        expect(metadata).to.have.property('display_name');
-        expect(metadata).to.have.property('description');
-        expect(metadata).to.have.property('minimum_license');
-        expect(metadata).to.have.property('supported_feature_ids');
-
-        // Type validations
-        expect(typeof metadata.id).to.eql('string');
-        expect(typeof metadata.display_name).to.eql('string');
-        expect(typeof metadata.description).to.eql('string');
-        expect(typeof metadata.minimum_license).to.eql('string');
-        expect(Array.isArray(metadata.supported_feature_ids)).to.eql(true);
-      });
-
       it('works without space prefix (default space)', async () => {
         const response = await supertest
           .get('/internal/actions/connector_types/.alienvault-otx/spec')

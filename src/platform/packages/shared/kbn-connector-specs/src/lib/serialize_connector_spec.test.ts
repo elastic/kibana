@@ -267,7 +267,7 @@ describe('serializeConnectorSpec', () => {
 
       const spy = jest.spyOn(generateSecretsModule, 'generateSecretsSchemaFromSpec');
 
-      serializeConnectorSpec(spec, { isPfxEnabled: false });
+      serializeConnectorSpec(spec, { isPfxEnabled: false, isEarsEnabled: false });
 
       expect(spy).toHaveBeenCalledWith(spec.auth, {
         isPfxEnabled: false,
@@ -298,7 +298,7 @@ describe('serializeConnectorSpec', () => {
       };
 
       const defaultEars = serializeConnectorSpec(spec);
-      const earsOn = serializeConnectorSpec(spec, { isEarsEnabled: true });
+      const earsOn = serializeConnectorSpec(spec, { isPfxEnabled: true, isEarsEnabled: true });
       interface SecretBranch {
         properties?: { authType?: { const?: string } };
       }
