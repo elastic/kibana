@@ -7,7 +7,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiShowFor, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { KibanaVersionBadge, TrialUsageBadge } from '@kbn/search-shared-ui';
@@ -81,12 +81,14 @@ export const SearchHomepagePage = () => {
                   <LicenseBadge />
                 ) : null}
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <span css={VerticalSeparatorStyle} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <CloudLinks />
-              </EuiFlexItem>
+              <EuiShowFor sizes={['m', 'l', 'xl']}>
+                <EuiFlexItem grow={false}>
+                  <span css={VerticalSeparatorStyle} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <CloudLinks />
+                </EuiFlexItem>
+              </EuiShowFor>
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
