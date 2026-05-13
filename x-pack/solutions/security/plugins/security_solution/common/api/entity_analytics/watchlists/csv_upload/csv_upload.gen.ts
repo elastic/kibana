@@ -14,47 +14,53 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const WatchlistCsvUploadResponseItem = lazySchema(() =>
+  z.object({
+    status: z.enum(['success', 'failure', 'unmatched']),
+    /**
+     * Number of entities matched for this row
+     */
+    matchedEntities: z.number().int(),
+    /**
+     * Error message if the row failed to process
+     */
+    error: z.string().optional(),
+  })
+);
 export type WatchlistCsvUploadResponseItem = z.infer<typeof WatchlistCsvUploadResponseItem>;
-export const WatchlistCsvUploadResponseItem = z.object({
-  status: z.enum(['success', 'failure', 'unmatched']),
-  /**
-   * Number of entities matched for this row
-   */
-  matchedEntities: z.number().int(),
-  /**
-   * Error message if the row failed to process
-   */
-  error: z.string().optional(),
-});
 
+export const UploadWatchlistCsvRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The ID of the watchlist to add entities to
+     */
+    watchlist_id: z.string(),
+  })
+);
 export type UploadWatchlistCsvRequestParams = z.infer<typeof UploadWatchlistCsvRequestParams>;
-export const UploadWatchlistCsvRequestParams = z.object({
-  /**
-   * The ID of the watchlist to add entities to
-   */
-  watchlist_id: z.string(),
-});
 export type UploadWatchlistCsvRequestParamsInput = z.input<typeof UploadWatchlistCsvRequestParams>;
 
+export const UploadWatchlistCsvResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Number of rows that matched at least one entity
+     */
+    successful: z.number().int(),
+    /**
+     * Number of rows that failed to process
+     */
+    failed: z.number().int(),
+    /**
+     * Total number of rows processed
+     */
+    total: z.number().int(),
+    /**
+     * Number of rows that matched no entities
+     */
+    unmatched: z.number().int(),
+    items: z.array(WatchlistCsvUploadResponseItem),
+  })
+);
 export type UploadWatchlistCsvResponse = z.infer<typeof UploadWatchlistCsvResponse>;
-export const UploadWatchlistCsvResponse = z.object({
-  /**
-   * Number of rows that matched at least one entity
-   */
-  successful: z.number().int(),
-  /**
-   * Number of rows that failed to process
-   */
-  failed: z.number().int(),
-  /**
-   * Total number of rows processed
-   */
-  total: z.number().int(),
-  /**
-   * Number of rows that matched no entities
-   */
-  unmatched: z.number().int(),
-  items: z.array(WatchlistCsvUploadResponseItem),
-});

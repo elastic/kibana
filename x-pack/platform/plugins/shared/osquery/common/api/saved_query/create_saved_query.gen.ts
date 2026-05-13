@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   SavedQueryId,
@@ -29,57 +29,61 @@ import {
   Query,
 } from '../model/schema/common_attributes.gen';
 
+export const CreateSavedQueryRequestBody = lazySchema(() =>
+  z.object({
+    id: SavedQueryId.optional(),
+    description: SavedQueryDescriptionOrUndefined.optional(),
+    query: QueryOrUndefined.optional(),
+    ecs_mapping: ECSMappingOrUndefined.optional(),
+    version: VersionOrUndefined.optional(),
+    platform: PlatformOrUndefined.optional(),
+    interval: Interval.optional(),
+    snapshot: SnapshotOrUndefined.optional(),
+    removed: RemovedOrUndefined.optional(),
+  })
+);
 export type CreateSavedQueryRequestBody = z.infer<typeof CreateSavedQueryRequestBody>;
-export const CreateSavedQueryRequestBody = z.object({
-  id: SavedQueryId.optional(),
-  description: SavedQueryDescriptionOrUndefined.optional(),
-  query: QueryOrUndefined.optional(),
-  ecs_mapping: ECSMappingOrUndefined.optional(),
-  version: VersionOrUndefined.optional(),
-  platform: PlatformOrUndefined.optional(),
-  interval: Interval.optional(),
-  snapshot: SnapshotOrUndefined.optional(),
-  removed: RemovedOrUndefined.optional(),
-});
 
 /**
  * The response for creating a saved query.
  */
+export const CreateSavedQueryResponse = lazySchema(() =>
+  z.object({
+    data: z.object({
+      /**
+       * The saved object ID of the saved query.
+       */
+      saved_object_id: z.string(),
+      id: SavedQueryId,
+      description: SavedQueryDescriptionOrUndefined.optional(),
+      query: Query.optional(),
+      /**
+       * An interval, in seconds, on which to run the query. May be returned as number or string.
+       */
+      interval: z.union([z.number().int(), z.string()]).optional(),
+      /**
+       * The query timeout in seconds.
+       */
+      timeout: z.number().int().optional(),
+      snapshot: SnapshotOrUndefined.optional(),
+      removed: RemovedOrUndefined.optional(),
+      platform: PlatformOrUndefined.optional(),
+      ecs_mapping: ECSMappingOrUndefined.optional(),
+      created_at: z.string().datetime().optional(),
+      created_by: z.string().nullable().optional(),
+      created_by_profile_uid: z.string().optional(),
+      updated_at: z.string().datetime().optional(),
+      updated_by: z.string().nullable().optional(),
+      updated_by_profile_uid: z.string().optional(),
+      /**
+       * Whether the saved query is prebuilt.
+       */
+      prebuilt: z.boolean().optional(),
+      /**
+       * The saved query version.
+       */
+      version: z.union([z.number().int(), z.string()]).optional(),
+    }),
+  })
+);
 export type CreateSavedQueryResponse = z.infer<typeof CreateSavedQueryResponse>;
-export const CreateSavedQueryResponse = z.object({
-  data: z.object({
-    /**
-     * The saved object ID of the saved query.
-     */
-    saved_object_id: z.string(),
-    id: SavedQueryId,
-    description: SavedQueryDescriptionOrUndefined.optional(),
-    query: Query.optional(),
-    /**
-     * An interval, in seconds, on which to run the query. May be returned as number or string.
-     */
-    interval: z.union([z.number().int(), z.string()]).optional(),
-    /**
-     * The query timeout in seconds.
-     */
-    timeout: z.number().int().optional(),
-    snapshot: SnapshotOrUndefined.optional(),
-    removed: RemovedOrUndefined.optional(),
-    platform: PlatformOrUndefined.optional(),
-    ecs_mapping: ECSMappingOrUndefined.optional(),
-    created_at: z.string().datetime().optional(),
-    created_by: z.string().nullable().optional(),
-    created_by_profile_uid: z.string().optional(),
-    updated_at: z.string().datetime().optional(),
-    updated_by: z.string().nullable().optional(),
-    updated_by_profile_uid: z.string().optional(),
-    /**
-     * Whether the saved query is prebuilt.
-     */
-    prebuilt: z.boolean().optional(),
-    /**
-     * The saved query version.
-     */
-    version: z.union([z.number().int(), z.string()]).optional(),
-  }),
-});

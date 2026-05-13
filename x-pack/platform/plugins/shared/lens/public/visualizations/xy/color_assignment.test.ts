@@ -254,6 +254,47 @@ describe('color_assignment', () => {
       };
       expect(getLayerPaletteName(layer)).toEqual(KbnPalette.Default);
     });
+
+    it('should ignore colorMapping.paletteId when layer is collapsed and fall back to series type default', () => {
+      const layer: XYDataLayerConfig = {
+        ...layers[0],
+        seriesType: 'line',
+        palette: undefined,
+        collapseFn: 'sum',
+        colorMapping: {
+          ...DEFAULT_COLOR_MAPPING_CONFIG,
+          paletteId: KbnPalette.Default,
+        },
+      };
+      expect(getLayerPaletteName(layer)).toEqual(KbnPalette.ElasticLineOptimized);
+    });
+
+    it('should ignore legacy palette when layer is collapsed and fall back to series type default', () => {
+      const layer: XYDataLayerConfig = {
+        ...layers[0],
+        seriesType: 'line',
+        palette: { type: 'palette', name: 'custom_palette' },
+        collapseFn: 'sum',
+        colorMapping: {
+          ...DEFAULT_COLOR_MAPPING_CONFIG,
+          paletteId: KbnPalette.Default,
+        },
+      };
+      expect(getLayerPaletteName(layer)).toEqual(KbnPalette.ElasticLineOptimized);
+    });
+
+    it('should use colorMapping.paletteId when layer is not collapsed', () => {
+      const layer: XYDataLayerConfig = {
+        ...layers[0],
+        seriesType: 'line',
+        palette: undefined,
+        colorMapping: {
+          ...DEFAULT_COLOR_MAPPING_CONFIG,
+          paletteId: KbnPalette.ElasticLineOptimized,
+        },
+      };
+      expect(getLayerPaletteName(layer)).toEqual(KbnPalette.ElasticLineOptimized);
+    });
   });
 
   describe('colorMapping palette support', () => {

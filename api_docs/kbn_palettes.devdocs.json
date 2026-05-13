@@ -153,6 +153,7 @@
                 "lineNumber": 17,
                 "columnNumber": 40,
                 "deprecated": false,
+                "docsReferencedTypeName": "IKbnPalette",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -355,6 +356,7 @@
             "lineNumber": 14,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "CoreTheme",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -883,7 +885,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [],
+            "description": [
+              "\nDefines a palette to be used directly and does not fully implement IKbnPalette"
+            ],
             "signature": [
               "\"log_level\""
             ],
@@ -899,7 +903,9 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [],
+            "description": [
+              "\nDefines a palette to be used directly and does not fully implement IKbnPalette"
+            ],
             "path": "src/platform/packages/shared/kbn-palettes/palettes/semantic/log_level.ts",
             "lineNumber": 33,
             "columnNumber": 3,
@@ -912,7 +918,9 @@
             "type": "Function",
             "tags": [],
             "label": "getColor",
-            "description": [],
+            "description": [
+              "\nDefines a palette to be used directly and does not fully implement IKbnPalette"
+            ],
             "signature": [
               "(key: \"Error\" | \"Other\" | \"Debug\" | \"Info\" | \"Notice\" | \"Alert\" | \"Emerg\" | \"Crit\" | \"Warn\") => string"
             ],
@@ -936,6 +944,7 @@
                 "lineNumber": 36,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogLevelKeys",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -948,7 +957,9 @@
             "type": "Object",
             "tags": [],
             "label": "colors",
-            "description": [],
+            "description": [
+              "\nDefines a palette to be used directly and does not fully implement IKbnPalette"
+            ],
             "signature": [
               "{ Emerg: string; Alert: string; Crit: string; Error: string; Warn: string; Notice: string; Info: string; Debug: string; Other: string; }"
             ],

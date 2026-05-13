@@ -80,9 +80,7 @@ test.describe.serial(
           rangeFrom: testData.START_DATE,
           rangeTo: testData.END_DATE,
         });
-        await serviceDetailsPage.dashboardsTab.addServiceDashboardButton.waitFor({
-          state: 'visible',
-        });
+        await serviceDetailsPage.dashboardsTab.waitForDashboardsToLoad();
       });
 
       await test.step('Link the test dashboard', async () => {

@@ -17,6 +17,7 @@ import {
   getInitialAiCreatedRulesUsage,
   getInitialEventLogUsage,
   getInitialRuleCustomizationStatus,
+  getInitialRuleDeprecatedStatus,
   getInitialRuleUpgradeStatus,
   getInitialRulesUsage,
   getInitialSpacesUsage,
@@ -67,6 +68,7 @@ export const getRuleMetrics = async ({
         detection_rule_status: getInitialEventLogUsage(),
         elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
         elastic_detection_rule_customization_status: getInitialRuleCustomizationStatus(),
+        elastic_detection_rule_deprecated_status: getInitialRuleDeprecatedStatus(),
         ai_created_rules: getInitialAiCreatedRulesUsage(),
         spaces_usage: getInitialSpacesUsage(),
       };
@@ -140,6 +142,12 @@ export const getRuleMetrics = async ({
     // Only bring back rule detail on elastic prepackaged detection rules
     const elasticRuleObjects = rulesCorrelated.filter((hit) => hit.elastic_rule === true);
 
+    const installedElasticRuleIds = new Set(elasticRuleObjects.map((rule) => rule.rule_id));
+    const deprecatedAssets = await ruleAssetsClient.fetchDeprecatedRules();
+    const numDeprecated = deprecatedAssets.filter((asset) =>
+      installedElasticRuleIds.has(asset.rule_id)
+    ).length;
+
     // calculate the rule usage
     const rulesUsage = rulesCorrelated.reduce(
       (usage, rule) => updateRuleUsage(rule, usage),
@@ -164,6 +172,7 @@ export const getRuleMetrics = async ({
       detection_rule_status: eventLogMetricsTypeStatus,
       elastic_detection_rule_upgrade_status: calculateRuleUpgradeStatus(upgradeableRules),
       elastic_detection_rule_customization_status: prepareRuleCustomizationStatus(ruleResults),
+      elastic_detection_rule_deprecated_status: { total: numDeprecated },
       ai_created_rules: aiCreatedRulesUsage,
       spaces_usage: getSpacesUsage(ruleResults),
     };
@@ -178,6 +187,7 @@ export const getRuleMetrics = async ({
       detection_rule_status: getInitialEventLogUsage(),
       elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
       elastic_detection_rule_customization_status: getInitialRuleCustomizationStatus(),
+      elastic_detection_rule_deprecated_status: getInitialRuleDeprecatedStatus(),
       ai_created_rules: getInitialAiCreatedRulesUsage(),
       spaces_usage: getInitialSpacesUsage(),
     };

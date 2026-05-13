@@ -18,8 +18,8 @@ jest.mock('../../../../../hooks/use_kibana', () => ({
   useKibana: jest.fn(),
 }));
 
-jest.mock('../../../../../context/send_message/send_message_context', () => ({
-  useSendMessage: jest.fn(),
+jest.mock('../../../../../hooks/chat/use_connector_selection', () => ({
+  useConnectorSelection: jest.fn(),
 }));
 
 jest.mock('../../../../../hooks/chat/use_default_connector', () => ({
@@ -45,16 +45,19 @@ jest.mock('../input_popover_button', () => ({
     disabled,
     children,
     onClick,
+    'aria-label': ariaLabel,
   }: {
     disabled?: boolean;
     children: React.ReactNode;
     onClick: () => void;
+    'aria-label'?: string;
   }) => (
     <button
       type="button"
       data-test-subj="agentBuilderConnectorSelectorButton"
       disabled={disabled}
       onClick={onClick}
+      aria-label={ariaLabel}
     >
       {children}
     </button>
@@ -71,13 +74,15 @@ jest.mock('./connector_icon', () => ({
 
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import { useSendMessage } from '../../../../../context/send_message/send_message_context';
+import { useConnectorSelection } from '../../../../../hooks/chat/use_connector_selection';
 import { useDefaultConnector } from '../../../../../hooks/chat/use_default_connector';
 import { ConnectorSelector } from './connector_selector';
 
 const mockUseLoadConnectors = useLoadConnectors as jest.MockedFunction<typeof useLoadConnectors>;
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseSendMessage = useSendMessage as jest.MockedFunction<typeof useSendMessage>;
+const mockUseConnectorSelection = useConnectorSelection as jest.MockedFunction<
+  typeof useConnectorSelection
+>;
 const mockUseDefaultConnector = useDefaultConnector as jest.MockedFunction<
   typeof useDefaultConnector
 >;
@@ -134,14 +139,12 @@ const setup = ({
 
   const selectConnector = jest.fn();
 
-  mockUseSendMessage.mockReturnValue({
-    connectorSelection: {
-      selectedConnector,
-      selectConnector,
-      defaultConnectorId,
-      defaultConnectorOnly,
-    },
-  } as any);
+  mockUseConnectorSelection.mockReturnValue({
+    selectedConnector,
+    selectConnector,
+    defaultConnectorId,
+    defaultConnectorOnly,
+  });
 
   const utils = render(
     <IntlProvider locale="en">
@@ -151,17 +154,15 @@ const setup = ({
   return {
     ...utils,
     selectConnector,
-    // Helper to re-render with a new send-message context (simulates admin changing a setting).
+    // Helper to re-render with a new connector selection (simulates admin changing a setting).
     updateContext: (next: Partial<RenderOptions>) => {
-      mockUseSendMessage.mockReturnValue({
-        connectorSelection: {
-          selectedConnector: next.selectedConnector ?? selectedConnector,
-          selectConnector,
-          defaultConnectorId:
-            'defaultConnectorId' in next ? next.defaultConnectorId : defaultConnectorId,
-          defaultConnectorOnly: next.defaultConnectorOnly ?? defaultConnectorOnly,
-        },
-      } as any);
+      mockUseConnectorSelection.mockReturnValue({
+        selectedConnector: next.selectedConnector ?? selectedConnector,
+        selectConnector,
+        defaultConnectorId:
+          'defaultConnectorId' in next ? next.defaultConnectorId : defaultConnectorId,
+        defaultConnectorOnly: next.defaultConnectorOnly ?? defaultConnectorOnly,
+      });
       act(() => {
         utils.rerender(
           <IntlProvider locale="en">
@@ -294,5 +295,21 @@ describe('ConnectorSelector sync effect', () => {
       const button = screen.getByTestId('agentBuilderConnectorSelectorButton');
       expect(button).not.toBeDisabled();
     });
+  });
+
+  it('announces the current connector name in the button aria-label', () => {
+    const connectors = [mkConnector('Elastic Managed LLM')];
+    setup({
+      connectors,
+      selectedConnector: 'Elastic Managed LLM',
+    });
+    const button = screen.getByTestId('agentBuilderConnectorSelectorButton');
+    expect(button).toHaveAttribute('aria-label', 'Select connector, Elastic Managed LLM');
+  });
+
+  it('uses a fallback label when no connector is selected', () => {
+    setup({ connectors: [], selectedConnector: undefined });
+    const button = screen.getByTestId('agentBuilderConnectorSelectorButton');
+    expect(button).toHaveAttribute('aria-label', 'Select connector, LLM');
   });
 });

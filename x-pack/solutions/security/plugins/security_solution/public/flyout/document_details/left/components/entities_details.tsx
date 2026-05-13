@@ -58,7 +58,7 @@ export const EntitiesDetails: React.FC = () => {
     dataAsNestedObject
   ) as IdentityFields;
 
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   /**
    * User EUID extraction applies postAggFilter (e.g. non-IDP path needs host.id), so many ECS docs
@@ -100,16 +100,13 @@ export const EntitiesDetails: React.FC = () => {
     hostNameFromStore
   );
 
-  const showUserDetails =
-    timestamp &&
-    resolvedUserName != null &&
-    (!entityStoreV2Enabled || userEntityFromStore.entityRecord != null);
+  const userDisplayName = userEntityFromStore.entityRecord?.entity?.name ?? resolvedUserName;
+  const hostDisplayName = hostEntityFromStore.entityRecord?.entity?.name ?? resolvedHostName;
+
+  const showUserDetails = timestamp != null && userDisplayName != null;
   const showHostDetails =
-    hostEntityIdentifiers &&
-    timestamp &&
-    resolvedHostName != null &&
-    (!entityStoreV2Enabled || hostEntityFromStore.entityRecord != null);
-  const showDetails = timestamp && (showUserDetails || showHostDetails);
+    hostEntityIdentifiers != null && timestamp != null && hostDisplayName != null;
+  const showDetails = showUserDetails || showHostDetails;
 
   return (
     <>
@@ -127,7 +124,7 @@ export const EntitiesDetails: React.FC = () => {
               </EuiTitle>
               <EuiSpacer size="s" />
               <UserDetails
-                userName={resolvedUserName}
+                userName={userDisplayName}
                 entityId={userEntityFromStore?.entityRecord?.entity?.id}
                 timestamp={timestamp}
                 scopeId={scopeId}
@@ -147,7 +144,7 @@ export const EntitiesDetails: React.FC = () => {
               <EuiSpacer size="s" />
 
               <HostDetails
-                hostName={resolvedHostName}
+                hostName={hostDisplayName}
                 entityId={hostEntityFromStore?.entityRecord?.entity?.id}
                 timestamp={timestamp}
                 scopeId={scopeId}

@@ -28,8 +28,8 @@ import { getAllMigrations } from './persistable_state/get_all_migrations';
 import type { EmbeddableTransforms } from '../common';
 import type { DrilldownSetup, DrilldownState } from './drilldowns/types';
 import { getDrilldownRegistry } from './drilldowns/registry';
-import type { EmbeddableTransformsSetup } from './embeddable_transforms/types';
-import { getTransformsRegistry } from './embeddable_transforms/registry';
+import type { EmbeddableServerDefinition } from './embeddable_transforms/types';
+import { getEmbeddableServerRegistry } from './embeddable_transforms/registry';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
@@ -43,29 +43,27 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
     type: string,
     drilldown: DrilldownSetup<StoredState, State>
   ) => void;
-  /*
-   * Use registerTransforms to register transforms and schema for an embeddable type.
-   * Transforms decouple REST API state from stored state,
-   * allowing embeddables to have one shape for REST APIs and another for storage.
-   * Embeddable containers, such as dashboard, use transforms to convert EmbeddableState into StoreEmbeddableState and vice versa.
-   * On read, transformOut is used to convert StoredEmbeddableState and inject references into EmbeddableState.
-   * On write, transformIn is used to extract references and convert EmbeddableState into StoredEmbeddableState.
+  /**
+   * Registers an embeddable server defintion.
+   * Be sure to register an embeddable public definition for this type.
    */
-  // TODO rename to registerEmbeddableSchema
-  registerTransforms: (type: string, transforms: EmbeddableTransformsSetup<any, any>) => void;
+  registerEmbeddableServerDefinition: (
+    type: string,
+    transforms: EmbeddableServerDefinition<any, any>
+  ) => void;
   getAllMigrations: () => MigrateFunctionsObject;
 }
 
 export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> & {
   /**
-   * Returns all embeddable schemas registered with registerTransforms.
+   * Returns all embeddable schemas registered with registerEmbeddableServerDefinition.
    */
   getAllEmbeddableSchemas: () => { [key: string]: { schema: ObjectType; title: string } };
 
   getTransforms: (type: string) =>
     | (EmbeddableTransforms & {
         schema?: Type<object>;
-        throwOnUnmappedPanel?: EmbeddableTransformsSetup['throwOnUnmappedPanel'];
+        throwOnUnmappedPanel?: EmbeddableServerDefinition['throwOnUnmappedPanel'];
       })
     | undefined;
 };
@@ -74,7 +72,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
   private migrateFn: PersistableStateMigrateFn | undefined;
   private drilldownRegistry = getDrilldownRegistry();
-  private transformsRegistry = getTransformsRegistry(this.drilldownRegistry);
+  private transformsRegistry = getEmbeddableServerRegistry(this.drilldownRegistry);
 
   public setup(core: CoreSetup): EmbeddableSetup {
     this.migrateFn = getMigrateFunction(this.getEmbeddableFactory);
@@ -82,7 +80,8 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
       registerEmbeddableFactory: this.registerEmbeddableFactory,
       registerDrilldown: this.drilldownRegistry
         .registerDrilldown as EmbeddableSetup['registerDrilldown'],
-      registerTransforms: this.transformsRegistry.registerTransforms,
+      registerEmbeddableServerDefinition:
+        this.transformsRegistry.registerEmbeddableServerDefinition,
       telemetry: getTelemetryFunction(this.getEmbeddableFactory),
       extract: getExtractFunction(this.getEmbeddableFactory),
       inject: getInjectFunction(this.getEmbeddableFactory),

@@ -5,20 +5,28 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import React, { useCallback, useEffect } from 'react';
+import type { EuiPageHeaderProps } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { EmbeddableProfilingSearchBar } from '@kbn/observability-shared-plugin/public';
 import { capitalize } from 'lodash';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useParentBreadcrumbResolver } from '../../../hooks/use_parent_breadcrumb_resolver';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { ASSET_DETAILS_PAGE_COMPONENT_NAME } from '../constants';
+import { ASSET_DETAILS_PAGE_COMPONENT_NAME, DATE_PICKER_VISIBLE_TABS } from '../constants';
 import { Content } from '../content/content';
+import { DatePicker } from '../date_picker/date_picker';
 import { useAssetDetailsRenderPropsContext } from '../hooks/use_asset_details_render_props';
+import { useDatePickerContext } from '../hooks/use_date_picker';
 import { useHostAttachmentConfig } from '../hooks/use_host_attachment_config';
 import { useMetadataStateContext } from '../hooks/use_metadata_state';
 import { usePageHeader } from '../hooks/use_page_header';
+import { useProfilingKuery } from '../hooks/use_profiling_kuery';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
-import type { ContentTemplateProps } from '../types';
+import { ContentTabIds, type ContentTemplateProps } from '../types';
+import { LogsSearchBarHeader } from '../tabs/logs/logs_search_bar_header';
+import { MetadataSearchBarHeader } from '../tabs/metadata/metadata_search_bar_header';
+import { ProcessesSearchBarHeader } from '../tabs/processes/processes_search_bar_header';
 import { getIntegrationsAvailable } from '../utils';
 import { DEFAULT_SCHEMA } from '../../../../common/constants';
 import { InfraPageTemplate } from '../../shared/templates/infra_page_template';
@@ -31,6 +39,11 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   const { entity, loading, schema } = useAssetDetailsRenderPropsContext();
   const trackOnlyOnce = React.useRef(false);
   const { activeTabId } = useTabSwitcherContext();
+  const isProfilingTab = activeTabId === ContentTabIds.PROFILING;
+  const isLogsTab = activeTabId === ContentTabIds.LOGS;
+  const isMetadataTab = activeTabId === ContentTabIds.METADATA;
+  const isProcessesTab = activeTabId === ContentTabIds.PROCESSES;
+  const showDatePicker = DATE_PICKER_VISIBLE_TABS.includes(activeTabId as ContentTabIds);
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();
@@ -93,12 +106,59 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
         tabs: tabEntries,
         rightSideItems,
         breadcrumbs: headerBreadcrumbs,
+        color: 'subdued' as unknown as EuiPageHeaderProps['color'],
+        children: isProfilingTab ? (
+          <ProfilingSearchBarHeader />
+        ) : isLogsTab ? (
+          <SearchBarWithDatePicker searchBar={<LogsSearchBarHeader />} />
+        ) : isMetadataTab ? (
+          <SearchBarWithDatePicker searchBar={<MetadataSearchBarHeader />} />
+        ) : isProcessesTab ? (
+          <SearchBarWithDatePicker searchBar={<ProcessesSearchBarHeader />} />
+        ) : showDatePicker ? (
+          <DatePicker />
+        ) : undefined,
       }}
       data-component-name={ASSET_DETAILS_PAGE_COMPONENT_NAME}
       data-asset-type={entity.type}
       data-schema-selected={schema}
     >
-      <Content />
+      <Content showDatePicker={false} showProfilingSearchBar={false} showTabSearchBar={false} />
     </InfraPageTemplate>
+  );
+};
+
+const SearchBarWithDatePicker = ({ searchBar }: { searchBar: React.ReactNode }) => (
+  <>
+    {searchBar}
+    <EuiSpacer size="s" />
+    <DatePicker />
+  </>
+);
+
+const ProfilingSearchBarHeader = () => {
+  const { dateRange, setDateRange } = useDatePickerContext();
+  const { customKuery, setCustomKuery } = useProfilingKuery();
+
+  const onSearchSubmit = useCallback(
+    ({ dateRange: range, query }: any) => {
+      setDateRange(range);
+      setCustomKuery(query);
+    },
+    [setCustomKuery, setDateRange]
+  );
+
+  const onSearchRefresh = useCallback(() => {
+    setDateRange(dateRange);
+  }, [dateRange, setDateRange]);
+
+  return (
+    <EmbeddableProfilingSearchBar
+      kuery={customKuery}
+      rangeFrom={dateRange.from}
+      rangeTo={dateRange.to}
+      onQuerySubmit={onSearchSubmit}
+      onRefresh={onSearchRefresh}
+    />
   );
 };

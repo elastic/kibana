@@ -28,7 +28,9 @@ const isPrimitive = (value: unknown): boolean => value != null && typeof value !
 export const defaultReferenceLineColor = euiLightVars.euiColorDarkShade;
 
 export const getLayerPaletteName = (layer: XYDataLayerConfig): string =>
-  layer.colorMapping?.paletteId ?? layer.palette?.name ?? getDefaultPalette(layer.seriesType);
+  layer.collapseFn
+    ? getDefaultPalette(layer.seriesType)
+    : layer.colorMapping?.paletteId ?? layer.palette?.name ?? getDefaultPalette(layer.seriesType);
 
 const getPaletteDefinition = (paletteService: PaletteRegistry, paletteName: string) =>
   paletteService.get(paletteName) ?? paletteService.get('default');

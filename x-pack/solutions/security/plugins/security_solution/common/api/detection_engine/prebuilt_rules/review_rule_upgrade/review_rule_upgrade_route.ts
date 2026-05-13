@@ -34,7 +34,7 @@ export const ReviewRuleUpgradeRequestBody = z
     /**
      * Rules per page
      */
-    per_page: z.coerce.number().int().min(0).optional().default(20),
+    per_page: z.coerce.number().int().min(0).max(500).optional().default(20),
   })
   .nullable();
 

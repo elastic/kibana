@@ -32,6 +32,11 @@ import {
   QUERY_FIELDS_USAGE_FIELD_NAMES,
 } from './discover_ebt_manager_registrations';
 import {
+  DISCOVER_IN_DASHBOARD_EVENT_TYPE,
+  DiscoverInDashboardEventDataKeys,
+  type DiscoverInDashboardEBTEvent,
+} from './discover_in_dashboard_event_definition';
+import {
   CASCADE_EVENT_TYPE,
   CascadeEventDataKeys,
   type CascadeEBTEvent,
@@ -270,11 +275,15 @@ export class ScopedDiscoverEBTManager {
       const embeddedQueryColumns = embeddedQueries
         ? embeddedQueries
             .map((embeddedQuery) => {
-              const embeddedKQLFieldNames = getKqlFieldNamesFromExpression(embeddedQuery);
-              if (getIsKqlFreeTextExpression(embeddedQuery)) {
-                embeddedKQLFieldNames.push(FREE_TEXT);
+              try {
+                const embeddedKQLFieldNames = getKqlFieldNamesFromExpression(embeddedQuery);
+                if (getIsKqlFreeTextExpression(embeddedQuery)) {
+                  embeddedKQLFieldNames.push(FREE_TEXT);
+                }
+                return embeddedKQLFieldNames;
+              } catch (e) {
+                return [];
               }
-              return embeddedKQLFieldNames;
             })
             .flat()
         : [];
@@ -301,16 +310,20 @@ export class ScopedDiscoverEBTManager {
         return;
       }
 
-      const fieldNames = getKqlFieldNamesFromExpression(query.query);
-      if (getIsKqlFreeTextExpression(query.query)) {
-        fieldNames.push(FREE_TEXT);
-      }
+      try {
+        const fieldNames = getKqlFieldNamesFromExpression(query.query);
+        if (getIsKqlFreeTextExpression(query.query)) {
+          fieldNames.push(FREE_TEXT);
+        }
 
-      await this.trackQueryFieldsUsageEvent({
-        eventName: QueryFieldsUsageEventName.kqlQuery,
-        fieldNames,
-        fieldsMetadata,
-      });
+        await this.trackQueryFieldsUsageEvent({
+          eventName: QueryFieldsUsageEventName.kqlQuery,
+          fieldNames,
+          fieldsMetadata,
+        });
+      } catch (e) {
+        // DO nothing for now
+      }
     }
   }
 
@@ -425,6 +438,16 @@ export class ScopedDiscoverEBTManager {
     }
     this.reportEvent(CASCADE_EVENT_TYPE, {
       [CascadeEventDataKeys.CASCADE_EVENT_NAME]: eventName,
+      ...payload,
+    });
+  }
+
+  public trackDiscoverToDashboardEvent({ eventName, ...payload }: DiscoverInDashboardEBTEvent) {
+    if (!this.reportEvent) {
+      return;
+    }
+    this.reportEvent(DISCOVER_IN_DASHBOARD_EVENT_TYPE, {
+      [DiscoverInDashboardEventDataKeys.EVENT_NAME]: eventName,
       ...payload,
     });
   }

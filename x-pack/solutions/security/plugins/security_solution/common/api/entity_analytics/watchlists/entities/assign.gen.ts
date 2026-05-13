@@ -14,62 +14,70 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const WatchlistEntityAssignResponseItem = lazySchema(() =>
+  z.object({
+    /**
+     * The EUID of the entity
+     */
+    euid: z.string(),
+    status: z.enum(['success', 'failure', 'not_found']),
+    /**
+     * Error message if the entity failed to process
+     */
+    error: z.string().optional(),
+  })
+);
 export type WatchlistEntityAssignResponseItem = z.infer<typeof WatchlistEntityAssignResponseItem>;
-export const WatchlistEntityAssignResponseItem = z.object({
-  /**
-   * The EUID of the entity
-   */
-  euid: z.string(),
-  status: z.enum(['success', 'failure', 'not_found']),
-  /**
-   * Error message if the entity failed to process
-   */
-  error: z.string().optional(),
-});
 
+export const AssignWatchlistEntitiesRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The ID of the watchlist to add entities to
+     */
+    watchlist_id: z.string(),
+  })
+);
 export type AssignWatchlistEntitiesRequestParams = z.infer<
   typeof AssignWatchlistEntitiesRequestParams
 >;
-export const AssignWatchlistEntitiesRequestParams = z.object({
-  /**
-   * The ID of the watchlist to add entities to
-   */
-  watchlist_id: z.string(),
-});
 export type AssignWatchlistEntitiesRequestParamsInput = z.input<
   typeof AssignWatchlistEntitiesRequestParams
 >;
 
+export const AssignWatchlistEntitiesRequestBody = lazySchema(() =>
+  z.object({
+    /**
+     * The EUIDs of the entities to assign
+     */
+    euids: z.array(z.string()),
+  })
+);
 export type AssignWatchlistEntitiesRequestBody = z.infer<typeof AssignWatchlistEntitiesRequestBody>;
-export const AssignWatchlistEntitiesRequestBody = z.object({
-  /**
-   * The EUIDs of the entities to assign
-   */
-  euids: z.array(z.string()),
-});
 export type AssignWatchlistEntitiesRequestBodyInput = z.input<
   typeof AssignWatchlistEntitiesRequestBody
 >;
 
+export const AssignWatchlistEntitiesResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Number of entities successfully assigned
+     */
+    successful: z.number().int(),
+    /**
+     * Number of entities that failed to process
+     */
+    failed: z.number().int(),
+    /**
+     * Number of entities not found in the entity store
+     */
+    not_found: z.number().int(),
+    /**
+     * Total number of entities processed
+     */
+    total: z.number().int(),
+    items: z.array(WatchlistEntityAssignResponseItem),
+  })
+);
 export type AssignWatchlistEntitiesResponse = z.infer<typeof AssignWatchlistEntitiesResponse>;
-export const AssignWatchlistEntitiesResponse = z.object({
-  /**
-   * Number of entities successfully assigned
-   */
-  successful: z.number().int(),
-  /**
-   * Number of entities that failed to process
-   */
-  failed: z.number().int(),
-  /**
-   * Number of entities not found in the entity store
-   */
-  not_found: z.number().int(),
-  /**
-   * Total number of entities processed
-   */
-  total: z.number().int(),
-  items: z.array(WatchlistEntityAssignResponseItem),
-});

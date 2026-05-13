@@ -69,12 +69,12 @@ export const REMOVE_ENTITY_BUTTON = i18n.translate(
 
 export const TARGET_ENTITY_TOOLTIP = i18n.translate(
   'xpack.securitySolution.entityResolution.targetEntityTooltip',
-  { defaultMessage: 'This is the target entity for this resolution group' }
+  { defaultMessage: 'This is the primary entity for this resolution group' }
 );
 
 export const CANNOT_REMOVE_TARGET_TOOLTIP = i18n.translate(
   'xpack.securitySolution.entityResolution.cannotRemoveTarget',
-  { defaultMessage: 'The target entity cannot be removed from the resolution group' }
+  { defaultMessage: 'The primary entity cannot be removed from the resolution group' }
 );
 
 export const ADD_ENTITIES_TITLE = i18n.translate(

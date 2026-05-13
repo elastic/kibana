@@ -14,25 +14,29 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { AttackDiscoveryGenerationConfig } from '../../../common_attributes.gen';
 import { NonEmptyString } from '../../../../common_attributes.gen';
 
+export const PostAttackDiscoveryGenerateRequestBody = lazySchema(
+  () => AttackDiscoveryGenerationConfig
+);
 export type PostAttackDiscoveryGenerateRequestBody = z.infer<
   typeof PostAttackDiscoveryGenerateRequestBody
 >;
-export const PostAttackDiscoveryGenerateRequestBody = AttackDiscoveryGenerationConfig;
 export type PostAttackDiscoveryGenerateRequestBodyInput = z.input<
   typeof PostAttackDiscoveryGenerateRequestBody
 >;
 
+export const PostAttackDiscoveryGenerateResponse = lazySchema(() =>
+  z.object({
+    /**
+     * The unique identifier for the attack discovery generation process. Use this UUID to track the generation progress and retrieve results via the find endpoint.
+     */
+    execution_uuid: NonEmptyString,
+  })
+);
 export type PostAttackDiscoveryGenerateResponse = z.infer<
   typeof PostAttackDiscoveryGenerateResponse
 >;
-export const PostAttackDiscoveryGenerateResponse = z.object({
-  /**
-   * The unique identifier for the attack discovery generation process. Use this UUID to track the generation progress and retrieve results via the find endpoint.
-   */
-  execution_uuid: NonEmptyString,
-});

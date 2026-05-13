@@ -704,7 +704,15 @@
         "tags": [],
         "label": "ChromeNavControls",
         "description": [
-          "\n{@link ChromeNavControls | APIs} for registering new controls to be displayed in the navigation bar.\n"
+          "\n",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-public.ChromeNavControls",
+            "text": "APIs"
+          },
+          " for registering new controls to be displayed in the navigation bar.\n"
         ],
         "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
         "lineNumber": 36,
@@ -746,6 +754,7 @@
                 "lineNumber": 51,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "ChromeNavControl",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -786,6 +795,7 @@
                 "lineNumber": 54,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "ChromeNavControl",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -826,6 +836,7 @@
                 "lineNumber": 57,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "ChromeNavControl",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1098,7 +1109,15 @@
         "tags": [],
         "label": "ChromeNavLinks",
         "description": [
-          "\n{@link ChromeNavLinks | APIs} for manipulating nav links.\n"
+          "\n",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-public.ChromeNavLinks",
+            "text": "APIs"
+          },
+          " for manipulating nav links.\n"
         ],
         "path": "src/core/packages/chrome/browser/src/nav_links.ts",
         "lineNumber": 85,
@@ -1229,6 +1248,39 @@
               }
             ],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-public.ChromeNext",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChromeNext",
+        "description": [
+          "\nChrome Next rollout APIs.\n"
+        ],
+        "path": "src/core/packages/chrome/browser/src/chrome_next/chrome_next.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.ChromeNext.isEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isEnabled",
+            "description": [
+              "Whether the Chrome Next feature flag is enabled."
+            ],
+            "path": "src/core/packages/chrome/browser/src/chrome_next/chrome_next.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1366,7 +1418,15 @@
         "tags": [],
         "label": "ChromeRecentlyAccessed",
         "description": [
-          "\n{@link ChromeRecentlyAccessed | APIs} for recently accessed history."
+          "\n",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-public.ChromeRecentlyAccessed",
+            "text": "APIs"
+          },
+          " for recently accessed history."
         ],
         "path": "src/core/packages/chrome/browser/src/recently_accessed.ts",
         "lineNumber": 19,
@@ -1633,7 +1693,7 @@
           "\nChromeSetup exposes APIs available during the setup phase."
         ],
         "path": "src/core/packages/chrome/browser/src/contracts.ts",
-        "lineNumber": 28,
+        "lineNumber": 29,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1645,13 +1705,19 @@
             "tags": [],
             "label": "sidebar",
             "description": [
-              "{@link SidebarSetup}"
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-public.SidebarSetup",
+                "text": "SidebarSetup"
+              }
             ],
             "signature": [
               "SidebarSetup"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 33,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1669,7 +1735,7 @@
           "\nChromeStart allows plugins to customize the global chrome header UI and\nenrich the UX with additional information about the current location of the\nbrowser.\n"
         ],
         "path": "src/core/packages/chrome/browser/src/contracts.ts",
-        "lineNumber": 37,
+        "lineNumber": 38,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1687,7 +1753,7 @@
               "ChromeNavLinks"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 64,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1705,7 +1771,7 @@
               "ChromeNavControls"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 66,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1723,7 +1789,7 @@
               "ChromeRecentlyAccessed"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 68,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1741,7 +1807,25 @@
               "ChromeDocTitle"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 70,
+            "lineNumber": 71,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.ChromeStart.next",
+            "type": "Object",
+            "tags": [],
+            "label": "next",
+            "description": [
+              "\nChrome Next rollout namespace.\n\n{@inheritdoc ChromeNext}"
+            ],
+            "signature": [
+              "ChromeNext"
+            ],
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1761,7 +1845,7 @@
               "<boolean>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 73,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1781,7 +1865,7 @@
               "(isVisible: boolean) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 78,
+            "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1797,7 +1881,7 @@
                   "boolean"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 83,
+                "lineNumber": 90,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1825,7 +1909,7 @@
               " | undefined>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 85,
+            "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
@@ -1851,7 +1935,15 @@
             ],
             "label": "setBadge",
             "description": [
-              "\nOverride the current badge.\nInternally delegates to {@link ChromeStart.setBreadcrumbsBadges} so the badge\nrenders inline with breadcrumbs in both classic and project layouts."
+              "\nOverride the current badge.\nInternally delegates to ",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-public.ChromeStart.setBreadcrumbsBadges",
+                "text": "ChromeStart.setBreadcrumbsBadges"
+              },
+              " so the badge\nrenders inline with breadcrumbs in both classic and project layouts."
             ],
             "signature": [
               "(badge?: ",
@@ -1859,7 +1951,7 @@
               " | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 91,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
@@ -1885,10 +1977,6 @@
                 "path": "x-pack/platform/plugins/shared/security/public/components/use_badge.ts"
               },
               {
-                "plugin": "@kbn/management-settings-application",
-                "path": "src/platform/packages/shared/kbn-management/settings/application/services.tsx"
-              },
-              {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/components/app/use_readonly_header.ts"
               },
@@ -1899,6 +1987,10 @@
               {
                 "plugin": "maps",
                 "path": "x-pack/platform/plugins/shared/maps/public/render_app.tsx"
+              },
+              {
+                "plugin": "@kbn/management-settings-application",
+                "path": "src/platform/packages/shared/kbn-management/settings/application/services.tsx"
               },
               {
                 "plugin": "dashboard",
@@ -1970,9 +2062,10 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 97,
+                "lineNumber": 104,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "ChromeBadge",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1996,7 +2089,7 @@
               "[]>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 99,
+            "lineNumber": 106,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2018,7 +2111,7 @@
               "[]"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 104,
+            "lineNumber": 111,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2042,7 +2135,7 @@
               " | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 109,
+            "lineNumber": 116,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2059,7 +2152,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 112,
+                "lineNumber": 119,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2077,9 +2170,10 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 112,
+                "lineNumber": 119,
                 "columnNumber": 54,
                 "deprecated": false,
+                "docsReferencedTypeName": "ChromeSetBreadcrumbsParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -2103,7 +2197,7 @@
               " | undefined>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 114,
+            "lineNumber": 121,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2125,7 +2219,7 @@
               " | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 119,
+            "lineNumber": 126,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2142,9 +2236,10 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 143,
+                "lineNumber": 150,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "AppMenuConfig",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -2168,7 +2263,7 @@
               "[]>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 145,
+            "lineNumber": 152,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2190,7 +2285,7 @@
               ") => () => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 150,
+            "lineNumber": 157,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2206,9 +2301,10 @@
                   "ChromeBreadcrumbsAppendExtension"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 166,
+                "lineNumber": 173,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ChromeBreadcrumbsAppendExtension",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2222,7 +2318,15 @@
             "tags": [],
             "label": "setBreadcrumbsBadges",
             "description": [
-              "\nSet badges to be displayed in the breadcrumbs area.\nThe badges will always be displayed as the last {@link ChromeBreadcrumbsAppendExtension} in the breadcrumbs.\nBy default, when navigating within the same application, badges are not cleared automatically, you need to handle\ntheir removal manually.\n"
+              "\nSet badges to be displayed in the breadcrumbs area.\nThe badges will always be displayed as the last ",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-public.ChromeBreadcrumbsAppendExtension",
+                "text": "ChromeBreadcrumbsAppendExtension"
+              },
+              " in the breadcrumbs.\nBy default, when navigating within the same application, badges are not cleared automatically, you need to handle\ntheir removal manually.\n"
             ],
             "signature": [
               "(badges: ",
@@ -2230,7 +2334,7 @@
               "[]) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 169,
+            "lineNumber": 176,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2249,7 +2353,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 193,
+                "lineNumber": 200,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2275,7 +2379,7 @@
               "> | undefined>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 195,
+            "lineNumber": 202,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2297,7 +2401,7 @@
               "> | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 200,
+            "lineNumber": 207,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2315,9 +2419,10 @@
                   "> | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 203,
+                "lineNumber": 210,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -2341,7 +2446,7 @@
               "[]>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 205,
+            "lineNumber": 212,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2363,7 +2468,7 @@
               "[]) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 210,
+            "lineNumber": 217,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2380,7 +2485,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 213,
+                "lineNumber": 220,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2406,7 +2511,7 @@
               "[]>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 215,
+            "lineNumber": 222,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2428,7 +2533,7 @@
               ") => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 220,
+            "lineNumber": 227,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2444,9 +2549,10 @@
                   "ChromeGlobalHelpExtensionMenuLink"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 224,
+                "lineNumber": 231,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ChromeGlobalHelpExtensionMenuLink",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2470,7 +2576,7 @@
               " | undefined>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 227,
+            "lineNumber": 234,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2492,7 +2598,7 @@
               " | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 232,
+            "lineNumber": 239,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2509,9 +2615,10 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 235,
+                "lineNumber": 242,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "ChromeHelpExtension",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -2531,7 +2638,7 @@
               "(url: string) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 237,
+            "lineNumber": 244,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2549,7 +2656,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 241,
+                "lineNumber": 248,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2573,7 +2680,7 @@
               "<string>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 243,
+            "lineNumber": 250,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2595,7 +2702,7 @@
               " | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 248,
+            "lineNumber": 255,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2612,9 +2719,10 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 253,
+                "lineNumber": 260,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "ChromeUserBanner",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -2636,7 +2744,7 @@
               "<boolean>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 255,
+            "lineNumber": 262,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2656,7 +2764,7 @@
               "() => boolean"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 260,
+            "lineNumber": 267,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2678,7 +2786,7 @@
               ") => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 265,
+            "lineNumber": 272,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2696,9 +2804,10 @@
                   "ChromeStyle"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 269,
+                "lineNumber": 276,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "ChromeStyle",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2722,7 +2831,7 @@
               ">"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 271,
+            "lineNumber": 278,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2743,7 +2852,7 @@
               "ChromeStyle"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 276,
+            "lineNumber": 283,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2765,7 +2874,7 @@
               "<number>; getWidth(): number; }"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 281,
+            "lineNumber": 288,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2777,13 +2886,20 @@
             "tags": [],
             "label": "sidebar",
             "description": [
-              "\n{@link SidebarStart}"
+              "\n",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-public.SidebarStart",
+                "text": "SidebarStart"
+              }
             ],
             "signature": [
               "SidebarStart"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 309,
+            "lineNumber": 316,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2800,10 +2916,10 @@
             "signature": [
               "() => ",
               "Observable",
-              "<\"security\" | \"es\" | \"workplaceai\" | \"oblt\" | null>"
+              "<\"security\" | \"es\" | \"workplaceai\" | \"vectordb\" | \"oblt\" | null>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 314,
+            "lineNumber": 321,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2820,10 +2936,10 @@
               "\nGet the id of the currently active project navigation synchronously."
             ],
             "signature": [
-              "() => \"security\" | \"es\" | \"workplaceai\" | \"oblt\" | null"
+              "() => \"security\" | \"es\" | \"workplaceai\" | \"vectordb\" | \"oblt\" | null"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 319,
+            "lineNumber": 326,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2843,7 +2959,7 @@
               "(component: React.ReactNode) => React.ReactNode"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 324,
+            "lineNumber": 331,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2859,9 +2975,10 @@
                   "React.ReactNode"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 327,
+                "lineNumber": 334,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "ReactNode",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -3152,7 +3269,7 @@
             "label": "id",
             "description": [],
             "signature": [
-              "\"security\" | \"es\" | \"workplaceai\" | \"oblt\""
+              "\"security\" | \"es\" | \"workplaceai\" | \"vectordb\" | \"oblt\""
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "lineNumber": 251,
@@ -3645,6 +3762,7 @@
                 "lineNumber": 115,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SidebarAppConfig",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3891,6 +4009,7 @@
                 "lineNumber": 160,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "SidebarAppId",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3933,6 +4052,7 @@
                 "lineNumber": 163,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SidebarAppId",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3975,6 +4095,7 @@
                 "lineNumber": 166,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "SidebarAppId",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4011,7 +4132,7 @@
               "Unique id for the solution navigation."
             ],
             "signature": [
-              "\"security\" | \"es\" | \"workplaceai\" | \"oblt\""
+              "\"security\" | \"es\" | \"workplaceai\" | \"vectordb\" | \"oblt\""
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "lineNumber": 266,
@@ -4088,7 +4209,7 @@
         "label": "AppDeepLinkId",
         "description": [],
         "signature": [
-          "\"fleet\" | \"graph\" | \"ml\" | \"monitoring\" | \"profiling\" | \"streams\" | \"uptime\" | \"workflows\" | \"metrics\" | \"rules\" | \"dashboards\" | \"apm\" | \"synthetics\" | \"ux\" | \"canvas\" | \"logs\" | \"slo\" | \"observabilityAIAssistant\" | \"home\" | \"integrations\" | \"management\" | \"discover\" | \"maps\" | \"visualize\" | \"observability-overview\" | \"dev_tools\" | \"dev_tools:console\" | \"dev_tools:searchprofiler\" | \"dev_tools:painless_lab\" | \"dev_tools:grokdebugger\" | \"ml:notifications\" | \"ml:nodes\" | \"ml:overview\" | \"ml:memoryUsage\" | \"ml:settings\" | \"ml:dataVisualizer\" | \"ml:logPatternAnalysis\" | \"ml:logRateAnalysis\" | \"ml:singleMetricViewer\" | \"ml:anomalyDetection\" | \"ml:anomalyExplorer\" | \"ml:dataDrift\" | \"ml:dataDriftPage\" | \"ml:dataFrameAnalytics\" | \"ml:resultExplorer\" | \"ml:analyticsMap\" | \"ml:aiOps\" | \"ml:logRateAnalysisPage\" | \"ml:logPatternAnalysisPage\" | \"ml:changePointDetections\" | \"ml:changePointDetectionsPage\" | \"ml:modelManagement\" | \"ml:nodesOverview\" | \"ml:esqlDataVisualizer\" | \"ml:fileUpload\" | \"ml:indexDataVisualizer\" | \"ml:indexDataVisualizerPage\" | \"ml:calendarSettings\" | \"ml:filterListsSettings\" | \"ml:suppliedConfigurations\" | \"osquery\" | \"cloud_connect\" | \"management:transform\" | \"management:watcher\" | \"management:tags\" | \"management:cases\" | \"management:spaces\" | \"management:rules\" | \"management:overview\" | \"management:cross_cluster_replication\" | \"management:settings\" | \"management:dataViews\" | \"management:analytics\" | \"management:users\" | \"management:migrate_data\" | \"management:search_sessions\" | \"management:data_quality\" | \"management:data_usage\" | \"management:evals\" | \"management:filesManagement\" | \"management:notification_policies\" | \"management:trained_models\" | \"management:pipelines\" | \"management:maintenanceWindows\" | \"management:anomaly_detection\" | \"management:roles\" | \"management:reporting\" | \"management:ad_settings\" | \"management:aiAssistantManagementSelection\" | \"management:queryActivity\" | \"management:securityAiAssistantManagement\" | \"management:observabilityAiAssistantManagement\" | \"management:api_keys\" | \"management:episodes\" | \"management:content_connectors\" | \"management:license_management\" | \"management:index_lifecycle_management\" | \"management:index_management\" | \"management:elastic_inference_service\" | \"management:inference_endpoints\" | \"management:model_settings\" | \"management:ingest_pipelines\" | \"management:jobsListLink\" | \"management:objects\" | \"management:remote_clusters\" | \"management:role_mappings\" | \"management:rollup_jobs\" | \"management:snapshot_restore\" | \"management:supplied_configurations\" | \"management:triggersActions\" | \"management:triggersActionsAlerts\" | \"management:triggersActionsConnectors\" | \"management:upgrade_assistant\" | \"management:genAiSettings\" | \"enterpriseSearch\" | \"enterpriseSearchContent\" | \"enterpriseSearchApplications\" | \"enterpriseSearchAnalytics\" | \"serverlessConnectors\" | \"serverlessWebCrawlers\" | \"searchPlayground\" | \"searchSynonyms\" | \"searchQueryRules\" | \"searchHomepage\" | \"enterpriseSearchContent:connectors\" | \"enterpriseSearchContent:webCrawlers\" | \"enterpriseSearchApplications:searchApplications\" | \"searchSynonyms:synonyms\" | \"elasticsearchIndexManagement\" | \"searchGettingStarted\" | \"observability-logs-explorer\" | \"last-used-logs-viewer\" | \"observabilityOnboarding\" | \"inventory\" | \"ingestHub\" | \"logs:anomalies\" | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"observability-overview:cases\" | \"observability-overview:rules\" | \"observability-overview:alerts\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:assetDetails\" | \"apm:services\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:service-groups-list\" | \"apm:storage-explorer\" | \"synthetics:overview\" | \"synthetics:certificates\" | \"uptime:Certificates\" | \"profiling:functions\" | \"profiling:stacktraces\" | \"profiling:flamegraphs\" | \"inventory:datastreams\" | \"streams:overview\" | \"securitySolutionUI\" | \"securitySolutionUI:\" | \"securitySolutionUI:cases\" | \"securitySolutionUI:rules\" | \"securitySolutionUI:artifacts\" | \"securitySolutionUI:dashboards\" | \"securitySolutionUI:alerts\" | \"securitySolutionUI:policy\" | \"securitySolutionUI:overview\" | \"securitySolutionUI:kubernetes\" | \"securitySolutionUI:configurations\" | \"securitySolutionUI:cases_create\" | \"securitySolutionUI:cases_configure\" | \"securitySolutionUI:cases_templates\" | \"securitySolutionUI:hosts\" | \"securitySolutionUI:users\" | \"securitySolutionUI:cloud_defend-policies\" | \"securitySolutionUI:cloud_security_posture-dashboard\" | \"securitySolutionUI:cloud_security_posture-vulnerability_dashboard\" | \"securitySolutionUI:cloud_security_posture-findings\" | \"securitySolutionUI:cloud_security_posture-benchmarks\" | \"securitySolutionUI:asset_inventory\" | \"securitySolutionUI:network\" | \"securitySolutionUI:data_quality\" | \"securitySolutionUI:endpoints\" | \"securitySolutionUI:explore\" | \"securitySolutionUI:cloud_defend\" | \"securitySolutionUI:administration\" | \"securitySolutionUI:attacks\" | \"securitySolutionUI:ai_value\" | \"securitySolutionUI:attack_discovery\" | \"securitySolutionUI:blocklist\" | \"securitySolutionUI:alert_detections\" | \"securitySolutionUI:cloud_security_posture-rules\" | \"securitySolutionUI:detections\" | \"securitySolutionUI:detection_response\" | \"securitySolutionUI:endpoint_exceptions\" | \"securitySolutionUI:event_filters\" | \"securitySolutionUI:exceptions\" | \"securitySolutionUI:host_isolation_exceptions\" | \"securitySolutionUI:hosts-all\" | \"securitySolutionUI:hosts-anomalies\" | \"securitySolutionUI:hosts-risk\" | \"securitySolutionUI:hosts-events\" | \"securitySolutionUI:hosts-sessions\" | \"securitySolutionUI:hosts-uncommon_processes\" | \"securitySolutionUI:get_started\" | \"securitySolutionUI:launchpad\" | \"securitySolutionUI:network-anomalies\" | \"securitySolutionUI:network-dns\" | \"securitySolutionUI:network-events\" | \"securitySolutionUI:network-flows\" | \"securitySolutionUI:network-http\" | \"securitySolutionUI:network-tls\" | \"securitySolutionUI:response_actions_history\" | \"securitySolutionUI:rules-add\" | \"securitySolutionUI:rules-create\" | \"securitySolutionUI:rules-landing\" | \"securitySolutionUI:rules-management\" | \"securitySolutionUI:script_library\" | \"securitySolutionUI:siem_readiness\" | \"securitySolutionUI:siem_migrations\" | \"securitySolutionUI:siem_migrations-rules\" | \"securitySolutionUI:siem_migrations-dashboards\" | \"securitySolutionUI:siem_migrations-manage\" | \"securitySolutionUI:threat_intelligence\" | \"securitySolutionUI:timelines\" | \"securitySolutionUI:timelines-templates\" | \"securitySolutionUI:trusted_apps\" | \"securitySolutionUI:trusted_devices\" | \"securitySolutionUI:users-all\" | \"securitySolutionUI:users-anomalies\" | \"securitySolutionUI:users-authentications\" | \"securitySolutionUI:users-events\" | \"securitySolutionUI:users-risk\" | \"securitySolutionUI:entity_analytics\" | \"securitySolutionUI:entity_analytics-management\" | \"securitySolutionUI:entity_analytics-landing\" | \"securitySolutionUI:entity_analytics-privileged_user_monitoring\" | \"securitySolutionUI:entity_analytics-overview\" | \"securitySolutionUI:entity_analytics-home_page\" | \"securitySolutionUI:entity_analytics-entity_store_management\" | \"securitySolutionUI:coverage-overview\" | \"securitySolutionUI:notes\" | \"securitySolutionUI:alert_summary\" | \"securitySolutionUI:configurations-integrations\" | \"securitySolutionUI:configurations-ai_settings\" | \"securitySolutionUI:configurations-basic_rules\" | \"securitySolutionUI:space-rules-health\" | \"securitySolutionUI:rule-health\" | \"fleet:settings\" | \"fleet:agents\" | \"fleet:policies\" | \"fleet:data_streams\" | \"fleet:enrollment_tokens\" | \"fleet:uninstall_tokens\" | \"workplace_ai\" | \"agent_builder\" | \"agent_builder:agents\" | \"agent_builder:tools\" | \"agent_builder:conversations\" | \"agent_builder:agents_create\" | \"workflows:workflows\""
+          "\"fleet\" | \"graph\" | \"ml\" | \"monitoring\" | \"profiling\" | \"streams\" | \"uptime\" | \"workflows\" | \"metrics\" | \"rules\" | \"dashboards\" | \"apm\" | \"synthetics\" | \"ux\" | \"canvas\" | \"logs\" | \"slo\" | \"observabilityAIAssistant\" | \"home\" | \"integrations\" | \"management\" | \"discover\" | \"maps\" | \"visualize\" | \"observability-overview\" | \"dev_tools\" | \"dev_tools:console\" | \"dev_tools:searchprofiler\" | \"dev_tools:painless_lab\" | \"dev_tools:grokdebugger\" | \"ml:notifications\" | \"ml:nodes\" | \"ml:overview\" | \"ml:memoryUsage\" | \"ml:settings\" | \"ml:dataVisualizer\" | \"ml:logPatternAnalysis\" | \"ml:logRateAnalysis\" | \"ml:singleMetricViewer\" | \"ml:anomalyDetection\" | \"ml:anomalyExplorer\" | \"ml:dataDrift\" | \"ml:dataDriftPage\" | \"ml:dataFrameAnalytics\" | \"ml:resultExplorer\" | \"ml:analyticsMap\" | \"ml:aiOps\" | \"ml:logRateAnalysisPage\" | \"ml:logPatternAnalysisPage\" | \"ml:changePointDetections\" | \"ml:changePointDetectionsPage\" | \"ml:modelManagement\" | \"ml:nodesOverview\" | \"ml:esqlDataVisualizer\" | \"ml:fileUpload\" | \"ml:indexDataVisualizer\" | \"ml:indexDataVisualizerPage\" | \"ml:calendarSettings\" | \"ml:filterListsSettings\" | \"ml:suppliedConfigurations\" | \"osquery\" | \"cloud_connect\" | \"management:transform\" | \"management:watcher\" | \"management:tags\" | \"management:cases\" | \"management:spaces\" | \"management:rules\" | \"management:overview\" | \"management:settings\" | \"management:dataViews\" | \"management:analytics\" | \"management:users\" | \"management:migrate_data\" | \"management:search_sessions\" | \"management:data_quality\" | \"management:data_usage\" | \"management:evals\" | \"management:filesManagement\" | \"management:action_policies\" | \"management:trained_models\" | \"management:pipelines\" | \"management:maintenanceWindows\" | \"management:anomaly_detection\" | \"management:roles\" | \"management:reporting\" | \"management:ad_settings\" | \"management:aiAssistantManagementSelection\" | \"management:queryActivity\" | \"management:securityAiAssistantManagement\" | \"management:observabilityAiAssistantManagement\" | \"management:api_keys\" | \"management:cross_cluster_replication\" | \"management:episodes\" | \"management:content_connectors\" | \"management:license_management\" | \"management:index_lifecycle_management\" | \"management:index_management\" | \"management:elastic_inference_service\" | \"management:inference_endpoints\" | \"management:model_settings\" | \"management:ingest_pipelines\" | \"management:jobsListLink\" | \"management:objects\" | \"management:remote_clusters\" | \"management:role_mappings\" | \"management:rollup_jobs\" | \"management:snapshot_restore\" | \"management:supplied_configurations\" | \"management:triggersActionsAlerts\" | \"management:triggersActionsConnectors\" | \"management:upgrade_assistant\" | \"management:genAiSettings\" | \"enterpriseSearch\" | \"enterpriseSearchContent\" | \"enterpriseSearchApplications\" | \"enterpriseSearchAnalytics\" | \"serverlessConnectors\" | \"serverlessWebCrawlers\" | \"searchPlayground\" | \"searchSynonyms\" | \"searchQueryRules\" | \"searchHomepage\" | \"enterpriseSearchContent:connectors\" | \"enterpriseSearchContent:webCrawlers\" | \"enterpriseSearchApplications:searchApplications\" | \"searchSynonyms:synonyms\" | \"elasticsearchIndexManagement\" | \"searchGettingStarted\" | \"observability-logs-explorer\" | \"last-used-logs-viewer\" | \"observabilityOnboarding\" | \"inventory\" | \"ingestHub\" | \"logs:anomalies\" | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"observability-overview:cases\" | \"observability-overview:rules\" | \"observability-overview:alerts\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:assetDetails\" | \"apm:services\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:service-groups-list\" | \"apm:storage-explorer\" | \"synthetics:overview\" | \"synthetics:certificates\" | \"uptime:Certificates\" | \"profiling:functions\" | \"profiling:stacktraces\" | \"profiling:flamegraphs\" | \"inventory:datastreams\" | \"streams:overview\" | \"securitySolutionUI\" | \"securitySolutionUI:\" | \"securitySolutionUI:cases\" | \"securitySolutionUI:rules\" | \"securitySolutionUI:artifacts\" | \"securitySolutionUI:dashboards\" | \"securitySolutionUI:alerts\" | \"securitySolutionUI:policy\" | \"securitySolutionUI:overview\" | \"securitySolutionUI:kubernetes\" | \"securitySolutionUI:configurations\" | \"securitySolutionUI:cases_create\" | \"securitySolutionUI:cases_configure\" | \"securitySolutionUI:cases_templates\" | \"securitySolutionUI:hosts\" | \"securitySolutionUI:users\" | \"securitySolutionUI:cloud_defend-policies\" | \"securitySolutionUI:cloud_security_posture-dashboard\" | \"securitySolutionUI:cloud_security_posture-vulnerability_dashboard\" | \"securitySolutionUI:cloud_security_posture-findings\" | \"securitySolutionUI:cloud_security_posture-benchmarks\" | \"securitySolutionUI:asset_inventory\" | \"securitySolutionUI:network\" | \"securitySolutionUI:data_quality\" | \"securitySolutionUI:endpoints\" | \"securitySolutionUI:explore\" | \"securitySolutionUI:cloud_defend\" | \"securitySolutionUI:administration\" | \"securitySolutionUI:attacks\" | \"securitySolutionUI:ai_value\" | \"securitySolutionUI:attack_discovery\" | \"securitySolutionUI:blocklist\" | \"securitySolutionUI:alert_detections\" | \"securitySolutionUI:cloud_security_posture-rules\" | \"securitySolutionUI:detections\" | \"securitySolutionUI:detection_response\" | \"securitySolutionUI:endpoint_exceptions\" | \"securitySolutionUI:event_filters\" | \"securitySolutionUI:exceptions\" | \"securitySolutionUI:host_isolation_exceptions\" | \"securitySolutionUI:hosts-all\" | \"securitySolutionUI:hosts-anomalies\" | \"securitySolutionUI:hosts-risk\" | \"securitySolutionUI:hosts-events\" | \"securitySolutionUI:hosts-sessions\" | \"securitySolutionUI:hosts-uncommon_processes\" | \"securitySolutionUI:get_started\" | \"securitySolutionUI:launchpad\" | \"securitySolutionUI:network-anomalies\" | \"securitySolutionUI:network-dns\" | \"securitySolutionUI:network-events\" | \"securitySolutionUI:network-flows\" | \"securitySolutionUI:network-http\" | \"securitySolutionUI:network-tls\" | \"securitySolutionUI:response_actions_history\" | \"securitySolutionUI:rules-add\" | \"securitySolutionUI:rules-create\" | \"securitySolutionUI:rules-landing\" | \"securitySolutionUI:rules-management\" | \"securitySolutionUI:script_library\" | \"securitySolutionUI:siem_readiness\" | \"securitySolutionUI:siem_migrations\" | \"securitySolutionUI:siem_migrations-rules\" | \"securitySolutionUI:siem_migrations-dashboards\" | \"securitySolutionUI:siem_migrations-manage\" | \"securitySolutionUI:threat_intelligence\" | \"securitySolutionUI:timelines\" | \"securitySolutionUI:timelines-templates\" | \"securitySolutionUI:trusted_apps\" | \"securitySolutionUI:trusted_devices\" | \"securitySolutionUI:users-all\" | \"securitySolutionUI:users-anomalies\" | \"securitySolutionUI:users-authentications\" | \"securitySolutionUI:users-events\" | \"securitySolutionUI:users-risk\" | \"securitySolutionUI:entity_analytics\" | \"securitySolutionUI:entity_analytics-management\" | \"securitySolutionUI:entity_analytics-landing\" | \"securitySolutionUI:entity_analytics-privileged_user_monitoring\" | \"securitySolutionUI:entity_analytics-overview\" | \"securitySolutionUI:entity_analytics-home_page\" | \"securitySolutionUI:entity_analytics-entity_store_management\" | \"securitySolutionUI:coverage-overview\" | \"securitySolutionUI:notes\" | \"securitySolutionUI:alert_summary\" | \"securitySolutionUI:configurations-integrations\" | \"securitySolutionUI:configurations-ai_settings\" | \"securitySolutionUI:configurations-basic_rules\" | \"securitySolutionUI:space-rules-health\" | \"securitySolutionUI:rule-health\" | \"fleet:settings\" | \"fleet:agents\" | \"fleet:policies\" | \"fleet:data_streams\" | \"fleet:enrollment_tokens\" | \"fleet:uninstall_tokens\" | \"workplace_ai\" | \"agent_builder\" | \"agent_builder:agents\" | \"agent_builder:tools\" | \"agent_builder:conversations\" | \"agent_builder:agents_create\" | \"workflows:workflows\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "lineNumber": 64,
@@ -4363,7 +4484,7 @@
         "label": "SolutionId",
         "description": [],
         "signature": [
-          "\"security\" | \"es\" | \"workplaceai\" | \"oblt\""
+          "\"security\" | \"es\" | \"workplaceai\" | \"vectordb\" | \"oblt\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "lineNumber": 45,
@@ -4389,6 +4510,10 @@
           "<",
           "AppDeepLinkId",
           "> | undefined; workplaceai?: ",
+          "SolutionNavigationDefinition",
+          "<",
+          "AppDeepLinkId",
+          "> | undefined; vectordb?: ",
           "SolutionNavigationDefinition",
           "<",
           "AppDeepLinkId",

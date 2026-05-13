@@ -14,46 +14,50 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { AttackDiscoveryApiAlert } from '../../../attack_discovery_api_alert.gen';
 
+export const PostAttackDiscoveryBulkRequestBody = lazySchema(() =>
+  z.object({
+    /**
+     * Configuration object containing all parameters for the bulk update operation
+     */
+    update: z.object({
+      /**
+       * Array of Attack Discovery IDs to update
+       */
+      ids: z.array(z.string()),
+      /**
+       * When provided, update the kibana.alert.workflow_status of the attack discovery alerts
+       */
+      kibana_alert_workflow_status: z.enum(['open', 'acknowledged', 'closed']).optional(),
+      /**
+       * When provided, update the visibility of the alert, as determined by the kibana.alert.attack_discovery.users field
+       */
+      visibility: z.enum(['not_shared', 'shared']).optional(),
+      /**
+       * When true, returns the updated Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields. This substitutes anonymized values with human-readable equivalents. Defaults to `true`.
+       */
+      with_replacements: z.boolean().optional().default(true),
+      /**
+       * Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack Discovery views within Kibana. Defaults to `false`.
+       */
+      enable_field_rendering: z.boolean().optional().default(false),
+    }),
+  })
+);
 export type PostAttackDiscoveryBulkRequestBody = z.infer<typeof PostAttackDiscoveryBulkRequestBody>;
-export const PostAttackDiscoveryBulkRequestBody = z.object({
-  /**
-   * Configuration object containing all parameters for the bulk update operation
-   */
-  update: z.object({
-    /**
-     * Array of Attack Discovery IDs to update
-     */
-    ids: z.array(z.string()),
-    /**
-     * When provided, update the kibana.alert.workflow_status of the attack discovery alerts
-     */
-    kibana_alert_workflow_status: z.enum(['open', 'acknowledged', 'closed']).optional(),
-    /**
-     * When provided, update the visibility of the alert, as determined by the kibana.alert.attack_discovery.users field
-     */
-    visibility: z.enum(['not_shared', 'shared']).optional(),
-    /**
-     * When true, returns the updated Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields. This substitutes anonymized values with human-readable equivalents. Defaults to `true`.
-     */
-    with_replacements: z.boolean().optional().default(true),
-    /**
-     * Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack Discovery views within Kibana. Defaults to `false`.
-     */
-    enable_field_rendering: z.boolean().optional().default(false),
-  }),
-});
 export type PostAttackDiscoveryBulkRequestBodyInput = z.input<
   typeof PostAttackDiscoveryBulkRequestBody
 >;
 
+export const PostAttackDiscoveryBulkResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Array of updated Attack Discovery alert objects. Each item includes the applied modifications from the bulk update request.
+     */
+    data: z.array(AttackDiscoveryApiAlert),
+  })
+);
 export type PostAttackDiscoveryBulkResponse = z.infer<typeof PostAttackDiscoveryBulkResponse>;
-export const PostAttackDiscoveryBulkResponse = z.object({
-  /**
-   * Array of updated Attack Discovery alert objects. Each item includes the applied modifications from the bulk update request.
-   */
-  data: z.array(AttackDiscoveryApiAlert),
-});

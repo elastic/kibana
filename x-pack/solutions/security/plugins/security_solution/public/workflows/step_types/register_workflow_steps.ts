@@ -6,28 +6,41 @@
  */
 
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
-import type { CoreStart } from '@kbn/core/public';
-import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
-import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
+import type { CoreSetup } from '@kbn/core/public';
 import {
   REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
   REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT,
 } from '../../../common/constants';
 
 /**
- * Registers all security workflow steps with the workflowsExtensions plugin
+ * Registers all security workflow steps with the workflowsExtensions plugin.
+ * Registration is synchronous; each step uses an async loader to perform the
+ * feature-flag check at resolution time.
  */
-export const registerWorkflowSteps = async (
+export const registerWorkflowSteps = (
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup,
-  core: CoreStart
-): Promise<void> => {
-  const registerAlertValidationStepsEnabled = await core.featureFlags.getBooleanValue(
-    REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
-    REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT
-  );
+  core: CoreSetup
+): void => {
+  const isEnabled = core
+    .getStartServices()
+    .then(([coreStart]) =>
+      coreStart.featureFlags.getBooleanValue(
+        REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
+        REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT
+      )
+    );
 
-  if (registerAlertValidationStepsEnabled) {
-    workflowsExtensions.registerStepDefinition(renderAlertNarrativeStepDefinition);
-    workflowsExtensions.registerStepDefinition(buildAlertEntityGraphStepDefinition);
-  }
+  workflowsExtensions.registerStepDefinition(async () => {
+    if (!(await isEnabled)) return undefined;
+    return import('./render_alert_narrative_step').then(
+      (m) => m.renderAlertNarrativeStepDefinition
+    );
+  });
+
+  workflowsExtensions.registerStepDefinition(async () => {
+    if (!(await isEnabled)) return undefined;
+    return import('./build_alert_entity_graph_step').then(
+      (m) => m.buildAlertEntityGraphStepDefinition
+    );
+  });
 };

@@ -94,6 +94,22 @@ function getOutsideLegendSize(legend: XYConfig['legend']): LegendSizeType | unde
   return legend && 'size' in legend ? legend.size : undefined;
 }
 
+function convertSeriesHeaderFromAPI(
+  legend?: XYConfig['legend']
+): Partial<Pick<XYVisualizationState['legend'], 'title' | 'isTitleVisible'>> {
+  const seriesHeader = legend && 'series_header' in legend ? legend.series_header : undefined;
+  if (!seriesHeader) return {};
+
+  const { text, visible } = seriesHeader;
+  if (visible === false) {
+    return { isTitleVisible: false, title: undefined };
+  }
+  if (text != null && text !== '') {
+    return { isTitleVisible: true, title: text };
+  }
+  return { isTitleVisible: true, title: undefined };
+}
+
 export function convertLegendToStateFormat(legend: XYConfig['legend']): {
   legend: XYVisualizationState['legend'];
 } {
@@ -104,6 +120,7 @@ export function convertLegendToStateFormat(legend: XYConfig['legend']): {
   const outsideLegendSize = getOutsideLegendSize(legend);
 
   const newStateLegend: XYVisualizationState['legend'] = {
+    ...convertSeriesHeaderFromAPI(legend),
     isVisible: legend?.visibility === 'auto' || legend?.visibility === 'visible',
     shouldTruncate: truncateEnabled,
     ...(legend?.statistics
@@ -171,10 +188,10 @@ function getLegendLayout(legend: XYVisualizationState['legend']) {
       placement: 'inside',
       layout: {
         type: 'grid',
-        truncate: {
-          max_lines,
+        truncate: stripUndefined({
           enabled,
-        },
+          max_lines,
+        }),
       },
       ...(legend.floatingColumns ? { columns: legend.floatingColumns } : {}),
       ...getLegendAlignment(legend),
@@ -197,10 +214,10 @@ function getLegendLayout(legend: XYVisualizationState['legend']) {
         }
       : {
           type: 'grid',
-          truncate: {
-            max_lines,
+          truncate: stripUndefined({
             enabled,
-          },
+            max_lines,
+          }),
         },
   } satisfies HorizontalOutsideLayoutLegend | VerticalOutsideLayoutLegend;
 }
@@ -217,8 +234,24 @@ function getApiLegendTruncate(
 
   return {
     max_lines: maxLines ?? 1,
-    enabled: shouldTruncate,
+    ...(shouldTruncate !== undefined ? { enabled: shouldTruncate } : {}),
   };
+}
+
+function convertSeriesHeaderToAPIFormat(legend: XYVisualizationState['legend']): {
+  series_header?: { text?: string; visible?: boolean };
+} {
+  const { title, isTitleVisible } = legend;
+  if (isTitleVisible === false) {
+    return { series_header: stripUndefined({ visible: false, text: undefined }) };
+  }
+  if (title != null && title !== '') {
+    return { series_header: stripUndefined({ visible: true, text: title }) };
+  }
+  if (isTitleVisible === true) {
+    return { series_header: stripUndefined({ visible: true, text: undefined }) };
+  }
+  return {};
 }
 
 export function convertLegendToAPIFormat(
@@ -233,6 +266,7 @@ export function convertLegendToAPIFormat(
     legend: stripUndefined({
       visibility,
       statistics,
+      ...convertSeriesHeaderToAPIFormat(legend),
       ...getLegendAlignment(legend),
       ...getLegendLayout(legend),
     }),

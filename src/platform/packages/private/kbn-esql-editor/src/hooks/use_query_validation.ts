@@ -9,8 +9,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ESQLCallbacks } from '@kbn/esql-types';
-import { ESQLLang, monaco } from '@kbn/monaco';
-import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
+import { ESQLLang, monaco, type MonacoMessage } from '@kbn/code-editor';
 import type { MapCache } from 'lodash';
 import {
   filterDataErrors,
@@ -80,6 +79,11 @@ export const useQueryValidation = ({
     errors: serverErrors ? parseErrors(serverErrors, code) : [],
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
+
+  const editorMessagesRef = useRef(editorMessages);
+  useEffect(() => {
+    editorMessagesRef.current = editorMessages;
+  }, [editorMessages]);
 
   const parseMessages = useCallback(
     async (options?: { invalidateColumnsCache?: boolean }) => {
@@ -283,6 +287,7 @@ export const useQueryValidation = ({
 
   return {
     editorMessages,
+    editorMessagesRef,
     queryValidation,
     onLookupIndexCreate,
     onNewFieldsAddedToLookupIndex,

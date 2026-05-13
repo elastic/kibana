@@ -14,53 +14,59 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import { NonEmptyString } from '../../../../common_attributes.gen';
 import { AttackDiscoveryApiAlert } from '../../../attack_discovery_api_alert.gen';
 import { AttackDiscoveryGeneration } from '../../../generation.gen';
 
+export const GetAttackDiscoveryGenerationRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack Discovery views within Kibana. Defaults to `false`.
+     */
+    enable_field_rendering: BooleanFromString.optional().default(false),
+    /**
+     * When true, return the created Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields. Defaults to `true`.
+     */
+    with_replacements: BooleanFromString.optional().default(true),
+  })
+);
 export type GetAttackDiscoveryGenerationRequestQuery = z.infer<
   typeof GetAttackDiscoveryGenerationRequestQuery
 >;
-export const GetAttackDiscoveryGenerationRequestQuery = z.object({
-  /**
-   * Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack Discovery views within Kibana. Defaults to `false`.
-   */
-  enable_field_rendering: BooleanFromString.optional().default(false),
-  /**
-   * When true, return the created Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields. Defaults to `true`.
-   */
-  with_replacements: BooleanFromString.optional().default(true),
-});
 export type GetAttackDiscoveryGenerationRequestQueryInput = z.input<
   typeof GetAttackDiscoveryGenerationRequestQuery
 >;
 
+export const GetAttackDiscoveryGenerationRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The unique identifier for the Attack Discovery generation execution. This UUID is returned at the start of an Attack Discovery generation.
+     */
+    execution_uuid: NonEmptyString,
+  })
+);
 export type GetAttackDiscoveryGenerationRequestParams = z.infer<
   typeof GetAttackDiscoveryGenerationRequestParams
 >;
-export const GetAttackDiscoveryGenerationRequestParams = z.object({
-  /**
-   * The unique identifier for the Attack Discovery generation execution. This UUID is returned at the start of an Attack Discovery generation.
-   */
-  execution_uuid: NonEmptyString,
-});
 export type GetAttackDiscoveryGenerationRequestParamsInput = z.input<
   typeof GetAttackDiscoveryGenerationRequestParams
 >;
 
+export const GetAttackDiscoveryGenerationResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Array of Attack discoveries generated during this execution.
+     */
+    data: z.array(AttackDiscoveryApiAlert),
+    /**
+     * Optional metadata about the attack discovery generation process, metadata including execution status and statistics. This metadata may not be available for all generations.
+     */
+    generation: AttackDiscoveryGeneration.optional(),
+  })
+);
 export type GetAttackDiscoveryGenerationResponse = z.infer<
   typeof GetAttackDiscoveryGenerationResponse
 >;
-export const GetAttackDiscoveryGenerationResponse = z.object({
-  /**
-   * Array of Attack discoveries generated during this execution.
-   */
-  data: z.array(AttackDiscoveryApiAlert),
-  /**
-   * Optional metadata about the attack discovery generation process, metadata including execution status and statistics. This metadata may not be available for all generations.
-   */
-  generation: AttackDiscoveryGeneration.optional(),
-});

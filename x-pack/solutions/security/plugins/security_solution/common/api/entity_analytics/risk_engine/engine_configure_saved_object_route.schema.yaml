@@ -51,6 +51,14 @@ paths:
                     required:
                       - entity_types
                       - filter
+                page_size:
+                  type: integer
+                  minimum: 100
+                  maximum: 10000
+                  description: >
+                    Number of entities to score per page. Higher values reduce total
+                    scoring time by reducing the number of alert-index scans, but
+                    cannot exceed the ES|QL result limit (10,000 by default).
             examples:
               ConfigureRiskEngineSavedObjectRequest:
                 summary: Configure the risk engine saved object
@@ -89,12 +97,26 @@ paths:
             application/json:
               schema:
                 $ref: "../common/common.schema.yaml#/components/schemas/TaskManagerUnavailableResponse"
+              examples:
+                taskManagerUnavailable:
+                  summary: Task manager is unavailable
+                  value:
+                    status_code: 400
+                    message: Task Manager is unavailable, but is required by the risk engine. Please enable the taskManager plugin and try again.
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ConfigureRiskEngineSavedObjectErrorResponse"
+              examples:
+                configureError:
+                  summary: Configure saved object failed
+                  value:
+                    risk_engine_saved_object_configured: false
+                    errors:
+                      - seq: 1
+                        error: "Internal server error"
 
 components:
   schemas:

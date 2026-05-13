@@ -58,7 +58,7 @@ const TemplatesInfoPanelComponent: React.FC = () => {
             <p>{i18n.TEMPLATES_INFO_DESCRIPTION}</p>
           </EuiText>
           <EuiSpacer size="s" />
-          <EuiLink href={docLinks.links.cases.casesPermissions} target="_blank" external>
+          <EuiLink href={docLinks.links.cases.configureCaseSettings} target="_blank" external>
             {i18n.LEARN_MORE}
           </EuiLink>
         </EuiFlexItem>

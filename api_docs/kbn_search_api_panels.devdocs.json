@@ -84,6 +84,7 @@
             "lineNumber": 33,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "EisCloudConnectPromoCalloutProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -135,6 +136,7 @@
             "lineNumber": 63,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "EisCloudConnectPromoTourProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -186,6 +188,7 @@
             "lineNumber": 35,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "EisPromotionalCalloutProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -237,6 +240,7 @@
             "lineNumber": 36,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "EisPromotionalTourProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -288,6 +292,7 @@
             "lineNumber": 60,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "EisUpdateCalloutProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -372,6 +377,7 @@
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "LanguageDefinitionSnippetArguments",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -441,6 +447,7 @@
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -488,6 +495,7 @@
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "LanguageDefinitionSnippetArguments",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -576,6 +584,7 @@
             "lineNumber": 58,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "InferenceCostsTransparencyTourProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -635,6 +644,7 @@
             "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UseCloudConnectStatusHook",
             "trackAdoption": false,
             "isRequired": false
           }

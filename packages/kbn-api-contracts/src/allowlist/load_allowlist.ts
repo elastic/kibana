@@ -17,6 +17,8 @@ export interface AllowlistEntry {
   approvedBy: string;
   prUrl?: string;
   expiresAt?: string;
+  oasdiffId?: string;
+  source?: string;
 }
 
 export interface Allowlist {
@@ -50,9 +52,24 @@ export const loadAllowlist = (allowlistPath?: string): Allowlist => {
   };
 };
 
-export const isAllowlisted = (allowlist: Allowlist, path: string, method: string): boolean => {
+export const isAllowlisted = (
+  allowlist: Allowlist,
+  path: string,
+  method: string,
+  oasdiffId?: string,
+  source?: string
+): boolean => {
   const normalizedMethod = method.toLowerCase();
-  return allowlist.entries.some(
-    (entry) => entry.path === path && entry.method.toLowerCase() === normalizedMethod
-  );
+  return allowlist.entries.some((entry) => {
+    if (entry.path !== path || entry.method.toLowerCase() !== normalizedMethod) {
+      return false;
+    }
+    if (entry.oasdiffId && entry.oasdiffId !== oasdiffId) {
+      return false;
+    }
+    if (entry.source && entry.source !== source) {
+      return false;
+    }
+    return true;
+  });
 };

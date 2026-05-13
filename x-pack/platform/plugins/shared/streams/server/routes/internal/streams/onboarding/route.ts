@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
 import { OnboardingStep } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -21,7 +20,6 @@ import { handleTaskAction } from '../../../utils/task_helpers';
 import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
 
 const timestampFromString = z.string().transform((input) => new Date(input).getTime());
-const saveQueriesSchema = BooleanFromString.optional().default(true);
 
 export type OnboardingTaskResult = TaskResult<OnboardingResult>;
 
@@ -40,9 +38,6 @@ export const onboardingTaskRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ streamName: z.string() }),
-    query: z.object({
-      saveQueries: saveQueriesSchema,
-    }),
     body: taskActionSchema({
       from: timestampFromString,
       to: timestampFromString,
@@ -73,13 +68,10 @@ export const onboardingTaskRoute = createServerRoute({
 
     const {
       path: { streamName },
-      query,
       body,
     } = params;
 
-    const { saveQueries } = query;
-
-    const onboardingTaskId = getOnboardingTaskId(streamName, saveQueries);
+    const onboardingTaskId = getOnboardingTaskId(streamName);
 
     const actionParams =
       body.action === 'schedule'
@@ -93,7 +85,6 @@ export const onboardingTaskRoute = createServerRoute({
                 from: body.from,
                 to: body.to,
                 steps: body.steps,
-                saveQueries,
                 connectors: body.connectors,
               },
               request,
@@ -123,9 +114,6 @@ export const onboardingStatusRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ streamName: z.string() }),
-    query: z.object({
-      saveQueries: saveQueriesSchema,
-    }),
   }),
   handler: async ({ params, request, getScopedClients, server }): Promise<OnboardingTaskResult> => {
     const { licensing, uiSettingsClient, taskClient } = await getScopedClients({
@@ -135,9 +123,8 @@ export const onboardingStatusRoute = createServerRoute({
 
     const {
       path: { streamName },
-      query: { saveQueries },
     } = params;
-    const taskId = getOnboardingTaskId(streamName, saveQueries);
+    const taskId = getOnboardingTaskId(streamName);
 
     return taskClient.getStatus<OnboardingTaskParams, OnboardingResult>(taskId);
   },

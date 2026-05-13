@@ -6,11 +6,13 @@
  */
 
 import type { AgentBuilderEvent } from '../base/events';
+import type { ToolOrigin } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
 import type {
   ConversationInternalState,
   ConversationRound,
   BackgroundExecutionState,
+  TodoItem,
 } from './conversation';
 import type { PromptRequestSource, PromptRequest } from '../agents/prompts';
 import type { VersionedAttachment } from '../attachments';
@@ -47,6 +49,7 @@ export interface ToolCallEventData {
   tool_id: string;
   params: Record<string, unknown>;
   tool_call_group_id?: string;
+  tool_origin?: ToolOrigin;
 }
 
 export type ToolCallEvent = ChatEventBase<ChatEventType.toolCall, ToolCallEventData>;
@@ -348,6 +351,19 @@ export const isBackgroundAgentCompleteEvent = (
   event: AgentBuilderEvent<string, any>
 ): event is BackgroundAgentCompleteEvent => {
   return event.type === ChatEventType.backgroundAgentComplete;
+};
+
+export const TODOS_UPDATED_UI_EVENT = 'todos_updated' as const;
+
+export interface TodosUpdatedUiEventData {
+  todos: TodoItem[];
+}
+
+export const isTodosUpdatedEvent = (event: AgentBuilderEvent<string, any>) => {
+  return isToolUiEvent<typeof TODOS_UPDATED_UI_EVENT, TodosUpdatedUiEventData>(
+    event,
+    TODOS_UPDATED_UI_EVENT
+  );
 };
 
 /**

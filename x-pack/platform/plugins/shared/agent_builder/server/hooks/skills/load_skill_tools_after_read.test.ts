@@ -16,8 +16,8 @@ import type {
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { ToolType } from '@kbn/agent-builder-common';
-import type { AnalyticsService } from '../../telemetry';
+import { ToolOrigin, ToolType } from '@kbn/agent-builder-common';
+import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { createToolHandlerContextMock, type ToolHandlerContextMock } from '../../test_utils/runner';
 import { createLoadSkillToolsAfterRead } from './load_skill_tools_after_read';
 
@@ -25,6 +25,12 @@ const createAnalyticsServiceMock = (): jest.Mocked<
   Pick<AnalyticsService, 'reportSkillInvoked'>
 > => ({
   reportSkillInvoked: jest.fn(),
+});
+
+const createTrackingServiceMock = (): jest.Mocked<
+  Pick<TrackingService, 'trackSkillInvocation'>
+> => ({
+  trackSkillInvocation: jest.fn(),
 });
 
 const createSkillFileEntry = (
@@ -191,7 +197,7 @@ describe('createLoadSkillToolsAfterRead', () => {
       expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledWith(
         {
           type: ToolManagerToolType.executable,
-          tools: [convertedTool],
+          tools: [{ ...convertedTool, origin: ToolOrigin.inline }],
           logger: toolHandlerContext.logger,
         },
         { dynamic: true }
@@ -217,7 +223,7 @@ describe('createLoadSkillToolsAfterRead', () => {
       expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledWith(
         expect.objectContaining({
           type: ToolManagerToolType.executable,
-          tools: expect.arrayContaining([registryTool]),
+          tools: expect.arrayContaining([{ ...registryTool, origin: ToolOrigin.registry }]),
         }),
         { dynamic: true }
       );
@@ -245,7 +251,10 @@ describe('createLoadSkillToolsAfterRead', () => {
       expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledWith(
         {
           type: ToolManagerToolType.executable,
-          tools: [convertedInline, registryTool],
+          tools: [
+            { ...convertedInline, origin: ToolOrigin.inline },
+            { ...registryTool, origin: ToolOrigin.registry },
+          ],
           logger: toolHandlerContext.logger,
         },
         { dynamic: true }
@@ -343,12 +352,15 @@ describe('createLoadSkillToolsAfterRead', () => {
 
   describe('telemetry', () => {
     let analyticsService: jest.Mocked<Pick<AnalyticsService, 'reportSkillInvoked'>>;
+    let trackingService: jest.Mocked<Pick<TrackingService, 'trackSkillInvocation'>>;
     let loadSkillToolsAfterReadWithTelemetry: ReturnType<typeof createLoadSkillToolsAfterRead>;
 
     beforeEach(() => {
       analyticsService = createAnalyticsServiceMock();
+      trackingService = createTrackingServiceMock();
       loadSkillToolsAfterReadWithTelemetry = createLoadSkillToolsAfterRead({
         analyticsService: analyticsService as unknown as AnalyticsService,
+        trackingService: trackingService as unknown as TrackingService,
       });
     });
 
@@ -438,6 +450,52 @@ describe('createLoadSkillToolsAfterRead', () => {
           pluginId: 'plugin-uuid-1',
         })
       );
+      expect(trackingService.trackSkillInvocation).toHaveBeenCalledWith('plugin');
+    });
+
+    it('calls trackSkillInvocation with the correct origin when a skill is invoked', async () => {
+      const skill = createMockSkill({
+        id: 'security-skill',
+        readonly: true,
+        basePath: 'skills/security/foo',
+        getInlineTools: jest.fn().mockReturnValue([]),
+        getRegistryTools: jest.fn().mockReturnValue([]),
+      });
+
+      toolHandlerContext.filestore.read.mockResolvedValue(
+        createSkillFileEntry({ skillId: 'security-skill' })
+      );
+      toolHandlerContext.skills.get.mockResolvedValue(skill);
+      toolHandlerContext.runContext = {
+        runId: 'run-1',
+        stack: [
+          { type: 'agent', agentId: 'my_agent', conversationId: 'conv-1', executionId: 'exec-1' },
+        ],
+      };
+
+      const context = createHookContext({ toolHandlerContext });
+
+      await loadSkillToolsAfterReadWithTelemetry(context);
+
+      expect(trackingService.trackSkillInvocation).toHaveBeenCalledTimes(1);
+      expect(trackingService.trackSkillInvocation).toHaveBeenCalledWith('builtin');
+    });
+
+    it('does not call trackSkillInvocation when no tracking service is provided', async () => {
+      const loadSkillToolsAfterReadAnalyticsOnly = createLoadSkillToolsAfterRead({
+        analyticsService: analyticsService as unknown as AnalyticsService,
+      });
+
+      const skill = createMockSkill();
+
+      toolHandlerContext.filestore.read.mockResolvedValue(createSkillFileEntry());
+      toolHandlerContext.skills.get.mockResolvedValue(skill);
+
+      const context = createHookContext({ toolHandlerContext });
+
+      await loadSkillToolsAfterReadAnalyticsOnly(context);
+
+      expect(trackingService.trackSkillInvocation).not.toHaveBeenCalled();
     });
 
     it('does not report telemetry when no analytics service is provided', async () => {
@@ -470,6 +528,7 @@ describe('createLoadSkillToolsAfterRead', () => {
       );
       // Tools were still added even though telemetry failed.
       expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalled();
+      expect(trackingService.trackSkillInvocation).not.toHaveBeenCalled();
     });
   });
 

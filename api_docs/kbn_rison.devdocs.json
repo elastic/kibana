@@ -65,7 +65,15 @@
           }
         ],
         "returnComment": [
-          "The decoded JavaScript value as a {@link RisonValue }."
+          "The decoded JavaScript value as a ",
+          {
+            "pluginId": "@kbn/rison",
+            "scope": "common",
+            "docId": "kibKbnRisonPluginApi",
+            "section": "def-common.RisonValue",
+            "text": "RisonValue"
+          },
+          "."
         ],
         "initialIsOpen": false
       },
@@ -116,7 +124,15 @@
           }
         ],
         "returnComment": [
-          "The decoded array of {@link RisonValue } elements."
+          "The decoded array of ",
+          {
+            "pluginId": "@kbn/rison",
+            "scope": "common",
+            "docId": "kibKbnRisonPluginApi",
+            "section": "def-common.RisonValue",
+            "text": "RisonValue"
+          },
+          " elements."
         ],
         "initialIsOpen": false
       },
@@ -127,7 +143,15 @@
         "tags": [],
         "label": "encode",
         "description": [
-          "\nRISON-encode a JavaScript value, throwing if the value cannot be encoded.\nFor values of unknown encodability, prefer {@link encodeUnknown}.\n"
+          "\nRISON-encode a JavaScript value, throwing if the value cannot be encoded.\nFor values of unknown encodability, prefer ",
+          {
+            "pluginId": "@kbn/rison",
+            "scope": "common",
+            "docId": "kibKbnRisonPluginApi",
+            "section": "def-common.encodeUnknown",
+            "text": "encodeUnknown"
+          },
+          ".\n"
         ],
         "signature": [
           "(obj: any) => string"
@@ -213,7 +237,15 @@
         "tags": [],
         "label": "encodeUnknown",
         "description": [
-          "\nRISON-encode a JavaScript value, returning `undefined` when the value cannot\nbe represented in RISON (e.g. functions, symbols, or circular references).\nUse {@link encode} when the input is expected to always be encodable.\n"
+          "\nRISON-encode a JavaScript value, returning `undefined` when the value cannot\nbe represented in RISON (e.g. functions, symbols, or circular references).\nUse ",
+          {
+            "pluginId": "@kbn/rison",
+            "scope": "common",
+            "docId": "kibKbnRisonPluginApi",
+            "section": "def-common.encode",
+            "text": "encode"
+          },
+          " when the input is expected to always be encodable.\n"
         ],
         "signature": [
           "(obj: any) => string | undefined"
@@ -295,7 +327,15 @@
           }
         ],
         "returnComment": [
-          "The decoded {@link RisonValue }, or `null` if the string is not valid RISON."
+          "The decoded ",
+          {
+            "pluginId": "@kbn/rison",
+            "scope": "common",
+            "docId": "kibKbnRisonPluginApi",
+            "section": "def-common.RisonValue",
+            "text": "RisonValue"
+          },
+          ", or `null` if the string is not valid RISON."
         ],
         "initialIsOpen": false
       }

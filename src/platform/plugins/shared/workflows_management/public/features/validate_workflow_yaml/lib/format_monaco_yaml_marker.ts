@@ -10,9 +10,10 @@
 import type YAML from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { SCHEDULED_INTERVAL_ERROR, SCHEDULED_INTERVAL_PATTERN } from '@kbn/workflows';
+import { getPathAtOffset } from '@kbn/workflows/common/utils/yaml';
+import { enrichErrorMessage } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
-import { getPathAtOffset } from '../../../../common/lib/yaml';
-import { enrichErrorMessage } from '../../../../common/lib/zod';
+import { connectorParamsSchemaResolver } from '../../../../common/lib/connector_params_schema_resolver';
 
 /**
  * Formats Monaco YAML validation markers with enriched error messages.
@@ -68,6 +69,7 @@ export function formatMonacoYamlMarker(
       {
         schema: workflowYamlSchemaLoose,
         yamlDocument: yamlDocument ?? undefined,
+        connectorParamsSchemaResolver,
       }
     );
 

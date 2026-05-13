@@ -18,6 +18,7 @@ import {
   TAGS,
   API_KEY_PROVISIONING_TASK_SCHEDULE,
   GET_RULES_BATCH_SIZE,
+  RESCHEDULE_DELAY_MS,
 } from './constants';
 import { emptyState } from './uiam_api_key_provisioning_task_state';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
@@ -256,6 +257,27 @@ describe('UiamApiKeyProvisioningTask', () => {
       expect(removeIfExists).not.toHaveBeenCalled();
     });
 
+    it('does not call removeIfExists or log on the initial false emission', async () => {
+      const core = coreMock.createStart();
+      core.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(of(false));
+      const ensureScheduled = jest.fn().mockResolvedValue(undefined);
+      const removeIfExists = jest.fn().mockResolvedValue(undefined);
+      const taskManager = { ensureScheduled, removeIfExists } as never;
+
+      logger.info.mockClear();
+      logger.error.mockClear();
+
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
+      await task.start({ core, taskManager });
+
+      await new Promise<void>((resolve) => setImmediate(resolve));
+
+      expect(ensureScheduled).not.toHaveBeenCalled();
+      expect(removeIfExists).not.toHaveBeenCalled();
+      expect(logger.info).not.toHaveBeenCalled();
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
     it('calls removeIfExists and logs info when flag emits false after true', async () => {
       const flag$ = new Subject<boolean>();
       const core = coreMock.createStart();
@@ -393,7 +415,7 @@ describe('UiamApiKeyProvisioningTask', () => {
       expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled();
     });
 
-    it('returns runAt 1m from now when response.total indicates more batches to process', async () => {
+    it('returns runAt RESCHEDULE_DELAY_MS from now when response.total indicates more batches to process', async () => {
       const batchSize = GET_RULES_BATCH_SIZE;
       const rules = Array.from({ length: batchSize }, (_, i) =>
         createRuleSavedObject({
@@ -442,8 +464,8 @@ describe('UiamApiKeyProvisioningTask', () => {
       expect(result).toHaveProperty('state', { runs: 1 });
       expect(result).toHaveProperty('runAt');
       const runAt = (result as { runAt?: Date }).runAt!;
-      expect(runAt.getTime()).toBeGreaterThanOrEqual(beforeRun + 60000 - 1000);
-      expect(runAt.getTime()).toBeLessThanOrEqual(afterRun + 60000 + 1000);
+      expect(runAt.getTime()).toBeGreaterThanOrEqual(beforeRun + RESCHEDULE_DELAY_MS - 1000);
+      expect(runAt.getTime()).toBeLessThanOrEqual(afterRun + RESCHEDULE_DELAY_MS + 1000);
       expect(uiamConvert).toHaveBeenCalledTimes(1);
       expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(logger.info).toHaveBeenCalledWith(
@@ -1084,7 +1106,8 @@ describe('UiamApiKeyProvisioningTask', () => {
       expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled();
     });
 
-    it('throws when savedObjectsClient.bulkUpdate throws', async () => {
+    it('rethrows without invalidating minted UIAM keys when savedObjectsClient.bulkUpdate throws', async () => {
+      (bulkMarkApiKeysForInvalidation as jest.Mock).mockClear();
       const uiamConvert = jest.fn().mockResolvedValue({
         results: [createConvertSuccessResult({ key: 'uiam-key-1' })],
       });
@@ -1122,13 +1145,10 @@ describe('UiamApiKeyProvisioningTask', () => {
       );
       expect(uiamConvert).toHaveBeenCalledTimes(1);
       expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled();
-      const orphanedKey = Buffer.from('essu_0:uiam-key-1').toString('base64');
-      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
-      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
-        { apiKeys: [orphanedKey] },
-        logger,
-        savedObjectsClient
-      );
+      // Minted UIAM keys are deliberately NOT invalidated here: if ES already committed the
+      // write, invalidating would break rules. The pre-commit-throw case accepts a bounded
+      // leak of minted keys in exchange.
+      expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
     });
 
     it('calls bulkMarkApiKeysForInvalidation for rules that fail in bulkUpdate response', async () => {
@@ -1268,14 +1288,163 @@ describe('UiamApiKeyProvisioningTask', () => {
       );
       const bulkCreateCalls = savedObjectsClient.bulkCreate.mock.calls[0][0] as Array<{
         id: string;
-        attributes: { status: string };
+        attributes: { status: string; errorCode?: string };
       }>;
       const statuses = bulkCreateCalls.map((c) => ({ id: c.id, status: c.attributes.status }));
       expect(statuses).toContainEqual({ id: 'r1', status: UiamApiKeyProvisioningStatus.COMPLETED });
       expect(statuses).toContainEqual({ id: 'r2', status: UiamApiKeyProvisioningStatus.FAILED });
+      expect(bulkCreateCalls.find((c) => c.id === 'r2')?.attributes.errorCode).toBe('400');
       expect(logger.info).toHaveBeenCalledWith(
         'Wrote provisioning status: 2 total (0 skipped, 1 failed conversions, 1 completed, 0 failed updates).',
         { tags: TAGS }
+      );
+    });
+
+    it('warns per saved_objects[i].error returned by bulkCreate without rethrowing', async () => {
+      const uiamConvert = jest.fn().mockResolvedValue({
+        results: [
+          createConvertSuccessResult({ key: 'uiam-a', id: 'essu_0' }),
+          createConvertSuccessResult({ key: 'uiam-b', id: 'essu_1' }),
+        ],
+      } as ConvertUiamAPIKeysResponse);
+
+      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
+        createMockCore(uiamConvert);
+
+      mockPitFinderRules(encryptedSavedObjectsClient, [
+        createRuleSavedObject({
+          id: 'r1',
+          attributes: { apiKey: 'es-a', apiKeyCreatedByUser: false },
+          version: '1',
+        }),
+        createRuleSavedObject({
+          id: 'r2',
+          attributes: { apiKey: 'es-b', apiKeyCreatedByUser: false },
+          version: '1',
+        }),
+      ]);
+
+      savedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'r1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {},
+            references: [],
+            version: '1',
+            error: undefined,
+          },
+          {
+            id: 'r2',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {},
+            references: [],
+            version: '1',
+            error: undefined,
+          },
+        ],
+      });
+
+      savedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'r1',
+            type: 'uiam_api_keys_provisioning_status',
+            attributes: {},
+            references: [],
+            error: { error: 'Bad Request', message: 'boom', statusCode: 400 },
+          },
+          {
+            id: 'r2',
+            type: 'uiam_api_keys_provisioning_status',
+            attributes: {},
+            references: [],
+          },
+        ],
+      } as never);
+
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
+      const taskManager = { registerTaskDefinitions: jest.fn() };
+      task.register({
+        core: coreSetup as CoreSetup<AlertingPluginsStart>,
+        taskManager: taskManager as never,
+      });
+
+      const def =
+        taskManager.registerTaskDefinitions.mock.calls[0][0][API_KEY_PROVISIONING_TASK_TYPE];
+      const runner = def.createTaskRunner({
+        taskInstance: createTaskInstance({ runs: 0 }),
+      });
+      const result = await runner.run();
+
+      expect(result).toEqual({ state: { runs: 1 } });
+      const warnCalls = (logger.warn as jest.Mock).mock.calls.filter(([msg]) =>
+        String(msg).startsWith('Failed to persist UIAM provisioning status')
+      );
+      expect(warnCalls).toHaveLength(1);
+      expect(warnCalls[0][0]).toEqual(expect.stringContaining('r1'));
+      expect(warnCalls[0][0]).toEqual(expect.stringContaining('boom'));
+      expect(warnCalls[0][1]).toEqual({ tags: TAGS });
+      expect(warnCalls[0][0]).not.toEqual(expect.stringContaining('r2'));
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('Wrote provisioning status:'),
+        { tags: TAGS }
+      );
+    });
+
+    it('tags the whole-call bulkCreate error log with status-write-failed and swallows the throw', async () => {
+      const uiamConvert = jest.fn().mockResolvedValue({
+        results: [createConvertSuccessResult({ key: 'uiam-1' })],
+      } as ConvertUiamAPIKeysResponse);
+
+      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
+        createMockCore(uiamConvert);
+
+      mockPitFinderRules(encryptedSavedObjectsClient, [
+        createRuleSavedObject({
+          id: 'r1',
+          attributes: { apiKey: 'es-1', apiKeyCreatedByUser: false },
+          version: '1',
+        }),
+      ]);
+
+      savedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'r1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {},
+            references: [],
+            version: '1',
+            error: undefined,
+          },
+        ],
+      });
+
+      savedObjectsClient.bulkCreate.mockRejectedValue(new Error('transport closed'));
+
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
+      const taskManager = { registerTaskDefinitions: jest.fn() };
+      task.register({
+        core: coreSetup as CoreSetup<AlertingPluginsStart>,
+        taskManager: taskManager as never,
+      });
+
+      const def =
+        taskManager.registerTaskDefinitions.mock.calls[0][0][API_KEY_PROVISIONING_TASK_TYPE];
+      const runner = def.createTaskRunner({
+        taskInstance: createTaskInstance({ runs: 0 }),
+      });
+      const result = await runner.run();
+      expect(result).toEqual({ state: { runs: 1 } });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'Error writing provisioning status: transport closed',
+        expect.objectContaining({
+          error: expect.objectContaining({
+            tags: expect.arrayContaining([...TAGS, 'status-write-failed']),
+          }),
+        })
       );
     });
 

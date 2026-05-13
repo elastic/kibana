@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   ExceptionListId,
@@ -30,24 +30,26 @@ import {
   ExceptionList,
 } from '../model/exception_list_common.gen';
 
+export const UpdateExceptionListRequestBody = lazySchema(() =>
+  z.object({
+    id: ExceptionListId.optional(),
+    list_id: ExceptionListHumanId.optional(),
+    name: ExceptionListName,
+    description: ExceptionListDescription,
+    type: ExceptionListType,
+    namespace_type: ExceptionNamespaceType.optional().default('single'),
+    os_types: ExceptionListOsTypeArray.optional().default([]),
+    tags: ExceptionListTags.optional(),
+    meta: ExceptionListMeta.optional(),
+    version: ExceptionListVersion.optional(),
+    /**
+     * The version id, normally returned by the API when the item was retrieved. Use it ensure updates are done against the latest version.
+     */
+    _version: z.string().optional(),
+  })
+);
 export type UpdateExceptionListRequestBody = z.infer<typeof UpdateExceptionListRequestBody>;
-export const UpdateExceptionListRequestBody = z.object({
-  id: ExceptionListId.optional(),
-  list_id: ExceptionListHumanId.optional(),
-  name: ExceptionListName,
-  description: ExceptionListDescription,
-  type: ExceptionListType,
-  namespace_type: ExceptionNamespaceType.optional().default('single'),
-  os_types: ExceptionListOsTypeArray.optional().default([]),
-  tags: ExceptionListTags.optional(),
-  meta: ExceptionListMeta.optional(),
-  version: ExceptionListVersion.optional(),
-  /**
-   * The version id, normally returned by the API when the item was retrieved. Use it ensure updates are done against the latest version.
-   */
-  _version: z.string().optional(),
-});
 export type UpdateExceptionListRequestBodyInput = z.input<typeof UpdateExceptionListRequestBody>;
 
+export const UpdateExceptionListResponse = lazySchema(() => ExceptionList);
 export type UpdateExceptionListResponse = z.infer<typeof UpdateExceptionListResponse>;
-export const UpdateExceptionListResponse = ExceptionList;

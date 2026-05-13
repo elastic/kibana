@@ -13,7 +13,7 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { PLUGIN_ID, PLUGIN_NAME, EVALS_API_PRIVILEGES, EVALS_UI_PRIVILEGES } from '../common';
 import type { EvalsConfig } from './config';
 import {
   EVALS_REMOTE_KIBANA_CONFIG_SAVED_OBJECT_TYPE,
@@ -35,11 +35,13 @@ export class EvalsPlugin
 {
   private readonly logger: Logger;
   private readonly config: EvalsConfig;
+  private readonly isServerless: boolean;
   private datasetService?: DatasetService;
 
   constructor(context: PluginInitializerContext<EvalsConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
   }
 
   setup(
@@ -52,7 +54,7 @@ export class EvalsPlugin
     }
 
     this.logger.info('Setting up Evals plugin');
-    this.datasetService = new DatasetService(this.logger);
+    this.datasetService = new DatasetService(this.logger, this.isServerless);
 
     coreSetup.savedObjects.registerType(evalsRemoteKibanaConfigSavedObjectType);
     encryptedSavedObjects.registerType({
@@ -78,29 +80,29 @@ export class EvalsPlugin
       id: PLUGIN_ID,
       name: PLUGIN_NAME,
       order: 9000,
-      category: DEFAULT_APP_CATEGORIES.management,
+      category: DEFAULT_APP_CATEGORIES.kibana,
       app: ['kibana', PLUGIN_ID],
       management: { ai: [PLUGIN_ID] },
       privileges: {
         all: {
           app: ['kibana', PLUGIN_ID],
-          api: [PLUGIN_ID],
+          api: [EVALS_API_PRIVILEGES.read, EVALS_API_PRIVILEGES.manage],
           management: { ai: [PLUGIN_ID] },
           savedObject: {
             all: [],
             read: [],
           },
-          ui: ['show'],
+          ui: [EVALS_UI_PRIVILEGES.show, EVALS_UI_PRIVILEGES.manage],
         },
         read: {
           app: ['kibana', PLUGIN_ID],
-          api: [PLUGIN_ID],
+          api: [EVALS_API_PRIVILEGES.read],
           management: { ai: [PLUGIN_ID] },
           savedObject: {
             all: [],
             read: [],
           },
-          ui: ['show'],
+          ui: [EVALS_UI_PRIVILEGES.show],
         },
       },
     });

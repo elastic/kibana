@@ -9,6 +9,8 @@
 
 import type { Observable } from 'rxjs';
 
+import type { SupportedLocaleId } from '@kbn/i18n';
+
 /**
  * Avatar stored in user profile.
  */
@@ -32,11 +34,20 @@ export type DarkModeValue = 'system' | 'dark' | 'light' | 'space_default';
 export type ContrastModeValue = 'system' | 'standard' | 'high';
 
 /**
+ * Value stored in the user profile for the display language.
+ *
+ * An empty string `""` means "no explicit choice" (fall back to the server-configured
+ * locale at render time). A `SupportedLocaleId` means the user has picked that locale.
+ */
+export type LocaleValue = SupportedLocaleId | '';
+
+/**
  * User settings stored in the data object of the User Profile
  */
 export interface UserSettingsData {
   darkMode?: DarkModeValue;
   contrastMode?: ContrastModeValue;
+  locale?: LocaleValue;
   solutionNavOptOut?: boolean;
   /**
    * Whether the Agent Builder announcement modal was dismissed for the current user (all spaces).

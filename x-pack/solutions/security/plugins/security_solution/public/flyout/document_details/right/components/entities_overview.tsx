@@ -36,7 +36,7 @@ export const EntitiesOverview: React.FC = () => {
     dataAsNestedObject
   ) as IdentityFields;
 
-  const hostEntitId = euidApi?.euid.getEuidFromObject('host', dataAsNestedObject);
+  const hostEntityId = euidApi?.euid.getEuidFromObject('host', dataAsNestedObject);
 
   const userEntityIdentifiers = euidApi?.euid.getEntityIdentifiersFromDocument(
     'user',
@@ -44,7 +44,7 @@ export const EntitiesOverview: React.FC = () => {
   ) as IdentityFields;
   const userEntityId = euidApi?.euid.getEuidFromObject('user', dataAsNestedObject);
 
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   const userEntityFromStore = useEntityFromStore({
     entityId: userEntityId,
@@ -53,7 +53,7 @@ export const EntitiesOverview: React.FC = () => {
     skip: !entityStoreV2Enabled,
   });
   const hostEntityFromStore = useEntityFromStore({
-    entityId: hostEntitId,
+    entityId: hostEntityId,
     identityFields: hostEntityIdentifiers ?? undefined,
     entityType: 'host',
     skip: !entityStoreV2Enabled,
@@ -61,12 +61,11 @@ export const EntitiesOverview: React.FC = () => {
 
   const showUserOverview =
     (!entityStoreV2Enabled && userName != null) ||
-    (entityStoreV2Enabled && userEntityFromStore.entityRecord != null);
+    (entityStoreV2Enabled && (userEntityFromStore.entityRecord != null || userName != null));
   const showHostOverview =
     (!entityStoreV2Enabled && hostName != null) ||
-    (entityStoreV2Enabled && hostEntityFromStore.entityRecord != null);
-  const hasAnyEntity =
-    (showUserOverview && !!userEntityIdentifiers) || (showHostOverview && !!hostEntityIdentifiers);
+    (entityStoreV2Enabled && (hostEntityFromStore.entityRecord != null || hostName != null));
+  const hasAnyEntity = showUserOverview || (showHostOverview && !!hostEntityIdentifiers);
 
   const navigateToLeftPanel = useNavigateToLeftPanel({
     tab: LeftPanelInsightsTab,
@@ -103,7 +102,7 @@ export const EntitiesOverview: React.FC = () => {
       >
         {hasAnyEntity ? (
           <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-            {showUserOverview && userEntityIdentifiers && (
+            {showUserOverview && (
               <>
                 <EuiFlexItem>
                   <UserEntityOverview

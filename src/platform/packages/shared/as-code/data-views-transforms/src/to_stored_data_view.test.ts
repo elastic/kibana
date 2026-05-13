@@ -30,14 +30,13 @@ describe('toStoredDataView', () => {
       type: AS_CODE_DATA_VIEW_SPEC_TYPE,
       index_pattern: 'my-index-*',
       time_field: '@timestamp',
-      runtime_fields: [
-        {
-          name: 'rt',
+      field_settings: {
+        rt: {
           type: 'keyword',
           script: 'emit(doc["id"].value)',
           format: { type: 'string' },
         },
-      ],
+      },
     };
     const result = toStoredDataView(dataView);
     expect(result).toEqual({
@@ -68,6 +67,59 @@ describe('toStoredDataView', () => {
     expect(result).toEqual({
       title: 'logs-*',
       timeFieldName: '@timestamp',
+    });
+  });
+
+  it('writes indexed field_settings to fieldFormats and fieldAttrs', () => {
+    const dataView: AsCodeDataViewSpec = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      field_settings: {
+        bytes_field: {
+          format: { type: 'bytes', params: { pattern: '0,0.[000]b' } },
+        },
+        host_name: {
+          custom_label: 'Host',
+          custom_description: 'Hostname',
+        },
+      },
+    };
+
+    const result = toStoredDataView(dataView);
+    expect(result).toEqual({
+      title: 'logs-*',
+      fieldFormats: {
+        bytes_field: { id: 'bytes', params: { pattern: '0,0.[000]b' } },
+      },
+      fieldAttrs: {
+        host_name: { customLabel: 'Host', customDescription: 'Hostname' },
+      },
+    });
+  });
+
+  it('stores a single field_settings entry per field name', () => {
+    const dataView: AsCodeDataViewSpec = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      field_settings: {
+        rt: { type: 'keyword', format: { type: 'string' } },
+      },
+    };
+
+    const result = toStoredDataView(dataView);
+    expect(result).toEqual({
+      title: 'logs-*',
+      runtimeFieldMap: {
+        rt: {
+          type: 'keyword',
+        },
+      },
+      fieldFormats: {
+        rt: { id: 'string', params: undefined },
+      },
+      fieldAttrs: {
+        rt: {},
+      },
     });
   });
 });
