@@ -13,14 +13,28 @@ import { expect } from '@kbn/scout/ui';
 import { DASHBOARD_DEFAULT_INDEX_TITLE, DASHBOARD_SAVED_SEARCH_ARCHIVE } from '../constants';
 
 const getExpected = (config: ScoutTestConfig) => {
-  if (config.projectType === 'es' || config.projectType === 'security') {
+  if (config.projectType === 'es') {
     return {
       groups: [
         'visualizationsGroup',
         'controlsGroup',
         'annotation-and-navigationGroup',
-        'mlGroup',
         'logs-aiopsGroup',
+        'mlGroup',
+        'legacyGroup',
+      ],
+      count: 17,
+    };
+  }
+
+  if (config.projectType === 'security') {
+    return {
+      groups: [
+        'visualizationsGroup',
+        'controlsGroup',
+        'annotation-and-navigationGroup',
+        'logs-aiopsGroup',
+        'mlGroup',
         'legacyGroup',
       ],
       count: 20,
@@ -32,8 +46,8 @@ const getExpected = (config: ScoutTestConfig) => {
       'visualizationsGroup',
       'controlsGroup',
       'annotation-and-navigationGroup',
-      'mlGroup',
       'logs-aiopsGroup',
+      'mlGroup',
       'observabilityGroup',
       'legacyGroup',
     ],
@@ -47,8 +61,7 @@ const getExpected = (config: ScoutTestConfig) => {
  * This test exists to ensures additions to menu
  * notify our team and can be reviewed by design.
  */
-// Failing: See https://github.com/elastic/kibana/issues/268101
-spaceTest.describe.skip(
+spaceTest.describe(
   'Dashboard add panel flyout',
   {
     tag: [
@@ -80,7 +93,7 @@ spaceTest.describe.skip(
       await scoutSpace.savedObjects.cleanStandardList();
     });
 
-    spaceTest('renders add panel flyout', async ({ pageObjects }) => {
+    spaceTest('renders add panel flyout', async ({ pageObjects, log }) => {
       await spaceTest.step('open new dashboard and add panel flyout', async () => {
         await pageObjects.dashboard.openNewDashboard();
         await pageObjects.dashboard.openAddPanelFlyout();
@@ -92,7 +105,9 @@ spaceTest.describe.skip(
       });
 
       await spaceTest.step('verify total panel count', async () => {
-        expect(await pageObjects.dashboard.getAddPanelFlyoutPanelTypesCount()).toBe(expectedCount);
+        const addPanelActions = await pageObjects.dashboard.getAddPanelFlyoutActions();
+        log.info(`Add panel actions: ${addPanelActions.join(',')}`);
+        expect(addPanelActions).toHaveLength(expectedCount);
       });
     });
   }
