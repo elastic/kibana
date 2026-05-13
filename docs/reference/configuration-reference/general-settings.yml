@@ -240,14 +240,25 @@ groups:
           self: ga
         note: "The `frame-ancestors` directive can also be configured by using [`server.securityResponseHeaders.disableEmbedding`](#server-securityresponseheaders-disableembedding). In that case, that takes precedence and any values in `csp.frame_ancestors` are ignored."
 
+      - setting: csp.form_action
+        description: |
+          Add sources for the [Content Security Policy `form-action` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/form-action).
+        datatype: string
+        default: "'self'"
+        applies_to:
+          - "stack: ga 9.5"
+          - "ech: ga"
+          - "self: ga"
+
       - setting: csp.report_only.form_action
         description: |
           Add sources for the [Content Security Policy `form-action` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/form-action) in reporting mode.
         datatype: string
         applies_to:
-          stack: ga
-          ech: unavailable
-          self: ga
+          - "stack: deprecated 9.5"
+          - "ech: ga"
+          - "self: ga"
+        deprecation_details: "Use `csp.form_action` instead."
 
       - setting: csp.report_only.object_src
         description: |
