@@ -98,9 +98,9 @@ export const getStatsOverviewEmbeddableFactory = (
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           filters$.pipe(
-                  skip(1),
-                  map(() => undefined)
-                ),
+            skip(1),
+            map(() => undefined)
+          ),
           drilldownsManager.anyStateChange$
         ),
         getComparators: () => ({

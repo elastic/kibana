@@ -29,7 +29,7 @@ export const createMockFilesStart = (): DeeplyMockedKeys<FilesPublicStart> => {
   return {
     filesClientFactory: createMockFilesClientFactory(),
     getFileKindDefinition: jest.fn(),
-    getAllFindKindDefinitions: jest.fn()
+    getAllFindKindDefinitions: jest.fn(),
   };
 };
 

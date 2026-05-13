@@ -78,11 +78,26 @@ export const getPatternAnalysisEmbeddableFactory = (
         anyStateChange$: merge(
           timeRangeManager.anyStateChange$,
           titleManager.anyStateChange$,
-          patternAnalysisControlsApi.dataViewId.pipe(skip(1), map(() => undefined)),
-          patternAnalysisControlsApi.fieldName.pipe(skip(1), map(() => undefined)),
-          patternAnalysisControlsApi.minimumTimeRangeOption.pipe(skip(1), map(() => undefined)),
-          patternAnalysisControlsApi.randomSamplerMode.pipe(skip(1), map(() => undefined)),
-          patternAnalysisControlsApi.randomSamplerProbability.pipe(skip(1), map(() => undefined))
+          patternAnalysisControlsApi.dataViewId.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          patternAnalysisControlsApi.fieldName.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          patternAnalysisControlsApi.minimumTimeRangeOption.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          patternAnalysisControlsApi.randomSamplerMode.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          patternAnalysisControlsApi.randomSamplerProbability.pipe(
+            skip(1),
+            map(() => undefined)
+          )
         ),
         getComparators: () => ({
           ...timeRangeComparators,

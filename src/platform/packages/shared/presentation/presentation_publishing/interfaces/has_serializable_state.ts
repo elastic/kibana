@@ -16,7 +16,7 @@ export interface HasSerializableState<SerializedState extends object = object> {
    * Must not emit on subscribe.
    */
   anyStateChange$: Observable<void>;
-  
+
   /**
    * Serializes all state into a format that can be saved into
    * some external store. The opposite of `deserialize` in the {@link ReactEmbeddableFactory}

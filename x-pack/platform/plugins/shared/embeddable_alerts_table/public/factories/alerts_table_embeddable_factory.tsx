@@ -63,7 +63,10 @@ export const getAlertsTableEmbeddableFactory = (
       anyStateChange$: merge(
         timeRangeManager.anyStateChange$,
         titleManager.anyStateChange$,
-        tableConfig$.pipe(skip(1), map(() => undefined))
+        tableConfig$.pipe(
+          skip(1),
+          map(() => undefined)
+        )
       ),
       serializeState,
       getComparators: () => ({

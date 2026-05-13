@@ -89,21 +89,22 @@ export const initializeAnomalyChartsControls = (
     } as AnomalyChartsDataLoadingApi,
     anyStateChange$: merge(
       jobIds$.pipe(
-              skip(1),
-              map(() => undefined)
-            ), 
+        skip(1),
+        map(() => undefined)
+      ),
       maxSeriesToPlot$.pipe(
-              skip(1),
-              map(() => undefined)
-            ), 
+        skip(1),
+        map(() => undefined)
+      ),
       severityThreshold$.pipe(
         skip(1),
         map(() => undefined)
-      ), 
+      ),
       selectedEntities$.pipe(
         skip(1),
         map(() => undefined)
-      )),
+      )
+    ),
     getLatestState,
     reinitializeState: (lastSavedState: AnomalyChartsEmbeddableState) => {
       jobIds$.next(lastSavedState.jobIds);

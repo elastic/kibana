@@ -34,7 +34,8 @@ export const initializeUnsavedChanges = <StateType extends object = object>({
   getComparators: () => StateComparators<StateType>;
   defaultState?: Partial<StateType>;
   onReset?: (lastSavedPanelState?: StateType) => MaybePromise<void>;
-}): PublishesUnsavedChanges & Pick<HasSerializableState<StateType>, 'anyStateChange$' | 'applySerializedState'> => {
+}): PublishesUnsavedChanges &
+  Pick<HasSerializableState<StateType>, 'anyStateChange$' | 'applySerializedState'> => {
   const applySerializedState = async (state?: StateType) => {
     await onReset?.(state);
   };

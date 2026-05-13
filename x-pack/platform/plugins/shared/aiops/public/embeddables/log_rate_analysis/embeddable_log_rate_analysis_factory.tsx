@@ -79,7 +79,10 @@ export const getLogRateAnalysisEmbeddableFactory = (
         anyStateChange$: merge(
           timeRangeManager.anyStateChange$,
           titleManager.anyStateChange$,
-          logRateAnalysisControlsApi.dataViewId.pipe(skip(1), map(() => undefined))
+          logRateAnalysisControlsApi.dataViewId.pipe(
+            skip(1),
+            map(() => undefined)
+          )
         ),
         getComparators: () => ({
           dataViewId: 'referenceEquality',

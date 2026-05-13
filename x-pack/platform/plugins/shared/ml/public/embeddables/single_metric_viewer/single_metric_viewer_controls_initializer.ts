@@ -81,17 +81,17 @@ export const initializeSingleMetricViewerControls = (
     },
     anyStateChange$: merge(
       jobIds.pipe(
-              skip(1),
-              map(() => undefined)
-            ),
+        skip(1),
+        map(() => undefined)
+      ),
       forecastId.pipe(
-              skip(1),
-              map(() => undefined)
-            ),
+        skip(1),
+        map(() => undefined)
+      ),
       selectedDetectorIndex.pipe(
-              skip(1),
-              map(() => undefined)
-            ),
+        skip(1),
+        map(() => undefined)
+      ),
       selectedEntities.pipe(
         skip(1),
         map(() => undefined)

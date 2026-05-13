@@ -87,15 +87,16 @@ export const getMonitorsEmbeddableFactory = (
         uuid,
         serializeState,
         anyStateChange$: merge(
-          titleManager.anyStateChange$, 
+          titleManager.anyStateChange$,
           filters$.pipe(
-                  skip(1),
-                  map(() => undefined)
-                ), 
+            skip(1),
+            map(() => undefined)
+          ),
           view$.pipe(
-                  skip(1),
-                  map(() => undefined)
-                )),
+            skip(1),
+            map(() => undefined)
+          )
+        ),
         getComparators: () => ({
           ...titleComparators,
           filters: 'referenceEquality',

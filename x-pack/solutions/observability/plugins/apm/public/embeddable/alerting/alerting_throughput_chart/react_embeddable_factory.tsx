@@ -62,45 +62,45 @@ export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableD
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           serviceName$.pipe(
-                  skip(1),
-                  map(() => undefined)
-                ),
+            skip(1),
+            map(() => undefined)
+          ),
           transactionType$.pipe(
-                  skip(1),
-                  map(() => undefined)
-                ),
+            skip(1),
+            map(() => undefined)
+          ),
           transactionName$.pipe(
-                  skip(1),
-                  map(() => undefined)
-                ),
+            skip(1),
+            map(() => undefined)
+          ),
           environment$.pipe(
-                  skip(1),
-                  map(() => undefined)
-                ),
+            skip(1),
+            map(() => undefined)
+          ),
           rangeFrom$.pipe(
-                  skip(1),
-                  map(() => undefined)
-                ),
+            skip(1),
+            map(() => undefined)
+          ),
           rangeTo$.pipe(
-                  skip(1),
-                  map(() => undefined)
-                ),
+            skip(1),
+            map(() => undefined)
+          ),
           rule$.pipe(
-                  skip(1),
-                  map(() => undefined)
-                ),
+            skip(1),
+            map(() => undefined)
+          ),
           alert$.pipe(
-                  skip(1),
-                  map(() => undefined)
-                ),
+            skip(1),
+            map(() => undefined)
+          ),
           kuery$.pipe(
-                  skip(1),
-                  map(() => undefined)
-                ),
+            skip(1),
+            map(() => undefined)
+          ),
           filters$.pipe(
-                  skip(1),
-                  map(() => undefined)
-                )
+            skip(1),
+            map(() => undefined)
+          )
         ),
         getComparators: () => ({
           ...titleComparators,

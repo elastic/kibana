@@ -78,21 +78,22 @@ export const initializeSwimLaneControls = (
     } as unknown as AnomalySwimLaneComponentApi,
     anyStateChange$: merge(
       jobIds.pipe(
-              skip(1),
-              map(() => undefined)
-            ),
-       swimlaneType.pipe(
-               skip(1),
-               map(() => undefined)
-             ),
-        viewBy.pipe(
-                skip(1),
-                map(() => undefined)
-              ),
-         perPage.pipe(
-                 skip(1),
-                 map(() => undefined)
-               )),
+        skip(1),
+        map(() => undefined)
+      ),
+      swimlaneType.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      viewBy.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      perPage.pipe(
+        skip(1),
+        map(() => undefined)
+      )
+    ),
     getLatestState,
     reinitializeState: (lastSavedState: AnomalySwimLaneControlsState) => {
       jobIds.next(lastSavedState.jobIds);

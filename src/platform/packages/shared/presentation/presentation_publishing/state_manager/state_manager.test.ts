@@ -110,7 +110,7 @@ describe('initializeStateManager', () => {
           expect(count).toBe(5);
         } catch (error) {
           // title and count assertions fail when
-          //anyStateChange$ emits on subscribe
+          // anyStateChange$ emits on subscribe
           done(error);
           return;
         }

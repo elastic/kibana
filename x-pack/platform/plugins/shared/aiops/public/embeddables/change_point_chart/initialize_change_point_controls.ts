@@ -69,13 +69,34 @@ export const initializeChangePointControls = (initialState: ChangePointEmbeddabl
       updateUserInput,
     } as unknown as ChangePointComponentApi,
     anyStateChange$: merge(
-      viewType.pipe(skip(1), map(() => undefined)),
-      dataViewId.pipe(skip(1), map(() => undefined)),
-      fn.pipe(skip(1), map(() => undefined)),
-      metricField.pipe(skip(1), map(() => undefined)),
-      splitField.pipe(skip(1), map(() => undefined)),
-      partitions.pipe(skip(1), map(() => undefined)),
-      maxSeriesToPlot.pipe(skip(1), map(() => undefined))
+      viewType.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      dataViewId.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      fn.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      metricField.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      splitField.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      partitions.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      maxSeriesToPlot.pipe(
+        skip(1),
+        map(() => undefined)
+      )
     ),
     getLatestState,
     reinitializeState: (lastSavedState: ChangePointEmbeddableCustomState) => {

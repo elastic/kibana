@@ -124,9 +124,9 @@ export const getOverviewEmbeddableFactory = ({
         drilldownsManager.anyStateChange$,
         titleManager.anyStateChange$,
         overviewMode$.pipe(
-                skip(1),
-                map(() => undefined)
-              ),
+          skip(1),
+          map(() => undefined)
+        ),
         singleSloManager.anyStateChange$,
         groupSloManager.anyStateChange$
       ),
