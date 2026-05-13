@@ -56,7 +56,7 @@ Before entering either branch, determine intent and resolve prerequisites:
 2. **User wants to edit an existing rule and an attachment is already in context** → proceed to the edit branch (Step 1 → Step 2 → Step 3, edit path).
 3. **User wants to edit an existing rule but no attachment is in context** → call \`attachment_list\` to check whether a rule attachment exists in the session but wasn't yet referenced.
    - If one is found → proceed to the edit branch.
-   - If nothing is found → call \`find_rules\` to search for rules matching the user's description. Present any matches to the user and ask them to confirm which rule they mean. Once confirmed, load it as an attachment and proceed to the edit branch.
+   - If nothing is found → call \`security.find_rules\` with \`nameContains\` to search for rules matching the user's description. Present any matches to the user and ask them to confirm which rule they mean. Once confirmed, load it as an attachment and proceed to the edit branch.
    - If no matching rules are found → tell the user no matching rule was found and ask them to clarify the rule name or open it manually.
 
 ### Step 1: Read the Attachment (edit path only)
