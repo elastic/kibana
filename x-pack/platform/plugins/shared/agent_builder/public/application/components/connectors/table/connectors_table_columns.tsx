@@ -17,6 +17,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { useConnectorOAuthConnect, OAuthRedirectMode } from '@kbn/response-ops-oauth-hooks';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import React, { useMemo } from 'react';
 import type { ConnectorItem } from '../../../../../common/http_api/tools';
 import { OAUTH_STATUS } from '../../../../../common/http_api/tools';
@@ -64,6 +65,9 @@ const NotAuthorizedBadge: React.FC<{ connector: ConnectorItem }> = ({ connector 
         onClick={() => connect()}
         onClickAriaLabel={labels.connectors.statusNotAuthorizedTooltip}
         data-test-subj={`agentBuilderConnectorsNotAuthorizedBadge-${connector.id}`}
+        data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS_TABLE}
+        data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageConnectors.OAUTH_CONNECT_BADGE}
+        data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.CONNECTOR}
         css={({ euiTheme }) => ({
           padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
           cursor: 'pointer',
@@ -106,6 +110,9 @@ export const useConnectorsTableColumns = (): Array<EuiBasicTableColumn<Connector
                   data-test-subj={`agentBuilderConnectorsTableNameLink-${connector.id}`}
                   onClick={() => editConnector(connector)}
                   disabled={disabled}
+                  data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS_TABLE}
+                  data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageConnectors.TABLE_ROW_EDIT}
+                  data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.CONNECTOR}
                 >
                   {name}
                 </EuiLink>

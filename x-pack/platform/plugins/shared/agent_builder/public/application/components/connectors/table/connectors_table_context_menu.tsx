@@ -14,6 +14,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useConnectorOAuthDisconnect } from '@kbn/response-ops-oauth-hooks';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import React, { useState } from 'react';
 import type { ConnectorItem } from '../../../../../common/http_api/tools';
 import { OAUTH_STATUS } from '../../../../../common/http_api/tools';
@@ -101,6 +102,9 @@ export const ConnectorContextMenu = ({ connector }: ConnectorContextMenuProps) =
             iconType="boxesVertical"
             onClick={() => setIsOpen((openState) => !openState)}
             aria-label={labels.connectors.connectorContextMenuButtonLabel}
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS_TABLE}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageConnectors.TABLE_CONTEXT_OPEN}
+            data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.CONNECTOR}
           />
         }
         isOpen={isOpen}
@@ -115,6 +119,9 @@ export const ConnectorContextMenu = ({ connector }: ConnectorContextMenuProps) =
               editConnector(connector);
               closeMenu();
             }}
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS_TABLE}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageConnectors.TABLE_CONTEXT_EDIT}
+            data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.CONNECTOR}
           >
             {labels.connectors.editConnectorButtonLabel}
           </EuiContextMenuItem>
@@ -127,6 +134,11 @@ export const ConnectorContextMenu = ({ connector }: ConnectorContextMenuProps) =
                 setShowDisconnectConfirm(true);
                 closeMenu();
               }}
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS_TABLE}
+              data-ebt-action={
+                AGENT_BUILDER_UI_EBT.action.manageConnectors.TABLE_CONTEXT_DISCONNECT
+              }
+              data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.CONNECTOR}
             >
               {labels.connectors.disconnectButtonLabel}
             </EuiContextMenuItem>
@@ -143,6 +155,9 @@ export const ConnectorContextMenu = ({ connector }: ConnectorContextMenuProps) =
                 deleteConnector(connector);
                 closeMenu();
               }}
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS_TABLE}
+              data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageConnectors.TABLE_CONTEXT_DELETE}
+              data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.CONNECTOR}
             >
               {labels.connectors.deleteConnectorButtonLabel}
             </EuiContextMenuItem>

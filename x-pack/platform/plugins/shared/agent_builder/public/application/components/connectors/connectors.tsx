@@ -35,8 +35,8 @@ export const AgentBuilderConnectors = () => {
                   fill
                   iconType="plusInCircle"
                   onClick={openCreateFlyout}
-                  data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_GLOBAL}
-                  data-ebt-action={AGENT_BUILDER_UI_EBT.action.layer2Crud.ENTITY_CREATE_NEW}
+                  data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS}
+                  data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageConnectors.CREATE_CONNECTOR}
                   data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.CONNECTOR}
                 >
                   <EuiText size="s">{labels.connectors.createButton}</EuiText>

@@ -12,6 +12,7 @@ import {
   EuiSkeletonText,
   EuiText,
 } from '@elastic/eui';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
@@ -104,6 +105,9 @@ export const ConnectorsTableHeader = ({
                   size="xs"
                   color="danger"
                   onClick={deleteSelection}
+                  data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS_TABLE}
+                  data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageConnectors.TABLE_BULK_DELETE}
+                  data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.CONNECTOR}
                   css={({ euiTheme }) => ({
                     fontWeight: euiTheme.font.weight.semiBold,
                   })}
@@ -118,6 +122,9 @@ export const ConnectorsTableHeader = ({
                 iconSize="m"
                 size="xs"
                 onClick={selectAll}
+                data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS_TABLE}
+                data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageConnectors.TABLE_SELECT_ALL}
+                data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.CONNECTOR}
                 css={({ euiTheme }) => ({
                   fontWeight: euiTheme.font.weight.semiBold,
                 })}
@@ -131,6 +138,9 @@ export const ConnectorsTableHeader = ({
                 iconSize="m"
                 size="xs"
                 onClick={clearSelection}
+                data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS_TABLE}
+                data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageConnectors.TABLE_CLEAR_SELECTION}
+                data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.CONNECTOR}
                 css={({ euiTheme }) => ({
                   fontWeight: euiTheme.font.weight.semiBold,
                 })}

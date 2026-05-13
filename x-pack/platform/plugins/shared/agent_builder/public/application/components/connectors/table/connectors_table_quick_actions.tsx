@@ -6,6 +6,7 @@
  */
 
 import { EuiButtonIcon, EuiFlexGroup } from '@elastic/eui';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { css } from '@emotion/react';
 import React from 'react';
 import type { ConnectorItem } from '../../../../../common/http_api/tools';
@@ -42,6 +43,9 @@ export const ConnectorQuickActions = ({ connector }: ConnectorQuickActionsProps)
         color="danger"
         onClick={() => deleteConnector(connector)}
         aria-label={labels.connectors.deleteConnectorButtonLabel}
+        data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS_TABLE}
+        data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageConnectors.TABLE_QUICK_DELETE}
+        data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.CONNECTOR}
       />
     </EuiFlexGroup>
   );
