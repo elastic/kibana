@@ -14,8 +14,10 @@ export {
   type NotificationEventsProviderProps,
   type SpacesDependency,
 } from './notification_events_provider';
-export { useNotifications } from './use_notifications';
-export { useUnreadNotifications } from './use_unread_notifications';
-export { useReadNotifications } from './use_read_notifications';
-export { usePinnedNotifications } from './use_pinned_notifications';
-export { useUnreadNotificationCount } from './use_unread_notification_count';
+export {
+  useNotifications,
+  useUnreadNotifications,
+  useReadNotifications,
+  usePinnedNotifications,
+  useUnreadNotificationCount,
+} from './hooks';

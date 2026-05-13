@@ -35,3 +35,36 @@ export function useNotifications(): NotificationEvent[] {
     });
   }, [raw]);
 }
+
+/** Notification events the user has not yet marked as read. */
+export function useUnreadNotifications(): NotificationEvent[] {
+  const all = useNotifications();
+  return useMemo(() => all.filter((e) => !e.isRead), [all]);
+}
+
+/** Notification events the user has already marked as read. */
+export function useReadNotifications(): NotificationEvent[] {
+  const all = useNotifications();
+  return useMemo(() => all.filter((e) => e.isRead), [all]);
+}
+
+/** Notification events the user has pinned. */
+export function usePinnedNotifications(): NotificationEvent[] {
+  const all = useNotifications();
+  return useMemo(() => all.filter((e) => e.isPinned), [all]);
+}
+
+/**
+ * Reactive unread count.
+ *
+ * Subscribes to the dedicated `getUnreadCount$()` observable on
+ * `INotificationEvents` — O(1) per render, only re-renders when the count
+ * actually changes. Designed for the global-header notification badge,
+ * which mounts for the page session and must not iterate the full events
+ * list on every render.
+ */
+export function useUnreadNotificationCount(): number {
+  const events = useNotificationEventsService();
+  const count$ = useMemo(() => events.getUnreadCount$(), [events]);
+  return useObservable(count$, events.getUnreadCount());
+}
