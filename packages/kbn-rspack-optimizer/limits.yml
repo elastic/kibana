@@ -91,6 +91,7 @@ pageLoadAssetSize:
   indexLifecycleManagement: 29229
   indexManagement: 316
   inference: 5751
+  inferenceWorkflows: 25000
   infra: 45673
   ingestHub: 1923
   ingestPipelines: 270
