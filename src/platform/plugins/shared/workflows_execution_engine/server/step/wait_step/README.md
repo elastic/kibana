@@ -148,7 +148,7 @@ steps:
 
 **Threshold:** `SHORT_DURATION_THRESHOLD = 5000ms` (5 seconds)
 
-**Duration Parsing:** [`parse-duration.ts`](../../utils/parse-duration/parse-duration.ts)
+**Duration Parsing:** `parseDuration` from `@kbn/workflows-execution-engine-utils`
 
 **Task Manager:** Long waits use `workflowTaskManager.scheduleResumeTask()` to schedule resume
 

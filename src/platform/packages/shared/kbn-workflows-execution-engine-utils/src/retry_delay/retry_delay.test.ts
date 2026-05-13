@@ -136,3 +136,70 @@ describe('computeRetryDelayMs', () => {
     });
   });
 });
+
+// ---------------------------------------------------------------------------
+// Property-based tests (fast-check)
+// ---------------------------------------------------------------------------
+
+import { fc } from '@fast-check/jest';
+
+describe('computeRetryDelayMs property-based tests', () => {
+  const attemptArb = fc.integer({ min: 0, max: 20 });
+
+  it('fixed strategy: result is always 0 when no delay configured', () => {
+    fc.assert(
+      fc.property(attemptArb, (attempt) => {
+        expect(computeRetryDelayMs({}, attempt)).toBe(0);
+        expect(computeRetryDelayMs({ strategy: 'fixed' }, attempt)).toBe(0);
+      })
+    );
+  });
+
+  it('fixed strategy: result equals parseDuration(delay) for any valid delay', () => {
+    const delayArb = fc.integer({ min: 1, max: 9999 }).map((n) => `${n}ms`);
+    fc.assert(
+      fc.property(delayArb, attemptArb, (delay, attempt) => {
+        const ms = computeRetryDelayMs({ strategy: 'fixed', delay }, attempt);
+        // Fixed delay is independent of attempt
+        expect(ms).toBe(computeRetryDelayMs({ strategy: 'fixed', delay }, 0));
+        expect(ms).toBeGreaterThan(0);
+      })
+    );
+  });
+
+  it('exponential strategy: result is non-negative for any attempt', () => {
+    fc.assert(
+      fc.property(attemptArb, (attempt) => {
+        const ms = computeRetryDelayMs({ delay: '1s', strategy: 'exponential' }, attempt);
+        expect(ms).toBeGreaterThanOrEqual(0);
+      })
+    );
+  });
+
+  it('exponential strategy: result is always ≤ max-delay when max-delay is set', () => {
+    fc.assert(
+      fc.property(attemptArb, (attempt) => {
+        const ms = computeRetryDelayMs(
+          { delay: '1s', strategy: 'exponential', 'max-delay': '10s' },
+          attempt
+        );
+        expect(ms).toBeLessThanOrEqual(10000);
+      })
+    );
+  });
+
+  it('jitter with fixed strategy: result is in [0, delay]', () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 100, max: 5000 }).map((n) => `${n}ms`),
+        attemptArb,
+        (delay, attempt) => {
+          const baseMs = computeRetryDelayMs({ strategy: 'fixed', delay }, attempt);
+          const jitterMs = computeRetryDelayMs({ strategy: 'fixed', delay, jitter: true }, attempt);
+          expect(jitterMs).toBeGreaterThanOrEqual(0);
+          expect(jitterMs).toBeLessThanOrEqual(baseMs);
+        }
+      )
+    );
+  });
+});

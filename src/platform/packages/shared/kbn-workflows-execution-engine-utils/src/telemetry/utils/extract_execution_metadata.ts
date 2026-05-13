@@ -14,7 +14,7 @@ import type {
   WorkflowExecutionEventDispatchMetadata,
 } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
-import { parseDuration } from '../../parse-duration/parse-duration';
+import { parseDuration } from '../../parse_duration/parse_duration';
 
 /**
  * Metadata extracted from a workflow execution for telemetry purposes

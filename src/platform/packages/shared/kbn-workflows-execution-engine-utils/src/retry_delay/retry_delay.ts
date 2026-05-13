@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { memoize, random } from 'lodash';
-import { parseDuration } from '../parse-duration/parse-duration';
+import { parseDuration } from '../parse_duration/parse_duration';
 
 // parseDuration is on the hot path of retry delay computation,
 // so we memoize it to avoid redundant parsing of the same duration strings across retries.

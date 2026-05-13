@@ -11,7 +11,7 @@
 // plugin. Prefer subpath imports where possible — `@kbn/workflows-execution-
 // engine-utils/<name>` — so callers only pull what they need.
 
-export { parseDuration } from './parse-duration/parse-duration';
+export { parseDuration } from './parse_duration/parse_duration';
 export { computeRetryDelayMs } from './retry_delay/retry_delay';
 export type { RetryDelayConfig } from './retry_delay/retry_delay';
 export { buildStepExecutionId } from './build_step_execution_id/build_step_execution_id';

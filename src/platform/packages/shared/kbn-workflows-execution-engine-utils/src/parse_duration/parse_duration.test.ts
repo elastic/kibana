@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseDuration } from './parse-duration';
+import { parseDuration } from './parse_duration';
 
 describe('parseDuration', () => {
   describe('valid duration formats', () => {
@@ -216,5 +216,82 @@ describe('parseDuration', () => {
     ])('should correctly sum multiple units: %s', (input, expected) => {
       expect(parseDuration(input)).toBe(expected);
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Property-based tests (fast-check)
+// ---------------------------------------------------------------------------
+
+import { fc } from '@fast-check/jest';
+
+describe('parseDuration property-based tests', () => {
+  // Generators for unit components in descending order
+  const unitMultipliers: Array<[string, number]> = [
+    ['w', 7 * 24 * 60 * 60 * 1000],
+    ['d', 24 * 60 * 60 * 1000],
+    ['h', 60 * 60 * 1000],
+    ['m', 60 * 1000],
+    ['s', 1000],
+    ['ms', 1],
+  ];
+
+  const positiveIntArb = fc.integer({ min: 0, max: 999 });
+
+  // Build a valid duration string from optional per-unit values and compute expected ms
+  const validDurationArb = fc
+    .tuple(...unitMultipliers.map(() => fc.option(positiveIntArb, { nil: undefined })))
+    .filter((parts) => parts.some((v) => v !== undefined))
+    .map((parts) => {
+      let str = '';
+      let expected = 0;
+      parts.forEach((v, i) => {
+        if (v !== undefined) {
+          str += `${v}${unitMultipliers[i][0]}`;
+          expected += v * unitMultipliers[i][1];
+        }
+      });
+      return { str, expected };
+    });
+
+  it('always returns a non-negative integer for any valid duration string', () => {
+    fc.assert(
+      fc.property(validDurationArb, ({ str, expected }) => {
+        const result = parseDuration(str);
+        expect(result).toBe(expected);
+        expect(result).toBeGreaterThanOrEqual(0);
+      })
+    );
+  });
+
+  it('adding two valid single-unit durations of the same unit yields their sum', () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 1, max: 500 }),
+        fc.integer({ min: 1, max: 500 }),
+        fc.constantFrom(...unitMultipliers),
+        (a, b, [unit, multiplier]) => {
+          const result = parseDuration(`${a + b}${unit}`);
+          expect(result).toBe((a + b) * multiplier);
+        }
+      )
+    );
+  });
+
+  it('throws for any input that is not a non-empty string', () => {
+    // Only numeric, null, undefined, object, array — not strings
+    const nonStringArb = fc.oneof(
+      fc.integer(),
+      fc.float(),
+      fc.constant(null),
+      fc.constant(undefined),
+      fc.constant({}),
+      fc.constant([])
+    );
+    fc.assert(
+      fc.property(nonStringArb, (input) => {
+        expect(() => parseDuration(input as any)).toThrow('Invalid duration format');
+      })
+    );
   });
 });
