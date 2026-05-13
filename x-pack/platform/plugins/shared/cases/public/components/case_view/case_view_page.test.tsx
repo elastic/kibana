@@ -56,12 +56,6 @@ jest.mock('./components/case_view_activity', () => ({
   )),
 }));
 
-jest.mock('./components/case_view_files', () => ({
-  CaseViewFiles: jest.fn(() => (
-    <div data-test-subj="test-case-view-files">{'Case view files'}</div>
-  )),
-}));
-
 jest.mock('./components/case_view_observables', () => ({
   CaseViewObservables: jest.fn(() => (
     <div data-test-subj="test-case-view-observables">{'Case view observables'}</div>
@@ -114,6 +108,16 @@ describe('CaseViewPage', () => {
         children: () => (
           <div data-test-subj="test-case-view-alerts-content">{'Alerts content'}</div>
         ),
+      }),
+      schemaValidator: () => {},
+    });
+    unifiedAttachmentTypeRegistry.register({
+      id: 'file',
+      displayName: 'File',
+      icon: 'document',
+      getAttachmentViewObject: () => ({ event: 'added a file' }),
+      getAttachmentTabViewObject: () => ({
+        children: () => <div data-test-subj="test-case-view-files">{'Case view files'}</div>,
       }),
       schemaValidator: () => {},
     });

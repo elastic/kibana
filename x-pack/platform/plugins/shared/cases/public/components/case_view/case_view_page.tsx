@@ -15,7 +15,6 @@ import { HeaderPage } from '../header_page';
 import { EditableTitle } from '../header_page/editable_title';
 import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
 import { CaseViewActivity } from './components/case_view_activity';
-import { CaseViewFiles } from './components/case_view_files';
 import { CaseViewObservables } from './components/case_view_observables';
 import { CaseViewMetrics } from './metrics';
 import type { CaseViewPageProps } from './types';
@@ -25,6 +24,7 @@ import { CaseViewSimilarCases } from './components/case_view_similar_cases';
 import { CaseViewAttachments } from './components/case_view_attachments';
 import { filterCaseAttachmentsBySearchTerm } from './components/helpers';
 import { toUnifiedAttachmentType } from '../../../common/utils/attachments/migration_utils';
+import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
 
 const getActiveTabId = (tabId?: string) => {
   if (tabId && Object.values(CASE_VIEW_PAGE_TABS).includes(tabId as CASE_VIEW_PAGE_TABS)) {
@@ -106,6 +106,14 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
       return unifiedAttachmentTypeRegistry.get(alertType)?.getAttachmentTabViewObject?.()?.children;
     }, [unifiedAttachmentTypeRegistry, owner]);
 
+    const FileTabComponent = useMemo(() => {
+      if (!unifiedAttachmentTypeRegistry.has(FILE_ATTACHMENT_TYPE)) {
+        return undefined;
+      }
+      return unifiedAttachmentTypeRegistry.get(FILE_ATTACHMENT_TYPE)?.getAttachmentTabViewObject?.()
+        ?.children;
+    }, [unifiedAttachmentTypeRegistry]);
+
     const onSubmitTitle = useCallback(
       (newTitle: string) =>
         onUpdateField({
@@ -172,8 +180,11 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
                   EventTabComponent != null && (
                     <EventTabComponent caseData={caseWithFilteredAttachments} />
                   )}
-                {activeTabId === CASE_VIEW_PAGE_TABS.FILES && (
-                  <CaseViewFiles caseData={caseWithFilteredAttachments} searchTerm={searchTerm} />
+                {activeTabId === CASE_VIEW_PAGE_TABS.FILES && FileTabComponent != null && (
+                  <FileTabComponent
+                    caseData={caseWithFilteredAttachments}
+                    searchTerm={searchTerm}
+                  />
                 )}
                 {activeTabId === CASE_VIEW_PAGE_TABS.OBSERVABLES && (
                   <CaseViewObservables

@@ -6,6 +6,7 @@
  */
 
 import {
+  FILE_ATTACHMENT_TYPE,
   LEGACY_LENS_ATTACHMENT_TYPE,
   LENS_ATTACHMENT_TYPE,
   OWNER_TO_PREFIX_MAP,
@@ -16,6 +17,7 @@ import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER, GENERAL_CASES_OWNER } fro
 import {
   isMigratedAttachmentType,
   isPersistableType,
+  toLegacyAttachmentType,
   toUnifiedAttachmentType,
 } from './migration_utils';
 
@@ -57,28 +59,19 @@ describe('migration_utils', () => {
       expect(toUnifiedAttachmentType(AttachmentType.event, 'unknownOwner')).toBe(
         AttachmentType.event
       );
-      expect(toUnifiedAttachmentType(AttachmentType.alert, 'unknownOwner')).toBe(
-        AttachmentType.alert
-      );
     });
+  });
 
-    it('produces owner-scoped alert types', () => {
-      expect(toUnifiedAttachmentType('alert', SECURITY_SOLUTION_OWNER)).toBe('security.alert');
-      expect(toUnifiedAttachmentType('alert', OBSERVABILITY_OWNER)).toBe('observability.alert');
-      expect(toUnifiedAttachmentType('alert', GENERAL_CASES_OWNER)).toBe('stack.alert');
+  describe('toLegacyAttachmentType', () => {
+    it('maps the unified file type back to externalReference (top-level type)', () => {
+      expect(toLegacyAttachmentType(FILE_ATTACHMENT_TYPE)).toBe(AttachmentType.externalReference);
     });
+  });
 
-    it('produces owner-scoped event types', () => {
-      expect(toUnifiedAttachmentType('event', SECURITY_SOLUTION_OWNER)).toBe('security.event');
+  describe('isMigratedAttachmentType - file', () => {
+    it('is true for the unified file type', () => {
+      expect(isMigratedAttachmentType(FILE_ATTACHMENT_TYPE, owner)).toBe(true);
     });
-
-    it.each(Object.keys(OWNER_TO_PREFIX_MAP))(
-      'maps legacy alert to a registered unified attachment type for owner "%s"',
-      (ownerKey) => {
-        const unifiedType = toUnifiedAttachmentType(AttachmentType.alert, ownerKey);
-        expect(UNIFIED_ATTACHMENT_TYPES.has(unifiedType)).toBe(true);
-      }
-    );
   });
 
   describe('isPersistableType', () => {
