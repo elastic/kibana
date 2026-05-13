@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       runComparisonTests({
         comparisonDisplay: 'Comparing 2 results',
-        tableHeaders: ['Field', /^1@/, /^2@/],
+        tableHeaders: ['Field', 'Result 1', 'Result 2'],
         fullFieldNames: [
           '@timestamp',
           '@message',
@@ -132,7 +132,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     bytesRowIndex,
   }: {
     comparisonDisplay: string;
-    tableHeaders: Array<string | RegExp>;
+    tableHeaders: string[];
     fullFieldNames: string[];
     selectedFieldNames: string[];
     extensionRowIndex: number;
@@ -150,14 +150,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should allow selecting comparison fields', async () => {
       const headers = await dataGrid.getHeaders();
-      expect(headers).have.length(tableHeaders.length);
-      tableHeaders.forEach((expectedHeader, index) => {
-        if (expectedHeader instanceof RegExp) {
-          expect(headers[index]).to.match(expectedHeader);
-        } else {
-          expect(headers[index]).to.be(expectedHeader);
-        }
-      });
+      expect(headers).to.eql(tableHeaders);
       let fieldNames = await dataGrid.getComparisonFieldNames();
       expect(fieldNames.length >= fullFieldNames.length).to.be(true);
       expect(fieldNames.slice(0, fullFieldNames.length)).to.eql(fullFieldNames);
