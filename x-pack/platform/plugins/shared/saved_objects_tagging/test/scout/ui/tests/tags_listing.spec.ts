@@ -15,7 +15,7 @@ test.describe('Tags management listing', { tag: tags.stateful.classic }, () => {
     await kbnClient.savedObjects.cleanStandardList();
     await kbnClient.importExport.load(KBN_ARCHIVES.FUNCTIONAL_BASE);
 
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsViewer();
     await page.goto(kbnUrl.app('management/kibana/tags'));
     await pageObjects.tagManagement.tagsTable.waitForLoaded();
   });

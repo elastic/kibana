@@ -15,7 +15,7 @@ test.describe('Tags management bulk assign', { tag: tags.stateful.classic }, () 
     await kbnClient.savedObjects.cleanStandardList();
     await kbnClient.importExport.load(KBN_ARCHIVES.BULK_ASSIGN);
 
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
     await page.goto(kbnUrl.app('management/kibana/tags'));
     await pageObjects.tagManagement.tagsTable.waitForLoaded();
   });
