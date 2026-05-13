@@ -89,6 +89,7 @@ export type {
   EditorState,
   Language,
 } from '@kbn/monaco';
+import type { MonacoHotkeyDiscoveryMeta } from './mods';
 
 const LazyCodeEditorBase = React.lazy(() =>
   import(/* webpackChunkName: "code-editor-entry" */ './code_editor').then((m) => ({
@@ -159,3 +160,32 @@ export const CodeEditorField: React.FunctionComponent<CodeEditorProps> = (props)
     </EuiErrorBoundary>
   );
 };
+
+/**
+ * Extend the Monaco editor API to account for the change to the `addCommand` and `addAction` method signature.
+ */
+declare module 'monaco-editor/esm/vs/editor/editor.api' {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  export namespace editor {
+    export interface IStandaloneCodeEditor {
+      /**
+       * Registers a keyboard shortcut. Native Monaco accepts an optional `context` string as the
+       * third argument; Kibana may pass {@link MonacoHotkeyDiscoveryMeta} when the Code Editor wires
+       * discovery-aware `addCommand` wrapping.
+       */
+      addCommand(
+        keybinding: number,
+        handler: ICommandHandler,
+        contextOrDiscoveryMeta?: MonacoHotkeyDiscoveryMeta
+      ): string | null;
+    }
+
+    export interface IActionDescriptor {
+      /**
+       * When hotkeys discovery is wired by Code Editor, optional metadata registers cheat-sheet rows
+       * for `keybindings` via discovery (Monaco still owns shortcut execution).
+       */
+      hotkeysDiscovery?: MonacoHotkeyDiscoveryMeta;
+    }
+  }
+}

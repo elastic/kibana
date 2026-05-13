@@ -21,6 +21,7 @@ import {
   CODE_EDITOR_DEFAULT_THEME_ID,
   CODE_EDITOR_TRANSPARENT_THEME_ID,
 } from '@kbn/monaco';
+import type { HotkeysStart } from '@kbn/core-hotkeys-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Interpolation, Theme } from '@emotion/react';
@@ -38,6 +39,8 @@ import {
   usePlaceholder,
   useFitToContent,
   ReBroadcastMouseDownEvents,
+  installDiscoveryAwareAddCommand,
+  installDiscoveryAwareAddAction,
 } from './mods';
 import { styles } from './editor.styles';
 
@@ -130,6 +133,12 @@ export interface CodeEditorProps
   editorDidMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
 
   editorWillUnmount?: () => void;
+
+  /**
+   * When set, Monaco `addCommand` invocations that pass discovery metadata, will register to the hotkeys service's cheat-sheet rows via
+   * {@link HotkeysStart.registerForDiscovery} without adding a global hotkey listener.
+   */
+  hotkeys?: HotkeysStart;
 
   /**
    * Should the editor use a transparent background
@@ -225,6 +234,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   editorDidMount,
   editorWillMount,
   editorWillUnmount,
+  hotkeys,
   transparentBackground,
   suggestionProvider,
   signatureProvider,
@@ -279,6 +289,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const [_editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor | null>(null);
   const isSuggestionMenuOpen = useRef(false);
   const editorHint = useRef<HTMLDivElement>(null);
+  const discoveryAddCommandDisposeRef = useRef<(() => void) | null>(null);
+  const discoveryAddActionDisposeRef = useRef<(() => void) | null>(null);
   const textboxMutationObserver = useRef<MutationObserver | null>(null);
 
   const [isHintActive, setIsHintActive] = useState(true);
@@ -501,6 +513,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         throw new Error('react-monaco-editor is using a different version of monaco');
       }
 
+      discoveryAddCommandDisposeRef.current = installDiscoveryAwareAddCommand(editor, hotkeys);
+      discoveryAddActionDisposeRef.current = installDiscoveryAwareAddAction(editor, hotkeys);
+
       remeasureFonts();
 
       const textbox = editor.getDomNode()?.getElementsByTagName('textarea')[0];
@@ -559,6 +574,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     },
     [
       editorDidMount,
+      hotkeys,
       onBlurMonaco,
       onKeydownMonaco,
       readOnlyMessage,
@@ -571,6 +587,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   const _editorWillUnmount = useCallback<NonNullable<ReactMonacoEditorProps['editorWillUnmount']>>(
     (editor) => {
+      discoveryAddCommandDisposeRef.current?.();
+      discoveryAddActionDisposeRef.current?.();
+
       if (enableCustomContextMenu) {
         unregisterContextMenuActions();
       }
