@@ -9,7 +9,8 @@
 import * as t from 'io-ts';
 import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
 import type { Coordinate } from '@kbn/apm-types';
-import { environmentRt, latencyAggregationTypeRt } from '@kbn/apm-types';
+import { latencyAggregationTypeRt } from '@kbn/apm-types';
+import { environmentRt } from '@kbn/apm-types-shared';
 import { defineRoute } from '../types';
 import { kueryRt, rangeRt, offsetRt } from '../../default_api_types';
 

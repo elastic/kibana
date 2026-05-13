@@ -8,7 +8,8 @@
  */
 import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
-import { environmentRt, type Coordinate } from '@kbn/apm-types';
+import { type Coordinate } from '@kbn/apm-types';
+import { environmentRt } from '@kbn/apm-types-shared';
 import { defineRoute } from '../types';
 import {
   kueryRt,

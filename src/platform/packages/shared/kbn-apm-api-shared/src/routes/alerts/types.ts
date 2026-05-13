@@ -8,7 +8,8 @@
  */
 import * as t from 'io-ts';
 import { jsonRt } from '@kbn/io-ts-utils';
-import { AggregationType, environmentRt, type Coordinate } from '@kbn/apm-types';
+import { AggregationType, type Coordinate } from '@kbn/apm-types';
+import { environmentRt } from '@kbn/apm-types-shared';
 import { rangeRt } from '../../default_api_types';
 
 const searchConfigurationRt = t.type({

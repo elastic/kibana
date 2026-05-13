@@ -8,7 +8,7 @@
  */
 import * as t from 'io-ts';
 import type { Coordinate } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types';
+import { environmentRt } from '@kbn/apm-types-shared';
 import { defineRoute } from '../types';
 import { kueryRt, rangeRt } from '../../default_api_types';
 

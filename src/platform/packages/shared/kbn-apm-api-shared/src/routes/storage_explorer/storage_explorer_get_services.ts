@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import * as t from 'io-ts';
-import { environmentRt, indexLifecyclePhaseRt } from '@kbn/apm-types';
+import { indexLifecyclePhaseRt } from '@kbn/apm-types';
+import { environmentRt } from '@kbn/apm-types-shared';
 import { defineRoute } from '../types';
 import { kueryRt, rangeRt } from '../../default_api_types';
 
