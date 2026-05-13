@@ -21,8 +21,7 @@
   "exclude": [
     "target/**/*",
     "**/cypress/**",
-    "public/management/cypress.config.ts",
-    "server/agent_builder/skills/detection_emulation/evals/*.spec.ts"
+    "public/management/cypress.config.ts"
   ],
   "kbn_references": [
     "@kbn/setup-node-env",

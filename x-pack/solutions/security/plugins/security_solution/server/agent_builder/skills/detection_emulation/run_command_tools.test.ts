@@ -211,14 +211,15 @@ describe('per-family runEmulationCommand tools', () => {
         name: 'runNetworkCommand',
         schema: createRunNetworkCommandTool(createMockDeps()).schema,
         command: 'isolate',
+        parameters: undefined,
       },
       {
         name: 'runExecutionCommand',
         schema: createRunExecutionCommandTool(createMockDeps()).schema,
         command: 'execute',
-        parameters: { command: 'whoami' },
+        parameters: { command: 'whoami' } as Record<string, unknown> | undefined,
       },
-    ] as const;
+    ];
 
     it.each(tools)(
       '$name accepts exactly MAX_ENDPOINT_FANOUT endpointIds',
@@ -308,17 +309,29 @@ describe('per-family runEmulationCommand tools', () => {
       }
     );
 
+    // The four per-family tools each have a discriminated `command` literal
+    // union, so `tool.confirmation.getConfirmation` is typed per-family. When
+    // `it.each` iterates the heterogenous `cases` union, TS intersects the
+    // four signatures and `toolParams` collapses to `never`. Cast the callback
+    // through `unknown` to a single shape that accepts any toolParams object;
+    // the runtime contract is identical (all four implementations accept the
+    // same property set, only the `command` enum differs per-family).
+    type GetConfirmationFn = (args: {
+      toolParams: Record<string, unknown>;
+    }) => Promise<{ color: string; title: string; message: string }>;
+
     it.each(cases)(
       '$name renders a destructive-coloured confirmation for [$destructiveCommand]',
       async ({ tool, destructiveCommand }) => {
-        const result = await tool.confirmation!.getConfirmation!({
+        const getConfirmation = tool.confirmation!.getConfirmation as unknown as GetConfirmationFn;
+        const result = await getConfirmation({
           toolParams: {
             emulationId: 'em-42',
             agentType: 'endpoint',
             endpointIds: ['host-a'],
             command: destructiveCommand,
             parameters: {},
-          } as Record<string, unknown>,
+          },
         });
         expect(result.color).toBe('danger');
         expect(result.title).toContain(destructiveCommand);
@@ -330,14 +343,15 @@ describe('per-family runEmulationCommand tools', () => {
     it.each(cases)(
       '$name renders a warning-coloured confirmation for the non-destructive [$nonDestructiveCommand]',
       async ({ tool, nonDestructiveCommand }) => {
-        const result = await tool.confirmation!.getConfirmation!({
+        const getConfirmation = tool.confirmation!.getConfirmation as unknown as GetConfirmationFn;
+        const result = await getConfirmation({
           toolParams: {
             emulationId: 'em-42',
             agentType: 'endpoint',
             endpointIds: ['host-a', 'host-b'],
             command: nonDestructiveCommand,
             parameters: {},
-          } as Record<string, unknown>,
+          },
         });
         expect(result.color).toBe('warning');
         expect(result.title).toContain(nonDestructiveCommand);

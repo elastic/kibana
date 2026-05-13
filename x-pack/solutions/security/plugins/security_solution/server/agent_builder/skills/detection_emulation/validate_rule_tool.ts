@@ -512,7 +512,7 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
                       'Another real_execution scenario is already in flight for this Kibana space. Concurrent real_execution scenarios are not allowed.',
                     reason: 'concurrency_exceeded',
                     rule_id: ruleId,
-                    inflight_scenario_fingerprint: concurrencyResult.inflightFingerprint,
+                    inflight_scenario_fingerprint: concurrencyResult.inflightScenarioFingerprint,
                     retry_after_seconds: concurrencyResult.retryAfterSeconds,
                     likely_cause:
                       'Another real_execution scenario is currently in flight for this space. Wait for it to complete or retry after the suggested interval.',

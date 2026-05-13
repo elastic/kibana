@@ -30,7 +30,9 @@
  *                            additional cost per example.
  *
  * NOT a Jest test — run via the @kbn/evals Playwright eval runner.
- * Excluded from the plugin's main tsconfig; requires @kbn/evals (devOnly).
+ * Lives in `@kbn/evals-suite-detection-emulation` (devOnly functional-tests
+ * package) so the production `security_solution` plugin doesn't need to
+ * pull in the devOnly `@kbn/evals` package as a kbn_reference.
  */
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
