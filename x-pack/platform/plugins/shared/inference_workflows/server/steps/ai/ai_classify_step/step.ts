@@ -39,7 +39,7 @@ export const aiClassifyStepDefinition = (coreSetup: CoreSetup<InferenceWorkflows
         request: context.contextManager.getFakeRequest(),
         chatModelOptions: {
           temperature: context.input.temperature,
-          maxRetries: 0,
+          maxRetries: 0, // Disable automatic retries; validation is handled via validateModelResponse
         },
       });
 

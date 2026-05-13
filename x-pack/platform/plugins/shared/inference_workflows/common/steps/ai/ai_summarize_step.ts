@@ -10,12 +10,18 @@ import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 
+/**
+ * Step type ID for the AI summarize step.
+ */
 export const AiSummarizeStepTypeId = 'ai.summarize';
 
 export const ConfigSchema = z.object({
   'connector-id': z.string().optional(),
 });
 
+/**
+ * Input schema for the AI summarize step.
+ */
 export const InputSchema = z.object({
   input: z.union([z.string(), z.array(z.unknown()), z.record(z.string(), z.unknown())]),
   instructions: z.string().optional(),
@@ -23,6 +29,9 @@ export const InputSchema = z.object({
   temperature: z.number().min(0).max(1).optional(),
 });
 
+/**
+ * Output schema for the AI summarize step.
+ */
 export const OutputSchema = z.object({
   content: z.string(),
   metadata: z.record(z.string(), z.any()).optional(),
@@ -32,6 +41,11 @@ export type AiSummarizeStepConfigSchema = typeof ConfigSchema;
 export type AiSummarizeStepInputSchema = typeof InputSchema;
 export type AiSummarizeStepOutputSchema = typeof OutputSchema;
 
+/**
+ * Common step definition for AI summarize step.
+ * This is shared between server and public implementations.
+ * Input and output types are automatically inferred from the schemas.
+ */
 export const AiSummarizeStepCommonDefinition: CommonStepDefinition<
   AiSummarizeStepInputSchema,
   AiSummarizeStepOutputSchema,

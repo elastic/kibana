@@ -10,12 +10,18 @@ import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 
+/**
+ * Step type ID for the AI classify step.
+ */
 export const AiClassifyStepTypeId = 'ai.classify';
 
 export const ConfigSchema = z.object({
   'connector-id': z.string().optional(),
 });
 
+/**
+ * Input schema for the AI classify step.
+ */
 export const InputSchema = z.object({
   input: z.union([z.string(), z.array(z.unknown()), z.record(z.string(), z.unknown())]),
   categories: z.array(z.string()).min(1),
@@ -26,6 +32,10 @@ export const InputSchema = z.object({
   temperature: z.number().min(0).max(1).optional(),
 });
 
+/**
+ * Output schema for the AI classify step.
+ * This is the base schema - the dynamic schema will be created based on input parameters.
+ */
 export const OutputSchema = z.object({
   category: z.string().optional(),
   categories: z.array(z.string()).optional(),
@@ -37,6 +47,11 @@ export type AiClassifyStepConfigSchema = typeof ConfigSchema;
 export type AiClassifyStepInputSchema = typeof InputSchema;
 export type AiClassifyStepOutputSchema = typeof OutputSchema;
 
+/**
+ * Common step definition for AI classify step.
+ * This is shared between server and public implementations.
+ * Input and output types are automatically inferred from the schemas.
+ */
 export const AiClassifyStepCommonDefinition: CommonStepDefinition<
   AiClassifyStepInputSchema,
   AiClassifyStepOutputSchema,
@@ -135,6 +150,9 @@ When \`allowMultipleCategories\` is true, the output includes a \`categories\` a
   configSchema: ConfigSchema,
 };
 
+/**
+ * Builds a dynamic Zod schema for structured output based on AI classification step inputs.
+ */
 export function buildStructuredOutputSchema(
   params: z.infer<AiClassifyStepInputSchema>
 ): typeof OutputSchema {

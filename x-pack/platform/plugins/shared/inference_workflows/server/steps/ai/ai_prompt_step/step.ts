@@ -46,6 +46,9 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
           {
             type: 'object',
             properties: {
+              // withStructuredOutput fails if outputSchema is not an object.
+              // for example, if the user expects an array, we wrap it into an object here
+              // and then unwrap it below
               response: context.input.schema,
             },
           },
@@ -60,6 +63,10 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
           signal: context.abortSignal,
         });
         return {
+          // We modify the output to match the expected schema
+          // For now, structured output flow does not output response_metadata,
+          // so we only return the content here, but looking ahead we might have response_metadata returned,
+          // so we keep the same output structure with potential response_metadata addition in the future.
           output: {
             content: invocationResult.parsed.response,
             metadata: invocationResult.raw.response_metadata,

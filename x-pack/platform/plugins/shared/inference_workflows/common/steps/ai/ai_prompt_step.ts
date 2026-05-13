@@ -11,14 +11,24 @@ import { JsonModelShapeSchema } from '@kbn/workflows/spec/schema/common/json_mod
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 
+/**
+ * Step type ID for the AI prompt step.
+ */
 export const AiPromptStepTypeId = 'ai.prompt';
 
 export const ConfigSchema = z.object({
   'connector-id': z.string().optional(),
 });
 
+// Maybe we can define specific schema for metadata in the future
+// For now it's a record with string keys and any values
+// Because langchain returns it this format
 export const MetadataSchema = z.record(z.string(), z.any());
 
+/**
+ * Input schema for the AI prompt step.
+ * Uses variables structure with key->value pairs.
+ */
 export const InputSchema = z.object({
   prompt: z.string(),
   systemPrompt: z.string().optional(),
@@ -38,12 +48,21 @@ const StringOutputSchema = z.object({
   metadata: MetadataSchema,
 });
 
+/**
+ * Output schema for the AI prompt step.
+ * Uses variables structure with key->value pairs.
+ */
 export const OutputSchema = z.union([StringOutputSchema, getStructuredOutputSchema(z.unknown())]);
 
 export type AiPromptStepConfigSchema = typeof ConfigSchema;
 export type AiPromptStepInputSchema = typeof InputSchema;
 export type AiPromptStepOutputSchema = typeof OutputSchema;
 
+/**
+ * Common step definition for AI prompt step.
+ * This is shared between server and public implementations.
+ * Input and output types are automatically inferred from the schemas.
+ */
 export const AiPromptStepCommonDefinition: CommonStepDefinition<
   AiPromptStepInputSchema,
   AiPromptStepOutputSchema,
