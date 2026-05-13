@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import {
   setConnectorActionErrorMeta,
+  getConnectorActionErrorMeta,
   getFinitePositiveNumber,
   getEstimatedBase64OutputBytes,
 } from '../../connector_spec';
@@ -50,7 +51,12 @@ function throwGoogleDriveError(error: unknown): void {
   };
   const googleError = axiosError.response?.data?.error;
   if (googleError) {
-    throw new Error(`Google Drive API error (${googleError.code})`);
+    const newError = new Error(`Google Drive API error (${googleError.code})`);
+    const meta = getConnectorActionErrorMeta(error);
+    if (meta) {
+      setConnectorActionErrorMeta(newError, meta);
+    }
+    throw newError;
   }
 }
 

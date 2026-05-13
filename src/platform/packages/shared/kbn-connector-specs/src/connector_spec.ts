@@ -207,6 +207,7 @@ export interface ConnectorActionErrorMeta {
 
 const connectorActionErrorMeta = new WeakMap<object, ConnectorActionErrorMeta>();
 
+/** Parses a value as a finite non-negative number. Returns `undefined` for NaN, Infinity, negatives, or non-numeric types. Accepts string representations. */
 export const getFinitePositiveNumber = (value: unknown): number | undefined => {
   const numericValue = typeof value === 'string' ? Number(value) : value;
   if (typeof numericValue !== 'number' || !Number.isFinite(numericValue) || numericValue < 0) {
@@ -223,6 +224,7 @@ export const ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES = 1024;
 export const getEstimatedBase64OutputBytes = (rawBytes: number): number =>
   Math.ceil(rawBytes / 3) * 4 + ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES;
 
+/** Case-insensitive header lookup. Returns the raw value (may be string or string[]). */
 export const getHeaderValue = ({
   headers,
   headerName,
@@ -243,7 +245,11 @@ export const getHeaderValue = ({
   return matchingHeaderName ? headersRecord[matchingHeaderName] : undefined;
 };
 
+/** Extracts content-length from an Axios-like error's response or request headers. */
 export const getResponseContentLengthBytes = (error: unknown): number | undefined => {
+  if (!error || typeof error !== 'object') {
+    return undefined;
+  }
   const axiosError = error as {
     response?: { headers?: unknown };
     request?: { res?: { headers?: unknown } };
@@ -263,13 +269,11 @@ export const setConnectorActionErrorMeta = (
     return;
   }
 
+  const contentLengthBytes = getFinitePositiveNumber(meta.contentLengthBytes);
+  const estimatedOutputBytes = getFinitePositiveNumber(meta.estimatedOutputBytes);
   const sanitizedMeta = {
-    ...(getFinitePositiveNumber(meta.contentLengthBytes) !== undefined
-      ? { contentLengthBytes: getFinitePositiveNumber(meta.contentLengthBytes) }
-      : {}),
-    ...(getFinitePositiveNumber(meta.estimatedOutputBytes) !== undefined
-      ? { estimatedOutputBytes: getFinitePositiveNumber(meta.estimatedOutputBytes) }
-      : {}),
+    ...(contentLengthBytes !== undefined ? { contentLengthBytes } : {}),
+    ...(estimatedOutputBytes !== undefined ? { estimatedOutputBytes } : {}),
   };
 
   connectorActionErrorMeta.set(error, {

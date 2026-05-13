@@ -8,7 +8,10 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { getConnectorActionErrorMeta } from '../../connector_spec';
+import {
+  getConnectorActionErrorMeta,
+  ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES,
+} from '../../connector_spec';
 import {
   listAmazonS3Buckets,
   listAmazonS3BucketObjects,
@@ -286,7 +289,7 @@ describe('amazon_s3_api exports', () => {
       );
       expect(getConnectorActionErrorMeta(s3Error)).toEqual({
         contentLengthBytes: 21005621,
-        estimatedOutputBytes: Math.ceil(21005621 / 3) * 4 + 1024,
+        estimatedOutputBytes: Math.ceil(21005621 / 3) * 4 + ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES,
       });
     }
   });

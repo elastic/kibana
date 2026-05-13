@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getConnectorActionErrorMeta } from '../../connector_spec';
+import {
+  getConnectorActionErrorMeta,
+  ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES,
+} from '../../connector_spec';
 import type { ActionContext } from '../../connector_spec';
 import { GoogleDriveConnector } from './google_drive';
 
@@ -365,7 +368,9 @@ describe('GoogleDriveConnector', () => {
         })
       ).rejects.toThrow('Google Drive API error (404)');
     });
+  });
 
+  describe('downloadFile action', () => {
     it('should attach file size hints when content download exceeds the Axios limit', async () => {
       const metadataResponse = {
         data: {
@@ -387,12 +392,10 @@ describe('GoogleDriveConnector', () => {
 
       expect(getConnectorActionErrorMeta(error)).toEqual({
         contentLengthBytes: 10 * 1024 * 1024,
-        estimatedOutputBytes: Math.ceil((10 * 1024 * 1024) / 3) * 4 + 1024,
+        estimatedOutputBytes:
+          Math.ceil((10 * 1024 * 1024) / 3) * 4 + ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES,
       });
     });
-  });
-
-  describe('downloadFile action', () => {
     it('should download a native file', async () => {
       const metadataResponse = {
         data: {

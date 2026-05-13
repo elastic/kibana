@@ -6,7 +6,11 @@
  */
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
-import { getConnectorActionErrorMeta } from '@kbn/connector-specs';
+import {
+  getConnectorActionErrorMeta,
+  getFinitePositiveNumber,
+  getHeaderValue,
+} from '@kbn/connector-specs';
 import type { ExecutorParams } from '../../sub_action_framework/types';
 import type {
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -20,34 +24,6 @@ interface FetcherOptions {
 }
 
 const DEFAULT_RESPONSE_SIZE_HEADER = 'content-length';
-
-const getFinitePositiveNumber = (value: unknown): number | undefined => {
-  const numericValue = typeof value === 'string' ? Number(value) : value;
-  if (typeof numericValue !== 'number' || !Number.isFinite(numericValue) || numericValue < 0) {
-    return undefined;
-  }
-  return numericValue;
-};
-
-const getHeaderValue = ({
-  headers,
-  headerName,
-}: {
-  headers: unknown;
-  headerName: string;
-}): unknown => {
-  if (!headers || typeof headers !== 'object') {
-    return undefined;
-  }
-
-  const normalizedHeaderName = headerName.toLowerCase();
-  const headersRecord = headers as Record<string, unknown>;
-  const matchingHeaderName = Object.keys(headersRecord).find(
-    (key) => key.toLowerCase() === normalizedHeaderName
-  );
-
-  return matchingHeaderName ? headersRecord[matchingHeaderName] : undefined;
-};
 
 const getResponseSizeHeaderBytes = ({
   error,
@@ -76,6 +52,8 @@ const getErrorMeta = ({
   contentLengthBytes?: number;
 }): Record<string, unknown> | undefined => {
   const connectorActionErrorMeta = getConnectorActionErrorMeta(error);
+  // Connector-provided metadata (e.g. file size from provider API) takes
+  // precedence over generic header-derived values.
   const errorMeta = {
     ...(contentLengthBytes !== undefined ? { contentLengthBytes } : {}),
     ...connectorActionErrorMeta,
