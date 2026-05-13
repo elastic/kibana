@@ -9,12 +9,18 @@ import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
 const config = createPlaywrightEvalsConfig({
   testDir: `${__dirname}/evals`,
-  // Each test does one agent_builder/converse round-trip (LLM call over the
-  // restored alerts snapshot, ~285 documents) plus N evaluator (LLM-as-judge)
-  // calls. 120s was tight enough that the converse call alone exhausted the
-  // budget for the larger model variants. 10 minutes leaves headroom for
-  // slow models and judge passes without masking real regressions.
-  timeout: 10 * 60_000,
+  // Each test batches all examples for one category through
+  // /api/agent_builder/converse over the restored alerts snapshot
+  // (~285 documents), plus N evaluator (LLM-as-judge) calls. 10 minutes was
+  // tight for slow-thinking models — Gemini 3.1 Pro deterministically blew
+  // through the 600s budget on `single_alert_query` across 3 attempts in
+  // Buildkite build 441723 while the other 5 EIS core models finished
+  // comfortably. 30 minutes matches every other security-evals suite
+  // (pci-compliance, security-ai-rules, attack-discovery, …) and aligns
+  // with the security-ai-rules note: "Gemini 2.5 Pro needs more time for
+  // the full dataset". It does not mask regressions — pass/fail comes from
+  // evaluator scores against snapshot invariants, not from wall-clock.
+  timeout: 30 * 60_000,
 });
 
 config.retries = 2;
