@@ -251,6 +251,9 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       .addVersion(
         {
           version: API_VERSIONS.public.v1,
+          options: {
+            oasOperationObject: () => path.join(__dirname, 'examples/post_remove_collector.yaml'),
+          },
           validate: { request: PostRemoveCollectorRequestSchema, response: {} },
         },
         postRemoveCollectorHandler
@@ -274,6 +277,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       .addVersion(
         {
           version: API_VERSIONS.public.v1,
+          options: {
+            oasOperationObject: () =>
+              path.join(__dirname, 'examples/post_bulk_remove_collectors.yaml'),
+          },
           validate: {
             request: PostBulkRemoveCollectorsRequestSchema,
             response: {
