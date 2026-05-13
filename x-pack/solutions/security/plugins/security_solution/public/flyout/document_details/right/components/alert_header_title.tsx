@@ -13,20 +13,20 @@ import {
   FlyoutHeaderBlock,
   flyoutHeaderBlockStyles,
 } from '../../../../flyout_v2/shared/components/flyout_header_block';
-import { useRefetchByScope } from '../../../../flyout_v2/document/hooks/use_refetch_by_scope';
+import { useRefetchByScope } from '../../../../flyout_v2/document/main/hooks/use_refetch_by_scope';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
-import { Assignees } from '../../../../flyout_v2/document/components/assignees';
+import { Assignees } from '../../../../flyout_v2/document/main/components/assignees';
 import { Timestamp } from '../../../../flyout_v2/shared/components/timestamp';
 import { Notes } from '../../../../flyout_v2/shared/components/notes';
-import { RiskScore } from '../../../../flyout_v2/document/components/risk_score';
-import { DocumentSeverity } from '../../../../flyout_v2/document/components/severity';
+import { RiskScore } from '../../../../flyout_v2/document/main/components/risk_score';
+import { DocumentSeverity } from '../../../../flyout_v2/document/main/components/severity';
 import { ALERT_SUMMARY_PANEL_TEST_ID } from '../../../../flyout_v2/shared/components/test_ids';
 import { LeftPanelNotesTab } from '../../left';
 import { STATUS_TITLE_TEST_ID } from './test_ids';
-import { Title } from '../../../../flyout_v2/document/components/title';
-import { Status } from '../../../../flyout_v2/document/components/status';
+import { Title } from '../../../../flyout_v2/document/main/components/title';
+import { Status } from '../../../../flyout_v2/document/main/components/status';
 import type { CellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { CellActions } from '../../shared/components/cell_actions';

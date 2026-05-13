@@ -87,9 +87,10 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2d-standard-16
+      machineType: n4-standard-16
+      diskType: hyperdisk-balanced
       preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
       diskSizeGb: 105
     key: linting
     timeout_in_minutes: 60
@@ -104,9 +105,10 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2d-standard-32
+      machineType: n4-standard-32
+      diskType: hyperdisk-balanced
       preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
       diskSizeGb: 105
     key: linting_with_types
     timeout_in_minutes: 60
@@ -121,9 +123,10 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2d-standard-16
+      machineType: n4-standard-4
+      diskType: hyperdisk-balanced
       preemptible: true
-      spotZones: us-central1-b,us-central1-c
+      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
       diskSizeGb: 105
     key: linting_with_oxlint
     timeout_in_minutes: 60
@@ -138,9 +141,10 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: c3d-standard-8-lssd
+      machineType: c4-standard-8-lssd
+      diskType: hyperdisk-balanced
       preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
       diskSizeGb: 105
     key: check_types
     timeout_in_minutes: 60
@@ -183,19 +187,16 @@ steps:
   #        - exit_status: '-1'
   #          limit: 3
 
-  - command: .buildkite/scripts/steps/on_merge_api_docs.sh
-    label: Check Public API Docs
-    key: public-api-docs
+  - command: .buildkite/scripts/steps/report_package_metrics.sh
+    label: Report Package Metrics
+    key: report_package_metrics
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: c4d-highmem-4
-      diskType: hyperdisk-balanced
-      preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c
+      machineType: n2-standard-2
       diskSizeGb: 105
-    timeout_in_minutes: 60
+    timeout_in_minutes: 15
     retry:
       automatic:
         - exit_status: '-1'
@@ -214,7 +215,7 @@ steps:
     timeout_in_minutes: 10
     depends_on:
       - build
-      - public-api-docs
+      - report_package_metrics
     retry:
       automatic:
         - exit_status: '*'

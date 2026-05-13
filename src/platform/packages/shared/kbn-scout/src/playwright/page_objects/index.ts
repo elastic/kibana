@@ -22,10 +22,20 @@ import { Toasts } from './toasts';
 import { createLazyPageObject } from './utils';
 import { Inspector } from './inspector';
 import { LensApp } from './lens_app';
+import { ListingTable } from './listing_table';
 import { LoginPage } from './login_page';
 import { OverlaysPage } from './overlays';
 import { VisualizeApp } from './visualize_app';
+import {
+  ContentListWrapper,
+  buildContentListSearch,
+  buildContentListUrlRegex,
+} from './content_list';
+import type { ContentListUrlState } from './content_list';
 import type { KibanaUrl } from '../../common/services/kibana_url';
+
+export { ContentListWrapper, buildContentListSearch, buildContentListUrlRegex };
+export type { ContentListUrlState };
 
 export interface PageObjectsFixtures {
   page: ScoutPage;
@@ -40,6 +50,7 @@ export interface PageObjects {
   dashboard: DashboardApp;
   dashboardLinks: DashboardLinks;
   filterBar: FilterBar;
+  listingTable: ListingTable;
   maps: MapsPage;
   renderable: RenderablePage;
   collapsibleNav: CollapsibleNav;
@@ -64,6 +75,7 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     dashboardLinks: createLazyPageObject(DashboardLinks, fixtures.page),
     discover: createLazyPageObject(DiscoverApp, fixtures.page),
     filterBar: createLazyPageObject(FilterBar, fixtures.page),
+    listingTable: createLazyPageObject(ListingTable, fixtures.page),
     maps: createLazyPageObject(MapsPage, fixtures.page),
     renderable: createLazyPageObject(RenderablePage, fixtures.page),
     collapsibleNav: createLazyPageObject(CollapsibleNav, fixtures.page, fixtures.config),
