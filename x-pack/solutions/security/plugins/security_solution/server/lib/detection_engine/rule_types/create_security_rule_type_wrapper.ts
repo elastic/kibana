@@ -195,6 +195,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               ruleRevision: rule.revision,
               ruleType: rule.ruleTypeId,
               spaceId,
+              cpsData: options.cpsData,
             },
           });
 

@@ -571,9 +571,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           */
           await dataGrid.clickRowToggle();
           await discover.isShowingDocViewer();
-          await retry.waitFor('rendered items', async () => {
-            return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
-          });
+          await dataGrid.waitForDocViewerFieldsToRender();
 
           // searchValue
           await discover.findFieldByNameOrValueInDocViewer('geo');
@@ -663,10 +661,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await dataGrid.clickRowToggle();
           await discover.isShowingDocViewer();
-
-          await retry.waitFor('rendered items', async () => {
-            return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
-          });
+          await dataGrid.waitForDocViewerFieldsToRender();
 
           // fieldTypeFilters
           await discover.openFilterByFieldTypeInDocViewer();
@@ -717,9 +712,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           */
           await dataGrid.clickRowToggle();
           await discover.isShowingDocViewer();
-          await retry.waitFor('rendered items', async () => {
-            return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
-          });
+          await dataGrid.waitForDocViewerFieldsToRender();
 
           // rowsPerPage
           const docViewerTable = await testSubjects.find('UnifiedDocViewerTableGrid');
@@ -748,10 +741,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await dataGrid.clickRowToggle();
           await discover.isShowingDocViewer();
-
-          await retry.waitFor('rendered items', async () => {
-            return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
-          });
+          await dataGrid.waitForDocViewerFieldsToRender();
 
           // rowsPerPage
           const docViewerTable2 = await testSubjects.find('UnifiedDocViewerTableGrid');
