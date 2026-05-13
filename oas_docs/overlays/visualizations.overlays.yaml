@@ -980,26 +980,6 @@ actions:
                 }
               ]
             }
-  # ──────────────────────────────────────────────
-  # POST /api/visualizations — query parameter descriptions
-  # ──────────────────────────────────────────────
-  - target: "$.paths['/api/visualizations']['post'].parameters[?(@.name=='overwrite')]"
-    description: Add description to overwrite parameter
-    update:
-      description: Determines whether the object at the requested id should be overwritten.
-
-  # ──────────────────────────────────────────────
-  # GET /api/visualizations — parameter descriptions
-  # ──────────────────────────────────────────────
-  - target: "$.paths['/api/visualizations']['get'].parameters[?(@.name=='fields')]"
-    description: Add description to fields parameter
-    update:
-      description: The saved object fields to include in each result. When omitted, all fields are returned.
-
-  - target: "$.paths['/api/visualizations']['get'].parameters[?(@.name=='search_fields')]"
-    description: Add description to search_fields parameter
-    update:
-      description: The fields to match the `query` text against. Defaults to `title` when omitted.
 
   # ──────────────────────────────────────────────
   # DELETE /api/visualizations/{id} — code samples
