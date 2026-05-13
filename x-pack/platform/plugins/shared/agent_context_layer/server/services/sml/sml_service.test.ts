@@ -175,7 +175,7 @@ describe('SmlService', () => {
       'type.autocomplete._index_prefix',
     ];
 
-    it('calls ES search with correct query, space filter, and _source fields', async () => {
+    it('calls ES search with correct retriever, space filter, and _source fields', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
@@ -199,30 +199,40 @@ describe('SmlService', () => {
       expect(
         (scopedClient.asCurrentUser as jest.Mocked<ElasticsearchClient>).search
       ).not.toHaveBeenCalled();
-      const call = esClient.search.mock.calls[0]![0]!;
+      const call = esClient.search.mock.calls[0]![0]! as Record<string, unknown>;
       expect(call.index).toBe(smlIndexName);
       expect(call.size).toBe(10);
       expect(call.allow_no_indices).toBe(true);
       expect(call.ignore_unavailable).toBe(true);
-      expect(call.query).toEqual({
-        bool: {
-          must: [
+      expect(call.query).toBeUndefined();
+      expect(call.retriever).toEqual({
+        rrf: {
+          query: 'foo bar',
+          fields: ['title_semantic', 'description_semantic', 'content_semantic'],
+          retrievers: [
             {
-              bool: {
-                should: [
-                  {
-                    multi_match: {
-                      query: 'foo bar',
-                      type: 'bool_prefix',
-                      fields: saytBoolPrefixFields,
-                    },
+              standard: {
+                query: {
+                  bool: {
+                    should: [
+                      {
+                        multi_match: {
+                          query: 'foo bar',
+                          type: 'bool_prefix',
+                          fields: saytBoolPrefixFields,
+                        },
+                      },
+                      {
+                        multi_match: {
+                          query: 'foo bar',
+                          type: 'best_fields',
+                          fields: ['title^2', 'description', 'content'],
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
                   },
-                  { match: { title: 'foo bar' } },
-                  { match: { description: 'foo bar' } },
-                  { match: { content: 'foo bar' } },
-                  { match: { unified_semantic: 'foo bar' } },
-                ],
-                minimum_should_match: 1,
+                },
               },
             },
           ],

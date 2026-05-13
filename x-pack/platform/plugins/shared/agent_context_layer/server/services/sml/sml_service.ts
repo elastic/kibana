@@ -315,48 +315,16 @@ const checkItemsAccess = async ({
 
 const SML_SEARCH_AS_YOU_TYPE_FIELDS = [
   'title_autocomplete',
-  'title_autocomplete._2gram', // Combination of two words
-  'title_autocomplete._3gram', // Combination of three words
+  'title_autocomplete._2gram',
+  'title_autocomplete._3gram',
   'title_autocomplete._index_prefix',
   'type.autocomplete',
   'type.autocomplete._index_prefix',
 ] as const;
 
-/**
- * Build the search query from a single string. `title_autocomplete` and `type.autocomplete`
- * (search_as_you_type) drive prefix matching via bool_prefix; `title`, `description`, and
- * `content` (text) contribute BM25; `unified_semantic` (a single semantic_text field that
- * copy_to-aggregates `title`, `description`, and `content`) drives vector retrieval.
- *
- * Search-API follow-up will refine this — splitting autocomplete from full retrieval,
- * adding field weighting, etc.
- *
- * After trim: empty string or `*` → `match_all` (return everything).
- */
-const buildSmlSearchQuery = (query: string): Record<string, unknown> => {
-  const trimmed = query.trim();
-  if (trimmed === '' || trimmed === '*') {
-    return { match_all: {} };
-  }
-  return {
-    bool: {
-      should: [
-        {
-          multi_match: {
-            query: trimmed,
-            type: 'bool_prefix',
-            fields: [...SML_SEARCH_AS_YOU_TYPE_FIELDS],
-          },
-        },
-        { match: { title: trimmed } },
-        { match: { description: trimmed } },
-        { match: { content: trimmed } },
-        { match: { unified_semantic: trimmed } },
-      ],
-      minimum_should_match: 1,
-    },
-  };
-};
+const SML_SEMANTIC_FIELDS = ['title_semantic', 'description_semantic', 'content_semantic'] as const;
+
+const SML_BM25_TEXT_FIELDS = ['title^2', 'description', 'content'] as const;
 
 /**
  * Build an ES filter clause from per-type SML search filters.
@@ -418,6 +386,11 @@ export const buildTypeFilters = (
 /**
  * Search the SML index. When the index hasn't been created yet,
  * the function returns empty results silently.
+ *
+ * Non-empty queries use the RRF retriever: the `rrf.query` + `rrf.fields` parameters
+ * drive semantic retrieval across `title_semantic`, `description_semantic`, and
+ * `content_semantic`; a `standard` sub-retriever handles BM25 + SAYT prefix matching.
+ * Empty / `*` queries fall back to a plain `match_all`.
  */
 const searchSml = async ({
   query,
@@ -443,7 +416,8 @@ const searchSml = async ({
   );
 
   try {
-    const smlQuery = buildSmlSearchQuery(query);
+    const trimmed = query.trim();
+    const isMatchAll = trimmed === '' || trimmed === '*';
 
     const typeFilter = buildTypeFilters(filters);
     const filterClauses: Array<Record<string, unknown>> = [
@@ -458,17 +432,58 @@ const searchSml = async ({
       filterClauses.push(typeFilter);
     }
 
+    const searchBody = isMatchAll
+      ? {
+          query: {
+            bool: {
+              must: [{ match_all: {} }],
+              filter: filterClauses,
+            },
+          },
+        }
+      : {
+          retriever: {
+            rrf: {
+              query: trimmed,
+              fields: [...SML_SEMANTIC_FIELDS],
+              retrievers: [
+                {
+                  standard: {
+                    query: {
+                      bool: {
+                        should: [
+                          {
+                            multi_match: {
+                              query: trimmed,
+                              type: 'bool_prefix' as const,
+                              fields: [...SML_SEARCH_AS_YOU_TYPE_FIELDS],
+                            },
+                          },
+                          {
+                            multi_match: {
+                              query: trimmed,
+                              type: 'best_fields' as const,
+                              fields: [...SML_BM25_TEXT_FIELDS],
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  },
+                },
+              ],
+              filter: filterClauses,
+            },
+          },
+        };
+
     const response = await esClient.asInternalUser.search<SmlDocument>({
       index: smlIndexName,
       size,
       allow_no_indices: true,
       ignore_unavailable: true,
-      query: {
-        bool: {
-          must: [smlQuery],
-          filter: filterClauses,
-        },
-      },
+      ...searchBody,
       _source: skipContent ? { excludes: ['content', 'description'] } : true,
     });
 

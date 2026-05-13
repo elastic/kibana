@@ -15,6 +15,9 @@ export const smlIndexName = chatSystemIndex('sml-data');
 
 /**
  * Single source of truth for SML data index field mappings (storage + Elasticsearch).
+ *
+ * Each text source field copies into a dedicated `semantic_text` mirror so the RRF retriever
+ * can address them independently (`title_semantic`, `description_semantic`, `content_semantic`).
  */
 const smlStorageSchemaProperties = {
   id: types.keyword({}),
@@ -23,12 +26,14 @@ const smlStorageSchemaProperties = {
       autocomplete: types.search_as_you_type({}),
     },
   }),
-  title: types.text({ copy_to: ['title_autocomplete', 'unified_semantic'] }),
+  title: types.text({ copy_to: ['title_autocomplete', 'title_semantic'] }),
   title_autocomplete: types.search_as_you_type({}),
+  title_semantic: types.semantic_text({}),
   origin_id: types.keyword({}),
-  content: types.text({ copy_to: 'unified_semantic' }),
-  description: types.text({ copy_to: 'unified_semantic' }),
-  unified_semantic: types.semantic_text({}),
+  content: types.text({ copy_to: 'content_semantic' }),
+  content_semantic: types.semantic_text({}),
+  description: types.text({ copy_to: 'description_semantic' }),
+  description_semantic: types.semantic_text({}),
   tags: types.keyword({}),
   references: types.keyword({}),
   payload: types.flattened({}),
