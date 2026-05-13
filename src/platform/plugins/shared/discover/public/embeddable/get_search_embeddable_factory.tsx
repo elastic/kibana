@@ -60,7 +60,7 @@ export const getSearchEmbeddableFactory = ({
   };
   discoverServices: DiscoverServices;
 }) => {
-  const { save, checkForDuplicateTitle } = discoverServices.savedSearch;
+  const { save, hasLibraryItemWithTitle } = discoverServices.savedSearch;
 
   const savedSearchEmbeddableFactory: EmbeddableFactory<
     SearchEmbeddablePanelApiState,
@@ -267,12 +267,7 @@ export const getSearchEmbeddableFactory = ({
           defaultDescription$.next(description);
           return savedObjectId!;
         },
-        checkForDuplicateTitle: (newTitle, isTitleDuplicateConfirmed, onTitleDuplicate) =>
-          checkForDuplicateTitle({
-            newTitle,
-            isTitleDuplicateConfirmed,
-            onTitleDuplicate,
-          }),
+        hasLibraryItemWithTitle,
         getSerializedStateByValue: () => serialize(undefined),
         getSerializedStateByReference: (newId: string) => serialize(newId),
         serializeState: () => serialize(savedObjectId$.getValue()),

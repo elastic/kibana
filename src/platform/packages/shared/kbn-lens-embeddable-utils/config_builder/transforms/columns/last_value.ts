@@ -37,6 +37,7 @@ export const fromLastValueLensStateToAPI = (
     operation: 'last_value',
     field: options.sourceField,
     time_field: options.params.sortField,
+    // when undefined or null, we default to true to match the behavior of the Lens 8.2 migration
     multi_value: options.params.showArrayValues ?? true,
     ...getLensAPIMetricSharedProps(options),
     ...(options.params?.format ? { format: fromFormatLensStateToAPI(options.params.format) } : {}),
