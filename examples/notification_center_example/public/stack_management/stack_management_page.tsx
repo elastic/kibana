@@ -120,10 +120,7 @@ export function StackManagementPage() {
               </Filters>
             </ContentListToolbar>
             <BulkActionsBar />
-            <NotificationStackTable
-              onMarkAsRead={handleMarkAsRead}
-              onTogglePin={handleTogglePin}
-            />
+            <NotificationStackTable onMarkAsRead={handleMarkAsRead} onTogglePin={handleTogglePin} />
             <ContentListFooter />
           </ContentList>
         </ContentListProvider>
