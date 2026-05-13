@@ -18,6 +18,8 @@
     "@kbn/core-http-server",
     "@kbn/core-saved-objects-api-server",
     "@kbn/features-plugin",
+    "@kbn/inference-plugin",
+    "@kbn/management-settings-ids",
     "@kbn/react-kibana-context-render",
     "@kbn/securitysolution-mitre-catalog",
     "@kbn/securitysolution-rules",

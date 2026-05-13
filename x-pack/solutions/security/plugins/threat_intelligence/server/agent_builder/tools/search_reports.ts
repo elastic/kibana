@@ -10,15 +10,26 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import {
-  GLOBAL_SPACE_ID,
+  SEARCH_REPORTS_API_PATH,
   SEVERITY_LEVELS,
   SOURCE_TYPES,
   THREAT_CATEGORIES,
   THREAT_INTEL_TOOL_IDS,
   THREAT_REGIONS,
-  THREAT_REPORTS_INDEX_PATTERN,
 } from '../../../common';
+import { searchReports } from '../../services';
 
+/**
+ * Thin Agent Builder tool wrapper for the `search_reports` domain action.
+ *
+ * Per the Agent Builder architecture guidance, the canonical execution
+ * surface is the internal HTTP route at `SEARCH_REPORTS_API_PATH` and the
+ * orchestrating agent should prefer `execute_workflow_step` with
+ * `kibana-request` against that route. This tool is retained only as a
+ * portability surface for 3rd party agents (Claude, Cursor) that can't
+ * reach Kibana APIs natively — it delegates to the same shared service
+ * the route uses, so the two paths can never drift.
+ */
 const searchReportsSchema = z.object({
   query: z
     .string()
@@ -67,136 +78,21 @@ const searchReportsSchema = z.object({
     ),
 });
 
-const SEVERITY_RANK: Record<(typeof SEVERITY_LEVELS)[number], number> = {
-  low: 0,
-  medium: 1,
-  high: 2,
-  critical: 3,
-};
-
-const buildSeverityFilter = (
-  minSeverity?: (typeof SEVERITY_LEVELS)[number]
-): Array<Record<string, unknown>> => {
-  if (!minSeverity) return [];
-  const allowed = SEVERITY_LEVELS.filter(
-    (level) => SEVERITY_RANK[level] >= SEVERITY_RANK[minSeverity]
-  );
-  return [{ terms: { 'severity.level': allowed } }];
-};
-
 export const searchReportsTool: BuiltinSkillBoundedTool<typeof searchReportsSchema> = {
   id: THREAT_INTEL_TOOL_IDS.searchReports,
   type: ToolType.builtin,
   description:
+    `Portability wrapper around POST ${SEARCH_REPORTS_API_PATH}. ` +
     'Semantic + BM25 hybrid search over the `.kibana-threat-reports-*` data stream. Returns the top ' +
     'matching threat intelligence reports across all sources (RSS feeds, STIX/TAXII, vendor ' +
     'APIs, analyst-pasted documents). Use when the user asks about threats, advisories, ' +
-    'CVEs in the wild, threat actors, or wants a digest of recent intel matching a topic.',
+    'CVEs in the wild, threat actors, or wants a digest of recent intel matching a topic. ' +
+    'Inside Kibana, prefer calling the route directly via `execute_workflow_step` + `kibana-request`.',
   schema: searchReportsSchema,
-  handler: async (
-    {
-      query,
-      size,
-      source_types: sourceTypes,
-      min_severity: minSeverity,
-      time_range: timeRange,
-      categories,
-      regions,
-    },
-    { esClient, logger, spaceId }
-  ) => {
-    const filters: Array<Record<string, unknown>> = [
-      { terms: { space_id: [spaceId, GLOBAL_SPACE_ID] } },
-    ];
-    if (sourceTypes?.length) filters.push({ terms: { 'source.type': sourceTypes } });
-    if (timeRange) {
-      filters.push({ range: { '@timestamp': { gte: timeRange.from, lte: timeRange.to } } });
-    }
-    if (categories?.length) filters.push({ terms: { 'extracted.categories': categories } });
-    if (regions?.length) filters.push({ terms: { 'geography.regions': regions } });
-    filters.push(...buildSeverityFilter(minSeverity));
-
-    const sharedFilter = filters.length ? { bool: { filter: filters } } : undefined;
-
+  handler: async (params, { esClient, logger, spaceId }) => {
     try {
-      // RRF retriever combines a BM25 multi_match against the mirror fields with a
-      // semantic retriever against the semantic_text fields. RRF degrades gracefully
-      // if inference is unavailable — BM25 hits still surface.
-      const response = await esClient.asCurrentUser.search({
-        index: THREAT_REPORTS_INDEX_PATTERN,
-        size,
-        _source: [
-          '@timestamp',
-          'source',
-          'content.title',
-          'severity',
-          'extracted.ttps.techniques',
-          'extracted.threat_actors',
-          'extracted.categories',
-          'geography.regions',
-          'content_fingerprint',
-        ],
-        retriever: {
-          rrf: {
-            rank_window_size: Math.max(size * 4, 50),
-            rank_constant: 60,
-            retrievers: [
-              {
-                standard: {
-                  query: {
-                    bool: {
-                      must: [
-                        {
-                          multi_match: {
-                            query,
-                            fields: ['content.title_bm25^2', 'content.body_text_bm25'],
-                          },
-                        },
-                      ],
-                      ...(sharedFilter ? { filter: sharedFilter.bool.filter } : {}),
-                    },
-                  },
-                },
-              },
-              {
-                standard: {
-                  query: {
-                    bool: {
-                      should: [
-                        { semantic: { field: 'content.title', query } },
-                        { semantic: { field: 'content.body_text', query } },
-                      ],
-                      minimum_should_match: 1,
-                      ...(sharedFilter ? { filter: sharedFilter.bool.filter } : {}),
-                    },
-                  },
-                },
-              },
-            ],
-          },
-        },
-      } as Parameters<typeof esClient.asCurrentUser.search>[0]);
-
-      const hits = (response.hits.hits ?? []).map((hit) => ({
-        report_id: hit._id,
-        score: hit._score,
-        ...(hit._source as Record<string, unknown>),
-      }));
-
-      return {
-        results: [
-          {
-            type: ToolResultType.other,
-            data: {
-              total:
-                typeof response.hits.total === 'number'
-                  ? response.hits.total
-                  : response.hits.total?.value ?? hits.length,
-              reports: hits,
-            },
-          },
-        ],
-      };
+      const data = await searchReports(esClient.asCurrentUser, logger, spaceId, params);
+      return { results: [{ type: ToolResultType.other, data }] };
     } catch (err) {
       logger.warn(`search_reports failed: ${(err as Error).message}`);
       return {

@@ -114,13 +114,46 @@ export const THREAT_INTEL_TOOL_IDS = {
 /**
  * Internal HTTP routes owned by this plugin.
  *
- * The interactive subscription form posts directly here from the browser
- * renderer instead of waiting on a second agent round-trip. This is the
- * "JSON-RPC back into create_subscription" path that replaces the Phase A
- * read-only confirmation card.
+ * Per the Agent Builder architecture guidance, every domain action exposes
+ * an internal HTTP route at `/internal/threat_intelligence/<action>`. The
+ * Agent Builder skill markdown documents these routes and the orchestrating
+ * agent invokes them via `execute_workflow_step` with `kibana-request`. The
+ * same routes are also callable from ECLI, workflows, and 3rd party agents
+ * without rework. Inline tools survive as thin portability wrappers (for
+ * Claude / Cursor) that delegate to the shared service modules these routes
+ * call.
+ */
+export const THREAT_INTELLIGENCE_API_BASE = '/internal/threat_intelligence' as const;
+
+/**
+ * Domain action routes — these are the canonical execution surface of the
+ * skill. Each path is consumed by exactly one Express route handler in
+ * `server/routes/` and by exactly one shared service module in
+ * `server/services/`.
+ */
+export const SEARCH_REPORTS_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/search_reports` as const;
+export const INGEST_REPORT_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/ingest_report` as const;
+export const HUNT_BEHAVIOR_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/hunt_behavior` as const;
+export const HUNT_FOR_THREAT_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/hunt_for_threat` as const;
+export const COVERAGE_GAP_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/coverage_gap` as const;
+export const GENERALIZE_FROM_TELEMETRY_API_PATH =
+  `${THREAT_INTELLIGENCE_API_BASE}/generalize_from_telemetry` as const;
+export const EXTRACT_IOCS_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/extract_iocs` as const;
+export const ANALYSE_ENVIRONMENT_API_PATH =
+  `${THREAT_INTELLIGENCE_API_BASE}/analyse_environment` as const;
+
+/**
+ * Subscription routes. The `submit` path is preserved for backwards
+ * compatibility with the interactive subscription-confirmation attachment
+ * (the form posts directly to it). The list / delete routes complete the
+ * CRUD surface so the agent can call any subscription action through HTTP.
  */
 export const SUBMIT_SUBSCRIPTION_API_PATH =
-  '/internal/threat_intelligence/subscriptions/submit' as const;
+  `${THREAT_INTELLIGENCE_API_BASE}/subscriptions/submit` as const;
+export const LIST_SUBSCRIPTIONS_API_PATH =
+  `${THREAT_INTELLIGENCE_API_BASE}/subscriptions/list` as const;
+export const DELETE_SUBSCRIPTION_API_PATH =
+  `${THREAT_INTELLIGENCE_API_BASE}/subscriptions/delete` as const;
 
 /**
  * Internal API path that powers the visual dashboard. Returns the
@@ -131,7 +164,7 @@ export const SUBMIT_SUBSCRIPTION_API_PATH =
  * a tiny terms agg on `.alerts-security.alerts-*` for the env-impact pill.
  */
 export const DASHBOARD_OVERVIEW_API_PATH =
-  '/internal/threat_intelligence/dashboard/overview' as const;
+  `${THREAT_INTELLIGENCE_API_BASE}/dashboard/overview` as const;
 
 /**
  * Internal API path for the saved-view CRUD routes that back the dashboard's
@@ -139,7 +172,7 @@ export const DASHBOARD_OVERVIEW_API_PATH =
  * filter set (regions, categories, optional time range, dashboard flags) as
  * a saved object so users can share or revisit a curated cut of the data.
  */
-export const SAVED_VIEWS_API_PATH = '/internal/threat_intelligence/saved_views' as const;
+export const SAVED_VIEWS_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/saved_views` as const;
 
 /**
  * Saved-object type for `threat-intelligence-saved-view`. The

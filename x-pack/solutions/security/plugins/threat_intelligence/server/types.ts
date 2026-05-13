@@ -7,6 +7,7 @@
 
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   TaskManagerSetupContract,
@@ -16,12 +17,14 @@ import type {
 export interface ThreatIntelligenceSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
   features: FeaturesPluginSetup;
+  inference?: InferenceServerSetup;
   spaces?: SpacesPluginSetup;
   taskManager?: TaskManagerSetupContract;
 }
 
 export interface ThreatIntelligenceStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
+  inference?: InferenceServerStart;
   spaces?: SpacesPluginStart;
   taskManager?: TaskManagerStartContract;
 }

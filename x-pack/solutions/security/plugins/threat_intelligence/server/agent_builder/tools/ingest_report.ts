@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { createHash } from 'crypto';
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import {
-  GLOBAL_SPACE_ID,
-  SEVERITY_LEVELS,
-  THREAT_INTEL_TOOL_IDS,
-  THREAT_REPORTS_DATA_STREAM,
-} from '../../../common';
+import { INGEST_REPORT_API_PATH, SEVERITY_LEVELS, THREAT_INTEL_TOOL_IDS } from '../../../common';
+import { ingestReport } from '../../services';
 
+/**
+ * Thin Agent Builder tool wrapper for the `ingest_report` domain action.
+ *
+ * Canonical execution surface is the internal HTTP route at
+ * `INGEST_REPORT_API_PATH`. This tool exists for 3rd party agent
+ * portability and delegates to the same shared service.
+ */
 const ingestReportSchema = z
   .object({
     title: z.string().min(1).describe('Report title (will be embedded for semantic search).'),
@@ -42,129 +44,23 @@ const ingestReportSchema = z
     'Ingest a single threat intelligence report into the `.kibana-threat-reports-*` data stream. ' +
       'Use when the analyst pastes a URL, blog post, vendor advisory, or incident postmortem ' +
       'directly into chat. The document is normalized, fingerprinted (sha256 of body_text) for ' +
-      'dedup, and indexed with `source.type: "manual"`. The fingerprint key uses op_type:create ' +
-      'so re-pasting the same content is a no-op.'
+      'dedup, and indexed with `source.type: "manual"`.'
   );
-
-const fingerprint = (text: string): string =>
-  createHash('sha256').update(text.trim().normalize('NFKC')).digest('hex');
 
 export const ingestReportTool: BuiltinSkillBoundedTool<typeof ingestReportSchema> = {
   id: THREAT_INTEL_TOOL_IDS.ingestReport,
   type: ToolType.builtin,
   description:
+    `Portability wrapper around POST ${INGEST_REPORT_API_PATH}. ` +
     'Ingest one threat intelligence report (analyst paste / ad-hoc URL / vendor advisory) ' +
     'into the source-agnostic `.kibana-threat-reports-*` data stream. The report is fingerprinted ' +
-    'for dedup so re-submitting the same content is a no-op.',
+    'for dedup so re-submitting the same content is a no-op. Inside Kibana, prefer calling the ' +
+    'route directly via `execute_workflow_step` + `kibana-request`.',
   schema: ingestReportSchema,
-  handler: async (
-    {
-      title,
-      body_text: bodyText,
-      source_name: sourceName,
-      source_url: sourceUrl,
-      severity,
-      language,
-    },
-    { esClient, logger, spaceId }
-  ) => {
-    const fp = fingerprint(`${title}\n${bodyText}`);
-    const now = new Date().toISOString();
-
+  handler: async (params, { esClient, logger, spaceId }) => {
     try {
-      // Look up duplicates first to avoid the data stream rejecting the create on
-      // primary; the data stream itself doesn't expose op_type:create idiomatically,
-      // so we do an explicit precheck.
-      const existing = await esClient.asCurrentUser.search({
-        index: THREAT_REPORTS_DATA_STREAM,
-        size: 1,
-        _source: false,
-        // Dedup is scoped to the current space + the global sentinel: the same
-        // advisory in another space is *not* a duplicate (per-space isolation),
-        // but a global-tagged seed is everyone's canonical copy.
-        query: {
-          bool: {
-            filter: [
-              { term: { content_fingerprint: fp } },
-              { terms: { space_id: [spaceId, GLOBAL_SPACE_ID] } },
-            ],
-          },
-        },
-      });
-
-      const total =
-        typeof existing.hits.total === 'number'
-          ? existing.hits.total
-          : existing.hits.total?.value ?? 0;
-
-      if (total > 0) {
-        const existingId = existing.hits.hits[0]._id;
-        return {
-          results: [
-            {
-              type: ToolResultType.other,
-              data: {
-                status: 'duplicate',
-                content_fingerprint: fp,
-                report_id: existingId,
-                message:
-                  'Report content already ingested. Returning the canonical document id without writing a new copy.',
-              },
-            },
-          ],
-        };
-      }
-
-      const indexResponse = await esClient.asCurrentUser.index({
-        index: THREAT_REPORTS_DATA_STREAM,
-        document: {
-          '@timestamp': now,
-          content_fingerprint: fp,
-          space_id: spaceId,
-          source: {
-            type: 'manual',
-            name: sourceName,
-            url: sourceUrl,
-            adapter_id: 'manual:analyst-paste',
-          },
-          content: {
-            title,
-            body_text: bodyText,
-            language,
-          },
-          severity: {
-            level: severity,
-            score:
-              severity === 'critical'
-                ? 90
-                : severity === 'high'
-                ? 70
-                : severity === 'medium'
-                ? 40
-                : 20,
-          },
-          provenance: {
-            ingested_at: now,
-            extraction_method: 'pending',
-          },
-        },
-      });
-
-      return {
-        results: [
-          {
-            type: ToolResultType.other,
-            data: {
-              status: 'ingested',
-              report_id: indexResponse._id,
-              content_fingerprint: fp,
-              message:
-                'Report ingested. Workflow 2 (`nl_extraction_behavioral`) will pick it up on the next run, ' +
-                'or invoke `threat_intel.hunt_behavior` directly to extract behaviors now.',
-            },
-          },
-        ],
-      };
+      const data = await ingestReport(esClient.asCurrentUser, logger, spaceId, params);
+      return { results: [{ type: ToolResultType.other, data }] };
     } catch (err) {
       logger.warn(`ingest_report failed: ${(err as Error).message}`);
       return {

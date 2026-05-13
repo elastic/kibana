@@ -12,6 +12,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { parseExperimentalConfigValue, type ExperimentalFeatures } from '../common';
 import type { ThreatIntelligenceConfig } from './config';
@@ -47,6 +48,10 @@ export class ThreatIntelligencePlugin
   // current request's space at call-time without needing the spaces plugin
   // at setup boundary.
   private spacesService: SpacesServiceStart | undefined;
+  // Captured during start() so the LLM-backed routes (`hunt_behavior`,
+  // `generalize_from_telemetry`) can build a `ScopedModel` per request
+  // without requiring the inference plugin at the setup boundary.
+  private inferenceService: InferenceServerStart | undefined;
 
   constructor(initializerContext: PluginInitializerContext<ThreatIntelligenceConfig>) {
     this.logger = initializerContext.logger.get();
@@ -101,6 +106,7 @@ export class ThreatIntelligencePlugin
       router,
       logger: this.logger,
       getSpacesService: () => this.spacesService,
+      getInference: () => this.inferenceService,
     });
 
     if (this.experimentalFeatures.threatIntelligenceSkillEnabled) {
@@ -143,6 +149,11 @@ export class ThreatIntelligencePlugin
     // current space id per request. When the spaces plugin is absent the
     // route helpers fall back to `'default'`.
     this.spacesService = startDeps.spaces?.spacesService;
+    // Optional: capture the inference service so the LLM-backed routes
+    // (`hunt_behavior`, `generalize_from_telemetry`) can resolve a scoped
+    // model per request. When the inference plugin is absent the routes
+    // return 503 with a structured "no GenAI connector" message.
+    this.inferenceService = startDeps.inference;
 
     // Index template installation + seeding are best-effort — they should not
     // block start. Errors are logged but the plugin continues so the rest of
