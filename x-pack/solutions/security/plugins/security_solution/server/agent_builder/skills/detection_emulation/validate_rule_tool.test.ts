@@ -53,6 +53,9 @@ interface MockContextOptions {
   promptStatus?: ConfirmationStatus;
   executionMode?: AgentExecutionMode;
   toolCallId?: string;
+  runId?: string;
+  conversationId?: string;
+  executionId?: string;
 }
 
 const createMockContext = (options: MockContextOptions = {}) => {
@@ -74,6 +77,21 @@ const createMockContext = (options: MockContextOptions = {}) => {
       toolId: 'security.detection-emulation.validate-rule',
       toolCallId: options.toolCallId ?? 'tc_default',
       callSource: 'agent' as const,
+    },
+    // PROD-2: validate_rule_tool now destructures `runContext` to build
+    // the agent-builder actor block on the SO write and audit comment.
+    // The test mock provides realistic IDs so any future assertion on
+    // the propagated actor object can read them back.
+    runContext: {
+      runId: options.runId ?? 'run-test',
+      stack: [
+        {
+          type: 'agent' as const,
+          agentId: 'agent-test',
+          conversationId: options.conversationId ?? 'conv-test',
+          executionId: options.executionId ?? 'exec-test',
+        },
+      ],
     },
     prompts: {
       checkConfirmationStatus,

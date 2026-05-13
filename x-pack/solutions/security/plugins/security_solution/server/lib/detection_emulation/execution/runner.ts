@@ -25,6 +25,7 @@ import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_c
 import type { ActionDetails } from '../../../../common/endpoint/types';
 import type { NormalizedExternalConnectorClient } from '../../../endpoint/services/actions/clients/lib/normalized_external_connector_client';
 import { buildEmulationComment } from './audit_logger';
+import type { ActorContext } from './audit_context';
 import {
   UnsupportedAgentTypeError,
   UnsupportedCommandForAgentTypeError,
@@ -59,6 +60,14 @@ export interface EmulationRunnerOptions {
   connectorActions?: NormalizedExternalConnectorClient;
   /** Optional: resolves `(emulationId) -> rule binding` so dispatched actions carry rule context. */
   ruleBindingLookup?: EmulationRuleBindingLookup;
+  /**
+   * Audit attribution for every dispatched response action. Embedded in
+   * the `comment` so an auditor can grep `via=agent-builder` to
+   * distinguish tool-driven dispatches from direct REST calls. When
+   * unset, the comment falls back to the original
+   * `Detection Emulation [<id>]: <command>` shape (legacy callers).
+   */
+  actorContext?: ActorContext;
 }
 
 export interface RunEmulationResult {
@@ -89,6 +98,7 @@ export class EmulationRunner {
   private readonly logger: Logger;
   private readonly connectorActions?: NormalizedExternalConnectorClient;
   private readonly ruleBindingLookup?: EmulationRuleBindingLookup;
+  private readonly actorContext?: ActorContext;
 
   constructor(options: EmulationRunnerOptions) {
     this.endpointService = options.endpointService;
@@ -99,6 +109,7 @@ export class EmulationRunner {
     this.logger = options.logger;
     this.connectorActions = options.connectorActions;
     this.ruleBindingLookup = options.ruleBindingLookup;
+    this.actorContext = options.actorContext;
   }
 
   /**
@@ -240,7 +251,7 @@ export class EmulationRunner {
   ): Promise<ActionDetails> {
     const { emulationId, command, endpointIds } = input;
     const userComment = input.parameters?.comment;
-    const comment = buildEmulationComment(emulationId, command, userComment);
+    const comment = buildEmulationComment(emulationId, command, userComment, this.actorContext);
     const base = { endpoint_ids: endpointIds, comment };
     const options: CommonResponseActionMethodOptions = {
       ruleId: ruleBinding.ruleId,

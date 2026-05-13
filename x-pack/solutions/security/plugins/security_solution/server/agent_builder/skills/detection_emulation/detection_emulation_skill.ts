@@ -214,6 +214,17 @@ endpoints into the allowlist explicitly. The previous experimental default
 \`createTestAllowlistConfig()\` but is intentionally absent from production
 construction paths.
 
+**Audit attribution (PROD-2).** Every dispatched response action carries an
+\`actor\` block describing who triggered it. Tool invocations are tagged
+\`actor.kind: 'agent-builder'\` plus \`conversationId\` / \`executionId\` /
+\`runId\` / \`toolCallId\` IDs from the agent runtime; direct REST calls are
+tagged \`actor.kind: 'user'\`. The same block is persisted on the
+\`detection-emulation-report\` Saved Object (model version \`2\`) and embedded
+in the response action's audit comment as a \`[via=agent-builder ...]\`
+suffix, so an auditor can pivot from a single response action back to the
+exact conversation and tool call that produced it. Legacy v1 reports are
+backfilled to \`actor: { kind: 'user' }\` on first read.
+
 ## Response Format
 
 Always include in your response to the user:

@@ -23,6 +23,7 @@ import {
 } from '../../../lib/detection_emulation/execution/runner';
 import type { EmulationAllowlist } from '../../../lib/detection_emulation/execution/allowlist';
 import type { EmulationRateLimiter } from '../../../lib/detection_emulation/execution/rate_limiter';
+import type { ActorContext } from '../../../lib/detection_emulation/execution/audit_context';
 import {
   getDetectionEmulationFeatureFlags,
   isRealExecutionEnabled,
@@ -47,6 +48,14 @@ export interface CommandGatesContext {
   request: KibanaRequest;
   esClient: { asCurrentUser: ElasticsearchClient };
   spaceId: string;
+  /**
+   * PROD-2: actor attribution for the dispatched response action's
+   * audit comment. Each per-family tool builds this from its
+   * `runContext` + `callContext.toolCallId` so the comment carries
+   * `via=agent-builder ...` straight through to the audit trail.
+   * Optional for backward compat with any future non-tool caller.
+   */
+  actorContext?: ActorContext;
 }
 
 /**
@@ -108,6 +117,7 @@ export const withCommandGates = async (
     request,
     esClient,
     spaceId,
+    actorContext,
   } = ctx;
   const { emulationId, agentType, endpointIds, command } = cmd;
 
@@ -270,6 +280,7 @@ export const withCommandGates = async (
       username: currentUser.username,
       logger,
       ruleBindingLookup,
+      actorContext,
     });
 
     // The per-family tool already re-parsed against the strict union —

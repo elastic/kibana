@@ -350,6 +350,11 @@ export const validateRuleRoute = (
               );
             }
 
+            // PROD-2: REST callers are direct human invocations
+            // (Kibana UI, curl with personal API key, etc.). Tag the
+            // audit comment with `kind: 'user'` so the SO + audit trail
+            // distinguish them from agent-driven dispatches that go
+            // through the Agent Builder tool.
             const runner = new EmulationRunner({
               endpointService,
               esClient,
@@ -357,6 +362,7 @@ export const validateRuleRoute = (
               casesClient,
               username: currentUser.username,
               logger,
+              actorContext: { kind: 'user' },
             });
 
             for (const payload of scenarioResult.selectedPayloads) {
@@ -458,6 +464,8 @@ export const validateRuleRoute = (
             perPhase,
             operator: currentUser.username,
             spaceId,
+            // PROD-2: REST writes always carry actor.kind: 'user'.
+            actor: { kind: 'user' },
           };
 
           const historyResult = await createEmulationHistory(

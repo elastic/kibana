@@ -45,6 +45,7 @@ import {
   EmulationRateLimiter,
   createDefaultRateLimiterConfig,
 } from '../../../lib/detection_emulation/execution/rate_limiter';
+import { buildAgentBuilderActor } from '../../../lib/detection_emulation/execution/audit_context';
 import { validateRuleSchema } from './validate_rule_input';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -178,7 +179,7 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
     schema: validateRuleSchema,
     handler: async (
       rawParams,
-      { esClient, spaceId, request, prompts, callContext, executionMode }
+      { esClient, spaceId, request, prompts, callContext, executionMode, runContext }
     ) => {
       const {
         ruleId,
@@ -188,6 +189,13 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
         wallBudgetMs: rawBudget,
       } = rawParams;
       const wallBudgetMs = Math.min(rawBudget ?? WALL_BUDGET_DEFAULT_MS, WALL_BUDGET_CEILING_MS);
+
+      // PROD-2: capture the agent-builder attribution once for both the
+      // SO write (Step 8 below) and the runner-side audit comment
+      // (passed via EmulationRunner.actorContext when real_execution
+      // dispatches). Pure / cheap; safe to compute even on the
+      // log_injection path because the SO write happens in either mode.
+      const actorContext = buildAgentBuilderActor(runContext, callContext.toolCallId);
 
       // I1: token from rate-limit acquire (real_execution only). Released in
       // the unified catch when any downstream step throws after acquire so a
@@ -493,6 +501,8 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
             );
           }
 
+          // PROD-2: actorContext flows through to every dispatched
+          // response action's audit comment as `via=agent-builder ...`.
           const runner = new EmulationRunner({
             endpointService,
             esClient: esClient.asCurrentUser,
@@ -500,6 +510,7 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
             casesClient,
             username: currentUser.username,
             logger,
+            actorContext,
           });
 
           for (const payload of scenarioResult.selectedPayloads) {
@@ -600,6 +611,11 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
           perPhase,
           operator: currentUser.username,
           spaceId,
+          // PROD-2: persist the same attribution we put on the audit
+          // comment. Auditors can `actor.kind:"agent-builder"` filter
+          // the SO to find every tool-driven run, then pivot via
+          // `actor.conversationId` / `actor.runId`.
+          actor: actorContext,
         };
 
         const historyResult = await createEmulationHistory(

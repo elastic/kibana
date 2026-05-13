@@ -22,6 +22,7 @@ import {
   EmulationRateLimiter,
   createDefaultRateLimiterConfig,
 } from '../../../lib/detection_emulation/execution/rate_limiter';
+import { buildAgentBuilderActor } from '../../../lib/detection_emulation/execution/audit_context';
 import { withCommandGates } from './with_command_gates';
 import { buildEmulationConfirmation } from './build_emulation_confirmation';
 
@@ -125,7 +126,7 @@ unrelated work.`,
           parameters: toolParams.parameters,
         }),
     },
-    handler: async (rawParams, { esClient, spaceId, request }) => {
+    handler: async (rawParams, { esClient, spaceId, request, runContext, callContext }) => {
       const { emulationId, agentType, command } = rawParams;
 
       const strictParseResult = RunEmulationCommandInputSchema.safeParse(rawParams);
@@ -152,6 +153,10 @@ unrelated work.`,
         };
       }
 
+      // PROD-2: capture agent-builder attribution for the dispatched
+      // response action's audit comment.
+      const actorContext = buildAgentBuilderActor(runContext, callContext.toolCallId);
+
       return withCommandGates(
         {
           core,
@@ -163,6 +168,7 @@ unrelated work.`,
           request,
           esClient,
           spaceId,
+          actorContext,
         },
         strictParseResult.data
       );

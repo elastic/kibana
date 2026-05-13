@@ -300,6 +300,10 @@ export const runEmulationCommandRoute = (
             casesClient = undefined;
           }
 
+          // PROD-2: REST callers are direct human invocations. Tag the
+          // audit comment with `kind: 'user'` so the response action
+          // trail distinguishes them from agent-driven dispatches that
+          // come through the Agent Builder per-family tools.
           const runner = new EmulationRunner({
             endpointService,
             esClient: coreContext.elasticsearch.client.asCurrentUser,
@@ -308,6 +312,7 @@ export const runEmulationCommandRoute = (
             username: currentUser.username,
             logger,
             ruleBindingLookup: createSavedObjectRuleBindingLookup(internalSoClient, logger),
+            actorContext: { kind: 'user' },
           });
 
           let result;

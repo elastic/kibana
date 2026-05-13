@@ -14,6 +14,24 @@ import { schema } from '@kbn/config-schema';
 
 export const emulationReportTypeName = 'detection-emulation-report';
 
+/**
+ * Audit attribution persisted on every report. Mirrors `ActorContext`
+ * from `execution/audit_context.ts` but is repeated here as a plain
+ * interface to keep the SO type free of cross-package value imports.
+ */
+export interface EmulationReportActor {
+  /** `'user'` for direct REST calls, `'agent-builder'` for tool dispatches. */
+  kind: 'user' | 'agent-builder';
+  /** Conversation that hosted the agent run. Agent-Builder only. */
+  conversationId?: string;
+  /** Per-invocation execution id from the agent runtime. Agent-Builder only. */
+  executionId?: string;
+  /** Top-level run id from the agent runtime. Agent-Builder only. */
+  runId?: string;
+  /** Per-tool-call id from the agent runtime. Agent-Builder only. */
+  toolCallId?: string;
+}
+
 /** One dispatched response action recorded in the report. */
 export interface EmulationReportDispatchedAction {
   actionId: string;
@@ -70,6 +88,14 @@ export interface EmulationReportAttributes {
   operator: string;
   /** Kibana space the report belongs to. */
   spaceId: string;
+  /**
+   * Audit attribution describing WHO triggered the run.
+   * Optional in the type signature because v1 documents were written
+   * before this field existed; v2's `data_backfill` migration sets
+   * `{ kind: 'user' }` on every legacy doc so reads after migration
+   * are guaranteed to populate it.
+   */
+  actor?: EmulationReportActor;
 }
 
 const dispatchedActionSchema = schema.object({
@@ -94,16 +120,34 @@ const scoreSchema = schema.object({
   fp: schema.number(),
 });
 
+const actorSchema = schema.object({
+  kind: schema.oneOf([schema.literal('user'), schema.literal('agent-builder')]),
+  conversationId: schema.maybe(schema.string()),
+  executionId: schema.maybe(schema.string()),
+  runId: schema.maybe(schema.string()),
+  toolCallId: schema.maybe(schema.string()),
+});
+
 /**
- * Initial model version. The baseline `'1'` unlocks future schema migrations:
- * any subsequent attribute change must bump to `'2'` with explicit forward +
- * backward transformations. Without this, the type is pinned to legacy
- * migrations and cannot evolve safely.
+ * Model version timeline:
+ *
+ *   v1 (baseline): every field except `actor`. The original schema
+ *   shipped without audit attribution.
+ *
+ *   v2 (PROD-2): adds the optional `actor` field, mapped as a structured
+ *   keyword group so auditors can query `actor.kind` and the per-tool-
+ *   call IDs without scripting. Existing v1 documents are backfilled to
+ *   `actor: { kind: 'user' }` because every pre-PROD-2 dispatch went
+ *   through the REST surface (no tool path existed yet).
  */
 const modelVersions: SavedObjectsModelVersionMap = {
   '1': {
     changes: [],
     schemas: {
+      // forwardCompatibility runs when a v2-aware node reads a v1
+      // document. `unknowns: 'ignore'` lets the new `actor` field pass
+      // through without rejection so v1 readers don't blow up on the
+      // additional v2 attribute.
       forwardCompatibility: schema.object(
         {
           scenarioId: schema.string(),
@@ -138,6 +182,79 @@ const modelVersions: SavedObjectsModelVersionMap = {
         perPhase: schema.arrayOf(phaseSchema),
         operator: schema.string(),
         spaceId: schema.string(),
+      }),
+    },
+  },
+  '2': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          actor: {
+            // dynamic: false here mirrors the parent — we want to be
+            // explicit about every queryable subfield so auditors can
+            // index-time-filter on `actor.kind` without scripting.
+            dynamic: false,
+            properties: {
+              kind: { type: 'keyword' },
+              conversationId: { type: 'keyword' },
+              executionId: { type: 'keyword' },
+              runId: { type: 'keyword' },
+              toolCallId: { type: 'keyword' },
+            },
+          },
+        },
+      },
+      {
+        // Why backfill to `kind: 'user'` and not leave it absent:
+        // every v1 document was written via the REST route (the
+        // Agent-Builder tool path didn't exist before PROD-2), so the
+        // historical caller really IS a direct user. Auditors querying
+        // `actor.kind:user` should see a clean union of legacy + v2
+        // REST writes without having to special-case "missing actor".
+        type: 'data_backfill',
+        backfillFn: () => ({
+          attributes: { actor: { kind: 'user' as const } },
+        }),
+      },
+    ],
+    schemas: {
+      forwardCompatibility: schema.object(
+        {
+          scenarioId: schema.string(),
+          ruleId: schema.string(),
+          scenarioFingerprint: schema.string(),
+          mode: schema.oneOf([schema.literal('real_execution'), schema.literal('log_injection')]),
+          endpointIds: schema.arrayOf(schema.string()),
+          agentType: schema.string(),
+          startedAt: schema.string(),
+          completedAt: schema.maybe(schema.string()),
+          payloadIds: schema.arrayOf(schema.string()),
+          dispatchedActions: schema.arrayOf(dispatchedActionSchema),
+          score: scoreSchema,
+          perPhase: schema.arrayOf(phaseSchema),
+          operator: schema.string(),
+          spaceId: schema.string(),
+          actor: schema.maybe(actorSchema),
+        },
+        { unknowns: 'ignore' }
+      ),
+      create: schema.object({
+        scenarioId: schema.string(),
+        ruleId: schema.string(),
+        scenarioFingerprint: schema.string(),
+        mode: schema.oneOf([schema.literal('real_execution'), schema.literal('log_injection')]),
+        endpointIds: schema.arrayOf(schema.string()),
+        agentType: schema.string(),
+        startedAt: schema.string(),
+        completedAt: schema.maybe(schema.string()),
+        payloadIds: schema.arrayOf(schema.string()),
+        dispatchedActions: schema.arrayOf(dispatchedActionSchema),
+        score: scoreSchema,
+        perPhase: schema.arrayOf(phaseSchema),
+        operator: schema.string(),
+        spaceId: schema.string(),
+        actor: schema.maybe(actorSchema),
       }),
     },
   },
@@ -192,6 +309,19 @@ export const emulationReportType: SavedObjectsType<EmulationReportAttributes> = 
       },
       operator: { type: 'keyword' },
       spaceId: { type: 'keyword' },
+      // PROD-2: matches the v2 `mappings_addition` so a fresh install
+      // gets the field in its initial mapping; the migration path is
+      // for upgrades from v1.
+      actor: {
+        dynamic: false,
+        properties: {
+          kind: { type: 'keyword' },
+          conversationId: { type: 'keyword' },
+          executionId: { type: 'keyword' },
+          runId: { type: 'keyword' },
+          toolCallId: { type: 'keyword' },
+        },
+      },
     },
   },
   modelVersions,
