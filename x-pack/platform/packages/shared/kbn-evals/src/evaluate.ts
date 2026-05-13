@@ -92,6 +92,12 @@ function toDatasetRouteExample(example: Example) {
   };
 }
 
+// Per-worker run ID, set by the executorClient fixture after connector resolution.
+// Used by the fetch fixture's getRunId callback to inject the per-model run ID
+// into OTel baggage headers. Module-scoped because Playwright fixtures in the same
+// base.extend() block cannot share closure state, and each worker is a separate process.
+let workerRunId: string | undefined;
+
 /**
  * Test type for evaluations. Loads an inference client and a
  * executor client.
@@ -119,9 +125,11 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
   ],
   fetch: [
     async ({ kbnClient, log }, use) => {
-      // add a HttpHandler as a fixture, so consumers can use
-      // modules that depend on it (like the inference client)
-      const fetch = httpHandlerFromKbnClient({ kbnClient, log });
+      const fetch = httpHandlerFromKbnClient({
+        kbnClient,
+        log,
+        getRunId: () => workerRunId,
+      });
       await use(fetch);
     },
     { scope: 'worker' },
@@ -282,10 +290,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       const currentRunId = `${baseRunId}-${connector.id}`;
       log.info(`Run ID for this worker: ${currentRunId}`);
 
-      // Update the env var so the fetch fixture's baggage header
-      // (read lazily via process.env.TEST_RUN_ID) uses the per-model run ID.
-      // Each Playwright worker is a separate process, so this is safe.
-      process.env.TEST_RUN_ID = currentRunId;
+      workerRunId = currentRunId;
 
       const shouldPreflightExport =
         process.env.KBN_EVALS_SKIP_PREFLIGHT_EXPORT !== 'true' &&
