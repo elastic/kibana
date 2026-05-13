@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await setFarequoteTimerange();
   }
 
-  describe('create jobs from lens', function () {
+  describe('create jobs from Lens', function () {
     this.tags(['ml']);
     let jobId: string;
 
