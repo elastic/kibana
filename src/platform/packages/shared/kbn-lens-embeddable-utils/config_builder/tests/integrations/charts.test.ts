@@ -33,6 +33,11 @@ const skipList: Record<string, string[]> = {
     'Events between Ports',
     'Top hosts by memory usage over time',
   ],
+  lnsDatatable: [
+    // pre-v1 colorMapping format (singular 'rule' instead of 'rules'). Check convertToRawColorMappingsFn.
+    'Worker utilization by pipeline',
+    '[Metrics Logstash] Node Health Report (panel: 5)',
+  ],
 };
 
 describe('Integration panels', () => {
