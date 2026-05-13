@@ -225,10 +225,9 @@ Expected one of:
     case 'expectedAggregationArgument':
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.expectedAggregationArgument', {
-          defaultMessage: 'Argument "{paramName}" of {parentName} must be an aggregation function.',
+          defaultMessage: 'This argument of {parentName} must be an aggregation function.',
           values: {
             parentName: out.parentName.toUpperCase(),
-            paramName: out.paramName,
           },
         }),
       };
@@ -633,12 +632,10 @@ export const errors = {
 
   expectedAggregationArgument: (
     parentFn: ESQLFunction,
-    paramName: string,
     location: ESQLLocation = parentFn.location
   ): ESQLMessage =>
     errors.byId('expectedAggregationArgument', location, {
       parentName: parentFn.name,
-      paramName,
     }),
 
   unknownAggFunction: (

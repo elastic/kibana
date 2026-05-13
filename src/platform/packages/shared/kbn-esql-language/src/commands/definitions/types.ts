@@ -360,7 +360,7 @@ export interface ValidationErrors {
   };
   expectedAggregationArgument: {
     message: string;
-    type: { parentName: string; paramName: string };
+    type: { parentName: string };
   };
   unknownAggregateFunction: {
     message: string;

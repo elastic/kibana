@@ -921,14 +921,14 @@ describe('function validation', () => {
     it('reports an error when the hint-marked position receives a non-aggregation function', async () => {
       const { expectErrors } = await setup();
       await expectErrors('FROM a_index | STATS AGG_OUTER(SCALAR_INNER(doubleField))', [
-        'Argument "aggregation" of AGG_OUTER must be an aggregation function.',
+        'This argument of AGG_OUTER must be an aggregation function.',
       ]);
     });
 
     it('reports an error when the hint-marked position receives a column', async () => {
       const { expectErrors } = await setup();
       await expectErrors('FROM a_index | STATS AGG_OUTER(doubleField)', [
-        'Argument "aggregation" of AGG_OUTER must be an aggregation function.',
+        'This argument of AGG_OUTER must be an aggregation function.',
       ]);
     });
 

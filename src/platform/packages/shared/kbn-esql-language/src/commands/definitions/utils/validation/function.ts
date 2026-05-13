@@ -137,27 +137,13 @@ class FunctionValidator {
     return this.hintKindAt(position) === 'aggregation';
   }
 
-  private paramNameAt(position: number): string | undefined {
-    if (!this.definition) {
-      return undefined;
-    }
-    for (const sig of this.definition.signatures) {
-      const name = sig.params[position]?.name;
-      if (name) {
-        return name;
-      }
-    }
-    return undefined;
-  }
-
-  private validateAggregationArg(arg: ESQLAstItem, position: number): void {
+  private validateAggregationArg(arg: ESQLAstItem): void {
     const isAggCall =
       isFunctionExpression(arg) &&
       getFunctionDefinition(arg.name)?.type === FunctionDefinitionTypes.AGG;
 
     if (!isAggCall) {
-      const paramName = this.paramNameAt(position) ?? `argument ${position + 1}`;
-      this.report(errors.expectedAggregationArgument(this.fn, paramName));
+      this.report(errors.expectedAggregationArgument(this.fn));
     }
 
     if (isFunctionExpression(arg)) {
@@ -252,7 +238,7 @@ class FunctionValidator {
       const arg = removeInlineCasts(flatArgs[i]);
 
       if (this.expectsAggregationAt(i)) {
-        this.validateAggregationArg(arg, i);
+        this.validateAggregationArg(arg);
         continue;
       }
 
