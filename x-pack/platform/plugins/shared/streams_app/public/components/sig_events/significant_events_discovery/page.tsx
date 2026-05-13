@@ -57,7 +57,7 @@ export function SignificantEventsDiscoveryPage() {
   } = useKibana();
 
   const {
-    features: { significantEventsDiscovery, significantEvents },
+    features: { significantEventsDiscovery },
   } = useStreamsPrivileges();
   const { euiTheme } = useEuiTheme();
 
@@ -183,7 +183,7 @@ export function SignificantEventsDiscoveryPage() {
                 })}
               </EuiFlexGroup>
             </EuiFlexItem>
-            {significantEvents?.enabled && (
+            {significantEventsDiscovery?.enabled && (
               <EuiFlexItem grow={false}>
                 <EuiButton
                   href={getUrlForApp('observability', { path: '/sigevents_overview' })}
