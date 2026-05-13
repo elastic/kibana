@@ -1,5 +1,5 @@
 {
-  "sha1": "5b62889419950add2740848b3c222567be213509",
+  "sha1": "06ecca0865c20da64929734f223ad498570eb00e",
   "tests": [
     {
       "id": "405beff6794306f-a54347ac1e57e7e",
@@ -32,28 +32,28 @@
     {
       "id": "f24ba03baeb5e26-0723e6c11fe5d87",
       "title": "APM integration not installed but setup completed Admin user",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_apm_not_installed.spec.ts",
-        "line": 34,
+        "line": 54,
         "column": 12
       }
     },
     {
       "id": "f24ba03baeb5e26-76b2ff68d4e7a1b",
       "title": "APM integration not installed but setup completed Viewer user",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_apm_not_installed.spec.ts",
-        "line": 49,
+        "line": 69,
         "column": 12
       }
     },
