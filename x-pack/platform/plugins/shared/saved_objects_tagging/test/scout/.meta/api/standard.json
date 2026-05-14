@@ -1,0 +1,173 @@
+{
+  "sha1": "69ac2ad604d179b5ffd51047d900ede647a75503",
+  "tests": [
+    {
+      "id": "f9d2b70425d8a75-d70fe63df1204d1",
+      "title": "POST /api/saved_objects_tagging/assignments/update_by_tags allows to update tag assignments",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_bulk_assign.spec.ts",
+        "line": 31,
+        "column": 12
+      }
+    },
+    {
+      "id": "f9d2b70425d8a75-47dbdfe3420978a",
+      "title": "POST /api/saved_objects_tagging/assignments/update_by_tags returns an error when assigning to non-taggable types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_bulk_assign.spec.ts",
+        "line": 69,
+        "column": 12
+      }
+    },
+    {
+      "id": "f9d2b70425d8a75-7d2aad8050a4f30",
+      "title": "POST /api/saved_objects_tagging/assignments/update_by_tags returns an error when both `assign` and `unassign` are unspecified",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_bulk_assign.spec.ts",
+        "line": 107,
+        "column": 12
+      }
+    },
+    {
+      "id": "651dd7f2acc024a-012419f1c482ab8",
+      "title": "POST /api/saved_objects_tagging/tags/create creates a tag when validation succeeds",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_create.spec.ts",
+        "line": 31,
+        "column": 12
+      }
+    },
+    {
+      "id": "651dd7f2acc024a-032a9afee55aa1c",
+      "title": "POST /api/saved_objects_tagging/tags/create returns validation details when create payload is invalid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_create.spec.ts",
+        "line": 84,
+        "column": 12
+      }
+    },
+    {
+      "id": "651dd7f2acc024a-1145c4f2d74bbaf",
+      "title": "POST /api/saved_objects_tagging/tags/create does not create a tag with an existing name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_create.spec.ts",
+        "line": 113,
+        "column": 12
+      }
+    },
+    {
+      "id": "9093c5311aa47ce-f23bb1137180db1",
+      "title": "DELETE /api/saved_objects_tagging/tags/{id} deletes a tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_delete.spec.ts",
+        "line": 31,
+        "column": 12
+      }
+    },
+    {
+      "id": "9093c5311aa47ce-8f6940527d9e942",
+      "title": "DELETE /api/saved_objects_tagging/tags/{id} removes references to a deleted tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_delete.spec.ts",
+        "line": 57,
+        "column": 12
+      }
+    },
+    {
+      "id": "079e13dcf8b627f-6b92bc812fdf0a0",
+      "title": "POST /api/saved_objects_tagging/tags/{id} updates the tag when validation succeeds",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_update.spec.ts",
+        "line": 31,
+        "column": 12
+      }
+    },
+    {
+      "id": "079e13dcf8b627f-43ee43e44e92ef7",
+      "title": "POST /api/saved_objects_tagging/tags/{id} does not allow updating a tag name to an existing name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_update.spec.ts",
+        "line": 74,
+        "column": 12
+      }
+    },
+    {
+      "id": "079e13dcf8b627f-eeebd4c89a03370",
+      "title": "POST /api/saved_objects_tagging/tags/{id} returns 404 when trying to update a missing tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_update.spec.ts",
+        "line": 114,
+        "column": 12
+      }
+    },
+    {
+      "id": "079e13dcf8b627f-41f1b7990a1875a",
+      "title": "POST /api/saved_objects_tagging/tags/{id} returns validation details when update payload is invalid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_update.spec.ts",
+        "line": 135,
+        "column": 12
+      }
+    }
+  ]
+}

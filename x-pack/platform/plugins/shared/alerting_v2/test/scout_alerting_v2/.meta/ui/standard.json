@@ -1,5 +1,5 @@
 {
-  "sha1": "fbbc92abe72d4828df6ca007bfbfe63453fce95f",
+  "sha1": "4ff7e92eb6efd3d76a62207344414d4bc9d437ef",
   "tests": [
     {
       "id": "8065d296c26f2cd-b37771106c4b8c3",
@@ -71,13 +71,13 @@
     {
       "id": "885339228dd56a5-73c89e4070ac6f5",
       "title": "Execution history — smoke loads the page and shows the empty state when there are no events",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/execution_history_smoke.spec.ts",
-        "line": 22,
+        "line": 21,
         "column": 7
       }
     },
