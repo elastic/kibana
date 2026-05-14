@@ -10,6 +10,7 @@ import { durationSchema } from './common';
 import {
   groupingModeSchema,
   actionPolicyDestinationSchema,
+  actionPolicyTypeSchema,
   throttleStrategySchema,
 } from './action_policy_data_schema';
 
@@ -18,6 +19,11 @@ export const actionPolicyResponseSchema = z.object({
   version: z.string().optional().describe('The version, used for optimistic concurrency control.'),
   name: z.string().describe('The name of the action policy.'),
   description: z.string().describe('A description of the action policy.'),
+  type: actionPolicyTypeSchema.describe('The action policy type.'),
+  ruleId: z
+    .string()
+    .nullable()
+    .describe('The linked rule id when type is "single_rule"; null otherwise.'),
   enabled: z.boolean().describe('Whether the action policy is enabled.'),
   destinations: z.array(actionPolicyDestinationSchema).describe('The list of destinations.'),
   matcher: z.string().nullable().describe('A KQL query to match alerts, or null to match all.'),
@@ -32,7 +38,11 @@ export const actionPolicyResponseSchema = z.object({
   throttle: z
     .object({
       strategy: throttleStrategySchema.optional().describe('The throttle strategy.'),
-      interval: durationSchema.optional().describe('The throttle interval duration (e.g. 5m, 1h).'),
+      interval: durationSchema
+        .nullable()
+        .describe(
+          'The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.'
+        ),
     })
     .nullable()
     .describe('The throttle configuration for notifications.'),
