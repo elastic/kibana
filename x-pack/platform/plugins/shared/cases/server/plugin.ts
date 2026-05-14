@@ -296,13 +296,21 @@ export class CasePlugin
     // installed, log loudly and skip v2 start. The flag-vs-dependency
     // mismatch is an administrator config error, not a runtime crash.
     if (this.casesAnalyticsV2Service) {
-      if (this.caseConfig.analyticsV2.enabled && plugins.dataViews == null) {
+      if (!this.caseConfig.analyticsV2.enabled) {
+        // v2 disabled — every method on the service is already a no-op via
+        // the writer / refresher proxy contracts. Don't construct the
+        // internal repo at all: the `cases-templates` SO type registration
+        // is gated on `templates.enabled`, and stripped configs (OAS
+        // capture, certain test harnesses) that disable both flags would
+        // otherwise throw "Missing mappings for saved objects types:
+        // 'cases-templates'" from `createInternalRepository`.
+      } else if (plugins.dataViews == null) {
         this.logger.error(
           'cases-analyticsV2 is enabled but the `dataViews` plugin is not installed. ' +
             'Install the dataViews plugin or set `xpack.cases.analyticsV2.enabled: false`. ' +
             'Skipping v2 start.'
         );
-      } else if (plugins.dataViews != null) {
+      } else {
         // The internal repo serves two consumers:
         //  - The reconciliation runner walks `cases` SOs.
         //  - The data view sub-service reads `cases-templates` SOs per-space
@@ -320,12 +328,6 @@ export class CasePlugin
           dataViewsService: plugins.dataViews,
         });
       }
-      // When the v2 flag is off AND dataViews is absent: nothing to do.
-      // Calling .start({...}) with a NO-OP service was the old behavior;
-      // we now only call .start() when dataViews is present, which is a
-      // strict improvement (avoids attempting bootstrap that can never
-      // succeed). The service's other lifecycle hooks (writer proxy,
-      // route registration in setup) remain wired regardless.
     }
 
     this.userProfileService.initialize({

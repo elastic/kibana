@@ -182,7 +182,9 @@ export class CasesAnalyticsV2DataViewService {
       // stale cache. Only fires on the post-TTL path; cold-start (cached
       // == null) is uninteresting noise.
       this.logger.debug(
-        `bootstrap cache expired for space=${deps.spaceId}; re-running ensure (cache TTL ${BOOTSTRAP_CACHE_TTL_MS}ms exceeded by ${
+        `bootstrap cache expired for space=${
+          deps.spaceId
+        }; re-running ensure (cache TTL ${BOOTSTRAP_CACHE_TTL_MS}ms exceeded by ${
           this.now() - cached.ensuredAt - BOOTSTRAP_CACHE_TTL_MS
         }ms)`
       );

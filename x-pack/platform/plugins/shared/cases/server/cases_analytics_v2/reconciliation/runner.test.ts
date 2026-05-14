@@ -31,7 +31,10 @@ describe('runReconciliation', () => {
   it('reconciles cases updated since lastRunAt', async () => {
     // Updated since lastRunAt — the classic "patched after a missed write" case.
     const { client, writer } = setup([
-      makeCase('case-B', { createdAt: '2026-05-01T00:00:00.000Z', updatedAt: '2026-05-05T00:00:00.000Z' }),
+      makeCase('case-B', {
+        createdAt: '2026-05-01T00:00:00.000Z',
+        updatedAt: '2026-05-05T00:00:00.000Z',
+      }),
     ]);
 
     const result = await runReconciliation({

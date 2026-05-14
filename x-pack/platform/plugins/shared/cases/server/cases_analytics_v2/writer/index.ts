@@ -251,9 +251,9 @@ export class CasesAnalyticsV2Writer implements CasesAnalyticsV2WriterContract {
       if (isRetryable) retryableCount++;
 
       this.logger.warn(
-        `cases.analyticsV2 bulk-${label} item failed [id=${ids[idx]}, status=${status}, retryable=${isRetryable}]: ${
-          op.error.reason ?? 'unknown'
-        }`
+        `cases.analyticsV2 bulk-${label} item failed [id=${
+          ids[idx]
+        }, status=${status}, retryable=${isRetryable}]: ${op.error.reason ?? 'unknown'}`
       );
       loggedCount++;
     }
@@ -293,10 +293,16 @@ export class CasesAnalyticsV2Writer implements CasesAnalyticsV2WriterContract {
  * type from `@elastic/elasticsearch` carries every possible operation
  * shape and ends up needing casts at every use; this captures just the
  * fields the writer needs (status code + error reason), keyed by op type.
+ *
+ * Note `error.reason` is `string | null | undefined` to match the ES
+ * client's `ErrorCause.reason` — the upstream type allows `null` and the
+ * structural assignment from `response.items` to our minimal shape only
+ * type-checks when the nullability matches. The `?? 'unknown'` fallback
+ * at the call site already handles both `null` and `undefined`.
  */
 interface BulkResponseItem {
-  index?: { status?: number; error?: { reason?: string } };
-  delete?: { status?: number; error?: { reason?: string } };
+  index?: { status?: number; error?: { reason?: string | null } };
+  delete?: { status?: number; error?: { reason?: string | null } };
 }
 
 /**

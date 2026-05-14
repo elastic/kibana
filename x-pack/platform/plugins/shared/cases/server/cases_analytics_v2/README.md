@@ -42,11 +42,11 @@ catches anything the primary path missed). Both call `writer.upsertCase` /
 
 ## Why three indices in the final design (this PR ships one)
 
-| Surface       | Index                | Mode                          | Source SO(s)                                          |
-| ------------- | -------------------- | ----------------------------- | ----------------------------------------------------- |
-| `case`        | `.cases`             | `index.mode: lookup`, hidden  | `cases`                                               |
-| `activity`    | `.cases-activity`    | plain, hidden                 | `cases-user-actions`                                  |
-| `attachments` | `.cases-attachments` | plain, hidden                 | `cases-comments` (legacy) + `cases-attachments` (v2)  |
+| Surface       | Index                | Mode                         | Source SO(s)                                         |
+| ------------- | -------------------- | ---------------------------- | ---------------------------------------------------- |
+| `case`        | `.cases`             | `index.mode: lookup`, hidden | `cases`                                              |
+| `activity`    | `.cases-activity`    | plain, hidden                | `cases-user-actions`                                 |
+| `attachments` | `.cases-attachments` | plain, hidden                | `cases-comments` (legacy) + `cases-attachments` (v2) |
 
 `.cases` is **lookup-mode** so the activity / attachments surfaces can
 `LOOKUP JOIN` it from ES|QL — "for each activity row, what's the current case
@@ -63,15 +63,16 @@ shouldn't be locked to a single shard.
 
 ```yaml
 xpack.cases.analyticsV2:
-  enabled: false                  # default — set to true to opt in
-  reconciliationIntervalMinutes: 30  # default — Task Manager cadence for the
-                                     # reconciliation backstop. Min 5; lower
-                                     # values catch up faster after a hook
-                                     # failure but cost more SO walks against
-                                     # the cases index. Picked up at plugin
-                                     # start; runtime changes require a Kibana
-                                     # restart (the next /reset re-applies the
-                                     # current value to the rescheduled task).
+  enabled: false # default — set to true to opt in
+  reconciliationIntervalMinutes:
+    30 # default — Task Manager cadence for the
+    # reconciliation backstop. Min 5; lower
+    # values catch up faster after a hook
+    # failure but cost more SO walks against
+    # the cases index. Picked up at plugin
+    # start; runtime changes require a Kibana
+    # restart (the next /reset re-applies the
+    # current value to the rescheduled task).
 ```
 
 When `enabled: false`, the v2 service is a no-op. Nothing registers, nothing
@@ -140,7 +141,7 @@ the runtime fields they want to keep. Out of scope for the managed feature.
 lands ([elastic/elasticsearch#148331](https://github.com/elastic/elasticsearch/pull/148331)),
 DLS will scope which case documents a user can read inside `.cases` (on
 `cases.owner` + `kibana.space_ids`). The per-space data view is orthogonal —
-it scopes the *runtime field set*, not the document set. The two compose
+it scopes the _runtime field set_, not the document set. The two compose
 cleanly: a user in space A sees only space-A runtime fields **and** only
 space-A cases.
 
@@ -249,12 +250,12 @@ writer failures, or administrator-initiated full backfills. Superuser only.
 
 ### Failure modes
 
-| Symptom                                          | Likely cause                          | Action                                                |
-| ------------------------------------------------ | ------------------------------------- | ----------------------------------------------------- |
-| `cases.analyticsV2 write failed [...]` at ERROR  | Transient ES blip                     | Reconciliation will repair within 30 min              |
-| Sustained write failures on every case event     | Mapping conflict (e.g. drifted schema)| Inspect mapping; consider POST /reset                 |
-| Reconciliation tick logs `processed=0` forever   | Task state cursor stuck in the future | POST /reset (clears state + repopulates)              |
-| Runtime fields missing from `Cases` data view    | Template SOs have no extended fields  | Check template SOs; reconciliation tick re-syncs runtime fields |
+| Symptom                                         | Likely cause                           | Action                                                          |
+| ----------------------------------------------- | -------------------------------------- | --------------------------------------------------------------- |
+| `cases.analyticsV2 write failed [...]` at ERROR | Transient ES blip                      | Reconciliation will repair within 30 min                        |
+| Sustained write failures on every case event    | Mapping conflict (e.g. drifted schema) | Inspect mapping; consider POST /reset                           |
+| Reconciliation tick logs `processed=0` forever  | Task state cursor stuck in the future  | POST /reset (clears state + repopulates)                        |
+| Runtime fields missing from `Cases` data view   | Template SOs have no extended fields   | Check template SOs; reconciliation tick re-syncs runtime fields |
 
 ## File layout
 

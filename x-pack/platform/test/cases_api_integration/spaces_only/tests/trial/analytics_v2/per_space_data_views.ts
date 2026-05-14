@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import type { Client as ESClient } from '@elastic/elasticsearch';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
 import { createCase, deleteAllCaseItems, getAuthWithSuperUser } from '../../../../common/lib/api';
@@ -147,9 +148,3 @@ interface DataViewSOShape {
     name?: string;
   };
 }
-
-type ESClient = ReturnType<FtrProviderContext['getService']> extends infer S
-  ? S extends { search: (...args: never) => unknown }
-    ? S
-    : never
-  : never;

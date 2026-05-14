@@ -177,9 +177,7 @@ export const makeMockDvService = (): MockDvService => ({
  * the analytics-v2 service consumes. Cast to `DataViewsServerPluginStart`
  * is the cheap path — every test pulls only `dataViewsServiceFactory`.
  */
-export const makeDataViewsPluginStart = (
-  dvService: MockDvService
-): DataViewsServerPluginStart =>
+export const makeDataViewsPluginStart = (dvService: MockDvService): DataViewsServerPluginStart =>
   ({
     dataViewsServiceFactory: jest.fn().mockResolvedValue(dvService),
   } as unknown as DataViewsServerPluginStart);

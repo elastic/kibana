@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ElasticsearchClient,
-  KibanaRequest,
-  SavedObject,
-} from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest, SavedObject } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
@@ -69,9 +65,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
 
   /** Pre-seed `dvService.get` to throw the canonical 404 the production code handles. */
   const stubMissingDataView = (dvService: MockDvService) => {
-    dvService.get.mockRejectedValueOnce(
-      Object.assign(new Error('not found'), { statusCode: 404 })
-    );
+    dvService.get.mockRejectedValueOnce(Object.assign(new Error('not found'), { statusCode: 404 }));
   };
 
   describe('ensureForSpace', () => {
@@ -427,7 +421,9 @@ describe('CasesAnalyticsV2DataViewService', () => {
       expect(dvService.get).toHaveBeenCalledTimes(1);
       expect(dvService.createAndSave).toHaveBeenCalledTimes(1);
       if (childLogger) {
-        const debugCalls = (childLogger.debug as jest.Mock).mock.calls.map(([msg]: [string]) => msg);
+        const debugCalls = (childLogger.debug as jest.Mock).mock.calls.map(
+          ([msg]: [string]) => msg
+        );
         expect(
           debugCalls.some((m) => m.includes('bootstrap cache expired') && m.includes(spaceId))
         ).toBe(true);

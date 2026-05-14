@@ -1432,7 +1432,11 @@ describe('TemplatesService', () => {
           '_getTemplate'
         )
         .mockResolvedValue(
-          createTemplateSO('so-1', { templateId: 'template-1', owner: 'securitySolution' })
+          createTemplateSO('so-1', {
+            templateId: 'template-1',
+            name: 'Template 1',
+            owner: 'securitySolution',
+          })
         );
       unsecuredSavedObjectsClient.find.mockResolvedValue({
         page: 1,

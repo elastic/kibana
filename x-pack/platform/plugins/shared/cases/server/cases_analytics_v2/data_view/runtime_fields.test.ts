@@ -57,7 +57,7 @@ describe('splitSnakeKey', () => {
    *          the next refresh publishes the runtime field normally.
    */
   it('rejects snake-keys containing characters outside [A-Za-z0-9_]', () => {
-    expect(splitSnakeKey("evil'); script(\"x\"_as_long")).toBeNull();
+    expect(splitSnakeKey('evil\'); script("x"_as_long')).toBeNull();
     expect(splitSnakeKey('with space_as_long')).toBeNull();
     expect(splitSnakeKey('quote\u0027_as_long')).toBeNull();
     expect(splitSnakeKey('backslash\\_as_long')).toBeNull();

@@ -6,7 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { clampCursorToNotFuture } from './index';
+import { clampCursorToNotFuture } from '.';
 
 describe('clampCursorToNotFuture', () => {
   const logger = loggerMock.create();
