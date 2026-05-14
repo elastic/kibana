@@ -7,16 +7,16 @@
 
 import React, { useState } from 'react';
 import {
-    EuiFlyout,
-    type EuiFlyoutProps,
-    EuiFlyoutHeader,
-    EuiFlexGroup,
-    EuiFlexItem,
-    EuiTab,
-    EuiTabs,
-    EuiTitle,
-    useEuiTheme,
-    useGeneratedHtmlId,
+  EuiFlyout,
+  type EuiFlyoutProps,
+  EuiFlyoutHeader,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTab,
+  EuiTabs,
+  EuiTitle,
+  useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
