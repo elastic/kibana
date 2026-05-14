@@ -83,6 +83,7 @@ const createAttachment = (
   origin: overrides.origin,
   data: {
     name: 'My Policy',
+    type: 'global' as const,
     description: 'A test policy',
     destinations: overrides.destinations ?? [{ type: 'workflow' as const, id: 'wf-1' }],
     matcher: overrides.matcher !== undefined ? overrides.matcher : 'rule.id: "abc"',

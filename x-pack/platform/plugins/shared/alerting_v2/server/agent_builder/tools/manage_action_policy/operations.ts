@@ -206,6 +206,7 @@ export const executeActionPolicyOperations = (
 
 const buildActionPolicyValidationPayload = (data: Partial<ActionPolicyAttachmentData>) => ({
   name: data.name ?? '',
+  type: data.type ?? 'global',
   description: data.description ?? '',
   destinations: data.destinations ?? [],
   ...(data.matcher !== undefined ? { matcher: data.matcher ?? undefined } : {}),
