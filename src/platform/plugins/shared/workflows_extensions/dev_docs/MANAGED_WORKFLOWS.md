@@ -317,6 +317,11 @@ await managed.install(MY_WORKFLOW_ID, { spaceId: 'default' });
 
 > Never hardcode the literal `'system-...'` string at call sites — always import the id const. This keeps definition ownership and rename safety in one place.
 
+Validation note: `@kbn/workflows/managed` tests validate YAML syntax and the core workflow shape,
+but intentionally tolerate extension-registered triggers, connectors, and plugin-registered steps.
+Full validation of those runtime extensions requires a plugin-level schema built from the
+workflows extension registries.
+
 ## 8) `yaml` vs `yamlTemplate`
 
 A managed definition must provide exactly one of `yaml` or `yamlTemplate`.
