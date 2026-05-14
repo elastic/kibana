@@ -331,9 +331,11 @@ describe('ContentListClientProvider', () => {
       const { result } = renderHook(() => useContentListConfig(), {
         wrapper: createWrapper(props),
       });
-      const onInspect = result.current.item?.onInspect;
+      const onInspect = result.current.item?.actions?.inspect?.onItemAction;
       if (!onInspect) {
-        throw new Error('expected provider to expose onInspect when contentEditor is configured');
+        throw new Error(
+          'expected provider to expose actions.inspect.onItemAction when contentEditor is configured'
+        );
       }
       return { onInspect, dataSource: result.current.dataSource };
     };
@@ -425,6 +427,53 @@ describe('ContentListClientProvider', () => {
       // Read-only flyout never receives an onSave to wrap, so the inspect
       // path should not synthesise one.
       expect(params?.onSave).toBeUndefined();
+    });
+  });
+
+  describe('inspect action merge', () => {
+    // The merge spreads the existing config so only `onItemAction` is overridden.
+    it('preserves consumer-provided `actions.inspect.restriction` when injecting the inspect handler', () => {
+      const openContentEditor = jest.fn<() => void, [OpenContentEditorParams]>(() => jest.fn());
+      const restriction = jest.fn(() => 'archived');
+      // Consumer-provided placeholder handler — the discriminated union
+      // requires at least one handler. The client provider's injection
+      // is what actually opens the flyout, so this should be overridden.
+      const consumerOnItemAction = jest.fn();
+
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper({
+          contentEditor: { openContentEditor, isReadonly: true },
+          item: {
+            actions: { inspect: { onItemAction: consumerOnItemAction, restriction } },
+          },
+        }),
+      });
+
+      const inspect = result.current.item?.actions?.inspect;
+      expect(inspect?.onItemAction).toEqual(expect.any(Function));
+      // The consumer's placeholder is overridden by the injected handler.
+      expect(inspect?.onItemAction).not.toBe(consumerOnItemAction);
+      // The restriction flows through unchanged.
+      expect(inspect?.restriction).toBe(restriction);
+    });
+
+    it('preserves other consumer-provided `actions[id]` entries unchanged', () => {
+      const openContentEditor = jest.fn<() => void, [OpenContentEditorParams]>(() => jest.fn());
+      const archiveOnBulkAction = jest.fn(async () => {});
+
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper({
+          contentEditor: { openContentEditor, isReadonly: true },
+          item: {
+            actions: {
+              archive: { onBulkAction: archiveOnBulkAction },
+            },
+          },
+        }),
+      });
+
+      const archive = result.current.item?.actions?.archive;
+      expect(archive?.onBulkAction).toBe(archiveOnBulkAction);
     });
   });
 });
