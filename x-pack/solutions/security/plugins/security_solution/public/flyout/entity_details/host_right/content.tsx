@@ -73,6 +73,7 @@ export const HostPanelContent = ({
         <EntityHighlightsAccordion
           entityIdentifier={entityRecord ? entityRecord.entity.id : hostName}
           entityType={EntityType.host}
+          entityRecord={entityRecord}
         />
       )}
       {!skipRiskAndCriticality &&

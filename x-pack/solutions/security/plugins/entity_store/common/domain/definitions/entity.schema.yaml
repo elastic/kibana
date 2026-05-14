@@ -135,6 +135,40 @@ components:
             oauth_consent_restriction:
               type: string
               description: OAuth consent restriction (e.g. admin_only, verified_only, unrestricted).
+            summary:
+              type: object
+              description: Persisted AI-generated summary for this entity.
+              additionalProperties: false
+              nullable: true
+              properties:
+                highlights:
+                  type: array
+                  description: Structured highlight sections produced by the LLM.
+                  items:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      title:
+                        type: string
+                        description: The title of the highlight section.
+                      text:
+                        type: string
+                        description: The detailed text content for this highlight section.
+                    required:
+                      - title
+                      - text
+                recommendedActions:
+                  type: array
+                  nullable: true
+                  description: Actionable recommendations produced by the LLM.
+                  items:
+                    type: string
+                generated_at:
+                  type: number
+                  description: Unix timestamp (ms) of when the summary was generated.
+                generated_by:
+                  type: string
+                  description: Username of the user who triggered the summary generation.
         behaviors:
           type: object
           description: Behavioral signals observed for the entity.

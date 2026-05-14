@@ -16,7 +16,10 @@ import {
 } from '@kbn/entity-store/common';
 import { compact } from 'lodash';
 import type { EntityDetailsHighlightsResponse } from '../../../common/api/entity_analytics/entity_details/highlights.gen';
-import { ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL } from '../../../common/entity_analytics/entity_analytics/constants';
+import {
+  ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL,
+  ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL,
+} from '../../../common/entity_analytics/entity_analytics/constants';
 import type {
   AssetCriticalityRecord,
   ConfigureRiskEngineSavedObjectRequestBodyInput,
@@ -716,6 +719,21 @@ export const useEntityAnalyticsRoutes = () => {
         signal,
       });
 
+    const saveEntityAiSummary = (params: {
+      entityId: string;
+      entityType: string;
+      summary: {
+        highlights: Array<{ title: string; text: string }>;
+        recommendedActions: string[] | null | undefined;
+        generated_at: number;
+      };
+    }): Promise<{ updated: boolean }> =>
+      http.fetch(ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL, {
+        version: API_VERSIONS.internal.v1,
+        method: 'POST',
+        body: JSON.stringify(params),
+      });
+
     /**
      * List all watchlists
      */
@@ -958,6 +976,7 @@ export const useEntityAnalyticsRoutes = () => {
       updateSavedObjectConfiguration,
       listPrivMonMonitoredIndices,
       fetchEntityDetailsHighlights,
+      saveEntityAiSummary,
       fetchWatchlists,
       fetchLeads,
       fetchLeadGenerationStatus,
