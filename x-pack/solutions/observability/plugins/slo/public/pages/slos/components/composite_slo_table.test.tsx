@@ -118,7 +118,7 @@ describe('CompositeSloTable', () => {
         uiSettings: {
           get: (key: string) => (key === 'format:percent:defaultPattern' ? '0.0%' : ''),
         },
-        application: { navigateToUrl: jest.fn(), navigateToApp: jest.fn() },
+        application: { navigateToApp: jest.fn() },
         http: { basePath: { prepend: (url: string) => url } },
         share: {
           url: {
