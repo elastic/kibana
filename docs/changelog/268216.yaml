@@ -4,4 +4,4 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-05-12
-title: Fix launchpad order in classic global nav
+title: Fix launchpad order in classic global navigation

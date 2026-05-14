@@ -134,9 +134,9 @@ entries:
   - https://github.com/elastic/kibana/issues/239387
 - file:
     name: 266493.yaml
-    checksum: dc7afb81a4e61aff75f5810f0ae131e45b12110a
+    checksum: 27736c1c9517d6662f11a08d3fc9ea22a0a16cbd
   type: bug-fix
-  title: Fix Save to library fails silently when duplicate title exists
+  title: Fix silent failure of "Save to library" when duplicate title exists
   products:
   - product: cloud-serverless
     target: 2026-05-12
@@ -158,9 +158,9 @@ entries:
   - https://github.com/elastic/kibana/pull/262628
 - file:
     name: 266827.yaml
-    checksum: ac4f903823a6d0c068ab4063077626288d441c28
+    checksum: 983e45567a69372bd7461b3846e7b2722f9e1d4d
   type: bug-fix
-  title: Fix All Cases view phrase search
+  title: Fix phrase search in All Cases view
   products:
   - product: cloud-serverless
     target: 2026-05-12
@@ -302,8 +302,8 @@ entries:
   - https://github.com/elastic/kibana/issues/255333
 - file:
     name: 261591.yaml
-    checksum: d834e8f996b8142f720851b0c2932134aca64dc7
-  type: deprecation
+    checksum: 566b7304596ef2f18a41feb95edbf74eb3371072
+  type: feature
   title: Mark all LLM connectors as deprecated
   products:
   - product: cloud-serverless
@@ -340,9 +340,9 @@ entries:
   - https://github.com/elastic/kibana/issues/268172
 - file:
     name: 268216.yaml
-    checksum: 53abbee088d7f277b943b2fd52d05508df2c5a7d
+    checksum: c76c667f94a38b5b3ac63ad3d569947f62d5502a
   type: bug-fix
-  title: Fix launchpad order in classic global nav
+  title: Fix launchpad order in classic global navigation
   products:
   - product: cloud-serverless
     target: 2026-05-12

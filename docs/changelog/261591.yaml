@@ -1,6 +1,6 @@
 prs:
 - https://github.com/elastic/kibana/pull/261591
-type: deprecation
+type: feature
 products:
 - product: cloud-serverless
   target: 2026-05-12

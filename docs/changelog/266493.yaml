@@ -8,4 +8,4 @@ products:
   target: 2026-05-12
 areas:
 - Dashboards and visualizations
-title: Fix Save to library fails silently when duplicate title exists
+title: Fix silent failure of "Save to library" when duplicate title exists
