@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { dump, load } from 'js-yaml';
-import { validateEsqlQuery } from '@kbn/alerting-v2-schemas';
 import type { FormValues, StateTransition } from '../types';
 import {
   deriveAlertDelayModeFromStateTransition,
@@ -107,7 +106,12 @@ export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
 };
 
 /**
- * Parse and validate YAML string to FormValues
+ * Parse YAML string to FormValues (lenient).
+ *
+ * Parses the YAML structure and extracts all recognised fields, providing
+ * safe defaults for any that are missing. YAML syntax errors are still
+ * reported. Field-level validation (required name, valid ES|QL, etc.)
+ * is handled by RHF at submit time, keeping a single validation pipeline.
  */
 export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
   let parsed: unknown;
@@ -170,41 +174,13 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
     };
   }
 
-  // Validate required fields
   const name = metadata?.name;
-  if (typeof name !== 'string' || !name.trim()) {
-    return {
-      values: null,
-      error: i18n.translate('xpack.alertingV2.yamlRuleForm.nameRequiredError', {
-        defaultMessage: 'metadata.name is required.',
-      }),
-    };
-  }
-
-  const breachQuery = queryObj?.breach;
-  if (typeof breachQuery !== 'string' || !breachQuery.trim()) {
-    return {
-      values: null,
-      error: i18n.translate('xpack.alertingV2.yamlRuleForm.queryRequiredError', {
-        defaultMessage: 'query.breach is required.',
-      }),
-    };
-  }
-
-  // Validate ES|QL query syntax
-  const queryValidationError = validateEsqlQuery(breachQuery);
-  if (queryValidationError) {
-    return {
-      values: null,
-      error: queryValidationError,
-    };
-  }
 
   return {
     values: {
       kind: (kind as 'alert' | 'signal') ?? 'alert',
       metadata: {
-        name: name.trim(),
+        name: typeof name === 'string' ? name.trim() : '',
         enabled: metadata?.enabled !== false,
         description: typeof metadata?.description === 'string' ? metadata.description : undefined,
         owner: typeof metadata?.owner === 'string' ? metadata.owner : undefined,
@@ -216,7 +192,7 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
         lookback: typeof schedule?.lookback === 'string' ? schedule.lookback : '1m',
       },
       query: {
-        breach: breachQuery,
+        breach: typeof queryObj?.breach === 'string' ? queryObj.breach : '',
       },
       grouping: Array.isArray(grouping?.fields)
         ? { fields: grouping.fields as string[] }

@@ -14,16 +14,6 @@ import {
 import { defaultTestFormValues } from '../../test_utils';
 import type { FormValues } from '../types';
 
-// Mock ES|QL validation
-jest.mock('@kbn/alerting-v2-schemas', () => ({
-  validateEsqlQuery: (query: string) => {
-    if (!query || query.includes('INVALID')) {
-      return 'Invalid ES|QL query syntax';
-    }
-    return null;
-  },
-}));
-
 describe('yaml_form_utils', () => {
   describe('formValuesToYamlObject', () => {
     it('converts FormValues to YAML-compatible object with snake_case keys', () => {
@@ -264,7 +254,7 @@ describe('yaml_form_utils', () => {
       expect(result.error).toContain('Kind must be "alert" or "signal"');
     });
 
-    it('returns error for missing name', () => {
+    it('returns values with empty name when metadata.name is missing', () => {
       const yaml = dump({
         kind: 'alert',
         metadata: {},
@@ -273,11 +263,11 @@ describe('yaml_form_utils', () => {
 
       const result = parseYamlToFormValues(yaml);
 
-      expect(result.values).toBeNull();
-      expect(result.error).toContain('metadata.name is required');
+      expect(result.error).toBeNull();
+      expect(result.values?.metadata.name).toBe('');
     });
 
-    it('returns error for empty name', () => {
+    it('returns values with trimmed empty name when name is whitespace', () => {
       const yaml = dump({
         kind: 'alert',
         metadata: { name: '   ' },
@@ -286,11 +276,11 @@ describe('yaml_form_utils', () => {
 
       const result = parseYamlToFormValues(yaml);
 
-      expect(result.values).toBeNull();
-      expect(result.error).toContain('metadata.name is required');
+      expect(result.error).toBeNull();
+      expect(result.values?.metadata.name).toBe('');
     });
 
-    it('returns error for missing query', () => {
+    it('returns values with empty query when query.breach is missing', () => {
       const yaml = dump({
         kind: 'alert',
         metadata: { name: 'Test' },
@@ -299,11 +289,11 @@ describe('yaml_form_utils', () => {
 
       const result = parseYamlToFormValues(yaml);
 
-      expect(result.values).toBeNull();
-      expect(result.error).toContain('query.breach is required');
+      expect(result.error).toBeNull();
+      expect(result.values?.query.breach).toBe('');
     });
 
-    it('returns error for invalid ES|QL query', () => {
+    it('returns values for ES|QL query without validation', () => {
       const yaml = dump({
         kind: 'alert',
         metadata: { name: 'Test' },
@@ -312,8 +302,8 @@ describe('yaml_form_utils', () => {
 
       const result = parseYamlToFormValues(yaml);
 
-      expect(result.values).toBeNull();
-      expect(result.error).toContain('Invalid ES|QL query syntax');
+      expect(result.error).toBeNull();
+      expect(result.values?.query.breach).toBe('INVALID query');
     });
 
     it('uses default values for missing optional fields', () => {
