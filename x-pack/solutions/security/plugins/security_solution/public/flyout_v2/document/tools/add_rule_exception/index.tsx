@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiSkeletonText } from '@elastic/eui';
-import { set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { ALERT_RULE_UUID, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
