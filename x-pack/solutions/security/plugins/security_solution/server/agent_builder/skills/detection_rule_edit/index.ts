@@ -65,22 +65,6 @@ If you are creating a new rule, use the following:
 - after calling the \`security.create_detection_rule\` tool, move to step 4.
 - render the latest version of the attachment inline.
 
-### Handling Tool Rejections
-
-The \`security.create_detection_rule\` tool can return a rejection when it deliberately cannot build a rule. A rejection looks like this:
-
-\`\`\`json
-{ "rejected": true, "rejectionCode": "NO_DATA", "message": "..." }
-\`\`\`
-
-**When you see \`rejected: true\`:**
-- Do NOT retry the tool. This is not a transient error — the agent tried and made a deliberate decision.
-- Surface the \`message\` field directly to the user. It is already written for the user to read.
-- Follow up based on \`rejectionCode\`:
-  - \`NO_DATA\` — No relevant index was found. Ask the user to name a specific index or data source (e.g. "Which index contains the data you want to detect on?").
-  - \`INVALID_OUTPUT\` — The agent produced a rule but it failed validation. Ask the user to rephrase or add more detail to their request, then retry the tool once with the revised description.
-
-
 When asked to edit or update the rule or any field of the rule, use the following:
 **Editing an existing rule** (changing fields like tags, severity, description, schedule, MITRE ATT&CK, index patterns, query, etc.):
 
@@ -102,6 +86,25 @@ attachment_update({ attachment_id: "ATTACHMENT_ID", data: { text: "<full stringi
 Checklist before finishing the answer:
 - [ ] Did I call the tool read attachment first?
 - [ ] Did I render inline the latest version of the attachment? ← YOU MUST DO THIS, always render the latest version of the attachment inline.
+
+---
+
+## Handling Tool Rejections
+
+The \`security.create_detection_rule\` tool can return a rejection when it deliberately cannot build a rule. A rejection looks like this:
+
+\`\`\`json
+{ "rejected": true, "rejectionCode": "NO_DATA", "message": "..." }
+\`\`\`
+
+**When you see \`rejected: true\`:**
+- Do NOT retry the tool. This is not a transient error — the agent tried and made a deliberate decision.
+- Surface the \`message\` field directly to the user. It is already written for the user to read.
+- Follow up based on \`rejectionCode\`:
+  - \`NO_DATA\` — No relevant index was found. Ask the user to name a specific index or data source (e.g. "Which index contains the data you want to detect on?").
+  - \`INVALID_OUTPUT\` — The agent produced a rule but it failed validation. Ask the user to rephrase or add more detail to their request, then retry the tool once with the revised description.
+  - \`INCOHERENT\` — The request did not describe a detectable behavior. Ask the user to rephrase and describe the specific activity to detect (e.g. "detect failed logins from a single IP").
+  - \`NOT_SECURITY_RELEVANT\` — The request is not a security detection scenario. Ask the user to describe suspicious behavior, attack patterns, or anomalies instead.
 
 ---
 
