@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const { common, header } = getPageObjects(['common', 'discover', 'header']);
+  const { common, header, discover } = getPageObjects(['common', 'discover', 'header']);
 
   describe('discover no data', () => {
     const kbnDirectory = 'src/platform/test/functional/fixtures/kbn_archiver/discover';

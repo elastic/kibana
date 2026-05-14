@@ -28,15 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const dataGrid = getService('dataGrid');
 
-  const { indexEditor, common, discover } = getPageObjects([
-    'indexEditor',
-    'discover',
-    'dashboard',
-    'header',
-    'timePicker',
-    'unifiedFieldList',
-    'unifiedSearch',
-  ]);
+  const { indexEditor, discover } = getPageObjects(['indexEditor', 'discover']);
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
