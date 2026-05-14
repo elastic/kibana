@@ -63,6 +63,7 @@ export class RpcClient implements CrudClient {
   }
 
   private sendMessage = async <O = unknown>(name: ProcedureName, input: any): Promise<O> => {
+    console.log({ input });
     try {
       const response = await this.http.post<{ result: O }>(`${API_ENDPOINT}/${name}`, {
         body: JSON.stringify(input),

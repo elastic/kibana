@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DeleteResult } from '@kbn/content-management-plugin/common';
+import type { DeleteResult, SearchQuery } from '@kbn/content-management-plugin/common';
 import { buildPath } from '@kbn/core-http-browser';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import type {
@@ -73,5 +73,32 @@ export const linksClient = {
 export function getLinksClient<
   Attr extends SerializableAttributes = SerializableAttributes
 >(): VisualizationClient<typeof CONTENT_ID, Attr> {
-  return linksClient as unknown as VisualizationClient<typeof CONTENT_ID, Attr>;
+  return {
+    ...linksClient,
+    search: async (searchQuery: SearchQuery) => {
+      if ((searchQuery.tags?.included ?? []).length) return { hits: [], pagination: { total: 0 } };
+
+      const result = await linksClient.search({
+        query: searchQuery.text,
+        per_page: searchQuery.limit,
+      });
+      return {
+        hits: result.data.map(({ id, data, meta }) => {
+          const { updated_at, updated_by, created_at, created_by, ...rest } = meta;
+          return {
+            type: LINKS_SAVED_OBJECT_TYPE,
+            id,
+            attributes: data,
+            updatedAt: updated_at,
+            updatedBy: updated_by,
+            createdAt: created_at,
+            createdBy: created_by,
+            ...rest,
+            references: [],
+          };
+        }),
+        pagination: result.meta,
+      };
+    },
+  } as unknown as VisualizationClient<typeof CONTENT_ID, Attr>;
 }
