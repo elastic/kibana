@@ -10,8 +10,10 @@ import type {
   ActionPolicyResponse,
   ActionPolicyType,
   CreateActionPolicyData,
+  ThrottleStrategy,
   UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
+import { needsInterval } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 import type { ActionPolicySavedObjectAttributes } from '../../saved_objects';
 
@@ -40,6 +42,18 @@ const resolveNextNullableField = <T>(
   }
 
   return normalizeNullableField(existing);
+};
+
+const normalizeThrottle = (
+  throttle: { strategy?: ThrottleStrategy; interval?: string | null } | null | undefined
+): { strategy?: ThrottleStrategy; interval: string | null } | null => {
+  if (throttle == null) return null;
+  const { strategy, interval } = throttle;
+  const keepInterval = strategy == null || needsInterval(strategy);
+  return {
+    strategy,
+    interval: keepInterval ? interval ?? null : null,
+  };
 };
 
 const toAuthResponse = (
@@ -81,7 +95,7 @@ export const buildCreateActionPolicyAttributes = ({
     groupBy: data.groupBy ?? null,
     tags: data.tags ?? null,
     groupingMode: data.groupingMode ?? null,
-    throttle: data.throttle ?? null,
+    throttle: normalizeThrottle(data.throttle),
     snoozedUntil: null,
     auth,
     createdBy,
@@ -119,7 +133,7 @@ export const buildUpdateActionPolicyAttributes = ({
     groupBy: resolveNextNullableField(update.groupBy, existing.groupBy),
     tags: resolveNextNullableField(update.tags, existing.tags),
     groupingMode: resolveNextNullableField(update.groupingMode, existing.groupingMode),
-    throttle: resolveNextNullableField(update.throttle, existing.throttle),
+    throttle: normalizeThrottle(resolveNextNullableField(update.throttle, existing.throttle)),
     snoozedUntil: normalizeNullableField(existing.snoozedUntil),
     auth,
     createdBy: existing.createdBy,
@@ -153,7 +167,7 @@ export const transformActionPolicySoAttributesToApiResponse = ({
     groupBy: normalizeNullableField(attributes.groupBy),
     tags: normalizeNullableField(attributes.tags),
     groupingMode: normalizeNullableField(attributes.groupingMode),
-    throttle: normalizeNullableField(attributes.throttle),
+    throttle: normalizeThrottle(attributes.throttle),
     snoozedUntil: normalizeNullableField(attributes.snoozedUntil),
     auth: toAuthResponse(attributes.auth),
     createdBy: attributes.createdBy,
