@@ -8,19 +8,20 @@
 import React, { useEffect, useMemo } from 'react';
 import { EuiTab, EuiTabs, EuiSpacer, EuiPanel, EuiText } from '@elastic/eui';
 import { CodeEditor, ESQL_LANG_ID, type monaco } from '@kbn/code-editor';
-import type {
-  ComposeDiscoverState,
-  ComposeDiscoverAction,
-  QueryTab,
-  SandboxTabConfig,
-} from './types';
+import type { QueryTab, SandboxTabConfig } from './types';
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 type LineNumbersType = monaco.editor.LineNumbersType;
 
 interface ComposeDiscoverTabsProps {
-  state: ComposeDiscoverState;
-  dispatch: React.Dispatch<ComposeDiscoverAction>;
+  baseQuery: string;
+  alertBlock: string;
+  recoveryBlock: string;
+  onBaseQueryChange: (val: string) => void;
+  onAlertBlockChange: (val: string) => void;
+  onRecoveryBlockChange: (val: string) => void;
+  activeTab: QueryTab;
+  onTabChange: (tab: QueryTab) => void;
   tabConfig: SandboxTabConfig;
   onAlertEditorMount?: (editor: IStandaloneCodeEditor) => void;
   onRecoveryEditorMount?: (editor: IStandaloneCodeEditor) => void;
@@ -123,8 +124,14 @@ export function visibleTabIds(tabConfig: SandboxTabConfig): QueryTab[] {
 }
 
 export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
-  state,
-  dispatch,
+  baseQuery,
+  alertBlock,
+  recoveryBlock,
+  onBaseQueryChange,
+  onAlertBlockChange,
+  onRecoveryBlockChange,
+  activeTab,
+  onTabChange,
   tabConfig,
   onAlertEditorMount,
   onRecoveryEditorMount,
@@ -133,35 +140,28 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
   const tabIds = visibleTabIds(tabConfig);
   const visibleTabs = TAB_DEFINITIONS.filter((t) => tabIds.includes(t.id));
 
-  // Default active tab to the first visible one if it has drifted outside the visible set.
   const safeActiveTab: QueryTab =
-    tabIds.length > 0 && tabIds.includes(state.activeTab) ? state.activeTab : tabIds[0] ?? 'alert';
+    tabIds.length > 0 && tabIds.includes(activeTab) ? activeTab : tabIds[0] ?? 'alert';
 
   useEffect(() => {
-    if (safeActiveTab !== state.activeTab) {
-      dispatch({ type: 'SET_TAB', tab: safeActiveTab });
+    if (safeActiveTab !== activeTab) {
+      onTabChange(safeActiveTab);
     }
-  }, [safeActiveTab, state.activeTab, dispatch]);
+  }, [safeActiveTab, activeTab, onTabChange]);
 
-  const baseLineCount = state.baseQuery.split('\n').length;
+  const baseLineCount = baseQuery.split('\n').length;
 
   const renderEditor = () => {
     switch (safeActiveTab) {
       case 'base':
-        return (
-          <BlockEditor
-            value={state.baseQuery}
-            onChange={(val) => dispatch({ type: 'SET_BASE_QUERY', query: val })}
-            lineNumberOffset={0}
-          />
-        );
+        return <BlockEditor value={baseQuery} onChange={onBaseQueryChange} lineNumberOffset={0} />;
       case 'alert':
         return (
           <>
-            {state.baseQuery && <LockedBaseEditor query={state.baseQuery} />}
+            {baseQuery && <LockedBaseEditor query={baseQuery} />}
             <BlockEditor
-              value={state.alertBlock}
-              onChange={(val) => dispatch({ type: 'SET_ALERT_BLOCK', block: val })}
+              value={alertBlock}
+              onChange={onAlertBlockChange}
               lineNumberOffset={baseLineCount}
               onEditorMount={onAlertEditorMount}
             />
@@ -170,10 +170,10 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
       case 'recovery':
         return (
           <>
-            {state.baseQuery && <LockedBaseEditor query={state.baseQuery} />}
+            {baseQuery && <LockedBaseEditor query={baseQuery} />}
             <BlockEditor
-              value={state.recoveryBlock}
-              onChange={(val) => dispatch({ type: 'SET_RECOVERY_BLOCK', block: val })}
+              value={recoveryBlock}
+              onChange={onRecoveryBlockChange}
               lineNumberOffset={baseLineCount}
               onEditorMount={onRecoveryEditorMount}
             />
@@ -199,7 +199,7 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
               <EuiTab
                 key={tab.id}
                 isSelected={safeActiveTab === tab.id}
-                onClick={() => dispatch({ type: 'SET_TAB', tab: tab.id })}
+                onClick={() => onTabChange(tab.id)}
                 data-test-subj={`composeDiscoverTab-${tab.id}`}
               >
                 {tab.label}

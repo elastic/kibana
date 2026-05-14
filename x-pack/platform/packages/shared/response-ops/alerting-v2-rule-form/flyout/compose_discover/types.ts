@@ -90,9 +90,6 @@ export interface ComposeDiscoverState {
 
 export type ComposeDiscoverAction =
   | { type: 'SET_FULL_QUERY'; query: string }
-  | { type: 'SET_BASE_QUERY'; query: string }
-  | { type: 'SET_ALERT_BLOCK'; block: string }
-  | { type: 'SET_RECOVERY_BLOCK'; block: string }
   | { type: 'SET_RECOVERY_TYPE'; recoveryType: RecoveryType }
   | { type: 'ENABLE_TRACKING'; base: string; alertBlock: string }
   | { type: 'DISABLE_TRACKING' }

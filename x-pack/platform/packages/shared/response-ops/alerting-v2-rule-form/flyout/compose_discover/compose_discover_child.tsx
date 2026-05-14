@@ -70,6 +70,9 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
   const services = useRuleFormServices();
   const isSplit = tabConfig.type !== 'single';
   const [localQuery, setLocalQuery] = useState(state.fullQuery);
+  const [localBaseQuery, setLocalBaseQuery] = useState(state.baseQuery);
+  const [localAlertBlock, setLocalAlertBlock] = useState(state.alertBlock);
+  const [localRecoveryBlock, setLocalRecoveryBlock] = useState(state.recoveryBlock);
   // Date range persists in the reducer so it's remembered across Sandbox open/close.
   // It is intentionally not connected to schedule.lookback in FormValues — it's a
   // preview window for testing the query, not a rule configuration field.
@@ -81,7 +84,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
   // In split mode the "active" query for execution and field-detection is the full assembled
   // query (base + alert block). In single mode it is the local editor content.
   const activeQuery = isSplit
-    ? [state.baseQuery, state.alertBlock].filter(Boolean).join('\n')
+    ? [localBaseQuery, localAlertBlock].filter(Boolean).join('\n')
     : localQuery;
 
   // Read timeField from RHF — it lives there, not in the UI reducer
@@ -160,23 +163,15 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
     if (isSplit) {
       dispatch({
         type: 'COMMIT_CHILD_SPLIT',
-        baseQuery: state.baseQuery,
-        alertBlock: state.alertBlock,
-        recoveryBlock: state.recoveryBlock,
+        baseQuery: localBaseQuery,
+        alertBlock: localAlertBlock,
+        recoveryBlock: localRecoveryBlock,
       });
     } else {
       dispatch({ type: 'COMMIT_CHILD_QUERY', fullQuery: localQuery });
     }
     onClose();
-  }, [
-    isSplit,
-    state.baseQuery,
-    state.alertBlock,
-    state.recoveryBlock,
-    localQuery,
-    dispatch,
-    onClose,
-  ]);
+  }, [isSplit, localBaseQuery, localAlertBlock, localRecoveryBlock, localQuery, dispatch, onClose]);
 
   const gridColumns: EuiDataGridColumn[] = useMemo(
     () =>
@@ -312,8 +307,14 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
         <EuiPanel hasBorder paddingSize="s" style={{ ...editorPanelStyles }}>
           {isSplit ? (
             <ComposeDiscoverTabs
-              state={state}
-              dispatch={dispatch}
+              baseQuery={localBaseQuery}
+              alertBlock={localAlertBlock}
+              recoveryBlock={localRecoveryBlock}
+              onBaseQueryChange={setLocalBaseQuery}
+              onAlertBlockChange={setLocalAlertBlock}
+              onRecoveryBlockChange={setLocalRecoveryBlock}
+              activeTab={state.activeTab}
+              onTabChange={(tab) => dispatch({ type: 'SET_TAB', tab })}
               tabConfig={tabConfig}
               onAlertEditorMount={onAlertEditorMount}
               onRecoveryEditorMount={onRecoveryEditorMount}

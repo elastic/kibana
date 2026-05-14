@@ -99,12 +99,6 @@ export function reducer(
   switch (action.type) {
     case 'SET_FULL_QUERY':
       return { ...state, fullQuery: action.query };
-    case 'SET_BASE_QUERY':
-      return { ...state, baseQuery: action.query };
-    case 'SET_ALERT_BLOCK':
-      return { ...state, alertBlock: action.block };
-    case 'SET_RECOVERY_BLOCK':
-      return { ...state, recoveryBlock: action.block };
     case 'SET_RECOVERY_TYPE': {
       const seedBlock =
         action.recoveryType === 'custom' && !state.recoveryBlock && state.alertBlock
@@ -127,8 +121,8 @@ export function reducer(
         tracking: true,
         baseQuery: action.base,
         alertBlock: action.alertBlock,
-        // Jump back to step 0 if we were somehow ahead (shouldn't happen on first toggle)
         step: 0,
+        childOpen: false,
         activeTab: defaultTabForConfig(tabConfig),
       };
     }
@@ -136,13 +130,13 @@ export function reducer(
       return {
         ...state,
         tracking: false,
-        // Re-assemble into fullQuery so the single editor is populated
         fullQuery: [state.baseQuery, state.alertBlock].filter(Boolean).join('\n'),
         baseQuery: '',
         alertBlock: '',
         recoveryBlock: '',
         recoveryType: 'default',
         step: 0,
+        childOpen: false,
         activeTab: 'alert',
       };
     case 'SET_TAB':

@@ -120,6 +120,83 @@ describe('reducer', () => {
       expect(state.alertBlock).toBe('');
       expect(state.recoveryBlock).toBe('');
     });
+
+    it('ENABLE_TRACKING closes the child so it remounts with fresh local state', () => {
+      const state = createState({
+        fullQuery: FULL_QUERY,
+        queryCommitted: true,
+        childOpen: true,
+      });
+
+      const next = reducer(state, {
+        type: 'ENABLE_TRACKING',
+        base: BASE_QUERY,
+        alertBlock: ALERT_BLOCK,
+      });
+
+      expect(next.childOpen).toBe(false);
+    });
+
+    it('DISABLE_TRACKING closes the child so it remounts with fresh local state', () => {
+      const state = createState({
+        tracking: true,
+        baseQuery: BASE_QUERY,
+        alertBlock: ALERT_BLOCK,
+        queryCommitted: true,
+        childOpen: true,
+      });
+
+      const next = reducer(state, { type: 'DISABLE_TRACKING' });
+
+      expect(next.childOpen).toBe(false);
+    });
+  });
+
+  describe('sandbox isolation', () => {
+    it('CLOSE_CHILD does not alter split query fields', () => {
+      const state = createState({
+        tracking: true,
+        childOpen: true,
+        queryCommitted: true,
+        baseQuery: BASE_QUERY,
+        alertBlock: ALERT_BLOCK,
+        recoveryBlock: RECOVERY_BLOCK,
+      });
+
+      const next = reducer(state, { type: 'CLOSE_CHILD' });
+
+      expect(next.childOpen).toBe(false);
+      expect(next.baseQuery).toBe(BASE_QUERY);
+      expect(next.alertBlock).toBe(ALERT_BLOCK);
+      expect(next.recoveryBlock).toBe(RECOVERY_BLOCK);
+    });
+
+    it('only COMMIT_CHILD_SPLIT updates baseQuery/alertBlock/recoveryBlock', () => {
+      const state = createState({
+        tracking: true,
+        queryCommitted: true,
+        baseQuery: BASE_QUERY,
+        alertBlock: ALERT_BLOCK,
+        recoveryBlock: '',
+      });
+
+      const newBase = 'FROM new-*\n| STATS c = COUNT(*)';
+      const newAlert = '| WHERE c > 50';
+      const newRecovery = '| WHERE c < 50';
+
+      const next = reducer(state, {
+        type: 'COMMIT_CHILD_SPLIT',
+        baseQuery: newBase,
+        alertBlock: newAlert,
+        recoveryBlock: newRecovery,
+      });
+
+      expect(next.baseQuery).toBe(newBase);
+      expect(next.alertBlock).toBe(newAlert);
+      expect(next.recoveryBlock).toBe(newRecovery);
+      expect(next.queryCommitted).toBe(true);
+      expect(next.childOpen).toBe(false);
+    });
   });
 
   describe('SET_RECOVERY_TYPE', () => {
