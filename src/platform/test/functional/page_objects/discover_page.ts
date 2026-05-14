@@ -1100,7 +1100,7 @@ export class DiscoverPageObject extends FtrService {
     await field.focus();
     await this.retry.try(async () => {
       await this.browser.pressKeys(this.browser.keys.ENTER);
-      await this.testSubjects.exists('.domDroppable--active'); // checks if we're in dnd mode and there's any drop target active
+      await this.find.byCssSelector('.domDroppable--active'); // checks if we're in dnd mode and there's any drop target active
     });
     await this.browser.pressKeys(this.browser.keys.RIGHT);
     await this.browser.pressKeys(this.browser.keys.ENTER);
