@@ -123,3 +123,47 @@ export interface RetentionInfo {
 export interface RetentionResponse {
   items: RetentionInfo[];
 }
+
+export type VisibilityStatus = 'healthy' | 'actionsRequired' | 'noData';
+
+export interface IndexDocCount {
+  index: string;
+  docCount: number;
+  exists: boolean;
+  error?: string;
+}
+
+export interface ActionableFinding {
+  category: MainCategories;
+  severity: 'critical' | 'warning';
+  message: string;
+  resource: string;
+}
+
+export interface CoveragePayload {
+  status: VisibilityStatus;
+  summary: string;
+  items: CategoryGroup[];
+  actionableFindings?: ActionableFinding[];
+}
+
+export interface QualityPayload {
+  status: VisibilityStatus;
+  summary: string;
+  items: DataQualityResultDocument[];
+  actionableFindings?: ActionableFinding[];
+}
+
+export interface ContinuityPayload {
+  status: VisibilityStatus;
+  summary: string;
+  items: PipelineStats[];
+  actionableFindings?: ActionableFinding[];
+}
+
+export interface RetentionPayload {
+  status: VisibilityStatus;
+  summary: string;
+  items: RetentionInfo[];
+  actionableFindings?: ActionableFinding[];
+}

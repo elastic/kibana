@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export type * from './src/types';
-export * from './src/constants';
-export * from './src/get_siem_readiness_statuses';
-export { getIndexCategoryMap } from './src/get_index_category_map';
+export {
+  SIEM_READINESS_COVERAGE_TOOL_ID,
+  SIEM_READINESS_QUALITY_TOOL_ID,
+  SIEM_READINESS_CONTINUITY_TOOL_ID,
+  SIEM_READINESS_RETENTION_TOOL_ID,
+} from './tool_ids';
+export { registerSiemReadinessTools } from './register_siem_readiness_tools';

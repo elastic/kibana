@@ -18,8 +18,9 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSiemReadinessApi, CATEGORY_ORDER } from '@kbn/siem-readiness';
 import type { PipelineStats } from '@kbn/siem-readiness';
+import { CATEGORY_ORDER } from '@kbn/siem-readiness';
+import { useSiemReadinessApi } from '../../../hooks/use_siem_readiness_api';
 import {
   CategoryAccordionTable,
   type CategoryData,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type * from './src/types';
-export * from './src/constants';
-export * from './src/get_siem_readiness_statuses';
-export { getIndexCategoryMap } from './src/get_index_category_map';
+export { fetchPipelines } from './fetch_pipelines';
+export { fetchCategories } from './fetch_categories';
+export { fetchRetention } from './fetch_retention';
+export { fetchIndicesDocCounts } from './fetch_indices_doc_counts';

@@ -43,6 +43,7 @@ export type SkillsDirectoryStructure = Directory<{
       entities: FileDirectory<{}>;
       endpoint: FileDirectory<{}>;
       ml: FileDirectory<{}>;
+      siem_readiness: FileDirectory<{}>;
     }>;
     search: FileDirectory<{}>;
   }>;

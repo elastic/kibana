@@ -15,13 +15,13 @@ import type {
   DataQualityResultDocument,
   PipelineStats,
   RetentionResponse,
-} from './types';
+} from '@kbn/siem-readiness';
 import {
   GET_SIEM_READINESS_CATEGORIES_API_PATH,
   GET_SIEM_READINESS_PIPELINES_API_PATH,
   GET_SIEM_READINESS_RETENTION_API_PATH,
   GET_INDEX_RESULTS_LATEST_API_PATH,
-} from './constants';
+} from '@kbn/siem-readiness';
 
 const REFETCH_INTERVAL = 30000;
 

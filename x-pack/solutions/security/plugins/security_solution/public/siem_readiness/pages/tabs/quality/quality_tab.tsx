@@ -21,8 +21,9 @@ import {
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { useSiemReadinessApi, CATEGORY_ORDER } from '@kbn/siem-readiness';
 import type { IndexInfo, DataQualityResultDocument, MainCategories } from '@kbn/siem-readiness';
+import { CATEGORY_ORDER } from '@kbn/siem-readiness';
+import { useSiemReadinessApi } from '../../../hooks/use_siem_readiness_api';
 import {
   CategoryAccordionTable,
   type CategoryData,

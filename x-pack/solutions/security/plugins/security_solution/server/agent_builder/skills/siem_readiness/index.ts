@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export type * from './src/types';
-export * from './src/constants';
-export * from './src/get_siem_readiness_statuses';
-export { getIndexCategoryMap } from './src/get_index_category_map';
+export { siemReadinessSkill } from './siem_readiness_skill';
