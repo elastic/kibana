@@ -29,7 +29,7 @@ import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { ApmServicesTable } from './service_list/apm_services_table';
 import { getAvailableFields, orderServiceItems } from './service_list/order_service_items';
-import { getApmInternalServices, type ApmPluginStartDeps, type ApmServices } from '../../../plugin';
+import { type ApmPluginStartDeps, type ApmServices } from '../../../plugin';
 
 type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/services'>;
 
