@@ -16,6 +16,8 @@ import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 import type { CommonPageObject } from './common_page';
 
+const FAST_PROBE_TIMEOUT_MS = 1000;
+
 interface SaveDashboardOptions {
   /**
    * @default true
@@ -53,7 +55,6 @@ export class DashboardPageObject extends FtrService {
   private readonly appMenu = this.ctx.getPageObject('appMenu');
   private readonly appsMenu = this.ctx.getService('appsMenu');
   private readonly toasts = this.ctx.getService('toasts');
-
   private readonly logstashIndex = this.config.get('esTestCluster.ccs')
     ? 'ftr-remote:logstash-*'
     : 'logstash-*';
@@ -366,7 +367,11 @@ export class DashboardPageObject extends FtrService {
     await this.appMenu.clickMenuItem('dashboardViewOnlyMode');
 
     if (accept) {
-      const confirmation = await this.testSubjects.exists('confirmModalTitleText');
+      // Optional modal; avoid `testSubjects.exists()` retry delay for negative checks
+      const confirmation = await this.find.existsByCssSelector(
+        '[data-test-subj="confirmModalTitleText"]',
+        FAST_PROBE_TIMEOUT_MS
+      );
       if (confirmation) {
         await this.common.clickConfirmOnModal();
       }
@@ -451,20 +456,35 @@ export class DashboardPageObject extends FtrService {
     options: AddNewDashboardOptions = { continueEditing: false, expectWarning: false }
   ) {
     const { continueEditing, expectWarning } = options;
-    const discardButtonExists = await this.testSubjects.exists('discardDashboardPromptButton');
+    // This button is optional; keep the check fast to avoid spending seconds waiting for "not present".
+    const discardButtonExists = await this.find.existsByCssSelector(
+      '[data-test-subj="discardDashboardPromptButton"]',
+      FAST_PROBE_TIMEOUT_MS
+    );
     if (!continueEditing && discardButtonExists) {
       this.log.debug('found discard button');
       await this.testSubjects.click('discardDashboardPromptButton');
-      const confirmation = await this.testSubjects.exists('confirmModalTitleText');
+      const confirmation = await this.find.existsByCssSelector(
+        '[data-test-subj="confirmModalTitleText"]',
+        FAST_PROBE_TIMEOUT_MS
+      );
       if (confirmation) {
         await this.common.clickConfirmOnModal();
       }
     }
+
     await this.listingTable.clickNewButton();
+
     if (expectWarning) {
       await this.testSubjects.existOrFail('dashboardCreateConfirm');
     }
-    if (await this.testSubjects.exists('dashboardCreateConfirm')) {
+    // This confirm is optional; keep the check fast.
+    if (
+      await this.find.existsByCssSelector(
+        '[data-test-subj="dashboardCreateConfirm"]',
+        FAST_PROBE_TIMEOUT_MS
+      )
+    ) {
       if (continueEditing) {
         await this.testSubjects.click('dashboardCreateConfirmContinue');
       } else {
@@ -485,7 +505,11 @@ export class DashboardPageObject extends FtrService {
 
   public async isSettingsOpen() {
     this.log.debug('isSettingsOpen');
-    return await this.testSubjects.exists('dashboardSettingsMenu');
+    // Optional; avoid `testSubjects.exists()` retry delay for negative checks
+    return await this.find.existsByCssSelector(
+      '[data-test-subj="dashboardSettingsMenu"]',
+      FAST_PROBE_TIMEOUT_MS
+    );
   }
 
   public async openSettingsFlyout() {
@@ -612,12 +636,16 @@ export class DashboardPageObject extends FtrService {
       await this.common.waitForSaveModalToClose();
     }
 
-    const isInViewMode = await this.testSubjects.exists('dashboardEditMode');
+    // This is a simple "am I in view mode?" probe; avoid `testSubjects.exists()` retry delay.
+    const isInViewMode = await this.find.existsByCssSelector(
+      '[data-test-subj="dashboardEditMode"]',
+      FAST_PROBE_TIMEOUT_MS
+    );
     if (saveOptions.exitFromEditMode && !isInViewMode) {
       await this.clickCancelOutOfEditMode();
     }
-    await this.header.waitUntilLoadingHasFinished();
 
+    await this.header.waitUntilLoadingHasFinished();
     return message;
   }
 
@@ -638,9 +666,11 @@ export class DashboardPageObject extends FtrService {
     dashboardTitle: string,
     saveOptions: Omit<SaveDashboardOptions, 'saveAsNew'> = { waitDialogIsClosed: true }
   ) {
-    const isSaveModalOpen = await this.testSubjects.exists('savedObjectSaveModal', {
-      timeout: 2000,
-    });
+    // Fast probe for whether the modal is already open; avoid `testSubjects.exists()` retry delay.
+    const isSaveModalOpen = await this.find.existsByCssSelector(
+      '[data-test-subj="savedObjectSaveModal"]',
+      FAST_PROBE_TIMEOUT_MS
+    );
 
     if (!isSaveModalOpen) {
       if (await this.appMenu.menuItemExists('dashboardInteractiveSaveMenuItem')) {

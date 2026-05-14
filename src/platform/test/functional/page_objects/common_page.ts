@@ -13,6 +13,9 @@ import { getUrl } from '@kbn/test';
 import moment from 'moment';
 import { FtrService } from '../ftr_provider_context';
 
+const SAVE_MODAL_ABSENCE_STABLE_MS = 250;
+const SAVE_MODAL_RETRY_DELAY_MS = 50;
+
 interface NavigateProps {
   appConfig: {};
   ensureCurrentUrl: boolean;
@@ -511,11 +514,31 @@ export class CommonPageObject extends FtrService {
 
   async waitForSaveModalToClose() {
     this.log.debug('Waiting for save modal to close');
-    await this.retry.try(async () => {
-      if (await this.testSubjects.exists('savedObjectSaveModal', { timeout: 5000 })) {
-        throw new Error('save modal still open');
-      }
-    });
+    let modalAbsenceStartedAt = 0;
+    await this.retry.tryForTime(
+      this.defaultTryTimeout,
+      async () => {
+        const modalStillExists = await this.find.existsByCssSelector(
+          '[data-test-subj="savedObjectSaveModal"]',
+          0
+        );
+        if (modalStillExists) {
+          modalAbsenceStartedAt = 0;
+          throw new Error('save modal still open');
+        }
+
+        if (modalAbsenceStartedAt === 0) {
+          modalAbsenceStartedAt = Date.now();
+          throw new Error('save modal absence not yet stable');
+        }
+
+        if (Date.now() - modalAbsenceStartedAt < SAVE_MODAL_ABSENCE_STABLE_MS) {
+          throw new Error('save modal still stabilizing');
+        }
+      },
+      undefined,
+      SAVE_MODAL_RETRY_DELAY_MS
+    );
   }
 
   async setFileInputPath(path: string) {
