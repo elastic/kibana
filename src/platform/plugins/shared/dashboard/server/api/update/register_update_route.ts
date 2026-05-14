@@ -86,11 +86,11 @@ export function registerUpdateRoute(
             isDashboardAppRequest
           );
           if (operation === 'create') {
-            await trackCreateDashboardAction(result, req);
-            return res.created({ body: result });
+            trackCreateDashboardAction(body, req);
+            return res.created({ body });
           } else {
-            await trackUpdateDashboardAction(result, req);
-            return res.ok({ body: result });
+            trackUpdateDashboardAction(body, req);
+            return res.ok({ body });
           }
         } catch (e) {
           return writeErrorHandler(e, res);
