@@ -342,29 +342,20 @@ describe('resolveModelsForFeature', () => {
   });
 
   describe('ignoreGlobalDefault', () => {
-    it('bypasses defaultConnectorOnly and returns the full feature list when ignoreGlobalDefault is true', async () => {
-      const recommended = inferenceConnector('rec');
-      const other = inferenceConnector('other');
-      const defaultConnector = inferenceConnector('default');
-      getForFeature.mockResolvedValue({
-        endpoints: [recommended],
-        warnings: [],
-        soEntryFound: false,
-      });
-      getConnectorList.mockResolvedValue([recommended, other]);
+    it('still returns only the default connector when ignoreGlobalDefault is true and defaultConnectorOnly is set', async () => {
+      const defaultConnector = inferenceConnector('default-id');
       getConnectorById.mockResolvedValue(defaultConnector);
 
       const result = await resolve(
-        { defaultConnectorId: 'default', defaultConnectorOnly: true },
+        { defaultConnectorId: 'default-id', defaultConnectorOnly: true },
         'my_feature',
         true
       );
 
-      expect(getForFeature).toHaveBeenCalledWith('my_feature');
-      expect(getConnectorList).toHaveBeenCalledTimes(1);
-      expect(result.connectors).not.toContain(defaultConnector);
+      expect(getForFeature).not.toHaveBeenCalled();
+      expect(getConnectorList).not.toHaveBeenCalled();
       expect(result).toEqual({
-        connectors: [{ ...recommended, isRecommended: true }, other],
+        connectors: [defaultConnector],
         warnings: [],
         soEntryFound: false,
       });

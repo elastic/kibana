@@ -365,16 +365,8 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
     });
   });
 
-  it('returns the full feature list when ignoreGlobalDefault is true even with defaultConnectorOnly set', async () => {
-    const recommended = inferenceConnector('rec');
-    const other = inferenceConnector('other');
+  it('still returns only the default connector when ignoreGlobalDefault is true and defaultConnectorOnly is set', async () => {
     const defaultConnector = inferenceConnector('default-id');
-    getForFeature.mockResolvedValue({
-      endpoints: [recommended],
-      warnings: [],
-      soEntryFound: false,
-    });
-    getConnectorList.mockResolvedValue([recommended, other]);
     getConnectorById.mockResolvedValue(defaultConnector);
     registerRoute(
       { defaultConnectorId: 'default-id', defaultConnectorOnly: true },
@@ -383,11 +375,11 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
 
     await mockRouter.callRoute({ query: { featureId: 'my_feature' } });
 
-    expect(getForFeature).toHaveBeenCalledTimes(1);
-    expect(getConnectorList).toHaveBeenCalledTimes(1);
+    expect(getForFeature).not.toHaveBeenCalled();
+    expect(getConnectorList).not.toHaveBeenCalled();
     expect(mockRouter.response.ok).toHaveBeenCalledWith({
       body: {
-        connectors: [{ ...recommended, isRecommended: true }, other],
+        connectors: [defaultConnector],
         soEntryFound: false,
       },
     });
