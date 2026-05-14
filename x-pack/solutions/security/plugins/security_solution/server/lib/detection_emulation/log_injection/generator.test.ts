@@ -98,12 +98,9 @@ describe('generateDocs — event.dataset and event.module', () => {
 // ─── event.dataset and event.module per-technique ────────────────────────────
 
 describe('generateDocs — per-technique ECS stamp', () => {
-  it.each(KNOWN_TECHNIQUES)(
-    'emits correct ECS stamp for technique %s',
-    (techniqueId) => {
-      const docs = generateDocs({ ...BASE_INPUT, payloads: [makePayload(techniqueId, 'test')] });
-      expect(docs[0].event.dataset).toBe('emulation.synthetic');
-      expect(docs[0].event.module).toBe('emulation');
-    }
-  );
+  it.each(KNOWN_TECHNIQUES)('emits correct ECS stamp for technique %s', (techniqueId) => {
+    const docs = generateDocs({ ...BASE_INPUT, payloads: [makePayload(techniqueId, 'test')] });
+    expect(docs[0].event.dataset).toBe('emulation.synthetic');
+    expect(docs[0].event.module).toBe('emulation');
+  });
 });

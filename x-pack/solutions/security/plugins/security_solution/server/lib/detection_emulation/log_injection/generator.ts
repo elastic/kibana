@@ -138,7 +138,12 @@ export const generateDocs = (input: GenerateDocsInput): EcsEmulationDocument[] =
     const tpl = TECHNIQUE_TEMPLATES[payload.techniqueId] ?? DEFAULT_TEMPLATE;
     return {
       '@timestamp': timestamp,
-      event: { ...tpl.event, kind: 'event', dataset: 'emulation.synthetic' as const, module: 'emulation' as const },
+      event: {
+        ...tpl.event,
+        kind: 'event',
+        dataset: 'emulation.synthetic' as const,
+        module: 'emulation' as const,
+      },
       process: {
         name: tpl.process.name,
         command_line: resolveCommandLine(payload),
