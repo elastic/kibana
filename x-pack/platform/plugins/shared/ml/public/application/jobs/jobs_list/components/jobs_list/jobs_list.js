@@ -353,20 +353,6 @@ export class JobsListUI extends Component {
         textOnly: true,
         width: '15%',
       },
-      {
-        name: (
-          <EuiScreenReaderOnly>
-            <p>
-              <FormattedMessage
-                id="xpack.ml.jobsList.jobActionsColumn.screenReaderDescription"
-                defaultMessage="This column contains extra actions in a menu that can be performed on each job"
-              />
-            </p>
-          </EuiScreenReaderOnly>
-        ),
-        render: (item) => <ResultLinks jobs={[item]} />,
-        width: '64px',
-      },
       ...(this.props.kibana.services.spaces
         ? [
             {
@@ -395,7 +381,20 @@ export class JobsListUI extends Component {
             },
           ]
         : []),
-
+      {
+        name: (
+          <EuiScreenReaderOnly>
+            <p>
+              <FormattedMessage
+                id="xpack.ml.jobsList.jobActionsColumn.screenReaderDescription"
+                defaultMessage="This column contains extra actions in a menu that can be performed on each job"
+              />
+            </p>
+          </EuiScreenReaderOnly>
+        ),
+        render: (item) => <ResultLinks jobs={[item]} />,
+        width: '64px',
+      },
       {
         name: i18n.translate('xpack.ml.jobsList.actionsLabel', {
           defaultMessage: 'Actions',

@@ -27,7 +27,7 @@ import {
   isResettable,
 } from '../utils';
 
-export interface MultiJobActionsMenuProps {
+interface Props {
   jobs: MlSummaryJob[];
   showStartDatafeedModal: (jobs: MlSummaryJob[]) => void;
   showDeleteJobModal: (jobs: MlSummaryJob[]) => void;
@@ -38,7 +38,7 @@ export interface MultiJobActionsMenuProps {
   showCreateAlertFlyout: (jobIds: string[]) => void;
 }
 
-export const MultiJobActionsMenu: FC<MultiJobActionsMenuProps> = ({
+export const MultiJobActionsMenu: FC<Props> = ({
   jobs,
   showStartDatafeedModal,
   showDeleteJobModal,
