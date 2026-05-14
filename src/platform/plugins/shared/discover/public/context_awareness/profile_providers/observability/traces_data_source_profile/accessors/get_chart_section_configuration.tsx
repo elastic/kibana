@@ -9,6 +9,7 @@
 
 import { TraceMetricsGrid } from '@kbn/unified-chart-section-viewer';
 import React from 'react';
+import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
 import type { DataSourceProfileProvider } from '../../../../profiles';
 import { OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID } from '../profile';
 
@@ -19,11 +20,19 @@ export const getChartSectionConfiguration =
     return {
       ...prev(params),
       renderChartSection: (props) => {
+        const { query } = props.fetchParams;
+        const groupByField =
+          query && 'esql' in query
+            ? getESQLStatsQueryMeta(query.esql).groupByFields?.[0]?.field
+            : undefined;
+
         return (
           <TraceMetricsGrid
+            key={groupByField ?? 'no-group'}
             profileId={OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID}
             {...props}
             actions={params.actions}
+            breakdownField={groupByField}
           />
         );
       },

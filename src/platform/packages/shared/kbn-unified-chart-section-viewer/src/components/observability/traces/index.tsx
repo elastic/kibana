@@ -21,6 +21,15 @@ import { TraceBreakdownSelector } from './trace_breakdown_selector';
 
 export const chartPalette = euiPaletteColorBlind({ rotations: 2 });
 
+const BASE_TRACE_DIMENSIONS = [
+  'service.name',
+  'service.environment',
+  'transaction.type',
+  'transaction.name',
+  'span.name',
+  'http.response.status_code',
+];
+
 function TraceMetricsGrid({
   fetchParams,
   fetch$: discoverFetch$,
@@ -32,6 +41,7 @@ function TraceMetricsGrid({
   renderToggleActions,
   chartToolbarCss,
   isComponentVisible,
+  breakdownField: initialBreakdownField,
 }: UnifiedMetricsGridProps) {
   const { query, dataView } = fetchParams;
   const esqlQuery = useEsqlQueryInfo({
@@ -56,19 +66,14 @@ function TraceMetricsGrid({
     });
   }, [esqlQuery.metadataFields, filters]);
 
-  const [breakdownField, setBreakdownField] = useState<string | undefined>();
+  const [breakdownField, setBreakdownField] = useState<string | undefined>(initialBreakdownField);
 
-  const traceDimensions = useMemo(
-    () => [
-      'service.name',
-      'service.environment',
-      'transaction.type',
-      'transaction.name',
-      'span.name',
-      'http.response.status_code',
-    ],
-    []
-  );
+  const traceDimensions = useMemo(() => {
+    if (initialBreakdownField && !BASE_TRACE_DIMENSIONS.includes(initialBreakdownField)) {
+      return [initialBreakdownField, ...BASE_TRACE_DIMENSIONS];
+    }
+    return BASE_TRACE_DIMENSIONS;
+  }, [initialBreakdownField]);
 
   const toolbar = useMemo(
     () => ({
