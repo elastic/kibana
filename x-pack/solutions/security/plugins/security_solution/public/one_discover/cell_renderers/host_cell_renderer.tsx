@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiLink } from '@elastic/eui';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { useHistory } from 'react-router-dom';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { getOrEmptyTagFromValue } from '../../common/components/empty_value';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { defaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
@@ -73,6 +74,7 @@ export const HostCellRenderer = React.memo<HostCellRendererProps>(
           {
             ...defaultToolsFlyoutProperties,
             size: 's',
+            historyKey: DOC_VIEWER_FLYOUT_HISTORY_KEY,
             session: 'start',
           }
         );

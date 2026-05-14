@@ -23,6 +23,7 @@ import { UpsellingProvider } from '../../../common/components/upselling_provider
 import { DiscoverInTimelineContextProvider } from '../../../common/components/discover_in_timeline/provider';
 import { AssistantProvider } from '../../../assistant/provider';
 import { CaseProvider } from '../../../cases/components/provider/provider';
+import { MlCapabilitiesProvider } from '../../../common/components/ml/permissions/ml_capabilities_provider';
 
 export const flyoutProviders = ({
   services,
@@ -58,7 +59,9 @@ export const flyoutProviders = ({
                   <DiscoverInTimelineContextProvider>
                     <CaseProvider>
                       <EntityStoreEuidApiProvider>
-                        <AssistantProvider>{flyoutContent}</AssistantProvider>
+                        <MlCapabilitiesProvider>
+                          <AssistantProvider>{flyoutContent}</AssistantProvider>
+                        </MlCapabilitiesProvider>
                       </EntityStoreEuidApiProvider>
                     </CaseProvider>
                   </DiscoverInTimelineContextProvider>

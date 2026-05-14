@@ -11,6 +11,7 @@ import { isString } from 'lodash/fp';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { HostPanelKey } from '../../../../../flyout/entity_details/shared/constants';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { HostDetailsLink } from '../../../../../common/components/links';
@@ -22,6 +23,7 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { Host } from '../../../../../flyout_v2/entity/host/main';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
 import { defaultToolsFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { alertFlyoutHistoryKey } from '../../../../../flyout_v2/document/constants/flyout_history';
 
 interface Props {
   contextId: string;
@@ -51,6 +53,8 @@ const HostNameComponent: React.FC<Props> = ({
 
   const isInSecurityApp = useIsInSecurityApp();
 
+  const historyKey = isInSecurityApp ? alertFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+
   const eventContext = useContext(StatefulEventContext);
   const hostName = `${value}`;
   const isInTimelineContext = hostName && eventContext?.timelineID;
@@ -77,6 +81,7 @@ const HostNameComponent: React.FC<Props> = ({
           }),
           {
             ...defaultToolsFlyoutProperties,
+            historyKey,
             session: 'start',
           }
         );
@@ -108,6 +113,7 @@ const HostNameComponent: React.FC<Props> = ({
       services,
       store,
       history,
+      historyKey,
     ]
   );
 

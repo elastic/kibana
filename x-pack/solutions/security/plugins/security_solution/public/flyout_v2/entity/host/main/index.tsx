@@ -8,8 +8,13 @@
 import type { FC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
 import { noop } from 'lodash/fp';
+import { useHistory } from 'react-router-dom';
+import { useStore } from 'react-redux';
 import { EuiFlyoutHeader, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
+import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { useRefetchQueryById } from '../../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
@@ -20,6 +25,15 @@ import { useQueryInspector } from '../../../../common/components/page/manage_que
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { buildHostNamesFilter, type RiskSeverity } from '../../../../../common/search_strategy';
 import { useUiSetting, useKibana } from '../../../../common/lib/kibana';
+import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
+import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
+import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
+import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
+import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { flyoutProviders } from '../../shared/components/flyout_provider';
+import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
+import { alertFlyoutHistoryKey } from '../../document/constants/flyout_history';
+import { HostDetails } from '../host_details';
 import { Header } from './header';
 import { Content } from './content';
 import { Footer } from './footer';
@@ -76,7 +90,8 @@ const FIRST_RECORD_PAGINATION = {
  * Standalone host details flyout content (for use with `overlays.openSystemFlyout`).
  *
  * Runs the same data hooks as the v1 `HostPanel`, but without the expandable-flyout
- * navigation, preview-mode handling, or host_details_left expansion.
+ * navigation or preview-mode handling. Detail panels (risk inputs, graph view, etc.)
+ * open as separate system flyouts via `overlays.openSystemFlyout`.
  */
 export const Host: FC<HostProps> = memo(function Host({
   hostName,
@@ -84,13 +99,18 @@ export const Host: FC<HostProps> = memo(function Host({
   scopeId = '',
   contextID,
 }) {
-  const { uiSettings } = useKibana().services;
+  const { services } = useKibana();
+  const { uiSettings, overlays } = services;
+  const store = useStore();
+  const history = useHistory();
   const euidApi = useEntityStoreEuidApi();
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const isInSecurityApp = useIsInSecurityApp();
+  const historyKey = isInSecurityApp ? alertFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
   const safeContextID = contextID ?? scopeId ?? 'host-panel';
-  const { setQuery, deleteQuery, isInitializing } = useGlobalTime();
+  const { setQuery, deleteQuery, isInitializing, to, from } = useGlobalTime();
 
   const hostStoreIdentityFields = useMemo(
     () => (!entityId && hostName ? { 'host.name': hostName } : undefined),
@@ -213,9 +233,78 @@ export const Host: FC<HostProps> = memo(function Host({
     />
   ) : undefined;
 
-  // No expandable-flyout left panel exists in v2 yet — degrade gracefully.
-  // TODO: wire `openDetailsPanel` once `host_details_left` migrates to v2.
-  const openDetailsPanel = noop;
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(
+    buildEuidCspPreviewOptions('host', entityFromStoreResult.entityRecord, euidApi, {
+      entityStoreV2Enabled,
+      legacyIdentityFields:
+        hostName != null && hostName !== '' ? { 'host.name': hostName } : undefined,
+    })
+  );
+
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
+    buildEuidCspPreviewOptions('host', entityFromStoreResult.entityRecord, euidApi, {
+      entityStoreV2Enabled,
+      legacyIdentityFields:
+        hostName != null && hostName !== '' ? { 'host.name': hostName } : undefined,
+    })
+  );
+
+  const { hasNonClosedAlerts } = useNonClosedAlerts({
+    identityFields: documentEntityIdentifiers,
+    entityType: EntityType.host,
+    entityRecord: entityStoreV2Enabled ? entityFromStoreResult.entityRecord : undefined,
+    to,
+    from,
+    queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}HOST_NAME_V2`,
+  });
+
+  const isRiskScoreExist = (effectiveRiskScoreState.data?.length ?? 0) > 0;
+
+  const openDetailsPanel = useCallback(
+    (path: EntityDetailsPath) => {
+      overlays.openSystemFlyout(
+        flyoutProviders({
+          services,
+          store,
+          history,
+          children: (
+            <HostDetails
+              isRiskScoreExist={isRiskScoreExist}
+              hostName={hostName}
+              entityId={panelDisplayEntityId ?? ''}
+              scopeId={scopeId}
+              hasMisconfigurationFindings={hasMisconfigurationFindings}
+              hasVulnerabilitiesFindings={hasVulnerabilitiesFindings}
+              hasNonClosedAlerts={hasNonClosedAlerts}
+              entityStoreEntityId={entityStoreEntityId}
+              initialPath={path}
+            />
+          ),
+        }),
+        {
+          ...defaultToolsFlyoutProperties,
+          title: hostName,
+          historyKey,
+          session: 'start',
+        }
+      );
+    },
+    [
+      overlays,
+      services,
+      store,
+      history,
+      historyKey,
+      isRiskScoreExist,
+      hostName,
+      panelDisplayEntityId,
+      scopeId,
+      hasMisconfigurationFindings,
+      hasVulnerabilitiesFindings,
+      hasNonClosedAlerts,
+      entityStoreEntityId,
+    ]
+  );
 
   const riskLevel = observedHost.entityRecord
     ? ((getRiskFromEntityRecord(observedHost.entityRecord)?.calculated_level ??
