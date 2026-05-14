@@ -31,7 +31,9 @@ const waitForSavedObjectsTable = async (page: ScoutPage) => {
 };
 
 const selectTagsInFilter = async (page: ScoutPage, ...tagNames: string[]) => {
-  await page.testSubj.locator('savedObjectSearchBar').getByRole('button', { name: 'Tags' }).click();
+  // EUI renders this filter button with aria-label "Tags Selection" (no dedicated test-subj).
+  // Regex matches the visible "Tags" text regardless of the i18n hint appended to aria-label.
+  await page.getByRole('button', { name: /Tags/i }).click();
   for (const tagName of tagNames) {
     await page.testSubj.click(`tag-searchbar-option-${tagName.replace(' ', '_')}`);
   }
@@ -40,6 +42,7 @@ const selectTagsInFilter = async (page: ScoutPage, ...tagNames: string[]) => {
 
 test.describe('Tags - saved objects management integration', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ kbnClient }) => {
+    await kbnClient.savedObjects.cleanStandardList();
     await kbnClient.importExport.load(KBN_ARCHIVES.SO_MANAGEMENT);
   });
 
@@ -50,7 +53,7 @@ test.describe('Tags - saved objects management integration', { tag: tags.statefu
   });
 
   test.afterAll(async ({ kbnClient }) => {
-    await kbnClient.importExport.unload(KBN_ARCHIVES.SO_MANAGEMENT);
+    await kbnClient.savedObjects.cleanStandardList();
   });
 
   test('accesses saved objects management from tags with pre-applied filter', async ({
@@ -59,7 +62,7 @@ test.describe('Tags - saved objects management integration', { tag: tags.statefu
     kbnUrl,
   }) => {
     await page.goto(kbnUrl.app('management/kibana/tags'));
-    await pageObjects.tagManagement.waitForTableLoaded();
+    await pageObjects.tagManagement.tagsTable.waitForLoaded();
 
     const tagRow = page.testSubj.locator('tagsTableRow').filter({
       has: page.locator('[data-test-subj="tagsTableRowName"]').getByText('tag-1', { exact: true }),
