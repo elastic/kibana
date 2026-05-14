@@ -6,3 +6,4 @@
  */
 
 export { alertAnalysisSkill } from './alert_analysis_skill';
+export { alertAnalysisApiDrivenSkill } from './alert_analysis_skill_api_driven';

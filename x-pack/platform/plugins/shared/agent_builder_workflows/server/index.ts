@@ -25,3 +25,4 @@ export const plugin: PluginInitializer<
 };
 
 export { config } from './config';
+export { WORKFLOW_EXECUTE_STEP_TOOL_ID } from './tools/workflow_execute_step_tool';

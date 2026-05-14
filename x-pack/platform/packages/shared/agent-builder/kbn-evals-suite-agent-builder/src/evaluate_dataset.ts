@@ -48,6 +48,50 @@ interface DatasetExample extends Example {
   };
 }
 
+const WORKFLOW_EXECUTE_STEP_TOOL_ID = 'platform.workflows.workflow_execute_step';
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const matchesWorkflowRequestExpectation = ({
+  params,
+  expectedPath,
+  expectedStepType,
+}: {
+  params: unknown;
+  expectedPath: string;
+  expectedStepType: string;
+}): boolean => {
+  if (!isRecord(params)) return false;
+
+  const yaml = params.yaml;
+  if (typeof yaml === 'string') {
+    const hasPath = yaml.includes(expectedPath);
+    const hasStepType = yaml.includes(`type: ${expectedStepType}`);
+    if (hasPath && hasStepType) return true;
+  }
+
+  const step = params.step;
+  if (!isRecord(step)) return false;
+
+  const stepType = step.type;
+  const withArgs = step.with;
+  if (!isRecord(withArgs)) return false;
+
+  return stepType === expectedStepType && withArgs.path === expectedPath;
+};
+
+const extractWorkflowExecuteParams = (output: TaskOutput): unknown[] => {
+  const steps = (output as { steps?: unknown[] }).steps;
+  if (!Array.isArray(steps)) return [];
+
+  return steps
+    .filter((step): step is Record<string, unknown> => isRecord(step))
+    .filter((step) => step.type === 'tool_call' && step.tool_id === WORKFLOW_EXECUTE_STEP_TOOL_ID)
+    .map((step) => step.params)
+    .filter((params) => params != null);
+};
+
 export type EvaluateDataset = ({
   dataset: { name, description, examples },
 }: {
@@ -122,18 +166,89 @@ function configureExperiment({
 
   const selectedEvaluators = selectEvaluators([
     {
+      name: 'ExpectedWorkflowRequest',
+      kind: 'CODE' as const,
+      evaluate: async ({ output, metadata }) => {
+        const expectedPath = getStringMeta(metadata, 'expectedWorkflowRequestPath');
+        if (!expectedPath) return { score: 1 };
+
+        const expectedStepType =
+          getStringMeta(metadata, 'expectedWorkflowStepType') ?? 'kibana.request';
+        const workflowParams = extractWorkflowExecuteParams(output as TaskOutput);
+        if (workflowParams.length === 0) {
+          return {
+            score: 0,
+            metadata: {
+              reason: 'No workflow execute step calls found',
+              expectedPath,
+              expectedStepType,
+            },
+          };
+        }
+
+        const matched = workflowParams.some((params) =>
+          matchesWorkflowRequestExpectation({
+            params,
+            expectedPath,
+            expectedStepType,
+          })
+        );
+
+        return {
+          score: matched ? 1 : 0,
+          metadata: {
+            expectedPath,
+            expectedStepType,
+            workflowCallCount: workflowParams.length,
+          },
+        };
+      },
+    },
+    {
+      name: 'ExpectedToolCalled',
+      kind: 'CODE' as const,
+      evaluate: async ({ output, metadata }) => {
+        const expectedToolId = getStringMeta(metadata, 'expectedToolId');
+        if (!expectedToolId) return { score: 1 };
+
+        const toolCalls = getToolCallSteps(output as TaskOutput);
+        if (toolCalls.length === 0) {
+          return { score: 0, metadata: { reason: 'No tool calls found', expectedToolId } };
+        }
+
+        const usedToolIds = toolCalls.map((t) => t.tool_id).filter(Boolean);
+        const invoked = usedToolIds.includes(expectedToolId);
+
+        return {
+          score: invoked ? 1 : 0,
+          metadata: { expectedToolId, usedToolIds },
+        };
+      },
+    },
+    {
       name: 'ToolUsageOnly',
       kind: 'CODE' as const,
       evaluate: async ({ output, metadata }) => {
         const expectedOnlyToolId = getStringMeta(metadata, 'expectedOnlyToolId');
         if (!expectedOnlyToolId) return { score: 1 };
 
+        // Exclude infrastructure/framework tools that are always called regardless of user intent.
+        // filestore.read is the skill-file loader — it's not a domain tool choice.
+        const INFRA_TOOL_IDS = new Set(['filestore.read']);
+
         const toolCalls = getToolCallSteps(output as TaskOutput);
-        if (toolCalls.length === 0) {
-          return { score: 0, metadata: { reason: 'No tool calls found', expectedOnlyToolId } };
+        const domainToolCalls = toolCalls.filter(
+          (t) => t.tool_id && !INFRA_TOOL_IDS.has(t.tool_id)
+        );
+
+        if (domainToolCalls.length === 0) {
+          return {
+            score: 0,
+            metadata: { reason: 'No domain tool calls found', expectedOnlyToolId },
+          };
         }
 
-        const usedToolIds = toolCalls.map((t) => t.tool_id).filter(Boolean);
+        const usedToolIds = domainToolCalls.map((t) => t.tool_id).filter(Boolean);
         const hasExpected = usedToolIds.includes(expectedOnlyToolId);
         const allExpected = usedToolIds.every((id) => id === expectedOnlyToolId);
 
@@ -218,7 +333,7 @@ function configureExperiment({
         }
 
         const query = `FROM traces-*
-| WHERE trace.id == "${traceId}"
+| WHERE trace_id == "${traceId}"
 | STATS skill_invoked = COUNT(
     CASE(
       attributes.gen_ai.tool.name == "filestore.read"
