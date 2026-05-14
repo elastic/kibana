@@ -108,35 +108,35 @@ describe('createSiemReadinessAttachmentType', () => {
   describe('format — getRepresentation', () => {
     const makeAttachment = (data: unknown) => ({ id: 'att-1', type: SIEM_READINESS_ATTACHMENT_ID, data });
 
-    it('formats coverage as text containing status and category', () => {
+    it('formats coverage as text containing human-readable status and category', () => {
       const { getRepresentation } = attachmentType.format(makeAttachment(coverageData));
       const rep = getRepresentation();
       expect(rep.type).toBe('text');
-      expect(rep.value).toContain('Coverage');
+      expect(rep.value).toContain('Healthy'); // not 'healthy'
       expect(rep.value).toContain('Endpoint');
     });
 
-    it('formats quality as text containing status and findings', () => {
+    it('formats quality as text containing human-readable status and findings', () => {
       const { getRepresentation } = attachmentType.format(makeAttachment(qualityData));
       const rep = getRepresentation();
       expect(rep.type).toBe('text');
-      expect(rep.value).toContain('Quality');
+      expect(rep.value).toContain('Actions Required'); // not 'actionsRequired'
       expect(rep.value).toContain('3 incompatible fields');
     });
 
-    it('formats continuity as text containing pipeline info', () => {
+    it('formats continuity as text containing human-readable status and pipeline info', () => {
       const { getRepresentation } = attachmentType.format(makeAttachment(continuityData));
       const rep = getRepresentation();
       expect(rep.type).toBe('text');
-      expect(rep.value).toContain('Continuity');
+      expect(rep.value).toContain('Actions Required'); // not 'actionsRequired'
       expect(rep.value).toContain('endpoint-pipeline');
     });
 
-    it('formats retention as text containing retention info', () => {
+    it('formats retention as text containing human-readable status and retention info', () => {
       const { getRepresentation } = attachmentType.format(makeAttachment(retentionData));
       const rep = getRepresentation();
       expect(rep.type).toBe('text');
-      expect(rep.value).toContain('Retention');
+      expect(rep.value).toContain('Actions Required'); // not 'actionsRequired'
       expect(rep.value).toContain('logs-cloud-default');
     });
 

@@ -114,8 +114,16 @@ export type SiemReadinessAttachmentData = z.infer<typeof siemReadinessAttachment
 
 // ---- Text format helpers ----
 
+const STATUS_LABELS: Record<string, string> = {
+  healthy: 'Healthy',
+  actionsRequired: 'Actions Required',
+  noData: 'No Data',
+};
+
+const formatStatus = (status: string): string => STATUS_LABELS[status] ?? status;
+
 const formatCoverageForAgent = (data: CoveragePayload & { dimension: 'coverage' }): string => {
-  const lines = [`SIEM Coverage — ${data.status}`, data.summary];
+  const lines = [`SIEM Coverage — ${formatStatus(data.status)}`, data.summary];
   data.items.forEach((cat) => {
     const totalDocs = cat.indices.reduce((sum, idx) => sum + idx.docs, 0);
     lines.push(
@@ -130,7 +138,7 @@ const formatCoverageForAgent = (data: CoveragePayload & { dimension: 'coverage' 
 };
 
 const formatQualityForAgent = (data: QualityPayload & { dimension: 'quality' }): string => {
-  const lines = [`SIEM Quality — ${data.status}`, data.summary];
+  const lines = [`SIEM Quality — ${formatStatus(data.status)}`, data.summary];
   if (data.actionableFindings?.length) {
     lines.push('Findings:');
     data.actionableFindings.forEach((f) => lines.push(`  [${f.severity}] ${f.message}`));
@@ -141,7 +149,7 @@ const formatQualityForAgent = (data: QualityPayload & { dimension: 'quality' }):
 const formatContinuityForAgent = (
   data: ContinuityPayload & { dimension: 'continuity' }
 ): string => {
-  const lines = [`SIEM Continuity — ${data.status}`, data.summary];
+  const lines = [`SIEM Continuity — ${formatStatus(data.status)}`, data.summary];
 
   // Group critical pipelines by their primary category for the agent.
   const criticalByCategory = new Map<string, typeof data.items>();
@@ -177,7 +185,7 @@ const formatContinuityForAgent = (
 };
 
 const formatRetentionForAgent = (data: RetentionPayload & { dimension: 'retention' }): string => {
-  const lines = [`SIEM Retention — ${data.status}`, data.summary];
+  const lines = [`SIEM Retention — ${formatStatus(data.status)}`, data.summary];
 
   // Group non-compliant items by their primary category for the agent.
   const nonCompliantByCategory = new Map<string, typeof data.items>();
