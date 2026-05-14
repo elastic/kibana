@@ -47,7 +47,7 @@ esac
 tar -xf "target/$DOCKER_CONTEXT_FILE" -C "$DOCKER_BUILD_FOLDER"
 cd $DOCKER_BUILD_FOLDER
 
-download_tmp_artifact "kibana-$FULL_VERSION-linux-x86_64.tar.gz" . "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+download_artifact "kibana-$FULL_VERSION-linux-x86_64.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
 
 echo "--- Build context"
 docker build $DOCKER_BUILD_ARGS .
