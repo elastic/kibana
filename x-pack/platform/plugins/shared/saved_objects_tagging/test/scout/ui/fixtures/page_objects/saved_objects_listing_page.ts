@@ -52,11 +52,9 @@ export class SavedObjectsListingPage {
 
   async expectItemsCount(appName: AppName, count: number) {
     const testSubjPrefix = APP_TEST_SUBJECT_PREFIX[appName];
-    await expect
-      .poll(() =>
-        this.page.locator(`[data-test-subj^="${testSubjPrefix}ListingTitleLink-"]`).count()
-      )
-      .toBe(count);
+    await expect(
+      this.page.locator(`[data-test-subj^="${testSubjPrefix}ListingTitleLink-"]`)
+    ).toHaveCount(count);
   }
 
   async getAllItemNames(appName: AppName) {
