@@ -49,6 +49,7 @@ import type {
   InMemoryConnector,
   ActionTypeExecutorResult,
   ConnectorTokenClientContract,
+  GetUserIdentifiersFromAPIKeyFn,
   HookServices,
   ActionType,
   ConnectorLifecycleListener,
@@ -126,6 +127,7 @@ export interface ConstructorOptions {
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
   connectorLifecycleListeners?: ConnectorLifecycleListener[];
+  getUserIdentifiersFromAPIKey?: GetUserIdentifiersFromAPIKeyFn;
   getCurrentUserProfileId?: (request: KibanaRequest) => Promise<string | undefined>;
 }
 
@@ -153,10 +155,15 @@ export interface ActionsClientContext {
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
   connectorLifecycleListeners?: ConnectorLifecycleListener[];
+  getUserIdentifiersFromAPIKey?: GetUserIdentifiersFromAPIKeyFn;
   getCurrentUserProfileId?: (request: KibanaRequest) => Promise<string | undefined>;
 }
 
-const noop = async (_request: KibanaRequest): Promise<string | undefined> => undefined;
+const getUserIdentifiersFromAPIKeyNoop: GetUserIdentifiersFromAPIKeyFn = async (
+  _request: KibanaRequest
+) => undefined;
+const getCurrentUserProfileIdNoop = async (_request: KibanaRequest): Promise<string | undefined> =>
+  undefined;
 
 export class ActionsClient {
   private readonly context: ActionsClientContext;
@@ -183,6 +190,7 @@ export class ActionsClient {
     spaces,
     isESOCanEncrypt,
     connectorLifecycleListeners,
+    getUserIdentifiersFromAPIKey,
     getCurrentUserProfileId,
   }: ConstructorOptions) {
     this.context = {
@@ -207,7 +215,9 @@ export class ActionsClient {
       spaces,
       isESOCanEncrypt,
       connectorLifecycleListeners,
-      getCurrentUserProfileId: getCurrentUserProfileId ?? noop,
+      getUserIdentifiersFromAPIKey:
+        getUserIdentifiersFromAPIKey ?? getUserIdentifiersFromAPIKeyNoop,
+      getCurrentUserProfileId: getCurrentUserProfileId ?? getCurrentUserProfileIdNoop,
     };
   }
 
@@ -469,7 +479,16 @@ export class ActionsClient {
           );
         }
 
-        const profileUid = await this.context.getCurrentUserProfileId?.(this.context.request);
+        const userIdentifiersFromAPIKey = await this.context.getUserIdentifiersFromAPIKey?.(
+          this.context.request
+        );
+        const currentUserProfileUid =
+          userIdentifiersFromAPIKey === undefined
+            ? await this.context.getCurrentUserProfileId?.(this.context.request)
+            : undefined;
+        const userIdentifiers =
+          userIdentifiersFromAPIKey ??
+          (currentUserProfileUid ? { profileUid: currentUserProfileUid } : undefined);
 
         accessToken = await getOAuthAuthorizationCodeAccessToken({
           connectorId: tokenOpts.connectorId,
@@ -482,7 +501,7 @@ export class ActionsClient {
           connectorTokenClient: this.context.connectorTokenClient,
           scope: tokenOpts.scope,
           authMode,
-          profileUid,
+          userIdentifiers,
         });
 
         this.context.logger.debug(

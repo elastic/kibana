@@ -363,7 +363,7 @@ describe('oauthCallbackRoute', () => {
     expect(mockConnectorTokenClientInstance.deleteConnectorTokens).toHaveBeenCalledWith({
       connectorId: 'connector-1',
       tokenType: 'access_token',
-      profileUid: 'test-profile-uid',
+      userIdentifiers: { profileUid: 'test-profile-uid' },
     });
     expect(mockConnectorTokenClientInstance.createWithRefreshToken).toHaveBeenCalledWith({
       connectorId: 'connector-1',
@@ -372,7 +372,7 @@ describe('oauthCallbackRoute', () => {
       expiresIn: 3600,
       refreshTokenExpiresIn: undefined,
       tokenType: 'access_token',
-      profileUid: 'test-profile-uid',
+      userIdentifiers: { profileUid: 'test-profile-uid' },
     });
 
     // Verify state cleanup

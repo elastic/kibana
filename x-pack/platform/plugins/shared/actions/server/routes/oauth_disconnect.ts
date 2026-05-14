@@ -99,7 +99,10 @@ export const oauthDisconnectRoute = (
           logger: routeLogger,
         });
 
-        await userConnectorTokenClient.deleteConnectorTokens({ connectorId, profileUid });
+        await userConnectorTokenClient.deleteConnectorTokens({
+          connectorId,
+          userIdentifiers: { profileUid },
+        });
 
         routeLogger.info(`OAuth tokens deleted for connector: ${connectorId}`);
 

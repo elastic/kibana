@@ -62,6 +62,8 @@ const licensing = licensingMock.createSetup();
 const logger = loggerMock.create();
 const connectorTokenClient = connectorTokenClientMock.create();
 const inMemoryMetrics = inMemoryMetricsMock.create();
+const getUserIdentifiersFromAPIKey = jest.fn().mockResolvedValue(undefined);
+const getCurrentUserProfileId = jest.fn().mockResolvedValue(undefined);
 
 let actionsClient: ActionsClient;
 let actionTypeRegistry: ActionTypeRegistry;
@@ -105,6 +107,8 @@ const inMemoryConnectors = [
 describe('getAxiosInstance()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    getUserIdentifiersFromAPIKey.mockResolvedValue(undefined);
+    getCurrentUserProfileId.mockResolvedValue(undefined);
     actionTypeRegistry = new ActionTypeRegistry({
       licensing,
       taskManager,
@@ -157,8 +161,44 @@ describe('getAxiosInstance()', () => {
       encryptedSavedObjectsClient,
       isESOCanEncrypt,
       getAxiosInstanceWithAuth,
+      getUserIdentifiersFromAPIKey,
+      getCurrentUserProfileId,
     });
     getEventLogClient.mockResolvedValue(eventLogClient);
+  });
+
+  it('prefers user identifiers from getUserIdentifiersFromAPIKey for axios auth params', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
+    getUserIdentifiersFromAPIKey.mockResolvedValueOnce({
+      profileUid: 'api-profile',
+      userCloudId: 'api-cloud',
+    });
+    getCurrentUserProfileId.mockResolvedValueOnce('session-profile');
+
+    await actionsClient.getAxiosInstance(defaultConnectorId);
+
+    expect(getUserIdentifiersFromAPIKey).toHaveBeenCalledWith(request);
+    expect(getCurrentUserProfileId).not.toHaveBeenCalled();
+    expect(getAxiosInstanceWithAuth).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userIdentifiers: { profileUid: 'api-profile', userCloudId: 'api-cloud' },
+      })
+    );
+  });
+
+  it('falls back to session profile when getUserIdentifiersFromAPIKey returns undefined', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
+    getUserIdentifiersFromAPIKey.mockResolvedValueOnce(undefined);
+    getCurrentUserProfileId.mockResolvedValueOnce('session-profile');
+
+    await actionsClient.getAxiosInstance(defaultConnectorId);
+
+    expect(getCurrentUserProfileId).toHaveBeenCalledWith(request);
+    expect(getAxiosInstanceWithAuth).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userIdentifiers: { profileUid: 'session-profile' },
+      })
+    );
   });
 
   it('calls getAxiosInstanceWithAuth with the correct params', async () => {
@@ -222,6 +262,8 @@ describe('getAxiosInstance()', () => {
         encryptedSavedObjectsClient,
         isESOCanEncrypt,
         getAxiosInstanceWithAuth,
+        getUserIdentifiersFromAPIKey,
+        getCurrentUserProfileId,
       });
 
       actionTypeRegistry.register(
