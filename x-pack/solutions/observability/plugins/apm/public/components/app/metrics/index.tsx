@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import moment from 'moment';
+import { useHistory, useLocation } from 'react-router-dom';
 import { isElasticAgentName, isJRubyAgentName } from '@kbn/elastic-agent-utils/src/agent_guards';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isAWSLambdaAgentName } from '../../../../common/agent_name';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -19,6 +20,7 @@ import { JsonMetricsDashboard } from './static_dashboard';
 import { hasDashboard } from './static_dashboard/helper';
 import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 import { JvmMetricsOverview } from './jvm_metrics_overview';
+import { fromQuery, toQuery, isInactiveHistoryError } from '../../shared/links/url_helpers';
 
 export function Metrics() {
   const {
@@ -34,6 +36,28 @@ export function Metrics() {
   } = useApmServiceContext();
   const isAWSLambda = isAWSLambdaAgentName(serverlessType);
   const { dataView, apmIndices } = useAdHocApmDataView();
+  const history = useHistory();
+  const location = useLocation();
+
+  const navigateToTimeRange = useCallback(
+    (range: { from: number; to: number }) => {
+      try {
+        history.push({
+          ...location,
+          search: fromQuery({
+            ...toQuery(location.search),
+            rangeFrom: new Date(range.from).toISOString(),
+            rangeTo: new Date(range.to).toISOString(),
+          }),
+        });
+      } catch (error) {
+        if (!isInactiveHistoryError(error)) {
+          throw error;
+        }
+      }
+    },
+    [history, location]
+  );
 
   const hasDashboardFile = hasDashboard({
     agentName,
@@ -78,6 +102,12 @@ export function Metrics() {
   const formatRange = (range: { from: number; to: number }) =>
     `${moment(range.from).format(dateFormat)} – ${moment(range.to).format(dateFormat)}`;
 
+  const renderRangeLink = (range: { from: number; to: number }) => (
+    <EuiLink data-test-subj="apmMetricsTimeRangeLink" onClick={() => navigateToTimeRange(range)}>
+      {formatRange(range)}
+    </EuiLink>
+  );
+
   const hasOverlap =
     ingestionTimeRanges &&
     ingestionTimeRanges.classicApm.from < ingestionTimeRanges.otelNative.to &&
@@ -102,15 +132,15 @@ export function Metrics() {
             data-test-subj="apmMetricsMixedAgentTypesOverlap"
           >
             <p>
-              {i18n.translate('xpack.apm.metrics.mixedAgentTypes.classicRange', {
-                defaultMessage: 'Classic APM metrics: {range}',
-                values: { range: formatRange(ingestionTimeRanges.classicApm) },
-              })}
+              {i18n.translate('xpack.apm.metrics.mixedAgentTypes.classicRangeLabel', {
+                defaultMessage: 'Classic APM metrics:',
+              })}{' '}
+              {renderRangeLink(ingestionTimeRanges.classicApm)}
               <br />
-              {i18n.translate('xpack.apm.metrics.mixedAgentTypes.otelRange', {
-                defaultMessage: 'OpenTelemetry metrics: {range}',
-                values: { range: formatRange(ingestionTimeRanges.otelNative) },
-              })}
+              {i18n.translate('xpack.apm.metrics.mixedAgentTypes.otelRangeLabel', {
+                defaultMessage: 'OpenTelemetry metrics:',
+              })}{' '}
+              {renderRangeLink(ingestionTimeRanges.otelNative)}
             </p>
             <p>
               {i18n.translate('xpack.apm.metrics.mixedAgentTypes.overlapping.description', {
@@ -137,15 +167,15 @@ export function Metrics() {
           data-test-subj="apmMetricsMixedAgentTypes"
         >
           <p>
-            {i18n.translate('xpack.apm.metrics.mixedAgentTypes.classicRange', {
-              defaultMessage: 'Classic APM metrics: {range}',
-              values: { range: formatRange(ingestionTimeRanges.classicApm) },
-            })}
+            {i18n.translate('xpack.apm.metrics.mixedAgentTypes.classicRangeLabel', {
+              defaultMessage: 'Classic APM metrics:',
+            })}{' '}
+            {renderRangeLink(ingestionTimeRanges.classicApm)}
             <br />
-            {i18n.translate('xpack.apm.metrics.mixedAgentTypes.otelRange', {
-              defaultMessage: 'OpenTelemetry metrics: {range}',
-              values: { range: formatRange(ingestionTimeRanges.otelNative) },
-            })}
+            {i18n.translate('xpack.apm.metrics.mixedAgentTypes.otelRangeLabel', {
+              defaultMessage: 'OpenTelemetry metrics:',
+            })}{' '}
+            {renderRangeLink(ingestionTimeRanges.otelNative)}
           </p>
           <p>
             {i18n.translate('xpack.apm.metrics.mixedAgentTypes.sequential.description', {
