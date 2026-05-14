@@ -66,6 +66,7 @@ export const AGENT_BUILDER_UI_EBT = {
     MANAGE_PLUGINS_DETAIL: 'agentBuilder.manage.plugins.detail',
     MANAGE_CONNECTORS: 'agentBuilder.manage.connectors',
     MANAGE_CONNECTORS_TABLE: 'agentBuilder.manage.connectors.table',
+    MANAGE_MCP_CLIENTS_TABLE: 'agentBuilder.manage.mcpClients.table',
     INAPP_CHAT: 'agentBuilder.inappChat',
     ACCESS_PROMPT: 'agentBuilder.access.prompt',
     ANNOUNCEMENT_MODAL: 'agentBuilder.announcement.modal',

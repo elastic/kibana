@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { i18n } from '@kbn/i18n';
 
 export interface McpClientActionsMenuProps {
@@ -23,5 +24,7 @@ export const McpClientActionsMenu = ({ clientId }: McpClientActionsMenuProps) =>
       defaultMessage: 'Actions',
     })}
     data-test-subj={`agentBuilderMcpClientsListActions-${clientId}`}
+    data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_MCP_CLIENTS_TABLE}
+    data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.MCP_CLIENTS_TABLE_ACTIONS_OPEN}
   />
 );

@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 
 const removeAriaLabel = i18n.translate('xpack.agentBuilder.attachmentPill.removeAriaLabel', {
@@ -96,6 +97,9 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
               color="text"
               aria-label={removeAriaLabel}
               onClick={onRemoveAttachment}
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_INPUT}
+              data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.ATTACHMENT_REMOVE}
+              data-ebt-detail={attachment.type}
             />
           </EuiFlexItem>
         )}
