@@ -182,12 +182,12 @@ export const checkValidationGates = (
     }
   }
 
-  if (cmd.command === 'execute' && config.allowedExecuteCommandPatterns.length > 0) {
+  if (cmd.command === 'execute' && (config.allowedExecuteCommandPatterns ?? []).length > 0) {
     const cmdString =
       cmd.parameters && typeof cmd.parameters.command === 'string'
         ? cmd.parameters.command
         : undefined;
-    const patterns = buildExecutePatternSet(config.allowedExecuteCommandPatterns);
+    const patterns = buildExecutePatternSet(config.allowedExecuteCommandPatterns ?? []);
     if (!cmdString || !patterns.some((re) => re.test(cmdString))) {
       return {
         allowed: false,
