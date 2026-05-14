@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import type {} from '@emotion/react/types/css-prop';
 import type { InlineEditLensEmbeddableContext, LensPublicStart } from '@kbn/lens-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
@@ -68,6 +68,7 @@ export function BaseVisualization({
   isLoading,
   registerActionButtons,
 }: BaseVisualizationProps) {
+  const euiTheme = useEuiTheme();
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [lensLoadEvent, setLensLoadEvent] = useState<
     InlineEditLensEmbeddableContext['lensEvent'] | null
@@ -173,7 +174,10 @@ export function BaseVisualization({
 
   return (
     <>
-      <div css={visualizationHeaderStyles} className={visualizationTimePickerContainerClassName}>
+      <div
+        css={visualizationHeaderStyles(euiTheme)}
+        className={visualizationTimePickerContainerClassName}
+      >
         <SearchBar {...searchBarProps} />
       </div>
 
