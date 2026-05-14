@@ -21,7 +21,12 @@ import type { LensCellValueAction, RowHeightMode } from '@kbn/lens-common';
 import type { FormatFactory } from '../../../../common/types';
 import type { DatatableColumnConfig } from '../../../../common/expressions';
 import { nonNullable } from '../../../utils';
-import { buildColumnsMetaLookup } from './helpers';
+import {
+  buildColumnsMetaLookup,
+  getNonFilterableQueryTimeFieldMessage,
+  getNonFilterableValueMessage,
+  isEsqlTableComputedColumn,
+} from './helpers';
 
 const hasFilterCellAction = (actions: LensCellValueAction[]) => {
   return actions.some(({ type }) => type === FILTER_CELL_ACTION_TYPE);
@@ -88,12 +93,18 @@ export const createGridColumns = (
       // compatible cell actions from actions registry
       const compatibleCellActions = columnCellValueActions?.[colIndex] ?? [];
 
-      if (
+      const showFilterActions =
         !hasFilterCellAction(compatibleCellActions) &&
-        filterable &&
         handleFilterClick &&
-        !columnArgs?.oneClickFilter
-      ) {
+        !columnArgs?.oneClickFilter;
+
+      const disabledFilterActionMessage = !filterable
+        ? isEsqlTableComputedColumn(table, field)
+          ? getNonFilterableQueryTimeFieldMessage()
+          : getNonFilterableValueMessage()
+        : undefined;
+
+      if (showFilterActions) {
         cellActions.push(
           ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
             const { rowValue, contentsIsDefined, cellContent } = getContentData({
@@ -123,12 +134,14 @@ export const createGridColumns = (
 
             return (
               <Component
-                aria-label={filterForAriaLabel}
                 data-test-subj="lensDatatableFilterFor"
+                aria-label={filterForAriaLabel}
+                disabled={!filterable}
                 onClick={() => {
                   handleFilterClick(field, rowValue, colIndex, rowIndex);
                   closeCellPopover?.();
                 }}
+                title={disabledFilterActionMessage}
                 iconType="plusCircle"
               >
                 {filterForText}
@@ -165,10 +178,12 @@ export const createGridColumns = (
               <Component
                 data-test-subj="lensDatatableFilterOut"
                 aria-label={filterOutAriaLabel}
+                disabled={!filterable}
                 onClick={() => {
                   handleFilterClick(field, rowValue, colIndex, rowIndex, true);
                   closeCellPopover?.();
                 }}
+                title={disabledFilterActionMessage}
                 iconType="minusCircle"
               >
                 {filterOutText}
