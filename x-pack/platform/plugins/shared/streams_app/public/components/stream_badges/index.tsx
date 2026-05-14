@@ -6,7 +6,14 @@
  */
 
 import type { IndicesIndexMode } from '@elastic/elasticsearch/lib/api/types';
-import { EuiBadge, EuiButton, EuiButtonIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBetaBadge,
+  EuiButton,
+  EuiButtonIcon,
+  EuiLink,
+  EuiToolTip,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
@@ -332,3 +339,17 @@ export function TimeSeriesBadge() {
     </EuiToolTip>
   );
 }
+
+export const TechnicalPreviewBadge = () => (
+  <EuiBetaBadge
+    tooltipContent={i18n.translate('xpack.streams.technicalPreviewTooltip', {
+      defaultMessage: 'This feature is in technical preview. We are working on it...',
+    })}
+    label={i18n.translate('xpack.streams.technicalPreviewLabel', {
+      defaultMessage: 'Technical preview',
+    })}
+    iconType="flask"
+    size="s"
+    css={{ display: 'block' }}
+  />
+);

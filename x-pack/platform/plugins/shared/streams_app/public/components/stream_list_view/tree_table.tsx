@@ -18,7 +18,6 @@ import {
   EuiIconTip,
   EuiButtonIcon,
   EuiTourStep,
-  EuiBetaBadge,
   EuiBadge,
   EuiToolTip,
 } from '@elastic/eui';
@@ -76,6 +75,7 @@ import {
   DiscoverBadgeButton,
   DraftStreamBadge,
   QueryStreamBadge,
+  TechnicalPreviewBadge,
 } from '../stream_badges';
 
 const datePickerStyle = css`
@@ -85,20 +85,6 @@ const datePickerStyle = css`
     height: 40px;
   }
 `;
-
-const TechnicalPreviewBadge = () => (
-  <EuiBetaBadge
-    tooltipContent={i18n.translate('xpack.streams.technicalPreviewTooltip', {
-      defaultMessage: 'This feature is in technical preview. We are working on it...',
-    })}
-    label={i18n.translate('xpack.streams.technicalPreviewLabel', {
-      defaultMessage: 'Technical preview',
-    })}
-    iconType="flask"
-    size="s"
-    css={{ display: 'block' }}
-  />
-);
 
 export function StreamsTreeTable({
   loading,
