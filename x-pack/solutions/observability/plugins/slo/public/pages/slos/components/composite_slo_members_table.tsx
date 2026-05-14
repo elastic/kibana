@@ -7,7 +7,6 @@
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiBadge,
   EuiBasicTable,
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -15,41 +14,17 @@ import {
   EuiLoadingSpinner,
   EuiPopover,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import type { CompositeSLOMemberSummary } from '@kbn/slo-schema';
 import React, { lazy, Suspense, useMemo, useState } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
-import { displayStatus } from '../../../components/slo/slo_badges/slo_status_badge';
+import { MemberStatusBadge } from './composite_slo_member_status_badge';
 
 const SLODetailsFlyout = lazy(() => import('../../slo_details/shared_flyout/slo_details_flyout'));
 
 type BurnRateWindow = '5m' | '1h' | '1d';
-
-function MemberStatusBadge({ status }: { status: CompositeSLOMemberSummary['status'] }) {
-  const statusInfo = displayStatus[status];
-  if (!statusInfo) {
-    return <>{NOT_AVAILABLE_LABEL}</>;
-  }
-  if (status === 'NO_DATA') {
-    return (
-      <EuiToolTip
-        position="top"
-        content={i18n.translate('xpack.slo.compositeSloList.members.statusNoDataTooltip', {
-          defaultMessage:
-            'It may take some time before the data is aggregated and available for this member SLO.',
-        })}
-      >
-        <EuiBadge tabIndex={0} color={statusInfo.badgeColor}>
-          {statusInfo.displayText}
-        </EuiBadge>
-      </EuiToolTip>
-    );
-  }
-  return <EuiBadge color={statusInfo.badgeColor}>{statusInfo.displayText}</EuiBadge>;
-}
 
 function getMemberBurnRateValue(
   item: CompositeSLOMemberSummary,
