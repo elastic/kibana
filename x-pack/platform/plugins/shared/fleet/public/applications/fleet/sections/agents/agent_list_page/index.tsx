@@ -607,6 +607,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         clearFilters={clearFilters}
         queryHasChanged={queryHasChanged}
       />
+      <EuiSpacer size="l" />
     </>
   );
 };
