@@ -30,10 +30,16 @@ export interface RunWorkflowPanelProps {
   onExecute?: () => void;
 }
 
+/** Returns true if the workflow has a required manual input with no default */
 const workflowHasRequiredManualInputs = (workflow: WorkflowListItemDto): boolean => {
-  const inputs = workflow.definition?.inputs;
-  if (!inputs?.required?.length) return false;
-  return inputs.required.some((name) => inputs.properties?.[name]?.default === undefined);
+  const manualTrigger = workflow.definition?.triggers?.find((t) => t.type === 'manual');
+  if (!manualTrigger || !('inputs' in manualTrigger)) return false;
+  const { inputs } = manualTrigger;
+  if (!inputs) return false;
+  if (Array.isArray(inputs)) {
+    return inputs.some((input) => input.required === true && input.default === undefined);
+  }
+  return inputs.required?.some((name) => inputs.properties?.[name]?.default === undefined) ?? false;
 };
 
 /** A shared panel that lets users select and execute a workflow with arbitrary inputs. */
@@ -116,12 +122,7 @@ export const RunWorkflowPanel = ({
       <WorkflowSelector
         config={{
           filterFunction: (workflows) =>
-            workflows.filter(
-              (w) =>
-                w.enabled &&
-                w.definition?.triggers?.some((t) => t.type === sortTriggerType) &&
-                !workflowHasRequiredManualInputs(w)
-            ),
+            workflows.filter((w) => w.enabled && !workflowHasRequiredManualInputs(w)),
           sortFunction: (workflows) =>
             workflows.sort((a, b) => {
               const aHasType = a.definition?.triggers?.some((t) => t.type === sortTriggerType);
