@@ -7,17 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 import type { EdgeProps } from '@xyflow/react';
 import { EdgeLabelRenderer, getSmoothStepPath, Position } from '@xyflow/react';
 import React from 'react';
-import { ExecutionStatus } from '@kbn/workflows';
-import { getExecutionStatusVisual } from './get_execution_status_color';
 
 interface WorkflowEdgeData extends Record<string, unknown> {
   label?: string;
   traversed?: boolean;
-  traversedStatus?: ExecutionStatus | null;
   points?: Array<{ x: number; y: number }>;
 }
 
@@ -303,11 +300,9 @@ export function WorkflowGraphEdge(props: EdgeProps) {
   }
 
   const traversed = edgeData?.traversed ?? false;
-  const traversedVisual = traversed
-    ? getExecutionStatusVisual(euiTheme, edgeData?.traversedStatus ?? ExecutionStatus.COMPLETED)
-    : null;
-  // Figma uses a muted blue for non-traversed edges to match the step palette.
-  const stroke = traversedVisual?.color ?? '#a8c5ee';
+  // Match the success color used by the node's green checkmark icon (#16c5c0).
+  // Non-traversed edges use a muted blue to match the step palette.
+  const stroke = traversed ? '#16c5c0' : '#a8c5ee';
   const strokeWidth = 1;
 
   const fullLabel = edgeData?.label ?? '';
