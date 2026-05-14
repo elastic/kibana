@@ -19,6 +19,7 @@ import {
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RetentionInfo, RetentionStatus, RetentionType } from '@kbn/siem-readiness';
+import { CATEGORY_ORDER } from '@kbn/siem-readiness';
 import { useSiemReadinessApi } from '../../../hooks/use_siem_readiness_api';
 import {
   CategoryAccordionTable,
