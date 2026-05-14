@@ -132,6 +132,7 @@ export class CasePlugin
     this.casesAnalyticsV2Service = new CasesAnalyticsV2Service({
       logger: this.logger,
       enabled: this.caseConfig.analyticsV2.enabled,
+      reconciliationIntervalMinutes: this.caseConfig.analyticsV2.reconciliationIntervalMinutes,
     });
     this.casesAnalyticsV2Service.setup({ core, taskManager: plugins.taskManager });
 

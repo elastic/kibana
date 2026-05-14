@@ -31,14 +31,6 @@ export const RECONCILIATION_TASK_TYPE = 'cases.analyticsV2.reconciliation';
  */
 export const RECONCILIATION_TASK_ID = 'cases-analyticsV2-reconciliation';
 
-/**
- * Default reconciliation cadence. 30 minutes balances "catch up quickly when
- * a real-time hook fails" against "don't hammer ES with redundant walks."
- * Operators can override on a per-task-instance basis via Task Manager APIs
- * if their tenant needs a different cadence.
- */
-const RECONCILIATION_INTERVAL = '30m';
-
 interface RegisterReconciliationTaskArgs {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
@@ -109,6 +101,14 @@ export function registerReconciliationTask({
 interface ScheduleReconciliationTaskArgs {
   taskManager: TaskManagerStartContract;
   logger: Logger;
+  /**
+   * Reconciliation cadence in minutes. Sourced from
+   * `xpack.cases.analyticsV2.reconciliationIntervalMinutes` and validated
+   * by the config schema (`min: 5`, `defaultValue: 30`). Threaded all the
+   * way through from the v2 service so the schedule honours per-tenant
+   * tuning instead of a hard-coded default.
+   */
+  intervalMinutes: number;
 }
 
 /**
@@ -118,13 +118,16 @@ interface ScheduleReconciliationTaskArgs {
 export async function scheduleReconciliationTask({
   taskManager,
   logger,
+  intervalMinutes,
 }: ScheduleReconciliationTaskArgs): Promise<void> {
   try {
     await taskManager.ensureScheduled({
       id: RECONCILIATION_TASK_ID,
       taskType: RECONCILIATION_TASK_TYPE,
       params: {},
-      schedule: { interval: RECONCILIATION_INTERVAL },
+      // Task Manager parses the "Nm" form as "every N minutes". The number
+      // is config-validated upstream (see `xpack.cases.analyticsV2.reconciliationIntervalMinutes`).
+      schedule: { interval: `${intervalMinutes}m` },
       state: {},
     });
   } catch (err) {
@@ -156,6 +159,7 @@ export async function scheduleReconciliationTask({
 export async function resetReconciliationTask({
   taskManager,
   logger,
+  intervalMinutes,
 }: ScheduleReconciliationTaskArgs): Promise<void> {
   try {
     await taskManager.remove(RECONCILIATION_TASK_ID);
@@ -174,5 +178,7 @@ export async function resetReconciliationTask({
       );
     }
   }
-  await scheduleReconciliationTask({ taskManager, logger });
+  // Re-schedule with the same operator-tuned interval the route handler
+  // received from the v2 service.
+  await scheduleReconciliationTask({ taskManager, logger, intervalMinutes });
 }

@@ -22,6 +22,7 @@ describe('CasesAnalyticsV2Service', () => {
       const service = new CasesAnalyticsV2Service({
         logger: loggerMock.create(),
         enabled: false, // doesn't matter for proxy shape
+        reconciliationIntervalMinutes: 30,
       });
       const proxy = service.getWriter();
 
@@ -48,6 +49,7 @@ describe('CasesAnalyticsV2Service', () => {
       const service = new CasesAnalyticsV2Service({
         logger: loggerMock.create(),
         enabled: false,
+        reconciliationIntervalMinutes: 30,
       });
       const refA = service.getDataViewRefresher();
       const refB = service.getDataViewRefresher();
@@ -60,6 +62,7 @@ describe('CasesAnalyticsV2Service', () => {
       const service = new CasesAnalyticsV2Service({
         logger: loggerMock.create(),
         enabled: false,
+        reconciliationIntervalMinutes: 30,
       });
       const refresher = service.getDataViewRefresher();
 

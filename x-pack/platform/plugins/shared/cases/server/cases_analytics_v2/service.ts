@@ -31,6 +31,14 @@ interface CasesAnalyticsV2ServiceDeps {
   logger: Logger;
   /** Resolved value of `xpack.cases.analyticsV2.enabled`. When false, every method is a no-op. */
   enabled: boolean;
+  /**
+   * Resolved value of `xpack.cases.analyticsV2.reconciliationIntervalMinutes`.
+   * Drives Task Manager's schedule for the durability-backstop walk. The
+   * config schema enforces `min: 5`; the default is 30. Captured at
+   * construction time and passed through to `scheduleReconciliationTask`
+   * at start.
+   */
+  reconciliationIntervalMinutes: number;
 }
 
 /**
@@ -121,6 +129,7 @@ export const V2_NOOP_DATA_VIEW_REFRESHER: CasesAnalyticsV2DataViewRefresher = ()
 export class CasesAnalyticsV2Service {
   private readonly logger: Logger;
   private readonly enabled: boolean;
+  private readonly reconciliationIntervalMinutes: number;
   /**
    * Holds the active writer. Starts as `V2_NOOP_WRITER` so calls before
    * `start()` (or when v2 is disabled) silently no-op. Replaced with a real
@@ -176,6 +185,7 @@ export class CasesAnalyticsV2Service {
   constructor(deps: CasesAnalyticsV2ServiceDeps) {
     this.logger = deps.logger.get('cases.analyticsV2');
     this.enabled = deps.enabled;
+    this.reconciliationIntervalMinutes = deps.reconciliationIntervalMinutes;
   }
 
   /**
@@ -228,6 +238,7 @@ export class CasesAnalyticsV2Service {
       getTaskManager: () => this.taskManager ?? null,
       clearDataViewBootstrapCache: () => this.dataViewService?.clearBootstrapCache(),
       enabled: this.enabled,
+      reconciliationIntervalMinutes: this.reconciliationIntervalMinutes,
     });
   }
 
@@ -281,8 +292,13 @@ export class CasesAnalyticsV2Service {
     });
 
     // Schedule the singleton reconciliation task. Idempotent; safe under
-    // concurrent node starts (Task Manager dedupes by id).
-    await scheduleReconciliationTask({ taskManager: deps.taskManager, logger: this.logger });
+    // concurrent node starts (Task Manager dedupes by id). The interval is
+    // operator-tunable via `xpack.cases.analyticsV2.reconciliationIntervalMinutes`.
+    await scheduleReconciliationTask({
+      taskManager: deps.taskManager,
+      logger: this.logger,
+      intervalMinutes: this.reconciliationIntervalMinutes,
+    });
   }
 
   /**

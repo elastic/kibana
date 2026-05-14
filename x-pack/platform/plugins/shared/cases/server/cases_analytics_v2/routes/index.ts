@@ -63,6 +63,13 @@ interface RegisterArgs {
    * through `/state` so operators can confirm whether v2 is active.
    */
   enabled: boolean;
+  /**
+   * Resolved config value for
+   * `xpack.cases.analyticsV2.reconciliationIntervalMinutes`. Threaded into
+   * the `/reset` handler so the re-scheduled task picks the operator-tuned
+   * cadence rather than reverting to a hard-coded default.
+   */
+  reconciliationIntervalMinutes: number;
 }
 
 /**
@@ -85,6 +92,7 @@ export const registerCasesAnalyticsV2Routes = ({
   getTaskManager,
   clearDataViewBootstrapCache,
   enabled,
+  reconciliationIntervalMinutes,
 }: RegisterArgs): void => {
   const router = core.http.createRouter();
   const log = logger.get('routes');
@@ -269,7 +277,11 @@ export const registerCasesAnalyticsV2Routes = ({
         let reconcileResult: string | null = null;
         if (taskManager != null) {
           try {
-            await resetReconciliationTask({ taskManager, logger: log });
+            await resetReconciliationTask({
+              taskManager,
+              logger: log,
+              intervalMinutes: reconciliationIntervalMinutes,
+            });
             const result = await taskManager.runSoon(RECONCILIATION_TASK_ID);
             reconcileResult = result.id;
           } catch (err) {

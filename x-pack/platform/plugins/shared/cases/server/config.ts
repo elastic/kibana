@@ -30,6 +30,22 @@ export const ConfigSchema = schema.object({
    */
   analyticsV2: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
+    /**
+     * Reconciliation cadence in minutes. The reconciliation task is the
+     * durability backstop for v2's fire-and-forget write hooks: every
+     * tick it walks cases updated since the previous tick and re-emits
+     * their analytics docs. Lower values catch up faster after a hook
+     * failure but cost more SO walks against the cases index.
+     *
+     * Defaults to 30 minutes — fast enough to recover from a tick of
+     * dropped hooks well within an operator response window, slow
+     * enough to keep background read load negligible. Hard floor of 5
+     * minutes prevents misconfigured deployments from hammering ES.
+     */
+    reconciliationIntervalMinutes: schema.number({
+      defaultValue: 30,
+      min: 5,
+    }),
   }),
   attachments: schema.object({
     enabled: schema.boolean({ defaultValue: false }),

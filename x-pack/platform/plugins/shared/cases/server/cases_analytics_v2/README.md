@@ -64,6 +64,14 @@ shouldn't be locked to a single shard.
 ```yaml
 xpack.cases.analyticsV2:
   enabled: false                  # default — set to true to opt in
+  reconciliationIntervalMinutes: 30  # default — Task Manager cadence for the
+                                     # reconciliation backstop. Min 5; lower
+                                     # values catch up faster after a hook
+                                     # failure but cost more SO walks against
+                                     # the cases index. Picked up at plugin
+                                     # start; runtime changes require a Kibana
+                                     # restart (the next /reset re-applies the
+                                     # current value to the rescheduled task).
 ```
 
 When `enabled: false`, the v2 service is a no-op. Nothing registers, nothing
@@ -271,7 +279,9 @@ cases_analytics_v2/
 │   └── retry.test.ts
 │
 ├── reconciliation/
-│   ├── index.ts       task type registration + scheduling (30m interval)
+│   ├── index.ts       task type registration + scheduling (interval from
+│   │                  xpack.cases.analyticsV2.reconciliationIntervalMinutes,
+│   │                  default 30m)
 │   └── runner.ts      walks SOs by `updated_at > last_run_at` using PIT
 │
 ├── data_view/
