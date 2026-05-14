@@ -253,6 +253,60 @@ describe('MetricsGrid', () => {
     );
   });
 
+  // Regression coverage for issue #262360: the user-typed source must be threaded
+  // from `fetchParams.query` through `MetricsGrid` into `createESQLQuery` as
+  // `originalSource`, so backing-index queries stay at the same scope METRICS_INFO
+  // scanned (avoiding cross-backing-index field-type conflicts being re-introduced
+  // when the chart query widens back to the parent data stream).
+  describe('originalSource plumbing (issue #262360)', () => {
+    const backingIndex = '.ds-edge-case-gauge-to-counter-2026.04.29-000001';
+
+    const backingIndexFetchParams: MetricsGridProps['fetchParams'] = getFetchParamsMock({
+      filters: [],
+      query: { esql: `TS ${backingIndex}` },
+      esqlVariables: [],
+      relativeTimeRange: { from: 'now-1h', to: 'now' },
+    });
+
+    const dataStreamFetchParams: MetricsGridProps['fetchParams'] = getFetchParamsMock({
+      filters: [],
+      query: { esql: 'TS edge-case-gauge-to-counter' },
+      esqlVariables: [],
+      relativeTimeRange: { from: 'now-1h', to: 'now' },
+    });
+
+    const globFetchParams: MetricsGridProps['fetchParams'] = getFetchParamsMock({
+      filters: [],
+      query: { esql: 'TS edge-case-*' },
+      esqlVariables: [],
+      relativeTimeRange: { from: 'now-1h', to: 'now' },
+    });
+
+    it('forwards the user-typed backing index as originalSource', () => {
+      renderMetricsGrid({ fetchParams: backingIndexFetchParams });
+
+      expect(createESQLQuery).toHaveBeenCalledWith(
+        expect.objectContaining({ originalSource: backingIndex })
+      );
+    });
+
+    it('forwards the user-typed data stream as originalSource', () => {
+      renderMetricsGrid({ fetchParams: dataStreamFetchParams });
+
+      expect(createESQLQuery).toHaveBeenCalledWith(
+        expect.objectContaining({ originalSource: 'edge-case-gauge-to-counter' })
+      );
+    });
+
+    it('forwards the raw glob pattern as originalSource (createESQLQuery falls back to dataStream)', () => {
+      renderMetricsGrid({ fetchParams: globFetchParams });
+
+      expect(createESQLQuery).toHaveBeenCalledWith(
+        expect.objectContaining({ originalSource: 'edge-case-*' })
+      );
+    });
+  });
+
   describe('MetricsGrid keyboard navigation', () => {
     beforeEach(() => {
       jest.useFakeTimers();
