@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { RetentionInfo, RetentionStatus, RetentionType } from '@kbn/siem-readiness';
+import type { MainCategories, RetentionInfo, RetentionStatus, RetentionType } from '@kbn/siem-readiness';
 import { CATEGORY_ORDER } from '@kbn/siem-readiness';
 import { useSiemReadinessApi } from '../../../hooks/use_siem_readiness_api';
 import {
@@ -59,39 +59,42 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
 }) => {
   const basePath = useBasePath();
   const { openNewCaseFlyout } = useSiemReadinessCases();
-  const { getReadinessRetention } = useSiemReadinessApi();
+  const { getReadinessRetention, getReadinessCategories } = useSiemReadinessApi();
   const {
     data: retentionData,
     isLoading: retentionLoading,
     error: retentionError,
   } = getReadinessRetention;
+  const { data: categoriesData, isLoading: categoriesLoading } = getReadinessCategories;
 
-  const isLoading = retentionLoading;
+  const isLoading = retentionLoading || categoriesLoading;
   const error = retentionError;
 
-  // Group items by category using pre-enriched categories from the orchestrator
+  // Group items by category using contains-match against the categories API response.
+  // Retention items carry data stream names; category indices carry backing index names,
+  // so data stream name is a substring of backing index name.
   const categories: Array<CategoryData<RetentionInfoWithStatus>> = useMemo(() => {
-    const categoryItemsMap = new Map<string, RetentionInfoWithStatus[]>();
+    const categoryItemsMap = new Map<string, Set<RetentionInfoWithStatus>>();
 
     for (const item of retentionData?.items ?? []) {
-      for (const category of item.categories ?? []) {
-        if (activeCategories.includes(category)) {
-          const existing = categoryItemsMap.get(category) ?? [];
-          existing.push(item as RetentionInfoWithStatus);
-          categoryItemsMap.set(category, existing);
+      categoriesData?.mainCategoriesMap?.forEach((group) => {
+        if (!activeCategories.includes(group.category as MainCategories)) return;
+        if (group.indices.some((idx) => idx.indexName.includes(item.indexName))) {
+          const set = categoryItemsMap.get(group.category) ?? new Set<RetentionInfoWithStatus>();
+          set.add(item as RetentionInfoWithStatus);
+          categoryItemsMap.set(group.category, set);
         }
-      }
+      });
     }
 
     const result: Array<CategoryData<RetentionInfoWithStatus>> = [];
     for (const category of activeCategories) {
       const items = categoryItemsMap.get(category);
-      if (items?.length) result.push({ category, items });
+      if (items?.size) result.push({ category, items: Array.from(items) });
     }
     return result;
-  }, [retentionData?.items, activeCategories]);
+  }, [retentionData?.items, categoriesData?.mainCategoriesMap, activeCategories]);
 
-  // All items in the payload are already categorized; data exists if there are any items at all.
   const hasUnfilteredData = (retentionData?.items?.length ?? 0) > 0;
 
   // Count non-compliant items (deduplicated by indexName)

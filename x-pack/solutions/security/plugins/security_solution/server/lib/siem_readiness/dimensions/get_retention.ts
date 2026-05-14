@@ -7,9 +7,9 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { ActionableFinding, MainCategories, RetentionPayload } from '@kbn/siem-readiness';
-import { ALL_CATEGORIES, getRetentionStatus, isRetentionNonCompliant } from '@kbn/siem-readiness';
-import { fetchCategories, fetchRetention } from '../fetchers';
+import type { ActionableFinding, RetentionPayload } from '@kbn/siem-readiness';
+import { isRetentionNonCompliant } from '@kbn/siem-readiness';
+import { fetchRetention } from '../fetchers';
 
 export const getRetention = async ({
   esClient,
@@ -20,46 +20,33 @@ export const getRetention = async ({
   isServerless: boolean;
   logger: Logger;
 }): Promise<RetentionPayload> => {
-  const [retentionResponse, categoriesData] = await Promise.all([
-    fetchRetention({ esClient, isServerless, logger }),
-    fetchCategories({ esClient, logger }),
-  ]);
+  const retentionResponse = await fetchRetention({ esClient, isServerless, logger });
 
-  // Category indices are backing index names (.ds-<stream>-YYYY.MM.DD-N); retention items carry the
-  // data stream name. Use the same contains-match the UI used: categoryIdx.includes(itemIndexName).
-  const getCategoriesForItem = (itemIndexName: string): MainCategories[] => {
-    const cats = new Set<MainCategories>();
-    categoriesData?.mainCategoriesMap?.forEach((group) => {
-      if (group.indices.some((idx) => idx.indexName.includes(itemIndexName))) {
-        cats.add(group.category as MainCategories);
-      }
-    });
-    return Array.from(cats);
-  };
-
-  const categorizedItems = retentionResponse.items
-    .map((item) => ({ item, categories: getCategoriesForItem(item.indexName) }))
-    .filter(({ categories }) => categories.length > 0)
-    .map(({ item, categories }) => ({ ...item, categories }));
-
-  const status = getRetentionStatus(categoriesData, retentionResponse, ALL_CATEGORIES);
-
-  const actionableFindings: ActionableFinding[] = categorizedItems
+  const actionableFindings: ActionableFinding[] = retentionResponse.items
     .filter((item) => isRetentionNonCompliant(item.status))
     .map((item) => {
-      const category = item.categories[0] ?? ('Endpoint' as MainCategories);
       const retentionLabel = item.retentionDays ? `${item.retentionDays}d` : 'no retention policy';
       return {
-        category,
         severity: 'warning' as const,
         message: `${item.indexName} has retention of ${retentionLabel}, below the 365-day FedRAMP threshold`,
         resource: item.indexName,
       };
     });
 
-  const summary = buildRetentionSummary(status, categorizedItems.length, actionableFindings.length);
+  const status =
+    retentionResponse.items.length === 0
+      ? ('noData' as const)
+      : actionableFindings.length > 0
+      ? ('actionsRequired' as const)
+      : ('healthy' as const);
 
-  return { status, summary, items: categorizedItems, actionableFindings };
+  const summary = buildRetentionSummary(
+    status,
+    retentionResponse.items.length,
+    actionableFindings.length
+  );
+
+  return { status, summary, items: retentionResponse.items, actionableFindings };
 };
 
 const buildRetentionSummary = (

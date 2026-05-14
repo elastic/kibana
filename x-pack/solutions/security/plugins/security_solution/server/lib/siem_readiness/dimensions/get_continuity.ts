@@ -7,14 +7,9 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { ActionableFinding, ContinuityPayload, MainCategories } from '@kbn/siem-readiness';
-import {
-  ALL_CATEGORIES,
-  getContinuityStatus,
-  getIndexCategoryMap,
-  isCriticalFailureRate,
-} from '@kbn/siem-readiness';
-import { fetchCategories, fetchPipelines } from '../fetchers';
+import type { ActionableFinding, ContinuityPayload } from '@kbn/siem-readiness';
+import { isCriticalFailureRate } from '@kbn/siem-readiness';
+import { fetchPipelines } from '../fetchers';
 
 export const getContinuity = async ({
   esClient,
@@ -25,54 +20,26 @@ export const getContinuity = async ({
   isServerless: boolean;
   logger: Logger;
 }): Promise<ContinuityPayload> => {
-  const [pipelines, categoriesData] = await Promise.all([
-    fetchPipelines({ esClient, isServerless, logger }),
-    fetchCategories({ esClient, logger }),
-  ]);
+  const pipelines = await fetchPipelines({ esClient, isServerless, logger });
 
-  const indexToCategoryMap = getIndexCategoryMap(categoriesData);
+  const actionableFindings: ActionableFinding[] = pipelines
+    .filter((p) => p.statsAvailable && isCriticalFailureRate(p.failedDocsCount, p.docsCount))
+    .map((p) => ({
+      severity: 'critical' as const,
+      message: `Pipeline ${p.name} has a critical document failure rate (${p.failedDocsCount} of ${p.docsCount} failed)`,
+      resource: p.name,
+    }));
 
-  // Build index → all categories map (an index can belong to multiple categories).
-  const allCategoriesMap = new Map<string, MainCategories[]>();
-  categoriesData?.mainCategoriesMap?.forEach((group) => {
-    group.indices.forEach((idx) => {
-      const existing = allCategoriesMap.get(idx.indexName) ?? [];
-      allCategoriesMap.set(idx.indexName, [...existing, group.category as MainCategories]);
-    });
-  });
+  const status =
+    pipelines.length === 0
+      ? ('noData' as const)
+      : actionableFindings.length > 0
+      ? ('actionsRequired' as const)
+      : ('healthy' as const);
 
-  // Only include pipelines that serve at least one categorized index.
-  const categorizedPipelines = pipelines
-    .filter((p) => p.indices.some((indexName) => indexToCategoryMap.has(indexName)))
-    .map((p) => {
-      const categoriesSet = new Set<MainCategories>();
-      p.indices.forEach((indexName) => {
-        (allCategoriesMap.get(indexName) ?? []).forEach((cat) => categoriesSet.add(cat));
-      });
-      return { ...p, categories: Array.from(categoriesSet) };
-    });
+  const summary = buildContinuitySummary(status, pipelines.length, actionableFindings.length);
 
-  const status = getContinuityStatus(categorizedPipelines, indexToCategoryMap, ALL_CATEGORIES);
-
-  const actionableFindings: ActionableFinding[] = categorizedPipelines
-    .filter((p) => isCriticalFailureRate(p.failedDocsCount, p.docsCount))
-    .map((p) => {
-      const category = p.categories[0] ?? ('Endpoint' as MainCategories);
-      return {
-        category,
-        severity: 'critical' as const,
-        message: `Pipeline ${p.name} has a critical document failure rate (${p.failedDocsCount} of ${p.docsCount} failed)`,
-        resource: p.name,
-      };
-    });
-
-  const summary = buildContinuitySummary(
-    status,
-    categorizedPipelines.length,
-    actionableFindings.length
-  );
-
-  return { status, summary, items: categorizedPipelines, actionableFindings };
+  return { status, summary, items: pipelines, actionableFindings };
 };
 
 const buildContinuitySummary = (

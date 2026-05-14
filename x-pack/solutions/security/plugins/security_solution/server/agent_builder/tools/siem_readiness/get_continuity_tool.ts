@@ -10,9 +10,12 @@ import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
+import type { MainCategories } from '@kbn/siem-readiness';
+import { getIndexCategoryMap } from '@kbn/siem-readiness';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { getContinuity } from '../../../lib/siem_readiness/dimensions';
+import { fetchCategories } from '../../../lib/siem_readiness/fetchers';
 import { SIEM_READINESS_CONTINUITY_TOOL_ID } from './tool_ids';
 
 const schema = z.object({});
@@ -25,7 +28,7 @@ export const getContinuityTool = (
   id: SIEM_READINESS_CONTINUITY_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Retrieves SIEM ingest pipeline continuity health. Returns active pipelines with document counts, failure rates, and which indices they serve. Includes an overall health status (healthy / actionsRequired / noData) and actionable findings for pipelines with critical failure rates.',
+    'Retrieves SIEM ingest pipeline continuity health. Returns active pipelines with document counts, failure rates, and which indices they serve — filtered to pipelines that serve categorized SIEM indices. Includes an overall health status (healthy / actionsRequired / noData) and actionable findings for pipelines with critical failure rates.',
   schema,
   tags: ['security', 'siem-readiness', 'continuity'],
   availability: {
@@ -36,17 +39,31 @@ export const getContinuityTool = (
   },
   handler: async (_params, { esClient, logger: handlerLogger }) => {
     try {
-      const payload = await getContinuity({
-        esClient: esClient.asCurrentUser,
-        isServerless,
-        logger: handlerLogger,
+      const [payload, categoriesResult] = await Promise.all([
+        getContinuity({ esClient: esClient.asCurrentUser, isServerless, logger: handlerLogger }),
+        fetchCategories({ esClient: esClient.asCurrentUser, logger: handlerLogger }),
+      ]);
+
+      const indexToCategoryMap = getIndexCategoryMap(categoriesResult);
+
+      const categorizedItems = payload.items.filter((p) =>
+        p.indices.some((idx) => indexToCategoryMap.has(idx))
+      );
+
+      const enrichedFindings = (payload.actionableFindings ?? []).map((finding) => {
+        const pipeline = categorizedItems.find((p) => p.name === finding.resource);
+        const category = pipeline?.indices
+          .map((idx) => indexToCategoryMap.get(idx))
+          .find(Boolean) as MainCategories | undefined;
+        return category ? { ...finding, category } : finding;
       });
+
       return {
         results: [
           {
             tool_result_id: getToolResultId(),
             type: ToolResultType.other,
-            data: payload,
+            data: { ...payload, items: categorizedItems, actionableFindings: enrichedFindings },
           },
         ],
       };

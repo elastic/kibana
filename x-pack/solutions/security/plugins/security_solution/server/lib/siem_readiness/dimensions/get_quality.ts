@@ -7,19 +7,8 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type {
-  ActionableFinding,
-  DataQualityResultDocument,
-  MainCategories,
-  QualityPayload,
-} from '@kbn/siem-readiness';
-import {
-  ALL_CATEGORIES,
-  getIndexCategoryMap,
-  getQualityStatus,
-  isQualityIncompatible,
-} from '@kbn/siem-readiness';
-import { fetchCategories } from '../fetchers';
+import type { ActionableFinding, DataQualityResultDocument, QualityPayload } from '@kbn/siem-readiness';
+import { isQualityIncompatible } from '@kbn/siem-readiness';
 
 const DATA_QUALITY_RESULTS_INDEX = '.kibana-data-quality-dashboard-results-*';
 
@@ -67,35 +56,26 @@ export const getQuality = async ({
   esClient: ElasticsearchClient;
   logger: Logger;
 }): Promise<QualityPayload> => {
-  const [qualityResults, categoriesData] = await Promise.all([
-    fetchDataQualityResults({ esClient, logger }),
-    fetchCategories({ esClient, logger }),
-  ]);
+  const qualityResults = await fetchDataQualityResults({ esClient, logger });
 
-  const indexToCategoryMap = getIndexCategoryMap(categoriesData);
-
-  // Only include indices that belong to at least one recognized category, matching the UI view.
-  const categorizedResults = qualityResults.filter((result) =>
-    indexToCategoryMap.has(result.indexName)
-  );
-
-  const status = getQualityStatus(categoriesData, qualityResults, ALL_CATEGORIES);
-
-  const actionableFindings: ActionableFinding[] = categorizedResults
+  const actionableFindings: ActionableFinding[] = qualityResults
     .filter((result) => isQualityIncompatible(result.incompatibleFieldCount))
-    .map((result) => {
-      const category = (indexToCategoryMap.get(result.indexName) as MainCategories) ?? 'Endpoint';
-      return {
-        category,
-        severity: 'warning' as const,
-        message: `${result.indexName} has ${result.incompatibleFieldCount} incompatible ECS fields`,
-        resource: result.indexName,
-      };
-    });
+    .map((result) => ({
+      severity: 'warning' as const,
+      message: `${result.indexName} has ${result.incompatibleFieldCount} incompatible ECS fields`,
+      resource: result.indexName,
+    }));
 
-  const summary = buildQualitySummary(status, categorizedResults.length, actionableFindings.length);
+  const status =
+    qualityResults.length === 0
+      ? ('noData' as const)
+      : actionableFindings.length > 0
+      ? ('actionsRequired' as const)
+      : ('healthy' as const);
 
-  return { status, summary, items: categorizedResults, actionableFindings };
+  const summary = buildQualitySummary(status, qualityResults.length, actionableFindings.length);
+
+  return { status, summary, items: qualityResults, actionableFindings };
 };
 
 const buildQualitySummary = (
