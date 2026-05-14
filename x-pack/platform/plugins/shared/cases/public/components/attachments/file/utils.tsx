@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type {
-  ExternalReferenceAttachmentPayload,
-  FileAttachmentMetadata,
-} from '../../../../common/types/domain';
-import { FileAttachmentMetadataRt } from '../../../../common/types/domain';
+import {
+  FileAttachmentMetadataSchema,
+  type FileAttachmentMetadata,
+} from '../../../../common/types/domain_zod/attachment/file/v2';
 
 import {
   compressionMimeTypes,
@@ -51,23 +50,19 @@ export const parseMimeType = (mimeType: string | undefined) => {
   return result[0].charAt(0).toUpperCase() + result[0].slice(1);
 };
 
-export const isValidFileExternalReferenceMetadata = (
-  externalReferenceMetadata: ExternalReferenceAttachmentPayload['externalReferenceMetadata']
-): externalReferenceMetadata is FileAttachmentMetadata => {
-  return (
-    FileAttachmentMetadataRt.is(externalReferenceMetadata) &&
-    externalReferenceMetadata?.files?.length >= 1
-  );
+/** Runtime guard for the unified `file` attachment metadata. */
+export const isValidFileMetadata = (metadata: unknown): metadata is FileAttachmentMetadata => {
+  return FileAttachmentMetadataSchema.safeParse(metadata).success;
 };
 
 export const getFileFromReferenceMetadata = ({
   fileId,
-  externalReferenceMetadata,
+  metadata,
 }: {
   fileId: string;
-  externalReferenceMetadata: FileAttachmentMetadata;
+  metadata: FileAttachmentMetadata;
 }) => {
-  const fileMetadata = externalReferenceMetadata.files[0];
+  const [fileMetadata] = metadata.files;
   return {
     id: fileId,
     ...fileMetadata,

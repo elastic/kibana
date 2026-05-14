@@ -6,30 +6,24 @@
  */
 
 import React from 'react';
-import { EuiFlexGrid, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { IntegrationTile } from './integration_tile';
-import type { IntegrationCategoryDefinition } from './tiles_config';
+import { EuiSpacer, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
 
 interface Props {
-  category: IntegrationCategoryDefinition;
+  id: string;
+  label: string;
+  children: React.ReactNode;
 }
 
-export const IntegrationsCategory = ({ category }: Props) => {
-  const labelId = `integrationsCategory-${category.id}`;
+export const IntegrationsCategory = ({ id, label, children }: Props) => {
+  const labelId = useGeneratedHtmlId({ prefix: 'integrationsCategory', suffix: id });
 
   return (
     <section aria-labelledby={labelId}>
       <EuiTitle size="xxs">
-        <h4 id={labelId}>{category.label}</h4>
+        <h4 id={labelId}>{label}</h4>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFlexGrid columns={3} gutterSize="m">
-        {category.tiles.map((tile) => (
-          <EuiFlexItem key={tile.id}>
-            <IntegrationTile tile={tile} />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGrid>
+      {children}
     </section>
   );
 };
