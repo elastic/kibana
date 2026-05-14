@@ -10,7 +10,7 @@ import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { useAlertsContext } from '../../detections/components/alerts_table/alerts_context';
 import { cellActionRenderer } from '../shared/components/cell_actions';
-import { DocumentFlyout } from '.';
+import { DocumentFlyout } from './main';
 
 export interface PaginatedDocumentFlyoutProps {
   /**
