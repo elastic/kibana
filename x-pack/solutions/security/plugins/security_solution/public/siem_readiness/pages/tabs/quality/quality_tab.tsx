@@ -21,7 +21,7 @@ import {
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import type { IndexInfo, DataQualityResultDocument, MainCategories } from '@kbn/siem-readiness';
+import type { IndexInfo, DataQualityResultDocument } from '@kbn/siem-readiness';
 import { CATEGORY_ORDER } from '@kbn/siem-readiness';
 import { useSiemReadinessApi } from '../../../hooks/use_siem_readiness_api';
 import {
@@ -65,15 +65,16 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     return new Map(getIndexQualityData.map((result) => [result.indexName, result]));
   }, [getIndexQualityData]);
 
-  // Extract flat list of all index names for auto-checking
+  // Extract flat list of all index names for auto-checking, in activeCategories order
   const allIndexNames = useMemo(() => {
     if (!getReadinessCategoriesData?.mainCategoriesMap) return [];
 
-    const activeOnly = getReadinessCategoriesData.mainCategoriesMap.filter((category) =>
-      activeCategories.includes(category.category as MainCategories)
-    );
-
-    return activeOnly.flatMap((category) => category.indices.map((index) => index.indexName));
+    return activeCategories.flatMap((activeCategory) => {
+      const catData = getReadinessCategoriesData.mainCategoriesMap.find(
+        (c) => c.category === activeCategory
+      );
+      return catData?.indices.map((index) => index.indexName) ?? [];
+    });
   }, [getReadinessCategoriesData?.mainCategoriesMap, activeCategories]);
 
   // Auto-check all indices when tab is visited
@@ -82,32 +83,33 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     enabled: !getReadinessCategories.isLoading && allIndexNames.length > 0,
   });
 
-  // Prepare categories data with computed status field, filtered by active categories
+  // Prepare categories data with computed status field, in activeCategories order
   const categories: Array<CategoryData<IndexInfoWithStatus>> = useMemo(() => {
     if (!getReadinessCategoriesData?.mainCategoriesMap) return [];
 
-    const activeOnly = getReadinessCategoriesData.mainCategoriesMap.filter((category) =>
-      activeCategories.includes(category.category as MainCategories)
-    );
-
-    const withStatus = activeOnly.map((category) => ({
-      category: category.category,
-      items: category.indices.map((index) => {
-        const result = indexDataQualityMap.get(index.indexName);
-        const incompatibleCount = result?.incompatibleFieldCount ?? 0;
-
+    return activeCategories
+      .map((activeCategory) => {
+        const catData = getReadinessCategoriesData.mainCategoriesMap.find(
+          (c) => c.category === activeCategory
+        );
+        if (!catData?.indices.length) return null;
         return {
-          ...index,
-          status: isQualityIncompatible(incompatibleCount)
-            ? ('incompatible' as const)
-            : ('healthy' as const),
-          incompatibleFieldCount: incompatibleCount,
-          checkedAt: result?.checkedAt,
+          category: catData.category,
+          items: catData.indices.map((index) => {
+            const qualityResult = indexDataQualityMap.get(index.indexName);
+            const incompatibleCount = qualityResult?.incompatibleFieldCount ?? 0;
+            return {
+              ...index,
+              status: isQualityIncompatible(incompatibleCount)
+                ? ('incompatible' as const)
+                : ('healthy' as const),
+              incompatibleFieldCount: incompatibleCount,
+              checkedAt: qualityResult?.checkedAt,
+            };
+          }),
         };
-      }),
-    }));
-
-    return withStatus.filter((category) => category.items.length > 0);
+      })
+      .filter((c): c is CategoryData<IndexInfoWithStatus> => c !== null);
   }, [getReadinessCategoriesData?.mainCategoriesMap, indexDataQualityMap, activeCategories]);
 
   // Calculate total incompatible indices - count unique indices only
