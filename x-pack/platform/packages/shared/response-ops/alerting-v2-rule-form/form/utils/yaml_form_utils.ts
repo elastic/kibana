@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { dump, load } from 'js-yaml';
-import { validateEsqlQuery } from '@kbn/alerting-v2-schemas';
 import type { FormValues, RecoveryPolicy, StateTransition } from '../types';
 import {
   deriveAlertDelayModeFromStateTransition,
@@ -17,11 +16,6 @@ import {
 export interface YamlParseResult {
   values: FormValues | null;
   error: string | null;
-}
-
-export interface YamlParseOptions {
-  /** When false, skip required-field and ES|QL syntax validation. Default: true. */
-  strict?: boolean;
 }
 
 const parseArtifacts = (artifacts: unknown): FormValues['artifacts'] => {
@@ -125,17 +119,14 @@ export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
 };
 
 /**
- * Parse and validate YAML string to FormValues.
+ * Parse YAML string to FormValues (lenient).
  *
- * With `strict: true` (default), all required fields must be present and
- * the ES|QL query must be syntactically valid. Use `strict: false` for
- * best-effort parsing (e.g. flushing partial edits when toggling out of
- * YAML mode) — missing required fields get safe defaults instead of errors.
+ * Parses the YAML structure and extracts all recognised fields, providing
+ * safe defaults for any that are missing. YAML syntax errors are still
+ * reported. Field-level validation (required name, valid ES|QL, etc.)
+ * is handled by RHF at submit time, keeping a single validation pipeline.
  */
-export const parseYamlToFormValues = (
-  yamlString: string,
-  { strict = true }: YamlParseOptions = {}
-): YamlParseResult => {
+export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
   let parsed: unknown;
   try {
     parsed = load(yamlString);
@@ -219,37 +210,8 @@ export const parseYamlToFormValues = (
     };
   }
 
-  // Validate required fields
   const name = metadata?.name;
-  if (strict && (typeof name !== 'string' || !name.trim())) {
-    return {
-      values: null,
-      error: i18n.translate('xpack.alertingV2.yamlRuleForm.nameRequiredError', {
-        defaultMessage: 'metadata.name is required.',
-      }),
-    };
-  }
-
   const queryBase = evalQuery?.base;
-  if (strict && (typeof queryBase !== 'string' || !queryBase.trim())) {
-    return {
-      values: null,
-      error: i18n.translate('xpack.alertingV2.yamlRuleForm.queryRequiredError', {
-        defaultMessage: 'evaluation.query.base is required.',
-      }),
-    };
-  }
-
-  // Validate ES|QL query syntax
-  if (strict && typeof queryBase === 'string' && queryBase.trim()) {
-    const queryValidationError = validateEsqlQuery(queryBase);
-    if (queryValidationError) {
-      return {
-        values: null,
-        error: queryValidationError,
-      };
-    }
-  }
 
   return {
     values: {

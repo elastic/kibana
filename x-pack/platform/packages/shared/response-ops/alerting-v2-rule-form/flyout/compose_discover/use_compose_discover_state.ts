@@ -26,7 +26,6 @@ const createInitialState = (
   sandboxDateStart: 'now-15m',
   sandboxDateEnd: 'now',
   yamlMode: false,
-  sandboxCommitVersion: 0,
 });
 
 /**
@@ -76,7 +75,6 @@ function reducer(state: ComposeDiscoverState, action: ComposeDiscoverAction): Co
         sandbox: { ...state.sandbox, query: action.query },
         childOpen: state.yamlMode ? state.childOpen : false,
         queryCommitted: true,
-        sandboxCommitVersion: state.sandboxCommitVersion + 1,
       };
     case 'SET_YAML_MODE':
       return {

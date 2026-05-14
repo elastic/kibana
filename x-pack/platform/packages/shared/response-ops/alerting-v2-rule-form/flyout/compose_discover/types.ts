@@ -57,10 +57,6 @@ export interface ComposeDiscoverState {
   sandboxDateEnd: string;
   /** When true the stepped form is replaced by a full YAML editor. */
   yamlMode: boolean;
-  /** Monotonically increasing counter bumped on every COMMIT_SANDBOX_QUERY.
-   *  Used as an effect dependency so the bridge fires even when the query
-   *  value itself hasn't changed (e.g. user clicks Apply without editing). */
-  sandboxCommitVersion: number;
 }
 
 export type ComposeDiscoverAction =

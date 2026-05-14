@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import {
   EuiBadge,
@@ -26,7 +26,6 @@ import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
 import type { FormValues } from '../../form/types';
 import { serializeFormToYaml, parseYamlToFormValues } from '../../form/utils/yaml_form_utils';
-import { RULE_FORM_ID } from '../../form/constants';
 import {
   mapRuleResponseToFormValues,
   mapFormValuesToCreateRequest,
@@ -161,6 +160,24 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   // ── YAML mode state ──────────────────────────────────────────────────────
   const [yamlText, setYamlText] = useState('');
   const preYamlFormSnapshotRef = useRef<FormValues | null>(null);
+  const debouncedParseRef = useRef<ReturnType<typeof setTimeout>>();
+
+  // Wraps setYamlText with a debounced (~300 ms) lenient parse that pushes
+  // every YAML keystroke into RHF. The Sandbox watches RHF, so it sees
+  // YAML edits live. Passed to YamlRuleForm as the setYamlText prop.
+  const handleSetYamlText = useCallback(
+    (yaml: string) => {
+      setYamlText(yaml);
+      clearTimeout(debouncedParseRef.current);
+      debouncedParseRef.current = setTimeout(() => {
+        const result = parseYamlToFormValues(yaml);
+        if (result.values) {
+          methods.reset(result.values);
+        }
+      }, 300);
+    },
+    [methods]
+  );
 
   const handleToggleYamlMode = useCallback(
     (enabled: boolean) => {
@@ -168,11 +185,10 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
         preYamlFormSnapshotRef.current = methods.getValues();
         setYamlText(serializeFormToYaml(methods.getValues()));
       } else {
-        const result = parseYamlToFormValues(yamlText, { strict: false });
+        clearTimeout(debouncedParseRef.current);
+        const result = parseYamlToFormValues(yamlText);
         if (result.values) {
           methods.reset(result.values);
-          // Keep sandbox.query in sync so the bridge effect doesn't
-          // overwrite the form reset with the stale pre-YAML query.
           const parsedQuery = result.values.evaluation?.query?.base ?? '';
           dispatch({ type: 'COMMIT_SANDBOX_QUERY', query: parsedQuery });
         }
@@ -184,6 +200,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   );
 
   const handleCancelYaml = useCallback(() => {
+    clearTimeout(debouncedParseRef.current);
     if (preYamlFormSnapshotRef.current) {
       methods.reset(preYamlFormSnapshotRef.current);
       preYamlFormSnapshotRef.current = null;
@@ -191,36 +208,19 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
     dispatch({ type: 'SET_YAML_MODE', enabled: false });
   }, [methods, dispatch]);
 
-  // YAML submit handler — parses YAML and submits directly.
-  const handleYamlSubmit = useCallback(
-    (values: FormValues) => {
-      if (isCreate) {
-        onCreateRule(mapFormValuesToCreateRequest(values));
-      } else if (ruleId && onUpdateRule) {
-        onUpdateRule(ruleId, mapFormValuesToUpdateRequest(values));
+  // Imperative handler for Sandbox "Apply changes". Writes the committed
+  // query into both the reducer and RHF, then regenerates YAML if in YAML
+  // mode. No effects involved — every Apply call executes this directly.
+  const handleSandboxApply = useCallback(
+    (query: string) => {
+      dispatch({ type: 'COMMIT_SANDBOX_QUERY', query });
+      methods.setValue('evaluation', { query: { base: query } });
+      if (uiState.yamlMode) {
+        setYamlText(serializeFormToYaml(methods.getValues()));
       }
     },
-    [isCreate, onCreateRule, ruleId, onUpdateRule]
+    [dispatch, methods, uiState.yamlMode]
   );
-
-  // Bridge: sync the committed Sandbox query into RHF on every Apply click.
-  // Keyed on sandboxCommitVersion so it fires even when the query value hasn't
-  // changed (e.g. user clicks Apply without editing the Sandbox).
-  useEffect(() => {
-    if (!uiState.queryCommitted) return;
-    methods.setValue('evaluation', { query: { base: uiState.sandbox.query } });
-  }, [uiState.sandboxCommitVersion, uiState.queryCommitted, uiState.sandbox.query, methods]);
-
-  // Form → YAML: watch(callback) regenerates YAML on any form value change
-  // while YAML mode is active. The Sandbox path flows through here:
-  // Apply → bridge writes sandbox.query to form → watch fires → YAML updates.
-  useEffect(() => {
-    if (!uiState.yamlMode) return;
-    const subscription = methods.watch(() => {
-      setYamlText(serializeFormToYaml(methods.getValues()));
-    });
-    return () => subscription.unsubscribe();
-  }, [uiState.yamlMode, methods, setYamlText]);
 
   const handleSubmit = methods.handleSubmit((values) => {
     if (isCreate) {
@@ -229,6 +229,17 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
       onUpdateRule(ruleId, mapFormValuesToUpdateRequest(values));
     }
   });
+
+  // YAML "Save" — flush any pending debounce into RHF, then run the shared
+  // handleSubmit path so validation + submission use a single pipeline.
+  const handleYamlSave = useCallback(() => {
+    clearTimeout(debouncedParseRef.current);
+    const result = parseYamlToFormValues(yamlText);
+    if (result.values) {
+      methods.reset(result.values);
+    }
+    handleSubmit();
+  }, [yamlText, methods, handleSubmit]);
 
   const handleNext = useCallback(async () => {
     // Step 0: require a committed query before advancing
@@ -295,9 +306,8 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
               <React.Suspense fallback={null}>
                 <LazyYamlRuleForm
                   services={services}
-                  onSubmit={handleYamlSubmit}
                   yamlText={yamlText}
-                  setYamlText={setYamlText}
+                  setYamlText={handleSetYamlText}
                   isSubmitting={isSaving}
                 />
               </React.Suspense>
@@ -322,8 +332,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     fill
-                    type="submit"
-                    form={RULE_FORM_ID}
+                    onClick={handleYamlSave}
                     isLoading={isSaving}
                     data-test-subj="composeDiscoverYamlSubmit"
                   >
@@ -393,6 +402,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
               state={uiState}
               dispatch={dispatch}
               onClose={() => dispatch({ type: 'CLOSE_CHILD' })}
+              onApply={handleSandboxApply}
             />
           )}
         </EuiFlyout>
