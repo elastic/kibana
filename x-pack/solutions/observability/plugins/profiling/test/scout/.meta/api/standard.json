@@ -67,7 +67,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_with_data.spec.ts",
-        "line": 31,
+        "line": 42,
         "column": 10
       }
     },
@@ -81,7 +81,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_with_data.spec.ts",
-        "line": 45,
+        "line": 56,
         "column": 10
       }
     },
