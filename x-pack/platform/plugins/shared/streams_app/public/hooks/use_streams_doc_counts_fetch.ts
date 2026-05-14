@@ -45,7 +45,8 @@ export interface StreamDocCountsFetch {
 
 interface UseDocCountFetchProps {
   groupTotalCountByTimestamp: boolean;
-  getCanReadFailureStore: (streamName: string) => boolean;
+  /** When `streamName` is omitted (streams listing), this decides whether to fetch failed-doc counts for all streams. */
+  getCanReadFailureStore: (streamName?: string) => boolean;
   numDataPoints: number;
 }
 
@@ -128,8 +129,7 @@ export function useStreamDocCountsFetch({
           : {}),
       });
 
-      // Check per-stream privilege
-      const canReadFailureStore = streamName ? getCanReadFailureStore(streamName) : false;
+      const canReadFailureStore = getCanReadFailureStore(streamName);
 
       const failedCountPromise = canReadFailureStore
         ? streamsRepositoryClient.fetch('GET /internal/streams/doc_counts/failed', {

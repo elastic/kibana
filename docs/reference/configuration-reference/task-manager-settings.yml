@@ -70,6 +70,19 @@ groups:
           self: ga
           ech: ga
 
+      - setting: xpack.task_manager.monitored_stats_health_verbose_log.level
+        description: |
+          The log level used when verbose health logging is enabled. Set to `debug` for detailed output or `info` for higher-level summaries.
+        datatype: enum
+        default: 'debug'
+        options:
+          - option: debug
+          - option: info
+        applies_to:
+          stack: ga 8.6
+          ech: ga
+          self: ga
+
       - setting: xpack.task_manager.event_loop_delay.monitor
         description: |
           Enables event loop delay monitoring, which will log a warning when a task causes an event loop delay which exceeds the `warn_threshold` setting.
@@ -88,6 +101,16 @@ groups:
           self: ga
           ech: ga
 
+      - setting: xpack.task_manager.version_conflict_threshold
+        description: |
+          The percentage threshold of workers experiencing version conflicts above which Task Manager shifts its polling interval to avoid overloading Elasticsearch. Accepts values between 50 and 100.
+        datatype: int
+        default: 80
+        applies_to:
+          stack: ga 7.11
+          ech: ga
+          self: ga
+
       - setting: xpack.task_manager.capacity
         description: |
           Controls the number of tasks that can be run at one time. The minimum value is 5 and the maximum is 50.
@@ -102,6 +125,28 @@ groups:
     description: |
       Settings that configure the [Health monitoring](docs-content://deploy-manage/monitor/kibana-task-manager-health-monitoring.md) endpoint.
     settings:
+
+      - setting: xpack.task_manager.ephemeral_tasks.enabled
+        description: |
+          Set to `true` to enable ephemeral tasks, which ran actions inline without persisting them to Elasticsearch.
+        datatype: bool
+        default: false
+        applies_to:
+          - "stack: ga 7.15, deprecated 8.8, removed 9.0"
+          - "ech: ga"
+          - "self: ga"
+        deprecation_details: "Ephemeral tasks were deprecated in 8.8 and removed in 9.0. This setting has no effect on Kibana 9.0 and later."
+
+      - setting: xpack.task_manager.ephemeral_tasks.request_capacity
+        description: |
+          The maximum number of ephemeral task requests that can be queued.
+        datatype: int
+        default: 10
+        applies_to:
+          - "stack: ga 7.15, deprecated 8.8, removed 9.0"
+          - "ech: ga"
+          - "self: ga"
+        deprecation_details: "Ephemeral tasks were deprecated in 8.8 and removed in 9.0. This setting has no effect on Kibana 9.0 and later."
 
       - setting: xpack.task_manager.monitored_task_execution_thresholds
         description: |
