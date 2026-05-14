@@ -21,18 +21,16 @@ async function waitForTracesProfileApplied(
 ) {
   await pageObjects.discover.waitForDocTableRendered();
   const [firstProfileSpecificColumn] = pageObjects.tracesExperience.grid.profileSpecificColumns;
+
   await expect(pageObjects.discover.getColumnHeader(firstProfileSpecificColumn)).toBeVisible({
     timeout: 30_000,
   });
 }
 
-export async function expectTracesExperienceEnabled({
-  pageObjects,
-  shouldCheckForREDMetricsCharts = true,
-}: {
-  pageObjects: PageObjects & { tracesExperience: TracesExperiencePage };
-  shouldCheckForREDMetricsCharts?: boolean;
-}) {
+export async function expectTracesExperienceEnabled(
+  pageObjects: PageObjects & { tracesExperience: TracesExperiencePage },
+  shouldCheckForREDMetricsCharts: boolean = true
+) {
   await waitForTracesProfileApplied(pageObjects);
 
   for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
