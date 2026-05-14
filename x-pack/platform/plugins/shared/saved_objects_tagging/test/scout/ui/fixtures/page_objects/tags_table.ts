@@ -45,18 +45,23 @@ export class TagsTable {
     return Promise.all(
       rows.map(async (row) => {
         const nameCell = row.locator('[data-test-subj="tagsTableRowTagName"]');
-        const descriptionCell = row.locator('[data-test-subj="tagsTableRowDescription"]');
+        // Read from the inner `.euiTableCellContent` div to exclude EUI's visually hidden
+        // tabular-copy markers (U+21A6 "↦" / U+21B5 "↵" spans appended to the `<td>`) which
+        // `innerText()` picks up and which `.trim()` cannot remove (they are not whitespace).
+        const descriptionCell = row
+          .locator('[data-test-subj="tagsTableRowDescription"]')
+          .locator('.euiTableCellContent');
         const connectionsLocator = row.locator('[data-test-subj="tagsTableRowConnectionsLink"]');
 
         const [rawName, rawDescription, connectionCount] = await Promise.all([
           nameCell.innerText(),
-          descriptionCell.textContent(),
+          descriptionCell.innerText(),
           this.parseConnectionCount(connectionsLocator),
         ]);
 
         return {
           name: rawName.trim(),
-          description: (rawDescription ?? '').trim(),
+          description: rawDescription.trim(),
           connectionCount,
         };
       })
