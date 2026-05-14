@@ -49,8 +49,6 @@ evaluate.describe('Automatic Migration Skills: Context', { tag: tags.stateful.cl
                 'The response surfaces a compact list of resources (id, type, name) rather than dumping the full content of each.',
                 'The response does NOT modify any resource (no upsert / remove invocation).',
               ],
-            },
-            metadata: {
               tool_sequence: ['security.migration_resources_list'],
             },
           },
@@ -83,8 +81,6 @@ evaluate.describe('Automatic Migration Skills: Context', { tag: tags.stateful.cl
                 'The response either pauses for confirmation OR passes `confirm: true` only because the user has explicitly approved the diff in the prior turn — never as a default.',
                 'After persistence, the response surfaces the "applies on the NEXT translation run" reminder verbatim or in clear paraphrase.',
               ],
-            },
-            metadata: {
               tool_sequence: [
                 'security.migration_resources_list',
                 'security.migration_resource_upsert',
@@ -120,8 +116,6 @@ evaluate.describe('Automatic Migration Skills: Context', { tag: tags.stateful.cl
                 'The response either pauses for confirmation OR passes `confirm: true` only because the user has explicitly approved the diff in the prior turn.',
                 'The response calls out that previously translated rules retain the OLD context — only the next translation run picks up the new version.',
               ],
-            },
-            metadata: {
               tool_sequence: [
                 'security.migration_resources_list',
                 'security.migration_resource_upsert',
@@ -156,8 +150,6 @@ evaluate.describe('Automatic Migration Skills: Context', { tag: tags.stateful.cl
                 'Before invoking the remove tool, the response surfaces the resource identity (type=lookup, name="tenant_id_map", first ~200 chars of content if available).',
                 'The response pauses for confirmation before invoking security.migration_resource_remove.',
               ],
-            },
-            metadata: {
               tool_sequence: [
                 'security.migration_resources_list',
                 'security.migration_resource_remove',
@@ -194,6 +186,7 @@ evaluate.describe('Automatic Migration Skills: Context', { tag: tags.stateful.cl
                   'The response either refuses politely and references `automatic-migration-correction`, or offers to hand off.',
                   "The response does NOT invoke any of the context skill's resource tools.",
                 ],
+                tool_sequence: [],
               },
               metadata: {
                 distractor: true,
@@ -228,6 +221,7 @@ evaluate.describe('Automatic Migration Skills: Context', { tag: tags.stateful.cl
                 'The response names the chat-skill scope ("one resource at a time" / "interactive work") as the reason.',
                 'The response either points to a bulk-import API OR offers to start with one resource interactively.',
               ],
+              tool_sequence: [],
             },
             metadata: {
               distractor: true,
@@ -260,6 +254,7 @@ evaluate.describe('Automatic Migration Skills: Context', { tag: tags.stateful.cl
                 'The response asks for a specific migration_id rather than guessing or proceeding.',
                 'The response does NOT invoke security.migration_resource_upsert without a migration_id.',
               ],
+              tool_sequence: [],
             },
             metadata: {
               distractor: true,

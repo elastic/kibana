@@ -55,8 +55,6 @@ evaluate.describe('Automatic Migration Skills: Correction', { tag: tags.stateful
                 'The proposed rewrite uses an ES|QL-native function (GROK, DISSECT, MATCH, or equivalent) — not `rex`.',
                 'The response does NOT immediately invoke the update tool; it shows the before/after diff first and pauses for confirmation.',
               ],
-            },
-            metadata: {
               tool_sequence: [
                 'security.migration_translated_rules_search',
                 'security.migration_translated_rule_get',
@@ -93,8 +91,6 @@ evaluate.describe('Automatic Migration Skills: Correction', { tag: tags.stateful
                 'The proposed diff touches ONLY the threat[] field; severity, risk_score, query, description, tags are NOT modified.',
                 'The response pauses for confirmation before invoking security.migration_translated_rule_update with confirm: true.',
               ],
-            },
-            metadata: {
               tool_sequence: [
                 'security.migration_translated_rule_get',
                 'security.security_labs_search',
@@ -130,8 +126,6 @@ evaluate.describe('Automatic Migration Skills: Correction', { tag: tags.stateful
                 'The proposed diff touches only severity and risk_score; query, description, tags, threat[] are NOT modified.',
                 'The response pauses for confirmation before invoking security.migration_translated_rule_update.',
               ],
-            },
-            metadata: {
               tool_sequence: ['security.migration_translated_rule_get'],
             },
           },
@@ -192,6 +186,7 @@ evaluate.describe('Automatic Migration Skills: Correction', { tag: tags.stateful
                 'The response identifies that this is a brand-new rule (no migration id mentioned by the user).',
                 'The response references the `detection-rule-edit` skill by name or offers to hand off.',
               ],
+              tool_sequence: [],
             },
             metadata: {
               distractor: true,
@@ -224,6 +219,7 @@ evaluate.describe('Automatic Migration Skills: Correction', { tag: tags.stateful
                 'The response identifies that "installed" / "running in production" means the rule is in the live index, not a migration draft.',
                 'The response either refuses politely and references detection-rule-edit, or offers to hand off.',
               ],
+              tool_sequence: [],
             },
             metadata: {
               distractor: true,
@@ -253,6 +249,7 @@ evaluate.describe('Automatic Migration Skills: Correction', { tag: tags.stateful
               criteria: [
                 'The response does NOT activate the correction skill nor invoke any of its tools.',
               ],
+              tool_sequence: [],
             },
             metadata: {
               distractor: true,

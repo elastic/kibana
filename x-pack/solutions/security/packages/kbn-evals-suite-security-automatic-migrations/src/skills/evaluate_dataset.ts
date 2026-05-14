@@ -14,7 +14,11 @@ import type {
   EvalsExecutorClient,
   Example,
 } from '@kbn/evals';
-import { createSkillInvocationEvaluator } from '@kbn/evals';
+import {
+  createSkillInvocationEvaluator,
+  createTrajectoryEvaluator,
+  getToolCallSteps,
+} from '@kbn/evals';
 import type { MigrationSkillsChatClient } from './chat_client';
 
 /**
@@ -33,6 +37,21 @@ export interface MigrationSkillExample extends Example {
   };
   output: {
     criteria: string[];
+    /**
+     * Golden tool sequence the agent is expected to follow. Consumed by the
+     * trajectory evaluator (LCS for order, set intersection for coverage).
+     *
+     * Convention:
+     *   - happy-path scenarios: list the minimum-sufficient tool ids (the LCS
+     *     scorer tolerates extra tools so the sequence stays robust as the
+     *     skill body evolves).
+     *   - distractor scenarios: pin to `[]` so the evaluator flips into
+     *     "no tools should be called" mode and scores 1.0 only when the
+     *     agent did not invoke any of the skill's tools.
+     *   - completely omit the field if you want a pure activation/criteria
+     *     check; the trajectory evaluator returns N/A.
+     */
+    tool_sequence?: string[];
   };
   metadata?: {
     /**
@@ -42,12 +61,6 @@ export interface MigrationSkillExample extends Example {
      * must include distractors to keep skill selection honest.
      */
     distractor?: boolean;
-    /**
-     * Optional golden tool sequence the agent is expected to roughly follow.
-     * Reserved for the trajectory evaluator (next iteration); included here
-     * as a placeholder so spec authors can start annotating now.
-     */
-    tool_sequence?: string[];
   };
 }
 
@@ -97,6 +110,75 @@ const baselineForSkill = (skillName: AutomaticMigrationSkillName): string[] => {
     }
   }
 };
+
+/**
+ * Tool ids the trajectory evaluator should ignore. SKILL.md loads come back as
+ * `platform.filestore.read` calls; including them in the trajectory would mean
+ * every happy-path example shows them as "extra tools" and pollutes the
+ * diagnostic output. `createSkillInvocationEvaluator` already covers SKILL.md
+ * activation, so we strip these from the trajectory's actual-tool view.
+ */
+const TRAJECTORY_IGNORED_TOOL_IDS = new Set<string>(['platform.filestore.read', 'filestore.read']);
+
+const extractAgentBuilderToolCalls = (output: unknown): string[] => {
+  const steps = getToolCallSteps(output as Parameters<typeof getToolCallSteps>[0]);
+  const ids: string[] = [];
+  for (const step of steps) {
+    if (typeof step.tool_id === 'string' && !TRAJECTORY_IGNORED_TOOL_IDS.has(step.tool_id)) {
+      ids.push(step.tool_id);
+    }
+  }
+  return ids;
+};
+
+/**
+ * Trajectory evaluator for the automatic-migration skills.
+ *
+ * Wraps the canonical `createTrajectoryEvaluator` from `@kbn/evals` with two
+ * adapters:
+ *
+ *   1. **N/A for unannotated examples.** If an example's `output.tool_sequence`
+ *      is `undefined`, return N/A instead of scoring — annotation is
+ *      opt-in and a missing annotation must not count against the model.
+ *      The empty array `[]` is *deliberately distinct* from `undefined`
+ *      and means "no tools expected" (used by distractors).
+ *
+ *   2. **Filter SKILL.md loader tool calls** (see
+ *      {@link TRAJECTORY_IGNORED_TOOL_IDS}) so they don't show up as
+ *      "extra tools" and obscure the actual trajectory diagnostics.
+ *
+ * Weights (0.6 order / 0.4 coverage) match the alerts-rag / streams suites'
+ * recommendation in CLAUDE.md (eval-conventions): order matters slightly
+ * more than pure coverage for tool-call sequences in a RAG/lookup skill.
+ */
+export function createMigrationSkillsTrajectoryEvaluator(): Evaluator {
+  const inner = createTrajectoryEvaluator({
+    extractToolCalls: extractAgentBuilderToolCalls,
+    goldenPathExtractor: (expected) => {
+      const exp = expected as MigrationSkillExample['output'] | undefined;
+      return exp?.tool_sequence ?? [];
+    },
+    orderWeight: 0.6,
+    coverageWeight: 0.4,
+  });
+
+  return {
+    ...inner,
+    name: 'migration-skill trajectory',
+    evaluate: async (args) => {
+      const exp = args.expected as MigrationSkillExample['output'] | undefined;
+      if (exp?.tool_sequence === undefined) {
+        return {
+          score: null,
+          label: 'N/A' as const,
+          explanation:
+            "No expected tool_sequence on the example — skipping trajectory evaluation. Annotate the example's `output.tool_sequence` to score this scenario.",
+        };
+      }
+      return inner.evaluate(args);
+    },
+  };
+}
 
 /**
  * Composes the per-example criteria list with the skill's baseline contract.
@@ -176,6 +258,7 @@ export function createEvaluateMigrationSkillsDataset({
           log,
           skillName,
         }),
+        createMigrationSkillsTrajectoryEvaluator(),
       ]
     );
   };
