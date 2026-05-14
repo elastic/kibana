@@ -94,6 +94,12 @@ export const snapshot: Command = {
       default: { kibanaUrl: MOCK_IDP_KIBANA_URL, ...defaults },
     });
 
+    // When --ssl is used and no explicit --kibana-url was provided, switch the
+    // default Kibana URL to https:// so the SAML realm ACS endpoint matches.
+    if (options.ssl && options.kibanaUrl === MOCK_IDP_KIBANA_URL) {
+      options.kibanaUrl = MOCK_IDP_KIBANA_URL.replace('http://', 'https://');
+    }
+
     const cluster = new Cluster({ ssl: options.ssl });
 
     if (options.docker) {
