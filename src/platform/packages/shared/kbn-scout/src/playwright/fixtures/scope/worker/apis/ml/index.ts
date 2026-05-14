@@ -64,6 +64,11 @@ export interface MlCalendarsApi {
   ) => Promise<void>;
   /** Add events to an existing ML calendar via the Elasticsearch API */
   createCalendarEvents: (calendarId: string, events: estypes.MlCalendarEvent[]) => Promise<void>;
+  /** Wait for specific events to exist in a calendar by polling the Elasticsearch API */
+  waitForEventsToExistInCalendar: (
+    calendarId: string,
+    eventsToCheck: estypes.MlCalendarEvent[]
+  ) => Promise<void>;
   /** Get all events for an ML calendar via the Elasticsearch API */
   getCalendarEvents: (calendarId: string) => Promise<{ events: estypes.MlCalendarEvent[] }>;
   /** Get an ML calendar by ID via the Kibana API (returns Kibana shape, including events) */
@@ -233,6 +238,7 @@ export const getMlApiHelper = (
         `mlApi.calendars.createCalendarEvents [${calendarId}]`,
         async () => {
           await esClient.ml.postCalendarEvents({ calendar_id: calendarId, events });
+          await this.waitForEventsToExistInCalendar(calendarId, events);
         }
       );
     },
@@ -246,6 +252,25 @@ export const getMlApiHelper = (
           return { events: response.events };
         }
       );
+    },
+
+    async waitForEventsToExistInCalendar(
+      calendarId: string,
+      eventsToCheck: estypes.MlCalendarEvent[]
+    ): Promise<void> {
+      await waitForCondition(`events to exist in calendar '${calendarId}'`, async () => {
+        const { events } = await this.getCalendarEvents(calendarId);
+        const allExist = eventsToCheck.every((e) =>
+          events.some(
+            (ce) =>
+              ce.description === e.description &&
+              String(ce.start_time) === String(e.start_time) &&
+              String(ce.end_time) === String(e.end_time)
+          )
+        );
+        if (allExist) return true;
+        throw new Error(`Expected events not yet present in calendar '${calendarId}'`);
+      });
     },
 
     async get(calendarId: string): Promise<MlCalendar> {
