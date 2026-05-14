@@ -177,7 +177,9 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
           }),
       };
 
-      let newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, pkgInfo);
+      let newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, pkgInfo, {
+        policyTemplate,
+      });
 
       // Integrate cloud connector if enabled for this agentless policy
       const {

@@ -481,14 +481,6 @@ export const SimplifiedPackagePolicyBaseSchema = schema.object({
   vars: schema.maybe(SimplifiedVarsSchema),
   var_group_selections: VarGroupSelectionsSchema,
   inputs: SimplifiedPackagePolicyInputsSchema,
-  policy_template: schema.maybe(
-    schema.string({
-      meta: {
-        description:
-          'The policy template to target when the package has multiple policy templates. Required when the package has inputs that are restricted to certain deployment modes in a secondary template.',
-      },
-    })
-  ),
   supports_agentless: schema.maybe(
     schema.nullable(
       schema.boolean({

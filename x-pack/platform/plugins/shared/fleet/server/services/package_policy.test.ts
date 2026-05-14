@@ -617,7 +617,7 @@ describe('Package policy service', () => {
               },
               {
                 // agentless-only input from the unrelated 'apache-agentless' template;
-                // simplifiedPackagePolicytoNewPackagePolicy disables it via template inference.
+                // simplifiedPackagePolicytoNewPackagePolicy disables it via the pre-pass.
                 type: 'aws/s3',
                 policy_template: 'apache-agentless',
                 enabled: false,

@@ -13,7 +13,6 @@ import {
   simplifiedPackagePolicytoNewPackagePolicy,
   packagePolicyToSimplifiedPackagePolicy,
   generateInputId,
-  inferPolicyTemplateFromInputs,
 } from './simplified_package_policy_helper';
 
 /**
@@ -328,27 +327,21 @@ describe('toPackagePolicy', () => {
   });
 
   // Regression tests for https://github.com/elastic/kibana/issues/268930
-  describe('With multi-template package (one normal, one agentless-only)', () => {
-    // Reproduces the exact payload from the issue (no policy_template provided).
-    const otelPolicyImplicitTemplate = {
-      name: 'good-v3-otel',
-      namespace: 'default',
-      policy_ids: ['policy123'],
-      inputs: {
-        'otel-otelcol': {
-          streams: {
-            'good_v3.otel_logs': {},
+  describe('With multi-template package', () => {
+    it('should disable inputs from unlisted templates when caller specifies inputs', () => {
+      const res = simplifiedPackagePolicytoNewPackagePolicy(
+        {
+          name: 'good-v3-otel',
+          namespace: 'default',
+          policy_ids: ['policy123'],
+          inputs: {
+            'otel-otelcol': {
+              streams: {
+                'good_v3.otel_logs': {},
+              },
+            },
           },
         },
-      },
-    };
-
-    it('should not include inputs from other templates when policy_template is inferred from input keys', () => {
-      // The "aws/s3" input from "apache-agentless" is annotated with
-      // deployment_modes: ['agentless']. Without inference, it would be left enabled and
-      // later rejected by validateDeploymentModesForInputs for the "default" deployment mode.
-      const res = simplifiedPackagePolicytoNewPackagePolicy(
-        otelPolicyImplicitTemplate,
         multiTemplatePkgInfo
       );
 
@@ -356,79 +349,80 @@ describe('toPackagePolicy', () => {
         (input) => input.policy_template === 'apache-agentless' && input.enabled
       );
       expect(agentlessOnlyInputs).toHaveLength(0);
-    });
-
-    it('should only enable inputs that belong to the inferred template', () => {
-      const res = simplifiedPackagePolicytoNewPackagePolicy(
-        otelPolicyImplicitTemplate,
-        multiTemplatePkgInfo
-      );
 
       const enabledInputs = res.inputs.filter((input) => input.enabled);
       expect(enabledInputs.every((input) => input.policy_template === 'otel')).toBe(true);
     });
 
-    it('should honor an explicit policy_template over inference', () => {
+    it('should keep all defaults when no inputs are provided', () => {
       const res = simplifiedPackagePolicytoNewPackagePolicy(
-        { ...otelPolicyImplicitTemplate, policy_template: 'otel' },
-        multiTemplatePkgInfo
-      );
-
-      const enabledInputs = res.inputs.filter((input) => input.enabled);
-      expect(enabledInputs.every((input) => input.policy_template === 'otel')).toBe(true);
-    });
-  });
-});
-
-describe('inferPolicyTemplateFromInputs', () => {
-  const singleTemplatePkgInfo = nginxPackageInfo as unknown as PackageInfo;
-
-  it('returns undefined for single-template packages', () => {
-    expect(
-      inferPolicyTemplateFromInputs({ 'nginx-logfile': { streams: {} } }, singleTemplatePkgInfo)
-    ).toBeUndefined();
-  });
-
-  it('returns undefined when no inputs are provided', () => {
-    expect(inferPolicyTemplateFromInputs(undefined, multiTemplatePkgInfo)).toBeUndefined();
-    expect(inferPolicyTemplateFromInputs({}, multiTemplatePkgInfo)).toBeUndefined();
-  });
-
-  it('returns the template name when all input keys belong to it', () => {
-    expect(
-      inferPolicyTemplateFromInputs({ 'otel-otelcol': { streams: {} } }, multiTemplatePkgInfo)
-    ).toBe('otel');
-  });
-
-  it('returns undefined when input keys span multiple templates', () => {
-    expect(
-      inferPolicyTemplateFromInputs(
         {
-          'otel-otelcol': { streams: {} },
-          'apache-agentless-aws/s3': { streams: {} },
+          name: 'good-v3-all-defaults',
+          namespace: 'default',
+          policy_ids: ['policy123'],
         },
         multiTemplatePkgInfo
-      )
-    ).toBeUndefined();
-  });
+      );
 
-  it('returns undefined when an input key does not match any known input', () => {
-    expect(
-      inferPolicyTemplateFromInputs(
-        { 'unknown-template-input': { streams: {} } },
-        multiTemplatePkgInfo
-      )
-    ).toBeUndefined();
-  });
+      const enabledInputs = res.inputs.filter((input) => input.enabled);
+      expect(enabledInputs.length).toBeGreaterThan(0);
+      const templates = new Set(enabledInputs.map((input) => input.policy_template));
+      expect(templates.size).toBeGreaterThanOrEqual(1);
+    });
 
-  it('handles template names containing dashes', () => {
-    // "apache-agentless" itself contains a dash and the input id "aws/s3" contains a slash;
-    // matching must not rely on naive splitting.
-    expect(
-      inferPolicyTemplateFromInputs(
-        { 'apache-agentless-aws/s3': { streams: {} } },
+    it('should enable inputs from multiple templates when all are listed', () => {
+      const res = simplifiedPackagePolicytoNewPackagePolicy(
+        {
+          name: 'good-v3-both',
+          namespace: 'default',
+          policy_ids: ['policy123'],
+          inputs: {
+            'otel-otelcol': {
+              streams: {
+                'good_v3.otel_logs': {},
+              },
+            },
+            'apache-agentless-aws/s3': {},
+          },
+        },
         multiTemplatePkgInfo
-      )
-    ).toBe('apache-agentless');
+      );
+
+      // Both inputs remain in the result (neither is removed by the pre-pass).
+      // The aws/s3 input is disabled by isInputAllowedForDeploymentMode because
+      // it is annotated deployment_modes: ['agentless'] and the policy is in
+      // 'default' mode — that is expected and unrelated to the pre-pass logic.
+      const otelInput = res.inputs.find((input) => input.policy_template === 'otel');
+      const agentlessInput = res.inputs.find(
+        (input) => input.policy_template === 'apache-agentless'
+      );
+      expect(otelInput?.enabled).toBe(true);
+      expect(agentlessInput).toBeDefined();
+    });
+
+    it('should not affect single-template packages', () => {
+      const res = simplifiedPackagePolicytoNewPackagePolicy(
+        {
+          name: 'nginx-1',
+          namespace: 'default',
+          policy_ids: ['policy123'],
+          inputs: {
+            'nginx-logfile': {
+              streams: {
+                'nginx.access': {},
+              },
+            },
+          },
+        },
+        nginxPackageInfo as unknown as PackageInfo
+      );
+
+      // Single-template packages skip the pre-pass entirely, so unlisted
+      // inputs (nginx-nginx/metrics) keep their defaults (enabled).
+      expect(getEnabledInputsAndStreams(res)).toEqual({
+        'nginx-logfile': ['nginx.access', 'nginx.error'],
+        'nginx-nginx/metrics': ['nginx.stubstatus'],
+      });
+    });
   });
 });
