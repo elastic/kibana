@@ -15,7 +15,7 @@ Investigate a flaky Scout, FTR, or Jest test failure and reach a sound conclusio
 
 You should accept any of these inputs:
 
-- A link to the GitHub `failed-test` issue. Prefer the latest failure, but review all of them.
+- A link to the GitHub `failed-test` issue.
 - A test file path, plus the branch it failed on (defaults to `main`).
 - A Buildkite build URL, plus enough information to identify the failing test (e.g. test name).
 
@@ -23,9 +23,16 @@ You should accept any of these inputs:
 
 More access means more context on the failure:
 
-- **GitHub API.** Run `gh auth status` to confirm `gh` is authenticated.
-  - Caveat: `failed-test` issues are not always current. Closing them is up to the development teams; the convention is that if no new failure appears within 2–3 weeks, the issue can be closed.
-- **Buildkite API** (for logs).
+### Buildkite
+
+Use the `bk` CLI when interacting with Buildkite. Create a token at https://buildkite.com/user/api-access-tokens and export it as `BUILDKITE_API_TOKEN`. Required scopes:
+
+- `read_builds`: browse pipelines, builds, and job logs.
+- `read_artifacts`: list and download build artifacts (Scout traces, screenshots, FTR debug output, etc.).
+
+### GitHub
+
+Run `gh auth status` to confirm `gh` is authenticated.
 
 # What "fixing" a flaky test actually means
 
@@ -43,7 +50,7 @@ A few patterns recur often enough that they should reshape your defaults:
 
 Before reading the latest failure, run these checks. They cheaply rule out "we've been here before" patterns.
 
-1. **Has this issue been reopened?** Look at the GitHub timeline. If yes, the previous diagnosis did not hold — re-using the same line of reasoning is unlikely to land somewhere new.
+1. **Has this issue been reopened?** Look at the GitHub timeline. If yes, the previous diagnosis did not hold — re-using the same line of reasoning is unlikely to land somewhere new. Note that an `open` state alone is not proof the test is still flaky: closing `failed-test` issues is up to the development teams, and the convention is that an issue can be closed if no new failure appears within 2–3 weeks. Always cross-check against recent build history.
 2. **Has the test path or suite already produced multiple `failed-test` issues?** Query:
 
    ```bash
