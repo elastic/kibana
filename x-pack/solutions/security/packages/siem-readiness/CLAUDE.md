@@ -30,10 +30,10 @@ The dimension orchestrators in `server/lib/siem_readiness/dimensions/` filter it
 
 ### Category assignment in payloads
 
-- **Coverage**: items are already `CategoryGroup[]` — pre-grouped by category.
-- **Continuity**: items are `PipelineStats[]` filtered to categorized pipelines, each with a `categories: MainCategories[]` field listing all categories that pipeline's indices belong to.
-- **Quality**: items are `DataQualityResultDocument[]` filtered to categorized indices. Use `actionableFindings[].category` for grouping.
-- **Retention**: items are `RetentionInfo[]` filtered to categorized indices, each with a `categories: MainCategories[]` field listing all categories that index belongs to.
+- **Coverage**: items are `CategoryGroup[]` — already grouped by category (this IS the categories data).
+- **Continuity**: items are ALL `PipelineStats[]` including uncategorized pipelines. Agent tools filter to categorized-only and populate `actionableFindings[].category`. The UI filters client-side using cached categories data.
+- **Quality**: items are ALL `DataQualityResultDocument[]`. Same pattern — agent tools filter and enrich; UI filters client-side.
+- **Retention**: items are ALL `RetentionInfo[]`. Same pattern. Note: retention items carry data stream names while categories indices carry backing index names — use contains-match (`idx.indexName.includes(item.indexName)`) when joining them.
 
 ### Thresholds and compliance rules
 
@@ -45,6 +45,64 @@ The dimension orchestrators in `server/lib/siem_readiness/dimensions/` filter it
 ### Serverless differences
 
 In serverless Kibana, ingest pipeline node stats are unavailable. `PipelineStats.statsAvailable` will be `false` for all pipelines. Pipelines are still listed (they exist) but `docsCount` and `failedDocsCount` cannot be reported. ILM is also unavailable on serverless — retention is DSL-only for data streams; standalone indices don't exist.
+
+---
+
+## Data flow
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  fetchers/  (raw ES I/O, no filtering, one file per query)              │
+│                                                                         │
+│  fetch_pipelines     — node stats API → PipelineStats[]                 │
+│  fetch_retention     — ILM + DSL policies → RetentionInfo[]             │
+│  fetch_categories    — event.category aggregation → CategoriesResponse  │
+│  (quality results fetched inline in get_quality.ts)                     │
+└───────────────────┬─────────────────────────────────────────────────────┘
+                    │ raw data, no filtering
+                    ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│  dimensions/  (per-dimension orchestrators)                             │
+│                                                                         │
+│  get_coverage   — calls fetch_categories + checks detection rules       │
+│                   → CoveragePayload (already grouped by category)       │
+│  get_continuity — calls fetch_pipelines → ContinuityPayload             │
+│  get_retention  — calls fetch_retention → RetentionPayload              │
+│  get_quality    — fetches ECS check results → QualityPayload            │
+│                                                                         │
+│  Each returns { status, summary, items[], actionableFindings[] }        │
+│  Items are ALL raw results — no category filtering at this layer        │
+└───────────────┬─────────────────────┬───────────────────────────────────┘
+                │                     │
+                ▼                     ▼
+┌──────────────────────┐   ┌──────────────────────────────────────────────┐
+│  routes/  (HTTP)     │   │  agent_builder/tools/siem_readiness/         │
+│                      │   │                                              │
+│  Thin wrappers that  │   │  Each tool calls its get_x orchestrator AND  │
+│  call get_x and      │   │  fetch_categories in parallel, then filters  │
+│  return the payload  │   │  items + enriches findings with categories   │
+│  as-is over HTTP     │   │  before returning to the agent               │
+└──────────┬───────────┘   └──────────────────┬───────────────────────────┘
+           │                                  │
+           ▼                                  ▼
+┌──────────────────────┐   ┌──────────────────────────────────────────────┐
+│  UI (React Query)    │   │  Agent (LLM)                                 │
+│                      │   │                                              │
+│  Calls /categories   │   │  Receives pre-filtered items and findings    │
+│  once and caches it. │   │  with category already populated.            │
+│  Each tab calls its  │   │  Uses the skill content to format a          │
+│  own route, then     │   │  four-section response (Status / Summary /   │
+│  joins with the      │   │  Findings by dimension+category /            │
+│  cached categories   │   │  Suggested Actions)                          │
+│  to group items into │   │                                              │
+│  accordions          │   │                                              │
+└──────────────────────┘   └──────────────────────────────────────────────┘
+```
+
+**Why categories live at the edges, not in the orchestrators:**
+- Routes are lean — the UI already has categories cached via React Query, so re-fetching in the route adds cost with no benefit.
+- Agent tools fetch categories in `Promise.all` alongside dimension data — no added latency.
+- Orchestrators stay focused on one job: fetch and shape a single dimension's raw data.
 
 ---
 
@@ -101,11 +159,11 @@ The same pattern applies to all four dimensions: **Coverage**, **Quality**, **Co
 
 **`fetchers/`** — Raw ES I/O, one file per query. No filtering, no verdict logic. Always return everything ES returns.
 
-**`dimensions/`** — Per-dimension orchestrators. Call fetchers, filter to categorized-only, enrich items with `categories[]`, call pure status functions, and return `*Payload` objects with `status`, `summary`, `items`, and `actionableFindings`. This is where new metrics become findings.
+**`dimensions/`** — Per-dimension orchestrators. Call fetchers, compute status and `actionableFindings` from the raw data, and return `*Payload` objects. Items are unfiltered — all results are included regardless of category. No `fetchCategories` call here (except in `get_coverage`, which IS the categories data).
 
-**`routes/`** — Thin HTTP wrappers (~20 lines) that call the matching dimension orchestrator. Because routes and agent tools call the same orchestrator, the UI and agent always receive identical data. The `categories` route is the one justified exception — it has no orchestrator because the raw categories structure is what the coverage tab renders directly.
+**`routes/`** — Thin HTTP wrappers (~20 lines) that call the matching dimension orchestrator and return the payload over HTTP. No filtering. The UI handles category grouping client-side using its cached categories response.
 
-**Agent tools** — Call dimension orchestrators directly (no HTTP). New fields in a payload are immediately available to the agent with no wiring changes.
+**Agent tools** — Call dimension orchestrators AND `fetchCategories` in parallel. Filter items to categorized-only and enrich `actionableFindings` with category before returning to the agent. New fields in a payload flow through automatically once added to the orchestrator.
 
 ---
 
