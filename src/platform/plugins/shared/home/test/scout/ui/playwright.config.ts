@@ -7,20 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable import/no-default-export */
+import { createPlaywrightConfig } from '@kbn/scout';
 
-import type { FtrConfigProviderContext } from '@kbn/test';
-
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const baseConfig = await readConfigFile(require.resolve('./config.base.ts'));
-
-  return {
-    ...baseConfig.getAll(),
-
-    testFiles: [require.resolve('../apps/home')],
-
-    junit: {
-      reportName: 'Firefox UI Functional Tests - Home',
-    },
-  };
-}
+export default createPlaywrightConfig({
+  testDir: './tests',
+});

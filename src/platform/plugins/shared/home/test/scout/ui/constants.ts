@@ -7,14 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrConfigProviderContext } from '@kbn/test';
-import { configureHTTP2 } from '../../../common/configure_http2';
+export const ES_ARCHIVE = 'src/platform/test/functional/fixtures/es_archiver/logstash_functional';
 
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../../config.base.js'));
-
-  return configureHTTP2({
-    ...functionalConfig.getAll(),
-    testFiles: [require.resolve('.')],
-  });
-}
+export const KBN_ARCHIVE = 'src/platform/test/functional/fixtures/kbn_archiver/discover';

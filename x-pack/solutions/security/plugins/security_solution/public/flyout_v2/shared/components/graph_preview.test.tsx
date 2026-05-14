@@ -8,8 +8,8 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
-import { mockContextValue } from '../../document_details/shared/mocks/mock_context';
-import { DocumentDetailsContext } from '../../document_details/shared/context';
+import { mockContextValue } from '../../../flyout/document_details/shared/mocks/mock_context';
+import { DocumentDetailsContext } from '../../../flyout/document_details/shared/context';
 import { GraphPreview, type GraphPreviewProps } from './graph_preview';
 import { GRAPH_PREVIEW_TEST_ID, GRAPH_PREVIEW_LOADING_TEST_ID } from './test_ids';
 

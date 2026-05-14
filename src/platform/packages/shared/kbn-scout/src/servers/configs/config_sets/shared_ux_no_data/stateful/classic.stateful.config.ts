@@ -11,10 +11,12 @@ import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 
 /**
- * Custom server config set used by playwright configs located under
- * `src/platform/plugins/private/kibana_overview/test/scout_kibana_overview_no_data/...`.
+ * Custom server config set for SharedUX-owned plugins that need a clean ES/Kibana state
+ * (no data views, no user data). Runs in its own Scout lane/server so "no data" suites
+ * don't get polluted by data loaded in the default lane.
  *
- * This intentionally matches the default stateful classic configuration, but runs in its own
- * Scout lane/server (fresh Kibana+ES) to support suites that require a clean ES/Kibana state.
+ * Used by:
+ *  - src/platform/plugins/shared/home/test/scout_shared_ux_no_data/
+ *  - src/platform/plugins/private/kibana_overview/test/scout_shared_ux_no_data/
  */
 export const servers: ScoutServerConfig = defaultConfig;
