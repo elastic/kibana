@@ -18,6 +18,8 @@ export const lensGetRequestParamsSchema = z
   })
   .strict();
 
-export const lensGetResponseBodySchema = lensResponseItemSchema.extend({
-  meta: lensItemMetaSchema.extend(lensCMGetResultSchema.shape.meta.shape).strict(),
-});
+export const lensGetResponseBodySchema = lensResponseItemSchema
+  .extend({
+    meta: lensItemMetaSchema.extend(lensCMGetResultSchema.shape.meta.shape).strict(),
+  })
+  .strict();

@@ -104,10 +104,12 @@ export const ESGeoLineSourceSchema = BaseESAggSourceSchema.extend({
     description: `Numeric field used as the sort key for ordering the points. Required when groupByTimeseries is false. Ignored when groupByTimeseries is true.`,
   }),
   type: z.literal(SOURCE_TYPES.ES_GEO_LINE),
-}).meta({
-  description:
-    'Vector feature source returning lines from Elasticsearch geo_line aggregation. One feature is returned per group.',
-});
+})
+  .strict()
+  .meta({
+    description:
+      'Vector feature source returning lines from Elasticsearch geo_line aggregation. One feature is returned per group.',
+  });
 
 export const ESPewPewSourceSchema = BaseESAggSourceSchema.extend({
   destGeoField: z.string().meta({
