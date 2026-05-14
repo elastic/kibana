@@ -48,12 +48,27 @@ export type SandboxTabConfig =
   | { type: 'base-recovery' };
 
 /**
+ * Data passed from the Sandbox child to the flyout parent on "Apply changes".
+ * The flyout writes these values into RHF (the source of truth) and updates
+ * the reducer cache.
+ */
+export interface SandboxApplyData {
+  isSplit: boolean;
+  fullQuery: string;
+  baseQuery: string;
+  alertBlock: string;
+  recoveryBlock: string;
+}
+
+/**
  * UI-only state for the ComposeDiscover flyout.
  *
- * This reducer manages navigation, Sandbox state, and split-query state.
+ * This reducer manages navigation, Sandbox state, and split-query cache.
  * All form values (name, schedule, delays, etc.) live in useForm<FormValues>()
- * via RHF and are never stored here. The exception is the query/split fields:
- * they live here until committed, at which point they are synced into RHF.
+ * via RHF and are never stored here. The query/split fields are a write-through
+ * cache: written imperatively alongside RHF at Apply time. RHF is the source
+ * of truth — these fields exist so the form view can display query summaries
+ * without subscribing to RHF watchers.
  */
 export interface ComposeDiscoverState {
   mode: ComposeDiscoverMode;
@@ -81,6 +96,8 @@ export interface ComposeDiscoverState {
    *  Intentionally NOT connected to FormValues.schedule.lookback. */
   sandboxDateStart: string;
   sandboxDateEnd: string;
+  /** When true the stepped form is replaced by a full YAML editor. */
+  yamlMode: boolean;
 }
 
 export type ComposeDiscoverAction =
@@ -97,4 +114,5 @@ export type ComposeDiscoverAction =
   | { type: 'OPEN_CHILD_FOR_STEP'; step: number }
   | { type: 'CLOSE_CHILD' }
   | { type: 'COMMIT_CHILD_QUERY'; fullQuery: string }
-  | { type: 'COMMIT_CHILD_SPLIT'; baseQuery: string; alertBlock: string; recoveryBlock: string };
+  | { type: 'COMMIT_CHILD_SPLIT'; baseQuery: string; alertBlock: string; recoveryBlock: string }
+  | { type: 'SET_YAML_MODE'; enabled: boolean };

@@ -35,7 +35,12 @@ import { CodeEditor, ESQL_LANG_ID, type monaco } from '@kbn/code-editor';
 import type { FormValues } from '../../form/types';
 import { useRuleFormServices } from '../../form/contexts/rule_form_context';
 import { useDataFields } from '../../form/hooks/use_data_fields';
-import type { ComposeDiscoverState, ComposeDiscoverAction, SandboxTabConfig } from './types';
+import type {
+  ComposeDiscoverState,
+  ComposeDiscoverAction,
+  SandboxTabConfig,
+  SandboxApplyData,
+} from './types';
 import { useQueryExecution } from './use_query_execution';
 import { ComposeDiscoverChart } from './compose_discover_chart';
 import { ComposeDiscoverTabs, TAB_DEFINITIONS, visibleTabIds } from './compose_discover_tabs';
@@ -48,6 +53,9 @@ interface ComposeDiscoverChildProps {
   onAlertEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
   onRecoveryEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
   onClose: () => void;
+  /** Called when the user clicks "Apply changes". The parent writes the query
+   *  into RHF (the source of truth) and updates the reducer cache. */
+  onApply: (data: SandboxApplyData) => void;
 }
 
 const CHILD_FLYOUT_TITLE_ID = 'composeDiscoverChildTitle';
@@ -66,6 +74,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
   onAlertEditorMount,
   onRecoveryEditorMount,
   onClose,
+  onApply,
 }) => {
   const services = useRuleFormServices();
   const isSplit = tabConfig.type !== 'single';
@@ -73,6 +82,22 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
   const [localBaseQuery, setLocalBaseQuery] = useState(state.baseQuery);
   const [localAlertBlock, setLocalAlertBlock] = useState(state.alertBlock);
   const [localRecoveryBlock, setLocalRecoveryBlock] = useState(state.recoveryBlock);
+
+  // Read timeField and the base query from RHF
+  const { setValue: setFormValue, watch: watchForm } = useFormContext<FormValues>();
+  const timeField = watchForm('timeField') ?? '@timestamp';
+  const formQuery = watchForm('evaluation.query.base') ?? '';
+
+  // In single mode, sync localQuery when RHF's query changes externally
+  // (e.g. from YAML edits that debounce into RHF). When the change comes
+  // from this Sandbox's own "Apply changes", formQuery equals localQuery
+  // so the setState is a no-op.
+  useEffect(() => {
+    if (!isSplit) {
+      setLocalQuery(formQuery);
+    }
+  }, [formQuery, isSplit]);
+
   // Date range persists in the reducer so it's remembered across Sandbox open/close.
   // It is intentionally not connected to schedule.lookback in FormValues — it's a
   // preview window for testing the query, not a rule configuration field.
@@ -86,10 +111,6 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
   const activeQuery = isSplit
     ? [localBaseQuery, localAlertBlock].filter(Boolean).join('\n')
     : localQuery;
-
-  // Read timeField from RHF — it lives there, not in the UI reducer
-  const { setValue: setFormValue, watch: watchForm } = useFormContext<FormValues>();
-  const timeField = watchForm('timeField') ?? '@timestamp';
 
   // Only fetch fields when the query has a real index pattern after FROM.
   const queryForFields = /^\s*FROM\s+[a-zA-Z0-9_.*-]/i.test(activeQuery) ? activeQuery : '';
@@ -160,18 +181,14 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
   }, [run]);
 
   const handleDone = useCallback(() => {
-    if (isSplit) {
-      dispatch({
-        type: 'COMMIT_CHILD_SPLIT',
-        baseQuery: localBaseQuery,
-        alertBlock: localAlertBlock,
-        recoveryBlock: localRecoveryBlock,
-      });
-    } else {
-      dispatch({ type: 'COMMIT_CHILD_QUERY', fullQuery: localQuery });
-    }
-    onClose();
-  }, [isSplit, localBaseQuery, localAlertBlock, localRecoveryBlock, localQuery, dispatch, onClose]);
+    onApply({
+      isSplit,
+      fullQuery: localQuery,
+      baseQuery: localBaseQuery,
+      alertBlock: localAlertBlock,
+      recoveryBlock: localRecoveryBlock,
+    });
+  }, [isSplit, localQuery, localBaseQuery, localAlertBlock, localRecoveryBlock, onApply]);
 
   const gridColumns: EuiDataGridColumn[] = useMemo(
     () =>

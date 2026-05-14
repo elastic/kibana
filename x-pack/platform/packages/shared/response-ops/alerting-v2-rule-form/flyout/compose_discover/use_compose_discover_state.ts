@@ -52,6 +52,7 @@ export const createInitialState = ({
     queryCommitted: mode === 'edit',
     sandboxDateStart: 'now-15m',
     sandboxDateEnd: 'now',
+    yamlMode: false,
   };
 
   if (!initialRecoveryQuery) return base;
@@ -176,15 +177,26 @@ export function reducer(
     case 'CLOSE_CHILD':
       return { ...state, childOpen: false };
     case 'COMMIT_CHILD_QUERY':
-      return { ...state, fullQuery: action.fullQuery, childOpen: false, queryCommitted: true };
+      return {
+        ...state,
+        fullQuery: action.fullQuery,
+        childOpen: state.yamlMode ? state.childOpen : false,
+        queryCommitted: true,
+      };
     case 'COMMIT_CHILD_SPLIT':
       return {
         ...state,
         baseQuery: action.baseQuery,
         alertBlock: action.alertBlock,
         recoveryBlock: action.recoveryBlock,
-        childOpen: false,
+        childOpen: state.yamlMode ? state.childOpen : false,
         queryCommitted: true,
+      };
+    case 'SET_YAML_MODE':
+      return {
+        ...state,
+        yamlMode: action.enabled,
+        childOpen: true,
       };
     default:
       return state;
