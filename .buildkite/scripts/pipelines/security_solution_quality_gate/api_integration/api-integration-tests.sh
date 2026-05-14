@@ -22,13 +22,8 @@ set +e
 TARGET_SCRIPT=$1 node ./scripts/mki_start_api_ftr_execution
 cmd_status=$?
 
-echo "--- BUILDKITE_JOB_ID: ${BUILDKITE_JOB_ID}"
-echo "--- PARENT_TRIGGER_JOB_ID: ${PARENT_TRIGGER_JOB_ID}"
-echo "--- BUILDKITE_TRIGGERED_FROM_BUILD_ID: ${BUILDKITE_TRIGGERED_FROM_BUILD_ID}"
-echo "--- $cmd_status"
-
 if [[ -n "${PARENT_TRIGGER_JOB_ID:-}" ]] && [[ "$cmd_status" -eq 101 ]]; then
-  echo "--- TIMEOUT CAPTURED"
+  echo "--- PROJECT_INIT_TIMEOUT_EXIT_CODE captured"
   buildkite-agent meta-data set "mki_project_init_timeout_occurred" "true" \
     --job "$PARENT_TRIGGER_JOB_ID" || true
 fi
