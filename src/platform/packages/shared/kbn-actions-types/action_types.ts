@@ -34,6 +34,8 @@ export interface ActionType {
   subFeature?: SubFeature;
   isDeprecated: boolean;
   allowMultipleSystemActions?: boolean;
+  description?: string;
+  isExperimental?: boolean;
 }
 
 export type ConnectorUserAuthStatus = 'connected' | 'not_connected' | 'not_applicable';
