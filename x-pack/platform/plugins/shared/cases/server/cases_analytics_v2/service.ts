@@ -116,6 +116,9 @@ export class CasesAnalyticsV2Service {
   private readonly writerProxy: CasesAnalyticsV2WriterContract = {
     upsertCase: (so) => this.writer.upsertCase(so),
     deleteCase: (id) => this.writer.deleteCase(id),
+    bulkUpsertCases: (sos) => this.writer.bulkUpsertCases(sos),
+    bulkDeleteCases: (ids) => this.writer.bulkDeleteCases(ids),
+    bulkUpsertCasesAwait: (sos) => this.writer.bulkUpsertCasesAwait(sos),
   };
   /**
    * Internal SO client captured at start, used by the reconciliation task

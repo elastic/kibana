@@ -307,12 +307,20 @@ export const registerCasesAnalyticsV2Routes = ({
  * walk continues — best-effort cleanup is preferred over aborting on a
  * single failure.
  *
- * Note: `index-pattern` SOs are namespaced (one space per SO). We pass
- * the SO's `namespaces[0]` explicitly on delete because the request-scoped
- * client we use is scoped to the route's space, not necessarily the data
- * view's. With `namespace` set, the SO API deletes from the right space.
+ * Notes:
+ *   - `index-pattern` is a multi-namespace SO type (`namespaceType: 'multiple'`).
+ *     We pass `force: true` so the underlying ES document is fully removed
+ *     regardless of how many namespaces the SO is in — without it, a `delete`
+ *     against a multi-namespace SO may only drop the namespace reference and
+ *     leave the doc behind, causing the next `createAndSave` (which collides
+ *     on the deterministic id) to 409 with `version_conflict_engine_exception`.
+ *     This matches the data-views plugin's own wrapper (see
+ *     `src/platform/plugins/shared/data_views/server/saved_objects_client_wrapper.ts`).
+ *   - We pass `namespace` from the SO's `namespaces[0]` so the request-scoped
+ *     client targets the right space for the delete (the request that hit
+ *     `/reset` may be in a different space than where the data view lives).
  */
-async function deleteAllPerSpaceCasesDataViews(
+export async function deleteAllPerSpaceCasesDataViews(
   soClient: SavedObjectsClientContract,
   logger: Logger
 ): Promise<number> {
@@ -333,7 +341,7 @@ async function deleteAllPerSpaceCasesDataViews(
       if (so.id.startsWith(CASE_DATA_VIEW_ID_PREFIX)) {
         const namespace = so.namespaces?.[0];
         try {
-          await soClient.delete(DATA_VIEW_SO_TYPE, so.id, { namespace });
+          await soClient.delete(DATA_VIEW_SO_TYPE, so.id, { namespace, force: true });
           deleted++;
         } catch (err) {
           logger.warn(
