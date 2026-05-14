@@ -933,7 +933,7 @@ describe('BurnRateRuleExecutor', () => {
           slo_budgeting_method: slo.budgetingMethod,
         })
       );
-      expect(setCustomContextMock).toHaveBeenCalledWith({ slo_id: slo.id, rule_id: ruleId });
+      expect(setCustomContextMock).toHaveBeenCalledWith({ slo_id: slo.id });
     });
 
     it('sets executor_outcome: skipped when the SLO is disabled', async () => {

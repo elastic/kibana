@@ -107,7 +107,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
     }
 
     addTransactionLabels(getSloApmLabels(slo));
-    apm.setCustomContext({ slo_id: slo.id, rule_id: options.rule.id });
+    apm.setCustomContext({ slo_id: slo.id });
 
     if (!slo.enabled) {
       addTransactionLabels({ executor_outcome: 'skipped' });
