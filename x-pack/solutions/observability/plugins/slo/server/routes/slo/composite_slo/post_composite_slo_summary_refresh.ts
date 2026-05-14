@@ -11,7 +11,7 @@ import { createSloServerRoute } from '../../create_slo_server_route';
 import { assertPlatinumLicense } from '../utils/assert_platinum_license';
 
 export const postCompositeSloSummaryRefreshRoute = createSloServerRoute({
-  endpoint: 'POST /internal/observability/slos/_composite_summary/refresh',
+  endpoint: 'POST /internal/observability/slo_composites/_summary_refresh',
   options: { access: 'internal' },
   security: {
     authz: {

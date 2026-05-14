@@ -8,6 +8,10 @@
 import React from 'react';
 import '@testing-library/jest-dom';
 import { render, waitFor } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { createStore } from 'redux';
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
 import { GraphInvestigation } from '@kbn/cloud-security-posture-graph';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { GraphVisualization } from './graph_visualization';
@@ -70,6 +74,9 @@ jest.mock('../../../../common/lib/kibana', () => ({
           securitySolutionTimeline: { read: true, crud: true },
         },
       },
+      overlays: {
+        openSystemFlyout: jest.fn(),
+      },
     },
   }),
   KibanaServices: {
@@ -79,6 +86,22 @@ jest.mock('../../../../common/lib/kibana', () => ({
       },
     }),
   },
+}));
+
+jest.mock('../../../../common/hooks/is_in_security_app', () => ({
+  useIsInSecurityApp: () => true,
+}));
+
+jest.mock('../../../../flyout_v2/shared/components/flyout_provider', () => ({
+  flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
+jest.mock('../../../../flyout_v2/document/main/document_flyout_wrapper', () => ({
+  DocumentFlyoutWrapper: () => <div />,
+}));
+
+jest.mock('../../../../flyout_v2/network/main', () => ({
+  Network: () => <div />,
 }));
 
 jest.mock('../../../../common/hooks/timeline/use_investigate_in_timeline', () => ({
@@ -109,9 +132,7 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => ({
 
 jest.mock('../../shared/context', () => ({
   useDocumentDetailsContext: () => ({
-    getFieldsData: jest.fn(),
-    dataAsNestedObject: {},
-    dataFormattedForFieldBrowser: {},
+    searchHit: { _id: 'doc-1', _index: 'idx', _source: {} },
     scopeId: 'test-scope',
   }),
 }));
@@ -119,13 +140,24 @@ jest.mock('../../shared/context', () => ({
 const MOCK_EVENT_IDS = ['event-1', 'event-2'];
 const MOCK_TIMESTAMP = new Date().toISOString();
 
-jest.mock('../../shared/hooks/use_graph_preview', () => ({
+jest.mock('../../../../flyout_v2/document/main/hooks/use_graph_preview', () => ({
   useGraphPreview: () => ({
     eventIds: MOCK_EVENT_IDS,
     timestamp: MOCK_TIMESTAMP,
-    isAlert: false,
   }),
 }));
+
+const store = createStore(() => ({}));
+const history = createMemoryHistory();
+
+const renderGraphVisualization = () =>
+  render(
+    <Provider store={store}>
+      <Router history={history}>
+        <GraphVisualization />
+      </Router>
+    </Provider>
+  );
 
 describe('GraphVisualization (document_details wrapper)', () => {
   beforeEach(() => {
@@ -141,7 +173,7 @@ describe('GraphVisualization (document_details wrapper)', () => {
   });
 
   it('renders the graph visualization wrapper', async () => {
-    const { getByTestId } = render(<GraphVisualization />);
+    const { getByTestId } = renderGraphVisualization();
     expect(getByTestId(GRAPH_VISUALIZATION_TEST_ID)).toBeInTheDocument();
 
     await waitFor(() => {
@@ -150,7 +182,7 @@ describe('GraphVisualization (document_details wrapper)', () => {
   });
 
   it('passes event context from useDocumentDetailsContext and useGraphPreview as originEventIds', async () => {
-    render(<GraphVisualization />);
+    renderGraphVisualization();
 
     await waitFor(() => {
       expect(GraphInvestigation).toHaveBeenCalledTimes(1);
