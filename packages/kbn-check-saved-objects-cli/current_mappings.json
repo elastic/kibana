@@ -467,9 +467,6 @@
       },
       "query": {
         "properties": {
-          "format": {
-            "type": "keyword"
-          },
           "base": {
             "type": "text"
           },
@@ -483,10 +480,13 @@
               }
             }
           },
-          "no_data": {
+          "breach": {
             "type": "text"
           },
-          "breach": {
+          "format": {
+            "type": "keyword"
+          },
+          "no_data": {
             "type": "text"
           },
           "recover": {
