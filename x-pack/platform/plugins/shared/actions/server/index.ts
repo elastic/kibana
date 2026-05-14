@@ -61,7 +61,6 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
     email: { domain_allowlist: true, recipient_allowlist: false, services: { enabled: true } },
     webhook: { ssl: { pfx: { enabled: true } } },
     auth: { ears: { enabled: true } },
-    ears: { enabled: true }, // legacy config
   },
 };
 
