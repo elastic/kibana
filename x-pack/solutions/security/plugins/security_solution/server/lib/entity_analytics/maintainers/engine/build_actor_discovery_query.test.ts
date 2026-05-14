@@ -155,6 +155,85 @@ describe('buildActorDiscoveryQuery (actor discovery)', () => {
     expect(JSON.stringify(result)).toContain('alice');
   });
 
+  // Regression: every config — including `kind: 'override'` — goes through
+  // Step 1 actor discovery. Hardcoding the ECS user-EUID-exists DSL filter
+  // here silently drops every document whose actor identity lives entirely
+  // in `customActor.fields` (e.g. Azure auditlogs docs that have only
+  // `azure.auditlogs.properties.initiated_by.user.userPrincipalName`), so
+  // Step 2 — including override Step 2s — never sees those actors.
+  describe('customActor base actor-presence filter (no ECS user.* dependency)', () => {
+    const customField = 'azure.auditlogs.properties.initiated_by.user.userPrincipalName';
+    const customActorConfig: RelationshipIntegrationConfig = {
+      ...communicatesConfig,
+      customActor: { fields: [customField] },
+    };
+
+    it('does NOT include the ECS user-EUID-exists DSL filter when customActor is set', () => {
+      const filters = (
+        buildActorDiscoveryQuery(customActorConfig, undefined) as {
+          query: { bool: { filter: Array<Record<string, unknown>> } };
+        }
+      ).query.bool.filter;
+      const userShape = JSON.stringify(USER_EUID_FILTER);
+      expect(filters.some((f) => JSON.stringify(f) === userShape)).toBe(false);
+    });
+
+    it('emits an "at least one of customActor.fields is non-empty" filter (each clause: exists AND != "")', () => {
+      const multiFieldConfig: RelationshipIntegrationConfig = {
+        ...communicatesConfig,
+        customActor: { fields: ['custom.actor.one', 'custom.actor.two'] },
+      };
+      const filters = (
+        buildActorDiscoveryQuery(multiFieldConfig, undefined) as {
+          query: { bool: { filter: Array<Record<string, unknown>> } };
+        }
+      ).query.bool.filter;
+      const presenceFilter = filters.find(
+        (f) =>
+          JSON.stringify(f).includes('custom.actor.one') &&
+          JSON.stringify(f).includes('custom.actor.two')
+      ) as
+        | {
+            bool: {
+              should: Array<{
+                bool: { must: Array<Record<string, unknown>> };
+              }>;
+              minimum_should_match: number;
+            };
+          }
+        | undefined;
+      expect(presenceFilter).toBeDefined();
+      expect(presenceFilter!.bool.minimum_should_match).toBe(1);
+      expect(presenceFilter!.bool.should).toHaveLength(2);
+      // Each clause requires the field to exist AND not equal the empty string.
+      const clauseFields = presenceFilter!.bool.should.map((s) => {
+        const exists = s.bool.must.find((m) => 'exists' in m) as
+          | { exists: { field: string } }
+          | undefined;
+        return exists?.exists.field;
+      });
+      expect(new Set(clauseFields)).toEqual(new Set(['custom.actor.one', 'custom.actor.two']));
+    });
+
+    it('preserves the existing requireTargetEntityIdExists target-EUID gate when set alongside customActor', () => {
+      const filters = (
+        buildActorDiscoveryQuery(
+          { ...customActorConfig, requireTargetEntityIdExists: true },
+          undefined
+        ) as { query: { bool: { filter: Array<Record<string, unknown>> } } }
+      ).query.bool.filter;
+      // The actor-side filter must NOT include the ECS user-EUID gate, but
+      // the target-side gate (parameterized by targetEntityType: 'user' for
+      // communicatesConfig) IS still emitted as a separate filter.
+      const userShape = JSON.stringify(USER_EUID_FILTER);
+      const userMatches = filters.filter((f) => JSON.stringify(f) === userShape).length;
+      // requireTargetEntityIdExists with targetEntityType 'user' adds the
+      // user-EUID filter once (target-side only); the actor side uses the
+      // custom-fields presence filter instead.
+      expect(userMatches).toBe(1);
+    });
+  });
+
   it('includes afterKey in composite sources when provided', () => {
     const afterKey = { 'user.name': 'alice', 'user.email': null };
     const result = buildActorDiscoveryQuery(accessesConfig, afterKey);
