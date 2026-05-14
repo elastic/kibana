@@ -92,9 +92,9 @@ entries:
   - https://github.com/elastic/kibana/pull/267333
 - file:
     name: 267329.yaml
-    checksum: 09e49c9544fd89522c31d2f421c3e375669adc71
+    checksum: 574030cdbf51ff7ecf0993c15a7d07b76eba998e
   type: bug-fix
-  title: Preserve HTTP status when serializing execution errors
+  title: Preserve HTTP status when serializing Agent Builder execution errors
   products:
   - product: cloud-serverless
     target: 2026-05-12
@@ -102,9 +102,9 @@ entries:
   - https://github.com/elastic/kibana/pull/267329
 - file:
     name: 268434.yaml
-    checksum: e4f725df89f091373dd64d2c8b569a57513c78dc
+    checksum: 2dcb5455d952c5cdb4031d851be2b0331601efe6
   type: bug-fix
-  title: Fix loop in retention tab
+  title: Fix loop in Streams retention management
   products:
   - product: cloud-serverless
     target: 2026-05-12
@@ -277,20 +277,20 @@ entries:
   - https://github.com/elastic/kibana/pull/267886
 - file:
     name: 266184.yaml
-    checksum: 79c639e3f33a43c0fb907158703971914146ad66
+    checksum: 1c90fb8ee314ffa113de861dd8fbdf5b258654ef
   type: feature
   title: Restructure Feature settings around clear AI toggles
   products:
   - product: cloud-serverless
     target: 2026-05-12
-  description: Enhances Feature Settings so you can turn AI on or off, pick an optional global default (including no default when feature-specific models are on), and manage per-feature recommended defaults with clearer validation on save
+  description: Feature Settings now allows you to turn AI on or off, pick an optional global default (including no default when feature-specific models are on), and manage per-feature recommended defaults with clearer validation on save.
   prs:
   - https://github.com/elastic/kibana/pull/266184
 - file:
     name: 262217.yaml
-    checksum: 36fc2dcec0b1122434269641e5122062bec785de
+    checksum: f0f4a8fc27cd531844ee77a69407dd2b23424bbd
   type: bug-fix
-  title: Fix inline charts with grey time series for ES|QL queries
+  title: Fix inline charts with gray time series for ES|QL queries
   products:
   - product: cloud-serverless
     target: 2026-05-12

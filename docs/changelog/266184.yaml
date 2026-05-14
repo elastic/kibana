@@ -5,4 +5,4 @@ products:
 - product: cloud-serverless
   target: 2026-05-12
 title: Restructure Feature settings around clear AI toggles
-description: Enhances Feature Settings so you can turn AI on or off, pick an optional global default (including no default when feature-specific models are on), and manage per-feature recommended defaults with clearer validation on save
+description: Feature Settings now allows you to turn AI on or off, pick an optional global default (including no default when feature-specific models are on), and manage per-feature recommended defaults with clearer validation on save.
