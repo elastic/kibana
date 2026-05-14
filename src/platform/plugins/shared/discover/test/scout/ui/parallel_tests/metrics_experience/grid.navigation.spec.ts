@@ -66,34 +66,32 @@ spaceTest.describe(
       await spaceTest.step('pagination is visible', async () => {
         await expect(metricsExperience.grid).toBeVisible();
         await expect(metricsExperience.pagination.container).toBeVisible();
+        await metricsExperience.waitForFirstCard(FIRST_CARD_PAGE_1);
         await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
       });
 
       await spaceTest.step('navigate to last page and grid updates', async () => {
         await metricsExperience.pagination.getPageButton(TOTAL_PAGES - 1).click();
         await expect(metricsExperience.grid).toBeVisible();
+        await metricsExperience.waitForFirstCard(FIRST_CARD_LAST_PAGE);
         await expect(metricsExperience.cards).toHaveCount(LAST_PAGE_CARDS);
-        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute(
-          'id',
-          FIRST_CARD_LAST_PAGE
-        );
       });
 
       await spaceTest.step('navigate using next and prev arrows', async () => {
         await metricsExperience.pagination.getPageButton(0).click();
         await expect(metricsExperience.grid).toBeVisible();
+        await metricsExperience.waitForFirstCard(FIRST_CARD_PAGE_1);
         await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
-        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_PAGE_1);
 
         await metricsExperience.pagination.nextButton.click();
         await expect(metricsExperience.grid).toBeVisible();
+        await metricsExperience.waitForFirstCard(FIRST_CARD_PAGE_2);
         await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
-        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_PAGE_2);
 
         await metricsExperience.pagination.prevButton.click();
         await expect(metricsExperience.grid).toBeVisible();
+        await metricsExperience.waitForFirstCard(FIRST_CARD_PAGE_1);
         await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
-        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_PAGE_1);
       });
     });
 

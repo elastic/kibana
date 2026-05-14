@@ -42,7 +42,7 @@ export function registerA2ARoutes({
       access: 'public',
       summary: 'Get A2A agent card',
       description:
-        'Get agent discovery metadata in JSON format. Use this endpoint to provide agent information for A2A protocol integration and discovery.',
+        'Get agent discovery metadata in JSON format. Use this endpoint to provide agent information for A2A protocol integration and discovery. To learn more about the Agent Builder A2A server, refer to the [A2A server documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/a2a-server).',
       options: {
         tags: ['a2a', 'oas-tag:agent builder'],
         availability: {
@@ -83,7 +83,8 @@ export function registerA2ARoutes({
       access: 'public',
       summary: 'Send A2A task',
       description: `> warn
-> This endpoint is designed for A2A protocol clients and should not be used directly via REST APIs. Use an A2A SDK or A2A Inspector instead.`,
+> This endpoint is designed for A2A protocol clients and should not be used directly via REST APIs. Use an A2A SDK or A2A Inspector instead.
+To learn more about the Agent Builder A2A server, refer to the [A2A server documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/a2a-server).`,
       options: {
         tags: ['a2a', 'oas-tag:agent builder'],
         xsrfRequired: false,
