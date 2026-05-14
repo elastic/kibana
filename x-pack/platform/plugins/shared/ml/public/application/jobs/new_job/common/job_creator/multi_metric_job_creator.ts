@@ -20,6 +20,7 @@ import { parseInterval } from '@kbn/ml-parse-interval';
 import { cloneDeep } from 'lodash';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { Job, Detector } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { AggregationsCompositeDateHistogramAggregation } from '@elastic/elasticsearch/lib/api/types';
 import type { MlApi } from '../../../../services/ml_api_service';
 import type { NewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { JobCreator } from './job_creator';
@@ -287,11 +288,6 @@ export class MultiMetricJobCreator extends JobCreator {
       return;
     }
 
-    const aggregations = cloneDeep(datafeedAggregations.buckets.aggregations);
-    const timeField = this._job_config.data_description.time_field!;
-    const timeFieldAgg = aggregations[timeField];
-    delete aggregations[timeField];
-
     const sourcesSet = new Set(this.influencers);
     if (this.splitField !== null) {
       sourcesSet.add(this.splitField.name);
@@ -299,19 +295,27 @@ export class MultiMetricJobCreator extends JobCreator {
     const sources = Array.from(sourcesSet);
 
     if (sources.length > 1) {
-      datafeedAggregations.buckets.aggregations = {
-        [timeField]: timeFieldAgg,
-        group_by_fields: {
-          composite: {
-            size: 1000,
-            sources: sources.map((s) => ({
-              [s]: { terms: { field: s } },
-            })),
+      const dateHistogram = cloneDeep(datafeedAggregations.buckets.date_histogram)!;
+      delete datafeedAggregations.buckets.date_histogram;
+      datafeedAggregations.buckets.composite = {
+        size: 1000,
+        sources: [
+          {
+            time_buckets: {
+              date_histogram: dateHistogram as AggregationsCompositeDateHistogramAggregation,
+            },
           },
-          aggregations,
-        },
+          ...sources.map((s) => ({
+            [s]: { terms: { field: s } },
+          })),
+        ],
       };
     } else if (this.splitField) {
+      const aggregations = cloneDeep(datafeedAggregations.buckets.aggregations);
+      const timeField = this._job_config.data_description.time_field!;
+      const timeFieldAgg = aggregations[timeField];
+      delete aggregations[timeField];
+
       const fieldName = this.splitField.name;
       datafeedAggregations.buckets.aggregations = {
         [timeField]: timeFieldAgg,
