@@ -81,7 +81,7 @@ evaluate.describe(
                   'observability.get_traces',
                 ],
               },
-              metadata: {},
+              metadata: { expectedSkill: 'investigation' },
             },
           ],
         },
