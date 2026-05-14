@@ -45,8 +45,16 @@ export const RefinementPopover = ({
   const editorRef = useRef<HTMLDivElement>(null);
   const editorId = useGeneratedHtmlId({ prefix: 'refinementEditor' });
 
-  const openPopover = useCallback(() => {
-    setIsPopoverOpen(true);
+  const togglePopover = useCallback(() => {
+    setIsPopoverOpen((prev) => {
+      if (prev) {
+        setUserPrompt('');
+        if (editorRef.current) {
+          editorRef.current.textContent = '';
+        }
+      }
+      return !prev;
+    });
   }, []);
 
   const closePopover = useCallback(() => {
@@ -141,7 +149,7 @@ export const RefinementPopover = ({
   const triggerButton = (
     <GenerateSuggestionButton
       size="s"
-      onClick={openPopover}
+      onClick={togglePopover}
       isLoading={isLoading}
       isDisabled={isDisabled}
       aiFeatures={aiFeatures}

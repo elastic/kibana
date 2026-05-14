@@ -72,3 +72,5 @@ export type CustomBulkActions = Array<
     key: string;
   }
 >;
+
+export type DocMap = Map<string, { doc: DataTableRecord; docIndex: number }>;
