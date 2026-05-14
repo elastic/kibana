@@ -11,7 +11,11 @@ import { useEuiTheme } from '@elastic/eui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import type { DashboardLayoutTweakpaneValues } from '../../dashboard_api/types';
-import { DASHBOARD_HORIZONTAL_PADDING_PX, DASHBOARD_MARGIN_SIZE } from './constants';
+import {
+  DASHBOARD_HORIZONTAL_PADDING_PX,
+  DASHBOARD_MARGIN_SIZE,
+  DASHBOARD_MARKDOWN_CORNER_PADDING_MAX_PX,
+} from './constants';
 import {
   DASHBOARD_DEFAULT_BACKGROUND_TOKEN,
   getDashboardBackgroundBaseTokenOptions,
@@ -65,7 +69,8 @@ interface DashboardLayoutTweakpanePane {
  * (named bundles of all layout values), then grid gutter
  * (when margins are on), viewport left/right padding, panel corner radius (defaults to the
  * active EUI theme `border.radius.medium` value), per-panel inner padding (vertical and horizontal,
- * 0–30 px), and dashboard canvas background using EUI `backgroundBase*` tokens (see
+ * 0–30 px), optional markdown-only corner padding (right/bottom, 0–400 px, linked to panel paddings until
+ * changed), and dashboard canvas background using EUI `backgroundBase*` tokens (see
  * https://eui.elastic.co/docs/getting-started/theming/tokens/colors/#background-colors).
  * Pane is fixed bottom-right while the dashboard viewport is mounted.
  */
@@ -86,8 +91,12 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
   const [panelBorderRadiusPx, setPanelBorderRadiusPx] = useState(defaultPanelBorderRadiusPx);
   const [panelPaddingVerticalPx, setPanelPaddingVerticalPx] = useState(0);
   const [panelPaddingHorizontalPx, setPanelPaddingHorizontalPx] = useState(0);
+  const [markdownCornerPaddingRightPx, setMarkdownCornerPaddingRightPx] = useState(0);
+  const [markdownCornerPaddingBottomPx, setMarkdownCornerPaddingBottomPx] = useState(0);
   const [dashboardBackgroundToken, setDashboardBackgroundToken] =
     useState<DashboardBackgroundBaseToken>(DASHBOARD_DEFAULT_BACKGROUND_TOKEN);
+
+  const markdownCornerUnlinkedFromPanelPaddingRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -118,6 +127,8 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
         panelBorderRadiusPx: defaultPanelRadiusRef.current,
         panelPaddingVerticalPx: 0,
         panelPaddingHorizontalPx: 0,
+        markdownCornerPaddingRightPx: 0,
+        markdownCornerPaddingBottomPx: 0,
         dashboardBackgroundToken: DASHBOARD_DEFAULT_BACKGROUND_TOKEN,
       };
 
@@ -127,18 +138,52 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
         expanded: true,
       }) as unknown as DashboardLayoutTweakpanePane;
 
+      const syncMarkdownCornerPaddingFromPanelPadding = () => {
+        if (markdownCornerUnlinkedFromPanelPaddingRef.current) {
+          return;
+        }
+        params.markdownCornerPaddingRightPx = params.panelPaddingHorizontalPx;
+        params.markdownCornerPaddingBottomPx = params.panelPaddingVerticalPx;
+        setMarkdownCornerPaddingRightPx(params.markdownCornerPaddingRightPx);
+        setMarkdownCornerPaddingBottomPx(params.markdownCornerPaddingBottomPx);
+        pane.refresh();
+      };
+
       const applyLayoutTweakValues = (next: DashboardLayoutTweakpaneValues) => {
         params.marginGutterPx = next.marginGutterPx;
         params.horizontalPaddingPx = next.horizontalPaddingPx;
         params.panelBorderRadiusPx = next.panelBorderRadiusPx;
         params.panelPaddingVerticalPx = Math.min(30, Math.max(0, next.panelPaddingVerticalPx));
         params.panelPaddingHorizontalPx = Math.min(30, Math.max(0, next.panelPaddingHorizontalPx));
+
+        const panelH = params.panelPaddingHorizontalPx;
+        const panelV = params.panelPaddingVerticalPx;
+        const markdownRightRaw = next.markdownCornerPaddingRightPx ?? panelH;
+        const markdownBottomRaw = next.markdownCornerPaddingBottomPx ?? panelV;
+        params.markdownCornerPaddingRightPx = Math.min(
+          DASHBOARD_MARKDOWN_CORNER_PADDING_MAX_PX,
+          Math.max(0, markdownRightRaw)
+        );
+        params.markdownCornerPaddingBottomPx = Math.min(
+          DASHBOARD_MARKDOWN_CORNER_PADDING_MAX_PX,
+          Math.max(0, markdownBottomRaw)
+        );
         params.dashboardBackgroundToken = next.dashboardBackgroundToken;
+
+        // Before `pane.refresh()`, which can re-fire other bindings' `change` handlers: if markdown
+        // still matches panel padding, those handlers should sync (linked). If not, skip sync so
+        // preset-specific markdown values (e.g. right 200 vs horizontal 12) are not overwritten.
+        markdownCornerUnlinkedFromPanelPaddingRef.current =
+          params.markdownCornerPaddingRightPx !== panelH ||
+          params.markdownCornerPaddingBottomPx !== panelV;
+
         setMarginGutterPx(params.marginGutterPx);
         setHorizontalPaddingPx(params.horizontalPaddingPx);
         setPanelBorderRadiusPx(params.panelBorderRadiusPx);
         setPanelPaddingVerticalPx(params.panelPaddingVerticalPx);
         setPanelPaddingHorizontalPx(params.panelPaddingHorizontalPx);
+        setMarkdownCornerPaddingRightPx(params.markdownCornerPaddingRightPx);
+        setMarkdownCornerPaddingBottomPx(params.markdownCornerPaddingBottomPx);
         setDashboardBackgroundToken(params.dashboardBackgroundToken);
         pane.refresh();
       };
@@ -221,6 +266,7 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
           const clamped = Math.min(30, Math.max(0, next));
           params.panelPaddingVerticalPx = clamped;
           setPanelPaddingVerticalPx(clamped);
+          syncMarkdownCornerPaddingFromPanelPadding();
         });
 
       pane
@@ -235,6 +281,37 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
           const clamped = Math.min(30, Math.max(0, next));
           params.panelPaddingHorizontalPx = clamped;
           setPanelPaddingHorizontalPx(clamped);
+          syncMarkdownCornerPaddingFromPanelPadding();
+        });
+
+      pane
+        .addBinding(params, 'markdownCornerPaddingRightPx', {
+          label: 'Markdown corner padding (right)',
+          min: 0,
+          max: DASHBOARD_MARKDOWN_CORNER_PADDING_MAX_PX,
+          step: 1,
+        })
+        .on('change', (ev) => {
+          markdownCornerUnlinkedFromPanelPaddingRef.current = true;
+          const next = readNumber(ev.value) ?? params.markdownCornerPaddingRightPx;
+          const clamped = Math.min(DASHBOARD_MARKDOWN_CORNER_PADDING_MAX_PX, Math.max(0, next));
+          params.markdownCornerPaddingRightPx = clamped;
+          setMarkdownCornerPaddingRightPx(clamped);
+        });
+
+      pane
+        .addBinding(params, 'markdownCornerPaddingBottomPx', {
+          label: 'Markdown corner padding (bottom)',
+          min: 0,
+          max: DASHBOARD_MARKDOWN_CORNER_PADDING_MAX_PX,
+          step: 1,
+        })
+        .on('change', (ev) => {
+          markdownCornerUnlinkedFromPanelPaddingRef.current = true;
+          const next = readNumber(ev.value) ?? params.markdownCornerPaddingBottomPx;
+          const clamped = Math.min(DASHBOARD_MARKDOWN_CORNER_PADDING_MAX_PX, Math.max(0, next));
+          params.markdownCornerPaddingBottomPx = clamped;
+          setMarkdownCornerPaddingBottomPx(clamped);
         });
 
       pane
@@ -271,6 +348,8 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
     panelBorderRadiusPx,
     panelPaddingVerticalPx,
     panelPaddingHorizontalPx,
+    markdownCornerPaddingRightPx,
+    markdownCornerPaddingBottomPx,
     dashboardBackgroundToken,
   };
 }

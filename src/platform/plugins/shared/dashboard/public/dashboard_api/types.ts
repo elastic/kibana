@@ -64,6 +64,17 @@ export interface DashboardLayoutTweakpaneValues {
   panelPaddingVerticalPx: number;
   /** Inset inside each dashboard panel (embeddable chrome), 0–30 px. */
   panelPaddingHorizontalPx: number;
+  /**
+   * Markdown panels only: bottom inset inside panel chrome, 0–400 px in Tweakpane. While linked
+   * to panel paddings in Tweakpane, tracks {@link panelPaddingVerticalPx}; changing this control
+   * unlinks until a preset is applied.
+   */
+  markdownCornerPaddingBottomPx: number;
+  /**
+   * Markdown panels only: right inset inside panel chrome, 0–400 px in Tweakpane. While linked,
+   * tracks {@link panelPaddingHorizontalPx}.
+   */
+  markdownCornerPaddingRightPx: number;
   dashboardBackgroundToken: string;
 }
 

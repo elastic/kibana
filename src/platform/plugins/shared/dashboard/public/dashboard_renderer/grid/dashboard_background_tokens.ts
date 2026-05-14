@@ -10,7 +10,7 @@
 import type { UseEuiTheme } from '@elastic/eui';
 
 /** Matches dashboard canvas default before Tweakpane (`dashboardViewportStyles.wrapper`). */
-export const DASHBOARD_DEFAULT_BACKGROUND_TOKEN = 'backgroundBaseSubdued';
+export const DASHBOARD_DEFAULT_BACKGROUND_TOKEN = 'backgroundBasePlain';
 
 export type DashboardBackgroundBaseToken = string;
 

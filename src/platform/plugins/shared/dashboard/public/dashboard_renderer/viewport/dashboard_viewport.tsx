@@ -77,6 +77,8 @@ export const DashboardViewport = () => {
     panelBorderRadiusPx,
     panelPaddingVerticalPx,
     panelPaddingHorizontalPx,
+    markdownCornerPaddingRightPx,
+    markdownCornerPaddingBottomPx,
     dashboardBackgroundToken,
   } = layoutTweak;
 
@@ -114,6 +116,13 @@ export const DashboardViewport = () => {
           paddingBlock: `${panelPaddingVerticalPx}px`,
           paddingInline: `${panelPaddingHorizontalPx}px`,
         },
+        // Markdown embeddable: allow independent bottom/right inset (Tweakpane "Markdown corner padding").
+        '.embPanel:has([data-embeddable-type="markdown"])': {
+          paddingTop: `${panelPaddingVerticalPx}px`,
+          paddingBottom: `${markdownCornerPaddingBottomPx}px`,
+          paddingLeft: `${panelPaddingHorizontalPx}px`,
+          paddingRight: `${markdownCornerPaddingRightPx}px`,
+        },
         '.embPanel__content, .embPanel__header, .embPanel__hoverActionsAnchor, .lnsExpressionRenderer':
           {
             borderRadius: `${panelBorderRadiusPx}px !important`,
@@ -122,7 +131,13 @@ export const DashboardViewport = () => {
           borderRadius: `${panelBorderRadiusPx}px !important`,
         },
       }),
-    [panelBorderRadiusPx, panelPaddingVerticalPx, panelPaddingHorizontalPx]
+    [
+      panelBorderRadiusPx,
+      panelPaddingVerticalPx,
+      panelPaddingHorizontalPx,
+      markdownCornerPaddingRightPx,
+      markdownCornerPaddingBottomPx,
+    ]
   );
 
   return (

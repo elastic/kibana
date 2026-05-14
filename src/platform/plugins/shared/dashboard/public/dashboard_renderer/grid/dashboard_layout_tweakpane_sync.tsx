@@ -24,6 +24,8 @@ export function DashboardLayoutTweakpaneSync() {
     panelBorderRadiusPx,
     panelPaddingVerticalPx,
     panelPaddingHorizontalPx,
+    markdownCornerPaddingRightPx,
+    markdownCornerPaddingBottomPx,
     dashboardBackgroundToken,
   } = useDashboardLayoutTweakpane();
 
@@ -34,6 +36,8 @@ export function DashboardLayoutTweakpaneSync() {
       panelBorderRadiusPx,
       panelPaddingVerticalPx,
       panelPaddingHorizontalPx,
+      markdownCornerPaddingRightPx,
+      markdownCornerPaddingBottomPx,
       dashboardBackgroundToken,
     });
   }, [
@@ -43,6 +47,8 @@ export function DashboardLayoutTweakpaneSync() {
     panelBorderRadiusPx,
     panelPaddingVerticalPx,
     panelPaddingHorizontalPx,
+    markdownCornerPaddingRightPx,
+    markdownCornerPaddingBottomPx,
     dashboardBackgroundToken,
   ]);
 
