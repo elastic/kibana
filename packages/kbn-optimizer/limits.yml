@@ -1,5 +1,5 @@
 pageLoadAssetSize:
-  actions: 20000
+  actions: 20500
   advancedSettings: 6196
   agentBuilder: 52831
   agentBuilderPlatform: 8737
@@ -59,7 +59,7 @@ pageLoadAssetSize:
   esql: 21193
   esqlDataGrid: 10209
   esUiShared: 101220
-  evals: 5743
+  evals: 6375
   eventAnnotation: 22334
   eventAnnotationListing: 13164
   exploratoryView: 45042
