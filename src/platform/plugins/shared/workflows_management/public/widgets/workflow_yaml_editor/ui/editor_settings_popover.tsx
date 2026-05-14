@@ -20,7 +20,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/monaco';
@@ -31,16 +31,26 @@ interface EditorSettingsPopoverProps {
   /** Graph layout direction. Owned by the parent so it can be threaded into the visual editor. */
   graphDirection?: LayoutDirection;
   onGraphDirectionChange?: (direction: LayoutDirection) => void;
+  openRef?: React.MutableRefObject<(() => void) | null>;
 }
 
 export function EditorSettingsPopover({
   editorRef,
   graphDirection,
   onGraphDirectionChange,
+  openRef,
 }: EditorSettingsPopoverProps) {
   const { euiTheme } = useEuiTheme();
   const styles = useMemoCss(componentStyles);
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (!openRef) return;
+    openRef.current = () => setIsOpen(true);
+    return () => {
+      openRef.current = null;
+    };
+  }, [openRef]);
   const [showIndentGuides, setShowIndentGuides] = useState(true);
   const [showWhitespace, setShowWhitespace] = useState(false);
 

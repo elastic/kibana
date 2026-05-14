@@ -28,6 +28,7 @@ import { isMac } from '@kbn/shared-ux-utility';
 import { WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID } from '@kbn/workflows';
 import {
   ReactFlowProvider,
+  type ToolMenuItemDef,
   useWorkflowsCapabilities,
   WorkflowDetailBottomBar,
 } from '@kbn/workflows-ui';
@@ -78,6 +79,8 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
   const styles = useMemoCss(componentStyles);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const openActionsRef = useRef<(() => void) | null>(null);
+  const openKeyboardShortcutsRef = useRef<(() => void) | null>(null);
+  const openEditorSettingsRef = useRef<(() => void) | null>(null);
   const dispatch = useDispatch();
 
   const workflowYaml = useSelector(selectYamlString) ?? '';
@@ -259,6 +262,23 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
     </EuiToolTip>
   );
 
+  const testWorkflowButtonCompact = (
+    <EuiToolTip content={runWorkflowTooltipContent}>
+      <EuiButtonIcon
+        color="success"
+        display="base"
+        iconType="play"
+        size="m"
+        onClick={handleRunClickWithUnsavedCheck}
+        isDisabled={runDisabled}
+        aria-label={i18n.translate('workflows.workflowDetailEditor.testWorkflowIconLabel', {
+          defaultMessage: 'Test workflow',
+        })}
+        data-test-subj="testWorkflowButton"
+      />
+    </EuiToolTip>
+  );
+
   const commandKey = isMac ? '⌘' : 'Ctrl';
   const documentationLabel = i18n.translate('workflows.workflowDetailEditor.tools.documentation', {
     defaultMessage: 'Documentation',
@@ -295,17 +315,50 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <KeyboardShortcutsPopover />
+        <KeyboardShortcutsPopover openRef={openKeyboardShortcutsRef} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EditorSettingsPopover
           editorRef={editorRef}
           graphDirection={graphDirection}
           onGraphDirectionChange={setGraphDirection}
+          openRef={openEditorSettingsRef}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+
+  const keyboardShortcutsLabel = i18n.translate(
+    'workflows.workflowDetailEditor.tools.keyboardShortcuts',
+    { defaultMessage: 'Keyboard shortcuts' }
+  );
+  const settingsLabel = i18n.translate('workflows.workflowDetailEditor.tools.settings', {
+    defaultMessage: 'Settings',
+  });
+
+  const toolsMenuItems: ToolMenuItemDef[] = [
+    {
+      iconType: 'documentation',
+      label: documentationLabel,
+      href: WORKFLOWS_DOCUMENTATION_URL,
+      target: '_blank',
+    },
+    {
+      iconType: 'search',
+      label: `${actionsMenuLabel} (${commandKey}+K)`,
+      onClick: () => openActionsRef.current?.(),
+    },
+    {
+      iconType: 'keyboard',
+      label: keyboardShortcutsLabel,
+      onClick: () => openKeyboardShortcutsRef.current?.(),
+    },
+    {
+      iconType: 'gear',
+      label: settingsLabel,
+      onClick: () => openEditorSettingsRef.current?.(),
+    },
+  ];
 
   return (
     <ReactFlowProvider>
@@ -339,7 +392,9 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
             editorView={editorView}
             onEditorViewChange={handleEditorViewChange}
             toolsSlot={toolsSlot}
+            toolsMenuItems={toolsMenuItems}
             testWorkflowButton={testWorkflowButton}
+            testWorkflowButtonCompact={testWorkflowButtonCompact}
             bottomOffset={isValidationOpen && !showGraph ? 220 : 0}
           />
         </EuiFlexItem>

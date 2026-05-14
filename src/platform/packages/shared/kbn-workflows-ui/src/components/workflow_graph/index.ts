@@ -17,4 +17,5 @@ export { WorkflowGraphPreview, type WorkflowGraphPreviewProps } from './workflow
 export {
   WorkflowDetailBottomBar,
   type WorkflowDetailBottomBarView,
+  type ToolMenuItemDef,
 } from './workflow_graph_bottom_bar';
