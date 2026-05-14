@@ -111,11 +111,10 @@ export class MappingsBuilder {
    * field-level metadata (`meta`), TSDB-only flags (`time_series_metric`,
    * `time_series_dimension`), and `subobjects`.
    *
-   * TODO: `time_series_metric` is also applied inside `numericType` and
-   * `booleanType` handlers (via `applyTimeSeriesMetric`). The handler-level
-   * call uses a truthy check on `field.metric_type` while this method uses a
-   * key-existence check; the two diverge for falsy values. Worth unifying
-   * once that subtle behavioral difference is confirmed acceptable.
+   * Uses key-existence checks (`'metric_type' in field`) rather than truthy
+   * checks, which is more correct for fields that explicitly set a falsy value.
+   * Dynamic mappings get time-series props from the handler itself (see
+   * `applyTimeSeriesMetric`/`applyTimeSeriesDimension` in `field_type_registry.ts`).
    */
   private applyCommonProps(fieldProps: Properties, field: Field, type: string): void {
     // TODO: when a field has `metric_type` but no `unit`, this assigns

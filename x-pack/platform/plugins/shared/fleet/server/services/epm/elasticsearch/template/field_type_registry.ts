@@ -70,6 +70,8 @@ export const dynamicObjectParentProps = (subobjects?: boolean): Properties => {
   return props;
 };
 
+// Used only in dynamicMapping handlers. Static mappings get time-series props
+// via MappingsBuilder.applyCommonProps, which runs after the handler returns.
 const applyTimeSeriesMetric = (props: Properties, field: Field, builder: MappingsBuilder): void => {
   if (builder.isIndexModeTimeSeries && field.metric_type) {
     props.time_series_metric = field.metric_type;
@@ -211,10 +213,8 @@ const wildcardType: FieldTypeHandler = {
  * 'integer' is handled by passing esType='long' since ES maps integers as long.
  */
 const numericType = (esType: string, defaultMatchingType: string): FieldTypeHandler => ({
-  staticMapping(field, builder) {
-    const props = { ...getDefaultProperties(field), type: esType };
-    applyTimeSeriesMetric(props, field, builder);
-    return props;
+  staticMapping(field) {
+    return { ...getDefaultProperties(field), type: esType };
   },
   dynamicMapping(field, builder) {
     const props = { ...getDefaultProperties(field), type: esType };
@@ -234,10 +234,8 @@ const numericType = (esType: string, defaultMatchingType: string): FieldTypeHand
 });
 
 const booleanType: FieldTypeHandler = {
-  staticMapping(field, builder) {
-    const props = { ...getDefaultProperties(field), type: 'boolean' };
-    applyTimeSeriesMetric(props, field, builder);
-    return props;
+  staticMapping(field) {
+    return { ...getDefaultProperties(field), type: 'boolean' };
   },
   dynamicMapping(field, builder) {
     const props = { ...getDefaultProperties(field), type: 'boolean' };
