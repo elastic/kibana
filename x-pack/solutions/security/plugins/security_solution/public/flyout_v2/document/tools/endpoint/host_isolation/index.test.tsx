@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { HostIsolation } from '.';
 import {
@@ -58,7 +58,7 @@ const detailsData = endpointAlertDataMock.generateEndpointAlertDetailsItemData()
 
 describe('<HostIsolation />', () => {
   it('renders the isolate title and agent integration', () => {
-    const { getByTestId } = render(
+    render(
       <HostIsolation
         hit={hit}
         detailsData={detailsData}
@@ -67,13 +67,13 @@ describe('<HostIsolation />', () => {
       />
     );
 
-    expect(getByTestId(HOST_ISOLATION_TITLE_TEST_ID)).toHaveTextContent('Isolate host');
-    expect(getByTestId(mockHostIsolationIntegrationTestId)).toHaveTextContent('endpoint');
-    expect(getByTestId(mockHostIsolationPanelTestId)).toBeInTheDocument();
+    expect(screen.getByTestId(HOST_ISOLATION_TITLE_TEST_ID)).toHaveTextContent('Isolate host');
+    expect(screen.getByTestId(mockHostIsolationIntegrationTestId)).toHaveTextContent('endpoint');
+    expect(screen.getByTestId(mockHostIsolationPanelTestId)).toBeInTheDocument();
   });
 
   it('renders the release title when action is unisolateHost', () => {
-    const { getByTestId } = render(
+    render(
       <HostIsolation
         hit={hit}
         detailsData={detailsData}
@@ -82,6 +82,6 @@ describe('<HostIsolation />', () => {
       />
     );
 
-    expect(getByTestId(HOST_ISOLATION_TITLE_TEST_ID)).toHaveTextContent('Release host');
+    expect(screen.getByTestId(HOST_ISOLATION_TITLE_TEST_ID)).toHaveTextContent('Release host');
   });
 });

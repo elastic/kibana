@@ -7,7 +7,8 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { AgentTypeIntegration } from '../../../../../common/components/endpoint/agents/agent_type_integration';
@@ -52,11 +53,17 @@ export const HostIsolation: FC<HostIsolationProps> = memo(
       details: { agentType },
     } = useAlertResponseActionsSupport(detailsData);
 
+    const { euiTheme } = useEuiTheme();
     const title = isolateAction === 'isolateHost' ? ISOLATE_HOST : UNISOLATE_HOST;
 
     return (
-      <>
-        <EuiFlyoutHeader hasBorder>
+      <EuiFlyout onClose={onClose} session="never" size="m" paddingSize="m" ownFocus={false}>
+        <EuiFlyoutHeader
+          hasBorder
+          css={css`
+            padding-inline-end: calc(${euiTheme.size.xl} + ${euiTheme.size.m}) !important;
+          `}
+        >
           <ToolsFlyoutHeader
             hit={hit}
             title={<span data-test-subj={HOST_ISOLATION_TITLE_TEST_ID}>{title}</span>}
@@ -77,7 +84,7 @@ export const HostIsolation: FC<HostIsolationProps> = memo(
             onClose={onClose}
           />
         </EuiFlyoutBody>
-      </>
+      </EuiFlyout>
     );
   }
 );

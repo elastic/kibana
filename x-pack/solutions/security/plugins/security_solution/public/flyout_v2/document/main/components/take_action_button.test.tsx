@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { useAddToCaseActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
@@ -18,9 +17,6 @@ import { useAlertTagsActions } from '../../../../detections/components/alerts_ta
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { useHostIsolationAction } from '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
-import { useKibana } from '../../../../common/lib/kibana';
-import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
-import { defaultToolsFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
 import { TakeActionButton } from './take_action_button';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
@@ -42,32 +38,12 @@ jest.mock(
     useHostIsolationAction: jest.fn(),
   })
 );
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
-  useStore: () => ({ getState: jest.fn(), dispatch: jest.fn(), subscribe: jest.fn() }),
-}));
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({}),
-}));
-jest.mock('../../../shared/components/flyout_provider', () => ({
-  flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
 jest.mock('../../tools/endpoint/host_isolation', () => ({
   HostIsolation: ({ isolateAction, onClose }: { isolateAction: string; onClose: () => void }) => (
     <button type="button" data-test-subj={`hostIsolationMock-${isolateAction}`} onClick={onClose}>
       {`isolation-mock-${isolateAction}`}
     </button>
   ),
-}));
-
-const mockGoBack = jest.fn();
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  getFlyoutManagerStore: () => ({ goBack: mockGoBack }),
 }));
 
 const mockUseExploreActions = jest.fn().mockReturnValue({ exploreActionItems: [] });
@@ -124,7 +100,6 @@ const remoteEventHit = createMockHit(
 const mockUseInvestigateInTimeline = useInvestigateInTimeline as jest.Mock;
 const mockUseIsInSecurityApp = useIsInSecurityApp as jest.Mock;
 const mockUseHostIsolationAction = useHostIsolationAction as jest.Mock;
-const mockUseKibana = useKibana as jest.Mock;
 const mockEcsData: Ecs = { _id: 'test-id', _index: 'test-index' };
 const mockNonEcsData: TimelineNonEcsData[] = [{ field: 'host.name', value: ['test-host'] }];
 const mockDetailsData = [
@@ -139,8 +114,6 @@ const mockDetailsData = [
 const mockRefetchFlyoutData = jest.fn().mockResolvedValue(undefined);
 const mockOnAlertUpdated = jest.fn();
 const mockOnShowNotes = jest.fn();
-const mockOpenSystemFlyout = jest.fn();
-const mockOverlayClose = jest.fn();
 const defaultProps = {
   hit: createMockHit(),
   ecsData: mockEcsData,
@@ -171,14 +144,6 @@ describe('<TakeActionButton />', () => {
     });
     mockUseExploreActions.mockReturnValue({ exploreActionItems: [] });
     mockUseHostIsolationAction.mockReturnValue([]);
-    mockOpenSystemFlyout.mockReturnValue({ close: mockOverlayClose });
-    mockUseKibana.mockReturnValue({
-      services: {
-        overlays: { openSystemFlyout: mockOpenSystemFlyout },
-        uiActions: { getTriggerCompatibleActions: jest.fn() },
-        application: { capabilities: {} },
-      },
-    });
   });
 
   it('should render the take action button', () => {
@@ -691,8 +656,7 @@ describe('<TakeActionButton />', () => {
       expect(queryByText('Isolate host')).not.toBeInTheDocument();
     });
 
-    it('should open the system flyout with documentFlyoutHistoryKey in Security app', () => {
-      mockUseIsInSecurityApp.mockReturnValue(true);
+    it('should render HostIsolation inline when isolation action is triggered', () => {
       let captured: ((action: 'isolateHost' | 'unisolateHost') => void) | undefined;
       mockUseHostIsolationAction.mockImplementation(
         ({ onAddIsolationStatusClick }: { onAddIsolationStatusClick: typeof captured }) => {
@@ -705,20 +669,15 @@ describe('<TakeActionButton />', () => {
         ...defaultProps,
         hit: createMockHit({ 'event.kind': 'signal' }),
       });
-      captured?.('isolateHost');
 
-      expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({
-          ...defaultToolsFlyoutProperties,
-          historyKey: documentFlyoutHistoryKey,
-          session: 'start',
-        })
-      );
+      expect(screen.queryByTestId('hostIsolationMock-isolateHost')).not.toBeInTheDocument();
+
+      act(() => captured?.('isolateHost'));
+
+      expect(screen.getByTestId('hostIsolationMock-isolateHost')).toBeInTheDocument();
     });
 
-    it('should open the system flyout with DOC_VIEWER_FLYOUT_HISTORY_KEY in Discover', () => {
-      mockUseIsInSecurityApp.mockReturnValue(false);
+    it('should unmount HostIsolation when its onClose is called', () => {
       let captured: ((action: 'isolateHost' | 'unisolateHost') => void) | undefined;
       mockUseHostIsolationAction.mockImplementation(
         ({ onAddIsolationStatusClick }: { onAddIsolationStatusClick: typeof captured }) => {
@@ -731,44 +690,13 @@ describe('<TakeActionButton />', () => {
         ...defaultProps,
         hit: createMockHit({ 'event.kind': 'signal' }),
       });
-      captured?.('unisolateHost');
 
-      expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({
-          historyKey: DOC_VIEWER_FLYOUT_HISTORY_KEY,
-          session: 'start',
-        })
-      );
-    });
+      act(() => captured?.('isolateHost'));
+      expect(screen.getByTestId('hostIsolationMock-isolateHost')).toBeInTheDocument();
 
-    it('should dispatch goBack on the EUI flyout manager when HostIsolation calls onClose', () => {
-      let captured: ((action: 'isolateHost' | 'unisolateHost') => void) | undefined;
-      mockUseHostIsolationAction.mockImplementation(
-        ({ onAddIsolationStatusClick }: { onAddIsolationStatusClick: typeof captured }) => {
-          captured = onAddIsolationStatusClick;
-          return [];
-        }
-      );
+      fireEvent.click(screen.getByTestId('hostIsolationMock-isolateHost'));
 
-      const { getByTestId } = renderTakeActionButton({
-        ...defaultProps,
-        hit: createMockHit({ 'event.kind': 'signal' }),
-      });
-      captured?.('isolateHost');
-
-      // The mocked HostIsolation is rendered inside flyoutProviders (mocked to pass-through),
-      // and openSystemFlyout receives the element as its first argument. Render it to invoke
-      // the onClose wiring.
-      const element = mockOpenSystemFlyout.mock.calls[0][0];
-      render(element);
-      fireEvent.click(getByTestId('hostIsolationMock-isolateHost'));
-
-      // goBack pops the host isolation session and restores the underlying alert details
-      // flyout; the previous behavior of hard-closing the host isolation flyout left no
-      // alert details visible.
-      expect(mockGoBack).toHaveBeenCalled();
-      expect(mockOverlayClose).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('hostIsolationMock-isolateHost')).not.toBeInTheDocument();
     });
   });
 });

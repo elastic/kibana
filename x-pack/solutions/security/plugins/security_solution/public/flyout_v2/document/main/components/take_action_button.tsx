@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { EuiButton, EuiContextMenu, EuiPopover, getFlyoutManagerStore } from '@elastic/eui';
+import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
@@ -14,9 +14,6 @@ import { isNonLocalIndexName } from '@kbn/es-query';
 import { ALERT_WORKFLOW_STATUS, EVENT_KIND } from '@kbn/rule-data-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import { useStore } from 'react-redux';
-import { useHistory } from 'react-router-dom';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { EventKind } from '../constants/event_kinds';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type { Status } from '../../../../../common/api/detection_engine';
@@ -28,12 +25,8 @@ import { useInvestigateInTimeline } from '../../../../detections/components/aler
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { useRunAlertWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
-import { useKibana } from '../../../../common/lib/kibana';
 import type { HostIsolationAction } from '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
 import { useHostIsolationAction } from '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
-import { flyoutProviders } from '../../../shared/components/flyout_provider';
-import { defaultToolsFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
-import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
 import { HostIsolation } from '../../tools/endpoint/host_isolation';
 import { useExploreActions } from '../hooks/use_explore_actions';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
@@ -95,49 +88,14 @@ export const TakeActionButton = memo(
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const togglePopoverHandler = useCallback(() => setIsPopoverOpen((open) => !open), []);
     const closePopoverHandler = useCallback(() => setIsPopoverOpen(false), []);
+    const [isolateAction, setIsolateAction] = useState<HostIsolationAction | null>(null);
 
     const isInSecurityApp = useIsInSecurityApp();
-    const { services } = useKibana();
-    const { overlays } = services;
-    const store = useStore();
-    const history = useHistory();
-
-    const openHostIsolation = useCallback(
-      (isolateAction: HostIsolationAction) => {
-        const historyKey = isInSecurityApp
-          ? documentFlyoutHistoryKey
-          : DOC_VIEWER_FLYOUT_HISTORY_KEY;
-        // Dispatch the same action EUI's built-in back arrow dispatches so the previous
-        // flyout (alert details) is restored when the user cancels or finishes the action.
-        const closeHostIsolation = () => getFlyoutManagerStore().goBack();
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: (
-              <HostIsolation
-                hit={hit}
-                detailsData={detailsData}
-                isolateAction={isolateAction}
-                onClose={closeHostIsolation}
-              />
-            ),
-          }),
-          {
-            ...defaultToolsFlyoutProperties,
-            historyKey,
-            session: 'start',
-          }
-        );
-      },
-      [detailsData, history, hit, isInSecurityApp, overlays, services, store]
-    );
 
     const hostIsolationActionItems = useHostIsolationAction({
       closePopover: closePopoverHandler,
       detailsData,
-      onAddIsolationStatusClick: openHostIsolation,
+      onAddIsolationStatusClick: setIsolateAction,
     });
 
     const documentId = hit.raw._id ?? '';
@@ -291,23 +249,33 @@ export const TakeActionButton = memo(
     );
 
     return (
-      <EuiPopover
-        aria-label={TAKE_ACTION}
-        id="AlertTakeActionPanel"
-        button={takeActionButton}
-        isOpen={isPopoverOpen}
-        closePopover={closePopoverHandler}
-        panelPaddingSize="none"
-        anchorPosition="downLeft"
-        repositionOnScroll
-      >
-        <EuiContextMenu
-          size="s"
-          initialPanelId={0}
-          panels={panels}
-          data-test-subj="takeActionPanelMenu"
-        />
-      </EuiPopover>
+      <>
+        {isolateAction !== null && (
+          <HostIsolation
+            hit={hit}
+            detailsData={detailsData}
+            isolateAction={isolateAction}
+            onClose={() => setIsolateAction(null)}
+          />
+        )}
+        <EuiPopover
+          aria-label={TAKE_ACTION}
+          id="AlertTakeActionPanel"
+          button={takeActionButton}
+          isOpen={isPopoverOpen}
+          closePopover={closePopoverHandler}
+          panelPaddingSize="none"
+          anchorPosition="downLeft"
+          repositionOnScroll
+        >
+          <EuiContextMenu
+            size="s"
+            initialPanelId={0}
+            panels={panels}
+            data-test-subj="takeActionPanelMenu"
+          />
+        </EuiPopover>
+      </>
     );
   }
 );
