@@ -144,7 +144,6 @@ export function WorkflowGraphEdge(props: EdgeProps) {
     data,
     style = {},
   } = props;
-  const { euiTheme } = useEuiTheme();
   const edgeData = data as WorkflowEdgeData | undefined;
 
   // If dagre supplied waypoints, route the edge through them so it avoids
