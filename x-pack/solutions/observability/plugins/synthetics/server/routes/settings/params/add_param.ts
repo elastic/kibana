@@ -41,7 +41,7 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
     request: {
       body: schema.oneOf([
         ParamsObjectSchema,
-        schema.arrayOf(ParamsObjectSchema, { maxSize: 1000 }),
+        schema.arrayOf(ParamsObjectSchema, { maxSize: 500 }),
       ]),
     },
   },

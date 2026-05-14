@@ -24,7 +24,7 @@ export const deleteSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
       body: schema.object({
         ids: schema.arrayOf(schema.string(), {
           minSize: 1,
-          maxSize: 1000,
+          maxSize: 500,
         }),
       }),
     },
