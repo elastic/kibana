@@ -153,6 +153,10 @@ describe('guessRecoveryBlock', () => {
     expect(result).toBe('| WHERE count >= 100');
   });
 
+  // Intentionally a naive per-operator flip, NOT De Morgan's logical negation.
+  // True negation of (a > 1 AND b < 2) would be (a <= 1 OR b >= 2), but
+  // guessRecoveryBlock only flips operators and preserves connectives. This is
+  // fine as a heuristic seed — users refine the result in the Recovery editor.
   it('handles multiple operators in one expression', () => {
     const result = guessRecoveryBlock('| WHERE a > 1 AND b < 2');
     expect(result).toBe('| WHERE a < 1 AND b > 2');
