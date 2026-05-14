@@ -115,7 +115,7 @@ const DEFAULT_PAGE_SIZE = 100;
 type WorkflowStorageClient = ReturnType<WorkflowStorage['getClient']>;
 
 export interface SearchWorkflowExecutionsParams {
-  workflowId: string;
+  workflowId?: string;
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
@@ -1647,7 +1647,7 @@ export class WorkflowsService {
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
     const must: estypes.QueryDslQueryContainer[] = [
-      { term: { workflowId: params.workflowId } },
+      ...(params.workflowId ? [{ term: { workflowId: params.workflowId } }] : []),
       {
         bool: {
           should: [

@@ -24,6 +24,7 @@ import { executeEsqlTool } from './execute_esql';
 import { searchTool } from './search';
 import { createVisualizationTool } from './create_visualization';
 import { getWorkflowExecutionStatusTool } from './get_workflow_execution_status';
+import { listWorkflowExecutionsTool } from './list_workflow_executions';
 import { resumeWorkflowExecutionTool } from './resume_workflow_execution';
 
 export const registerTools = ({
@@ -52,7 +53,8 @@ export const registerTools = ({
   if (setupDeps.workflowsManagement) {
     tools.push(
       getWorkflowExecutionStatusTool({ workflowsManagement: setupDeps.workflowsManagement }),
-      resumeWorkflowExecutionTool({ workflowsManagement: setupDeps.workflowsManagement })
+      resumeWorkflowExecutionTool({ workflowsManagement: setupDeps.workflowsManagement }),
+      listWorkflowExecutionsTool({ workflowsManagement: setupDeps.workflowsManagement })
     );
   }
 
