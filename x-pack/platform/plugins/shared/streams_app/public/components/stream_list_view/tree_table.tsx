@@ -452,6 +452,8 @@ export function StreamsTreeTable({
                   </EuiFlexItem>
                 )}
                 <EuiFlexGroup alignItems="center" gutterSize="s" responsive wrap>
+                  {Streams.QueryStream.Definition.is(item.stream) && <QueryStreamBadge />}
+                  {isDraftStream(item.stream) && <DraftStreamBadge />}
                   <EuiLink
                     data-test-subj={`streamsNameLink-${item.stream.name}`}
                     href={router.link('/{key}', {
@@ -472,8 +474,6 @@ export function StreamsTreeTable({
                     Streams.QueryStream.Definition.is(item.stream) ||
                     (Streams.WiredStream.Definition.is(item.stream) &&
                       isDraftStream(item.stream))) && <TechnicalPreviewBadge />}
-                  {Streams.QueryStream.Definition.is(item.stream) && <QueryStreamBadge />}
-                  {isDraftStream(item.stream) && <DraftStreamBadge />}
                   {item.stream.name === LOGS_ROOT_STREAM_NAME &&
                     !Streams.QueryStream.Definition.is(item.stream) && (
                       <DeprecatedLogsBadge
