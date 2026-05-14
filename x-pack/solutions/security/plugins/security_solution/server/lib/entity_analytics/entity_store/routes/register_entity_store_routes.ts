@@ -20,6 +20,7 @@ import { enableEntityStoreRoute } from './enablement';
 import { upsertEntity } from './entity_crud/upsert_entity';
 import { upsertEntitiesBulk } from './entity_crud/upsert_entities_bulk';
 import { deleteEntity } from './entity_crud/delete_entity';
+import { getRelationshipHistoryRoute } from './entities/get_relationship_history';
 
 export const registerEntityStoreRoutes = ({
   router,
@@ -43,4 +44,5 @@ export const registerEntityStoreRoutes = ({
   upsertEntity(router, telemetry, logger);
   upsertEntitiesBulk(router, telemetry, logger);
   deleteEntity(router, telemetry, logger);
+  getRelationshipHistoryRoute(router, telemetry, logger);
 };

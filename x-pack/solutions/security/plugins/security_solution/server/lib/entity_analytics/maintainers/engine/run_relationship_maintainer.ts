@@ -23,6 +23,8 @@ import { parseTargetsPerActorRows } from './parse_targets_per_actor_rows';
 import { writeEntityIds, type WriteEntityIdsResult } from './update_entities';
 import { LOOKBACK_WINDOW, MAX_ITERATIONS } from './constants';
 import { assertValidNamespace } from './validate_namespace';
+import { RelationshipHistoryClient } from '../../entity_store/relationship_history/relationship_history_client';
+import { createRelationshipHistoryIndex } from '../../entity_store/relationship_history/relationship_history_index';
 
 interface CompositeAggregations {
   users: {
@@ -219,7 +221,9 @@ async function runIntegration(
 
   // Stream per-integration: write this integration's records before
   // returning so memory does not accumulate across the outer loop.
-  const write = await writeEntityIds(crudClient, logger, records);
+  await createRelationshipHistoryIndex(esClient);
+  const historyClient = new RelationshipHistoryClient(esClient, logger);
+  const write = await writeEntityIds(crudClient, logger, records, historyClient);
   return { buckets: totalBuckets, recordsCount: records.length, write };
 }
 

@@ -5,11 +5,17 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import type { Logger } from '@kbn/logging';
 import type { EntityUpdateClient, BulkObject } from '@kbn/entity-store/server';
 import type { Entity } from '@kbn/entity-store/common/domain/definitions/entity.gen';
 
 import type { ProcessedEngineRecord } from './types';
+import type { RelationshipHistoryClient } from '../../entity_store/relationship_history/relationship_history_client';
+
+function hashEntityId(id: string): string {
+  return createHash('sha256').update(id).digest('hex');
+}
 
 type ValidRecord = ProcessedEngineRecord & { entityId: string };
 
@@ -67,7 +73,9 @@ export interface WriteEntityIdsResult {
 export const writeEntityIds = async (
   crudClient: EntityUpdateClient,
   logger: Logger,
-  records: ProcessedEngineRecord[]
+  records: ProcessedEngineRecord[],
+  historyClient?: RelationshipHistoryClient,
+  seen: string = new Date().toISOString()
 ): Promise<WriteEntityIdsResult> => {
   if (records.length === 0) return { updated: 0, notFound: 0, errors: 0 };
 
@@ -77,6 +85,9 @@ export const writeEntityIds = async (
   const merged = mergeRecords(valid);
 
   const objects: BulkObject[] = [];
+  // Maps hashEuid(entityId) → entityId so we can identify which entities
+  // failed from bulkUpdateEntity's error responses (which carry _id = hash).
+  const hashToEntityId = new Map<string, string>();
   for (const [entityId, mergedRels] of merged) {
     const relationships: Record<string, { ids: string[] }> = {};
     for (const [relType, idSet] of Object.entries(mergedRels)) {
@@ -85,6 +96,7 @@ export const writeEntityIds = async (
       }
     }
     if (Object.keys(relationships).length > 0) {
+      hashToEntityId.set(hashEntityId(entityId), entityId);
       // TODO(follow-up): entity type hardcoded to 'user' — use actorEntityType from config.
       objects.push({
         type: 'user',
@@ -122,5 +134,22 @@ export const writeEntityIds = async (
   }
 
   logger.info(`Wrote relationship ids for ${updated} entities`);
+
+  if (historyClient) {
+    const failedEntityIds = new Set(
+      responseErrors.map((e) => hashToEntityId.get(e._id)).filter((id): id is string => !!id)
+    );
+    const batches = [];
+    for (const [entityId, mergedRels] of merged) {
+      if (failedEntityIds.has(entityId)) continue;
+      for (const [relType, idSet] of Object.entries(mergedRels)) {
+        if (idSet.size > 0) {
+          batches.push({ entityId, relType, euids: Array.from(idSet), seen });
+        }
+      }
+    }
+    await historyClient.appendBatch(batches);
+  }
+
   return { updated, notFound: missingErrors.length, errors: realErrors.length };
 };

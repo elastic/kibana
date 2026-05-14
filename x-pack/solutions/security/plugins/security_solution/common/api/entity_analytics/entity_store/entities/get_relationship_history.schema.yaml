@@ -1,0 +1,58 @@
+openapi: 3.0.0
+info:
+  title: Get Entity Relationship History
+  version: '1'
+paths:
+  /api/entity_store/entities/{entityId}/relationship_history:
+    get:
+      operationId: GetEntityRelationshipHistory
+      summary: Get relationship history for an entity
+      tags:
+        - Entity Store
+      parameters:
+        - name: entityId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The entity store ID (e.g. "user:john")
+      responses:
+        '200':
+          description: Relationship history records
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - records
+                properties:
+                  records:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RelationshipHistorySummary'
+components:
+  schemas:
+    RelationshipHistorySummary:
+      type: object
+      required:
+        - entity_id
+        - rel_type
+        - target_euid
+        - first_seen
+        - last_seen
+        - seen_count
+      properties:
+        entity_id:
+          type: string
+        rel_type:
+          type: string
+        target_euid:
+          type: string
+        first_seen:
+          type: string
+          format: date-time
+        last_seen:
+          type: string
+          format: date-time
+        seen_count:
+          type: integer
