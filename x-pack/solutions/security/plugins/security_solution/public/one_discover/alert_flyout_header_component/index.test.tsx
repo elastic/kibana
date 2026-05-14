@@ -34,11 +34,11 @@ jest.mock('../../common/components/user_privileges/user_privileges_context', () 
   UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-jest.mock('../../flyout_v2/document/header', () => ({
+jest.mock('../../flyout_v2/document/main/header', () => ({
   Header: (props: unknown) => mockDocumentHeader(props),
 }));
 
-jest.mock('../../flyout_v2/notes', () => ({
+jest.mock('../../flyout_v2/shared/tools/notes', () => ({
   NotesDetails: () => <div>{'MockNotesDetails'}</div>,
 }));
 

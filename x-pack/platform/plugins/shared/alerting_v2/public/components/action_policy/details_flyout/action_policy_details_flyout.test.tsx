@@ -24,6 +24,11 @@ jest.mock('@kbn/core-di-browser', () => ({
         client: { get: () => 'YYYY-MM-DD HH:mm' },
       };
     }
+    if (token === 'http') {
+      return {
+        basePath: { prepend: (path: string) => `/base${path}` },
+      };
+    }
     return {};
   },
   CoreStart: (key: string) => key,
@@ -51,6 +56,8 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   version: 'v1',
   name: 'Critical alerts policy',
   description: 'Routes critical alerts to the oncall workflow',
+  type: 'global',
+  ruleId: null,
   enabled: true,
   destinations: [
     { type: 'workflow', id: 'wf-1' },
@@ -134,6 +141,23 @@ describe('ActionPolicyDetailsFlyout', () => {
       renderFlyout({ policy: createPolicy({ snoozedUntil: null }) });
       expect(screen.queryByText(/Snoozed until/i)).not.toBeInTheDocument();
     });
+
+    it('renders a "Global" badge for global policies', () => {
+      renderFlyout({ policy: createPolicy({ type: 'global', ruleId: null }) });
+
+      expect(screen.getByText('Global')).toBeInTheDocument();
+      expect(screen.queryByText('Single rule')).not.toBeInTheDocument();
+    });
+
+    it('renders a "Single rule" badge and a link to the rule details for single_rule policies', () => {
+      renderFlyout({
+        policy: createPolicy({ type: 'single_rule', ruleId: 'rule-42' }),
+      });
+
+      expect(screen.getByText('Single rule')).toBeInTheDocument();
+      const link = screen.getByTestId('actionPolicyDetailsFlyoutLinkedRuleLink');
+      expect(link).toHaveAttribute('href', expect.stringContaining('rule-42'));
+    });
   });
 
   describe('body sections', () => {
@@ -171,7 +195,7 @@ describe('ActionPolicyDetailsFlyout', () => {
         policy: createPolicy({
           groupingMode: 'per_episode',
           groupBy: null,
-          throttle: { strategy: 'on_status_change' },
+          throttle: { strategy: 'on_status_change', interval: null },
         }),
       });
 
@@ -220,26 +244,26 @@ describe('ActionPolicyDetailsFlyout', () => {
       expect(screen.getByTestId(TEST_SUBJ.actionsMenuButton)).toBeInTheDocument();
     });
 
-    it('calls onClone and closes the flyout when Clone is selected', async () => {
+    it('calls onClone without closing the flyout', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
       const { handlers, policy } = renderFlyout();
 
       await user.click(screen.getByTestId(TEST_SUBJ.actionsMenuButton));
       await user.click(screen.getByText('Clone'));
 
-      expect(handlers.onClose).toHaveBeenCalledTimes(1);
       expect(handlers.onClone).toHaveBeenCalledWith(policy);
+      expect(handlers.onClose).not.toHaveBeenCalled();
     });
 
-    it('calls onDelete and closes the flyout when Delete is selected', async () => {
+    it('calls onDelete without closing the flyout', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
       const { handlers, policy } = renderFlyout();
 
       await user.click(screen.getByTestId(TEST_SUBJ.actionsMenuButton));
       await user.click(screen.getByText('Delete'));
 
-      expect(handlers.onClose).toHaveBeenCalledTimes(1);
       expect(handlers.onDelete).toHaveBeenCalledWith(policy);
+      expect(handlers.onClose).not.toHaveBeenCalled();
     });
 
     it('calls onDisable without closing the flyout when Disable is selected on an enabled policy', async () => {
@@ -264,15 +288,15 @@ describe('ActionPolicyDetailsFlyout', () => {
       expect(handlers.onClose).not.toHaveBeenCalled();
     });
 
-    it('calls onUpdateApiKey and closes the flyout when Update API key is selected', async () => {
+    it('calls onUpdateApiKey without closing the flyout', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
       const { handlers, policy } = renderFlyout();
 
       await user.click(screen.getByTestId(TEST_SUBJ.actionsMenuButton));
       await user.click(screen.getByText('Update API key'));
 
-      expect(handlers.onClose).toHaveBeenCalledTimes(1);
       expect(handlers.onUpdateApiKey).toHaveBeenCalledWith(policy.id);
+      expect(handlers.onClose).not.toHaveBeenCalled();
     });
   });
 });

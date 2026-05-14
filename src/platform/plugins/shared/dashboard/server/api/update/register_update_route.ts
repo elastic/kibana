@@ -19,7 +19,7 @@ import { trackCreateDashboardAction, trackUpdateDashboardAction } from '../../us
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getRouteConfig } from '../get_route_config';
 import { writeErrorHandler } from '../write_error_handler';
-import { getUpdateRequestBodySchema, getUpdateResponseBodySchema } from './schemas';
+import { getUpdateResponseBodySchema } from './schemas';
 import { update } from './update';
 
 export function registerUpdateRoute(
@@ -51,7 +51,7 @@ export function registerUpdateRoute(
             // existing dashboards may have invalid "as code" ids
             id: schema.string(),
           }),
-          body: getUpdateRequestBodySchema(isDashboardAppRequest),
+          body: getDashboardStateSchema(isDashboardAppRequest),
         },
         response: {
           200: {
@@ -68,13 +68,16 @@ export function registerUpdateRoute(
           403: {
             description: 'forbidden',
           },
+          409: {
+            description: 'conflict',
+          },
         },
       }),
     },
     async (ctx, req, res) =>
       telemetryHandler(req, usageCounter, async () => {
         try {
-          const result = await update(
+          const { body, operation } = await update(
             ctx,
             getCachedDashboardStateSchema(),
             req.params.id,
@@ -82,7 +85,7 @@ export function registerUpdateRoute(
             req.serverTiming,
             isDashboardAppRequest
           );
-          if (result.meta.updated_at === result.meta.created_at) {
+          if (operation === 'create') {
             await trackCreateDashboardAction(result, req);
             return res.created({ body: result });
           } else {
