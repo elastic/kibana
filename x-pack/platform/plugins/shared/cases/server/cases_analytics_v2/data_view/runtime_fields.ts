@@ -14,9 +14,17 @@ import type { RuntimeFieldSpec, RuntimeType } from '@kbn/data-views-plugin/commo
  * Source of truth: `common/types/domain/template/fields.ts` — the
  * `BaseFieldSchema.type` union across all field schemas. The runtime field
  * type set is smaller than the ES mapping type set, so we coerce all numeric
- * variants down to `long` or `double`. Templates declared as `keyword` get
- * no runtime field at all — the indexed value is already keyword, and an
- * override would just add painless overhead with no benefit.
+ * variants down to `long` or `double`.
+ *
+ * **Why `keyword` is in here too.** `cases.extended_fields` is mapped as
+ * `flattened` (see `mappings/case.ts` for the field-limit rationale). Under
+ * `flattened`, sub-keys are queryable in ES but **do not surface as
+ * discoverable fields in Kibana data views** — only the parent
+ * `cases.extended_fields` shows up in Discover / Lens / Stack Management.
+ * To make per-field keyword values navigable in those UIs we publish a
+ * keyword runtime field at `cases.<name>_as_keyword` that emits the raw
+ * string from `_source`. Without this, every `keyword`-typed template
+ * field would be invisible to the analytics surface.
  *
  * `unsigned_long` is mapped to `long` for runtime purposes; values exceeding
  * `Long.MAX_VALUE` lose precision when surfaced through the data view but
@@ -35,13 +43,22 @@ const SUFFIX_TO_RUNTIME_TYPE: Record<string, RuntimeType> = {
   scaled_float: 'double',
   date: 'date',
   boolean: 'boolean',
+  keyword: 'keyword',
 };
 
 /**
- * Suffixes that don't get a runtime field — the indexed value is already
- * usable as-is. Today only `keyword`.
+ * Suffixes that the template system can emit but that intentionally don't
+ * get a runtime field — the indexed value is already independently
+ * accessible at its native path in the data view.
+ *
+ * Currently empty: every supported suffix needs a runtime field because
+ * `cases.extended_fields` is `flattened` (sub-keys aren't discoverable as
+ * data-view fields). Kept as a structural hook so a future mapping change
+ * — e.g. promoting a specific suffix to a typed sub-field — can opt that
+ * suffix out of the runtime-field path without touching the rest of the
+ * pipeline.
  */
-const NO_RUNTIME_FIELD_SUFFIXES = new Set(['keyword']);
+const NO_RUNTIME_FIELD_SUFFIXES = new Set<string>();
 
 /**
  * Every suffix the cases template system can emit — derived once from the two
@@ -58,9 +75,10 @@ export const ALL_TEMPLATE_TYPE_SUFFIXES: readonly string[] = [
 
 /**
  * Suffix → runtime type. Returns:
- *   - the runtime type if the suffix is mapped (e.g. 'long' → 'long')
- *   - `null` if the suffix is known but doesn't need a runtime field
- *     (today only `keyword`)
+ *   - the runtime type if the suffix is mapped (e.g. 'long' → 'long',
+ *     'keyword' → 'keyword')
+ *   - `null` if the suffix is known but intentionally doesn't get a runtime
+ *     field (today: nothing; see `NO_RUNTIME_FIELD_SUFFIXES`)
  *   - `undefined` if the suffix is unknown — caller should ignore the field
  */
 export const suffixToRuntimeType = (suffix: string): RuntimeType | null | undefined => {
@@ -131,6 +149,13 @@ export const buildPainlessSource = (snakeKey: string, runtimeType: RuntimeType):
       return `${guard} try { emit(Instant.parse(v).toEpochMilli()); return; } catch (Exception e1) {} try { emit(LocalDateTime.parse(v).toInstant(ZoneOffset.UTC).toEpochMilli()); } catch (Exception e2) {}`;
     case 'boolean':
       return `${guard} try { emit(Boolean.parseBoolean(v)); } catch (Exception e) {}`;
+    case 'keyword':
+      // No parsing — `flattened` sub-keys come back from `_source` already
+      // string-shaped (the guard above coerces non-strings via
+      // `toString()`). Emitting `v` lifts the value out of the opaque
+      // `flattened` parent and into a discoverable typed field at
+      // `cases.<name>_as_keyword`.
+      return `${guard} emit(v);`;
     default:
       // ip / geo_point / composite — not currently produced by the template
       // system. If a future template type maps here, extend this switch
@@ -151,9 +176,8 @@ export interface RuntimeFieldEntry {
  * From a template snake-key, decide whether to emit a runtime field and, if
  * so, return the spec ready to merge into a data view's `runtimeFieldMap`.
  *
- * Returns `null` when the suffix doesn't need a runtime field — the snake-key
- * isn't shaped like `<name>_as_<type>`, the suffix is `keyword` (already
- * keyword in the index), or the suffix is unknown.
+ * Returns `null` when the snake-key isn't shaped like `<name>_as_<type>`,
+ * the suffix is in `NO_RUNTIME_FIELD_SUFFIXES`, or the suffix is unknown.
  *
  * Publication path: `cases.<snakeKey>` (e.g. `cases.riskScore_as_long`),
  * sitting alongside `cases.title`, `cases.severity`, etc. The painless reads

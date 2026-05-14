@@ -42,8 +42,15 @@ describe('splitSnakeKey', () => {
 });
 
 describe('suffixToRuntimeType', () => {
-  it('returns null for keyword — no runtime field needed', () => {
-    expect(suffixToRuntimeType('keyword')).toBeNull();
+  it('maps keyword to a keyword runtime field — flattened sub-keys are not discoverable on their own', () => {
+    // Regression guard: under the `flattened` mapping for
+    // `cases.extended_fields`, sub-keys are queryable in ES but invisible
+    // to Kibana's data-view field list. Returning `null` here (the prior
+    // behaviour) silently dropped every `keyword`-typed template field
+    // from Discover / Lens / Stack Management. Lifting them through a
+    // keyword runtime field at `cases.<name>_as_keyword` is the only
+    // path that surfaces the value.
+    expect(suffixToRuntimeType('keyword')).toBe('keyword');
   });
 
   it('coerces numeric variants to long', () => {
@@ -104,6 +111,20 @@ describe('buildPainlessSource', () => {
     expect(buildPainlessSource('b', 'boolean')).toContain('Boolean.parseBoolean');
   });
 
+  it('emits the raw string for keyword without parsing', () => {
+    // The flattened `_source` value is already string-shaped (or coerced
+    // via the guard's `toString()`); a keyword runtime field just lifts
+    // it to a discoverable path. No try/catch needed because there is no
+    // parse step.
+    const src = buildPainlessSource('summary_as_keyword', 'keyword');
+    expect(src).toContain("ef.get('summary_as_keyword')");
+    expect(src).toMatch(/emit\(v\)\s*;?\s*$/);
+    expect(src).not.toContain('parseLong');
+    expect(src).not.toContain('parseDouble');
+    expect(src).not.toContain('Instant.parse');
+    expect(src).not.toContain('parseBoolean');
+  });
+
   it('wraps every parse in try/catch so malformed values silently drop', () => {
     expect(buildPainlessSource('a', 'long')).toMatch(/try\s*\{[\s\S]+\}\s*catch/);
     expect(buildPainlessSource('b', 'double')).toMatch(/try\s*\{[\s\S]+\}\s*catch/);
@@ -126,8 +147,16 @@ describe('buildRuntimeFieldEntry', () => {
     expect(entry!.spec.script?.source).toContain("ef.get('riskScore_as_long')");
   });
 
-  it('returns null for keyword (already keyword at index level — no runtime needed)', () => {
-    expect(buildRuntimeFieldEntry('playbook_as_keyword')).toBeNull();
+  it('publishes a keyword runtime field for keyword extended fields (flattened sub-keys are not discoverable)', () => {
+    // Without this entry, `<name>_as_keyword` template fields are
+    // invisible in Discover / Lens / Stack Management — the parent
+    // `cases.extended_fields` is the only thing the data view sees.
+    const entry = buildRuntimeFieldEntry('playbook_as_keyword');
+    expect(entry).not.toBeNull();
+    expect(entry!.fieldName).toBe('cases.playbook_as_keyword');
+    expect(entry!.spec.type).toBe('keyword');
+    expect(entry!.spec.script?.source).toContain("ef.get('playbook_as_keyword')");
+    expect(entry!.spec.script?.source).toMatch(/emit\(v\)/);
   });
 
   it('returns null for non-snake-key names', () => {

@@ -40,11 +40,17 @@ import { CASE_DYNAMIC_TEMPLATES } from './dynamic_templates';
  *     analytics doc converts them to human-readable keywords (`"low"`,
  *     `"open"`, etc.) so Lens / Discover display sensible labels without an
  *     extra transform. The conversion lives in the doc-builder.
- *   - `extended_fields`: SO uses `flattened`; v2 uses an object with a
- *     `dynamic_template` mapping every child to keyword. The per-child
- *     keyword paths are needed by the runtime field lift
- *     (`cases.<snake>` → typed) — `flattened` collapses everything into one
- *     field and breaks individual access.
+ *   - `extended_fields`: same `flattened` mapping as the SO. An earlier
+ *     v2 design used an object with a `dynamic_template` mapping every
+ *     child to keyword, but tenants with many templates (× many spaces)
+ *     blew through the default `index.mapping.total_fields.limit` of
+ *     1000. `flattened` keeps the index mapping bounded at one field
+ *     regardless of cluster-wide snake-key cardinality. Per-child
+ *     querying still happens via runtime fields published at
+ *     `cases.<snake>` (see `data_view/runtime_fields.ts`) — those scripts
+ *     read the value from `params._source` at query time. Slightly
+ *     slower per-doc than doc_values, but unbounded sub-key cardinality
+ *     is the right trade-off here.
  *   - `observables`: SO uses a nested array of `{ typeKey, value,
  *     description }` triples; v2 denormalizes to one keyword array per
  *     `typeKey` (`cases.observables.url: ["http://..."]`). Preserves the
