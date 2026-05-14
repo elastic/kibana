@@ -185,23 +185,35 @@ const usePreview = (state: PlaygroundState, onInspect?: (item: ContentListItem) 
 
   const providerItemConfig = useMemo(() => {
     const config: Record<string, unknown> = {};
+    const actions: Record<string, unknown> = {};
+
     if (itemConfig.getHref) {
       config.getHref = (i: ContentListItem) => `#/${provider.entity}/${i.id}`;
     }
-    if (itemConfig.getEditUrl) {
-      config.getEditUrl = (i: ContentListItem) => `#/${provider.entity}/${i.id}/edit`;
-    }
     if (itemConfig.onEdit) {
-      config.onEdit = (i: ContentListItem) => alert(`Edit: ${i.title}`);
+      actions.edit = { onItemAction: (i: ContentListItem) => alert(`Edit: ${i.title}`) };
     }
     if (itemConfig.onDelete) {
-      config.onDelete = async () => {
-        await new Promise((resolve) => setTimeout(resolve, 300));
+      actions.delete = {
+        onBulkAction: async () => {
+          await new Promise((resolve) => setTimeout(resolve, 300));
+        },
       };
     }
     if (itemConfig.onInspect && onInspect) {
-      config.onInspect = onInspect;
+      actions.inspect = { onItemAction: onInspect };
     }
+
+    // Sample handler for the custom `'export'` action declared in the
+    // playground's actions column.
+    actions.export = {
+      onItemAction: (item: ContentListItem) => alert(`Export: ${item.title}`),
+    };
+
+    if (Object.keys(actions).length > 0) {
+      config.actions = actions;
+    }
+
     return Object.keys(config).length > 0 ? config : undefined;
   }, [itemConfig, provider.entity, onInspect]);
 
@@ -253,7 +265,6 @@ const usePreview = (state: PlaygroundState, onInspect?: (item: ContentListItem) 
                           id="export"
                           name="Export"
                           icon="exportAction"
-                          onClick={(item) => alert(`Export: ${item.title}`)}
                         />
                       );
                     default:
