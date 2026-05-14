@@ -235,54 +235,51 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
     }
   );
 
-  apiTest(
-    'Update accepts and persists KI promotion fields',
-    async ({ apiClient, kbnClient }) => {
-      await kbnClient.uiSettings.update({
-        [FF_ENABLE_ENTITY_STORE_V2]: true,
-      });
+  apiTest('Update accepts and persists KI promotion fields', async ({ apiClient, kbnClient }) => {
+    await kbnClient.uiSettings.update({
+      [FF_ENABLE_ENTITY_STORE_V2]: true,
+    });
 
-      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {},
-      });
+    await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {},
+    });
 
-      // Set both KI extraction and promotion knobs in one body so the
-      // cross-field invariant (`promoteToTypedThreshold >= entityMinConfidence`)
-      // is satisfied. The same body also exercises the new
-      // `promotedEntityTypes` enum validation.
-      const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {
-          knowledgeIndicators: {
-            entityMinConfidence: 80,
-            promoteToTypedThreshold: 95,
-            promotedEntityTypes: ['service'],
-          },
+    // Set both KI extraction and promotion knobs in one body so the
+    // cross-field invariant (`promoteToTypedThreshold >= entityMinConfidence`)
+    // is satisfied. The same body also exercises the new
+    // `promotedEntityTypes` enum validation.
+    const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {
+        knowledgeIndicators: {
+          entityMinConfidence: 80,
+          promoteToTypedThreshold: 95,
+          promotedEntityTypes: ['service'],
         },
-      });
-      expect(update.statusCode).toBe(200);
+      },
+    });
+    expect(update.statusCode).toBe(200);
 
-      // A second update with only one of the two knobs should preserve
-      // the other from the persisted state.
-      const update2 = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {
-          knowledgeIndicators: { promotedEntityTypes: ['host', 'service'] },
-        },
-      });
-      expect(update2.statusCode).toBe(200);
+    // A second update with only one of the two knobs should preserve
+    // the other from the persisted state.
+    const update2 = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {
+        knowledgeIndicators: { promotedEntityTypes: ['host', 'service'] },
+      },
+    });
+    expect(update2.statusCode).toBe(200);
 
-      await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {},
-      });
-    }
-  );
+    await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {},
+    });
+  });
 
   apiTest(
     'Update rejects promoteToTypedThreshold < entityMinConfidence in the same body',
@@ -368,6 +365,153 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
         },
       });
       expect(update.statusCode).toBe(400);
+
+      await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {},
+      });
+    }
+  );
+
+  // ----------------------------------------------------------------------
+  // Option E (Identity Alias Inference via Streams KI) — `schemaAliasMinConfidence`.
+  // The new knob is the user-facing toggle that turns alias-scoped extraction
+  // passes on/off. These tests exercise the full HTTP route + SO round-trip
+  // (validation, persistence, partial-update preservation, and explicit-null
+  // disable) so the public surface is covered against accidental regression.
+  // The full alias-pass query/extraction path is exercised by the unit + snapshot
+  // suites in `server/domain/logs_extraction/*.test.ts` and the loader unit
+  // tests in `server/domain/streams_features/*.test.ts`.
+  // ----------------------------------------------------------------------
+  apiTest(
+    'Update accepts schemaAliasMinConfidence in the 0..100 range and persists alongside other KI knobs',
+    async ({ apiClient, kbnClient }) => {
+      await kbnClient.uiSettings.update({
+        [FF_ENABLE_ENTITY_STORE_V2]: true,
+      });
+
+      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {},
+      });
+
+      // Set alongside another KI knob in the same body so we also catch
+      // regressions in the partial-update merge path.
+      const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {
+          knowledgeIndicators: {
+            entityMinConfidence: 50,
+            schemaAliasMinConfidence: 80,
+          },
+        },
+      });
+      expect(update.statusCode).toBe(200);
+
+      // A second update touching only one of the two should not clobber
+      // the other — the SO merge has to preserve `schemaAliasMinConfidence`
+      // when the body only mentions `entityMinConfidence`.
+      const update2 = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {
+          knowledgeIndicators: { entityMinConfidence: 60 },
+        },
+      });
+      expect(update2.statusCode).toBe(200);
+
+      await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {},
+      });
+    }
+  );
+
+  apiTest(
+    'Update accepts an explicit null schemaAliasMinConfidence to disable alias adoption (default-off semantics)',
+    async ({ apiClient, kbnClient }) => {
+      await kbnClient.uiSettings.update({
+        [FF_ENABLE_ENTITY_STORE_V2]: true,
+      });
+
+      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {},
+      });
+
+      // Enable, then explicitly disable. `null` is the documented way to
+      // turn the alias-scoped pass off; the loader short-circuits to `[]`
+      // when the value is `null`, so this is the user-facing kill switch.
+      const enableUpdate = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {
+          knowledgeIndicators: { schemaAliasMinConfidence: 70 },
+        },
+      });
+      expect(enableUpdate.statusCode).toBe(200);
+
+      const disableUpdate = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {
+          knowledgeIndicators: { schemaAliasMinConfidence: null },
+        },
+      });
+      expect(disableUpdate.statusCode).toBe(200);
+
+      await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {},
+      });
+    }
+  );
+
+  apiTest(
+    'Update rejects schemaAliasMinConfidence outside 0..100 (route-level guard before SO write)',
+    async ({ apiClient, kbnClient }) => {
+      await kbnClient.uiSettings.update({
+        [FF_ENABLE_ENTITY_STORE_V2]: true,
+      });
+
+      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {},
+      });
+
+      const tooHigh = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {
+          knowledgeIndicators: { schemaAliasMinConfidence: 101 },
+        },
+      });
+      expect(tooHigh.statusCode).toBe(400);
+
+      const tooLow = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {
+          knowledgeIndicators: { schemaAliasMinConfidence: -1 },
+        },
+      });
+      expect(tooLow.statusCode).toBe(400);
+
+      const nonInteger = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {
+          knowledgeIndicators: { schemaAliasMinConfidence: 80.5 },
+        },
+      });
+      expect(nonInteger.statusCode).toBe(400);
 
       await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
         headers: defaultHeaders,

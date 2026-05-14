@@ -37,6 +37,7 @@ describe('createKnowledgeIndicatorsReader', () => {
     const reader: StreamsKnowledgeIndicatorsReader = {
       listEntityFeatures: jest.fn().mockResolvedValue([]),
       listDependencyFeatures: jest.fn().mockResolvedValue([]),
+      listSchemaFeatures: jest.fn().mockResolvedValue([]),
       resolveIndexPatterns: jest.fn().mockResolvedValue(['logs.k8s.pods']),
     };
     const getKnowledgeIndicatorsReader = jest.fn().mockResolvedValue(reader);
@@ -67,6 +68,7 @@ describe('createKnowledgeIndicatorsReader', () => {
   it('the no-op reader yields empty arrays for every method without performing any I/O', async () => {
     expect(await __NO_OP_KI_READER_FOR_TESTING.listEntityFeatures()).toEqual([]);
     expect(await __NO_OP_KI_READER_FOR_TESTING.listDependencyFeatures()).toEqual([]);
+    expect(await __NO_OP_KI_READER_FOR_TESTING.listSchemaFeatures()).toEqual([]);
     expect(await __NO_OP_KI_READER_FOR_TESTING.resolveIndexPatterns('any-stream')).toEqual([]);
   });
 

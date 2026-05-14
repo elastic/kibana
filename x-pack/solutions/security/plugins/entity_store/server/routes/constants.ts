@@ -86,4 +86,13 @@ export const KnowledgeIndicatorsUpdateParams = z.object({
   aggregationGroupCap: z.number().int().min(1).optional(),
   promoteToTypedThreshold: z.number().int().min(0).max(100).nullable().optional(),
   promotedEntityTypes: z.array(z.enum(['host', 'service'])).optional(),
+  /**
+   * Schema-feature alias adoption confidence threshold. `null` (the default)
+   * disables alias adoption and the static engines run their existing
+   * single-pass extraction unchanged. Set to a number 0–100 to enable
+   * Option E identity aliases on streams whose schema features clear the bar.
+   * See `KI_SCHEMA_ALIAS_MIN_CONFIDENCE_DEFAULT` in
+   * `server/domain/saved_objects/global_state/constants.ts` for rationale.
+   */
+  schemaAliasMinConfidence: z.number().int().min(0).max(100).nullable().optional(),
 });

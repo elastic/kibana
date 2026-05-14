@@ -88,6 +88,7 @@ const buildEsClient = () => {
 const buildReader = (deps: Feature[] = []): jest.Mocked<StreamsKnowledgeIndicatorsReader> => ({
   listEntityFeatures: jest.fn(),
   listDependencyFeatures: jest.fn().mockResolvedValue(deps),
+  listSchemaFeatures: jest.fn().mockResolvedValue([]),
   resolveIndexPatterns: jest.fn(),
 });
 

@@ -107,6 +107,7 @@ const buildEsClient = (
 const buildReader = (features: Feature[] = []): jest.Mocked<StreamsKnowledgeIndicatorsReader> => ({
   listEntityFeatures: jest.fn().mockResolvedValue(features),
   listDependencyFeatures: jest.fn(),
+  listSchemaFeatures: jest.fn().mockResolvedValue([]),
   resolveIndexPatterns: jest.fn(),
 });
 
@@ -119,6 +120,7 @@ const buildGlobalStateClient = (
       aggregationGroupCap: 200,
       promoteToTypedThreshold: 95,
       promotedEntityTypes: ['host', 'service'],
+      schemaAliasMinConfidence: null,
       ...state,
     },
     historySnapshot: { status: 'started', frequency: '24h' },

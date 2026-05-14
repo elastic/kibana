@@ -64,6 +64,22 @@ export interface StreamsKnowledgeIndicatorsReader {
   listDependencyFeatures(options?: StreamsKnowledgeIndicatorsListOptions): Promise<Feature[]>;
 
   /**
+   * Lists `type: 'schema'` Knowledge Indicators across all streams the caller
+   * is authorized to read. Schema features describe the log schema family
+   * evident in a stream (`properties.schema_family` ∈ `'ecs' | 'otel' |
+   * 'custom'`). Cross-plugin consumers (currently entity_store) read these
+   * for their `properties.ecs_identity_aliases` table — an LLM-emitted
+   * mapping of ECS identity destinations (e.g. `user.email`) to the non-ECS
+   * source paths in this stream that carry the same identity. The aliases
+   * let entity extraction land canonical entities from log sources nobody
+   * has ECS-normalized.
+   *
+   * Filters are pushed into the underlying storage query — they are not
+   * applied client-side.
+   */
+  listSchemaFeatures(options?: StreamsKnowledgeIndicatorsListOptions): Promise<Feature[]>;
+
+  /**
    * Resolves a stream name to the Elasticsearch index pattern(s) backing it.
    *
    * For wired streams the stream name equals the data-stream name, and
@@ -91,7 +107,7 @@ export const createKnowledgeIndicatorsReader = (deps: {
   const { featureClient, streamsClient } = deps;
 
   const listFeaturesOfType = async (
-    type: 'entity' | 'dependency',
+    type: 'entity' | 'dependency' | 'schema',
     options?: StreamsKnowledgeIndicatorsListOptions
   ): Promise<Feature[]> => {
     const streams = await streamsClient.listStreams();
@@ -109,6 +125,7 @@ export const createKnowledgeIndicatorsReader = (deps: {
   return {
     listEntityFeatures: (options) => listFeaturesOfType('entity', options),
     listDependencyFeatures: (options) => listFeaturesOfType('dependency', options),
+    listSchemaFeatures: (options) => listFeaturesOfType('schema', options),
 
     resolveIndexPatterns: async (streamName) => {
       try {

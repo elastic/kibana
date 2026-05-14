@@ -48,6 +48,20 @@ export const KI_AGGREGATION_GROUP_CAP_DEFAULT = 200;
 export const KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT = null;
 export const KI_PROMOTED_ENTITY_TYPES_DEFAULT: ReadonlyArray<'host' | 'service'> = [];
 
+// Knowledge Indicators schema-feature alias adoption — gates the
+// schema-feature `ecs_identity_aliases` projection inside the static
+// engine extraction path (Option E from the entity-store-ki-integration
+// research notes). When `null` the loader short-circuits before any I/O,
+// so disabled tenants pay zero cost and behavior is byte-identical to
+// pre-Option-E. When set to a number 0–100, only schema features at or
+// above that confidence contribute aliases; the LLM's intended actor-
+// identity scoping is enforced via each feature's `filter`. Conservative
+// default (off) follows the same opt-in pattern as `entityMinConfidence`
+// (default 99) and `promoteToTypedThreshold` (default null) — the cost
+// of adopting a wrong alias is merging two real entities into one, which
+// is exactly the false-merge risk the "off by default" stance avoids.
+export const KI_SCHEMA_ALIAS_MIN_CONFIDENCE_DEFAULT = null;
+
 export type LogExtractionConfig = z.infer<typeof LogExtractionConfig>;
 export const LogExtractionConfig = z.object({
   additionalIndexPatterns: z.array(z.string()).default([]),
@@ -121,6 +135,22 @@ export const KnowledgeIndicatorsConfig = z.object({
   promotedEntityTypes: z
     .array(z.enum(['host', 'service']))
     .default([...KI_PROMOTED_ENTITY_TYPES_DEFAULT]),
+  /**
+   * Schema-feature ECS identity alias confidence threshold. When `null` the
+   * extraction loop never reads schema features and behaves byte-identically
+   * to pre-Option-E. When set, the static engines run an extra extraction
+   * pass per stream that has a schema feature at or above this confidence
+   * with a valid `properties.ecs_identity_aliases` table. Conservative
+   * default (off) — the cost of a wrong alias is two real entities merging
+   * into one, so opt-in is mandatory.
+   */
+  schemaAliasMinConfidence: z
+    .number()
+    .int()
+    .min(0)
+    .max(100)
+    .nullable()
+    .default(KI_SCHEMA_ALIAS_MIN_CONFIDENCE_DEFAULT),
 });
 
 export type EntityStoreGlobalState = z.infer<typeof EntityStoreGlobalState>;

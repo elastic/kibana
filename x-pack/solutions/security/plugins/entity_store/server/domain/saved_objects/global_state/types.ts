@@ -13,6 +13,7 @@ import {
   KI_ENTITY_MIN_CONFIDENCE_DEFAULT,
   KI_PROMOTED_ENTITY_TYPES_DEFAULT,
   KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
+  KI_SCHEMA_ALIAS_MIN_CONFIDENCE_DEFAULT,
   LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT,
 } from './constants';
 
@@ -57,6 +58,10 @@ const knowledgeIndicatorsSchemaV3 = schema.object({
 const knowledgeIndicatorsSchemaV4 = knowledgeIndicatorsSchemaV3.extends({
   promoteToTypedThreshold: schema.nullable(schema.number()),
   promotedEntityTypes: schema.arrayOf(schema.string()),
+});
+
+const knowledgeIndicatorsSchemaV5 = knowledgeIndicatorsSchemaV4.extends({
+  schemaAliasMinConfidence: schema.nullable(schema.number()),
 });
 
 const globalStateSchemaV1 = schema.object({
@@ -185,12 +190,8 @@ export const backfillKnowledgeIndicatorsPromotion = (document: {
       ...document.attributes,
       knowledgeIndicators: {
         ...knowledgeIndicators,
-        ...(hasPromote
-          ? {}
-          : { promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT }),
-        ...(hasTypes
-          ? {}
-          : { promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT] }),
+        ...(hasPromote ? {} : { promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT }),
+        ...(hasTypes ? {} : { promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT] }),
       },
     },
   };
@@ -209,11 +210,64 @@ const version4: SavedObjectsFullModelVersion = {
   },
 };
 
+const globalStateSchemaV5 = globalStateSchemaV4.extends({
+  knowledgeIndicators: knowledgeIndicatorsSchemaV5,
+});
+
+/**
+ * Layered backfill that adds the schema-feature alias adoption knob (Option E)
+ * to the `knowledgeIndicators` block. Runs AFTER `backfillKnowledgeIndicatorsPromotion`
+ * so an old document migrates v3 → v4 → v5: extraction defaults → promotion
+ * defaults → alias-adoption default. The default is `null` (off), preserving
+ * pre-Option-E behavior on every existing tenant.
+ *
+ * Idempotent: a document that already carries `schemaAliasMinConfidence`
+ * is preserved verbatim. Tolerates a missing `knowledgeIndicators` block
+ * defensively (which should never happen post-v3) so we never throw
+ * mid-migration.
+ *
+ * Exported for direct unit testing.
+ */
+export const backfillKnowledgeIndicatorsSchemaAliases = (document: {
+  attributes: Record<string, unknown>;
+}): { attributes: Record<string, unknown> } => {
+  const existing = document.attributes.knowledgeIndicators;
+  const knowledgeIndicators =
+    existing !== undefined && existing !== null && typeof existing === 'object'
+      ? (existing as Record<string, unknown>)
+      : {};
+  if ('schemaAliasMinConfidence' in knowledgeIndicators) {
+    return { attributes: document.attributes };
+  }
+  return {
+    attributes: {
+      ...document.attributes,
+      knowledgeIndicators: {
+        ...knowledgeIndicators,
+        schemaAliasMinConfidence: KI_SCHEMA_ALIAS_MIN_CONFIDENCE_DEFAULT,
+      },
+    },
+  };
+};
+
+const version5: SavedObjectsFullModelVersion = {
+  changes: [
+    {
+      type: 'data_backfill' as const,
+      backfillFn: backfillKnowledgeIndicatorsSchemaAliases,
+    },
+  ],
+  schemas: {
+    create: globalStateSchemaV5,
+    forwardCompatibility: globalStateSchemaV5.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
 export const EntityStoreGlobalStateType: SavedObjectsType = {
   name: EntityStoreGlobalStateTypeName,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: EntityStoreGlobalStateTypeMappings,
-  modelVersions: { 1: version1, 2: version2, 3: version3, 4: version4 },
+  modelVersions: { 1: version1, 2: version2, 3: version3, 4: version4, 5: version5 },
   hiddenFromHttpApis: true,
 };

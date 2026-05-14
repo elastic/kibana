@@ -14,7 +14,11 @@ export const ENTITY_BASE_PREFIX = 'entities';
 export const ENTITY_SCHEMA_VERSION_V2 = 'v2';
 
 // Bump this integer whenever entity index mappings change.
-export const MAPPING_VERSION = 1;
+// v2 (Option E): adds the `entity.knowledge_indicator.*` namespace
+// (identity_source, feature_uuid, stream_name, confidence) at the BASE
+// mapping so alias-scoped extraction passes can stamp identity provenance
+// without per-engine mapping changes.
+export const MAPPING_VERSION = 2;
 
 type SchemaVersion = `v${number}`;
 type Dataset = typeof ENTITY_LATEST | typeof ENTITY_UPDATES | typeof ENTITY_HISTORY;

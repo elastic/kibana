@@ -25,7 +25,10 @@ import {
   type ExtractEntityTaskState,
   type KiDefinitionStates,
 } from './extract_entity_task_state';
-import { createKnowledgeIndicatorsReader } from '../domain/streams_features';
+import {
+  createKnowledgeIndicatorsReader,
+  loadStreamSchemaAliases,
+} from '../domain/streams_features';
 import {
   runKnowledgeIndicatorsExtraction,
   type KnowledgeIndicatorsLoopMetrics,
@@ -73,9 +76,34 @@ async function runTask({
       namespace,
     });
 
+    // Schema-feature alias contexts: loaded once per task run and passed to
+    // every static-engine extraction in this task. The loader is a no-op when
+    // `schemaAliasMinConfidence` is null (the default), so disabled tenants
+    // skip the streams round-trip entirely. Failures here log at warn and
+    // fall through to a default-only extraction; aliasing is opportunistic.
+    let aliasContexts: Awaited<ReturnType<typeof loadStreamSchemaAliases>> = [];
+    try {
+      const reader = await createKnowledgeIndicatorsReader({ core, fakeRequest, logger });
+      const globalStateForAliases = await globalStateClient.findOrThrow();
+      aliasContexts = await loadStreamSchemaAliases(
+        reader,
+        {
+          minConfidence: globalStateForAliases.knowledgeIndicators.schemaAliasMinConfidence,
+        },
+        logger
+      );
+    } catch (aliasLoadError) {
+      const message =
+        aliasLoadError instanceof Error ? aliasLoadError.message : String(aliasLoadError);
+      logger.warn(
+        `[entity_store] Failed to load schema-feature aliases (${message}); falling back to default-only extraction`
+      );
+    }
+
     const extractionStart = Date.now();
     const extractionResult = await logsExtractionClient.extractLogs(entityType, {
       abortController,
+      aliasContexts,
     });
     const extractionDuration = moment().diff(extractionStart, 'milliseconds');
 

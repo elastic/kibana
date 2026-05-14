@@ -46,6 +46,7 @@ const buildReader = (
   return {
     listEntityFeatures: jest.fn().mockResolvedValue([]),
     listDependencyFeatures: jest.fn().mockResolvedValue([]),
+    listSchemaFeatures: jest.fn().mockResolvedValue([]),
     resolveIndexPatterns: jest.fn().mockResolvedValue([]),
     ...overrides,
   } as jest.Mocked<StreamsKnowledgeIndicatorsReader>;
@@ -80,6 +81,7 @@ const baseKiConfig = {
   aggregationGroupCap: 200,
   promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
   promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
+  schemaAliasMinConfidence: null,
 };
 
 describe('runKnowledgeIndicatorsExtraction', () => {
@@ -131,6 +133,7 @@ describe('runKnowledgeIndicatorsExtraction', () => {
           aggregationGroupCap: 200,
           promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
           promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
+          schemaAliasMinConfidence: null,
         },
         abortController: new AbortController(),
       },
@@ -442,6 +445,7 @@ describe('runKnowledgeIndicatorsExtraction', () => {
           aggregationGroupCap: 3,
           promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
           promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
+          schemaAliasMinConfidence: null,
         },
         abortController: new AbortController(),
       },

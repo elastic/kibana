@@ -13,6 +13,7 @@ import {
   KI_ENTITY_MIN_CONFIDENCE_DEFAULT,
   KI_PROMOTED_ENTITY_TYPES_DEFAULT,
   KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
+  KI_SCHEMA_ALIAS_MIN_CONFIDENCE_DEFAULT,
 } from './constants';
 import { EntityStoreGlobalStateClient } from '.';
 
@@ -57,6 +58,7 @@ describe('EntityStoreGlobalStateClient', () => {
         aggregationGroupCap: KI_AGGREGATION_GROUP_CAP_DEFAULT,
         promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
         promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
+        schemaAliasMinConfidence: KI_SCHEMA_ALIAS_MIN_CONFIDENCE_DEFAULT,
       });
     });
 
@@ -74,6 +76,7 @@ describe('EntityStoreGlobalStateClient', () => {
           aggregationGroupCap: 50,
           promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
           promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
+          schemaAliasMinConfidence: KI_SCHEMA_ALIAS_MIN_CONFIDENCE_DEFAULT,
         },
       });
 
@@ -84,6 +87,7 @@ describe('EntityStoreGlobalStateClient', () => {
         aggregationGroupCap: 50,
         promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
         promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
+        schemaAliasMinConfidence: KI_SCHEMA_ALIAS_MIN_CONFIDENCE_DEFAULT,
       });
     });
 
@@ -97,6 +101,7 @@ describe('EntityStoreGlobalStateClient', () => {
           aggregationGroupCap: 150,
           promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
           promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
+          schemaAliasMinConfidence: KI_SCHEMA_ALIAS_MIN_CONFIDENCE_DEFAULT,
         },
       };
       soClient.find.mockResolvedValue({
@@ -112,6 +117,7 @@ describe('EntityStoreGlobalStateClient', () => {
           aggregationGroupCap: 50,
           promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
           promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
+          schemaAliasMinConfidence: KI_SCHEMA_ALIAS_MIN_CONFIDENCE_DEFAULT,
         },
       });
 
@@ -130,6 +136,7 @@ describe('EntityStoreGlobalStateClient', () => {
           aggregationGroupCap: 200,
           promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
           promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
+          schemaAliasMinConfidence: KI_SCHEMA_ALIAS_MIN_CONFIDENCE_DEFAULT,
         },
         ...overrides,
       } as EntityStoreGlobalState);
@@ -152,6 +159,7 @@ describe('EntityStoreGlobalStateClient', () => {
         aggregationGroupCap: 200,
         promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
         promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
+        schemaAliasMinConfidence: KI_SCHEMA_ALIAS_MIN_CONFIDENCE_DEFAULT,
       });
 
       // The SO write request also contains the full merged block (not just the partial)
@@ -162,6 +170,7 @@ describe('EntityStoreGlobalStateClient', () => {
         aggregationGroupCap: 200,
         promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
         promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
+        schemaAliasMinConfidence: KI_SCHEMA_ALIAS_MIN_CONFIDENCE_DEFAULT,
       });
     });
 
@@ -191,6 +200,7 @@ describe('EntityStoreGlobalStateClient', () => {
         aggregationGroupCap: 50,
         promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
         promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
+        schemaAliasMinConfidence: KI_SCHEMA_ALIAS_MIN_CONFIDENCE_DEFAULT,
       });
     });
 
@@ -202,6 +212,7 @@ describe('EntityStoreGlobalStateClient', () => {
           aggregationGroupCap: 200,
           promoteToTypedThreshold: 95,
           promotedEntityTypes: ['service'],
+          schemaAliasMinConfidence: KI_SCHEMA_ALIAS_MIN_CONFIDENCE_DEFAULT,
         },
       });
       soClient.find.mockResolvedValue({
@@ -220,6 +231,7 @@ describe('EntityStoreGlobalStateClient', () => {
         aggregationGroupCap: 200,
         promoteToTypedThreshold: 95,
         promotedEntityTypes: ['host'],
+        schemaAliasMinConfidence: KI_SCHEMA_ALIAS_MIN_CONFIDENCE_DEFAULT,
       });
     });
 
@@ -231,6 +243,7 @@ describe('EntityStoreGlobalStateClient', () => {
           aggregationGroupCap: 200,
           promoteToTypedThreshold: 95,
           promotedEntityTypes: ['service', 'host'],
+          schemaAliasMinConfidence: KI_SCHEMA_ALIAS_MIN_CONFIDENCE_DEFAULT,
         },
       });
       soClient.find.mockResolvedValue({
@@ -253,6 +266,7 @@ describe('EntityStoreGlobalStateClient', () => {
           aggregationGroupCap: 200,
           promoteToTypedThreshold: 95,
           promotedEntityTypes: ['service'],
+          schemaAliasMinConfidence: KI_SCHEMA_ALIAS_MIN_CONFIDENCE_DEFAULT,
         },
       });
       soClient.find.mockResolvedValue({

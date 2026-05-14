@@ -11,6 +11,7 @@ import {
   KI_ENTITY_MIN_CONFIDENCE_DEFAULT,
   KI_PROMOTED_ENTITY_TYPES_DEFAULT,
   KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
+  KI_SCHEMA_ALIAS_MIN_CONFIDENCE_DEFAULT,
   KnowledgeIndicatorsConfig,
 } from './constants';
 
@@ -19,6 +20,7 @@ const KI_DEFAULTS = {
   aggregationGroupCap: KI_AGGREGATION_GROUP_CAP_DEFAULT,
   promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
   promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
+  schemaAliasMinConfidence: KI_SCHEMA_ALIAS_MIN_CONFIDENCE_DEFAULT,
 };
 
 describe('KnowledgeIndicatorsConfig', () => {
@@ -117,9 +119,7 @@ describe('KnowledgeIndicatorsConfig promotion knobs', () => {
   });
 
   it('rejects entries outside the host/service enum (the user tier is intentionally deferred)', () => {
-    expect(() =>
-      KnowledgeIndicatorsConfig.parse({ promotedEntityTypes: ['user'] })
-    ).toThrow();
+    expect(() => KnowledgeIndicatorsConfig.parse({ promotedEntityTypes: ['user'] })).toThrow();
     expect(() =>
       KnowledgeIndicatorsConfig.parse({ promotedEntityTypes: ['service', 'something-else'] })
     ).toThrow();
@@ -129,5 +129,32 @@ describe('KnowledgeIndicatorsConfig promotion knobs', () => {
     expect(
       KnowledgeIndicatorsConfig.parse({ promotedEntityTypes: [] }).promotedEntityTypes
     ).toEqual([]);
+  });
+});
+
+describe('KnowledgeIndicatorsConfig schema-alias knob', () => {
+  it('defaults schemaAliasMinConfidence to null (alias adoption off)', () => {
+    expect(KnowledgeIndicatorsConfig.parse({}).schemaAliasMinConfidence).toBeNull();
+  });
+
+  it('preserves an explicit non-null schemaAliasMinConfidence', () => {
+    expect(
+      KnowledgeIndicatorsConfig.parse({ schemaAliasMinConfidence: 85 }).schemaAliasMinConfidence
+    ).toBe(85);
+  });
+
+  it('accepts null as a valid value for schemaAliasMinConfidence', () => {
+    expect(
+      KnowledgeIndicatorsConfig.parse({ schemaAliasMinConfidence: null }).schemaAliasMinConfidence
+    ).toBeNull();
+  });
+
+  it('rejects out-of-range schemaAliasMinConfidence values', () => {
+    expect(() => KnowledgeIndicatorsConfig.parse({ schemaAliasMinConfidence: -1 })).toThrow();
+    expect(() => KnowledgeIndicatorsConfig.parse({ schemaAliasMinConfidence: 101 })).toThrow();
+  });
+
+  it('rejects non-integer schemaAliasMinConfidence values', () => {
+    expect(() => KnowledgeIndicatorsConfig.parse({ schemaAliasMinConfidence: 80.5 })).toThrow();
   });
 });

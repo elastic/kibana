@@ -10,13 +10,14 @@ import type { Condition } from '@kbn/streamlang';
 import { conditionToESQL } from '@kbn/streamlang';
 import { HASH_ALG } from '../../../common/domain/euid';
 import { recentData } from '../../../common/domain/definitions/esql';
-import { esqlIsNotNullOrEmpty } from '../../../common/esql/strings';
+import { escapeEsqlStringLiteral, esqlIsNotNullOrEmpty } from '../../../common/esql/strings';
 import {
   type EntityDefinition,
   type EntityField,
   type EntityType,
 } from '../../../common/domain/definitions/entity_schema';
 import { getEuidEsqlEvaluation } from '../../../common/domain/euid/esql';
+import type { StreamAliasContext } from '../streams_features';
 
 import {
   buildExtractionSourceClause,
@@ -70,6 +71,25 @@ interface LogsExtractionQueryParams {
   pagination?: PaginationParams;
   logsPageCursorStart?: PaginationParams;
   logsPageCursorEnd?: PaginationParams;
+  /**
+   * Optional pre-built ESQL fragment (typically produced by {@link buildAliasPrelude})
+   * that COALESCEs non-ECS source paths into the engine's ECS identity slots and
+   * stamps `entity.knowledge_indicator.*` provenance fields. Applied per-stream by
+   * the alias-scoped query path in `LogsExtractionClient`; the default extraction
+   * pass omits it. Spliced after the FROM/WHERE source clause and before the
+   * static engine's existing field-evaluation block, so the COALESCE'd ECS values
+   * are visible to all downstream identity logic (EUID composition, documentsFilter,
+   * field aggregation).
+   */
+  aliasPrelude?: string;
+  /**
+   * Optional pre-translated ESQL predicate (typically the schema feature's
+   * `filter` translated via `conditionToESQL`) that scopes the alias prelude to
+   * docs matching the LLM's intended actor-identity context (e.g. only sign-in
+   * events on `logs.azure.signinlogs`, not audit events). Appended as an extra
+   * `| WHERE` after the FROM/WHERE source clause.
+   */
+  aliasFilter?: string;
 }
 
 export function buildRemainingLogsCountQuery(params: {
@@ -97,6 +117,8 @@ export function buildLogsExtractionEsqlQuery({
   pagination,
   logsPageCursorStart,
   logsPageCursorEnd,
+  aliasPrelude,
+  aliasFilter,
 }: LogsExtractionQueryParams): string {
   const { fields, type, entityTypeFallback, identityField } = entityDefinition;
 
@@ -126,6 +148,24 @@ export function buildLogsExtractionEsqlQuery({
       logsPageCursorEnd,
     })
   );
+
+  // Schema-feature filter scoping for the alias prelude. Applied as an extra
+  // WHERE after the source clause so it composes with the time-window /
+  // identity-presence filters via ESQL's standard predicate chaining. Only
+  // present on alias-scoped extraction passes; the default pass omits it.
+  if (aliasFilter) {
+    parts.push(`| WHERE ${aliasFilter}`);
+  }
+
+  // Schema-feature ECS identity alias prelude. Stamps `entity.knowledge_indicator.*`
+  // provenance fields and COALESCEs non-ECS source paths into the ECS identity
+  // slots (`user.email`, `host.name`, …) so the downstream static-engine logic
+  // sees ECS-shaped input and produces canonical entities from non-normalized
+  // streams. Spliced before the field-evaluation block so the COALESCE'd values
+  // are visible to identity-aware EVALs (entity.namespace, EUID composition).
+  if (aliasPrelude) {
+    parts.push(aliasPrelude);
+  }
 
   // Special evaluations for entity id
   if (hasFieldEvaluations(entityDefinition)) {
@@ -322,4 +362,110 @@ function getMainEntityIdFromUntypedEsql(
 /** ESQL WHERE clause fragment after LOOKUP JOIN when entity definition has postAggFilter; otherwise empty. */
 function buildPostAggFilter(postAggFilter: Condition): string {
   return `| WHERE ${conditionToESQL(postAggFilter)} `;
+}
+
+/**
+ * Source-prefix mapping for `entity.knowledge_indicator.*` writes from the
+ * alias prelude. Mirrors `getEntityFieldsDescriptions(rootField)`'s prefix
+ * derivation in `common_fields.ts`: static engines (`user`/`host`/`service`)
+ * read the per-engine source under `<type>.entity.*`; the `generic` engine
+ * reads `entity.*` directly.
+ *
+ * The prelude must write to the SOURCE path so the STATS aggregation defined
+ * by `getEntityFieldsDescriptions` picks it up via
+ *   `recent.entity.knowledge_indicator.* = LAST(TO_STRING(<prefix>.knowledge_indicator.*), …)`
+ * and the post-LOOKUP merge EVAL surfaces it on the final entity doc as
+ * `entity.knowledge_indicator.*`. Writing the destination directly would be
+ * dropped at the STATS boundary (ESQL only retains explicitly-aggregated
+ * columns) and the provenance namespace would never land.
+ */
+function getEngineKnowledgeIndicatorSourcePrefix(entityType: EntityType): string {
+  return entityType === 'generic'
+    ? 'entity.knowledge_indicator'
+    : `${entityType}.entity.knowledge_indicator`;
+}
+
+/**
+ * Builds the ESQL fragment that applies a single schema feature's identity
+ * aliases for one extraction pass. Returns `''` when no alias destination in
+ * the context overlaps the engine's identity vocabulary — the caller can then
+ * skip the alias-scoped query for this engine entirely.
+ *
+ * Output shape (two EVAL blocks; ordering matters):
+ *
+ *   | EVAL
+ *       <prefix>.knowledge_indicator.identity_source = CASE(
+ *         <ECS field> IS NULL AND MV_FIRST(<src>) IS NOT NULL, "<src>",
+ *         …,
+ *         null
+ *       ),
+ *       <prefix>.knowledge_indicator.feature_uuid = "<uuid>",
+ *       <prefix>.knowledge_indicator.stream_name = "<stream>",
+ *       <prefix>.knowledge_indicator.confidence = <number>
+ *   | EVAL
+ *       <ECS field> = COALESCE(<ECS field>, MV_FIRST(<src1>), MV_FIRST(<src2>), …),
+ *       …
+ *
+ * Splitting into two `| EVAL` commands guarantees the provenance CASE sees the
+ * pre-COALESCE state of the ECS slot regardless of how ESQL orders intra-EVAL
+ * assignments. Otherwise the COALESCE in the same EVAL could mask the
+ * `IS NULL` branch of the CASE and the provenance would never land.
+ *
+ * `MV_FIRST` is applied to every non-ECS source because real-world non-ECS
+ * identity fields are sometimes multi-valued (e.g. an array of UPNs in an
+ * Azure event); the static engines downstream expect single values.
+ *
+ * The provenance writes target the engine's source-prefix
+ * (`<type>.entity.knowledge_indicator.*` for static engines; `entity.knowledge_indicator.*`
+ * for `generic`) so the existing `getEntityFieldsDescriptions` aggregation
+ * carries them through STATS + LOOKUP JOIN to the final destination on the
+ * entity document. See `getEngineKnowledgeIndicatorSourcePrefix`.
+ */
+export function buildAliasPrelude(
+  aliasContext: StreamAliasContext,
+  engineIdentityFields: ReadonlyArray<string>,
+  entityType: EntityType
+): string {
+  const applicable = Array.from(aliasContext.aliases.entries()).filter(
+    ([destination, sources]) => engineIdentityFields.includes(destination) && sources.length > 0
+  );
+  if (applicable.length === 0) {
+    return '';
+  }
+
+  // Provenance CASE: pairs of (predicate, source-path-literal) followed by a
+  // trailing `null` default. CASE returns `null` when no branch fires, which
+  // is the "no alias contributed identity for this row" signal.
+  const provenanceCaseArgs: string[] = [];
+  for (const [destination, sources] of applicable) {
+    for (const sourcePath of sources) {
+      provenanceCaseArgs.push(
+        `${destination} IS NULL AND MV_FIRST(${sourcePath}) IS NOT NULL`,
+        `"${escapeEsqlStringLiteral(sourcePath)}"`
+      );
+    }
+  }
+  provenanceCaseArgs.push('null');
+
+  const enginePrefix = getEngineKnowledgeIndicatorSourcePrefix(entityType);
+
+  const provenanceEval = `| EVAL
+    ${enginePrefix}.identity_source = CASE(${provenanceCaseArgs.join(', ')}),
+    ${enginePrefix}.feature_uuid = "${escapeEsqlStringLiteral(aliasContext.featureUuid)}",
+    ${enginePrefix}.stream_name = "${escapeEsqlStringLiteral(aliasContext.streamName)}",
+    ${enginePrefix}.confidence = ${aliasContext.confidence}`;
+
+  // ECS-slot COALESCE: prefer the existing ECS value; fall back to the alias
+  // sources in declaration order. Multiple sources for one destination produce
+  // a flat COALESCE(ecs, src1, src2, …) — preference is array order.
+  const coalesceAssignments = applicable.map(([destination, sources]) => {
+    const args = [destination, ...sources.map((sourcePath) => `MV_FIRST(${sourcePath})`)].join(
+      ', '
+    );
+    return `${destination} = COALESCE(${args})`;
+  });
+
+  const ecsSlotEval = `| EVAL ${coalesceAssignments.join(',\n    ')}`;
+
+  return `${provenanceEval}\n${ecsSlotEval}`;
 }

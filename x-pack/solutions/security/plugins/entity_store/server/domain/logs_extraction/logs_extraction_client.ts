@@ -10,6 +10,7 @@ import moment from 'moment';
 import { SavedObjectsErrorHelpers, type ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isNonLocalIndexName } from '@kbn/es-query';
+import { conditionToESQL } from '@kbn/streamlang';
 import type {
   EntityIdentity,
   EntityType,
@@ -27,11 +28,14 @@ import {
   parseLogPaginationCursorRow,
 } from './log_pagination_probe_query_builder';
 import {
+  buildAliasPrelude,
   buildLogsExtractionEsqlQuery,
   buildRemainingLogsCountQuery,
   extractMainPaginationParams,
   HASHED_ID_FIELD,
 } from './logs_extraction_query_builder';
+import { getEuidSourceFields } from '../../../common/domain/euid/identity_fields';
+import type { StreamAliasContext } from '../streams_features';
 import {
   capExtractionWindowEnd,
   resolveMainExtractionWindow,
@@ -77,6 +81,19 @@ interface LogsExtractionOptions {
     toDateISO: string;
   };
   abortController?: AbortController;
+  /**
+   * Pre-loaded schema-feature alias contexts (one per stream + schema feature).
+   * When non-empty, `extractLogs` runs an extra alias-scoped extraction pass per
+   * context whose alias destinations overlap with the static engine's identity
+   * vocabulary. The default extraction pass remains untouched and runs first;
+   * alias passes are stateless extras that add freshly-aliased entities to the
+   * same `entities-latest` index via the standard LOOKUP-JOIN-then-upsert path.
+   *
+   * The caller is responsible for loading these via `loadStreamSchemaAliases`
+   * before invoking `extractLogs`. When undefined or empty, behavior is
+   * identical to today's single-pass extraction.
+   */
+  aliasContexts?: StreamAliasContext[];
 }
 
 interface ExtractedLogsSummarySuccess {
@@ -168,11 +185,27 @@ export class LogsExtractionClient {
         persistState,
       });
 
+      // Alias-scoped extra passes. One per (stream, schema feature) whose
+      // alias destinations overlap with this engine's identity vocabulary.
+      // Each pass is stateless (no engine-descriptor persistence) — its only
+      // observable effect is upserting freshly-aliased entities via the same
+      // `entities-latest` LOOKUP JOIN path the default pass uses. Failures in
+      // an alias pass are logged at warn level and swallowed so a bad alias
+      // never breaks the default extraction.
+      const aliasPassOutcomes = await this.runAliasScopedPasses({
+        type,
+        entityDefinition,
+        config,
+        opts,
+      });
+      const totalCount = result.count + aliasPassOutcomes.totalCount;
+      const totalPages = result.pages + aliasPassOutcomes.totalPages;
+
       const operationResult = {
         success: true as const,
-        count: result.count,
-        pages: result.pages,
-        scannedIndices: result.scannedIndices,
+        count: totalCount,
+        pages: totalPages,
+        scannedIndices: [...result.scannedIndices, ...aliasPassOutcomes.scannedIndices],
       };
 
       if (opts?.specificWindow) {
@@ -188,6 +221,94 @@ export class LogsExtractionClient {
     } catch (error) {
       return await this.handleError(error, type);
     }
+  }
+
+  /**
+   * Runs one extraction pass per applicable schema-feature alias context.
+   *
+   * Selection: a context is applicable to an engine when at least one of its
+   * alias destinations (e.g. `user.email`) appears in the engine's identity
+   * vocabulary (`getEuidSourceFields(type).identitySourceFields`). Contexts
+   * that don't overlap with this engine are silently skipped — they apply to
+   * a different engine.
+   *
+   * Each pass:
+   * - Targets only the alias context's `indexPatterns` (one stream's data
+   *   stream), NOT the full data view. The default pass already covered the
+   *   data view; the alias pass exists to surface entities the default pass
+   *   couldn't see because the source docs lacked ECS identity fields.
+   * - Skips the CCS path entirely. Aliased streams are local data streams.
+   * - Uses ephemeral state (no `persistState`) — alias passes are stateless
+   *   extras and don't compete with the engine descriptor's pagination state.
+   * - Wraps its execution in try/catch so a single bad alias context never
+   *   breaks the engine's default extraction.
+   *
+   * Returns aggregated counts that the caller adds to the default-pass totals
+   * so the operation's reported `count` / `pages` reflect the full extraction.
+   */
+  private async runAliasScopedPasses({
+    type,
+    entityDefinition,
+    config,
+    opts,
+  }: {
+    type: EntityType;
+    entityDefinition: ManagedEntityDefinition;
+    config: LogExtractionConfig;
+    opts?: LogsExtractionOptions;
+  }): Promise<{ totalCount: number; totalPages: number; scannedIndices: string[] }> {
+    const aliasContexts = opts?.aliasContexts ?? [];
+    if (aliasContexts.length === 0) {
+      return { totalCount: 0, totalPages: 0, scannedIndices: [] };
+    }
+    const { identitySourceFields } = getEuidSourceFields(type);
+    const applicableContexts = aliasContexts.filter((ctx) =>
+      Array.from(ctx.aliases.keys()).some((destination) =>
+        identitySourceFields.includes(destination)
+      )
+    );
+    if (applicableContexts.length === 0) {
+      return { totalCount: 0, totalPages: 0, scannedIndices: [] };
+    }
+    let totalCount = 0;
+    let totalPages = 0;
+    const scannedIndices: string[] = [];
+    for (const aliasContext of applicableContexts) {
+      if (opts?.abortController?.signal.aborted) break;
+      try {
+        const aliasPrelude = buildAliasPrelude(aliasContext, identitySourceFields, type);
+        if (aliasPrelude === '') {
+          // Defensive — applicableContexts pre-filters this case but the
+          // helper may still produce '' if every overlapping destination has
+          // an empty source list.
+          continue;
+        }
+        const aliasFilter = aliasContext.filter ? conditionToESQL(aliasContext.filter) : undefined;
+        const aliasResult = await this.extractLogsForDefinition({
+          entityDefinition,
+          paginationState: { ...FRESH_ENGINE_LOG_EXTRACTION_STATE },
+          config,
+          indexPatterns: {
+            localIndexPatterns: aliasContext.indexPatterns,
+            remoteIndexPatterns: [],
+          },
+          opts,
+          // Stateless: no persistState. Alias passes never write to the
+          // engine descriptor's pagination cursor.
+          aliasPrelude,
+          aliasFilter,
+        });
+        totalCount += aliasResult.count;
+        totalPages += aliasResult.pages;
+        scannedIndices.push(...aliasResult.scannedIndices);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        this.logger.warn(
+          `[entity_store] Alias-scoped extraction pass failed for engine "${type}" against stream "${aliasContext.streamName}" (feature ${aliasContext.featureUuid}): ${message}; default extraction unaffected`
+        );
+      }
+    }
+    return { totalCount, totalPages, scannedIndices };
   }
 
   public async updateConfig(params: LogExtractionUpdateParams): Promise<LogExtractionConfig> {
@@ -268,6 +389,8 @@ export class LogsExtractionClient {
     indexPatterns,
     opts,
     persistState,
+    aliasPrelude,
+    aliasFilter,
   }: {
     entityDefinition: ManagedEntityDefinition;
     paginationState: EngineLogExtractionState;
@@ -275,6 +398,23 @@ export class LogsExtractionClient {
     indexPatterns: { localIndexPatterns: string[]; remoteIndexPatterns: string[] };
     opts?: LogsExtractionOptions;
     persistState?: (state: EngineLogExtractionState) => Promise<void>;
+    /**
+     * Optional pre-built ESQL EVAL fragment that COALESCEs non-ECS source paths
+     * into the engine's ECS identity slots and stamps `entity.knowledge_indicator.*`
+     * provenance. When set, it's threaded through to {@link buildLogsExtractionEsqlQuery}
+     * for every entity-page query in this extraction run. Generated by
+     * {@link buildAliasPrelude} from a {@link StreamAliasContext}; the orchestrator
+     * (`runAliasScopedPasses`) sets it for alias-scoped passes only — the
+     * default extraction pass and the KI generic loop both leave it undefined.
+     */
+    aliasPrelude?: string;
+    /**
+     * Optional pre-translated ESQL predicate from the schema feature's `filter`,
+     * scoping the alias pass to docs that match the LLM's intended actor-identity
+     * context. Threaded through to {@link buildLogsExtractionEsqlQuery} for every
+     * entity-page query in this extraction run.
+     */
+    aliasFilter?: string;
   }): Promise<{
     count: number;
     pages: number;
@@ -300,6 +440,8 @@ export class LogsExtractionClient {
       indexPatterns: localIndexPatterns,
       latestIndex,
       persistState: effectivePersistState,
+      aliasPrelude,
+      aliasFilter,
     });
 
     let mainResult: Awaited<typeof mainPromise>;
@@ -364,6 +506,8 @@ export class LogsExtractionClient {
     indexPatterns,
     latestIndex,
     persistState,
+    aliasPrelude,
+    aliasFilter,
   }: {
     type: EntityType;
     config: LogExtractionConfig;
@@ -373,6 +517,8 @@ export class LogsExtractionClient {
     indexPatterns: string[];
     latestIndex: string;
     persistState?: (state: EngineLogExtractionState) => Promise<void>;
+    aliasPrelude?: string;
+    aliasFilter?: string;
   }): Promise<{
     count: number;
     pages: number;
@@ -396,6 +542,8 @@ export class LogsExtractionClient {
         maxLogsPerPage,
         entityDefinition,
         persistState,
+        aliasPrelude,
+        aliasFilter,
       });
       return { ...result, indexPatterns };
     }
@@ -444,6 +592,8 @@ export class LogsExtractionClient {
         maxLogsPerPage,
         entityDefinition,
         persistState,
+        aliasPrelude,
+        aliasFilter,
       });
 
       totalCount += subResult.count;
@@ -479,6 +629,8 @@ export class LogsExtractionClient {
     maxLogsPerPage,
     entityDefinition,
     persistState,
+    aliasPrelude,
+    aliasFilter,
   }: {
     type: EntityType;
     engineState: EngineLogExtractionState;
@@ -491,6 +643,8 @@ export class LogsExtractionClient {
     maxLogsPerPage: number;
     entityDefinition: ManagedEntityDefinition;
     persistState?: (state: EngineLogExtractionState) => Promise<void>;
+    aliasPrelude?: string;
+    aliasFilter?: string;
   }) {
     let totalCount = 0;
     let pages = 0;
@@ -565,6 +719,8 @@ export class LogsExtractionClient {
           recoveryId,
           state,
           persistState,
+          aliasPrelude,
+          aliasFilter,
         });
 
         totalCount += sliceIngestOutcome.addedToTotalCount;
@@ -684,6 +840,8 @@ export class LogsExtractionClient {
     recoveryId,
     state: initialSliceState,
     persistState,
+    aliasPrelude,
+    aliasFilter,
   }: {
     type: EntityType;
     opts?: LogsExtractionOptions;
@@ -699,6 +857,8 @@ export class LogsExtractionClient {
     recoveryId: string | undefined;
     state: EngineLogExtractionState;
     persistState?: (state: EngineLogExtractionState) => Promise<void>;
+    aliasPrelude?: string;
+    aliasFilter?: string;
   }): Promise<{
     addedToTotalCount: number;
     addedToPageCount: number;
@@ -723,6 +883,8 @@ export class LogsExtractionClient {
         recoveryId: recoveryIdForBounded,
         logsPageCursorStart,
         logsPageCursorEnd,
+        aliasPrelude,
+        aliasFilter,
       });
       recoveryIdForBounded = undefined;
 

@@ -1564,6 +1564,13 @@ describe('LogsExtractionClient', () => {
         additionalIndexPatterns: [],
         lookbackPeriod: '3h',
         delay: '1m',
+        // Default schema cap is `'15m'`; with a `'3h'` lookback the main path
+        // would split into 12 sub-windows, each demanding its own probe/extract
+        // mock. The success-sequence helper only queues one slice's worth of
+        // responses, so without raising the cap the second sub-window's probe
+        // falls off the end of the mock queue and crashes inside
+        // `parseLogPaginationCursorRow` with `Cannot read properties of undefined`.
+        maxTimeWindowSize: '999d',
       });
 
     it('drives the extraction loop using only caller-provided index patterns and never touches the engine descriptor', async () => {
@@ -1727,6 +1734,173 @@ describe('LogsExtractionClient', () => {
           indexPatterns: { localIndexPatterns: ['logs.k8s.pods'], remoteIndexPatterns: [] },
         })
       ).rejects.toThrow(/From .* date is after to .* date/);
+    });
+  });
+
+  describe('extractLogs with schema-feature alias contexts (Option E)', () => {
+    const buildAliasContext = (
+      overrides: Partial<{
+        streamName: string;
+        indexPatterns: string[];
+        aliases: Map<string, string[]>;
+        featureUuid: string;
+        confidence: number;
+      }> = {}
+    ) => ({
+      streamName: overrides.streamName ?? 'logs.azure.signinlogs',
+      indexPatterns: overrides.indexPatterns ?? ['logs-azure.signinlogs-*'],
+      aliases:
+        overrides.aliases ??
+        new Map<string, string[]>([
+          ['user.email', ['azure.signinlogs.properties.user_principal_name']],
+        ]),
+      featureUuid: overrides.featureUuid ?? 'feat-azure-1',
+      confidence: overrides.confidence ?? 90,
+    });
+
+    const buildExtractionResponse = (idHash: string): ESQLSearchResponse => ({
+      columns: [
+        { name: '@timestamp', type: 'date' },
+        { name: HASHED_ID_FIELD, type: 'keyword' },
+        { name: 'user.name', type: 'keyword' },
+      ],
+      values: [['2024-01-02T10:00:00.000Z', idHash, 'alice']],
+    });
+
+    beforeEach(() => {
+      const mockDataView = { getIndexPattern: jest.fn().mockReturnValue('logs-*') };
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
+      );
+      mockIngestEntities.mockResolvedValue(undefined);
+    });
+
+    it('runs the default extraction plus one alias-scoped pass per applicable context (queries=2*3 ESQL calls, ingests=2)', async () => {
+      // Default pass: probe -> extract -> terminal probe (3 calls).
+      // Alias pass: probe -> extract -> terminal probe (3 calls).
+      mockExtractSuccessSequence(buildExtractionResponse('hash-default'));
+      mockExtractSuccessSequence(buildExtractionResponse('hash-alias'));
+
+      const result = await client.extractLogs('user', {
+        aliasContexts: [buildAliasContext() as any],
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.success && result.count).toBe(2);
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(6);
+      expect(mockIngestEntities).toHaveBeenCalledTimes(2);
+    });
+
+    it('threads the alias prelude only into the alias-pass query (default query has no prelude)', async () => {
+      mockExtractSuccessSequence(buildExtractionResponse('hash-default'));
+      mockExtractSuccessSequence(buildExtractionResponse('hash-alias'));
+
+      await client.extractLogs('user', {
+        aliasContexts: [buildAliasContext() as any],
+      });
+
+      const queries = mockExecuteEsqlQuery.mock.calls.map(([{ query }]) => query);
+      const queriesWithPrelude = queries.filter((q) =>
+        q.includes('user.entity.knowledge_indicator.identity_source = CASE(')
+      );
+      const queriesWithCoalesce = queries.filter((q) =>
+        q.includes(
+          'user.email = COALESCE(user.email, MV_FIRST(azure.signinlogs.properties.user_principal_name))'
+        )
+      );
+      expect(queriesWithPrelude.length).toBeGreaterThan(0);
+      expect(queriesWithCoalesce.length).toBeGreaterThan(0);
+      // Alias-pass queries also target the alias context's index patterns (not the data view).
+      expect(queriesWithPrelude.every((q) => q.includes('logs-azure.signinlogs-*'))).toBe(true);
+    });
+
+    it('skips alias contexts whose destinations do not overlap the engine identity vocabulary', async () => {
+      mockExtractSuccessSequence(buildExtractionResponse('hash-default'));
+
+      const hostOnlyContext = buildAliasContext({
+        aliases: new Map<string, string[]>([
+          ['host.name', ['azure.signinlogs.properties.computer_name']],
+        ]),
+      });
+
+      const result = await client.extractLogs('user', {
+        aliasContexts: [hostOnlyContext as any],
+      });
+
+      expect(result.success).toBe(true);
+      // Only the default pass ran (3 ESQL calls).
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(3);
+      expect(mockIngestEntities).toHaveBeenCalledTimes(1);
+    });
+
+    it('translates feature.filter into a WHERE clause on the alias-pass query', async () => {
+      mockExtractSuccessSequence(buildExtractionResponse('hash-default'));
+      mockExtractSuccessSequence(buildExtractionResponse('hash-alias'));
+
+      await client.extractLogs('user', {
+        aliasContexts: [
+          {
+            ...buildAliasContext(),
+            filter: { field: 'event.action', eq: 'UserLoggedIn' },
+          } as any,
+        ],
+      });
+
+      const queries = mockExecuteEsqlQuery.mock.calls.map(([{ query }]) => query);
+      const aliasQueries = queries.filter((q) =>
+        q.includes('user.entity.knowledge_indicator.identity_source = CASE(')
+      );
+      expect(aliasQueries.length).toBeGreaterThan(0);
+      expect(aliasQueries.every((q) => q.includes('event.action'))).toBe(true);
+      expect(aliasQueries.every((q) => q.includes('"UserLoggedIn"'))).toBe(true);
+    });
+
+    it('does not persist alias-pass state on the engine descriptor (alias passes are stateless)', async () => {
+      mockExtractSuccessSequence(buildExtractionResponse('hash-default'));
+      mockExtractSuccessSequence(buildExtractionResponse('hash-alias'));
+
+      await client.extractLogs('user', {
+        aliasContexts: [buildAliasContext() as any],
+      });
+
+      // Engine descriptor is updated exactly once (default pass's final reset),
+      // never additionally for alias-pass intermediate state.
+      const calls = mockEngineDescriptorClient.update.mock.calls;
+      const setLastTimestamp = calls.filter(
+        ([, payload]: any[]) => payload?.logExtractionState?.lastExecutionTimestamp
+      );
+      expect(setLastTimestamp.length).toBe(1);
+    });
+
+    it('logs a warn and continues when an alias-pass extraction throws (default pass remains successful)', async () => {
+      // Default pass succeeds (3 calls). Alias pass: first call (probe) throws.
+      mockExtractSuccessSequence(buildExtractionResponse('hash-default'));
+      mockExecuteEsqlQuery.mockRejectedValueOnce(new Error('alias query boom'));
+
+      const result = await client.extractLogs('user', {
+        aliasContexts: [buildAliasContext() as any],
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.success && result.count).toBe(1);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('logs.azure.signinlogs')
+      );
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('default extraction unaffected')
+      );
+    });
+
+    it('runs no alias passes when aliasContexts is empty (zero overhead default-off behavior)', async () => {
+      mockExtractSuccessSequence(buildExtractionResponse('hash-default'));
+
+      const result = await client.extractLogs('user', { aliasContexts: [] });
+
+      expect(result.success).toBe(true);
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(3);
     });
   });
 });

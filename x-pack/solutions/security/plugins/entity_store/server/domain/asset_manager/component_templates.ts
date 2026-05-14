@@ -34,6 +34,15 @@ const BASE_ENTITY_INDEX_MAPPING = {
   'entity.risk.calculated_level': { type: 'keyword' },
   'entity.risk.calculated_score': { type: 'float' },
   'entity.risk.calculated_score_norm': { type: 'float' },
+  // `entity.knowledge_indicator.*` is stamped by the alias-scoped extraction
+  // pass (Option E) and records which schema feature / stream / source path
+  // contributed the identity. Mapped at the BASE level so the namespace exists
+  // on the shared physical latest index regardless of which engines are
+  // installed; absent on entities materialized via the default ECS path.
+  'entity.knowledge_indicator.identity_source': { type: 'keyword' },
+  'entity.knowledge_indicator.feature_uuid': { type: 'keyword' },
+  'entity.knowledge_indicator.stream_name': { type: 'keyword' },
+  'entity.knowledge_indicator.confidence': { type: 'float' },
 } as const satisfies MappingProperties;
 
 export const getComponentTemplateName = (type: EntityType, namespace: string) =>

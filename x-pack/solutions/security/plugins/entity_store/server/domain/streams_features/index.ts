@@ -6,3 +6,14 @@
  */
 
 export { createKnowledgeIndicatorsReader } from './knowledge_indicators_reader_factory';
+export {
+  ECS_IDENTITY_FIELD_SET,
+  loadStreamSchemaAliases,
+  validateAliasTable,
+} from './load_stream_schema_aliases';
+export type {
+  AliasMap,
+  EcsIdentityField,
+  LoadStreamSchemaAliasesOptions,
+  StreamAliasContext,
+} from './load_stream_schema_aliases';

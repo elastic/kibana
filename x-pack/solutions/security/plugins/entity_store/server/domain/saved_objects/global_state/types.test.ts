@@ -10,10 +10,12 @@ import {
   KI_ENTITY_MIN_CONFIDENCE_DEFAULT,
   KI_PROMOTED_ENTITY_TYPES_DEFAULT,
   KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
+  KI_SCHEMA_ALIAS_MIN_CONFIDENCE_DEFAULT,
 } from './constants';
 import {
   backfillKnowledgeIndicators,
   backfillKnowledgeIndicatorsPromotion,
+  backfillKnowledgeIndicatorsSchemaAliases,
 } from './types';
 
 describe('backfillKnowledgeIndicators (V3 model migration)', () => {
@@ -232,6 +234,141 @@ describe('backfillKnowledgeIndicatorsPromotion (V4 model migration)', () => {
     const before = JSON.stringify(document);
 
     backfillKnowledgeIndicatorsPromotion(document);
+
+    expect(JSON.stringify(document)).toEqual(before);
+  });
+});
+
+describe('backfillKnowledgeIndicatorsSchemaAliases (V5 model migration)', () => {
+  it('adds schemaAliasMinConfidence default to a V4 knowledgeIndicators block', () => {
+    const document = {
+      attributes: {
+        historySnapshot: {},
+        logsExtraction: {},
+        knowledgeIndicators: {
+          entityMinConfidence: KI_ENTITY_MIN_CONFIDENCE_DEFAULT,
+          aggregationGroupCap: KI_AGGREGATION_GROUP_CAP_DEFAULT,
+          promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
+          promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
+        },
+      },
+    };
+
+    const result = backfillKnowledgeIndicatorsSchemaAliases(document);
+
+    expect(result.attributes.knowledgeIndicators).toEqual({
+      entityMinConfidence: KI_ENTITY_MIN_CONFIDENCE_DEFAULT,
+      aggregationGroupCap: KI_AGGREGATION_GROUP_CAP_DEFAULT,
+      promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
+      promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
+      schemaAliasMinConfidence: KI_SCHEMA_ALIAS_MIN_CONFIDENCE_DEFAULT,
+    });
+  });
+
+  it('is idempotent on a V5 document (preserves the existing custom value)', () => {
+    const document = {
+      attributes: {
+        historySnapshot: {},
+        logsExtraction: {},
+        knowledgeIndicators: {
+          entityMinConfidence: 80,
+          aggregationGroupCap: 200,
+          promoteToTypedThreshold: 95,
+          promotedEntityTypes: ['service'],
+          schemaAliasMinConfidence: 85,
+        },
+      },
+    };
+
+    const result = backfillKnowledgeIndicatorsSchemaAliases(document);
+
+    expect(result.attributes.knowledgeIndicators).toEqual({
+      entityMinConfidence: 80,
+      aggregationGroupCap: 200,
+      promoteToTypedThreshold: 95,
+      promotedEntityTypes: ['service'],
+      schemaAliasMinConfidence: 85,
+    });
+  });
+
+  it('preserves an explicit null schemaAliasMinConfidence (the explicit-off value)', () => {
+    const document = {
+      attributes: {
+        historySnapshot: {},
+        logsExtraction: {},
+        knowledgeIndicators: {
+          entityMinConfidence: 80,
+          aggregationGroupCap: 200,
+          promoteToTypedThreshold: null,
+          promotedEntityTypes: [],
+          schemaAliasMinConfidence: null,
+        },
+      },
+    };
+
+    const result = backfillKnowledgeIndicatorsSchemaAliases(document);
+
+    expect(result.attributes.knowledgeIndicators).toEqual({
+      entityMinConfidence: 80,
+      aggregationGroupCap: 200,
+      promoteToTypedThreshold: null,
+      promotedEntityTypes: [],
+      schemaAliasMinConfidence: null,
+    });
+  });
+
+  it('layers correctly across all three migrations starting from a pre-V3 document', () => {
+    const document = {
+      attributes: {
+        historySnapshot: {},
+        logsExtraction: {},
+      },
+    };
+
+    const v3 = backfillKnowledgeIndicators(document);
+    const v4 = backfillKnowledgeIndicatorsPromotion(v3);
+    const v5 = backfillKnowledgeIndicatorsSchemaAliases(v4);
+
+    expect(v5.attributes.knowledgeIndicators).toEqual({
+      entityMinConfidence: KI_ENTITY_MIN_CONFIDENCE_DEFAULT,
+      aggregationGroupCap: KI_AGGREGATION_GROUP_CAP_DEFAULT,
+      promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
+      promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
+      schemaAliasMinConfidence: KI_SCHEMA_ALIAS_MIN_CONFIDENCE_DEFAULT,
+    });
+  });
+
+  it('tolerates a defensively-missing knowledgeIndicators block (should not throw)', () => {
+    const document = {
+      attributes: {
+        historySnapshot: {},
+        logsExtraction: {},
+      },
+    };
+
+    const result = backfillKnowledgeIndicatorsSchemaAliases(document);
+
+    expect(result.attributes.knowledgeIndicators).toEqual({
+      schemaAliasMinConfidence: KI_SCHEMA_ALIAS_MIN_CONFIDENCE_DEFAULT,
+    });
+  });
+
+  it('does not mutate the input document', () => {
+    const document = {
+      attributes: {
+        historySnapshot: {},
+        logsExtraction: {},
+        knowledgeIndicators: {
+          entityMinConfidence: KI_ENTITY_MIN_CONFIDENCE_DEFAULT,
+          aggregationGroupCap: KI_AGGREGATION_GROUP_CAP_DEFAULT,
+          promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
+          promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
+        },
+      },
+    };
+    const before = JSON.stringify(document);
+
+    backfillKnowledgeIndicatorsSchemaAliases(document);
 
     expect(JSON.stringify(document)).toEqual(before);
   });

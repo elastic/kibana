@@ -732,7 +732,7 @@ export const expectedUserEntities: Hits = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default-00001',
+    _index: '.entities.v2.latest.security_default-00002',
     _id: 'b344de5598be1f9ca0f3438b9e1dc4711a3677cea2c4187bc404013764caa3b5',
     _source: {
       '@timestamp': '2026-01-20T12:05:23.000Z',
@@ -768,7 +768,7 @@ export const expectedUserEntities: Hits = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default-00001',
+    _index: '.entities.v2.latest.security_default-00002',
     _id: '91e6005b85bd2de67e1610f7bb07e2dd8506088f74729d56b9e8867d8f6dc102',
     _source: {
       '@timestamp': '2026-01-20T12:05:24.000Z',

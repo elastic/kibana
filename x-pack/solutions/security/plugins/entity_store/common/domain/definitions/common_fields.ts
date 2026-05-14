@@ -177,6 +177,38 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       allowAPIUpdate: true,
     }),
 
+    // KNOWLEDGE INDICATOR (Option E) ----------------------------------------
+    // Provenance for entities materialized via a stream's schema-feature
+    // `ecs_identity_aliases` table. Stamped by the alias-scoped extraction
+    // prelude; absent on entities extracted via the default ECS path.
+    // `allowAPIUpdate: true` lets a future `ki-enrichment` maintainer (Track
+    // 4 in research/entity-store-ki-integration) write these fields without
+    // `?force=true`.
+    newestValue({
+      source: `${prefix}.knowledge_indicator.identity_source`,
+      destination: 'entity.knowledge_indicator.identity_source',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    newestValue({
+      source: `${prefix}.knowledge_indicator.feature_uuid`,
+      destination: 'entity.knowledge_indicator.feature_uuid',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    newestValue({
+      source: `${prefix}.knowledge_indicator.stream_name`,
+      destination: 'entity.knowledge_indicator.stream_name',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    newestValue({
+      source: `${prefix}.knowledge_indicator.confidence`,
+      destination: 'entity.knowledge_indicator.confidence',
+      mapping: { type: 'float' },
+      allowAPIUpdate: true,
+    }),
+
     // RELATIONSHIPS ------------------------------------------------------------
     // Source logs use flat `host.entity.relationships.<relationship>.<identifier>`; the entity index
     // stores raw bags under `raw_identifiers` and canonical EUIDs under `ids`.

@@ -150,7 +150,60 @@ describe('createKnowledgeIndicatorsReader', () => {
     });
   });
 
-  it('listEntityFeatures and listDependencyFeatures never request the same call (independent type scope)', async () => {
+  describe('listSchemaFeatures', () => {
+    it("hardwires type=['schema'] to the underlying client", async () => {
+      const { featureClient, streamsClient } = buildClients();
+      streamsClient.listStreams.mockResolvedValue([buildStreamDef('logs.azure.signinlogs')]);
+      const schemaFeature = buildFeature({
+        type: 'schema',
+        subtype: 'custom',
+        stream_name: 'logs.azure.signinlogs',
+        properties: {
+          schema_family: 'custom',
+          ecs_identity_aliases: {
+            'user.email': ['azure.signinlogs.properties.user_principal_name'],
+          },
+        },
+      });
+      featureClient.getFeatures.mockResolvedValue({ hits: [schemaFeature], total: 1 });
+
+      const reader = createKnowledgeIndicatorsReader({ featureClient, streamsClient });
+      const result = await reader.listSchemaFeatures({ minConfidence: 85 });
+
+      expect(result).toEqual([schemaFeature]);
+      expect(featureClient.getFeatures).toHaveBeenCalledWith(
+        ['logs.azure.signinlogs'],
+        expect.objectContaining({ type: ['schema'], minConfidence: 85 })
+      );
+    });
+
+    it('returns an empty array without calling the feature client when there are no streams', async () => {
+      const { featureClient, streamsClient } = buildClients();
+      streamsClient.listStreams.mockResolvedValue([]);
+
+      const reader = createKnowledgeIndicatorsReader({ featureClient, streamsClient });
+      const result = await reader.listSchemaFeatures();
+
+      expect(result).toEqual([]);
+      expect(featureClient.getFeatures).not.toHaveBeenCalled();
+    });
+
+    it('omits minConfidence when the caller does not pass it', async () => {
+      const { featureClient, streamsClient } = buildClients();
+      streamsClient.listStreams.mockResolvedValue([buildStreamDef('logs.azure.signinlogs')]);
+      featureClient.getFeatures.mockResolvedValue({ hits: [], total: 0 });
+
+      const reader = createKnowledgeIndicatorsReader({ featureClient, streamsClient });
+      await reader.listSchemaFeatures();
+
+      expect(featureClient.getFeatures).toHaveBeenCalledWith(
+        ['logs.azure.signinlogs'],
+        expect.objectContaining({ type: ['schema'], minConfidence: undefined })
+      );
+    });
+  });
+
+  it('list*Features methods never share a call (independent type scope)', async () => {
     const { featureClient, streamsClient } = buildClients();
     streamsClient.listStreams.mockResolvedValue([buildStreamDef('logs.k8s.pods')]);
     featureClient.getFeatures.mockResolvedValue({ hits: [], total: 0 });
@@ -158,12 +211,12 @@ describe('createKnowledgeIndicatorsReader', () => {
     const reader = createKnowledgeIndicatorsReader({ featureClient, streamsClient });
     await reader.listEntityFeatures();
     await reader.listDependencyFeatures();
+    await reader.listSchemaFeatures();
 
-    expect(featureClient.getFeatures).toHaveBeenCalledTimes(2);
-    const firstTypes = featureClient.getFeatures.mock.calls[0][1]?.type;
-    const secondTypes = featureClient.getFeatures.mock.calls[1][1]?.type;
-    expect(firstTypes).toEqual(['entity']);
-    expect(secondTypes).toEqual(['dependency']);
+    expect(featureClient.getFeatures).toHaveBeenCalledTimes(3);
+    expect(featureClient.getFeatures.mock.calls[0][1]?.type).toEqual(['entity']);
+    expect(featureClient.getFeatures.mock.calls[1][1]?.type).toEqual(['dependency']);
+    expect(featureClient.getFeatures.mock.calls[2][1]?.type).toEqual(['schema']);
   });
 
   describe('resolveIndexPatterns', () => {

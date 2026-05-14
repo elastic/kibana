@@ -112,6 +112,30 @@ export const EntityField = lazySchema(() =>
       url: z.string().optional(),
       EngineMetadata: EngineMetadata.optional(),
       /**
+       * Provenance metadata stamped on entities that were materialized from a stream's schema-feature `ecs_identity_aliases` table (Option E). All fields are absent on entities extracted via the default ECS-shaped path; a populated namespace means at least one identity slot (`user.email`, `host.name`, …) was contributed by an alias rather than read directly from an ECS field.
+       */
+      knowledge_indicator: z
+        .object({
+          /**
+           * The non-ECS source path that contributed an identity to this entity (e.g. `azure.signinlogs.properties.user_principal_name`). Set by the alias prelude's CASE expression only when an ECS identity slot was empty AND the aliased source was non-null on the contributing log document.
+           */
+          identity_source: z.string().optional(),
+          /**
+           * UUID of the schema feature whose `ecs_identity_aliases` table produced this identity. Lets operators trace a surprising entity back to the LLM-emitted feature that contributed it without re-running the inference.
+           */
+          feature_uuid: z.string().optional(),
+          /**
+           * Stream name (e.g. `logs.azure.signinlogs`) the alias-scoped extraction pass ran against. Useful for debugging cross-stream identity overlap and bounding the blast radius of a wrong alias.
+           */
+          stream_name: z.string().optional(),
+          /**
+           * Confidence (0–100) of the schema feature whose alias contributed this identity. Mirrors the LLM's own confidence in the alias mapping and lets downstream consumers (UI / case management) surface low-confidence aliased entities for human review.
+           */
+          confidence: z.number().min(0).max(100).optional(),
+        })
+        .strict()
+        .optional(),
+      /**
        * Boolean flags describing characteristics of the entity.
        */
       attributes: z

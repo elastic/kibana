@@ -32,6 +32,18 @@ requestBody:
           value:
             knowledgeIndicators:
               promoteToTypedThreshold: null
+        enableSchemaAliasesExample:
+          summary: "Enable schema-feature ECS identity aliases"
+          description: "Opt the tenant into Option E: when the LLM emits a schema feature with `properties.ecs_identity_aliases` and confidence >= the threshold, the static engines run an extra extraction pass against the alias-bearing stream so non-ECS identity fields surface as canonical entities."
+          value:
+            knowledgeIndicators:
+              schemaAliasMinConfidence: 85
+        disableSchemaAliasesExample:
+          summary: "Disable schema-feature ECS identity aliases"
+          description: "Explicitly turn alias adoption off by setting the threshold to null. The static engines fall back to their pre-Option-E single-pass extraction."
+          value:
+            knowledgeIndicators:
+              schemaAliasMinConfidence: null
         updateBothExample:
           summary: "Update log extraction and knowledge indicators"
           description: "Update both blocks in a single request, including KI promotion configuration."
