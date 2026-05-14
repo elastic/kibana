@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Prints CODEOWNERS path prefixes assigned to an Elastic GitHub team (one path per line, deduped).
-# Requires: POSIX grep/awk/git (no dependency on rg).
+# Prints path prefixes for an Elastic GitHub team (one per line, deduped): CODEOWNERS matches
+# merged with team_inventory_path_overrides.json (inventory-only; see team-auto-tests-stats §1).
+# Requires: POSIX grep/awk/git, Node.
 # Usage (from anywhere inside the repo):
 #   bash x-pack/solutions/security/plugins/security_solution/.agents/skills/team-auto-tests-stats/scripts/list_owned_paths_for_team.sh @elastic/core-analysis
 
@@ -27,4 +28,4 @@ else
 fi
 
 grep -Ev '^\s*#' "$ROOT/.github/CODEOWNERS" | grep -F "$TEAM_FULL" | awk '{ print $1 }' \
-  | grep -Ev '^$' | sort -u
+  | grep -Ev '^$' | node "$SCRIPT_DIR/merge_team_inventory_path_overrides.mjs" "$TEAM_FULL" | sort -u

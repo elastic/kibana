@@ -5,7 +5,8 @@ description: >
   Buildkite execution phases, and per-framework counts/skips for FTR, Cypress, and Scout
   (including Playwright `--list`). Typical asks: team automation stats, where Security Solution
   tests run in CI, Scout vs Cypress coverage by ownership; per-team or multi-team `@elastic/`
-  visibility; auditing completeness of the three framework rows. Deliver markdown only under
+  visibility; auditing completeness of the three framework rows; Security Solution Scout `parallel_tests/`
+  paths via scripts/team_inventory_path_overrides.json (stats-only, not CODEOWNERS). Deliver markdown only under
   gitignored `.agents/tmp/`, never `docs/`. Do not use for CI Stats volume, flaky-test mining,
   GitHub skipped-test triage, or Jest unit tests — those are out of scope for this skill.
 ---
@@ -28,6 +29,7 @@ YAML **`description`** carries **when / when-not triggers** for discovery. **Pro
 
 - **Location:** `security_solution/.agents/skills`; workflow is **repo-wide** (`.github/CODEOWNERS`, `.buildkite/`).
 - **Multi-owner paths:** Each team gets full credit for every CODEOWNERS line that lists it (totals across teams are not additive).
+- **Inventory-only overrides:** Paths in [`scripts/team_inventory_path_overrides.json`](scripts/team_inventory_path_overrides.json) extend **`list_owned_paths_for_team.sh`** beyond `.github/CODEOWNERS` (e.g. Security Solution **`parallel_tests/`** subtree by feature team). Stats-only — **does not** change GitHub reviewers. Edit the JSON when new folders need team-level attribution.
 - **Skips:** Static markers in source (e.g. `describe.skip`) plus **Cypress conditional tag skips** (see §3). Exclude CI Stats / GitHub `skipped-test` volume — those are not grepped from sources.
 
 ## Completeness rule (Tests table)
@@ -68,7 +70,7 @@ Reports live under **`.agents/tmp/<file>.md`** (two levels below repo root). Eve
 Navigation only — details are in the referenced sections.
 
 - [ ] Output path, link prefix **`../../`**, no **`docs/`** copy (**§6**)
-- [ ] Ownership — test-relevant CODEOWNERS (**§1**)
+- [ ] Ownership — test-relevant paths from CODEOWNERS + **`team_inventory_path_overrides.json`** (**§1**)
 - [ ] Scout — configs, **`--list`**, sum rule, skips, Security Solution shared-config caveat (**§2**)
 - [ ] Cypress — counts & skips (**§3**)
 - [ ] FTR — counts & skips (**§4**)
@@ -76,16 +78,16 @@ Navigation only — details are in the referenced sections.
 - [ ] **Execution phase** — `.buildkite/` links plus Elastic Cloud / Appex QA note (**§5**)
 - [ ] **Coverage and descriptions** — **`extract_scout_api_coverage_md.mjs`** (**§6**)
 
-### 1) Ownership — CODEOWNERS (prefixes with tests only)
+### 1) Ownership — CODEOWNERS + inventory overrides (prefixes with tests only)
 
-The **Ownership** table lists CODEOWNERS paths **only when that path’s subtree contains Scout, Cypress, or FTR-style automated test source** (for example `**/test/scout/**`, `*.cy.ts`, `test/api_integration/**`, `test/security_solution_api_integration/**`). **Jest unit files** (`*.test.ts` / `*.test.tsx` next to source) **do not** qualify a path for this table and **must not** appear in the report narrative as test inventory. Full product ownership stays in `.github/CODEOWNERS`.
+The **Ownership** table lists paths **only when** that prefix’s subtree contains Scout, Cypress, or FTR-style automated test source (for example `**/test/scout/**`, `*.cy.ts`, `test/api_integration/**`, `test/security_solution_api_integration/**`). **Prefixes** come from **`list_owned_paths_for_team.sh`**, which merges `.github/CODEOWNERS` with **[`team_inventory_path_overrides.json`](scripts/team_inventory_path_overrides.json)** (stats-only attribution; overrides do **not** replace or mirror GitHub ownership). **Jest unit files** (`*.test.ts` / `*.test.tsx` next to source) **do not** qualify a path for this table and **must not** appear in the report narrative as test inventory.
 
 ```bash
 bash x-pack/solutions/security/plugins/security_solution/.agents/skills/team-auto-tests-stats/scripts/list_owned_paths_for_team.sh @elastic/<slug> \
   | node x-pack/solutions/security/plugins/security_solution/.agents/skills/team-auto-tests-stats/scripts/filter_codeowners_paths_with_tests.mjs
 ```
 
-**Helpers:** [scripts/list_owned_paths_for_team.sh](scripts/list_owned_paths_for_team.sh), [scripts/filter_codeowners_paths_with_tests.mjs](scripts/filter_codeowners_paths_with_tests.mjs)
+**Helpers:** [scripts/list_owned_paths_for_team.sh](scripts/list_owned_paths_for_team.sh), [scripts/merge_team_inventory_path_overrides.mjs](scripts/merge_team_inventory_path_overrides.mjs), [scripts/team_inventory_path_overrides.json](scripts/team_inventory_path_overrides.json), [scripts/filter_codeowners_paths_with_tests.mjs](scripts/filter_codeowners_paths_with_tests.mjs)
 
 Reference (not for the table): `rg -n '@elastic/<slug>\b' .github/CODEOWNERS`
 
