@@ -18,14 +18,12 @@ export function MachineLearningNavigationProviderSecurity({
   const PageObjects = getPageObjects(['common']);
 
   async function navigateToStackManagement() {
-    await retry.tryForTime(20 * 1000, async () => {
-      await svlCommonNavigation.sidenav.clickLink({ navId: 'stack_management' });
-      // ensure the side panel is visible
-      await testSubjects.existOrFail(
-        'kbnChromeNav-sidePanel kbnChromeNav-sidePanel_stack_management',
-        { timeout: 2500 }
-      );
-    });
+    await svlCommonNavigation.sidenav.clickLink({ navId: 'stack_management' });
+    // ensure the side panel is visible
+    await testSubjects.existOrFail(
+      'kbnChromeNav-sidePanel kbnChromeNav-sidePanel_stack_management',
+      { timeout: 2500 }
+    );
   }
 
   async function navigateToArea(id: string, expectedTestSubject: string) {
