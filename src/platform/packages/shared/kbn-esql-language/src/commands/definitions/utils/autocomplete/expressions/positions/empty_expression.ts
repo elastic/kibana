@@ -397,10 +397,12 @@ function buildSuggestionsFromHints(
     (a, b) => a.entityType === b.entityType && isEqual(a.constraints, b.constraints)
   );
 
-  const results = hints.map(
-    (hint) =>
+  const results = hints.map((hint) => {
+    if (!hint.entityType) return [];
+    return (
       parametersFromHintsResolvers[hint.entityType]?.suggestionResolver?.(hint, ctx.context) ?? []
-  );
+    );
+  });
 
   return results.flat();
 }

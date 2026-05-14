@@ -188,7 +188,7 @@ const createActiveConversation = ({
 
 describe('registerDashboardAppIntegration', () => {
   let mockApi: MockDashboardApi;
-  let chat$: Subject<ChatEvent>;
+  let chatEventsByConversationId: Map<string, Subject<ChatEvent>>;
   let addAttachment: jest.Mock;
   let updateAttachmentOrigin: jest.Mock;
   let getUpdateOrigin: jest.Mock;
@@ -203,7 +203,7 @@ describe('registerDashboardAppIntegration', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     mockApi = createMockDashboardApi();
-    chat$ = new Subject<ChatEvent>();
+    chatEventsByConversationId = new Map();
     addAttachment = jest.fn();
     updateAttachmentOrigin = jest.fn().mockResolvedValue(undefined);
     getUpdateOrigin = jest.fn(
@@ -223,6 +223,10 @@ describe('registerDashboardAppIntegration', () => {
     };
   });
 
+  const emitChatEvent = (conversationId: string, event: ChatEvent) => {
+    chatEventsByConversationId.get(conversationId)?.next(event);
+  };
+
   afterEach(() => {
     cleanup?.();
     jest.useRealTimers();
@@ -234,7 +238,16 @@ describe('registerDashboardAppIntegration', () => {
       addAttachment,
       updateAttachmentOrigin,
       events: {
-        chat$,
+        getChatEvents$: jest.fn((conversationId: string) => {
+          let chatEvents$ = chatEventsByConversationId.get(conversationId);
+
+          if (!chatEvents$) {
+            chatEvents$ = new Subject<ChatEvent>();
+            chatEventsByConversationId.set(conversationId, chatEvents$);
+          }
+
+          return chatEvents$.asObservable();
+        }),
         ui: { activeConversation$: activeConversation$.asObservable() },
       },
     } as unknown as AgentBuilderPluginStart;
@@ -459,7 +472,9 @@ describe('registerDashboardAppIntegration', () => {
     );
 
     addAttachment.mockClear();
-    chat$.next(
+    emitConversationChange({ id: 'conversation-1', attachments: [] });
+    emitChatEvent(
+      'conversation-1',
       createMockRoundCompleteEvent(
         [createVersionedAttachment(createDashboardAttachment({ id: firstDraftAttachment.id }))],
         [{ attachment_id: firstDraftAttachment.id, operation: ATTACHMENT_REF_OPERATION.created }]
