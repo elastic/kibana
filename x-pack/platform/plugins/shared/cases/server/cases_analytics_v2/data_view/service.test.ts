@@ -14,11 +14,7 @@ import type {
 } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import type {
-  DataView,
-  DataViewSpec,
-  RuntimeFieldSpec,
-} from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewSpec, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
 import { CasesAnalyticsV2DataViewService } from './service';
@@ -78,9 +74,7 @@ const makeDvService = (): MockDvService => ({
   updateSavedObject: jest.fn(),
 });
 
-const makeDataViewsPluginStart = (
-  dvService: MockDvService
-): DataViewsServerPluginStart =>
+const makeDataViewsPluginStart = (dvService: MockDvService): DataViewsServerPluginStart =>
   ({
     dataViewsServiceFactory: jest.fn().mockResolvedValue(dvService),
   } as unknown as DataViewsServerPluginStart);
@@ -104,11 +98,14 @@ const makeDataViewWithRuntime = (
   };
   // `toSpec` returns a fresh shallow copy so the diff in the service uses
   // the recorded state, not whatever happens after `replaceAllRuntimeFields`.
-  dv.toSpec.mockImplementation(() => ({
-    id,
-    title: '.cases',
-    runtimeFieldMap: { ...dv.__runtimeFieldMap },
-  } as DataViewSpec));
+  dv.toSpec.mockImplementation(
+    () =>
+      ({
+        id,
+        title: '.cases',
+        runtimeFieldMap: { ...dv.__runtimeFieldMap },
+      } as DataViewSpec)
+  );
   // Mirror the real method's behaviour for any test that later calls
   // `toSpec` and expects to see the new map.
   dv.replaceAllRuntimeFields.mockImplementation((newMap) => {
@@ -279,9 +276,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
       dvService.get.mockRejectedValueOnce(new Error('cluster unavailable'));
 
       await expect(service.ensureForSpace(deps)).resolves.toBeUndefined();
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('cluster unavailable')
-      );
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('cluster unavailable'));
     });
   });
 
@@ -347,9 +342,7 @@ async function captureExpectedRuntimeFieldMap(
   deps: Parameters<CasesAnalyticsV2DataViewService['ensureForSpace']>[0]
 ): Promise<Record<string, RuntimeFieldSpec>> {
   service.clearBootstrapCache();
-  dvService.get.mockRejectedValueOnce(
-    Object.assign(new Error('not found'), { statusCode: 404 })
-  );
+  dvService.get.mockRejectedValueOnce(Object.assign(new Error('not found'), { statusCode: 404 }));
   await service.refreshForSpace(deps);
   const lastCreate = dvService.createAndSave.mock.calls.at(-1);
   const map =

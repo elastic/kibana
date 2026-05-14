@@ -211,14 +211,12 @@ export class CasesAnalyticsV2DataViewService {
           // any extra fields. `replaceAllRuntimeFields` strips field-attribute
           // metadata internally, so a round-trip through `toSpec()` returns
           // the same shape we wrote.
-          existing.replaceAllRuntimeFields(
-            desiredRuntimeFieldMap as Record<string, RuntimeField>
-          );
+          existing.replaceAllRuntimeFields(desiredRuntimeFieldMap as Record<string, RuntimeField>);
           await dvService.updateSavedObject(existing);
           this.logger.info(
-            `refreshed runtime fields on data view ${dataViewId} (space=${deps.spaceId}, runtime_fields=${
-              Object.keys(desiredRuntimeFieldMap).length
-            })`
+            `refreshed runtime fields on data view ${dataViewId} (space=${
+              deps.spaceId
+            }, runtime_fields=${Object.keys(desiredRuntimeFieldMap).length})`
           );
         }
       }

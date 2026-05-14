@@ -908,9 +908,8 @@ export class CasesService {
       // item would fan out to N ES `index` requests, saturating the
       // connection pool the rest of Kibana shares — `bulkUpsertCases`
       // collapses that to one `_bulk` request.
-      const successfulAnalyticsV2Mirrors: Array<
-        (typeof bulkCreateResponse.saved_objects)[number]
-      > = [];
+      const successfulAnalyticsV2Mirrors: Array<(typeof bulkCreateResponse.saved_objects)[number]> =
+        [];
       const res = bulkCreateResponse.saved_objects.map((theCase) => {
         if (isSOError<CasePersistedAttributes>(theCase)) {
           return theCase;
