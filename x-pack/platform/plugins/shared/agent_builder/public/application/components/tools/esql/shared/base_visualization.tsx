@@ -8,7 +8,6 @@
 import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import type {} from '@emotion/react/types/css-prop';
 import type { InlineEditLensEmbeddableContext, LensPublicStart } from '@kbn/lens-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
@@ -24,8 +23,7 @@ import {
   visualizationHeaderStyles,
 } from './styles';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useTimeRange } from './use_time_range';
-import { useVisualizationLensTimeSearchBarProps } from './use_visualization_lens_time_search_bar_props';
+import { useVisPreviewUnifiedSearch } from './use_vis_preview_unified_search';
 
 const saveButtonLabel = i18n.translate(
   'xpack.agentBuilder.conversation.visualization.saveToDashboard',
@@ -79,27 +77,16 @@ export function BaseVisualization({
   } = useKibana();
   const SearchBar = plugins.unifiedSearch.ui.SearchBar;
   const canWriteDashboards = application?.capabilities.dashboard_v2?.showWriteControls === true;
-  const { selectedTimeRange, onTimeChange, onBrushEnd } = useTimeRange({
-    timeRange: lensInput?.timeRange,
+
+  const { searchBarProps, effectiveTimeRange, onBrushEnd } = useVisPreviewUnifiedSearch({
+    lensTimeRange: lensInput?.timeRange,
   });
+
   const lensInputWithTimeRange = useMemo(
     () =>
-      lensInput && selectedTimeRange ? { ...lensInput, timeRange: selectedTimeRange } : lensInput,
-    [lensInput, selectedTimeRange]
+      lensInput && effectiveTimeRange ? { ...lensInput, timeRange: effectiveTimeRange } : lensInput,
+    [lensInput, effectiveTimeRange]
   );
-
-  const onDateRangeCommit = useCallback(
-    (dateRange: TimeRange) => {
-      onTimeChange({ start: dateRange.from, end: dateRange.to });
-    },
-    [onTimeChange]
-  );
-
-  const searchBarProps = useVisualizationLensTimeSearchBarProps({
-    dateRangeFrom: selectedTimeRange.from,
-    dateRangeTo: selectedTimeRange.to,
-    onDateRangeCommit,
-  });
 
   const onLoad = useCallback(
     (
