@@ -11,7 +11,7 @@ import { apiTest } from '../fixtures';
 import { COMMON_HEADERS, TEST_TASK_TYPE } from '../fixtures/constants';
 
 apiTest.describe(
-  'Task Manager Schedule and Delete Routes',
+  'Task Manager internal routes',
   { tag: tags.serverless.observability.complete },
   () => {
     const taskIdsToCleanup: string[] = [];
@@ -109,6 +109,45 @@ apiTest.describe(
             state: {},
           },
         },
+      });
+
+      expect(response).toHaveStatusCode(403);
+    });
+
+    apiTest('run_soon: returns 200 for an existing idle task', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+
+      const scheduleResponse = await apiClient.post('internal/task_manager/schedule', {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        body: {
+          task: {
+            taskType: TEST_TASK_TYPE,
+            params: {},
+            state: {},
+            enabled: false,
+          },
+        },
+        responseType: 'json',
+      });
+      expect(scheduleResponse).toHaveStatusCode(200);
+      const taskId = (scheduleResponse.body as Record<string, unknown>).id as string;
+      taskIdsToCleanup.push(taskId);
+
+      const runSoonResponse = await apiClient.post(`internal/ftr/task_manager/${taskId}/run_soon`, {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+
+      expect(runSoonResponse).toHaveStatusCode(200);
+      const runSoonBody = runSoonResponse.body as Record<string, unknown>;
+      expect(runSoonBody.id).toBe(taskId);
+    });
+
+    apiTest('run_soon: returns 403 when called by a viewer', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+
+      const response = await apiClient.post('internal/ftr/task_manager/any-task-id/run_soon', {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
       });
 
       expect(response).toHaveStatusCode(403);

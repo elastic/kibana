@@ -11,6 +11,11 @@ import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/sco
 import type { TaggingPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
 
+export const KBN_ARCHIVES = {
+  FUNCTIONAL_BASE:
+    'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/functional_base/data.json',
+} as const;
+
 export interface TaggingTestFixtures extends ScoutTestFixtures {
   pageObjects: TaggingPageObjects;
 }
