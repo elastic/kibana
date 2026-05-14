@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, of, Subject } from 'rxjs';
 import type { ChromeStart } from '@kbn/core/public';
 import type { DashboardApi, DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { DashboardSaveEvent } from '@kbn/dashboard-plugin/public';
@@ -118,6 +118,7 @@ const createMockDashboardApi = (
   const setState = jest.fn();
   const getSerializedState = jest.fn().mockReturnValue({ attributes: { title: '', panels: [] } });
   return {
+    anyStateChange$: of(),
     savedObjectId$,
     onSave$,
     filters$,
