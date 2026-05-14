@@ -34,12 +34,6 @@ const GROUP_BY_OPTIONS = [
     }),
   },
   {
-    key: GroupByOptions.Model,
-    label: i18n.translate('xpack.searchInferenceEndpoints.groupBy.options.models.label', {
-      defaultMessage: 'Model Author',
-    }),
-  },
-  {
     key: GroupByOptions.Service,
     label: i18n.translate('xpack.searchInferenceEndpoints.groupBy.options.service.label', {
       defaultMessage: 'Service',
@@ -49,8 +43,6 @@ const GROUP_BY_OPTIONS = [
 
 function parseGroupByValue(value: string | undefined): GroupByOptions {
   switch (value) {
-    case GroupByOptions.Model:
-      return GroupByOptions.Model;
     case GroupByOptions.Service:
       return GroupByOptions.Service;
     case GroupByOptions.None:

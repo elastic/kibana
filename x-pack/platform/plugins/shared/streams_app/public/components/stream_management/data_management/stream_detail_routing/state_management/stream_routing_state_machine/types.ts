@@ -77,7 +77,7 @@ export type StreamRoutingEvent =
   | { type: 'routingRule.change'; routingRule: Partial<RoutingDefinitionWithUIAttributes> }
   | { type: 'routingRule.create' }
   | { type: 'routingRule.edit'; id: string }
-  | { type: 'routingRule.fork'; routingRule?: RoutingDefinition }
+  | { type: 'routingRule.fork'; routingRule?: RoutingDefinition; draft?: boolean }
   | { type: 'routingRule.bulkFork'; items: BulkForkItem[] }
   | { type: 'routingRule.reorder'; routing: RoutingDefinitionWithUIAttributes[] }
   | { type: 'routingRule.remove' }

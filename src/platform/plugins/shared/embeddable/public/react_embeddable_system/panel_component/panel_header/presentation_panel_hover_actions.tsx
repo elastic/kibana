@@ -359,7 +359,7 @@ export const PresentationPanelHoverActions = ({
 
         if (tooltip) {
           notificationComponent = (
-            <EuiToolTip position="top" delay="regular" content={tooltip} key={notification.id}>
+            <EuiToolTip position="top" content={tooltip} key={notification.id}>
               {notificationComponent}
             </EuiToolTip>
           );
@@ -427,14 +427,13 @@ export const PresentationPanelHoverActions = ({
     [setDragHandle, euiTheme.size.xs]
   );
 
-  const hasHoverActions = useMemo(() => {
-    if (quickActionElements.length) return true;
-    return contextMenuPanels.every(({ items }) => items?.length);
-  }, [quickActionElements, contextMenuPanels]);
+  const showContextMenu = useMemo(() => {
+    return contextMenuPanels.some(({ items }) => items?.length);
+  }, [contextMenuPanels]);
 
   return (
     <>
-      {api && hasHoverActions && (
+      {api && (quickActionElements.length || showContextMenu) && (
         <div
           className={classNames('embPanel__hoverActions', className)}
           data-test-subj={`hover-actions-${api.uuid}`}
@@ -448,7 +447,6 @@ export const PresentationPanelHoverActions = ({
                 size="m"
                 title={!hideTitle ? title || undefined : undefined}
                 content={description}
-                delay="regular"
                 position="top"
                 data-test-subj="embeddablePanelDescriptionTooltip"
                 type="info"
@@ -472,7 +470,7 @@ export const PresentationPanelHoverActions = ({
                 </EuiToolTip>
               )
             )}
-            {contextMenuPanels.length ? (
+            {showContextMenu ? (
               <EuiPopover
                 repositionOnScroll
                 panelPaddingSize="none"

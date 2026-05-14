@@ -12,6 +12,7 @@ import { withSpan } from '@kbn/apm-utils';
 import pMap from 'p-map';
 import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { RawRule, SanitizedRule } from '../../../../types';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
@@ -40,6 +41,7 @@ import { ruleDomainSchema } from '../../schemas';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import type { RuleParams, RuleDomain } from '../../types';
 import { bulkDisableRulesSo } from '../../../../data/rule';
+import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
 
 export const bulkDisableRules = async <Params extends RuleParams>(
   context: RulesClientContext,
@@ -74,7 +76,11 @@ export const bulkDisableRules = async <Params extends RuleParams>(
         action: 'DISABLE',
         logger: context.logger,
         bulkOperation: (filterKueryNode: KueryNode | null) =>
-          bulkDisableRulesWithOCC(context, { filter: filterKueryNode, untrack }),
+          bulkDisableRulesWithOCC(context, {
+            filter: filterKueryNode,
+            untrack,
+            totalNumOfRules: total,
+          }),
         filter: kueryNodeFilterWithAuth,
       })
   );
@@ -128,10 +134,12 @@ const bulkDisableRulesWithOCC = async (
   context: RulesClientContext,
   {
     filter,
-    untrack = false,
+    untrack,
+    totalNumOfRules,
   }: {
     filter: KueryNode | null;
     untrack: boolean;
+    totalNumOfRules: number;
   }
 ) => {
   const rulesFinder = await withSpan(
@@ -230,7 +238,7 @@ const bulkDisableRulesWithOCC = async (
   // TODO (http-versioning): for whatever reasoning we are using SavedObjectsBulkUpdateObject
   // everywhere when it should be SavedObjectsBulkCreateObject. We need to fix it in
   // bulk_disable, bulk_enable, etc. to fix this cast
-
+  const bulkDisableTimestamp = Date.now();
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkCreate', type: 'rules' },
     () =>
@@ -240,6 +248,16 @@ const bulkDisableRulesWithOCC = async (
         savedObjectsBulkCreateOptions: { overwrite: true },
       })
   );
+
+  await logBulkRuleChanges({
+    ruleSOs: result.saved_objects,
+    rulesClientContext: context,
+    changesContext: {
+      action: RuleChangeTrackingAction.ruleDisable,
+      timestamp: bulkDisableTimestamp,
+      metadata: { bulkCount: totalNumOfRules },
+    },
+  });
 
   const taskIdsToDisable: string[] = [];
   const taskIdsToDelete: string[] = [];

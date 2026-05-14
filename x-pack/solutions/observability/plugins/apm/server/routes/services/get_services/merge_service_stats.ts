@@ -12,7 +12,6 @@ import type { ServiceAlertsResponse } from './get_service_alerts';
 import type { ServiceSloStatsResponse } from './get_services_slo_stats';
 import type { ServiceTransactionStatsResponse } from './get_service_transaction_stats';
 import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import type { ServiceHealthStatus } from '../../../../common/service_health_status';
 
 export interface MergedServiceStat {
   serviceName: string;
@@ -22,7 +21,6 @@ export interface MergedServiceStat {
   latency?: number | null;
   transactionErrorRate?: number;
   throughput?: number;
-  healthStatus?: ServiceHealthStatus;
   anomalyScore?: number;
   alertsCount?: number;
   sloStatus?: SloStatus;

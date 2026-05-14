@@ -59,6 +59,7 @@ export const CollapsibleIndicesList: React.FunctionComponent<Props> = ({ indices
             <EuiIcon
               type={isShowingFullList ? 'chevronSingleUp' : 'chevronSingleDown'}
               data-test-subj="collapsibleIndicesArrow"
+              aria-hidden={true}
             />
           </EuiLink>
         </>

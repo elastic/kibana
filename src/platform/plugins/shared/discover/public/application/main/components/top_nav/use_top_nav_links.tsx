@@ -322,7 +322,6 @@ export const useTopNavLinks = ({
         popoverWidth: 150,
         popoverTestId: 'discoverSaveButtonPopover',
         splitButtonProps: {
-          secondaryButtonIcon: 'chevronSingleDown',
           secondaryButtonAriaLabel: i18n.translate('discover.localMenu.saveOptionsAriaLabel', {
             defaultMessage: 'Save options',
           }),
@@ -346,7 +345,7 @@ export const useTopNavLinks = ({
               }
             : {
                 showNotificationIndicator: hasUnsavedChanges,
-                notifcationIndicatorTooltipContent: hasUnsavedChanges
+                notificationIndicatorTooltipContent: hasUnsavedChanges
                   ? i18n.translate('discover.localMenu.unsavedChangesTooltip', {
                       defaultMessage: 'You have unsaved changes',
                     })

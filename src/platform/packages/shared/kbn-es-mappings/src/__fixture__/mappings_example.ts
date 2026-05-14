@@ -74,6 +74,7 @@ export const invalidMapping: MappingsDefinition = {
 const objectMapping = {
   properties: {
     nestedObj: mappings.object({
+      dynamic: 'strict',
       properties: {
         name: mappings.text(),
         age: mappings.integer(),

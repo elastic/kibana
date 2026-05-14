@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { ESTermQuery } from '../../../../../common/typed_json';
 import type { GlobalTimeArgs } from '../../use_global_time';
 import type { HostsType } from '../../../../explore/hosts/store/model';
@@ -15,6 +16,7 @@ import type { UsersType } from '../../../../explore/users/store/model';
 interface QueryTabBodyProps {
   type: HostsType | NetworkType | UsersType;
   filterQuery?: string | ESTermQuery;
+  entityRecord?: EntityStoreRecord | null;
   identityFields?: Record<string, string>;
 }
 

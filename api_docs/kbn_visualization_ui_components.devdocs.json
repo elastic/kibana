@@ -832,7 +832,7 @@
           "(icon: string | undefined) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/util.ts",
-        "lineNumber": 19,
+        "lineNumber": 20,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -848,7 +848,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/util.ts",
-            "lineNumber": 22,
+            "lineNumber": 23,
             "columnNumber": 25,
             "deprecated": false,
             "trackAdoption": false,
@@ -1135,7 +1135,7 @@
           " | T | undefined; shouldRotate?: boolean | undefined; }) => number"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/util.ts",
-        "lineNumber": 26,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1153,7 +1153,7 @@
               " | T | undefined; shouldRotate?: boolean | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/util.ts",
-            "lineNumber": 29,
+            "lineNumber": 30,
             "columnNumber": 52,
             "deprecated": false,
             "trackAdoption": false,
@@ -1172,7 +1172,7 @@
               " | T | undefined; shouldRotate?: boolean | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/util.ts",
-            "lineNumber": 29,
+            "lineNumber": 30,
             "columnNumber": 75,
             "deprecated": false,
             "trackAdoption": false,
@@ -1201,7 +1201,7 @@
           ") => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/util.ts",
-        "lineNumber": 16,
+        "lineNumber": 17,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1223,7 +1223,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/util.ts",
-            "lineNumber": 16,
+            "lineNumber": 17,
             "columnNumber": 39,
             "deprecated": false,
             "docsReferencedTypeName": "DataViewField",
@@ -2584,6 +2584,55 @@
     "misc": [
       {
         "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.AnnotationReferenceLineIcons",
+        "type": "Type",
+        "tags": [],
+        "label": "AnnotationReferenceLineIcons",
+        "description": [],
+        "signature": [
+          "\"circle\" | \"pinFilled\" | \"starFilled\" | \"triangle\" | ",
+          {
+            "pluginId": "@kbn/visualization-ui-components",
+            "scope": "public",
+            "docId": "kibKbnVisualizationUiComponentsPluginApi",
+            "section": "def-public.SharedSetOfIcons",
+            "text": "SharedSetOfIcons"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-visualization-ui-components/types.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.annotationReferenceLineSharedSetOfIcons",
+        "type": "Array",
+        "tags": [],
+        "label": "annotationReferenceLineSharedSetOfIcons",
+        "description": [],
+        "signature": [
+          "{ value: ",
+          {
+            "pluginId": "@kbn/visualization-ui-components",
+            "scope": "public",
+            "docId": "kibKbnVisualizationUiComponentsPluginApi",
+            "section": "def-public.AnnotationReferenceLineIcons",
+            "text": "AnnotationReferenceLineIcons"
+          },
+          "; label: string; icon?: string | React.ComponentType | undefined; shouldRotate?: boolean | undefined; }[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-visualization-ui-components/util.ts",
+        "lineNumber": 120,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
         "id": "def-public.DataType",
         "type": "Type",
         "tags": [],
@@ -2750,7 +2799,7 @@
         "tags": [],
         "label": "sharedSetOfIcons",
         "description": [
-          "\nThis is the minimal icons set.\nSo far it is computed from Reference line and Metric chart icons.\nNeeds to consider annotation icons set too in the future."
+          "\nIntersection of icons shared across Reference Lines, Annotations, and Metric charts.\nEach consumer extends this base with its own additional icons."
         ],
         "signature": [
           "{ value: ",
@@ -2764,7 +2813,7 @@
           "; label: string; icon?: string | React.ComponentType | undefined; shouldRotate?: boolean | undefined; }[]"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/util.ts",
-        "lineNumber": 45,
+        "lineNumber": 51,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2778,17 +2827,63 @@
         "label": "SharedSetOfIcons",
         "description": [],
         "signature": [
-          "\"alert\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"empty\" | \"flag\" | \"heart\" | \"mapMarker\" | \"starEmpty\""
+          "\"alert\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"starEmpty\""
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/types.ts",
-        "lineNumber": 17,
+        "lineNumber": 18,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.emptyIconEntry",
+        "type": "Object",
+        "tags": [],
+        "label": "emptyIconEntry",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-visualization-ui-components/util.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.emptyIconEntry.value",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "\"empty\""
+            ],
+            "path": "src/platform/packages/shared/kbn-visualization-ui-components/util.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.emptyIconEntry.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-visualization-ui-components/util.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   },
   "server": {
     "classes": [],

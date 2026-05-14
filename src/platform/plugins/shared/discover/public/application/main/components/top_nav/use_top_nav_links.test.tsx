@@ -269,7 +269,7 @@ describe('useTopNavLinks', () => {
         true
       );
       expect(
-        appMenuConfig.primaryActionItem?.splitButtonProps?.notifcationIndicatorTooltipContent
+        appMenuConfig.primaryActionItem?.splitButtonProps?.notificationIndicatorTooltipContent
       ).toBe('You have unsaved changes');
     });
 
@@ -282,7 +282,7 @@ describe('useTopNavLinks', () => {
         false
       );
       expect(
-        appMenuConfig.primaryActionItem?.splitButtonProps?.notifcationIndicatorTooltipContent
+        appMenuConfig.primaryActionItem?.splitButtonProps?.notificationIndicatorTooltipContent
       ).toBeUndefined();
     });
 

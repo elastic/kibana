@@ -478,7 +478,10 @@ export class ActionsPlugin
       ) => {
         subActionFramework.registerConnector(connector);
       },
-      getAxiosInstanceWithAuth: this.getAxiosInstanceWithAuthHelper(actionsConfigUtils),
+      getAxiosInstanceWithAuth: this.getAxiosInstanceWithAuthHelper(
+        actionsConfigUtils,
+        plugins.cloud
+      ),
       isPreconfiguredConnector: (connectorId: string): boolean => {
         return !!this.inMemoryConnectors.find(
           (inMemoryConnector) =>
@@ -1054,9 +1057,13 @@ export class ActionsPlugin
     }
   };
 
-  private getAxiosInstanceWithAuthHelper = (actionsConfigUtils: ActionsConfigurationUtilities) => {
+  private getAxiosInstanceWithAuthHelper = (
+    actionsConfigUtils: ActionsConfigurationUtilities,
+    cloud?: CloudSetup
+  ) => {
     const getAxiosInstanceFn = getAxiosInstanceWithAuth({
       authTypeRegistry: this.authTypeRegistry!,
+      cloud,
       configurationUtilities: actionsConfigUtils,
       logger: this.logger,
     });

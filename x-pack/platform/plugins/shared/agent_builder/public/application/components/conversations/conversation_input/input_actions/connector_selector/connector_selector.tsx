@@ -21,7 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useUiPrivileges } from '../../../../../hooks/use_ui_privileges';
 import { useNavigation } from '../../../../../hooks/use_navigation';
-import { useSendMessage } from '../../../../../context/send_message/send_message_context';
+import { useConnectorSelection } from '../../../../../hooks/chat/use_connector_selection';
 import { useDefaultConnector } from '../../../../../hooks/chat/use_default_connector';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import {
@@ -165,13 +165,11 @@ export const ConnectorSelector: React.FC<{}> = () => {
     services: { http, settings },
   } = useKibana();
   const {
-    connectorSelection: {
-      selectConnector: onSelectConnector,
-      selectedConnector: selectedConnectorId,
-      defaultConnectorId,
-      defaultConnectorOnly,
-    },
-  } = useSendMessage();
+    selectConnector: onSelectConnector,
+    selectedConnector: selectedConnectorId,
+    defaultConnectorId,
+    defaultConnectorOnly,
+  } = useConnectorSelection();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const { data: aiConnectors, isLoading } = useLoadConnectors({

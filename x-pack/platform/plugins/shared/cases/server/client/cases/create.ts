@@ -17,9 +17,9 @@ import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
+import type { Owner } from '../../../common/constants/types';
 import type { CasePostRequest } from '../../../common/types/api';
 import { CasePostRequestRt } from '../../../common/types/api';
-import {} from '../utils';
 import { validateCustomFields } from './validators';
 import { emptyCaseAssigneesSanitizer } from './sanitizers';
 import { normalizeCreateCaseRequest } from './utils';
@@ -174,7 +174,14 @@ export const create = async (
       savedObject: newCase,
     });
 
-    return decodeOrThrow(CaseRt)(res);
+    const createdCase = decodeOrThrow(CaseRt)(res);
+
+    clientArgs.casesEventBus?.emitCaseCreated(clientArgs.request, {
+      caseId: createdCase.id,
+      owner: createdCase.owner as Owner,
+    });
+
+    return createdCase;
   } catch (error) {
     throw createCaseError({ message: `Failed to create case: ${error}`, error, logger });
   }

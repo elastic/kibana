@@ -34,7 +34,7 @@ import { Resolver } from '../../../../resolver/view';
 import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 import { isActiveTimeline } from '../../../../helpers';
 import { useIsAnalyzerEnabled } from '../../../../detections/hooks/use_is_analyzer_enabled';
-import { AnalyzerPreviewNoDataMessage } from '../../../../flyout_v2/document/components/analyzer_no_data_message';
+import { AnalyzerPreviewNoDataMessage } from '../../../../flyout_v2/document/main/components/analyzer_no_data_message';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
