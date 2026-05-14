@@ -214,7 +214,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   const handleSandboxApply = useCallback(
     (query: string) => {
       dispatch({ type: 'COMMIT_SANDBOX_QUERY', query });
-      methods.setValue('evaluation', { query: { base: query } });
+      methods.setValue('evaluation.query.base', query);
       if (uiState.yamlMode) {
         setYamlText(serializeFormToYaml(methods.getValues()));
       }

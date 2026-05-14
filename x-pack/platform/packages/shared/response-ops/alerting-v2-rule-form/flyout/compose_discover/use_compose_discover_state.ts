@@ -80,7 +80,7 @@ function reducer(state: ComposeDiscoverState, action: ComposeDiscoverAction): Co
       return {
         ...state,
         yamlMode: action.enabled,
-        childOpen: action.enabled,
+        childOpen: true,
       };
     default:
       return state;
