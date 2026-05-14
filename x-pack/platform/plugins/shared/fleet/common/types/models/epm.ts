@@ -216,6 +216,12 @@ export interface DeploymentsModesDefault {
   is_default?: boolean;
 }
 
+// Ordering should be from least to most mature
+export enum AgentlessDeploymentReleaseStatus {
+  Beta = 'beta',
+  GA = 'ga',
+}
+
 export interface DeploymentsModesAgentless extends DeploymentsModesDefault {
   organization?: string;
   division?: string;
@@ -227,6 +233,7 @@ export interface DeploymentsModesAgentless extends DeploymentsModesDefault {
       memory: string;
     };
   };
+  release?: AgentlessDeploymentReleaseStatus;
 }
 export interface DeploymentsModes {
   agentless: DeploymentsModesAgentless;
@@ -807,6 +814,10 @@ export interface Installation {
   is_dependency_of?: IsDependencyOf | null;
   /** Whether the package was installed as a dependency (not manually by a user) */
   installed_as_dependency?: boolean;
+  /** Namespaces opted in for namespace-level customization for this package. */
+  namespace_customization_enabled_for?: string[];
+  /** Snapshot of dependency version changes made when this (composable) package was last installed/upgraded; used for rollback */
+  previous_dependency_versions?: Array<{ name: string; previous_version: string | null }> | null;
 }
 
 export interface PackageUsageStats {

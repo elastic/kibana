@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useMemo, useRef, type MutableRefObject } from 'react';
+import { useCallback, useEffect, useMemo, useRef, type MutableRefObject } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { ESQLCallbacks, ESQLControlVariable, ESQLRegistrySolutionId } from '@kbn/esql-types';
@@ -23,6 +23,7 @@ import {
   getInferenceEndpoints,
   getTimeseriesIndices,
   getViews,
+  getDatasets,
 } from '@kbn/esql-utils';
 import type { getEsqlColumns, getESQLSources } from '@kbn/esql-utils';
 import type { ESQLSourceResult } from '@kbn/esql-types';
@@ -157,8 +158,10 @@ export const useEsqlCallbacks = ({
           dropNullColumns: true,
         }).result;
 
+        // Bail out without touching the cache — cache cleanup for the aborted query
+        // already happened at abort time. Deleting here would race with a fresh re-request that may
+        // have repopulated the same key.
         if (currentController.signal.aborted) {
-          esqlFieldsCache.delete(queryToExecute);
           return [];
         }
 
@@ -176,6 +179,17 @@ export const useEsqlCallbacks = ({
       esqlService,
     ]
   );
+
+  // Abort any in-flight getColumnsFor request when the editor unmounts. Without this, navigating away
+  // from a long-running query leaves it polling in the browser and running on ES.
+  useEffect(() => {
+    return () => {
+      columnsAbortControllerRef.current?.abort();
+      if (previousColumnsQueryRef.current) {
+        esqlFieldsCache.delete(previousColumnsQueryRef.current);
+      }
+    };
+  }, [esqlFieldsCache]);
 
   const getPolicies = useCallback(async () => getEsqlPolicies(core.http), [core.http]);
 
@@ -204,6 +218,10 @@ export const useEsqlCallbacks = ({
 
   const getViewsCallback = useCallback(async () => {
     return await getViews(core.http);
+  }, [core.http]);
+
+  const getDatasetsCallback = useCallback(async () => {
+    return await getDatasets(core.http);
   }, [core.http]);
 
   const getEditorExtensionsCallback = useCallback(
@@ -297,6 +315,7 @@ export const useEsqlCallbacks = ({
       getJoinIndices: getJoinIndicesCallback,
       getTimeseriesIndices: getTimeseriesIndicesCallback,
       getViews: getViewsCallback,
+      getDatasets: getDatasetsCallback,
       getEditorExtensions: getEditorExtensionsCallback,
       getInferenceEndpoints: getInferenceEndpointsCallback,
       getLicense,
@@ -318,6 +337,7 @@ export const useEsqlCallbacks = ({
       getJoinIndicesCallback,
       getTimeseriesIndicesCallback,
       getViewsCallback,
+      getDatasetsCallback,
       getEditorExtensionsCallback,
       getInferenceEndpointsCallback,
       getLicense,

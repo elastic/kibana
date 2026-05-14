@@ -13,6 +13,7 @@ import { KbnPalette } from '../../../constants';
 
 export const kibana4Palette = new KbnCategoricalPalette({
   id: KbnPalette.Kibana4,
+  legacy: true,
   aliases: [
     'kibana_palette', // used in legacy chart palette service
   ],

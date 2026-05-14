@@ -27,7 +27,7 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { getTransformIn } from '../common/transforms/transform_in';
 import { getTransformOut } from '../common/transforms/transform_out';
 import type { LensTransforms } from '../common/transforms/types';
-import { isByRefLensConfig, unflattenAPIConfig } from './utils';
+import { isByRefLensConfig, unflattenAPIConfig } from '../common/transforms/utils';
 import type { FlattenedLensByValuePanelSchema } from './types';
 
 /**

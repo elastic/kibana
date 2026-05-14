@@ -6,112 +6,51 @@
  */
 
 import { expect } from '@kbn/scout/api';
-import { apiTest, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
-import {
-  API_HEADERS,
-  INSIGHTS_API_PATH,
-  RULE_DOCTOR_INSIGHTS_INDEX,
-  ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
-} from '../fixtures';
+import { apiTest, testData } from '../fixtures';
 
-const createInsight = (overrides: Record<string, unknown> = {}) => ({
-  '@timestamp': new Date().toISOString(),
-  insight_id: `insight-${Math.random().toString(36).slice(2, 10)}`,
-  execution_id: 'exec-1',
-  status: 'open',
-  type: 'coverage_gap',
-  action: 'create_rule',
-  impact: 'medium',
-  confidence: 'high',
-  title: 'Test insight',
-  summary: 'A test insight for Scout API tests',
-  rule_ids: [],
-  data: {},
-  current: null,
-  proposed: null,
-  space_id: 'default',
-  ...overrides,
-});
+const SEEDED_INSIGHT_COUNT = 3;
 
 apiTest.describe('Rule Doctor insights API', { tag: tags.stateful.classic }, () => {
   let adminCredentials: RoleApiCredentials;
+  let adminHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ requestAuth, esClient, kbnClient }) => {
+  apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
     adminCredentials = await requestAuth.getApiKeyForAdmin();
+    adminHeaders = { ...adminCredentials.apiKeyHeader };
 
-    await kbnClient.uiSettings.update({
-      [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
-    });
-
-    await esClient.indices.delete({
-      index: RULE_DOCTOR_INSIGHTS_INDEX,
-      ignore_unavailable: true,
-    });
-
-    await esClient.indices.create({
-      index: RULE_DOCTOR_INSIGHTS_INDEX,
-      mappings: {
-        dynamic: false,
-        properties: {
-          '@timestamp': { type: 'date' },
-          insight_id: { type: 'keyword' },
-          execution_id: { type: 'keyword' },
-          status: { type: 'keyword' },
-          type: { type: 'keyword' },
-          action: { type: 'keyword' },
-          impact: { type: 'keyword' },
-          confidence: { type: 'keyword' },
-          title: { type: 'text' },
-          summary: { type: 'text' },
-          rule_ids: { type: 'keyword' },
-          data: { type: 'flattened' },
-          space_id: { type: 'keyword' },
-        },
-      },
-    });
-
-    const insights = [
-      createInsight({ insight_id: 'scout-insight-1', status: 'open', type: 'coverage_gap' }),
-      createInsight({ insight_id: 'scout-insight-2', status: 'open', type: 'deduplication' }),
-      createInsight({ insight_id: 'scout-insight-3', status: 'dismissed', type: 'coverage_gap' }),
-    ];
-
-    const operations = insights.flatMap((insight) => [
-      { index: { _index: RULE_DOCTOR_INSIGHTS_INDEX, _id: insight.insight_id } },
-      insight,
+    await apiServices.alertingV2.insights.cleanUp();
+    await apiServices.alertingV2.insights.seed([
+      { insight_id: 'scout-insight-1', status: 'open', type: 'coverage_gap' },
+      { insight_id: 'scout-insight-2', status: 'open', type: 'deduplication' },
+      { insight_id: 'scout-insight-3', status: 'dismissed', type: 'coverage_gap' },
     ]);
-
-    await esClient.bulk({ operations, refresh: 'wait_for' });
   });
 
-  apiTest.afterAll(async ({ esClient, kbnClient }) => {
-    await esClient.indices.delete({
-      index: RULE_DOCTOR_INSIGHTS_INDEX,
-      ignore_unavailable: true,
-    });
-
-    await kbnClient.uiSettings.update({
-      [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: false,
-    });
+  apiTest.afterAll(async ({ apiServices }) => {
+    await apiServices.alertingV2.insights.cleanUp();
   });
 
   apiTest('should list insights with pagination', async ({ apiClient }) => {
-    const response = await apiClient.get(`${INSIGHTS_API_PATH}?perPage=2&page=1`, {
-      headers: { ...adminCredentials.apiKeyHeader },
+    const response = await apiClient.get(`${testData.INSIGHTS_API_PATH}?perPage=2&page=1`, {
+      headers: adminHeaders,
       responseType: 'json',
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body.page).toBe(1);
-    expect(response.body.perPage).toBe(2);
+    expect(response.body).toMatchObject({
+      page: 1,
+      perPage: 2,
+      total: SEEDED_INSIGHT_COUNT,
+      items: expect.arrayContaining([]),
+    });
     expect(response.body.items).toHaveLength(2);
-    expect(response.body.total).toBeGreaterThanOrEqual(3);
   });
 
   apiTest('should filter insights by status', async ({ apiClient }) => {
-    const response = await apiClient.get(`${INSIGHTS_API_PATH}?status=dismissed`, {
-      headers: { ...adminCredentials.apiKeyHeader },
+    const response = await apiClient.get(`${testData.INSIGHTS_API_PATH}?status=dismissed`, {
+      headers: adminHeaders,
       responseType: 'json',
     });
 
@@ -123,19 +62,22 @@ apiTest.describe('Rule Doctor insights API', { tag: tags.stateful.classic }, () 
   });
 
   apiTest('should get an insight by ID', async ({ apiClient }) => {
-    const response = await apiClient.get(`${INSIGHTS_API_PATH}/scout-insight-1`, {
-      headers: { ...adminCredentials.apiKeyHeader },
+    const response = await apiClient.get(`${testData.INSIGHTS_API_PATH}/scout-insight-1`, {
+      headers: adminHeaders,
       responseType: 'json',
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body.insight_id).toBe('scout-insight-1');
-    expect(response.body.status).toBe('open');
+    expect(response.body).toMatchObject({
+      insight_id: 'scout-insight-1',
+      status: 'open',
+      type: 'coverage_gap',
+    });
   });
 
   apiTest('should return 404 for an unknown insight ID', async ({ apiClient }) => {
-    const response = await apiClient.get(`${INSIGHTS_API_PATH}/nonexistent-id`, {
-      headers: { ...adminCredentials.apiKeyHeader },
+    const response = await apiClient.get(`${testData.INSIGHTS_API_PATH}/nonexistent-id`, {
+      headers: adminHeaders,
       responseType: 'json',
     });
 
@@ -143,16 +85,19 @@ apiTest.describe('Rule Doctor insights API', { tag: tags.stateful.classic }, () 
   });
 
   apiTest('should update insight status from open to dismissed', async ({ apiClient }) => {
-    const updateResponse = await apiClient.put(`${INSIGHTS_API_PATH}/scout-insight-2/status`, {
-      headers: { ...API_HEADERS, ...adminCredentials.apiKeyHeader },
-      body: { status: 'dismissed' },
-      responseType: 'json',
-    });
+    const updateResponse = await apiClient.put(
+      `${testData.INSIGHTS_API_PATH}/scout-insight-2/status`,
+      {
+        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        body: { status: 'dismissed' },
+        responseType: 'json',
+      }
+    );
 
     expect(updateResponse).toHaveStatusCode(204);
 
-    const getResponse = await apiClient.get(`${INSIGHTS_API_PATH}/scout-insight-2`, {
-      headers: { ...adminCredentials.apiKeyHeader },
+    const getResponse = await apiClient.get(`${testData.INSIGHTS_API_PATH}/scout-insight-2`, {
+      headers: adminHeaders,
       responseType: 'json',
     });
 
@@ -161,8 +106,8 @@ apiTest.describe('Rule Doctor insights API', { tag: tags.stateful.classic }, () 
   });
 
   apiTest('should return 404 when updating status of unknown insight', async ({ apiClient }) => {
-    const response = await apiClient.put(`${INSIGHTS_API_PATH}/nonexistent-id/status`, {
-      headers: { ...API_HEADERS, ...adminCredentials.apiKeyHeader },
+    const response = await apiClient.put(`${testData.INSIGHTS_API_PATH}/nonexistent-id/status`, {
+      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       body: { status: 'applied' },
       responseType: 'json',
     });

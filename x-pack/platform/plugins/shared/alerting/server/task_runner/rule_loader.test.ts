@@ -317,6 +317,23 @@ describe('rule_loader', () => {
       );
     });
 
+    test('logs a debug message for likely non-Cloud user API key owners', () => {
+      const uiamContext = {
+        ...context,
+        shouldGrantUiam: true,
+        apiKeyType: ApiKeyType.UIAM,
+        logger: mockLogger,
+      } as unknown as TaskRunnerContext;
+
+      getFakeKibanaRequest(uiamContext, 'default', apiKey, undefined, false, 'elastic');
+
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'UIAM API key is not provided because the Elasticsearch API key creator is likely a non-Cloud user, falling back to regular API key.',
+        expect.objectContaining({ tags: expect.any(Array) })
+      );
+    });
+
     test('logs a debug message when UIAM is expected but no UIAM API key and apiKeyCreatedByUser is true with an ES API key', () => {
       const uiamContext = {
         ...context,

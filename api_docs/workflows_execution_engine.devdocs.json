@@ -218,7 +218,47 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "workflowsExecutionEngine",
+        "id": "def-server.resolveWorkflowEventsModeFromOn",
+        "type": "Function",
+        "tags": [],
+        "label": "resolveWorkflowEventsModeFromOn",
+        "description": [
+          "\nResolves `on.workflowEvents` the same way event-driven scheduling does: unknown or omitted -> `avoid-loop`."
+        ],
+        "signature": [
+          "(on: Record<string, unknown> | null | undefined) => \"ignore\" | \"allow-all\" | \"avoid-loop\""
+        ],
+        "path": "src/platform/plugins/shared/workflows_execution_engine/server/trigger_events/lib/resolve_workflow_events_mode_from_on.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsExecutionEngine",
+            "id": "def-server.resolveWorkflowEventsModeFromOn.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "on",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | null | undefined"
+            ],
+            "path": "src/platform/plugins/shared/workflows_execution_engine/server/trigger_events/lib/resolve_workflow_events_mode_from_on.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "workflowsExecutionEngine",
@@ -998,7 +1038,7 @@
           " extends Partial<{ '@timestamp'?: Partial<string | number> | Partial<string | number>[] | undefined; spaceId?: string | string[] | undefined; level?: string | string[] | undefined; workflow?: Partial<{ id?: string | string[] | undefined; execution_id?: string | string[] | undefined; step_id?: string | string[] | undefined; step_execution_id?: string | string[] | undefined; }> | Partial<{ id?: string | string[] | undefined; execution_id?: string | string[] | undefined; step_id?: string | string[] | undefined; step_execution_id?: string | string[] | undefined; }>[] | undefined; }>"
         ],
         "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/data_stream.ts",
-        "lineNumber": 46,
+        "lineNumber": 47,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1011,7 +1051,7 @@
             "label": "'@timestamp'",
             "description": [],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/data_stream.ts",
-            "lineNumber": 47,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1024,7 +1064,7 @@
             "label": "message",
             "description": [],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/data_stream.ts",
-            "lineNumber": 48,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1040,7 +1080,7 @@
               "\"info\" | \"error\" | \"trace\" | \"debug\" | \"warn\" | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/data_stream.ts",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1056,7 +1096,7 @@
               "{ id?: string | undefined; name?: string | undefined; execution_id?: string | undefined; step_id?: string | undefined; step_execution_id?: string | undefined; step_name?: string | undefined; step_type?: string | undefined; } | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/data_stream.ts",
-            "lineNumber": 50,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1072,7 +1112,7 @@
               "{ action?: string | undefined; category?: string[] | undefined; type?: string[] | undefined; provider?: string | undefined; outcome?: \"unknown\" | \"success\" | \"failure\" | undefined; duration?: number | undefined; start?: string | undefined; end?: string | undefined; } | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/data_stream.ts",
-            "lineNumber": 59,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1088,7 +1128,7 @@
               "{ workflow_transaction_id?: string | undefined; task_transaction_id?: string | undefined; name?: string | undefined; type?: string | null | undefined; is_triggered_by_alerting?: boolean | undefined; alerting_rule_id?: string | undefined; transaction_id?: string | undefined; outcome?: \"success\" | \"failure\" | undefined; } | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/data_stream.ts",
-            "lineNumber": 69,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1104,7 +1144,7 @@
               "{ trace_id?: string | undefined; } | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/data_stream.ts",
-            "lineNumber": 79,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1120,7 +1160,7 @@
               "{ message?: string | undefined; type?: string | undefined; stack_trace?: string | undefined; } | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/data_stream.ts",
-            "lineNumber": 82,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1136,7 +1176,7 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/data_stream.ts",
-            "lineNumber": 87,
+            "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1152,7 +1192,7 @@
               "Record<string, string | number | undefined> | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/data_stream.ts",
-            "lineNumber": 88,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

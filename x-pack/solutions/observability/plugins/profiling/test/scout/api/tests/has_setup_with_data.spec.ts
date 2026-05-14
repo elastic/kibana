@@ -14,7 +14,18 @@ import { esArchiversPath, esResourcesEndpoint } from '../../common/fixtures/cons
 apiTest.describe('Profiling is setup and data is loaded', { tag: tags.stateful.classic }, () => {
   let viewerApiCreditials: RoleApiCredentials;
   let adminApiCreditials: RoleApiCredentials;
-  apiTest.beforeAll(async ({ requestAuth, profilingSetup }) => {
+
+  apiTest.beforeAll(async ({ requestAuth, profilingHelper, profilingSetup }) => {
+    // Make this spec self-sufficient instead of relying on has_no_setup.spec running first:
+    // ensure the cloud agent policy exists and profiling resources are set up before
+    // attempting to load data.
+    await profilingHelper.installPolicies();
+
+    // Ensure the ES profiling data streams + aliases (`profiling-stackframes`, `profiling-stacktraces`, `profiling-executables`, `profiling-hosts`, `profiling-events-*`) exist before we bulk-write into them. Bulk `create` ops to non-existing aliases would otherwise create regular indices that later collide with the ES profiling plugin's alias creation (`InvalidAliasNameException`).
+    if (!(await profilingSetup.checkStatus()).has_setup) {
+      await profilingSetup.setupResources();
+    }
+
     await profilingSetup.loadData(esArchiversPath);
     viewerApiCreditials = await requestAuth.getApiKey('viewer');
     adminApiCreditials = await requestAuth.getApiKey('admin');

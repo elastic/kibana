@@ -50,9 +50,15 @@ export class ListInsightsRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const { page, perPage, status, type, execution_id: executionId, rule_ids } = this.request.query;
+    const {
+      page,
+      perPage,
+      status,
+      type,
+      execution_id: executionId,
+      rule_ids: ruleIds,
+    } = this.request.query;
     const from = (page - 1) * perPage;
-    const ruleIds = rule_ids ? rule_ids.split(',').map((id) => id.trim()) : undefined;
 
     const result = await this.insightsClient.listInsights({
       spaceId: this.spaceContext.spaceId,

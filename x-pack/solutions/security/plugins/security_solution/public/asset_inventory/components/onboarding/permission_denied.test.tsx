@@ -10,7 +10,7 @@ import { PermissionDenied } from './permission_denied';
 import { renderWithTestProvider } from '../../test/test_provider';
 import { screen } from '@testing-library/dom';
 import { TEST_SUBJ_ONBOARDING_PERMISSION_DENIED } from '../../constants';
-import type { AssetInventoryStatusResponse } from '../../../../common/api/asset_inventory/types';
+import type { AssetInventoryStatusResponse } from '../../hooks/use_asset_inventory_status';
 
 describe('PermissionDenied Component', () => {
   it('should render the component correctly', () => {

@@ -10,6 +10,7 @@
 import * as React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { TelemetryService } from '../services';
 import type { TelemetryConstants } from '..';
@@ -54,7 +55,10 @@ export const OptInMessage: React.FC<OptInMessageProps> = ({
           privacyStatementLink: (
             /* eslint-disable-next-line @elastic/eui/href-or-on-click */
             <EuiLink
-              onClick={onClick}
+              onClick={(e: React.MouseEvent) => {
+                if (hasActiveModifierKey(e)) return;
+                onClick?.();
+              }}
               href={telemetryConstants.getPrivacyStatementUrl()}
               target="_blank"
               rel="noopener"
@@ -96,7 +100,13 @@ function renderTelemetryEnabledOrDisabledText(
 
   return (
     /* eslint-disable-next-line @elastic/eui/href-or-on-click */
-    <EuiLink href={addBasePath(PATH_TO_ADVANCED_SETTINGS)} onClick={onClick}>
+    <EuiLink
+      href={addBasePath(PATH_TO_ADVANCED_SETTINGS)}
+      onClick={(e: React.MouseEvent) => {
+        if (hasActiveModifierKey(e)) return;
+        onClick?.();
+      }}
+    >
       {actionMessage}
     </EuiLink>
   );

@@ -47,6 +47,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./internal/get_connectors'));
     loadTestFile(require.resolve('./internal/user_actions_get_users'));
     loadTestFile(require.resolve('./internal/bulk_delete_file_attachments'));
+    loadTestFile(require.resolve('./internal/field_definitions'));
 
     /**
      * Telemetry
@@ -58,8 +59,5 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
 
     // NOTE: These need to be at the end because they could delete the .kibana index and inadvertently remove the users and spaces
     loadTestFile(require.resolve('../common/migrations'));
-
-    // NOTE: These need to be at the end because they could delete the .kibana index and inadvertently remove the users and spaces
-    loadTestFile(require.resolve('../common/kibana_alerting_cases_index'));
   });
 };

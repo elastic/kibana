@@ -17,7 +17,13 @@ import {
   type Evaluator,
   type Example,
 } from '@kbn/evals';
-import type { EvaluationChatClient, ErrorResponse, Step, Messages } from './chat_client';
+import type {
+  EvaluationChatClient,
+  ErrorResponse,
+  Step,
+  Messages,
+  AttachmentRecord,
+} from './chat_client';
 
 interface ToolCallAssertion {
   id: string;
@@ -26,9 +32,42 @@ interface ToolCallAssertion {
   criteria?: string[];
 }
 
+/**
+ * Assertion against a conversation-level attachment persisted as a side effect
+ * of tool execution. Used by the attachments evaluator to validate that (for
+ * example) `security.get_entity` registered a `security.entity` attachment
+ * with the expected payload shape.
+ *
+ * Semantics:
+ * - `type` is required and matched exactly against `attachment.type`.
+ * - `shape` narrows the payload on `attachment.versions[current_version].data`:
+ *    - `single` expects `EntityAttachmentSingleData` (identifier + identifierType).
+ *    - `table` expects `EntityAttachmentMultiData` (entities[]).
+ * - `entityId` / `entityType` match the attachment identifier (single payload
+ *   only). `entityId` matches either raw or stripped-prefix form.
+ * - `minEntities` / `count` bound the number of matching attachments and/or
+ *   entries in a table payload.
+ * - `criteria` delegates free-form payload assertions to the LLM judge via the
+ *   standard `evaluators.criteria(...)` pathway — the payload JSON is passed
+ *   as the evaluator output.
+ */
+interface AttachmentAssertion {
+  type: string;
+  shape?: 'single' | 'table';
+  entityId?: string;
+  entityType?: 'host' | 'user' | 'service' | 'generic';
+  minEntities?: number;
+  count?: { min?: number; max?: number; exact?: number };
+  criteria?: string[];
+}
+
 interface DatasetExample extends Example {
   input: { question: string };
-  output: { criteria?: string[]; toolCalls?: ToolCallAssertion[] };
+  output: {
+    criteria?: string[];
+    toolCalls?: ToolCallAssertion[];
+    attachments?: AttachmentAssertion[];
+  };
   metadata?: { query_intent?: string };
 }
 
@@ -36,6 +75,7 @@ interface ChatTaskOutput {
   errors: ErrorResponse[];
   messages: Messages;
   steps?: Step[];
+  attachments?: AttachmentRecord[];
 }
 
 export type EvaluateDataset = ({
@@ -258,6 +298,7 @@ export function createEvaluateDataset({
             errors: response.errors,
             messages: response.messages,
             steps: response.steps,
+            attachments: response.attachments,
             traceId: response.traceId,
             modelUsage: response.modelUsage,
             correctnessAnalysis: correctnessResult?.metadata,
@@ -268,6 +309,7 @@ export function createEvaluateDataset({
       [
         createCriteriaEvaluator({ evaluators }),
         createToolCallsEvaluator({ evaluators }),
+        createAttachmentsEvaluator({ evaluators }),
         ...selectEvaluators([
           createQuantitativeGroundednessEvaluator(),
           ...createQuantitativeCorrectnessEvaluators().filter(
@@ -349,6 +391,211 @@ const createToolCallsEvaluator = ({ evaluators }: { evaluators: DefaultEvaluator
       );
 
       return combineEvaluationResults(toolCallResults);
+    },
+  };
+};
+
+/**
+ * Returns the current-version payload for an attachment, or `undefined` when
+ * the record has no versions / current version mismatch. The Agent Builder
+ * attachment API keeps version arrays 1-indexed so we locate the matching
+ * entry rather than indexing blindly.
+ */
+const getCurrentAttachmentData = (attachment: AttachmentRecord): unknown => {
+  const current = attachment.versions.find((v) => v.version === attachment.current_version);
+  return current?.data;
+};
+
+interface AttachmentPayloadShape {
+  shape?: 'single' | 'table';
+  identifier?: string;
+  identifierType?: string;
+  entityStoreId?: string;
+  entitiesCount?: number;
+}
+
+/**
+ * Classifies an attachment payload into `single` / `table` shape and extracts
+ * the identifier fields used by the matcher. Mirrors the discriminator logic
+ * in `EntityAttachmentData` (single: `identifier` + `identifierType`;
+ * table: `entities: []`).
+ */
+const classifyPayload = (data: unknown): AttachmentPayloadShape => {
+  if (!data || typeof data !== 'object') {
+    return {};
+  }
+  const obj = data as Record<string, unknown>;
+  if (Array.isArray(obj.entities)) {
+    return { shape: 'table', entitiesCount: obj.entities.length };
+  }
+  if (typeof obj.identifier === 'string' && typeof obj.identifierType === 'string') {
+    return {
+      shape: 'single',
+      identifier: obj.identifier,
+      identifierType: obj.identifierType,
+      entityStoreId: typeof obj.entityStoreId === 'string' ? obj.entityStoreId : undefined,
+    };
+  }
+  return {};
+};
+
+/**
+ * Checks whether an `entityId` assertion matches an attachment identifier.
+ * Tolerant of the `{type}:` prefix so specs can assert either the canonical
+ * EUID ("user:jsmith123") or the bare identity value ("jsmith123") — the tool
+ * strips the prefix on single payloads (see `stripEntityIdPrefix`).
+ */
+const entityIdMatches = (expected: string, shape: AttachmentPayloadShape): boolean => {
+  const candidates = [shape.identifier, shape.entityStoreId].filter(
+    (v): v is string => typeof v === 'string'
+  );
+  const expectedLower = expected.toLowerCase();
+  const expectedStripped = expectedLower.includes(':')
+    ? expectedLower.slice(expectedLower.indexOf(':') + 1)
+    : expectedLower;
+  return candidates.some((c) => {
+    const cLower = c.toLowerCase();
+    return cLower === expectedLower || cLower === expectedStripped;
+  });
+};
+
+const findMatchingAttachments = (
+  assertion: AttachmentAssertion,
+  attachments: AttachmentRecord[]
+): Array<{ attachment: AttachmentRecord; shape: AttachmentPayloadShape }> => {
+  return attachments
+    .filter((a) => a.type === assertion.type && a.active !== false)
+    .map((attachment) => ({
+      attachment,
+      shape: classifyPayload(getCurrentAttachmentData(attachment)),
+    }))
+    .filter(({ shape }) => {
+      if (assertion.shape && shape.shape !== assertion.shape) return false;
+      if (assertion.entityType && shape.identifierType !== assertion.entityType) return false;
+      if (assertion.entityId && !entityIdMatches(assertion.entityId, shape)) return false;
+      if (assertion.minEntities !== undefined) {
+        if (shape.shape !== 'table') return false;
+        if ((shape.entitiesCount ?? 0) < assertion.minEntities) return false;
+      }
+      return true;
+    });
+};
+
+const formatCountBounds = (count: NonNullable<AttachmentAssertion['count']>): string => {
+  const parts: string[] = [];
+  if (count.exact !== undefined) parts.push(`exact=${count.exact}`);
+  if (count.min !== undefined) parts.push(`min=${count.min}`);
+  if (count.max !== undefined) parts.push(`max=${count.max}`);
+  return parts.join(', ');
+};
+
+const evaluateAttachmentAssertion = async (
+  assertion: AttachmentAssertion,
+  attachments: AttachmentRecord[],
+  evaluators: DefaultEvaluators,
+  input: DatasetExample['input'],
+  metadata: DatasetExample['metadata']
+): Promise<EvaluationResult> => {
+  const matches = findMatchingAttachments(assertion, attachments);
+  const count = assertion.count;
+
+  // Count-based assertion (including `count.exact: 0` for negative assertions).
+  if (count) {
+    const n = matches.length;
+    const exactFail = count.exact !== undefined && n !== count.exact;
+    const minFail = count.min !== undefined && n < count.min;
+    const maxFail = count.max !== undefined && n > count.max;
+    if (exactFail || minFail || maxFail) {
+      return {
+        score: 0,
+        label: 'FAIL',
+        explanation: `Expected ${formatCountBounds(count)} attachments of type "${
+          assertion.type
+        }" matching shape/entity filters, found ${n}.`,
+      };
+    }
+    // If exact=0, pass here — no criteria to judge.
+    if (count.exact === 0) {
+      return {
+        score: 1,
+        label: 'PASS',
+        explanation: `Confirmed 0 attachments of type "${assertion.type}" matching filters.`,
+      };
+    }
+  } else if (matches.length === 0) {
+    // Default: require at least one match.
+    const typesSeen = [...new Set(attachments.map((a) => a.type))].join(', ') || '(none)';
+    return {
+      score: 0,
+      label: 'FAIL',
+      explanation: `No attachment matched type="${assertion.type}"${
+        assertion.shape ? ` shape=${assertion.shape}` : ''
+      }${assertion.entityId ? ` entityId=${assertion.entityId}` : ''}${
+        assertion.entityType ? ` entityType=${assertion.entityType}` : ''
+      }. Types present: [${typesSeen}].`,
+    };
+  }
+
+  if (!assertion.criteria || assertion.criteria.length === 0) {
+    return {
+      score: 1,
+      label: 'PASS',
+      explanation: `Attachment assertion satisfied (${matches.length} match${
+        matches.length === 1 ? '' : 'es'
+      } of type "${assertion.type}").`,
+    };
+  }
+
+  // Delegate free-form payload assertions to the LLM judge. Feed the matched
+  // attachment data in as the evaluator `output` so the judge can reason over
+  // the actual payload JSON.
+  const payloadOutput = {
+    attachments: matches.map(({ attachment, shape }) => ({
+      id: attachment.id,
+      type: attachment.type,
+      shape: shape.shape,
+      data: getCurrentAttachmentData(attachment),
+    })),
+  };
+  const criteriaResult = await evaluators.criteria(assertion.criteria).evaluate({
+    input,
+    expected: { criteria: assertion.criteria },
+    output: payloadOutput,
+    metadata,
+  });
+  return {
+    score: criteriaResult.score ?? null,
+    label: criteriaResult.label ?? 'PASS',
+    explanation: `Matched ${matches.length} attachment(s). ${criteriaResult.explanation ?? ''}`,
+  };
+};
+
+const createAttachmentsEvaluator = ({
+  evaluators,
+}: {
+  evaluators: DefaultEvaluators;
+}): Evaluator<DatasetExample, ChatTaskOutput> => {
+  return {
+    name: 'Attachments',
+    kind: 'LLM' as const,
+    evaluate: async ({ input, output, expected, metadata }: EvaluateOpts) => {
+      const assertions = expected.attachments ?? [];
+      if (assertions.length === 0) {
+        return {
+          score: 1,
+          label: 'PASS',
+          explanation: 'No attachment assertions specified.',
+        };
+      }
+
+      const attachments = output.attachments ?? [];
+      const results: EvaluationResult[] = [];
+      for (const assertion of assertions) {
+        results.push(
+          await evaluateAttachmentAssertion(assertion, attachments, evaluators, input, metadata)
+        );
+      }
+      return combineEvaluationResults(results);
     },
   };
 };

@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
-import type { ReadOnlyConversationClient } from '@kbn/agent-builder-plugin/server';
+import type { ReadOnlyConversationClient } from '@kbn/agent-builder-server';
 import type { GetScopedClients } from '../../../routes/types';
 import type { StreamsServer } from '../../../types';
 import { createStreamsDescriptionGenerationTask } from './description_generation';

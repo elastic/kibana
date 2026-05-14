@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { AgentMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
+import type { AgentMark } from './agent_marker';
 import { AgentMarker } from './agent_marker';
 import { renderWithTheme } from '../../../../../utils/test_helpers';
 

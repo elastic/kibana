@@ -275,11 +275,15 @@ export class ScopedDiscoverEBTManager {
       const embeddedQueryColumns = embeddedQueries
         ? embeddedQueries
             .map((embeddedQuery) => {
-              const embeddedKQLFieldNames = getKqlFieldNamesFromExpression(embeddedQuery);
-              if (getIsKqlFreeTextExpression(embeddedQuery)) {
-                embeddedKQLFieldNames.push(FREE_TEXT);
+              try {
+                const embeddedKQLFieldNames = getKqlFieldNamesFromExpression(embeddedQuery);
+                if (getIsKqlFreeTextExpression(embeddedQuery)) {
+                  embeddedKQLFieldNames.push(FREE_TEXT);
+                }
+                return embeddedKQLFieldNames;
+              } catch (e) {
+                return [];
               }
-              return embeddedKQLFieldNames;
             })
             .flat()
         : [];
@@ -306,16 +310,20 @@ export class ScopedDiscoverEBTManager {
         return;
       }
 
-      const fieldNames = getKqlFieldNamesFromExpression(query.query);
-      if (getIsKqlFreeTextExpression(query.query)) {
-        fieldNames.push(FREE_TEXT);
-      }
+      try {
+        const fieldNames = getKqlFieldNamesFromExpression(query.query);
+        if (getIsKqlFreeTextExpression(query.query)) {
+          fieldNames.push(FREE_TEXT);
+        }
 
-      await this.trackQueryFieldsUsageEvent({
-        eventName: QueryFieldsUsageEventName.kqlQuery,
-        fieldNames,
-        fieldsMetadata,
-      });
+        await this.trackQueryFieldsUsageEvent({
+          eventName: QueryFieldsUsageEventName.kqlQuery,
+          fieldNames,
+          fieldsMetadata,
+        });
+      } catch (e) {
+        // DO nothing for now
+      }
     }
   }
 

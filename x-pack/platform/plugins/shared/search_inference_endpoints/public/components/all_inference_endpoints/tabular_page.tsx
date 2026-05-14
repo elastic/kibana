@@ -41,7 +41,7 @@ const searchContainerStyles = ({ euiTheme }: UseEuiTheme) => css`
   width: ${euiTheme.base * 25}px;
 `;
 
-const DEFAULT_GROUP_BY = GroupByOptions.Model;
+const DEFAULT_GROUP_BY = GroupByOptions.None;
 
 const initializeGroupBy = (): GroupByOptions => {
   const params = new URLSearchParams(window.location.search);
@@ -52,8 +52,6 @@ const initializeGroupBy = (): GroupByOptions => {
       return GroupByOptions.None;
     case GroupByOptions.Service:
       return GroupByOptions.Service;
-    case GroupByOptions.Model:
-      return GroupByOptions.Model;
     default:
       // Fallback to default group by setting
       return DEFAULT_GROUP_BY;

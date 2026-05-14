@@ -10,7 +10,7 @@ import { useMemo, useRef } from 'react';
 import type { OsqueryTable } from '../../common/types/schema';
 import { useOsquerySchema } from '../common/hooks/use_osquery_schema';
 // Static path required by webpack — must match FALLBACK_OSQUERY_VERSION in common/constants.ts
-import bundledSchemaJson from '../common/schemas/osquery/v5.19.0.json';
+import bundledSchemaJson from '../../common/schemas/osquery/v5.19.0.json';
 
 const normalizeTables = (tablesJSON: OsqueryTable[]) => sortBy(tablesJSON, 'name');
 
