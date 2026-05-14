@@ -3475,5 +3475,28 @@ describe('EPM template', () => {
         expect(result.runtime).toEqual({ 'a.b': { type: 'keyword' } });
       });
     });
+
+    // --- group with no fields key ---
+    //
+    // Real EPR packages can contain group fields without a `fields` array (the
+    // key is simply absent from the YAML). This must not throw — it should
+    // silently produce no properties for that group, identical to a group whose
+    // `fields` array is empty.
+    describe('group with no fields key', () => {
+      it('does not throw and emits no properties', () => {
+        expect(() =>
+          generateMappings([{ name: 'a', type: 'group' } as any])
+        ).not.toThrow();
+
+        const result = generateMappings([{ name: 'a', type: 'group' } as any]);
+        expect(result.properties).toEqual({});
+      });
+
+      it('behaves identically to a group with an empty fields array', () => {
+        const withUndefined = generateMappings([{ name: 'a', type: 'group' } as any]);
+        const withEmpty = generateMappings([{ name: 'a', type: 'group', fields: [] }]);
+        expect(withUndefined).toEqual(withEmpty);
+      });
+    });
   });
 });

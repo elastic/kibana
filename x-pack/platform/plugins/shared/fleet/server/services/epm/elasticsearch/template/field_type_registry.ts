@@ -373,7 +373,10 @@ const groupType: FieldTypeHandler = {
    * Returns undefined when the group has no mappings to emit.
    */
   mapGroup(field, builder, context) {
-    const mappings = builder.build(field.fields!, fieldPath(context.groupFieldName, field.name));
+    const mappings = builder.build(
+      field.fields ?? [],
+      fieldPath(context.groupFieldName, field.name)
+    );
 
     if (mappings.hasNonDynamicTemplateMappings) {
       const fieldProps: Properties = {
