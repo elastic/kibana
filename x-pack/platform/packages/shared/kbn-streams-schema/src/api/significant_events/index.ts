@@ -84,6 +84,7 @@ export const generatedSignificantEventQuerySchema = z.object({
   description: z.string(),
   evidence: z.array(z.string()).optional(),
   replaces: z.string().optional(),
+  feature_ids: z.array(z.string()),
 });
 
 type GeneratedSignificantEventQuery = z.infer<typeof generatedSignificantEventQuerySchema>;

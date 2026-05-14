@@ -40,6 +40,7 @@ import {
   QUERY_DESCRIPTION,
   QUERY_ESQL_QUERY,
   QUERY_EVIDENCE,
+  QUERY_FEATURE_IDS,
   QUERY_FEATURE_FILTER,
   QUERY_FEATURE_NAME,
   QUERY_KQL_BODY,
@@ -244,10 +245,11 @@ function fromStorage(link: StoredQueryLink): QueryLink {
         query: esql,
       },
       severity_score: link[QUERY_SEVERITY_SCORE],
-      // QUERY_EVIDENCE ('experimental.query.evidence') lives under the dynamic-disabled
-      // 'experimental' object, so it can't be added to QueryLinkStorageFields without
-      // breaking the IStorageClient Exact type check.
+      // QUERY_EVIDENCE and QUERY_FEATURE_IDS live under the dynamic-disabled
+      // 'experimental' object, so they can't be added to QueryLinkStorageFields
+      // without breaking the IStorageClient Exact type check.
       evidence: (link as Record<string, unknown>)[QUERY_EVIDENCE] as string[] | undefined,
+      feature_ids: (link as Record<string, unknown>)[QUERY_FEATURE_IDS] as string[] | undefined,
     },
   };
 }
@@ -291,6 +293,7 @@ function toStorage(
     [QUERY_SEVERITY_SCORE]: query.severity_score,
     [QUERY_TYPE]: derivedType,
     [QUERY_EVIDENCE]: query.evidence,
+    [QUERY_FEATURE_IDS]: query.feature_ids,
     [RULE_BACKED]: request.rule_backed,
     [RULE_ID]: link.rule_id,
     ...(includeEmbedding && embeddingText ? { [QUERY_SEARCH_EMBEDDING]: embeddingText } : {}),

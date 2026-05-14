@@ -66,6 +66,7 @@ interface ParsedToolQuery {
   severity_score: number;
   evidence?: string[];
   replaces?: string;
+  feature_ids: string[];
 }
 
 function getErrorMessage(error: unknown): string {
@@ -130,6 +131,8 @@ export async function generateSignificantEvents({
       )
     : '';
 
+  const returnedFeatureIds = new Set<string>();
+
   logger.trace('Generating significant events via reasoning agent');
   const response = await withSpan('generate_significant_events', () =>
     executeAsReasoningAgent({
@@ -161,6 +164,10 @@ export async function generateSignificantEvents({
               })
             );
             const llmFeatures = features.map(toFeatureForLlmContext);
+
+            for (const feature of features) {
+              returnedFeatureIds.add(feature.id);
+            }
 
             return {
               response: {
@@ -211,6 +218,26 @@ export async function generateSignificantEvents({
                   );
                 }
 
+                const rawFeatureIds: string[] = query.feature_ids ?? [];
+                const validFeatureIds = rawFeatureIds.filter((id) => returnedFeatureIds.has(id));
+                const invalidFeatureIds = rawFeatureIds.filter((id) => !returnedFeatureIds.has(id));
+
+                if (validFeatureIds.length === 0) {
+                  hasFailures = true;
+                  return {
+                    query,
+                    valid: false,
+                    status: 'Failed to add',
+                    error: `feature_ids must reference at least one feature returned by get_stream_features. Unknown IDs: [${rawFeatureIds.join(
+                      ', '
+                    )}]`,
+                  };
+                }
+
+                if (invalidFeatureIds.length > 0) {
+                  warnings.push(`Stripped unknown feature_ids: [${invalidFeatureIds.join(', ')}]`);
+                }
+
                 const sourceRewritten = replaceFromSources(query.esql, targetSources);
                 const rewritten =
                   derivedType === QUERY_TYPE_STATS
@@ -219,7 +246,12 @@ export async function generateSignificantEvents({
 
                 if (normalizedStoredEsqls.has(normalizeEsqlSafe(rewritten))) {
                   return {
-                    query: { ...query, type: derivedType, esql: rewritten },
+                    query: {
+                      ...query,
+                      type: derivedType,
+                      esql: rewritten,
+                      feature_ids: validFeatureIds,
+                    },
                     valid: false,
                     status: 'Duplicate',
                     error: 'This query already exists for this stream.',
@@ -239,7 +271,12 @@ export async function generateSignificantEvents({
 
                 const allHints = [...warnings, ...hints];
                 return {
-                  query: { ...query, type: derivedType, esql: rewritten },
+                  query: {
+                    ...query,
+                    type: derivedType,
+                    esql: rewritten,
+                    feature_ids: validFeatureIds,
+                  },
                   valid: true,
                   status: 'Added',
                   error: undefined,

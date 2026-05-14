@@ -29,3 +29,4 @@ export const QUERY_FEATURE_NAME = 'experimental.query.system.name';
 export const QUERY_FEATURE_FILTER = 'experimental.query.system.filter';
 export const QUERY_FEATURE_TYPE = 'experimental.query.system.type';
 export const QUERY_EVIDENCE = 'experimental.query.evidence';
+export const QUERY_FEATURE_IDS = 'experimental.query.feature_ids';

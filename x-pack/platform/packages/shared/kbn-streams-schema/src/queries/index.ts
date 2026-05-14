@@ -45,6 +45,7 @@ export interface StreamQuery extends StreamQueryBase {
   // from 0 to 100. aligned with anomaly detection scoring
   severity_score?: number;
   evidence?: string[];
+  feature_ids?: string[];
 }
 
 const streamQueryBaseSchema = z.object({
@@ -62,6 +63,7 @@ export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryBaseSchema.ex
   type: queryTypeSchema.default(QUERY_TYPE_MATCH),
   severity_score: z.number().optional(),
   evidence: z.array(z.string()).optional(),
+  feature_ids: z.array(z.string()).optional(),
   esql: esqlQuerySchema,
 });
 
