@@ -292,6 +292,7 @@ const CreateConnector: React.FC = () => {
                             <EuiIcon
                               size="l"
                               type={selectedConnector?.iconPath ?? ''}
+                              aria-hidden={true}
                               css={css`
                                 margin-right: ${euiTheme.size.m};
                               `}
