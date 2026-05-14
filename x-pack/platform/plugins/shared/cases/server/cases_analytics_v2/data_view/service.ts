@@ -11,8 +11,9 @@ import type {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { isEqual } from 'lodash';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import type { RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
+import type { DataView, RuntimeField, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
 import { CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
 import { buildCaseDataViewSpec, getCaseDataViewId } from './data_view_specs';
 import { buildRuntimeFieldEntry } from './runtime_fields';
@@ -54,17 +55,18 @@ interface EnsureForSpaceDeps {
 }
 
 /**
- * Shape of the relevant subset of a template SO. Templates store a richer
- * `definition` blob — we only need the `fields` portion (with `name` and
- * `type`) to build runtime field entries. Typed loosely to avoid a strict
- * dependency on the full template schema; templates evolve independently
- * and we shouldn't need a v2 update every time a template field gains a
- * new property.
+ * Shape of the relevant subset of a template SO. The persisted
+ * `attributes.definition` is the raw YAML string the user submitted —
+ * structured field metadata lives on `attributes.fieldNames`, an array
+ * populated at create / update time by `toFieldNames(parsedDefinition.fields)`
+ * (see `services/templates/index.ts`).
+ *
+ * Typed loosely with `unknown` per element so a future template-field type
+ * (`metadata`, `display`, `validation`, etc.) that we don't care about here
+ * can land without a v2 update.
  */
 interface TemplateAttributesLike {
-  definition?: {
-    fields?: Array<{ name?: unknown; type?: unknown }>;
-  };
+  fieldNames?: Array<{ name?: unknown; type?: unknown }>;
 }
 
 /**
@@ -90,14 +92,17 @@ interface TemplateAttributesLike {
  * typed runtime field at `cases.<snake>` that parses the keyword at query
  * time. See `runtime_fields.ts` for the snake-key → painless transform.
  *
- * **Template-change latency.** A new template's extended fields don't
- * appear in the data view until either:
- *   1. A Kibana process restart in this space (Set is empty, re-check
- *      finds the data view, runtime fields are refreshed during ensure).
- *   2. The operator calls `/reset` (drops all data views, in-memory Set
- *      is cleared, next request bootstraps fresh).
- * This is acceptable for PR 1; a follow-up can hook into the template SO
- * lifecycle for instant propagation.
+ * **Template-change latency.** A new template's extended fields propagate
+ * to the data view via three paths:
+ *   1. Template SO lifecycle hook — the templates service calls
+ *      `refreshForSpace` after every create / update / delete, so in-process
+ *      changes land on the data view immediately. Fire-and-forget; failures
+ *      log at WARN and the next access path repairs.
+ *   2. Kibana process restart — the Set is empty, `ensureForSpace`
+ *      computes the freshly-derived runtime field map and diffs it against
+ *      the persisted data view's map. Different → update; same → skip.
+ *   3. Operator-initiated `/reset` — drops all per-space data views and
+ *      clears the in-memory Set; the next request rebuilds from scratch.
  *
  * **Failure policy.** Never throws past the service boundary. Bootstrap or
  * sync failures log at WARN; the cases plugin's request handlers continue.
@@ -119,9 +124,22 @@ export class CasesAnalyticsV2DataViewService {
   }
 
   /**
-   * Ensures the Cases data view exists in the given space, populating its
-   * runtime field map from that space's templates. Idempotent — repeated
-   * calls in the same process hit the in-memory cache and return immediately.
+   * Ensures the Cases data view exists in the given space and that its
+   * runtime field map matches the union of currently-declared template
+   * fields in that space.
+   *
+   * Idempotent. Repeated calls in the same process hit the in-memory cache
+   * and return immediately after the first successful run.
+   *
+   * **Behaviour by branch.** The runtime field map is computed up-front so
+   * the existence-check branches make a like-for-like comparison:
+   *   - Data view doesn't exist → create with the freshly-computed map.
+   *   - Data view exists, runtime field map matches → no-op.
+   *   - Data view exists, runtime field map differs → update in place.
+   * Computing up-front is what makes process restart actually refresh
+   * runtime fields when templates have been added between restarts —
+   * without it, the existence check short-circuits and stale runtime fields
+   * would persist until `/reset` ran.
    *
    * Fire-and-forget by contract from the caller's perspective: errors are
    * caught internally and logged at WARN. The request handler context
@@ -129,7 +147,27 @@ export class CasesAnalyticsV2DataViewService {
    */
   public async ensureForSpace(deps: EnsureForSpaceDeps): Promise<void> {
     if (this.bootstrappedSpaces.has(deps.spaceId)) return;
+    await this.ensureOrRefreshForSpace(deps);
+  }
 
+  /**
+   * Force-refresh path used by template lifecycle hooks. Same compute +
+   * diff + update flow as `ensureForSpace`, but bypasses the in-memory
+   * bootstrap cache so a template create / update / delete in a space that
+   * has already been ensured this process actually re-runs the diff.
+   *
+   * Fire-and-forget like `ensureForSpace`.
+   */
+  public async refreshForSpace(deps: EnsureForSpaceDeps): Promise<void> {
+    await this.ensureOrRefreshForSpace(deps);
+  }
+
+  /**
+   * Shared body for `ensureForSpace` and `refreshForSpace`. The only
+   * difference between the two is whether the in-memory cache short-circuit
+   * runs ahead of this call — once we're in here, the work is identical.
+   */
+  private async ensureOrRefreshForSpace(deps: EnsureForSpaceDeps): Promise<void> {
     try {
       const dvService = await this.deps.dataViewsService.dataViewsServiceFactory(
         deps.savedObjectsClient,
@@ -140,21 +178,18 @@ export class CasesAnalyticsV2DataViewService {
 
       const dataViewId = getCaseDataViewId(deps.spaceId);
 
-      let exists = false;
-      try {
-        await dvService.get(dataViewId);
-        exists = true;
-      } catch {
-        // Not found — fall through to create. Other errors propagate to the
-        // outer try/catch.
-      }
+      // Compute the desired runtime field map up-front so we can compare it
+      // against an existing data view on the diff branch below. Cheap (one
+      // paginated SO read of templates in this space) and gives both
+      // branches a consistent view.
+      const snakeKeys = await this.collectSnakeKeysForSpace(deps.spaceId);
+      const desiredRuntimeFieldMap = this.buildRuntimeFieldMap(snakeKeys);
 
-      if (!exists) {
-        const snakeKeys = await this.collectSnakeKeysForSpace(deps.spaceId);
-        const runtimeFieldMap = this.buildRuntimeFieldMap(snakeKeys);
+      const existing = await this.getDataViewIfExists(dvService, dataViewId);
 
+      if (existing == null) {
         const spec = buildCaseDataViewSpec(deps.spaceId);
-        spec.runtimeFieldMap = runtimeFieldMap;
+        spec.runtimeFieldMap = desiredRuntimeFieldMap;
 
         // `overwrite: false` — the deterministic id means a second concurrent
         // create from another node hits a conflict error rather than racing.
@@ -162,9 +197,30 @@ export class CasesAnalyticsV2DataViewService {
         await dvService.createAndSave(spec, false, true);
         this.logger.info(
           `bootstrapped data view ${dataViewId} (space=${deps.spaceId}, runtime_fields=${
-            Object.keys(runtimeFieldMap).length
+            Object.keys(desiredRuntimeFieldMap).length
           })`
         );
+      } else {
+        // `toSpec()` clones internal state, so it's safe to read without
+        // worrying about mutating the cached DataView.
+        const currentRuntimeFieldMap = existing.toSpec().runtimeFieldMap ?? {};
+        if (!isEqual(currentRuntimeFieldMap, desiredRuntimeFieldMap)) {
+          // `RuntimeFieldSpec` is structurally compatible with `RuntimeField`
+          // for the (type + script) entries this surface produces — the cast
+          // crosses the public/private contract boundary without introducing
+          // any extra fields. `replaceAllRuntimeFields` strips field-attribute
+          // metadata internally, so a round-trip through `toSpec()` returns
+          // the same shape we wrote.
+          existing.replaceAllRuntimeFields(
+            desiredRuntimeFieldMap as Record<string, RuntimeField>
+          );
+          await dvService.updateSavedObject(existing);
+          this.logger.info(
+            `refreshed runtime fields on data view ${dataViewId} (space=${deps.spaceId}, runtime_fields=${
+              Object.keys(desiredRuntimeFieldMap).length
+            })`
+          );
+        }
       }
 
       this.bootstrappedSpaces.add(deps.spaceId);
@@ -174,6 +230,30 @@ export class CasesAnalyticsV2DataViewService {
           err instanceof Error ? err.message : String(err)
         }`
       );
+    }
+  }
+
+  /**
+   * Returns the data view if present, `null` if not. Any other failure
+   * propagates to the caller's try/catch.
+   */
+  private async getDataViewIfExists(
+    dvService: Awaited<ReturnType<DataViewsServerPluginStart['dataViewsServiceFactory']>>,
+    dataViewId: string
+  ): Promise<DataView | null> {
+    try {
+      return await dvService.get(dataViewId);
+    } catch (err) {
+      const status =
+        (err as { statusCode?: number })?.statusCode ??
+        (err as { meta?: { statusCode?: number } })?.meta?.statusCode;
+      if (status === 404) return null;
+      // Some `dvService.get` failure paths surface as plain `Error('Saved
+      // object [...] not found')` without a status code. Fall back to a
+      // message check to avoid misclassifying real failures as not-found.
+      const message = err instanceof Error ? err.message : String(err);
+      if (/not\s+found/i.test(message)) return null;
+      throw err;
     }
   }
 
@@ -193,9 +273,19 @@ export class CasesAnalyticsV2DataViewService {
 
   /**
    * Page through every template SO in the given space and extract
-   * `<name>_as_<type>` snake-keys from each one's declared fields. Uses the
-   * internal SO client (held since construction) — templates are hidden and
-   * the request-scoped client may not include them.
+   * `<name>_as_<type>` snake-keys from each template's persisted
+   * `fieldNames` array.
+   *
+   * **Why `fieldNames`, not `definition`.** `attributes.definition` is the
+   * raw YAML string the user submitted — the structured `{ name, type }`
+   * pairs only exist as transient parser output during create / update
+   * request handling. The persisted form lives on `attributes.fieldNames`,
+   * populated by `toFieldNames(parsedDefinition.fields)` in
+   * `services/templates/index.ts`. Reading from there is the only way to
+   * recover field metadata after the request has completed.
+   *
+   * Uses the internal SO client (held since construction) — templates are
+   * hidden and the request-scoped client may not include them.
    */
   private async collectSnakeKeysForSpace(spaceId: string): Promise<string[]> {
     const out: string[] = [];
@@ -212,8 +302,8 @@ export class CasesAnalyticsV2DataViewService {
       });
 
       for (const tpl of response.saved_objects) {
-        const fields = tpl.attributes?.definition?.fields ?? [];
-        for (const f of fields) {
+        const fieldNames = tpl.attributes?.fieldNames ?? [];
+        for (const f of fieldNames) {
           const name = typeof f?.name === 'string' ? f.name : undefined;
           const type = typeof f?.type === 'string' ? f.type : undefined;
           if (name && type) {
@@ -233,14 +323,15 @@ export class CasesAnalyticsV2DataViewService {
     const map: Record<string, RuntimeFieldSpec> = {};
     for (const snakeKey of snakeKeys) {
       const entry = buildRuntimeFieldEntry(snakeKey);
-      // Last write wins on collisions WITHIN a space — two templates in the
-      // same space declaring the same `<name>_as_<type>` produce the same
-      // entry, so there's nothing to merge. Two templates declaring
-      // `<name>_as_<type1>` and `<name>_as_<type2>` would conflict; we pick
-      // whichever appears last. Templates aren't supposed to disagree on
-      // type for a given name within a space, but this keeps the runtime
-      // resilient. Cross-space collisions don't happen at all — each space
-      // has its own map.
+      // The `<name>_as_<type>` suffix is a feature, not a workaround.
+      // Different solutions in the same space can store a logically-shared
+      // field name under different physical types — Security may want
+      // `classification_as_keyword`, Observability may want
+      // `classification_as_long`, and both coexist as distinct runtime
+      // fields with no collision. Two templates declaring the identical
+      // `<name>_as_<type>` produce the identical entry; map insertion is
+      // idempotent. Cross-space collisions don't happen at all — each
+      // space has its own map.
       if (entry != null) {
         map[entry.fieldName] = entry.spec;
       }
