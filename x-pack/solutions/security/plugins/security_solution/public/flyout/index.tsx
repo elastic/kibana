@@ -33,7 +33,6 @@ import type { NetworkExpandableFlyoutProps } from './network_details';
 import { NetworkPanel, NetworkPanelKey, NetworkPreviewPanelKey } from './network_details';
 import { Flyouts } from './document_details/shared/constants/flyouts';
 import {
-  DocumentDetailsAlertReasonPanelKey,
   DocumentDetailsAnalyzerPanelKey,
   DocumentDetailsIsolateHostPanelKey,
   DocumentDetailsLeftPanelKey,
@@ -49,9 +48,6 @@ import { DocumentDetailsProvider } from './document_details/shared/context';
 import { RightPanel } from './document_details/right';
 import { LeftPanel } from './document_details/left';
 import { PreviewPanel } from './document_details/preview';
-import type { AlertReasonPanelProps } from './document_details/alert_reason';
-import { AlertReasonPanel } from './document_details/alert_reason';
-import { AlertReasonPanelProvider } from './document_details/alert_reason/context';
 import type { RulePanelExpandableFlyoutProps } from './rule_details/right';
 import { RulePanel, RulePanelKey, RulePreviewPanelKey } from './rule_details/right';
 import type { UserPanelExpandableFlyoutProps } from './entity_details/user_right';
@@ -79,7 +75,6 @@ import {
   ATTACK_DETAILS_LEFT_PANEL_ARIA_LABEL,
   ATTACK_DETAILS_PREVIEW_PANEL_ARIA_LABEL,
   ATTACK_DETAILS_RIGHT_PANEL_ARIA_LABEL,
-  DOCUMENT_DETAILS_ALERT_REASON_PANEL_ARIA_LABEL,
   DOCUMENT_DETAILS_ANALYZER_PANEL_ARIA_LABEL,
   DOCUMENT_DETAILS_ISOLATE_HOST_PANEL_ARIA_LABEL,
   DOCUMENT_DETAILS_LEFT_PANEL_ARIA_LABEL,
@@ -173,15 +168,6 @@ export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredP
       </DocumentDetailsProvider>
     ),
     'aria-label': DOCUMENT_DETAILS_PREVIEW_PANEL_ARIA_LABEL,
-  },
-  {
-    key: DocumentDetailsAlertReasonPanelKey,
-    component: (props) => (
-      <AlertReasonPanelProvider {...(props as AlertReasonPanelProps).params}>
-        <AlertReasonPanel />
-      </AlertReasonPanelProvider>
-    ),
-    'aria-label': DOCUMENT_DETAILS_ALERT_REASON_PANEL_ARIA_LABEL,
   },
   {
     key: GraphGroupedNodePreviewPanelKey,

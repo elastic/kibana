@@ -21,7 +21,6 @@ import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_
 import { RULE_PREVIEW_BANNER, RulePreviewPanelKey } from '../../../rule_details/right';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { DocumentDetailsAlertReasonPanelKey } from '../../shared/constants/panel_keys';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { EventKind } from '../../../../flyout_v2/document/main/constants/event_kinds';
 import { useDocumentDetailsContext } from '../../shared/context';
@@ -36,10 +35,7 @@ import {
   ABOUT_SECTION_TITLE,
 } from '../../../../flyout_v2/document/main/components/about_section';
 import { AlertStatus } from '../../../../flyout_v2/document/main/components/alert_status';
-import {
-  ALERT_REASON_BANNER,
-  AlertReason,
-} from '../../../../flyout_v2/document/main/components/alert_reason';
+import { AlertReason } from '../../../../flyout_v2/document/main/components/alert_reason';
 import { MitreAttack } from '../../../../flyout_v2/document/main/components/mitre_attack';
 
 const KEY = 'about';
@@ -55,7 +51,6 @@ export const AboutSection = memo(() => {
   const {
     dataAsNestedObject,
     dataFormattedForFieldBrowser,
-    eventId,
     indexName,
     isRulePreview,
     scopeId,
@@ -103,22 +98,6 @@ export const AboutSection = memo(() => {
     });
   }, [openPreviewPanel, scopeId, ruleId, telemetry]);
 
-  const openAlertReasonPreview = useCallback(() => {
-    openPreviewPanel({
-      id: DocumentDetailsAlertReasonPanelKey,
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-        banner: ALERT_REASON_BANNER,
-      },
-    });
-    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-      location: scopeId,
-      panel: 'preview',
-    });
-  }, [eventId, indexName, openPreviewPanel, scopeId, telemetry]);
-
   const content =
     eventKind === EventKind.signal ? (
       <>
@@ -127,7 +106,7 @@ export const AboutSection = memo(() => {
           onShowRuleSummary={openRulePreview}
           ruleSummaryDisabled={ruleSummaryDisabled}
         />
-        <AlertReason hit={hit} onShowFullReason={openAlertReasonPreview} />
+        <AlertReason hit={hit} />
         <MitreAttack hit={hit} />
         <AlertStatus hit={hit} />
       </>
