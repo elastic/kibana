@@ -32,8 +32,6 @@ import {
   type EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
 import { CodeEditor, ESQL_LANG_ID, type monaco } from '@kbn/code-editor';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { FormValues } from '../../form/types';
 import { useRuleFormServices } from '../../form/contexts/rule_form_context';
 import { useDataFields } from '../../form/hooks/use_data_fields';
@@ -240,26 +238,12 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
     <EuiFlyout type="overlay" size="fill" onClose={onClose} aria-labelledby={CHILD_FLYOUT_TITLE_ID}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s" id={CHILD_FLYOUT_TITLE_ID}>
-          <h3>
-            {state.queryCommitted ? (
-              <FormattedMessage
-                id="xpack.responseOps.alertingV2RuleForm.composeDiscover.child.editAlertQueryTitle"
-                defaultMessage="Edit alert query"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.responseOps.alertingV2RuleForm.composeDiscover.child.defineAlertQueryTitle"
-                defaultMessage="Define alert query"
-              />
-            )}
-          </h3>
+          <h3>{state.queryCommitted ? 'Edit alert query' : 'Define alert query'}</h3>
         </EuiTitle>
         {!state.queryCommitted && (
           <EuiText size="s" color="subdued">
-            <FormattedMessage
-              id="xpack.responseOps.alertingV2RuleForm.composeDiscover.child.defineAlertQueryDescription"
-              defaultMessage="Write the ES|QL query that defines when this rule should alert. You'll configure the rest of the rule settings next."
-            />
+            Write the ES|QL query that defines when this rule should alert. You&apos;ll configure
+            the rest of the rule settings next.
           </EuiText>
         )}
       </EuiFlyoutHeader>
@@ -290,16 +274,10 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
             <EuiSelect
               options={timeFieldOptions}
               value={timeField}
-              aria-label={i18n.translate(
-                'xpack.responseOps.alertingV2RuleForm.composeDiscover.child.timeFieldAriaLabel',
-                { defaultMessage: 'Time field for rule execution' }
-              )}
+              aria-label="Time field for rule execution"
               onChange={(e) => setFormValue('timeField', e.target.value)}
               compressed
-              prepend={i18n.translate(
-                'xpack.responseOps.alertingV2RuleForm.composeDiscover.child.timeFieldPrepend',
-                { defaultMessage: 'Time field' }
-              )}
+              prepend="Time field"
               data-test-subj="composeDiscoverTimeField"
             />
           </EuiFlexItem>
@@ -316,25 +294,14 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={i18n.translate(
-                'xpack.responseOps.alertingV2RuleForm.composeDiscover.child.searchTooltip',
-                {
-                  defaultMessage: 'Search ({shortcut})',
-                  values: { shortcut: RUN_SHORTCUT_LABEL },
-                }
-              )}
-            >
+            <EuiToolTip content={`Search (${RUN_SHORTCUT_LABEL})`}>
               <EuiButton
                 size="s"
                 onClick={run}
                 isLoading={isLoading}
                 data-test-subj="composeDiscoverRunQuery"
               >
-                <FormattedMessage
-                  id="xpack.responseOps.alertingV2RuleForm.composeDiscover.child.searchButtonLabel"
-                  defaultMessage="Search"
-                />
+                Search
               </EuiButton>
             </EuiToolTip>
           </EuiFlexItem>
@@ -372,13 +339,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
         {/* ── 3. Footer stats ─────────────────────────────────────────── */}
         {hasRun && !isLoading && !isError && (
           <EuiText size="xs" color="subdued">
-            {i18n.translate(
-              'xpack.responseOps.alertingV2RuleForm.composeDiscover.child.resultCountLabel',
-              {
-                defaultMessage: '{count, plural, one {# result} other {# results}}',
-                values: { count: totalRowCount },
-              }
-            )}
+            {totalRowCount.toLocaleString()} {totalRowCount === 1 ? 'result' : 'results'}
           </EuiText>
         )}
 
@@ -390,24 +351,11 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
         {!hasRun && (
           <EuiEmptyPrompt
             iconType="playFilled"
-            title={
-              <h4>
-                <FormattedMessage
-                  id="xpack.responseOps.alertingV2RuleForm.composeDiscover.child.emptyStateTitle"
-                  defaultMessage="Run your query to see results"
-                />
-              </h4>
-            }
+            title={<h4>Run your query to see results</h4>}
             body={
               <p>
-                <FormattedMessage
-                  id="xpack.responseOps.alertingV2RuleForm.composeDiscover.child.emptyStateDescription"
-                  defaultMessage="Click <strong>Search</strong> or press <strong>{shortcut}</strong> to execute the query."
-                  values={{
-                    strong: (chunks) => <strong>{chunks}</strong>,
-                    shortcut: RUN_SHORTCUT_LABEL,
-                  }}
-                />
+                Click <strong>Search</strong> or press <strong>{RUN_SHORTCUT_LABEL}</strong> to
+                execute the query.
               </p>
             }
           />
@@ -422,15 +370,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
         )}
 
         {hasRun && isError && (
-          <EuiCallOut
-            announceOnMount
-            color="danger"
-            iconType="error"
-            title={i18n.translate(
-              'xpack.responseOps.alertingV2RuleForm.composeDiscover.child.queryErrorCalloutTitle',
-              { defaultMessage: 'Query error' }
-            )}
-          >
+          <EuiCallOut announceOnMount color="danger" iconType="error" title="Query error">
             <p>{error}</p>
           </EuiCallOut>
         )}
@@ -438,22 +378,8 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
         {hasRun && !isLoading && !isError && rows.length === 0 && activeQuery.trim() && (
           <EuiEmptyPrompt
             iconType="search"
-            title={
-              <h4>
-                <FormattedMessage
-                  id="xpack.responseOps.alertingV2RuleForm.composeDiscover.child.noResultsTitle"
-                  defaultMessage="No results"
-                />
-              </h4>
-            }
-            body={
-              <p>
-                <FormattedMessage
-                  id="xpack.responseOps.alertingV2RuleForm.composeDiscover.child.noResultsDescription"
-                  defaultMessage="The query returned no results for the current time range."
-                />
-              </p>
-            }
+            title={<h4>No results</h4>}
+            body={<p>The query returned no results for the current time range.</p>}
           />
         )}
 
@@ -469,10 +395,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
             <EuiSpacer size="m" />
 
             <EuiDataGrid
-              aria-label={i18n.translate(
-                'xpack.responseOps.alertingV2RuleForm.composeDiscover.child.queryResultsGridAriaLabel',
-                { defaultMessage: 'Query results' }
-              )}
+              aria-label="Query results"
               columns={gridColumns}
               columnVisibility={{ visibleColumns, setVisibleColumns }}
               rowCount={rows.length}
@@ -498,10 +421,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiButton fill onClick={handleDone} data-test-subj="composeDiscoverChildDone">
-              <FormattedMessage
-                id="xpack.responseOps.alertingV2RuleForm.composeDiscover.child.applyChangesButtonLabel"
-                defaultMessage="Apply changes"
-              />
+              Apply changes
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

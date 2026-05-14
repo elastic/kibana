@@ -6,8 +6,6 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTab, EuiTabs, EuiSpacer, EuiPanel, EuiText } from '@elastic/eui';
 import { CodeEditor, ESQL_LANG_ID, type monaco } from '@kbn/code-editor';
 import type {
@@ -107,27 +105,9 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
 };
 
 export const TAB_DEFINITIONS: Array<{ id: QueryTab; label: string }> = [
-  {
-    id: 'base',
-    label: i18n.translate(
-      'xpack.responseOps.alertingV2RuleForm.composeDiscover.tabs.baseQueryTabLabel',
-      { defaultMessage: 'Base query' }
-    ),
-  },
-  {
-    id: 'alert',
-    label: i18n.translate(
-      'xpack.responseOps.alertingV2RuleForm.composeDiscover.tabs.alertQueryTabLabel',
-      { defaultMessage: 'Alert query' }
-    ),
-  },
-  {
-    id: 'recovery',
-    label: i18n.translate(
-      'xpack.responseOps.alertingV2RuleForm.composeDiscover.tabs.recoveryQueryTabLabel',
-      { defaultMessage: 'Recovery query' }
-    ),
-  },
+  { id: 'base', label: 'Base query' },
+  { id: 'alert', label: 'Alert query' },
+  { id: 'recovery', label: 'Recovery query' },
 ];
 
 export function visibleTabIds(tabConfig: SandboxTabConfig): QueryTab[] {
@@ -203,10 +183,7 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
         return (
           <EuiPanel color="subdued" paddingSize="l">
             <EuiText size="s" color="subdued" textAlign="center">
-              <FormattedMessage
-                id="xpack.responseOps.alertingV2RuleForm.composeDiscover.tabs.noEditorAvailableLabel"
-                defaultMessage="No editor available for this tab."
-              />
+              No editor available for this tab.
             </EuiText>
           </EuiPanel>
         );

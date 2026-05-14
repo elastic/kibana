@@ -6,8 +6,6 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { FormProvider, useForm } from 'react-hook-form';
 import {
   EuiButton,
@@ -152,13 +150,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   const methods = useForm<FormValues>({ mode: 'onBlur', defaultValues });
 
   const isCreate = mode === 'create';
-  const title = isCreate
-    ? i18n.translate('xpack.responseOps.alertingV2RuleForm.composeDiscover.flyout.createTitle', {
-        defaultMessage: 'Create alert rule',
-      })
-    : i18n.translate('xpack.responseOps.alertingV2RuleForm.composeDiscover.flyout.editTitle', {
-        defaultMessage: 'Edit alert rule',
-      });
+  const title = isCreate ? 'Create alert rule' : 'Edit alert rule';
 
   const steps = getSteps(uiState.tracking);
   const currentStep = steps[uiState.step];
@@ -255,12 +247,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={onClose}>
-                  <FormattedMessage
-                    id="xpack.responseOps.alertingV2RuleForm.composeDiscover.flyout.cancelButtonLabel"
-                    defaultMessage="Cancel"
-                  />
-                </EuiButtonEmpty>
+                <EuiButtonEmpty onClick={onClose}>Cancel</EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="s" responsive={false}>
@@ -271,10 +258,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                         onClick={() => dispatch({ type: 'GO_BACK' })}
                         data-test-subj="composeDiscoverBack"
                       >
-                        <FormattedMessage
-                          id="xpack.responseOps.alertingV2RuleForm.composeDiscover.flyout.backButtonLabel"
-                          defaultMessage="Back"
-                        />
+                        Back
                       </EuiButtonEmpty>
                     </EuiFlexItem>
                   )}
@@ -286,28 +270,13 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                         onClick={handleSubmit}
                         data-test-subj="composeDiscoverSubmit"
                       >
-                        {isCreate ? (
-                          <FormattedMessage
-                            id="xpack.responseOps.alertingV2RuleForm.composeDiscover.flyout.createRuleButtonLabel"
-                            defaultMessage="Create rule"
-                          />
-                        ) : (
-                          <FormattedMessage
-                            id="xpack.responseOps.alertingV2RuleForm.composeDiscover.flyout.saveRuleButtonLabel"
-                            defaultMessage="Save rule"
-                          />
-                        )}
+                        {isCreate ? 'Create rule' : 'Save rule'}
                       </EuiButton>
                     ) : (
                       <EuiToolTip
                         content={
                           currentStep?.id === 'alertCondition' && !uiState.queryCommitted
-                            ? i18n.translate(
-                                'xpack.responseOps.alertingV2RuleForm.composeDiscover.flyout.queryRequiredTooltip',
-                                {
-                                  defaultMessage: 'Define a query in the editor before continuing',
-                                }
-                              )
+                            ? 'Define a query in the editor before continuing'
                             : undefined
                         }
                       >
@@ -322,10 +291,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                           onClick={handleNext}
                           data-test-subj="composeDiscoverNext"
                         >
-                          <FormattedMessage
-                            id="xpack.responseOps.alertingV2RuleForm.composeDiscover.flyout.nextButtonLabel"
-                            defaultMessage="Next"
-                          />
+                          Next
                         </EuiButton>
                       </EuiToolTip>
                     )}
