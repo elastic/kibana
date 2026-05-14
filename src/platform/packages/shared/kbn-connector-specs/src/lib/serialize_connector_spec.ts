@@ -12,21 +12,20 @@ import type { ConnectorSpec } from '../connector_spec';
 import { generateSecretsSchemaFromSpec } from './generate_secrets_schema_from_spec';
 
 export interface SerializeConnectorSpecOptions {
-  isPfxEnabled?: boolean;
-  isEarsEnabled?: boolean;
+  isPfxEnabled: boolean;
+  isEarsEnabled: boolean;
 }
 
 export function serializeConnectorSpec(
   spec: ConnectorSpec,
   options?: SerializeConnectorSpecOptions
 ) {
-  const combinedZodSchema = z.object({
-    config: spec.schema ?? z.object({}),
-    secrets: generateSecretsSchemaFromSpec(spec.auth, {
-      isPfxEnabled: options?.isPfxEnabled ?? true,
-      isEarsEnabled: options?.isEarsEnabled ?? false,
-    }),
-  });
+  const combinedZodSchema = z
+    .object({
+      config: spec.schema ?? z.object({}),
+      secrets: generateSecretsSchemaFromSpec(spec.auth, options),
+    })
+    .strict();
 
   const jsonSchema = z.toJSONSchema(combinedZodSchema);
 

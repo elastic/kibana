@@ -15,7 +15,7 @@ const specsByIdMap = new Map(
   Object.values(connectorsSpecs).map((spec) => [spec.metadata.id, spec])
 );
 
-export async function getConnectorSpec({
+export async function getConnectorSpecAsJsonSchema({
   context,
   id,
   configurationUtilities,

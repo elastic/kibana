@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { getConnectorSpec } from './get_connector_spec';
+export { getConnectorSpecAsJsonSchema } from './get_connector_spec';
 export type { GetConnectorSpecParams } from './types';
