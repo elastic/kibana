@@ -93,7 +93,7 @@ const claimNudgeConfig = schema.object({
       schema.literal(CLAIM_NUDGE_STRATEGY_GLOBAL_CHECKPOINTS),
       schema.literal(CLAIM_NUDGE_STRATEGY_DISABLED),
     ],
-    { defaultValue: CLAIM_NUDGE_STRATEGY_GLOBAL_CHECKPOINTS }
+    { defaultValue: CLAIM_NUDGE_STRATEGY_HTTP }
   ),
   http_timeout_ms: schema.number({
     defaultValue: 2000,
