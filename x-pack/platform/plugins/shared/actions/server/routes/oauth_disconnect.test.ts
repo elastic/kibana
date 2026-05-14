@@ -174,7 +174,7 @@ describe('oauthDisconnectRoute', () => {
 
     expect(mockConnectorTokenClientInstance.deleteConnectorTokens).toHaveBeenCalledWith({
       connectorId: 'connector-1',
-      profileUid: 'test-profile-uid',
+      userIdentifiers: { profileUid: 'test-profile-uid' },
     });
   });
 
