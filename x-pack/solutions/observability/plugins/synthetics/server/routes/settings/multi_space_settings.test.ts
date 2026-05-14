@@ -14,9 +14,27 @@ import {
   createPutMultiSpaceSettingsRoute,
 } from './multi_space_settings';
 
+const NOT_FOUND_SENTINEL = { status: 404 };
+
+const buildServer = ({
+  isElasticsearchServerless = false,
+  ccsEnabled = true,
+}: { isElasticsearchServerless?: boolean; ccsEnabled?: boolean } = {}) =>
+  ({
+    isElasticsearchServerless,
+    config: { experimental: { ccs: { enabled: ccsEnabled } } },
+  } as unknown as RouteContext['server']);
+
+const buildResponse = () =>
+  ({
+    notFound: jest.fn().mockReturnValue(NOT_FOUND_SENTINEL),
+  } as unknown as RouteContext['response']);
+
 const buildRouteContext = (overrides: Partial<RouteContext> = {}): RouteContext =>
   ({
     savedObjectsClient: savedObjectsClientMock.create(),
+    server: buildServer(),
+    response: buildResponse(),
     ...overrides,
   } as unknown as RouteContext);
 
@@ -26,7 +44,7 @@ describe('multi space settings routes', () => {
   });
 
   describe('createGetMultiSpaceSettingsRoute', () => {
-    it('returns the settings produced by the repository', async () => {
+    it('returns the settings produced by the repository when CCS is enabled', async () => {
       const expected: SyntheticsMultiSpaceSettingsWithSpaces = {
         useAllRemoteClusters: true,
         selectedRemoteClusters: ['cluster-a'],
@@ -41,6 +59,40 @@ describe('multi space settings routes', () => {
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(result).toEqual(expected);
+    });
+
+    it('returns 404 when running on serverless', async () => {
+      const getSpy = jest.spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'get');
+      const response = buildResponse();
+
+      const route = createGetMultiSpaceSettingsRoute();
+      const result = await route.handler(
+        buildRouteContext({
+          server: buildServer({ isElasticsearchServerless: true }),
+          response,
+        })
+      );
+
+      expect(response.notFound).toHaveBeenCalledTimes(1);
+      expect(result).toBe(NOT_FOUND_SENTINEL);
+      expect(getSpy).not.toHaveBeenCalled();
+    });
+
+    it('returns 404 when the experimental CCS flag is disabled', async () => {
+      const getSpy = jest.spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'get');
+      const response = buildResponse();
+
+      const route = createGetMultiSpaceSettingsRoute();
+      const result = await route.handler(
+        buildRouteContext({
+          server: buildServer({ ccsEnabled: false }),
+          response,
+        })
+      );
+
+      expect(response.notFound).toHaveBeenCalledTimes(1);
+      expect(result).toBe(NOT_FOUND_SENTINEL);
+      expect(getSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -90,6 +142,42 @@ describe('multi space settings routes', () => {
         ['default', 'marketing']
       );
       expect(result).toEqual(expected);
+    });
+
+    it('returns 404 on serverless without persisting anything', async () => {
+      const saveSpy = jest.spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'save');
+      const response = buildResponse();
+
+      const route = createPutMultiSpaceSettingsRoute();
+      const result = await route.handler(
+        buildRouteContext({
+          server: buildServer({ isElasticsearchServerless: true }),
+          response,
+          request: { body: { useAllRemoteClusters: true } } as unknown as RouteContext['request'],
+        })
+      );
+
+      expect(response.notFound).toHaveBeenCalledTimes(1);
+      expect(result).toBe(NOT_FOUND_SENTINEL);
+      expect(saveSpy).not.toHaveBeenCalled();
+    });
+
+    it('returns 404 when the experimental CCS flag is disabled', async () => {
+      const saveSpy = jest.spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'save');
+      const response = buildResponse();
+
+      const route = createPutMultiSpaceSettingsRoute();
+      const result = await route.handler(
+        buildRouteContext({
+          server: buildServer({ ccsEnabled: false }),
+          response,
+          request: { body: { useAllRemoteClusters: true } } as unknown as RouteContext['request'],
+        })
+      );
+
+      expect(response.notFound).toHaveBeenCalledTimes(1);
+      expect(result).toBe(NOT_FOUND_SENTINEL);
+      expect(saveSpy).not.toHaveBeenCalled();
     });
   });
 });

@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { SyntheticsMultiSpaceSettingsWithSpaces } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { isCCSEnabled } from '../../lib/remote_result_utils';
 import { DefaultSyntheticsMultiSpaceSettingsRepository } from '../../services/synthetics_multi_space_settings_repository';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 
@@ -34,7 +35,13 @@ export const createGetMultiSpaceSettingsRoute: SyntheticsRestApiRouteFactory<
   method: 'GET',
   path: SYNTHETICS_API_URLS.MULTI_SPACE_SETTINGS,
   validate: false,
-  handler: async ({ savedObjectsClient }) => {
+  handler: async ({ savedObjectsClient, server, response }) => {
+    // Mirror the UI's gating: the endpoint must not exist on serverless or when the
+    // experimental CCS flag is off, so external clients can't write a `synthetics-settings-multi-space`
+    // SO that nothing else respects.
+    if (!isCCSEnabled(server)) {
+      return response.notFound();
+    }
     const repository = new DefaultSyntheticsMultiSpaceSettingsRepository(savedObjectsClient);
     return repository.get();
   },
@@ -49,7 +56,10 @@ export const createPutMultiSpaceSettingsRoute: SyntheticsRestApiRouteFactory<
     body: SyntheticsMultiSpaceSettingsSchema,
   },
   writeAccess: true,
-  handler: async ({ savedObjectsClient, request }) => {
+  handler: async ({ savedObjectsClient, request, server, response }) => {
+    if (!isCCSEnabled(server)) {
+      return response.notFound();
+    }
     const repository = new DefaultSyntheticsMultiSpaceSettingsRepository(savedObjectsClient);
     const { spaces, ...attributes } = request.body;
     return repository.save(attributes, spaces);
