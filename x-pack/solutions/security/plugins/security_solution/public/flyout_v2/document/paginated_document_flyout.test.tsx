@@ -19,7 +19,7 @@ const mockDocumentFlyout = jest.fn(({ hit }: { hit: DataTableRecord }) => (
   <div data-test-subj="mock-document-flyout" data-hit-id={hit.id} />
 ));
 
-jest.mock('.', () => ({
+jest.mock('./main', () => ({
   DocumentFlyout: (props: { hit: DataTableRecord }) => mockDocumentFlyout(props),
 }));
 
