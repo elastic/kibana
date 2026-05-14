@@ -101,6 +101,7 @@ export const Content = ({
               isPreviewMode={isPreviewMode}
               entityId={entityRecord?.entity.id}
               prefetchedResolutionRisk={prefetchedResolutionRisk}
+              hideHeaderIcon
             />
             <EuiHorizontalRule />
           </>
@@ -139,6 +140,7 @@ export const Content = ({
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
         entityType={EntityType.host}
+        hideAlertsHeaderIcon
       />
       <ObservedDataSection
         observedHost={observedHost}
