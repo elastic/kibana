@@ -16,8 +16,8 @@ jest.mock('../performance/query_performance_tracking', () => {
     startQueryPerformanceTracking: jest.fn(),
   };
 });
-import { startQueryPerformanceTracking } from '../performance/query_performance_tracking';
-import { DASHBOARD_DURATION_START_MARK } from '../performance/dashboard_duration_start_mark';
+import { startTrackingDashboardLoadTelemetry } from '../telemetry/dashboard_load_telemetry';
+import { DASHBOARD_DURATION_START_MARK } from '../telemetry/dashboard_duration_start_mark';
 
 jest.mock('@kbn/content-management-content-insights-public', () => {
   class ContentInsightsClientMock {
@@ -135,7 +135,7 @@ describe('loadDashboardApi', () => {
         DASHBOARD_DURATION_START_MARK,
         'mark'
       );
-      expect(startQueryPerformanceTracking).toHaveBeenCalledWith(expect.any(Object), {
+      expect(startTrackingDashboardLoadTelemetry).toHaveBeenCalledWith(expect.any(Object), {
         firstLoad: true,
         creationStartTime: 12345,
       });

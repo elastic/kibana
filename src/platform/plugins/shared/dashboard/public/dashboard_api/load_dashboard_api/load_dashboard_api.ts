@@ -17,8 +17,8 @@ import { coreServices } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
 import { getLastSavedState } from '../default_dashboard_state';
 import { getDashboardApi } from '../get_dashboard_api';
-import { DASHBOARD_DURATION_START_MARK } from '../performance/dashboard_duration_start_mark';
-import { startQueryPerformanceTracking } from '../performance/query_performance_tracking';
+import { DASHBOARD_DURATION_START_MARK } from '../telemetry/dashboard_duration_start_mark';
+import { startTrackingDashboardLoadTelemetry } from '../telemetry/dashboard_load_telemetry';
 import type { DashboardCreationOptions } from '../types';
 import { getUserAccessControlData } from './get_user_access_control_data';
 import { transformPanels } from './transform_panels';
@@ -116,7 +116,7 @@ export async function loadDashboardApi({
   });
   const userActivityService = getDashboardUserActivityService(api);
 
-  const performanceSubscription = startQueryPerformanceTracking(api, {
+  const performanceSubscription = startTrackingDashboardLoadTelemetry(api, {
     firstLoad: true,
     creationStartTime: performance.getEntriesByName(DASHBOARD_DURATION_START_MARK, 'mark')[0]
       ?.startTime,

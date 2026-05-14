@@ -41,7 +41,7 @@ const loadTypesMapping: { [key in DashboardLoadType]: number } = {
   dashboardSubsequentLoad: 2, // on filter-refresh
 };
 
-export function startQueryPerformanceTracking(
+export function startTrackingDashboardLoadTelemetry(
   dashboard: DashboardApi,
   performanceState: PerformanceState
 ) {
