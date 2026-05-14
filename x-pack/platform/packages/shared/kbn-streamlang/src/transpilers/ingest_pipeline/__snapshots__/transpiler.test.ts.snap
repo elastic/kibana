@@ -484,7 +484,7 @@ fromValues.add(' ');if (ctx.containsKey('last_name') && ctx['last_name'] != null
   def val_attributes_href = $('attributes.href', null); if (val_attributes_href instanceof List && val_attributes_href.size() == 1) { val_attributes_href = val_attributes_href[0]; }
   
   
-  if ((val_attributes_href !== null && ((val_attributes_href instanceof Number && val_attributes_href.toString() != \\"\\") || val_attributes_href != \\"\\"))) {
+  if ((val_attributes_href === null || ((val_attributes_href instanceof Number && val_attributes_href.toString() != \\"\\") || val_attributes_href != \\"\\"))) {
     return true;
   }
   return false;

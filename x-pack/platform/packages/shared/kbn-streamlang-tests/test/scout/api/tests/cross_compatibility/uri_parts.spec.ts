@@ -469,8 +469,21 @@ apiTest.describe(
     });
 
     apiTest(
-      'preserves pre-existing `<to>.*` and `<to>.original` values on where:false rows (destruction-fix parity)',
+      'preserves pre-existing `<to>.*` and `<to>.original` values on where:false rows for every sub-field (destruction-fix parity, full coverage)',
       async ({ testBed, esql }) => {
+        // Seeds a prior value for EVERY URI_PARTS sub-field (not just
+        // `domain` + `original`) and asserts each one is preserved on the
+        // `where:false` row in BOTH transpilers.
+        //
+        // The narrower variant of this test (preserving only `domain` and
+        // `original`) misses the URI_PARTS empty-string sub-field leak: when
+        // the conditional input gate fed URI_PARTS `""`, URI_PARTS emitted
+        // `path = ""` (non-null), and the merge `COALESCE("" /* temp */,
+        // "/prior/path" /* target */)` returned `""` because `""` is not
+        // null in ES|QL. The fix is the NULL-sentinel gate
+        // (`CASE(<where>, <from>, NULL)`); the csv-spec's `nullInputRow`
+        // pins URI_PARTS(NULL) → every output sub-field NULL, so every
+        // merge COALESCE preserves on gated rows.
         const streamlangDSL: StreamlangDSL = {
           steps: [
             {
@@ -485,16 +498,30 @@ apiTest.describe(
         const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
 
+        const priorUrl = {
+          scheme: 'prior',
+          domain: 'prior.example.com',
+          path: '/prior/path',
+          query: 'prior=1',
+          fragment: 'prior-fragment',
+          extension: 'priorext',
+          port: 12345,
+          user_info: 'prioruser:priorpass',
+          username: 'prioruser',
+          password: 'priorpass',
+          original: 'prior://value',
+        };
+
         const docs = [
           {
             case: 'processed',
             attributes: { should_process: true, href: 'https://new.example.com/a' },
-            url: { domain: 'prior.example.com', original: 'prior://value' },
+            url: priorUrl,
           },
           {
             case: 'skipped',
             attributes: { should_process: false, href: 'https://ignored.example.com/b' },
-            url: { domain: 'prior.example.com', original: 'prior://value' },
+            url: priorUrl,
           },
         ];
 
@@ -533,13 +560,16 @@ apiTest.describe(
         expect(processedEsql?.['url.domain']).toBe('new.example.com');
         expect(processedEsql?.['url.original']).toBe('https://new.example.com/a');
 
-        // Skipped row: BOTH transpilers must preserve the prior `url.domain`
-        // AND `url.original` (this is the destruction-fix invariant). Without
-        // the COALESCE/CASE temp-output merge, ES|QL used to null both.
-        expect(skippedIngest['url.domain']).toBe('prior.example.com');
-        expect(skippedIngest['url.original']).toBe('prior://value');
-        expect(skippedEsql?.['url.domain']).toBe('prior.example.com');
-        expect(skippedEsql?.['url.original']).toBe('prior://value');
+        // Skipped row: BOTH transpilers must preserve the prior value of
+        // EVERY sub-field. The pre-NULL-sentinel implementation would have
+        // clobbered at least `url.path` (and possibly `url.extension`,
+        // `url.query`, etc.) with empty strings because URI_PARTS("") emits
+        // non-null empty strings for some sub-fields.
+        for (const [subfield, priorValue] of Object.entries(priorUrl)) {
+          const key = `url.${subfield}`;
+          expect(skippedIngest[key]).toBe(priorValue);
+          expect(skippedEsql?.[key]).toBe(priorValue);
+        }
       }
     );
 
