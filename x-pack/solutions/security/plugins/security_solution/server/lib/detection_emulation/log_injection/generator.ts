@@ -87,7 +87,13 @@ export interface GenerateDocsInput {
 
 export interface EcsEmulationDocument {
   '@timestamp': string;
-  event: { category: string[]; type: string[]; kind: 'event' };
+  event: {
+    category: string[];
+    type: string[];
+    kind: 'event';
+    dataset: 'emulation.synthetic';
+    module: 'emulation';
+  };
   process: {
     name: string;
     command_line: string;
@@ -132,7 +138,7 @@ export const generateDocs = (input: GenerateDocsInput): EcsEmulationDocument[] =
     const tpl = TECHNIQUE_TEMPLATES[payload.techniqueId] ?? DEFAULT_TEMPLATE;
     return {
       '@timestamp': timestamp,
-      event: { ...tpl.event, kind: 'event' },
+      event: { ...tpl.event, kind: 'event', dataset: 'emulation.synthetic' as const, module: 'emulation' as const },
       process: {
         name: tpl.process.name,
         command_line: resolveCommandLine(payload),
