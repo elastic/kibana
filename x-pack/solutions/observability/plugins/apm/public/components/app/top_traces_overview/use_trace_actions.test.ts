@@ -78,6 +78,7 @@ describe('useTraceActions', () => {
     expect(result.current[0].actions[0]).toMatchObject({
       id: 'traceList-openInDiscover',
       name: 'Explore traces',
+      icon: 'discoverApp',
     });
   });
 

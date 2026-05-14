@@ -45,6 +45,7 @@ export function useTraceActions({
             name: i18n.translate('xpack.apm.tracesTable.exploreTracesInDiscover', {
               defaultMessage: 'Explore traces',
             }),
+            icon: 'discoverApp',
             href: (item) => {
               if (!discoverLocator) return undefined;
 
