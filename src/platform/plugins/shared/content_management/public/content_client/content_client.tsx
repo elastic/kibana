@@ -144,7 +144,6 @@ export class ContentClient {
   }
 
   mSearch<T = unknown>(input: MSearchIn): Promise<MSearchResult<T>> {
-    console.log({ input });
     const crudClient = this.crudClientProvider();
     if (!crudClient.mSearch) {
       throw new Error('mSearch is not supported by provided crud client');

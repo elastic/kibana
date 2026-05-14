@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import _, { orderBy, sortBy } from 'lodash';
+import _ from 'lodash';
 import type { Reference } from '@kbn/content-management-utils';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -21,10 +21,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import type { VisualizationSavedObject } from '../../common/content_management';
 import { saveWithConfirmation } from './saved_objects_utils';
-import type {
-  VisualizationClient,
-  VisualizationsAppExtension,
-} from '../vis_types/vis_type_alias_registry';
+import type { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
 import type {
   VisSavedObject,
   SerializedVis,
@@ -41,7 +38,6 @@ import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from './saved_objects_uti
 import { visualizationsClient } from '../content_management';
 import type { VisualizationSavedObjectAttributes } from '../../common';
 import { urlFor } from './url_utils';
-import { getContentManagement, getHttp } from '../services';
 
 export const SAVED_VIS_TYPE = 'visualization';
 
@@ -160,63 +156,44 @@ export async function findListItems(
       return acc;
     }, acc);
   }, {} as { [visType: string]: VisualizationsAppExtension });
-  console.log({ extensions });
   const searchOption = (field: string, ...defaults: string[]) =>
-    _(extensions)
-      .filter(({ client }) => {
-        return !client;
-      })
-      .map(field)
-      .concat(defaults)
-      .compact()
-      .flatten()
-      .uniq()
-      .value() as string[];
+    _(extensions).map(field).concat(defaults).compact().flatten().uniq().value() as string[];
 
-  const searchableClients = extensions.reduce((prev, { client }) => {
-    const clientInstance = client(getContentManagement(), getHttp()) as VisualizationClient;
-    return 'search' in clientInstance ? [...prev, clientInstance] : prev;
-  }, [] as VisualizationClient[]);
-
-  const searchQuery = {
-    text: search ? `${search}*` : undefined,
-    limit: size,
-    tags: {
-      included: references?.map((r) => r.id),
-      excluded: referencesToExclude?.map((r) => r.id),
+  const {
+    hits: savedObjects,
+    pagination: { total },
+  } = await visualizationsClient.search(
+    {
+      text: search ? `${search}*` : undefined,
+      limit: size,
+      tags: {
+        included: references?.map((r) => r.id),
+        excluded: referencesToExclude?.map((r) => r.id),
+      },
     },
-  };
-  const searchPromises = [
-    visualizationsClient.search(searchQuery, {
+    {
       types: searchOption('docTypes', 'visualization'),
       searchFields: searchOption('searchFields', 'title^3', 'description'),
-    }),
-    ...searchableClients.map((client) => client.search(searchQuery)),
-  ];
-  const result = await Promise.all(searchPromises);
-  const savedObjects = result.map(({ hits }) => hits).flat();
-  const total = result.reduce((prev, { pagination }) => prev + pagination.total, 0);
-  console.log({ total, savedObjects, sorted: orderBy(savedObjects, ['type'], ['desc']) });
+    }
+  );
 
   return {
     total,
-    hits: orderBy(savedObjects, 'type', 'desc')
-      .splice(0, Math.min(size, total))
-      .map((savedObject: VisualizationSavedObject) => {
-        const config = extensionByType[savedObject.type];
+    hits: savedObjects.map((savedObject: VisualizationSavedObject) => {
+      const config = extensionByType[savedObject.type];
 
-        if (config) {
-          return {
-            // TODO: understand why this SO can take any shape based on type?
-            // This conflicts with the type of `savedObject` value as `VisualizationSavedObject`.
-            // See test case titled 'uses type-specific toListItem function, if available'
-            ...config.toListItem(savedObject),
-            references: savedObject.references,
-          };
-        } else {
-          return mapHitSource(visTypes, savedObject);
-        }
-      }),
+      if (config) {
+        return {
+          // TODO: understand why this SO can take any shape based on type?
+          // This conflicts with the type of `savedObject` value as `VisualizationSavedObject`.
+          // See test case titled 'uses type-specific toListItem function, if available'
+          ...config.toListItem(savedObject),
+          references: savedObject.references,
+        };
+      } else {
+        return mapHitSource(visTypes, savedObject);
+      }
+    }),
   };
 }
 

@@ -478,6 +478,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         if (recentlyAccessed && recentlyAccessed.get().length > 0) {
           response.hits = sortByRecentlyAccessed(response.hits, recentlyAccessed.get());
         }
+
         dispatch({
           type: 'onFetchItemsSuccess',
           data: {
