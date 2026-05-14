@@ -48,7 +48,8 @@ const docs = generateEsHits(dataViewWithTimefieldMock, 3).map((hit, i) => {
   return buildDataTableRecord(hit, dataViewWithTimefieldMock);
 });
 
-const getDocById = (id: string) => docs.find((doc) => doc.raw._id === id);
+const createDocMap = (currentDocs = docs) =>
+  new Map(currentDocs.map((doc, docIndex) => [doc.raw._id ?? doc.id, { doc, docIndex }]));
 
 const fieldColumnId = 'fieldColumnId';
 
@@ -60,7 +61,7 @@ const renderComparisonCellValue = (props: Partial<UseComparisonCellValueProps> =
     selectedDocIds: ['0', '1', '2'],
     diffMode: undefined,
     fieldFormats: fieldFormatsMock,
-    getDocById,
+    docMap: createDocMap(),
     ...props,
   };
   const hook = renderHook((currentProps) => useComparisonCellValue(currentProps), {
