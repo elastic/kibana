@@ -31,9 +31,21 @@ The dimension orchestrators in `server/lib/siem_readiness/dimensions/` filter it
 ### Category assignment in payloads
 
 - **Coverage**: items are `CategoryGroup[]` — already grouped by category (this IS the categories data).
-- **Continuity**: items are ALL `PipelineStats[]` including uncategorized pipelines. Agent tools filter to categorized-only and populate `actionableFindings[].category`. The UI filters client-side using cached categories data.
-- **Quality**: items are ALL `DataQualityResultDocument[]`. Same pattern — agent tools filter and enrich; UI filters client-side.
-- **Retention**: items are ALL `RetentionInfo[]`. Same pattern. Note: retention items carry data stream names while categories indices carry backing index names — use contains-match (`idx.indexName.includes(item.indexName)`) when joining them.
+- **Continuity**: items are ALL `PipelineStats[]` including uncategorized pipelines. The agent tool and the UI tab **both call `filterPipelinesByCategories`** (from `src/filter_pipelines_by_categories.ts`) to reduce to categorized-only before displaying. Use exact-match against the category index list.
+- **Quality**: items are ALL `DataQualityResultDocument[]`. Agent tools filter and enrich; UI filters client-side using `getIndexCategoryMap`.
+- **Retention**: items are ALL `RetentionInfo[]`. The agent tool and the UI tab **both call `filterRetentionItemsByCategories`** (from `src/filter_retention_items_by_categories.ts`). Note: retention items carry data stream names while categories indices carry backing index names — use contains-match (`idx.indexName.includes(item.indexName)`) when joining them.
+
+### Shared filtering predicates
+
+The filtering logic for continuity and retention is extracted into pure functions in this package so that **both the agent tool and the UI tab use the same predicate**. This is what makes parity tests possible: a test can call the shared function with a fixture and assert it produces the same items as the tool handler.
+
+| Function | Match strategy | Used by |
+|---|---|---|
+| `filterPipelinesByCategories(pipelines, categoriesData)` | Exact-match on backing index name | `getContinuityTool` + `continuity_tab.tsx` |
+| `filterRetentionItemsByCategories(items, categoriesData)` | Contains-match (data stream ⊂ backing index) | `getRetentionTool` + `retention_tab.tsx` |
+| `getIndexCategoryMap(categoriesData)` | Exact-match, returns Map for lookups | used by the above + quality tool |
+
+**If you change how items are filtered** (e.g., different matching strategy, new exclusion rules), change the shared function — not the tool or the tab independently.
 
 ### Thresholds and compliance rules
 

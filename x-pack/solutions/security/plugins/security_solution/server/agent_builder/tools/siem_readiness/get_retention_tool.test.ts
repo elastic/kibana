@@ -16,6 +16,7 @@ import {
 import { getRetentionTool } from './get_retention_tool';
 import { getRetention } from '../../../lib/siem_readiness/dimensions';
 import { fetchCategories } from '../../../lib/siem_readiness/fetchers';
+import { filterRetentionItemsByCategories } from '@kbn/siem-readiness';
 
 jest.mock('../../../lib/siem_readiness/dimensions', () => ({ getRetention: jest.fn() }));
 jest.mock('../../../lib/siem_readiness/fetchers', () => ({ fetchCategories: jest.fn() }));
@@ -206,6 +207,32 @@ describe('getRetentionTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
       expect(result.results[0].type).toBe(ToolResultType.error);
+    });
+  });
+
+  describe('parity — agent tool matches filterRetentionItemsByCategories (shared predicate)', () => {
+    it('agent data.items contains exactly the items that filterRetentionItemsByCategories returns', async () => {
+      const rawItems = [
+        makeRetentionItem(CLOUD_DATA_STREAM),
+        makeRetentionItem(NETWORK_DATA_STREAM),
+        makeRetentionItem('logs-completely-unrelated-default'),
+      ];
+      mockGetRetention.mockResolvedValueOnce(makePayload({ items: rawItems }));
+
+      const result = (await tool.handler(
+        {},
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      const agentItemNames = ((result.results[0] as OtherResult).data as RetentionPayload).items.map(
+        (i) => i.indexName
+      );
+      // Apply the same shared predicate that the UI tab now uses
+      const sharedFilterNames = filterRetentionItemsByCategories(rawItems, mockCategories).map(
+        (i) => i.indexName
+      );
+
+      expect(agentItemNames).toEqual(sharedFilterNames);
     });
   });
 });

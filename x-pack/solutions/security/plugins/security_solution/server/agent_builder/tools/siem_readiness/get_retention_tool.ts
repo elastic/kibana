@@ -11,7 +11,7 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
 import type { MainCategories } from '@kbn/siem-readiness';
-import { isRetentionNonCompliant } from '@kbn/siem-readiness';
+import { isRetentionNonCompliant, filterRetentionItemsByCategories } from '@kbn/siem-readiness';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { getRetention } from '../../../lib/siem_readiness/dimensions';
@@ -55,11 +55,8 @@ export const getRetentionTool = (
         return undefined;
       };
 
-      const categorizedItems = payload.items.filter((item) =>
-        categoriesResult.mainCategoriesMap?.some((group) =>
-          group.indices.some((idx) => idx.indexName.includes(item.indexName))
-        )
-      );
+      // Shared predicate — same function used by the UI retention tab
+      const categorizedItems = filterRetentionItemsByCategories(payload.items, categoriesResult);
 
       const enrichedFindings = (payload.actionableFindings ?? [])
         .filter((finding) => getCategoryForItem(finding.resource) !== undefined)

@@ -19,7 +19,7 @@ import {
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { MainCategories, PipelineStats } from '@kbn/siem-readiness';
-import { CATEGORY_ORDER } from '@kbn/siem-readiness';
+import { CATEGORY_ORDER, filterPipelinesByCategories } from '@kbn/siem-readiness';
 import { useSiemReadinessApi } from '../../../hooks/use_siem_readiness_api';
 import {
   CategoryAccordionTable,
@@ -85,13 +85,20 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     return map;
   }, [categoriesData]);
 
-  // Group pipelines by category using the categories map
+  // Shared filter: same predicate used by the agent tool.
+  // Produces the flat list of pipelines that serve at least one categorized SIEM index.
+  const filteredPipelineItems = useMemo(
+    () => filterPipelinesByCategories(pipelineItems ?? [], categoriesData),
+    [pipelineItems, categoriesData]
+  );
+
+  // Group filtered pipelines by category (UI-only: adds status fields and respects activeCategories).
   const categorizedPipelines: Array<CategoryData<PipelineInfoWithStatus>> = useMemo(() => {
-    if (!pipelineItems?.length) return [];
+    if (!filteredPipelineItems.length) return [];
 
     const categoryPipelinesMap = new Map<string, PipelineInfoWithStatus[]>();
 
-    pipelineItems.forEach((pipeline) => {
+    filteredPipelineItems.forEach((pipeline) => {
       const failureRate = getFailureRateString(pipeline.failedDocsCount, pipeline.docsCount);
 
       const pipelineWithStats: PipelineInfoWithStatus = {
@@ -123,7 +130,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     });
 
     return result;
-  }, [pipelineItems, indexToCategoriesMap, activeCategories]);
+  }, [filteredPipelineItems, indexToCategoriesMap, activeCategories]);
 
   const hasUnfilteredData = (pipelineItems?.length ?? 0) > 0;
 

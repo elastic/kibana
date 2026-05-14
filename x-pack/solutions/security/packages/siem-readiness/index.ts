@@ -9,3 +9,5 @@ export type * from './src/types';
 export * from './src/constants';
 export * from './src/get_siem_readiness_statuses';
 export { getIndexCategoryMap } from './src/get_index_category_map';
+export { filterPipelinesByCategories } from './src/filter_pipelines_by_categories';
+export { filterRetentionItemsByCategories } from './src/filter_retention_items_by_categories';

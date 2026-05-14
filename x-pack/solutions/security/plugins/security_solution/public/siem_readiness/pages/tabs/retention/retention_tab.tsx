@@ -19,7 +19,7 @@ import {
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { MainCategories, RetentionInfo, RetentionStatus, RetentionType } from '@kbn/siem-readiness';
-import { CATEGORY_ORDER } from '@kbn/siem-readiness';
+import { CATEGORY_ORDER, filterRetentionItemsByCategories } from '@kbn/siem-readiness';
 import { useSiemReadinessApi } from '../../../hooks/use_siem_readiness_api';
 import {
   CategoryAccordionTable,
@@ -70,13 +70,18 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
   const isLoading = retentionLoading || categoriesLoading;
   const error = retentionError;
 
-  // Group items by category using contains-match against the categories API response.
-  // Retention items carry data stream names; category indices carry backing index names,
-  // so data stream name is a substring of backing index name.
+  // Shared filter: same predicate used by the agent tool (contains-match).
+  // Produces the flat list of items that belong to at least one categorized SIEM index.
+  const filteredRetentionItems = useMemo(
+    () => filterRetentionItemsByCategories(retentionData?.items ?? [], categoriesData),
+    [retentionData?.items, categoriesData]
+  );
+
+  // Group filtered items by category (UI-only: respects activeCategories).
   const categories: Array<CategoryData<RetentionInfoWithStatus>> = useMemo(() => {
     const categoryItemsMap = new Map<string, Set<RetentionInfoWithStatus>>();
 
-    for (const item of retentionData?.items ?? []) {
+    for (const item of filteredRetentionItems) {
       categoriesData?.mainCategoriesMap?.forEach((group) => {
         if (!activeCategories.includes(group.category as MainCategories)) return;
         if (group.indices.some((idx) => idx.indexName.includes(item.indexName))) {
@@ -93,7 +98,7 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
       if (items?.size) result.push({ category, items: Array.from(items) });
     }
     return result;
-  }, [retentionData?.items, categoriesData?.mainCategoriesMap, activeCategories]);
+  }, [filteredRetentionItems, categoriesData?.mainCategoriesMap, activeCategories]);
 
   const hasUnfilteredData = (retentionData?.items?.length ?? 0) > 0;
 

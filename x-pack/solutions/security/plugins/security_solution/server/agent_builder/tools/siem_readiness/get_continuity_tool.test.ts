@@ -16,6 +16,7 @@ import {
 import { getContinuityTool } from './get_continuity_tool';
 import { getContinuity } from '../../../lib/siem_readiness/dimensions';
 import { fetchCategories } from '../../../lib/siem_readiness/fetchers';
+import { filterPipelinesByCategories } from '@kbn/siem-readiness';
 
 jest.mock('../../../lib/siem_readiness/dimensions', () => ({ getContinuity: jest.fn() }));
 jest.mock('../../../lib/siem_readiness/fetchers', () => ({ fetchCategories: jest.fn() }));
@@ -183,6 +184,32 @@ describe('getContinuityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
       expect(result.results[0].type).toBe(ToolResultType.error);
+    });
+  });
+
+  describe('parity — agent tool matches filterPipelinesByCategories (shared predicate)', () => {
+    it('agent data.items contains exactly the pipelines that filterPipelinesByCategories returns', async () => {
+      const rawPipelines = [
+        { name: 'endpoint-pipeline', indices: [ENDPOINT_INDEX], docsCount: 1000, failedDocsCount: 0, statsAvailable: true },
+        { name: 'network-pipeline', indices: [NETWORK_INDEX], docsCount: 500, failedDocsCount: 0, statsAvailable: true },
+        { name: 'internal', indices: [INTERNAL_INDEX], docsCount: 50, failedDocsCount: 0, statsAvailable: true },
+      ];
+      mockGetContinuity.mockResolvedValueOnce(makePayload({ items: rawPipelines }));
+
+      const result = (await tool.handler(
+        {},
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      const agentItemNames = ((result.results[0] as OtherResult).data as ContinuityPayload).items.map(
+        (p) => p.name
+      );
+      // Apply the same shared predicate that the UI tab now uses
+      const sharedFilterNames = filterPipelinesByCategories(rawPipelines, mockCategories).map(
+        (p) => p.name
+      );
+
+      expect(agentItemNames).toEqual(sharedFilterNames);
     });
   });
 });
