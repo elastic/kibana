@@ -84,7 +84,11 @@ export const fetchCategories = async ({
 
   const aggregations = searchResult.aggregations as AggregationResponse | undefined;
   aggregations?.by_index?.buckets?.forEach((indexBucket) => {
-    const indexName = indexBucket.key;
+    // Normalize backing data stream indices (.ds-<name>-YYYY.MM.DD-NNNNNN) to the data stream name
+    // so downstream consumers can match against data stream names (e.g. from ILM/DSL retention data).
+    const rawName = indexBucket.key;
+    const dsMatch = rawName.match(/^\.ds-(.+)-\d{4}\.\d{2}\.\d{2}-\d+$/);
+    const indexName = dsMatch ? dsMatch[1] : rawName;
 
     indexBucket.by_category?.buckets?.forEach((categoryBucket) => {
       const category = categoryBucket.key;
@@ -94,7 +98,13 @@ export const fetchCategories = async ({
         rawCategoryMap[category] = [];
       }
 
-      rawCategoryMap[category].push({ indexName, docs: docCount });
+      // Multiple backing indices for the same data stream collapse into one entry; sum their docs.
+      const existing = rawCategoryMap[category].find((e) => e.indexName === indexName);
+      if (existing) {
+        existing.docs += docCount;
+      } else {
+        rawCategoryMap[category].push({ indexName, docs: docCount });
+      }
     });
   });
 
