@@ -82,7 +82,9 @@ export class LinksPlugin
       savedObjectName: APP_NAME,
       getIconForSavedObject: () => APP_ICON,
       getSavedObjects: async (searchRequest) => {
-        const result = await linksClient.search({ ...searchRequest });
+        const { text, tags, limit } = searchRequest ?? {};
+        if (tags?.included) return []; // links panels do not support tags
+        const result = await linksClient.search({ per_page: limit, query: text });
         return result.data.map(({ id, data, meta }) => {
           return {
             type: LINKS_SAVED_OBJECT_TYPE,
