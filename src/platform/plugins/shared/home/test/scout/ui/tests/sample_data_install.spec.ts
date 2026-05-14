@@ -30,6 +30,7 @@ const sampleDataRole: KibanaRole = {
   ],
 };
 
+// Tagged @local-stateful-classic (not cloud) until loginWithCustomRole is supported on Cloud runs
 test.describe('Sample data install/uninstall', { tag: '@local-stateful-classic' }, () => {
   test.afterAll(async ({ apiServices }) => {
     await apiServices.sampleData.remove('flights');
