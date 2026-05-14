@@ -6906,7 +6906,11 @@
   version "0.0.0"
   uid ""
 
+<<<<<<< Updated upstream
 "@kbn/evals-suite-attack-discovery@link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery":
+=======
+"@kbn/evals-suite-dashboard-agent@link:x-pack/platform/packages/shared/dashboard-agent/kbn-evals-suite-dashboard-agent":
+>>>>>>> Stashed changes
   version "0.0.0"
   uid ""
 
