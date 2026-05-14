@@ -9,6 +9,8 @@
 
 import { type NormalizableFieldSchema, normalizeFieldsToJsonSchema } from './lib/field_conversion';
 import { WorkflowSchema } from './schema';
+import { JsonModelSchema } from './schema/common/json_model_schema';
+import { isManualTrigger } from './schema/triggers/manual_trigger_schema';
 
 /**
  * Security-themed workflow showcasing JSON Schema inputs
@@ -21,197 +23,206 @@ describe('Security Workflow Example - JSON Schema Showcase', () => {
       name: 'Threat Intelligence Enrichment & Incident Response',
       description: 'Enriches threat indicators and creates incident response tickets',
       enabled: true,
-      triggers: [{ type: 'manual' }],
-      inputs: {
-        properties: {
-          // Security analyst information with email format
-          analyst: {
-            type: 'object',
-            description: 'Security analyst handling the incident',
+      triggers: [
+        {
+          type: 'manual',
+          inputs: {
             properties: {
-              email: {
-                type: 'string',
-                format: 'email',
-                description: 'Analyst email address',
-              },
-              name: {
-                type: 'string',
-                minLength: 2,
-                maxLength: 100,
-                description: 'Analyst full name',
-              },
-              team: {
-                type: 'string',
-                enum: ['SOC', 'Threat Intelligence', 'Incident Response', 'Forensics'],
-                description: 'Security team',
-              },
-            },
-            required: ['email', 'name', 'team'],
-            additionalProperties: false,
-          },
-          // Threat indicator with regex pattern for IP address
-          threatIndicator: {
-            type: 'object',
-            description: 'Threat indicator to investigate',
-            properties: {
-              type: {
-                type: 'string',
-                enum: ['ip', 'domain', 'hash', 'url', 'email'],
-                description: 'Type of threat indicator',
-              },
-              value: {
-                type: 'string',
-                description: 'The indicator value',
-              },
-              // IP address with regex pattern validation
-              ipAddress: {
-                type: 'string',
-                pattern:
-                  '^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$',
-                description: 'IPv4 address (if type is ip)',
-              },
-              // CVE ID with regex pattern
-              cveId: {
-                type: 'string',
-                pattern: '^CVE-\\d{4}-\\d{4,}$',
-                description: 'CVE identifier (e.g., CVE-2024-1234)',
-              },
-              firstSeen: {
-                type: 'string',
-                format: 'date-time',
-                description: 'When the indicator was first observed',
-              },
-              severity: {
-                type: 'string',
-                enum: ['low', 'medium', 'high', 'critical'],
-                default: 'medium',
-                description: 'Threat severity level',
-              },
-            },
-            required: ['type', 'value', 'severity'],
-            additionalProperties: false,
-          },
-          // Incident metadata with nested objects
-          incidentMetadata: {
-            type: 'object',
-            description: 'Incident response metadata',
-            properties: {
-              incidentId: {
-                type: 'string',
-                pattern: '^INC-\\d{8}-\\d{4}$',
-                description: 'Incident ID (format: INC-YYYYMMDD-####)',
-              },
-              source: {
-                type: 'string',
-                enum: ['SIEM Alert', 'Threat Intelligence Feed', 'Manual Report', 'EDR Detection'],
-                description: 'Source of the incident',
-              },
-              affectedSystems: {
-                type: 'array',
-                items: {
-                  type: 'string',
-                },
-                minItems: 1,
-                maxItems: 50,
-                uniqueItems: true,
-                description: 'List of affected system hostnames or IPs',
-              },
-              tags: {
-                type: 'array',
-                items: {
-                  type: 'string',
-                  enum: [
-                    'malware',
-                    'phishing',
-                    'ransomware',
-                    'apt',
-                    'botnet',
-                    'c2',
-                    'data-exfiltration',
-                  ],
-                },
-                minItems: 1,
-                maxItems: 10,
-                uniqueItems: true,
-                description: 'Incident classification tags',
-              },
-              enrichment: {
+              // Security analyst information with email format
+              analyst: {
                 type: 'object',
-                description: 'Threat intelligence enrichment data',
+                description: 'Security analyst handling the incident',
                 properties: {
-                  reputation: {
+                  email: {
                     type: 'string',
-                    enum: ['unknown', 'clean', 'suspicious', 'malicious'],
-                    default: 'unknown',
+                    format: 'email',
+                    description: 'Analyst email address',
                   },
-                  confidence: {
-                    type: 'number',
-                    minimum: 0,
-                    maximum: 100,
-                    description: 'Confidence score (0-100)',
+                  name: {
+                    type: 'string',
+                    minLength: 2,
+                    maxLength: 100,
+                    description: 'Analyst full name',
                   },
-                  threatActors: {
+                  team: {
+                    type: 'string',
+                    enum: ['SOC', 'Threat Intelligence', 'Incident Response', 'Forensics'],
+                    description: 'Security team',
+                  },
+                },
+                required: ['email', 'name', 'team'],
+                additionalProperties: false,
+              },
+              // Threat indicator with regex pattern for IP address
+              threatIndicator: {
+                type: 'object',
+                description: 'Threat indicator to investigate',
+                properties: {
+                  type: {
+                    type: 'string',
+                    enum: ['ip', 'domain', 'hash', 'url', 'email'],
+                    description: 'Type of threat indicator',
+                  },
+                  value: {
+                    type: 'string',
+                    description: 'The indicator value',
+                  },
+                  // IP address with regex pattern validation
+                  ipAddress: {
+                    type: 'string',
+                    pattern:
+                      '^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$',
+                    description: 'IPv4 address (if type is ip)',
+                  },
+                  // CVE ID with regex pattern
+                  cveId: {
+                    type: 'string',
+                    pattern: '^CVE-\\d{4}-\\d{4,}$',
+                    description: 'CVE identifier (e.g., CVE-2024-1234)',
+                  },
+                  firstSeen: {
+                    type: 'string',
+                    format: 'date-time',
+                    description: 'When the indicator was first observed',
+                  },
+                  severity: {
+                    type: 'string',
+                    enum: ['low', 'medium', 'high', 'critical'],
+                    default: 'medium',
+                    description: 'Threat severity level',
+                  },
+                },
+                required: ['type', 'value', 'severity'],
+                additionalProperties: false,
+              },
+              // Incident metadata with nested objects
+              incidentMetadata: {
+                type: 'object',
+                description: 'Incident response metadata',
+                properties: {
+                  incidentId: {
+                    type: 'string',
+                    pattern: '^INC-\\d{8}-\\d{4}$',
+                    description: 'Incident ID (format: INC-YYYYMMDD-####)',
+                  },
+                  source: {
+                    type: 'string',
+                    enum: [
+                      'SIEM Alert',
+                      'Threat Intelligence Feed',
+                      'Manual Report',
+                      'EDR Detection',
+                    ],
+                    description: 'Source of the incident',
+                  },
+                  affectedSystems: {
                     type: 'array',
                     items: {
                       type: 'string',
                     },
-                    description: 'Associated threat actor groups',
+                    minItems: 1,
+                    maxItems: 50,
+                    uniqueItems: true,
+                    description: 'List of affected system hostnames or IPs',
                   },
-                  iocs: {
+                  tags: {
+                    type: 'array',
+                    items: {
+                      type: 'string',
+                      enum: [
+                        'malware',
+                        'phishing',
+                        'ransomware',
+                        'apt',
+                        'botnet',
+                        'c2',
+                        'data-exfiltration',
+                      ],
+                    },
+                    minItems: 1,
+                    maxItems: 10,
+                    uniqueItems: true,
+                    description: 'Incident classification tags',
+                  },
+                  enrichment: {
                     type: 'object',
+                    description: 'Threat intelligence enrichment data',
+                    properties: {
+                      reputation: {
+                        type: 'string',
+                        enum: ['unknown', 'clean', 'suspicious', 'malicious'],
+                        default: 'unknown',
+                      },
+                      confidence: {
+                        type: 'number',
+                        minimum: 0,
+                        maximum: 100,
+                        description: 'Confidence score (0-100)',
+                      },
+                      threatActors: {
+                        type: 'array',
+                        items: {
+                          type: 'string',
+                        },
+                        description: 'Associated threat actor groups',
+                      },
+                      iocs: {
+                        type: 'object',
+                        additionalProperties: false,
+                        description: 'Additional indicators of compromise',
+                      },
+                    },
                     additionalProperties: false,
-                    description: 'Additional indicators of compromise',
                   },
                 },
+                required: ['incidentId', 'source'],
                 additionalProperties: false,
               },
-            },
-            required: ['incidentId', 'source'],
-            additionalProperties: false,
-          },
-          // Response actions
-          responseActions: {
-            type: 'object',
-            description: 'Automated response actions to take',
-            properties: {
-              blockIndicator: {
-                type: 'boolean',
-                default: false,
-                description: 'Block the threat indicator in firewall/IDS',
-              },
-              quarantineHosts: {
-                type: 'boolean',
-                default: false,
-                description: 'Quarantine affected hosts',
-              },
-              createTicket: {
-                type: 'boolean',
-                default: true,
-                description: 'Create incident response ticket',
-              },
-              notifyTeams: {
-                type: 'array',
-                items: {
-                  type: 'string',
-                  enum: ['SOC', 'Management', 'Legal', 'Compliance'],
+              // Response actions
+              responseActions: {
+                type: 'object',
+                description: 'Automated response actions to take',
+                properties: {
+                  blockIndicator: {
+                    type: 'boolean',
+                    default: false,
+                    description: 'Block the threat indicator in firewall/IDS',
+                  },
+                  quarantineHosts: {
+                    type: 'boolean',
+                    default: false,
+                    description: 'Quarantine affected hosts',
+                  },
+                  createTicket: {
+                    type: 'boolean',
+                    default: true,
+                    description: 'Create incident response ticket',
+                  },
+                  notifyTeams: {
+                    type: 'array',
+                    items: {
+                      type: 'string',
+                      enum: ['SOC', 'Management', 'Legal', 'Compliance'],
+                    },
+                    description: 'Teams to notify',
+                  },
                 },
-                description: 'Teams to notify',
+                required: ['createTicket'],
+                additionalProperties: false,
+              },
+              // Priority level
+              priority: {
+                type: 'string',
+                enum: ['P1', 'P2', 'P3', 'P4'],
+                default: 'P2',
+                description: 'Incident priority (P1=Critical, P4=Low)',
               },
             },
-            required: ['createTicket'],
+            required: ['analyst', 'threatIndicator', 'incidentMetadata'],
             additionalProperties: false,
-          },
-          // Priority level
-          priority: {
-            type: 'string',
-            enum: ['P1', 'P2', 'P3', 'P4'],
-            default: 'P2',
-            description: 'Incident priority (P1=Critical, P4=Low)',
           },
         },
-        required: ['analyst', 'threatIndicator', 'incidentMetadata'],
-        additionalProperties: false,
-      },
+      ],
       steps: [
         {
           name: 'enrich-threat-indicator',
@@ -249,36 +260,34 @@ describe('Security Workflow Example - JSON Schema Showcase', () => {
 
     const parsedWorkflow = parseResult.data;
 
+    const manualTrigger = parsedWorkflow.triggers?.find((trigger) => isManualTrigger(trigger));
+
+    if (!manualTrigger) {
+      fail('Expected a manual trigger to be present in the workflow');
+    }
+
+    const jsonSchema = JsonModelSchema.parse(manualTrigger?.inputs);
+
     // Test 2: Verify all JSON Schema features are present
-    expect(parsedWorkflow.inputs?.properties?.analyst.properties?.email.format).toBe('email');
-    expect(
-      parsedWorkflow.inputs?.properties?.threatIndicator.properties?.ipAddress.pattern
-    ).toBeDefined();
-    expect(parsedWorkflow.inputs?.properties?.threatIndicator.properties?.cveId.pattern).toBe(
+    expect(jsonSchema?.properties?.analyst.properties?.email.format).toBe('email');
+    expect(jsonSchema?.properties?.threatIndicator.properties?.ipAddress.pattern).toBeDefined();
+    expect(jsonSchema?.properties?.threatIndicator.properties?.cveId.pattern).toBe(
       '^CVE-\\d{4}-\\d{4,}$'
     );
-    expect(parsedWorkflow.inputs?.properties?.threatIndicator.properties?.firstSeen.format).toBe(
-      'date-time'
-    );
-    expect(parsedWorkflow.inputs?.properties?.incidentMetadata.properties?.incidentId.pattern).toBe(
+    expect(jsonSchema?.properties?.threatIndicator.properties?.firstSeen.format).toBe('date-time');
+    expect(jsonSchema?.properties?.incidentMetadata.properties?.incidentId.pattern).toBe(
       '^INC-\\d{8}-\\d{4}$'
     );
+    expect(jsonSchema?.properties?.incidentMetadata.properties?.affectedSystems.minItems).toBe(1);
     expect(
-      parsedWorkflow.inputs?.properties?.incidentMetadata.properties?.affectedSystems.minItems
-    ).toBe(1);
-    expect(
-      parsedWorkflow.inputs?.properties?.incidentMetadata.properties?.enrichment.properties
-        ?.confidence.minimum
+      jsonSchema?.properties?.incidentMetadata.properties?.enrichment.properties?.confidence.minimum
     ).toBe(0);
     expect(
-      parsedWorkflow.inputs?.properties?.incidentMetadata.properties?.enrichment.properties
-        ?.confidence.maximum
+      jsonSchema?.properties?.incidentMetadata.properties?.enrichment.properties?.confidence.maximum
     ).toBe(100);
 
     // Test 3: Verify normalization works
-    const normalizedInputs = normalizeFieldsToJsonSchema(
-      parsedWorkflow.inputs as NormalizableFieldSchema
-    );
+    const normalizedInputs = normalizeFieldsToJsonSchema(jsonSchema as NormalizableFieldSchema);
     expect(normalizedInputs).toBeDefined();
     expect(normalizedInputs?.properties?.analyst.properties?.email.format).toBe('email');
   });

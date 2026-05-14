@@ -8,7 +8,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { convertLegacyFieldsToJsonSchema } from './field_conversion';
 import { type ConnectorContractUnion } from '../..';
 import { getDeprecatedStepMessage, getStepDeprecationInfo } from '../deprecated_step_metadata';
 import { KIBANA_TYPE_ALIASES } from '../kibana/aliases';
@@ -35,7 +34,6 @@ import {
   WorkflowSchemaForAutocompleteBase,
   WorkflowSettingsSchema,
 } from '../schema';
-import type { JsonModelSchema } from '../schema/common/json_model_schema';
 import { getTriggerSchema } from '../schema/triggers';
 
 export function getStepId(stepName: string): string {
@@ -72,31 +70,10 @@ export function generateYamlSchemaFromConnectors(
     triggers: z.array(triggerSchema).min(1),
   });
 
-  return workflowBaseWithTriggers
-    .extend({
-      settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
-      steps: z.array(recursiveStepSchema),
-    })
-    .transform((data) => {
-      let normalizedInputs: z.infer<typeof JsonModelSchema> | undefined;
-      if (data.inputs) {
-        if (
-          'properties' in data.inputs &&
-          typeof data.inputs === 'object' &&
-          !Array.isArray(data.inputs)
-        ) {
-          normalizedInputs = data.inputs as z.infer<typeof JsonModelSchema>;
-        } else if (Array.isArray(data.inputs)) {
-          normalizedInputs = convertLegacyFieldsToJsonSchema(data.inputs);
-        }
-      }
-      const { inputs: _, ...rest } = data;
-      return {
-        ...rest,
-        version: '1' as const,
-        ...(normalizedInputs !== undefined && { inputs: normalizedInputs }),
-      };
-    });
+  return workflowBaseWithTriggers.extend({
+    settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
+    steps: z.array(recursiveStepSchema),
+  });
 }
 
 function createRecursiveStepSchema(
