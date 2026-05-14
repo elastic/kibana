@@ -5,10 +5,10 @@ in-product chat and MCP / IDE clients.
 
 ## Skills
 
-| Skill                            | When                                                            | Phase |
-| -------------------------------- | --------------------------------------------------------------- | ----- |
-| `automatic-migration-correction` | Polish a translated rule (ES\|QL fix, MITRE remap, severity)    | 2     |
-| `automatic-migration-context`    | Seed translation with docs, naming conventions, lookup data     | 3     |
+| Skill                            | When                                                            | Status |
+| -------------------------------- | --------------------------------------------------------------- | ------ |
+| `automatic-migration-correction` | Polish a translated rule (ES\|QL fix, MITRE remap, severity)    | Phase 2a — content + registry tools; inline tool handlers TODO |
+| `automatic-migration-context`    | Seed translation with docs, naming conventions, lookup data     | Phase 2a — content + registry tools; inline tool handlers TODO |
 
 Both skills are gated behind the `automaticMigrationSkillsEnabled` experimental
 feature flag (`x-pack/.../common/experimental_features.ts`) and stay off in
@@ -20,11 +20,11 @@ production until all phases land.
 automatic_migration/
 ├── README.md                                  # this file
 ├── index.ts                                   # public barrel
-├── automatic_migration_correction_skill.ts    # Phase 2 (stub in Phase 1)
-├── automatic_migration_context_skill.ts       # Phase 3 (stub in Phase 1)
+├── automatic_migration_correction_skill.ts    # 5-section SKILL.md + registry tools (Phase 2a)
+├── automatic_migration_context_skill.ts       # 5-section SKILL.md + registry tools (Phase 2a)
 └── shared/
     ├── index.ts                               # barrel
-    └── schemas.ts                             # Zod base schemas
+    └── schemas.ts                             # Zod base schemas (incl. confirmDestructiveSchema)
 ```
 
 ## Shared schemas
@@ -48,12 +48,23 @@ both skills consume:
 
 ## Roadmap
 
-- **Phase 1 (this commit)** — feature flag, RBAC audit, shared schemas, skill
-  stubs registered under the flag.
-- **Phase 2** — `automatic-migration-correction` tool handlers, eval coverage.
-- **Phase 3** — `automatic-migration-context` tool handlers, eval coverage.
-- **Phase 4** — `@kbn/evals-suite-siem-migrations` package wiring both skills.
-- **Phase 5** — end-to-end verification + draft PR.
+- **Phase 1 (commit 1)** — feature flag, RBAC audit, shared schemas, skill
+  stubs registered under the flag. ✅
+- **Phase 2a (commit 2)** — comprehensive 5-section SKILL.md content for both
+  skills, registry-tool wiring (`generateEsql`, `productDocumentation`,
+  `security.security_labs_search`). ✅
+- **Phase 2b** — `automatic-migration-correction` inline tool handlers:
+  rule retrieval, ES|QL repair scaffolding, MITRE remapping, persistence with
+  `confirmation` primitive. Will use `workflow_execute_step` /
+  `kibana.request` per
+  [workflow-step-conventions](../../../../../../../../../packages/kbn-workflows/scripts/generate_kibana_connectors/included_operations.ts).
+- **Phase 3** — `automatic-migration-context` inline tool handlers: resource
+  list / upsert / remove with `confirmation` primitive for destructive ops.
+- **Phase 4** — `@kbn/evals-suite-siem-migrations` package: skill-invocation,
+  trajectory, trace-based, schema-compliance, and (for ES|QL repair)
+  functional-equivalence evaluators.
+- **Phase 5** — `verify-and-self-fix` audit on the full branch, lift the PR
+  out of draft.
 
 ## RBAC
 
