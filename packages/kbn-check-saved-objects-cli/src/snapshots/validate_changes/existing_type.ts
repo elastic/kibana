@@ -24,6 +24,7 @@ import {
   validateNewMappingsInModelVersion,
   validateNameTitleFieldTypesExistingType,
 } from './existing_type_utils';
+import { validateAdditiveOnlyMappings } from './additive_only_mappings';
 
 interface ValidateChangesExistingTypeParams {
   from: MigrationInfoRecord;
@@ -63,6 +64,9 @@ export function validateChangesExistingType({
 
   // validate that name and title fields are of type "text"
   validateNameTitleFieldTypesExistingType(name, to, from, registeredType, log);
+
+  // assert that no mapped property has been removed compared to the baseline snapshot
+  validateAdditiveOnlyMappings(name, from.mappings, to.mappings);
 
   const newModelVersionCount = to.modelVersions.length - from.modelVersions.length;
 
