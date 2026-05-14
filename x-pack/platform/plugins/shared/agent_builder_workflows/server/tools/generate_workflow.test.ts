@@ -116,7 +116,8 @@ describe('generateWorkflowTool', () => {
     );
 
     // result includes diff_attachment_id and proposal_id
-    const result = (out as { results: Array<{ data: Record<string, unknown> }> }).results[0];
+    const result = (out as unknown as { results: Array<{ data: Record<string, unknown> }> })
+      .results[0];
     expect(result.data.diff_attachment_id).toBe('diff-att');
     expect(result.data.attachment_id).toBe('new-att');
     expect(result.data.proposal_id).toEqual(expect.any(String));
@@ -177,7 +178,8 @@ describe('generateWorkflowTool', () => {
       expect.objectContaining({ editSuccess: true, isCreation: false })
     );
 
-    const result = (out as { results: Array<{ data: Record<string, unknown> }> }).results[0];
+    const result = (out as unknown as { results: Array<{ data: Record<string, unknown> }> })
+      .results[0];
     expect(result.data.updated).toBe(true);
   });
 
