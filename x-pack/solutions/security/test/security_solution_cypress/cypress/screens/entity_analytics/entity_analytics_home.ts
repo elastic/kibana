@@ -38,6 +38,10 @@ export const GROUPING_SELECTOR = '[data-test-subj="entity-analytics-grouping"]';
 export const GROUPING_COUNTER = '[data-test-subj="entity-analytics-grouping-counter"]';
 
 export const FLYOUT_RIGHT_PANEL = '[data-test-subj="rightSection"]';
+export const FLYOUT_TITLE_TEXT = '[data-test-subj="flyoutTitleText"]';
+/** Resolution group header — opens the primary (target) entity flyout */
+export const GROUP_HEADER_OPEN_ENTITY_FLYOUT_BUTTON =
+  '[data-test-subj="entity-analytics-resolution-group-open-flyout"]';
 
 export const ALERTS_DISTRIBUTION_BAR =
   '[data-test-subj="entity-analytics-alerts-distribution-bar"]';
