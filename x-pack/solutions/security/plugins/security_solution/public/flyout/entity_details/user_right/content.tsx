@@ -93,6 +93,7 @@ export const UserPanelContent = ({
         <EntityHighlightsAccordion
           entityIdentifier={entityRecord?.entity?.id ?? userName}
           entityType={EntityType.user}
+          entityRecord={entityRecord}
         />
       )}
       {!skipRiskAndCriticality &&

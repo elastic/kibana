@@ -136,6 +136,10 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
+    // NOTE: entity.attributes.summary is intentionally excluded from ESQL extraction.
+    // It is a purely API-written field (never present in source logs) and is written
+    // directly to the entity store via crudClient.updateEntity with force=true.
+    // The field mapping is defined in entity.schema.yaml and entity.gen.ts.
 
     // LIFECYCLE ------------------------------------------------------------
     oldestValue({

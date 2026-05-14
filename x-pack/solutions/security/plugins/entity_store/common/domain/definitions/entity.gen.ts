@@ -140,6 +140,44 @@ export const EntityField = lazySchema(() =>
            * OAuth consent restriction (e.g. admin_only, verified_only, unrestricted).
            */
           oauth_consent_restriction: z.string().optional(),
+          /**
+           * Persisted AI-generated summary for this entity.
+           */
+          summary: z
+            .object({
+              /**
+               * Structured highlight sections produced by the LLM.
+               */
+              highlights: z.array(
+                z
+                  .object({
+                    /**
+                     * The title of the highlight section.
+                     */
+                    title: z.string(),
+                    /**
+                     * The detailed text content for this highlight section.
+                     */
+                    text: z.string(),
+                  })
+                  .strict()
+              ),
+              /**
+               * Actionable recommendations produced by the LLM.
+               */
+              recommendedActions: z.array(z.string()).nullable().optional(),
+              /**
+               * Unix timestamp (ms) of when the summary was generated.
+               */
+              generated_at: z.number().optional(),
+              /**
+               * Username of the user who triggered the summary generation.
+               */
+              generated_by: z.string().optional(),
+            })
+            .strict()
+            .nullable()
+            .optional(),
         })
         .strict()
         .optional(),
@@ -728,3 +766,11 @@ export const EntityInternal = lazySchema(() =>
 
 export type Entity = z.infer<typeof EntityInternal>;
 export const Entity = EntityInternal as z.ZodType<Entity>;
+
+/**
+ * The shape of the persisted AI-generated summary stored under
+ * `entity.attributes.summary` in the entity store.
+ */
+export type EntitySummaryAttribute = NonNullable<
+  NonNullable<EntityField['attributes']>['summary']
+>;

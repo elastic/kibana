@@ -38,11 +38,14 @@ import { useHasEntityHighlightsLicense } from '../../../../common/hooks/use_has_
 import { useFetchEntityDetailsHighlights } from '../hooks/use_fetch_entity_details_highlights';
 import { EntityHighlightsSettings } from './entity_highlights_settings';
 import { EntityHighlightsResult } from './entity_highlights_result';
+import type { Entity } from '../../../../../common/api/entity_analytics';
+import type { EntitySummaryAttribute } from '@kbn/entity-store/common';
 
 export const EntityHighlightsAccordion: React.FC<{
   entityIdentifier: string;
   entityType: EntityType;
-}> = ({ entityType, entityIdentifier }) => {
+  entityRecord?: Entity | null;
+}> = ({ entityType, entityIdentifier, entityRecord }) => {
   // Degrade gracefully on surfaces that render outside `AssistantProvider` (e.g. the Agent
   // Builder attachment Canvas). The Elastic Assistant–backed summary cannot work without it.
   const assistantContext = useMaybeAssistantContext();
@@ -94,6 +97,12 @@ export const EntityHighlightsAccordion: React.FC<{
     [setShowAnonymizedValues]
   );
 
+  // Read the persisted summary from the entity store record (may be null if never generated)
+  const storedSummary = useMemo((): EntitySummaryAttribute | null => {
+    const summary = entityRecord?.entity?.attributes?.summary;
+    return summary ?? null;
+  }, [entityRecord]);
+
   const {
     fetchEntityHighlights,
     isChatLoading,
@@ -104,6 +113,7 @@ export const EntityHighlightsAccordion: React.FC<{
     anonymizationFields: anonymizationFields?.data ?? [],
     entityType,
     entityIdentifier,
+    storedSummary,
   });
 
   const onAddConnectorClick = useCallback(() => {
@@ -254,6 +264,7 @@ export const EntityHighlightsAccordion: React.FC<{
             assistantResult={assistantResult}
             showAnonymizedValues={showAnonymizedValues}
             generatedAt={assistantResult?.generatedAt ?? null}
+            generatedBy={assistantResult?.generatedBy ?? ''}
             onRefresh={fetchEntityHighlights}
           />
         )}

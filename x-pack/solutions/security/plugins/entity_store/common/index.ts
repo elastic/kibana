@@ -109,6 +109,7 @@ export type {
   EntityField,
   EngineMetadata,
   Asset,
+  EntitySummaryAttribute,
 } from './domain/definitions/entity.gen';
 
 export interface IdentitySourceFields {
