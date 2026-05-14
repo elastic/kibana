@@ -1,6 +1,6 @@
 ---
 # This file is used to generate the "General settings in Kibana" page in the product docs.
-# For the schema and an example refer to the automated settings reference: 
+# For the schema and an example refer to the automated settings reference:
 # https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
 
 product: Kibana
@@ -269,6 +269,15 @@ groups:
           - "ech: unavailable"
           - "self: ga"
         deprecation_details: "This setting is deprecated in favor of `csp.object_src`."
+
+      - setting: csp.report_only.connect_src
+        description: |
+          Add sources for the [Content Security Policy `connect-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/connect-src) in reporting mode.
+        datatype: string
+        applies_to:
+          - "stack: ga 9.5"
+          - "ech: ga"
+          - "self: ga"
 
       - setting: csp.report_uri
         description: |
@@ -1515,12 +1524,22 @@ groups:
           - "ech: ga"
           - "self: ga"
 
+      - setting: vis_type_timelion.enabled
+        description: |
+          Set to `false` to disable Timelion visualizations.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
       - setting: vis_type_table.legacyVisEnabled
         description: |
           Starting from version 7.11, a new datatable visualization is used. Set to `true` to enable the legacy version. In version 8.0 and later, the old implementation is removed and this setting is no longer supported.
         datatype: bool
         applies_to:
-          stack: ga
+          stack: removed 8.0
           ech: ga
           self: ga
 

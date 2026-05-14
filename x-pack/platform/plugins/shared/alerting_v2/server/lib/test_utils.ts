@@ -186,6 +186,78 @@ export function createEsqlResponse(
   };
 }
 
+export interface MockArrowBatch {
+  numRows: number;
+  rows: Array<Record<string, unknown>>;
+}
+
+export interface MockArrowReader {
+  closed: boolean;
+  cancel: jest.Mock<Promise<void>, []>;
+  [Symbol.asyncIterator]: () => AsyncIterator<{
+    numRows: number;
+    toArray: () => Array<{ toJSON: () => Record<string, unknown> }>;
+  }>;
+}
+
+/**
+ * Creates a mock {@link AsyncRecordBatchStreamReader}-shaped object that yields
+ * the provided batches when iterated. Marks itself `closed` once iteration
+ * completes.
+ */
+export function createMockArrowReader(batches: MockArrowBatch[]): MockArrowReader {
+  const reader: MockArrowReader = {
+    closed: false,
+    cancel: jest.fn().mockImplementation(async () => {
+      reader.closed = true;
+    }),
+    async *[Symbol.asyncIterator]() {
+      for (const batch of batches) {
+        yield {
+          numRows: batch.numRows,
+          toArray: () =>
+            batch.rows.map((row) => ({
+              toJSON: () => row,
+            })),
+        };
+      }
+      reader.closed = true;
+    },
+  };
+
+  return reader;
+}
+
+/**
+ * Configures `mockEsClient.helpers.esql(...)` to return an `EsqlHelper`-shaped
+ * object whose `toArrowReader` is the provided jest mock. Use this together
+ * with {@link createMockArrowReader} to drive `QueryService.executeQueryStream`
+ * in tests.
+ */
+export function mockHelpersEsqlToArrowReader(
+  mockEsClient: DeeplyMockedApi<ElasticsearchClient>,
+  toArrowReader: jest.Mock
+): void {
+  (mockEsClient.helpers.esql as unknown as jest.Mock).mockReturnValue({
+    toArrowReader,
+    toRecords: jest.fn(),
+    toArrowTable: jest.fn(),
+  });
+}
+
+/**
+ * Convenience wrapper that wires {@link mockHelpersEsqlToArrowReader} with a
+ * reader produced from {@link createMockArrowReader}.
+ */
+export function mockHelpersEsqlArrowBatches(
+  mockEsClient: DeeplyMockedApi<ElasticsearchClient>,
+  batches: MockArrowBatch[]
+): MockArrowReader {
+  const reader = createMockArrowReader(batches);
+  mockHelpersEsqlToArrowReader(mockEsClient, jest.fn().mockResolvedValue(reader));
+  return reader;
+}
+
 export function createAlertEvent(overrides: Partial<AlertEvent> = {}): AlertEvent {
   return {
     '@timestamp': '2025-01-01T00:00:00.000Z',

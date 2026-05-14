@@ -8,7 +8,7 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import { writeEntityIds } from './update_entities';
-import type { ProcessedEngineRecord } from './types';
+import type { EntityRelationshipRecord } from './types';
 
 const makeCrudClient = (errors: Array<{ status: number }> = []): EntityUpdateClient =>
   ({
@@ -25,7 +25,7 @@ describe('writeEntityIds', () => {
 
   it('skips records with null entityId', async () => {
     const crudClient = makeCrudClient();
-    const records: ProcessedEngineRecord[] = [
+    const records: EntityRelationshipRecord[] = [
       {
         entityId: null,
         entityType: 'user',
@@ -39,7 +39,7 @@ describe('writeEntityIds', () => {
 
   it('skips records where all relationship arrays are empty', async () => {
     const crudClient = makeCrudClient();
-    const records: ProcessedEngineRecord[] = [
+    const records: EntityRelationshipRecord[] = [
       {
         entityId: 'user:alice@corp',
         entityType: 'user',
@@ -56,7 +56,7 @@ describe('writeEntityIds', () => {
 
   it('calls bulkUpdateEntity with ids array per relType', async () => {
     const crudClient = makeCrudClient();
-    const records: ProcessedEngineRecord[] = [
+    const records: EntityRelationshipRecord[] = [
       {
         entityId: 'user:alice@corp',
         entityType: 'user',
@@ -77,7 +77,7 @@ describe('writeEntityIds', () => {
 
   it('merges records with the same entityId', async () => {
     const crudClient = makeCrudClient();
-    const records: ProcessedEngineRecord[] = [
+    const records: EntityRelationshipRecord[] = [
       {
         entityId: 'user:alice@corp',
         entityType: 'user',
@@ -101,7 +101,7 @@ describe('writeEntityIds', () => {
 
   it('returns updated/notFound/errors counts and counts only successfully updated entities in `updated`', async () => {
     const crudClient = makeCrudClient([{ status: 404 }]);
-    const records: ProcessedEngineRecord[] = [
+    const records: EntityRelationshipRecord[] = [
       {
         entityId: 'user:alice@corp',
         entityType: 'user',
@@ -119,7 +119,7 @@ describe('writeEntityIds', () => {
 
   it('separates 404 (notFound) from non-404 (errors) in the response counts', async () => {
     const crudClient = makeCrudClient([{ status: 404 }, { status: 500 }, { status: 503 }]);
-    const records: ProcessedEngineRecord[] = [
+    const records: EntityRelationshipRecord[] = [
       {
         entityId: 'user:alice@corp',
         entityType: 'user',
@@ -148,7 +148,7 @@ describe('writeEntityIds', () => {
   it('logs 404 (notFound) at info level — non-zero 404s are surfaced for the caller (was debug)', async () => {
     const logger = loggerMock.create();
     const crudClient = makeCrudClient([{ status: 404 }]);
-    const records: ProcessedEngineRecord[] = [
+    const records: EntityRelationshipRecord[] = [
       {
         entityId: 'user:alice@corp',
         entityType: 'user',
@@ -164,7 +164,7 @@ describe('writeEntityIds', () => {
   it('logs non-404 errors at error level', async () => {
     const logger = loggerMock.create();
     const crudClient = makeCrudClient([{ status: 500 }]);
-    const records: ProcessedEngineRecord[] = [
+    const records: EntityRelationshipRecord[] = [
       {
         entityId: 'user:alice@corp',
         entityType: 'user',
@@ -177,7 +177,7 @@ describe('writeEntityIds', () => {
 
   it('calls bulkUpdateEntity with force: true', async () => {
     const crudClient = makeCrudClient();
-    const records: ProcessedEngineRecord[] = [
+    const records: EntityRelationshipRecord[] = [
       {
         entityId: 'user:alice@corp',
         entityType: 'user',
