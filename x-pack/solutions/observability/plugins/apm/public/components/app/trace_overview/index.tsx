@@ -8,6 +8,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ApmMainTemplate } from '../../routing/templates/apm_main_template';
 import { Breadcrumb } from '../breadcrumb';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { OpenInDiscover } from '../../shared/links/discover_links/open_in_discover';
 
 export function TraceOverview({
   children,
@@ -20,11 +22,31 @@ export function TraceOverview({
     defaultMessage: 'Traces',
   });
 
+  const {
+    query: { environment, kuery, rangeFrom, rangeTo },
+  } = useApmParams('/traces');
+
   return (
     <Breadcrumb href="/traces" title={title} omitOnServerless>
       <ApmMainTemplate
         pageTitle={title}
         searchBar={searchBar}
+        pageHeader={{
+          rightSideItems: [
+            <OpenInDiscover
+              key="apmTracesExploreInDiscoverButton"
+              dataTestSubj="apmTracesExploreInDiscoverButton"
+              variant="button"
+              indexType="traces"
+              label={i18n.translate('xpack.apm.tracesOverview.exploreTracesInDiscover', {
+                defaultMessage: 'Explore traces',
+              })}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              queryParams={{ kuery, environment, sortDirection: 'DESC' }}
+            />,
+          ],
+        }}
         pageSectionProps={{
           contentProps: {
             style: {
