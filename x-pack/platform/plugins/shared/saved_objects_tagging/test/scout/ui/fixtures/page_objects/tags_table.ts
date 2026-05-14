@@ -50,13 +50,13 @@ export class TagsTable {
 
         const [rawName, rawDescription, connectionCount] = await Promise.all([
           nameCell.innerText(),
-          descriptionCell.innerText(),
+          descriptionCell.textContent(),
           this.parseConnectionCount(connectionsLocator),
         ]);
 
         return {
           name: rawName.trim(),
-          description: rawDescription.trim(),
+          description: (rawDescription ?? '').trim(),
           connectionCount,
         };
       })

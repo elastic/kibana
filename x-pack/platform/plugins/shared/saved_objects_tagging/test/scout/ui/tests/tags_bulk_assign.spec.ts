@@ -20,10 +20,6 @@ test.describe('Tags management bulk assign', { tag: tags.stateful.classic }, () 
     await pageObjects.tagManagement.tagsTable.waitForLoaded();
   });
 
-  test.afterAll(async ({ kbnClient }) => {
-    await kbnClient.savedObjects.cleanStandardList();
-  });
-
   test('bulk assigns tags to objects', async ({ pageObjects }) => {
     const { tagManagement } = pageObjects;
     const { assignFlyout, tagsTable } = tagManagement;

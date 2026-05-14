@@ -24,10 +24,6 @@ test.describe('Tags management edit', { tag: tags.stateful.classic }, () => {
     await pageObjects.tagManagement.tagModal.closeIfOpen();
   });
 
-  test.afterAll(async ({ kbnClient }) => {
-    await kbnClient.savedObjects.cleanStandardList();
-  });
-
   test('displays tag attributes in the edit form', async ({ pageObjects }) => {
     const { tagManagement } = pageObjects;
     await tagManagement.editTag('tag-1');

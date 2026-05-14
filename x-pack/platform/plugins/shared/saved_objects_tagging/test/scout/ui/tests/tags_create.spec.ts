@@ -24,10 +24,6 @@ test.describe('Tags management create', { tag: tags.stateful.classic }, () => {
     await pageObjects.tagManagement.tagModal.closeIfOpen();
   });
 
-  test.afterAll(async ({ kbnClient }) => {
-    await kbnClient.savedObjects.cleanStandardList();
-  });
-
   test('creates a valid tag', async ({ pageObjects }) => {
     const { tagManagement } = pageObjects;
 

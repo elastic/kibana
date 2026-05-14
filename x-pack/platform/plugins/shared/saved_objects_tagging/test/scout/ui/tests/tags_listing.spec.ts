@@ -24,10 +24,6 @@ test.describe('Tags management listing', { tag: tags.stateful.classic }, () => {
     await pageObjects.tagManagement.tagsTable.searchForTerm('');
   });
 
-  test.afterAll(async ({ kbnClient }) => {
-    await kbnClient.savedObjects.cleanStandardList();
-  });
-
   test('searches by term', async ({ pageObjects }) => {
     const { tagsTable } = pageObjects.tagManagement;
 

@@ -20,10 +20,6 @@ test.describe('Tags management bulk actions', { tag: tags.stateful.classic }, ()
     await pageObjects.tagManagement.tagsTable.waitForLoaded();
   });
 
-  test.afterAll(async ({ kbnClient }) => {
-    await kbnClient.savedObjects.cleanStandardList();
-  });
-
   test('deletes multiple tags', async ({ page, pageObjects }) => {
     const { tagsTable } = pageObjects.tagManagement;
 
