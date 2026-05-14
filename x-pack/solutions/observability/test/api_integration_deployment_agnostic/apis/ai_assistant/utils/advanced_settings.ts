@@ -5,22 +5,13 @@
  * 2.0.
  */
 
-import {
-  ELASTIC_HTTP_VERSION_HEADER,
-  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
-} from '@kbn/core-http-common';
-
-import type SuperTest from 'supertest';
+import type { KibanaServer } from '@kbn/ftr-common-functional-services';
+import type { UiSettingValues } from '@kbn/kbn-client';
 
 export const setAdvancedSettings = async (
-  supertest: SuperTest.Agent,
-  settings: Record<string, string[] | string | number | boolean | object>
+  kibanaServer: KibanaServer,
+  settings: UiSettingValues
 ) => {
-  return supertest
-    .post('/internal/kibana/settings')
-    .set('kbn-xsrf', 'true')
-    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-    .send({ changes: settings })
-    .expect(200);
+  await kibanaServer.uiSettings.update(settings);
+  await kibanaServer.uiSettings.waitForEventualCacheRefresh();
 };
