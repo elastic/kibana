@@ -14,7 +14,7 @@ import { saveHistoryFilters } from './history_filter_storage';
 export const DEFAULT_START_DATE = 'now-24h';
 export const DEFAULT_END_DATE = 'now';
 
-const VALID_SOURCES: readonly SourceFilter[] = ['live', 'rule', 'scheduled'];
+const VALID_SOURCES: readonly SourceFilter[] = ['live', 'rule', 'scheduled', 'workflows'];
 
 export type SortDirection = 'asc' | 'desc';
 

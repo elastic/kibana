@@ -35,6 +35,12 @@ const SOURCE_OPTIONS: SourceOption[] = [
       defaultMessage: 'Scheduled',
     }),
   },
+  {
+    key: 'workflows',
+    label: i18n.translate('xpack.osquery.historyFilters.source.workflows', {
+      defaultMessage: 'Workflows',
+    }),
+  },
 ];
 
 const PANEL_PROPS = { 'data-test-subj': 'history-source-filter-popover' };

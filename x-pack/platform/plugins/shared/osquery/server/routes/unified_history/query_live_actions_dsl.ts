@@ -84,15 +84,58 @@ export const buildLiveActionsQuery = ({
   if (activeFilters) {
     const wantsLive = activeFilters.has('live');
     const wantsRule = activeFilters.has('rule');
+    const wantsWorkflows = activeFilters.has('workflows');
 
-    if (wantsRule && !wantsLive) {
-      // Rule-only: keep actions that have alert_ids
-      filters.push({ exists: { field: 'alert_ids' } });
-    } else if (wantsLive && !wantsRule) {
-      // Live-only: exclude actions that have alert_ids
-      filters.push({ bool: { must_not: { exists: { field: 'alert_ids' } } } });
+    const sourceConditions: estypes.QueryDslQueryContainer[] = [];
+
+    if (wantsLive) {
+      sourceConditions.push({
+        bool: {
+          should: [
+            // New actions with explicit action_source
+            { term: { action_source: 'live' } },
+            // Old actions without action_source: no alert_ids and no action_source field
+            {
+              bool: {
+                must_not: [
+                  { exists: { field: 'alert_ids' } },
+                  { exists: { field: 'action_source' } },
+                ],
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      });
     }
-    // Both live+rule selected (or neither, which shouldn't reach here): no filter needed
+    if (wantsRule) {
+      sourceConditions.push({
+        bool: {
+          should: [
+            // New actions with explicit action_source
+            { term: { action_source: 'rule' } },
+            // Old actions without action_source: has alert_ids
+            {
+              bool: {
+                must: [{ exists: { field: 'alert_ids' } }],
+                must_not: [{ exists: { field: 'action_source' } }],
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+    }
+    if (wantsWorkflows) {
+      sourceConditions.push({ term: { action_source: 'workflows' } });
+    }
+
+    if (sourceConditions.length > 0 && sourceConditions.length < 3) {
+      filters.push({
+        bool: { should: sourceConditions, minimum_should_match: 1 },
+      });
+    }
+    // All three selected: no filter needed
   }
 
   return {

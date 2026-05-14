@@ -30,6 +30,11 @@ export const allowedExperimentalValues = Object.freeze({
    * for downloading osquery results as NDJSON, JSON, or CSV files.
    */
   exportResults: false,
+  /**
+   * Registers osquery workflow steps (runQuery, runPack, getResults, getSavedQuery)
+   * with the Workflows Extensions plugin for use in Kibana Workflows.
+   */
+  workflowsExtensionsEnabled: false,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };

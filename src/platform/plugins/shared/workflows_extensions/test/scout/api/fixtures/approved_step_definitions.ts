@@ -200,4 +200,20 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     id: 'cases.updateObservable',
     handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
   },
+  {
+    id: 'osquery.getResults',
+    handlerHash: '0671778eae91bcb032c116ea16fea54c02e45d52f70cd5a1faa13d03caa0a880',
+  },
+  {
+    id: 'osquery.getSavedQuery',
+    handlerHash: '7117b16a4bba8df9f24c492cd9852cef3b84ee20bcfd56d247edd99cfb5be380',
+  },
+  {
+    id: 'osquery.runPack',
+    handlerHash: '2b8596e72f7e971cb0d96c2c16005912ea12f188ae5a97bab40e9aa8971f7263',
+  },
+  {
+    id: 'osquery.runQuery',
+    handlerHash: '36fce1793aac575b22e924b7fad4e9c0c40c8c7d4f85aeff89121dc9f531fe97',
+  },
 ];

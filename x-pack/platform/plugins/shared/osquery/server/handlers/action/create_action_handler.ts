@@ -46,6 +46,21 @@ interface CreateActionHandlerOptions {
   error?: string;
 }
 
+const deriveActionSource = (
+  params: CreateLiveQueryRequestBodySchema,
+  options: CreateActionHandlerOptions
+): string => {
+  // Explicit source from metadata (e.g., workflows)
+  const explicitSource = (params.metadata as Record<string, unknown>)?.source as string | undefined;
+  if (explicitSource) return explicitSource;
+
+  // Rule-triggered: has alert data or alert_ids
+  if (options.alertData || (params.alert_ids && params.alert_ids.length > 0)) return 'rule';
+
+  // Default: manual live query
+  return 'live';
+};
+
 export const createActionHandler = async (
   osqueryContext: OsqueryAppContext,
   params: CreateLiveQueryRequestBodySchema,
@@ -110,6 +125,7 @@ export const createActionHandler = async (
     user_id: metadata?.currentUser,
     user_profile_uid: metadata?.userProfileUid,
     metadata: params.metadata,
+    action_source: deriveActionSource(params, options),
     pack_id: params.pack_id,
     pack_name: packSO?.attributes?.name,
     pack_prebuilt: params.pack_id
@@ -183,7 +199,7 @@ export const createActionHandler = async (
   }
 
   osqueryContext.telemetryEventsSender.reportEvent(TELEMETRY_EBT_LIVE_QUERY_EVENT, {
-    ...omit(osqueryAction, ['type', 'input_type', 'user_id', 'user_profile_uid', 'error']),
+    ...omit(osqueryAction, ['type', 'input_type', 'user_id', 'user_profile_uid', 'error', 'action_source']),
     agents: osqueryAction.agents.length,
   });
 

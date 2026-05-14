@@ -43,6 +43,7 @@ import type { ServicesWrapperProps } from './shared_components/services_wrapper'
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
+import { registerOsqueryWorkflowExtensions } from './workflows';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private kibanaVersion: string;
@@ -101,6 +102,10 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         } as unknown as ServicesWrapperProps['services'])
       );
     });
+
+    if (this.experimentalFeatures.workflowsExtensionsEnabled && plugins.workflowsExtensions) {
+      registerOsqueryWorkflowExtensions(plugins.workflowsExtensions);
+    }
 
     // Return methods that should be available to other plugins
     return {};

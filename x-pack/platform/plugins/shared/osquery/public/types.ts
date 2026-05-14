@@ -16,6 +16,7 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { CasesPublicStart, CasesPublicSetup } from '@kbn/cases-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -104,6 +105,7 @@ export interface StartPlugins {
 export interface SetupPlugins {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   cases?: CasesPublicSetup;
+  workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
 }
 
 export type StartServices = CoreStart & StartPlugins;
