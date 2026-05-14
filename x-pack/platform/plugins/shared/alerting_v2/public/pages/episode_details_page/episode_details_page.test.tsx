@@ -12,7 +12,7 @@ import { useFetchEpisodeEventsQuery } from '@kbn/alerting-v2-episodes-ui/hooks/u
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
 import { useFetchEpisodeEventDataQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_event_data_query';
-import { useFetchRule } from '../../hooks/use_fetch_rule';
+import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule';
 import { TestProviders } from '../../test_utils/test_providers';
 import { EpisodeDetailsPage } from './episode_details_page';
 
@@ -38,7 +38,7 @@ jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_event_data_query
   useFetchEpisodeEventDataQuery: jest.fn(),
 }));
 
-jest.mock('../../hooks/use_fetch_rule', () => ({
+jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule', () => ({
   useFetchRule: jest.fn(),
 }));
 
@@ -125,10 +125,9 @@ describe('EpisodeDetailsPage', () => {
     );
 
     expect(screen.getByTestId('alertingV2EpisodeDetailsSidebar')).toBeInTheDocument();
-    expect(screen.getByText('Grouping fields')).toBeInTheDocument();
+    expect(screen.getByText('Grouping')).toBeInTheDocument();
     expect(screen.getByText('Triggered')).toBeInTheDocument();
     expect(screen.getByText('Duration')).toBeInTheDocument();
-    expect(screen.getByText('Tags')).toBeInTheDocument();
     expect(screen.getByText('Assignee')).toBeInTheDocument();
   });
 });
