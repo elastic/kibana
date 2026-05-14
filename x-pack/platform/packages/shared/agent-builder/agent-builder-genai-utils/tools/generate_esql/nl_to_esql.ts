@@ -21,11 +21,11 @@ export interface GenerateEsqlResponse {
   /**
    * The ES|QL query which was generated
    */
-  query: string;
+  query?: string;
   /**
    * The full text answer which was provided by the LLM when generating the query.
    */
-  answer: string;
+  answer?: string;
   /**
    * Results from executing the query.
    * Available if `executeQuery` was true and if a successful query was executed.
@@ -35,6 +35,11 @@ export interface GenerateEsqlResponse {
    * Error message if the query could not be executed
    */
   error?: string;
+  /**
+   * Set when the generator deliberately cannot produce a query (e.g. no relevant index found).
+   * Consumers should surface this to the user rather than treating it as a system error.
+   */
+  rejectionReason?: { code: string; message: string };
 }
 
 export interface GenerateEsqlDeps {
@@ -144,9 +149,13 @@ export const generateEsql = async ({
             logger,
           });
           if (!selectedResource) {
-            throw new Error(
-              'Could not discover a suitable index for the query. Please specify an index explicitly.'
-            );
+            return {
+              rejectionReason: {
+                code: 'NO_DATA',
+                message:
+                  'Could not discover a suitable index for the query. Please specify an index explicitly.',
+              },
+            };
           }
           selectedTarget = selectedResource.name;
           logger?.debug(`Discovered target index: ${selectedTarget}`);
