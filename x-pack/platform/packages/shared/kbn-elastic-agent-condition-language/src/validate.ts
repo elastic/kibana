@@ -22,11 +22,11 @@ export interface AgentConditionSyntaxError {
 /**
  * Validate an Elastic Agent condition expression for syntax errors.
  *
- * Returns an empty array for valid expressions or for empty/whitespace input
- * (the agent treats an absent `condition` as "no condition" — this matches).
+ * Returns an empty array for valid expressions or for empty/whitespace/undefined
+ * input (the agent treats an absent `condition` as "no condition" — this matches).
  */
 export const validateAgentConditionExpression = (
-  expression: string
+  expression: string | undefined
 ): AgentConditionSyntaxError[] => {
   if (!expression?.trim()) return [];
 

@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-agent-condition-language'],
+  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-elastic-agent-condition-language'],
 };

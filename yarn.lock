@@ -4596,10 +4596,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/agent-condition-language@link:x-pack/platform/packages/shared/kbn-agent-condition-language":
-  version "0.0.0"
-  uid ""
-
 "@kbn/agent-context-layer-plugin@link:x-pack/platform/plugins/shared/agent_context_layer":
   version "0.0.0"
   uid ""
@@ -6677,6 +6673,10 @@
   uid ""
 
 "@kbn/edot-collector@link:src/platform/packages/shared/kbn-edot-collector":
+  version "0.0.0"
+  uid ""
+
+"@kbn/elastic-agent-condition-language@link:x-pack/platform/packages/shared/kbn-elastic-agent-condition-language":
   version "0.0.0"
   uid ""
 

@@ -116,7 +116,7 @@ function rewriteTsFiles(basenameMap) {
       content = content.replaceAll(`./${oldBase}.js`, `./${newBase}.js`);
     }
 
-    if (!content.startsWith('/*')) {
+    if (!content.includes('Elastic License')) {
       content = `${LICENSE_HEADER}// @ts-nocheck\n${content}`;
     }
 

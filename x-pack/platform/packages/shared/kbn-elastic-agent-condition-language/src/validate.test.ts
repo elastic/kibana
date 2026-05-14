@@ -9,7 +9,7 @@ import { validateAgentConditionExpression } from './validate';
 
 describe('validateAgentConditionExpression', () => {
   describe('empty / whitespace input', () => {
-    it.each(['', '   ', '\n\t', undefined as unknown as string])('returns [] for %p', (input) => {
+    it.each(['', '   ', '\n\t', undefined])('returns [] for %p', (input) => {
       expect(validateAgentConditionExpression(input)).toEqual([]);
     });
   });

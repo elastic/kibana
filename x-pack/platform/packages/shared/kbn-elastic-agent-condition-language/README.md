@@ -1,4 +1,4 @@
-# @kbn/agent-condition-language
+# @kbn/elastic-agent-condition-language
 
 Syntax validator for **Elastic Agent's condition expression language** which is evaluated by the Elastic Agent to conditionally include agent inputs and streams.
 
@@ -10,7 +10,7 @@ See <https://www.elastic.co/docs/reference/fleet/dynamic-input-configuration#con
 import {
   validateAgentConditionExpression,
   type AgentConditionSyntaxError,
-} from '@kbn/agent-condition-language';
+} from '@kbn/elastic-agent-condition-language';
 
 const errors = validateAgentConditionExpression("${host.platform} == 'linux'");
 // → [] when valid, [{ line, column, message }, ...] when malformed
@@ -59,4 +59,4 @@ brew install antlr
 
 ANTLR4's TypeScript target emits code that doesn't strictly satisfy Kibana's stricter `tsconfig` rules. `@ts-nocheck` skips type checking on those files only — application code that uses the parser (in `src/validate.ts`) is fully type-checked.
 
-The `src/antlr/` directory is also added to `.eslintignore` so generated files aren't linted.
+The `src/parser/` directory is also added to `.eslintignore` so generated files aren't linted.
