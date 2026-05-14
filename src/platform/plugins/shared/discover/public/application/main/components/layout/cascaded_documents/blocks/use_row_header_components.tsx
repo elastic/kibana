@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 import { type AggregateQuery } from '@kbn/es-query';
+import { getESQLResults } from '@kbn/esql-utils';
+import type { ISearchGeneric } from '@kbn/search-types';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   appendFilteringWhereClauseForCascadeLayout,
   constructCascadeQuery,
@@ -39,12 +42,12 @@ import {
   getStatsGroupFieldType,
   getFieldParamDefinition,
 } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers/utils';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldTerminals } from '@kbn/esql-utils/src/utils/esql_fields_utils';
 import { getSparklineCellRenderer } from '../../../../../../context_awareness/profile_providers/common/patterns_data_source_profile/sparkline_cell_renderer';
-import { type UpdateESQLQueryFn } from '../../../../../../context_awareness';
+import { type UpdateESQLQueryFn, useProfileAccessor } from '../../../../../../context_awareness';
+import { useCascadedDocumentsContext } from '../cascaded_documents_provider';
 import { getPatternCellRenderer } from '../../../../../../context_awareness/profile_providers/common/patterns_data_source_profile/pattern_cell_renderer';
 import type { ESQLDataGroupNode } from './types';
 import type { internalStateActions } from '../../../../state_management/redux';
@@ -394,6 +397,57 @@ export function useEsqlDataCascadeRowHeaderComponents(
   columnTypes: Map<string, 'number' | 'array'>
 ) {
   const services = useDiscoverServices();
+  const { esqlQuery, timeRange } = useCascadedDocumentsContext();
+  const getGroupRowMetaSlotsAccessor = useProfileAccessor('getGroupRowMetaSlots');
+  const getGroupRowEnrichmentQueryAccessor = useProfileAccessor('getGroupRowEnrichmentQuery');
+
+  const groupByField = editorQueryMeta.groupByFields[0]?.field;
+
+  const enrichmentQueryStr = useMemo(() => {
+    if (!groupByField) return undefined;
+    return getGroupRowEnrichmentQueryAccessor(() => undefined)({ query: esqlQuery, groupByField });
+  }, [getGroupRowEnrichmentQueryAccessor, esqlQuery, groupByField]);
+
+  const [enrichmentData, setEnrichmentData] = useState<
+    Map<string, Record<string, unknown>> | undefined
+  >(undefined);
+
+  useEffect(() => {
+    if (!enrichmentQueryStr || !groupByField) {
+      setEnrichmentData(undefined);
+      return;
+    }
+
+    const abortController = new AbortController();
+
+    getESQLResults({
+      esqlQuery: enrichmentQueryStr,
+      search: services.data.search.search as ISearchGeneric,
+      timeRange: timeRange ?? undefined,
+      signal: abortController.signal,
+    })
+      .then(({ response }) => {
+        const columnNames = response.columns.map((c) => c.name);
+        const map = new Map<string, Record<string, unknown>>();
+        response.values.forEach((row) => {
+          const record: Record<string, unknown> = {};
+          columnNames.forEach((col, i) => {
+            record[col] = row[i];
+          });
+          const key = String(record[groupByField] ?? '');
+          map.set(key, record);
+        });
+        setEnrichmentData(map);
+      })
+      .catch(() => {
+        setEnrichmentData(undefined);
+      });
+
+    return () => {
+      abortController.abort();
+    };
+  }, [enrichmentQueryStr, timeRange, groupByField, services]);
+
   const aggregateColumnIdentifiers = useMemo(() => {
     return new Set(editorQueryMeta.appliedFunctions.map(({ identifier }) => identifier));
   }, [editorQueryMeta.appliedFunctions]);
@@ -436,8 +490,28 @@ export function useEsqlDataCascadeRowHeaderComponents(
   const rowHeaderMeta = useCallback<
     NonNullable<DataCascadeRowProps<ESQLDataGroupNode, DataTableRecord>['rowHeaderMetaSlots']>
   >(
-    ({ rowData }) =>
-      selectedColumns
+    ({ rowData, nodePath }) => {
+      const groupField = nodePath[nodePath.length - 1];
+      const groupValue = rowData.groupValue;
+
+      const profileSlots = getGroupRowMetaSlotsAccessor(() => undefined)({
+        groupField,
+        groupValue,
+        aggregatedValues: rowData.aggregatedValues as Record<string, unknown>,
+        selectedColumns,
+        columnTypes,
+        appliedFunctions: editorQueryMeta.appliedFunctions,
+        query: esqlQuery,
+        timeRange,
+        charts: services.charts,
+        enrichmentData,
+      });
+
+      if (profileSlots !== undefined) {
+        return profileSlots;
+      }
+
+      return selectedColumns
         .map((selectedColumn) => {
           if (!aggregateColumnIdentifiers.has(selectedColumn)) {
             return null;
@@ -505,8 +579,19 @@ export function useEsqlDataCascadeRowHeaderComponents(
             </EuiFlexGroup>
           );
         })
-        .filter(Boolean),
-    [aggregateColumnIdentifiers, columnTypes, editorQueryMeta, selectedColumns, services]
+        .filter(Boolean);
+    },
+    [
+      aggregateColumnIdentifiers,
+      columnTypes,
+      editorQueryMeta,
+      enrichmentData,
+      esqlQuery,
+      getGroupRowMetaSlotsAccessor,
+      selectedColumns,
+      services,
+      timeRange,
+    ]
   );
 
   const rowActions = useCallback<

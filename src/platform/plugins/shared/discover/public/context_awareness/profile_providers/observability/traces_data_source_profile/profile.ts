@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { TRACES_PRODUCT_FEATURE_ID } from '../../../../../common/constants';
 import {
   SolutionType,
@@ -15,7 +15,13 @@ import {
 } from '../../../profiles';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 import type { ProfileProviderServices } from '../../profile_provider_services';
-import { getCellRenderers, getDefaultAppState, getChartSectionConfiguration } from './accessors';
+import {
+  getCellRenderers,
+  getDefaultAppState,
+  getChartSectionConfiguration,
+  getGroupRowMetaSlots,
+  getGroupRowEnrichmentQuery,
+} from './accessors';
 import { isValidNonTransformationalESQLQuery } from '../../../utils/is_valid_non_transformational_esql_query';
 import { DataSourceType } from '../../../../../common/data_sources';
 
@@ -31,13 +37,16 @@ export const createTracesDataSourceProfileProvider = ({
     getDefaultAppState,
     getCellRenderers,
     getChartSectionConfiguration: getChartSectionConfiguration(),
+    getGroupRowEnrichmentQuery,
+    getGroupRowMetaSlots,
   },
   resolve: (params) => {
     if (
       params.rootContext.solutionType === SolutionType.Observability &&
       apmContextService.tracesService.isTracesIndexPattern(extractIndexPatternFrom(params)) &&
       (params.dataSource?.type === DataSourceType.DataView ||
-        isValidNonTransformationalESQLQuery(params.query))
+        isValidNonTransformationalESQLQuery(params.query) ||
+        isOfAggregateQueryType(params.query))
     ) {
       return {
         isMatch: true,

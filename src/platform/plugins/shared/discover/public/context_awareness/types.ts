@@ -28,6 +28,8 @@ import type {
 } from '@kbn/unified-histogram/types';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
+import type React from 'react';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type {
   DiscoverAppState,
@@ -196,6 +198,40 @@ export interface DocViewerExtension {
    * @returns A React element to render at the bottom of the flyout
    */
   renderFooter?: (props: DocViewRenderProps) => React.ReactElement;
+}
+
+/**
+ * Parameters passed to the group row enrichment query extension
+ */
+export interface GroupRowEnrichmentQueryParams {
+  /**
+   * The current editor query (used to extract the index pattern and filters)
+   */
+  query: AggregateQuery | Query;
+  /**
+   * The field being grouped by in the cascade layout
+   */
+  groupByField: string;
+}
+
+/**
+ * Parameters passed to the group row meta slots extension
+ */
+export interface GroupRowMetaSlotsParams {
+  groupField: string;
+  groupValue: string;
+  aggregatedValues: Record<string, unknown>;
+  selectedColumns: string[];
+  columnTypes: Map<string, 'number' | 'array'>;
+  appliedFunctions: Array<{ identifier: string; aggregation: string }>;
+  query: AggregateQuery | Query;
+  timeRange?: TimeRange;
+  charts: ChartsPluginStart;
+  /**
+   * Pre-fetched enrichment data for all group rows, keyed by group value.
+   * Populated by running the query returned from getGroupRowEnrichmentQuery once.
+   */
+  enrichmentData?: Map<string, Record<string, unknown>>;
 }
 
 /**
@@ -562,6 +598,20 @@ export interface Profile {
    * Example use case is to overwrite the column header display name or to add icons to the column headers.
    */
   getColumnsConfiguration: () => CustomGridColumnsConfiguration;
+
+  /**
+   * Declares an ES|QL query to run once per cascade render to enrich all group row headers.
+   * Discover runs this query and passes the results (keyed by group value) into getGroupRowMetaSlots.
+   * Return undefined to opt out of enrichment.
+   */
+  getGroupRowEnrichmentQuery: (params: GroupRowEnrichmentQueryParams) => string | undefined;
+
+  /**
+   * Allows profiles to enrich the meta slots rendered in cascaded group row headers.
+   * Receives the aggregated row values and column metadata; return ReactNode[] to override
+   * default rendering, or undefined to fall through to the default.
+   */
+  getGroupRowMetaSlots: (params: GroupRowMetaSlotsParams) => React.ReactNode[] | undefined;
 
   /**
    * Field list
