@@ -124,26 +124,34 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
           {/* Start: icon + title/badges/subtitle */}
           <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
             <EuiFlexGroup
-              gutterSize="m"
+              gutterSize="s"
               alignItems="center"
               responsive={false}
               style={{ minWidth: 0 }}
             >
               {icon && (
                 <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
-                  <EuiIcon type={icon} size="l" aria-hidden={true} />
+                  <EuiIcon type={icon} color="subdued" size="l" aria-hidden={true} />
                 </EuiFlexItem>
               )}
-              <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
+              <EuiFlexItem
+                grow={true}
+                style={{
+                  minWidth: 0,
+                  borderLeft: euiTheme.border.thin,
+                  borderColor: euiTheme.colors.borderBaseSubdued,
+                  paddingLeft: euiTheme.size.s,
+                }}
+              >
                 <EuiFlexGroup
                   direction="column"
-                  gutterSize="xs"
+                  gutterSize="none"
                   responsive={false}
                   style={{ minWidth: 0 }}
                 >
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup
-                      gutterSize="xs"
+                      gutterSize="s"
                       alignItems="center"
                       responsive={false}
                       wrap
