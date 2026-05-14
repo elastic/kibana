@@ -7,8 +7,8 @@ in-product chat and MCP / IDE clients.
 
 | Skill                            | When                                                            | Status |
 | -------------------------------- | --------------------------------------------------------------- | ------ |
-| `automatic-migration-correction` | Polish a translated rule (ES\|QL fix, MITRE remap, severity)    | Phase 2a — content + registry tools; inline tool handlers TODO |
-| `automatic-migration-context`    | Seed translation with docs, naming conventions, lookup data     | Phase 2a — content + registry tools; inline tool handlers TODO |
+| `automatic-migration-correction` | Polish a translated rule (ES\|QL fix, MITRE remap, severity)    | ✅ content + 3 backing registry tools (Phase 2a + 2b) |
+| `automatic-migration-context`    | Seed translation with docs, naming conventions, lookup data     | ✅ content + 3 backing registry tools (Phase 2a + 3) |
 
 Both skills are gated behind the `automaticMigrationSkillsEnabled` experimental
 feature flag (`x-pack/.../common/experimental_features.ts`) and stay off in
@@ -53,16 +53,34 @@ both skills consume:
 - **Phase 2a (commit 2)** — comprehensive 5-section SKILL.md content for both
   skills, registry-tool wiring (`generateEsql`, `productDocumentation`,
   `security.security_labs_search`). ✅
-- **Phase 2b** — `automatic-migration-correction` inline tool handlers:
-  rule retrieval, ES|QL repair scaffolding, MITRE remapping, persistence with
-  `confirmation` primitive. Will use `workflow_execute_step` /
-  `kibana.request` per
-  [workflow-step-conventions](../../../../../../../../../packages/kbn-workflows/scripts/generate_kibana_connectors/included_operations.ts).
-- **Phase 3** — `automatic-migration-context` inline tool handlers: resource
-  list / upsert / remove with `confirmation` primitive for destructive ops.
-- **Phase 4** — `@kbn/evals-suite-siem-migrations` package: skill-invocation,
-  trajectory, trace-based, schema-compliance, and (for ES|QL repair)
-  functional-equivalence evaluators.
+- **Phase 2b** — `automatic-migration-correction` backing registry tools:
+  `security.migration_translated_rules_search`,
+  `security.migration_translated_rule_get`, and
+  `security.migration_translated_rule_update`. Destructive update gated by
+  schema-enforced `confirm: z.literal(true)`. Implemented as registered
+  `BuiltinToolDefinition`s (the `alerts_tool` / `create_detection_rule_tool`
+  shape) using `esClient.asCurrentUser` against
+  `.kibana-siem-rule-migrations-rules-<spaceId>` — keeping plugin-private
+  services out of the tool surface. ✅
+- **Phase 3** — `automatic-migration-context` backing registry tools:
+  `security.migration_resources_list`, `security.migration_resource_upsert`,
+  and `security.migration_resource_remove`. Destructive ops gated by
+  schema-enforced `confirm: z.literal(true)`. Same registered-tool shape
+  against `.kibana-siem-rule-migrations-resources-<spaceId>`. ✅
+- **Phase 4** — eval suite extension. The existing
+  `@kbn/evals-suite-security-automatic-migrations` package gets a `src/skills/`
+  subsystem (chat client + `createEvaluateMigrationSkillsDataset`) and two
+  spec files under `evals/skills/`:
+  - `automatic_migration_correction.spec.ts` — 4 happy-path scenarios + 3
+    distractors.
+  - `automatic_migration_context.spec.ts` — 4 happy-path scenarios + 3
+    distractors.
+  Each example runs both an LLM-judged criteria evaluator (with skill-specific
+  baseline contract) and `createSkillInvocationEvaluator` so SKILL.md
+  activation is gated, not freelanced. Distractors flip the criteria evaluator
+  into "must NOT activate" mode via `metadata.distractor = true`. Trajectory +
+  schema-compliance evaluators are stubbed via per-example
+  `metadata.tool_sequence` for the next iteration. ✅
 - **Phase 5** — `verify-and-self-fix` audit on the full branch, lift the PR
   out of draft.
 
