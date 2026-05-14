@@ -26,7 +26,6 @@ More access means more context on the failure:
 - **GitHub API.** Run `gh auth status` to confirm `gh` is authenticated.
   - Caveat: `failed-test` issues are not always current. Closing them is up to the development teams; the convention is that if no new failure appears within 2–3 weeks, the issue can be closed.
 - **Buildkite API** (for logs).
-- **AppEx QA cluster.**
 
 # What "fixing" a flaky test actually means
 
@@ -113,7 +112,6 @@ Don't just inspect the latest failure. Build a picture of the failure over time 
 
 ### Guiding questions
 
-- **Where is the test currently running?** Both local and Cloud pipelines, or just one? Query the AppEx QA cluster to see all recent runs.
 - **Is it failing consistently?** Place the test on the spectrum from "very occasional" to "fails every run".
 - **Is it failing on both local and Cloud pipelines, or just one?**
 - **Did it fail in builds with many other test failures?** That points to a broader test environment issue rather than a problem with this test.
@@ -132,7 +130,7 @@ For each Buildkite URL the test failed in:
 - Understand the test server configuration (for Scout and Jest tests, are the tests using **default** or **custom test servers** configuration?).
   - Tip: reference `docs/extend/scout/feature-flags.md#custom-server-configs-reach-out-to-appex-qa-first-scout-feature-flags-custom-servers` for more information on custom servers configs in Scout.
 
-Ideally, query the AppEx QA cluster — see `references/appex-qa-cluster-queries.md`. Otherwise, read the comments on the `failed-test` issue to gauge frequency.
+Read the comments on the `failed-test` issue and the linked Buildkite builds to gauge frequency.
 
 ### Did the environment cause the failure?
 
