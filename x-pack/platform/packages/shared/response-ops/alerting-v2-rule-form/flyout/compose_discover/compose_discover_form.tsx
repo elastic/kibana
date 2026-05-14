@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+// TODO (#269023): This file contains 4+ step components, the STEP_REGISTRY,
+// the recovery type selector, and the ComposeDiscoverForm wrapper. Extract
+// each step into its own file under a `steps/` directory and move the
+// STEP_REGISTRY + recovery selector into dedicated modules to keep each file
+// focused and under ~200 lines.
+
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Parser, isColumn } from '@elastic/esql';
