@@ -7,6 +7,7 @@
 
 import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
+import { addTransactionLabels } from '@kbn/apm-utils';
 import type { UpdateSLOParams, UpdateSLOResponse } from '@kbn/slo-schema';
 import { updateSLOResponseSchema } from '@kbn/slo-schema';
 import { asyncForEach } from '@kbn/std';
@@ -32,6 +33,7 @@ import type { SLODefinitionRepository } from './slo_definition_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import type { TransformManager } from './transform_manager';
 import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_expected_indicator_source_index_privileges';
+import { getSloApmLabels } from './utils';
 
 export class UpdateSLO {
   constructor(
@@ -52,6 +54,7 @@ export class UpdateSLO {
       groupBy: !!params.groupBy ? params.groupBy : originalSlo.groupBy,
       settings: Object.assign({}, originalSlo.settings, params.settings),
     });
+    addTransactionLabels(getSloApmLabels(updatedSlo));
 
     if (isEqual(originalSlo, updatedSlo)) {
       return this.toResponse(originalSlo);
