@@ -79,23 +79,35 @@ import {
 import { DiscoverTour } from './application/discover_tour';
 const VERSION_OPTIONS = [
   {
-    value: 'version1' as IngestHubVersion,
-    inputDisplay: 'Version 1',
+    value: 'current' as IngestHubVersion,
+    inputDisplay: 'Current',
     dropdownDisplay: (
       <>
-        <strong>Version 1</strong>
+        <strong>Current</strong>
         <EuiText size="s" color="subdued">
-          <p>Earlier ingest hub prototype in the onboarding app (before the Version 2 canvas).</p>
+          <p>Clean canvas — Karolina&apos;s working version. Christian&apos;s reference designs are below.</p>
+        </EuiText>
+      </>
+    ),
+  },
+  {
+    value: 'version1' as IngestHubVersion,
+    inputDisplay: 'Christian-V1',
+    dropdownDisplay: (
+      <>
+        <strong>Christian-V1</strong>
+        <EuiText size="s" color="subdued">
+          <p>Earlier ingest hub prototype in the onboarding app (before the V2 canvas).</p>
         </EuiText>
       </>
     ),
   },
   {
     value: 'version2' as IngestHubVersion,
-    inputDisplay: 'Version 2',
+    inputDisplay: 'Christian-V2',
     dropdownDisplay: (
       <>
-        <strong>Version 2</strong>
+        <strong>Christian-V2</strong>
         <EuiText size="s" color="subdued">
           <p>
             &ldquo;Everything is a stream&rdquo; canvas vision + AI-assisted onboarding +
@@ -107,13 +119,13 @@ const VERSION_OPTIONS = [
   },
   {
     value: 'version3' as IngestHubVersion,
-    inputDisplay: 'Version 3',
+    inputDisplay: 'Christian-V3',
     dropdownDisplay: (
       <>
-        <strong>Version 3</strong>
+        <strong>Christian-V3</strong>
         <EuiText size="s" color="subdued">
           <p>
-            Same as Version 2: &ldquo;Everything is a stream&rdquo; canvas vision + AI-assisted
+            Same as Christian-V2: &ldquo;Everything is a stream&rdquo; canvas + AI-assisted
             onboarding + AI-generated integrations + progressive disclosure principles.
           </p>
         </EuiText>

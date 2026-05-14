@@ -6,6 +6,7 @@
  */
 
 export type IngestHubVersion =
+  | 'current'
   | 'blockUx'
   | 'streamsUx'
   | 'agentUx'
@@ -33,6 +34,7 @@ const getOrCreateStore = (): VersionStore => {
   const STORAGE_KEY = 'ingestHub:activeVersion';
   const stored = sessionStorage.getItem(STORAGE_KEY) as IngestHubVersion | null;
   const validVersions: IngestHubVersion[] = [
+    'current',
     'blockUx',
     'streamsUx',
     'agentUx',
@@ -43,7 +45,7 @@ const getOrCreateStore = (): VersionStore => {
   ];
   const resolved: IngestHubVersion = validVersions.includes(stored as IngestHubVersion)
     ? (stored as IngestHubVersion)
-    : 'version2';
+    : 'current';
   let version = resolved;
   if (stored !== resolved) {
     try {
