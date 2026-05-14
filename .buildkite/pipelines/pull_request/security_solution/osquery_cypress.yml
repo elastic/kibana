@@ -3,7 +3,7 @@ steps:
     label: 'Osquery Cypress Tests'
     key: osquery-cypress
     agents:
-      machineType: n2-highmem-4
+      machineType: n2-standard-4
       diskSizeGb: 120
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
@@ -23,7 +23,7 @@ steps:
     key: osquery-serverless
     if: "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'"
     agents:
-      machineType: n2-highmem-4
+      machineType: n2-standard-4
       diskSizeGb: 120
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a

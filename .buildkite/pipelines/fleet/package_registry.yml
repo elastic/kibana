@@ -74,7 +74,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      machineType: n2-highmem-4
+      machineType: n2-standard-4
       diskSizeGb: 120
     timeout_in_minutes: 75
     parallelism: 22
@@ -92,7 +92,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      machineType: n2-highmem-4
+      machineType: n2-standard-4
       diskSizeGb: 120
     timeout_in_minutes: 75
     parallelism: 14
@@ -109,7 +109,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-highmem-4
+      machineType: n2-standard-4
       diskSizeGb: 120
       preemptible: true
     timeout_in_minutes: 60
@@ -126,7 +126,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-highmem-4
+      machineType: n2-standard-4
       diskSizeGb: 120
       preemptible: true
     timeout_in_minutes: 60
