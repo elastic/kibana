@@ -9,20 +9,12 @@ import type { Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../common/endpoint/service/response_actions/constants';
 import { RunEmulationCommandInputSchema } from '../../../../common/detection_emulation/schemas/run_emulation_command_input';
 import { MAX_ENDPOINT_FANOUT } from '../../../../common/detection_emulation/schemas/constants';
 import type { ConfigType } from '../../../config';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
-import {
-  EmulationAllowlist,
-  createAllowlistFromConfig,
-} from '../../../lib/detection_emulation/execution/allowlist';
-import {
-  EmulationRateLimiter,
-  createDefaultRateLimiterConfig,
-} from '../../../lib/detection_emulation/execution/rate_limiter';
+import type { DetectionEmulationGuardrails } from '../../../lib/detection_emulation/execution/shared_guardrails';
 import { buildAgentBuilderActor } from '../../../lib/detection_emulation/execution/audit_context';
 import { withCommandGates } from './with_command_gates';
 import { buildEmulationConfirmation } from './build_emulation_confirmation';
@@ -38,9 +30,10 @@ const NETWORK_FAMILY_COMMANDS = ['isolate', 'unisolate'] as const;
 const runNetworkCommandSchema = z.object({
   emulationId: z.string().min(1).describe('Unique identifier for the emulation run.'),
   agentType: z
-    .enum(RESPONSE_ACTION_AGENT_TYPE)
+    .literal('endpoint')
+    .default('endpoint')
     .describe(
-      'EDR agent type. Only `endpoint` is wired through the route today; selecting another type returns 400 until external connectors are resolved.'
+      'EDR agent type. Always `endpoint` — the route does not yet wire `sentinel_one`, `crowdstrike`, or `microsoft_defender_endpoint`. Omit; defaults to `endpoint`.'
     ),
   endpointIds: z
     .array(z.string().min(1))
@@ -68,6 +61,8 @@ export interface RunNetworkCommandToolDeps {
   endpointService: EndpointAppContextService;
   config: ConfigType;
   logger: Logger;
+  /** See `RunProcessCommandToolDeps.guardrails`. */
+  guardrails: DetectionEmulationGuardrails;
 }
 
 /**
@@ -78,19 +73,8 @@ export interface RunNetworkCommandToolDeps {
 export const createRunNetworkCommandTool = (
   deps: RunNetworkCommandToolDeps
 ): BuiltinSkillBoundedTool<typeof runNetworkCommandSchema> => {
-  const { core, endpointService, config, logger } = deps;
-
-  // PROD-1: default-deny when no operator allowlist is supplied, with a
-  // registration-time warning so operators see immediately that
-  // real_execution is locked out until the allowlist is configured.
-  const operatorAllowlist = config.detectionEmulation?.allowlist;
-  if (!operatorAllowlist) {
-    logger.warn(
-      '[detection-emulation] runNetworkCommand tool registered with NO operator allowlist (`xpack.securitySolution.detectionEmulation.allowlist`); default-deny is in effect — every call will be blocked until the allowlist is configured.'
-    );
-  }
-  const allowlist = new EmulationAllowlist(createAllowlistFromConfig(operatorAllowlist), logger);
-  const rateLimiter = new EmulationRateLimiter(createDefaultRateLimiterConfig(), logger);
+  const { core, endpointService, config, logger, guardrails } = deps;
+  const { allowlist, rateLimiter } = guardrails;
 
   return {
     id: 'security.detection-emulation.run-network-command',

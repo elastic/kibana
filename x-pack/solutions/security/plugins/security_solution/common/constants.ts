@@ -359,6 +359,18 @@ export const DETECTION_ENGINE_EMULATION_RUN_COMMAND_URL =
   `${DETECTION_ENGINE_EMULATION_URL}/run_command` as const;
 export const DETECTION_ENGINE_EMULATION_VALIDATE_RULE_URL =
   `${DETECTION_ENGINE_EMULATION_URL}/validate_rule` as const;
+/**
+ * Operator-driven halt for in-flight emulation reservations. Pairs
+ * with the runtime kill switch
+ * (`xpack.securitySolution.detectionEmulation.realExecutionEnabled`):
+ * the kill switch blocks NEW dispatches; this route releases the
+ * concurrency-gate slots already in flight so a fresh `acquire()`
+ * succeeds immediately after the operator flips the switch. Closes
+ * register row #10 residual / R-N3 — see
+ * `detection-emulation-production-risk-analysis.html`.
+ */
+export const DETECTION_ENGINE_EMULATION_HALT_URL =
+  `${DETECTION_ENGINE_EMULATION_URL}/halt` as const;
 
 /**
  * Extended alerts routes

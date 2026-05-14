@@ -21,6 +21,7 @@ import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_c
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { createValidateRuleTool } from './validate_rule_tool';
 import { generateScenario } from '../../../lib/detection_emulation/scenario_generator';
+import { createDetectionEmulationGuardrails } from '../../../lib/detection_emulation/execution/shared_guardrails';
 
 // Stub scenario generation so the only path that proceeds past HITL
 // (standalone-mode real_execution) short-circuits BEFORE the runner is
@@ -181,13 +182,21 @@ const createTool = (
     endpointService?: EndpointAppContextService;
     config?: ConfigType;
   } = {}
-) =>
-  createValidateRuleTool({
+) => {
+  const config = overrides.config ?? FEATURE_ENABLED_CONFIG;
+  const logger = loggingSystemMock.createLogger();
+  return createValidateRuleTool({
     core: overrides.core ?? createMockCore(),
     endpointService: overrides.endpointService ?? createMockEndpointService(),
-    config: overrides.config ?? FEATURE_ENABLED_CONFIG,
-    logger: loggingSystemMock.createLogger(),
+    config,
+    logger,
+    // Build a real (test-isolated) guardrail bundle so the tool factory
+    // gets a coherent allowlist + rate-limiter + concurrency-gate trio.
+    // Each `createTool()` call gets its own bundle, mirroring the
+    // pre-singleton-hoist behaviour these tests were written against.
+    guardrails: createDetectionEmulationGuardrails(config, logger),
   });
+};
 
 const REAL_EXECUTION_INPUT = {
   ruleId: 'rule-under-test',

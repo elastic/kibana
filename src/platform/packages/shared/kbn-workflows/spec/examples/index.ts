@@ -134,6 +134,24 @@ export const WORKFLOW_EXAMPLES: WorkflowExampleEntry[] = [
     tags: ['alert', 'agent-builder', 'ai', 'console'],
     filename: 'invoke_agent.yml',
   },
+  {
+    id: 'detection_rule_periodic_validation',
+    name: 'Detection Rule Periodic Validation',
+    description:
+      'Daily run of the detection-emulation skill against a rule; opens a case + Slack-pages on-call when confidence regresses below a threshold',
+    category: 'security',
+    tags: [
+      'scheduled',
+      'agent-builder',
+      'ai',
+      'detection-emulation',
+      'cases',
+      'slack',
+      'if',
+      'json-schema',
+    ],
+    filename: 'detection_rule_periodic_validation.yml',
+  },
 ];
 
 /** Allowlisted example IDs — prevents path traversal attacks when reading files */

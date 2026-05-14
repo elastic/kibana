@@ -11,21 +11,32 @@ import type { ConfigType } from '../../../config';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { MAX_ENDPOINT_FANOUT } from '../../../../common/detection_emulation/schemas/constants';
+import { createDetectionEmulationGuardrails } from '../../../lib/detection_emulation/execution/shared_guardrails';
 import { createRunProcessCommandTool } from './run_process_command_tool';
 import { createRunFileCommandTool } from './run_file_command_tool';
 import { createRunNetworkCommandTool } from './run_network_command_tool';
 import { createRunExecutionCommandTool } from './run_execution_command_tool';
 
-const createMockDeps = () => ({
-  core: {} as unknown as SecuritySolutionPluginCoreSetupDependencies,
-  endpointService: {} as unknown as EndpointAppContextService,
-  config: {
+const createMockDeps = () => {
+  const logger = loggingSystemMock.createLogger();
+  const config = {
     experimentalFeatures: {
       detectionEmulationRealExecution: true,
     },
-  } as unknown as ConfigType,
-  logger: loggingSystemMock.createLogger(),
-});
+  } as unknown as ConfigType;
+  return {
+    core: {} as unknown as SecuritySolutionPluginCoreSetupDependencies,
+    endpointService: {} as unknown as EndpointAppContextService,
+    config,
+    logger,
+    // Real guardrail bundle constructed from the same factory the
+    // production wiring uses, so the per-family tool factories can
+    // destructure `allowlist`/`rateLimiter` without a hand-rolled stub.
+    // The schema-shape tests below never reach the dispatch path, so the
+    // guardrails' default-deny behaviour is irrelevant here.
+    guardrails: createDetectionEmulationGuardrails(config, logger),
+  };
+};
 
 const baseInput = (command: string, parameters?: Record<string, unknown>) => ({
   emulationId: 'em-1',
@@ -169,9 +180,27 @@ describe('per-family runEmulationCommand tools', () => {
       ).toBe(false);
     });
 
-    it('accepts all supported agent types at the boundary', () => {
-      const agentTypes = ['endpoint', 'sentinel_one', 'crowdstrike', 'microsoft_defender_endpoint'];
-      agentTypes.forEach((agentType) => {
+    // P1 (AGENT-NATIVE-DEAD-END): the boundary schema is intentionally
+    // narrowed to `'endpoint'` so the JSON Schema the LLM sees never
+    // surfaces `sentinel_one`, `crowdstrike`, or `microsoft_defender_endpoint`
+    // as selectable options. The runner rejects those agent types
+    // downstream anyway; surfacing them in the boundary just gave eval
+    // traces real dead-end paths.
+    it('accepts only the wired agent type (endpoint) at the boundary', () => {
+      expect(
+        tool.schema.safeParse({
+          emulationId: 'em-1',
+          agentType: 'endpoint',
+          endpointIds: ['agent-1'],
+          command: 'kill-process',
+          parameters: { pid: 1 },
+        }).success
+      ).toBe(true);
+    });
+
+    it.each(['sentinel_one', 'crowdstrike', 'microsoft_defender_endpoint'])(
+      'rejects non-endpoint agent type [%s] at the boundary',
+      (agentType) => {
         expect(
           tool.schema.safeParse({
             emulationId: 'em-1',
@@ -180,8 +209,21 @@ describe('per-family runEmulationCommand tools', () => {
             command: 'kill-process',
             parameters: { pid: 1 },
           }).success
-        ).toBe(true);
+        ).toBe(false);
+      }
+    );
+
+    it('defaults agentType to "endpoint" when omitted at the boundary', () => {
+      const result = tool.schema.safeParse({
+        emulationId: 'em-1',
+        endpointIds: ['agent-1'],
+        command: 'kill-process',
+        parameters: { pid: 1 },
       });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.agentType).toBe('endpoint');
+      }
     });
   });
 

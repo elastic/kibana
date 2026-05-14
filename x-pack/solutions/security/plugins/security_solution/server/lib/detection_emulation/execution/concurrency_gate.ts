@@ -204,6 +204,74 @@ export class EmulationConcurrencyGate {
   }
 
   /**
+   * Operator-driven cancel: drops every in-flight reservation for one
+   * space (or every space when `spaceId` is omitted) and emits one
+   * `WARN`-level audit log entry per cancelled scenario so SIEM rules
+   * can correlate the halt event with the original dispatch.
+   *
+   * Pairs with the runtime kill switch
+   * (`detectionEmulation.realExecutionEnabled`): the kill switch blocks
+   * NEW dispatches; this method releases the slots already in flight
+   * so a fresh `acquire()` in the same space succeeds immediately
+   * after the operator flips the switch. The two together implement a
+   * "stop everything" story without restarting Kibana.
+   *
+   * Returns the count of slots actually released. Calling on a space
+   * with no in-flight reservations is a no-op (returns 0). Safe to
+   * invoke when `disabled: true` — the gate has nothing tracked, so
+   * nothing is cancelled.
+   *
+   * Note: this method only frees the gate's reservation. It does NOT
+   * try to terminate the dispatched response action on the EDR side
+   * (the EDR has its own queue that the runner cannot reach into
+   * after `runner.run(cmd)` returns). The companion halt route is
+   * responsible for surfacing the cancellation to the SOC, who can
+   * decide whether to follow up with the EDR-side cancel command.
+   *
+   * Closes register row #10 residual / R-N3 — see
+   * `detection-emulation-production-risk-analysis.html`.
+   */
+  cancelAllInflight(spaceId?: string): { cancelled: number } {
+    if (this.config.disabled) {
+      this.logger.debug(
+        `Concurrency gate cancelAllInflight no-op: gate is disabled${
+          spaceId ? ` (space=${spaceId})` : ''
+        }`
+      );
+      return { cancelled: 0 };
+    }
+    const targetSpaces = spaceId ? [spaceId] : Array.from(this.inflight.keys());
+    let cancelled = 0;
+    for (const space of targetSpaces) {
+      const entries = this.inflight.get(space);
+      if (entries && entries.length > 0) {
+        for (const entry of entries) {
+          const heldMs = Date.now() - entry.acquiredAt;
+          this.logger.warn(
+            `[detection-emulation-halt] Concurrency slot cancelled for space ${space}: scenario=${entry.scenarioFingerprint} held for ${heldMs}ms`
+          );
+          cancelled++;
+        }
+        this.inflight.delete(space);
+      }
+    }
+    if (cancelled > 0) {
+      this.logger.warn(
+        `[detection-emulation-halt] Cancelled ${cancelled} in-flight emulation reservation(s)${
+          spaceId ? ` for space ${spaceId}` : ' across all spaces'
+        }`
+      );
+    } else {
+      this.logger.debug(
+        `Concurrency gate cancelAllInflight: nothing to cancel${
+          spaceId ? ` (space=${spaceId})` : ''
+        }`
+      );
+    }
+    return { cancelled };
+  }
+
+  /**
    * Drop any in-flight entry older than `staleMs` for the given
    * space. This is the safety net for process crashes / runaway
    * runners that never reach their `release()` — without it the gate

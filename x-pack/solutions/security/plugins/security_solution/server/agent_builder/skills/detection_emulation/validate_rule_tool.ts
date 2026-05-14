@@ -41,22 +41,11 @@ import {
   type EmulationReportPhase,
 } from '../../../lib/detection_emulation/emulation_report_type';
 import { EmulationRunner } from '../../../lib/detection_emulation/execution/runner';
-import {
-  EmulationAllowlist,
-  createAllowlistFromConfig,
-} from '../../../lib/detection_emulation/execution/allowlist';
-import {
-  EmulationRateLimiter,
-  createDefaultRateLimiterConfig,
-} from '../../../lib/detection_emulation/execution/rate_limiter';
+import type { DetectionEmulationGuardrails } from '../../../lib/detection_emulation/execution/shared_guardrails';
 import {
   resolveAllowlistConfig,
   resolveRateLimiterConfig,
 } from '../../../lib/detection_emulation/runtime_config_resolver';
-import {
-  EmulationConcurrencyGate,
-  createDefaultConcurrencyGateConfig,
-} from '../../../lib/detection_emulation/execution/concurrency_gate';
 import { buildAgentBuilderActor } from '../../../lib/detection_emulation/execution/audit_context';
 import { resolveCurrentUsername } from './resolve_current_user';
 import { validateRuleSchema } from './validate_rule_input';
@@ -123,6 +112,13 @@ export interface ValidateRuleToolDeps {
   endpointService: EndpointAppContextService;
   config: ConfigType;
   logger: Logger;
+  /**
+   * Shared guardrails (allowlist + rate limiter + concurrency gate)
+   * constructed once in `plugin.ts`. See `shared_guardrails.ts` for why
+   * these MUST be shared with the routes and the four `run*Command`
+   * tools rather than built per-factory.
+   */
+  guardrails: DetectionEmulationGuardrails;
 }
 
 /**
@@ -141,31 +137,8 @@ export interface ValidateRuleToolDeps {
 export const createValidateRuleTool = (
   deps: ValidateRuleToolDeps
 ): BuiltinSkillBoundedTool<typeof validateRuleSchema> => {
-  const { core, endpointService, config, logger } = deps;
-
-  // Constructed once at registration so the rate-limit window and
-  // allowlist set are shared across all invocations of the tool. Per-call
-  // construction would defeat the per-space rate window. Mirrors the
-  // pattern in the per-family run*Command tools and validate_rule/route.ts.
-  //
-  // PROD-1: the allowlist now defaults to deny when no operator config is
-  // supplied — log a warning at registration so operators see immediately
-  // that real_execution is locked out until they populate the allowlist.
-  const operatorAllowlist = config.detectionEmulation?.allowlist;
-  if (!operatorAllowlist) {
-    logger.warn(
-      '[detection-emulation] validateRule tool registered with NO operator allowlist (`xpack.securitySolution.detectionEmulation.allowlist`); default-deny is in effect — every real_execution call will be blocked until the allowlist is configured.'
-    );
-  }
-  const allowlist = new EmulationAllowlist(createAllowlistFromConfig(operatorAllowlist), logger);
-  const rateLimiter = new EmulationRateLimiter(createDefaultRateLimiterConfig(), logger);
-  // PROD-5: per-space concurrency gate, shared across all invocations of
-  // the tool — same singleton lifetime as the rate limiter so the limit
-  // is enforced across requests, not within a single one.
-  const concurrencyGate = new EmulationConcurrencyGate(
-    createDefaultConcurrencyGateConfig(),
-    logger
-  );
+  const { core, endpointService, config, logger, guardrails } = deps;
+  const { allowlist, rateLimiter, concurrencyGate } = guardrails;
 
   return {
     id: 'security.detection-emulation.validate-rule',

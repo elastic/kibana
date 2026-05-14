@@ -21,6 +21,7 @@ import { registerRuleManagementRoutes } from '../lib/detection_engine/rule_manag
 import { registerRuleMonitoringRoutes } from '../lib/detection_engine/rule_monitoring';
 import { registerRulePreviewRoutes } from '../lib/detection_engine/rule_preview';
 import { registerDetectionEmulationRoutes } from '../lib/detection_emulation';
+import type { DetectionEmulationGuardrails } from '../lib/detection_emulation/execution/shared_guardrails';
 
 import { createIndexRoute } from '../lib/detection_engine/routes/index/create_index_route';
 import { readIndexRoute } from '../lib/detection_engine/routes/index/read_index_route';
@@ -80,7 +81,14 @@ export const initRoutes = (
   docLinks: DocLinksServiceSetup,
   endpointContext: EndpointAppContext,
   trialCompanionDeps: TrialCompanionRoutesDeps,
-  enableDataGeneratorRoutes: boolean
+  enableDataGeneratorRoutes: boolean,
+  /**
+   * Shared detection-emulation guardrail bundle constructed in
+   * `plugin.ts` so the two REST routes share the SAME allowlist set,
+   * the SAME per-space + per-host rate-limit windows, and the SAME
+   * concurrency gate as the Agent Builder skill's inline tools.
+   */
+  detectionEmulationGuardrails: DetectionEmulationGuardrails
 ) => {
   registerFleetIntegrationsRoutes(router, logger);
   registerLegacyRuleActionsRoutes(router, logger);
@@ -100,7 +108,7 @@ export const initRoutes = (
     logger,
     isServerless
   );
-  registerDetectionEmulationRoutes(router, config, logger);
+  registerDetectionEmulationRoutes(router, config, logger, detectionEmulationGuardrails);
 
   registerResolverRoutes(router, getStartServices);
 

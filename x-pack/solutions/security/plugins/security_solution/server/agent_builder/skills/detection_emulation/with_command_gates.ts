@@ -36,6 +36,10 @@ import {
   resolveAllowlistConfig,
   resolveRateLimiterConfig,
 } from '../../../lib/detection_emulation/runtime_config_resolver';
+import {
+  checkValidationGates,
+  resolveValidationGateConfig,
+} from '../../../lib/detection_emulation/execution/validation_gate';
 import { resolveCurrentUsername } from './resolve_current_user';
 
 /**
@@ -162,6 +166,34 @@ export const withCommandGates = async (
         status_code: 403,
         likely_cause: likelyCause,
         disable_reason: disableReason ?? undefined,
+      });
+    }
+
+    // ── Gate 1.5: Validation gates (curatedOnly + allowedScriptIds) ─────────
+    // Pure-function checks against the bundled payload library and the
+    // operator's `runscript` allow-list. Both default to no-op so existing
+    // deployments see no behaviour change. Runs BEFORE the RBAC lookup
+    // because it requires no I/O — fail-fast cheapest checks first.
+    //
+    // Closes register rows #15 (curatedOnly) and #12 (allowedScriptIds).
+    // See `detection-emulation-production-risk-analysis.html`.
+    const validationGateConfig = resolveValidationGateConfig(config.detectionEmulation?.validation);
+    const validationGateResult = checkValidationGates(cmd, validationGateConfig);
+    if (!validationGateResult.allowed) {
+      logger.warn(
+        `Emulation command [${command}] for emulation [${emulationId}] blocked by validation gate [${validationGateResult.reason}]: ${validationGateResult.message}`
+      );
+      return errorResult({
+        error_type: validationGateResult.reason,
+        message: validationGateResult.message,
+        emulation_id: emulationId,
+        agent_type: agentType,
+        command,
+        status_code: 403,
+        likely_cause:
+          validationGateResult.reason === 'not_in_curated_library'
+            ? 'Curated-only mode rejects commands not present in the bundled payload library.'
+            : 'Script ID is not on the operator allow-list.',
       });
     }
 

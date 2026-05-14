@@ -331,6 +331,48 @@ export const configSchema = schema.object({
            * Default 300 000 ms (5 min) prevents runaway long-poll connections.
            */
           wallBudgetMsMax: schema.number({ defaultValue: 300_000, min: 1_000 }),
+          /**
+           * Curated-only mode for the per-family `run*Command` tools. When
+           * `true`, the four tools accept a command/parameters tuple ONLY if
+           * its `(command, parameters.command)` fingerprint exists in the
+           * bundled curated payload library
+           * (`server/lib/detection_emulation/payloads/payloads.json`).
+           * Commands with no free-form `command` parameter
+           * (e.g. `running-processes`, `kill-process`, `isolate`) match on
+           * the API command name alone.
+           *
+           * Default `false` preserves today's behaviour (any command the
+           * other gates approve is dispatched). Operators flip to `true`
+           * via `kibana.yml` reload to lock the LLM down to the
+           * pre-blessed payload set — primarily intended for MSSP /
+           * multi-tenant deployments where the "let the LLM
+           * pick a command" tradeoff isn't acceptable.
+           *
+           * Closes register row #15 (no safe-by-default payload library
+           * lockdown) — see `detection-emulation-production-risk-analysis.html`.
+           */
+          curatedOnly: schema.boolean({ defaultValue: false }),
+          /**
+           * Per-script allow-list for the `runscript` command. When the
+           * array is non-empty AND the LLM dispatches `runscript`, the
+           * supplied `parameters.scriptId` (or the `script_id` field used
+           * by some EDR vendors) MUST be present in this list — otherwise
+           * the gate rejects with 403 `script_not_allowed` BEFORE the EDR
+           * sees the request. When empty (default), the gate is a no-op
+           * and the existing per-command RBAC privilege
+           * (`writeExecuteOperations`) is the only enforcement.
+           *
+           * This is defense-in-depth on top of RBAC: RBAC asks "is this
+           * user allowed to runscript at all", `allowedScriptIds` asks
+           * "is this *specific* script approved by the operator". Useful
+           * when the operator has a finite set of vetted scripts and
+           * doesn't want the LLM dispatching arbitrary IDs that may
+           * exist on the EDR side.
+           *
+           * Closes register row #12 (`runscript` parameters passed
+           * through to the EDR).
+           */
+          allowedScriptIds: schema.arrayOf(schema.string(), { defaultValue: [] }),
         })
       ),
     })

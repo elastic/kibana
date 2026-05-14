@@ -16,19 +16,17 @@ import { validateRuleSchema } from './validate_rule_input';
  *
  * The tool boundary schema (`validateRuleSchema`) carries `.describe()`
  * docstrings the LLM consumes; the route schema (`ValidateRuleInputSchema`)
- * carries the production input contract. They MUST stay in sync on field
- * names + accepted shapes — if they drift, the LLM happily emits a payload
- * the route then rejects with a 400, which is invisible to anyone reading
- * the LLM trace.
+ * carries the production input contract. They MUST stay in sync on every
+ * field name + shape THAT THE TOOL ALSO ACCEPTS — drift on a field both
+ * schemas accept means the LLM happily emits a payload the route then
+ * rejects with a 400, which is invisible to anyone reading the LLM trace.
  *
- * For each fixture below we assert:
- *   1. Both schemas accept the input.
- *   2. The parsed result is structurally identical (deep-equal).
- *
- * If a future change adds a field to one schema but not the other, the
- * matching fixture will fail with a clear shape diff. Adding a new field
- * therefore requires extending BOTH schemas AND a fixture in this file —
- * which is the entire point.
+ * One DELIBERATE divergence exists: `agentType` is narrowed to
+ * `'endpoint'` in the tool schema (and only the tool schema) so the LLM
+ * cannot pick a dead-end agent type that the runner would reject
+ * downstream. The route schema still accepts the broader enum for
+ * non-LLM callers. The "tool narrowing" block below locks this
+ * divergence in place.
  */
 describe('validate_rule schemas — drift round-trip', () => {
   const fixtures: Array<{ name: string; input: Record<string, unknown> }> = [
@@ -57,15 +55,6 @@ describe('validate_rule schemas — drift round-trip', () => {
       },
     },
     {
-      name: 'real_execution mode + non-endpoint agentType (sentinel_one)',
-      input: {
-        ruleId: 'rule-abc-123',
-        endpointIds: ['ws-001'],
-        mode: 'real_execution',
-        agentType: 'sentinel_one',
-      },
-    },
-    {
       name: 'wallBudgetMs only',
       input: {
         ruleId: 'rule-abc-123',
@@ -74,12 +63,12 @@ describe('validate_rule schemas — drift round-trip', () => {
       },
     },
     {
-      name: 'all optionals populated',
+      name: 'all optionals populated (endpoint agentType)',
       input: {
         ruleId: 'rule-abc-123',
         endpointIds: ['ws-001', 'ws-002', 'ws-003'],
         mode: 'real_execution',
-        agentType: 'crowdstrike',
+        agentType: 'endpoint',
         wallBudgetMs: 200_000,
       },
     },
@@ -95,10 +84,49 @@ describe('validate_rule schemas — drift round-trip', () => {
       expect(routeResult.success).toBe(true);
       expect(toolResult.success).toBe(true);
 
-      // Parsed shapes must match — tool schema cannot strip or transform
-      // fields the route schema preserves (or vice versa).
+      // Parsed shapes must match on the fields BOTH schemas observe.
+      // The tool schema applies `.default('endpoint')` on `agentType`
+      // (whereas the route schema makes it optional with no default),
+      // so we strip `agentType` before deep-equality to avoid a false
+      // positive when the input omits the field.
       if (routeResult.success && toolResult.success) {
-        expect(toolResult.data).toEqual(routeResult.data);
+        const { agentType: _routeAgentType, ...routeWithoutAgent } = routeResult.data;
+        const { agentType: _toolAgentType, ...toolWithoutAgent } = toolResult.data;
+        expect(toolWithoutAgent).toEqual(routeWithoutAgent);
+      }
+    });
+  });
+
+  // ─── DELIBERATE divergence: tool narrows agentType to 'endpoint' ─────────────
+  //
+  // The route schema still accepts the broader RESPONSE_ACTION_AGENT_TYPE
+  // enum (for non-LLM callers, future external connectors, etc.). The tool
+  // boundary intentionally narrows so the LLM cannot pick `sentinel_one`,
+  // `crowdstrike`, or `microsoft_defender_endpoint` — none of which are
+  // wired through the runner today, and surfacing them in the JSON Schema
+  // gave the LLM real dead-end paths in eval traces.
+  describe('tool narrowing: agentType', () => {
+    (['sentinel_one', 'crowdstrike', 'microsoft_defender_endpoint'] as const).forEach(
+      (agentType) => {
+        it(`route accepts but tool rejects agentType=${agentType}`, () => {
+          const input = {
+            ruleId: 'rule-abc-123',
+            endpointIds: ['ws-001'],
+            mode: 'real_execution',
+            agentType,
+          };
+          expect(ValidateRuleInputSchema.safeParse(input).success).toBe(true);
+          expect(validateRuleSchema.safeParse(input).success).toBe(false);
+        });
+      }
+    );
+
+    it('tool defaults agentType to "endpoint" when omitted', () => {
+      const input = { ruleId: 'rule-abc-123', endpointIds: ['ws-001'] };
+      const result = validateRuleSchema.safeParse(input);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.agentType).toBe('endpoint');
       }
     });
   });
