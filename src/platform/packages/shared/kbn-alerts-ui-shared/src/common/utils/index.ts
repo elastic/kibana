@@ -7,4 +7,3 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './action_type_model_utils';
