@@ -238,3 +238,76 @@ Three consumption patterns are supported:
 3. **Fleet / Filebeat audit pipeline** — If `xpack.security.audit.appender.type: rolling-file` is configured, Filebeat's `kibana` module ingests the audit log. Filter on `event.action: "saved_object_create"` and `kibana.saved_object.type: "detection-emulation-report"` to forward notifications to the SIEM.
 
 The `actor.kind` discriminator is the single field that distinguishes a human operator (who presumably knows they triggered a test) from an AI-driven dispatch (which may warrant a page to the SOC). Build alerting thresholds around `actor.kind == "agent-builder"` rather than on all emulation activity.
+
+---
+
+## Index read-access guidance (Risk #16)
+
+The `.kibana-security-emulation-logs-*` index stores synthetic endpoint events that emulation injects. Operators should understand which principals can read that index and take steps to limit unintended access.
+
+### Discovering actual access on your cluster
+
+The smoke spec at `log_injection/__tests__/index_access.smoke.test.ts` probes which built-in Elasticsearch roles have read access. Run it against a representative cluster before configuring role restrictions:
+
+```sh
+EMULATION_SMOKE_ES_URL=https://elastic:changeme@localhost:9200 \
+  node scripts/jest \
+  x-pack/solutions/security/plugins/security_solution/server/lib/detection_emulation/log_injection/__tests__/index_access.smoke.test.ts
+```
+
+The probe creates a temporary test user for each built-in role, calls `security.hasPrivileges` via `run_as`, then uses `cat.indices` to count actual matching indices. Output is structured JSON written to stdout:
+
+```json
+{
+  "probe": "index_access",
+  "index_pattern": ".kibana-security-emulation-logs-*",
+  "findings": [
+    { "role": "superuser",    "canRead": true,  "indexCount": 3, "write": true,  "create_index": true },
+    { "role": "kibana_system","canRead": true,  "indexCount": 3, "write": false, "create_index": false },
+    { "role": "viewer",       "canRead": false, "indexCount": 0, "write": false, "create_index": false }
+  ],
+  "summary": {
+    "can_read": ["superuser", "kibana_system"],
+    "cannot_read": ["kibana_admin", "monitoring_user", "viewer", "editor", ...]
+  }
+}
+```
+
+### Expected access surface
+
+Based on Elasticsearch's built-in role definitions:
+
+| Role | Expected `canRead` | Reason |
+|---|---|---|
+| `superuser` | yes | Unrestricted cluster-wide access; intentional |
+| `kibana_system` | yes | Broad `.kibana*` read required for Kibana internals |
+| `kibana_admin` | no | Kibana-level admin privilege; limited ES index access |
+| `viewer` | no | Reads non-system indices only; dot-prefix excluded by default |
+| `editor` | no | Same as `viewer` for index access |
+| All others | no | No explicit `.kibana*` grants |
+
+`kibana_system` read access is a known residual: the role requires broad `.kibana*` read and cannot be narrowed without forking the role definition. The 7-day ILM auto-delete policy (configured in `index_template.ts`) bounds the exposure window.
+
+### Least-privilege recommendations for operator-defined roles
+
+Elasticsearch RBAC is additive — there is no index-level deny. To prevent a custom service account from reading emulation logs:
+
+1. **Do not grant** `read` or `indices:data/read/*` on `.kibana*` or `.kibana-security-emulation-logs-*` in custom roles. Grant only the specific `.kibana` sub-indices that the service account actually needs.
+
+2. **Scope cross-cluster-search (CCS) roles** explicitly. If you have a CCS reader role with `indices: [".kibana*"]`, add an explicit exclusion by splitting it into two narrower patterns instead of using the wildcard.
+
+3. **Prefer document-level security (DLS)** if a service account legitimately needs `.kibana*` access but should not see emulation data. Add a DLS filter:
+   ```json
+   {
+     "indices": [{
+       "names":      [".kibana-security-emulation-logs-*"],
+       "privileges": ["read"],
+       "query":      { "match_none": {} }
+     }]
+   }
+   ```
+   This grants the `read` privilege but returns zero documents — the service account passes privilege checks but sees nothing.
+
+4. **Audit index access** using Elasticsearch audit logging (`xpack.security.audit.enabled: true` at the ES layer, not just Kibana). Filter on `event.type: "access"` and `indices: [".kibana-security-emulation-logs-*"]` to detect reads from unexpected principals.
+
+5. **Re-run the probe after role changes** to verify the access surface matches expectations. The probe's `indexCount` field distinguishes "role has the privilege" (privilege check returns true, but no indices exist yet) from "role can actually read data" (indices exist and the role can count them).
