@@ -171,6 +171,24 @@ describe('WorkflowExecuteModal', () => {
       expect(getByText('Historical')).toBeInTheDocument();
     });
 
+    it('uses the test run title and still exposes the full trigger tab set', () => {
+      const { getByText } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={true}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      expect(getByText('Test Workflow')).toBeInTheDocument();
+      expect(getByText('Alert')).toBeInTheDocument();
+      expect(getByText('Document')).toBeInTheDocument();
+      expect(getByText('Event')).toBeInTheDocument();
+      expect(getByText('Manual')).toBeInTheDocument();
+      expect(getByText('Historical')).toBeInTheDocument();
+    });
+
     it('keeps the alert trigger enabled when RAC prefetch succeeds (no capability pre-check)', () => {
       mockUseKibana.mockReturnValue({
         services: {
@@ -616,6 +634,23 @@ describe('WorkflowExecuteModal', () => {
       expect(getByTestId('executeWorkflowButton')).toBeDisabled();
     });
 
+    it('disables execute for test runs when the user cannot execute workflows', () => {
+      mockUseWorkflowsCapabilities.mockReturnValue({
+        ...defaultWorkflowsCapabilities,
+        canExecuteWorkflow: false,
+      });
+      const { getByTestId } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={true}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      expect(getByTestId('executeWorkflowButton')).toBeDisabled();
+    });
+
     it('disables execute button when there are errors', () => {
       const { getByTestId } = renderWithProviders(
         <WorkflowExecuteModal
@@ -655,6 +690,32 @@ describe('WorkflowExecuteModal', () => {
 
       const executeButton = getByTestId('executeWorkflowButton');
       expect(executeButton).toBeDisabled();
+    });
+
+    it('disables execute for test runs when the event trigger reports multiple table row selections', () => {
+      const { getByTestId, getByText } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={true}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      const eventTrigger = getByText('Event').closest('button');
+      fireEvent.click(eventTrigger!);
+
+      const eventFormCalls = mockWorkflowExecuteEventForm.mock.calls;
+      const lastEventFormProps = eventFormCalls[eventFormCalls.length - 1]?.[0] as
+        | { onTriggerEventTableSelectionCountChange?: (count: number) => void }
+        | undefined;
+      expect(lastEventFormProps?.onTriggerEventTableSelectionCountChange).toBeDefined();
+
+      act(() => {
+        lastEventFormProps!.onTriggerEventTableSelectionCountChange!(2);
+      });
+
+      expect(getByTestId('executeWorkflowButton')).toBeDisabled();
     });
   });
 

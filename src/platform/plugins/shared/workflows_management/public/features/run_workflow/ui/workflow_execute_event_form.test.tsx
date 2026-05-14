@@ -17,6 +17,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useQueryTriggerEvents } from '@kbn/workflows-ui';
 import { testQueryClientConfig } from '@kbn/workflows-ui/src/test_utils';
+import { TIMEPICKER_FALLBACK } from './constants';
 import { MockSearchBar } from './test_utils/workflow_form_test_setup';
 import {
   buildTriggerEventReplayInputs,
@@ -238,12 +239,63 @@ describe('WorkflowExecuteEventForm', () => {
         triggerIds: ['custom.trigger'],
         page: 1,
         size: 50,
-        from: 'now-15m',
-        to: 'now',
+        from: TIMEPICKER_FALLBACK.from,
+        to: TIMEPICKER_FALLBACK.to,
       }),
       expect.objectContaining({ enabled: true })
     );
     expect(mockUseQueryTriggerEvents.mock.calls[0][0]).not.toHaveProperty('kql');
+  });
+
+  it('uses TIMEPICKER_FALLBACK when timefilter getTimeDefaults returns undefined', async () => {
+    (mockData.query.timefilter.timefilter.getTimeDefaults as jest.Mock).mockReturnValue(undefined);
+
+    const { findByTestId } = render(
+      <TestWrapper>
+        <WorkflowExecuteEventForm
+          definition={baseDefinition as any}
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+        />
+      </TestWrapper>
+    );
+
+    await findByTestId('workflowTriggerEventsTable');
+    expect(mockUseQueryTriggerEvents).toHaveBeenCalledWith(
+      expect.objectContaining({
+        from: TIMEPICKER_FALLBACK.from,
+        to: TIMEPICKER_FALLBACK.to,
+      }),
+      expect.objectContaining({ enabled: true })
+    );
+  });
+
+  it('uses timefilter getTimeDefaults for the initial trigger event query range when set', async () => {
+    (mockData.query.timefilter.timefilter.getTimeDefaults as jest.Mock).mockReturnValue({
+      from: 'now-1h',
+      to: 'now',
+    });
+
+    const { findByTestId } = render(
+      <TestWrapper>
+        <WorkflowExecuteEventForm
+          definition={baseDefinition as any}
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+        />
+      </TestWrapper>
+    );
+
+    await findByTestId('workflowTriggerEventsTable');
+    expect(mockUseQueryTriggerEvents).toHaveBeenCalledWith(
+      expect.objectContaining({
+        from: 'now-1h',
+        to: 'now',
+      }),
+      expect.objectContaining({ enabled: true })
+    );
   });
 
   it('sends workflow triggerIds when submitted KQL does not reference triggerId', async () => {
