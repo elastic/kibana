@@ -24,6 +24,20 @@ When asking, be specific: quote the ambiguous text or describe exactly what is m
 
 If the user is not available and the information cannot be found in any source, leave a visible `⚠️` flag in the relevant section — never publish an assumption as a fact.
 
+### Red flags — STOP and ask
+
+If you catch yourself thinking any of these, STOP. The thought itself is the signal that the Core rule is about to be bypassed — surface the underlying gap to the user before acting on it.
+
+| Red flag thought | What to do instead |
+|---|---|
+| "I'll infer the target version from the label name / branch / surrounding context." | Use only the issue's milestone, project fields, or explicit mentions. If none, ask the user. |
+| "The parent epic has enough context, I don't need to re-read the current issue." | Read the current issue in full; use parent to enrich, not to substitute. |
+| "This scenario is obviously needed, no trace to an AC required." | Every scenario must map to a consolidated AC item or PR artifact. If neither exists, ask the user. |
+| "The user said 'be thorough' — I can add RBAC / multi-tenant / upgrade speculatively." | Optional sections need explicit justification from the issue. See `references/optional-scenarios.md`. |
+| "The image / Figma / Google Doc fetch failed, but I can describe it from the alt text or surrounding text." | Flag the source with `⚠️` in Known Limitations and write scenarios only from what you actually read. |
+| "The total scenarios count looks close enough — I'll round." | Run the three mechanical sum-checks in `references/output-formats.md`. (Eyeballing produced a 7-scenario undercount in dry-run validation.) |
+| "This sub-issue's ACs apply even though the sub-issue is not yet implemented." | Use the Pending work pattern in `references/document-structure.md`. |
+
 ---
 
 ## Execution constraints
