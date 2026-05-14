@@ -40,26 +40,28 @@ describe('useFormattedEOLDate', () => {
   });
 
   it('recomputes when metadata changes from undefined to a date', () => {
-    let metadata: EisInferenceEndpointMetadata | undefined;
-    const { result, rerender } = renderHook(() => useFormattedEOLDate(metadata));
+    const props: { metadata: EisInferenceEndpointMetadata | undefined } = { metadata: undefined };
+    const { result, rerender } = renderHook(() => useFormattedEOLDate(props.metadata));
 
     expect(result.current).toBeNull();
 
-    metadata = makeMetadata({ end_of_life_date: '2026-04-15' });
+    props.metadata = makeMetadata({ end_of_life_date: '2026-04-15' });
     rerender();
 
     expect(result.current).not.toBeNull();
   });
 
   it('recomputes when metadata changes from a date to undefined', () => {
-    let metadata: EisInferenceEndpointMetadata | undefined = makeMetadata({
-      end_of_life_date: '2026-04-15',
-    });
-    const { result, rerender } = renderHook(() => useFormattedEOLDate(metadata));
+    const props: { metadata: EisInferenceEndpointMetadata | undefined } = {
+      metadata: makeMetadata({
+        end_of_life_date: '2026-04-15',
+      }),
+    };
+    const { result, rerender } = renderHook(() => useFormattedEOLDate(props.metadata));
 
     expect(result.current).not.toBeNull();
 
-    metadata = undefined;
+    props.metadata = undefined;
     rerender();
 
     expect(result.current).toBeNull();
