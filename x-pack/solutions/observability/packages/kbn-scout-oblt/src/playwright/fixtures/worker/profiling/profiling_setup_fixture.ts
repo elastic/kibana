@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { BulkOperationType, BulkResponseItem } from '@elastic/elasticsearch/lib/api/types';
 import { test as base } from '@kbn/scout';
 import path from 'path';
 import fs from 'fs';
@@ -92,13 +93,16 @@ export const profilingSetupFixture = base.extend<{}, { profilingSetup: Profiling
           });
 
           if (response.errors) {
-            const erroredItems = response.items?.filter((item: any) => {
-              const action = item?.index ?? item?.create ?? item?.update ?? item?.delete;
-              return action?.error;
-            });
+            const erroredItems = response.items?.filter(
+              (item: Partial<Record<BulkOperationType, BulkResponseItem>>) => {
+                const action = item?.index ?? item?.create ?? item?.update ?? item?.delete;
+                return action?.error;
+              }
+            );
             log.error(
               `Some errors occurred during bulk indexing: ${JSON.stringify(erroredItems, null, 2)}`
             );
+
             throw new Error(
               `Bulk indexing had ${
                 erroredItems?.length ?? 0
