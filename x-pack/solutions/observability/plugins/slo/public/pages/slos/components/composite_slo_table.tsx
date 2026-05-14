@@ -23,7 +23,7 @@ import {
 import numeral from '@elastic/numeral';
 import { sloListLocatorID, type SloListLocatorParams } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import { observabilityPaths } from '@kbn/observability-plugin/common';
+import { observabilityAppId } from '@kbn/observability-plugin/common';
 import { encode } from '@kbn/rison';
 import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import type {
@@ -93,7 +93,7 @@ export function CompositeSloTable({
 }: CompositeSloTableProps) {
   const {
     uiSettings,
-    application: { navigateToUrl },
+    application: { navigateToUrl, navigateToApp },
     http: { basePath },
     share,
   } = useKibana().services;
@@ -400,9 +400,9 @@ export function CompositeSloTable({
           return (
             <EuiToolTip
               position="top"
-              content={i18n.translate('xpack.slo.compositeSloList.activeAlerts.tooltip', {
+                content={i18n.translate('xpack.slo.compositeSloList.activeAlerts.tooltip', {
                 defaultMessage:
-                  '{count, plural, one {# burn rate alert} other {# burn rate alerts}} across member SLOs, click to view.',
+                  '{count, plural, one {# burn rate alert} other {# burn rate alerts}} across member SLOs. Opens in a new browser tab.',
                 values: { count: alertCount },
               })}
               display="block"
@@ -410,12 +410,16 @@ export function CompositeSloTable({
               <EuiBadge
                 iconType="warning"
                 color="danger"
-                onClick={() =>
-                  navigateToUrl(`${basePath.prepend(observabilityPaths.alerts)}?_a=${encodedKuery}`)
-                }
+                onClick={(e) => {
+                  e.stopPropagation();
+                  void navigateToApp(observabilityAppId, {
+                    path: `/alerts?_a=${encodedKuery}`,
+                    openInNewTab: true,
+                  });
+                }}
                 onClickAriaLabel={i18n.translate(
                   'xpack.slo.compositeSloList.activeAlerts.ariaLabel',
-                  { defaultMessage: 'active alerts badge' }
+                  { defaultMessage: 'View active alerts in a new browser tab' }
                 )}
                 css={{ cursor: 'pointer' }}
               >
@@ -521,6 +525,7 @@ export function CompositeSloTable({
       historicalSummaryById,
       isBurnRatePopoverOpen,
       isHistoricalLoading,
+      navigateToApp,
       navigateToUrl,
       openMemberHealthPopoverId,
       percentFormat,
