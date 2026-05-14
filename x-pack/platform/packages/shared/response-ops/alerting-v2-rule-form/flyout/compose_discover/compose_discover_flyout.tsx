@@ -255,6 +255,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
                         iconType="arrowLeft"
+                        isDisabled={uiState.childOpen}
                         onClick={() => dispatch({ type: 'GO_BACK' })}
                         data-test-subj="composeDiscoverBack"
                       >

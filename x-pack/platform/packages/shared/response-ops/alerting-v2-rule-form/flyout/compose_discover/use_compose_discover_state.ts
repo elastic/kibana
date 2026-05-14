@@ -14,12 +14,12 @@ import type {
   QueryTab,
   SandboxTabConfig,
 } from './types';
+import { guessRecoveryBlock, splitQuery } from './use_heuristic_split';
 
 export const getStepIds = (tracking: boolean): StepId[] =>
   tracking
     ? ['alertCondition', 'recoveryCondition', 'details', 'notifications']
     : ['alertCondition', 'details', 'notifications'];
-import { guessRecoveryBlock, splitQuery } from './use_heuristic_split';
 
 export interface InitialStateConfig {
   mode: ComposeDiscoverMode;
