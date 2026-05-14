@@ -200,6 +200,7 @@ export const getEndpointConsoleCommands = ({
     crowdstrikeRunScriptEnabled,
     microsoftDefenderEndpointRunScriptEnabled,
     microsoftDefenderEndpointCancelEnabled,
+    responseActionsEndpointCancel,
     responseActionsEndpointMemoryDump,
     responseActionsEndpointRunScript,
   } = featureFlags;
@@ -660,7 +661,7 @@ export const getEndpointConsoleCommands = ({
     }),
   });
 
-  if (microsoftDefenderEndpointCancelEnabled) {
+  if (microsoftDefenderEndpointCancelEnabled || responseActionsEndpointCancel) {
     const isSupported = canCancelForCurrentContext();
     consoleCommands.push({
       name: 'cancel',

@@ -134,6 +134,20 @@ export const connectorTypeResponseSchema = schema.object({
       description: 'The source of the connector type definition.',
     },
   }),
+  description: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'Description of the connector type.',
+      },
+    })
+  ),
+  is_experimental: schema.maybe(
+    schema.boolean({
+      meta: {
+        description: 'Indicates whether the connector type is in technical preview.',
+      },
+    })
+  ),
 });
 
 export const getAllConnectorTypesResponseSchema = schema.arrayOf(connectorTypeResponseSchema);
@@ -188,4 +202,109 @@ export const connectorExecuteResponseSchema = schema.object({
       },
     })
   ),
+  error_name: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'When the status is error, identifies the error class name so consumers can branch on specific error types (e.g. ConnectorAuthorizationError).',
+      },
+    })
+  ),
+  error_meta: schema.maybe(
+    schema.recordOf(schema.string(), schema.any(), {
+      meta: {
+        description:
+          'When the status is error, carries structured metadata describing the failure (e.g. the auth method and reason for a ConnectorAuthorizationError).',
+      },
+    })
+  ),
+});
+
+export const connectorAuthStatusResponseSchema = schema.recordOf(
+  schema.string(),
+  schema.object({
+    user_auth_status: schema.oneOf(
+      [
+        schema.literal('connected'),
+        schema.literal('not_connected'),
+        schema.literal('not_applicable'),
+      ],
+      {
+        meta: {
+          description: 'The authentication status of the current user for this connector.',
+        },
+      }
+    ),
+  }),
+  {
+    meta: {
+      description: 'A map of connector IDs to their user authentication status.',
+    },
+  }
+);
+
+export const getConnectorSpecResponseBodySchema = schema.object({
+  metadata: schema.object(
+    {
+      id: schema.string({
+        meta: {
+          description: 'The connector type identifier (same shape as an action type id).',
+        },
+      }),
+      display_name: schema.string({
+        meta: {
+          description: 'Human-readable label for this connector type.',
+        },
+      }),
+      description: schema.string({
+        meta: {
+          description: 'Short summary of what this connector type is used for.',
+        },
+      }),
+      minimum_license: schema.string({
+        meta: {
+          description: 'Minimum Elastic license tier required to use this connector type.',
+        },
+      }),
+      supported_feature_ids: schema.arrayOf(schema.string(), {
+        maxSize: 100,
+        meta: {
+          description:
+            'Kibana feature identifiers this connector type supports (for example alerting or workflows).',
+        },
+      }),
+      icon: schema.maybe(
+        schema.string({
+          meta: {
+            description: 'Optional icon key or URL for this connector type in the UI.',
+          },
+        })
+      ),
+      docs_url: schema.maybe(
+        schema.string({
+          meta: {
+            description: 'Optional link to documentation for this connector type.',
+          },
+        })
+      ),
+      is_technical_preview: schema.maybe(
+        schema.boolean({
+          meta: {
+            description: 'When true, this connector type is offered as a technical preview.',
+          },
+        })
+      ),
+    },
+    {
+      meta: {
+        description: 'Connector spec metadata (snake_case HTTP shape).',
+      },
+    }
+  ),
+  schema: schema.recordOf(schema.string(), schema.any(), {
+    meta: {
+      description:
+        'JSON Schema envelope for the connector form (top-level `config` and `secrets` shapes)',
+    },
+  }),
 });

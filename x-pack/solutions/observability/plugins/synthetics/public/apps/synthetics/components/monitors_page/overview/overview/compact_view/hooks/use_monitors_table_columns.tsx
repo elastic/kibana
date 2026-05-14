@@ -20,6 +20,7 @@ import { MonitorBarSeries } from '../components/monitor_bar_series';
 import { useMonitorHistogram } from '../../../../hooks/use_monitor_histogram';
 import type { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
 import { MonitorTypeBadge } from '../../../../../common/components/monitor_type_badge';
+import { SyntheticsRemoteBadge } from '../../../../../common/components/synthetics_remote_badge';
 import { getFilterForTypeMessage } from '../../../../management/monitor_list_table/labels';
 import type { FlyoutParamProps } from '../../types';
 import { MonitorsActions } from '../components/monitors_actions';
@@ -131,22 +132,29 @@ export const useMonitorsTableColumns = ({
         width: '25%',
         sortable: true,
         render: (name: OverviewStatusMetaData['name'], monitor) => (
-          <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="xs">
+          <EuiFlexGroup
+            direction="column"
+            alignItems="flexStart"
+            gutterSize="xs"
+            css={{ minWidth: 0 }}
+          >
             <EuiFlexItem grow={false}>
               <EuiText size="s">{name}</EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+              <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center" wrap>
                 <EuiFlexItem grow={false}>
                   <MonitorTypeBadge
                     monitorType={monitor.type}
                     ariaLabel={getFilterForTypeMessage(monitor.type)}
                     onClick={() => onClickMonitorFilter('monitorTypes', monitor.type)}
-                    size="s"
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
+                  <SyntheticsRemoteBadge remote={monitor.remote} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued" css={{ whiteSpace: 'nowrap' }}>
                     {i18n.translate('xpack.synthetics.overview.compactView.scheduleInline', {
                       defaultMessage: 'Every {schedule}m',
                       values: { schedule: monitor.schedule },
@@ -245,9 +253,6 @@ export const useMonitorsTableColumns = ({
                       size="xs"
                       color="danger"
                       data-test-subj="syntheticsLatestErrorCell"
-                      // Wrap onto multiple lines naturally, then clamp to 3
-                      // lines with an ellipsis. `word-break: break-word`
-                      // keeps long URLs / hashes from overflowing.
                       css={{
                         display: '-webkit-box',
                         WebkitLineClamp: 3,
@@ -265,9 +270,6 @@ export const useMonitorsTableColumns = ({
             },
             {
               name: TAGS,
-              // 15% was wider than typical 1–2 short tags need; 12% keeps two
-              // tags visible inline and the rest collapse into a "+N more"
-              // chip via TagsList's built-in overflow handling.
               width: '12%',
               render: (monitor: OverviewStatusMetaData) => (
                 <TagsList

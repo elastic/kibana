@@ -44,13 +44,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           throttle: { interval: '1m' },
         });
 
-      expect(createResponse.status).to.be(200);
+      expect(createResponse.status).to.be(201);
 
       const createdPolicyId = createResponse.body.id as string;
       const currentVersion = createResponse.body.version as string;
 
       const response = await supertestWithoutAuth
-        .put(`${ACTION_POLICY_API_PATH}/${createdPolicyId}`)
+        .patch(`${ACTION_POLICY_API_PATH}/${createdPolicyId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({
@@ -93,13 +93,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           throttle: { interval: '1m' },
         });
 
-      expect(createResponse.status).to.be(200);
+      expect(createResponse.status).to.be(201);
 
       const createdPolicyId = createResponse.body.id as string;
       const currentVersion = createResponse.body.version as string;
 
       const response = await supertestWithoutAuth
-        .put(`${ACTION_POLICY_API_PATH}/${createdPolicyId}`)
+        .patch(`${ACTION_POLICY_API_PATH}/${createdPolicyId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ name: 'only-name-updated', version: currentVersion });
@@ -128,13 +128,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           throttle: { interval: '1m' },
         });
 
-      expect(createResponse.status).to.be(200);
+      expect(createResponse.status).to.be(201);
 
       const createdPolicyId = createResponse.body.id as string;
       const currentVersion = createResponse.body.version as string;
 
       const response = await supertestWithoutAuth
-        .put(`${ACTION_POLICY_API_PATH}/${createdPolicyId}`)
+        .patch(`${ACTION_POLICY_API_PATH}/${createdPolicyId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ description: 'only-description-updated', version: currentVersion });
@@ -163,13 +163,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           throttle: { interval: '1m' },
         });
 
-      expect(createResponse.status).to.be(200);
+      expect(createResponse.status).to.be(201);
 
       const createdPolicyId = createResponse.body.id as string;
       const currentVersion = createResponse.body.version as string;
 
       const response = await supertestWithoutAuth
-        .put(`${ACTION_POLICY_API_PATH}/${createdPolicyId}`)
+        .patch(`${ACTION_POLICY_API_PATH}/${createdPolicyId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({
@@ -200,13 +200,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           destinations: [{ type: 'workflow', id: 'conflict-workflow-id' }],
         });
 
-      expect(createResponse.status).to.be(200);
+      expect(createResponse.status).to.be(201);
 
       const createdPolicyId = createResponse.body.id as string;
       const staleVersion = createResponse.body.version as string;
 
       const firstUpdate = await supertestWithoutAuth
-        .put(`${ACTION_POLICY_API_PATH}/${createdPolicyId}`)
+        .patch(`${ACTION_POLICY_API_PATH}/${createdPolicyId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ name: 'first-update', version: staleVersion });
@@ -214,7 +214,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(firstUpdate.status).to.be(200);
 
       const secondUpdate = await supertestWithoutAuth
-        .put(`${ACTION_POLICY_API_PATH}/${createdPolicyId}`)
+        .patch(`${ACTION_POLICY_API_PATH}/${createdPolicyId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ name: 'second-update', version: staleVersion });
@@ -235,14 +235,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           throttle: { strategy: 'on_status_change' },
         });
 
-      expect(createResponse.status).to.be(200);
+      expect(createResponse.status).to.be(201);
       expect(createResponse.body.groupingMode).to.be('per_episode');
 
       const createdPolicyId = createResponse.body.id as string;
       const currentVersion = createResponse.body.version as string;
 
       const response = await supertestWithoutAuth
-        .put(`${ACTION_POLICY_API_PATH}/${createdPolicyId}`)
+        .patch(`${ACTION_POLICY_API_PATH}/${createdPolicyId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({
@@ -255,6 +255,55 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.groupingMode).to.be('all');
       expect(response.body.throttle).to.eql({ strategy: 'time_interval', interval: '10m' });
       expect(response.body.name).to.be('mode-update-policy');
+    });
+
+    it('clears throttle.interval when transitioning to an intervalless strategy', async () => {
+      const createResponse = await supertestWithoutAuth
+        .post(ACTION_POLICY_API_PATH)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          name: 'strategy-transition-policy',
+          description: 'transitions from per_status_interval to on_status_change',
+          destinations: [{ type: 'workflow', id: 'wf-1' }],
+          groupingMode: 'per_episode',
+          throttle: { strategy: 'per_status_interval', interval: '10m' },
+        });
+
+      expect(createResponse.status).to.be(201);
+      expect(createResponse.body.throttle).to.eql({
+        strategy: 'per_status_interval',
+        interval: '10m',
+      });
+
+      const createdPolicyId = createResponse.body.id as string;
+      const currentVersion = createResponse.body.version as string;
+
+      const updateResponse = await supertestWithoutAuth
+        .patch(`${ACTION_POLICY_API_PATH}/${createdPolicyId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          throttle: { strategy: 'on_status_change' },
+          version: currentVersion,
+        });
+
+      expect(updateResponse.status).to.be(200);
+      expect(updateResponse.body.throttle).to.eql({
+        strategy: 'on_status_change',
+        interval: null,
+      });
+
+      const getResponse = await supertestWithoutAuth
+        .get(`${ACTION_POLICY_API_PATH}/${createdPolicyId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader());
+
+      expect(getResponse.status).to.be(200);
+      expect(getResponse.body.throttle).to.eql({
+        strategy: 'on_status_change',
+        interval: null,
+      });
     });
 
     it('should clear groupingMode when set to null', async () => {
@@ -271,13 +320,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           throttle: { strategy: 'time_interval', interval: '5m' },
         });
 
-      expect(createResponse.status).to.be(200);
+      expect(createResponse.status).to.be(201);
 
       const createdPolicyId = createResponse.body.id as string;
       const currentVersion = createResponse.body.version as string;
 
       const response = await supertestWithoutAuth
-        .put(`${ACTION_POLICY_API_PATH}/${createdPolicyId}`)
+        .patch(`${ACTION_POLICY_API_PATH}/${createdPolicyId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({
@@ -307,13 +356,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           throttle: { interval: '5m' },
         });
 
-      expect(createResponse.status).to.be(200);
+      expect(createResponse.status).to.be(201);
 
       const createdPolicyId = createResponse.body.id as string;
       const currentVersion = createResponse.body.version as string;
 
       const response = await supertestWithoutAuth
-        .put(`${ACTION_POLICY_API_PATH}/${createdPolicyId}`)
+        .patch(`${ACTION_POLICY_API_PATH}/${createdPolicyId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({
@@ -345,13 +394,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           throttle: { interval: '2m' },
         });
 
-      expect(createResponse.status).to.be(200);
+      expect(createResponse.status).to.be(201);
 
       const createdPolicyId = createResponse.body.id as string;
       const currentVersion = createResponse.body.version as string;
 
       const response = await supertestWithoutAuth
-        .put(`${ACTION_POLICY_API_PATH}/${createdPolicyId}`)
+        .patch(`${ACTION_POLICY_API_PATH}/${createdPolicyId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({
@@ -381,13 +430,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           destinations: [{ type: 'workflow', id: 'some-workflow' }],
         });
 
-      expect(createResponse.status).to.be(200);
+      expect(createResponse.status).to.be(201);
 
       const createdPolicyId = createResponse.body.id as string;
       const currentVersion = createResponse.body.version as string;
 
       const response = await supertestWithoutAuth
-        .put(`${ACTION_POLICY_API_PATH}/${createdPolicyId}`)
+        .patch(`${ACTION_POLICY_API_PATH}/${createdPolicyId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ destinations: [], version: currentVersion });
@@ -397,7 +446,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('should return 404 when updating a non-existent action policy', async () => {
       const response = await supertestWithoutAuth
-        .put(`${ACTION_POLICY_API_PATH}/non-existent-id`)
+        .patch(`${ACTION_POLICY_API_PATH}/non-existent-id`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({

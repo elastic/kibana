@@ -17,10 +17,34 @@ apiTest.describe(
   () => {
     let viewerApiCreditials: RoleApiCredentials;
     let adminApiCreditials: RoleApiCredentials;
-    apiTest.beforeAll(async ({ profilingSetup, requestAuth }) => {
-      if (!(await profilingSetup.checkStatus()).has_setup) {
-        await profilingSetup.setupResources();
-      }
+
+    apiTest.beforeAll(async ({ profilingHelper, profilingSetup, requestAuth }) => {
+      // Full cleanup of all profiling data streams and indices left by other specs
+      // (e.g. has_setup_with_data). The previous deleteByQuery on profiling-events-*
+      // was insufficient: hasProfilingData() searches `profiling*`, which includes
+      // stackframes, stacktraces, executables, and hosts.
+      await profilingSetup.cleanup();
+
+      await profilingHelper.installPolicies();
+      await profilingSetup.setupResources();
+
+      // setupResources() is asynchronous — poll until the status converges to
+      // has_setup: true, has_data: false before running the actual tests.
+      await expect
+        .poll(
+          async () => {
+            const status = await profilingSetup.checkStatus();
+            return status.has_setup === true && status.has_data === false;
+          },
+          {
+            timeout: 30_000,
+            intervals: [500, 1000, 2000, 4000],
+            message:
+              'Profiling status did not converge to has_setup: true, has_data: false after cleanup + setupResources',
+          }
+        )
+        .toBe(true);
+
       viewerApiCreditials = await requestAuth.getApiKey('viewer');
       adminApiCreditials = await requestAuth.getApiKey('admin');
     });

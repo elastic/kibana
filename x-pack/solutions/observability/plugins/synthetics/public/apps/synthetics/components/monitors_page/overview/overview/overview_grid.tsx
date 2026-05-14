@@ -11,7 +11,7 @@ import { ShowAllSpaces } from '../../common/show_all_spaces';
 import type { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../../../common/embeddables/monitors_overview/constants';
 import { AddToDashboard } from '../../../common/components/add_to_dashboard';
-import { useOverviewStatus } from '../../hooks/use_overview_status';
+import { useOverviewStatusState } from '../../hooks/use_overview_status';
 import { GroupFields } from './grid_by_group/group_fields';
 import type { OverviewView } from '../../../../state/overview';
 import { setFlyoutConfig } from '../../../../state/overview';
@@ -31,13 +31,7 @@ export const OverviewGrid = memo(
   ({ view, isEmbeddable }: { view: OverviewView; isEmbeddable?: boolean }) => {
     const dispatch = useDispatch();
 
-    const {
-      status,
-      loaded: isInitialized,
-      loading,
-    } = useOverviewStatus({
-      scopeStatusByLocation: true,
-    });
+    const { status, loaded: isInitialized, loading } = useOverviewStatusState();
     const monitorsSortedByStatus: OverviewStatusMetaData[] = useMonitorsSortedByStatus();
 
     const setFlyoutConfigCallback = useCallback(

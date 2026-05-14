@@ -101,6 +101,7 @@ dependsOn:
   - '@kbn/core-theme-browser'
   - '@kbn/ebt-tools'
   - '@kbn/alerting-rule-utils'
+  - '@kbn/apm-utils'
   - '@kbn/discover-shared-plugin'
   - '@kbn/server-route-repository-client'
   - '@kbn/response-ops-alerts-table'
@@ -131,7 +132,7 @@ dependsOn:
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/content-management-utils'
   - '@kbn/observability-agent-builder-plugin'
-  - '@kbn/agent-builder-plugin'
+  - '@kbn/agent-builder-browser'
   - '@kbn/core-analytics-browser'
 tags:
   - plugin

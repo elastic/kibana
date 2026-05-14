@@ -1,5 +1,5 @@
 {
-  "sha1": "",
+  "sha1": "63793ffcd2b26cee9d3d486a944ff3b4ba7c2da1",
   "tests": [
     {
       "id": "0e7ddf934973be7-7cabd7589c944d7",
@@ -7,19 +7,8 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_authorization.spec.ts",
@@ -33,19 +22,8 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_authorization.spec.ts",
@@ -59,19 +37,8 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_authorization.spec.ts",
@@ -85,23 +52,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_authorization.spec.ts",
-        "line": 67,
+        "line": 68,
         "column": 10
       }
     },
@@ -111,23 +67,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_crud.spec.ts",
-        "line": 27,
+        "line": 32,
         "column": 10
       }
     },
@@ -137,23 +82,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_crud.spec.ts",
-        "line": 37,
+        "line": 42,
         "column": 10
       }
     },
@@ -163,23 +97,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_crud.spec.ts",
-        "line": 51,
+        "line": 56,
         "column": 10
       }
     },
@@ -189,23 +112,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_crud.spec.ts",
-        "line": 70,
+        "line": 75,
         "column": 10
       }
     },
@@ -215,19 +127,8 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_spaces.spec.ts",
@@ -241,19 +142,8 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_spaces.spec.ts",
@@ -267,23 +157,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_spaces.spec.ts",
-        "line": 75,
+        "line": 76,
         "column": 10
       }
     },
@@ -293,19 +172,8 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_validation.spec.ts",
@@ -319,23 +187,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_validation.spec.ts",
-        "line": 34,
+        "line": 36,
         "column": 10
       }
     },
@@ -345,23 +202,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_validation.spec.ts",
-        "line": 50,
+        "line": 54,
         "column": 10
       }
     },
@@ -371,23 +217,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_validation.spec.ts",
-        "line": 61,
+        "line": 66,
         "column": 10
       }
     }

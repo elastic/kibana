@@ -18,14 +18,9 @@ const getCustomDashboardsUrl = (assetType: string, dashboardSavedObjectId?: stri
     ? `/api/infra/${assetType}/custom-dashboards/${dashboardSavedObjectId}`
     : `/api/infra/${assetType}/custom-dashboards`;
 
-// TDDO: Ideally we should have a deterministic way to know when settings updates are propagated to the UI.
-const CUSTOM_DASHBOARDS_SETTING_PROPAGATION_DELAY_MS = 12_000;
-const CUSTOM_DASHBOARDS_SETTING_PROPAGATION_TIMEOUT_MS = 20_000;
-
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const kibanaServer = getService('kibanaServer');
-  const retry = getService('retry');
 
   describe('Infra Custom Dashboards API', () => {
     let supertestWithAdminScope: SupertestWithRoleScopeType;
@@ -46,22 +41,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         types: [INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE],
       });
     });
-
-    // Stateful cloud requests can hit a different Kibana node before the shared
-    // advanced settings cache has expired.
-    const waitForEnabledCustomDashboardsSetting = async () => {
-      const startedAt = Date.now();
-
-      await retry.tryForTime(CUSTOM_DASHBOARDS_SETTING_PROPAGATION_TIMEOUT_MS, async () => {
-        const response = await supertestWithAdminScope.get(getCustomDashboardsUrl('host'));
-
-        expect(response.status).to.be(200);
-
-        if (Date.now() - startedAt < CUSTOM_DASHBOARDS_SETTING_PROPAGATION_DELAY_MS) {
-          throw new Error('Waiting for custom dashboards setting propagation');
-        }
-      });
-    };
 
     describe('when custom dashboards are disabled', () => {
       describe('GET endpoint for fetching custom dashboard', () => {
@@ -116,13 +95,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await kibanaServer.uiSettings.update({
           [enableInfrastructureAssetCustomDashboards]: true,
         });
-        await waitForEnabledCustomDashboardsSetting();
+        await kibanaServer.uiSettings.waitForEventualCacheRefresh();
       });
 
       after(async () => {
         await kibanaServer.uiSettings.update({
           [enableInfrastructureAssetCustomDashboards]: false,
         });
+        await kibanaServer.uiSettings.waitForEventualCacheRefresh();
       });
 
       describe('GET endpoint for fetching custom dashboard', () => {

@@ -33,6 +33,7 @@ import {
 } from './bwc/legacy_url_transform';
 import { registerDrilldown } from './drilldowns/registry';
 import { registerActions } from './ui_actions/register_actions';
+import { closeSetup } from './react_embeddable_system/react_embeddable_registry';
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private stateTransferService: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
@@ -53,6 +54,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   }
 
   public start(core: CoreStart, deps: EmbeddableStartDependencies): EmbeddableStart {
+    closeSetup();
     this.appListSubscription = core.application.applications$.subscribe((appList) => {
       this.appList = appList;
     });
@@ -67,6 +69,12 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       getAddFromLibraryComponent: async () => {
         const { AddFromLibraryFlyout } = await import('./add_from_library/add_from_library_flyout');
         return AddFromLibraryFlyout;
+      },
+      getAddFromLibraryContentComponent: async () => {
+        const { AddFromLibraryContent } = await import(
+          './add_from_library/add_from_library_flyout'
+        );
+        return AddFromLibraryContent;
       },
       getStateTransfer: (storage?: Storage) =>
         storage

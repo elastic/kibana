@@ -110,10 +110,14 @@ const IntegrationManagementContents: React.FC<IntegrationManagementContentsProps
     setReanalysisJustScheduled(false);
   }, [integrationId]);
 
+  const pageTitle = integrationId
+    ? i18n.PAGE_TITLE_EDIT_INTEGRATION
+    : i18n.PAGE_TITLE_NEW_INTEGRATION;
+
   return (
     <>
       <KibanaPageTemplate restrictWidth={PAGE_RESTRICT_WIDTH}>
-        <KibanaPageTemplate.Header pageTitle={i18n.PAGE_TITLE_NEW_INTEGRATION} />
+        <KibanaPageTemplate.Header pageTitle={pageTitle} />
         <KibanaPageTemplate.Section>
           <ConnectorSelector />
           <ManagementContents onDataStreamReanalyzeSuccess={handleDataStreamReanalyzeSuccess} />

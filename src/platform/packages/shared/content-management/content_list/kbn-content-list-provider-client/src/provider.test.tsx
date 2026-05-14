@@ -8,9 +8,10 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type { FavoritesClientPublic } from '@kbn/content-management-favorites-public';
+import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import { useContentListConfig } from '@kbn/content-list-provider';
 import { ContentListClientProvider } from './provider';
 import type { ContentListClientProviderProps } from './provider';
@@ -224,7 +225,7 @@ describe('ContentListClientProvider', () => {
       expect(result.current.services).toBe(services);
     });
 
-    it('reads uiSettings once at mount', () => {
+    it('reads uiSettings values once at mount', () => {
       const services = createMockServices(15);
 
       const { rerender } = renderHook(() => useContentListConfig(), {
@@ -234,8 +235,10 @@ describe('ContentListClientProvider', () => {
       rerender();
       rerender();
 
-      // uiSettings.get should only be called once (at mount).
-      expect(services.uiSettings.get).toHaveBeenCalledTimes(1);
+      // uiSettings.get should read each setting once at mount, order-independent.
+      expect(services.uiSettings.get).toHaveBeenCalledTimes(2);
+      expect(services.uiSettings.get).toHaveBeenCalledWith('savedObjects:listingLimit');
+      expect(services.uiSettings.get).toHaveBeenCalledWith('savedObjects:perPage');
     });
   });
 
@@ -312,6 +315,116 @@ describe('ContentListClientProvider', () => {
       });
 
       expect(result.current.supports.starred).toBe(false);
+    });
+  });
+
+  describe('contentEditor onSave invalidation', () => {
+    /**
+     * Regression: the inspect path used to invalidate the React Query cache
+     * after `onSave` but never reset the client strategy's
+     * `searchQuery`-keyed item cache. The post-save refetch then re-used
+     * stale items and the row in the table did not reflect the edit. The
+     * provider now wraps `contentEditor.onSave` so the strategy cache is
+     * cleared before the React Query invalidation runs.
+     */
+    const captureOnInspect = (props?: Partial<ContentListClientProviderProps>) => {
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper(props),
+      });
+      const onInspect = result.current.item?.onInspect;
+      if (!onInspect) {
+        throw new Error('expected provider to expose onInspect when contentEditor is configured');
+      }
+      return { onInspect, dataSource: result.current.dataSource };
+    };
+
+    const captureFlyoutOnSave = (
+      onInspect: NonNullable<ReturnType<typeof captureOnInspect>['onInspect']>,
+      openContentEditor: jest.Mock<() => void, [OpenContentEditorParams]>
+    ) => {
+      act(() => {
+        onInspect({ id: '1', title: 'Item 1' });
+      });
+      const params = openContentEditor.mock.calls[0]?.[0];
+      if (!params?.onSave) {
+        throw new Error('expected the inspect path to provide an onSave callback');
+      }
+      return params.onSave;
+    };
+
+    it('clears the strategy cache before the React Query invalidation runs', async () => {
+      const findItems = createMockFindItems([createMockItem('1')]);
+      const consumerOnSave = jest.fn(async () => {});
+      const openContentEditor = jest.fn<() => void, [OpenContentEditorParams]>(() => jest.fn());
+
+      const { onInspect, dataSource } = captureOnInspect({
+        findItems,
+        contentEditor: {
+          openContentEditor,
+          onSave: consumerOnSave,
+          isReadonly: false,
+        },
+      });
+
+      const fetchParams = {
+        searchQuery: 'foo',
+        filters: {},
+        sort: { field: 'title', direction: 'asc' as const },
+        page: { index: 0, size: 20 },
+      };
+
+      // Prime the strategy's `searchQuery`-keyed item cache so a fresh call
+      // with the same `searchQuery` would otherwise be served from cache.
+      await dataSource.findItems(fetchParams);
+
+      // Reset the call counter to isolate the post-save behavior. React
+      // Strict Mode double-mounts the provider in dev, which can register
+      // an extra strategy and inflate the priming-phase call count — that's
+      // unrelated to the bug under test.
+      findItems.mockClear();
+
+      // Verify the strategy is in a "cache hit" state before the save: a
+      // second fetch with the same `searchQuery` should not call findItems.
+      await dataSource.findItems(fetchParams);
+      expect(findItems).not.toHaveBeenCalled();
+
+      const flyoutOnSave = captureFlyoutOnSave(onInspect, openContentEditor);
+      await act(async () => {
+        await flyoutOnSave({ id: '1', title: 'Updated', tags: [] });
+      });
+
+      expect(consumerOnSave).toHaveBeenCalledWith({
+        id: '1',
+        title: 'Updated',
+        tags: [],
+      });
+
+      // After the wrapped `onSave` runs the strategy cache is invalidated,
+      // so the next fetch with the same `searchQuery` must call findItems
+      // again. Without the wrapper, this assertion would fail (the React
+      // Query invalidation never reaches the strategy's internal cache).
+      await dataSource.findItems(fetchParams);
+      expect(findItems).toHaveBeenCalled();
+    });
+
+    it('preserves the consumer onSave when contentEditor has no save handler', () => {
+      const openContentEditor = jest.fn<() => void, [OpenContentEditorParams]>(() => jest.fn());
+
+      const { onInspect } = captureOnInspect({
+        contentEditor: {
+          openContentEditor,
+          isReadonly: true,
+        },
+      });
+
+      act(() => {
+        onInspect({ id: '1', title: 'Item 1' });
+      });
+
+      const params = openContentEditor.mock.calls[0]?.[0];
+      // Read-only flyout never receives an onSave to wrap, so the inspect
+      // path should not synthesise one.
+      expect(params?.onSave).toBeUndefined();
     });
   });
 });

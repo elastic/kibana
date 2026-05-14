@@ -175,6 +175,7 @@ export interface RuleExecutorOptions<
   getTimeRange: (timeWindow?: string) => GetTimeRangeResult;
   isServerless: boolean;
   ruleExecutionTimeout?: string;
+  cpsData?: CpsData;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
@@ -372,6 +373,13 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
+  /**
+   * When true, the alerting framework records change history events for this
+   * rule type via the registered `IChangeTrackingService`. Rule types must
+   * opt in (typically gated behind a config setting) before any history is
+   * tracked.
+   */
+  trackChanges?: boolean;
   alerts?: IRuleTypeAlerts<AlertData>;
   /**
    * Determines whether framework should
@@ -451,6 +459,18 @@ export type RulesClientApi = PublicMethodsOf<RulesClient>;
 export type RulesSettingsClientApi = PublicMethodsOf<RulesSettingsClient>;
 export type RulesSettingsFlappingClientApi = PublicMethodsOf<RulesSettingsFlappingClient>;
 export type RulesSettingsQueryDelayClientApi = PublicMethodsOf<RulesSettingsQueryDelayClient>;
+
+export interface CpsLinkedProject {
+  id: string;
+  alias: string;
+  type: string;
+  organization: string;
+}
+
+export interface CpsData {
+  resolvedExpression?: string;
+  linkedProjects: CpsLinkedProject[];
+}
 
 export interface ConsumerExecutionMetrics {
   total_indexing_duration_ms: number;

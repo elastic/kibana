@@ -40,7 +40,6 @@
     "@kbn/scout",
     "@kbn/workflows",
     "@kbn/agent-builder-browser",
-    "@kbn/agent-builder-plugin",
     "@kbn/zod",
   ],
   "exclude": ["target/**/*"]

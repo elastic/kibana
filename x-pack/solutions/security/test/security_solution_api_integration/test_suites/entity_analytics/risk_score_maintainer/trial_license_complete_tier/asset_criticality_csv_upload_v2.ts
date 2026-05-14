@@ -75,8 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
 
-  // Failing: See https://github.com/elastic/kibana/issues/265098
-  describe.skip('@ess @serverless @serverlessQA Asset Criticality CSV Upload V2', () => {
+  describe('@ess @serverless @serverlessQA Asset Criticality CSV Upload V2', () => {
     before(async () => {
       await entityStoreUtils.enableEntityStoreV2();
 
@@ -115,7 +114,10 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await Promise.all(entities.map((e) => entityStoreUtils.deleteEntityV2(e.id)));
+      // Use allSettled so a 403 (V2 mode cleared by a concurrent test's
+      // cleanEngines()) does not fail the suite — the entity store uninstall
+      // in cleanEngines already removes the underlying index documents.
+      await Promise.allSettled(entities.map((e) => entityStoreUtils.deleteEntityV2(e.id)));
     });
 
     it('uploads CSV and updates asset criticality for a matched entity', async () => {
