@@ -7,5 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { TimeRange } from '@kbn/es-query';
+
+export const TIMEPICKER_FALLBACK: Readonly<TimeRange> = {
+  from: 'now-15m',
+  to: 'now',
+};
+
 export const ENABLED_TRIGGER_TABS = ['alert', 'index', 'event', 'manual', 'historical'] as const;
 export const ENABLED_STEP_TRIGGER_TABS = ['manual', 'historical'] as const;

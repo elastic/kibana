@@ -136,6 +136,10 @@ describe('WorkflowExecuteEventForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
+    (mockData.query.timefilter.timefilter.getTimeDefaults as jest.Mock).mockReturnValue({
+      from: 'now-15m',
+      to: 'now',
+    });
     mockUseQueryTriggerEvents.mockReturnValue({
       data: {
         hits: [
@@ -222,6 +226,8 @@ describe('WorkflowExecuteEventForm', () => {
         triggerIds: ['custom.trigger'],
         page: 1,
         size: 50,
+        from: 'now-15m',
+        to: 'now',
       }),
       expect.objectContaining({ enabled: true })
     );

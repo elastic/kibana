@@ -49,6 +49,7 @@ import {
   type WorkflowYaml,
 } from '@kbn/workflows';
 import { useQueryTriggerEvents } from '@kbn/workflows-ui';
+import { TIMEPICKER_FALLBACK } from './constants';
 import type { TriggerEventLogGridRow } from './trigger_event_log_grid_cells';
 import { TriggerEventLogSummaryCell, triggerSourceToGridRow } from './trigger_event_log_grid_cells';
 import {
@@ -251,7 +252,9 @@ export const WorkflowExecuteEventForm = ({
   const replaySpaceId = activeSpaceId ?? 'default';
   const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
   const [submittedQuery, setSubmittedQuery] = useState<Query>({ query: '', language: 'kuery' });
-  const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
+  const [timeRange, setTimeRange] = useState<TimeRange>(
+    () => services.data?.query?.timefilter?.timefilter?.getTimeDefaults?.() ?? TIMEPICKER_FALLBACK
+  );
   const [dataView, setDataView] = useState<DataView | null>(null);
   const dataViewCreatingRef = useRef(false);
   const [pageIndex, setPageIndex] = useState(0);
