@@ -7,13 +7,27 @@
 
 import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
+import type { ClaimNudgeTarget } from '../claim_nudge';
 
 export interface ClaimNudgeRouteParams {
   router: IRouter;
   logger: Logger;
   shouldRunTasks: boolean;
-  onClaimNudge: (source: string) => void;
+  onClaimNudge: (source: string, taskTargets: ClaimNudgeTarget[]) => void;
 }
+
+const claimNudgeBodySchema = schema.object({
+  taskTargets: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        taskId: schema.string(),
+        version: schema.string(),
+        taskType: schema.string(),
+      })
+    )
+  ),
+});
 
 export function claimNudgeRoute({ router, logger, shouldRunTasks, onClaimNudge }: ClaimNudgeRouteParams) {
   router.post(
@@ -29,7 +43,9 @@ export function claimNudgeRoute({ router, logger, shouldRunTasks, onClaimNudge }
           reason: 'Route is internal system-to-system signaling.',
         },
       },
-      validate: false,
+      validate: {
+        body: schema.maybe(claimNudgeBodySchema),
+      },
       xsrfRequired: false,
       options: {
         access: 'public',
@@ -41,7 +57,7 @@ export function claimNudgeRoute({ router, logger, shouldRunTasks, onClaimNudge }
         return response.ok({ body: { acknowledged: true } });
       }
 
-      onClaimNudge(request.id);
+      onClaimNudge(request.id, request.body?.taskTargets ?? []);
       return response.ok({ body: { acknowledged: true } });
     }
   );

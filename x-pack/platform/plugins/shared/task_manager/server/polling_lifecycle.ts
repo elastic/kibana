@@ -41,6 +41,7 @@ import { fillPool, FillPoolResult } from './lib/fill_pool';
 import type { Middleware } from './lib/middleware';
 import { intervalFromNow } from './lib/intervals';
 import type { ConcreteTaskInstance, TaskEventLogger } from './task';
+import { TaskCost } from './task';
 import { createTaskPoller, PollingError, PollingErrorType } from './polling';
 import { TaskPool } from './task_pool';
 import type { TaskRunner } from './task_running';
@@ -53,8 +54,10 @@ import type { TaskTypeDictionary } from './task_type_dictionary';
 import { delayOnClaimConflicts } from './polling';
 import { TaskClaiming } from './queries/task_claiming';
 import type { ClaimOwnershipResult } from './task_claimers';
+import { claimTasksById } from './task_claimers/claim_by_id';
 import type { TaskPartitioner } from './lib/task_partitioner';
 import type { TaskPoller } from './polling/task_poller';
+import type { ClaimNudgeEvent, ClaimNudgeTarget } from './claim_nudge';
 import {
   createCapacityScan,
   createPollIntervalScan,
@@ -83,7 +86,7 @@ export interface TaskPollingLifecycleOpts {
   startingCapacity: number;
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
-  claimNudge$?: Observable<void>;
+  claimNudge$?: Observable<ClaimNudgeEvent>;
 }
 
 export type TaskLifecycleEvent =
@@ -227,6 +230,9 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       pollInterval$: this.pollIntervalConfiguration$,
       pollIntervalDelay$,
       claimNudge$,
+      onTaskTargetNudge: async (taskTargets: ClaimNudgeTarget[]) => {
+        await this.claimAndRunTasksById(taskTargets);
+      },
       getCapacity: () => {
         const capacity = this.pool.availableCapacity();
         if (!capacity) {
@@ -312,26 +318,85 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       // wrap each task in a Task Runner
       this.createTaskRunnerForTask,
       // place tasks in the Task Pool
-      async (tasks: TaskRunner[]) => {
-        const tasksToRun = [];
-        const removeTaskPromises = [];
-        for (const task of tasks) {
-          if (task.isAdHocTaskAndOutOfAttempts) {
-            this.logger.debug(`Removing ${task} because the max attempts have been reached.`);
-            removeTaskPromises.push(task.removeTask());
-          } else {
-            tasksToRun.push(task);
-          }
-        }
-        // Wait for all the promises at once to speed up the polling cycle
-        const [result] = await Promise.all([this.pool.run(tasksToRun), ...removeTaskPromises]);
-        // Emit the load after fetching tasks, giving us a good metric for evaluating how
-        // busy Task manager tends to be in this Kibana instance
-        this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.usedCapacityPercentage)));
-        return result;
-      }
+      async (tasks: TaskRunner[]) => this.runClaimedTaskRunners(tasks)
     );
   };
+
+  private async claimAndRunTasksById(taskTargets: ClaimNudgeTarget[]) {
+    if (taskTargets.length === 0) {
+      return;
+    }
+
+    for (const target of taskTargets) {
+      const taskDefinition = this.definitions.get(target.taskType);
+      if (!taskDefinition) {
+        this.logger.info(
+          `[claim_nudge] claim_by_id skipped task_id=${target.taskId} reason=unknown_task_type`
+        );
+        continue;
+      }
+
+      const reservationCost = taskDefinition.cost ?? TaskCost.Normal;
+      if (!this.pool.reserveCapacity(reservationCost)) {
+        this.logger.info(
+          `[claim_nudge] claim_by_id skipped task_id=${target.taskId} reason=no_capacity`
+        );
+        continue;
+      }
+
+      let reservationReleased = false;
+      try {
+        const claimResult = await claimTasksById({
+          taskTargets: [target],
+          taskStore: this.store,
+          definitions: this.definitions,
+          logger: this.logger,
+        });
+
+        if (!claimResult.docs.length) {
+          this.pool.releaseCapacity(reservationCost);
+          reservationReleased = true;
+          continue;
+        }
+
+        const runners = claimResult.docs.map(this.createTaskRunnerForTask);
+        await this.runClaimedTaskRunners(runners, reservationCost);
+        reservationReleased = true;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        this.logger.info(`[claim_nudge] claim_by_id failed task_id=${target.taskId} reason=${message}`);
+      } finally {
+        if (!reservationReleased) {
+          this.pool.releaseCapacity(reservationCost);
+        }
+      }
+    }
+  }
+
+  private async runClaimedTaskRunners(tasks: TaskRunner[], reservedCapacity?: number) {
+    const tasksToRun = [];
+    const removeTaskPromises = [];
+    for (const task of tasks) {
+      if (task.isAdHocTaskAndOutOfAttempts) {
+        this.logger.debug(`Removing ${task} because the max attempts have been reached.`);
+        removeTaskPromises.push(task.removeTask());
+      } else {
+        tasksToRun.push(task);
+      }
+    }
+
+    const runPromise =
+      reservedCapacity !== undefined
+        ? this.pool.runWithReservedCapacity(tasksToRun, reservedCapacity)
+        : this.pool.run(tasksToRun);
+
+    // Wait for all the promises at once to speed up the polling cycle
+    const [result] = await Promise.all([runPromise, ...removeTaskPromises]);
+    // Emit the load after fetching tasks, giving us a good metric for evaluating how
+    // busy Task manager tends to be in this Kibana instance
+    this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.usedCapacityPercentage)));
+    return result;
+  }
 
   private subscribeToPoller(
     poller$: Observable<Result<TimedFillPoolResult, PollingError<string>>>

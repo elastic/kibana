@@ -30,6 +30,7 @@ import { calculateNextRunAtFromSchedule } from './lib/get_next_run_at';
 import { TaskAlreadyRunningError } from './lib/errors';
 import type { TaskPollingLifecycle } from './polling_lifecycle';
 import { getExecutionId } from './lib/get_execution_id';
+import type { ClaimNudgeTarget } from './claim_nudge';
 import type { TaskManagerClaimNudgeService } from './claim_nudge';
 
 const VERSION_CONFLICT_STATUS = 409;
@@ -110,7 +111,7 @@ export class TaskScheduling {
 
     const shouldRequestImmediateClaim =
       options?.requestImmediateClaim === true || options?.refresh === true;
-    const effectiveRefresh = shouldRequestImmediateClaim ? true : options?.refresh;
+    const effectiveRefresh = options?.requestImmediateClaim === true ? false : options?.refresh;
 
     const scheduledTask = await this.store.schedule(
       {
@@ -128,7 +129,12 @@ export class TaskScheduling {
 
     if (shouldRequestImmediateClaim && this.claimNudgeService) {
       try {
-        await this.claimNudgeService.notify();
+        const claimTarget: ClaimNudgeTarget = {
+          taskId: scheduledTask.id,
+          version: scheduledTask.version,
+          taskType: scheduledTask.taskType,
+        };
+        await this.claimNudgeService.notify([claimTarget]);
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         this.logger.info(`[claim_nudge] notify failed during schedule: ${message}`);
@@ -166,15 +172,30 @@ export class TaskScheduling {
       })
     );
 
-    return await this.store.bulkSchedule(
+    const shouldRequestImmediateClaim =
+      options?.requestImmediateClaim === true || options?.refresh === true;
+    const effectiveRefresh = options?.requestImmediateClaim === true ? false : options?.refresh;
+
+    const scheduledTasks = await this.store.bulkSchedule(
       modifiedTasks,
-      options?.request || options?.refresh !== undefined
+      options?.request || effectiveRefresh !== undefined
         ? {
             request: options?.request,
-            refresh: options?.refresh,
+            refresh: effectiveRefresh,
           }
         : undefined
     );
+
+    if (shouldRequestImmediateClaim && this.claimNudgeService) {
+      try {
+        await this.claimNudgeService.notify();
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        this.logger.info(`[claim_nudge] notify failed during bulk_schedule: ${message}`);
+      }
+    }
+
+    return scheduledTasks;
   }
 
   public async bulkDisable(

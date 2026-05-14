@@ -15,6 +15,7 @@ import { Subject } from 'rxjs';
 import type { Option } from 'fp-ts/Option';
 import { none } from 'fp-ts/Option';
 import type { Logger } from '@kbn/core/server';
+import type { ClaimNudgeEvent, ClaimNudgeTarget } from '../claim_nudge';
 import { TaskErrorSource } from '../task_running';
 import type { Result } from '../lib/result_type';
 import { asOk, asErr } from '../lib/result_type';
@@ -26,7 +27,8 @@ interface Opts<H> {
   initialPollInterval: number;
   pollInterval$: Observable<number>;
   pollIntervalDelay$?: Observable<number>;
-  claimNudge$?: Observable<void>;
+  claimNudge$?: Observable<ClaimNudgeEvent>;
+  onTaskTargetNudge?: (taskTargets: ClaimNudgeTarget[]) => Promise<void>;
   getCapacity: () => number;
   work: WorkFn<H>;
 }
@@ -54,6 +56,7 @@ export function createTaskPoller<T, H>({
   pollInterval$,
   pollIntervalDelay$,
   claimNudge$,
+  onTaskTargetNudge,
   getCapacity,
   work,
 }: Opts<H>): TaskPoller<T, H> {
@@ -130,8 +133,15 @@ export function createTaskPoller<T, H>({
       });
     }
     if (claimNudge$) {
-      claimNudge$.subscribe(() => {
+      claimNudge$.subscribe((event) => {
         if (!running) {
+          return;
+        }
+
+        if (event.taskTargets.length > 0) {
+          onTaskTargetNudge?.(event.taskTargets).catch((e) => {
+            subject.next(asPollingError(e, PollingErrorType.PollerError));
+          });
           return;
         }
 

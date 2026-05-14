@@ -27,7 +27,7 @@ import type {
   ConcreteTaskInstanceVersion,
   PartialConcreteTaskInstance,
 } from '../task';
-import { TaskStatus, TaskCost } from '../task';
+import { TaskCost } from '../task';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import { TASK_MANAGER_MARK_AS_CLAIMED } from '../queries/task_claiming';
 import type { TaskClaim } from '../task_events';
@@ -47,10 +47,11 @@ import {
 
 import type { TaskStore, SearchOpts } from '../task_store';
 import { isOk, asOk } from '../lib/result_type';
+import { buildClaimUpdate } from './lib/build_claim_update';
+import { executeClaimUpdates } from './lib/execute_claim_updates';
 import { selectTasksByCapacity } from './lib/task_selector_by_capacity';
 import { getTaskCost } from './lib/get_task_cost';
 import type { TaskPartitioner } from '../lib/task_partitioner';
-import { getRetryAt } from '../lib/get_retry_at';
 
 interface OwnershipClaimingOpts {
   claimOwnershipUntil: Date;
@@ -176,23 +177,23 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   }
 
   // build the updated task objects we'll claim
-  const now = new Date();
   const taskUpdates: PartialConcreteTaskInstance[] = [];
   for (const task of tasksToRun) {
     try {
-      taskUpdates.push({
-        id: task.id,
-        version: task.version,
-        scheduledAt:
-          task.retryAt != null && new Date(task.retryAt).getTime() < Date.now()
-            ? task.retryAt
-            : task.runAt,
-        status: TaskStatus.Running,
-        startedAt: now,
-        attempts: task.attempts + 1,
-        retryAt: getRetryAt(task, definitions.get(task.taskType)) ?? null,
-        ownerId: taskStore.taskManagerId,
-      });
+      taskUpdates.push(
+        buildClaimUpdate({
+          taskId: task.id,
+          version: task.version,
+          taskType: task.taskType,
+          attempts: task.attempts,
+          retryAt: task.retryAt,
+          runAt: task.runAt,
+          schedule: task.schedule,
+          timeoutOverride: task.timeoutOverride,
+          ownerId: taskStore.taskManagerId,
+          definitions,
+        })
+      );
     } catch (error) {
       logger.error(
         `Error validating task schema ${task.id}:${task.taskType} during claim: ${JSON.stringify(
@@ -203,47 +204,17 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     }
   }
 
-  // perform the task object updates, deal with errors
-  const updatedTasks: Record<string, PartialConcreteTaskInstance> = {};
-  let conflicts = 0;
-  let bulkUpdateErrors = 0;
-  let bulkGetErrors = 0;
-
-  const updateResults = await taskStore.bulkPartialUpdate(taskUpdates);
-  for (const updateResult of updateResults) {
-    if (isOk(updateResult)) {
-      updatedTasks[updateResult.value.id] = updateResult.value;
-    } else {
-      const { id, type, error, status } = updateResult.error;
-
-      // check for 409 conflict errors
-      if (status === 409) {
-        conflicts++;
-      } else {
-        logger.error(`Error updating task ${id}:${type} during claim: ${JSON.stringify(error)}`);
-        bulkUpdateErrors++;
-      }
-    }
-  }
-
-  // perform an mget to get the full task instance for claiming
-  const fullTasksToRun = (await taskStore.bulkGet(Object.keys(updatedTasks))).reduce<
-    ConcreteTaskInstance[]
-  >((acc, task) => {
-    if (isOk(task) && task.value.version !== updatedTasks[task.value.id].version) {
-      logger.warn(
-        `Task ${task.value.id} was modified during the claiming phase, skipping until the next claiming cycle.`
-      );
-      conflicts++;
-    } else if (isOk(task)) {
-      acc.push(task.value);
-    } else {
-      const { id, type, error } = task.error;
-      logger.error(`Error getting full task ${id}:${type} during claim: ${error.message}`);
-      bulkGetErrors++;
-    }
-    return acc;
-  }, []);
+  const {
+    docs: fullTasksToRun,
+    conflicts,
+    updateErrors: bulkUpdateErrors,
+    getErrors: bulkGetErrors,
+  } = await executeClaimUpdates({
+    taskStore,
+    updates: taskUpdates,
+    logger,
+    logPrefix: '[task_claimer_mget]',
+  });
 
   // TODO: need a better way to generate stats
   const message = `task claimer claimed: ${fullTasksToRun.length}; stale: ${staleTasks.length}; conflicts: ${conflicts}; missing: ${missingTasks.length}; capacity reached: ${leftOverTasks.length}; updateErrors: ${bulkUpdateErrors}; getErrors: ${bulkGetErrors}; malformed data errors: ${tasksWithMalformedData.length}`;

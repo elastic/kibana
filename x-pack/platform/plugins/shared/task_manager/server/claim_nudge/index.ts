@@ -6,6 +6,7 @@
  */
 
 export type { TaskManagerClaimNudgeService } from './claim_nudge_service';
+export type { ClaimNudgeEvent, ClaimNudgeTarget } from './claim_nudge_service';
 export {
   GlobalCheckpointsClaimNudgeService,
   HttpClaimNudgeService,

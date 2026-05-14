@@ -9,6 +9,7 @@ import { request as httpRequest } from 'node:http';
 import { request as httpsRequest } from 'node:https';
 import { URL } from 'node:url';
 import type { Logger } from '@kbn/core/server';
+import type { ClaimNudgeTarget } from './claim_nudge_service';
 import type { KibanaDiscoveryService } from '../kibana_discovery_service';
 
 export interface HttpClaimNudgeClientOptions {
@@ -46,11 +47,12 @@ export class HttpClaimNudgeClient {
     this.nudgePath = `${serverBasePath}/internal/task_manager/_claim_nudge`;
   }
 
-  public async notify() {
+  public async notify(taskTargets: ClaimNudgeTarget[] = []) {
     const { addresses, discoveredNodes } = await this.getNodeAddresses();
+    const requestBody = JSON.stringify({ taskTargets });
 
     this.logger.info(
-      `[claim_nudge] notify discovered_nodes=${discoveredNodes} addressable_nodes=${addresses.length}`
+      `[claim_nudge] notify discovered_nodes=${discoveredNodes} addressable_nodes=${addresses.length} task_targets=${taskTargets.length}`
     );
 
     if (addresses.length === 0) {
@@ -66,7 +68,9 @@ export class HttpClaimNudgeClient {
     }
 
     const results = await Promise.allSettled(
-      addresses.map((address) => this.sendNudgeRequest(address, this.nudgePath, this.timeoutMs))
+      addresses.map((address) =>
+        this.sendNudgeRequest(address, this.nudgePath, this.timeoutMs, requestBody)
+      )
     );
 
     let successCount = 0;
@@ -128,7 +132,7 @@ export class HttpClaimNudgeClient {
     };
   }
 
-  private sendNudgeRequest(address: string, path: string, timeoutMs: number) {
+  private sendNudgeRequest(address: string, path: string, timeoutMs: number, body: string) {
     const url = new URL(address);
     const isHttps = url.protocol === 'https:';
     const requestFn = isHttps ? httpsRequest : httpRequest;
@@ -147,7 +151,7 @@ export class HttpClaimNudgeClient {
               'content-type': 'application/json',
               'x-elastic-internal-origin': 'task-manager',
               'kbn-xsrf': 'task-manager-claim-nudge',
-              'content-length': '2',
+              'content-length': String(Buffer.byteLength(body, 'utf8')),
             },
             ...(isHttps ? { rejectUnauthorized: false } : {}),
           },
@@ -171,7 +175,7 @@ export class HttpClaimNudgeClient {
           );
         });
 
-        request.write('{}');
+        request.write(body);
         request.end();
       }
     );

@@ -49,6 +49,7 @@ const VERSION_CONFLICT_MESSAGE = 'Task has been claimed by another Kibana servic
  */
 export class TaskPool {
   private tasksInPool = new Map<string, TaskRunner>();
+  private reservedCapacity = 0;
   private logger: Logger;
   private load$ = new Subject<TaskManagerStat>();
   private definitions: TaskTypeDictionary;
@@ -116,10 +117,44 @@ export class TaskPool {
     // the poller and the pool from hanging due to lack of capacity
     this.cancelExpiredTasks();
 
-    return this.capacityCalculator.availableCapacity(
+    const available = this.capacityCalculator.availableCapacity(
       this.tasksInPool,
       taskType ? this.definitions.get(taskType) : null
     );
+    return Math.max(available - this.reservedCapacity, 0);
+  }
+
+  public reserveCapacity(amount: number) {
+    if (amount <= 0) {
+      return true;
+    }
+
+    if (this.availableCapacity() < amount) {
+      return false;
+    }
+
+    this.reservedCapacity += amount;
+    return true;
+  }
+
+  public releaseCapacity(amount: number) {
+    if (amount <= 0) {
+      return;
+    }
+
+    this.reservedCapacity = Math.max(this.reservedCapacity - amount, 0);
+  }
+
+  public async runWithReservedCapacity(
+    tasks: TaskRunner[],
+    reservedCapacity: number
+  ): Promise<TaskPoolRunResult> {
+    try {
+      const availableCapacity = Math.max(this.availableCapacity() + reservedCapacity, 0);
+      return await this.runWithAvailableCapacity(tasks, availableCapacity);
+    } finally {
+      this.releaseCapacity(reservedCapacity);
+    }
   }
 
   /**
@@ -138,9 +173,13 @@ export class TaskPool {
    * @returns {Promise<boolean>}
    */
   public async run(tasks: TaskRunner[]): Promise<TaskPoolRunResult> {
-    // Note `this.availableCapacity` has side effects, so we just want
-    // to call it once for this bit of the code.
-    const availableCapacity = this.availableCapacity();
+    return await this.runWithAvailableCapacity(tasks, this.availableCapacity());
+  }
+
+  private async runWithAvailableCapacity(
+    tasks: TaskRunner[],
+    availableCapacity: number
+  ): Promise<TaskPoolRunResult> {
     const [tasksToRun, leftOverTasks] = this.capacityCalculator.determineTasksToRunBasedOnCapacity(
       tasks,
       availableCapacity

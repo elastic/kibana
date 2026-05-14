@@ -341,7 +341,8 @@ export class TaskManagerPlugin
       router,
       logger: this.logger,
       shouldRunTasks: this.shouldRunBackgroundTasks,
-      onClaimNudge: (source: string) => this.claimNudgeService?.emitLocalNudge(source),
+      onClaimNudge: (source: string, taskTargets) =>
+        this.claimNudgeService?.emitLocalNudge(source, taskTargets),
     });
 
     core.status.derivedStatus$.subscribe((status) =>
