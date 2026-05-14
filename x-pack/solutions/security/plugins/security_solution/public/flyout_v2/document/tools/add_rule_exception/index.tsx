@@ -6,12 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiSkeletonText,
-} from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiSkeletonText } from '@elastic/eui';
 import { set } from 'lodash';
 import { ALERT_RULE_UUID, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import type { DataTableRecord } from '@kbn/discover-utils';
