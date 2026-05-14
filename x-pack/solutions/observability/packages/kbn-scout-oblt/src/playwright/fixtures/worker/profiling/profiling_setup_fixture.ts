@@ -92,9 +92,17 @@ export const profilingSetupFixture = base.extend<{}, { profilingSetup: Profiling
           });
 
           if (response.errors) {
-            const erroredItems = response.items?.filter((item: any) => item?.index?.error);
+            const erroredItems = response.items?.filter((item: any) => {
+              const action = item?.index ?? item?.create ?? item?.update ?? item?.delete;
+              return action?.error;
+            });
             log.error(
               `Some errors occurred during bulk indexing: ${JSON.stringify(erroredItems, null, 2)}`
+            );
+            throw new Error(
+              `Bulk indexing had ${
+                erroredItems?.length ?? 0
+              } errors — profiling data may be incomplete`
             );
           } else {
             log.info(`Successfully indexed ${response.items?.length || 0} profiling documents`);
@@ -112,21 +120,38 @@ export const profilingSetupFixture = base.extend<{}, { profilingSetup: Profiling
           throw error;
         };
 
-        const profilingIndices = (await esClient.cat.indices({ format: 'json' }))
+        // Disable resource management so the ES profiling plugin stops
+        // recreating data streams. This must happen before deleting
+        // indices, otherwise the plugin immediately recreates them.
+        await esClient.cluster.putSettings({
+          persistent: {
+            xpack: { profiling: { templates: { enabled: null } } },
+          },
+        });
+
+        // ES profiling resources are mostly data streams (.profiling-stackframes-*,
+        // .profiling-stacktraces-*, .profiling-executables-*, .profiling-hosts-*,
+        // profiling-events-*). Deleting data streams first avoids the 400
+        // "cannot_delete_data_stream_index" error from trying indices.delete() on
+        // data-stream backing indices.
+        await Promise.all([
+          esClient.indices.deleteDataStream({ name: 'profiling-*' }).catch(ignoreNotFound),
+          esClient.indices.deleteDataStream({ name: '.profiling-*' }).catch(ignoreNotFound),
+        ]);
+
+        // Delete any remaining plain indices (e.g. created by bulk create ops
+        // against non-existent aliases).
+        const remaining = (await esClient.cat.indices({ format: 'json' }))
           .map((index) => index.index)
           .filter(
             (name): name is string =>
               !!name && (name.startsWith('profiling') || name.startsWith('.profiling'))
           );
 
-        await Promise.all([
-          ...profilingIndices.map((index) =>
-            esClient.indices.delete({ index, ignore_unavailable: true }).catch(ignoreNotFound)
-          ),
-          // 'profiling-events*' may not exist on a fresh cluster; tolerate the 404 so we
-          // do not abort the whole Promise.all and leave preceding cleanup work half-done.
-          esClient.indices.deleteDataStream({ name: 'profiling-events*' }).catch(ignoreNotFound),
-        ]);
+        for (const index of remaining) {
+          await esClient.indices.delete({ index, ignore_unavailable: true }).catch(ignoreNotFound);
+        }
+
         log.info('Unloaded Profiling data');
       };
 

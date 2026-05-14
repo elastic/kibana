@@ -21,10 +21,7 @@ apiTest.describe('Profiling is setup and data is loaded', { tag: tags.stateful.c
     // attempting to load data.
     await profilingHelper.installPolicies();
 
-    // Ensure the ES profiling data streams + aliases (`profiling-stackframes`, `profiling-stacktraces`, `profiling-executables`, `profiling-hosts`, `profiling-events-*`) exist before we bulk-write into them. Bulk `create` ops to non-existing aliases would otherwise create regular indices that later collide with the ES profiling plugin's alias creation (`InvalidAliasNameException`).
-    if (!(await profilingSetup.checkStatus()).has_setup) {
-      await profilingSetup.setupResources();
-    }
+    await profilingSetup.setupResources();
 
     await profilingSetup.loadData(esArchiversPath);
     viewerApiCreditials = await requestAuth.getApiKey('viewer');
