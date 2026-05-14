@@ -48,10 +48,12 @@ export interface KiRelationshipsLastRun {
   edgesWritten: number;
 }
 
-export interface KiRelationshipsState extends EntityMaintainerState {
+// Likewise a type alias (not an interface) so the recursive `JsonValue`
+// constraint inherited from `EntityMaintainerState` still admits this shape.
+export type KiRelationshipsState = EntityMaintainerState & {
   lastRun: KiRelationshipsLastRun | null;
   lastRunTimestamp: string | null;
-}
+};
 
 export const INITIAL_STATE: KiRelationshipsState = {
   lastRun: null,

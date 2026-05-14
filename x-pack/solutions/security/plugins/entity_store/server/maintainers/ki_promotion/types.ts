@@ -20,6 +20,12 @@ import type { EntityMaintainerState } from '../../tasks/entity_maintainers/types
  *  - `bulkUpdateErrors` counts ES bulk-item failures (the maintainer
  *    tolerates them like `ki-relationships` does — see the partial-failure
  *    path in `run.ts`); it is not a fatal-error counter.
+ *
+ * Declared as a type alias (not an interface) so it satisfies the recursive
+ * `JsonValue` constraint that `EntityMaintainerState` carries: an interface
+ * is treated as a nominal type without an implicit index signature, which
+ * trips `EntityMaintainerState['lastRun']` ('Property … is incompatible with
+ * index signature'). The structurally identical type alias passes the check.
  */
 export interface KiPromotionLastRun {
   /**
@@ -70,10 +76,12 @@ export interface KiPromotionLastRun {
   bulkUpdateErrors: number;
 }
 
-export interface KiPromotionState extends EntityMaintainerState {
+// Likewise a type alias (not an interface) so the recursive `JsonValue`
+// constraint inherited from `EntityMaintainerState` still admits this shape.
+export type KiPromotionState = EntityMaintainerState & {
   lastRun: KiPromotionLastRun | null;
   lastRunTimestamp: string | null;
-}
+};
 
 export const INITIAL_STATE: KiPromotionState = {
   lastRun: null,

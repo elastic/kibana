@@ -9,7 +9,11 @@ import type { Logger } from '@kbn/logging';
 import type { Feature } from '@kbn/streams-schema';
 import type { StreamsKnowledgeIndicatorsReader } from '@kbn/streams-plugin/server';
 import type { LogsExtractionClient } from '../domain/logs_extraction';
-import { LogExtractionConfig } from '../domain/saved_objects/global_state/constants';
+import {
+  LogExtractionConfig,
+  KI_PROMOTED_ENTITY_TYPES_DEFAULT,
+  KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
+} from '../domain/saved_objects/global_state/constants';
 import { runKnowledgeIndicatorsExtraction } from './knowledge_indicators_loop';
 
 const buildLogger = () =>
@@ -71,7 +75,12 @@ const buildExtractionClient = (
 };
 
 const baseConfig = LogExtractionConfig.parse({});
-const baseKiConfig = { entityMinConfidence: 70, aggregationGroupCap: 200 };
+const baseKiConfig = {
+  entityMinConfidence: 70,
+  aggregationGroupCap: 200,
+  promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
+  promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
+};
 
 describe('runKnowledgeIndicatorsExtraction', () => {
   it('is a no-op when there are no entity features', async () => {
@@ -117,7 +126,12 @@ describe('runKnowledgeIndicatorsExtraction', () => {
         logsExtractionClient: extractionClient as unknown as LogsExtractionClient,
         namespace: 'default',
         config: baseConfig,
-        knowledgeIndicatorsConfig: { entityMinConfidence: 85, aggregationGroupCap: 200 },
+        knowledgeIndicatorsConfig: {
+          entityMinConfidence: 85,
+          aggregationGroupCap: 200,
+          promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
+          promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
+        },
         abortController: new AbortController(),
       },
       { currentStates: undefined }
@@ -423,7 +437,12 @@ describe('runKnowledgeIndicatorsExtraction', () => {
         logsExtractionClient: extractionClient as unknown as LogsExtractionClient,
         namespace: 'default',
         config: baseConfig,
-        knowledgeIndicatorsConfig: { entityMinConfidence: 70, aggregationGroupCap: 3 },
+        knowledgeIndicatorsConfig: {
+          entityMinConfidence: 70,
+          aggregationGroupCap: 3,
+          promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
+          promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
+        },
         abortController: new AbortController(),
       },
       { currentStates: undefined }

@@ -142,7 +142,7 @@ FROM test-index-*
 | LIMIT 10000
 | EVAL recent.entity.id = recent.entity.EngineMetadata.UntypedId
 | LOOKUP JOIN latest-index
-      ON recent.entity.id == entity.id
+      ON recent.entity.EngineMetadata.UntypedId == entity.EngineMetadata.UntypedId
 | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  event.module = MV_SLICE(MV_UNION(recent.event.module, event.module), 0, 9),
  event.dataset = MV_SLICE(MV_UNION(recent.event.dataset, event.dataset), 0, 9),
@@ -264,10 +264,10 @@ FROM test-index-*
  entity.risk.calculated_score_norm = COALESCE(recent.entity.risk.calculated_score_norm, entity.risk.calculated_score_norm),
               @timestamp = recent.timestamp,
  entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
- entity.EngineMetadata.Type = \\"generic\\",
+ entity.EngineMetadata.Type = CASE(entity.confidence == \\"low\\", entity.EngineMetadata.Type, \\"generic\\"),
  entity.hashedId = HASH(\\"sha256\\", recent.entity.id)
+| EVAL entity.id = CASE(entity.confidence == \\"low\\", entity.id, recent.entity.id)
 | RENAME
-    recent.entity.id AS entity.id,
     recent.entity.EngineMetadata.UntypedId AS entity.EngineMetadata.UntypedId
 | KEEP entity*,
 event*,
@@ -438,7 +438,7 @@ FROM test-index-*
 | LIMIT 10000
 | EVAL recent.entity.id = CONCAT(\\"host:\\", recent.entity.EngineMetadata.UntypedId)
 | LOOKUP JOIN latest-index
-      ON recent.entity.id == entity.id
+      ON recent.entity.EngineMetadata.UntypedId == entity.EngineMetadata.UntypedId
 | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  host.entity.id = COALESCE(host.entity.id, recent.host.entity.id),
  host.name = MV_SLICE(MV_UNION(recent.host.name, host.name), 0, 9),
@@ -577,11 +577,11 @@ FROM test-index-*
  entity.relationships.resolution.risk.calculated_score_norm = COALESCE(recent.entity.relationships.resolution.risk.calculated_score_norm, entity.relationships.resolution.risk.calculated_score_norm),
               @timestamp = recent.timestamp,
  entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
- entity.EngineMetadata.Type = \\"host\\",
+ entity.EngineMetadata.Type = CASE(entity.confidence == \\"low\\", entity.EngineMetadata.Type, \\"host\\"),
  entity.hashedId = HASH(\\"sha256\\", recent.entity.id),
  entity.type = COALESCE(entity.type, \\"Host\\")
+| EVAL entity.id = CASE(entity.confidence == \\"low\\", entity.id, recent.entity.id)
 | RENAME
-    recent.entity.id AS entity.id,
     recent.entity.EngineMetadata.UntypedId AS entity.EngineMetadata.UntypedId
 | KEEP entity*,
 host*,
@@ -757,7 +757,7 @@ FROM test-index-*
 | LIMIT 10000
 | EVAL recent.entity.id = CONCAT(\\"host:\\", recent.entity.EngineMetadata.UntypedId)
 | LOOKUP JOIN latest-index
-      ON recent.entity.id == entity.id
+      ON recent.entity.EngineMetadata.UntypedId == entity.EngineMetadata.UntypedId
 | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  host.entity.id = COALESCE(host.entity.id, recent.host.entity.id),
  host.name = MV_SLICE(MV_UNION(recent.host.name, host.name), 0, 9),
@@ -896,11 +896,11 @@ FROM test-index-*
  entity.relationships.resolution.risk.calculated_score_norm = COALESCE(recent.entity.relationships.resolution.risk.calculated_score_norm, entity.relationships.resolution.risk.calculated_score_norm),
               @timestamp = recent.timestamp,
  entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
- entity.EngineMetadata.Type = \\"host\\",
+ entity.EngineMetadata.Type = CASE(entity.confidence == \\"low\\", entity.EngineMetadata.Type, \\"host\\"),
  entity.hashedId = HASH(\\"sha256\\", recent.entity.id),
  entity.type = COALESCE(entity.type, \\"Host\\")
+| EVAL entity.id = CASE(entity.confidence == \\"low\\", entity.id, recent.entity.id)
 | RENAME
-    recent.entity.id AS entity.id,
     recent.entity.EngineMetadata.UntypedId AS entity.EngineMetadata.UntypedId
 | KEEP entity*,
 host*,
@@ -1076,7 +1076,7 @@ FROM test-index-*
 | LIMIT 10000
 | EVAL recent.entity.id = CONCAT(\\"host:\\", recent.entity.EngineMetadata.UntypedId)
 | LOOKUP JOIN latest-index
-      ON recent.entity.id == entity.id
+      ON recent.entity.EngineMetadata.UntypedId == entity.EngineMetadata.UntypedId
 | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  host.entity.id = COALESCE(host.entity.id, recent.host.entity.id),
  host.name = MV_SLICE(MV_UNION(recent.host.name, host.name), 0, 9),
@@ -1215,11 +1215,11 @@ FROM test-index-*
  entity.relationships.resolution.risk.calculated_score_norm = COALESCE(recent.entity.relationships.resolution.risk.calculated_score_norm, entity.relationships.resolution.risk.calculated_score_norm),
               @timestamp = recent.timestamp,
  entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
- entity.EngineMetadata.Type = \\"host\\",
+ entity.EngineMetadata.Type = CASE(entity.confidence == \\"low\\", entity.EngineMetadata.Type, \\"host\\"),
  entity.hashedId = HASH(\\"sha256\\", recent.entity.id),
  entity.type = COALESCE(entity.type, \\"Host\\")
+| EVAL entity.id = CASE(entity.confidence == \\"low\\", entity.id, recent.entity.id)
 | RENAME
-    recent.entity.id AS entity.id,
     recent.entity.EngineMetadata.UntypedId AS entity.EngineMetadata.UntypedId
 | KEEP entity*,
 host*,
@@ -1359,7 +1359,7 @@ FROM test-index-*
 | LIMIT 10000
 | EVAL recent.entity.id = CONCAT(\\"service:\\", recent.entity.EngineMetadata.UntypedId)
 | LOOKUP JOIN latest-index
-      ON recent.entity.id == entity.id
+      ON recent.entity.EngineMetadata.UntypedId == entity.EngineMetadata.UntypedId
 | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  service.entity.id = COALESCE(service.entity.id, recent.service.entity.id),
  service.name = MV_SLICE(MV_UNION(recent.service.name, service.name), 0, 9),
@@ -1467,11 +1467,11 @@ FROM test-index-*
  entity.relationships.resolution.risk.calculated_score_norm = COALESCE(recent.entity.relationships.resolution.risk.calculated_score_norm, entity.relationships.resolution.risk.calculated_score_norm),
               @timestamp = recent.timestamp,
  entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
- entity.EngineMetadata.Type = \\"service\\",
+ entity.EngineMetadata.Type = CASE(entity.confidence == \\"low\\", entity.EngineMetadata.Type, \\"service\\"),
  entity.hashedId = HASH(\\"sha256\\", recent.entity.id),
  entity.type = COALESCE(entity.type, \\"Service\\")
+| EVAL entity.id = CASE(entity.confidence == \\"low\\", entity.id, recent.entity.id)
 | RENAME
-    recent.entity.id AS entity.id,
     recent.entity.EngineMetadata.UntypedId AS entity.EngineMetadata.UntypedId
 | KEEP entity*,
 service*,
@@ -1621,7 +1621,7 @@ true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace
     BY recent.entity.EngineMetadata.UntypedId
 | EVAL recent.entity.id = CONCAT(\\"user:\\", recent.entity.EngineMetadata.UntypedId)
 | LOOKUP JOIN latest-index
-      ON recent.entity.id == entity.id
+      ON recent.entity.EngineMetadata.UntypedId == entity.EngineMetadata.UntypedId
 | WHERE NOT(\`entity.id\` IS NULL) OR COALESCE(\`recent.entity.namespace\` == \\"local\\", FALSE) OR COALESCE(MV_CONTAINS(\`recent.event.kind\`, \\"asset\\"), FALSE) OR (COALESCE(\`recent.event.kind\` != \\"enrichment\\", TRUE) OR \`recent.event.kind\` IS NULL) AND COALESCE(MV_CONTAINS(\`recent.event.category\`, \\"iam\\"), FALSE) AND (COALESCE(MV_CONTAINS(\`recent.event.type\`, \\"user\\"), FALSE) OR COALESCE(MV_CONTAINS(\`recent.event.type\`, \\"creation\\"), FALSE) OR COALESCE(MV_CONTAINS(\`recent.event.type\`, \\"deletion\\"), FALSE) OR COALESCE(MV_CONTAINS(\`recent.event.type\`, \\"group\\"), FALSE)) 
 | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
 | LIMIT 10000
@@ -1744,11 +1744,11 @@ true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace
  host.name = COALESCE(recent.host.name, host.name),
               @timestamp = recent.timestamp,
  entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
- entity.EngineMetadata.Type = \\"user\\",
+ entity.EngineMetadata.Type = CASE(entity.confidence == \\"low\\", entity.EngineMetadata.Type, \\"user\\"),
  entity.hashedId = HASH(\\"sha256\\", recent.entity.id),
  entity.type = COALESCE(entity.type, \\"Identity\\")
+| EVAL entity.id = CASE(entity.confidence == \\"low\\", entity.id, recent.entity.id)
 | RENAME
-    recent.entity.id AS entity.id,
     recent.entity.EngineMetadata.UntypedId AS entity.EngineMetadata.UntypedId
 | KEEP entity*,
 event*,

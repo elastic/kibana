@@ -42,6 +42,7 @@ export const ENGINE_METADATA_TYPE_FIELD = 'entity.EngineMetadata.Type';
 export const MAIN_ENTITY_ID_FIELD = 'entity.id';
 export const ENTITY_NAME_FIELD = 'entity.name';
 export const ENTITY_TYPE_FIELD = 'entity.type';
+export const ENTITY_CONFIDENCE_FIELD = 'entity.confidence';
 export const TIMESTAMP_FIELD = '@timestamp';
 
 export const DOCUMENT_ID_FIELD = '_id';

@@ -81,12 +81,43 @@ Promotion gates (all must pass; failures are counted but never throw):
 
 On promotion the maintainer:
 
-- Re-computes the EUID with `getEuidFromObject(targetEngine, flattenedDoc)` and writes a new doc at the new `_id`.
-- Sets `entity.confidence: 'low'` and `entity.previous_id: <oldEntityId>` so the relationship to the original generic doc is traceable.
+- Re-computes the EUID with `getEuidFromObject(targetEngine, flattenedDoc)` and writes the new `entity.id` onto the existing doc (in-place partial update — the ES `_id` is **not** changed; only `entity.id`, `entity.EngineMetadata.Type`, `entity.confidence`, and `entity.previous_id` are touched).
+- Sets `entity.confidence: 'low'` and `entity.previous_id: <oldEntityId>` so the original generic identity is recoverable.
 - Switches `entity.EngineMetadata.Type` to the target engine.
 
 On demotion (when a previously-promoted entity no longer satisfies the gates):
 
-- Restores `entity.EngineMetadata.Type: 'generic'`, clears `entity.confidence` and `entity.previous_id`, and re-keys the doc back to the original EUID.
+- Restores `entity.EngineMetadata.Type: 'generic'`, clears `entity.confidence` and `entity.previous_id`, and rolls `entity.id` back to `previous_id`. The doc's ES `_id` is unchanged.
 
 Failures from `bulkUpdateEntityDocs` are logged at `warn` level and counted in `bulkUpdateErrors`; the run continues so a partial failure does not stall promotion of unrelated entities.
+
+#### Why promotion is durable across re-extraction
+
+Both the promote and demote paths only change the doc's *logical* identity
+(`entity.id` and `entity.EngineMetadata.Type`); the physical `_id` is
+`HASH(... recent.entity.id ...)` from the source-engine identity (`UntypedId`),
+which the maintainer never touches. The next extraction would re-write the
+same `_id` and clobber `entity.id` / `EngineMetadata.Type` back to their
+generic values if not coordinated. The extraction query coordinates with
+the maintainer in three places (see `logs_extraction_query_builder.ts`):
+
+1. The `LOOKUP JOIN` keys on `entity.EngineMetadata.UntypedId` (stable
+   across promotion), not `entity.id` (mutated by promotion). Joining on
+   the mutated id would hide the promoted doc from the JOIN.
+2. `entity.EngineMetadata.Type` is rewritten as
+   `CASE(entity.confidence == "low", entity.EngineMetadata.Type, "<engine>")`
+   — promoted docs keep their typed engine; everything else uses the
+   engine literal as before.
+3. `entity.id` is rewritten as
+   `CASE(entity.confidence == "low", entity.id, recent.entity.id)`
+   instead of the historical unconditional
+   `RENAME recent.entity.id AS entity.id`.
+
+`entity.confidence == "low"` is the marker; the `ki-promotion` maintainer
+is the sole writer of that value, which is what makes it a safe gate.
+`entity.hashedId` (and therefore the doc `_id`) stays unconditional so
+the upsert continues to target the same physical doc — promotion is a
+logical-identity rewrite, not a re-keying.
+
+The regression test that enforces this contract is
+`buildLogsExtractionEsqlQuery > preserves promoted entity.id and EngineMetadata.Type across re-extraction (KI promotion durability)`.

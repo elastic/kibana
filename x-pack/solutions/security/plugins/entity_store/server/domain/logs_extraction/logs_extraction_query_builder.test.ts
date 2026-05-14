@@ -93,6 +93,51 @@ describe('buildLogsExtractionEsqlQuery', () => {
     expect(afterStatsEvalIdx).toBeGreaterThan(lookupIdx);
     expect(mergeCoalesceIdx).toBeGreaterThan(afterStatsEvalIdx);
   });
+
+  // Promotion durability contract: the KI promotion maintainer mutates `entity.id`
+  // and `entity.EngineMetadata.Type` on a generic doc (e.g. `service:foo`, `service`)
+  // and marks it with `entity.confidence = "low"`. The next extraction pass must NOT
+  // clobber those values, otherwise the maintainer's work is silently reverted on
+  // every cycle. We enforce this with three properties of the extraction query:
+  //   1. LOOKUP JOIN keys on `EngineMetadata.UntypedId`, the source-engine identity
+  //      that is stable across promotion (the maintainer mutates `entity.id` only).
+  //   2. `entity.id` is rewritten via a `CASE(entity.confidence == "low", ...)`
+  //      EVAL instead of an unconditional `RENAME recent.entity.id AS entity.id`,
+  //      so a promoted doc's typed id is preserved post-JOIN.
+  //   3. `entity.EngineMetadata.Type` carries the same `CASE` guard so the engine
+  //      label tracks the id.
+  // The doc `_id` itself (HASH of `recent.entity.id`) stays unconditional so the
+  // upsert keeps writing to the same physical doc — promotion only changes the
+  // doc's logical identity, not its storage key.
+  it('preserves promoted entity.id and EngineMetadata.Type across re-extraction (KI promotion durability)', async () => {
+    const query = buildLogsExtractionEsqlQuery({
+      indexPatterns: ['test-index-*'],
+      latestIndex: 'latest-index',
+      entityDefinition: getEntityDefinition('generic', 'default'),
+      docsLimit: 10000,
+      fromDateISO: '2022-01-01T00:00:00.000Z',
+      toDateISO: '2022-01-01T23:59:59.999Z',
+    });
+
+    expect(query).toContain(
+      'LOOKUP JOIN latest-index\n      ON recent.entity.EngineMetadata.UntypedId == entity.EngineMetadata.UntypedId'
+    );
+    expect(query).not.toContain('ON recent.entity.id == entity.id');
+
+    expect(query).toContain(
+      'EVAL entity.id = CASE(entity.confidence == "low", entity.id, recent.entity.id)'
+    );
+    expect(query).not.toMatch(/RENAME\s+recent\.entity\.id AS entity\.id/);
+
+    expect(query).toContain(
+      'entity.EngineMetadata.Type = CASE(entity.confidence == "low", entity.EngineMetadata.Type, "generic")'
+    );
+    expect(query).not.toContain('entity.EngineMetadata.Type = "generic",');
+
+    expect(query).toContain('entity.hashedId = HASH("sha256", recent.entity.id)');
+
+    await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+  });
 });
 
 describe('buildRemainingLogsCountQuery', () => {

@@ -69,7 +69,12 @@ describe('EntityStoreGlobalStateClient', () => {
       const client = new EntityStoreGlobalStateClient(soClient, 'default', buildLogger());
 
       await client.init({
-        knowledgeIndicators: { entityMinConfidence: 70, aggregationGroupCap: 50 },
+        knowledgeIndicators: {
+          entityMinConfidence: 70,
+          aggregationGroupCap: 50,
+          promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
+          promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
+        },
       });
 
       const [, attributes] = soClient.create.mock.calls[0];
@@ -87,7 +92,12 @@ describe('EntityStoreGlobalStateClient', () => {
       const existing: EntityStoreGlobalState = {
         historySnapshot: { status: 'started', frequency: '24h' } as never,
         logsExtraction: { lookbackPeriod: '3h', delay: '1m' } as never,
-        knowledgeIndicators: { entityMinConfidence: 80, aggregationGroupCap: 150 },
+        knowledgeIndicators: {
+          entityMinConfidence: 80,
+          aggregationGroupCap: 150,
+          promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
+          promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
+        },
       };
       soClient.find.mockResolvedValue({
         total: 1,
@@ -97,7 +107,12 @@ describe('EntityStoreGlobalStateClient', () => {
       const client = new EntityStoreGlobalStateClient(soClient, 'default', buildLogger());
 
       await client.init({
-        knowledgeIndicators: { entityMinConfidence: 70, aggregationGroupCap: 50 },
+        knowledgeIndicators: {
+          entityMinConfidence: 70,
+          aggregationGroupCap: 50,
+          promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
+          promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
+        },
       });
 
       expect(soClient.create).not.toHaveBeenCalled();
@@ -196,7 +211,9 @@ describe('EntityStoreGlobalStateClient', () => {
       soClient.update.mockResolvedValue({ attributes: existing } as never);
       const client = new EntityStoreGlobalStateClient(soClient, 'default', buildLogger());
 
-      const merged = await client.updateKnowledgeIndicatorsConfig({ promotedEntityTypes: ['host'] });
+      const merged = await client.updateKnowledgeIndicatorsConfig({
+        promotedEntityTypes: ['host'],
+      });
 
       expect(merged).toEqual({
         entityMinConfidence: 80,
