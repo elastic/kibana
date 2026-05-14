@@ -25,7 +25,7 @@ export class TagManagementPage {
   readonly tagModal: TagModal;
   readonly assignFlyout: TagAssignFlyout;
 
-  constructor(page: ScoutPage) {
+  constructor(private readonly page: ScoutPage) {
     this.tagsTable = new TagsTable(page);
     this.tagModal = new TagModal(page);
     this.assignFlyout = new TagAssignFlyout(page);
