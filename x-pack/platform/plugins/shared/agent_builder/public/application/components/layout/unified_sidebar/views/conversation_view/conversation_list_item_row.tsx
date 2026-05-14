@@ -92,54 +92,46 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
     `,
   ]);
 
-  const rowLayoutStyles = css`
-    display: flex;
-    align-items: center;
-    gap: ${euiTheme.size.xxs};
-    border-radius: ${euiTheme.border.radius.small};
-    ${showActionsMenu ? `padding-inline-end: ${euiTheme.size.xxs};` : ''}
-  `;
+  const rowStyles = useMemo(() => {
+    const bg = euiTheme.colors.backgroundLightPrimary;
+    return css`
+      display: flex;
+      align-items: center;
+      gap: ${euiTheme.size.xxs};
+      border-radius: ${euiTheme.border.radius.small};
+      padding-inline-end: ${showActionsMenu ? euiTheme.size.xxs : 0};
 
-  const rowHoverAndFocusStyles = showActionsMenu
-    ? css`
-        &:hover .${ACTIONS_CLASS}, &:focus-within .${ACTIONS_CLASS} {
-          opacity: 1;
-        }
-        &:hover,
-        &:focus-within {
-          background-color: ${euiTheme.colors.backgroundLightPrimary};
-        }
-      `
-    : css`
-        &:hover,
-        &:focus-within {
-          background-color: ${euiTheme.colors.backgroundLightPrimary};
-        }
-      `;
+      &:hover,
+      &:focus-within {
+        background-color: ${bg};
+      }
 
-  const activeOrPopoverRowBg = css`
-    background-color: ${euiTheme.colors.backgroundLightPrimary};
-  `;
+      ${(isActive || isPopoverOpen) &&
+      css`
+        background-color: ${bg};
+      `}
 
-  const popoverOpenActionsVisible = showActionsMenu
-    ? css`
+      ${showActionsMenu &&
+      css`
         .${ACTIONS_CLASS} {
+          flex-shrink: 0;
+          opacity: 0;
+        }
+
+        &:hover .${ACTIONS_CLASS},
+        &:focus-within .${ACTIONS_CLASS} {
           opacity: 1;
         }
-      `
-    : css``;
 
-  const rowStyles = css([
-    rowLayoutStyles,
-    rowHoverAndFocusStyles,
-    (isActive || isPopoverOpen) && activeOrPopoverRowBg,
-    isPopoverOpen && popoverOpenActionsVisible,
-  ]);
-
-  const actionsStyles = css`
-    flex-shrink: 0;
-    opacity: 0;
-  `;
+        ${isPopoverOpen &&
+        css`
+          .${ACTIONS_CLASS} {
+            opacity: 1;
+          }
+        `}
+      `}
+    `;
+  }, [euiTheme, isActive, isPopoverOpen, showActionsMenu]);
 
   const menuItems = useMemo(
     () => [
@@ -217,7 +209,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
 
         {showActionsMenu ? (
           <EuiFlexItem grow={false}>
-            <div css={actionsStyles} className={ACTIONS_CLASS}>
+            <div className={ACTIONS_CLASS}>
               <EuiPopover
                 button={menuButton}
                 isOpen={isPopoverOpen}

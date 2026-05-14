@@ -12,11 +12,15 @@ import { queryKeys } from '../query_keys';
 
 const agentConversationListKey = (agentId: string) => queryKeys.conversations.byAgent(agentId);
 
+export type SidebarConversationListRow = ConversationWithoutRounds & {
+  _isOptimistic?: boolean;
+};
+
 export const buildSidebarConversationListRow = (p: {
   id: string;
   agent_id: string;
   title: string;
-}): ConversationWithoutRounds => {
+}): SidebarConversationListRow => {
   const t = new Date().toISOString();
   return {
     id: p.id,
@@ -25,6 +29,7 @@ export const buildSidebarConversationListRow = (p: {
     title: p.title,
     created_at: t,
     updated_at: t,
+    _isOptimistic: true,
   };
 };
 
@@ -35,16 +40,21 @@ export const insertSidebarConversationListRow = async ({
 }: {
   queryClient: QueryClient;
   agentId: string;
-  row: ConversationWithoutRounds;
+  row: SidebarConversationListRow;
 }): Promise<boolean> => {
   const key = agentConversationListKey(agentId);
   await queryClient.cancelQueries({ queryKey: key });
-  const cur = queryClient.getQueryData<ConversationWithoutRounds[]>(key);
-  if (cur?.some((c) => c.id === row.id)) {
-    return false;
-  }
-  queryClient.setQueryData<ConversationWithoutRounds[]>(key, [row, ...(cur ?? [])]);
-  return true;
+
+  let inserted = false;
+  queryClient.setQueryData<SidebarConversationListRow[] | undefined>(key, (prev) => {
+    if (prev?.some((c) => c.id === row.id)) {
+      return prev;
+    }
+    inserted = true;
+    return [row, ...(prev ?? [])];
+  });
+
+  return inserted;
 };
 
 export const removeSidebarConversationListRow = ({
@@ -57,14 +67,12 @@ export const removeSidebarConversationListRow = ({
   conversationId: string;
 }) => {
   const key = agentConversationListKey(agentId);
-  const cur = queryClient.getQueryData<ConversationWithoutRounds[]>(key);
-  if (cur === undefined) {
-    return;
-  }
-  queryClient.setQueryData<ConversationWithoutRounds[]>(
-    key,
-    cur.filter((c) => c.id !== conversationId)
-  );
+  queryClient.setQueryData<SidebarConversationListRow[] | undefined>(key, (prev) => {
+    if (!prev?.length) {
+      return prev;
+    }
+    return prev.filter((c) => c.id !== conversationId);
+  });
 };
 
 export const patchSidebarConversationListTitle = ({
@@ -79,20 +87,20 @@ export const patchSidebarConversationListTitle = ({
   title: string;
 }) => {
   const key = agentConversationListKey(agentId);
-  const cur = queryClient.getQueryData<ConversationWithoutRounds[]>(key);
-  if (!cur?.length) {
-    return;
-  }
-  const i = cur.findIndex((c) => c.id === conversationId);
-  if (i === -1) {
-    return;
-  }
   const updatedAt = new Date().toISOString();
-  queryClient.setQueryData<ConversationWithoutRounds[]>(
-    key,
-    cur.map((c, j) => (j === i ? { ...c, title, updated_at: updatedAt } : c))
-  );
+
+  queryClient.setQueryData<SidebarConversationListRow[] | undefined>(key, (prev) => {
+    if (!prev?.length) {
+      return prev;
+    }
+    const i = prev.findIndex((c) => c.id === conversationId);
+    if (i === -1) {
+      return prev;
+    }
+    return prev.map((c, j) => (j === i ? { ...c, title, updated_at: updatedAt } : c));
+  });
 };
 
-export const isServerBackedConversationListRow = (c: ConversationWithoutRounds): boolean =>
-  Boolean(c.user?.username?.trim());
+export const isServerBackedConversationListRow = (
+  conversation: ConversationWithoutRounds
+): boolean => !(conversation as SidebarConversationListRow)._isOptimistic;

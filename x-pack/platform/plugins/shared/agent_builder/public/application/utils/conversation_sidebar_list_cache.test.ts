@@ -19,13 +19,25 @@ import {
 
 describe('conversation_sidebar_list_cache', () => {
   describe('isServerBackedConversationListRow', () => {
-    it('is false for optimistic stub user', () => {
+    it('is false for optimistic rows built for the sidebar cache', () => {
       const row = buildSidebarConversationListRow({
         id: '1',
         agent_id: 'a',
         title: 't',
       });
       expect(isServerBackedConversationListRow(row)).toBe(false);
+    });
+
+    it('is true for API list rows without _isOptimistic (even if username is empty)', () => {
+      const row: ConversationWithoutRounds = {
+        id: '1',
+        agent_id: 'a',
+        user: { id: '', username: '' },
+        title: 't',
+        created_at: '2020-01-01T00:00:00.000Z',
+        updated_at: '2020-01-01T00:00:00.000Z',
+      };
+      expect(isServerBackedConversationListRow(row)).toBe(true);
     });
 
     it('is true when username is set', () => {
@@ -53,6 +65,9 @@ describe('conversation_sidebar_list_cache', () => {
       });
 
       expect(await insertSidebarConversationListRow({ queryClient, agentId, row })).toBe(true);
+      expect(queryClient.getQueryData<ConversationWithoutRounds[]>(listKey)?.[0]).toMatchObject({
+        _isOptimistic: true,
+      });
       expect(await insertSidebarConversationListRow({ queryClient, agentId, row })).toBe(false);
 
       patchSidebarConversationListTitle({
