@@ -10,7 +10,7 @@ import { HumanMessage, AIMessage } from '@langchain/core/messages';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
 import { CREATE_ESQL_RULE_NAME_AND_DESCRIPTION_PROMPT } from './prompts';
-import type { RuleCreationAnnotation } from '../state';
+import type { RuleCreationAnnotation, RejectionCode } from '../state';
 
 interface CreateRuleNameAndDescriptionNodeParams {
   model: InferenceChatModel;
@@ -80,7 +80,10 @@ export const createRuleNameAndDescriptionNode = ({
 
       events?.reportProgress('Failed to generate valid rule name and description after retry');
       return {
-        errors: ['Generated rule name or description was empty or invalid after retry'],
+        rejectionReason: {
+          code: 'INVALID_OUTPUT' as RejectionCode,
+          message: 'Generated rule name or description was empty or invalid after retry',
+        },
       };
     } catch (e) {
       events?.reportProgress(`Failed to create rule name and description: ${e.message}`);
