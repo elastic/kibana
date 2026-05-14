@@ -414,6 +414,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
   /**
    * Show a CSV export button in the toolbar. The button exports all alerts matching
    * the current filters using the reporting CSV endpoint.
+   * Note: `services.rendering` must also be provided, otherwise the button will not render.
    * @default false
    */
   showCsvExportButton?: boolean;
@@ -424,6 +425,10 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
     data: DataPublicPluginStart;
     http: HttpStart;
     notifications: NotificationsStart;
+    /**
+     * Required to render the CSV export button (`showCsvExportButton`). The button will
+     * not appear if this is omitted, even when `showCsvExportButton` is true.
+     */
     rendering?: RenderingService;
     fieldFormats: FieldFormatsStart;
     application: ApplicationStart;

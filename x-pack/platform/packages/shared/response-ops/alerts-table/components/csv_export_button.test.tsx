@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import 'moment-timezone';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -13,7 +14,9 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { CsvExportButton } from './csv_export_button';
+import { testQueryClientConfig } from '../utils/test';
 
 jest.mock('../contexts/alerts_table_context', () => {
   const actual = jest.requireActual('../contexts/alerts_table_context');
@@ -40,6 +43,12 @@ jest.mock('@kbn/react-kibana-mount', () => ({
 jest.mock('@kbn/rison', () => ({
   encode: jest.fn((val) => JSON.stringify(val)),
 }));
+
+const queryClient = new QueryClient(testQueryClientConfig);
+
+const wrapper = ({ children }: PropsWithChildren) => (
+  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+);
 
 describe('CsvExportButton', () => {
   const http = httpServiceMock.createStartContract();
@@ -68,6 +77,7 @@ describe('CsvExportButton', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    queryClient.clear();
     application.capabilities = {
       ...application.capabilities,
       reportingLegacy: { generateReport: true },
@@ -77,7 +87,7 @@ describe('CsvExportButton', () => {
   });
 
   it('renders the export button', () => {
-    render(<CsvExportButton />);
+    render(<CsvExportButton />, { wrapper });
     expect(screen.getByTestId('alerts-csv-export-button')).toBeInTheDocument();
   });
 
@@ -89,7 +99,7 @@ describe('CsvExportButton', () => {
     };
     useAlertsTableContext.mockReturnValue(defaultContext);
 
-    render(<CsvExportButton />);
+    render(<CsvExportButton />, { wrapper });
     expect(screen.getByTestId('alerts-csv-export-button')).toBeInTheDocument();
   });
 
@@ -101,12 +111,12 @@ describe('CsvExportButton', () => {
     };
     useAlertsTableContext.mockReturnValue(defaultContext);
 
-    const { container } = render(<CsvExportButton />);
+    const { container } = render(<CsvExportButton />, { wrapper });
     expect(container).toBeEmptyDOMElement();
   });
 
   it('calls the reporting API with correct params on click', async () => {
-    render(<CsvExportButton />);
+    render(<CsvExportButton />, { wrapper });
     await userEvent.click(screen.getByTestId('alerts-csv-export-button'));
 
     await waitFor(() => {
@@ -121,7 +131,7 @@ describe('CsvExportButton', () => {
 
   it('fetches alert index names via the query hook', () => {
     const { useFetchAlertsIndexNamesQuery } = jest.requireMock('@kbn/alerts-ui-shared');
-    render(<CsvExportButton />);
+    render(<CsvExportButton />, { wrapper });
 
     expect(useFetchAlertsIndexNamesQuery).toHaveBeenCalledWith({
       http,
@@ -130,7 +140,7 @@ describe('CsvExportButton', () => {
   });
 
   it('shows a success toast on successful export', async () => {
-    render(<CsvExportButton />);
+    render(<CsvExportButton />, { wrapper });
     await userEvent.click(screen.getByTestId('alerts-csv-export-button'));
 
     await waitFor(() => {
@@ -146,7 +156,7 @@ describe('CsvExportButton', () => {
   it('shows a danger toast on export failure', async () => {
     http.post.mockRejectedValue({ message: 'Something went wrong' });
 
-    render(<CsvExportButton />);
+    render(<CsvExportButton />, { wrapper });
     await userEvent.click(screen.getByTestId('alerts-csv-export-button'));
 
     await waitFor(() => {
@@ -163,7 +173,7 @@ describe('CsvExportButton', () => {
   it('shows a danger toast with body.message when available', async () => {
     http.post.mockRejectedValue({ body: { message: 'Detailed error' } });
 
-    render(<CsvExportButton />);
+    render(<CsvExportButton />, { wrapper });
     await userEvent.click(screen.getByTestId('alerts-csv-export-button'));
 
     await waitFor(() => {
@@ -176,7 +186,7 @@ describe('CsvExportButton', () => {
   });
 
   it('includes consumer and ruleTypeId filters in the request', async () => {
-    render(<CsvExportButton />);
+    render(<CsvExportButton />, { wrapper });
     await userEvent.click(screen.getByTestId('alerts-csv-export-button'));
 
     await waitFor(() => {
@@ -205,7 +215,7 @@ describe('CsvExportButton', () => {
       query: { ids: { values: ['id-1', 'id-2'] } },
     });
 
-    render(<CsvExportButton />);
+    render(<CsvExportButton />, { wrapper });
     await userEvent.click(screen.getByTestId('alerts-csv-export-button'));
 
     await waitFor(() => {
@@ -229,7 +239,7 @@ describe('CsvExportButton', () => {
       consumers: [],
     });
 
-    render(<CsvExportButton />);
+    render(<CsvExportButton />, { wrapper });
     await userEvent.click(screen.getByTestId('alerts-csv-export-button'));
 
     await waitFor(() => {
@@ -249,7 +259,7 @@ describe('CsvExportButton', () => {
   });
 
   it('maps column ids correctly', async () => {
-    render(<CsvExportButton />);
+    render(<CsvExportButton />, { wrapper });
     await userEvent.click(screen.getByTestId('alerts-csv-export-button'));
 
     await waitFor(() => {
@@ -273,7 +283,7 @@ describe('CsvExportButton', () => {
         })
     );
 
-    render(<CsvExportButton />);
+    render(<CsvExportButton />, { wrapper });
     await userEvent.click(screen.getByTestId('alerts-csv-export-button'));
 
     await waitFor(() => {
