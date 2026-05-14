@@ -28,6 +28,7 @@ import { useFetchAlertsIndexNamesQuery } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowYaml } from '@kbn/workflows';
+import { extractNormalizedInputsFromYaml } from '@kbn/workflows/spec/lib/field_conversion';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { ENABLED_TRIGGER_TABS } from './constants';
 import { TRIGGER_TABS_DESCRIPTIONS, TRIGGER_TABS_LABELS } from './translations';
@@ -40,7 +41,6 @@ import {
   getFallbackTriggerTab,
   hasWorkflowInputFields,
   isRacAlertsApiForbiddenError,
-  normalizeInputsFromDefinitionOrYaml,
   resolveInitialSelectedTrigger,
 } from './workflow_execute_modal_helpers';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -79,7 +79,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
     );
 
     const normalizedInputs = useMemo(
-      () => normalizeInputsFromDefinitionOrYaml(definition, yamlString),
+      () => extractNormalizedInputsFromYaml(definition, yamlString),
       [definition, yamlString]
     );
 

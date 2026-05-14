@@ -38,6 +38,10 @@ export enum WorkflowExecutionEventTypes {
    * When bulk cancellation of all non-terminal executions for a workflow is requested from the UI.
    */
   WorkflowExecutionsCancelled = 'workflows_workflow_executions_cancelled',
+  /**
+   * When a paused workflow execution is resumed from the UI (HITL resume action)
+   */
+  WorkflowRunResumed = 'workflows_workflow_run_resumed',
 }
 
 /**
@@ -153,4 +157,29 @@ export interface ReportWorkflowExecutionsCancelledActionParams extends BaseResul
    * The workflow whose non-terminal executions were cancelled in bulk.
    */
   workflowId: string;
+}
+
+/**
+ * Parameters for workflow execution resume telemetry (HITL).
+ */
+export interface ReportWorkflowRunResumedActionParams extends BaseResultActionParams {
+  eventName: string;
+  /**
+   * The workflow execution ID being resumed
+   */
+  workflowExecutionId: string;
+  /**
+   * The workflow ID if available
+   */
+  workflowId?: string;
+  /**
+   * Time in milliseconds from when the resume modal was opened until submit (UX / form latency).
+   */
+  timeInModalMs?: number;
+  /**
+   * Milliseconds from this step execution's `startedAt` (server) until submit.
+   * Proxy for "time blocked on human" when the step is `waitForInput`; may include any work
+   * before the run entered `WAITING_FOR_INPUT` because we do not persist a separate wait timestamp yet.
+   */
+  timeSinceStepStartedMs?: number;
 }
