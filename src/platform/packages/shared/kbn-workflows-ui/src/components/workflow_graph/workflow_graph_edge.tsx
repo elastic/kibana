@@ -308,7 +308,7 @@ export function WorkflowGraphEdge(props: EdgeProps) {
     : null;
   // Figma uses a muted blue for non-traversed edges to match the step palette.
   const stroke = traversedVisual?.color ?? '#a8c5ee';
-  const strokeWidth = traversed ? 2 : 1;
+  const strokeWidth = 1;
 
   const fullLabel = edgeData?.label ?? '';
   const truncated =
