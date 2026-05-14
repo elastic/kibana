@@ -490,7 +490,12 @@ describe('WorkflowExecuteModal', () => {
           definition={
             {
               ...baseWorkflowDefinition,
-              inputs: [{ name: 'test-input', type: 'string', required: true }],
+              triggers: [
+                {
+                  type: 'manual',
+                  inputs: [{ name: 'test-input', type: 'string', required: true }],
+                },
+              ],
             } as WorkflowYaml
           }
           onClose={mockOnClose}
@@ -532,8 +537,12 @@ describe('WorkflowExecuteModal', () => {
           definition={
             {
               ...baseWorkflowDefinition,
-              triggers: [{ type: 'manual' }],
-              inputs: [{ name: 'test-input', type: 'string', required: true }],
+              triggers: [
+                {
+                  type: 'manual',
+                  inputs: [{ name: 'test-input', type: 'string', required: true }],
+                },
+              ],
             } as WorkflowYaml
           }
           onClose={mockOnClose}

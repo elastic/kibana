@@ -1,0 +1,7 @@
+﻿prs:
+- https://github.com/elastic/kibana/pull/263687
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-05-06
+title: Move Endpoint exceptions to the Endpoint Artifacts page and add per-policy usage with export and import functionality for all Endpoint artifacts
