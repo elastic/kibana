@@ -402,7 +402,7 @@ export function CompositeSloTable({
           return (
             <EuiToolTip
               position="top"
-                content={i18n.translate('xpack.slo.compositeSloList.activeAlerts.tooltip', {
+              content={i18n.translate('xpack.slo.compositeSloList.activeAlerts.tooltip', {
                 defaultMessage:
                   '{count, plural, one {# burn rate alert} other {# burn rate alerts}} across member SLOs. Opens in a new browser tab.',
                 values: { count: alertCount },

@@ -6,11 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import {
-  EuiBasicTable,
-  EuiLoadingSpinner,
-  EuiText,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import type { CompositeSLOMemberSummary } from '@kbn/slo-schema';
@@ -57,9 +53,7 @@ const getMemberColumns = (
       defaultMessage: 'Status',
     }),
     width: '110px',
-    render: (status: CompositeSLOMemberSummary['status']) => (
-      <MemberStatusBadge status={status} />
-    ),
+    render: (status: CompositeSLOMemberSummary['status']) => <MemberStatusBadge status={status} />,
   },
   {
     field: 'instanceId',
@@ -118,9 +112,12 @@ const getMemberColumns = (
         isPopoverOpen={isBurnRatePopoverOpen}
         setIsPopoverOpen={setIsBurnRatePopoverOpen}
         buttonTestSubj="compositeSloMembersBurnRateWindowSelector"
-        popoverAriaLabel={i18n.translate('xpack.slo.compositeSloList.members.burnRate.windowAriaLabel', {
-          defaultMessage: 'Select burn rate window for member SLOs',
-        })}
+        popoverAriaLabel={i18n.translate(
+          'xpack.slo.compositeSloList.members.burnRate.windowAriaLabel',
+          {
+            defaultMessage: 'Select burn rate window for member SLOs',
+          }
+        )}
         burnRateLabel={i18n.translate('xpack.slo.compositeSloList.members.burnRateColumn', {
           defaultMessage: 'Burn rate',
         })}
