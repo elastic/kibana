@@ -13,31 +13,20 @@ import {
   EuiSpacer,
   EuiText,
   useCurrentEuiBreakpoint,
-  EuiBadge,
-  EuiButtonEmpty,
 } from '@elastic/eui';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { KibanaVersionBadge } from '@kbn/search-shared-ui';
+import { KibanaVersionBadge, TrialUsageBadge } from '@kbn/search-shared-ui';
 
 import { docLinks } from '../../common/doc_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { ElasticsearchConnectionDetails } from '../elasticsearch_connection_details';
-import { TrialBadgeContainerStyle } from './styles';
-
-function getCloudBaseWhenInTrial(cloud?: CloudStart): string | undefined {
-  if (!cloud) return undefined;
-  if (!cloud.isInTrial()) return undefined;
-  const cloudUrls = cloud.getUrls();
-  return cloudUrls.baseUrl;
-}
 
 export const SearchGettingStartedHeader: React.FC = () => {
   const currentBreakpoint = useCurrentEuiBreakpoint();
   const {
     services: { cloud, kibanaVersion },
   } = useKibana();
-  const cloudHomeHref = getCloudBaseWhenInTrial(cloud);
+  const isTrial = cloud?.isInTrial() ?? false;
 
   return (
     <EuiFlexGroup gutterSize={currentBreakpoint === 'xl' ? 'l' : 'xl'} direction="column">
@@ -48,46 +37,10 @@ export const SearchGettingStartedHeader: React.FC = () => {
             alignSelf: 'stretch',
           })}
         >
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent={cloudHomeHref ? 'spaceBetween' : 'flexEnd'}
-          >
-            {cloudHomeHref && (
-              <EuiFlexItem
-                grow={false}
-                css={css({
-                  // Ensure trial badge does not grow to fill space when on smaller screens
-                  alignItems: 'flex-start',
-                })}
-              >
-                <EuiFlexGroup
-                  alignItems="center"
-                  gutterSize="s"
-                  css={TrialBadgeContainerStyle}
-                  responsive={false}
-                >
-                  <EuiFlexItem grow={false}>
-                    <span>
-                      <EuiBadge color="primary" fill>
-                        {i18n.translate('xpack.search.gettingStarted.page.trialBadge', {
-                          defaultMessage: 'TRIAL',
-                        })}
-                      </EuiBadge>
-                    </span>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      data-test-subj="cloudHomeLink"
-                      color="primary"
-                      size="xs"
-                      href={cloudHomeHref}
-                    >
-                      {i18n.translate('xpack.search.gettingStarted.page.cloudHomeLink', {
-                        defaultMessage: 'Elastic Cloud',
-                      })}
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+          <EuiFlexGroup alignItems="center" justifyContent={isTrial ? 'spaceBetween' : 'flexEnd'}>
+            {isTrial && cloud && (
+              <EuiFlexItem grow={false}>
+                <TrialUsageBadge cloud={cloud} />
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
