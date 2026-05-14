@@ -16,7 +16,7 @@ description: >
 
 Analyze failing or skipped Fleet tests to determine root cause, then act:
 - **Investigation** (all modes): produce a structured report with verdict, evidence, and root cause.
-- **Fix / delete verdicts** (Modes 1 and 3): after the report, apply the changes and open a PR. The report becomes the PR description.
+- **Fix / delete verdicts** (Modes 1 and 3): after the report, apply the fix, run the affected tests locally, then ask for approval before opening a PR.
 - **Other verdicts**: present the report and let the human act (close issue, trigger re-run, escalate).
 
 Human-gated on merging and issue closure: never merge PRs, never close GitHub issues directly.
@@ -243,7 +243,7 @@ Always produce the investigation report first. For `fix` and `delete-test` verdi
 
 | Verdict | Next step |
 |---|---|
-| `fix` or `delete-test` | Apply the changes, present the diff, then **ask for approval before opening a PR**. Use a short summary of the investigation report as the PR body (root cause in 1–2 sentences, what changed and why). List all sibling issues to close in the PR description. |
+| `fix` or `delete-test` | Apply the changes, present the diff, run the affected tests locally, report the result, then **ask for approval before opening a PR**. Use a short summary of the investigation report as the PR body (root cause in 1–2 sentences, what changed and why). List all sibling issues to close in the PR description. |
 | `close-stale` | Present the drafted closing comment. Human posts it. |
 | `flaky-rerun` | Present the re-run command and draft unskip diff. Human triggers the run. |
 | `escalate` | Present the evidence package and questions. Stop. |
@@ -363,7 +363,7 @@ Run all of the following and confirm green:
 #N, #N, ... — reference this PR in each closing comment.
 ```
 
-**After the report:** Apply the fix, present the diff, then **ask for approval before opening a PR**. Use a short summary of the investigation report as the PR body (root cause in 1–2 sentences, what changed and why). Include all cluster issue numbers in the PR description so they are closed on merge.
+**After the report:** Apply the fix, present the diff, run the verification matrix locally, report the result, then **ask for approval before opening a PR**. Use a short summary of the investigation report as the PR body (root cause in 1–2 sentences, what changed and why). Include all cluster issue numbers in the PR description so they are closed on merge.
 
 ---
 
@@ -417,7 +417,7 @@ For jest: if it passes 9/10 or more runs locally after a long silence, that's su
 
 - **Always:** analyze test code, search for duplicates, produce the investigation report before taking any action.
 - **Always:** self-investigate before asking the user.
-- **For `fix` and `delete-test` verdicts:** apply the changes, present the diff, and **ask for approval before opening a PR**. The investigation report is the PR body.
+- **For `fix` and `delete-test` verdicts:** apply the changes, present the diff, run the affected tests locally, report the result, and **ask for approval before opening a PR**.
 - **Ask first:** before suggesting moving a test to a different layer (may affect coverage intentionally).
 - **Never:** open a PR without explicit human approval — the report is the gate, approval is the trigger.
 - **Never:** assume the problem is with the test — it might be a real app bug.
