@@ -30,12 +30,8 @@ import { DEVTOOL_IGNORE_ATTR, EDIT_MODAL_ID } from '../../../lib/constants';
 import { collectAllTextNodes } from '../../../lib/dom/collect_text_nodes';
 import { collectSourceElements } from '../../../lib/dom/collect_source_elements';
 import { setImportant } from '../../../lib/dom/clone_element';
-import {
-  useOverlayZIndex,
-  usePortalZIndex,
-  useElementSelection,
-  usePageColorMode,
-} from '../../../hooks';
+import { useOverlayZIndex, usePortalZIndex, useElementSelection } from '../../../hooks';
+import { getPageColorMode } from '../../../lib/dom';
 import { ElementTree } from './element_tree';
 import { TextNodeEditor } from './text_node_editor';
 import type { TextNodeEntry } from './text_node_editor';
@@ -263,7 +259,7 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
     [sourceEntries, handleSelect]
   );
 
-  const pageColorMode = usePageColorMode();
+  const pageColorMode = getPageColorMode();
 
   const previewCss = useMemo(
     () =>

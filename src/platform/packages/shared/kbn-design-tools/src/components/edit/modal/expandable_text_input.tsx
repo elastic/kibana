@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MutableRefObject } from 'react';
 import React, { useCallback, useRef, useState } from 'react';
 import { EuiFieldText, EuiPopover, EuiTextArea } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -83,7 +84,7 @@ export const ExpandableTextInput = ({ value, onChange, onFocus, rows = 4, placeh
     >
       <EuiTextArea
         inputRef={(el) => {
-          (textAreaRef as React.MutableRefObject<HTMLTextAreaElement | null>).current = el;
+          (textAreaRef as MutableRefObject<HTMLTextAreaElement | null>).current = el;
         }}
         className={textAreaCss}
         value={value}

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type React from 'react';
+import type { RefObject } from 'react';
 import { useCallback, useRef, useState } from 'react';
 import { rgbToHex, useEuiTheme } from '@elastic/eui';
 import { isTransparentColor } from '../lib/dom/is_transparent_color';
@@ -25,7 +25,7 @@ interface UseElementSelectionResult {
  * highlights its clone in the preview, and reads its background color.
  */
 export const useElementSelection = (
-  elementMap: React.RefObject<Map<Element, Element>>
+  elementMap: RefObject<Map<Element, Element>>
 ): UseElementSelectionResult => {
   const { euiTheme } = useEuiTheme();
   const zIndex = useOverlayZIndex();
@@ -55,8 +55,8 @@ export const useElementSelection = (
       if (cloneEl instanceof HTMLElement || cloneEl instanceof SVGElement) {
         const parent = cloneEl.parentElement;
         if (parent) {
-          const prevPos = parent.style.position;
-          if (!prevPos || prevPos === 'static') {
+          const computedPos = window.getComputedStyle(parent).position;
+          if (!computedPos || computedPos === 'static') {
             parent.style.position = 'relative';
           }
 

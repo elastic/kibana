@@ -67,15 +67,23 @@ export const createPreviewClone = (target: HTMLElement): PreviewCloneResult => {
   // Strip devtool markers from the clone root.
   // Children with DEVTOOL_HIDDEN_ATTR remain hidden — they were soft-deleted
   // by the user and the preview should reflect the current editing state.
+  // Collect hidden subtree roots first so descendants are not accidentally
+  // made visible (CSS visibility:visible on a child overrides the parent).
+  const hiddenRoots = clone.querySelectorAll<HTMLElement>(`[${DEVTOOL_HIDDEN_ATTR}]`);
+  const insideHidden = new Set<Element>();
+  for (const root of hiddenRoots) {
+    for (const desc of root.querySelectorAll('*')) {
+      insideHidden.add(desc);
+    }
+  }
+
   clone.removeAttribute(DEVTOOL_HIDDEN_ATTR);
   clone.removeAttribute(DEVTOOL_MANAGED_ATTR);
   for (const child of clone.querySelectorAll<HTMLElement>('*')) {
     const isHidden = child.hasAttribute(DEVTOOL_HIDDEN_ATTR);
     child.removeAttribute(DEVTOOL_MANAGED_ATTR);
-    if (isHidden) {
-      // Keep hidden children invisible — only strip the marker attribute
-      child.removeAttribute(DEVTOOL_HIDDEN_ATTR);
-    } else {
+    child.removeAttribute(DEVTOOL_HIDDEN_ATTR);
+    if (!isHidden && !insideHidden.has(child)) {
       if (child.style.visibility === 'hidden') child.style.visibility = 'visible';
       if (child.style.opacity === '0') child.style.opacity = '1';
     }

@@ -18,8 +18,9 @@ import {
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { useEuiColorTokens, usePageColorMode } from '../hooks';
+import { useEuiColorTokens } from '../hooks';
 import type { EuiColorToken } from '../hooks';
+import { getPageColorMode } from '../lib/dom';
 
 const TEXT_TOKENS = new Set([
   'textParagraph',
@@ -80,7 +81,7 @@ export const EuiColorTokenSelect = ({
   preferText = false,
   onFocus,
 }: Props) => {
-  const pageColorMode = usePageColorMode();
+  const pageColorMode = getPageColorMode();
 
   // Resolve tokens in the page's color mode so hex values match the actual page
   return (

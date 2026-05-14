@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/css';
 import { EuiPortal, useResizeObserver } from '@elastic/eui';
@@ -38,7 +39,7 @@ export const LayoutOverlay = ({ layoutConfig }: Props) => {
       zIndex: zIndex.overlay,
     });
 
-    let pattern: React.ReactNode;
+    let pattern: ReactNode;
 
     if (layoutConfig.layoutType === 'grid') {
       pattern = <GridPattern layoutConfig={layoutConfig} />;

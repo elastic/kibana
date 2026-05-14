@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { EditOverlay } from './edit_overlay';
-export { EditOutline, OutlineControls, EditButton, DeleteButton, DuplicateButton } from './outline';
-export { EditModal, ElementTree } from './modal';
-export { buildAddEuiPanels, EUI_LIBRARY } from './library';
-export type { EuiLibraryEntry, EuiComponentVariant } from './library';
-export type { EditOverlayHandle } from './edit_overlay';
+/**
+ * Detect the page color mode from the Kibana theme tag on window.
+ * The design tools toolbar is always rendered in dark mode via its own
+ * `EuiThemeProvider`, so `useEuiTheme().colorMode` cannot be trusted
+ * for page-level color matching.
+ */
+export const getPageColorMode = (): 'light' | 'dark' => {
+  const tag = (window as unknown as { __kbnThemeTag__?: string }).__kbnThemeTag__;
+  return tag?.endsWith('dark') ? 'dark' : 'light';
+};

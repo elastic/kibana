@@ -226,3 +226,9 @@ export const IGNORED_SELECTOR = [
   DEVTOOL_IGNORE_SELECTOR,
   DEVTOOL_RESIZE_SELECTOR,
 ].join(',');
+
+/** Panel ID for the top-level "Add from EUI" component list. */
+export const ADD_EUI_PANEL_ID = 'addEuiPanel';
+
+/** Prefix for variant sub-panel IDs. */
+export const VARIANT_PANEL_PREFIX = 'addEuiVariant_';

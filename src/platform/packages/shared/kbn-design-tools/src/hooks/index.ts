@@ -22,4 +22,3 @@ export { useElementRect } from './use_element_rect';
 export { useElementSelection } from './use_element_selection';
 export { useEuiColorTokens } from './use_eui_color_tokens';
 export type { EuiColorToken } from './use_eui_color_tokens';
-export { usePageColorMode } from './use_page_color_mode';

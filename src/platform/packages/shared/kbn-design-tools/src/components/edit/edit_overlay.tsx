@@ -29,6 +29,7 @@ import {
 import { getElementUnder } from '../../lib/dom/get_element_under';
 import type { LayoutConfig } from '../../lib/layout/layout_config';
 import { GlobalCursorOverride } from '../global_cursor_override';
+import type { ElementSession } from '../../lib/dom/element_registry';
 import { ElementRegistry } from '../../lib/dom/element_registry';
 import {
   findManagedSession,
@@ -48,6 +49,7 @@ import type { StyleChange, TextNodeChange, SourceChange } from './modal/edit_mod
 
 export interface EditOverlayHandle {
   resetAll: () => void;
+  insertElement: (element: HTMLElement) => void;
 }
 
 interface Props {
@@ -81,6 +83,7 @@ export const EditOverlay = ({
   const interaction = useRef<InteractionState>(IDLE);
   const registry = useRef(new ElementRegistry());
   const rafId = useRef<number>(0);
+  const stickyHover = useRef<HTMLElement | null>(null);
   const styleEdits = useRef<Array<{ element: HTMLElement; property: string; original: string }>>(
     []
   );
@@ -159,7 +162,30 @@ export const EditOverlay = ({
     onChangeCount?.(0);
   }, [onChangeCount, restoreAll]);
 
-  useImperativeHandle(handleRef, () => ({ resetAll }), [resetAll]);
+  const insertElement = useCallback(
+    (element: HTMLElement) => {
+      const rect = element.getBoundingClientRect();
+      const originalRect = new DOMRect(rect.left, rect.top, rect.width, rect.height);
+
+      const session: ElementSession = {
+        el: element,
+        dx: 0,
+        dy: 0,
+        dw: 0,
+        dh: 0,
+        originalRect,
+        isDuplicate: true,
+      };
+      registry.current.set(session);
+      stickyHover.current = element;
+      updateHoverTarget(element);
+      updateCursor('grab');
+      notifyCount();
+    },
+    [notifyCount, updateHoverTarget, updateCursor]
+  );
+
+  useImperativeHandle(handleRef, () => ({ resetAll, insertElement }), [resetAll, insertElement]);
 
   // Reset all edits when SPA navigation removes the edited originals.
   // Hidden originals are marked with DEVTOOL_HIDDEN_ATTR — when React
@@ -256,6 +282,22 @@ export const EditOverlay = ({
 
           default: {
             interaction.current = IDLE;
+
+            // Sticky hover: keep selection locked until cursor enters the element
+            if (stickyHover.current) {
+              const stickyRect = stickyHover.current.getBoundingClientRect();
+              if (
+                event.clientX >= stickyRect.left &&
+                event.clientX <= stickyRect.right &&
+                event.clientY >= stickyRect.top &&
+                event.clientY <= stickyRect.bottom
+              ) {
+                stickyHover.current = null;
+              } else {
+                return;
+              }
+            }
+
             const resolution = resolveHoverTarget(
               event.clientX,
               event.clientY,

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useRef, useState } from 'react';
-import type { MouseEvent } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
+import type { MouseEvent, ReactElement } from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
   EuiButtonIcon,
@@ -28,11 +28,14 @@ import { LayoutSettingsPanel } from './settings/layout_settings_panel';
 import { EditOverlay } from '../edit/edit_overlay';
 import type { EditOverlayHandle } from '../edit/edit_overlay';
 import {
+  ADD_EUI_PANEL_ID,
   DEVTOOL_IGNORE_ATTR,
   LAYOUT_POPOVER_ID,
   LAYOUT_SETTINGS_FLYOUT_ID,
 } from '../../lib/constants';
 import { useOverlayZIndex, usePortalZIndex } from '../../hooks';
+import { buildAddEuiPanels } from '../edit/library';
+import { renderAndCloneEuiComponent, centerInViewport } from '../../lib/dom/insert_element';
 
 /**
  * Toggles a column layout overlay and provides layout settings.
@@ -44,6 +47,7 @@ export const DesignToolsButton = () => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [moveCount, setMoveCount] = useState(0);
+  const [euiSearchTerms, setEuiSearchTerms] = useState<Record<string, string>>({});
   const [layoutConfig, setLayoutConfig] = useState<LayoutConfig>(() =>
     getDefaultLayoutConfig(parseInt(euiTheme.size.base, 10))
   );
@@ -53,6 +57,10 @@ export const DesignToolsButton = () => {
 
   usePortalZIndex(LAYOUT_SETTINGS_FLYOUT_ID, zIndex.flyout, isFlyoutOpen);
   usePortalZIndex(LAYOUT_POPOVER_ID, zIndex.popover, isPopoverOpen);
+
+  const handleEuiSearchChange = useCallback((panelId: string, value: string) => {
+    setEuiSearchTerms((prev) => ({ ...prev, [panelId]: value }));
+  }, []);
 
   const preventTargetFromLosingFocus = (event: MouseEvent) => {
     event.preventDefault();
@@ -78,6 +86,32 @@ export const DesignToolsButton = () => {
     setMoveCount(0);
     setIsPopoverOpen(false);
   };
+
+  const handleInsertEui = useCallback(
+    async (element: ReactElement) => {
+      const { clone, rect } = await renderAndCloneEuiComponent(element, zIndex.clone);
+      centerInViewport(clone, rect);
+      clone.style.pointerEvents = 'auto';
+      document.body.appendChild(clone);
+      setIsEditMode(true);
+      setIsPopoverOpen(false);
+      setMoveCount((prev) => prev + 1);
+
+      // Defer insertElement until after React renders EditOverlay.
+      // The state updates above are batched, so editHandleRef.current
+      // is null until the next commit.
+      requestAnimationFrame(() => {
+        editHandleRef.current?.insertElement(clone);
+      });
+    },
+    [zIndex.clone]
+  );
+
+  const addEuiPanels = buildAddEuiPanels({
+    onInsert: handleInsertEui,
+    searchTerms: euiSearchTerms,
+    onSearchChange: handleEuiSearchChange,
+  });
 
   const contextMenuPanels: EuiContextMenuPanelDescriptor[] = [
     {
@@ -128,8 +162,19 @@ export const DesignToolsButton = () => {
           onClick: handleResetEdits,
           disabled: moveCount === 0,
         },
+        {
+          isSeparator: true,
+        },
+        {
+          name: i18n.translate('kbnDesignTools.layout.popover.addEuiLabel', {
+            defaultMessage: 'Add from EUI',
+          }),
+          icon: 'plusInCircle',
+          panel: ADD_EUI_PANEL_ID,
+        },
       ],
     },
+    ...addEuiPanels,
   ];
 
   return (
@@ -167,7 +212,10 @@ export const DesignToolsButton = () => {
           </EuiToolTip>
         }
         isOpen={isPopoverOpen}
-        closePopover={() => setIsPopoverOpen(false)}
+        closePopover={() => {
+          setIsPopoverOpen(false);
+          setEuiSearchTerms({});
+        }}
         anchorPosition="upRight"
         panelPaddingSize="none"
         aria-label={i18n.translate('kbnDesignTools.layout.toggle.label', {

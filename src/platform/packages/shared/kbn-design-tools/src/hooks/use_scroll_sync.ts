@@ -41,8 +41,11 @@ export const useScrollSync = (registry: MutableRefObject<ElementRegistry>) => {
         // Only adjust clones whose reference element lives inside the
         // scrolled container.  This prevents unrelated scroll sources
         // (e.g. EuiComboBox dropdown portals) from shifting clones.
+        // Inserted elements (isDuplicate without a referenceEl) always
+        // receive scroll deltas since they have no reference to check.
         if (
           !isDocumentScroll &&
+          !(session.isDuplicate && !session.referenceEl) &&
           (!session.referenceEl ||
             !(target instanceof Element) ||
             !target.contains(session.referenceEl))

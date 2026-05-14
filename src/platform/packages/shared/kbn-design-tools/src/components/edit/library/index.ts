@@ -7,13 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Returns the page's actual color mode ('light' or 'dark') by reading
- * `window.__kbnThemeTag__`. The design tools toolbar is always rendered in
- * dark mode via its own `EuiThemeProvider`, so `useEuiTheme().colorMode`
- * cannot be trusted for page-level color matching.
- */
-export const usePageColorMode = (): 'light' | 'dark' => {
-  const tag = (window as any)?.__kbnThemeTag__ as string | undefined;
-  return tag?.endsWith('dark') ? 'dark' : 'light';
-};
+export { buildAddEuiPanels } from './build_add_eui_panels';
+export { EUI_LIBRARY } from './library_entries';
+export type { EuiLibraryEntry, EuiComponentVariant } from './library_entries';
