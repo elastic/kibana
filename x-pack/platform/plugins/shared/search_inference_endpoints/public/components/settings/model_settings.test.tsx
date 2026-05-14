@@ -418,12 +418,24 @@ describe('ModelSettings', () => {
       ],
     };
 
-    it('renders opt-out sections even when featureSpecificModels is off', () => {
+    it('hides opt-out sections when featureSpecificModels is off', () => {
       mockUseModelSettingsForm.mockReturnValue(optOutFormState);
       mockUseDefaultModelSettings.mockReturnValue({
         ...defaultModelSettingsState,
         state: { enableAi: true, defaultModelId: 'pre-1', featureSpecificModels: false },
       });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.queryByTestId('featureSection-Workflows')).not.toBeInTheDocument();
+    });
+
+    it('renders opt-out sections when featureSpecificModels is on', () => {
+      mockUseModelSettingsForm.mockReturnValue(optOutFormState);
 
       render(
         <Wrapper>
@@ -432,34 +444,6 @@ describe('ModelSettings', () => {
       );
 
       expect(screen.getByTestId('featureSection-Workflows')).toBeInTheDocument();
-    });
-
-    it('shows the ignoreGlobalDefault callout when featureSpecificModels is off and opt-out sections exist', () => {
-      mockUseModelSettingsForm.mockReturnValue(optOutFormState);
-      mockUseDefaultModelSettings.mockReturnValue({
-        ...defaultModelSettingsState,
-        state: { enableAi: true, defaultModelId: 'pre-1', featureSpecificModels: false },
-      });
-
-      render(
-        <Wrapper>
-          <ModelSettings />
-        </Wrapper>
-      );
-
-      expect(screen.getByTestId('ignoreGlobalDefaultCallout')).toBeInTheDocument();
-    });
-
-    it('does not show the ignoreGlobalDefault callout when featureSpecificModels is on', () => {
-      mockUseModelSettingsForm.mockReturnValue(optOutFormState);
-
-      render(
-        <Wrapper>
-          <ModelSettings />
-        </Wrapper>
-      );
-
-      expect(screen.queryByTestId('ignoreGlobalDefaultCallout')).not.toBeInTheDocument();
     });
 
     it('hides opt-out sections when enableAi is off', () => {
