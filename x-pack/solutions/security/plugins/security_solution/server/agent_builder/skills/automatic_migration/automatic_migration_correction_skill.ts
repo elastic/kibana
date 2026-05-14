@@ -8,7 +8,12 @@
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-import { SECURITY_LABS_SEARCH_TOOL_ID } from '../../tools';
+import {
+  SECURITY_LABS_SEARCH_TOOL_ID,
+  SECURITY_MIGRATION_TRANSLATED_RULES_SEARCH_TOOL_ID,
+  SECURITY_MIGRATION_TRANSLATED_RULE_GET_TOOL_ID,
+  SECURITY_MIGRATION_TRANSLATED_RULE_UPDATE_TOOL_ID,
+} from '../../tools';
 
 export const AUTOMATIC_MIGRATION_CORRECTION_SKILL_ID = 'automatic-migration-correction';
 
@@ -38,8 +43,10 @@ export const getAutomaticMigrationCorrectionSkill = () =>
       'to the bulk automatic translation pass — it does not generate brand-new rules from scratch.',
     content: SKILL_CONTENT,
     getRegistryTools: () => [
+      SECURITY_MIGRATION_TRANSLATED_RULES_SEARCH_TOOL_ID,
+      SECURITY_MIGRATION_TRANSLATED_RULE_GET_TOOL_ID,
+      SECURITY_MIGRATION_TRANSLATED_RULE_UPDATE_TOOL_ID,
       platformCoreTools.generateEsql,
-      platformCoreTools.productDocumentation,
       SECURITY_LABS_SEARCH_TOOL_ID,
     ],
   });
@@ -90,12 +97,12 @@ When the user asks to correct a translated rule, follow this order:
    context) the \`migrationId\` and the rule's display name or id. Do not
    guess — if more than one migration matches, ask which one.
 
-2. **Read the current translated rule.** Use the migration-rules API
-   (exposed via the skill's inline tools when present, or via the Kibana
-   request workflow step) to load the rule's current draft fields:
-   \`query\`, \`severity\`, \`risk_score\`, \`threat\` (MITRE), \`interval\`,
-   \`description\`, \`tags\`. Quote the relevant subset back to the user so
-   they can confirm what they're correcting.
+2. **Read the current translated rule.** Use
+   \`security.migration_translated_rules_search\` to find the rule by name
+   if you only have a display name, then \`security.migration_translated_rule_get\`
+   to fetch the full draft (query, severity, risk_score, description, tags,
+   translation_result, status). Quote the relevant subset back to the user
+   so they can confirm what they're correcting.
 
 3. **Diagnose before editing.** If the user reports an ES|QL error, run
    the query through \`platform.core.generate_esql\` (or
@@ -119,11 +126,13 @@ When the user asks to correct a translated rule, follow this order:
 
 6. **Confirm before persisting.** Persisting a corrected rule into the
    migration draft is a destructive operation (overwrites the translator
-   output for that rule). The persistence step uses an Agent Builder
-   \`confirmation\` field — the agent MUST surface the diff and pause for
-   explicit operator approval before invoking the update. Never rely on
-   prose alone to gate the write; the schema-level \`confirm: z.literal(true)\`
-   primitive is the contract.
+   output for that rule). Use
+   \`security.migration_translated_rule_update\` and pass
+   \`confirm: true\` ONLY after the operator has explicitly approved the
+   diff. The schema rejects calls without \`confirm: true\` — this is the
+   structural contract, never substitute prose for it. The patch field
+   accepts only \`query\`, \`severity\`, \`risk_score\`, \`description\`,
+   \`tags\`; omitted fields are preserved.
 
 7. **Report what landed.** After persistence, summarize the fields that
    changed and remind the user the rule still has to be installed via the

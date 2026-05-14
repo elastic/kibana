@@ -8,7 +8,12 @@
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-import { SECURITY_LABS_SEARCH_TOOL_ID } from '../../tools';
+import {
+  SECURITY_LABS_SEARCH_TOOL_ID,
+  SECURITY_MIGRATION_RESOURCES_LIST_TOOL_ID,
+  SECURITY_MIGRATION_RESOURCE_UPSERT_TOOL_ID,
+  SECURITY_MIGRATION_RESOURCE_REMOVE_TOOL_ID,
+} from '../../tools';
 
 export const AUTOMATIC_MIGRATION_CONTEXT_SKILL_ID = 'automatic-migration-context';
 
@@ -36,7 +41,13 @@ export const getAutomaticMigrationContextSkill = () =>
       'reference articles, or seed lookup data so the next translation pass produces a higher-quality ' +
       'draft rule. This skill is the pre-translation companion to automatic-migration-correction.',
     content: SKILL_CONTENT,
-    getRegistryTools: () => [platformCoreTools.productDocumentation, SECURITY_LABS_SEARCH_TOOL_ID],
+    getRegistryTools: () => [
+      SECURITY_MIGRATION_RESOURCES_LIST_TOOL_ID,
+      SECURITY_MIGRATION_RESOURCE_UPSERT_TOOL_ID,
+      SECURITY_MIGRATION_RESOURCE_REMOVE_TOOL_ID,
+      platformCoreTools.productDocumentation,
+      SECURITY_LABS_SEARCH_TOOL_ID,
+    ],
   });
 
 const SKILL_CONTENT = `# Automatic Migration Context
@@ -81,10 +92,11 @@ When the user asks to manage migration context, follow this order:
    Refuse to proceed if it is missing — context resources are scoped to
    a specific migration; uploading "globally" is not supported.
 
-2. **List existing resources first.** Before adding new context, list
-   what is already attached (via the resources index endpoint). Surface
-   the resource ids and types — this prevents duplicate uploads and
-   helps the user understand the current state.
+2. **List existing resources first.** Before adding new context, call
+   \`security.migration_resources_list\` with the \`migration_id\` (and
+   optionally a \`type\` filter: \`macro\`, \`list\`, or \`lookup\`).
+   Surface the resource ids, types, and names — this prevents duplicate
+   uploads and helps the user understand the current state.
 
 3. **Diagnose what's missing.** If the user describes a translation
    problem ("the translator keeps picking the wrong index pattern"),
@@ -103,9 +115,11 @@ When the user asks to manage migration context, follow this order:
 
 5. **Confirm destructive operations.** *Removing* or *replacing* an
    existing resource is destructive: the next translation run will see
-   different context and may produce different output. Use an Agent
-   Builder \`confirmation\` field for removal / replacement, never
-   prose-only "are you sure?" gating.
+   different context and may produce different output. Use
+   \`security.migration_resource_upsert\` for creates / replacements and
+   \`security.migration_resource_remove\` for deletes; both require
+   \`confirm: true\` — the schema rejects calls without it. Never
+   substitute prose for the structural gate.
 
 6. **Report what landed.** After upsert, list the migration's
    resources again so the user can verify the change. Remind them the

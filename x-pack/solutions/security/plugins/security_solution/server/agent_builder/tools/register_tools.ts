@@ -16,6 +16,16 @@ import { createDetectionRuleTool } from './create_detection_rule_tool';
 import { pciComplianceTool } from './pci_compliance_tool';
 import { pciScopeDiscoveryTool } from './pci_scope_discovery_tool';
 import { pciFieldMapperTool } from './pci_field_mapper_tool';
+import {
+  migrationTranslatedRulesSearchTool,
+  migrationTranslatedRuleGetTool,
+  migrationTranslatedRuleUpdateTool,
+} from './migration_translated_rules_tools';
+import {
+  migrationResourcesListTool,
+  migrationResourceUpsertTool,
+  migrationResourceRemoveTool,
+} from './migration_resources_tools';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
 /**
@@ -42,5 +52,18 @@ export const registerTools = async (
     agentBuilder.tools.register(pciScopeDiscoveryTool(core, logger));
     agentBuilder.tools.register(pciComplianceTool(core, logger));
     agentBuilder.tools.register(pciFieldMapperTool(core, logger));
+  }
+
+  if (experimentalFeatures.automaticMigrationSkillsEnabled) {
+    agentBuilder.tools.register(
+      migrationTranslatedRulesSearchTool(core, logger, experimentalFeatures)
+    );
+    agentBuilder.tools.register(migrationTranslatedRuleGetTool(core, logger, experimentalFeatures));
+    agentBuilder.tools.register(
+      migrationTranslatedRuleUpdateTool(core, logger, experimentalFeatures)
+    );
+    agentBuilder.tools.register(migrationResourcesListTool(core, logger, experimentalFeatures));
+    agentBuilder.tools.register(migrationResourceUpsertTool(core, logger, experimentalFeatures));
+    agentBuilder.tools.register(migrationResourceRemoveTool(core, logger, experimentalFeatures));
   }
 };
