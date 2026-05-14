@@ -56,7 +56,7 @@ import type { ServerlessProjectType } from '../common/constants/types';
 import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
 import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from './cases_analytics';
 import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task';
-import { CasesAnalyticsV2Service } from './cases_analytics_v2';
+import { CasesAnalyticsV2Service, V2_NOOP_DATA_VIEW_REFRESHER } from './cases_analytics_v2';
 import { V2_NOOP_WRITER } from './cases_analytics_v2/writer';
 import { CasesEventBus } from './events/event_bus';
 import { registerCaseWorkflowSteps } from './workflows';
@@ -387,6 +387,12 @@ export class CasePlugin
       // here. But test harnesses that exercise `start()` in isolation get a
       // no-op writer instead of a runtime crash.
       analyticsV2Writer: this.casesAnalyticsV2Service?.getWriter() ?? V2_NOOP_WRITER,
+      // Companion data-view refresher proxy. Same lifetime + same defensive
+      // fallback as `analyticsV2Writer`. Captured by the templates service
+      // through the cases client factory and called fire-and-forget after
+      // every template create / update / delete.
+      analyticsV2DataViewRefresher:
+        this.casesAnalyticsV2Service?.getDataViewRefresher() ?? V2_NOOP_DATA_VIEW_REFRESHER,
     });
 
     return {

@@ -6,7 +6,8 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { CasesAnalyticsV2Service } from './service';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import { CasesAnalyticsV2Service, V2_NOOP_DATA_VIEW_REFRESHER } from './service';
 import { V2_NOOP_WRITER, type CasesAnalyticsV2WriterContract } from './writer';
 
 describe('CasesAnalyticsV2Service', () => {
@@ -34,6 +35,61 @@ describe('CasesAnalyticsV2Service', () => {
       for (const key of contractKeys) {
         expect(typeof proxy[key]).toBe('function');
       }
+    });
+  });
+
+  describe('data view refresher proxy', () => {
+    // Same pattern as the writer proxy: the refresher reference is captured
+    // by the cases client factory once at initialize-time and bound into
+    // every templates service instance. It must stay stable + always
+    // resolvable across the v2 service's whole lifecycle.
+
+    it('returns the same callable reference across calls', () => {
+      const service = new CasesAnalyticsV2Service({
+        logger: loggerMock.create(),
+        enabled: false,
+      });
+      const refA = service.getDataViewRefresher();
+      const refB = service.getDataViewRefresher();
+
+      expect(refA).toBe(refB);
+      expect(typeof refA).toBe('function');
+    });
+
+    it('no-ops safely when v2 is disabled (no underlying data view service)', () => {
+      const service = new CasesAnalyticsV2Service({
+        logger: loggerMock.create(),
+        enabled: false,
+      });
+      const refresher = service.getDataViewRefresher();
+
+      expect(() =>
+        refresher({
+          spaceId: 'default',
+          request: {} as unknown as KibanaRequest,
+          savedObjectsClient: {} as unknown as SavedObjectsClientContract,
+        })
+      ).not.toThrow();
+    });
+
+    it('exposes a no-op sentinel for callers that need a default before the service initializes', () => {
+      expect(typeof V2_NOOP_DATA_VIEW_REFRESHER).toBe('function');
+      // No-op sentinel must accept the same shape callers will actually pass.
+      expect(() =>
+        V2_NOOP_DATA_VIEW_REFRESHER({
+          spaceId: 'default',
+          request: {} as unknown as KibanaRequest,
+          savedObjectsClient: {} as unknown as SavedObjectsClientContract,
+        })
+      ).not.toThrow();
+      // Returns void.
+      expect(
+        V2_NOOP_DATA_VIEW_REFRESHER({
+          spaceId: 'default',
+          request: {} as unknown as KibanaRequest,
+          savedObjectsClient: {} as unknown as SavedObjectsClientContract,
+        })
+      ).toBeUndefined();
     });
   });
 });

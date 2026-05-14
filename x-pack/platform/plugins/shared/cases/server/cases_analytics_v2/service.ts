@@ -59,16 +59,35 @@ interface CasesAnalyticsV2StartDeps {
 }
 
 /**
- * Per-request inputs for the data view ensure hook. The request-scoped SO
- * client lands the data view in the request's space without manual namespace
- * juggling — for "create a data view in space X" we just hand the data
- * views API a client that's already scoped to X.
+ * Per-request inputs for the data view ensure / refresh hooks. The
+ * request-scoped SO client lands the data view in the request's space
+ * without manual namespace juggling — for "create a data view in space X"
+ * we just hand the data views API a client that's already scoped to X.
  */
 interface EnsureDataViewForSpaceDeps {
   spaceId: string;
   request: KibanaRequest;
   savedObjectsClient: SavedObjectsClientContract;
 }
+
+/**
+ * Stable callback handed to consumers (today: the templates service) so
+ * they can ask the v2 subsystem to recompute and persist a space's
+ * runtime field map after a template-level change. Fire-and-forget — the
+ * caller never awaits and never sees errors.
+ *
+ * Mirrors the writer-proxy pattern: callers hold a reference captured at
+ * factory time and the v2 service owns when the underlying work runs (or
+ * is a no-op when the feature flag is off).
+ */
+export type CasesAnalyticsV2DataViewRefresher = (deps: EnsureDataViewForSpaceDeps) => void;
+
+/**
+ * No-op refresher used when v2 is disabled or hasn't been wired into the
+ * cases client factory. Keeps the templates service oblivious to v2's
+ * lifecycle — every code path just calls the refresher unconditionally.
+ */
+export const V2_NOOP_DATA_VIEW_REFRESHER: CasesAnalyticsV2DataViewRefresher = () => {};
 
 /**
  * Top-level orchestrator for cases-analytics v2.
@@ -120,6 +139,15 @@ export class CasesAnalyticsV2Service {
     bulkDeleteCases: (ids) => this.writer.bulkDeleteCases(ids),
     bulkUpsertCasesAwait: (sos) => this.writer.bulkUpsertCasesAwait(sos),
   };
+  /**
+   * Stable refresher returned to consumers. Captured by the cases client
+   * factory at initialize time, bound per-request, and handed to the
+   * templates service so template create / update / delete can refresh
+   * the per-space runtime field map without taking a hard dep on the v2
+   * service. No-op when v2 is disabled or before `start()` runs.
+   */
+  private readonly dataViewRefresherProxy: CasesAnalyticsV2DataViewRefresher = (deps) =>
+    this.refreshDataViewForSpace(deps);
   /**
    * Internal SO client captured at start, used by the reconciliation task
    * runner. The runner needs an SO client without a request context (it
@@ -295,5 +323,35 @@ export class CasesAnalyticsV2Service {
       esClient: this.esClient,
       request: deps.request,
     });
+  }
+
+  /**
+   * Fire-and-forget hook invoked by the templates service after a template
+   * create / update / delete. Same shape as `ensureDataViewForSpace` but
+   * routes to `refreshForSpace` so the in-memory bootstrap cache is
+   * bypassed — without this, a template change in an already-bootstrapped
+   * space wouldn't propagate to the data view until process restart or
+   * `/reset`.
+   *
+   * Safe to call when v2 is disabled or before start completes — same
+   * short-circuit semantics as `ensureDataViewForSpace`.
+   */
+  public refreshDataViewForSpace(deps: EnsureDataViewForSpaceDeps): void {
+    if (!this.enabled || this.dataViewService == null || this.esClient == null) return;
+    void this.dataViewService.refreshForSpace({
+      spaceId: deps.spaceId,
+      savedObjectsClient: deps.savedObjectsClient,
+      esClient: this.esClient,
+      request: deps.request,
+    });
+  }
+
+  /**
+   * Stable refresher reference for the cases client factory to capture at
+   * initialize time. Mirrors `getWriter()` — same lifetime semantics, same
+   * "always resolvable, may no-op" guarantees.
+   */
+  public getDataViewRefresher(): CasesAnalyticsV2DataViewRefresher {
+    return this.dataViewRefresherProxy;
   }
 }

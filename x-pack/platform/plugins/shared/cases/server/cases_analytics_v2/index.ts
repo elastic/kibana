@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export { CasesAnalyticsV2Service } from './service';
+export {
+  CasesAnalyticsV2Service,
+  V2_NOOP_DATA_VIEW_REFRESHER,
+} from './service';
+export type { CasesAnalyticsV2DataViewRefresher } from './service';
 export type { CasesAnalyticsV2WriterContract } from './writer';
