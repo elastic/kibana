@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import userEvent from '@testing-library/user-event';
-import { discoverServiceMock } from '../../__mocks__/services';
-import { DiscoverTestProvider } from '../../__mocks__/test_provider';
-import { ErrorCallout } from './error_callout';
+import { EuiProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import React from 'react';
+import { ErrorCallout } from './error_callout';
 
 const mockRenderSearchError = jest.fn();
 
@@ -25,8 +24,8 @@ jest.mock('@kbn/search-errors', () => {
   };
 });
 
-const renderWithServices = (ui: React.ReactElement) =>
-  render(<DiscoverTestProvider services={discoverServiceMock}>{ui}</DiscoverTestProvider>);
+const renderErrorCallout = (ui: React.ReactElement) =>
+  render(<EuiProvider highContrastMode={false}>{ui}</EuiProvider>);
 
 describe('ErrorCallout', () => {
   beforeEach(() => {
@@ -41,7 +40,7 @@ describe('ErrorCallout', () => {
     const ERROR = new Error('My error');
     const TITLE = 'Error title';
 
-    renderWithServices(<ErrorCallout error={ERROR} title={TITLE} />);
+    renderErrorCallout(<ErrorCallout error={ERROR} title={TITLE} showErrorDialog={jest.fn()} />);
 
     expect(screen.getByText(TITLE)).toBeVisible();
     expect(screen.getByText(ERROR.message)).toBeVisible();
@@ -54,7 +53,9 @@ describe('ErrorCallout', () => {
     const OVERWRITE_TITLE = 'Override title';
 
     mockRenderSearchError.mockReturnValue({ body: OVERWRITE_DISPLAY, title: OVERWRITE_TITLE });
-    renderWithServices(<ErrorCallout error={ERROR} title="Original title" />);
+    renderErrorCallout(
+      <ErrorCallout error={ERROR} title="Original title" showErrorDialog={jest.fn()} />
+    );
 
     expect(screen.getByText(OVERWRITE_TITLE)).toBeVisible();
     expect(screen.getByTestId('discoverErrorCalloutBody')).toBeVisible();
@@ -65,14 +66,17 @@ describe('ErrorCallout', () => {
   it('should call showErrorDialog when the button is clicked', async () => {
     const ERROR = new Error('My error');
     const TITLE = 'Error title';
+    const showErrorDialog = jest.fn();
     const user = userEvent.setup();
 
-    renderWithServices(<ErrorCallout error={ERROR} title={TITLE} />);
+    renderErrorCallout(
+      <ErrorCallout error={ERROR} title={TITLE} showErrorDialog={showErrorDialog} />
+    );
 
     const actionButton = screen.getByRole('button', { name: /view details/i });
     await user.click(actionButton);
 
-    expect(discoverServiceMock.core.notifications.showErrorDialog).toHaveBeenCalledWith({
+    expect(showErrorDialog).toHaveBeenCalledWith({
       error: ERROR,
       title: TITLE,
     });
@@ -82,7 +86,9 @@ describe('ErrorCallout', () => {
     const ERROR = new Error('My error');
     const TITLE = 'Error title';
 
-    renderWithServices(<ErrorCallout error={ERROR} isEsqlMode title={TITLE} />);
+    renderErrorCallout(
+      <ErrorCallout error={ERROR} isEsqlMode title={TITLE} showErrorDialog={jest.fn()} />
+    );
 
     expect(screen.queryByRole('button', { name: /view details/i })).not.toBeInTheDocument();
   });
@@ -90,9 +96,14 @@ describe('ErrorCallout', () => {
   it('should render the "ES|QL reference" button for ES|QL', () => {
     const ERROR = new Error('My error');
     const TITLE = 'Error title';
+    const ESQL_HREF = 'https://example.test/esql-reference';
 
-    renderWithServices(<ErrorCallout error={ERROR} isEsqlMode title={TITLE} />);
+    renderErrorCallout(
+      <ErrorCallout error={ERROR} isEsqlMode title={TITLE} esqlReferenceHref={ESQL_HREF} />
+    );
 
-    expect(screen.getByRole('link', { name: /open es\|ql reference/i })).toBeVisible();
+    const link = screen.getByRole('link', { name: /open es\|ql reference/i });
+    expect(link).toBeVisible();
+    expect(link).toHaveAttribute('href', ESQL_HREF);
   });
 });

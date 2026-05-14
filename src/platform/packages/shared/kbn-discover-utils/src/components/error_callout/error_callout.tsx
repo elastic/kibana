@@ -9,28 +9,35 @@
 
 import {
   EuiButton,
-  EuiEmptyPrompt,
-  useEuiTheme,
-  EuiIcon,
-  EuiCodeBlock,
   EuiButtonEmpty,
+  EuiCodeBlock,
+  EuiEmptyPrompt,
+  EuiIcon,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { renderSearchError } from '@kbn/search-errors';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useDiscoverServices } from '../../hooks/use_discover_services';
 
-interface Props {
+export interface ErrorCalloutProps {
   title: string;
   error: Error;
   isEsqlMode?: boolean;
+  /** When set, renders the "View details" action (non-ES|QL mode only). */
+  showErrorDialog?: (args: { title: string; error: Error }) => void;
+  /** Doc link for the ES|QL reference button. Used when `isEsqlMode` is true. */
+  esqlReferenceHref?: string;
 }
 
-export const ErrorCallout = ({ title, error, isEsqlMode }: Props) => {
-  const { core, docLinks } = useDiscoverServices();
+export const ErrorCallout = ({
+  title,
+  error,
+  isEsqlMode,
+  showErrorDialog,
+  esqlReferenceHref,
+}: ErrorCalloutProps) => {
   const { euiTheme } = useEuiTheme();
-
   const searchErrorDisplay = renderSearchError(error);
 
   return (
@@ -62,25 +69,25 @@ export const ErrorCallout = ({ title, error, isEsqlMode }: Props) => {
               >
                 {error.message}
               </EuiCodeBlock>
-              {!isEsqlMode && (
+              {!isEsqlMode && showErrorDialog ? (
                 <EuiButton
-                  onClick={() => core.notifications.showErrorDialog({ title, error })}
+                  onClick={() => showErrorDialog({ title, error })}
                   data-test-subj="discoverErrorCalloutShowDetailsButton"
                 >
                   {i18n.translate('discover.errorCalloutShowErrorMessage', {
                     defaultMessage: 'View details',
                   })}
                 </EuiButton>
-              )}
+              ) : null}
             </>
           )}
         </>
       }
       footer={
-        isEsqlMode ? (
+        isEsqlMode && esqlReferenceHref ? (
           <EuiButtonEmpty
             iconType="documentation"
-            href={docLinks.links.query.queryESQL}
+            href={esqlReferenceHref}
             data-test-subj="discoverErrorCalloutESQLReferenceButton"
             target="_blank"
           >
