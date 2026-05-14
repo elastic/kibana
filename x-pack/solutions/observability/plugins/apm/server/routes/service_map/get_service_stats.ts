@@ -28,17 +28,8 @@ export async function getServiceStats({
 }: IEnvOptions & { maxNumberOfServices: number }): Promise<ServicesResponse[]> {
   const processorEvent = getProcessorEventForTransactions(searchAggregatedTransactions);
   const shouldQueryMetrics = processorEvent === ProcessorEvent.metric;
-  const params = {
-    apm: shouldQueryMetrics
-      ? {
-          sources: [
-            {
-              documentType: ApmDocumentType.ServiceTransactionMetric,
-              rollupInterval: RollupInterval.OneMinute,
-            },
-          ],
-        }
-      : { events: [processorEvent] },
+
+  const sharedRequestBody = {
     track_total_hits: false,
     size: 0,
     query: {
@@ -69,14 +60,48 @@ export async function getServiceStats({
     },
   };
 
-  const response = await apmEventClient.search('get_service_stats_for_service_map', params);
+  const primaryResponse = await apmEventClient.search('get_service_stats_for_service_map', {
+    apm: shouldQueryMetrics
+      ? {
+          sources: [
+            {
+              documentType: ApmDocumentType.ServiceTransactionMetric,
+              rollupInterval: RollupInterval.OneMinute,
+            },
+          ],
+        }
+      : { events: [processorEvent] },
+    ...sharedRequestBody,
+  });
 
-  const services =
-    response.aggregations?.services.buckets.map((bucket) => ({
-      [SERVICE_NAME]: bucket.key as string,
-      [AGENT_NAME]: (bucket.agent_name.buckets[0]?.key as string | undefined) || '',
-      [SERVICE_ENVIRONMENT]: environment === ENVIRONMENT_ALL.value ? null : environment,
-    })) || [];
+  let buckets = primaryResponse.aggregations?.services.buckets ?? [];
 
-  return services;
+  // `ServiceTransactionMetric` doesn't carry `transaction.name`; retry against the
+  // per-transaction-group `TransactionMetric` rollup when the kuery referenced it.
+  const hasKueryFilter = Boolean(kuery && kuery.trim() !== '');
+  const shouldRetry = shouldQueryMetrics && buckets.length === 0 && hasKueryFilter;
+
+  if (shouldRetry) {
+    const fallbackResponse = await apmEventClient.search(
+      'get_service_stats_for_service_map_fallback',
+      {
+        apm: {
+          sources: [
+            {
+              documentType: ApmDocumentType.TransactionMetric,
+              rollupInterval: RollupInterval.OneMinute,
+            },
+          ],
+        },
+        ...sharedRequestBody,
+      }
+    );
+    buckets = fallbackResponse.aggregations?.services.buckets ?? [];
+  }
+
+  return buckets.map((bucket) => ({
+    [SERVICE_NAME]: bucket.key as string,
+    [AGENT_NAME]: (bucket.agent_name.buckets[0]?.key as string | undefined) || '',
+    [SERVICE_ENVIRONMENT]: environment === ENVIRONMENT_ALL.value ? null : environment,
+  }));
 }
