@@ -19,6 +19,17 @@ interface CommandWithSummary {
   summary: ESQLCommandSummary;
 }
 
+interface RenameResolutionContext {
+  commandSummaries: CommandWithSummary[];
+  /** Names produced by rename/stats/inline-stats renamings only — excludes eval-computed columns. */
+  renameOutputNames: Set<string>;
+  /** All synthetic column names: rename targets + eval/stats outputs. Used to detect non-rename-origin columns. */
+  fullNewColumns: Set<string>;
+  lastRenameDefIndexByNewName: Map<string, number>;
+  renameNewToOldByCommandIndex: Array<Map<string, string> | undefined>;
+  droppedColumnNamesByIndex: Array<Set<string> | undefined>;
+}
+
 function getDroppedColumnNamesFromArgs(command: ESQLAstCommand): string[] {
   const names: string[] = [];
   for (const arg of command.args) {
@@ -30,32 +41,19 @@ function getDroppedColumnNamesFromArgs(command: ESQLAstCommand): string[] {
   return names;
 }
 
-function getLastRenameCommandIndexForNewName(
-  commandSummaries: CommandWithSummary[],
-  fieldName: string
-): number {
-  let lastIndex = -1;
-  for (let i = 0; i < commandSummaries.length; i++) {
-    const { cmd, summary } = commandSummaries[i];
-    if (!COMMANDS_THAT_ALLOW_RENAMING.has(cmd.name) || !summary.renamedColumnsPairs?.size) {
-      continue;
-    }
-    if ([...summary.renamedColumnsPairs].some(([newName]) => newName === fieldName)) {
-      lastIndex = i;
-    }
-  }
-  return lastIndex;
-}
-
 function isFieldNameInvalidatedAfterRenameDefinition(
   commandSummaries: CommandWithSummary[],
+  droppedColumnNamesByIndex: Array<Set<string> | undefined>,
   fieldName: string,
   renameDefIndex: number
 ): boolean {
   for (let i = renameDefIndex + 1; i < commandSummaries.length; i++) {
     const { cmd, summary } = commandSummaries[i];
-    if (cmd.name === 'drop' && getDroppedColumnNamesFromArgs(cmd).includes(fieldName)) {
-      return true;
+    if (cmd.name === 'drop') {
+      const dropped = droppedColumnNamesByIndex[i];
+      if (dropped?.has(fieldName)) {
+        return true;
+      }
     }
     if (cmd.name === 'eval' && summary.newColumns.has(fieldName)) {
       return true;
@@ -66,36 +64,43 @@ function isFieldNameInvalidatedAfterRenameDefinition(
 
 function resolveOneField(
   fieldName: string,
-  commandSummaries: CommandWithSummary[],
-  renameOutputNames: Set<string>,
-  fullNewColumns: Set<string>
+  {
+    commandSummaries,
+    renameOutputNames,
+    fullNewColumns,
+    lastRenameDefIndexByNewName,
+    renameNewToOldByCommandIndex,
+    droppedColumnNamesByIndex,
+  }: RenameResolutionContext
 ): string {
-  if (!renameOutputNames.has(fieldName)) {
-    return fieldName;
-  }
-
-  const wouldUnwindIntoNonRenameSynthetic = (oldName: string) =>
+  const isComputedColumn = (oldName: string) =>
     fullNewColumns.has(oldName) && !renameOutputNames.has(oldName);
 
-  const renameDefIndex = getLastRenameCommandIndexForNewName(commandSummaries, fieldName);
+  const renameDefIndex = lastRenameDefIndexByNewName.get(fieldName) ?? -1;
   if (
     renameDefIndex >= 0 &&
-    isFieldNameInvalidatedAfterRenameDefinition(commandSummaries, fieldName, renameDefIndex)
+    isFieldNameInvalidatedAfterRenameDefinition(
+      commandSummaries,
+      droppedColumnNamesByIndex,
+      fieldName,
+      renameDefIndex
+    )
   ) {
     return fieldName;
   }
 
   let current = fieldName;
-  for (const { cmd, summary } of [...commandSummaries].reverse()) {
-    if (!COMMANDS_THAT_ALLOW_RENAMING.has(cmd.name) || !summary.renamedColumnsPairs?.size) {
+  // Walk backwards so the most recent rename wins when a column is renamed more than once.
+  for (let i = commandSummaries.length - 1; i >= 0; i--) {
+    const pairMap = renameNewToOldByCommandIndex[i];
+    if (!pairMap?.size) {
       continue;
     }
-    const pair = [...summary.renamedColumnsPairs].find(([newName]) => newName === current);
-    if (!pair) {
+    const oldName = pairMap.get(current);
+    if (oldName === undefined) {
       continue;
     }
-    const [, oldName] = pair;
-    if (wouldUnwindIntoNonRenameSynthetic(oldName)) {
+    if (isComputedColumn(oldName)) {
       return fieldName;
     }
     current = oldName;
@@ -103,11 +108,7 @@ function resolveOneField(
   return current;
 }
 
-function buildContext(query: string): {
-  commandSummaries: CommandWithSummary[];
-  renameOutputNames: Set<string>;
-  fullNewColumns: Set<string>;
-} {
+function buildContext(query: string): RenameResolutionContext {
   const { root } = Parser.parse(query);
   const commandSummaries: CommandWithSummary[] = root.commands.map((cmd) => ({
     cmd,
@@ -116,12 +117,43 @@ function buildContext(query: string): {
 
   const renameOutputNames = new Set<string>();
   const fullNewColumns = new Set<string>();
-  for (const { summary } of commandSummaries) {
+  const lastRenameDefIndexByNewName = new Map<string, number>();
+  const renameNewToOldByCommandIndex: Array<Map<string, string> | undefined> = new Array(
+    commandSummaries.length
+  );
+  const droppedColumnNamesByIndex: Array<Set<string> | undefined> = new Array(
+    commandSummaries.length
+  );
+
+  for (let i = 0; i < commandSummaries.length; i++) {
+    const { cmd, summary } = commandSummaries[i];
     summary.renamedColumnsPairs?.forEach(([newName]) => renameOutputNames.add(newName));
     summary.newColumns?.forEach((col) => fullNewColumns.add(col));
+
+    if (cmd.name === 'drop') {
+      droppedColumnNamesByIndex[i] = new Set(getDroppedColumnNamesFromArgs(cmd));
+    }
+
+    if (COMMANDS_THAT_ALLOW_RENAMING.has(cmd.name) && summary.renamedColumnsPairs?.size) {
+      const pairMap = new Map<string, string>();
+      for (const [newName, oldName] of summary.renamedColumnsPairs) {
+        if (!pairMap.has(newName)) {
+          pairMap.set(newName, oldName);
+        }
+        lastRenameDefIndexByNewName.set(newName, i);
+      }
+      renameNewToOldByCommandIndex[i] = pairMap;
+    }
   }
 
-  return { commandSummaries, renameOutputNames, fullNewColumns };
+  return {
+    commandSummaries,
+    renameOutputNames,
+    fullNewColumns,
+    lastRenameDefIndexByNewName,
+    renameNewToOldByCommandIndex,
+    droppedColumnNamesByIndex,
+  };
 }
 
 /**
@@ -131,10 +163,10 @@ function buildContext(query: string): {
  * returned map; callers should fall back to the column name for absent entries.
  */
 export function buildRenameSourceFieldMap(query: string): Map<string, string> {
-  const { commandSummaries, renameOutputNames, fullNewColumns } = buildContext(query);
+  const context = buildContext(query);
   const map = new Map<string, string>();
-  for (const name of renameOutputNames) {
-    const resolved = resolveOneField(name, commandSummaries, renameOutputNames, fullNewColumns);
+  for (const name of context.renameOutputNames) {
+    const resolved = resolveOneField(name, context);
     if (resolved !== name) {
       map.set(name, resolved);
     }
