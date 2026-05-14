@@ -86,6 +86,7 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
           ...baseFlyoutProperties,
           historyKey,
           session: asParent ? 'start' : 'inherit',
+          outsideClickCloses: asParent,
         }
       );
     }
