@@ -20,6 +20,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { labels } from '../../../utils/i18n';
 
 const { agentOverview: overviewLabels } = labels;
@@ -83,12 +84,21 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
             description={overviewLabels.customInstructionsSubtitle}
             textAlign="left"
             onClick={canEditAgent ? onOpenEditFlyout : undefined}
+            {...(canEditAgent
+              ? {
+                  'data-ebt-element': AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_OVERVIEW,
+                  'data-ebt-action':
+                    AGENT_BUILDER_UI_EBT.action.manageAgent.OVERVIEW_INSTRUCTIONS_CARD_OPEN,
+                }
+              : {})}
             footer={
               !currentInstructions && canEditAgent ? (
                 <EuiButtonEmpty
                   size="s"
                   flush="left"
                   data-test-subj="agentOverviewAddInstructionsLink"
+                  data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_OVERVIEW}
+                  data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageAgent.OVERVIEW_ADD_INSTRUCTIONS_LINK}
                 >
                   {overviewLabels.addInstructionsLink}
                 </EuiButtonEmpty>
@@ -126,6 +136,13 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
             description={overviewLabels.agentSettingsCardSubtitle}
             textAlign="left"
             onClick={canEditAgent ? onOpenEditFlyout : undefined}
+            {...(canEditAgent
+              ? {
+                  'data-ebt-element': AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_OVERVIEW,
+                  'data-ebt-action':
+                    AGENT_BUILDER_UI_EBT.action.manageAgent.OVERVIEW_AGENT_SETTINGS_CARD_OPEN,
+                }
+              : {})}
             css={css`
               height: 100%;
               .euiCard__content p {

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { labels } from '../../../utils/i18n';
 import { CapabilityCard } from './capability_card';
 import skillsImage from './assets/connected-power-plug.svg';
@@ -63,6 +64,8 @@ export const CapabilitiesSection: React.FC<CapabilitiesSectionProps> = ({
           href={skillsCountLoading ? undefined : skillsHref}
           onClick={skillsCountLoading ? undefined : onNavigateToSkills}
           isCountLoading={skillsCountLoading}
+          dataEbtElement={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_OVERVIEW}
+          dataEbtAction={AGENT_BUILDER_UI_EBT.action.manageAgent.OVERVIEW_CAPABILITY_SKILLS}
         />
       </EuiFlexItem>
       {isExperimentalFeaturesEnabled && (
@@ -77,6 +80,8 @@ export const CapabilitiesSection: React.FC<CapabilitiesSectionProps> = ({
             href={pluginsCountLoading ? undefined : pluginsHref}
             onClick={pluginsCountLoading ? undefined : onNavigateToPlugins}
             isCountLoading={pluginsCountLoading}
+            dataEbtElement={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_OVERVIEW}
+            dataEbtAction={AGENT_BUILDER_UI_EBT.action.manageAgent.OVERVIEW_CAPABILITY_PLUGINS}
           />
         </EuiFlexItem>
       )}
@@ -91,6 +96,8 @@ export const CapabilitiesSection: React.FC<CapabilitiesSectionProps> = ({
           href={toolsCountLoading ? undefined : toolsHref}
           onClick={toolsCountLoading ? undefined : onNavigateToTools}
           isCountLoading={toolsCountLoading}
+          dataEbtElement={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_OVERVIEW}
+          dataEbtAction={AGENT_BUILDER_UI_EBT.action.manageAgent.OVERVIEW_CAPABILITY_TOOLS}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { useConversationStream } from '../../../../hooks/use_conversation_stream';
 import { RoundIcon } from './round_icon';
 import { lineClampStyles } from '../../../../../common.styles';
@@ -61,6 +62,12 @@ export const RoundThinkingTitle = ({ isLoading, hasSteps, onShow }: RoundThinkin
       data-test-subj="agentBuilderThinkingToggle"
       onClick={hasSteps ? onShow : undefined}
       alignItems="center"
+      {...(hasSteps
+        ? {
+            'data-ebt-element': AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_THINKING,
+            'data-ebt-action': AGENT_BUILDER_UI_EBT.action.conversation.THINKING_PANEL_EXPAND,
+          }
+        : {})}
       css={css`
         min-height: ${MIN_HEIGHT};
         cursor: ${hasSteps ? 'pointer' : 'default'};

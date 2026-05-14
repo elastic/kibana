@@ -120,6 +120,8 @@ export const RoundThinkingPanel = ({
           onClick={onClose}
           aria-label={closePanelLabel}
           data-test-subj="agentBuilderThinkingToggle"
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_THINKING}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.THINKING_PANEL_COLLAPSE}
           css={css`
             cursor: pointer;
           `}

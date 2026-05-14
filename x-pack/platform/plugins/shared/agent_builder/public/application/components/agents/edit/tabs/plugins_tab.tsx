@@ -27,6 +27,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { PluginDefinition } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { Controller } from 'react-hook-form';
 import type { Control } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
@@ -208,6 +209,8 @@ const PluginsSelection: React.FC<PluginsSelectionProps> = ({
               onChange={(e) => onShowActiveOnlyChange(e.target.checked)}
               disabled={disabled}
               compressed
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_FORM}
+              data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageAgent.FORM_PLUGINS_SHOW_ACTIVE_ONLY}
             />
           </EuiFlexItem>
         )}
@@ -296,7 +299,11 @@ const ActivePluginsStatus: React.FC<{ activePluginsCount: number; totalPlugins: 
                   defaultMessage="{pluginsLink} extend agents with additional skills and capabilities."
                   values={{
                     pluginsLink: (
-                      <EuiLink href={createAgentBuilderUrl(appPaths.plugins.list)}>
+                      <EuiLink
+                        href={createAgentBuilderUrl(appPaths.plugins.list)}
+                        data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_FORM}
+                        data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageAgent.FORM_PLUGINS_MANAGE_LIBRARY_LINK}
+                      >
                         {labels.plugins.title}
                       </EuiLink>
                     ),
@@ -358,6 +365,9 @@ const createCheckboxColumn = (
         checked={isPluginActive(plugin)}
         onChange={() => onToggle(plugin.id)}
         disabled={disabled || autoIncluded}
+        data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_FORM}
+        data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageAgent.FORM_PLUGINS_SELECTION_TOGGLE}
+        data-ebt-detail={plugin.id}
       />
     );
     return autoIncluded ? (

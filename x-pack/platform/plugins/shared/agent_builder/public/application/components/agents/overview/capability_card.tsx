@@ -26,6 +26,9 @@ export interface CapabilityCardProps {
   onClick?: () => void;
   isCountLoading?: boolean;
   dataTestSubj?: string;
+  dataEbtElement?: string;
+  dataEbtAction?: string;
+  dataEbtDetail?: string;
 }
 
 const TEXT_SIZE = '64px';
@@ -41,8 +44,20 @@ export const CapabilityCard: React.FC<CapabilityCardProps> = ({
   onClick,
   isCountLoading = false,
   dataTestSubj,
+  dataEbtElement,
+  dataEbtAction,
+  dataEbtDetail,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const isClickable = Boolean(href || onClick);
+  const ebtCardProps =
+    isClickable && dataEbtElement && dataEbtAction
+      ? {
+          'data-ebt-element': dataEbtElement,
+          'data-ebt-action': dataEbtAction,
+          ...(dataEbtDetail ? { 'data-ebt-detail': dataEbtDetail } : {}),
+        }
+      : {};
 
   if (isCountLoading) {
     return (
@@ -76,6 +91,7 @@ export const CapabilityCard: React.FC<CapabilityCardProps> = ({
   if (count === 0) {
     return (
       <EuiCard
+        {...ebtCardProps}
         data-test-subj={dataTestSubj}
         hasBorder
         display="plain"
@@ -116,6 +132,7 @@ export const CapabilityCard: React.FC<CapabilityCardProps> = ({
 
   return (
     <EuiCard
+      {...ebtCardProps}
       data-test-subj={dataTestSubj}
       hasBorder
       display="plain"
