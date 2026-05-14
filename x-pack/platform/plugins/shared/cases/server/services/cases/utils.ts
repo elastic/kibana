@@ -153,7 +153,7 @@ export const constructSearchQuery = ({
       runtimeFields.forEach((field) => {
         shouldClauses.push({
           simple_query_string: {
-            query: search,
+            query: search.toLowerCase(),
             fields: [field],
             default_operator: 'AND',
           },

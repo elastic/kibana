@@ -697,7 +697,7 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
     });
   });
 
-  it('preserves original case in simple_query_string (ES handles case matching)', () => {
+  it('lowercases the search query to match the lowercased runtime field tokens', () => {
     const result = constructSearchQuery({
       search: 'EMEA',
       searchFields: DEFAULT_CASE_RUNTIME_FIELDS,
@@ -712,7 +712,7 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
     );
     expect(runtimeClause).toEqual({
       simple_query_string: {
-        query: 'EMEA',
+        query: 'emea',
         fields: [EF_ALL_VALUES_FIELD],
         default_operator: 'AND',
       },
@@ -804,9 +804,9 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
     });
   });
 
-  it('passes extra whitespace through to simple_query_string (ES normalizes)', () => {
+  it('lowercases and passes extra whitespace through to simple_query_string (ES normalizes)', () => {
     const result = constructSearchQuery({
-      search: '  test   text  ',
+      search: '  Test   TEXT  ',
       searchFields: DEFAULT_CASE_RUNTIME_FIELDS,
       caseIds: [],
     });

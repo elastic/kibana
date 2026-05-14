@@ -90,7 +90,7 @@ const buildPainlessScript = (
     `def so = params._source.get(${soType});` +
     `if (so == null) { return; }` +
     `def ef = so.get(${efKey});` +
-    `if (ef == null) { return; }` +
+    `if (ef == null || !(ef instanceof Map)) { return; }` +
     `def rawVal = ef.get(${fieldKey});` +
     `if (rawVal == null) { return; }` +
     `def raw = rawVal.toString();`;
