@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import {
   DEVTOOL_HIDDEN_ATTR,
   DEVTOOL_MANAGED_ATTR,
@@ -145,7 +146,7 @@ const applyPseudoStyle = (
 
   const isInteractive = original.matches(':hover, :focus, :active');
 
-  const className = `__pseudo_${Math.random().toString(36).slice(2, 8)}`;
+  const className = `__pseudo_${uuidv4().replace(/-/g, '').slice(0, 8)}`;
   clone.classList.add(className);
 
   const rules: string[] = [`content: ${content};`];
@@ -171,9 +172,16 @@ export const copyStylesDeep = (
   original: HTMLElement,
   clone: HTMLElement,
   isRoot = true,
-  depth = 0
+  depth = 0,
+  counter?: { count: number }
 ): void => {
   if (depth > MAX_DEPTH) return;
+
+  // Lazily initialize a shared counter for the entire tree walk.
+  const ctx = counter ?? { count: 0 };
+  ctx.count++;
+  if (ctx.count > MAX_CLONE_ELEMENTS) return;
+
   copyInheritedStyles(original, clone);
   applyPseudoStyle(original, clone, '::before');
   applyPseudoStyle(original, clone, '::after');
@@ -200,7 +208,7 @@ export const copyStylesDeep = (
     const origChild = origChildren[i];
     const cloneChild = cloneChildren[i];
     if (origChild instanceof HTMLElement && cloneChild instanceof HTMLElement) {
-      copyStylesDeep(origChild, cloneChild, false, depth + 1);
+      copyStylesDeep(origChild, cloneChild, false, depth + 1, ctx);
     }
   }
 };
@@ -248,6 +256,14 @@ export const cloneElement = (
 const MAX_DEPTH = 50;
 
 /**
+ * Maximum number of elements to process in copyStylesDeep before bailing out.
+ * Prevents freezing the main thread when cloning large component trees
+ * (e.g. data tables with hundreds of rows). Elements beyond this limit
+ * will retain their CSS class styling but won't have computed styles inlined.
+ */
+const MAX_CLONE_ELEMENTS = 2000;
+
+/**
  * Fix visibility/pointerEvents that may have been baked into the clone tree
  * by copyInheritedStylesDeep when the source element was hidden.
  */
@@ -287,14 +303,15 @@ export const cloneClean = (
   if (saved.visibility === 'hidden') target.style.visibility = 'visible';
   if (saved.pointerEvents === 'none') target.style.pointerEvents = '';
 
-  const result = cloneElement(target, zIndex);
-
-  target.style.setProperty('transform', saved.transform, saved.transformPriority);
-  target.style.setProperty('display', saved.display, saved.displayPriority);
-  target.style.setProperty('visibility', saved.visibility, saved.visibilityPriority);
-  target.style.setProperty('pointer-events', saved.pointerEvents, saved.pointerEventsPriority);
-
-  fixCloneVisibility(result.clone);
-
-  return result;
+  try {
+    const result = cloneElement(target, zIndex);
+    fixCloneVisibility(result.clone);
+    return result;
+  } finally {
+    // Always restore original styles, even if cloneElement throws.
+    target.style.setProperty('transform', saved.transform, saved.transformPriority);
+    target.style.setProperty('display', saved.display, saved.displayPriority);
+    target.style.setProperty('visibility', saved.visibility, saved.visibilityPriority);
+    target.style.setProperty('pointer-events', saved.pointerEvents, saved.pointerEventsPriority);
+  }
 };

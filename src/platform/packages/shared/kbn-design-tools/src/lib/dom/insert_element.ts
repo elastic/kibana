@@ -112,6 +112,7 @@ export const renderEuiComponentLive = async (
   const rect = rendered.getBoundingClientRect();
   const cleanup = () => {
     root.unmount();
+    wrapper.remove();
   };
 
   return { wrapper, rect, liveReactElement: { element, zIndex }, cleanup };

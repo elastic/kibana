@@ -8,7 +8,7 @@
  */
 
 import type { RefObject } from 'react';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { rgbToHex, useEuiTheme } from '@elastic/eui';
 import { isTransparentColor } from '../lib/dom/is_transparent_color';
 import { useOverlayZIndex } from './use_overlay_z_index';
@@ -32,6 +32,14 @@ export const useElementSelection = (
   const [selectedElement, setSelectedElement] = useState<Element | null>(null);
   const [color, setColor] = useState('');
   const overlayRef = useRef<HTMLElement | null>(null);
+
+  // Clean up the selection overlay on unmount to prevent leaked DOM nodes.
+  useEffect(() => {
+    return () => {
+      overlayRef.current?.remove();
+      overlayRef.current = null;
+    };
+  }, []);
 
   const handleSelect = useCallback(
     (element: Element) => {

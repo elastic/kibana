@@ -12,6 +12,9 @@ import { isIgnoredElement } from './is_ignored_element';
 /**
  * Get the deepest element at the given mouse event's coordinates.
  * Returns the most specific DOM element for precise measurements.
+ *
+ * For SVG elements, the nearest ancestor HTMLElement is returned so
+ * that callers can safely use HTMLElement-specific APIs.
  */
 export const getElementFromPoint = (event: MouseEvent): HTMLElement | null => {
   const elements = document.elementsFromPoint(event.clientX, event.clientY);
@@ -25,7 +28,12 @@ export const getElementFromPoint = (event: MouseEvent): HTMLElement | null => {
     }
 
     if (el instanceof SVGElement) {
-      return (el.closest('svg') as unknown as HTMLElement) ?? el.ownerSVGElement ?? null;
+      // SVGElement is not HTMLElement. Walk up to find the nearest
+      // HTMLElement ancestor so the return type is sound.
+      const svg = el.closest('svg');
+      const ancestor = svg?.parentElement ?? el.ownerSVGElement?.parentElement ?? null;
+      if (ancestor instanceof HTMLElement) return ancestor;
+      return null;
     }
   }
 

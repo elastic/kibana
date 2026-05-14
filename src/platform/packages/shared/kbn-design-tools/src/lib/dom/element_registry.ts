@@ -9,13 +9,15 @@
 
 import type { ReactElement } from 'react';
 import { DEVTOOL_HIDDEN_ATTR } from '../constants';
-import { setImportant } from './clone_element';
+import { replaceIconContent } from '../eui_icon_cache';
 
 /** A recorded inline style override (for undo). */
 export interface StyleEdit {
   element: HTMLElement;
   property: string;
   original: string;
+  /** The original CSS priority ('' or 'important'). */
+  originalPriority: string;
 }
 
 /** A recorded text node change (for undo). */
@@ -39,9 +41,9 @@ const revertEdits = (
   textEdits: TextEdit[],
   sourceEdits: SourceEdit[]
 ): void => {
-  for (const { element, property, original } of styleEdits) {
+  for (const { element, property, original, originalPriority } of styleEdits) {
     if (original) {
-      setImportant(element, property, original);
+      element.style.setProperty(property, original, originalPriority);
     } else {
       element.style.removeProperty(property);
     }
@@ -54,7 +56,11 @@ const revertEdits = (
   textEdits.length = 0;
 
   for (const { element, attribute, original } of sourceEdits) {
-    element.setAttribute(attribute, original);
+    if (attribute === 'data-icon-type') {
+      replaceIconContent(element, original);
+    } else {
+      element.setAttribute(attribute, original);
+    }
   }
   sourceEdits.length = 0;
 };

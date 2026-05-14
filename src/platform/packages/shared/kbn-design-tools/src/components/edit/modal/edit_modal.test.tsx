@@ -48,7 +48,7 @@ describe('EditModal', () => {
   it('renders the modal with title and action buttons', () => {
     renderWithI18n(<EditModal target={target} onClose={onClose} onSave={onSave} />);
 
-    expect(screen.getByText('Edit Element')).toBeInTheDocument();
+    expect(screen.getByText('Edit element')).toBeInTheDocument();
     expect(screen.getByText('Cancel')).toBeInTheDocument();
     expect(screen.getByText('Save')).toBeInTheDocument();
   });

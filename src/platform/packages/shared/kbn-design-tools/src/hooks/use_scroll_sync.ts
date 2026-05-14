@@ -8,71 +8,54 @@
  */
 
 import type { MutableRefObject } from 'react';
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import type { ElementRegistry } from '../lib/dom/element_registry';
-import { IGNORED_SELECTOR } from '../lib/constants';
+import { setImportant } from '../lib/dom/clone_element';
 
 /**
- * Keeps managed element positions in sync during scroll using
- * delta tracking. Ignores scroll events from tool overlays (e.g. the edit modal).
+ * Keeps managed element positions in sync with the Kibana main scroll
+ * container and window resize events.
  */
 export const useScrollSync = (registry: MutableRefObject<ElementRegistry>) => {
-  const scrollPositions = useRef(new WeakMap<EventTarget, { x: number; y: number }>());
-
-  const handleScroll = useCallback(
-    (event: Event) => {
-      const target = event.target;
-      if (!target) return;
-
-      // Ignore scroll events from within tool overlays (edit modal, toolbar, etc.)
-      if (target instanceof Element && target.closest(IGNORED_SELECTOR)) return;
-
-      const el = target === document ? document.documentElement : (target as HTMLElement);
-      const currentX = el.scrollLeft ?? 0;
-      const currentY = el.scrollTop ?? 0;
-      const prev = scrollPositions.current.get(target);
-      const scrollDx = prev ? currentX - prev.x : 0;
-      const scrollDy = prev ? currentY - prev.y : 0;
-      scrollPositions.current.set(target, { x: currentX, y: currentY });
-
-      const isDocumentScroll = target === document || target === document.documentElement;
-
-      for (const session of registry.current.values()) {
-        // Only adjust clones whose reference element lives inside the
-        // scrolled container.  This prevents unrelated scroll sources
-        // (e.g. EuiComboBox dropdown portals) from shifting clones.
-        // Inserted elements (isDuplicate without a referenceEl) always
-        // receive scroll deltas since they have no reference to check.
-        if (
-          !isDocumentScroll &&
-          !(session.isDuplicate && !session.referenceEl) &&
-          (!session.referenceEl ||
-            !(target instanceof Element) ||
-            !target.contains(session.referenceEl))
-        ) {
-          continue;
-        }
-
-        const left = parseFloat(session.el.style.left) - scrollDx;
-        const top = parseFloat(session.el.style.top) - scrollDy;
-        session.el.style.left = `${left}px`;
-        session.el.style.top = `${top}px`;
-      }
-    },
-    [registry]
-  );
+  const prevScroll = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
-    // When the window resizes, page content reflows. Reposition each clone
-    // so it stays aligned with its reference element's new layout position.
+    const scrollEl = document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID);
+
+    const handleScroll = () => {
+      if (!scrollEl) return;
+      const currentX = scrollEl.scrollLeft;
+      const currentY = scrollEl.scrollTop;
+      const dx = currentX - prevScroll.current.x;
+      const dy = currentY - prevScroll.current.y;
+      prevScroll.current = { x: currentX, y: currentY };
+
+      if (dx === 0 && dy === 0) return;
+
+      for (const session of registry.current.values()) {
+        // Guard against NaN from empty/invalid inline style values.
+        const parsedLeft = parseFloat(session.el.style.left);
+        const parsedTop = parseFloat(session.el.style.top);
+        if (Number.isNaN(parsedLeft) || Number.isNaN(parsedTop)) continue;
+
+        const left = Math.round(parsedLeft - dx);
+        const top = Math.round(parsedTop - dy);
+        setImportant(session.el, 'left', `${left}px`);
+        setImportant(session.el, 'top', `${top}px`);
+      }
+    };
+
     const handleResize = () => {
-      scrollPositions.current = new WeakMap();
+      if (scrollEl) {
+        prevScroll.current = { x: scrollEl.scrollLeft, y: scrollEl.scrollTop };
+      }
 
       for (const session of registry.current.values()) {
         if (!session.referenceEl) continue;
         const refRect = session.referenceEl.getBoundingClientRect();
-        session.el.style.left = `${refRect.left}px`;
-        session.el.style.top = `${refRect.top}px`;
+        setImportant(session.el, 'left', `${refRect.left}px`);
+        setImportant(session.el, 'top', `${refRect.top}px`);
         session.originalRect = new DOMRect(
           refRect.left,
           refRect.top,
@@ -82,11 +65,16 @@ export const useScrollSync = (registry: MutableRefObject<ElementRegistry>) => {
       }
     };
 
-    document.addEventListener('scroll', handleScroll, true);
+    // Initialise baseline from current scroll position.
+    if (scrollEl) {
+      prevScroll.current = { x: scrollEl.scrollLeft, y: scrollEl.scrollTop };
+      scrollEl.addEventListener('scroll', handleScroll);
+    }
     window.addEventListener('resize', handleResize);
+
     return () => {
-      document.removeEventListener('scroll', handleScroll, true);
+      scrollEl?.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleResize);
     };
-  }, [handleScroll, registry]);
+  }, [registry]);
 };

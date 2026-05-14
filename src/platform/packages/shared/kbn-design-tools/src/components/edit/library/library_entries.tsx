@@ -119,7 +119,7 @@ export interface EuiComponentVariant {
 }
 
 /**
- * Catalog entry for an EUI component that can be inserted via design tools.
+ * Library entry for an EUI component that can be inserted via design tools.
  */
 export interface EuiLibraryEntry {
   /** Short label for the context menu (e.g. "Button"). */
@@ -269,58 +269,15 @@ const superSelectVariants: EuiComponentVariant[] = [
 ];
 
 /**
- * Curated catalog of EUI components available for insertion via design tools.
+ * Curated library of EUI components available for insertion via design tools.
  * Each entry uses JSX to define the rendered element directly.
  */
 export const EUI_LIBRARY: EuiLibraryEntry[] = [
-  {
-    label: 'Button',
-    element: <ButtonRegular />,
-    variants: buttonVariants,
-  },
-  {
-    label: 'Switch',
-    element: <SwitchRegular />,
-    interactive: true,
-    variants: switchVariants,
-  },
   {
     label: 'Accordion',
     element: <AccordionRegular />,
     interactive: true,
     variants: accordionVariants,
-  },
-  {
-    label: 'Card',
-    element: <CardRegular />,
-    variants: cardVariants,
-  },
-  {
-    label: 'Split Button',
-    element: <SplitButtonRegular />,
-    variants: splitButtonVariants,
-  },
-  {
-    label: 'Button Group',
-    element: <ButtonGroupSingle />,
-    interactive: true,
-    variants: buttonGroupVariants,
-  },
-  {
-    label: 'Link',
-    element: <LinkRegular />,
-    variants: linkVariants,
-  },
-  {
-    label: 'Steps',
-    element: <StepsRegular />,
-    variants: stepsVariants,
-  },
-  {
-    label: 'Tree View',
-    element: <TreeViewRegular />,
-    interactive: true,
-    variants: treeViewVariants,
   },
   {
     label: 'Avatar',
@@ -338,14 +295,35 @@ export const EUI_LIBRARY: EuiLibraryEntry[] = [
     variants: beaconVariants,
   },
   {
+    label: 'Button',
+    element: <ButtonRegular />,
+    variants: buttonVariants,
+  },
+  {
+    label: 'Button Group',
+    element: <ButtonGroupSingle />,
+    interactive: true,
+    variants: buttonGroupVariants,
+  },
+  {
     label: 'Callout',
     element: <CalloutInfo />,
     variants: calloutVariants,
   },
   {
+    label: 'Card',
+    element: <CardRegular />,
+    variants: cardVariants,
+  },
+  {
     label: 'Icon',
     element: <IconRegular />,
     variants: iconVariants,
+  },
+  {
+    label: 'Link',
+    element: <LinkRegular />,
+    variants: linkVariants,
   },
   {
     label: 'Select',
@@ -354,9 +332,31 @@ export const EUI_LIBRARY: EuiLibraryEntry[] = [
     variants: selectVariants,
   },
   {
+    label: 'Split Button',
+    element: <SplitButtonRegular />,
+    variants: splitButtonVariants,
+  },
+  {
+    label: 'Steps',
+    element: <StepsRegular />,
+    variants: stepsVariants,
+  },
+  {
     label: 'Super Select',
     element: <SuperSelectRegular />,
     interactive: true,
     variants: superSelectVariants,
+  },
+  {
+    label: 'Switch',
+    element: <SwitchRegular />,
+    interactive: true,
+    variants: switchVariants,
+  },
+  {
+    label: 'Tree View',
+    element: <TreeViewRegular />,
+    interactive: true,
+    variants: treeViewVariants,
   },
 ];

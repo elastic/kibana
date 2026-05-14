@@ -63,3 +63,166 @@ export const preloadAllEuiIcons = (() => {
     return promise;
   };
 })();
+
+/**
+ * Replace the SVG content inside an EUI icon DOM element with a different
+ * icon type. Uses the pre-built icon SVG cache (from buildIconCache) to
+ * avoid React renders and flushSync side-effects on live element roots.
+ * Falls back to a temporary React render if the cache is not yet built.
+ */
+export const replaceIconContent = (container: Element, iconType: string): void => {
+  const isSvg = (el: Element) => el.tagName.toLowerCase() === 'svg';
+  const targetSvg = isSvg(container) ? container : container.querySelector('svg');
+
+  // Try the pre-built cache first (no React render needed)
+  const cached = iconSvgCache?.get(iconType);
+  if (cached && targetSvg) {
+    while (targetSvg.firstChild) {
+      targetSvg.removeChild(targetSvg.firstChild);
+    }
+    for (const child of Array.from(cached.children)) {
+      targetSvg.appendChild(child.cloneNode(true));
+    }
+    for (const attr of ['viewBox', 'width', 'height']) {
+      const val = cached.svg.getAttribute(attr);
+      if (val) {
+        targetSvg.setAttribute(attr, val);
+      }
+    }
+    container.setAttribute('data-icon-type', iconType);
+    return;
+  }
+
+  // Fallback: render a temporary EuiIcon (cache not yet built).
+  // This path uses synchronous require + flushSync which can fail in
+  // edge cases (e.g. during concurrent React renders).  Wrap in
+  // try/catch so a failure here doesn't break the entire edit session.
+  try {
+    const React = require('react'); // eslint-disable-line @typescript-eslint/no-var-requires
+    const { createRoot } = require('react-dom/client'); // eslint-disable-line @typescript-eslint/no-var-requires
+    const { flushSync } = require('react-dom'); // eslint-disable-line @typescript-eslint/no-var-requires
+    const { EuiIcon } = require('@elastic/eui'); // eslint-disable-line @typescript-eslint/no-var-requires
+
+    const tmp = document.createElement('div');
+    const root = createRoot(tmp);
+    try {
+      flushSync(() => {
+        root.render(React.createElement(EuiIcon, { type: iconType }));
+      });
+      const rendered = tmp.firstElementChild;
+      if (!rendered) return;
+
+      const newSvg = isSvg(rendered) ? rendered : rendered.querySelector('svg');
+      if (!newSvg) return;
+
+      if (targetSvg) {
+        while (targetSvg.firstChild) {
+          targetSvg.removeChild(targetSvg.firstChild);
+        }
+        for (const child of Array.from(newSvg.childNodes)) {
+          targetSvg.appendChild(child.cloneNode(true));
+        }
+        for (const attr of ['viewBox', 'width', 'height']) {
+          const val = newSvg.getAttribute(attr);
+          if (val) {
+            targetSvg.setAttribute(attr, val);
+          }
+        }
+      } else {
+        container.appendChild(newSvg.cloneNode(true));
+      }
+      container.setAttribute('data-icon-type', iconType);
+    } finally {
+      root.unmount();
+      tmp.remove();
+    }
+  } catch {
+    // Fallback render failed — the icon content is unchanged.
+    // This is non-critical: the user simply sees the previous icon.
+  }
+};
+
+/** Cached SVG data per icon type: child nodes and SVG attributes. */
+interface IconSvgEntry {
+  /** Cloned child nodes (paths, etc.) of the rendered SVG. */
+  children: Node[];
+  /** The full rendered SVG element (for reading attributes like viewBox). */
+  svg: SVGSVGElement;
+}
+
+let pathToTypeMap: Map<string, string> | undefined;
+let iconSvgCache: Map<string, IconSvgEntry> | undefined;
+let buildIconCachePromise: Promise<Map<string, string>> | undefined;
+
+/**
+ * Build a reverse lookup map from SVG path `d` attribute to icon type name,
+ * and a forward cache of rendered SVG children per icon type.
+ * Built lazily on first call; requires icons to be preloaded.
+ */
+const buildIconCache = (): Promise<Map<string, string>> => {
+  if (pathToTypeMap) return Promise.resolve(pathToTypeMap);
+  if (buildIconCachePromise) return buildIconCachePromise;
+
+  buildIconCachePromise = buildIconCacheImpl();
+  return buildIconCachePromise;
+};
+
+const buildIconCacheImpl = async (): Promise<Map<string, string>> => {
+  const React = require('react'); // eslint-disable-line @typescript-eslint/no-var-requires
+  const { createRoot } = require('react-dom/client'); // eslint-disable-line @typescript-eslint/no-var-requires
+  const { flushSync } = require('react-dom'); // eslint-disable-line @typescript-eslint/no-var-requires
+  const { EuiIcon } = require('@elastic/eui'); // eslint-disable-line @typescript-eslint/no-var-requires
+
+  const types = await getIconTypes();
+  const pMap = new Map<string, string>();
+  const svgMap = new Map<string, IconSvgEntry>();
+  const tmp = document.createElement('div');
+  const root = createRoot(tmp);
+
+  try {
+    for (const iconType of types) {
+      flushSync(() => {
+        root.render(React.createElement(EuiIcon, { type: iconType, key: iconType }));
+      });
+      const rendered = tmp.firstElementChild;
+      if (!rendered) continue;
+      const isSvg = rendered.tagName.toLowerCase() === 'svg';
+      const svg = isSvg ? rendered : rendered.querySelector('svg');
+      if (!svg) continue;
+
+      // Cache the rendered SVG children for replaceIconContent
+      const children = Array.from(svg.childNodes).map((n) => n.cloneNode(true));
+      svgMap.set(iconType, {
+        children,
+        svg: svg.cloneNode(false) as SVGSVGElement,
+      });
+
+      // Build reverse path fingerprint map
+      const firstPath = svg.querySelector('path');
+      if (firstPath) {
+        const d = firstPath.getAttribute('d');
+        if (d) pMap.set(d, iconType);
+      }
+    }
+  } finally {
+    root.unmount();
+    tmp.remove();
+  }
+
+  pathToTypeMap = pMap;
+  iconSvgCache = svgMap;
+  return pMap;
+};
+
+/**
+ * Identify an EUI icon type from an SVG element by matching its path data
+ * against known icons. Returns the icon type name or empty string.
+ */
+export const identifyIconType = async (svgElement: Element): Promise<string> => {
+  const firstPath = svgElement.querySelector('path');
+  if (!firstPath) return '';
+  const d = firstPath.getAttribute('d');
+  if (!d) return '';
+  const map = await buildIconCache();
+  return map.get(d) ?? '';
+};

@@ -43,32 +43,38 @@ export const resolveEuiTag = (el: Element): string | null => {
  * EuiButton) from also resolving to the parent component name.
  */
 export const resolveReactComponentName = (el: Element): string | null => {
-  const fiberKey = Object.keys(el).find((k) => k.startsWith('__reactFiber$'));
-  if (!fiberKey) return null;
+  try {
+    const fiberKey = Object.keys(el).find((k) => k.startsWith('__reactFiber$'));
+    if (!fiberKey) return null;
 
-  const hostFiber = (el as unknown as Record<string, unknown>)[fiberKey] as {
-    type?: { displayName?: string; name?: string } | string;
-    return?: unknown;
-    child?: unknown;
-  } | null;
+    const hostFiber = (el as unknown as Record<string, unknown>)[fiberKey] as {
+      type?: { displayName?: string; name?: string } | string;
+      return?: unknown;
+      child?: unknown;
+    } | null;
 
-  if (!hostFiber) return null;
+    if (!hostFiber) return null;
 
-  let fiber = hostFiber.return as typeof hostFiber | null;
-  while (fiber) {
-    const { type } = fiber;
-    if (type != null && (typeof type === 'function' || typeof type === 'object')) {
-      const name =
-        (type as { displayName?: string }).displayName ?? (type as { name?: string }).name;
-      if (name && isUsableComponentName(name)) {
-        if (isRootChild(fiber, hostFiber)) return name;
-        return null;
+    let fiber = hostFiber.return as typeof hostFiber | null;
+    while (fiber) {
+      const { type } = fiber;
+      if (type != null && (typeof type === 'function' || typeof type === 'object')) {
+        const name =
+          (type as { displayName?: string }).displayName ?? (type as { name?: string }).name;
+        if (name && isUsableComponentName(name)) {
+          if (isRootChild(fiber, hostFiber)) return name;
+          return null;
+        }
       }
+      fiber = fiber.return as typeof hostFiber | null;
     }
-    fiber = fiber.return as typeof hostFiber | null;
-  }
 
-  return null;
+    return null;
+  } catch {
+    // React fiber internals are undocumented and may change across versions.
+    // Fall back to null so resolveTag uses the HTML tag name instead.
+    return null;
+  }
 };
 
 /**

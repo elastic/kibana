@@ -10,6 +10,7 @@
 import type { MutableRefObject } from 'react';
 import { useCallback } from 'react';
 import { setImportant } from '../lib/dom/clone_element';
+import { replaceIconContent } from '../lib/eui_icon_cache';
 import type { ElementRegistry } from '../lib/dom/element_registry';
 import type {
   StyleChange,
@@ -55,7 +56,8 @@ export const useEditChangeTracker = (registryRef: MutableRefObject<ElementRegist
       for (const { element, property, value } of savedStyleChanges) {
         const cssProp = property.replace(/([A-Z])/g, '-$1').toLowerCase();
         const original = element.style.getPropertyValue(cssProp);
-        styleEdits.push({ element, property: cssProp, original });
+        const originalPriority = element.style.getPropertyPriority(cssProp);
+        styleEdits.push({ element, property: cssProp, original, originalPriority });
         setImportant(element, cssProp, value);
       }
 
@@ -68,11 +70,17 @@ export const useEditChangeTracker = (registryRef: MutableRefObject<ElementRegist
           const parent = node.parentElement;
           const originalColor = parent.style.color;
           const originalFill = parent.style.getPropertyValue('-webkit-text-fill-color');
-          styleEdits.push({ element: parent, property: 'color', original: originalColor });
+          styleEdits.push({
+            element: parent,
+            property: 'color',
+            original: originalColor,
+            originalPriority: parent.style.getPropertyPriority('color'),
+          });
           styleEdits.push({
             element: parent,
             property: '-webkit-text-fill-color',
             original: originalFill,
+            originalPriority: parent.style.getPropertyPriority('-webkit-text-fill-color'),
           });
           setImportant(parent, 'color', textColor);
           setImportant(parent, '-webkit-text-fill-color', textColor);
@@ -82,7 +90,11 @@ export const useEditChangeTracker = (registryRef: MutableRefObject<ElementRegist
       for (const { element, attribute, value } of savedSourceChanges) {
         const original = element.getAttribute(attribute) ?? '';
         sourceEdits.push({ element, attribute, original });
-        element.setAttribute(attribute, value);
+        if (attribute === 'data-icon-type') {
+          replaceIconContent(element, value);
+        } else {
+          element.setAttribute(attribute, value);
+        }
       }
     },
     [registryRef]

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { DEVELOPER_TOOLBAR_ID, DEVTOOL_HIDDEN_ATTR, NON_DELETABLE_TAGS } from '../lib/constants';
 import { setImportant } from '../lib/dom/clone_element';
 
@@ -17,6 +17,7 @@ import { setImportant } from '../lib/dom/clone_element';
  */
 export const useDeleteElement = (onDelete?: () => void) => {
   const deletedElements = useRef(new Set<HTMLElement>());
+  const pendingTimers = useRef(new Set<ReturnType<typeof setTimeout>>());
 
   const isDeletable = useCallback((el: HTMLElement): boolean => {
     if (NON_DELETABLE_TAGS.includes(el.tagName)) return false;
@@ -33,17 +34,24 @@ export const useDeleteElement = (onDelete?: () => void) => {
       deletedElements.current.add(el);
       el.style.transition = 'opacity 120ms ease';
       el.style.opacity = '0';
-      setTimeout(() => {
+      const timerId = setTimeout(() => {
+        pendingTimers.current.delete(timerId);
         setImportant(el, 'visibility', 'hidden');
         el.style.transition = '';
         el.style.opacity = '';
       }, 120);
+      pendingTimers.current.add(timerId);
       onDelete?.();
     },
     [isDeletable, onDelete]
   );
 
   const restoreAll = useCallback(() => {
+    for (const timerId of pendingTimers.current) {
+      clearTimeout(timerId);
+    }
+    pendingTimers.current.clear();
+
     for (const el of deletedElements.current) {
       if (el.hasAttribute(DEVTOOL_HIDDEN_ATTR)) {
         el.style.transform = el.getAttribute(DEVTOOL_HIDDEN_ATTR) ?? '';
@@ -53,6 +61,18 @@ export const useDeleteElement = (onDelete?: () => void) => {
       el.style.pointerEvents = '';
     }
     deletedElements.current.clear();
+  }, []);
+
+  // Clear any in-flight fade-out timers on unmount to prevent
+  // side-effects on elements that may no longer be in the DOM.
+  useEffect(() => {
+    const timers = pendingTimers;
+    return () => {
+      for (const timerId of timers.current) {
+        clearTimeout(timerId);
+      }
+      timers.current.clear();
+    };
   }, []);
 
   const deletedCount = useCallback(() => deletedElements.current.size, []);

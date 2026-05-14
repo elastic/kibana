@@ -28,6 +28,9 @@ export const EDIT_MODAL_ID = 'editModal';
 /** The fixed toolbar rendered at the bottom of the viewport. */
 export const DEVELOPER_TOOLBAR_ID = 'developerToolbar';
 
+/** Height in pixels of the developer toolbar when visible. */
+export const DEVELOPER_TOOLBAR_HEIGHT = 32;
+
 /** Radius (px) of spacing-line endpoint circles. */
 export const ENDPOINT_SIZE = 5;
 

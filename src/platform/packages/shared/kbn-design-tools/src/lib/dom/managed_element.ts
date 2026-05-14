@@ -13,17 +13,37 @@ import { DEVTOOL_LIVE_ATTR } from '../constants';
  * Return the meaningful content root for a managed element.
  *
  * Live elements are wrapped in a container div that holds the `data-devtool-live`
- * attribute. The actual component content is the first child of that wrapper.
- * Static clones and regular DOM elements use themselves as the content root.
+ * attribute. The actual component content is typically the first child of that
+ * wrapper, but some EUI components prepend invisible helper elements (e.g. a
+ * screen-reader-only `<p>` in EuiTreeView). We skip those and return the first
+ * visible child instead.
  *
- * This centralizes the `target.hasAttribute(DEVTOOL_LIVE_ATTR) && target.firstElementChild`
- * pattern used in edit_modal.tsx and elsewhere.
+ * Static clones and regular DOM elements use themselves as the content root.
  */
 export const getContentRoot = (target: HTMLElement): HTMLElement => {
-  if (target.hasAttribute(DEVTOOL_LIVE_ATTR) && target.firstElementChild) {
-    return target.firstElementChild as HTMLElement;
+  if (target.hasAttribute(DEVTOOL_LIVE_ATTR)) {
+    for (let i = 0; i < target.children.length; i++) {
+      const child = target.children[i] as HTMLElement;
+      if (!isHiddenHelper(child)) return child;
+    }
+    // All children are hidden helpers — fall back to the first child or target.
+    if (target.firstElementChild) return target.firstElementChild as HTMLElement;
   }
   return target;
+};
+
+/**
+ * Check whether an element is a non-visible helper (screen-reader-only,
+ * aria-hidden, or explicitly hidden) that should be skipped when resolving
+ * the content root.
+ */
+const isHiddenHelper = (el: HTMLElement): boolean => {
+  if (el.getAttribute('aria-hidden') === 'true') return true;
+  if (el.hasAttribute('hidden')) return true;
+  // Emotion class names embed the original class: css-xxx-euiScreenReaderOnly
+  const cls = el.className;
+  if (typeof cls === 'string' && cls.includes('euiScreenReaderOnly')) return true;
+  return false;
 };
 
 /**

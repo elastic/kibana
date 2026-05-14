@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ExpandableTextInput } from './expandable_text_input';
+import { IconPicker } from './icon_picker';
 
 export interface SourceEditorEntry {
   element: Element;
@@ -74,15 +75,26 @@ export const SourceEditor = ({ entries, onChange, onFocus }: Props) => {
         >
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem>
-              <ExpandableTextInput
-                value={entry.value}
-                onChange={(value) => handleChange(idx, value)}
-                onFocus={() => onFocus?.(idx)}
-                rows={2}
-                placeholder={i18n.translate('kbnDesignTools.edit.modal.sourcePlaceholder', {
-                  defaultMessage: 'Enter URL or path',
-                })}
-              />
+              {entry.label === 'icon' ? (
+                <IconPicker
+                  value={entry.value}
+                  onChange={(value) => handleChange(idx, value)}
+                  onFocus={() => onFocus?.(idx)}
+                  aria-label={i18n.translate('kbnDesignTools.edit.modal.iconPickerAria', {
+                    defaultMessage: 'Select icon type',
+                  })}
+                />
+              ) : (
+                <ExpandableTextInput
+                  value={entry.value}
+                  onChange={(value) => handleChange(idx, value)}
+                  onFocus={() => onFocus?.(idx)}
+                  rows={2}
+                  placeholder={i18n.translate('kbnDesignTools.edit.modal.sourcePlaceholder', {
+                    defaultMessage: 'Enter URL or path',
+                  })}
+                />
+              )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip

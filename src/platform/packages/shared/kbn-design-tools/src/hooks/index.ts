@@ -8,7 +8,6 @@
  */
 
 export { useEuiSizeLookup } from './use_eui_size_lookup';
-export { useToolbarHeight } from './use_toolbar_height';
 export { useHoverLock } from './use_hover_lock';
 export { useDeleteElement } from './use_delete_element';
 export { useEditListeners } from './use_edit_listeners';
@@ -23,3 +22,5 @@ export { useElementSelection } from './use_element_selection';
 export { useEuiColorTokens } from './use_eui_color_tokens';
 export type { EuiColorToken } from './use_eui_color_tokens';
 export { useEditChangeTracker } from './use_edit_change_tracker';
+export { useInteractionMachine } from './use_interaction_machine';
+export type { InteractionEffects, InteractionMachineOptions } from './use_interaction_machine';

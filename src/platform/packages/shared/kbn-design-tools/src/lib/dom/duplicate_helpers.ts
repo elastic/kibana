@@ -9,9 +9,78 @@
 
 import { DUPLICATE_OFFSET } from '../constants';
 import { cloneClean, setImportant, roundRect } from './clone_element';
-import type { ElementSession, ElementRegistry } from './element_registry';
+import type { ElementSession, ElementRegistry, SourceEdit } from './element_registry';
 import { buildTransform } from './resize_helpers';
 import { renderEuiComponentLive } from './insert_element';
+import { replaceIconContent } from '../eui_icon_cache';
+
+/**
+ * Replay source edits (e.g. icon replacements) from a source element tree
+ * onto a freshly created duplicate. Matches elements by structural
+ * fingerprint so the correct target is updated.
+ */
+const transferSourceEdits = (
+  sourceEdits: SourceEdit[],
+  source: HTMLElement,
+  target: HTMLElement
+): void => {
+  if (sourceEdits.length === 0) return;
+
+  // Build fingerprint maps for both trees (including roots)
+  const allSource = [source, ...source.querySelectorAll<Element>('*')];
+  const allTarget = [target, ...target.querySelectorAll<Element>('*')];
+
+  const sourceFingerprints = new Map<Element, string>();
+  for (const el of allSource) {
+    sourceFingerprints.set(el, buildFingerprint(el));
+  }
+
+  const targetByFingerprint = new Map<string, Element[]>();
+  for (const el of allTarget) {
+    const key = buildFingerprint(el);
+    const list = targetByFingerprint.get(key);
+    if (list) {
+      list.push(el);
+    } else {
+      targetByFingerprint.set(key, [el]);
+    }
+  }
+
+  // For each source edit, find the matching target element
+  // Build source element order for consistent indexing
+  const sourceByFingerprint = new Map<string, Element[]>();
+  for (const el of allSource) {
+    const key = sourceFingerprints.get(el)!;
+    const list = sourceByFingerprint.get(key);
+    if (list) {
+      list.push(el);
+    } else {
+      sourceByFingerprint.set(key, [el]);
+    }
+  }
+
+  for (const edit of sourceEdits) {
+    const key = sourceFingerprints.get(edit.element);
+    if (!key) continue;
+
+    // Find the index of this element among same-fingerprint siblings in source
+    const sourceSiblings = sourceByFingerprint.get(key);
+    const sourceIdx = sourceSiblings?.indexOf(edit.element) ?? -1;
+    if (sourceIdx < 0) continue;
+
+    const targetSiblings = targetByFingerprint.get(key);
+    if (!targetSiblings || sourceIdx >= targetSiblings.length) continue;
+
+    const targetEl = targetSiblings[sourceIdx];
+    const currentValue = edit.element.getAttribute(edit.attribute) ?? '';
+
+    if (edit.attribute === 'data-icon-type') {
+      replaceIconContent(targetEl, currentValue);
+    } else {
+      targetEl.setAttribute(edit.attribute, currentValue);
+    }
+  }
+};
 
 /**
  * Build a structural fingerprint for matching elements across two structurally
@@ -172,11 +241,17 @@ const readHookValues = (fiber: Record<string, unknown>): unknown[] => {
  * across duplicates without needing to re-read fibers.
  */
 export const snapshotComponentState = (el: HTMLElement): unknown[][] | undefined => {
-  const root = getRootFiber(el);
-  if (!root) return undefined;
-  const fibers = collectComponentFibers(root);
-  if (fibers.length === 0) return undefined;
-  return fibers.map(readHookValues);
+  try {
+    const root = getRootFiber(el);
+    if (!root) return undefined;
+    const fibers = collectComponentFibers(root);
+    if (fibers.length === 0) return undefined;
+    return fibers.map(readHookValues);
+  } catch {
+    // React fiber internals are undocumented and may change across versions.
+    // Gracefully degrade — duplicates will still work without state transfer.
+    return undefined;
+  }
 };
 
 /**
@@ -189,9 +264,17 @@ export const restoreComponentState = async (
   el: HTMLElement,
   snapshot: unknown[][]
 ): Promise<void> => {
-  const root = getRootFiber(el);
-  if (!root) return;
-  const fibers = collectComponentFibers(root);
+  let root: Record<string, unknown> | null;
+  let fibers: Array<Record<string, unknown>>;
+  try {
+    root = getRootFiber(el);
+    if (!root) return;
+    fibers = collectComponentFibers(root);
+  } catch {
+    // React fiber internals are undocumented and may change across versions.
+    // Gracefully degrade — the duplicate will render with default state.
+    return;
+  }
 
   const updates: Array<{ dispatch: (v: unknown) => void; value: unknown }> = [];
 
@@ -200,17 +283,22 @@ export const restoreComponentState = async (
     const hookValues = readHookValues(fibers[i]);
 
     // Walk the hook list again to find dispatchers
-    let hook = fibers[i].memoizedState as Record<string, unknown> | null;
-    let j = 0;
-    while (hook && j < values.length) {
-      const queue = hook.queue as { dispatch: (v: unknown) => void } | null;
-      if (queue && typeof queue.dispatch === 'function') {
-        if (j < hookValues.length && values[j] !== hookValues[j]) {
-          updates.push({ dispatch: queue.dispatch, value: values[j] });
+    try {
+      let hook = fibers[i].memoizedState as Record<string, unknown> | null;
+      let j = 0;
+      while (hook && j < values.length) {
+        const queue = hook.queue as { dispatch: (v: unknown) => void } | null;
+        if (queue && typeof queue.dispatch === 'function') {
+          if (j < hookValues.length && values[j] !== hookValues[j]) {
+            updates.push({ dispatch: queue.dispatch, value: values[j] });
+          }
+          j++;
         }
-        j++;
+        hook = hook.next as Record<string, unknown> | null;
       }
-      hook = hook.next as Record<string, unknown> | null;
+    } catch {
+      // Skip this fiber — its structure may not match expectations.
+      continue;
     }
   }
 
@@ -288,9 +376,26 @@ export const createDuplicate = async (
     duplicate.style.transformOrigin = '0 0';
     transferDomEdits(sourceEl, duplicate);
 
+    // Replay source edits (icon changes, etc.) from the source session.
+    if (existingSession?.sourceEdits.length) {
+      transferSourceEdits(existingSession.sourceEdits, sourceEl, duplicate);
+    }
+
     // Restore the snapshotted state (with transitions suppressed).
+    // Wrapped in try/catch because this touches React fiber internals
+    // which may change across React versions.
     if (stateSnapshot) {
-      await restoreComponentState(duplicate, stateSnapshot);
+      try {
+        await restoreComponentState(duplicate, stateSnapshot);
+        // Re-measure after state restore — the element's dimensions may have
+        // changed (e.g. an accordion that expanded).
+        const rendered = duplicate.firstElementChild as HTMLElement | null;
+        if (rendered) {
+          rect = rendered.getBoundingClientRect();
+        }
+      } catch {
+        // State restore failed — the duplicate will use default state.
+      }
     }
   } else {
     const cloned = cloneClean(sourceEl, cloneZIndex);
@@ -308,8 +413,8 @@ export const createDuplicate = async (
   // session.originalRect matches the actual left/top we set.
   const sourceRect = roundRect(sourceEl.getBoundingClientRect());
   // Position the duplicate at the rounded visual location.
-  duplicate.style.left = `${sourceRect.left}px`;
-  duplicate.style.top = `${sourceRect.top}px`;
+  setImportant(duplicate, 'left', `${sourceRect.left}px`);
+  setImportant(duplicate, 'top', `${sourceRect.top}px`);
 
   const correctedRect = new DOMRect(sourceRect.left, sourceRect.top, rect.width, rect.height);
 

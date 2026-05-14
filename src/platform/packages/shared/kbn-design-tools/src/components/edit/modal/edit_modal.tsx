@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiModal,
   EuiModalHeader,
@@ -33,6 +33,7 @@ import { setImportant } from '../../../lib/dom/clone_element';
 import { useOverlayZIndex, usePortalZIndex, useElementSelection } from '../../../hooks';
 import { getPageColorMode } from '../../../lib/dom';
 import { getContentRoot } from '../../../lib/dom/managed_element';
+import { replaceIconContent } from '../../../lib/eui_icon_cache';
 import { ElementTree } from './element_tree';
 import { TextNodeEditor } from './text_node_editor';
 import type { TextNodeEntry } from './text_node_editor';
@@ -78,6 +79,7 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
   const [cloneRoot, setCloneRoot] = useState<HTMLElement | null>(null);
   const elementMapRef = useRef(new Map<Element, Element>());
   const cloneRef = useRef<HTMLElement | null>(null);
+  const mountedRef = useRef(true);
   const textNodeMap = useRef<Array<{ original: Text; clone: Text }>>([]);
   const [textEntries, setTextEntries] = useState<TextNodeEntry[]>([]);
   const sourceMap = useRef<Array<{ original: Element; clone: Element; attribute: string }>>([]);
@@ -88,6 +90,15 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
 
   const handleSelectRef = useRef(handleSelect);
   handleSelectRef.current = handleSelect;
+
+  // Clean up clone ref and mark unmounted so async callbacks can bail out.
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      cloneRef.current = null;
+    };
+  }, []);
 
   const previewCallbackRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -125,25 +136,29 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
       setTextEntries(entries);
 
       // Collect source elements (img, video, svg image/use, etc.)
-      const origSources = collectSourceElements(target);
-      const cloneSources = collectSourceElements(clone);
-      const srcEntries: SourceEditorEntry[] = [];
-      const srcMapping: Array<{ original: Element; clone: Element; attribute: string }> = [];
-      for (let idx2 = 0; idx2 < origSources.length; idx2++) {
-        const orig = origSources[idx2];
-        const cl = cloneSources[idx2];
-        if (!cl) continue;
-        srcEntries.push({
-          element: orig.element,
-          attribute: orig.attribute,
-          value: orig.value,
-          originalValue: orig.value,
-          label: orig.label,
-        });
-        srcMapping.push({ original: orig.element, clone: cl.element, attribute: orig.attribute });
-      }
-      sourceMap.current = srcMapping;
-      setSourceEntries(srcEntries);
+      const collectSources = async () => {
+        const origSources = await collectSourceElements(target);
+        const cloneSources = await collectSourceElements(clone);
+        if (!mountedRef.current) return;
+        const srcEntries: SourceEditorEntry[] = [];
+        const srcMapping: Array<{ original: Element; clone: Element; attribute: string }> = [];
+        for (let idx2 = 0; idx2 < origSources.length; idx2++) {
+          const orig = origSources[idx2];
+          const cl = cloneSources[idx2];
+          if (!cl) continue;
+          srcEntries.push({
+            element: orig.element,
+            attribute: orig.attribute,
+            value: orig.value,
+            originalValue: orig.value,
+            label: orig.label,
+          });
+          srcMapping.push({ original: orig.element, clone: cl.element, attribute: orig.attribute });
+        }
+        sourceMap.current = srcMapping;
+        setSourceEntries(srcEntries);
+      };
+      collectSources();
 
       setCloneRoot(clone);
 
@@ -234,7 +249,11 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
     if (!entry) return;
 
     // Update clone preview
-    entry.clone.setAttribute(entry.attribute, value);
+    if (entry.attribute === 'data-icon-type') {
+      replaceIconContent(entry.clone, value);
+    } else {
+      entry.clone.setAttribute(entry.attribute, value);
+    }
 
     // Update entries state
     setSourceEntries((prev) => prev.map((e, i) => (i === index ? { ...e, value } : e)));
@@ -255,9 +274,7 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
     (index: number) => {
       const entry = sourceEntries[index];
       if (!entry) return;
-      if (entry.element instanceof HTMLElement) {
-        handleSelect(entry.element);
-      }
+      handleSelect(entry.element);
     },
     [sourceEntries, handleSelect]
   );
@@ -315,7 +332,7 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
             <EuiFlexItem grow={false}>
               <h3>
                 {i18n.translate('kbnDesignTools.edit.modal.title', {
-                  defaultMessage: 'Edit Element',
+                  defaultMessage: 'Edit element',
                 })}
               </h3>
             </EuiFlexItem>

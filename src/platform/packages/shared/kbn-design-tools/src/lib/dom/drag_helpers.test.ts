@@ -116,7 +116,6 @@ describe('drag_helpers', () => {
       applyDragMove(state, 150, 250, true, {
         isLayoutVisible: false,
         layoutConfig: makeLayoutConfig(),
-        toolbarHeight: 0,
       });
 
       // dx = baseOffsetX(0) + mouseDx(50) = 50
@@ -139,7 +138,6 @@ describe('drag_helpers', () => {
       applyDragMove(state, 110, 210, true, {
         isLayoutVisible: false,
         layoutConfig: makeLayoutConfig(),
-        toolbarHeight: 0,
       });
 
       // dx = 20 + 10 = 30, dy = 30 + 10 = 40
@@ -155,7 +153,6 @@ describe('drag_helpers', () => {
       applyDragMove(state, 13, 17, false, {
         isLayoutVisible: true,
         layoutConfig: config,
-        toolbarHeight: 0,
       });
 
       // snapToGrid rounds to nearest cellSize: 13→10, 17→20
@@ -172,7 +169,6 @@ describe('drag_helpers', () => {
       applyDragMove(state, 30, 40, true, {
         isLayoutVisible: false,
         layoutConfig: makeLayoutConfig(),
-        toolbarHeight: 0,
       });
 
       // scaleX = (100+20)/100 = 1.2, scaleY = (50+10)/50 = 1.2

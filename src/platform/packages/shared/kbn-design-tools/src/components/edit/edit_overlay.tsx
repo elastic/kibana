@@ -7,11 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type { Dispatch, ReactElement, Ref, SetStateAction } from 'react';
 import { EuiPortal } from '@elastic/eui';
 import {
-  useToolbarHeight,
   useHoverLock,
   useDeleteElement,
   useEditListeners,
@@ -19,8 +25,9 @@ import {
   useScrollSync,
   useLockedTarget,
   useEditChangeTracker,
+  useInteractionMachine,
 } from '../../hooks';
-import { DEVTOOL_HIDDEN_ATTR, HANDLE_CURSORS, MEASURE_OVERLAY_ID } from '../../lib/constants';
+import { DEVTOOL_HIDDEN_ATTR, MEASURE_OVERLAY_ID } from '../../lib/constants';
 import {
   isEscapeKey,
   isDeleteKey,
@@ -32,17 +39,7 @@ import type { LayoutConfig } from '../../lib/layout/layout_config';
 import { GlobalCursorOverride } from '../global_cursor_override';
 import type { ElementSession } from '../../lib/dom/element_registry';
 import { ElementRegistry } from '../../lib/dom/element_registry';
-import {
-  findManagedSession,
-  startDragFromSession,
-  startDragFromElement,
-  applyDragMove,
-} from '../../lib/dom/drag_helpers';
 import { createDuplicate } from '../../lib/dom/duplicate_helpers';
-import { startResize, applyResizeMove } from '../../lib/dom/resize_helpers';
-import type { InteractionState, DragState } from '../../lib/dom/interaction_state';
-import { IDLE, deriveCursor } from '../../lib/dom/interaction_state';
-import { resolveHoverTarget } from '../../lib/dom/resolve_hover_target';
 import { EditOutline } from './outline';
 import { EditModal } from './modal/edit_modal';
 import type { StyleChange, TextNodeChange, SourceChange } from './modal/edit_modal';
@@ -68,6 +65,27 @@ interface Props {
 /**
  * Captures pointer events on the document to enable dragging and resizing elements
  * via CSS transforms. Press Escape to exit edit mode.
+ *
+ * ## Mutable ref state (design note)
+ *
+ * Several pieces of state are stored in `useRef` rather than `useState`:
+ * `interaction`, `registry`, `rafId`, `stickyHover`, `roundedTargets`, and
+ * `hoverTargetRef`.  This is intentional — pointer-move handlers fire at
+ * 60 Hz and reading or writing React state on every frame would trigger
+ * costly re-renders with no visible benefit.
+ *
+ * The refs form a **parallel mutable state system** that lives outside
+ * React's render cycle.  The tradeoff is that React cannot observe changes
+ * to these values, so any derived UI (cursor, outline, modal) must be
+ * bridged explicitly via `setCursor`, `updateHoverTarget`, etc.
+ *
+ * When modifying this component, keep the following invariants:
+ * - Only write to a ref inside a callback, effect, or event handler —
+ *   never during render.
+ * - When a ref change must be visible to React, call the corresponding
+ *   state setter in the same handler (see `updateHoverTarget`).
+ * - Treat `interaction.current` as a finite state machine — transitions
+ *   must be exhaustive and deterministic.
  */
 export const EditOverlay = ({
   layoutConfig,
@@ -77,14 +95,12 @@ export const EditOverlay = ({
   onChangeCount,
   handleRef,
 }: Props) => {
-  const toolbarHeight = useToolbarHeight();
   const zIndex = useOverlayZIndex();
   const [cursor, setCursor] = useState('');
   const [hoverTarget, setHoverTarget] = useState<HTMLElement | null>(null);
   const hoverTargetRef = useRef<HTMLElement | null>(null);
   const [editModalTarget, setEditModalTarget] = useState<HTMLElement | null>(null);
 
-  const interaction = useRef<InteractionState>(IDLE);
   const registry = useRef(new ElementRegistry());
   const rafId = useRef<number>(0);
   const stickyHover = useRef<HTMLElement | null>(null);
@@ -108,6 +124,22 @@ export const EditOverlay = ({
     onChangeCount?.(hiddenOriginals + duplicates + editCount());
   }, [onChangeCount, editCount]);
 
+  const effects = useMemo(
+    () => ({ setCursor, updateHoverTarget, notifyCount }),
+    [updateHoverTarget, notifyCount]
+  );
+
+  const machine = useInteractionMachine({
+    registry,
+    hoverTargetRef,
+    stickyHover,
+    roundedTargets,
+    rafId,
+    effects,
+    isInsideHoverLock,
+    cloneZIndex: zIndex.clone,
+  });
+
   const deleteElement = useCallback(
     (el: HTMLElement) => {
       const session = registry.current.get(el);
@@ -127,14 +159,16 @@ export const EditOverlay = ({
   );
 
   const resetAll = useCallback(() => {
-    if (interaction.current.type === 'drag') {
-      interaction.current.session.el.remove();
+    const state = machine.getState();
+    if (state.type === 'drag') {
+      state.session.el.remove();
     }
-    interaction.current = IDLE;
+    machine.forceIdle();
+    stickyHover.current = null;
     registry.current.resetAll();
     restoreAll();
     onChangeCount?.(0);
-  }, [onChangeCount, restoreAll]);
+  }, [onChangeCount, restoreAll, machine]);
 
   const insertElement = useCallback(
     (
@@ -176,7 +210,19 @@ export const EditOverlay = ({
   // Duplicates have no hidden original, so we also check whether any
   // session's referenceEl was disconnected from the document.
   useEffect(() => {
+    let lastHref = window.location.href;
+
     const observer = new MutationObserver((mutations) => {
+      // Detect SPA navigation by comparing the current URL to the last
+      // seen value. MutationObserver fires naturally when React swaps
+      // page content — no History monkeypatching needed.
+      const currentHref = window.location.href;
+      if (currentHref !== lastHref) {
+        lastHref = currentHref;
+        resetAll();
+        return;
+      }
+
       for (const mutation of mutations) {
         for (const removed of mutation.removedNodes) {
           if (!(removed instanceof HTMLElement)) continue;
@@ -206,250 +252,48 @@ export const EditOverlay = ({
 
   const handlePointerMove = useCallback(
     (event: PointerEvent) => {
-      cancelAnimationFrame(rafId.current);
-      rafId.current = requestAnimationFrame(() => {
-        const state = interaction.current;
-        const currentHover = hoverTargetRef.current;
-
-        switch (state.type) {
-          case 'resize': {
-            applyResizeMove(state, event.clientX, event.clientY);
-            notifyCount();
-            break;
-          }
-
-          case 'drag': {
-            applyDragMove(state, event.clientX, event.clientY, event.shiftKey, {
-              isLayoutVisible,
-              layoutConfig,
-              toolbarHeight,
-            });
-            notifyCount();
-            break;
-          }
-
-          case 'pending-drag': {
-            const dx = event.clientX - state.startX;
-            const dy = event.clientY - state.startY;
-            // Only promote to a real drag after moving more than 3px
-            if (dx * dx + dy * dy < 9) return;
-
-            const existingSession = findManagedSession(state.target, registry.current);
-            if (existingSession) {
-              interaction.current = startDragFromSession(
-                existingSession,
-                state.startX,
-                state.startY
-              );
-            } else {
-              interaction.current = startDragFromElement(
-                state.target,
-                registry.current,
-                zIndex.clone,
-                state.startX,
-                state.startY
-              );
-            }
-            setCursor('grabbing');
-            notifyCount();
-            // Apply the move that triggered promotion
-            applyDragMove(
-              interaction.current as DragState,
-              event.clientX,
-              event.clientY,
-              event.shiftKey,
-              { isLayoutVisible, layoutConfig, toolbarHeight }
-            );
-            break;
-          }
-
-          default: {
-            interaction.current = IDLE;
-
-            // Sticky hover: keep selection locked until cursor enters the element
-            if (stickyHover.current) {
-              const stickyRect = stickyHover.current.getBoundingClientRect();
-              if (
-                event.clientX >= stickyRect.left &&
-                event.clientX <= stickyRect.right &&
-                event.clientY >= stickyRect.top &&
-                event.clientY <= stickyRect.bottom
-              ) {
-                stickyHover.current = null;
-              } else {
-                return;
-              }
-            }
-
-            const resolution = resolveHoverTarget(
-              event.clientX,
-              event.clientY,
-              currentHover,
-              isInsideHoverLock,
-              currentHover ? roundedTargets.current.has(currentHover) : false
-            );
-
-            if (resolution.handle) {
-              interaction.current = {
-                type: 'hover',
-                target: resolution.target!,
-                handle: resolution.handle,
-              };
-              setCursor(HANDLE_CURSORS[resolution.handle]);
-              return;
-            }
-
-            if (resolution.isRounded && resolution.target) {
-              roundedTargets.current.add(resolution.target);
-            }
-
-            // When locked in hover-lock zone with no handle, show grab cursor
-            if (
-              resolution.target === currentHover &&
-              isInsideHoverLock(event.clientX, event.clientY)
-            ) {
-              setCursor('grab');
-              return;
-            }
-
-            // When in rounded dead-zone with no handle, derive cursor from idle state
-            if (resolution.target === currentHover && currentHover) {
-              setCursor(deriveCursor(IDLE, currentHover));
-              return;
-            }
-
-            updateHoverTarget(resolution.target);
-            setCursor(resolution.target ? 'grab' : '');
-          }
-        }
-      });
+      machine.handlePointerMove(event, layoutConfig, isLayoutVisible);
     },
-    [
-      layoutConfig,
-      isLayoutVisible,
-      toolbarHeight,
-      notifyCount,
-      isInsideHoverLock,
-      updateHoverTarget,
-      zIndex.clone,
-    ]
+    [machine, layoutConfig, isLayoutVisible]
   );
-
-  const parkInteraction = useCallback(() => {
-    const state = interaction.current;
-    if (state.type !== 'drag' && state.type !== 'resize') return;
-
-    state.session.el.style.pointerEvents = 'auto';
-    // Clear will-change so the element leaves its GPU-composited layer.
-    // Leaving will-change:'transform' after drag/resize disables subpixel
-    // antialiasing and causes visibly blurry text.
-    state.session.el.style.willChange = '';
-    interaction.current = IDLE;
-    setCursor('grab');
-  }, []);
 
   const handlePointerDown = useCallback(
     (event: PointerEvent) => {
-      const state = interaction.current;
-
-      // If a keyboard-initiated drag is active (e.g. Cmd+D duplicate),
-      // park it on the first pointer-down so the element becomes targetable.
-      if (state.type === 'drag' || state.type === 'resize') {
-        parkInteraction();
-      }
-
-      // Start resize if hovering a handle
-      if (state.type === 'hover' && state.handle) {
-        const corner = state.handle;
-        event.preventDefault();
-        event.stopPropagation();
-        // Prevent native drag from stealing the pointer (fires pointercancel)
-        (event.target as Element)?.setPointerCapture?.(event.pointerId);
-
-        let session = registry.current.get(state.target);
-        if (!session) {
-          const dragState = startDragFromElement(
-            state.target,
-            registry.current,
-            zIndex.clone,
-            event.clientX,
-            event.clientY
-          );
-          session = dragState.session;
-          session.el.style.pointerEvents = 'auto';
-        }
-
-        interaction.current = startResize(session, corner, event.clientX, event.clientY);
-        updateHoverTarget(null);
-        setCursor(deriveCursor(interaction.current, null));
-        notifyCount();
-        return;
-      }
-
-      const target = getElementUnder(event.clientX, event.clientY);
-      if (!target) return;
-
-      event.preventDefault();
-      event.stopPropagation();
-      // Prevent native drag from stealing the pointer (fires pointercancel)
-      (event.target as Element)?.setPointerCapture?.(event.pointerId);
-
-      // Don't start a real drag yet — wait for the pointer to move beyond
-      // a minimum threshold so that plain clicks don't create clones.
-      interaction.current = {
-        type: 'pending-drag',
-        target,
-        startX: event.clientX,
-        startY: event.clientY,
-      };
-
-      updateHoverTarget(null);
-      setCursor('grab');
-      notifyCount();
+      machine.handlePointerDown(event);
     },
-    [zIndex.clone, notifyCount, updateHoverTarget, parkInteraction]
+    [machine]
   );
 
   const duplicateAndDrag = useCallback(
     async (target: HTMLElement) => {
       const duplicate = await createDuplicate(target, registry.current, zIndex.clone);
+      // Guard: if the user started a new gesture during the async
+      // createDuplicate, don't overwrite it with a drag.
+      const currentState = machine.getState();
+      if (currentState.type !== 'idle' && currentState.type !== 'hover') {
+        notifyCount();
+        return;
+      }
       const session = registry.current.get(duplicate);
       if (session) {
         const rect = duplicate.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
         const cy = rect.top + rect.height / 2;
-        interaction.current = startDragFromSession(session, cx, cy);
+        machine.startSessionDrag(session, cx, cy);
       }
       updateHoverTarget(null);
       clearLock();
       setCursor('grabbing');
       notifyCount();
     },
-    [zIndex.clone, clearLock, notifyCount, updateHoverTarget]
+    [zIndex.clone, clearLock, notifyCount, updateHoverTarget, machine]
   );
 
   const handlePointerUp = useCallback(
     (event: PointerEvent) => {
-      const state = interaction.current;
-
-      if (state.type === 'pending-drag') {
-        interaction.current = IDLE;
-        (event.target as Element)?.releasePointerCapture?.(event.pointerId);
-      } else if (state.type === 'drag' || state.type === 'resize') {
-        event.preventDefault();
-        event.stopPropagation();
-        (event.target as Element)?.releasePointerCapture?.(event.pointerId);
-        parkInteraction();
-      } else {
-        return;
-      }
-
-      // Re-resolve hover so the outline shows immediately
-      const target = getElementUnder(event.clientX, event.clientY);
-      updateHoverTarget(target);
-      setCursor(target ? 'grab' : '');
+      machine.handlePointerUp(event);
     },
-    [parkInteraction, updateHoverTarget]
+    [machine]
   );
 
   const handleKeydown = useCallback(
@@ -495,20 +339,14 @@ export const EditOverlay = ({
     event.stopPropagation();
   }, []);
 
-  const abortDrag = useCallback(() => {
-    if (interaction.current.type === 'pending-drag') {
-      interaction.current = IDLE;
-    }
-    parkInteraction();
-  }, [parkInteraction]);
-
   useEffect(() => {
     if (!isActive) {
       setCursor('');
       updateHoverTarget(null);
-      abortDrag();
+      machine.abortDrag();
+      stickyHover.current = null;
     }
-  }, [isActive, abortDrag, updateHoverTarget]);
+  }, [isActive, machine, updateHoverTarget]);
 
   const listenersActive = isActive && !editModalTarget;
 
@@ -519,17 +357,18 @@ export const EditOverlay = ({
     handlePointerUp,
     handleClick,
     handleKeydown,
-    abortDrag,
+    machine.abortDrag,
     rafId
   );
 
   useScrollSync(registry);
 
+  const interactionState = machine.getState();
   const showOutline =
     hoverTarget &&
-    interaction.current.type !== 'drag' &&
-    interaction.current.type !== 'resize' &&
-    interaction.current.type !== 'pending-drag';
+    interactionState.type !== 'drag' &&
+    interactionState.type !== 'resize' &&
+    interactionState.type !== 'pending-drag';
 
   const lockedTarget = useLockedTarget(hoverTarget, !!showOutline);
 

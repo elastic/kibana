@@ -12,8 +12,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/css';
 import { EuiPortal, useResizeObserver } from '@elastic/eui';
 import type { LayoutConfig } from '../../../lib/layout/layout_config';
-import { LAYOUT_OVERLAY_ID } from '../../../lib/constants';
-import { useToolbarHeight, useOverlayZIndex } from '../../../hooks';
+import { LAYOUT_OVERLAY_ID, DEVELOPER_TOOLBAR_HEIGHT } from '../../../lib/constants';
+import { useOverlayZIndex } from '../../../hooks';
 import { GridPattern, RowPattern, ColumnPattern } from '.';
 
 interface Props {
@@ -25,7 +25,6 @@ export const LayoutOverlay = ({ layoutConfig }: Props) => {
   const containerRef = useCallback((node: HTMLDivElement | null) => setContainerEl(node), []);
   const { width: viewportWidth, height: viewportHeight } = useResizeObserver(containerEl);
 
-  const toolbarHeight = useToolbarHeight();
   const zIndex = useOverlayZIndex();
 
   const { containerCss, content } = useMemo(() => {
@@ -34,7 +33,7 @@ export const LayoutOverlay = ({ layoutConfig }: Props) => {
       top: 0,
       left: 0,
       right: 0,
-      bottom: toolbarHeight,
+      bottom: DEVELOPER_TOOLBAR_HEIGHT,
       pointerEvents: 'none',
       zIndex: zIndex.overlay,
     });
@@ -50,7 +49,7 @@ export const LayoutOverlay = ({ layoutConfig }: Props) => {
     }
 
     return { containerCss: container, content: pattern };
-  }, [viewportWidth, viewportHeight, toolbarHeight, layoutConfig, zIndex.overlay]);
+  }, [viewportWidth, viewportHeight, layoutConfig, zIndex.overlay]);
 
   return (
     <EuiPortal>

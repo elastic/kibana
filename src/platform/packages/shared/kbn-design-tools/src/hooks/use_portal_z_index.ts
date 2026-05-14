@@ -18,8 +18,10 @@ export const usePortalZIndex = (elementId: string, zIndex: number, isOpen: boole
   useEffect(() => {
     if (!isOpen) return;
     const z = String(zIndex);
+    let observer: MutationObserver | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
-    const rafId = requestAnimationFrame(() => {
+    const applyZIndex = (): boolean => {
       const targetEl = document.getElementById(elementId);
       const portalParent = targetEl?.closest('[data-euiportal="true"]');
 
@@ -28,9 +30,35 @@ export const usePortalZIndex = (elementId: string, zIndex: number, isOpen: boole
       }
       if (targetEl instanceof HTMLElement) {
         targetEl.style.zIndex = z;
+        return true;
       }
+      return false;
+    };
+
+    // Try immediately via rAF — this covers the common case.
+    const rafId = requestAnimationFrame(() => {
+      if (applyZIndex()) return;
+
+      // Portal not yet rendered — observe DOM additions and retry.
+      // This handles cases where React defers the portal render
+      // (e.g. concurrent mode, Suspense).
+      observer = new MutationObserver(() => {
+        if (applyZIndex()) {
+          observer?.disconnect();
+          if (timeoutId !== undefined) clearTimeout(timeoutId);
+        }
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+
+      // Safety: disconnect after 2s to avoid observing indefinitely
+      // if the portal never appears.
+      timeoutId = setTimeout(() => observer?.disconnect(), 2000);
     });
 
-    return () => cancelAnimationFrame(rafId);
+    return () => {
+      cancelAnimationFrame(rafId);
+      observer?.disconnect();
+      if (timeoutId !== undefined) clearTimeout(timeoutId);
+    };
   }, [isOpen, elementId, zIndex]);
 };

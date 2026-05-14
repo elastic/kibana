@@ -11,14 +11,24 @@ import type { MutableRefObject } from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { useScrollSync } from './use_scroll_sync';
 import { ElementRegistry } from '../lib/dom/element_registry';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 
 describe('useScrollSync', () => {
   let registry: ElementRegistry;
   let registryRef: MutableRefObject<ElementRegistry>;
+  let scrollContainer: HTMLDivElement;
 
   beforeEach(() => {
     registry = new ElementRegistry();
     registryRef = { current: registry };
+
+    scrollContainer = document.createElement('div');
+    scrollContainer.id = APP_MAIN_SCROLL_CONTAINER_ID;
+    document.body.appendChild(scrollContainer);
+  });
+
+  afterEach(() => {
+    scrollContainer.remove();
   });
 
   const makeSession = (left: number, top: number) => {
@@ -50,55 +60,58 @@ describe('useScrollSync', () => {
     };
   };
 
-  it('registers a capture-phase scroll listener', () => {
-    const addSpy = jest.spyOn(document, 'addEventListener');
+  const scroll = (x: number, y: number) => {
+    Object.defineProperty(scrollContainer, 'scrollLeft', { value: x, configurable: true });
+    Object.defineProperty(scrollContainer, 'scrollTop', { value: y, configurable: true });
+    act(() => {
+      scrollContainer.dispatchEvent(new Event('scroll'));
+    });
+  };
+
+  it('attaches a scroll listener to the main scroll container', () => {
+    const addSpy = jest.spyOn(scrollContainer, 'addEventListener');
     renderHook(() => useScrollSync(registryRef));
-    expect(addSpy).toHaveBeenCalledWith('scroll', expect.any(Function), true);
+    expect(addSpy).toHaveBeenCalledWith('scroll', expect.any(Function));
     addSpy.mockRestore();
   });
 
-  it('adjusts managed element positions on scroll', () => {
+  it('adjusts all managed elements on scroll', () => {
     const session = makeSession(100, 200);
     registry.set(session);
 
     renderHook(() => useScrollSync(registryRef));
 
-    // First scroll establishes baseline
-    act(() => {
-      const event = new Event('scroll', { bubbles: true });
-      Object.defineProperty(event, 'target', { value: document });
-      document.dispatchEvent(event);
-    });
-
-    // Simulate scrolling by changing scrollTop
-    Object.defineProperty(document.documentElement, 'scrollLeft', {
-      value: 10,
-      configurable: true,
-    });
-    Object.defineProperty(document.documentElement, 'scrollTop', { value: 20, configurable: true });
-
-    act(() => {
-      const event = new Event('scroll', { bubbles: true });
-      Object.defineProperty(event, 'target', { value: document });
-      document.dispatchEvent(event);
-    });
+    scroll(10, 20);
 
     expect(session.el.style.left).toBe('90px');
     expect(session.el.style.top).toBe('180px');
 
-    // Clean up
-    Object.defineProperty(document.documentElement, 'scrollLeft', { value: 0, configurable: true });
-    Object.defineProperty(document.documentElement, 'scrollTop', { value: 0, configurable: true });
+    scroll(0, 0);
     session.el.remove();
   });
 
+  it('adjusts live elements the same as clones', () => {
+    const liveSession = { ...makeSession(100, 200), isDuplicate: true };
+    registry.set(liveSession);
+
+    renderHook(() => useScrollSync(registryRef));
+
+    scroll(10, 20);
+
+    expect(liveSession.el.style.left).toBe('90px');
+    expect(liveSession.el.style.top).toBe('180px');
+
+    scroll(0, 0);
+    liveSession.el.remove();
+  });
+
   it('cleans up listener on unmount', () => {
-    const removeSpy = jest.spyOn(document, 'removeEventListener');
+    const removeSpy = jest.spyOn(scrollContainer, 'removeEventListener');
     const { unmount } = renderHook(() => useScrollSync(registryRef));
 
     unmount();
 
-    expect(removeSpy).toHaveBeenCalledWith('scroll', expect.any(Function), true);
+    expect(removeSpy).toHaveBeenCalledWith('scroll', expect.any(Function));
     removeSpy.mockRestore();
   });
 });

@@ -38,6 +38,12 @@ export const flattenElementTree = (el: Element, depth: number): TreeNode[] => {
     return nodes;
   }
 
+  // Skip <style> tags — they're injected by Emotion and aren't meaningful
+  // in the element tree.
+  if (el.tagName.toLowerCase() === 'style') {
+    return nodes;
+  }
+
   if (children.length === 0 || isSvg) {
     nodes.push({ tag, depth, element: el, hasChildren: false });
     return nodes;

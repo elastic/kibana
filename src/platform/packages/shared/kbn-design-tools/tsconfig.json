@@ -15,6 +15,7 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/shared-ux-utility",
-    "@kbn/test-jest-helpers"
+    "@kbn/test-jest-helpers",
+    "@kbn/core-chrome-layout-constants"
   ]
 }
