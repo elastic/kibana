@@ -83,6 +83,7 @@ const buildCompositeSloDetails = (
       sliValue: 0.995,
       contribution: 0.995,
       status: 'HEALTHY',
+      errorBudget: { initial: 0.01, consumed: 0.005, remaining: 0.5, isEstimated: false },
       fiveMinuteBurnRate: 1.2,
       oneHourBurnRate: 0.8,
       oneDayBurnRate: 0.6,

@@ -122,6 +122,22 @@ const getMemberColumns = (
       value === -1 ? NOT_AVAILABLE_LABEL : numeral(value).format(percentFormat),
   },
   {
+    field: 'errorBudget.remaining',
+    name: i18n.translate('xpack.slo.compositeSloList.members.budgetRemaining', {
+      defaultMessage: 'Budget remaining',
+    }),
+    width: '130px',
+    render: (_: unknown, item: CompositeSLOMemberSummary) => {
+      if (item.status === 'NO_DATA') {
+        return NOT_AVAILABLE_LABEL;
+      }
+      if (item.errorBudget === undefined) {
+        return NOT_AVAILABLE_LABEL;
+      }
+      return numeral(item.errorBudget.remaining).format(percentFormat);
+    },
+  },
+  {
     name: (
       <EuiPopover
         aria-label={i18n.translate('xpack.slo.compositeSloList.members.burnRate.windowAriaLabel', {

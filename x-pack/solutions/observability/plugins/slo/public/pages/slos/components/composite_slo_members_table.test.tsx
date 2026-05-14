@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -24,6 +25,7 @@ const baseMember = {
   sliValue: 0.99,
   contribution: 0.495,
   status: 'HEALTHY' as const,
+  errorBudget: { initial: 0.01, consumed: 0.001, remaining: 0.9, isEstimated: false },
   fiveMinuteBurnRate: 1.25,
   oneHourBurnRate: 0.9,
   oneDayBurnRate: 0.7,
@@ -67,6 +69,28 @@ describe('CompositeSloMembersTable', () => {
     ).toBeInTheDocument();
   });
 
+  it('formats budget remaining using the shared percent pattern', () => {
+    render(<CompositeSloMembersTable members={[{ ...baseMember }]} percentFormat="0.0%" />);
+
+    expect(screen.getByText('90.0%')).toBeInTheDocument();
+  });
+
+  it('shows N/A for budget remaining when legacy member docs omit errorBudget', () => {
+    render(
+      <CompositeSloMembersTable
+        members={[
+          {
+            ...baseMember,
+            errorBudget: undefined,
+          },
+        ]}
+        percentFormat="0.0%"
+      />
+    );
+
+    expect(screen.getAllByText('N/A').length).toBeGreaterThanOrEqual(1);
+  });
+
   it('renders member burn rate for the selected window and updates when the window changes', async () => {
     const user = userEvent.setup();
     render(<CompositeSloMembersTable members={[{ ...baseMember }]} percentFormat="0.0%" />);
@@ -74,6 +98,7 @@ describe('CompositeSloMembersTable', () => {
     expect(screen.getByText('1.25x')).toBeInTheDocument();
 
     await user.click(screen.getByTestId('compositeSloMembersBurnRateWindowSelector'));
+    await waitForEuiPopoverOpen();
     await user.click(screen.getByText('1h'));
     expect(screen.queryByText('1.25x')).not.toBeInTheDocument();
     expect(screen.getByText('0.9x')).toBeInTheDocument();
