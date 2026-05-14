@@ -17,7 +17,7 @@ import {
   DEV_TOOLS_ALL_ROLE,
   DEV_TOOLS_READ_ROLE,
   NO_DEV_TOOLS_ROLE,
-} from '../../ui/fixtures/constants';
+} from '../../common/fixtures/constants';
 
 const getCapabilitiesApiPath = (spaceId?: string) =>
   spaceId ? `/s/${spaceId}${CAPABILITIES_API_PATH}` : CAPABILITIES_API_PATH;
