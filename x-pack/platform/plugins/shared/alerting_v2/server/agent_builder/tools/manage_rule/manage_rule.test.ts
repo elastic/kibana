@@ -138,6 +138,7 @@ describe('manageRuleTool', () => {
             data: {
               metadata: { name: 'Persisted Rule' },
               kind: 'alert',
+              query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 1' },
             },
           },
         ],

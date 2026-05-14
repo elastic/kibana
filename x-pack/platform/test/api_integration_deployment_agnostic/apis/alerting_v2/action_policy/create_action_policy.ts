@@ -257,7 +257,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             metadata: { name: 'rule-in-custom-space' },
             time_field: '@timestamp',
             schedule: { every: '5m' },
-            evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+            query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 10' },
           });
 
         expect(ruleResponse.status).to.be(201);

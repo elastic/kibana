@@ -8,7 +8,6 @@
 import { ExecuteRuleQueryStep } from './execute_rule_query_step';
 import {
   collectStreamResults,
-  createEsqlResponse,
   createPipelineStream,
   createRuleExecutionInput,
   createRuleResponse,
@@ -61,9 +60,7 @@ describe('ExecuteRuleQueryStep', () => {
   });
 
   it('concatenates base and breach block for composed format rules', async () => {
-    mockEsClient.esql.query.mockResolvedValue(
-      createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [['host-a']])
-    );
+    mockHelpersEsqlArrowBatches(mockEsClient, [{ numRows: 1, rows: [{ 'host.name': 'host-a' }] }]);
 
     const rule = createRuleResponse({
       query: {
@@ -76,7 +73,7 @@ describe('ExecuteRuleQueryStep', () => {
 
     await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
-    expect(mockEsClient.esql.query).toHaveBeenCalledWith(
+    expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
       expect.objectContaining({
         query: 'FROM metrics-* | STATS avg(cpu) BY host.name | WHERE avg(cpu) > 0.9',
       }),

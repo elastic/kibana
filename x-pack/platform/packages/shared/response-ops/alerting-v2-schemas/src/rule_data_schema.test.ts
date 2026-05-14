@@ -293,7 +293,7 @@ describe('createRuleDataSchema', () => {
         query: {
           format: 'standalone',
           breach: 'FROM logs-* | LIMIT 1',
-          recover: 'FROM logs-* | WHERE status = "ok"',
+          recover: 'FROM logs-* | WHERE status == "ok"',
         },
       });
       expect(result.success).toBe(true);
