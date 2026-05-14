@@ -174,6 +174,45 @@ describe('WorkflowTaskManager', () => {
     });
   });
 
+  describe('hasActiveTaskForExecution', () => {
+    const workflowExecutionId = 'test-execution-id';
+
+    it('should return true when an idle, claiming, or running task exists for the execution scope', async () => {
+      mockTaskManager.fetch.mockResolvedValue({ docs: [{ id: 't1' }] } as any);
+
+      const hasActive = await workflowTaskManager.hasActiveTaskForExecution(workflowExecutionId);
+
+      expect(hasActive).toBe(true);
+      expect(mockTaskManager.fetch).toHaveBeenCalledWith({
+        size: 1,
+        query: {
+          bool: {
+            filter: [
+              {
+                terms: {
+                  'task.status': [TaskStatus.Idle, TaskStatus.Claiming, TaskStatus.Running],
+                },
+              },
+              {
+                term: {
+                  'task.scope': `workflow:execution:${workflowExecutionId}`,
+                },
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    it('should return false when no matching tasks are found', async () => {
+      mockTaskManager.fetch.mockResolvedValue({ docs: [] } as any);
+
+      const hasActive = await workflowTaskManager.hasActiveTaskForExecution(workflowExecutionId);
+
+      expect(hasActive).toBe(false);
+    });
+  });
+
   describe('forceRunIdleTasks', () => {
     const workflowExecutionId = 'test-execution-id';
 

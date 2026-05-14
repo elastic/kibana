@@ -15,6 +15,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { LiveQuery } from '../../live_queries';
 import { OsqueryIcon } from '../../components/osquery_icon';
 import { useIsOsqueryAvailable } from '../use_is_osquery_available';
+import type { AddToTimelineHandler } from '../../types';
 
 export interface OsqueryActionProps {
   agentId?: string;
@@ -22,6 +23,7 @@ export interface OsqueryActionProps {
   formType: 'steps' | 'simple';
   hideAgentsField?: boolean;
   onSuccess?: () => void;
+  addToTimeline?: AddToTimelineHandler;
 }
 
 const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
@@ -30,6 +32,7 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
   defaultValues,
   hideAgentsField,
   onSuccess,
+  addToTimeline,
 }) => {
   const permissions = useKibana().services.application.capabilities.osquery;
 
@@ -94,6 +97,7 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
       agentId={agentId}
       hideAgentsField={hideAgentsField}
       onSuccess={onSuccess}
+      addToTimeline={addToTimeline}
       {...defaultValues}
     />
   );

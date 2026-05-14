@@ -122,6 +122,7 @@ export function AddLayerButton({
       key="lsnLayerAdd"
     >
       <EuiPopover
+        aria-label={buttonLabel}
         data-test-subj="lnsConfigPanel__addLayerPopover"
         button={
           <EuiToolTip content={buttonLabel} disableScreenReaderOutput>

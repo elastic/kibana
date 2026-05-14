@@ -627,7 +627,6 @@ export const createDatasetQualityControllerStateMachine = ({
       loadDataStreamStats: (context, _event) => {
         return dataStreamStatsClient.getDataStreamsStats({
           types: getValidDatasetTypes(context, isDatasetQualityAllSignalsAvailable),
-          datasetQuery: context.filters.query,
         });
       },
       loadDataStreamDocsStats:
@@ -660,7 +659,6 @@ export const createDatasetQualityControllerStateMachine = ({
 
         return dataStreamStatsClient.getDataStreamsDegradedStats({
           types: getValidDatasetTypes(context, isDatasetQualityAllSignalsAvailable),
-          datasetQuery: context.filters.query,
           start,
           end,
         });
@@ -670,7 +668,6 @@ export const createDatasetQualityControllerStateMachine = ({
 
         return dataStreamStatsClient.getDataStreamsFailedStats({
           types: getValidDatasetTypes(context, isDatasetQualityAllSignalsAvailable),
-          datasetQuery: context.filters.query,
           start,
           end,
         });

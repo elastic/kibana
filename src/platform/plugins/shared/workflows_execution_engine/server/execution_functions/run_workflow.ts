@@ -9,6 +9,7 @@
 
 import apm from 'elastic-apm-node';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { isTerminalStatus } from '@kbn/workflows';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import type { ContextDependencies } from '../workflow_context_manager/types';
@@ -45,6 +46,14 @@ export async function runWorkflow({
     esClient,
   } = await setupDependencies(workflowRunId, spaceId, logger, config, dependencies, fakeRequest);
   setupSpan?.end();
+
+  const { status } = workflowExecutionState.getWorkflowExecution();
+  if (isTerminalStatus(status)) {
+    logger.debug(
+      `Skipping workflow run for execution ${workflowRunId}: already terminal (${status})`
+    );
+    return;
+  }
 
   // Span for runtime initialization
   const startSpan = apm.startSpan('workflow runtime start', 'workflow', 'initialization');

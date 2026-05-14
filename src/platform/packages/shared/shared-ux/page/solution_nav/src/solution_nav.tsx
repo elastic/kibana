@@ -19,9 +19,7 @@ import type {
   EuiSideNavProps,
 } from '@elastic/eui';
 import {
-  EuiCollapsibleNavGroup,
   EuiFlyout,
-  EuiPanel,
   EuiSideNav,
   EuiSpacer,
   EuiTitle,
@@ -32,7 +30,6 @@ import {
   useEuiThemeCSSVariables,
   EuiPageSidebar,
   useEuiOverflowScroll,
-  useEuiMinBreakpoint,
   euiCanAnimate,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -197,7 +194,7 @@ export const SolutionNav: FC<SolutionNavProps> = ({
     if (isLargerBreakpoint) {
       return isOpenOnDesktop ? FLYOUT_SIZE_CSS : euiTheme.size.xxl;
     }
-    if (isMediumBreakpoint) {
+    if (isMediumBreakpoint || isSmallerBreakpoint) {
       return isSideNavOpenOnMobile || !canBeCollapsed ? FLYOUT_SIZE_CSS : euiTheme.size.xxl;
     }
     return '0';
@@ -206,6 +203,7 @@ export const SolutionNav: FC<SolutionNavProps> = ({
     isOpenOnDesktop,
     isSideNavOpenOnMobile,
     canBeCollapsed,
+    isSmallerBreakpoint,
     isMediumBreakpoint,
     isLargerBreakpoint,
   ]);
@@ -225,10 +223,9 @@ export const SolutionNav: FC<SolutionNavProps> = ({
 
       ${useEuiOverflowScroll('y')};
 
-      ${useEuiMinBreakpoint('m')} {
-        width: ${FLYOUT_SIZE_CSS};
-        padding: ${euiTheme.size.l};
-      }
+      width: ${FLYOUT_SIZE_CSS};
+      padding: ${euiTheme.size.l};
+      height: 100%;
     `,
     solutionNavHidden: css`
       pointer-events: none;
@@ -241,24 +238,7 @@ export const SolutionNav: FC<SolutionNavProps> = ({
   };
   return (
     <>
-      {isSmallerBreakpoint && (
-        // @ts-expect-error Mismatch in collapsible vs unconllapsible props
-        <EuiCollapsibleNavGroup
-          className={sideNavClasses}
-          css={[styles.solutionNav, isHidden && styles.solutionNavHidden]}
-          paddingSize="none"
-          background="none"
-          title={titleText}
-          titleElement="span"
-          isCollapsible={canBeCollapsed}
-          initialIsOpen={false}
-        >
-          <EuiPanel color="transparent" paddingSize="s">
-            {sideNavContent}
-          </EuiPanel>
-        </EuiCollapsibleNavGroup>
-      )}
-      {isMediumBreakpoint && (
+      {(isSmallerBreakpoint || isMediumBreakpoint) && (
         <>
           {(isSideNavOpenOnMobile || !canBeCollapsed) && (
             <EuiFlyout
