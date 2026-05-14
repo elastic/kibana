@@ -7,16 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export default function ({ getService, loadTestFile }: FtrProviderContext) {
-  const browser = getService('browser');
-
-  describe('home app', function () {
-    before(function () {
-      return browser.setWindowSize(1200, 800);
-    });
-
-    loadTestFile(require.resolve('./_sample_data'));
-  });
-}
+export default createPlaywrightConfig({
+  testDir: './tests',
+});

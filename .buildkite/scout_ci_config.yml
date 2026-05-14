@@ -29,6 +29,7 @@ plugins:
     - infra
     - ingest_pipelines
     - intercepts
+    - home
     - kibana_overview
     - lens
     - logstash

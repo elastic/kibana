@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { ScoutPage } from '..';
 
-export default function ({ getService, loadTestFile }: FtrProviderContext) {
-  const browser = getService('browser');
+export class HomePage {
+  constructor(private readonly page: ScoutPage) {}
 
-  describe('home app', function () {
-    before(function () {
-      return browser.setWindowSize(1200, 800);
-    });
+  public get homeApp() {
+    return this.page.testSubj.locator('homeApp');
+  }
 
-    loadTestFile(require.resolve('./_sample_data'));
-  });
+  public async goto() {
+    await this.page.gotoApp('home');
+    await this.homeApp.waitFor({ state: 'visible' });
+  }
 }
