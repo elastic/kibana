@@ -174,6 +174,42 @@ If `recovery_policy.query.base` is configured, the executor runs a separate reco
 
 Recovered documents are appended to `alertEventsBatch` before `DirectorStep` and storage.
 
+## Severity behavior
+
+Severity is a best-effort enrichment applied when the executor materializes
+breached rule events in `CreateAlertEventsStep`.
+
+The framework supports the following fixed severity values:
+
+- `info`
+- `low`
+- `medium`
+- `high`
+- `critical`
+
+Rules do **not** define arbitrary framework severities. Instead, the rule's
+ES\|QL query is expected to map source data into one of the supported values and
+emit that result as a `severity` column.
+
+### How extraction works
+
+For each breached ES\|QL row, the executor:
+
+1. Looks for a `severity` column in the row payload returned by the ES\QL query.
+2. Skips enrichment if the value is not a string.
+3. Lowercases the string value.
+4. Checks whether the normalized value matches the fixed supported set.
+5. If it matches, writes it to the top-level event field `severity`.
+6. If it does not match, leaves the top-level field unset.
+
+### Important constraints
+
+- Severity is only considered for `breached` events.
+- `recovered` and `no_data` events do not carry severity.
+- The original ES\|QL row is still stored in `data`, so `data.severity`
+  is preserved even when the top-level `severity` field is absent or normalized.
+- Unsupported values never fail the rule execution.
+
 ## Halt reasons
 
 `HaltReason` is defined in `types.ts`.

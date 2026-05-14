@@ -82,7 +82,7 @@ jest.mock('../../hooks/use_fetch_action_policy', () => ({
 }));
 
 jest.mock('../../hooks/use_fetch_data_fields', () => ({
-  useFetchDataFields: () => ({ data: undefined, isLoading: false }),
+  useFetchDataFields: (_matcher?: string) => ({ data: undefined, isLoading: false }),
 }));
 
 jest.mock('../../hooks/use_fetch_rules', () => ({
@@ -209,7 +209,7 @@ describe('ActionPolicyFormPage', () => {
             description: 'Description from test',
             type: 'global',
             groupingMode: 'per_episode',
-            throttle: { strategy: 'on_status_change' },
+            throttle: { strategy: 'on_status_change', interval: null },
             destinations: [{ type: 'workflow', id: 'workflow-1' }],
           },
           expect.objectContaining({ onSuccess: expect.any(Function) })
