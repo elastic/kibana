@@ -142,6 +142,9 @@ export const AlertActions: GetAlertsTableProp<'renderActionsCell'> = (props) => 
     <>
       <EuiPopover
         anchorPosition="downLeft"
+        aria-label={i18n.translate('xpack.ml.alertsTable.actionsPopoverAriaLabel', {
+          defaultMessage: 'Alert actions',
+        })}
         button={
           <EuiToolTip content={actionsToolTip} disableScreenReaderOutput>
             <EuiButtonIcon
