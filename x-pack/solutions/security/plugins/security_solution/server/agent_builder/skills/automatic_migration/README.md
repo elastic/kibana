@@ -103,11 +103,10 @@ in the phase that requires it, following the existing pattern.
 
 ## Known Limitations
 
-These are scheduled-fix items per the workspace's
-[`address-known-limitations`](https://github.com/elastic/agent-builder-skill-dev-cursor-plugin/blob/main/rules/address-known-limitations.mdc)
-discipline — each one names the fix shape, the driver path, and the test
-name that will pass once it lands. Acknowledgement-only entries are not
-allowed here.
+Scheduled-fix items only — each entry names the fix shape, the driver
+path, and the test name that will pass once it lands. Acknowledgement-
+only entries are not allowed here; if a limitation cannot be fixed in
+this cycle it carries a concrete follow-up commitment.
 
 ### 1. Translated-rule update tool writes directly to ES instead of routing through the migration PATCH endpoint
 
@@ -123,14 +122,14 @@ allowed here.
   pipeline — specifically `withLicense`, `withExistingMigration`,
   `logUpdateRules` audit emission via `SiemMigrationAuditLogger`, and any
   future middleware that route accumulates.
-- **Why this shape for now:** the inline
-  `BuiltinToolDefinition` handler context only exposes `esClient`,
-  `savedObjectsClient`, `spaceId`, `request` — not
-  `ruleMigrationsClient`. Calling the internal route from a tool
-  handler is itself anti-pattern #22 verbatim
-  ([`knowledge/anti-patterns.md` #22](https://github.com/elastic/agent-builder-skill-dev-cursor-plugin/blob/main/knowledge/anti-patterns.md));
-  the workspace-canonical path is `platform.workflows.workflow_execute_step`
-  with `step.type: kibana.request`, which requires a workflow YAML
+- **Why this shape for now:** the inline `BuiltinToolDefinition`
+  handler context only exposes `esClient`, `savedObjectsClient`,
+  `spaceId`, `request` — not `ruleMigrationsClient`. Calling the
+  internal route from a tool handler via `core.http.fetch` is its own
+  anti-pattern (inline tool wrapping a single internal HTTP route);
+  the canonical alternative is
+  `platform.workflows.workflow_execute_step` with
+  `step.type: kibana.request`, which requires a workflow YAML
   attachment mechanism that has zero in-tree precedent among
   `security_solution` Agent Builder skills (every existing tool —
   `alertsTool`, `attackDiscoverySearchTool`, etc. — uses the same
