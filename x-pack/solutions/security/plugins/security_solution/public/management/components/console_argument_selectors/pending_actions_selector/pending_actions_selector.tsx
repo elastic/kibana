@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getListOfCancelableResponseActions } from '../../../../../common/endpoint/service/response_actions/is_response_action_cancelable';
 import type { EndpointCommandDefinitionMeta } from '../../endpoint_responder/types';
 import type { CommandArgumentValueSelectorProps } from '../../console/types';
 import { useGetEndpointActionList } from '../../../hooks/response_actions/use_get_endpoint_action_list';
@@ -35,7 +36,6 @@ import {
 } from '../shared/hooks';
 import { createSelectionHandler, createKeyDownHandler } from '../shared/utils';
 import { ERROR_LOADING_PENDING_ACTIONS } from '../../../common/translations';
-import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../common/endpoint/service/response_actions/constants';
 
 /**
  * State for the pending actions selector component
@@ -70,7 +70,7 @@ export const PendingActionsSelector = memo<
       page: 1,
       pageSize: 200,
       statuses: ['pending'],
-      commands: RESPONSE_ACTION_API_COMMANDS_NAMES.filter((action) => action !== 'cancel'),
+      commands: agentType ? getListOfCancelableResponseActions(agentType) : [],
     },
     {
       enabled: state.isPopoverOpen,
@@ -151,6 +151,7 @@ export const PendingActionsSelector = memo<
                   size="s"
                   color="subdued"
                   data-test-subj={`${option.label}-disabled-icon`}
+                  aria-hidden={true}
                 />
               </EuiFlexItem>
             )}
