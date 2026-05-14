@@ -55,7 +55,7 @@ describe('SelectionBar', () => {
         id="test-list"
         labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
         dataSource={{ findItems: mockFindItems }}
-        item={withOnDelete ? { onDelete: mockOnDelete } : undefined}
+        item={withOnDelete ? { actions: { delete: { onBulkAction: mockOnDelete } } } : undefined}
       >
         {children}
       </ContentListProvider>
@@ -118,7 +118,7 @@ describe('SelectionBar', () => {
     expect(container.innerHTML).toBe('');
   });
 
-  it('returns null when `onDelete` is not configured even with selected items', async () => {
+  it('returns null when `actions.delete.onBulkAction` is not configured even with selected items', async () => {
     const Wrapper = createWrapper({ withOnDelete: false });
     const { container } = render(
       <Wrapper>

@@ -96,11 +96,19 @@ const useDashboardProviderProps = ({
   const item = useMemo(
     () => ({
       getHref: (content: ContentListItem) => `#/dashboard/${content.id}`,
-      getEditUrl: (content: ContentListItem) => `#/dashboard/${content.id}?view=edit`,
-      onDelete: async () => {
-        await wait(250);
+      actions: {
+        // The edit row icon renders as an `<a href>` link, preserving
+        // right/middle-click open-in-new-tab and keyboard activation.
+        edit: {
+          getItemActionHref: (content: ContentListItem) => `#/dashboard/${content.id}?view=edit`,
+        },
+        delete: {
+          onBulkAction: async () => {
+            await wait(250);
+          },
+        },
+        ...(includeInspect && onInspect ? { inspect: { onItemAction: onInspect } } : {}),
       },
-      ...(includeInspect && onInspect ? { onInspect } : {}),
     }),
     [includeInspect, onInspect]
   );

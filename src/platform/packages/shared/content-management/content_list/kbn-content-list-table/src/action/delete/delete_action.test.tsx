@@ -17,7 +17,7 @@ const onDelete = jest.fn();
 
 const defaultContext: ActionBuilderContext = {
   itemConfig: {
-    onDelete: jest.fn(async () => {}),
+    actions: { delete: { onBulkAction: jest.fn(async () => {}) } },
   },
   isReadOnly: false,
   entityName: 'dashboard',
@@ -39,7 +39,7 @@ describe('delete action builder', () => {
   });
 
   describe('buildDeleteAction', () => {
-    it('returns an action with defaults when props are empty and `onDelete` is configured', () => {
+    it('returns an action with defaults when props are empty and `actions.delete.onBulkAction` is configured', () => {
       const result = buildDeleteAction({}, defaultContext);
 
       expect(result).toMatchObject({
@@ -62,7 +62,7 @@ describe('delete action builder', () => {
       expect(result).toBeUndefined();
     });
 
-    it('returns `undefined` when no `onDelete` handler is configured', () => {
+    it('returns `undefined` when no bulk-delete handler is configured', () => {
       const context: ActionBuilderContext = {
         ...defaultContext,
         itemConfig: {},
@@ -99,18 +99,29 @@ describe('delete action builder', () => {
       expect(onDelete).toHaveBeenCalledWith([item]);
     });
 
-    it('does not call `itemConfig.onDelete` directly', () => {
-      const itemOnDelete = jest.fn();
+    it('does not call `itemConfig.actions.delete.onBulkAction` directly', () => {
+      const onBulkAction = jest.fn(async () => {});
       const context: ActionBuilderContext = {
         ...defaultContext,
-        itemConfig: { onDelete: itemOnDelete },
+        itemConfig: { actions: { delete: { onBulkAction } } },
       };
       const result = buildDeleteAction({}, context);
       const item = { id: '1', title: 'Test' };
 
       result?.onClick?.(item, {} as React.MouseEvent);
 
-      expect(itemOnDelete).not.toHaveBeenCalled();
+      expect(onBulkAction).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('enabled', () => {
+    it('forwards the consumer `enabled` predicate', () => {
+      const enabled = jest.fn(() => false);
+      const result = buildDeleteAction({ enabled }, defaultContext);
+      const item = { id: '1', title: 'Test' };
+
+      expect(result?.enabled?.(item)).toBe(false);
+      expect(enabled).toHaveBeenCalledWith(item);
     });
   });
 });

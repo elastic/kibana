@@ -24,13 +24,13 @@ const DEFAULT_EDIT_DESCRIPTION = i18n.translate(
 /**
  * Build a `DefaultItemAction` for the edit action preset.
  *
- * Returns `undefined` when:
- * - The table is in read-only mode.
- * - No edit handler (`onEdit`) or edit URL generator (`getEditUrl`) is configured.
+ * Returns `undefined` when read-only or when neither
+ * `actions.edit.onItemAction` nor `actions.edit.getItemActionHref` is
+ * configured.
  *
- * When both `getEditUrl` and `onEdit` are provided, the action renders as a link
- * (`href`) and also fires `onEdit` on click. This enables composable behavior
- * such as navigating to an edit page while also tracking analytics.
+ * When `getItemActionHref` is configured the row icon renders as an
+ * `<a href>` link (with native right-click / middle-click open-in-new-tab
+ * affordances). Otherwise it renders as a button calling `onItemAction`.
  *
  * @param attributes - The declarative attributes from the parsed `Action.Edit` element.
  * @param context - Builder context with provider configuration.
@@ -46,9 +46,11 @@ export const buildEditAction = (
     return undefined;
   }
 
-  const { getEditUrl, onEdit } = itemConfig;
+  const editConfig = itemConfig.actions?.edit;
+  const onItemAction = editConfig?.onItemAction;
+  const getItemActionHref = editConfig?.getItemActionHref;
 
-  if (!getEditUrl && !onEdit) {
+  if (!onItemAction && !getItemActionHref) {
     return undefined;
   }
 
@@ -60,9 +62,10 @@ export const buildEditAction = (
     icon: 'pencil',
     type: 'icon',
     isPrimary: true,
-    ...(getEditUrl && { href: (item) => getEditUrl(item) }),
-    ...(onEdit && { onClick: (item) => onEdit(item) }),
     ...(attributes.enabled && { enabled: attributes.enabled }),
     'data-test-subj': 'content-list-table-action-edit',
+    ...(getItemActionHref
+      ? { href: (item) => getItemActionHref(item) }
+      : { onClick: (item) => onItemAction!(item) }),
   };
 };

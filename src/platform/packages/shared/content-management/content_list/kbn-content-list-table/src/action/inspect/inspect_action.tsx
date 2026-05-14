@@ -12,12 +12,7 @@ import type { InspectActionProps, ActionOutput, ActionBuilderContext } from '../
 
 /**
  * Default i18n-translated label for the inspect action.
- *
- * Used as both the `name` (visible text / aria-label) and `description`
- * (tooltip) on the underlying `DefaultItemAction` so the action reads as
- * a simple "View details" affordance rather than per-item phrasing like
- * "View {itemTitle} details". Override with the `label` prop on
- * `Action.Inspect` when an item-aware label is desired.
+ * Used as both `name` and `description` (tooltip).
  */
 const DEFAULT_INSPECT_LABEL = i18n.translate(
   'contentManagement.contentList.table.action.inspect.label',
@@ -27,7 +22,12 @@ const DEFAULT_INSPECT_LABEL = i18n.translate(
 /**
  * Build a `DefaultItemAction` for the inspect (view details) action preset.
  *
- * Returns `undefined` when no `onInspect` handler is configured on the item config.
+ * Returns `undefined` when neither `actions.inspect.onItemAction` nor
+ * `actions.inspect.getItemActionHref` is configured.
+ *
+ * When `getItemActionHref` is configured the row icon renders as an
+ * `<a href>` link; otherwise it renders as a button calling
+ * `onItemAction`.
  *
  * @param attributes - The declarative attributes from the parsed `Action.Inspect` element.
  * @param context - Builder context with provider configuration.
@@ -37,11 +37,13 @@ export const buildInspectAction = (
   attributes: InspectActionProps,
   context: ActionBuilderContext
 ): ActionOutput | undefined => {
-  if (!context.itemConfig?.onInspect) {
+  const inspectConfig = context.itemConfig?.actions?.inspect;
+  const onItemAction = inspectConfig?.onItemAction;
+  const getItemActionHref = inspectConfig?.getItemActionHref;
+  if (!onItemAction && !getItemActionHref) {
     return undefined;
   }
 
-  const { onInspect } = context.itemConfig;
   const label = attributes.label ?? DEFAULT_INSPECT_LABEL;
 
   return {
@@ -49,7 +51,10 @@ export const buildInspectAction = (
     description: DEFAULT_INSPECT_LABEL,
     icon: 'inspect',
     type: 'icon',
-    onClick: (item) => onInspect(item),
+    ...(attributes.enabled && { enabled: attributes.enabled }),
     'data-test-subj': 'content-list-table-action-inspect',
+    ...(getItemActionHref
+      ? { href: (item) => getItemActionHref(item) }
+      : { onClick: (item) => onItemAction!(item) }),
   };
 };

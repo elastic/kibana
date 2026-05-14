@@ -70,7 +70,17 @@ export { CONTENT_LIST_ACTIONS } from './src/state';
 export type { ContentListAction } from './src/state';
 
 // Types.
-export type { ContentListItem, ContentListItemConfig } from './src/item';
+export type {
+  ContentListItem,
+  ContentListItemConfig,
+  ContentListActions,
+  ActionConfig,
+  ActionId,
+  KnownActionId,
+  ItemActionHref,
+  ItemActionHandler,
+  BulkActionHandler,
+} from './src/item';
 export type {
   ContentListFeatures,
   ContentListSupports,

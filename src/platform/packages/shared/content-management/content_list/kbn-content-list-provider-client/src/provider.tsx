@@ -128,10 +128,11 @@ export type ContentListClientProviderProps = ContentListCoreConfig & {
   /**
    * Content editor (metadata editing flyout) configuration.
    *
-   * When provided, creates an `onInspect` callback on the item config that opens
-   * the Kibana content editor flyout. The consumer must wrap their component tree
-   * with `ContentEditorKibanaProvider` (from `@kbn/content-management-content-editor`)
-   * above this provider.
+   * When provided, populates `actions.inspect.onItemAction` on the item
+   * config with a handler that opens the Kibana content editor flyout.
+   * The consumer must wrap their component tree with
+   * `ContentEditorKibanaProvider` (from
+   * `@kbn/content-management-content-editor`) above this provider.
    */
   contentEditor?: ContentEditorConfig;
 };
@@ -394,7 +395,7 @@ export const ContentListClientProvider = ({
     };
   }, [contentEditor, onInvalidate]);
 
-  // Create the onInspect callback from the content editor config.
+  // Create the inspect handler from the content editor config.
   const onInspect = useContentEditorInspect({
     contentEditor: contentEditorWithInvalidation,
     entityName: rest.labels.entity,
@@ -402,14 +403,33 @@ export const ContentListClientProvider = ({
     queryKeyScope,
   });
 
-  // Merge onInspect into the item config.
-  const itemConfig = useMemo(
-    () => ({
+  // Merge the inspect handler into the item config.
+  //
+  // - Preserve consumer-supplied fields on `actions.inspect`.
+  // - When the consumer set `getItemActionHref`, respect their explicit
+  //   link choice and skip the inject — `onItemAction` and
+  //   `getItemActionHref` are mutually exclusive.
+  // - Otherwise default-inject `onItemAction` (which also overrides any
+  //   consumer-provided placeholder handler).
+  const itemConfig = useMemo(() => {
+    if (!onInspect) {
+      return itemConfigProp;
+    }
+    const consumerInspect = itemConfigProp?.actions?.inspect;
+    if (consumerInspect?.getItemActionHref) {
+      return itemConfigProp;
+    }
+    return {
       ...itemConfigProp,
-      ...(onInspect && { onInspect }),
-    }),
-    [itemConfigProp, onInspect]
-  );
+      actions: {
+        ...itemConfigProp?.actions,
+        inspect: {
+          ...consumerInspect,
+          onItemAction: onInspect,
+        },
+      },
+    };
+  }, [itemConfigProp, onInspect]);
 
   return (
     <ContentListProvider

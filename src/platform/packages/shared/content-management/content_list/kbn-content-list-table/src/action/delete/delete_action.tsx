@@ -64,12 +64,8 @@ const DEFAULT_DELETE_DESCRIPTION = i18n.translate(
 /**
  * Build a `DefaultItemAction` for the delete action preset.
  *
- * Returns `undefined` when:
- * - The table is in read-only mode.
- * - No delete handler (`onDelete`) is configured on the item config.
- *
- * The `onClick` handler calls {@link BuilderContextActions.onDelete} to open
- * the delete confirmation modal at the table level.
+ * Returns `undefined` when read-only or when `onBulkAction` is not configured.
+ * The `onClick` handler opens the table-level delete confirmation modal.
  *
  * @param attributes - The declarative attributes from the parsed `Action.Delete` element.
  * @param context - Builder context with provider configuration.
@@ -84,7 +80,9 @@ export const buildDeleteAction = (
   if (isReadOnly) {
     return undefined;
   }
-  if (typeof itemConfig?.onDelete !== 'function') {
+
+  const deleteConfig = itemConfig?.actions?.delete;
+  if (typeof deleteConfig?.onBulkAction !== 'function') {
     return undefined;
   }
 

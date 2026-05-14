@@ -24,13 +24,12 @@ export interface SelectionBarProps {
 /**
  * Selection actions rendered as `toolsLeft` inside the `EuiSearchBar`.
  *
- * When items are selected and `onDelete` is configured on the provider, renders
- * a danger button labelled "Delete {count} {entity}" matching the existing
- * `TableListView` pattern. Clicking the button opens a {@link DeleteConfirmationModal}
- * that handles the delete lifecycle (confirmation, loading, error, refetch).
- * Clears selection when the modal closes (cancel or success).
+ * When items are selected and `actions.delete.onBulkAction` is
+ * configured, renders a "Delete {count} {entity}" button.
+ * Clicking opens a {@link DeleteConfirmationModal}.
  *
- * Returns `null` when nothing is selected or when `onDelete` is not configured.
+ * Returns `null` when nothing is selected or when
+ * `actions.delete.onBulkAction` is not configured.
  *
  * @internal Rendered automatically by {@link ContentListToolbar}.
  */
@@ -53,7 +52,7 @@ export const SelectionBar = ({
     [selectedCount, labels.entity, labels.entityPlural]
   );
 
-  if (selectedCount === 0 || typeof itemConfig?.onDelete !== 'function') {
+  if (selectedCount === 0 || typeof itemConfig?.actions?.delete?.onBulkAction !== 'function') {
     return null;
   }
 

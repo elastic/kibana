@@ -331,9 +331,11 @@ describe('ContentListClientProvider', () => {
       const { result } = renderHook(() => useContentListConfig(), {
         wrapper: createWrapper(props),
       });
-      const onInspect = result.current.item?.onInspect;
+      const onInspect = result.current.item?.actions?.inspect?.onItemAction;
       if (!onInspect) {
-        throw new Error('expected provider to expose onInspect when contentEditor is configured');
+        throw new Error(
+          'expected provider to expose actions.inspect.onItemAction when contentEditor is configured'
+        );
       }
       return { onInspect, dataSource: result.current.dataSource };
     };
@@ -425,6 +427,66 @@ describe('ContentListClientProvider', () => {
       // Read-only flyout never receives an onSave to wrap, so the inspect
       // path should not synthesise one.
       expect(params?.onSave).toBeUndefined();
+    });
+  });
+
+  describe('inspect action merge', () => {
+    it('overrides consumer-provided `actions.inspect.onItemAction` with the content editor handler', () => {
+      const openContentEditor = jest.fn<() => void, [OpenContentEditorParams]>(() => jest.fn());
+      const consumerOnItemAction = jest.fn();
+
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper({
+          contentEditor: { openContentEditor, isReadonly: true },
+          item: {
+            actions: { inspect: { onItemAction: consumerOnItemAction } },
+          },
+        }),
+      });
+
+      const inspect = result.current.item?.actions?.inspect;
+      expect(inspect?.onItemAction).toEqual(expect.any(Function));
+      expect(inspect?.onItemAction).not.toBe(consumerOnItemAction);
+    });
+
+    it('preserves other consumer-provided `actions[id]` entries unchanged', () => {
+      const openContentEditor = jest.fn<() => void, [OpenContentEditorParams]>(() => jest.fn());
+      const archiveOnItemAction = jest.fn();
+
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper({
+          contentEditor: { openContentEditor, isReadonly: true },
+          item: {
+            actions: {
+              archive: { onItemAction: archiveOnItemAction },
+            },
+          },
+        }),
+      });
+
+      const archive = result.current.item?.actions?.archive;
+      expect(archive?.onItemAction).toBe(archiveOnItemAction);
+    });
+
+    it('respects a consumer-supplied `actions.inspect.getItemActionHref` and does not inject an `onItemAction`', () => {
+      // When the consumer chooses link-style inspect, the flyout
+      // injection must yield to the explicit `getItemActionHref`.
+      // `onItemAction` and `getItemActionHref` are mutually exclusive.
+      const openContentEditor = jest.fn<() => void, [OpenContentEditorParams]>(() => jest.fn());
+      const getItemActionHref = jest.fn((item: { id: string }) => `/inspect/${item.id}`);
+
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper({
+          contentEditor: { openContentEditor, isReadonly: true },
+          item: {
+            actions: { inspect: { getItemActionHref } },
+          },
+        }),
+      });
+
+      const inspect = result.current.item?.actions?.inspect;
+      expect(inspect?.getItemActionHref).toBe(getItemActionHref);
+      expect(inspect?.onItemAction).toBeUndefined();
     });
   });
 });

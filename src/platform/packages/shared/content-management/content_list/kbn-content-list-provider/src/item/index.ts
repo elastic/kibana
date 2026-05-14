@@ -7,7 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { ContentListItem, ContentListItemConfig } from './types';
+export type {
+  ContentListItem,
+  ContentListItemConfig,
+  ContentListActions,
+  ActionConfig,
+  ActionId,
+  KnownActionId,
+  ItemActionHref,
+  ItemActionHandler,
+  BulkActionHandler,
+} from './types';
 export {
   USER_UID_FIELDS,
   MANAGED_USER_FILTER,

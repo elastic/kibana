@@ -13,7 +13,7 @@ import { buildEditAction } from './edit_action';
 
 const defaultContext: ActionBuilderContext = {
   itemConfig: {
-    getEditUrl: (item) => `/edit/${item.id}`,
+    actions: { edit: { onItemAction: jest.fn() } },
   },
   isReadOnly: false,
   entityName: 'dashboard',
@@ -30,7 +30,7 @@ const defaultContext: ActionBuilderContext = {
 
 describe('edit action builder', () => {
   describe('buildEditAction', () => {
-    it('returns an action with defaults when props are empty and `getEditUrl` is configured', () => {
+    it('returns an action with defaults when props are empty and `actions.edit.onItemAction` is configured', () => {
       const result = buildEditAction({}, defaultContext);
 
       expect(result).toMatchObject({
@@ -60,6 +60,21 @@ describe('edit action builder', () => {
       expect(result).toBeUndefined();
     });
 
+    it('returns `undefined` when `actions.edit` is configured but empty (no handler/href)', () => {
+      // Defensive runtime guard. The discriminated union prevents this at
+      // compile time, but a JS consumer could still construct an empty
+      // object; the builder should skip rather than emit a bad action.
+      const context: ActionBuilderContext = {
+        ...defaultContext,
+        // Cast through `unknown` to bypass the discriminated union, which
+        // statically forbids an empty `ActionConfig`.
+        itemConfig: { actions: { edit: {} as unknown as never } },
+      };
+      const result = buildEditAction({}, context);
+
+      expect(result).toBeUndefined();
+    });
+
     it('returns `undefined` when `itemConfig` is undefined', () => {
       const context: ActionBuilderContext = {
         ...defaultContext,
@@ -77,74 +92,70 @@ describe('edit action builder', () => {
       expect(result).toMatchObject({ name: 'Modify' });
     });
 
-    it('provides `href` when `getEditUrl` is configured', () => {
+    it('provides `onClick` and no `href`', () => {
       const result = buildEditAction({}, defaultContext);
-
-      expect(result).toHaveProperty('href');
-      expect(result).not.toHaveProperty('onClick');
-    });
-
-    it('generates correct href for an item', () => {
-      const result = buildEditAction({}, defaultContext);
-      const href = (result?.href as (item: { id: string }) => string)({ id: '123' });
-
-      expect(href).toBe('/edit/123');
-    });
-
-    it('provides `onClick` when only `onEdit` is configured (no `getEditUrl`)', () => {
-      const onEdit = jest.fn();
-      const context: ActionBuilderContext = {
-        ...defaultContext,
-        itemConfig: { onEdit },
-      };
-      const result = buildEditAction({}, context);
 
       expect(result).toHaveProperty('onClick');
       expect(result).not.toHaveProperty('href');
     });
 
-    it('calls `onEdit` when onClick is triggered', () => {
-      const onEdit = jest.fn();
+    it('calls `actions.edit.onItemAction` when onClick is triggered', () => {
+      const onItemAction = jest.fn();
       const context: ActionBuilderContext = {
         ...defaultContext,
-        itemConfig: { onEdit },
+        itemConfig: { actions: { edit: { onItemAction } } },
       };
       const result = buildEditAction({}, context);
       const item = { id: '1', title: 'Test' };
 
       result?.onClick?.(item, {} as React.MouseEvent);
-      expect(onEdit).toHaveBeenCalledWith(item);
+      expect(onItemAction).toHaveBeenCalledWith(item);
     });
 
-    it('composes both `href` and `onClick` when `getEditUrl` and `onEdit` are provided', () => {
-      const onEdit = jest.fn();
-      const context: ActionBuilderContext = {
-        ...defaultContext,
-        itemConfig: {
-          getEditUrl: (item) => `/edit/${item.id}`,
-          onEdit,
-        },
-      };
-      const result = buildEditAction({}, context);
-
-      expect(result).toHaveProperty('href');
-      expect(result).toHaveProperty('onClick');
-    });
-
-    it('calls `onEdit` on click even when `getEditUrl` is also provided', () => {
-      const onEdit = jest.fn();
-      const context: ActionBuilderContext = {
-        ...defaultContext,
-        itemConfig: {
-          getEditUrl: (item) => `/edit/${item.id}`,
-          onEdit,
-        },
-      };
-      const result = buildEditAction({}, context);
+    it('forwards the consumer `enabled` predicate', () => {
+      const enabled = jest.fn(() => false);
+      const result = buildEditAction({ enabled }, defaultContext);
       const item = { id: '1', title: 'Test' };
 
-      result?.onClick?.(item, {} as React.MouseEvent);
-      expect(onEdit).toHaveBeenCalledWith(item);
+      expect(result?.enabled?.(item)).toBe(false);
+      expect(enabled).toHaveBeenCalledWith(item);
+    });
+
+    describe('with `actions.edit.getItemActionHref`', () => {
+      const item = { id: '42', title: 'Test' };
+
+      const hrefContext: ActionBuilderContext = {
+        ...defaultContext,
+        itemConfig: {
+          actions: { edit: { getItemActionHref: (i) => `/edit/${i.id}` } },
+        },
+      };
+
+      it('renders as an `<a href>` link when `getItemActionHref` is configured', () => {
+        const result = buildEditAction({}, hrefContext);
+
+        expect(result).toHaveProperty('href');
+        expect(result).not.toHaveProperty('onClick');
+      });
+
+      it('forwards the per-item href via the function', () => {
+        const result = buildEditAction({}, hrefContext);
+        const href = (result?.href as (i: typeof item) => string)(item);
+
+        expect(href).toBe('/edit/42');
+      });
+
+      it('keeps the default name/description/icon when only an href is configured', () => {
+        const result = buildEditAction({}, hrefContext);
+
+        expect(result).toMatchObject({
+          name: 'Edit',
+          description: expect.any(String),
+          icon: 'pencil',
+          type: 'icon',
+          isPrimary: true,
+        });
+      });
     });
   });
 });

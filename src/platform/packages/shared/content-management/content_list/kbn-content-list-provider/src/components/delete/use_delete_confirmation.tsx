@@ -36,9 +36,8 @@ export interface UseDeleteConfirmationReturn {
 /**
  * Encapsulates the open/close state for a {@link DeleteConfirmationModal}.
  *
- * Consumers call `requestDelete(items)` to open the modal and render
- * `deleteModal` in their JSX. The modal handles confirmation, deletion
- * (via the provider's `onDelete`), loading, and error display internally.
+ * Consumers call `requestDelete(items)` and render `deleteModal` in their JSX.
+ * The modal invokes `actions.delete.onBulkAction` with the requested items.
  *
  * @example Row-level delete (table)
  * ```tsx

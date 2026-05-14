@@ -15,7 +15,7 @@ const onInspect = jest.fn();
 
 const defaultContext: ActionBuilderContext = {
   itemConfig: {
-    onInspect,
+    actions: { inspect: { onItemAction: onInspect } },
   },
   isReadOnly: false,
   entityName: 'dashboard',
@@ -84,6 +84,46 @@ describe('inspect action builder', () => {
       const result = buildInspectAction({ label: 'Details' }, defaultContext);
 
       expect(result).toMatchObject({ name: 'Details' });
+    });
+  });
+
+  describe('enabled', () => {
+    it('forwards the consumer `enabled` predicate', () => {
+      const enabled = jest.fn(() => false);
+      const result = buildInspectAction({ enabled }, defaultContext);
+      const item = { id: '1', title: 'Test' };
+
+      expect(result?.enabled?.(item)).toBe(false);
+      expect(enabled).toHaveBeenCalledWith(item);
+    });
+  });
+
+  describe('with `actions.inspect.getItemActionHref`', () => {
+    const item = { id: '7', title: 'Dashboard 7' };
+
+    const hrefContext: ActionBuilderContext = {
+      ...defaultContext,
+      itemConfig: {
+        actions: { inspect: { getItemActionHref: (i) => `/inspect/${i.id}` } },
+      },
+    };
+
+    it('renders as an `<a href>` link when `getItemActionHref` is configured', () => {
+      const result = buildInspectAction({}, hrefContext);
+
+      expect(result).toHaveProperty('href');
+      expect(result).not.toHaveProperty('onClick');
+      const href = (result?.href as (i: typeof item) => string)(item);
+      expect(href).toBe('/inspect/7');
+    });
+
+    it('falls back to `getItemActionHref` when only `onItemAction` would otherwise be required', () => {
+      // An inspect config with neither handler nor href returns undefined
+      // (consistent with the old behavior). Wiring a href should produce
+      // an action without forcing a placeholder `onItemAction`.
+      const result = buildInspectAction({}, hrefContext);
+      expect(result).toBeDefined();
+      expect(result).toMatchObject({ icon: 'inspect', type: 'icon' });
     });
   });
 });

@@ -27,8 +27,8 @@ export interface DeleteConfirmationModalProps {
 /**
  * Connected confirmation modal for delete operations.
  *
- * Reads `item.onDelete` and entity labels from the provider config, calls
- * `refetch` on success, and manages `isDeleting`/`error` locally.
+ * Reads `actions.delete.onBulkAction` and entity labels from the provider
+ * config, calls `refetch` on success, and manages `isDeleting`/`error` locally.
  * Delegates rendering to {@link DeleteConfirmationComponent}.
  *
  * @example
@@ -50,7 +50,8 @@ export const DeleteConfirmationModal = ({ items, onClose }: DeleteConfirmationMo
   const [error, setError] = useState<string | null>(null);
 
   const onConfirm = useCallback(async () => {
-    if (!itemConfig?.onDelete || deletingRef.current) {
+    const onBulkDelete = itemConfig?.actions?.delete?.onBulkAction;
+    if (!onBulkDelete || deletingRef.current) {
       return;
     }
 
@@ -59,7 +60,7 @@ export const DeleteConfirmationModal = ({ items, onClose }: DeleteConfirmationMo
     setError(null);
 
     try {
-      await itemConfig.onDelete(items);
+      await onBulkDelete(items);
       refetch();
       onClose();
     } catch (e) {
