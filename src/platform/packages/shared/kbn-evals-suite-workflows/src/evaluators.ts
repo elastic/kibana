@@ -16,12 +16,13 @@ import type { Step, WorkflowYaml } from '@kbn/workflows';
 import type {
   WorkflowEditExample,
   WorkflowCreateExample,
+  NegativeWorkflowExample,
   WorkflowTaskOutput,
   StructuralExpectations,
   EfficiencyExpectations,
 } from './types';
 
-type WorkflowExample = WorkflowEditExample | WorkflowCreateExample;
+type WorkflowExample = WorkflowEditExample | WorkflowCreateExample | NegativeWorkflowExample;
 
 const INFRA_ERROR_NA = {
   score: null as null,
@@ -674,10 +675,10 @@ export function createCriteriaEvaluator({ evaluators }: { evaluators: DefaultEva
       expected,
       metadata,
     }: {
-      input: WorkflowEditExample['input'] | WorkflowCreateExample['input'];
+      input: WorkflowExample['input'];
       output: WorkflowTaskOutput;
-      expected: WorkflowEditExample['output'] | WorkflowCreateExample['output'];
-      metadata: WorkflowEditExample['metadata'] | WorkflowCreateExample['metadata'];
+      expected: WorkflowExample['output'];
+      metadata: WorkflowExample['metadata'];
     }) => {
       const { criteria } = expected;
       if (!criteria || criteria.length === 0) {
@@ -687,7 +688,7 @@ export function createCriteriaEvaluator({ evaluators }: { evaluators: DefaultEva
       const cleanInput: Record<string, string> = {
         instruction: input.instruction,
       };
-      if ('initialYaml' in input) {
+      if ('initialYaml' in input && input.initialYaml != null) {
         cleanInput.initialYaml = input.initialYaml;
       }
 
