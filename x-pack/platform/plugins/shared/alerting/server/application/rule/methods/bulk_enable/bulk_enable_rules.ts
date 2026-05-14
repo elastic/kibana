@@ -16,8 +16,6 @@ import type {
   SavedObjectsFindResult,
 } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
-import type { Logger } from '@kbn/core/server';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
@@ -46,6 +44,7 @@ import type { RulesClientContext, BulkOperationError } from '../../../../rules_c
 import { validateScheduleLimit } from '../get_schedule_frequency';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { BulkEnableRulesParams, BulkEnableRulesResult } from './types';
+import { bulkEnableTasks } from '../bulk_enable_tasks';
 import { bulkEnableRulesParamsSchema } from './schemas';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';
@@ -117,10 +116,8 @@ export const bulkEnableRules = async <Params extends RuleParams>(
 
   const [taskIdsToEnable] = accListSpecificForBulkOperation;
 
-  const taskIdsFailedToBeEnabled = await tryToEnableTasks({
-    taskIdsToEnable,
-    logger: context.logger,
-    taskManager: context.taskManager,
+  const { taskIdsFailedToBeEnabled } = await bulkEnableTasks(context, {
+    taskIds: taskIdsToEnable,
   });
 
   const updatedRules = rules.map(({ id, attributes, references }) => {
@@ -442,50 +439,4 @@ const bulkEnableRulesWithOCC = async (
     rules: rules as Array<SavedObjectsBulkUpdateObject<RawRule>>,
     accListSpecificForBulkOperation: [taskIdsToEnable],
   };
-};
-
-export const tryToEnableTasks = async ({
-  taskIdsToEnable,
-  logger,
-  taskManager,
-}: {
-  taskIdsToEnable: string[];
-  logger: Logger;
-  taskManager: TaskManagerStartContract;
-}) => {
-  const taskIdsFailedToBeEnabled: string[] = [];
-
-  if (taskIdsToEnable.length > 0) {
-    try {
-      const resultFromEnablingTasks = await withSpan(
-        { name: 'taskManager.bulkEnable', type: 'rules' },
-        async () => taskManager.bulkEnable(taskIdsToEnable)
-      );
-      resultFromEnablingTasks?.errors?.forEach((error) => {
-        taskIdsFailedToBeEnabled.push(error.id);
-      });
-      if (resultFromEnablingTasks.tasks.length) {
-        logger.debug(
-          `Successfully enabled schedules for underlying tasks: ${resultFromEnablingTasks.tasks
-            .map((task) => task.id)
-            .join(', ')}`
-        );
-      }
-      if (resultFromEnablingTasks.errors.length) {
-        logger.error(
-          `Failure to enable schedules for underlying tasks: ${resultFromEnablingTasks.errors
-            .map((error) => error.id)
-            .join(', ')}`
-        );
-      }
-    } catch (error) {
-      taskIdsFailedToBeEnabled.push(...taskIdsToEnable);
-      logger.error(
-        `Failure to enable schedules for underlying tasks: ${taskIdsToEnable.join(
-          ', '
-        )}. TaskManager bulkEnable failed with Error: ${error.message}`
-      );
-    }
-  }
-  return taskIdsFailedToBeEnabled;
 };
