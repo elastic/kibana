@@ -6,8 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { durationSchema } from './common';
-import { groupingModeSchema, throttleStrategySchema } from './action_policy_data_schema';
+import { optionalWithDescription as opt } from './common';
 import { actionPolicyResponseSchema } from './action_policy_response_schema';
 
 export const ACTION_POLICY_ATTACHMENT_TYPE = 'action_policy' as const;
@@ -27,33 +26,24 @@ export const ACTION_POLICY_SML_TYPE = 'alerting_v2_action_policy' as const;
  * proposed policy built incrementally by the manage_action_policy tool can omit
  * fields that haven't been set yet.
  */
+const { shape } = actionPolicyResponseSchema;
+
 export const actionPolicyAttachmentDataSchema = actionPolicyResponseSchema.extend({
-  id: z.string().optional(),
-  enabled: z.boolean().optional(),
-  auth: z
-    .object({
-      owner: z.string(),
-      createdByUser: z.boolean(),
-    })
-    .optional(),
-  createdAt: z.string().optional(),
-  updatedAt: z.string().optional(),
-  description: z.string().optional(),
-  groupBy: z.array(z.string()).nullable().optional(),
-  tags: z.array(z.string()).nullable().optional(),
-  snoozedUntil: z.string().nullable().optional(),
-  createdBy: z.string().nullable().optional(),
-  createdByUsername: z.string().nullable().optional(),
-  updatedBy: z.string().nullable().optional(),
-  updatedByUsername: z.string().nullable().optional(),
-  groupingMode: groupingModeSchema.nullable().optional(),
-  throttle: z
-    .object({
-      strategy: throttleStrategySchema.optional(),
-      interval: durationSchema.optional(),
-    })
-    .nullable()
-    .optional(),
+  id: opt(shape.id),
+  enabled: opt(shape.enabled),
+  auth: opt(shape.auth),
+  createdAt: opt(shape.createdAt),
+  updatedAt: opt(shape.updatedAt),
+  description: opt(shape.description),
+  groupBy: opt(shape.groupBy),
+  tags: opt(shape.tags),
+  snoozedUntil: opt(shape.snoozedUntil),
+  createdBy: opt(shape.createdBy),
+  createdByUsername: opt(shape.createdByUsername),
+  updatedBy: opt(shape.updatedBy),
+  updatedByUsername: opt(shape.updatedByUsername),
+  groupingMode: opt(shape.groupingMode),
+  throttle: opt(shape.throttle),
   /** Maps destination IDs to resolved metadata for display (not persisted to API). */
   resolvedDestinations: z
     .record(z.string(), z.object({ name: z.string(), isDraft: z.boolean() }))
