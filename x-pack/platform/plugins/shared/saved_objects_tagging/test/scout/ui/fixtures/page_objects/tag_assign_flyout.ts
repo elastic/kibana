@@ -25,7 +25,6 @@ export class TagAssignFlyout {
     await this.page.testSubj.click(`assign-result-${type}-${id}`);
   }
 
-  // FTR-equivalent of waitUntilResultsAreLoaded (renamed: shorter).
   async waitForResultsLoaded() {
     await this.resultList.locator('.euiLoadingSpinner').waitFor({ state: 'hidden' });
   }

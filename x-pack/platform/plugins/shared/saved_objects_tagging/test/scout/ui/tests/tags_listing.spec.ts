@@ -32,12 +32,20 @@ test.describe('Tags management listing', { tag: tags.stateful.classic }, () => {
     const { tagsTable } = pageObjects.tagManagement;
 
     const searchCases = [
-      { term: 'my-favorite', expectedTagName: 'my-favorite-tag' },
-      { term: 'Another awesome', expectedTagName: 'tag-2' },
+      {
+        term: 'my-favorite',
+        expectedTagName: 'my-favorite-tag',
+        title: 'searches by name fragment',
+      },
+      {
+        term: 'Another awesome',
+        expectedTagName: 'tag-2',
+        title: 'searches by description keyword',
+      },
     ] as const;
 
-    for (const { term, expectedTagName } of searchCases) {
-      await test.step(`searches "${term}"`, async () => {
+    for (const { term, expectedTagName, title } of searchCases) {
+      await test.step(title, async () => {
         await tagsTable.searchForTerm(term);
 
         const displayedTags = await tagsTable.getDisplayedTagsInfo();
