@@ -22,11 +22,11 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getRecoverEsqlQuery } from '@kbn/alerting-v2-schemas';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
 import type { FormValues } from '../../form/types';
 import { serializeFormToYaml, parseYamlToFormValues } from '../../form/utils/yaml_form_utils';
-import { getRecoverEsqlQuery } from '@kbn/alerting-v2-schemas';
 import {
   mapRuleResponseToFormValues,
   mapFormValuesToCreateRequest,
