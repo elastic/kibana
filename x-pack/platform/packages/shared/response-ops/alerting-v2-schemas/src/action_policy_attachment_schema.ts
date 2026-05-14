@@ -30,6 +30,8 @@ const { shape } = actionPolicyResponseSchema;
 
 export const actionPolicyAttachmentDataSchema = actionPolicyResponseSchema.extend({
   id: opt(shape.id),
+  type: opt(shape.type),
+  ruleId: opt(shape.ruleId),
   enabled: opt(shape.enabled),
   auth: opt(shape.auth),
   createdAt: opt(shape.createdAt),
