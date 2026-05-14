@@ -30,6 +30,7 @@ import {
   usageCollection,
 } from '../kibana_services';
 import { getAddFromLibraryType, useAddFromLibraryTypes } from './registry';
+import { SEARCH_ROUTE_PATH } from '../../common/constants';
 
 const runAddTelemetry = (
   parent: unknown,
@@ -86,7 +87,7 @@ export const AddFromLibraryContent = ({ container }: AddFromLibraryContentProps)
         contentClient: {
           ...contentManagement.client,
           mSearch: (input: MSearchIn): Promise<MSearchResult<any>> => {
-            return core.http.post('/internal/embeddable/fetch_saved_objects', {
+            return core.http.post(SEARCH_ROUTE_PATH, {
               body: JSON.stringify({
                 type: input.contentTypes.map(({ contentTypeId }) => contentTypeId),
                 search: input.query.text,

@@ -99,5 +99,5 @@ export interface EmbeddableStart {
     type: string
   ) => Promise<EmbeddableTransforms['transformOut'] | undefined>;
   hasLegacyURLTransform: (type: string) => boolean;
-  getSavedObjects: (request: RequestType) => ResponseType;
+  getSavedObjects: (request: RequestType) => Promise<ResponseType>;
 }

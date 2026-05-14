@@ -10,11 +10,12 @@
 import type { IRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext, SavedObjectsFindOptionsReference } from '@kbn/core/server';
 import { requestTypeSchema, responseTypeSchema } from './types';
+import { SEARCH_ROUTE_PATH } from '../../common/constants';
 
 export function registerSearchRoute(router: IRouter<RequestHandlerContext>) {
   router.post(
     {
-      path: '/internal/embeddable/fetch_saved_objects',
+      path: SEARCH_ROUTE_PATH,
       validate: {
         request: {
           body: requestTypeSchema,
@@ -36,6 +37,11 @@ export function registerSearchRoute(router: IRouter<RequestHandlerContext>) {
       const { core } = await ctx.resolve(['core']);
       const { type, search, tags, limit } = req.body;
 
+      const tagIdToSavedObjectReference = (tagId: string): SavedObjectsFindOptionsReference => ({
+        type: 'tag',
+        id: tagId,
+      });
+
       try {
         const savedObjectResult = await core.savedObjects.client.find({
           type,
@@ -55,8 +61,3 @@ export function registerSearchRoute(router: IRouter<RequestHandlerContext>) {
     }
   );
 }
-
-const tagIdToSavedObjectReference = (tagId: string): SavedObjectsFindOptionsReference => ({
-  type: 'tag',
-  id: tagId,
-});
