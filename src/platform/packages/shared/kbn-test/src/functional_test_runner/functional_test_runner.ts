@@ -23,6 +23,8 @@ import {
   SuiteTracker,
   EsVersion,
   DedicatedTaskRunner,
+  ftrTimingRegistry,
+  ftrTimingEnabled,
 } from './lib';
 import { createEsClientForFtrConfig } from '../ftr_es_client';
 
@@ -63,6 +65,16 @@ export class FunctionalTestRunner {
           await this.validateEsVersion();
         }
         await providers.loadAll();
+
+        if (ftrTimingEnabled) {
+          const timingFile = Path.resolve(
+            REPO_ROOT,
+            'target/test-metrics/ftr-service-timing.ndjson'
+          );
+          lifecycle.cleanup.add(() => {
+            ftrTimingRegistry.writeToFile(timingFile);
+          });
+        }
       }
 
       const customTestRunner = this.config.get('testRunner');

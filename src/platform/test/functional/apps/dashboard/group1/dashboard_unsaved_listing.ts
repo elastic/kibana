@@ -150,6 +150,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardPanelActions.removePanelByTitle('RenderingTest:heatmap');
       await header.waitUntilLoadingHasFinished();
 
+      // Wait for the unsaved changes badge to disappear (dashboard is back to saved state)
+      await dashboard.ensureMissingUnsavedChangesNotification({ retry: true });
+
       // Check that it now does not exist
       await dashboard.gotoDashboardLandingPage();
       await header.waitUntilLoadingHasFinished();

@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const find = getService('find');
   const security = getService('security');
+  const retry = getService('retry');
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'header']);
 
   const USERS_PATH = 'security/users';
@@ -81,9 +82,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.setValue('userFormEmailInput', 'example@example.com');
           await PageObjects.security.clickSaveCreateUser();
 
-          const currentUrl = await browser.getCurrentUrl();
-          expect(currentUrl).to.contain(USERS_PATH);
-          expect(currentUrl).to.not.contain(CREATE_USERS_PATH);
+          // Wait for navigation to complete after save
+          await retry.waitFor('navigation to users listing', async () => {
+            const currentUrl = await browser.getCurrentUrl();
+            return currentUrl.includes(USERS_PATH) && !currentUrl.includes(CREATE_USERS_PATH);
+          });
         });
 
         it('Can navigate to edit user section', async () => {

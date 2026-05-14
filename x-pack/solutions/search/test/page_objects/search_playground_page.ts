@@ -494,6 +494,8 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       async clickManageButton() {
         await testSubjects.existOrFail('manageConnectorsLink');
         await testSubjects.click('manageConnectorsLink');
+        // Wait for the new tab to open before switching
+        await browser.waitForTabCount(2);
         await browser.switchTab(1);
         await testSubjects.existOrFail('modelSettingsPage');
         await browser.closeCurrentWindow();
