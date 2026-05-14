@@ -14,10 +14,12 @@ description: >
 
 ## Overview
 
-Analyze failing or skipped Fleet tests to determine root cause and recommend:
-**fix the test**, **fix the app**, **delete the test**, **close the issue as stale**, or **re-run to classify**.
+Analyze failing or skipped Fleet tests to determine root cause, then act:
+- **Investigation** (all modes): produce a structured report with verdict, evidence, and root cause.
+- **Fix / delete verdicts** (Modes 1 and 3): after the report, apply the changes and open a PR. The report becomes the PR description.
+- **Other verdicts**: present the report and let the human act (close issue, trigger re-run, escalate).
 
-Human-gated: never close issues, never push commits, never merge PRs autonomously. Produce a verdict + evidence; a human acts.
+Human-gated on merging and issue closure: never merge PRs, never close GitHub issues directly.
 
 **Fleet test domains (non-exhaustive):** Agents, Agent Policies, Package Policies, EPM (Elastic Package Manager), Policy Secrets, Knowledge Base, Fleet Tasks, Settings, Space Awareness, Outputs, Enrollment — and any other area owned by the Fleet team. When a test path or issue title refers to a Fleet-owned plugin or config, treat it in scope even if the domain isn't listed here.
 
@@ -174,15 +176,15 @@ Follow Fleet test conventions from `references/conventions-and-deletion.md` for 
 
 ### Step 6 — Issue disposition
 
-Recommend one of the following for the linked GitHub issue:
+Determine the verdict, then act:
 
-| Verdict | Condition | Deliverable |
+| Verdict | Condition | Action |
 |---|---|---|
-| **close-stale** | Test deleted/renamed; feature removed; duplicate of newer issue | Drafted closing comment citing evidence (commit SHA, PR number, or duplicate issue #) |
-| **flaky-rerun** | Passes locally N×; issue >60 days old; no recent test-file commits; OR `before all`/`after each` hook failure | Re-run command (type-dependent — see §Flaky Runner Support) + draft unskip diff to merge if it passes |
-| **fix** | Fails locally and reproduces the issue | Root cause + before/after diff in Fleet conventions + exact local verify command. If sibling issues exist, list them — one PR may close multiple. |
-| **delete-test** | `.skip`'d >180 days AND no intent-to-fix AND coverage duplicative at a lower layer | File-removal diff + justification + draft PR description |
-| **escalate** | None of the above — couldn't confidently classify | Evidence package + focused questions for the human |
+| **close-stale** | Test deleted/renamed; feature removed; duplicate of newer issue | Produce investigation report with drafted closing comment. Human posts it. |
+| **flaky-rerun** | Passes locally N×; issue >60 days old; no recent test-file commits; OR `before all`/`after each` hook failure | Produce investigation report with re-run command + draft unskip diff. Human triggers the re-run. |
+| **fix** | Fails locally and reproduces the issue | Produce investigation report, then **open a PR** with the fix. The investigation report becomes the PR description. |
+| **delete-test** | `.skip`'d >180 days AND no intent-to-fix AND coverage duplicative at a lower layer | Produce investigation report, then **open a PR** removing the test. The investigation report becomes the PR description. |
+| **escalate** | None of the above — couldn't confidently classify | Produce investigation report with focused questions for the human. No PR. |
 
 **Decision rubric** (first match wins):
 1. **close-stale** — test file/name gone; feature removed; duplicate of newer issue.
@@ -194,6 +196,8 @@ Recommend one of the following for the linked GitHub issue:
 ---
 
 ## Mode 1: Response format
+
+Always produce the investigation report first. For `fix` and `delete-test` verdicts, follow it by opening a PR.
 
 ```
 ## Analysis: #<N> — <title>
@@ -234,6 +238,15 @@ Recommend one of the following for the linked GitHub issue:
 ## Related Files
 [List of files to check or modify]
 ```
+
+**After the report — verdict-dependent next step:**
+
+| Verdict | Next step |
+|---|---|
+| `fix` or `delete-test` | Apply the changes, present the diff, then **ask for approval before opening a PR**. Use a short summary of the investigation report as the PR body (root cause in 1–2 sentences, what changed and why). List all sibling issues to close in the PR description. |
+| `close-stale` | Present the drafted closing comment. Human posts it. |
+| `flaky-rerun` | Present the re-run command and draft unskip diff. Human triggers the run. |
+| `escalate` | Present the evidence package and questions. Stop. |
 
 ---
 
@@ -312,6 +325,8 @@ A cluster name (e.g. `A`) or a list of issue numbers copy-pasted from the Mode 2
 
 ### Output format
 
+Always produce the investigation report first, then open a PR with the fix.
+
 ```markdown
 ## Cluster fix: <cluster name>
 
@@ -347,6 +362,8 @@ Run all of the following and confirm green:
 
 #N, #N, ... — reference this PR in each closing comment.
 ```
+
+**After the report:** Apply the fix, present the diff, then **ask for approval before opening a PR**. Use a short summary of the investigation report as the PR body (root cause in 1–2 sentences, what changed and why). Include all cluster issue numbers in the PR description so they are closed on merge.
 
 ---
 
@@ -398,10 +415,11 @@ For jest: if it passes 9/10 or more runs locally after a long silence, that's su
 
 ## Boundaries
 
-- **Always:** analyze test code, search for duplicates, propose fixes, draft closing comments.
+- **Always:** analyze test code, search for duplicates, produce the investigation report before taking any action.
 - **Always:** self-investigate before asking the user.
+- **For `fix` and `delete-test` verdicts:** apply the changes, present the diff, and **ask for approval before opening a PR**. The investigation report is the PR body.
 - **Ask first:** before suggesting moving a test to a different layer (may affect coverage intentionally).
-- **Never:** delete tests without explicit human approval.
+- **Never:** open a PR without explicit human approval — the report is the gate, approval is the trigger.
 - **Never:** assume the problem is with the test — it might be a real app bug.
 - **Never:** close GitHub issues directly — draft the comment, human posts it.
 
