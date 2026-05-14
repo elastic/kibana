@@ -53,6 +53,8 @@ export const EMULATION_LOGS_INDEX_TEMPLATE = deepFreeze<IndicesPutIndexTemplateR
             category: { type: 'keyword' },
             type: { type: 'keyword' },
             kind: { type: 'keyword' },
+            dataset: { type: 'keyword' },
+            module: { type: 'keyword' },
           },
         },
         process: {
