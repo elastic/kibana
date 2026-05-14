@@ -155,6 +155,104 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.grouping).to.be(undefined);
     });
 
+    it('should update query to standalone format with a recover query', async () => {
+      const createResponse = await createRule(roleAuthc);
+      expect(createResponse.status).to.be(201);
+
+      const ruleId = createResponse.body.id as string;
+
+      const response = await supertestWithoutAuth
+        .patch(`${RULE_API_PATH}/${ruleId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          query: {
+            format: 'standalone',
+            breach:
+              'FROM logs-* | WHERE severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+            recover:
+              'FROM logs-* | WHERE severity == "resolved" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+          },
+        });
+
+      expect(response.status).to.be(200);
+      expect(response.body.query).to.eql({
+        format: 'standalone',
+        breach:
+          'FROM logs-* | WHERE severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+        recover:
+          'FROM logs-* | WHERE severity == "resolved" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+      });
+      // Other fields should be preserved
+      expect(response.body.schedule).to.eql({ every: '5m', lookback: '10m' });
+    });
+
+    it('should update query to composed format', async () => {
+      const createResponse = await createRule(roleAuthc);
+      expect(createResponse.status).to.be(201);
+
+      const ruleId = createResponse.body.id as string;
+
+      const response = await supertestWithoutAuth
+        .patch(`${RULE_API_PATH}/${ruleId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          query: {
+            format: 'composed',
+            base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+            blocks: {
+              breach: '| WHERE count >= 10',
+            },
+          },
+        });
+
+      expect(response.status).to.be(200);
+      expect(response.body.query).to.eql({
+        format: 'composed',
+        base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+        blocks: {
+          breach: '| WHERE count >= 10',
+        },
+      });
+      // Other fields should be preserved
+      expect(response.body.schedule).to.eql({ every: '5m', lookback: '10m' });
+    });
+
+    it('should update query to composed format with a recover block', async () => {
+      const createResponse = await createRule(roleAuthc);
+      expect(createResponse.status).to.be(201);
+
+      const ruleId = createResponse.body.id as string;
+
+      const response = await supertestWithoutAuth
+        .patch(`${RULE_API_PATH}/${ruleId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          query: {
+            format: 'composed',
+            base: 'FROM logs-* | STATS max_val = MAX(value) BY host.name',
+            blocks: {
+              breach: '| WHERE max_val >= 10',
+              recover: '| WHERE max_val < 5',
+            },
+          },
+        });
+
+      expect(response.status).to.be(200);
+      expect(response.body.query).to.eql({
+        format: 'composed',
+        base: 'FROM logs-* | STATS max_val = MAX(value) BY host.name',
+        blocks: {
+          breach: '| WHERE max_val >= 10',
+          recover: '| WHERE max_val < 5',
+        },
+      });
+      // Other fields should be preserved
+      expect(response.body.schedule).to.eql({ every: '5m', lookback: '10m' });
+    });
+
     it('should return 404 when updating a non-existent rule', async () => {
       const response = await supertestWithoutAuth
         .patch(`${RULE_API_PATH}/non-existent-rule-id`)

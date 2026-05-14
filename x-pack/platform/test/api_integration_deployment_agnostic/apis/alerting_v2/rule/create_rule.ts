@@ -72,7 +72,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           metadata: { name: 'test-signal-rule' },
           time_field: '@timestamp',
           schedule: { every: '10m' },
-          query: { fromat: 'standalone', breach: 'FROM logs-* | LIMIT 1' },
+          query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 1' },
         });
 
       expect(response.status).to.be(201);
@@ -111,6 +111,91 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
       expect(response.body.state_transition).to.eql({ pending_count: 3 });
       expect(response.body.grouping).to.eql({ fields: ['host.name'] });
+    });
+
+    it('should create a rule with standalone format and a recover query', async () => {
+      const response = await supertestWithoutAuth
+        .post(RULE_API_PATH)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          kind: 'alert',
+          metadata: { name: 'standalone-recover-rule' },
+          time_field: '@timestamp',
+          schedule: { every: '5m' },
+          query: {
+            format: 'standalone',
+            breach: 'FROM logs-* | WHERE severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+            recover: 'FROM logs-* | WHERE severity == "resolved" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+          },
+        });
+
+      expect(response.status).to.be(201);
+      expect(response.body.query).to.eql({
+        format: 'standalone',
+        breach: 'FROM logs-* | WHERE severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+        recover: 'FROM logs-* | WHERE severity == "resolved" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+      });
+    });
+
+    it('should create a rule with composed format', async () => {
+      const response = await supertestWithoutAuth
+        .post(RULE_API_PATH)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          kind: 'alert',
+          metadata: { name: 'composed-rule' },
+          time_field: '@timestamp',
+          schedule: { every: '5m' },
+          query: {
+            format: 'composed',
+            base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+            blocks: {
+              breach: '| WHERE count >= 10',
+            },
+          },
+        });
+
+      expect(response.status).to.be(201);
+      expect(response.body.query).to.eql({
+        format: 'composed',
+        base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+        blocks: {
+          breach: '| WHERE count >= 10',
+        },
+      });
+    });
+
+    it('should create a rule with composed format including a recover block', async () => {
+      const response = await supertestWithoutAuth
+        .post(RULE_API_PATH)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          kind: 'alert',
+          metadata: { name: 'composed-recover-rule' },
+          time_field: '@timestamp',
+          schedule: { every: '5m' },
+          query: {
+            format: 'composed',
+            base: 'FROM logs-* | STATS max_val = MAX(value) BY host.name',
+            blocks: {
+              breach: '| WHERE max_val >= 10',
+              recover: '| WHERE max_val < 5',
+            },
+          },
+        });
+
+      expect(response.status).to.be(201);
+      expect(response.body.query).to.eql({
+        format: 'composed',
+        base: 'FROM logs-* | STATS max_val = MAX(value) BY host.name',
+        blocks: {
+          breach: '| WHERE max_val >= 10',
+          recover: '| WHERE max_val < 5',
+        },
+      });
     });
 
     it('should return 400 when kind is missing', async () => {

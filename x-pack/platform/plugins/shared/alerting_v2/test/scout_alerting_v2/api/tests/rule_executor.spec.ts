@@ -1299,6 +1299,125 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
     }
   );
 
+  apiTest(
+    'executes the concatenated base+breach block query for composed format rules',
+    async ({ apiServices }) => {
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-composed-breach-only',
+            severity: 'high',
+            value: 10,
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            // This host has a low value and must NOT produce a breach event,
+            // proving the breach block (not just the base) drives the filter.
+            'host.name': 'host-composed-no-breach',
+            severity: 'high',
+            value: 1,
+          },
+        ],
+      });
+
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'executor-composed-breach' },
+          query: {
+            format: 'composed',
+            base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-composed-breach-only", "host-composed-no-breach") | STATS max_val = MAX(value) BY host.name`,
+            blocks: {
+              breach: `| WHERE max_val >= 10`,
+            },
+          },
+        })
+      );
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
+
+      await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+        ruleId: rule.id,
+        runs: 2,
+      });
+
+      const breachEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'breached',
+      });
+
+      const breachedHosts = breachEvents.map((e) => e.data['host.name']);
+      expect(breachedHosts).toContain('host-composed-breach-only');
+      expect(breachedHosts).not.toContain('host-composed-no-breach');
+    }
+  );
+
+  apiTest(
+    'emits a recovered event using the composed blocks.recover query',
+    async ({ apiServices }) => {
+      // Index a high-value doc so the breach block (max_val >= 10) fires.
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-composed-recover',
+            value: 10,
+          },
+        ],
+      });
+
+      // base query returns max value per host; the breach and recover blocks each
+      // append a WHERE clause — the composed format shares the FROM/STATS between them.
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'executor-composed-recover' },
+          query: {
+            format: 'composed',
+            base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-composed-recover" | STATS max_val = MAX(value) BY host.name`,
+            blocks: {
+              breach: `| WHERE max_val >= 10`,
+              recover: `| WHERE max_val < 5`,
+            },
+          },
+        })
+      );
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
+
+      const breachedEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'breached',
+      });
+      const breachedHash = breachedEvents[0].group_hash;
+
+      // Replace the high-value doc with a low-value one so the recover block matches.
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
+        index: SOURCE_INDEX,
+        query: { term: { 'host.name': 'host-composed-recover' } },
+      });
+
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-composed-recover',
+            value: 1,
+          },
+        ],
+      });
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'recovered' });
+
+      const recoveredEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'recovered',
+      });
+
+      expect(recoveredEvents.length).toBeGreaterThanOrEqual(1);
+      expect(recoveredEvents[0].group_hash).toBe(breachedHash);
+    }
+  );
+
   apiTest('writes zero events when the ES|QL query returns no rows', async ({ apiServices }) => {
     const rule = await apiServices.alertingV2.rules.create(
       buildCreateRuleData({
