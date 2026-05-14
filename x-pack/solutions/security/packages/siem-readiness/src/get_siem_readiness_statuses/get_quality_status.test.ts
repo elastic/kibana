@@ -46,7 +46,13 @@ const makeQualityResult = (
     error: null,
   } as const);
 
-const ALL_CATEGORIES: MainCategories[] = ['Endpoint', 'Cloud', 'Identity', 'Network', 'Application/SaaS'];
+const ALL_CATEGORIES: MainCategories[] = [
+  'Endpoint',
+  'Cloud',
+  'Identity',
+  'Network',
+  'Application/SaaS',
+];
 
 describe('getQualityStatus', () => {
   describe('noData', () => {

@@ -59,7 +59,13 @@ describe('getContinuityTool', () => {
       mockGetContinuity.mockResolvedValueOnce(
         makePayload({
           items: [
-            { name: 'internal', indices: [INTERNAL_INDEX], docsCount: 100, failedDocsCount: 0, statsAvailable: true },
+            {
+              name: 'internal',
+              indices: [INTERNAL_INDEX],
+              docsCount: 100,
+              failedDocsCount: 0,
+              statsAvailable: true,
+            },
           ],
         })
       );
@@ -77,8 +83,20 @@ describe('getContinuityTool', () => {
       mockGetContinuity.mockResolvedValueOnce(
         makePayload({
           items: [
-            { name: 'endpoint-pipeline', indices: [ENDPOINT_INDEX], docsCount: 1000, failedDocsCount: 0, statsAvailable: true },
-            { name: 'internal', indices: [INTERNAL_INDEX], docsCount: 100, failedDocsCount: 0, statsAvailable: true },
+            {
+              name: 'endpoint-pipeline',
+              indices: [ENDPOINT_INDEX],
+              docsCount: 1000,
+              failedDocsCount: 0,
+              statsAvailable: true,
+            },
+            {
+              name: 'internal',
+              indices: [INTERNAL_INDEX],
+              docsCount: 100,
+              failedDocsCount: 0,
+              statsAvailable: true,
+            },
           ],
         })
       );
@@ -99,7 +117,13 @@ describe('getContinuityTool', () => {
       mockGetContinuity.mockResolvedValueOnce(
         makePayload({
           items: [
-            { name: 'endpoint-pipeline', indices: [ENDPOINT_INDEX], docsCount: 100, failedDocsCount: 5, statsAvailable: true },
+            {
+              name: 'endpoint-pipeline',
+              indices: [ENDPOINT_INDEX],
+              docsCount: 100,
+              failedDocsCount: 5,
+              statsAvailable: true,
+            },
           ],
           actionableFindings: [
             { severity: 'critical', message: 'critical failure', resource: 'endpoint-pipeline' },
@@ -121,7 +145,11 @@ describe('getContinuityTool', () => {
         makePayload({
           items: [],
           actionableFindings: [
-            { severity: 'critical', message: 'unknown pipeline failure', resource: 'ghost-pipeline' },
+            {
+              severity: 'critical',
+              message: 'unknown pipeline failure',
+              resource: 'ghost-pipeline',
+            },
           ],
         })
       );
@@ -145,9 +173,27 @@ describe('getContinuityTool', () => {
           status: 'healthy',
           summary: 'All 3 active ingest pipelines are functioning properly.',
           items: [
-            { name: 'endpoint-pipeline', indices: [ENDPOINT_INDEX], docsCount: 1000, failedDocsCount: 0, statsAvailable: true },
-            { name: 'internal-1', indices: [INTERNAL_INDEX], docsCount: 50, failedDocsCount: 0, statsAvailable: true },
-            { name: 'internal-2', indices: ['.other-internal-000001'], docsCount: 50, failedDocsCount: 0, statsAvailable: true },
+            {
+              name: 'endpoint-pipeline',
+              indices: [ENDPOINT_INDEX],
+              docsCount: 1000,
+              failedDocsCount: 0,
+              statsAvailable: true,
+            },
+            {
+              name: 'internal-1',
+              indices: [INTERNAL_INDEX],
+              docsCount: 50,
+              failedDocsCount: 0,
+              statsAvailable: true,
+            },
+            {
+              name: 'internal-2',
+              indices: ['.other-internal-000001'],
+              docsCount: 50,
+              failedDocsCount: 0,
+              statsAvailable: true,
+            },
           ],
         })
       );
@@ -190,9 +236,27 @@ describe('getContinuityTool', () => {
   describe('parity — agent tool matches filterPipelinesByCategories (shared predicate)', () => {
     it('agent data.items contains exactly the pipelines that filterPipelinesByCategories returns', async () => {
       const rawPipelines = [
-        { name: 'endpoint-pipeline', indices: [ENDPOINT_INDEX], docsCount: 1000, failedDocsCount: 0, statsAvailable: true },
-        { name: 'network-pipeline', indices: [NETWORK_INDEX], docsCount: 500, failedDocsCount: 0, statsAvailable: true },
-        { name: 'internal', indices: [INTERNAL_INDEX], docsCount: 50, failedDocsCount: 0, statsAvailable: true },
+        {
+          name: 'endpoint-pipeline',
+          indices: [ENDPOINT_INDEX],
+          docsCount: 1000,
+          failedDocsCount: 0,
+          statsAvailable: true,
+        },
+        {
+          name: 'network-pipeline',
+          indices: [NETWORK_INDEX],
+          docsCount: 500,
+          failedDocsCount: 0,
+          statsAvailable: true,
+        },
+        {
+          name: 'internal',
+          indices: [INTERNAL_INDEX],
+          docsCount: 50,
+          failedDocsCount: 0,
+          statsAvailable: true,
+        },
       ];
       mockGetContinuity.mockResolvedValueOnce(makePayload({ items: rawPipelines }));
 
@@ -201,9 +265,9 @@ describe('getContinuityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      const agentItemNames = ((result.results[0] as OtherResult).data as ContinuityPayload).items.map(
-        (p) => p.name
-      );
+      const agentItemNames = (
+        (result.results[0] as OtherResult).data as ContinuityPayload
+      ).items.map((p) => p.name);
       // Apply the same shared predicate that the UI tab now uses
       const sharedFilterNames = filterPipelinesByCategories(rawPipelines, mockCategories).map(
         (p) => p.name

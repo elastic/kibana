@@ -7,7 +7,11 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { ActionableFinding, DataQualityResultDocument, QualityPayload } from '@kbn/siem-readiness';
+import type {
+  ActionableFinding,
+  DataQualityResultDocument,
+  QualityPayload,
+} from '@kbn/siem-readiness';
 import { isQualityIncompatible } from '@kbn/siem-readiness';
 
 const DATA_QUALITY_RESULTS_INDEX = '.kibana-data-quality-dashboard-results-*';

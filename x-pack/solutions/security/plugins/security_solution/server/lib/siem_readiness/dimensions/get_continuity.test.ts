@@ -39,14 +39,18 @@ describe('getContinuity', () => {
     });
 
     it('returns healthy when pipelines exist but none have critical failure rates', async () => {
-      mockFetchPipelines.mockResolvedValueOnce([makePipeline({ docsCount: 100, failedDocsCount: 0 })]);
+      mockFetchPipelines.mockResolvedValueOnce([
+        makePipeline({ docsCount: 100, failedDocsCount: 0 }),
+      ]);
       const result = await getContinuity({ esClient, isServerless: false, logger });
       expect(result.status).toBe('healthy');
     });
 
     it('returns actionsRequired when a pipeline exceeds the critical failure rate threshold', async () => {
       // 5% failure rate — above the 1% threshold
-      mockFetchPipelines.mockResolvedValueOnce([makePipeline({ docsCount: 100, failedDocsCount: 5 })]);
+      mockFetchPipelines.mockResolvedValueOnce([
+        makePipeline({ docsCount: 100, failedDocsCount: 5 }),
+      ]);
       const result = await getContinuity({ esClient, isServerless: false, logger });
       expect(result.status).toBe('actionsRequired');
     });

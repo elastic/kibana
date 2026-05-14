@@ -65,8 +65,18 @@ describe('getContinuityStatus', () => {
 
   it('ignores uncategorized pipelines when computing status', () => {
     const pipelines = [
-      makePipeline({ name: 'cat', indices: ['logs-endpoint.events-000001'], docsCount: 100, failedDocsCount: 0 }),
-      makePipeline({ name: 'uncat', indices: ['internal-index'], docsCount: 100, failedDocsCount: 99 }),
+      makePipeline({
+        name: 'cat',
+        indices: ['logs-endpoint.events-000001'],
+        docsCount: 100,
+        failedDocsCount: 0,
+      }),
+      makePipeline({
+        name: 'uncat',
+        indices: ['internal-index'],
+        docsCount: 100,
+        failedDocsCount: 99,
+      }),
     ];
     const map = makeMap({ 'logs-endpoint.events-000001': 'Endpoint' });
     expect(getContinuityStatus(pipelines, map, ALL)).toBe('healthy');

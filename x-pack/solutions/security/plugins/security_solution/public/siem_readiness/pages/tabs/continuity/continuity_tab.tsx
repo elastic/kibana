@@ -109,9 +109,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
 
       const pipelineCategories = new Set<MainCategories>();
       pipeline.indices.forEach((indexName) => {
-        (indexToCategoriesMap.get(indexName) ?? []).forEach((cat) =>
-          pipelineCategories.add(cat)
-        );
+        (indexToCategoriesMap.get(indexName) ?? []).forEach((cat) => pipelineCategories.add(cat));
       });
 
       pipelineCategories.forEach((category) => {
