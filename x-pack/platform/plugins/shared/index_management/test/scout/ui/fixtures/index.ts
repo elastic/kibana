@@ -22,6 +22,8 @@ type PageObjectClass = new (page: ScoutPage) => AbstractPageObject;
 
 export interface IndexManagementBrowserAuthFixture extends BrowserAuthFixture {
   loginAsIndexManagementUser: () => Promise<void>;
+  loginAsIndexManagementMonitorEnrichOnly: () => Promise<void>;
+  loginAsIndexManagementMonitorOnly: () => Promise<void>;
 }
 
 export const createTest = function <PageObjectsExtensions = Record<string, AbstractPageObject>>(
@@ -71,9 +73,17 @@ export const createTest = function <PageObjectsExtensions = Record<string, Abstr
       const loginAsIndexManagementUser = async () =>
         browserAuth.loginWithCustomRole(CUSTOM_ROLES.indexManagementUser);
 
+      const loginAsIndexManagementMonitorEnrichOnly = async () =>
+        browserAuth.loginWithCustomRole(CUSTOM_ROLES.indexManagementMonitorEnrichOnly);
+
+      const loginAsIndexManagementMonitorOnly = async () =>
+        browserAuth.loginWithCustomRole(CUSTOM_ROLES.indexManagementMonitorOnly);
+
       await use({
         ...browserAuth,
         loginAsIndexManagementUser,
+        loginAsIndexManagementMonitorEnrichOnly,
+        loginAsIndexManagementMonitorOnly,
       });
     },
   });

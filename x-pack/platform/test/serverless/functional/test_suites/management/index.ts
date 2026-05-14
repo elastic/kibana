@@ -11,7 +11,6 @@ export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Serverless Common UI - Management', function () {
     this.tags(['esGate']);
 
-    loadTestFile(require.resolve('./index_management'));
     loadTestFile(require.resolve('./transforms/search_bar_features'));
     loadTestFile(require.resolve('./transforms/transform_list'));
     loadTestFile(require.resolve('./advanced_settings'));
