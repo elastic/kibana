@@ -87,8 +87,8 @@ const HOT_ALL_ROLLOVER_POLICY: SerializedPolicy = {
 };
 
 const meta: Meta<typeof InspectIlmPolicyFlyout> = {
+  title: 'Data Lifecycle Phases / Inspect ILM Policy Flyout',
   component: InspectIlmPolicyFlyout,
-  title: 'Inspect ILM policy flyout',
 };
 
 export default meta;

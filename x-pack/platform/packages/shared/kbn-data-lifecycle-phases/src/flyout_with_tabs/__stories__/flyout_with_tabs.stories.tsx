@@ -19,7 +19,7 @@ const TABS: NonEmptyFlyoutTabs<DemoTab> = [
 ];
 
 const meta: Meta<typeof FlyoutWithTabs> = {
-  title: 'Flyout with tabs',
+  title: 'Data Lifecycle Phases / Flyout With Tabs',
   component: FlyoutWithTabs,
 };
 

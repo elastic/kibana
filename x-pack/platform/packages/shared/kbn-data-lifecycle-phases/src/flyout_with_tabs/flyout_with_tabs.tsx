@@ -7,15 +7,16 @@
 
 import React, { useState } from 'react';
 import {
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTab,
-  EuiTabs,
-  EuiTitle,
-  useEuiTheme,
-  useGeneratedHtmlId,
+    EuiFlyout,
+    type EuiFlyoutProps,
+    EuiFlyoutHeader,
+    EuiFlexGroup,
+    EuiFlexItem,
+    EuiTab,
+    EuiTabs,
+    EuiTitle,
+    useEuiTheme,
+    useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -37,6 +38,7 @@ export interface FlyoutWithTabsProps<TId extends string> {
   initialTabId?: TId;
   onClose: () => void;
   size?: number;
+  type?: EuiFlyoutProps['type'];
   children: (selectedTabId: TId) => React.ReactNode;
 }
 
@@ -47,11 +49,24 @@ export const FlyoutWithTabs = <TId extends string>({
   initialTabId,
   onClose,
   size = 400,
+  type = 'push',
   children,
 }: FlyoutWithTabsProps<TId>) => {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'flyoutWithTabs' });
-  const [selectedTab, setSelectedTab] = useState<TId>(() => initialTabId ?? tabs[0].id);
   const { euiTheme } = useEuiTheme();
+  const [selectedTab, setSelectedTab] = useState<TId | undefined>(
+    () => initialTabId ?? tabs[0]?.id
+  );
+
+  if (!tabs.length) {
+    throw new Error('FlyoutWithTabs requires at least one tab.');
+  }
+
+  const resolvedSelectedTab =
+    selectedTab !== undefined && tabs.some(({ id }) => id === selectedTab)
+      ? selectedTab
+      : tabs[0].id;
+
   const headerStyles = css`
     padding: ${euiTheme.size.l} ${euiTheme.size.l} 0;
   `;
@@ -69,7 +84,7 @@ export const FlyoutWithTabs = <TId extends string>({
       size={size}
       ownFocus
       paddingSize="none"
-      type="push"
+      type={type}
       flyoutMenuProps={{ title }}
       data-test-subj="flyoutWithTabs"
     >
@@ -85,7 +100,7 @@ export const FlyoutWithTabs = <TId extends string>({
               {tabs.map(({ id, label }) => (
                 <EuiTab
                   key={id}
-                  isSelected={selectedTab === id}
+                  isSelected={resolvedSelectedTab === id}
                   onClick={() => setSelectedTab(id)}
                   data-test-subj={`flyoutTab-${id}`}
                 >
@@ -96,7 +111,7 @@ export const FlyoutWithTabs = <TId extends string>({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
-      {children(selectedTab)}
+      {children(resolvedSelectedTab)}
     </EuiFlyout>
   );
 };

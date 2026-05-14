@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import '@testing-library/jest-dom';
 import { EuiThemeProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import type { Phases } from '@kbn/index-lifecycle-management-common-shared';
@@ -26,12 +27,13 @@ describe('IlmPolicySummaryTab', () => {
 
     renderWithTheme(<IlmPolicySummaryTab phases={phases} />);
 
-    const accordions = screen.getAllByTestId(/^ilmPhaseAccordion-/);
-    const ids = accordions.map((el) => el.getAttribute('data-test-subj'));
+    const renderedAccordions = screen.getAllByTestId(/^ilmInspectPhaseAccordion-/);
+    const ids = renderedAccordions.map((el) => el.getAttribute('data-test-subj'));
+
     expect(ids).toEqual([
-      'ilmPhaseAccordion-hot',
-      'ilmPhaseAccordion-warm',
-      'ilmPhaseAccordion-delete',
+      'ilmInspectPhaseAccordion-hot',
+      'ilmInspectPhaseAccordion-warm',
+      'ilmInspectPhaseAccordion-delete',
     ]);
   });
 
@@ -40,11 +42,11 @@ describe('IlmPolicySummaryTab', () => {
 
     renderWithTheme(<IlmPolicySummaryTab phases={phases} />);
 
-    expect(screen.queryByTestId('ilmPhaseAccordion-hot')).toBeNull();
-    expect(screen.queryByTestId('ilmPhaseAccordion-warm')).toBeNull();
-    expect(screen.queryByTestId('ilmPhaseAccordion-cold')).toBeNull();
-    expect(screen.queryByTestId('ilmPhaseAccordion-frozen')).toBeNull();
-    expect(screen.queryByTestId('ilmPhaseAccordion-delete')).not.toBeNull();
+    expect(screen.queryByTestId('ilmInspectPhaseAccordion-hot')).toBeNull();
+    expect(screen.queryByTestId('ilmInspectPhaseAccordion-warm')).toBeNull();
+    expect(screen.queryByTestId('ilmInspectPhaseAccordion-cold')).toBeNull();
+    expect(screen.queryByTestId('ilmInspectPhaseAccordion-frozen')).toBeNull();
+    expect(screen.getByTestId('ilmInspectPhaseAccordion-delete')).not.toBeNull();
   });
 });
 
@@ -60,7 +62,7 @@ describe('PhaseAccordion', () => {
     };
 
     renderWithTheme(<PhaseAccordion phase="warm" phases={phases} />);
-    expect(screen.getByTestId('ilmPhaseAccordionMinAge-warm').textContent).toContain('7d');
+    expect(screen.getByTestId('ilmInspectPhaseMinAgeBadge-warm')).toHaveTextContent('7d');
   });
 
   it('does not render the min_age badge when min_age is 0ms', () => {
@@ -69,7 +71,7 @@ describe('PhaseAccordion', () => {
     };
 
     renderWithTheme(<PhaseAccordion phase="hot" phases={phases} />);
-    expect(screen.queryByTestId('ilmPhaseAccordionMinAge-hot')).toBeNull();
+    expect(screen.queryByTestId('ilmInspectPhaseMinAgeBadge-hot')).toBeNull();
   });
 
   it('renders no content area when buildPhaseContent returns empty sections', () => {
@@ -79,7 +81,7 @@ describe('PhaseAccordion', () => {
 
     renderWithTheme(<PhaseAccordion phase="frozen" phases={phases} />);
 
-    expect(screen.queryByTestId('ilmPhaseAccordion-frozen')).not.toBeNull();
-    expect(screen.queryByTestId('ilmPhaseAccordionContent-frozen')).toBeNull();
+    expect(screen.getByTestId('ilmInspectPhaseAccordion-frozen')).not.toBeNull();
+    expect(screen.queryByTestId('ilmInspectPhaseAccordionContent-frozen')).toBeNull();
   });
 });

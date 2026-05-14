@@ -41,6 +41,7 @@ export const InspectIlmPolicyFlyout = ({
   onBack,
   onEditPolicy,
   onSelectAndApply,
+  type,
 }: InspectIlmPolicyFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
   const footerStyles = css`
@@ -54,6 +55,7 @@ export const InspectIlmPolicyFlyout = ({
       tabs={TABS}
       initialTabId="summary"
       onClose={onBack}
+      type={type}
     >
       {(selectedTab) => (
         <>

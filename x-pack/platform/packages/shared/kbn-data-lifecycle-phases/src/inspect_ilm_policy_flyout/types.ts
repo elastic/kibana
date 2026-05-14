@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiFlyoutProps } from '@elastic/eui';
 import type { SerializedPolicy } from '@kbn/index-lifecycle-management-common-shared';
 
 export interface InspectIlmPolicyFlyoutProps {
@@ -27,4 +28,6 @@ export interface InspectIlmPolicyFlyoutProps {
    * Closes the flyout and applies the selected policy.
    */
   onSelectAndApply: (policyName: string) => void;
+  /** Flyout display mode. Defaults to push. */
+  type?: EuiFlyoutProps['type'];
 }

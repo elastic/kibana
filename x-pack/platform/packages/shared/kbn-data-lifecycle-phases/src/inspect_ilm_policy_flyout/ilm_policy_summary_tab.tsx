@@ -78,7 +78,7 @@ export const PhaseAccordion = ({ phase, phases }: PhaseAccordionProps) => {
       gutterSize="s"
       alignItems="center"
       responsive={false}
-      data-test-subj={`ilmPhaseAccordionButton-${phase}`}
+      data-test-subj={`ilmInspectPhaseAccordionButton-${phase}`}
     >
       <EuiFlexItem grow={false}>
         <PhaseIndicator phase={phase} />
@@ -90,7 +90,7 @@ export const PhaseAccordion = ({ phase, phases }: PhaseAccordionProps) => {
       </EuiFlexItem>
       {minAge && minAge !== '0ms' && (
         <EuiFlexItem grow={false}>
-          <EuiBadge data-test-subj={`ilmPhaseAccordionMinAge-${phase}`}>{minAge}</EuiBadge>
+          <EuiBadge data-test-subj={`ilmInspectPhaseMinAgeBadge-${phase}`}>{minAge}</EuiBadge>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
@@ -100,12 +100,12 @@ export const PhaseAccordion = ({ phase, phases }: PhaseAccordionProps) => {
     <>
       <EuiAccordion
         id={`ilm-inspect-phase-${phase}`}
+        data-test-subj={`ilmInspectPhaseAccordion-${phase}`}
         buttonContent={buttonContent}
         initialIsOpen={content.length > 0}
         paddingSize="none"
         arrowDisplay="right"
         buttonProps={{ paddingSize: 'l' }}
-        data-test-subj={`ilmPhaseAccordion-${phase}`}
         // Needed so the line doesn't get cut off
         css={{ '.euiAccordion__triggerWrapper': { paddingRight: euiTheme.size.l } }}
       >
@@ -113,7 +113,7 @@ export const PhaseAccordion = ({ phase, phases }: PhaseAccordionProps) => {
           <EuiFlexGroup
             direction="column"
             gutterSize="m"
-            data-test-subj={`ilmPhaseAccordionContent-${phase}`}
+            data-test-subj={`ilmInspectPhaseAccordionContent-${phase}`}
             css={accordionContentStyles}
           >
             {content.map((section) => (
