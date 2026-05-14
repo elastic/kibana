@@ -9,7 +9,7 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { LabsPlugin } from './plugin';
-import { HELLO_WORLD_APP_ID, PLUGIN_ID, PLUGIN_PATH } from '../common';
+import { EMBEDDING_EXPLORER_APP_ID, HELLO_WORLD_APP_ID, PLUGIN_ID, PLUGIN_PATH } from '../common';
 
 describe('LabsPlugin', () => {
   it('registers the Labs marketplace in the left nav', () => {
@@ -37,6 +37,20 @@ describe('LabsPlugin', () => {
     expect(coreSetup.application.register).toHaveBeenCalledWith(
       expect.objectContaining({
         id: HELLO_WORLD_APP_ID,
+        visibleIn: ['globalSearch', 'sideNav'],
+      })
+    );
+  });
+
+  it('registers the embedding explorer lab application', () => {
+    const plugin = new LabsPlugin(coreMock.createPluginInitializerContext());
+    const coreSetup = coreMock.createSetup();
+
+    plugin.setup(coreSetup);
+
+    expect(coreSetup.application.register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: EMBEDDING_EXPLORER_APP_ID,
         visibleIn: ['globalSearch', 'sideNav'],
       })
     );

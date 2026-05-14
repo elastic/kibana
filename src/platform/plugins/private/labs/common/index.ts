@@ -17,6 +17,21 @@ export {
 } from './constants';
 export { LAB_IDS, type LabId, type LabsProfileData } from './types';
 export {
+  EMBEDDING_EXPLORER_APP_ID,
+  EMBEDDING_EXPLORER_INDEX_DATA_API_PATH,
+  EMBEDDING_EXPLORER_INDEX_FIELDS_API_PATH,
+  EMBEDDING_EXPLORER_INDICES_API_PATH,
+  EMBEDDING_EXPLORER_LAB_ID,
+  EMBEDDING_EXPLORER_SAMPLE_API_PATH,
+  type EmbeddingExplorerDatasetResponse,
+  type EmbeddingExplorerIndexDataRequest,
+  type EmbeddingExplorerIndexDataResponse,
+  type EmbeddingExplorerIndexFieldsResponse,
+  type EmbeddingExplorerIndicesResponse,
+  type EmbeddingExplorerMetadataValue,
+  type EmbeddingExplorerPoint,
+} from './lab_apps/embedding_explorer';
+export {
   HELLO_WORLD_API_PATH,
   HELLO_WORLD_APP_ID,
   HELLO_WORLD_LAB_ID,

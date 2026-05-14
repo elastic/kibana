@@ -8,6 +8,7 @@
  */
 
 import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { registerEmbeddingExplorerRoutes } from './lab_apps/embedding_explorer/routes/register_routes';
 import { registerHelloWorldRoutes } from './lab_apps/hello_world/routes/register_routes';
 
 export class LabsPlugin implements Plugin {
@@ -16,6 +17,7 @@ export class LabsPlugin implements Plugin {
   public setup(core: CoreSetup) {
     const router = core.http.createRouter();
 
+    registerEmbeddingExplorerRoutes(router);
     registerHelloWorldRoutes(router);
 
     return {};

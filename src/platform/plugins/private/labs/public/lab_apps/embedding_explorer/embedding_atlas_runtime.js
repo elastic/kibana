@@ -7,15 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EMBEDDING_EXPLORER_LAB_ID } from './lab_apps/embedding_explorer';
-import { HELLO_WORLD_LAB_ID } from './lab_apps/hello_world';
+import { t as EmbeddingView } from '../../../../../../../../node_modules/embedding-atlas/dist/chunk-BBxPb3G0.js';
 
-export const LAB_IDS = [HELLO_WORLD_LAB_ID, EMBEDDING_EXPLORER_LAB_ID] as const;
-
-export type LabId = (typeof LAB_IDS)[number];
-
-export interface LabsProfileData extends Record<string, unknown> {
-  userSettings?: {
-    labsInstalledLabIdsJson?: string;
-  };
-}
+export { EmbeddingView };
