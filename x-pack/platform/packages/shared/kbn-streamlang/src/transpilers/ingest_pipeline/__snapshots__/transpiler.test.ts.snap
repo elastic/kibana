@@ -261,6 +261,17 @@ exports[`transpile (Streamlang DSL to ingest pipeline) should transpile a variet
 Object {
   "processors": Array [
     Object {
+      "registered_domain": Object {
+        "description": undefined,
+        "field": "expression",
+        "if": undefined,
+        "ignore_failure": undefined,
+        "ignore_missing": true,
+        "tag": undefined,
+        "target_field": "prefix",
+      },
+    },
+    Object {
       "network_direction": Object {
         "destination_ip": "destination_ip",
         "internal_networks": Array [

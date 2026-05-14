@@ -16,11 +16,13 @@ import { setTestFunctions } from '../../../commands/definitions/utils/test_funct
 import { FunctionDefinitionTypes } from '../../../commands';
 import { Location } from '../../../commands/registry/types';
 
-const allUniqueParameterHints = uniqBy(
-  getAllFunctions()
-    .flatMap((fn) => fn.signatures)
-    .flatMap((signature) => signature.params)
-    .flatMap((param) => (param.hint ? [param.hint] : [])),
+const allHints = getAllFunctions()
+  .flatMap((fn) => fn.signatures)
+  .flatMap((signature) => signature.params)
+  .flatMap((param) => (param.hint ? [param.hint] : []));
+
+const entityTypeHints = uniqBy(
+  allHints.filter((hint) => hint.entityType !== undefined),
   'entityType'
 );
 
@@ -35,7 +37,9 @@ describe('function parameters autocomplete from hints', () => {
     },
   };
 
-  it.each(allUniqueParameterHints)('should resolve suggestions for $entityType', async (hint) => {
+  afterEach(() => setTestFunctions([]));
+
+  it.each(entityTypeHints)('should resolve suggestions for $entityType', async (hint) => {
     const functionName = `test_hint_${hint.entityType}`;
 
     // Define a fake function to test the parameter hint
