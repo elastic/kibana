@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useMemo, useRef } from 'react';
-import type { DocViewerProps, FlyoutOriginDocType } from '@kbn/unified-doc-viewer';
+import type { DocViewerProps } from '@kbn/unified-doc-viewer';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -35,7 +35,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { ChromeStart } from '@kbn/core/public';
 import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { FlyoutHistoryKeyContext } from './flyout_history_key_context';
-import { FlyoutOriginDocTypeContext } from './flyout_origin_doc_type_context';
+import { OriginDocTypeContext } from './origin_doc_type_context';
 import { UnifiedDocViewer } from '../lazy_doc_viewer';
 import { useFlyoutA11y } from './use_flyout_a11y';
 
@@ -48,7 +48,7 @@ export interface UnifiedDocViewerFlyoutProps
   flyoutActions?: React.ReactNode;
   flyoutType?: 'push' | 'overlay';
   flyoutWidthLocalStorageKey?: string;
-  flyoutOriginDocType?: FlyoutOriginDocType;
+  originDocType?: string;
   services: {
     toastNotifications?: ToastsStart;
     chrome: ChromeStart;
@@ -94,7 +94,7 @@ export function UnifiedDocViewerFlyout({
   flyoutActions,
   flyoutType,
   flyoutWidthLocalStorageKey,
-  flyoutOriginDocType,
+  originDocType,
   services,
   docViewsRegistry,
   isEsqlQuery,
@@ -269,7 +269,7 @@ export function UnifiedDocViewerFlyout({
 
   return (
     <FlyoutHistoryKeyContext.Provider value={historyKey}>
-      <FlyoutOriginDocTypeContext.Provider value={flyoutOriginDocType}>
+      <OriginDocTypeContext.Provider value={originDocType}>
         <EuiPortal>
           <EuiFlyout
             session="start"
@@ -345,7 +345,7 @@ export function UnifiedDocViewerFlyout({
                 initialState={initialDocViewerState}
                 onInitialStateChange={onInitialDocViewerStateChange}
                 onUpdateSelectedTabId={onUpdateSelectedTabId}
-                flyoutOriginDocType={flyoutOriginDocType}
+                originDocType={originDocType}
                 {...docViewRenderProps}
               />
             </EuiFlyoutBody>
@@ -354,7 +354,7 @@ export function UnifiedDocViewerFlyout({
             )}
           </EuiFlyout>
         </EuiPortal>
-      </FlyoutOriginDocTypeContext.Provider>
+      </OriginDocTypeContext.Provider>
     </FlyoutHistoryKeyContext.Provider>
   );
 }

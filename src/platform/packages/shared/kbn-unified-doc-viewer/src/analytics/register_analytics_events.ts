@@ -14,11 +14,11 @@ export const registerDocViewerAnalyticsEvents = (analytics: AnalyticsServiceSetu
   analytics.registerEventType({
     eventType: DOC_VIEWER_VIEWED_EVENT_TYPE,
     schema: {
-      flyoutOriginDocType: {
+      originDocType: {
         type: 'keyword',
         _meta: {
           description:
-            'Document type of the originating top-level flyout (trace, log, generic, default). Inherited by all nested flyouts.',
+            'Document type of the originating top-level doc view (trace, log, generic, default). Inherited by all nested views.',
           optional: true,
         },
       },

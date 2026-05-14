@@ -29,7 +29,7 @@ import { useDocViewerSpanLogViewedEvent } from '@kbn/unified-doc-viewer';
 import DocViewerSource from '../../../../../doc_viewer_source';
 import DocViewerTable from '../../../../../doc_viewer_table';
 import { getUnifiedDocViewerServices } from '../../../../../../plugin';
-import { useFlyoutOriginDocType } from '../../../../../doc_viewer_flyout/flyout_origin_doc_type_context';
+import { useOriginDocType } from '../../../../../doc_viewer_flyout/origin_doc_type_context';
 import type { FlyoutContentId } from '../../../common/constants';
 
 const tabIds = {
@@ -105,11 +105,11 @@ export function WaterfallFlyout({
   const [selectedTabId, setSelectedTabId] = useState(tabIds.OVERVIEW);
   const flyoutTitleId = useGeneratedHtmlId();
   const flyoutId = useGeneratedHtmlId({ prefix: 'documentDetailFlyout' });
-  const flyoutOriginDocType = useFlyoutOriginDocType();
+  const originDocType = useOriginDocType();
 
   useDocViewerSpanLogViewedEvent({
     reportEvent: analytics.reportEvent,
-    flyoutOriginDocType,
+    originDocType,
     contentId: flyoutContentId,
     tabId: selectedTabId,
     hit,

@@ -8,8 +8,7 @@
  */
 
 import { createContext, useContext } from 'react';
-import type { FlyoutOriginDocType } from '@kbn/unified-doc-viewer';
 
-export const FlyoutOriginDocTypeContext = createContext<FlyoutOriginDocType | undefined>(undefined);
+export const OriginDocTypeContext = createContext<string | undefined>(undefined);
 
-export const useFlyoutOriginDocType = () => useContext(FlyoutOriginDocTypeContext);
+export const useOriginDocType = () => useContext(OriginDocTypeContext);

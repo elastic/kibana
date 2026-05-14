@@ -14,11 +14,7 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
-import type {
-  DocViewerProps,
-  DocViewsRegistry,
-  FlyoutOriginDocType,
-} from '@kbn/unified-doc-viewer';
+import type { DocViewerProps, DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { UnifiedDocViewerFlyoutProps } from '@kbn/unified-doc-viewer-plugin/public';
 import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
@@ -26,7 +22,7 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useFlyoutActions } from './use_flyout_actions';
 import { DiscoverGridFlyoutActions } from './discover_grid_flyout_actions';
 import type { DocViewerExtensionParams } from '../../context_awareness';
-import { useProfileAccessor } from '../../context_awareness';
+import { DocumentType, useProfileAccessor } from '../../context_awareness';
 import { recordHasContext } from '../../context_awareness/profiles_manager/record_has_context';
 
 export const FLYOUT_WIDTH_KEY = 'discover:flyoutWidth';
@@ -58,12 +54,8 @@ export interface DiscoverGridFlyoutProps
   hideFilteringOnComputedColumns?: boolean;
 }
 
-const getFlyoutOriginDocType = (record: DataTableRecord): FlyoutOriginDocType => {
-  if (!recordHasContext(record)) return 'default';
-
-  const flyoutOriginDocType: FlyoutOriginDocType = record.context.type;
-  return flyoutOriginDocType;
-};
+const getOriginDocType = (record: DataTableRecord): DocumentType =>
+  recordHasContext(record) ? record.context.type : DocumentType.Default;
 
 /**
  * Flyout displaying an expanded Elasticsearch document
@@ -120,11 +112,11 @@ export function DiscoverGridFlyout({
     dismissAllFlyoutsExceptFor(DiscoverFlyouts.docViewer);
   }, []);
 
-  const flyoutOriginDocType = useMemo(() => getFlyoutOriginDocType(actualHit), [actualHit]);
+  const originDocType = useMemo(() => getOriginDocType(actualHit), [actualHit]);
 
   return (
     <UnifiedDocViewerFlyout
-      flyoutOriginDocType={flyoutOriginDocType}
+      originDocType={originDocType}
       flyoutTitle={docViewer.title}
       flyoutActions={
         !isESQLQuery && flyoutActions.length > 0 ? (

@@ -9,7 +9,6 @@
 
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import { useEffect, useMemo, useRef } from 'react';
-import type { FlyoutOriginDocType } from './constants';
 import { DOC_VIEWER_VIEWED_EVENT_TYPE, DOC_VIEWER_VIEWED_ROOT_CONTENT_ID } from './constants';
 import type { DocViewRenderProps } from '../types';
 
@@ -18,9 +17,9 @@ import type { DocViewRenderProps } from '../types';
  */
 export interface DocViewerViewedEvent {
   /**
-   * Document type of the originating top-level flyout; inherited by all nested flyouts.
+   * Document type of the originating top-level doc view; inherited by all nested views.
    */
-  flyoutOriginDocType?: FlyoutOriginDocType;
+  originDocType?: string;
   /**
    * Identifies which doc viewer content is being viewed.
    */
@@ -65,7 +64,7 @@ export interface UseDocViewerViewedEventParams
  * Reports a viewed event for a doc viewer content area when its calculated event key changes.
  */
 export const useDocViewerViewedEvent = ({
-  flyoutOriginDocType,
+  originDocType,
   contentId,
   tabId,
   keys,
@@ -83,9 +82,7 @@ export const useDocViewerViewedEvent = ({
       return;
     }
 
-    const eventKey = [contentId, tabId, flyoutOriginDocType, ...(keys ?? [])]
-      .filter(Boolean)
-      .join('|');
+    const eventKey = [contentId, tabId, originDocType, ...(keys ?? [])].filter(Boolean).join('|');
 
     if (lastReportedEventRef.current === eventKey) {
       return;
@@ -101,7 +98,7 @@ export const useDocViewerViewedEvent = ({
     try {
       onEventKeyChange?.(eventKey);
       reportEvent(DOC_VIEWER_VIEWED_EVENT_TYPE, {
-        flyoutOriginDocType,
+        originDocType,
         contentId,
         tabId,
       });
@@ -109,7 +106,7 @@ export const useDocViewerViewedEvent = ({
       // eslint-disable-next-line no-console
       console.error(`Error reporting event ${DOC_VIEWER_VIEWED_EVENT_TYPE}:`, error);
     }
-  }, [contentId, enabled, flyoutOriginDocType, keys, onEventKeyChange, reportEvent, tabId]);
+  }, [contentId, enabled, originDocType, keys, onEventKeyChange, reportEvent, tabId]);
 };
 
 /**

@@ -11,7 +11,6 @@ import { renderHook } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import type { FlyoutOriginDocType } from './constants';
 import { DOC_VIEWER_VIEWED_EVENT_TYPE, DOC_VIEWER_VIEWED_ROOT_CONTENT_ID } from './constants';
 import {
   useDocViewerSpanLogViewedEvent,
@@ -80,7 +79,7 @@ describe('useDocViewerViewedEvent', () => {
     });
   });
 
-  test('reports flyoutOriginDocType and includes it in the dedup key', () => {
+  test('reports originDocType and includes it in the dedup key', () => {
     const reportEvent = createReportEvent();
     const onEventKeyChange = jest.fn();
 
@@ -90,14 +89,14 @@ describe('useDocViewerViewedEvent', () => {
         contentId: 'content-1',
         tabId: 'tab-1',
         keys: ['doc-1'],
-        flyoutOriginDocType: 'trace' as FlyoutOriginDocType,
+        originDocType: 'trace',
         onEventKeyChange,
       },
     });
 
     expect(onEventKeyChange).toHaveBeenCalledWith('content-1|tab-1|trace|doc-1');
     expect(reportEvent).toHaveBeenCalledWith(DOC_VIEWER_VIEWED_EVENT_TYPE, {
-      flyoutOriginDocType: 'trace',
+      originDocType: 'trace',
       contentId: 'content-1',
       tabId: 'tab-1',
     });
@@ -108,13 +107,13 @@ describe('useDocViewerViewedEvent', () => {
       contentId: 'content-1',
       tabId: 'tab-1',
       keys: ['doc-1'],
-      flyoutOriginDocType: 'log',
+      originDocType: 'log',
       onEventKeyChange,
     });
 
     expect(reportEvent).toHaveBeenCalledTimes(2);
     expect(reportEvent).toHaveBeenNthCalledWith(2, DOC_VIEWER_VIEWED_EVENT_TYPE, {
-      flyoutOriginDocType: 'log',
+      originDocType: 'log',
       contentId: 'content-1',
       tabId: 'tab-1',
     });
@@ -267,7 +266,7 @@ describe('useDocViewerTabViewedEvent', () => {
     expect(reportEvent).toHaveBeenCalledTimes(2);
   });
 
-  test('forwards flyoutOriginDocType to the reported event', () => {
+  test('forwards originDocType to the reported event', () => {
     const reportEvent = createReportEvent();
 
     renderHook(useDocViewerTabViewedEvent, {
@@ -275,12 +274,12 @@ describe('useDocViewerTabViewedEvent', () => {
         reportEvent,
         hit: createHit('doc-1'),
         tabId: 'table',
-        flyoutOriginDocType: 'log' as FlyoutOriginDocType,
+        originDocType: 'log',
       },
     });
 
     expect(reportEvent).toHaveBeenCalledWith(DOC_VIEWER_VIEWED_EVENT_TYPE, {
-      flyoutOriginDocType: 'log',
+      originDocType: 'log',
       contentId: DOC_VIEWER_VIEWED_ROOT_CONTENT_ID,
       tabId: 'table',
     });
@@ -288,7 +287,7 @@ describe('useDocViewerTabViewedEvent', () => {
 });
 
 describe('useDocViewerSpanLogViewedEvent', () => {
-  test('forwards flyoutOriginDocType to the reported event', () => {
+  test('forwards originDocType to the reported event', () => {
     const reportEvent = createReportEvent();
 
     renderHook(useDocViewerSpanLogViewedEvent, {
@@ -297,12 +296,12 @@ describe('useDocViewerSpanLogViewedEvent', () => {
         contentId: 'span_detail',
         tabId: 'overview',
         hit: createHit('span-1'),
-        flyoutOriginDocType: 'log' as FlyoutOriginDocType,
+        originDocType: 'log',
       },
     });
 
     expect(reportEvent).toHaveBeenCalledWith(DOC_VIEWER_VIEWED_EVENT_TYPE, {
-      flyoutOriginDocType: 'log',
+      originDocType: 'log',
       contentId: 'span_detail',
       tabId: 'overview',
     });
@@ -317,7 +316,7 @@ describe('useDocViewerSpanLogViewedEvent', () => {
         contentId: 'span_detail',
         tabId: 'overview',
         hit: null as ReturnType<typeof createHit> | null,
-        flyoutOriginDocType: 'trace' as FlyoutOriginDocType,
+        originDocType: 'trace',
       },
     });
 
@@ -328,11 +327,11 @@ describe('useDocViewerSpanLogViewedEvent', () => {
       contentId: 'span_detail',
       tabId: 'overview',
       hit: createHit('span-1'),
-      flyoutOriginDocType: 'trace',
+      originDocType: 'trace',
     });
 
     expect(reportEvent).toHaveBeenCalledWith(DOC_VIEWER_VIEWED_EVENT_TYPE, {
-      flyoutOriginDocType: 'trace',
+      originDocType: 'trace',
       contentId: 'span_detail',
       tabId: 'overview',
     });

@@ -399,7 +399,7 @@ describe('<DocViewer />', () => {
     });
   });
 
-  test('forwards flyoutOriginDocType to the unified_doc_viewer_viewed event', () => {
+  test('forwards originDocType to the unified_doc_viewer_viewed event', () => {
     const reportEvent = analytics.reportEvent as jest.Mock;
     reportEvent.mockClear();
 
@@ -412,7 +412,7 @@ describe('<DocViewer />', () => {
         docViews={registry.getAll()}
         hit={records[0]}
         dataView={dataViewMock}
-        flyoutOriginDocType="trace"
+        originDocType="trace"
       />
     );
 
@@ -420,7 +420,7 @@ describe('<DocViewer />', () => {
       'unified_doc_viewer_viewed',
       expect.objectContaining({
         contentId: 'doc_detail',
-        flyoutOriginDocType: 'trace',
+        originDocType: 'trace',
       })
     );
   });

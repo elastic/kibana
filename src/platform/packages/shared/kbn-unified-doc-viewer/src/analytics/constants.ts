@@ -9,9 +9,3 @@
 
 export const DOC_VIEWER_VIEWED_EVENT_TYPE = 'unified_doc_viewer_viewed';
 export const DOC_VIEWER_VIEWED_ROOT_CONTENT_ID = 'doc_detail';
-
-/**
- *  Document type of the originating top-level flyout for telemetry purposes.
- *  Should be inherited by every nested flyout.
- * */
-export type FlyoutOriginDocType = 'trace' | 'log' | 'generic' | 'default';

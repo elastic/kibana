@@ -15,7 +15,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { FlyoutContentId } from '../../../common/constants';
 import { setUnifiedDocViewerServices } from '../../../../../../plugin';
 import { mockUnifiedDocViewerServices } from '../../../../../../__mocks__';
-import { FlyoutOriginDocTypeContext } from '../../../../../doc_viewer_flyout/flyout_origin_doc_type_context';
+import { OriginDocTypeContext } from '../../../../../doc_viewer_flyout/origin_doc_type_context';
 
 setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
 
@@ -144,21 +144,21 @@ describe('WaterfallFlyout', () => {
     });
   });
 
-  describe('flyoutOriginDocType telemetry', () => {
-    it('forwards the parent FlyoutOriginDocTypeContext value into the unified_doc_viewer_viewed event', () => {
+  describe('originDocType telemetry', () => {
+    it('forwards the parent OriginDocTypeContext value into the unified_doc_viewer_viewed event', () => {
       const reportEvent = mockUnifiedDocViewerServices.analytics.reportEvent as jest.Mock;
       reportEvent.mockClear();
 
       render(
-        <FlyoutOriginDocTypeContext.Provider value="log">
+        <OriginDocTypeContext.Provider value="log">
           <WaterfallFlyout {...defaultProps} flyoutContentId={FlyoutContentId.SPAN_DETAIL} />
-        </FlyoutOriginDocTypeContext.Provider>
+        </OriginDocTypeContext.Provider>
       );
 
       expect(reportEvent).toHaveBeenCalledWith(
         'unified_doc_viewer_viewed',
         expect.objectContaining({
-          flyoutOriginDocType: 'log',
+          originDocType: 'log',
           contentId: FlyoutContentId.SPAN_DETAIL,
         })
       );
