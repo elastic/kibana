@@ -10,7 +10,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
-import type { RuleCreationState } from '../../../state';
+import type { RejectionCode, RuleCreationState } from '../../../state';
 
 interface GenerateEsqlQueryParams {
   model: InferenceChatModel;
@@ -52,7 +52,7 @@ Guidelines for ES|QL query generation:
 - Do not use any date range filters in the query (like WHERE @timestamp > NOW() - 5 minutes) or bucket aggregation limited by time (COUNT(*) BY bucket = BUCKET(@timestamp, 10 minutes)), unless explicitly told to include them in query. The system will handle time range filtering separately.
 - Never include bucket aggregation limited by time (like this example COUNT(*) BY bucket = BUCKET(@timestamp, 10 minutes)), to avoid clash with scheduling of the detection rule.
 - If you use KEEP command, after METADATA operator, make sure to include _id field.
-- If there is no relevant data in provided index patterns context to fulfil user request, use the best effort to create query based on your knowledge of ES|QL and security detection use cases.
+- If there is no relevant data in provided index patterns context to fulfil user request, indicate that no suitable index was found rather than fabricating a query.
 - Ensure the query is syntactically correct and adheres to ES|QL standards.
 - Do not include any explanations, only provide the ES|QL query string.
 - When referring to fields take into account their data types as well. For example, do not use text field in arithmetic operations.
@@ -78,6 +78,15 @@ Optimize for Elastic Security: Suggest additional filters, aggregations, or enha
         logger,
         events: toolEvents,
       });
+
+      if (esqlResponse.rejectionReason) {
+        return {
+          rejectionReason: {
+            code: esqlResponse.rejectionReason.code as RejectionCode,
+            message: esqlResponse.rejectionReason.message,
+          },
+        };
+      }
 
       if (esqlResponse.error) {
         events?.reportProgress(`Failed to generate ES|QL query: ${esqlResponse.error}`);
