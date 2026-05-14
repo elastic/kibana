@@ -10,9 +10,9 @@ import type { LoadResult } from '@kbn/es-snapshot-loader';
 import {
   replayObservabilityDataStreams,
   cleanObservabilityDataStreams,
-} from '../../src/data_generators/replay';
-import { GCS_BUCKET } from '../../src/scenarios/constants';
-import { evaluate } from './evaluate';
+} from '../../../src/data_generators/replay';
+import { GCS_BUCKET } from '../../../src/scenarios/constants';
+import { evaluate } from '../evaluate';
 
 const PAYMENT_UNREACHABLE_GCS = {
   bucket: GCS_BUCKET,
@@ -22,7 +22,7 @@ const PAYMENT_UNREACHABLE_GCS = {
 const SNAPSHOT_NAME = 'payment-unreachable';
 
 evaluate.describe(
-  'Payment Unreachable Investigation',
+  'Investigation Skill: Payment Unreachable',
   { tag: tags.serverless.observability.complete },
   () => {
     let replayResult: LoadResult;
