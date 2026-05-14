@@ -97,7 +97,7 @@ const makeEnterForeachNode = (overrides: Partial<EnterForeachNode> = {}): EnterF
     type: 'enter-foreach' as const,
     stepId: 'myForeach',
     exitNodeId: 'exit-foreach-1',
-    configuration: { foreach: ['a', 'b', 'c'] },
+    configuration: { type: 'foreach' as const, name: 'myForeach', foreach: ['a', 'b', 'c'] },
     ...overrides,
   } as EnterForeachNode);
 
@@ -135,7 +135,9 @@ describe('EnterForeachNodeImpl', () => {
       const step = makeStepRuntime();
       const runtime = makeRuntimeManager();
       const logger = makeLogger();
-      const node = makeEnterForeachNode({ configuration: { foreach: [] } });
+      const node = makeEnterForeachNode({
+        configuration: { type: 'foreach' as const, name: 'myForeach', foreach: [] },
+      });
 
       const impl = new EnterForeachNodeImpl(node, runtime, step, logger);
       await impl.run();
@@ -150,7 +152,11 @@ describe('EnterForeachNodeImpl', () => {
       const runtime = makeRuntimeManager();
       const logger = makeLogger();
       const node = makeEnterForeachNode({
-        configuration: { foreach: JSON.stringify([1, 2]) },
+        configuration: {
+          type: 'foreach' as const,
+          name: 'myForeach',
+          foreach: JSON.stringify([1, 2]),
+        },
       });
 
       const impl = new EnterForeachNodeImpl(node, runtime, step, logger);
@@ -164,7 +170,11 @@ describe('EnterForeachNodeImpl', () => {
       const runtime = makeRuntimeManager();
       const logger = makeLogger();
       const node = makeEnterForeachNode({
-        configuration: { foreach: JSON.stringify({ not: 'an array' }) },
+        configuration: {
+          type: 'foreach' as const,
+          name: 'myForeach',
+          foreach: JSON.stringify({ not: 'an array' }),
+        },
       });
 
       const impl = new EnterForeachNodeImpl(node, runtime, step, logger);
