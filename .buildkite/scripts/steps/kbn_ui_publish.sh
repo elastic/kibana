@@ -102,7 +102,7 @@ report_step "Fetching Artifactory credentials"
 # Secret layout:
 #   registry   - full npm registry URL
 #   npm_token  - auth token
-NPM_REGISTRY="$(vault_kv_get kv/ci-shared/serverless/cloud-ui/kbn-ui-artifactory-registry registry)"
+NPM_REGISTRY="$(vault_kv_get kv/ci-shared/serverless/cloud-ui/kbn-ui-artifactory-registry registry_url)"
 NPM_TOKEN="$(vault_kv_get kv/ci-shared/serverless/cloud-ui/kbn-ui-artifactory-registry npm_token)"
 if [[ -z "$NPM_REGISTRY" || -z "$NPM_TOKEN" ]]; then
   echo "ERROR: Artifactory credentials missing from vault." >&2
