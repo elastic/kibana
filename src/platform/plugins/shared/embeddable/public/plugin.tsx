@@ -35,6 +35,7 @@ import { registerDrilldown } from './drilldowns/registry';
 import { registerActions } from './ui_actions/register_actions';
 import { closeSetup } from './react_embeddable_system/react_embeddable_registry';
 import type { RequestType, ResponseType } from '../server/search_route/types';
+import { SEARCH_ROUTE_PATH } from '../common/constants';
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private stateTransferService: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
