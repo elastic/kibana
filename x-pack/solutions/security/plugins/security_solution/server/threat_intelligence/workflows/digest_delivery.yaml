@@ -36,14 +36,14 @@ steps:
       # RRULE for the current hour and short-circuits non-due subscriptions.
       - name: render_digest
         type: ai.agent
+        agent-id: default
         with:
-          agentId: default
-          skills:
-            - threat-intelligence
-          prompt: >-
-            Build the recurring digest for subscription {{ item._id }}.
-            Tags: {{ item._source.tags | join: ", " }}.
-            Min severity: {{ item._source.severity_threshold }}.
+          message: >-
+            Use the threat-intelligence skill and tools as needed.
+
+            Build the recurring digest for subscription {{ foreach.item._id }}.
+            Tags: {{ foreach.item._source.tags | join: ", " }}.
+            Min severity: {{ foreach.item._source.severity_threshold }}.
             Time range: last 7 days.
 
             Use threat_intel.search_reports to gather the matching reports.
@@ -51,8 +51,23 @@ steps:
             threat-intel-report-table attachment, then a short prose summary
             and (if time range > 7 days) a threat-intel-severity-timeline.
 
-            Then return the rendered digest content as plain markdown so this
-            workflow can deliver it.
+            Respond with JSON matching the provided schema: digest_markdown must
+            contain the full digest as markdown for archival and delivery, and
+            report_ids must list the threat report ids included in the digest.
+          schema:
+            type: object
+            properties:
+              digest_markdown:
+                type: string
+                description: Full digest as markdown for email and archival
+              report_ids:
+                type: array
+                items:
+                  type: string
+                description: Kibana threat report ids included in the digest
+            required:
+              - digest_markdown
+              - report_ids
 
       - name: archive_digest
         type: elasticsearch.index
@@ -60,16 +75,32 @@ steps:
           index: .kibana-threat-intel-digests
           document:
             "@timestamp": "{{ now }}"
-            subscription_id: "{{ item._id }}"
-            space_id: "{{ item._source.space_id | default: 'default' }}"
+            subscription_id: "{{ foreach.item._id }}"
+            space_id: "{{ foreach.item._source.space_id | default: 'default' }}"
+            # Liquid `date` accepts a Date or a Unix-seconds number. We compute
+            # `now - 7d` via integer math (604800 s) and re-format as ISO 8601
+            # so the workflow validator does not need a custom `date_minus`
+            # filter (which is not registered on the engine).
             time_range:
-              from: "{{ now | date_minus: 7, 'days' }}"
-              to: "{{ now }}"
-            content_markdown: "{{ steps.render_digest.output.text }}"
-            report_ids: "{{ steps.render_digest.output.report_ids }}"
+              from: "{{ now | date: '%s' | minus: 604800 | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+              to: "{{ now | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+            content_markdown: "{{ steps.render_digest.output.structured_output.digest_markdown }}"
+            report_ids: "{{ steps.render_digest.output.structured_output.report_ids | json }}"
             delivered: false
         on-failure:
           continue: true
+
+      # Capture the per-iteration subscription fields into a step output so
+      # downstream switch-level fields (`expression`, `default`) can reference
+      # them. Those fields are validated against the *switch* step's context,
+      # which currently does not include `foreach.item`; capturing here (where
+      # `foreach.item` IS in scope) keeps the YAML editor green without
+      # changing the workflow engine.
+      - name: capture_subscription
+        type: data.set
+        with:
+          subscription_id: "{{ foreach.item._id }}"
+          delivery_type: "{{ foreach.item._source.delivery.type }}"
 
       # Delivery dispatched per subscription delivery.type. The
       # `connector-id` is liquid-rendered per iteration so each subscription
@@ -82,66 +113,71 @@ steps:
       # `delivery_connector_id` parameter).
       - name: deliver
         type: switch
-        with:
-          expression: "{{ item._source.delivery.type }}"
-          cases:
-            - match: email
-              steps:
-                - name: email_guard
-                  type: if
-                  condition: "{{ item._source.delivery.connector_id | size }} > 0"
-                  steps:
-                    - name: email_send
-                      type: email
-                      connector-id: "{{ item._source.delivery.connector_id }}"
-                      with:
-                        to:
-                          - "{{ item._source.delivery.target }}"
-                        subject: >-
-                          Threat intelligence digest [{{ item._source.severity_threshold }}+] -
-                          {{ item._source.tags | join: ", " }}
-                        message: "{{ steps.render_digest.output.text }}"
-                      on-failure:
-                        continue: true
-                  else:
-                    - name: email_missing_connector
-                      type: data.set
-                      with:
-                        key: warning
-                        value: >-
-                          Subscription {{ item._id }} has delivery.type=email but no
-                          delivery.connector_id - skipping email send. Update the
-                          subscription with a configured Kibana actions connector id
-                          (preconfigured-email-connector / Gmail / etc.).
-            - match: slack
-              steps:
-                - name: slack_guard
-                  type: if
-                  condition: "{{ item._source.delivery.connector_id | size }} > 0"
-                  steps:
-                    - name: slack_send
-                      type: slack
-                      connector-id: "{{ item._source.delivery.connector_id }}"
-                      with:
-                        message: >-
-                          *Threat intelligence digest* [{{ item._source.severity_threshold }}+]
-                          ({{ item._source.tags | join: ", " }})
+        expression: "{{ steps.capture_subscription.output.delivery_type }}"
+        cases:
+          - match: email
+            steps:
+              - name: email_guard
+                type: if
+                condition: "foreach.item._source.delivery.connector_id : *"
+                steps:
+                  - name: email_send
+                    type: email
+                    connector-id: "{{ foreach.item._source.delivery.connector_id }}"
+                    with:
+                      to:
+                        - "{{ foreach.item._source.delivery.target }}"
+                      subject: >-
+                        Threat intelligence digest [{{ foreach.item._source.severity_threshold }}+] -
+                        {{ foreach.item._source.tags | join: ", " }}
+                      message: "{{ steps.render_digest.output.structured_output.digest_markdown }}"
+                    on-failure:
+                      continue: true
+                else:
+                  - name: email_missing_connector
+                    type: data.set
+                    with:
+                      key: warning
+                      value: >-
+                        Subscription {{ foreach.item._id }} has delivery.type=email but no
+                        delivery.connector_id - skipping email send. Update the
+                        subscription with a configured Kibana actions connector id
+                        (preconfigured-email-connector / Gmail / etc.).
+          - match: slack
+            steps:
+              - name: slack_guard
+                type: if
+                condition: "foreach.item._source.delivery.connector_id : *"
+                steps:
+                  - name: slack_send
+                    type: slack
+                    connector-id: "{{ foreach.item._source.delivery.connector_id }}"
+                    with:
+                      message: >-
+                        *Threat intelligence digest* [{{ foreach.item._source.severity_threshold }}+]
+                        ({{ foreach.item._source.tags | join: ", " }})
 
-                          {{ steps.render_digest.output.text }}
-                      on-failure:
-                        continue: true
-                  else:
-                    - name: slack_missing_connector
-                      type: data.set
-                      with:
-                        key: warning
-                        value: >-
-                          Subscription {{ item._id }} has delivery.type=slack but no
-                          delivery.connector_id - skipping slack send. Update the
-                          subscription with a configured Kibana actions connector id.
-          default:
-            - name: log_unknown_delivery
-              type: data.set
-              with:
-                key: warning
-                value: "Subscription {{ item._id }} has unknown delivery.type"
+                        {{ steps.render_digest.output.structured_output.digest_markdown }}
+                    on-failure:
+                      continue: true
+                else:
+                  - name: slack_missing_connector
+                    type: data.set
+                    with:
+                      key: warning
+                      value: >-
+                        Subscription {{ foreach.item._id }} has delivery.type=slack but no
+                        delivery.connector_id - skipping slack send. Update the
+                        subscription with a configured Kibana actions connector id.
+        default:
+          - name: log_unknown_delivery
+            type: data.set
+            with:
+              key: warning
+              # `default` branch fields resolve to the `switch` step's context
+              # which does not include `foreach.item`, so reference the
+              # captured subscription id from `capture_subscription` above.
+              value: >-
+                Subscription
+                {{ steps.capture_subscription.output.subscription_id }}
+                has unknown delivery.type

@@ -10,12 +10,12 @@
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { BuiltinWorkflowsService, type BuiltinWorkflowCommand } from './builtin_workflows_service';
+import { type BuiltinWorkflowCommand, BuiltinWorkflowsService } from './builtin_workflows_service';
 import type { WorkflowCrudDeps } from './types';
 import type { WorkflowExecutionQueryService } from './workflow_execution_query_service';
 import type { WorkflowValidationService } from './workflow_validation_service';
-import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowProperties } from '../storage/workflow_storage';
+import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 
 const VALID_BUILTIN_YAML = `name: My Built-in
 enabled: true
@@ -147,6 +147,41 @@ describe('BuiltinWorkflowsService', () => {
       expect(client.index).not.toHaveBeenCalled();
     });
 
+    it('updates when YAML is unchanged but the denormalized top-level name drifted', async () => {
+      const existing: WorkflowProperties = {
+        name: 'Untitled workflow',
+        description: undefined,
+        enabled: true,
+        tags: [],
+        triggerTypes: ['scheduled'],
+        yaml: VALID_BUILTIN_YAML,
+        definition: null,
+        createdBy: 'examplePlugin',
+        lastUpdatedBy: 'examplePlugin',
+        spaceId: 'default',
+        valid: true,
+        deleted_at: null,
+        created_at: '2024-01-01T00:00:00.000Z',
+        updated_at: '2024-01-01T00:00:00.000Z',
+      };
+      const client = makeStorageClient();
+      client.search.mockResolvedValue({
+        hits: { hits: [{ _id: 'builtin.example', _source: existing }] },
+      });
+
+      const { deps } = makeDeps({ client });
+      const service = new BuiltinWorkflowsService(deps);
+
+      const result = await service.ensureWorkflow(cmd(), 'default');
+
+      expect(result).toEqual({ id: 'builtin.example', status: 'updated' });
+      expect(client.index).toHaveBeenCalledTimes(1);
+      const indexed = client.index.mock.calls[0][0];
+      expect(indexed.document.name).toBe('My Built-in');
+      expect(indexed.document.created_at).toBe('2024-01-01T00:00:00.000Z');
+      expect(indexed.document.createdBy).toBe('examplePlugin');
+    });
+
     it('updates the workflow when the YAML changed, preserving created_at / createdBy', async () => {
       const existing: WorkflowProperties = {
         name: 'My Built-in',
@@ -173,10 +208,7 @@ describe('BuiltinWorkflowsService', () => {
       const { deps } = makeDeps({ client });
       const service = new BuiltinWorkflowsService(deps);
 
-      const result = await service.ensureWorkflow(
-        cmd({ owner: 'examplePlugin' }),
-        'default'
-      );
+      const result = await service.ensureWorkflow(cmd({ owner: 'examplePlugin' }), 'default');
 
       expect(result).toEqual({ id: 'builtin.example', status: 'updated' });
       expect(client.index).toHaveBeenCalledTimes(1);
@@ -236,11 +268,7 @@ describe('BuiltinWorkflowsService', () => {
         .mockResolvedValueOnce({ result: 'created' });
 
       const result = await service.bulkEnsureWorkflows(
-        [
-          cmd({ id: 'builtin.a' }),
-          cmd({ id: 'builtin.b' }),
-          cmd({ id: 'builtin.c' }),
-        ],
+        [cmd({ id: 'builtin.a' }), cmd({ id: 'builtin.b' }), cmd({ id: 'builtin.c' })],
         'default'
       );
 

@@ -22,75 +22,91 @@ steps:
   - name: load_pending_reports
     type: elasticsearch.search
     with:
-      index: .kibana-threat-reports-*
+      # Source-ingestion writes to the bare data stream name
+      # (`THREAT_REPORTS_DATA_STREAM` in `common/threat_intelligence/hub/constants.ts`).
+      # The `.kibana-threat-reports-*` pattern requires at least one
+      # character after the dash and therefore matches neither the data
+      # stream alias nor its backing `.ds-.kibana-threat-reports-…` indices
+      # (see the long comment next to `THREAT_REPORTS_INDEX_PATTERN`).
+      index: .kibana-threat-reports
       size: 200
       query:
         bool:
           must:
             - term:
                 provenance.extraction_method: pending
+      # The generated `types_sort` schema only accepts a string, a string
+      # array, or the closed-set `types_sort_options` keys (`_score`, `_doc`,
+      # `_geo_distance`, `_script`) — arbitrary field-name keys like
+      # `{ "@timestamp": "asc" }` are rejected by the strict workflow JSON
+      # schema. Plain field-name strings default to ascending order, which
+      # is what we want here (oldest pending reports first).
       sort:
-        - "@timestamp": asc
-
-  - name: load_already_extracted_fingerprints
-    type: elasticsearch.search
-    with:
-      index: .kibana-threat-reports-*
-      size: 0
-      query:
-        bool:
-          must_not:
-            - term:
-                provenance.extraction_method: pending
-      aggs:
-        fingerprints:
-          terms:
-            field: content_fingerprint
-            size: 10000
+        - "@timestamp"
 
   - name: extract_each_report
     type: foreach
     foreach: "{{ steps.load_pending_reports.output.hits.hits }}"
     steps:
-      - name: skip_if_extracted
-        type: if
+      # Per-iteration dedup gate. A single upfront `terms` aggregation over
+      # already-extracted fingerprints would be cheaper, but `if` conditions
+      # are evaluated as KQL (`IfStepConfigSchema` in
+      # `kbn-workflows/spec/schema.ts`), and KQL has no array-containment
+      # operator. A per-item `term` lookup keeps the condition expressible
+      # in KQL while remaining O(N) on a single-index data stream — the
+      # 200-doc page size caps the fan-out per run.
+      - name: check_already_extracted
+        type: elasticsearch.search
         with:
-          condition: >-
-            {{ steps.load_already_extracted_fingerprints.output.aggregations.fingerprints.buckets
-               | map: "key"
-               | includes: item._source.content_fingerprint }}
-        then:
-          - name: log_skipped
-            type: data.set
-            with:
-              key: skipped_report
-              value: "{{ item._id }} - duplicate content_fingerprint"
-          - name: skip
-            type: loop.continue
+          index: .kibana-threat-reports
+          size: 0
+          track_total_hits: true
+          query:
+            bool:
+              must:
+                - term:
+                    content_fingerprint: "{{ foreach.item._source.content_fingerprint }}"
+              must_not:
+                - term:
+                    provenance.extraction_method: pending
+
+      - name: skip_already_extracted
+        type: loop.continue
+        if: "steps.check_already_extracted.output.hits.total.value > 0"
 
       - name: extract_iocs
-        type: builtin
+        type: kibana.request
         with:
-          tool: threat_intel.extract_iocs
-          input:
-            text: "{{ item._source.content.body_text }}"
+          method: POST
+          path: /internal/threat_intelligence/extract_iocs
+          use_server_info: true
+          headers:
+            x-elastic-internal-origin: "kibana"
+          body:
+            text: "{{ foreach.item._source.content.body_text }}"
             defang: true
 
       - name: extract_behaviors
         type: ai.agent
+        agent-id: default
         with:
           # The agent loads the threat-intelligence skill and invokes
           # hunt_behavior with the report text. The agent is responsible for
           # delegating valid behaviors to security.create_detection_rule (or
           # emitting copy-paste rule definitions when aiRuleCreationEnabled
           # is off).
-          agentId: default
-          skills:
-            - threat-intelligence
-          prompt: >-
+          message: >-
             Run threat_intel.hunt_behavior on this report. Report id is
-            {{ item._id }}. Report text:
-            {{ item._source.content.body_text }}
+            {{ foreach.item._id }}. Report text:
+            {{ foreach.item._source.content.body_text }}
+          schema:
+            type: object
+            properties:
+              behaviors:
+                type: array
+                description: Behavioral findings from hunt_behavior for persistence
+            required:
+              - behaviors
 
       # Stage 2 — closed-set taxonomy enrichment. Drives the visual
       # dashboard's category-breakdown panel and the "Affects You" geo
@@ -101,9 +117,9 @@ steps:
       # the enums are dropped by the persist step's `default: []`.
       - name: enrich_taxonomy
         type: ai.agent
+        agent-id: default
         with:
-          agentId: default
-          prompt: >-
+          message: >-
             You are a threat intel taxonomist. Categorize the following report.
 
             Return a strict JSON object with exactly two keys:
@@ -124,10 +140,24 @@ steps:
             genuinely targets multiple continents. Do not invent values
             outside the closed sets.
 
-            Report id: {{ item._id }}
-            Report title: {{ item._source.content.title }}
+            Report id: {{ foreach.item._id }}
+            Report title: {{ foreach.item._source.content.title }}
             Report text:
-            {{ item._source.content.body_text }}
+            {{ foreach.item._source.content.body_text }}
+          schema:
+            type: object
+            properties:
+              categories:
+                type: array
+                items:
+                  type: string
+              regions:
+                type: array
+                items:
+                  type: string
+            required:
+              - categories
+              - regions
         on-failure:
           # Enrichment is best-effort — a stale connector or an over-quota
           # LLM should not block the rest of the extraction pipeline.
@@ -141,7 +171,7 @@ steps:
       - name: find_related_reports
         type: elasticsearch.search
         with:
-          index: .kibana-threat-reports-*
+          index: .kibana-threat-reports
           size: 25
           _source: false
           query:
@@ -152,7 +182,7 @@ steps:
               must_not:
                 - ids:
                     values:
-                      - "{{ item._id }}"
+                      - "{{ foreach.item._id }}"
         on-failure:
           # If the field doesn't exist yet (first run after the v2 mapping bump)
           # treat the related-reports list as empty rather than failing the doc.
@@ -161,20 +191,29 @@ steps:
       - name: persist_extractions
         type: elasticsearch.update
         with:
-          index: .kibana-threat-reports-*
-          id: "{{ item._id }}"
+          # `elasticsearch.update` targets a single doc, so wildcards are
+          # rejected by the index-selection handler ("Wildcard patterns are
+          # not allowed" — see `index_selection_handler.ts`). We bind to the
+          # concrete backing index returned by `load_pending_reports`,
+          # mirroring the pattern used by `hit_provenance_backfill.yaml`.
+          index: "{{ foreach.item._index }}"
+          id: "{{ foreach.item._id }}"
           doc:
             extracted:
               iocs: "{{ steps.extract_iocs.output.iocs }}"
               ioc_set_hash: "{{ steps.extract_iocs.output.ioc_set_hash }}"
-              behaviors: "{{ steps.extract_behaviors.output.behaviors }}"
-              categories: "{{ steps.enrich_taxonomy.output.categories | default: [] }}"
+              behaviors: "{{ steps.extract_behaviors.output.structured_output.behaviors }}"
+              categories: "{{ steps.enrich_taxonomy.output.structured_output.categories | default: [] }}"
             geography:
-              regions: "{{ steps.enrich_taxonomy.output.regions | default: [] }}"
+              regions: "{{ steps.enrich_taxonomy.output.structured_output.regions | default: [] }}"
             provenance:
               extracted_at: "{{ now }}"
               extraction_method: workflow_v2
               related_reports: "{{ steps.find_related_reports.output.hits.hits | map: '_id' }}"
-              related_reports_count: "{{ steps.find_related_reports.output.hits.total.value }}"
+              # `find_related_reports` runs with `on-failure: continue: true`
+              # so its output type is unknown to the validator. Default to 0
+              # so the consumer remains numeric even when the search step
+              # was skipped.
+              related_reports_count: "{{ steps.find_related_reports.output.hits.total.value | default: 0 }}"
         on-failure:
           continue: true

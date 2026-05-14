@@ -14,6 +14,30 @@
 # adapter implementations belong to follow-up PRs. The key shape this workflow
 # pins down is the `switch` dispatch + fingerprint-and-write pattern.
 #
+# `content_fingerprint` is intended to be the SHA-256 of the normalized
+# response body so RSS-syndicated copies dedup via `op_type: create` on a
+# matching `_id`. A `| sha256` filter is not registered in the workflow
+# Liquid engine yet — see
+# `src/platform/packages/shared/kbn-workflows/common/utils/create_workflow_liquid_engine`
+# and `filter_contribution.md`. Until that lands, the fingerprint is a
+# short composite of `adapter_type:item_id:now` hoisted into
+# `variables.fingerprint` by `capture_source_fields` and reused as both
+# the doc field and the `_id`. The composite is unique per iteration per
+# run (because `now` changes), so true content-dedup only kicks in once
+# the sha256 filter is wired up and this value flips to
+# `{{ steps.<fetch>.output.data | sha256 }}`. The HTTP step's response
+# body lives on `.output.data` (see `HttpResponseSchema` in
+# `src/platform/plugins/shared/workflows_management/common/stack_connectors_schema/http.ts`),
+# *not* `.output.body`.
+#
+# The previous revision wrote the entire response body verbatim into
+# `content_fingerprint`. That field is mapped as `keyword`, and Lucene
+# rejects any term over 32766 bytes with `max_bytes_length_exceeded_exception`
+# — so RSS/STIX/TAXII feeds (which routinely exceed 32 KB) made every
+# `elasticsearch.index` step fail. The failure was then swallowed by
+# `on-failure: continue: true`, leaving `.kibana-threat-reports` empty
+# while the workflow reported success.
+#
 # Index names mirror the constants in `common/constants.ts`. They live under
 # `.kibana-*` so the `kibana_system` reserved role can create / read / write
 # them without a custom Elasticsearch role descriptor — see
@@ -34,165 +58,214 @@ steps:
       size: 1000
       query:
         term:
-          enabled: true
+          # `term` value must be a string or an object — boolean shorthand is
+          # rejected by the generated ES query schema (see
+          # `types_query_dsl_term_query` in es_openapi_zod.gen.ts).
+          enabled:
+            value: true
 
   - name: dispatch_each_source
     type: foreach
     foreach: "{{ steps.load_sources.output.hits.hits }}"
     steps:
+      # The YAML editor's variable validator builds the step context from the
+      # graph node ID, but `getStepContextSchemaEnrichmentEntries` is called
+      # with the bare step name. For container steps (switch/if/while) the
+      # node is `enterSwitch_<stepName>` etc., so the foreach enrichment is
+      # silently dropped — that's why `foreach.item.X` on the switch step's
+      # own `expression` / `default` fields reports "Variable ... is invalid"
+      # even though the same path validates fine inside `cases[i].steps[j]`
+      # (which resolve to atomic steps where stepId === nodeId).
+      #
+      # Hoist the per-iteration values into `variables` via an atomic
+      # `data.set` step so the references the switch step needs (`expression`
+      # and the `default` branch's data.set `value`) only touch
+      # `variables.X` — those are populated by `getVariablesSchema` from
+      # predecessor `data.set` steps regardless of the container-step bug.
+      - name: capture_source_fields
+        type: data.set
+        with:
+          adapter_type: "{{ foreach.item._source.adapter_type }}"
+          item_id: "{{ foreach.item._id }}"
+          # Placeholder fingerprint until a `| sha256` Liquid filter is
+          # registered (see top-of-file comment). Computed once per
+          # foreach iteration so the `elasticsearch.index` step below can
+          # use the same value for both the doc field and `_id` —
+          # `renderValueAccordingToContext` builds the rendering context
+          # once per call, so `{{ now }}` is stable across all
+          # references inside a single `with:` render anyway, but
+          # hoisting keeps the wiring explicit and matches the existing
+          # `variables.adapter_type` / `variables.item_id` pattern.
+          fingerprint: "{{ foreach.item._source.adapter_type }}:{{ foreach.item._id }}:{{ now }}"
+
       - name: dispatch_by_adapter
         type: switch
-        with:
-          expression: "{{ item._source.adapter_type }}"
-          cases:
-            - match: rss
-              steps:
-                - name: rss_fetch
-                  type: http
-                  with:
-                    method: GET
-                    url: "{{ item._source.config.url }}"
-                  on-failure:
-                    continue: true
-                - name: fingerprint_and_write_rss
-                  type: elasticsearch.index
-                  with:
-                    index: .kibana-threat-reports
-                    op_type: create
-                    document:
-                      "@timestamp": "{{ now }}"
-                      content_fingerprint: "{{ steps.rss_fetch.output.body | sha256 }}"
-                      space_id: "{{ item._source.space_id | default: '*' }}"
-                      source:
-                        type: rss
-                        name: "{{ item._source.name }}"
-                        url: "{{ item._source.config.url }}"
-                        adapter_id: "rss:{{ item._id }}"
-                      content:
-                        title: "{{ item._source.name }}"
-                        body_text: "{{ steps.rss_fetch.output.body }}"
-                        language: en
-                      severity:
-                        level: medium
-                        score: 40
-                      provenance:
-                        ingested_at: "{{ now }}"
-                        extraction_method: pending
-                  on-failure:
-                    # 409 conflict on op_type:create == duplicate fingerprint -> skip silently
-                    continue: true
-            - match: stix
-              steps:
-                - name: stix_pull
-                  type: http
-                  with:
-                    method: GET
-                    url: "{{ item._source.config.url }}"
-                    headers:
-                      Accept: application/stix+json
-                  on-failure:
-                    continue: true
-                - name: fingerprint_and_write_stix
-                  type: elasticsearch.index
-                  with:
-                    index: .kibana-threat-reports
-                    op_type: create
-                    document:
-                      "@timestamp": "{{ now }}"
-                      content_fingerprint: "{{ steps.stix_pull.output.body | sha256 }}"
-                      space_id: "{{ item._source.space_id | default: '*' }}"
-                      source:
-                        type: stix
-                        name: "{{ item._source.name }}"
-                        url: "{{ item._source.config.url }}"
-                        adapter_id: "stix:{{ item._id }}"
-                      content:
-                        title: "{{ item._source.name }}"
-                        body_text: "{{ steps.stix_pull.output.body }}"
-                        language: en
-                      severity:
-                        level: medium
-                        score: 40
-                      provenance:
-                        ingested_at: "{{ now }}"
-                        extraction_method: pending
-                  on-failure:
-                    continue: true
-            - match: taxii
-              steps:
-                - name: taxii_poll
-                  type: http
-                  with:
-                    method: GET
-                    url: "{{ item._source.config.url }}"
-                    headers:
-                      Accept: application/taxii+json;version=2.1
-                  on-failure:
-                    continue: true
-                - name: fingerprint_and_write_taxii
-                  type: elasticsearch.index
-                  with:
-                    index: .kibana-threat-reports
-                    op_type: create
-                    document:
-                      "@timestamp": "{{ now }}"
-                      content_fingerprint: "{{ steps.taxii_poll.output.body | sha256 }}"
-                      space_id: "{{ item._source.space_id | default: '*' }}"
-                      source:
-                        type: taxii
-                        name: "{{ item._source.name }}"
-                        url: "{{ item._source.config.url }}"
-                        adapter_id: "taxii:{{ item._id }}"
-                      content:
-                        title: "{{ item._source.name }}"
-                        body_text: "{{ steps.taxii_poll.output.body }}"
-                        language: en
-                      severity:
-                        level: medium
-                        score: 40
-                      provenance:
-                        ingested_at: "{{ now }}"
-                        extraction_method: pending
-                  on-failure:
-                    continue: true
-            - match: vendor_api
-              steps:
-                - name: vendor_call
-                  type: http
-                  with:
-                    method: GET
-                    url: "{{ item._source.config.url }}"
-                  on-failure:
-                    continue: true
-                - name: fingerprint_and_write_vendor
-                  type: elasticsearch.index
-                  with:
-                    index: .kibana-threat-reports
-                    op_type: create
-                    document:
-                      "@timestamp": "{{ now }}"
-                      content_fingerprint: "{{ steps.vendor_call.output.body | sha256 }}"
-                      space_id: "{{ item._source.space_id | default: '*' }}"
-                      source:
-                        type: vendor_api
-                        name: "{{ item._source.name }}"
-                        url: "{{ item._source.config.url }}"
-                        adapter_id: "vendor_api:{{ item._id }}"
-                      content:
-                        title: "{{ item._source.name }}"
-                        body_text: "{{ steps.vendor_call.output.body }}"
-                        language: en
-                      severity:
-                        level: medium
-                        score: 40
-                      provenance:
-                        ingested_at: "{{ now }}"
-                        extraction_method: pending
-                  on-failure:
-                    continue: true
-          default:
-            - name: log_unknown_adapter
-              type: data.set
-              with:
-                key: warning
-                value: "Skipping source {{ item._id }} - unknown adapter_type {{ item._source.adapter_type }}"
+        expression: "{{ variables.adapter_type }}"
+        cases:
+          - match: rss
+            steps:
+              - name: rss_fetch
+                type: http
+                with:
+                  method: GET
+                  url: "{{ foreach.item._source.config.url }}"
+                on-failure:
+                  continue: true
+              - name: fingerprint_and_write_rss
+                type: elasticsearch.index
+                with:
+                  index: .kibana-threat-reports
+                  # Setting `_id` to the fingerprint is what makes
+                  # `op_type: create` translate a duplicate write into a
+                  # 409 instead of a fresh doc — see the top-of-file
+                  # comment on the fingerprint shape. Once a `| sha256`
+                  # filter is registered, both `id` and
+                  # `content_fingerprint` flip to the body hash and the
+                  # dedup behaviour described by `op_type: create`
+                  # actually kicks in.
+                  id: "{{ variables.fingerprint }}"
+                  op_type: create
+                  document:
+                    "@timestamp": "{{ now }}"
+                    content_fingerprint: "{{ variables.fingerprint }}"
+                    space_id: "{{ foreach.item._source.space_id | default: '*' }}"
+                    source:
+                      type: rss
+                      name: "{{ foreach.item._source.name }}"
+                      url: "{{ foreach.item._source.config.url }}"
+                      adapter_id: "rss:{{ foreach.item._id }}"
+                    content:
+                      title: "{{ foreach.item._source.name }}"
+                      body_text: "{{ steps.rss_fetch.output.data }}"
+                      language: en
+                    severity:
+                      level: medium
+                      score: 40
+                    provenance:
+                      ingested_at: "{{ now }}"
+                      extraction_method: pending
+                on-failure:
+                  # 409 conflict on op_type:create == duplicate fingerprint -> skip silently
+                  continue: true
+          - match: stix
+            steps:
+              - name: stix_pull
+                type: http
+                with:
+                  method: GET
+                  url: "{{ foreach.item._source.config.url }}"
+                  headers:
+                    Accept: application/stix+json
+                on-failure:
+                  continue: true
+              - name: fingerprint_and_write_stix
+                type: elasticsearch.index
+                with:
+                  index: .kibana-threat-reports
+                  id: "{{ variables.fingerprint }}"
+                  op_type: create
+                  document:
+                    "@timestamp": "{{ now }}"
+                    content_fingerprint: "{{ variables.fingerprint }}"
+                    space_id: "{{ foreach.item._source.space_id | default: '*' }}"
+                    source:
+                      type: stix
+                      name: "{{ foreach.item._source.name }}"
+                      url: "{{ foreach.item._source.config.url }}"
+                      adapter_id: "stix:{{ foreach.item._id }}"
+                    content:
+                      title: "{{ foreach.item._source.name }}"
+                      body_text: "{{ steps.stix_pull.output.data }}"
+                      language: en
+                    severity:
+                      level: medium
+                      score: 40
+                    provenance:
+                      ingested_at: "{{ now }}"
+                      extraction_method: pending
+                on-failure:
+                  continue: true
+          - match: taxii
+            steps:
+              - name: taxii_poll
+                type: http
+                with:
+                  method: GET
+                  url: "{{ foreach.item._source.config.url }}"
+                  headers:
+                    Accept: application/taxii+json;version=2.1
+                on-failure:
+                  continue: true
+              - name: fingerprint_and_write_taxii
+                type: elasticsearch.index
+                with:
+                  index: .kibana-threat-reports
+                  id: "{{ variables.fingerprint }}"
+                  op_type: create
+                  document:
+                    "@timestamp": "{{ now }}"
+                    content_fingerprint: "{{ variables.fingerprint }}"
+                    space_id: "{{ foreach.item._source.space_id | default: '*' }}"
+                    source:
+                      type: taxii
+                      name: "{{ foreach.item._source.name }}"
+                      url: "{{ foreach.item._source.config.url }}"
+                      adapter_id: "taxii:{{ foreach.item._id }}"
+                    content:
+                      title: "{{ foreach.item._source.name }}"
+                      body_text: "{{ steps.taxii_poll.output.data }}"
+                      language: en
+                    severity:
+                      level: medium
+                      score: 40
+                    provenance:
+                      ingested_at: "{{ now }}"
+                      extraction_method: pending
+                on-failure:
+                  continue: true
+          - match: vendor_api
+            steps:
+              - name: vendor_call
+                type: http
+                with:
+                  method: GET
+                  url: "{{ foreach.item._source.config.url }}"
+                on-failure:
+                  continue: true
+              - name: fingerprint_and_write_vendor
+                type: elasticsearch.index
+                with:
+                  index: .kibana-threat-reports
+                  id: "{{ variables.fingerprint }}"
+                  op_type: create
+                  document:
+                    "@timestamp": "{{ now }}"
+                    content_fingerprint: "{{ variables.fingerprint }}"
+                    space_id: "{{ foreach.item._source.space_id | default: '*' }}"
+                    source:
+                      type: vendor_api
+                      name: "{{ foreach.item._source.name }}"
+                      url: "{{ foreach.item._source.config.url }}"
+                      adapter_id: "vendor_api:{{ foreach.item._id }}"
+                    content:
+                      title: "{{ foreach.item._source.name }}"
+                      body_text: "{{ steps.vendor_call.output.data }}"
+                      language: en
+                    severity:
+                      level: medium
+                      score: 40
+                    provenance:
+                      ingested_at: "{{ now }}"
+                      extraction_method: pending
+                on-failure:
+                  continue: true
+        default:
+          # Same workaround as the `expression` field above: read the loop
+          # variable through the hoisted `variables.*` instead of `foreach.*`
+          # so the validator can resolve the references on this step (which
+          # lives directly under the switch's `default` key).
+          - name: log_unknown_adapter
+            type: data.set
+            with:
+              key: warning
+              value: "Skipping source {{ variables.item_id }} - unknown adapter_type {{ variables.adapter_type }}"

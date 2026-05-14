@@ -84,7 +84,11 @@ export class BuiltinWorkflowsService {
     const now = new Date();
     const triggerDefinitions = this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
 
-    const { id: preparedId, workflowData, definition } = prepareWorkflowDocument({
+    const {
+      id: preparedId,
+      workflowData,
+      definition,
+    } = prepareWorkflowDocument({
       workflow: { id: workflow.id, yaml: workflow.yaml },
       zodSchema,
       authenticatedUser: workflow.owner,
@@ -117,6 +121,11 @@ export class BuiltinWorkflowsService {
         taskScheduler: this.deps.getTaskScheduler(),
         logger: this.deps.logger,
       });
+      // YAML is unchanged but denormalized fields (e.g. top-level `name`) can still
+      // drift from the parsed definition — repair on the next upsert.
+      if (existing.name !== workflowData.name) {
+        return this.updateBuiltin(workflow.id, spaceId, workflow.owner, workflowData, definition);
+      }
       return { id: workflow.id, status: 'unchanged' };
     }
 

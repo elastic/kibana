@@ -60,8 +60,13 @@ steps:
             - exists:
                 field: extracted.behaviors
           minimum_should_match: 1
-      sort:
-        - provenance.extracted_at: desc
+      # `@timestamp` is always mapped on this data stream, so it's a safe sort
+      # field even when reports were ingested before `provenance.extracted_at`
+      # was added. Uses the `<field>:<direction>` shorthand because the
+      # workflow `elasticsearch.search` schema collapses the URL-param `sort`
+      # (`string | string[]`) over the body-param shape — see `search_sort` in
+      # `kbn-workflows/spec/elasticsearch/generated/schemas/es_openapi_zod.gen.ts`.
+      sort: "@timestamp:desc"
 
   - name: backfill_each_report
     type: foreach
@@ -93,11 +98,24 @@ steps:
 
       # Layer 2 — behavioral DE rule alerts whose ATT&CK techniques overlap
       # with this report's extracted techniques. Skipped when the report has
-      # no techniques because the terms query would be malformed. The
-      # condition is in KQL form (workflow `if` steps don't accept Liquid
+      # no techniques as a cheap short-circuit — `terms_lookup` against a
+      # missing path resolves to an empty terms list and returns zero hits
+      # anyway, but we avoid the round-trip when we already know the answer.
+      # The condition is in KQL form (workflow `if` steps don't accept Liquid
       # here — see `IfStepConfigSchema` in `kbn-workflows/spec/schema.ts`).
       # KQL `field : *` evaluates to true when the field has at least one
       # value, which for an array means non-empty.
+      #
+      # The technique list itself is resolved by Elasticsearch via
+      # `terms_lookup` rather than interpolated as a Liquid variable. The
+      # generated ES schema types `_source` as `Record<string, unknown>`
+      # (see `global_search_types_hit._source` in
+      # `kbn-workflows/spec/elasticsearch/generated/schemas/es_openapi_zod.gen.ts`),
+      # so `{{ foreach.item._source.extracted.ttps.techniques }}` resolves to
+      # `unknown` in the workflow type checker and produces a "type is unknown"
+      # warning. `terms_lookup` only needs the report's `_index` + `_id` —
+      # both typed on `global_search_types_hit` — so the workflow validates
+      # cleanly without changing the schema.
       - name: count_layer2_hits
         type: if
         condition: "foreach.item._source.extracted.ttps.techniques : *"
@@ -114,7 +132,10 @@ steps:
                         "@timestamp":
                           gte: "now-7d"
                     - terms:
-                        kibana.alert.rule.threat.technique.id: "{{ foreach.item._source.extracted.ttps.techniques }}"
+                        kibana.alert.rule.threat.technique.id:
+                          index: "{{ foreach.item._index }}"
+                          id: "{{ foreach.item._id }}"
+                          path: extracted.ttps.techniques
                   must_not:
                     - term:
                         kibana.alert.rule.type: threat_match
