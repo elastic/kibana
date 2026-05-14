@@ -124,7 +124,7 @@ describe('getRetentionTool', () => {
       expect(data.actionableFindings![0].category).toBe('Network');
     });
 
-    it('leaves finding category undefined when resource has no category match', async () => {
+    it('filters out findings whose resource has no category match', async () => {
       mockGetRetention.mockResolvedValueOnce(
         makePayload({
           items: [],
@@ -140,7 +140,52 @@ describe('getRetentionTool', () => {
       )) as ToolHandlerStandardReturn;
 
       const data = (result.results[0] as OtherResult).data as RetentionPayload;
-      expect(data.actionableFindings![0].category).toBeUndefined();
+      // logs-orphan-default is not in any category backing index → finding is dropped
+      expect(data.actionableFindings).toHaveLength(0);
+    });
+  });
+
+  describe('handler — summary recomputation after filtering', () => {
+    it('recomputes summary and status from filtered items, not the pre-filter payload', async () => {
+      // Orchestrator sees 13 items (2 non-compliant), but only 5 are categorized.
+      const uncategorizedItems = Array.from({ length: 8 }, (_, i) =>
+        makeRetentionItem(`logs-uncategorized-${i}-default`, 'non-compliant')
+      );
+      mockGetRetention.mockResolvedValueOnce(
+        makePayload({
+          status: 'actionsRequired',
+          summary: '2 of 13 data streams or indices have retention below the 365-day threshold.',
+          items: [
+            makeRetentionItem(CLOUD_DATA_STREAM, 'non-compliant'),
+            makeRetentionItem(NETWORK_DATA_STREAM, 'healthy'),
+            ...uncategorizedItems,
+          ],
+          actionableFindings: [
+            { severity: 'warning', message: 'below threshold', resource: CLOUD_DATA_STREAM },
+            // uncategorized findings that should be filtered out
+            ...uncategorizedItems.map((item) => ({
+              severity: 'warning' as const,
+              message: 'below threshold',
+              resource: item.indexName,
+            })),
+          ],
+        })
+      );
+
+      const result = (await tool.handler(
+        {},
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      const data = (result.results[0] as OtherResult).data as RetentionPayload;
+      // After filtering: only Cloud + Network (2 items)
+      expect(data.items).toHaveLength(2);
+      // Summary must reference 2, not 13
+      expect(data.summary).toContain('2');
+      expect(data.summary).not.toContain('13');
+      // Only the Cloud finding survives (Network is healthy, uncategorized findings dropped)
+      expect(data.actionableFindings).toHaveLength(1);
+      expect(data.actionableFindings![0].resource).toBe(CLOUD_DATA_STREAM);
     });
   });
 

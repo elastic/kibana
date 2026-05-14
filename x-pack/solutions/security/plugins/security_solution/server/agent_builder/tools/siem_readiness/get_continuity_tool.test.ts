@@ -115,7 +115,7 @@ describe('getContinuityTool', () => {
       expect(data.actionableFindings![0].category).toBe('Endpoint');
     });
 
-    it('passes through findings whose resource is not in any category pipeline', async () => {
+    it('filters out findings whose resource is not in any categorized pipeline', async () => {
       mockGetContinuity.mockResolvedValueOnce(
         makePayload({
           items: [],
@@ -131,8 +131,38 @@ describe('getContinuityTool', () => {
       )) as ToolHandlerStandardReturn;
 
       const data = (result.results[0] as OtherResult).data as ContinuityPayload;
-      expect(data.actionableFindings![0].category).toBeUndefined();
-      expect(data.actionableFindings![0].resource).toBe('ghost-pipeline');
+      // ghost-pipeline is not in categorizedItems → finding is dropped
+      expect(data.actionableFindings).toHaveLength(0);
+    });
+  });
+
+  describe('handler — summary recomputation after filtering', () => {
+    it('recomputes summary and status from filtered items, not the pre-filter payload', async () => {
+      // Orchestrator sees 3 pipelines (summary: "All 3 active..."), but 2 are uncategorized.
+      mockGetContinuity.mockResolvedValueOnce(
+        makePayload({
+          status: 'healthy',
+          summary: 'All 3 active ingest pipelines are functioning properly.',
+          items: [
+            { name: 'endpoint-pipeline', indices: [ENDPOINT_INDEX], docsCount: 1000, failedDocsCount: 0, statsAvailable: true },
+            { name: 'internal-1', indices: [INTERNAL_INDEX], docsCount: 50, failedDocsCount: 0, statsAvailable: true },
+            { name: 'internal-2', indices: ['.other-internal-000001'], docsCount: 50, failedDocsCount: 0, statsAvailable: true },
+          ],
+        })
+      );
+
+      const result = (await tool.handler(
+        {},
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      const data = (result.results[0] as OtherResult).data as ContinuityPayload;
+      // After filtering: only endpoint-pipeline remains
+      expect(data.items).toHaveLength(1);
+      // Summary must reference 1, not 3
+      expect(data.summary).toContain('1');
+      expect(data.summary).not.toContain('3');
+      expect(data.status).toBe('healthy');
     });
   });
 

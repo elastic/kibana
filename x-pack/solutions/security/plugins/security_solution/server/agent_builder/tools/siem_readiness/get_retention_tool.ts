@@ -11,6 +11,7 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
 import type { MainCategories } from '@kbn/siem-readiness';
+import { isRetentionNonCompliant } from '@kbn/siem-readiness';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { getRetention } from '../../../lib/siem_readiness/dimensions';
@@ -60,17 +61,41 @@ export const getRetentionTool = (
         )
       );
 
-      const enrichedFindings = (payload.actionableFindings ?? []).map((finding) => {
-        const category = getCategoryForItem(finding.resource);
-        return category ? { ...finding, category } : finding;
-      });
+      const enrichedFindings = (payload.actionableFindings ?? [])
+        .filter((finding) => getCategoryForItem(finding.resource) !== undefined)
+        .map((finding) => {
+          const category = getCategoryForItem(finding.resource);
+          return category ? { ...finding, category } : finding;
+        });
+
+      const nonCompliantCount = categorizedItems.filter((item) =>
+        isRetentionNonCompliant(item.status)
+      ).length;
+      const filteredStatus =
+        categorizedItems.length === 0
+          ? ('noData' as const)
+          : nonCompliantCount > 0
+          ? ('actionsRequired' as const)
+          : ('healthy' as const);
+      const filteredSummary =
+        filteredStatus === 'noData'
+          ? 'No retention data available for categorized indices.'
+          : nonCompliantCount > 0
+          ? `${nonCompliantCount} of ${categorizedItems.length} data streams or indices have retention below the 365-day threshold.`
+          : `All ${categorizedItems.length} data streams and indices meet the 365-day retention requirement.`;
 
       return {
         results: [
           {
             tool_result_id: getToolResultId(),
             type: ToolResultType.other,
-            data: { ...payload, items: categorizedItems, actionableFindings: enrichedFindings },
+            data: {
+              ...payload,
+              status: filteredStatus,
+              summary: filteredSummary,
+              items: categorizedItems,
+              actionableFindings: enrichedFindings,
+            },
           },
         ],
       };
