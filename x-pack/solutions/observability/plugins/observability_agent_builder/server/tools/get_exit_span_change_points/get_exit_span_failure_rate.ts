@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { termQuery } from '@kbn/observability-plugin/server';
+import { termQuery } from '@kbn/observability-utils-server/es/queries/term_query';
 import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import {

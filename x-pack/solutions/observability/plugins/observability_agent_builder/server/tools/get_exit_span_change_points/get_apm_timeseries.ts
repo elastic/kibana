@@ -6,7 +6,9 @@
  */
 
 import datemath from '@elastic/datemath';
-import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { kqlQuery } from '@kbn/observability-utils-server/es/queries/kql_query';
+import { rangeQuery } from '@kbn/observability-utils-server/es/queries/range_query';
+import { termQuery } from '@kbn/observability-utils-server/es/queries/term_query';
 import * as t from 'io-ts';
 import type { ChangePointType } from '@kbn/es-types/src';
 import { SERVICE_NAME } from '@kbn/apm-types/es_fields';
