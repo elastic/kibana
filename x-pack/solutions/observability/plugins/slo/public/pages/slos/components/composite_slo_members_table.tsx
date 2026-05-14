@@ -8,11 +8,7 @@
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiLoadingSpinner,
-  EuiPopover,
   EuiText,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
@@ -20,15 +16,17 @@ import { i18n } from '@kbn/i18n';
 import type { CompositeSLOMemberSummary } from '@kbn/slo-schema';
 import React, { lazy, Suspense, useMemo, useState } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
+import {
+  CompositeSloBurnRateWindowColumnHeader,
+  type CompositeSloBurnRateWindow,
+} from './composite_slo_burn_rate_window_column_header';
 import { MemberStatusBadge } from './composite_slo_member_status_badge';
 
 const SLODetailsFlyout = lazy(() => import('../../slo_details/shared_flyout/slo_details_flyout'));
 
-type BurnRateWindow = '5m' | '1h' | '1d';
-
 function getMemberBurnRateValue(
   item: CompositeSLOMemberSummary,
-  window: BurnRateWindow
+  window: CompositeSloBurnRateWindow
 ): number | undefined {
   const map = {
     '5m': item.fiveMinuteBurnRate,
@@ -40,8 +38,8 @@ function getMemberBurnRateValue(
 
 const getMemberColumns = (
   percentFormat: string,
-  burnRateWindow: BurnRateWindow,
-  setBurnRateWindow: (w: BurnRateWindow) => void,
+  burnRateWindow: CompositeSloBurnRateWindow,
+  setBurnRateWindow: (w: CompositeSloBurnRateWindow) => void,
   isBurnRatePopoverOpen: boolean,
   setIsBurnRatePopoverOpen: React.Dispatch<React.SetStateAction<boolean>>
 ): Array<EuiBasicTableColumn<CompositeSLOMemberSummary>> => [
@@ -114,45 +112,19 @@ const getMemberColumns = (
   },
   {
     name: (
-      <EuiPopover
-        aria-label={i18n.translate('xpack.slo.compositeSloList.members.burnRate.windowAriaLabel', {
+      <CompositeSloBurnRateWindowColumnHeader
+        burnRateWindow={burnRateWindow}
+        onBurnRateWindowChange={setBurnRateWindow}
+        isPopoverOpen={isBurnRatePopoverOpen}
+        setIsPopoverOpen={setIsBurnRatePopoverOpen}
+        buttonTestSubj="compositeSloMembersBurnRateWindowSelector"
+        popoverAriaLabel={i18n.translate('xpack.slo.compositeSloList.members.burnRate.windowAriaLabel', {
           defaultMessage: 'Select burn rate window for member SLOs',
         })}
-        button={
-          <EuiButtonEmpty
-            data-test-subj="compositeSloMembersBurnRateWindowSelector"
-            size="xs"
-            iconType="arrowDown"
-            iconSide="right"
-            onClick={() => setIsBurnRatePopoverOpen((open) => !open)}
-            css={{ fontWeight: 700 }}
-          >
-            {i18n.translate('xpack.slo.compositeSloList.members.burnRateColumn', {
-              defaultMessage: 'Burn rate',
-            })}{' '}
-            ({burnRateWindow})
-          </EuiButtonEmpty>
-        }
-        isOpen={isBurnRatePopoverOpen}
-        closePopover={() => setIsBurnRatePopoverOpen(false)}
-        panelPaddingSize="none"
-        anchorPosition="downLeft"
-      >
-        <EuiContextMenuPanel
-          items={(['5m', '1h', '1d'] as const).map((itemWindow) => (
-            <EuiContextMenuItem
-              key={itemWindow}
-              icon={burnRateWindow === itemWindow ? 'check' : 'empty'}
-              onClick={() => {
-                setBurnRateWindow(itemWindow);
-                setIsBurnRatePopoverOpen(false);
-              }}
-            >
-              {itemWindow}
-            </EuiContextMenuItem>
-          ))}
-        />
-      </EuiPopover>
+        burnRateLabel={i18n.translate('xpack.slo.compositeSloList.members.burnRateColumn', {
+          defaultMessage: 'Burn rate',
+        })}
+      />
     ),
     width: '130px',
     render: (item: CompositeSLOMemberSummary) => {
@@ -184,7 +156,7 @@ export function CompositeSloMembersTable({
   members: CompositeSLOMemberSummary[];
   percentFormat: string;
 }) {
-  const [burnRateWindow, setBurnRateWindow] = useState<BurnRateWindow>('5m');
+  const [burnRateWindow, setBurnRateWindow] = useState<CompositeSloBurnRateWindow>('5m');
   const [isBurnRatePopoverOpen, setIsBurnRatePopoverOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<CompositeSLOMemberSummary | null>(null);
 

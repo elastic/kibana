@@ -9,10 +9,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiBadge,
-  EuiButtonEmpty,
   EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   type CriteriaWithPagination,
   EuiFlexGroup,
   EuiFlexItem,
@@ -46,6 +43,10 @@ import { useFetchActiveAlerts } from '../../../hooks/use_fetch_active_alerts';
 import { useKibana } from '../../../hooks/use_kibana';
 import { usePermissions } from '../../../hooks/use_permissions';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
+import {
+  CompositeSloBurnRateWindowColumnHeader,
+  type CompositeSloBurnRateWindow,
+} from './composite_slo_burn_rate_window_column_header';
 import { CompositeSloMembersTable } from './composite_slo_members_table';
 import { SloSparkline } from './slo_sparkline';
 
@@ -102,7 +103,7 @@ export function CompositeSloTable({
   const hasWritePermissions = permissions?.hasAllWriteRequested === true;
 
   const [expandedRowIds, setExpandedRowIds] = useState<Set<string>>(new Set());
-  const [burnRateWindow, setBurnRateWindow] = useState<'5m' | '1h' | '1d'>('5m');
+  const [burnRateWindow, setBurnRateWindow] = useState<CompositeSloBurnRateWindow>('5m');
   const [isBurnRatePopoverOpen, setIsBurnRatePopoverOpen] = useState(false);
   const [openMemberHealthPopoverId, setOpenMemberHealthPopoverId] = useState<string | null>(null);
 
@@ -426,46 +427,20 @@ export function CompositeSloTable({
       },
       {
         name: (
-          <EuiPopover
-            aria-label={i18n.translate(
+          <CompositeSloBurnRateWindowColumnHeader
+            burnRateWindow={burnRateWindow}
+            onBurnRateWindowChange={setBurnRateWindow}
+            isPopoverOpen={isBurnRatePopoverOpen}
+            setIsPopoverOpen={setIsBurnRatePopoverOpen}
+            buttonTestSubj="compositeSloListBurnRateWindowSelector"
+            popoverAriaLabel={i18n.translate(
               'xpack.slo.compositeSloList.burnRate.windowSelectorAriaLabel',
               { defaultMessage: 'Select burn rate window' }
             )}
-            button={
-              <EuiButtonEmpty
-                data-test-subj="compositeSloListBurnRateWindowSelector"
-                size="xs"
-                iconType="arrowDown"
-                iconSide="right"
-                onClick={() => setIsBurnRatePopoverOpen((open) => !open)}
-                css={{ fontWeight: 700 }}
-              >
-                {i18n.translate('xpack.slo.compositeSloList.columns.burnRate', {
-                  defaultMessage: 'Burn rate',
-                })}{' '}
-                ({burnRateWindow})
-              </EuiButtonEmpty>
-            }
-            isOpen={isBurnRatePopoverOpen}
-            closePopover={() => setIsBurnRatePopoverOpen(false)}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-          >
-            <EuiContextMenuPanel
-              items={(['5m', '1h', '1d'] as const).map((w) => (
-                <EuiContextMenuItem
-                  key={w}
-                  icon={burnRateWindow === w ? 'check' : 'empty'}
-                  onClick={() => {
-                    setBurnRateWindow(w);
-                    setIsBurnRatePopoverOpen(false);
-                  }}
-                >
-                  {w}
-                </EuiContextMenuItem>
-              ))}
-            />
-          </EuiPopover>
+            burnRateLabel={i18n.translate('xpack.slo.compositeSloList.columns.burnRate', {
+              defaultMessage: 'Burn rate',
+            })}
+          />
         ),
         width: '160px',
         render: (item: CompositeSLOItem) => {
