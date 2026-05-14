@@ -9,6 +9,7 @@
 
 import type { JSONSchema7 } from 'json-schema';
 import { monaco } from '@kbn/monaco';
+import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import type { ExtendedAutocompleteContext } from '../../context/autocomplete.types';
 import { getInputPropertyName } from '../../context/inputs_utils';
 
@@ -22,19 +23,15 @@ function getEnumSuggestions(
   propertyName: string | null,
   workflowDefinition: ExtendedAutocompleteContext['workflowDefinition']
 ): monaco.languages.CompletionItem[] {
-  if (!propertyName || !workflowDefinition?.inputs) {
+  const inputs = getInputsFromDefinition(workflowDefinition);
+
+  if (!propertyName || !inputs) {
     return [];
   }
 
   // Check if inputs is in the new JSON Schema format
-  if (
-    typeof workflowDefinition.inputs === 'object' &&
-    !Array.isArray(workflowDefinition.inputs) &&
-    'properties' in workflowDefinition.inputs
-  ) {
-    const properties = workflowDefinition.inputs.properties as
-      | Record<string, JSONSchema7>
-      | undefined;
+  if (typeof inputs === 'object' && !Array.isArray(inputs) && 'properties' in inputs) {
+    const properties = inputs.properties as Record<string, JSONSchema7> | undefined;
     if (properties && typeof properties === 'object' && propertyName in properties) {
       const propertySchema = properties[propertyName] as JSONSchema7;
       if (propertySchema.enum && Array.isArray(propertySchema.enum)) {
