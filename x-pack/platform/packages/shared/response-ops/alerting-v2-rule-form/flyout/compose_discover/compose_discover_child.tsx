@@ -67,7 +67,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
   // Read timeField and the base query from RHF
   const { setValue: setFormValue, watch: watchForm } = useFormContext<FormValues>();
   const timeField = watchForm('timeField') ?? '@timestamp';
-  const formQuery = watchForm('evaluation.query.base') ?? '';
+  const formQuery = watchForm('query.breach') ?? '';
 
   // Sync localQuery when RHF's query changes externally (e.g. from YAML edits
   // that debounce into RHF). When the change comes from this Sandbox's own
