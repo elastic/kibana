@@ -8,6 +8,7 @@
 import React from 'react';
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,12 +27,9 @@ const PREVIEW_ONLY_LABEL = i18n.translate('xpack.agentBuilder.attachmentHeader.p
   defaultMessage: 'Preview Only',
 });
 
-const CURRENTLY_PREVIEWING_LABEL = i18n.translate(
-  'xpack.agentBuilder.attachmentHeader.currentlyPreviewing',
-  {
-    defaultMessage: "You're previewing this",
-  }
-);
+const CLOSE_PREVIEW_LABEL = i18n.translate('xpack.agentBuilder.attachmentHeader.closePreview', {
+  defaultMessage: 'Close preview',
+});
 
 const CLOSE_BUTTON_ARIA_LABEL = i18n.translate('xpack.agentBuilder.attachmentHeader.close', {
   defaultMessage: 'Close',
@@ -48,11 +46,12 @@ interface AttachmentHeaderProps {
   badges?: HeaderBadge[];
   actionButtons?: ActionButton[];
   onClose?: () => void;
+  onClosePreview?: () => void;
   /**
    * Controls preview UI state from the parent.
    * - none: show regular action buttons
    * - preview_available: show "Preview Only" badge
-   * - previewing: show "You're previewing this" and hide action buttons
+   * - previewing: show "Close preview" button and hide action buttons
    */
   previewBadgeState?: 'none' | 'preview_available' | 'previewing';
 }
@@ -64,6 +63,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   badges,
   actionButtons,
   onClose,
+  onClosePreview,
   previewBadgeState = 'none',
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -164,9 +164,9 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
         )}
         {previewBadgeState === 'previewing' && (
           <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
-            <EuiBadge iconType="eye" color="success">
-              {CURRENTLY_PREVIEWING_LABEL}
-            </EuiBadge>
+            <EuiButtonEmpty color="text" size="s" iconType="cross" onClick={onClosePreview}>
+              {CLOSE_PREVIEW_LABEL}
+            </EuiButtonEmpty>
           </EuiFlexItem>
         )}
         {onClose && (

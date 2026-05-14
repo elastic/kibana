@@ -50,6 +50,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
 }) => {
   const {
     openCanvas: openCanvasContext,
+    closeCanvas,
     previewedAttachmentKey,
     setPreviewedAttachmentKey,
   } = useCanvasContext();
@@ -156,6 +157,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
         badges={headerBadges}
         actionButtons={inlineActionButtons}
         previewBadgeState={resolvedPreviewBadgeState}
+        onClosePreview={closeCanvas}
       />
       <EuiSplitPanel.Inner grow={false} paddingSize="none">
         {uiDefinition?.renderInlineContent?.(
