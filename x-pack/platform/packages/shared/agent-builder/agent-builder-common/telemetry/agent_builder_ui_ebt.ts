@@ -336,6 +336,10 @@ export const AGENT_BUILDER_UI_EBT = {
       MANAGE_CLICK: 'manage_click',
       BACK_CLICK: 'back_click',
     },
+    customizePluginsInstall: {
+      FROM_URL: 'install_from_url',
+      FROM_UPLOAD: 'install_from_upload',
+    },
     sidebarNavItem: {
       INSTRUCTIONS: 'instructions',
       SKILLS: 'skills',

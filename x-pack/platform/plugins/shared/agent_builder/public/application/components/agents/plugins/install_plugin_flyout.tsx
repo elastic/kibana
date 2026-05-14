@@ -190,7 +190,11 @@ export const InstallPluginFlyout: React.FC<InstallPluginFlyoutProps> = ({
               data-test-subj="agentBuilderInstallPluginSubmitButton"
               data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_PLUGINS}
               data-ebt-action={AGENT_BUILDER_UI_EBT.action.uiChrome.INSTALL_FROM_URL_OR_ZIP}
-              data-ebt-detail={activeTab === 'url' ? 'install_from_url' : 'install_from_upload'}
+              data-ebt-detail={
+                activeTab === 'url'
+                  ? AGENT_BUILDER_UI_EBT.detail.customizePluginsInstall.FROM_URL
+                  : AGENT_BUILDER_UI_EBT.detail.customizePluginsInstall.FROM_UPLOAD
+              }
             >
               {labels.plugins.installButton}
             </EuiButton>
