@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import { optionalWithDescription as opt } from './common';
 import { ruleResponseSchema } from './rule_data_schema';
 
