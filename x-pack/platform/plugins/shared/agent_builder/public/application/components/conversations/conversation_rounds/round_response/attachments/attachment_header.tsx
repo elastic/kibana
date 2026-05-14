@@ -25,7 +25,7 @@ import type { IconType } from '@elastic/eui';
 import { AttachmentActions } from './attachment_actions';
 
 const PREVIEW_ONLY_LABEL = i18n.translate('xpack.agentBuilder.attachmentHeader.previewOnly', {
-  defaultMessage: 'Preview Only',
+  defaultMessage: 'Read-only preview',
 });
 
 const CLOSE_PREVIEW_LABEL = i18n.translate('xpack.agentBuilder.attachmentHeader.closePreview', {
@@ -109,7 +109,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
     <div ref={measureRef} style={{ width: '100%' }}>
       <EuiSplitPanel.Inner color="subdued" css={headerStyles} paddingSize="m">
         {previewBadgeState === 'preview_available' && (
-          <EuiBadge iconType="lock" color="primary" css={badgeStyles}>
+          <EuiBadge iconType="readOnly" css={badgeStyles}>
             {PREVIEW_ONLY_LABEL}
           </EuiBadge>
         )}
