@@ -32,6 +32,7 @@ import { createToolHealthClient } from './health';
 import type { AgentBuilderConfig } from '../../config';
 
 export interface ToolsServiceSetupDeps {
+  inboxEnabled?: boolean;
   logger: Logger;
   workflowsManagement?: WorkflowsServerPluginSetup;
   config: AgentBuilderConfig;
@@ -78,9 +79,10 @@ export class ToolsService {
     savedObjects,
     actions,
   }: ToolsServiceStartDeps): ToolsServiceStart {
-    const { logger, workflowsManagement, config } = this.setupDeps!;
+    const { inboxEnabled, logger, workflowsManagement, config } = this.setupDeps!;
 
     const toolTypes = getToolTypeDefinitions({
+      inboxEnabled,
       workflowsManagement,
       actions,
       indexSearchDeps: {

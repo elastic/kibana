@@ -49,7 +49,16 @@ export const registerRespondToActionRoute = ({
       async (_context, request, response) => {
         const { source_app: sourceApp, source_id: sourceId } = request.params;
 
+        logger.debug(
+          () =>
+            `[hitl-debug][inbox] inbox.respond.received exec=(none) seq=(none) stepId=(none) sourceApp=${sourceApp} sourceId=${sourceId}`
+        );
+
         try {
+          logger.debug(
+            () =>
+              `[hitl-debug][inbox] inbox.respond.delegate exec=(none) seq=(none) stepId=(none) sourceApp=${sourceApp} sourceId=${sourceId}`
+          );
           await registry.respondTo(sourceApp, sourceId, request.body.input, {
             request,
             spaceId: getSpaceId(request),
@@ -68,6 +77,10 @@ export const registerRespondToActionRoute = ({
             // resource (e.g. a workflow step) is no longer in a state that
             // can accept a response. Surface as 409 so clients can refresh
             // their inbox instead of treating it like a server error.
+            logger.debug(
+              () =>
+                `[hitl-debug][inbox] inbox.respond.conflict exec=(none) seq=(none) stepId=(none) sourceApp=${sourceApp} sourceId=${sourceId} message=${error.message}`
+            );
             return response.conflict({
               body: { message: error.message },
             });

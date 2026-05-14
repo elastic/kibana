@@ -605,7 +605,8 @@ describe('Execution Routes', () => {
         'ex-1',
         'default',
         { resume: true },
-        request
+        request,
+        undefined
       );
       expect(result).toMatchObject({
         type: 'ok',
@@ -615,6 +616,42 @@ describe('Execution Routes', () => {
           message: 'Workflow resume scheduled',
         },
       });
+    });
+
+    it('should pass expectedResumeSeq option when expected_resume_seq is in body', async () => {
+      mockApi.resumeWorkflowExecution.mockResolvedValue({ resumedBy: 'user' });
+      const h = handler('POST', path)!;
+      const request = {
+        params: { executionId: 'ex-1' },
+        body: { expected_resume_seq: 5, input: { answer: 'yes' } },
+      };
+
+      await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.resumeWorkflowExecution).toHaveBeenCalledWith(
+        'ex-1',
+        'default',
+        { answer: 'yes' },
+        request,
+        { expectedResumeSeq: 5 }
+      );
+    });
+
+    it('should return 409 conflict when api.resumeWorkflowExecution throws WorkflowExecutionStaleResumeError', async () => {
+      const { WorkflowExecutionStaleResumeError } = await import('@kbn/workflows/common/errors');
+      mockApi.resumeWorkflowExecution.mockRejectedValue(
+        new WorkflowExecutionStaleResumeError('ex-1', 2, 1)
+      );
+      const h = handler('POST', path)!;
+      const request = {
+        params: { executionId: 'ex-1' },
+        body: { expected_resume_seq: 2, input: { answer: 'yes' } },
+      };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockResponse.conflict).toHaveBeenCalled();
+      expect(result).toMatchObject({ type: 'conflict' });
     });
   });
 

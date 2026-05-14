@@ -2,6 +2,972 @@
   "sha1": "477c0c903f235b6dd188aadd071768d598d2bd3f",
   "tests": [
     {
+      "id": "69056a2d02da36d-6971f124238b63a",
+      "title": "Agent Builder — LLM smoke (converse API) static connector anthropic-claude-3-7-sonnet — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 100,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-757fd821d75de10",
+      "title": "Agent Builder — LLM smoke (converse API) static connector anthropic-claude-3-7-sonnet — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 113,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-6ca49c4ed6eb410",
+      "title": "Agent Builder — LLM smoke (converse API) static connector anthropic-claude-3-7-sonnet — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 129,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-e0a4624bcabaa8c",
+      "title": "Agent Builder — LLM smoke (converse API) static connector anthropic-claude-4-5-haiku — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 100,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-8f13b2b5ce98284",
+      "title": "Agent Builder — LLM smoke (converse API) static connector anthropic-claude-4-5-haiku — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 113,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-8d0c12789f3e4cd",
+      "title": "Agent Builder — LLM smoke (converse API) static connector anthropic-claude-4-5-haiku — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 129,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-2ad8893e3de3547",
+      "title": "Agent Builder — LLM smoke (converse API) static connector anthropic-claude-4-5-opus — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 100,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-68ec1083c61a7cf",
+      "title": "Agent Builder — LLM smoke (converse API) static connector anthropic-claude-4-5-opus — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 113,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-b425cee846d6fdc",
+      "title": "Agent Builder — LLM smoke (converse API) static connector anthropic-claude-4-5-opus — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 129,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-a8aea0fb1e8b91b",
+      "title": "Agent Builder — LLM smoke (converse API) static connector anthropic-claude-4-5-sonnet — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 100,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-8bdbe2a1b18015c",
+      "title": "Agent Builder — LLM smoke (converse API) static connector anthropic-claude-4-5-sonnet — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 113,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-d1890090644111b",
+      "title": "Agent Builder — LLM smoke (converse API) static connector anthropic-claude-4-5-sonnet — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 129,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-cb5c8ad8eabce56",
+      "title": "Agent Builder — LLM smoke (converse API) static connector anthropic-claude-4-6-opus — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 100,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-3a4499375caecbb",
+      "title": "Agent Builder — LLM smoke (converse API) static connector anthropic-claude-4-6-opus — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 113,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-8ed02584ea96a62",
+      "title": "Agent Builder — LLM smoke (converse API) static connector anthropic-claude-4-6-opus — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 129,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-bd97bf2583f76a7",
+      "title": "Agent Builder — LLM smoke (converse API) static connector anthropic-claude-4-6-sonnet — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 100,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-2cbd1b83d3dff89",
+      "title": "Agent Builder — LLM smoke (converse API) static connector anthropic-claude-4-6-sonnet — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 113,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-d6198a580e39a90",
+      "title": "Agent Builder — LLM smoke (converse API) static connector anthropic-claude-4-6-sonnet — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 129,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-f44c6f23cfe0d1e",
+      "title": "Agent Builder — LLM smoke (converse API) static connector google-gemini-2-5-flash — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 100,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-8932ecb1c80a6c8",
+      "title": "Agent Builder — LLM smoke (converse API) static connector google-gemini-2-5-flash — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 113,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-1fc54e828ea1293",
+      "title": "Agent Builder — LLM smoke (converse API) static connector google-gemini-2-5-flash — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 129,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-9fc899a38c1c487",
+      "title": "Agent Builder — LLM smoke (converse API) static connector google-gemini-2-5-flash-lite — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 100,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-6ada5195b1949c3",
+      "title": "Agent Builder — LLM smoke (converse API) static connector google-gemini-2-5-flash-lite — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 113,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-ebba14616021e6b",
+      "title": "Agent Builder — LLM smoke (converse API) static connector google-gemini-2-5-flash-lite — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 129,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-d894a2d4e4b62fd",
+      "title": "Agent Builder — LLM smoke (converse API) static connector google-gemini-2-5-pro — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 100,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-9da1fd040c2834a",
+      "title": "Agent Builder — LLM smoke (converse API) static connector google-gemini-2-5-pro — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 113,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-a0d1fc5f39cb536",
+      "title": "Agent Builder — LLM smoke (converse API) static connector google-gemini-2-5-pro — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 129,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-099fd64b20e212f",
+      "title": "Agent Builder — LLM smoke (converse API) static connector google-gemini-3-0-flash — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 100,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-439c75c517300f8",
+      "title": "Agent Builder — LLM smoke (converse API) static connector google-gemini-3-0-flash — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 113,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-5a5f6deb678577c",
+      "title": "Agent Builder — LLM smoke (converse API) static connector google-gemini-3-0-flash — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 129,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-858cf1d2fdc9f8f",
+      "title": "Agent Builder — LLM smoke (converse API) static connector google-gemini-3-1-pro — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 100,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-8ade686cb425f26",
+      "title": "Agent Builder — LLM smoke (converse API) static connector google-gemini-3-1-pro — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 113,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-fd0fdd4e33b1c45",
+      "title": "Agent Builder — LLM smoke (converse API) static connector google-gemini-3-1-pro — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 129,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-9f3988e3fd5e805",
+      "title": "Agent Builder — LLM smoke (converse API) static connector gp-llm-v2 — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 100,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-6cd8620f0667f7a",
+      "title": "Agent Builder — LLM smoke (converse API) static connector gp-llm-v2 — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 113,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-e0fa6b19daf43dd",
+      "title": "Agent Builder — LLM smoke (converse API) static connector gp-llm-v2 — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 129,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-494850e60c95d64",
+      "title": "Agent Builder — LLM smoke (converse API) static connector openai-gpt-4-1 — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 100,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-c56f8c6aaebb713",
+      "title": "Agent Builder — LLM smoke (converse API) static connector openai-gpt-4-1 — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 113,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-eddd4c7b2546e35",
+      "title": "Agent Builder — LLM smoke (converse API) static connector openai-gpt-4-1 — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 129,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-0b3cf63921f23bf",
+      "title": "Agent Builder — LLM smoke (converse API) static connector openai-gpt-4-1-mini — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 100,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-ba29f4df930a4c1",
+      "title": "Agent Builder — LLM smoke (converse API) static connector openai-gpt-4-1-mini — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 113,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-5db4085acd07495",
+      "title": "Agent Builder — LLM smoke (converse API) static connector openai-gpt-4-1-mini — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 129,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-e9860916c7810bc",
+      "title": "Agent Builder — LLM smoke (converse API) static connector openai-gpt-5-2 — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 100,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-266eedb56644947",
+      "title": "Agent Builder — LLM smoke (converse API) static connector openai-gpt-5-2 — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 113,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-675285873627117",
+      "title": "Agent Builder — LLM smoke (converse API) static connector openai-gpt-5-2 — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 129,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-4d0b7e1208876d2",
+      "title": "Agent Builder — LLM smoke (converse API) static connector openai-gpt-5-4 — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 100,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-7e2f9ce0c2edca8",
+      "title": "Agent Builder — LLM smoke (converse API) static connector openai-gpt-5-4 — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 113,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-076699fe2a93991",
+      "title": "Agent Builder — LLM smoke (converse API) static connector openai-gpt-5-4 — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 129,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-d877769db08106a",
+      "title": "Agent Builder — LLM smoke (converse API) static connector openai-gpt-5-4-mini — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 100,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-4e609fa133dd646",
+      "title": "Agent Builder — LLM smoke (converse API) static connector openai-gpt-5-4-mini — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 113,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-9f64790d42972f4",
+      "title": "Agent Builder — LLM smoke (converse API) static connector openai-gpt-5-4-mini — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 129,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-a4c35eba088e43f",
+      "title": "Agent Builder — LLM smoke (converse API) static connector openai-gpt-5-4-nano — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 100,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-647a7d7877871b3",
+      "title": "Agent Builder — LLM smoke (converse API) static connector openai-gpt-5-4-nano — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 113,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-125b76a12c5b828",
+      "title": "Agent Builder — LLM smoke (converse API) static connector openai-gpt-5-4-nano — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 129,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-b8ce740f6c2a02d",
+      "title": "Agent Builder — LLM smoke (converse API) static connector openai-gpt-5-4-pro — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 100,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-b2cfc519cb86d4b",
+      "title": "Agent Builder — LLM smoke (converse API) static connector openai-gpt-5-4-pro — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 113,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-900fa9ecb288cfd",
+      "title": "Agent Builder — LLM smoke (converse API) static connector openai-gpt-5-4-pro — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 129,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-c28083ad2902e32",
+      "title": "Agent Builder — LLM smoke (converse API) static connector openai-gpt-oss-120b — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 100,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-3f06588c046e0c5",
+      "title": "Agent Builder — LLM smoke (converse API) static connector openai-gpt-oss-120b — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 113,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-6df4a2419e6bfe7",
+      "title": "Agent Builder — LLM smoke (converse API) static connector openai-gpt-oss-120b — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 129,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-a3e59d25fff032f",
+      "title": "Agent Builder — LLM smoke (converse API) static connector openai-gpt-oss-20b — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 100,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-8bae23da3321fdc",
+      "title": "Agent Builder — LLM smoke (converse API) static connector openai-gpt-oss-20b — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 113,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-105b43c47257e0a",
+      "title": "Agent Builder — LLM smoke (converse API) static connector openai-gpt-oss-20b — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 129,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-71588f6e2a4ed32",
+      "title": "Agent Builder — LLM smoke (converse API) static connector rainbow-sprinkles — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 100,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-4dc37b2f8a58137",
+      "title": "Agent Builder — LLM smoke (converse API) static connector rainbow-sprinkles — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 113,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-1a28e44941435d9",
+      "title": "Agent Builder — LLM smoke (converse API) static connector rainbow-sprinkles — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 129,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-d86c906b203b25a",
+      "title": "Agent Builder — LLM smoke (converse API) static connector chatGpt_5_2Azure — simple message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 100,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-9c79a5f176328b8",
+      "title": "Agent Builder — LLM smoke (converse API) static connector chatGpt_5_2Azure — tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 113,
+        "column": 14
+      }
+    },
+    {
+      "id": "69056a2d02da36d-1c682bbe68840d8",
+      "title": "Agent Builder — LLM smoke (converse API) static connector chatGpt_5_2Azure — conversation continue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 129,
+        "column": 14
+      }
+    },
+    {
       "id": "69056a2d02da36d-4a8c5e89b96ac8d",
       "title": "Agent Builder — LLM smoke (converse API) should skip - no EIS models discovered",
       "expectedStatus": "passed",

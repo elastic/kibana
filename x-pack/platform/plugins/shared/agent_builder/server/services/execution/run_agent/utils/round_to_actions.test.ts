@@ -11,6 +11,10 @@ import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
 import type { ConversationRound } from '@kbn/agent-builder-common';
+import { loggerMock } from '@kbn/logging-mocks';
+import { ExecutionStatus } from '@kbn/workflows';
+import type { WorkflowExecutionState } from '@kbn/agent-builder-tools-base/workflows';
+import type { ResumedFormPromptState } from '../../runner/utils/resume_form_prompts';
 import { roundToActions } from './round_to_actions';
 import { AgentActionType } from '../actions';
 import type { ToolCallAction, ExecuteToolAction } from '../actions';
@@ -185,5 +189,205 @@ describe('roundToActions', () => {
     expect(pendingToolCall.message).toBe('group thought');
     expect(pendingToolCall.tool_calls).toHaveLength(1);
     expect(pendingToolCall.tool_calls[0].toolCallId).toBe('c2');
+  });
+});
+
+const makeStaleWorkflowExecution = (
+  overrides: Partial<WorkflowExecutionState> = {}
+): WorkflowExecutionState => ({
+  execution_id: 'exec-wf-1',
+  started_at: '2026-01-01T00:00:00.000Z',
+  status: ExecutionStatus.WAITING_FOR_INPUT,
+  workflow_id: 'wf-1',
+  waiting_input: {
+    message: 'Please fill in the form',
+    schema: { type: 'object', properties: { approved: { type: 'boolean' } } },
+    step_execution_id: 'step-exec-old',
+  },
+  ...overrides,
+});
+
+const makeWorkflowToolResult = (execution: WorkflowExecutionState): ToolResult => ({
+  data: { execution },
+  tool_result_id: 'wf-result-1',
+  type: ToolResultType.other,
+});
+
+const makeResumedState = (
+  overrides: Partial<ResumedFormPromptState> = {}
+): ResumedFormPromptState => ({
+  execution_id: 'exec-wf-1',
+  observedExecution: null,
+  observedStatus: ExecutionStatus.COMPLETED,
+  ...overrides,
+});
+
+describe('roundToActions with resumedStates', () => {
+  const workflowIdMapping: ToolIdMapping = new Map([['run_workflow', 'run_workflow']]);
+
+  it('preserves original content when resumedStates is empty', () => {
+    const staleExecution = makeStaleWorkflowExecution();
+    const steps: ConversationRoundStep[] = [
+      makeToolCallStep('c1', 'run_workflow', { results: [makeWorkflowToolResult(staleExecution)] }),
+    ];
+
+    const actions = roundToActions({
+      logger: loggerMock.create(),
+      resumedStates: [],
+      round: makeRound(steps),
+      toolIdMapping: workflowIdMapping,
+    });
+
+    const executeAction = actions[1] as ExecuteToolAction;
+    const content = JSON.parse(executeAction.tool_results[0].content);
+    expect(content.results[0].data.execution.status).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+  });
+
+  it('rewrites execution status in content when resumedState has terminal match', () => {
+    const staleExecution = makeStaleWorkflowExecution();
+    const steps: ConversationRoundStep[] = [
+      makeToolCallStep('c1', 'run_workflow', { results: [makeWorkflowToolResult(staleExecution)] }),
+    ];
+
+    const actions = roundToActions({
+      logger: loggerMock.create(),
+      resumedStates: [makeResumedState({ observedStatus: ExecutionStatus.COMPLETED })],
+      round: makeRound(steps),
+      toolIdMapping: workflowIdMapping,
+    });
+
+    const executeAction = actions[1] as ExecuteToolAction;
+    const content = JSON.parse(executeAction.tool_results[0].content);
+    expect(content.results[0].data.execution.status).toBe(ExecutionStatus.COMPLETED);
+  });
+
+  it('strips waiting_input from content when resumedState has terminal match', () => {
+    const staleExecution = makeStaleWorkflowExecution();
+    const steps: ConversationRoundStep[] = [
+      makeToolCallStep('c1', 'run_workflow', { results: [makeWorkflowToolResult(staleExecution)] }),
+    ];
+
+    const actions = roundToActions({
+      logger: loggerMock.create(),
+      resumedStates: [makeResumedState({ observedStatus: ExecutionStatus.COMPLETED })],
+      round: makeRound(steps),
+      toolIdMapping: workflowIdMapping,
+    });
+
+    const executeAction = actions[1] as ExecuteToolAction;
+    const content = JSON.parse(executeAction.tool_results[0].content);
+    expect(content.results[0].data.execution.waiting_input).toBeUndefined();
+  });
+
+  it('rewrites artifact when resumedState has terminal match', () => {
+    const staleExecution = makeStaleWorkflowExecution();
+    const steps: ConversationRoundStep[] = [
+      makeToolCallStep('c1', 'run_workflow', { results: [makeWorkflowToolResult(staleExecution)] }),
+    ];
+
+    const actions = roundToActions({
+      logger: loggerMock.create(),
+      resumedStates: [makeResumedState({ observedStatus: ExecutionStatus.COMPLETED })],
+      round: makeRound(steps),
+      toolIdMapping: workflowIdMapping,
+    });
+
+    const executeAction = actions[1] as ExecuteToolAction;
+    const artifact = executeAction.tool_results[0].artifact as { results: ToolResult[] };
+    expect((artifact.results[0].data as Record<string, unknown>).execution).toMatchObject({
+      status: ExecutionStatus.COMPLETED,
+    });
+  });
+
+  it('does not rewrite content for non-workflow other result even with matching resumedState', () => {
+    const nonWorkflowResult: ToolResult = {
+      data: { some: 'other data' },
+      tool_result_id: 'non-wf-1',
+      type: ToolResultType.other,
+    };
+    const steps: ConversationRoundStep[] = [
+      makeToolCallStep('c1', 'search', { results: [nonWorkflowResult] }),
+    ];
+
+    const actions = roundToActions({
+      logger: loggerMock.create(),
+      resumedStates: [makeResumedState()],
+      round: makeRound(steps),
+      toolIdMapping: workflowIdMapping,
+    });
+
+    const executeAction = actions[1] as ExecuteToolAction;
+    const content = JSON.parse(executeAction.tool_results[0].content);
+    expect(content.results[0].data).toEqual({ some: 'other data' });
+  });
+
+  it('does not rewrite content when logger is undefined', () => {
+    const staleExecution = makeStaleWorkflowExecution();
+    const steps: ConversationRoundStep[] = [
+      makeToolCallStep('c1', 'run_workflow', { results: [makeWorkflowToolResult(staleExecution)] }),
+    ];
+
+    const actions = roundToActions({
+      resumedStates: [makeResumedState({ observedStatus: ExecutionStatus.COMPLETED })],
+      round: makeRound(steps),
+      toolIdMapping: workflowIdMapping,
+    });
+
+    const executeAction = actions[1] as ExecuteToolAction;
+    const content = JSON.parse(executeAction.tool_results[0].content);
+    expect(content.results[0].data.execution.status).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+  });
+
+  it('calls logger.error on I3 invariant violation (same step_execution_id after resume)', () => {
+    const staleExecution = makeStaleWorkflowExecution();
+    const freshExecution: WorkflowExecutionState = {
+      ...staleExecution,
+      waiting_input: { ...staleExecution.waiting_input!, step_execution_id: 'step-exec-old' },
+    };
+    const steps: ConversationRoundStep[] = [
+      makeToolCallStep('c1', 'run_workflow', { results: [makeWorkflowToolResult(staleExecution)] }),
+    ];
+    const logger = loggerMock.create();
+
+    roundToActions({
+      logger,
+      resumedStates: [
+        makeResumedState({
+          observedExecution: freshExecution,
+          observedStatus: ExecutionStatus.WAITING_FOR_INPUT,
+        }),
+      ],
+      round: makeRound(steps),
+      toolIdMapping: workflowIdMapping,
+    });
+
+    expect(logger.error).toHaveBeenCalled();
+  });
+
+  it('leaves content unchanged on I3 invariant violation', () => {
+    const staleExecution = makeStaleWorkflowExecution();
+    const freshExecution: WorkflowExecutionState = {
+      ...staleExecution,
+      waiting_input: { ...staleExecution.waiting_input!, step_execution_id: 'step-exec-old' },
+    };
+    const steps: ConversationRoundStep[] = [
+      makeToolCallStep('c1', 'run_workflow', { results: [makeWorkflowToolResult(staleExecution)] }),
+    ];
+
+    const actions = roundToActions({
+      logger: loggerMock.create(),
+      resumedStates: [
+        makeResumedState({
+          observedExecution: freshExecution,
+          observedStatus: ExecutionStatus.WAITING_FOR_INPUT,
+        }),
+      ],
+      round: makeRound(steps),
+      toolIdMapping: workflowIdMapping,
+    });
+
+    const executeAction = actions[1] as ExecuteToolAction;
+    const content = JSON.parse(executeAction.tool_results[0].content);
+    expect(content.results[0].data.execution.status).toBe(ExecutionStatus.WAITING_FOR_INPUT);
   });
 });

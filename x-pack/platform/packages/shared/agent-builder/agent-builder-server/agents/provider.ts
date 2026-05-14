@@ -38,6 +38,7 @@ import type {
   ToolManager,
   TodoStateManager,
 } from '../runner';
+import type { ResumedExecutionState } from '../execution/types';
 import type { IFileStore } from '../runner/filestore';
 import type { AttachmentStateManager } from '../attachments';
 import type { AgentBuilderHooks } from '../hooks/types';
@@ -228,6 +229,17 @@ export interface AgentHandlerContext {
    * skill-invocation counts. Provided by the plugin when telemetry is wired.
    */
   trackingService?: AgentBuilderTracking;
+  /**
+   * Optional poller for HITL workflow execution status.
+   * When provided, BackgroundExecutionService uses it to detect when a paused
+   * workflow finishes after the user submits a form prompt, so the LLM
+   * receives the completed result instead of seeing `waiting_for_input`.
+   */
+  workflowExecutionPoller?: (executionId: string) => Promise<{
+    status: string;
+    output?: unknown;
+    error_message?: string;
+  } | null>;
 }
 
 /**
@@ -277,6 +289,9 @@ export interface AgentParams {
    * The execution ID for this run. Used for sub-agent parent tracking.
    */
   executionId?: string;
+  /** Resolved states from resumed form prompts. Threaded from chat.ts through the
+   *  execution pipeline so roundToActions can refresh stale workflow tool results. */
+  resumedStates?: ResumedExecutionState[];
 }
 
 export interface AgentResponse {

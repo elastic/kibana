@@ -10,6 +10,7 @@
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
+import type { InboxPluginSetup } from '@kbn/inbox-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
@@ -70,6 +71,7 @@ export interface WorkflowsExecutionEnginePluginStart {
 }
 
 export interface WorkflowsExecutionEnginePluginSetupDeps {
+  inbox?: InboxPluginSetup;
   taskManager: TaskManagerSetupContract;
   cloud: CloudSetup;
   usageApi?: UsageApiSetup;
@@ -110,11 +112,24 @@ export type CancelAllActiveWorkflowExecutions = (params: {
   workflowId: string;
 }) => Promise<void>;
 
+export interface ResumeWorkflowExecutionOptions {
+  /**
+   * Sequence number the caller expects the execution's `resume_seq` to advance to.
+   * When provided, the implementation performs an atomic CAS — only proceeds if
+   * `current resume_seq == expectedResumeSeq - 1`, otherwise throws
+   * `WorkflowExecutionStaleResumeError`. When omitted, falls back to the legacy
+   * path that resumes unconditionally (backward compatibility with callers that
+   * have not yet been updated).
+   */
+  expectedResumeSeq?: number;
+}
+
 export type ResumeWorkflowExecution = (
   executionId: string,
   spaceId: string,
   input: Record<string, unknown>,
-  request: KibanaRequest
+  request: KibanaRequest,
+  options?: ResumeWorkflowExecutionOptions
 ) => Promise<ResumeWorkflowExecutionResponse>;
 
 export type InternalResumeWorkflowExecution = (

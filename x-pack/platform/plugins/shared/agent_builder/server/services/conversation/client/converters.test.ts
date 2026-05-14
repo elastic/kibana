@@ -6,6 +6,7 @@
  */
 
 import type { Conversation } from '@kbn/agent-builder-common';
+import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
 import { ConversationRoundStatus, ToolOrigin } from '@kbn/agent-builder-common';
 import {
   isToolCallStep,
@@ -26,7 +27,7 @@ jest.mock('@kbn/agent-builder-server/tools/utils');
 
 const getToolResultIdMock = getToolResultId as jest.MockedFn<typeof getToolResultId>;
 
-const createTestState = () => ({
+const createTestState = (): ConversationInternalState => ({
   prompt: {
     responses: {
       'tools.my-tool.confirmation': {

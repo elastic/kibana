@@ -85,6 +85,9 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     concurrencyGroupKey: {
       type: 'keyword',
     },
+    resume_seq: {
+      type: 'long',
+    },
   },
 };
 

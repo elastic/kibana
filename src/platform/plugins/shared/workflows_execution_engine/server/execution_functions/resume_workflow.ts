@@ -66,7 +66,15 @@ export async function resumeWorkflow({
   );
 
   const loadedExecution = workflowExecutionState.getWorkflowExecution();
+  logger.debug(
+    () =>
+      `[hitl-debug][wf] resume.engine.start exec=${workflowRunId} seq=(none) stepId=(none) status=${loadedExecution.status}`
+  );
   if (isTerminalStatus(loadedExecution.status)) {
+    logger.debug(
+      () =>
+        `[hitl-debug][wf] resume.engine.skipTerminal exec=${workflowRunId} seq=(none) stepId=(none) status=${loadedExecution.status}`
+    );
     logger.info(
       `Resume skipped for ${workflowRunId}: already in terminal status ${loadedExecution.status}`
     );

@@ -11,6 +11,7 @@ import type { KibanaResponseFactory } from '@kbn/core/server';
 import {
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
+  WorkflowExecutionStaleResumeError,
   WorkflowNotFoundError,
 } from '@kbn/workflows/common/errors';
 import {
@@ -41,6 +42,19 @@ export function handleRouteError(
     return response.conflict({
       body: {
         message: error.message,
+      },
+    });
+  }
+
+  if (error instanceof WorkflowExecutionStaleResumeError) {
+    return response.conflict({
+      body: {
+        message: error.message,
+        attributes: {
+          current_resume_seq: error.currentResumeSeq,
+          expected_resume_seq: error.expectedResumeSeq,
+          reason: 'stale_resume',
+        },
       },
     });
   }

@@ -38,6 +38,19 @@ describe('getExecutionState', () => {
     expect(state).toBeNull();
   });
 
+  it('requests the step input so the nested waiting-input schema is included', async () => {
+    const workflowApi = createWorkflowApi();
+    workflowApi.getWorkflowExecution = jest.fn().mockResolvedValue(null);
+
+    await getExecutionState({ executionId: 'exec-1', spaceId: 'default', workflowApi });
+
+    expect(workflowApi.getWorkflowExecution).toHaveBeenCalledWith(
+      'exec-1',
+      'default',
+      expect.objectContaining({ includeInput: true })
+    );
+  });
+
   it('includes output for completed execution', async () => {
     const workflowApi = createWorkflowApi();
     const stepExecutions = [{ id: 'step-1' }];
@@ -308,6 +321,59 @@ describe('getExecutionState', () => {
 
       expect(state?.waiting_input?.step_execution_id).toBe('step-exec-iter-1-waiting');
       expect(state?.waiting_input?.message).toBe('Approve item');
+    });
+
+    it('reads message, schema, and agent_context from step input when step is not a waitForInput type', async () => {
+      const workflowApi = createWorkflowApi();
+      workflowApi.getWorkflowExecution = jest.fn().mockResolvedValue({
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        workflowId: 'wf-agent',
+        startedAt: '2026-01-01T00:00:00.000Z',
+        workflowDefinition: {
+          name: 'Agent Workflow',
+          steps: [
+            {
+              name: 'run_agent',
+              type: 'ai.agent',
+              with: { 'agent-id': 'elastic-ai-agent' },
+            },
+          ],
+        },
+        stepExecutions: [
+          {
+            id: 'step-exec-agent',
+            scopeStack: [],
+            stepId: 'run_agent',
+            status: ExecutionStatus.WAITING_FOR_INPUT,
+            input: {
+              agent_context: {
+                intended_tool: 'hitl.form',
+                intended_tool_args: { key: 'val' },
+                reasoning: 'I need approval',
+              },
+              message: 'Please approve',
+              schema: { type: 'object', properties: { approved: { type: 'boolean' } } },
+            },
+          },
+        ],
+      });
+
+      const state = await getExecutionState({
+        executionId: 'exec-agent',
+        spaceId: 'default',
+        workflowApi,
+      });
+
+      expect(state?.waiting_input).toEqual({
+        agent_context: {
+          intended_tool: 'hitl.form',
+          intended_tool_args: { key: 'val' },
+          reasoning: 'I need approval',
+        },
+        message: 'Please approve',
+        schema: { type: 'object', properties: { approved: { type: 'boolean' } } },
+        step_execution_id: 'step-exec-agent',
+      });
     });
 
     it('omits waiting_input entirely when no waiting step is found', async () => {

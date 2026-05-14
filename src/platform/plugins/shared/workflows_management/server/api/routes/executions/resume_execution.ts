@@ -43,6 +43,15 @@ export function registerResumeExecutionRoute(deps: RouteDependencies) {
               input: schema.recordOf(schema.string(), schema.any(), {
                 meta: { description: 'Input data to resume the execution with.' },
               }),
+              expected_resume_seq: schema.maybe(
+                schema.number({
+                  min: 1,
+                  meta: {
+                    description:
+                      'Atomic CAS guard: only proceed if the execution`s current resume_seq equals expected_resume_seq - 1. When omitted, the resume proceeds unconditionally (legacy).',
+                  },
+                })
+              ),
             }),
           },
         },
@@ -50,14 +59,22 @@ export function registerResumeExecutionRoute(deps: RouteDependencies) {
       withAvailabilityCheck(async (context, request, response) => {
         try {
           const { executionId } = request.params;
-          const { input } = request.body;
+          const { input, expected_resume_seq: expectedResumeSeq } = request.body;
           const spaceId = spaces.getSpaceId(request);
+
+          deps.logger.debug(
+            () =>
+              `[hitl-debug][wf] wfMgmt.resume.received exec=${executionId} seq=${
+                expectedResumeSeq ?? '(none)'
+              } stepId=(none)`
+          );
 
           const { resumedBy } = await api.resumeWorkflowExecution(
             executionId,
             spaceId,
             input,
-            request
+            request,
+            expectedResumeSeq !== undefined ? { expectedResumeSeq } : undefined
           );
 
           audit.logExecutionResumed(request, {

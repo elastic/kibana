@@ -123,6 +123,65 @@ export class WorkflowExecutionRepository {
   }
 
   /**
+   * Atomically increments the execution's `resume_seq` if and only if the caller's
+   * `expectedSeq` matches `current resume_seq + 1`. Implemented as an ES update
+   * script that sets `ctx.op = 'noop'` when the assertion fails so we get a clean
+   * { result: "noop" } response instead of a version_conflict_engine_exception.
+   *
+   * Returns `true` when the CAS won (resume_seq was incremented), `false` when
+   * the submission was stale and no write occurred.
+   */
+  public async casIncrementResumeSeq({
+    id,
+    spaceId,
+    expectedSeq,
+  }: {
+    id: string;
+    spaceId: string;
+    expectedSeq: number;
+  }): Promise<{ won: boolean; currentSeq: number }> {
+    try {
+      const response = await this.esClient.update<Partial<EsWorkflowExecution>>({
+        index: this.indexName,
+        id,
+        refresh: 'wait_for',
+        script: {
+          source: `
+            if (ctx._source.spaceId != params.spaceId) {
+              ctx.op = 'noop';
+              return;
+            }
+            int current = ctx._source.resume_seq instanceof Number ? ((Number) ctx._source.resume_seq).intValue() : 0;
+            if (current == params.expected - 1) {
+              ctx._source.resume_seq = params.expected;
+            } else {
+              ctx.op = 'noop';
+            }
+          `,
+          lang: 'painless',
+          params: { expected: expectedSeq, spaceId },
+        },
+        _source: true,
+      });
+
+      const updated = (response.get?._source ?? {}) as Partial<EsWorkflowExecution>;
+      const currentSeq =
+        typeof updated.resume_seq === 'number' ? updated.resume_seq : expectedSeq - 1;
+
+      return { won: response.result === 'updated', currentSeq };
+    } catch (error: unknown) {
+      if (
+        error instanceof Error &&
+        'meta' in error &&
+        (error as { meta?: { statusCode?: number } }).meta?.statusCode === 404
+      ) {
+        return { won: false, currentSeq: -1 };
+      }
+      throw error;
+    }
+  }
+
+  /**
    * Partially updates an existing workflow execution in Elasticsearch.
    *
    * This method requires the `id` property to be present in the `workflowExecution` object.

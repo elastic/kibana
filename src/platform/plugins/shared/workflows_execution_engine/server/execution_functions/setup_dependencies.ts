@@ -177,7 +177,8 @@ export async function setupDependencies(
     workflowExecutionGraph,
     stepExecutionRuntimeFactory,
     enhancedDependencies,
-    stepIoService
+    stepIoService,
+    coreStart.analytics
   );
 
   return {

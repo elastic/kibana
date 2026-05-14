@@ -10,23 +10,26 @@ import { useCallback, useMemo, useRef } from 'react';
 import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { Conversation, ConversationRoundStep } from '@kbn/agent-builder-common';
+import type { ConversationRoundStep } from '@kbn/agent-builder-common';
+import type { FormPromptResponse } from '@kbn/agent-builder-common/agents';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { mutationKeys } from '../../mutation_keys';
-import { queryKeys } from '../../query_keys';
 import { subscribeToChatEvents } from './use_subscribe_to_chat_events';
 import { BrowserToolExecutor } from '../../services/browser_tool_executor';
 import { createConversationActions } from '../conversation/use_conversation_actions';
 
 export interface ResumeRoundVars {
-  prompts: Record<string, { allow: boolean }>;
-  conversationId: string;
   agentId: string;
-  connectorId?: string;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
+  connectorId?: string;
+  conversationId: string;
+  form_prompts?: FormPromptResponse[];
+  lastRoundSteps?: ConversationRoundStep[];
+  prompts?: Record<string, { allow: boolean }>;
 }
 
 export interface ResumeRoundMutationBindings {
+  updateActiveReasoning: (conversationId: string, reasoning: string) => void;
   setError: (conversationId: string, error: unknown, errorSteps: ConversationRoundStep[]) => void;
   clearActiveStream: (conversationId: string) => void;
 }
@@ -38,6 +41,7 @@ type UseResumeRoundMutationProps = ResumeRoundMutationBindings;
  * `ConfirmationPrompt`. Same single-scope `mutationFn` shape as the send mutation.
  */
 export const useResumeRoundMutation = ({
+  updateActiveReasoning,
   setError,
   clearActiveStream,
 }: UseResumeRoundMutationProps) => {
@@ -73,12 +77,13 @@ export const useResumeRoundMutation = ({
         const browserApiToolsMetadata = vars.browserApiTools?.map(toToolMetadata);
 
         const events$ = chatService.resume({
-          signal: controller.signal,
-          prompts: vars.prompts,
-          conversationId: vars.conversationId,
           agentId: vars.agentId,
-          connectorId: vars.connectorId,
           browserApiTools: browserApiToolsMetadata,
+          connectorId: vars.connectorId,
+          conversationId: vars.conversationId,
+          form_prompts: vars.form_prompts,
+          prompts: vars.prompts,
+          signal: controller.signal,
         });
 
         await subscribeToChatEvents({
@@ -87,16 +92,11 @@ export const useResumeRoundMutation = ({
           browserApiTools: vars.browserApiTools,
           browserToolExecutor,
           isAborted: () => controller.signal.aborted,
+          setAgentReasoning: (reasoning) => updateActiveReasoning(vars.conversationId, reasoning),
         });
         succeeded = true;
       } catch (err) {
-        // Snapshot the failing round's accumulated steps from the cache so the
-        // error panel shows the steps that actually ran during this round.
-        const cached = queryClient.getQueryData<Conversation>(
-          queryKeys.conversations.byId(vars.conversationId)
-        );
-        const inProgressSteps = cached?.rounds?.at(-1)?.steps ?? [];
-        setError(vars.conversationId, err, inProgressSteps);
+        setError(vars.conversationId, err, vars.lastRoundSteps ?? []);
         throw err;
       } finally {
         // Only invalidate on success — see use_send_message_mutation.ts for rationale.

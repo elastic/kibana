@@ -144,6 +144,29 @@ describe('WorkflowEventLogger', () => {
     expect(logger.trace).toHaveBeenCalled();
   });
 
+  it('mirrors [hitl-debug] markers to the Kibana logger even when console logging is disabled', () => {
+    const logsRepository = createLogsRepositoryMock();
+    const logger = loggerMock.create();
+    const workflowLogger = new WorkflowEventLogger(logsRepository, logger);
+
+    workflowLogger.logDebug('[hitl-debug][wf] waitForInput.enter schemaPresent=true');
+
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('[hitl-debug][wf] waitForInput.enter schemaPresent=true'),
+      expect.any(Object)
+    );
+  });
+
+  it('does not mirror ordinary debug events to the Kibana logger when console logging is disabled', () => {
+    const logsRepository = createLogsRepositoryMock();
+    const logger = loggerMock.create();
+    const workflowLogger = new WorkflowEventLogger(logsRepository, logger);
+
+    workflowLogger.logDebug('ordinary debug without a marker');
+
+    expect(logger.debug).not.toHaveBeenCalled();
+  });
+
   it('creates step loggers and tracks timing events', async () => {
     const logsRepository = createLogsRepositoryMock();
     const logger = loggerMock.create();

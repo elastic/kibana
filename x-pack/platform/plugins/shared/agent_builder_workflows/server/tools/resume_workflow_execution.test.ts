@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { ExecutionStatus } from '@kbn/workflows';
 import { platformCoreTools } from '@kbn/agent-builder-common';
+import { AgentPromptType } from '@kbn/agent-builder-common/agents';
 import { resumeWorkflowExecutionTool } from './resume_workflow_execution';
 
 jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
@@ -56,6 +57,29 @@ describe('resumeWorkflowExecutionTool', () => {
       'default',
       { approved: true },
       mockContext.request
+    );
+  });
+
+  it('passes expectedResumeSeq when expected_resume_seq is provided', async () => {
+    const wm = createWorkflowsManagement();
+    const tool = resumeWorkflowExecutionTool({ workflowsManagement: wm as any });
+
+    getExecutionState.mockResolvedValue({
+      execution_id: 'exec-1',
+      status: ExecutionStatus.RUNNING,
+    });
+
+    await tool.handler(
+      { executionId: 'exec-1', expected_resume_seq: 2, input: { approved: true } },
+      mockContext as any
+    );
+
+    expect(wm.management.resumeWorkflowExecution).toHaveBeenCalledWith(
+      'exec-1',
+      'default',
+      { approved: true },
+      mockContext.request,
+      { expectedResumeSeq: 2 }
     );
   });
 
@@ -154,6 +178,167 @@ describe('resumeWorkflowExecutionTool', () => {
           },
         },
       ],
+    });
+  });
+
+  describe('inboxEnabled HITL emission', () => {
+    const waitingInputExecution = {
+      execution_id: 'exec-1',
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      waiting_input: {
+        agent_context: {
+          reasoning: 'needs approval',
+          intended_tool: 'none',
+          intended_tool_args: {},
+        },
+        message: 'Please confirm the action',
+        schema: { type: 'object', properties: { confirmed: { type: 'boolean' } } },
+        step_execution_id: 'step-exec-2',
+      },
+    };
+
+    it('returns a combined results+prompt return when inboxEnabled and execution is WAITING_FOR_INPUT', async () => {
+      const wm = createWorkflowsManagement();
+      const tool = resumeWorkflowExecutionTool({
+        inboxEnabled: true,
+        workflowsManagement: wm as any,
+      });
+      getExecutionState.mockResolvedValue(waitingInputExecution);
+
+      const result = await tool.handler(
+        { executionId: 'exec-1', input: { approved: true } },
+        mockContext as any
+      );
+
+      expect(result).toMatchObject({
+        prompt: {
+          type: AgentPromptType.form,
+          execution_id: 'exec-1',
+          step_execution_id: 'step-exec-2',
+          message: 'Please confirm the action',
+          schema: { type: 'object', properties: { confirmed: { type: 'boolean' } } },
+          agent_context: {
+            reasoning: 'needs approval',
+            intended_tool: 'none',
+            intended_tool_args: {},
+          },
+        },
+        results: [
+          {
+            type: 'other',
+            data: {
+              resumed: true,
+              execution: waitingInputExecution,
+            },
+          },
+        ],
+      });
+    });
+
+    it('prompt.id equals step_execution_id so handle_form_prompt can filter the old prompt', async () => {
+      const wm = createWorkflowsManagement();
+      const tool = resumeWorkflowExecutionTool({
+        inboxEnabled: true,
+        workflowsManagement: wm as any,
+      });
+      getExecutionState.mockResolvedValue(waitingInputExecution);
+
+      const result = (await tool.handler(
+        { executionId: 'exec-1', input: { approved: true } },
+        mockContext as any
+      )) as any;
+
+      expect(result.prompt?.id).toBe('step-exec-2');
+      expect(result.prompt?.id).toBe(result.prompt?.step_execution_id);
+    });
+
+    it('omits agent_context from prompt when waiting_input has no agent_context', async () => {
+      const wm = createWorkflowsManagement();
+      const tool = resumeWorkflowExecutionTool({
+        inboxEnabled: true,
+        workflowsManagement: wm as any,
+      });
+      const execNoContext = {
+        ...waitingInputExecution,
+        waiting_input: {
+          message: 'Please confirm',
+          schema: {},
+          step_execution_id: 'step-exec-2',
+        },
+      };
+      getExecutionState.mockResolvedValue(execNoContext);
+
+      const result = (await tool.handler(
+        { executionId: 'exec-1', input: { approved: true } },
+        mockContext as any
+      )) as any;
+
+      expect(result.prompt?.agent_context).toBeUndefined();
+    });
+
+    it('returns standard results only when inboxEnabled is false and execution is WAITING_FOR_INPUT', async () => {
+      const wm = createWorkflowsManagement();
+      const tool = resumeWorkflowExecutionTool({
+        inboxEnabled: false,
+        workflowsManagement: wm as any,
+      });
+      getExecutionState.mockResolvedValue(waitingInputExecution);
+
+      const result = (await tool.handler(
+        { executionId: 'exec-1', input: { approved: true } },
+        mockContext as any
+      )) as any;
+
+      expect(result.prompt).toBeUndefined();
+      expect(result.results).toHaveLength(1);
+    });
+
+    it('returns standard results only when inboxEnabled is not set and execution is WAITING_FOR_INPUT', async () => {
+      const wm = createWorkflowsManagement();
+      const tool = resumeWorkflowExecutionTool({ workflowsManagement: wm as any });
+      getExecutionState.mockResolvedValue(waitingInputExecution);
+
+      const result = (await tool.handler(
+        { executionId: 'exec-1', input: { approved: true } },
+        mockContext as any
+      )) as any;
+
+      expect(result.prompt).toBeUndefined();
+    });
+
+    it('returns standard results only when inboxEnabled is true but execution is COMPLETED', async () => {
+      const wm = createWorkflowsManagement();
+      const tool = resumeWorkflowExecutionTool({
+        inboxEnabled: true,
+        workflowsManagement: wm as any,
+      });
+      getExecutionState.mockResolvedValue({
+        execution_id: 'exec-1',
+        status: ExecutionStatus.COMPLETED,
+      });
+
+      const result = (await tool.handler(
+        { executionId: 'exec-1', input: { approved: true } },
+        mockContext as any
+      )) as any;
+
+      expect(result.prompt).toBeUndefined();
+    });
+
+    it('returns standard results only when inboxEnabled is true but execution is null', async () => {
+      const wm = createWorkflowsManagement();
+      const tool = resumeWorkflowExecutionTool({
+        inboxEnabled: true,
+        workflowsManagement: wm as any,
+      });
+      getExecutionState.mockResolvedValue(null);
+
+      const result = (await tool.handler(
+        { executionId: 'exec-1', input: { approved: true } },
+        mockContext as any
+      )) as any;
+
+      expect(result.prompt).toBeUndefined();
     });
   });
 });

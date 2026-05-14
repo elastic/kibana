@@ -121,6 +121,7 @@ const handleConversationExecution = async ({
     browserApiTools,
     configurationOverrides,
     action,
+    resumedStates,
   } = execution.agentParams;
 
   const { logger, runAgent, trackingService, analyticsService, meteringService } = deps;
@@ -163,6 +164,7 @@ const handleConversationExecution = async ({
     browserApiTools,
     configurationOverrides,
     action,
+    resumedStates,
   });
 
   // Generate title (for CREATE) or use existing title (for UPDATE)

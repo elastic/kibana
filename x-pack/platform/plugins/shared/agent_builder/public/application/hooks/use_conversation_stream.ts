@@ -7,6 +7,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import type { FormPromptResponse } from '@kbn/agent-builder-common/agents';
 import { useConversationContext } from '../context/conversation/conversation_context';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useAgentId, useConversation } from './use_conversation';
@@ -17,8 +18,8 @@ import { useStreamingContext, useStreamRecord } from '../context/streaming/strea
  * Per-conversation scoped slice of the streaming state machine.
  *
  * Use INSIDE a conversation tree — it reads `conversationId` and `agentId` from context.
- * Components asking "am I streaming?" get an answer about their own conversation, not
- * the global app.
+ * Components asking "am I streaming?" / "what's my agent reasoning?" get an answer about
+ * their own conversation, not the global app.
  *
  * Outside a conversation tree (e.g. the global sidebar), read `useStreamingContext()`
  * directly. This hook lives in `hooks/` rather than alongside the provider in
@@ -114,7 +115,13 @@ export const useConversationStream = () => {
   ]);
 
   const resumeRound = useCallback(
-    ({ prompts }: { prompts: Record<string, { allow: boolean }> }) => {
+    ({
+      form_prompts,
+      prompts,
+    }: {
+      form_prompts?: FormPromptResponse[];
+      prompts?: Record<string, { allow: boolean }>;
+    }) => {
       if (!conversationId) {
         throw new Error('Cannot resume without a conversation id');
       }
@@ -122,14 +129,16 @@ export const useConversationStream = () => {
         throw new Error('agentId is required to resume');
       }
       mutateResumeRound({
-        prompts,
-        conversationId,
         agentId,
-        connectorId,
         browserApiTools,
+        connectorId,
+        conversationId,
+        form_prompts,
+        lastRoundSteps: lastRound?.steps,
+        prompts,
       });
     },
-    [mutateResumeRound, conversationId, agentId, connectorId, browserApiTools]
+    [mutateResumeRound, conversationId, agentId, connectorId, lastRound?.steps, browserApiTools]
   );
 
   const retry = useCallback(() => {
@@ -169,6 +178,7 @@ export const useConversationStream = () => {
       pendingMessage: record.pendingMessage,
       error: record.error,
       errorSteps: record.errorSteps,
+      agentReasoning: myStream?.agentReasoning ?? null,
       canCancel: isMyStreamActive,
       // Use this when the question is "is the conversation locked from external action because
       // a mutation is in flight?" — `isResponseLoading` answers a narrower question (round-level loading
@@ -189,6 +199,7 @@ export const useConversationStream = () => {
       record.error,
       record.errorSteps,
       isMyStreamActive,
+      myStream?.agentReasoning,
     ]
   );
 };

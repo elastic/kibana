@@ -19,6 +19,7 @@ import {
   useConversationError,
   useConversationRounds,
   useHasActiveConversation,
+  useIsAwaitingPrompt,
 } from '../../hooks/use_conversation';
 import { ConversationInput } from './conversation_input/conversation_input';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
@@ -49,6 +50,7 @@ import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { useConversationContext } from '../../context/conversation/conversation_context';
 import { StaleAttachmentsPanel } from './stale_attachments_panel';
 import { useStaleAttachments } from '../../hooks/use_stale_attachments_check';
+import { shouldStickToBottomNow } from './utils/should_stick_to_bottom';
 
 export const Conversation: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
@@ -62,8 +64,9 @@ export const Conversation: React.FC<{}> = () => {
   const { isFetched } = useConversationStatus();
   const { errorType } = useConversationError();
   const shouldStickToBottom = useShouldStickToBottom();
+  const isAwaitingPrompt = useIsAwaitingPrompt();
   const onAppLeave = useAppLeave();
-  const { attachmentsService } = useAgentBuilderServices();
+  const { attachmentsService, inboxEnabled } = useAgentBuilderServices();
   const { attachments: stagedAttachments = [], upsertAttachments } = useConversationContext();
   const { staleAttachments, scheduleStaleCheck } = useStaleAttachments(conversationId);
   const [dismissStaleAttachments, setDismissStaleAttachments] = useState(false);
@@ -108,14 +111,47 @@ export const Conversation: React.FC<{}> = () => {
     setDismissStaleAttachments(false);
   }, [staleAttachments, conversationId]);
 
-  // Stick to bottom only when user returns to an existing conversation (conversationId is defined and changes)
+  // Stick to bottom when returning to an existing conversation, unless the round is
+  // awaiting a HITL prompt — in that case we scroll the prompt into view instead.
   useEffect(() => {
-    if (isFetched && conversationId && shouldStickToBottom) {
+    if (
+      shouldStickToBottomNow({
+        conversationId,
+        inboxEnabled,
+        isAwaitingPrompt,
+        isFetched,
+        shouldStickToBottom,
+      })
+    ) {
       requestAnimationFrame(() => {
         stickToBottom();
       });
     }
-  }, [stickToBottom, isFetched, conversationId, shouldStickToBottom]);
+  }, [
+    stickToBottom,
+    isFetched,
+    conversationId,
+    shouldStickToBottom,
+    isAwaitingPrompt,
+    inboxEnabled,
+  ]);
+
+  // When a HITL prompt is waiting for input, ensure it's visible by scrolling it into
+  // view. This fires both on initial page load (isFetched transitions to true while
+  // status is already awaitingPrompt) and mid-session (status transitions to awaitingPrompt
+  // after streaming ends).
+  useEffect(() => {
+    if (!inboxEnabled) return;
+    if (isFetched && isAwaitingPrompt && scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      requestAnimationFrame(() => {
+        const prompt = container.querySelector(
+          '[data-test-subj="agentBuilderFormPrompt"],[data-test-subj="agentBuilderConfirmationPrompt"]'
+        );
+        prompt?.scrollIntoView({ behavior: 'instant', block: 'nearest' });
+      });
+    }
+  }, [isFetched, isAwaitingPrompt, inboxEnabled]);
 
   const containerStyles = css`
     ${fullWidthAndHeightStyles}
@@ -137,7 +173,7 @@ export const Conversation: React.FC<{}> = () => {
       bottom: 0;
       height: ${scrollMaskHeight};
       pointer-events: none;
-      z-index: 1;
+      z-index: ${euiTheme.levels.content};
       background: linear-gradient(to top, ${euiTheme.colors.backgroundBasePlain}, transparent);
     }
   `;

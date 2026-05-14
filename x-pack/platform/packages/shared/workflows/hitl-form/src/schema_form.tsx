@@ -7,16 +7,21 @@
 
 import React, { useMemo } from 'react';
 import {
+  EuiCallOut,
   EuiComboBox,
   EuiFieldNumber,
   EuiFieldText,
   EuiFormRow,
   EuiSelect,
+  EuiSpacer,
   EuiSwitch,
   EuiText,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import * as i18n from '../translations';
+import type { AgentContext } from '@kbn/workflows-hitl-common';
+import * as i18n from './translations';
+
+export type { AgentContext };
 
 /**
  * Minimal JSON Schema shape the form renders in Phase 0. Aligns with the
@@ -43,17 +48,19 @@ export interface InboxFieldSchema {
 }
 
 export interface SchemaFormProps {
+  agent_context?: AgentContext;
+  disabled?: boolean;
+  errors?: Record<string, string | undefined>;
+  onChange: (values: Record<string, unknown>) => void;
   schema: InboxJsonSchema | null | undefined;
   values: Record<string, unknown>;
-  onChange: (values: Record<string, unknown>) => void;
-  errors?: Record<string, string | undefined>;
-  disabled?: boolean;
 }
 
 const describedField = ({
   name,
   field,
   isRequired,
+  // EuiSwitch carries its own label; EuiFormRow should not duplicate it.
   isSwitch,
   content,
   error,
@@ -61,7 +68,6 @@ const describedField = ({
   name: string;
   field: InboxFieldSchema;
   isRequired: boolean;
-  // EuiSwitch carries its own label; EuiFormRow should not duplicate it.
   isSwitch: boolean;
   content: React.ReactNode;
   error: string | undefined;
@@ -241,11 +247,12 @@ const renderField = ({
 };
 
 export const SchemaForm: React.FC<SchemaFormProps> = ({
+  agent_context: agentContext,
+  disabled = false,
+  errors = {},
+  onChange,
   schema,
   values,
-  onChange,
-  errors = {},
-  disabled = false,
 }) => {
   const properties = useMemo(() => Object.entries(schema?.properties ?? {}), [schema]);
   const requiredSet = useMemo(() => new Set(schema?.required ?? []), [schema]);
@@ -253,13 +260,28 @@ export const SchemaForm: React.FC<SchemaFormProps> = ({
   if (!schema || properties.length === 0) {
     return (
       <EuiText color="subdued" size="s">
-        <p>{i18n.FLYOUT_NO_SCHEMA_BODY}</p>
+        <p>{i18n.NO_SCHEMA_BODY}</p>
       </EuiText>
     );
   }
 
   return (
     <>
+      {agentContext && (
+        <>
+          <EuiCallOut
+            announceOnMount={false}
+            color="primary"
+            data-test-subj="agentContextCallout"
+            iconType="iInCircle"
+            size="s"
+            title={agentContext.reasoning}
+          >
+            <p>{i18n.agentContextVia(agentContext.intended_tool)}</p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
       {properties.map(([name, field]) => (
         <React.Fragment key={name}>
           {renderField({

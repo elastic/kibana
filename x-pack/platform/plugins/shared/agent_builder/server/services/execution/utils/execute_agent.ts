@@ -18,6 +18,7 @@ import type {
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { RunAgentFn } from '@kbn/agent-builder-server';
+import type { ResumedExecutionState } from '@kbn/agent-builder-server/execution';
 
 export const executeAgent$ = ({
   agentId,
@@ -35,6 +36,7 @@ export const executeAgent$ = ({
   configurationOverrides,
   action,
   executionMode,
+  resumedStates,
 }: {
   agentId: string;
   executionId: string;
@@ -51,6 +53,7 @@ export const executeAgent$ = ({
   configurationOverrides?: AgentConfigurationOverrides;
   action?: ConversationAction;
   executionMode?: AgentExecutionMode;
+  resumedStates?: ResumedExecutionState[];
 }): Observable<ChatAgentEvent> => {
   return new Observable<ChatAgentEvent>((observer) => {
     runAgent({
@@ -66,6 +69,7 @@ export const executeAgent$ = ({
         capabilities,
         browserApiTools,
         configurationOverrides,
+        resumedStates,
         structuredOutput,
         outputSchema,
         action,

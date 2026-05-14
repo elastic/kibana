@@ -7,7 +7,10 @@
 
 import { z } from '@kbn/zod/v4';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { ExecutionStatus } from '@kbn/workflows';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { AgentPromptType } from '@kbn/agent-builder-common/agents';
+import type { FormPromptRequest } from '@kbn/agent-builder-common/agents';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { getExecutionState } from '@kbn/agent-builder-tools-base/workflows';
@@ -19,6 +22,13 @@ const resumeWorkflowExecutionSchema = z.object({
     .describe(
       'The executionId of the workflow execution that is waiting for input. Use the executionId value returned by the status tool.'
     ),
+  expected_resume_seq: z
+    .number()
+    .int()
+    .optional()
+    .describe(
+      'Optional CAS guard. When the status tool returns a resume_seq, pass resume_seq + 1 here to reject stale submissions atomically. Omit only when resume_seq was not available.'
+    ),
   input: z
     .record(z.string(), z.unknown())
     .describe(
@@ -27,8 +37,10 @@ const resumeWorkflowExecutionSchema = z.object({
 });
 
 export const resumeWorkflowExecutionTool = ({
+  inboxEnabled,
   workflowsManagement,
 }: {
+  inboxEnabled?: boolean;
   workflowsManagement: WorkflowsServerPluginSetup;
 }): BuiltinToolDefinition<typeof resumeWorkflowExecutionSchema> => {
   const { management: workflowApi } = workflowsManagement;
@@ -51,9 +63,18 @@ export const resumeWorkflowExecutionTool = ({
     **If status has not changed after those polls:** tell the user their resume was **submitted**, but you **could not confirm** the new execution state from Kibana yet - do **not** invent a second approval workflow.
     `),
     schema: resumeWorkflowExecutionSchema,
-    handler: async ({ executionId, input }, { spaceId, request }) => {
+    handler: async (
+      { executionId, expected_resume_seq: expectedResumeSeq, input },
+      { spaceId, request }
+    ) => {
       try {
-        await workflowApi.resumeWorkflowExecution(executionId, spaceId, input, request);
+        if (expectedResumeSeq !== undefined) {
+          await workflowApi.resumeWorkflowExecution(executionId, spaceId, input, request, {
+            expectedResumeSeq,
+          });
+        } else {
+          await workflowApi.resumeWorkflowExecution(executionId, spaceId, input, request);
+        }
       } catch (e) {
         const message = e instanceof Error ? e.message : String(e);
         return {
@@ -69,14 +90,31 @@ export const resumeWorkflowExecutionTool = ({
         execution = null;
       }
 
-      return {
-        results: [
-          otherResult({
-            resumed: true,
-            execution: execution ?? { execution_id: executionId, status: 'unknown' },
+      const toolResults = [
+        otherResult({
+          resumed: true,
+          execution: execution ?? { execution_id: executionId, status: 'unknown' },
+        }),
+      ];
+
+      if (inboxEnabled && execution?.status === ExecutionStatus.WAITING_FOR_INPUT) {
+        const { resume_seq: resumeSeq, waiting_input: waitingInput } = execution;
+        const formPrompt: FormPromptRequest = {
+          ...(waitingInput?.agent_context !== undefined && {
+            agent_context: waitingInput.agent_context,
           }),
-        ],
-      };
+          execution_id: executionId,
+          id: waitingInput?.step_execution_id ?? '',
+          message: waitingInput?.message ?? '',
+          resume_seq: typeof resumeSeq === 'number' ? resumeSeq : 0,
+          schema: waitingInput?.schema ?? {},
+          step_execution_id: waitingInput?.step_execution_id ?? '',
+          type: AgentPromptType.form,
+        };
+        return { prompt: formPrompt, results: toolResults };
+      }
+
+      return { results: toolResults };
     },
     tags: [],
   };

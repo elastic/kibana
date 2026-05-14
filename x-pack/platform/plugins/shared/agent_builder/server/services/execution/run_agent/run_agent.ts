@@ -16,6 +16,7 @@ import type {
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server';
+import type { ResumedFormPromptState } from '../runner/utils/resume_form_prompts';
 import { runDefaultAgentMode } from './run_chat_agent';
 
 export interface RunAgentParams {
@@ -73,6 +74,9 @@ export interface RunAgentParams {
    * The execution ID for this run. Used for sub-agent parent tracking.
    */
   executionId?: string;
+  /** Resolved states from resumed form prompts, used to refresh stale workflow tool
+   *  results in roundToActions before the LLM re-processes them. */
+  resumedStates?: ResumedFormPromptState[];
 }
 
 export interface RunAgentResponse {

@@ -7,7 +7,13 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { of, throwError } from 'rxjs';
-import { ChatEventType, createRequestAbortedError } from '@kbn/agent-builder-common';
+import {
+  ChatEventType,
+  ConversationRoundStatus,
+  ConversationRoundStepType,
+  createRequestAbortedError,
+} from '@kbn/agent-builder-common';
+import { AgentPromptType } from '@kbn/agent-builder-common/agents';
 import { ConfigSchema } from '../../common/step_types/run_agent_step';
 import { CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW } from '../../common/resolve_connector_or_inference_id';
 import { getRunAgentStepDefinition } from './run_agent_step';
@@ -317,6 +323,362 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       })
     );
     expect(res.output?.message).toBe('ok');
+  });
+
+  describe('S4 WAITING_FOR_INPUT propagation', () => {
+    it('returns waitingForInput when the agent round has awaitingPrompt status', async () => {
+      const formPrompt = {
+        type: AgentPromptType.form,
+        id: 'prompt-1',
+        execution_id: 'inner-exec-id',
+        step_execution_id: 'step-exec-id',
+        message: 'Please fill out the form',
+        schema: { type: 'object', properties: { name: { type: 'string' } } },
+      };
+
+      const events$ = of(
+        {
+          type: ChatEventType.conversationCreated,
+          data: { conversation_id: 'c-1', title: 't' },
+        },
+        {
+          type: ChatEventType.roundComplete,
+          data: {
+            round: {
+              id: 'r-1',
+              status: ConversationRoundStatus.awaitingPrompt,
+              pending_prompts: [formPrompt],
+              response: { message: '' },
+            },
+          },
+        }
+      );
+
+      const execution = createExecutionMock(events$);
+      const serviceManager = { internalStart: { execution } } as any;
+      const step = getRunAgentStepDefinition(serviceManager, undefined, true);
+
+      const res = await step.handler(
+        createContext({
+          input: { message: 'hello' },
+          config: { 'create-conversation': true },
+        })
+      );
+
+      expect(res.waitingForInput).toBeDefined();
+      expect(res.waitingForInput?.message).toBe('Please fill out the form');
+      expect(res.waitingForInput?.schema).toEqual({
+        type: 'object',
+        properties: { name: { type: 'string' } },
+      });
+      expect(res.waitingForInput?.stepState).toEqual({
+        conversationId: 'c-1',
+        innerExecutionId: 'inner-exec-id',
+      });
+    });
+
+    it('emits [hitl-debug][ab] runAgent.awaitingPrompt debug marker when round is awaitingPrompt', async () => {
+      const formPrompt = {
+        type: AgentPromptType.form,
+        id: 'prompt-1',
+        execution_id: 'inner-exec-id',
+        step_execution_id: 'step-exec-id',
+        message: 'Please fill out the form',
+        schema: { type: 'object', properties: { name: { type: 'string' } } },
+      };
+
+      const events$ = of(
+        { type: ChatEventType.conversationCreated, data: { conversation_id: 'c-1', title: 't' } },
+        {
+          type: ChatEventType.roundComplete,
+          data: {
+            round: {
+              id: 'r-1',
+              status: ConversationRoundStatus.awaitingPrompt,
+              pending_prompts: [formPrompt],
+              response: { message: '' },
+            },
+          },
+        }
+      );
+
+      const execution = createExecutionMock(events$);
+      const serviceManager = { internalStart: { execution } } as any;
+      const step = getRunAgentStepDefinition(serviceManager, undefined, true);
+
+      const context = createContext({
+        input: { message: 'hello' },
+        config: { 'create-conversation': true },
+        stepId: 'test-step-id',
+      });
+      await step.handler(context);
+
+      expect(context.logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('[hitl-debug][ab] runAgent.awaitingPrompt')
+      );
+      expect(context.logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('schemaPresent=true')
+      );
+      expect(context.logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('messagePresent=true')
+      );
+    });
+
+    it('emits [hitl-debug][ab] runAgent.start debug marker at the start of execution', async () => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: { round: { id: 'r-1', response: { message: 'ok' } } },
+      });
+
+      const execution = createExecutionMock(events$);
+      const serviceManager = { internalStart: { execution } } as any;
+      const step = getRunAgentStepDefinition(serviceManager);
+
+      const context = createContext({ input: { message: 'hello' }, stepId: 'my-step' });
+      await step.handler(context);
+
+      expect(context.logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('[hitl-debug][ab] runAgent.start')
+      );
+    });
+
+    it('answers the inner pending form prompt and re-runs the agent when isResuming is true', async () => {
+      const resumeValues = { approved: true };
+      const resumeWorkflowExecution = jest.fn().mockResolvedValue(undefined);
+
+      const events$ = of(
+        {
+          type: ChatEventType.conversationUpdated,
+          data: { conversation_id: 'c-1', title: 't' },
+        },
+        {
+          type: ChatEventType.roundComplete,
+          data: {
+            round: {
+              id: 'r-2',
+              status: ConversationRoundStatus.completed,
+              response: { message: 'workflow completed' },
+            },
+          },
+        }
+      );
+
+      const execution = createExecutionMock(events$);
+      const workflowsManagement = {
+        management: {
+          resumeWorkflowExecution,
+          // getExecutionState (used by handleFormPromptResponse without a logger) reads the
+          // advanced execution after resume.
+          getWorkflowExecution: jest.fn().mockResolvedValue({
+            id: 'inner-exec-id',
+            status: 'completed',
+            startedAt: new Date().toISOString(),
+            finishedAt: new Date().toISOString(),
+            workflowId: 'wf-1',
+            workflowDefinition: { name: 'wf-1', steps: [] },
+            stepExecutions: [],
+          }),
+        },
+      } as any;
+
+      // Inner conversation carries the pending form prompt the inner agent paused on.
+      const conversationClient = {
+        get: jest.fn().mockResolvedValue({
+          rounds: [
+            {
+              status: ConversationRoundStatus.awaitingPrompt,
+              steps: [],
+              pending_prompts: [
+                {
+                  type: AgentPromptType.form,
+                  id: 'inner-step-exec-id',
+                  execution_id: 'inner-exec-id',
+                  step_execution_id: 'inner-step-exec-id',
+                  message: 'approve?',
+                  schema: { type: 'object' },
+                  resume_seq: 0,
+                },
+              ],
+            },
+          ],
+        }),
+        update: jest.fn().mockResolvedValue(undefined),
+      };
+      const conversations = {
+        getScopedClient: jest.fn().mockResolvedValue(conversationClient),
+      };
+      const serviceManager = { internalStart: { execution, conversations } } as any;
+      const step = getRunAgentStepDefinition(serviceManager, workflowsManagement, true);
+
+      const fakeRequest = { headers: {} } as unknown as KibanaRequest;
+      const res = await step.handler(
+        createContext({
+          input: { message: 'hello' },
+          config: { 'create-conversation': true },
+          isResuming: true,
+          resumeInput: resumeValues,
+          stepState: { conversationId: 'c-1', innerExecutionId: 'inner-exec-id' },
+          contextManager: {
+            getFakeRequest: jest.fn().mockReturnValue(fakeRequest),
+            getContext: jest.fn().mockReturnValue({ workflow: { spaceId: 'test-space' } }),
+            getScopedEsClient: jest.fn(),
+            renderInputTemplate: jest.fn(),
+          },
+        })
+      );
+
+      // The inner workflow is resumed via the pending form prompt's CAS path.
+      expect(resumeWorkflowExecution).toHaveBeenCalledWith(
+        'inner-exec-id',
+        'test-space',
+        resumeValues,
+        fakeRequest,
+        { expectedResumeSeq: 1 }
+      );
+      // The inner agent is re-run as a pure form submission (no message).
+      expect(execution.executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            conversationId: 'c-1',
+            nextInput: expect.objectContaining({
+              form_prompts: [
+                expect.objectContaining({
+                  execution_id: 'inner-exec-id',
+                  values: resumeValues,
+                }),
+              ],
+            }),
+          }),
+        })
+      );
+      expect(res.output?.message).toBe('workflow completed');
+    });
+  });
+
+  describe('S5 agent_context is not surfaced on the nested HITL prompt', () => {
+    it('does not attach agent_context even when the round has reasoning + tool-call steps', async () => {
+      const formPrompt = {
+        type: AgentPromptType.form,
+        id: 'prompt-1',
+        execution_id: 'inner-exec-id',
+        step_execution_id: 'step-exec-id',
+        message: 'Please fill out the form',
+        schema: { type: 'object', properties: { name: { type: 'string' } } },
+      };
+
+      const events$ = of(
+        { type: ChatEventType.conversationCreated, data: { conversation_id: 'c-1', title: 't' } },
+        {
+          type: ChatEventType.roundComplete,
+          data: {
+            round: {
+              id: 'r-1',
+              status: ConversationRoundStatus.awaitingPrompt,
+              pending_prompts: [formPrompt],
+              steps: [
+                {
+                  type: ConversationRoundStepType.reasoning,
+                  reasoning: 'I should use the HITL tool to get approval',
+                  tool_call_id: 'tc-1',
+                },
+                {
+                  type: ConversationRoundStepType.toolCall,
+                  tool_call_id: 'tc-1',
+                  tool_id: 'andrew.testing.agent.hitl.test',
+                  params: { message: 'Need approval' },
+                  results: [],
+                },
+              ],
+              response: { message: '' },
+            },
+          },
+        }
+      );
+
+      const execution = createExecutionMock(events$);
+      const serviceManager = { internalStart: { execution } } as any;
+      const step = getRunAgentStepDefinition(serviceManager, undefined, true);
+
+      const res = await step.handler(
+        createContext({ input: { message: 'hello' }, config: { 'create-conversation': true } })
+      );
+
+      expect(res.waitingForInput?.agent_context).toBeUndefined();
+    });
+
+    it('omits agent_context when round steps have no reasoning or tool-call steps', async () => {
+      const formPrompt = {
+        type: AgentPromptType.form,
+        id: 'prompt-1',
+        execution_id: 'inner-exec-id',
+        step_execution_id: 'step-exec-id',
+        message: 'Please fill out the form',
+        schema: {},
+      };
+
+      const events$ = of(
+        { type: ChatEventType.conversationCreated, data: { conversation_id: 'c-1', title: 't' } },
+        {
+          type: ChatEventType.roundComplete,
+          data: {
+            round: {
+              id: 'r-1',
+              status: ConversationRoundStatus.awaitingPrompt,
+              pending_prompts: [formPrompt],
+              steps: [],
+              response: { message: '' },
+            },
+          },
+        }
+      );
+
+      const execution = createExecutionMock(events$);
+      const serviceManager = { internalStart: { execution } } as any;
+      const step = getRunAgentStepDefinition(serviceManager, undefined, true);
+
+      const res = await step.handler(
+        createContext({ input: { message: 'hello' }, config: { 'create-conversation': true } })
+      );
+
+      expect(res.waitingForInput?.agent_context).toBeUndefined();
+    });
+
+    it('does not emit waitingForInput when inboxEnabled is false, even if round has awaitingPrompt status', async () => {
+      const formPrompt = {
+        type: AgentPromptType.form,
+        id: 'prompt-1',
+        execution_id: 'inner-exec-id',
+        step_execution_id: 'step-exec-id',
+        message: 'Please fill out the form',
+        schema: {},
+      };
+
+      const events$ = of(
+        { type: ChatEventType.conversationCreated, data: { conversation_id: 'c-1', title: 't' } },
+        {
+          type: ChatEventType.roundComplete,
+          data: {
+            round: {
+              id: 'r-1',
+              status: ConversationRoundStatus.awaitingPrompt,
+              pending_prompts: [formPrompt],
+              steps: [],
+              response: { message: '' },
+            },
+          },
+        }
+      );
+
+      const execution = createExecutionMock(events$);
+      const serviceManager = { internalStart: { execution } } as any;
+      const step = getRunAgentStepDefinition(serviceManager, undefined, false);
+
+      const res = await step.handler(
+        createContext({ input: { message: 'hello' }, config: { 'create-conversation': true } })
+      );
+
+      expect(res.waitingForInput).toBeUndefined();
+    });
   });
 
   describe('connector-id / inference-id', () => {

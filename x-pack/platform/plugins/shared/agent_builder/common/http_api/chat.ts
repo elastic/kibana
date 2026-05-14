@@ -14,7 +14,11 @@ import type {
 } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
-import type { PromptRequest, PromptResponse } from '@kbn/agent-builder-common/agents';
+import type {
+  FormPromptResponse,
+  PromptRequest,
+  PromptResponse,
+} from '@kbn/agent-builder-common/agents';
 
 /**
  * Body payload for the public agent_builder converse endpoints (`/api/agent_builder/converse`, `/converse/async`).
@@ -28,6 +32,7 @@ export interface ChatRequestBodyPayload {
   attachments?: AttachmentInput[];
   input?: string;
   prompts?: Record<string, PromptResponse>;
+  form_prompts?: FormPromptResponse[];
   browser_api_tools?: BrowserApiToolMetadata[];
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
   action?: ConversationAction;

@@ -53,13 +53,15 @@ const ctx = () => ({
   spaceId: 'default',
 });
 
-const fakeApi = () => {
+const fakeApi = ({ resumeSeq = 0 }: { resumeSeq?: number } = {}) => {
   const api: Partial<WorkflowsManagementApi> = {
     listWaitingForInputSteps: jest.fn(async () => ({ results: [buildStep()], total: 1 })),
     resumeWorkflowExecution: jest.fn(async () => ({ resumedBy: 'user' })),
     // Default to "step is still waiting" so existing happy-path tests
     // remain unchanged after we added pre-resume verification.
     getStepExecution: jest.fn(async () => buildStep()),
+    // Returns a minimal execution doc so respond() can read resume_seq for CAS.
+    getWorkflowExecution: jest.fn(async () => ({ resume_seq: resumeSeq } as any)),
   };
   return api as jest.Mocked<WorkflowsManagementApi>;
 };
@@ -118,7 +120,7 @@ describe('createWorkflowsInboxProvider', () => {
 
   describe('respond()', () => {
     it('calls resumeWorkflowExecution with the parsed executionId and the opaque input', async () => {
-      const api = fakeApi();
+      const api = fakeApi({ resumeSeq: 0 });
       const logger = loggerMock.create();
       const provider = createWorkflowsInboxProvider({ api, logger, audit: createTestAudit() });
       const c = ctx();
@@ -129,8 +131,69 @@ describe('createWorkflowsInboxProvider', () => {
         'run-1',
         'default',
         { approved: true, reason: 'contained' },
+        c.request,
+        { expectedResumeSeq: 1 }
+      );
+    });
+
+    it('omits expectedResumeSeq when getWorkflowExecution returns null', async () => {
+      const api = fakeApi();
+      (api.getWorkflowExecution as jest.Mock).mockResolvedValueOnce(null);
+      const c = ctx();
+      const provider = createWorkflowsInboxProvider({
+        api,
+        logger: loggerMock.create(),
+        audit: createTestAudit(),
+      });
+
+      await provider.respond('wf-1:run-1:step-exec-1', { approved: true }, c);
+
+      expect(api.resumeWorkflowExecution).toHaveBeenCalledWith(
+        'run-1',
+        'default',
+        { approved: true },
         c.request
       );
+    });
+
+    it('uses resume_seq from the execution doc to compute expectedResumeSeq', async () => {
+      const api = fakeApi({ resumeSeq: 5 });
+      const c = ctx();
+      const provider = createWorkflowsInboxProvider({
+        api,
+        logger: loggerMock.create(),
+        audit: createTestAudit(),
+      });
+
+      await provider.respond('wf-1:run-1:step-exec-1', { approved: true }, c);
+
+      expect(api.resumeWorkflowExecution).toHaveBeenCalledWith(
+        'run-1',
+        'default',
+        { approved: true },
+        c.request,
+        { expectedResumeSeq: 6 }
+      );
+    });
+
+    it('throws InboxActionConflictError when resumeWorkflowExecution rejects with WorkflowExecutionStaleResumeError', async () => {
+      const { WorkflowExecutionStaleResumeError } = await import('@kbn/workflows/common/errors');
+      const api = fakeApi();
+      (api.resumeWorkflowExecution as jest.Mock).mockRejectedValueOnce(
+        new WorkflowExecutionStaleResumeError('run-1', 1, 2)
+      );
+      const provider = createWorkflowsInboxProvider({
+        api,
+        logger: loggerMock.create(),
+        audit: createTestAudit(),
+      });
+
+      const err = await provider
+        .respond('wf-1:run-1:step-exec-1', { approved: true }, ctx())
+        .catch((e: unknown) => e);
+
+      expect(isInboxActionConflictError(err)).toBe(true);
+      expect((err as Error).message).toMatch(/already advanced by another responder/);
     });
 
     it('emits the same security audit as the resume HTTP route after a successful inbox resume', async () => {

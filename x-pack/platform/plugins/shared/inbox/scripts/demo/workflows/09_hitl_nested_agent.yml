@@ -1,0 +1,16 @@
+# HITL demo — nested agent scenario
+# An ai.agent step instructs the default agent to call the
+# hitl-demo-single-approval tool (created by the seed script).
+# The tool executes that inner workflow, which pauses on waitForInput
+# and surfaces an inbox action — the canonical "nested HITL" path.
+name: hitl-demo-nested-agent
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: run_agent
+    type: ai.agent
+    agent-id: elastic-ai-agent
+    create-conversation: true
+    with:
+      message: "Use the hitl-demo-single-approval tool"

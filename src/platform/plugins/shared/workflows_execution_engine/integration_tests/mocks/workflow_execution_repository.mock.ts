@@ -244,6 +244,33 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
     return results;
   }
 
+  public async casIncrementResumeSeq({
+    id,
+    spaceId,
+    expectedSeq,
+  }: {
+    id: string;
+    spaceId: string;
+    expectedSeq: number;
+  }): Promise<{ won: boolean; currentSeq: number }> {
+    const execution = this.workflowExecutions.get(id);
+    if (!execution || execution.spaceId !== spaceId) {
+      return { won: false, currentSeq: -1 };
+    }
+    const current =
+      typeof (execution as unknown as { resume_seq?: number }).resume_seq === 'number'
+        ? (execution as unknown as { resume_seq: number }).resume_seq
+        : 0;
+    if (current === expectedSeq - 1) {
+      this.workflowExecutions.set(id, {
+        ...execution,
+        ...({ resume_seq: expectedSeq } as unknown as Partial<typeof execution>),
+      } as typeof execution);
+      return { won: true, currentSeq: expectedSeq };
+    }
+    return { won: false, currentSeq: current };
+  }
+
   public async bulkUpdateWorkflowExecutions(
     updates: Array<Partial<EsWorkflowExecution>>
   ): Promise<void> {

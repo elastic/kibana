@@ -967,4 +967,64 @@ describe('runInternalTool - sub-agent HITL blocking', () => {
       })
     );
   });
+
+  it('returns error result instead of combined prompt+results when executionMode is standalone and inboxEnabled is true', async () => {
+    runnerDeps.executionMode = AgentExecutionMode.standalone;
+    (runnerDeps as any).inboxEnabled = true;
+    const runnerManager = new RunnerManager(runnerDeps);
+
+    toolHandler.mockReturnValue({
+      prompt: { type: AgentPromptType.confirmation, id: 'combo-prompt' },
+      results: [{ type: ToolResultType.other, data: { val: 1 } }],
+    });
+
+    const result = await runInternalTool({
+      toolExecutionParams: {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-combined-standalone',
+        source: 'agent',
+      },
+      parentManager: runnerManager,
+    });
+
+    expect(result).toHaveProperty('results');
+    expect(result.results).toHaveLength(1);
+    expect(result.results![0].type).toBe(ToolResultType.error);
+    expect(result.results![0].data).toEqual(
+      expect.objectContaining({ message: expect.stringContaining('non-interactive mode') })
+    );
+    expect(result.prompt).toBeUndefined();
+  });
+
+  it('returns both prompt and results when executionMode is not standalone and inboxEnabled is true', async () => {
+    (runnerDeps as any).inboxEnabled = true;
+    const runnerManager = new RunnerManager(runnerDeps);
+
+    toolHandler.mockReturnValue({
+      prompt: { type: AgentPromptType.confirmation, id: 'combo-prompt' },
+      results: [{ type: ToolResultType.other, data: { val: 2 } }],
+    });
+
+    const result = await runInternalTool({
+      toolExecutionParams: {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-combined-normal',
+        source: 'agent',
+      },
+      parentManager: runnerManager,
+    });
+
+    expect(result).toHaveProperty('prompt');
+    expect(result.prompt).toEqual(
+      expect.objectContaining({ type: AgentPromptType.confirmation, id: 'combo-prompt' })
+    );
+    expect(result.results).toHaveLength(1);
+    expect(result.results![0]).toMatchObject({
+      tool_result_id: 'some-result-id',
+      type: ToolResultType.other,
+      data: { val: 2 },
+    });
+  });
 });

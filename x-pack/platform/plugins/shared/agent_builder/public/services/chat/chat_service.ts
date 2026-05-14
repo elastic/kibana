@@ -7,11 +7,12 @@
 
 import type { Observable } from 'rxjs';
 import { defer } from 'rxjs';
-import type { HttpSetup } from '@kbn/core-http-browser';
+import { buildPath, type HttpSetup } from '@kbn/core-http-browser';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import type { ChatEvent, AgentCapabilities } from '@kbn/agent-builder-common';
 import {
   getKibanaDefaultAgentCapabilities,
+  type FormPromptResponse,
   type PromptResponse,
 } from '@kbn/agent-builder-common/agents';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
@@ -37,7 +38,8 @@ export type ChatParams = BaseConverseParams & {
 };
 
 export type ResumeRoundParams = BaseConverseParams & {
-  prompts: Record<string, PromptResponse>;
+  form_prompts?: FormPromptResponse[];
+  prompts?: Record<string, PromptResponse>;
 };
 
 export type RegenerateParams = BaseConverseParams;
@@ -75,11 +77,12 @@ export class ChatService {
   resume(params: ResumeRoundParams): Observable<ChatEvent> {
     return this.converse(params.signal, {
       agent_id: params.agentId,
-      conversation_id: params.conversationId,
-      connector_id: params.connectorId,
-      capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
-      prompts: params.prompts,
       browser_api_tools: params.browserApiTools ?? [],
+      capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
+      connector_id: params.connectorId,
+      conversation_id: params.conversationId,
+      form_prompts: params.form_prompts,
+      prompts: params.prompts,
     });
   }
 
@@ -96,11 +99,14 @@ export class ChatService {
 
   followExecution(executionId: string, signal?: AbortSignal): Observable<ChatEvent> {
     return defer(() => {
-      return this.http.get(`${internalApiPath}/executions/${executionId}/follow`, {
-        signal,
-        asResponse: true,
-        rawResponse: true,
-      });
+      return this.http.get(
+        buildPath(`${internalApiPath}/executions/{executionId}/follow`, { executionId }),
+        {
+          signal,
+          asResponse: true,
+          rawResponse: true,
+        }
+      );
     }).pipe(
       // @ts-expect-error SseEvent mixin issue
       httpResponseIntoObservable<ChatEvent>(),
@@ -110,7 +116,7 @@ export class ChatService {
 
   private converse(signal: AbortSignal | undefined, payload: ConversePayload) {
     return defer(() => {
-      return this.http.post(`${publicApiPath}/converse/async`, {
+      return this.http.post(buildPath(`${publicApiPath}/converse/async`), {
         signal,
         asResponse: true,
         rawResponse: true,

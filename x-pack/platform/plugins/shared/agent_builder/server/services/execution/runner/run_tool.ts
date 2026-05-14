@@ -33,7 +33,10 @@ import type {
   InternalToolDefinition,
   ToolHandlerCallContext,
 } from '@kbn/agent-builder-server/tools';
-import { isToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
+import {
+  isToolHandlerResultsWithPromptReturn,
+  isToolHandlerStandardReturn,
+} from '@kbn/agent-builder-server/tools';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents';
 import { getCurrentSpaceId } from '../../../utils/spaces';
@@ -45,6 +48,7 @@ import {
   createSkillsService,
 } from './utils';
 import { toolConfirmationId, createToolConfirmationPrompt } from './utils/prompts';
+import { buildCombinedResultsPromptReturn } from './helpers/build_combined_results_prompt_return';
 import type { RunnerManager } from './runner';
 
 export const runTool = async <TParams = Record<string, unknown>>({
@@ -211,6 +215,22 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
       source,
       results: resultsWithIds,
       duration,
+    });
+  } else if (manager.deps.inboxEnabled && isToolHandlerResultsWithPromptReturn(toolReturn)) {
+    // Combined: tool completes with results AND emits a HITL prompt (e.g. workflow WAITING_FOR_INPUT)
+    runToolReturn = buildCombinedResultsPromptReturn({
+      getToolResultId,
+      isStandaloneExecution,
+      reportToolCallTelemetry: (results) =>
+        reportToolCallTelemetry({
+          duration,
+          parentManager,
+          results,
+          source,
+          toolCallId,
+          toolId: tool.id,
+        }),
+      toolReturn,
     });
   } else {
     // On-demand HITL prompt from tool handler

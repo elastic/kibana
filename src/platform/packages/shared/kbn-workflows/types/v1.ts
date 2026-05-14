@@ -154,6 +154,14 @@ export interface EsWorkflowExecution {
   eventChainVisitedWorkflowIds?: string[];
   /** Trigger dispatch id from event-driven scheduling (`context.metadata.eventId`), when set */
   dispatchEventId?: string;
+  /**
+   * Monotonic counter incremented on every HITL (waitForInput) resume. Used by the
+   * resumeWorkflowExecution CAS path to reject stale resume calls atomically without
+   * relying on ES `_seq_no`/`_primary_term` retries.
+   *
+   * Missing on documents created before this field was added; treat as 0.
+   */
+  resume_seq?: number;
 }
 
 export interface ProviderInput {
@@ -245,6 +253,13 @@ export interface WorkflowExecutionDto {
   traceId?: string; // APM trace ID for observability
   entryTransactionId?: string; // APM root transaction ID for trace embeddable
   concurrencyGroupKey?: string; // Evaluated concurrency group key for grouping executions
+  /**
+   * Monotonic counter incremented on every HITL (waitForInput) resume. Mirrors
+   * {@link EsWorkflowExecution.resume_seq}; present in the DTO so callers can
+   * compute the next `expectedResumeSeq` for CAS-protected resume calls.
+   * Missing on documents created before this field was added; treat as 0.
+   */
+  resume_seq?: number;
 }
 
 export type WorkflowExecutionListItemDto = Omit<

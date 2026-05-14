@@ -45,6 +45,7 @@
     "optionalPlugins": [
       "cloud",
       "evals",
+      "inbox",
       "licenseManagement",
       "security",
       "workflowsManagement",

@@ -36,8 +36,14 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
     // Merge context, default properties, and provided properties
     merge(event, eventProperties);
 
-    // Log to console if enabled
-    if (this.options.enableConsoleLogging) {
+    // Log to console if enabled, or always for [hitl-debug] diagnostic markers so they are
+    // visible in the Kibana file log (see hitl-common/README "Enabling Debug Logging"). Without
+    // this, markers routed through the workflow event logger (e.g. waitForInput.enter,
+    // runAgent.*, build.waitingForInput) only reach the workflow-events ES index — never the
+    // file log — making the nested HITL path invisible to file-log-based debugging. The markers
+    // are emitted at debug level, so they incur zero overhead unless the engine logger namespace
+    // is configured at debug.
+    if (this.options.enableConsoleLogging || event.message?.includes('[hitl-debug]')) {
       this.logToConsole(event);
     }
 

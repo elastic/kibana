@@ -9947,6 +9947,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/workflows-hitl-common@link:x-pack/platform/packages/shared/workflows/hitl-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workflows-hitl-form@link:x-pack/platform/packages/shared/workflows/hitl-form":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workflows-hitl-telemetry@link:x-pack/platform/packages/shared/workflows/hitl-telemetry":
+  version "0.0.0"
+  uid ""
+
 "@kbn/workflows-management-plugin@link:src/platform/plugins/shared/workflows_management":
   version "0.0.0"
   uid ""

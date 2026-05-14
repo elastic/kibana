@@ -15,6 +15,27 @@ import { ResumeExecutionButton } from './resume_execution_button';
 import { TestWrapper } from '../../../shared/test_utils';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 
+jest.mock('../lib/can_render_with_schema_form', () => ({
+  canRenderWithSchemaForm: jest.fn(),
+}));
+
+jest.mock('./resume_execution_schema_form_modal', () => ({
+  ResumeExecutionSchemaFormModal: ({
+    onClose,
+    resumeMessage,
+  }: {
+    onClose: () => void;
+    resumeMessage?: string;
+  }) => (
+    <div data-test-subj="resume-execution-schema-form-modal">
+      <span data-test-subj="schema-modal-resume-message">{resumeMessage ?? ''}</span>
+      <button type="button" data-test-subj="schema-modal-close" onClick={onClose}>
+        {'Close'}
+      </button>
+    </div>
+  ),
+}));
+
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
 }));
@@ -66,6 +87,7 @@ jest.mock('./resume_execution_modal', () => ({
 }));
 
 const { useKibana } = jest.requireMock('@kbn/kibana-react-plugin/public');
+const { canRenderWithSchemaForm } = jest.requireMock('../lib/can_render_with_schema_form');
 
 describe('ResumeExecutionButton', () => {
   const mockHttpPost = jest.fn();
@@ -82,12 +104,16 @@ describe('ResumeExecutionButton', () => {
     capturedContextOverride = undefined;
     // Default: schema conversion succeeds and returns a minimal Zod-like object.
     convertJsonSchemaToZod.mockReturnValue({ safeParse: jest.fn(() => ({ success: true })) });
+    canRenderWithSchemaForm.mockReturnValue(false);
     mockHttpPost.mockResolvedValue({});
     useKibana.mockReturnValue({
       services: {
         http: { post: mockHttpPost },
         notifications: {
           toasts: { addSuccess: mockAddSuccess, addError: mockAddError },
+        },
+        workflowsManagement: {
+          inboxEnabled: false,
         },
       },
     });
@@ -283,6 +309,65 @@ describe('ResumeExecutionButton', () => {
         </TestWrapper>
       );
       expect(screen.getByTestId('provideActionButton')).not.toBeDisabled();
+    });
+  });
+
+  describe('modal selection', () => {
+    const renderableSchema = {
+      type: 'object',
+      properties: { approved: { type: 'boolean', title: 'Approve action' } },
+      required: ['approved'],
+    };
+
+    it('renders the Monaco modal (fallback) when inboxEnabled is false', () => {
+      renderComponent({ resumeSchema: renderableSchema as never });
+      fireEvent.click(screen.getByTestId('provideActionButton'));
+      expect(screen.getByTestId('resume-execution-modal')).toBeInTheDocument();
+      expect(screen.queryByTestId('resume-execution-schema-form-modal')).not.toBeInTheDocument();
+    });
+
+    it('renders the Monaco modal (fallback) when inboxEnabled is true but no schema is provided', () => {
+      useKibana.mockReturnValue({
+        services: {
+          http: { post: mockHttpPost },
+          notifications: { toasts: { addSuccess: mockAddSuccess, addError: mockAddError } },
+          workflowsManagement: { inboxEnabled: true },
+        },
+      });
+      renderComponent();
+      fireEvent.click(screen.getByTestId('provideActionButton'));
+      expect(screen.getByTestId('resume-execution-modal')).toBeInTheDocument();
+      expect(screen.queryByTestId('resume-execution-schema-form-modal')).not.toBeInTheDocument();
+    });
+
+    it('renders the Monaco modal (fallback) when inboxEnabled is true but canRenderWithSchemaForm returns false', () => {
+      canRenderWithSchemaForm.mockReturnValue(false);
+      useKibana.mockReturnValue({
+        services: {
+          http: { post: mockHttpPost },
+          notifications: { toasts: { addSuccess: mockAddSuccess, addError: mockAddError } },
+          workflowsManagement: { inboxEnabled: true },
+        },
+      });
+      renderComponent({ resumeSchema: renderableSchema as never });
+      fireEvent.click(screen.getByTestId('provideActionButton'));
+      expect(screen.getByTestId('resume-execution-modal')).toBeInTheDocument();
+      expect(screen.queryByTestId('resume-execution-schema-form-modal')).not.toBeInTheDocument();
+    });
+
+    it('renders the schema-form modal when inboxEnabled is true and canRenderWithSchemaForm returns true', () => {
+      canRenderWithSchemaForm.mockReturnValue(true);
+      useKibana.mockReturnValue({
+        services: {
+          http: { post: mockHttpPost },
+          notifications: { toasts: { addSuccess: mockAddSuccess, addError: mockAddError } },
+          workflowsManagement: { inboxEnabled: true },
+        },
+      });
+      renderComponent({ resumeSchema: renderableSchema as never });
+      fireEvent.click(screen.getByTestId('provideActionButton'));
+      expect(screen.getByTestId('resume-execution-schema-form-modal')).toBeInTheDocument();
+      expect(screen.queryByTestId('resume-execution-modal')).not.toBeInTheDocument();
     });
   });
 });

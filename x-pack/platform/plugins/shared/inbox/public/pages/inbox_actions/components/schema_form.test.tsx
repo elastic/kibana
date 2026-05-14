@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { extractSchemaDefaults, validateSchemaValues, type InboxJsonSchema } from './schema_form';
+import {
+  extractSchemaDefaults,
+  validateSchemaValues,
+  type InboxJsonSchema,
+} from '@kbn/workflows-hitl-form';
 
 const SCHEMA: InboxJsonSchema = {
   type: 'object',

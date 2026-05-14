@@ -54,8 +54,9 @@ export class AgentBuilderWorkflowsPlugin
     coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderWorkflowsPluginStart>,
     setupDeps: PluginSetupDependencies
   ): AgentBuilderWorkflowsPluginSetup {
-    const { agentBuilder, agentContextLayer, workflowsManagement } = setupDeps;
+    const { agentBuilder, agentContextLayer, inbox, workflowsManagement } = setupDeps;
     const api = workflowsManagement.management;
+    const inboxEnabled = !!inbox;
     this.api = api;
 
     const aiTelemetryClient = new WorkflowsAiTelemetryClient(coreSetup.analytics, this.logger);
@@ -81,7 +82,7 @@ export class AgentBuilderWorkflowsPlugin
     // Platform-level workflow execution tools
     const platformTools: Array<BuiltinToolDefinition<any>> = [
       getWorkflowExecutionStatusTool({ workflowsManagement }),
-      resumeWorkflowExecutionTool({ workflowsManagement }),
+      resumeWorkflowExecutionTool({ inboxEnabled, workflowsManagement }),
       listWorkflowExecutionsTool({ workflowsManagement }),
       generateWorkflowTool({ workflowsManagement, aiTelemetryClient }),
     ];

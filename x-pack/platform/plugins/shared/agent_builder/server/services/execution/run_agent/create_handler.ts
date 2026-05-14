@@ -8,6 +8,7 @@
 import type { AgentConfiguration } from '@kbn/agent-builder-common';
 import type { AgentHandlerFn } from '@kbn/agent-builder-server';
 import type { InternalAgentDefinition } from '../../agents/agent_registry';
+import type { ResumedFormPromptState } from '../runner/utils/resume_form_prompts';
 import { runAgent } from './run_agent';
 
 /**
@@ -32,6 +33,7 @@ export const createAgentHandler = ({
         configurationOverrides,
         action,
         executionId,
+        resumedStates,
       },
       runId,
       abortSignal,
@@ -53,6 +55,7 @@ export const createAgentHandler = ({
         configurationOverrides,
         action,
         executionId,
+        resumedStates: resumedStates as ResumedFormPromptState[] | undefined,
       },
       context
     );

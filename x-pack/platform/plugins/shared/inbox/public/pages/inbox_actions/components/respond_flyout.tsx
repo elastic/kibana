@@ -21,15 +21,15 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { InboxAction } from '@kbn/inbox-common';
-import { useRespondToInboxAction } from '../../../hooks/use_respond_to_inbox_action';
-import { useActionDetailRenderer } from '../../../hooks/use_action_detail_renderer';
-import * as i18n from '../translations';
 import {
   SchemaForm,
   extractSchemaDefaults,
   validateSchemaValues,
   type InboxJsonSchema,
-} from './schema_form';
+} from '@kbn/workflows-hitl-form';
+import { useRespondToInboxAction } from '../../../hooks/use_respond_to_inbox_action';
+import { useActionDetailRenderer } from '../../../hooks/use_action_detail_renderer';
+import * as i18n from '../translations';
 import { TimeoutChip } from './timeout_chip';
 
 export interface RespondFlyoutProps {
@@ -112,7 +112,7 @@ export const RespondFlyout: React.FC<RespondFlyoutProps> = ({ action, onClose, o
 
       <EuiFlyoutBody>
         {isTimedOut ? (
-          <EuiCallOut color="warning" iconType="clock">
+          <EuiCallOut announceOnMount color="warning" iconType="clock">
             <p>{i18n.getTimedOutBannerText(action.responded_at ?? action.timeout_at ?? '')}</p>
           </EuiCallOut>
         ) : (
@@ -127,7 +127,7 @@ export const RespondFlyout: React.FC<RespondFlyoutProps> = ({ action, onClose, o
             {mutation.isError ? (
               <>
                 <EuiSpacer size="m" />
-                <EuiCallOut color="danger" iconType="warning">
+                <EuiCallOut announceOnMount color="danger" iconType="warning">
                   <p>{i18n.getFlyoutSubmitErrorMessage(String(mutation.error))}</p>
                 </EuiCallOut>
               </>

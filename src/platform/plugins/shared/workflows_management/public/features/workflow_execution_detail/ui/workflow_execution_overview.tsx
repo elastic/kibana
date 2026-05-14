@@ -26,6 +26,7 @@ interface WorkflowExecutionOverviewProps {
   workflowExecutionDuration?: number;
   showResumeUI?: boolean;
   executionId?: string;
+  expectedResumeSeq?: number;
   resumeMessage?: string;
   resumeSchema?: JsonModelSchemaType;
   shouldAutoResume?: boolean;
@@ -58,6 +59,7 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
     workflowExecutionDuration,
     showResumeUI = false,
     executionId,
+    expectedResumeSeq,
     resumeMessage,
     resumeSchema,
     shouldAutoResume = false,
@@ -200,6 +202,7 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                 executionId={executionId}
                 workflowId={stepExecution.workflowId}
                 stepStartedAt={stepExecution.startedAt}
+                expectedResumeSeq={expectedResumeSeq}
                 resumeMessage={resumeMessage}
                 resumeSchema={resumeSchema}
                 autoOpen={shouldAutoResume}

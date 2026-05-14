@@ -66,6 +66,7 @@ export interface InternalStartServices {
 }
 
 export interface ServiceSetupDeps {
+  inboxEnabled?: boolean;
   logger: Logger;
   workflowsManagement?: WorkflowsServerPluginSetup;
   trackingService?: TrackingService;

@@ -59,6 +59,7 @@ export interface SendMessageVars {
 }
 
 export interface SendMessageMutationBindings {
+  updateActiveReasoning: (conversationId: string, reasoning: string) => void;
   setPendingMessage: (conversationId: string, message: string) => void;
   clearPendingMessage: (conversationId: string) => void;
   setError: (conversationId: string, error: unknown, errorSteps: ConversationRoundStep[]) => void;
@@ -134,6 +135,7 @@ const withScreenContextAttachment = async ({
  * to the right cache regardless of where the user has navigated.
  */
 export const useSendMessageMutation = ({
+  updateActiveReasoning,
   setPendingMessage,
   clearPendingMessage,
   setError,
@@ -231,6 +233,7 @@ export const useSendMessageMutation = ({
           browserApiTools: vars.browserApiTools,
           browserToolExecutor,
           isAborted: () => controller.signal.aborted,
+          setAgentReasoning: (reasoning) => updateActiveReasoning(vars.conversationId, reasoning),
         });
 
         if (!isRegenerate) {

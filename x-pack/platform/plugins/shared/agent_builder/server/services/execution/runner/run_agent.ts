@@ -13,6 +13,7 @@ import type {
 } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getCurrentSpaceId } from '../../../utils/spaces';
+import { createWorkflowExecutionPoller } from './helpers/create_workflow_execution_poller';
 import { withAgentSpan } from '../../../tracing';
 import { createAgentHandler } from '../run_agent/create_handler';
 import {
@@ -37,6 +38,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     request,
     spaces,
     elasticsearch,
+    inboxEnabled,
     savedObjects,
     modelProvider,
     toolsService,
@@ -54,6 +56,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     toolManager,
     analyticsService,
     trackingService,
+    workflowsManagement,
   } = manager.deps;
 
   const spaceId = getCurrentSpaceId({ request, spaces });
@@ -118,6 +121,11 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     subAgentExecutor: manager.deps.subAgentExecutor,
     analyticsService,
     trackingService,
+    workflowExecutionPoller: createWorkflowExecutionPoller({
+      inboxEnabled,
+      spaceId,
+      workflowsManagement,
+    }),
   };
 };
 

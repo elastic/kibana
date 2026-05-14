@@ -102,7 +102,7 @@ export class WorkflowsPlugin
     if (plugins.inbox) {
       this.logger.debug('Workflows Management: registering inbox provider');
       plugins.inbox.registerActionProvider(
-        createWorkflowsInboxProvider({ api, logger: this.logger, audit })
+        createWorkflowsInboxProvider({ analytics: core.analytics, api, audit, logger: this.logger })
       );
     }
 

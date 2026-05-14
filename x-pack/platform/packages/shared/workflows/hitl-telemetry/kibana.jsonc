@@ -1,0 +1,7 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/workflows-hitl-telemetry",
+  "owner": ["@elastic/security-generative-ai"],
+  "group": "platform",
+  "visibility": "shared"
+}

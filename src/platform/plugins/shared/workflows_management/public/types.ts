@@ -37,6 +37,7 @@ import type { WorkflowsBaseTelemetry } from './common/service/telemetry';
 export interface WorkflowsPublicPluginSetup {}
 
 export interface WorkflowsPublicPluginSetupDependencies {
+  inbox?: object;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
 
@@ -85,12 +86,13 @@ export interface WorkflowsPublicPluginStartDependencies {
 export interface WorkflowsPublicPluginStartAdditionalServices {
   storage: Storage;
   workflowsManagement: {
-    telemetry: TelemetryServiceClient;
     agentBuilder?: AgentBuilderPluginStart;
     availability: AvailabilityService;
     globalExecutionsView: {
       enabled: boolean;
     };
+    inboxEnabled: boolean;
+    telemetry: TelemetryServiceClient;
   };
 }
 

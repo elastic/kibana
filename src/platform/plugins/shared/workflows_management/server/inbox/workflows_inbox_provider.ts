@@ -16,6 +16,9 @@ import {
   type InboxRequestContext,
 } from '@kbn/inbox-plugin/server';
 import { ExecutionStatus } from '@kbn/workflows';
+import { WorkflowExecutionStaleResumeError } from '@kbn/workflows/common/errors';
+import { HITL_EVENT_TYPES, reportHitlEvent } from '@kbn/workflows-hitl-telemetry';
+import type { HitlAnalytics } from '@kbn/workflows-hitl-telemetry';
 import { buildWorkflowSourceId, parseWorkflowSourceId, toInboxAction } from './to_inbox_action';
 import type { WorkflowManagementAuditLog } from '../api/routes/utils/workflow_audit_logging';
 import type { WorkflowsManagementApi } from '../api/workflows_management_api';
@@ -33,10 +36,11 @@ export class InvalidWorkflowSourceIdError extends Error {
 }
 
 export interface CreateWorkflowsInboxProviderArgs {
+  analytics?: HitlAnalytics;
   api: WorkflowsManagementApi;
-  logger: Logger;
   /** Same instance as HTTP routes — inbox resume must emit identical security audit events. */
   audit: WorkflowManagementAuditLog;
+  logger: Logger;
   /**
    * Upper bound on rows the registry hands us per `list()`. Phase 1 leans on
    * the registry's own pagination; we ask the service for a generous slice
@@ -55,9 +59,10 @@ export interface CreateWorkflowsInboxProviderArgs {
  * responder embed it in the `waitForInput.with.message` template.
  */
 export const createWorkflowsInboxProvider = ({
+  analytics,
   api,
-  logger,
   audit,
+  logger,
   pageSize = 1000,
 }: CreateWorkflowsInboxProviderArgs): InboxActionProvider => {
   return {
@@ -140,16 +145,42 @@ export const createWorkflowsInboxProvider = ({
         );
       }
 
+      // Read resume_seq from the execution doc so we can submit a CAS-protected resume.
+      // This closes concern (2) from the comment above: two near-simultaneous inbox
+      // responses now race through the CAS; only the first wins and the second gets a
+      // clean WorkflowExecutionStaleResumeError → 409.
+      const workflowExecution = await api.getWorkflowExecution(parsed.executionId, ctx.spaceId);
+      const expectedResumeSeq =
+        workflowExecution != null ? (workflowExecution.resume_seq ?? 0) + 1 : undefined;
+
       logger.debug(
         `Workflows inbox provider resuming execution ${parsed.executionId} (workflow ${parsed.workflowId})`
       );
+      logger.debug(
+        () =>
+          `[hitl-debug][wf] wfMgmt.inbox.respondToAction exec=${parsed.executionId} seq=${
+            expectedResumeSeq ?? '(none)'
+          } stepId=${parsed.stepExecutionId} workflowId=${parsed.workflowId}`
+      );
+      const hitlLogger = {
+        debug: (msg: string | (() => string), meta?: Record<string, unknown>) => {
+          const resolved = typeof msg === 'function' ? msg() : msg;
+          logger.debug(resolved, meta);
+        },
+      };
       try {
-        const { resumedBy } = await api.resumeWorkflowExecution(
-          parsed.executionId,
-          ctx.spaceId,
-          input,
-          ctx.request
-        );
+        const { resumedBy } = await (expectedResumeSeq !== undefined
+          ? api.resumeWorkflowExecution(parsed.executionId, ctx.spaceId, input, ctx.request, {
+              expectedResumeSeq,
+            })
+          : api.resumeWorkflowExecution(parsed.executionId, ctx.spaceId, input, ctx.request));
+        reportHitlEvent(analytics, hitlLogger, HITL_EVENT_TYPES.responded, {
+          execution_id: parsed.executionId,
+          source_app: 'workflows',
+          step_execution_id: parsed.stepExecutionId,
+          responseSource: 'inbox',
+          workflow_id: parsed.workflowId,
+        });
         audit.logExecutionResumed(ctx.request, {
           executionId: parsed.executionId,
           resumedBy,
@@ -159,6 +190,15 @@ export const createWorkflowsInboxProvider = ({
           executionId: parsed.executionId,
           error,
         });
+        // Convert CAS-stale errors into the inbox conflict contract so the
+        // route surfaces a clean 409 to the client rather than a 500.
+        if (error instanceof WorkflowExecutionStaleResumeError) {
+          throw createInboxActionConflictError(
+            WORKFLOWS_INBOX_SOURCE_APP,
+            sourceId,
+            `workflow execution ${parsed.executionId} was already advanced by another responder (stale resume)`
+          );
+        }
         throw error;
       }
     },

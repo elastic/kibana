@@ -9,6 +9,7 @@
 
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
+import { parseAgentContext } from '@kbn/workflows-hitl-common';
 import { buildWorkflowSourceId, parseWorkflowSourceId, toInboxAction } from './to_inbox_action';
 
 const buildStep = (overrides: Partial<EsWorkflowStepExecution> = {}): EsWorkflowStepExecution => ({
@@ -109,5 +110,44 @@ describe('toInboxAction', () => {
       })
     );
     expect(action.input_schema).toBeUndefined();
+  });
+
+  it('appends Why clause to description when agent_context is present', () => {
+    const action = toInboxAction(
+      buildStep({
+        input: {
+          message: 'Confirm?',
+          agent_context: {
+            intended_tool: 'my.hitl.tool',
+            intended_tool_args: { key: 'val' },
+            reasoning: 'I need human approval before proceeding',
+          },
+        },
+      })
+    );
+
+    expect(action.description).toContain('Why: I need human approval before proceeding');
+    expect(action.description).toContain('via my.hitl.tool');
+  });
+
+  it('leaves description unchanged when agent_context is absent', () => {
+    const action = toInboxAction(buildStep({ input: { message: 'Confirm?' } }));
+
+    expect(action.description).not.toContain('Why:');
+  });
+
+  it('preserves intended_tool_args through parseAgentContext (regression: inline cast silently dropped it)', () => {
+    const agentContextInput = {
+      intended_tool: 'endpoint.isolate',
+      intended_tool_args: { endpoint_id: 'abc-123', isolate: true },
+      reasoning: 'Suspicious activity on the endpoint',
+    };
+
+    // parseAgentContext is now used inside toInboxAction; verify the helper
+    // preserves intended_tool_args rather than silently dropping it as the
+    // previous inline cast `as { reasoning: string; intended_tool: string }` did.
+    const parsed = parseAgentContext(agentContextInput);
+
+    expect(parsed?.intended_tool_args).toEqual({ endpoint_id: 'abc-123', isolate: true });
   });
 });

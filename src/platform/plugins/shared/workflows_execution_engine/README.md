@@ -115,6 +115,10 @@ Integrates with Kibana's Task Manager to schedule and execute workflows.
 - `workflow:run` - Execute a workflow immediately or on schedule
 - `workflow:resume` - Resume a paused or failed workflow execution
 
+**HITL concurrency safety:** When a `waitForInput` step is used in conjunction with Agent Builder, the Inbox, or the Workflows execution view, resume calls are CAS-protected. `resumeWorkflowExecution` accepts an optional `expectedResumeSeq` and delegates to `casIncrementResumeSeq` — an Elasticsearch Painless update script that atomically increments `resume_seq` or returns a no-op if the sequence number has already been advanced. A losing CAS raises `WorkflowExecutionStaleResumeError`, which each surface converts to a user-facing stale UX without corrupting execution state.
+
+- For the full HITL architecture, race-condition analysis, and debug traces, see the [HITL deep-dive — Sequence Numbers & CAS](/x-pack/platform/packages/shared/workflows/hitl-common/README.md#sequence-numbers--cas).
+
 ---
 
 ### 2. Workflow Execution Loop

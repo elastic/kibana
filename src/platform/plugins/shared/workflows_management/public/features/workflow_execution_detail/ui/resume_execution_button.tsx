@@ -18,12 +18,17 @@ import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { ResumeExecutionModal } from './resume_execution_modal';
+import { ResumeExecutionSchemaFormModal } from './resume_execution_schema_form_modal';
 import { generateSampleFromJsonSchema } from '../../../../common/lib/generate_sample_from_json_schema';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
+import type { WorkflowsServices } from '../../../types';
+import { canRenderWithSchemaForm } from '../lib/can_render_with_schema_form';
 
 interface ResumeExecutionButtonProps {
+  /** CAS guard: pass `(workflowExecution.resume_seq ?? 0) + 1` to enable atomic conflict detection */
+  expectedResumeSeq?: number;
   executionId: string;
   workflowId?: string;
   /** Step execution `startedAt` (ISO) for telemetry: approximate human-wait duration vs time in modal */
@@ -37,6 +42,7 @@ interface ResumeExecutionButtonProps {
 }
 
 export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
+  expectedResumeSeq,
   executionId,
   workflowId,
   stepStartedAt,
@@ -45,8 +51,9 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   autoOpen = false,
   waitingStepExecutionId,
 }) => {
-  const { notifications } = useKibana().services;
+  const { notifications, workflowsManagement } = useKibana<WorkflowsServices>().services;
   const workflowsApi = useWorkflowsApi();
+  const { inboxEnabled } = workflowsManagement;
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const { clearResumeParam } = useWorkflowUrlState();
   const telemetry = useTelemetry();
@@ -96,7 +103,13 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   }, [clearResumeParam]);
 
   const handleSubmit = useCallback(
-    async ({ stepInputs }: { stepInputs: Record<string, unknown> }) => {
+    async ({
+      expectedResumeSeq: submittedExpectedResumeSeq,
+      stepInputs,
+    }: {
+      expectedResumeSeq?: number;
+      stepInputs: Record<string, unknown>;
+    }) => {
       setIsSubmitting(true);
       const submittedAt = Date.now();
       const timeInModalMs =
@@ -106,7 +119,10 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
         ? Math.max(0, submittedAt - stepStartMs)
         : undefined;
       try {
-        await workflowsApi.resumeExecution(executionId, { input: stepInputs });
+        await workflowsApi.resumeExecution(executionId, {
+          expectedResumeSeq: submittedExpectedResumeSeq,
+          input: stepInputs,
+        });
         notifications?.toasts.addSuccess({
           title: i18n.translate(
             'workflowsManagement.executionDetail.resumeButton.successNotificationTitle',
@@ -122,20 +138,35 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
         setIsSubmitted(true);
         closeModal();
       } catch (error) {
-        const errorObj = error instanceof Error ? error : new Error(String(error));
-        notifications?.toasts.addError?.(errorObj, {
-          title: i18n.translate(
-            'workflowsManagement.executionDetail.resumeButton.errorNotificationTitle',
-            { defaultMessage: 'Error resuming workflow' }
-          ),
-        });
-        telemetry.reportWorkflowRunResumed({
-          workflowExecutionId: executionId,
-          workflowId,
-          timeInModalMs,
-          timeSinceStepStartedMs,
-          error: errorObj,
-        });
+        const isStaleResume =
+          (error as { response?: { status?: number } })?.response?.status === 409;
+        if (isStaleResume) {
+          notifications?.toasts.addSuccess({
+            title: i18n.translate(
+              'workflowsManagement.executionDetail.resumeButton.staleNotificationTitle',
+              {
+                defaultMessage:
+                  'Another response was already submitted; the workflow has been updated.',
+              }
+            ),
+          });
+          closeModal();
+        } else {
+          const errorObj = error instanceof Error ? error : new Error(String(error));
+          notifications?.toasts.addError?.(errorObj, {
+            title: i18n.translate(
+              'workflowsManagement.executionDetail.resumeButton.errorNotificationTitle',
+              { defaultMessage: 'Error resuming workflow' }
+            ),
+          });
+          telemetry.reportWorkflowRunResumed({
+            workflowExecutionId: executionId,
+            workflowId,
+            timeInModalMs,
+            timeSinceStepStartedMs,
+            error: errorObj,
+          });
+        }
       } finally {
         setIsSubmitting(false);
       }
@@ -177,14 +208,24 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
         </EuiFlexGroup>
       </EuiCallOut>
 
-      {isModalOpen && (
-        <ResumeExecutionModal
-          initialcontextOverride={contextOverride}
-          resumeMessage={resumeMessage}
-          onClose={closeModal}
-          onSubmit={handleSubmit}
-        />
-      )}
+      {isModalOpen &&
+        (inboxEnabled && resumeSchema && canRenderWithSchemaForm(resumeSchema) ? (
+          <ResumeExecutionSchemaFormModal
+            expectedResumeSeq={expectedResumeSeq}
+            isSubmitting={isSubmitting}
+            onClose={closeModal}
+            onSubmit={handleSubmit}
+            resumeMessage={resumeMessage}
+            schema={resumeSchema}
+          />
+        ) : (
+          <ResumeExecutionModal
+            initialcontextOverride={contextOverride}
+            onClose={closeModal}
+            onSubmit={handleSubmit}
+            resumeMessage={resumeMessage}
+          />
+        ))}
     </>
   );
 };

@@ -15,10 +15,12 @@ import { getBuiltinToolType } from './builtin';
 import { getMcpToolType } from './mcp';
 
 export const getToolTypeDefinitions = ({
+  inboxEnabled,
   workflowsManagement,
   actions,
   indexSearchDeps,
 }: {
+  inboxEnabled?: boolean;
   workflowsManagement?: WorkflowsServerPluginSetup;
   actions: ActionsPluginStart;
   indexSearchDeps: IndexSearchToolTypeDeps;
@@ -27,7 +29,7 @@ export const getToolTypeDefinitions = ({
     getBuiltinToolType(),
     getEsqlToolType(),
     getIndexSearchToolType(indexSearchDeps),
-    getWorkflowToolType({ workflowsManagement }),
+    getWorkflowToolType({ inboxEnabled, workflowsManagement }),
     getMcpToolType({ actions }),
   ];
   return toolTypes;

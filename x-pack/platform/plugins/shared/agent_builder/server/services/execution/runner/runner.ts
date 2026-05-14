@@ -13,6 +13,7 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentConfiguration, Conversation, ConverseInput } from '@kbn/agent-builder-common';
 import {
   AgentExecutionMode,
@@ -67,6 +68,7 @@ import type { PluginsServiceStart } from '../../plugins/plugin_service';
 export interface CreateScopedRunnerDeps {
   // core services
   elasticsearch: ElasticsearchServiceStart;
+  inboxEnabled?: boolean;
   security: SecurityServiceStart;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
@@ -107,6 +109,8 @@ export interface CreateScopedRunnerDeps {
   subAgentExecutor: SubAgentExecutor;
   /** The effective agent configuration for the current run (with overrides applied). */
   agentConfiguration?: AgentConfiguration;
+  /** Optional workflows management plugin, used to poll HITL workflow execution state. */
+  workflowsManagement?: WorkflowsServerPluginSetup;
 }
 
 export type CreateRunnerDeps = Omit<

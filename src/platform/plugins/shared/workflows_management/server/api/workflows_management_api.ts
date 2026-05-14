@@ -41,7 +41,10 @@ import type {
 import { WORKFLOW_SML_TYPE } from '@kbn/workflows/common/constants';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { ChildWorkflowExecutionItem, WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
-import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import type {
+  ResumeWorkflowExecutionOptions,
+  WorkflowsExecutionEnginePluginStart,
+} from '@kbn/workflows-execution-engine/server';
 import type { LogSearchResult } from '@kbn/workflows-execution-engine/server/repositories/logs_repository';
 import type {
   ExecutionLogsParams,
@@ -544,6 +547,10 @@ export class WorkflowsManagementApi {
     do {
       try {
         execution = await this.getWorkflowExecution(workflowExecutionId, spaceId, {
+          // includeInput is required so a WAITING_FOR_INPUT execution carries the paused step's
+          // input — the only source of schema/message/agent_context for nested ai.agent HITL
+          // steps (the direct waitForInput case reads schema from static YAML config instead).
+          includeInput: true,
           includeOutput: true,
         });
 
@@ -845,10 +852,17 @@ export class WorkflowsManagementApi {
     executionId: string,
     spaceId: string,
     input: Record<string, unknown>,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: ResumeWorkflowExecutionOptions
   ): Promise<ResumeWorkflowExecutionResponseDto> {
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-    return workflowsExecutionEngine.resumeWorkflowExecution(executionId, spaceId, input, request);
+    return workflowsExecutionEngine.resumeWorkflowExecution(
+      executionId,
+      spaceId,
+      input,
+      request,
+      options
+    );
   }
 
   /**

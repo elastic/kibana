@@ -82,9 +82,10 @@ describe('subscribeToChatEvents — roundComplete', () => {
     const conversationActions = buildActionsMock();
 
     const done = subscribeToChatEvents({
-      events$,
       conversationActions,
+      events$,
       isAborted: () => false,
+      setAgentReasoning: jest.fn(),
     });
 
     events$.next({
@@ -109,9 +110,10 @@ describe('subscribeToChatEvents — roundComplete', () => {
     const conversationActions = buildActionsMock();
 
     const done = subscribeToChatEvents({
-      events$,
       conversationActions,
+      events$,
       isAborted: () => false,
+      setAgentReasoning: jest.fn(),
     });
 
     events$.next({

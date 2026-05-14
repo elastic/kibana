@@ -11,6 +11,7 @@ export type StreamType = 'send' | 'regenerate' | 'resume';
 
 export interface ActiveStream {
   type: StreamType;
+  agentReasoning: string | null;
 }
 
 export interface StreamRecord {
