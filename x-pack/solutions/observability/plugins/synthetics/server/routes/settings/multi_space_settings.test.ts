@@ -6,31 +6,38 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import type { SyntheticsMultiSpaceSettingsWithSpaces } from '../../../common/runtime_types';
 import { DefaultSyntheticsMultiSpaceSettingsRepository } from '../../services/synthetics_multi_space_settings_repository';
+import type { RouteContext } from '../types';
 import {
   createGetMultiSpaceSettingsRoute,
   createPutMultiSpaceSettingsRoute,
 } from './multi_space_settings';
 
-describe('multi space settings routes', () => {
-  const soClient = savedObjectsClientMock.create();
+const buildRouteContext = (overrides: Partial<RouteContext> = {}): RouteContext =>
+  ({
+    savedObjectsClient: savedObjectsClientMock.create(),
+    ...overrides,
+  } as unknown as RouteContext);
 
+describe('multi space settings routes', () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
   describe('createGetMultiSpaceSettingsRoute', () => {
     it('returns the settings produced by the repository', async () => {
-      const expected = { useAllRemoteClusters: true, selectedRemoteClusters: ['cluster-a'] };
+      const expected: SyntheticsMultiSpaceSettingsWithSpaces = {
+        useAllRemoteClusters: true,
+        selectedRemoteClusters: ['cluster-a'],
+        spaces: ['default'],
+      };
       const getSpy = jest
         .spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'get')
         .mockResolvedValue(expected);
 
       const route = createGetMultiSpaceSettingsRoute();
-      const result = await route.handler({
-        // @ts-expect-error partial implementation for testing
-        savedObjectsClient: soClient,
-      });
+      const result = await route.handler(buildRouteContext());
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(result).toEqual(expected);
@@ -38,22 +45,51 @@ describe('multi space settings routes', () => {
   });
 
   describe('createPutMultiSpaceSettingsRoute', () => {
-    it('persists the request body via the repository and returns the saved settings', async () => {
-      const body = { useAllRemoteClusters: true, selectedRemoteClusters: ['cluster-a'] };
+    it('persists attributes via the repository without spaces when none are provided', async () => {
+      const expected: SyntheticsMultiSpaceSettingsWithSpaces = {
+        useAllRemoteClusters: true,
+        selectedRemoteClusters: ['cluster-a'],
+        spaces: ['default'],
+      };
       const saveSpy = jest
         .spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'save')
-        .mockResolvedValue(body);
+        .mockResolvedValue(expected);
 
       const route = createPutMultiSpaceSettingsRoute();
-      const result = await route.handler({
-        // @ts-expect-error partial implementation for testing
-        savedObjectsClient: soClient,
-        // @ts-expect-error partial implementation for testing
-        request: { body },
-      });
+      const body = { useAllRemoteClusters: true, selectedRemoteClusters: ['cluster-a'] };
+      const result = await route.handler(
+        buildRouteContext({ request: { body } as unknown as RouteContext['request'] })
+      );
 
-      expect(saveSpy).toHaveBeenCalledWith(body);
-      expect(result).toEqual(body);
+      expect(saveSpy).toHaveBeenCalledWith(body, undefined);
+      expect(result).toEqual(expected);
+    });
+
+    it('forwards the spaces array to the repository', async () => {
+      const expected: SyntheticsMultiSpaceSettingsWithSpaces = {
+        useAllRemoteClusters: true,
+        selectedRemoteClusters: ['cluster-a'],
+        spaces: ['default', 'marketing'],
+      };
+      const saveSpy = jest
+        .spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'save')
+        .mockResolvedValue(expected);
+
+      const route = createPutMultiSpaceSettingsRoute();
+      const body = {
+        useAllRemoteClusters: true,
+        selectedRemoteClusters: ['cluster-a'],
+        spaces: ['default', 'marketing'],
+      };
+      const result = await route.handler(
+        buildRouteContext({ request: { body } as unknown as RouteContext['request'] })
+      );
+
+      expect(saveSpy).toHaveBeenCalledWith(
+        { useAllRemoteClusters: true, selectedRemoteClusters: ['cluster-a'] },
+        ['default', 'marketing']
+      );
+      expect(result).toEqual(expected);
     });
   });
 });

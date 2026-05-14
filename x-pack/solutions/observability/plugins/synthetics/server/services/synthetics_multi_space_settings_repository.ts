@@ -7,12 +7,18 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import type { SyntheticsMultiSpaceSettings } from '../../common/runtime_types';
+import type {
+  SyntheticsMultiSpaceSettings,
+  SyntheticsMultiSpaceSettingsWithSpaces,
+} from '../../common/runtime_types';
 import { SYNTHETICS_SETTINGS_MULTI_SPACE_SO_TYPE } from '../saved_objects/synthetics_settings_multi_space';
 
 export interface SyntheticsMultiSpaceSettingsRepository {
-  get(): Promise<SyntheticsMultiSpaceSettings>;
-  save(settings: SyntheticsMultiSpaceSettings): Promise<SyntheticsMultiSpaceSettings>;
+  get(): Promise<SyntheticsMultiSpaceSettingsWithSpaces>;
+  save(
+    settings: SyntheticsMultiSpaceSettings,
+    spaces?: string[]
+  ): Promise<SyntheticsMultiSpaceSettingsWithSpaces>;
 }
 
 export const DEFAULT_MULTI_SPACE_SETTINGS: SyntheticsMultiSpaceSettings = {
@@ -22,50 +28,100 @@ export const DEFAULT_MULTI_SPACE_SETTINGS: SyntheticsMultiSpaceSettings = {
 
 // Backed by the `synthetics-settings-multi-space` saved object (namespaceType: 'multiple').
 // Because the SO can be shared across spaces, lookups use `find` rather than a deterministic
-// `get` by id; on first save we anchor the document to the active space via `initialNamespaces`,
-// leaving the door open for a future "share to multiple spaces" UI without migrating the SO.
+// `get` by id. On first save we anchor the document to the requested spaces (defaulting to the
+// active space); on subsequent saves we diff the requested spaces against the SO's current
+// namespaces and reconcile via `updateObjectsSpaces`.
 export class DefaultSyntheticsMultiSpaceSettingsRepository
   implements SyntheticsMultiSpaceSettingsRepository
 {
   constructor(private readonly soClient: SavedObjectsClientContract) {}
 
-  async get(): Promise<SyntheticsMultiSpaceSettings> {
+  async get(): Promise<SyntheticsMultiSpaceSettingsWithSpaces> {
     const response = await this.soClient.find<SyntheticsMultiSpaceSettings>({
       type: SYNTHETICS_SETTINGS_MULTI_SPACE_SO_TYPE,
       perPage: 1,
     });
 
     if (response.saved_objects.length === 0) {
-      return DEFAULT_MULTI_SPACE_SETTINGS;
+      return {
+        ...DEFAULT_MULTI_SPACE_SETTINGS,
+        spaces: [this.currentNamespace()],
+      };
     }
 
-    return this.applyDefaults(response.saved_objects[0].attributes);
+    const existing = response.saved_objects[0];
+    return {
+      ...this.applyDefaults(existing.attributes),
+      spaces: existing.namespaces ?? [this.currentNamespace()],
+    };
   }
 
-  async save(settings: SyntheticsMultiSpaceSettings): Promise<SyntheticsMultiSpaceSettings> {
+  async save(
+    settings: SyntheticsMultiSpaceSettings,
+    spaces?: string[]
+  ): Promise<SyntheticsMultiSpaceSettingsWithSpaces> {
     const merged = this.applyDefaults(settings);
 
-    const existing = await this.soClient.find<SyntheticsMultiSpaceSettings>({
+    const existingResponse = await this.soClient.find<SyntheticsMultiSpaceSettings>({
       type: SYNTHETICS_SETTINGS_MULTI_SPACE_SO_TYPE,
       perPage: 1,
     });
 
-    if (existing.saved_objects.length > 0) {
+    if (existingResponse.saved_objects.length > 0) {
+      const existing = existingResponse.saved_objects[0];
       await this.soClient.update<SyntheticsMultiSpaceSettings>(
         SYNTHETICS_SETTINGS_MULTI_SPACE_SO_TYPE,
-        existing.saved_objects[0].id,
+        existing.id,
         merged
       );
-      return merged;
+
+      const effectiveSpaces = await this.reconcileSpaces(
+        existing.id,
+        existing.namespaces ?? [],
+        spaces
+      );
+
+      return { ...merged, spaces: effectiveSpaces };
     }
 
-    const initialNamespace = this.soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
+    const initialNamespaces = spaces?.length ? spaces : [this.currentNamespace()];
     await this.soClient.create<SyntheticsMultiSpaceSettings>(
       SYNTHETICS_SETTINGS_MULTI_SPACE_SO_TYPE,
       merged,
-      { initialNamespaces: [initialNamespace] }
+      { initialNamespaces }
     );
-    return merged;
+    return { ...merged, spaces: initialNamespaces };
+  }
+
+  private async reconcileSpaces(
+    id: string,
+    currentSpaces: string[],
+    requestedSpaces: string[] | undefined
+  ): Promise<string[]> {
+    if (!requestedSpaces?.length) {
+      return currentSpaces;
+    }
+
+    const currentSet = new Set(currentSpaces);
+    const requestedSet = new Set(requestedSpaces);
+    const spacesToAdd = requestedSpaces.filter((space) => !currentSet.has(space));
+    const spacesToRemove = currentSpaces.filter((space) => !requestedSet.has(space));
+
+    if (spacesToAdd.length === 0 && spacesToRemove.length === 0) {
+      return currentSpaces;
+    }
+
+    await this.soClient.updateObjectsSpaces(
+      [{ id, type: SYNTHETICS_SETTINGS_MULTI_SPACE_SO_TYPE }],
+      spacesToAdd,
+      spacesToRemove
+    );
+
+    return requestedSpaces;
+  }
+
+  private currentNamespace(): string {
+    return this.soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
   }
 
   private applyDefaults(

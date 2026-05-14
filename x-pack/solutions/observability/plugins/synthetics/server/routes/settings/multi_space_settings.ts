@@ -6,22 +6,30 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { SyntheticsMultiSpaceSettings } from '../../../common/runtime_types';
+import type { SyntheticsMultiSpaceSettingsWithSpaces } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { DefaultSyntheticsMultiSpaceSettingsRepository } from '../../services/synthetics_multi_space_settings_repository';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 
 const MAX_SELECTED_REMOTE_CLUSTERS = 100;
+const MAX_SHARED_SPACES = 1_000;
 
 export const SyntheticsMultiSpaceSettingsSchema = schema.object({
   useAllRemoteClusters: schema.maybe(schema.boolean()),
   selectedRemoteClusters: schema.maybe(
     schema.arrayOf(schema.string(), { maxSize: MAX_SELECTED_REMOTE_CLUSTERS })
   ),
+  // Optional list of spaces the settings should be shared with. Accepts `*` for "all spaces".
+  spaces: schema.maybe(
+    schema.arrayOf(schema.string({ minLength: 1 }), {
+      minSize: 1,
+      maxSize: MAX_SHARED_SPACES,
+    })
+  ),
 });
 
 export const createGetMultiSpaceSettingsRoute: SyntheticsRestApiRouteFactory<
-  SyntheticsMultiSpaceSettings
+  SyntheticsMultiSpaceSettingsWithSpaces
 > = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.MULTI_SPACE_SETTINGS,
@@ -33,7 +41,7 @@ export const createGetMultiSpaceSettingsRoute: SyntheticsRestApiRouteFactory<
 });
 
 export const createPutMultiSpaceSettingsRoute: SyntheticsRestApiRouteFactory<
-  SyntheticsMultiSpaceSettings
+  SyntheticsMultiSpaceSettingsWithSpaces
 > = () => ({
   method: 'PUT',
   path: SYNTHETICS_API_URLS.MULTI_SPACE_SETTINGS,
@@ -43,6 +51,7 @@ export const createPutMultiSpaceSettingsRoute: SyntheticsRestApiRouteFactory<
   writeAccess: true,
   handler: async ({ savedObjectsClient, request }) => {
     const repository = new DefaultSyntheticsMultiSpaceSettingsRepository(savedObjectsClient);
-    return repository.save(request.body);
+    const { spaces, ...attributes } = request.body;
+    return repository.save(attributes, spaces);
   },
 });

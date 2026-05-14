@@ -16,3 +16,10 @@ export const syntheticsMultiSpaceSettingsSchema = t.partial({
 });
 
 export type SyntheticsMultiSpaceSettings = t.TypeOf<typeof syntheticsMultiSpaceSettingsSchema>;
+
+// API-facing shape that includes the spaces the settings are currently shared with.
+// `spaces` is SO envelope metadata, not an attribute, so it lives only on this
+// type and never inside the io-ts attributes codec.
+export interface SyntheticsMultiSpaceSettingsWithSpaces extends SyntheticsMultiSpaceSettings {
+  spaces: string[];
+}
