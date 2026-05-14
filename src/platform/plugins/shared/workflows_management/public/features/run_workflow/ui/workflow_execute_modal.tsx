@@ -269,7 +269,10 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
           defaultMessage: 'Run Workflow',
         };
 
-    const isEventTabLayout = selectedTrigger === 'event';
+    const isFillHeightTriggerBody =
+      selectedTrigger === 'event' ||
+      selectedTrigger === 'manual' ||
+      selectedTrigger === 'historical';
 
     const runIsDisabled =
       !canExecuteWorkflow ||
@@ -464,6 +467,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
               direction="column"
               gutterSize="m"
               css={css`
+                flex: 1;
                 min-height: 0;
               `}
             >
@@ -592,9 +596,9 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
 
               <EuiFlexItem
                 data-test-subj="workflowExecuteModalBodyContent"
-                grow={isEventTabLayout}
+                grow={isFillHeightTriggerBody}
                 css={css`
-                  ${isEventTabLayout
+                  ${isFillHeightTriggerBody
                     ? css`
                         flex: 1;
                         min-height: 0;

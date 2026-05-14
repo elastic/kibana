@@ -173,7 +173,9 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
         direction="column"
         gutterSize="m"
         css={css`
+          flex: 1;
           min-height: 0;
+          align-self: stretch;
         `}
       >
         <EuiFlexItem grow={false}>
@@ -198,14 +200,20 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
 
         {selectedExecution && (
           <EuiFlexItem
+            grow
             css={css`
+              flex: 1;
+              min-height: 0;
               overflow: hidden;
+              display: flex;
+              flex-direction: column;
             `}
           >
             <EuiFlexGroup
               direction="column"
               gutterSize="s"
               css={css`
+                flex: 1;
                 min-height: 0;
               `}
             >
@@ -216,7 +224,10 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
               )}
 
               <EuiFlexItem
+                grow
                 css={css`
+                  flex: 1;
+                  min-height: 0;
                   overflow: hidden;
                 `}
               >
