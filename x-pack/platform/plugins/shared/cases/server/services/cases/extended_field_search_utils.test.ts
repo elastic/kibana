@@ -364,13 +364,6 @@ describe('resolveExtendedFieldFilters', () => {
 });
 
 describe('parseDateFilterToRange', () => {
-  it('parses MM/DD/YYYY to a full-day UTC range', () => {
-    expect(parseDateFilterToRange('01/01/2024')).toEqual({
-      gte: '2024-01-01T00:00:00.000Z',
-      lt: '2024-01-02T00:00:00.000Z',
-    });
-  });
-
   it('parses YYYY-MM-DD to a full-day UTC range', () => {
     expect(parseDateFilterToRange('2024-01-01')).toEqual({
       gte: '2024-01-01T00:00:00.000Z',
@@ -391,30 +384,26 @@ describe('parseDateFilterToRange', () => {
     expect(parseDateFilterToRange('2024/01/01')).toBeUndefined();
   });
 
-  it('returns undefined for out-of-range month or day', () => {
-    expect(parseDateFilterToRange('13/01/2024')).toBeUndefined();
-    expect(parseDateFilterToRange('00/01/2024')).toBeUndefined();
+  it('returns undefined for MM/DD/YYYY format (only ISO accepted)', () => {
+    expect(parseDateFilterToRange('01/01/2024')).toBeUndefined();
+    expect(parseDateFilterToRange('12/31/2024')).toBeUndefined();
+  });
+
+  it('returns undefined for out-of-range month or day in ISO format', () => {
+    expect(parseDateFilterToRange('2024-13-01')).toBeUndefined();
+    expect(parseDateFilterToRange('2024-00-01')).toBeUndefined();
   });
 
   it('returns undefined for invalid day-of-month in February (non-leap year)', () => {
-    expect(parseDateFilterToRange('02/29/2023')).toBeUndefined();
-    expect(parseDateFilterToRange('02/30/2023')).toBeUndefined();
-    expect(parseDateFilterToRange('02/31/2023')).toBeUndefined();
     expect(parseDateFilterToRange('2023-02-29')).toBeUndefined();
     expect(parseDateFilterToRange('2023-02-30')).toBeUndefined();
   });
 
   it('returns undefined for invalid day-of-month in February (leap year)', () => {
-    expect(parseDateFilterToRange('02/30/2024')).toBeUndefined();
-    expect(parseDateFilterToRange('02/31/2024')).toBeUndefined();
     expect(parseDateFilterToRange('2024-02-30')).toBeUndefined();
   });
 
   it('accepts valid leap day in February (leap year)', () => {
-    expect(parseDateFilterToRange('02/29/2024')).toEqual({
-      gte: '2024-02-29T00:00:00.000Z',
-      lt: '2024-03-01T00:00:00.000Z',
-    });
     expect(parseDateFilterToRange('2024-02-29')).toEqual({
       gte: '2024-02-29T00:00:00.000Z',
       lt: '2024-03-01T00:00:00.000Z',
@@ -422,10 +411,6 @@ describe('parseDateFilterToRange', () => {
   });
 
   it('returns undefined for invalid day-of-month in 30-day months', () => {
-    expect(parseDateFilterToRange('04/31/2024')).toBeUndefined();
-    expect(parseDateFilterToRange('06/31/2024')).toBeUndefined();
-    expect(parseDateFilterToRange('09/31/2024')).toBeUndefined();
-    expect(parseDateFilterToRange('11/31/2024')).toBeUndefined();
     expect(parseDateFilterToRange('2024-04-31')).toBeUndefined();
     expect(parseDateFilterToRange('2024-06-31')).toBeUndefined();
     expect(parseDateFilterToRange('2024-09-31')).toBeUndefined();
@@ -433,22 +418,22 @@ describe('parseDateFilterToRange', () => {
   });
 
   it('accepts valid last day of 30-day months', () => {
-    expect(parseDateFilterToRange('04/30/2024')).toEqual({
+    expect(parseDateFilterToRange('2024-04-30')).toEqual({
       gte: '2024-04-30T00:00:00.000Z',
       lt: '2024-05-01T00:00:00.000Z',
     });
-    expect(parseDateFilterToRange('11/30/2024')).toEqual({
+    expect(parseDateFilterToRange('2024-11-30')).toEqual({
       gte: '2024-11-30T00:00:00.000Z',
       lt: '2024-12-01T00:00:00.000Z',
     });
   });
 
   it('accepts valid day 31 in 31-day months', () => {
-    expect(parseDateFilterToRange('01/31/2024')).toEqual({
+    expect(parseDateFilterToRange('2024-01-31')).toEqual({
       gte: '2024-01-31T00:00:00.000Z',
       lt: '2024-02-01T00:00:00.000Z',
     });
-    expect(parseDateFilterToRange('12/31/2024')).toEqual({
+    expect(parseDateFilterToRange('2024-12-31')).toEqual({
       gte: '2024-12-31T00:00:00.000Z',
       lt: '2025-01-01T00:00:00.000Z',
     });
@@ -737,6 +722,30 @@ describe('buildExtendedFieldFilterClauses', () => {
     });
   });
 
+  it('escapes wildcard characters in INPUT_TEXT filter value', () => {
+    const clauses = buildExtendedFieldFilterClauses([
+      [
+        {
+          storageKey: 'summary_as_keyword',
+          value: 'test*value?here',
+          esType: 'keyword',
+          control: 'INPUT_TEXT',
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
+        },
+      ],
+    ]);
+
+    const filterArray = clauses[0]!.bool!.filter as estypes.QueryDslQueryContainer[];
+    expect(filterArray[0]).toEqual({
+      wildcard: {
+        ef_summary_as_keyword: {
+          value: '*test\\*value\\?here*',
+          case_insensitive: true,
+        },
+      },
+    });
+  });
+
   it('builds term queries with numeric value for integer fields', () => {
     const clauses = buildExtendedFieldFilterClauses([
       [
@@ -878,7 +887,7 @@ describe('buildExtendedFieldFilterClauses', () => {
     ]);
   });
 
-  it('builds range query for DATE_PICKER using MM/DD/YYYY input on flattened path', () => {
+  it('drops DATE_PICKER filter when value is MM/DD/YYYY (non-ISO)', () => {
     const clauses = buildExtendedFieldFilterClauses([
       [
         {
@@ -891,45 +900,7 @@ describe('buildExtendedFieldFilterClauses', () => {
       ],
     ]);
 
-    expect(clauses).toEqual([
-      {
-        bool: {
-          filter: [
-            {
-              range: {
-                'cases.extended_fields.start_date_as_date': {
-                  gte: '2024-01-01T00:00:00.000Z',
-                  lt: '2024-01-02T00:00:00.000Z',
-                },
-              },
-            },
-            {
-              bool: {
-                minimum_should_match: 1,
-                should: [
-                  {
-                    bool: {
-                      must: [
-                        {
-                          term: {
-                            'cases.template.id': 'tmpl-a',
-                          },
-                        },
-                        {
-                          term: {
-                            'cases.template.version': 1,
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      },
-    ]);
+    expect(clauses).toHaveLength(0);
   });
 
   it('builds range query for DATE_PICKER using YYYY-MM-DD input on flattened path', () => {
@@ -1798,5 +1769,26 @@ describe('buildAllExtendedFieldValuesRuntimeMapping', () => {
     const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
 
     expect(src).not.toContain('?.');
+  });
+
+  it('extracts USER_PICKER names via regex before falling back to tokenization', () => {
+    const mappings = buildAllExtendedFieldValuesRuntimeMapping();
+    const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
+
+    expect(src).toContain('"name":"([^"]*)"');
+  });
+
+  it('uses = as a word separator in the fallback tokenization', () => {
+    const mappings = buildAllExtendedFieldValuesRuntimeMapping();
+    const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
+
+    expect(src).toContain('\\s,=');
+  });
+
+  it('guards against non-Map ef values with instanceof check', () => {
+    const mappings = buildAllExtendedFieldValuesRuntimeMapping();
+    const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
+
+    expect(src).toContain('instanceof Map');
   });
 });

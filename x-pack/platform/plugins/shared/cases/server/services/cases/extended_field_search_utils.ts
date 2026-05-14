@@ -155,25 +155,15 @@ export const resolveExtendedFieldFilters = (
   });
 };
 
-/** Parses a date string (MM/DD/YYYY, YYYY-MM-DD, or ISO 8601) into a full-day UTC range [gte, lt). */
+/** Parses an ISO 8601 date string (YYYY-MM-DD or full ISO timestamp) into a full-day UTC range [gte, lt). */
 export const parseDateFilterToRange = (value: string): { gte: string; lt: string } | undefined => {
-  let year: number;
-  let month: number;
-  let day: number;
+  const isoPart = value.slice(0, 10);
+  const isoMatch = isoPart.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!isoMatch) return undefined;
 
-  const mdyMatch = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-  if (mdyMatch) {
-    month = parseInt(mdyMatch[1], 10);
-    day = parseInt(mdyMatch[2], 10);
-    year = parseInt(mdyMatch[3], 10);
-  } else {
-    const isoPart = value.slice(0, 10);
-    const isoMatch = isoPart.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (!isoMatch) return undefined;
-    year = parseInt(isoMatch[1], 10);
-    month = parseInt(isoMatch[2], 10);
-    day = parseInt(isoMatch[3], 10);
-  }
+  const year = parseInt(isoMatch[1], 10);
+  const month = parseInt(isoMatch[2], 10);
+  const day = parseInt(isoMatch[3], 10);
 
   if (month < 1 || month > 12 || day < 1 || day > 31 || year < 1000 || year > 9999) {
     return undefined;
@@ -240,6 +230,8 @@ const buildTemplateVersionFilter = (
 const isFreeTextControl = (control: string): boolean =>
   control === INPUT_TEXT || control === TEXTAREA;
 
+const escapeWildcard = (s: string): string => s.replace(/[\\*?]/g, (c) => `\\${c}`);
+
 const buildFlattenedFilterClause = ({
   storageKey,
   value,
@@ -271,7 +263,9 @@ const buildRuntimeFilterClause = ({
   }
 
   if (isFreeTextControl(control)) {
-    return { wildcard: { [fieldName]: { value: `*${value}*`, case_insensitive: true } } };
+    return {
+      wildcard: { [fieldName]: { value: `*${escapeWildcard(value)}*`, case_insensitive: true } },
+    };
   }
 
   const runtimeType = mapToRuntimeType(esType);
@@ -485,14 +479,19 @@ const buildAllValuesTokenizingScript = (): string => {
     `def so = params._source.get(${soType});` +
     `if (so == null) { return; }` +
     `def ef = so.get(${efKey});` +
-    `if (ef == null) { return; }` +
+    `if (ef == null || !(ef instanceof Map)) { return; }` +
     `for (def entry : ef.entrySet()) {` +
     `if (entry.getValue() != null) {` +
     `def raw = entry.getValue().toString();` +
+    `def nm = /"name":"([^"]*)"/.matcher(raw);` +
+    `boolean found = false;` +
+    `while (nm.find()) { found = true; def t = nm.group(1).trim().toLowerCase(Locale.ROOT); if (!t.isEmpty()) { emit(t); } }` +
+    `if (!found) {` +
     `def cleaned = /[\\[\\]"{}]/.matcher(raw).replaceAll('').trim();` +
-    `for (def word : /[\\s,]+/.split(cleaned)) {` +
+    `for (def word : /[\\s,=]+/.split(cleaned)) {` +
     `def t = word.trim().toLowerCase(Locale.ROOT);` +
     `if (!t.isEmpty()) { emit(t); }` +
+    `}` +
     `}` +
     `}` +
     `}`

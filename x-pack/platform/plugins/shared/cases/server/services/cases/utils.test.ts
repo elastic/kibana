@@ -673,7 +673,7 @@ describe('constructSearchQuery with fieldLabelFilters', () => {
 });
 
 describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () => {
-  it('adds a term clause for EF_ALL_VALUES_FIELD when included in searchFields', () => {
+  it('adds a simple_query_string clause for EF_ALL_VALUES_FIELD when included in searchFields', () => {
     const result = constructSearchQuery({
       search: 'reason',
       searchFields: [...DEFAULT_CASE_SEARCH_FIELDS, ...DEFAULT_CASE_RUNTIME_FIELDS],
@@ -684,14 +684,20 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
     expect(shouldClauses).toBeDefined();
 
     const runtimeClause = shouldClauses!.find(
-      (c: estypes.QueryDslQueryContainer) => c?.term?.[EF_ALL_VALUES_FIELD] != null
+      (c: estypes.QueryDslQueryContainer) =>
+        c?.simple_query_string != null &&
+        (c.simple_query_string as { fields?: string[] }).fields?.[0] === EF_ALL_VALUES_FIELD
     );
     expect(runtimeClause).toEqual({
-      term: { [EF_ALL_VALUES_FIELD]: { value: 'reason', case_insensitive: true } },
+      simple_query_string: {
+        query: 'reason',
+        fields: [EF_ALL_VALUES_FIELD],
+        default_operator: 'AND',
+      },
     });
   });
 
-  it('lowercases the search term for runtime field matching', () => {
+  it('preserves original case in simple_query_string (ES handles case matching)', () => {
     const result = constructSearchQuery({
       search: 'EMEA',
       searchFields: DEFAULT_CASE_RUNTIME_FIELDS,
@@ -702,10 +708,14 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
     expect(shouldClauses).toBeDefined();
 
     const runtimeClause = shouldClauses!.find(
-      (c: estypes.QueryDslQueryContainer) => c?.term?.[EF_ALL_VALUES_FIELD] != null
+      (c: estypes.QueryDslQueryContainer) => c?.simple_query_string != null
     );
     expect(runtimeClause).toEqual({
-      term: { [EF_ALL_VALUES_FIELD]: { value: 'emea', case_insensitive: true } },
+      simple_query_string: {
+        query: 'EMEA',
+        fields: [EF_ALL_VALUES_FIELD],
+        default_operator: 'AND',
+      },
     });
   });
 
@@ -720,7 +730,9 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
     expect(shouldClauses).toBeDefined();
 
     const runtimeClause = shouldClauses!.find(
-      (c: estypes.QueryDslQueryContainer) => c?.term?.[EF_ALL_VALUES_FIELD] != null
+      (c: estypes.QueryDslQueryContainer) =>
+        c?.simple_query_string != null &&
+        (c.simple_query_string as { fields?: string[] }).fields?.[0] === EF_ALL_VALUES_FIELD
     );
     expect(runtimeClause).toBeUndefined();
   });
@@ -750,8 +762,10 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
         }),
         expect.objectContaining({ nested: expect.anything() }),
         expect.objectContaining({
-          term: expect.objectContaining({
-            [EF_ALL_VALUES_FIELD]: { value: 'test', case_insensitive: true },
+          simple_query_string: expect.objectContaining({
+            query: 'test',
+            fields: [EF_ALL_VALUES_FIELD],
+            default_operator: 'AND',
           }),
         }),
       ])
@@ -768,7 +782,7 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
     expect(result).toBeUndefined();
   });
 
-  it('splits multi-word search into bool.must of individual term queries', () => {
+  it('uses simple_query_string with AND operator for multi-word search', () => {
     const result = constructSearchQuery({
       search: 'test text',
       searchFields: DEFAULT_CASE_RUNTIME_FIELDS,
@@ -779,19 +793,18 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
     expect(shouldClauses).toBeDefined();
 
     const runtimeClause = shouldClauses!.find(
-      (c: estypes.QueryDslQueryContainer) => c?.bool?.must != null
+      (c: estypes.QueryDslQueryContainer) => c?.simple_query_string != null
     );
     expect(runtimeClause).toEqual({
-      bool: {
-        must: [
-          { term: { [EF_ALL_VALUES_FIELD]: { value: 'test', case_insensitive: true } } },
-          { term: { [EF_ALL_VALUES_FIELD]: { value: 'text', case_insensitive: true } } },
-        ],
+      simple_query_string: {
+        query: 'test text',
+        fields: [EF_ALL_VALUES_FIELD],
+        default_operator: 'AND',
       },
     });
   });
 
-  it('handles multi-word search with extra whitespace', () => {
+  it('passes extra whitespace through to simple_query_string (ES normalizes)', () => {
     const result = constructSearchQuery({
       search: '  test   text  ',
       searchFields: DEFAULT_CASE_RUNTIME_FIELDS,
@@ -802,19 +815,18 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
     expect(shouldClauses).toBeDefined();
 
     const runtimeClause = shouldClauses!.find(
-      (c: estypes.QueryDslQueryContainer) => c?.bool?.must != null
+      (c: estypes.QueryDslQueryContainer) => c?.simple_query_string != null
     );
     expect(runtimeClause).toEqual({
-      bool: {
-        must: [
-          { term: { [EF_ALL_VALUES_FIELD]: { value: 'test', case_insensitive: true } } },
-          { term: { [EF_ALL_VALUES_FIELD]: { value: 'text', case_insensitive: true } } },
-        ],
+      simple_query_string: {
+        query: '  test   text  ',
+        fields: [EF_ALL_VALUES_FIELD],
+        default_operator: 'AND',
       },
     });
   });
 
-  it('uses a simple term query for single-word search', () => {
+  it('uses simple_query_string with AND for single-word search', () => {
     const result = constructSearchQuery({
       search: 'spy',
       searchFields: DEFAULT_CASE_RUNTIME_FIELDS,
@@ -825,10 +837,16 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
     expect(shouldClauses).toBeDefined();
 
     const runtimeClause = shouldClauses!.find(
-      (c: estypes.QueryDslQueryContainer) => c?.term?.[EF_ALL_VALUES_FIELD] != null
+      (c: estypes.QueryDslQueryContainer) =>
+        c?.simple_query_string != null &&
+        (c.simple_query_string as { fields?: string[] }).fields?.[0] === EF_ALL_VALUES_FIELD
     );
     expect(runtimeClause).toEqual({
-      term: { [EF_ALL_VALUES_FIELD]: { value: 'spy', case_insensitive: true } },
+      simple_query_string: {
+        query: 'spy',
+        fields: [EF_ALL_VALUES_FIELD],
+        default_operator: 'AND',
+      },
     });
   });
 });

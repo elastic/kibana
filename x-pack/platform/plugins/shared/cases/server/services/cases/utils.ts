@@ -151,24 +151,13 @@ export const constructSearchQuery = ({
 
     if (runtimeFields?.length) {
       runtimeFields.forEach((field) => {
-        const words = search
-          .toLowerCase()
-          .split(/\s+/)
-          .filter((w) => w.length > 0);
-
-        if (words.length <= 1) {
-          shouldClauses.push({
-            term: { [field]: { value: search.toLowerCase(), case_insensitive: true } },
-          });
-        } else {
-          shouldClauses.push({
-            bool: {
-              must: words.map((word) => ({
-                term: { [field]: { value: word, case_insensitive: true } },
-              })),
-            },
-          });
-        }
+        shouldClauses.push({
+          simple_query_string: {
+            query: search,
+            fields: [field],
+            default_operator: 'AND',
+          },
+        });
       });
     }
   }
