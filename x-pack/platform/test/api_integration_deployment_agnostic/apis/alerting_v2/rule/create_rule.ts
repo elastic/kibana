@@ -125,16 +125,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           schedule: { every: '5m' },
           query: {
             format: 'standalone',
-            breach: 'FROM logs-* | WHERE severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
-            recover: 'FROM logs-* | WHERE severity == "resolved" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+            breach:
+              'FROM logs-* | WHERE severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+            recover:
+              'FROM logs-* | WHERE severity == "resolved" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
           },
         });
 
       expect(response.status).to.be(201);
       expect(response.body.query).to.eql({
         format: 'standalone',
-        breach: 'FROM logs-* | WHERE severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
-        recover: 'FROM logs-* | WHERE severity == "resolved" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+        breach:
+          'FROM logs-* | WHERE severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+        recover:
+          'FROM logs-* | WHERE severity == "resolved" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
       });
     });
 
