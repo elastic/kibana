@@ -1,17 +1,17 @@
 {
-  "sha1": "5103d70339e7075b26d6d5131c8835ec2fa30014",
+  "sha1": "2db682e604032f1564472eec6758642208a5aba3",
   "tests": [
     {
       "id": "693cb822f00b147-c7297dddd0937a8",
       "title": "Tags management — accessibility tags management page a11y",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_a11y.spec.ts",
-        "line": 21,
+        "line": 22,
         "column": 7
       }
     }

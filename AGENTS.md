@@ -43,6 +43,7 @@ Follow existing patterns in the target area first; below are common defaults.
 - Without `--project` it checks **all** projects (very slow). Always scope to a single project:
   `node scripts/type_check --project src/core/packages/http/server-internal/tsconfig.json`
 - Only one `--project` per run. To check multiple packages, run separate commands.
+- `.buildkite/` is **not** a valid target for `scripts/type_check`. Buildkite scripts live in a separate workspace; typecheck them with `npm run typecheck` (or `yarn typecheck`) from inside `.buildkite/`.
 
 ### TypeScript & Types
 - Use TypeScript for all new code; avoid `any` and `unknown`.
@@ -84,6 +85,9 @@ Follow existing patterns in the target area first; below are common defaults.
 ## Internationalization (i18n)
 - Guidelines are found in src/platform/packages/shared/kbn-i18n/GUIDELINE.md
 - Run `node scripts/i18n_check --fix` to check for and fix errors.
+
+## CI
+- Use the `bk` CLI when interacting with Buildkite.
 
 ## Contribution Hygiene
 - Unsure: read more code; if still stuck, ask w/ short options. Never guess.

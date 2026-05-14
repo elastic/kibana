@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { EuiPanel, EuiText } from '@elastic/eui';
-import { CodeEditor } from '@kbn/code-editor';
-import { ESQL_LANG_ID } from '@kbn/code-editor';
+import { CodeEditor, ESQL_LANG_ID } from '@kbn/code-editor';
 
 interface QuerySummaryProps {
   query: string;
