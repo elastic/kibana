@@ -16,7 +16,7 @@ export type SidebarConversationListRow = ConversationWithoutRounds & {
   _isOptimistic?: boolean;
 };
 
-export const buildSidebarConversationListRow = (p: {
+const buildSidebarConversationListRow = (p: {
   id: string;
   agent_id: string;
   title: string;
@@ -36,12 +36,19 @@ export const buildSidebarConversationListRow = (p: {
 export const insertSidebarConversationListRow = async ({
   queryClient,
   agentId,
-  row,
+  conversationId,
+  title,
 }: {
   queryClient: QueryClient;
   agentId: string;
-  row: SidebarConversationListRow;
+  conversationId: string;
+  title: string;
 }): Promise<boolean> => {
+  const row = buildSidebarConversationListRow({
+    id: conversationId,
+    agent_id: agentId,
+    title,
+  });
   const key = agentConversationListKey(agentId);
   await queryClient.cancelQueries({ queryKey: key });
 
@@ -72,32 +79,6 @@ export const removeSidebarConversationListRow = ({
       return prev;
     }
     return prev.filter((c) => c.id !== conversationId);
-  });
-};
-
-export const patchSidebarConversationListTitle = ({
-  queryClient,
-  agentId,
-  conversationId,
-  title,
-}: {
-  queryClient: QueryClient;
-  agentId: string;
-  conversationId: string;
-  title: string;
-}) => {
-  const key = agentConversationListKey(agentId);
-  const updatedAt = new Date().toISOString();
-
-  queryClient.setQueryData<SidebarConversationListRow[] | undefined>(key, (prev) => {
-    if (!prev?.length) {
-      return prev;
-    }
-    const i = prev.findIndex((c) => c.id === conversationId);
-    if (i === -1) {
-      return prev;
-    }
-    return prev.map((c, j) => (j === i ? { ...c, title, updated_at: updatedAt } : c));
   });
 };
 

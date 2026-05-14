@@ -313,7 +313,6 @@ export const createConversationActions = ({
           }
         })
       );
-
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
     },
     deleteConversation: async (id: string) => {

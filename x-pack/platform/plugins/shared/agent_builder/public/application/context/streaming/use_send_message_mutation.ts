@@ -34,7 +34,6 @@ import { subscribeToChatEvents } from './use_subscribe_to_chat_events';
 import { BrowserToolExecutor } from '../../services/browser_tool_executor';
 import { createConversationActions } from '../conversation/use_conversation_actions';
 import {
-  buildSidebarConversationListRow,
   insertSidebarConversationListRow,
   removeSidebarConversationListRow,
 } from '../../utils/conversation_sidebar_list_cache';
@@ -190,11 +189,8 @@ export const useSendMessageMutation = ({
         hasInsertedOptimisticListRow = await insertSidebarConversationListRow({
           queryClient,
           agentId: vars.agentId,
-          row: buildSidebarConversationListRow({
-            id: vars.conversationId,
-            agent_id: vars.agentId,
-            title: optimisticConversationListTitle,
-          }),
+          conversationId: vars.conversationId,
+          title: optimisticConversationListTitle,
         });
         await streamActions.addOptimisticRound({
           userMessage: vars.message,
