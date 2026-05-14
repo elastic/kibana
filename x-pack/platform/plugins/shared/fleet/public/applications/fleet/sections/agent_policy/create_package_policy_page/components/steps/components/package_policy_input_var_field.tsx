@@ -33,7 +33,11 @@ import { useFleetStatus, useStartServices } from '../../../../../../../../hooks'
 
 import { DATASET_VAR_NAME } from '../../../../../../../../../common/constants';
 
-import type { DataStream, RegistryVarsEntry, RegistryVarsMigrateFrom } from '../../../../../../types';
+import type {
+  DataStream,
+  RegistryVarsEntry,
+  RegistryVarsMigrateFrom,
+} from '../../../../../../types';
 
 import { MultiTextInput } from './multi_text_input';
 import { DatasetComponent } from './dataset_component';
