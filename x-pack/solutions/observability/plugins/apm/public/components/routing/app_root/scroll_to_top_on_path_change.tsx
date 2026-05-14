@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import type { Location } from 'history';
 import { Component } from 'react';
 
@@ -15,7 +16,7 @@ interface Props {
 export class ScrollToTopOnPathChange extends Component<Props> {
   public componentDidUpdate(prevProps: Props) {
     if (this.props.location.pathname !== prevProps.location.pathname) {
-      window.scrollTo(0, 0);
+      document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID)?.scrollTo(0, 0);
     }
   }
 

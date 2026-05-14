@@ -32,7 +32,7 @@ The evaluation system spans three packages:
 │  - server: 4 internal API routes (runs, run detail,          │
 │    scores, traces)                                           │
 │  - public: React UI (runs list, run detail, trace waterfall) │
-│  - exposes TraceWaterfall component for use by other plugins │
+│  - uses @kbn/llm-trace-waterfall for trace visualisation     │
 └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -97,12 +97,13 @@ All routes are internal, versioned (`v1`), and require the `evals` privilege.
 | Runs list | `/app/evals` | Paginated table of evaluation runs with branch filter, model badges, CI links |
 | Run detail | `/app/evals/runs/:runId` | Run metadata, evaluator statistics table, trace links, trace waterfall flyout |
 
-The `TraceWaterfall` component is also exported from the plugin's public start contract for use by other plugins:
+The trace waterfall UI lives in the standalone `@kbn/llm-trace-waterfall` package so any plugin can consume it without depending on the evals runtime:
 
 ```ts
-const { TraceWaterfall } = plugins.evals;
-<TraceWaterfall traceId="abc123" />
+import { TraceWaterfall, createEsTraceFetcher } from '@kbn/llm-trace-waterfall';
 ```
+
+The package ships a built-in ES fetcher (`createEsTraceFetcher`), or bring your own fetcher via the `TraceFetcher` callback interface.
 
 ## Development
 

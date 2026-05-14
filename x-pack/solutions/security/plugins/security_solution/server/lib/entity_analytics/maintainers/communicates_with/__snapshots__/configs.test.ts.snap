@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`COMMUNICATES_WITH_ENGINE_CONFIGS golden snapshots aws_cloudtrail: targets-per-actor ES|QL is locked 1`] = `
+exports[`COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots aws_cloudtrail: targets-per-actor ES|QL is locked 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-aws.cloudtrail-__namespace__
 | WHERE aws.cloudtrail.user_identity.type IN (\\"IAMUser\\", \\"AssumedRole\\", \\"Root\\", \\"FederatedUser\\", \\"IdentityCenterUser\\")
@@ -28,7 +28,7 @@ true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace
 | LIMIT 3500"
 `;
 
-exports[`COMMUNICATES_WITH_ENGINE_CONFIGS golden snapshots azure_auditlogs: targets-per-actor ES|QL is locked 1`] = `
+exports[`COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots azure_auditlogs: targets-per-actor ES|QL is locked 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-azure.auditlogs-__namespace__
 | WHERE azure.auditlogs.properties.initiated_by.user.userPrincipalName IS NOT NULL
@@ -49,7 +49,7 @@ FROM logs-azure.auditlogs-__namespace__
 | LIMIT 3500"
 `;
 
-exports[`COMMUNICATES_WITH_ENGINE_CONFIGS golden snapshots jamf_pro: targets-per-actor ES|QL is locked 1`] = `
+exports[`COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots jamf_pro: targets-per-actor ES|QL is locked 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-jamf_pro.events-__namespace__
 | WHERE user.name IS NOT NULL
@@ -79,7 +79,7 @@ true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace
 | LIMIT 3500"
 `;
 
-exports[`COMMUNICATES_WITH_ENGINE_CONFIGS golden snapshots okta: targets-per-actor ES|QL is locked 1`] = `
+exports[`COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots okta: targets-per-actor ES|QL is locked 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-okta.system-__namespace__
 | WHERE event.action IN (\\"user.lifecycle.create\\", \\"user.lifecycle.activate\\", \\"user.lifecycle.deactivate\\", \\"user.lifecycle.suspend\\", \\"user.lifecycle.unsuspend\\", \\"group.user_membership.add\\", \\"group.user_membership.remove\\", \\"application.user_membership.add\\", \\"application.user_membership.remove\\", \\"application.user_membership.change_username\\")

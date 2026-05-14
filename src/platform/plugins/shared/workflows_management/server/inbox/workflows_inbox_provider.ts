@@ -17,6 +17,7 @@ import {
 } from '@kbn/inbox-plugin/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import { buildWorkflowSourceId, parseWorkflowSourceId, toInboxAction } from './to_inbox_action';
+import type { WorkflowManagementAuditLog } from '../api/routes/utils/workflow_audit_logging';
 import type { WorkflowsManagementApi } from '../api/workflows_management_api';
 
 export const WORKFLOWS_INBOX_SOURCE_APP = 'workflows' as const;
@@ -34,6 +35,8 @@ export class InvalidWorkflowSourceIdError extends Error {
 export interface CreateWorkflowsInboxProviderArgs {
   api: WorkflowsManagementApi;
   logger: Logger;
+  /** Same instance as HTTP routes — inbox resume must emit identical security audit events. */
+  audit: WorkflowManagementAuditLog;
   /**
    * Upper bound on rows the registry hands us per `list()`. Phase 1 leans on
    * the registry's own pagination; we ask the service for a generous slice
@@ -54,6 +57,7 @@ export interface CreateWorkflowsInboxProviderArgs {
 export const createWorkflowsInboxProvider = ({
   api,
   logger,
+  audit,
   pageSize = 1000,
 }: CreateWorkflowsInboxProviderArgs): InboxActionProvider => {
   return {
@@ -139,7 +143,24 @@ export const createWorkflowsInboxProvider = ({
       logger.debug(
         `Workflows inbox provider resuming execution ${parsed.executionId} (workflow ${parsed.workflowId})`
       );
-      await api.resumeWorkflowExecution(parsed.executionId, ctx.spaceId, input, ctx.request);
+      try {
+        const { resumedBy } = await api.resumeWorkflowExecution(
+          parsed.executionId,
+          ctx.spaceId,
+          input,
+          ctx.request
+        );
+        audit.logExecutionResumed(ctx.request, {
+          executionId: parsed.executionId,
+          resumedBy,
+        });
+      } catch (error) {
+        audit.logExecutionResumed(ctx.request, {
+          executionId: parsed.executionId,
+          error,
+        });
+        throw error;
+      }
     },
   };
 };
