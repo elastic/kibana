@@ -253,6 +253,13 @@ export const allowedExperimentalValues = Object.freeze({
   alertAnalysisApiDrivenSkill: false,
 
   /**
+   * Enables the inline-api-tool alert-analysis skill: replaces workflow_execute_step / YAML
+   * with a focused inline tool that calls findRelatedAlerts directly, eliminating YAML
+   * authoring overhead. Takes precedence over alertAnalysisApiDrivenSkill when both are set.
+   */
+  alertAnalysisInlineApiToolSkill: false,
+
+  /**
    * Enables the deprecated prebuilt rules UI
    * Release: 9.4
    */

@@ -197,15 +197,12 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'I will call the related alerts internal API for alert test-alert-id-123 and summarize correlated entities from the last 24 hours.',
+                    'I will use the get-related-alerts tool for alert test-alert-id-123 and summarize correlated entities from the last 24 hours.',
                 },
                 metadata: {
                   query_intent: 'Alert Correlation',
                   expectedSkill: 'alert-analysis',
-                  expectedToolId: 'platform.workflows.workflow_execute_step',
-                  expectedWorkflowRequestPath:
-                    '/internal/security_solution/alert_analysis/related_alerts',
-                  expectedWorkflowStepType: 'kibana.request',
+                  expectedToolId: 'security.alert-analysis.get-related-alerts',
                 },
               },
             ],
