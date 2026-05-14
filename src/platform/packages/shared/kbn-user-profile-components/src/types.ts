@@ -50,6 +50,10 @@ export interface UserSettingsData {
   locale?: LocaleValue;
   solutionNavOptOut?: boolean;
   /**
+   * Stringified JSON array of Labs app ids installed for the current user.
+   */
+  labsInstalledLabIdsJson?: string;
+  /**
    * Whether the Agent Builder announcement modal was dismissed for the current user (all spaces).
    */
   agentBuilderAnnouncementModalSeen?: boolean;
