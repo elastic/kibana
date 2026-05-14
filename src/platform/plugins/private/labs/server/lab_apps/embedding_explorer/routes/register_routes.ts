@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  FieldCapsFieldCapability,
+  IndicesCreateRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import type { ElasticsearchClient, IRouter } from '@kbn/core/server';
@@ -15,17 +18,19 @@ import type {
   EmbeddingExplorerIndexDataResponse,
   EmbeddingExplorerIndexFieldsResponse,
   EmbeddingExplorerMetadataValue,
+  EmbeddingExplorerSampleIndicesResponse,
 } from '../../../../common';
 import {
+  EMBEDDING_EXPLORER_DEFAULT_INDEX_SAMPLE_SIZE,
   EMBEDDING_EXPLORER_INDEX_DATA_API_PATH,
   EMBEDDING_EXPLORER_INDEX_FIELDS_API_PATH,
   EMBEDDING_EXPLORER_INDICES_API_PATH,
   EMBEDDING_EXPLORER_LAB_ID,
-  EMBEDDING_EXPLORER_SAMPLE_API_PATH,
+  EMBEDDING_EXPLORER_SAMPLE_INDICES_API_PATH,
 } from '../../../../common';
 import { fetchIndices } from '../../../lib/fetch_indices';
 import { isLabInstalled } from '../../../lib/installed_labs';
-import { getSampleDataset } from './get_sample_dataset';
+import { getSampleIndexDocuments, type SampleIndexDocument } from './get_sample_index_documents';
 
 const NUMERIC_FIELD_TYPES = new Set([
   'byte',
@@ -49,12 +54,13 @@ const LABEL_FIELD_TYPES = new Set([
 ]);
 
 const CATEGORY_FIELD_TYPES = new Set(['boolean', 'constant_keyword', 'keyword', 'wildcard']);
+const SAMPLE_INDEX_BULK_SIZE = 250;
 
 const CUSTOM_INDEX_PROJECTION_NOTICE = i18n.translate(
   'labs.embeddingExplorer.customIndexProjectionNoticeDescription',
   {
     defaultMessage:
-      'This first pass expects two numeric projection fields in the index so Atlas can render immediately.',
+      'If your index already includes two numeric projection fields, Atlas can render immediately without computing a client-side projection.',
   }
 );
 
@@ -70,6 +76,183 @@ const getForbiddenInstallMessage = () =>
   i18n.translate('labs.embeddingExplorer.installRequiredErrorMessage', {
     defaultMessage: 'Install the Embedding explorer lab before using this API.',
   });
+
+const getSampleIndexNames = () => {
+  const asset = getSampleIndexDocuments();
+
+  return {
+    projectedIndex: `${asset.indexNamePrefix}_projected`,
+    vectorOnlyIndex: `${asset.indexNamePrefix}_vectors_only`,
+  };
+};
+
+const getSampleVectorDimensions = () => {
+  const asset = getSampleIndexDocuments();
+  const dimensions = asset.docs[0]?.embedding.length;
+
+  if (!dimensions) {
+    throw new Error(
+      i18n.translate('labs.embeddingExplorer.sampleIndexDocumentsMissingVectorsErrorMessage', {
+        defaultMessage:
+          'The sample Elasticsearch setup artifact does not include any vector documents.',
+      })
+    );
+  }
+
+  if (!asset.docs.every((doc) => doc.embedding.length === dimensions)) {
+    throw new Error(
+      i18n.translate('labs.embeddingExplorer.sampleIndexDocumentsInvalidVectorsErrorMessage', {
+        defaultMessage:
+          'The sample Elasticsearch setup artifact contains inconsistent vector dimensions.',
+      })
+    );
+  }
+
+  return dimensions;
+};
+
+const getSampleIndicesResponse = async (
+  client: ElasticsearchClient
+): Promise<EmbeddingExplorerSampleIndicesResponse> => {
+  const asset = getSampleIndexDocuments();
+  const { projectedIndex, vectorOnlyIndex } = getSampleIndexNames();
+  const [projectedExists, vectorOnlyExists] = await Promise.all([
+    client.indices.exists({ index: projectedIndex }),
+    client.indices.exists({ index: vectorOnlyIndex }),
+  ]);
+
+  return {
+    categoryField: asset.categoryField,
+    isReady: projectedExists && vectorOnlyExists,
+    labelField: asset.labelField,
+    projectedIndex,
+    vectorField: asset.vectorField,
+    vectorOnlyIndex,
+    xField: asset.projectionFields.x,
+    yField: asset.projectionFields.y,
+  };
+};
+
+const getSampleIndexCreateBody = (
+  includeProjection: boolean
+): Pick<IndicesCreateRequest, 'mappings' | 'settings'> =>
+  ({
+    mappings: {
+      dynamic: false,
+      properties: {
+        author: { type: 'keyword' },
+        embedding: {
+          dims: getSampleVectorDimensions(),
+          index: true,
+          similarity: 'cosine',
+          type: 'dense_vector',
+        },
+        id: { type: 'keyword' },
+        length: { type: 'integer' },
+        score: { type: 'integer' },
+        source_dataset: { type: 'keyword' },
+        summary: { type: 'text' },
+        text: { type: 'text' },
+        time: { format: 'epoch_second||strict_date_optional_time', type: 'date' },
+        title: { type: 'text' },
+        type: { type: 'keyword' },
+        ...(includeProjection
+          ? {
+              projection: {
+                properties: {
+                  x: { type: 'float' },
+                  y: { type: 'float' },
+                },
+                type: 'object',
+              },
+            }
+          : {}),
+      },
+    },
+    settings: {
+      index: {
+        number_of_replicas: 0,
+        number_of_shards: 1,
+      },
+    },
+  } as Pick<IndicesCreateRequest, 'mappings' | 'settings'>);
+
+const bulkIndexSampleDocuments = async (
+  client: ElasticsearchClient,
+  indexName: string,
+  transformDocument: (
+    document: SampleIndexDocument
+  ) => Record<string, unknown> | SampleIndexDocument
+) => {
+  const { docs } = getSampleIndexDocuments();
+
+  for (let offset = 0; offset < docs.length; offset += SAMPLE_INDEX_BULK_SIZE) {
+    const chunk = docs.slice(offset, offset + SAMPLE_INDEX_BULK_SIZE);
+    const operations: Array<Record<string, unknown>> = chunk.flatMap((document) => [
+      {
+        index: {
+          _id: document.id,
+          _index: indexName,
+        },
+      },
+      transformDocument(document) as Record<string, unknown>,
+    ]);
+
+    const bulkResponse = await client.bulk({
+      operations,
+      refresh: false,
+    });
+
+    const firstError = (
+      bulkResponse.items as
+        | Array<{ index?: { error?: { reason?: string; type?: string } } }>
+        | undefined
+    )?.find((item) => item.index?.error)?.index?.error;
+
+    if (bulkResponse.errors && firstError) {
+      throw new Error(
+        i18n.translate('labs.embeddingExplorer.sampleIndexBulkInsertErrorMessage', {
+          defaultMessage: 'Bulk indexing the sample embeddings failed: {type}: {reason}',
+          values: {
+            reason: firstError.reason ?? 'unknown error',
+            type: firstError.type ?? 'bulk_index_error',
+          },
+        })
+      );
+    }
+  }
+
+  await client.indices.refresh({ index: indexName });
+};
+
+const ensureSampleIndices = async (client: ElasticsearchClient) => {
+  const { projectedIndex, vectorOnlyIndex } = getSampleIndexNames();
+  const [projectedExists, vectorOnlyExists] = await Promise.all([
+    client.indices.exists({ index: projectedIndex }),
+    client.indices.exists({ index: vectorOnlyIndex }),
+  ]);
+
+  if (!projectedExists) {
+    await client.indices.create({
+      index: projectedIndex,
+      ...getSampleIndexCreateBody(true),
+    });
+    await bulkIndexSampleDocuments(client, projectedIndex, (document) => document);
+  }
+
+  if (!vectorOnlyExists) {
+    await client.indices.create({
+      index: vectorOnlyIndex,
+      ...getSampleIndexCreateBody(false),
+    });
+    await bulkIndexSampleDocuments(client, vectorOnlyIndex, (document) => {
+      const { projection, ...vectorOnlyDocument } = document;
+      return vectorOnlyDocument;
+    });
+  }
+
+  return getSampleIndicesResponse(client);
+};
 
 const getSourceValue = (
   source: Record<string, unknown> | undefined,
@@ -304,7 +487,7 @@ const getIndexDataset = async (
 export const registerEmbeddingExplorerRoutes = (router: IRouter) => {
   router.get(
     {
-      path: EMBEDDING_EXPLORER_SAMPLE_API_PATH,
+      path: EMBEDDING_EXPLORER_SAMPLE_INDICES_API_PATH,
       options: { access: 'internal' },
       security: {
         authz: {
@@ -319,7 +502,60 @@ export const registerEmbeddingExplorerRoutes = (router: IRouter) => {
         return response.forbidden({ body: { message: getForbiddenInstallMessage() } });
       }
 
-      return response.ok({ body: getSampleDataset() });
+      try {
+        const { client } = (await context.core).elasticsearch;
+        const sampleIndices = await getSampleIndicesResponse(client.asCurrentUser);
+        return response.ok({ body: sampleIndices });
+      } catch (error) {
+        return response.badRequest({
+          body: {
+            message:
+              error instanceof Error
+                ? error.message
+                : i18n.translate('labs.embeddingExplorer.sampleIndexStatusErrorMessage', {
+                    defaultMessage:
+                      'Unable to inspect the sample Elasticsearch indices for this lab.',
+                  }),
+          },
+        });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: EMBEDDING_EXPLORER_SAMPLE_INDICES_API_PATH,
+      options: { access: 'internal' },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Labs installs are enforced per user inside the route handler.',
+        },
+      },
+      validate: false,
+    },
+    async (context, _request, response) => {
+      if (!(await isLabInstalled(context, EMBEDDING_EXPLORER_LAB_ID))) {
+        return response.forbidden({ body: { message: getForbiddenInstallMessage() } });
+      }
+
+      try {
+        const { client } = (await context.core).elasticsearch;
+        const sampleIndices = await ensureSampleIndices(client.asCurrentUser);
+        return response.ok({ body: sampleIndices });
+      } catch (error) {
+        return response.badRequest({
+          body: {
+            message:
+              error instanceof Error
+                ? error.message
+                : i18n.translate('labs.embeddingExplorer.sampleIndexSetupErrorMessage', {
+                    defaultMessage:
+                      'Unable to load the sample embeddings into Elasticsearch for this lab.',
+                  }),
+          },
+        });
+      }
     }
   );
 
@@ -400,7 +636,11 @@ export const registerEmbeddingExplorerRoutes = (router: IRouter) => {
           yField: schema.maybe(schema.string({ minLength: 1, maxLength: 512 })),
           labelField: schema.maybe(schema.string({ minLength: 1, maxLength: 512 })),
           categoryField: schema.maybe(schema.string({ minLength: 1, maxLength: 512 })),
-          size: schema.number({ defaultValue: 200, min: 25, max: 500 }),
+          size: schema.number({
+            defaultValue: EMBEDDING_EXPLORER_DEFAULT_INDEX_SAMPLE_SIZE,
+            min: 25,
+            max: EMBEDDING_EXPLORER_DEFAULT_INDEX_SAMPLE_SIZE,
+          }),
         }),
       },
     },

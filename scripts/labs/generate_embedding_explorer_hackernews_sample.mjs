@@ -9,8 +9,8 @@ import { UMAP } from 'umap-js';
 const SOURCE_URL =
   'https://clickhouse-datasets.s3.amazonaws.com/hackernews-miniLM/hackernews_part_1_of_1.parquet';
 const SOURCE_BYTE_LENGTH = 59267912355;
-const OUTPUT_PATH = resolve(
-  'src/platform/plugins/private/labs/server/lab_apps/embedding_explorer/routes/hackernews_sample_dataset.json'
+const INDEX_DOCUMENTS_OUTPUT_PATH = resolve(
+  'src/platform/plugins/private/labs/server/lab_apps/embedding_explorer/routes/hackernews_sample_index_documents.json'
 );
 
 const WINDOW_COUNT = 12;
@@ -42,6 +42,9 @@ const decodeHtml = (value) =>
 
 const truncate = (value, maxLength) =>
   value.length <= maxLength ? value : `${value.slice(0, maxLength - 1).trimEnd()}…`;
+
+const roundNumber = (value, digits = 6) =>
+  Number.isFinite(value) ? Number(value.toFixed(digits)) : value;
 
 const getCosineDistance = (left, right) => {
   let dotProduct = 0;
@@ -209,6 +212,17 @@ const main = async () => {
         summary,
         category,
         source: 'clickhouse-hackernews-sample',
+        document: {
+          author: row.by ?? 'unknown',
+          id: String(row.id),
+          length: Number(row.length),
+          score: Number(row.post_score ?? 0),
+          summary,
+          text: truncate(decodeHtml(row.text ?? ''), 1000),
+          time: row.time,
+          title: truncate(decodeHtml(row.title ?? ''), 160),
+          type: category,
+        },
         metadata: {
           author: row.by ?? 'unknown',
           length: Number(row.length),
@@ -239,34 +253,43 @@ const main = async () => {
   console.log(`running UMAP for ${selectedRows.length} points`);
   const embedding = await umap.fitAsync(vectors);
 
-  const dataset = {
+  const indexDocuments = {
+    categoryField: 'type',
     datasetName: 'Sample Hacker News vector corpus',
     description:
       'A preprojected sample of Hacker News posts and comments derived from the ClickHouse vector search dataset.',
-    projectionNote:
-      'This sample is a few thousand rows from the ClickHouse Hacker News vector dataset with precomputed two-dimensional coordinates so the view can render immediately.',
-    points: selectedRows.map((row, index) => ({
-      id: row.id,
-      x: embedding[index][0],
-      y: embedding[index][1],
-      label: row.label,
-      summary: row.summary,
-      category: row.category,
-      source: row.source,
-      metadata: row.metadata,
+    indexNamePrefix: 'labs_embedding_hackernews_sample',
+    labelField: 'summary',
+    projectionFields: {
+      x: 'projection.x',
+      y: 'projection.y',
+    },
+    vectorField: 'embedding',
+    docs: selectedRows.map((row, index) => ({
+      ...row.document,
+      embedding: row.vector.map((value) => roundNumber(value)),
+      projection: {
+        x: roundNumber(embedding[index][0]),
+        y: roundNumber(embedding[index][1]),
+      },
+      source_dataset: row.source,
     })),
   };
 
-  await mkdir(dirname(OUTPUT_PATH), { recursive: true });
-  await writeFile(`${OUTPUT_PATH}`, `${JSON.stringify(dataset, null, 2)}\n`, 'utf8');
+  await mkdir(dirname(INDEX_DOCUMENTS_OUTPUT_PATH), { recursive: true });
+  await writeFile(
+    `${INDEX_DOCUMENTS_OUTPUT_PATH}`,
+    `${JSON.stringify(indexDocuments, null, 2)}\n`,
+    'utf8'
+  );
 
   console.log(
     JSON.stringify(
       {
-        outputPath: OUTPUT_PATH,
-        pointCount: dataset.points.length,
-        categories: dataset.points.reduce((acc, point) => {
-          acc[point.category] = (acc[point.category] ?? 0) + 1;
+        indexDocumentsOutputPath: INDEX_DOCUMENTS_OUTPUT_PATH,
+        pointCount: indexDocuments.docs.length,
+        categories: indexDocuments.docs.reduce((acc, point) => {
+          acc[point.type] = (acc[point.type] ?? 0) + 1;
           return acc;
         }, {}),
       },

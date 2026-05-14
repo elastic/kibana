@@ -9,7 +9,9 @@
 
 export const EMBEDDING_EXPLORER_LAB_ID = 'embedding_explorer' as const;
 export const EMBEDDING_EXPLORER_APP_ID = 'labsEmbeddingExplorer';
-export const EMBEDDING_EXPLORER_SAMPLE_API_PATH = '/internal/labs/embedding_explorer/sample';
+export const EMBEDDING_EXPLORER_DEFAULT_INDEX_SAMPLE_SIZE = 2500;
+export const EMBEDDING_EXPLORER_SAMPLE_INDICES_API_PATH =
+  '/internal/labs/embedding_explorer/sample_indices';
 export const EMBEDDING_EXPLORER_INDICES_API_PATH = '/internal/labs/embedding_explorer/indices';
 export const EMBEDDING_EXPLORER_INDEX_FIELDS_API_PATH =
   '/internal/labs/embedding_explorer/index_fields';
@@ -44,6 +46,17 @@ export interface EmbeddingExplorerIndexOption {
 
 export interface EmbeddingExplorerIndicesResponse {
   indices: EmbeddingExplorerIndexOption[];
+}
+
+export interface EmbeddingExplorerSampleIndicesResponse {
+  isReady: boolean;
+  projectedIndex: string;
+  vectorOnlyIndex: string;
+  vectorField: string;
+  labelField: string;
+  categoryField: string;
+  xField: string;
+  yField: string;
 }
 
 export interface EmbeddingExplorerIndexFieldsResponse {

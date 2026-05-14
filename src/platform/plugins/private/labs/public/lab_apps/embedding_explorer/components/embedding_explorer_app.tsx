@@ -10,11 +10,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
-  EuiButtonGroup,
   EuiCallOut,
-  EuiDescriptionList,
   EuiEmptyPrompt,
-  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -23,29 +20,28 @@ import {
   EuiPanel,
   EuiSelect,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { ApplicationStart, HttpStart } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { dynamic } from '@kbn/shared-ux-utility';
 import {
   EMBEDDING_EXPLORER_INDEX_DATA_API_PATH,
+  EMBEDDING_EXPLORER_DEFAULT_INDEX_SAMPLE_SIZE,
   EMBEDDING_EXPLORER_INDEX_FIELDS_API_PATH,
   EMBEDDING_EXPLORER_INDICES_API_PATH,
-  EMBEDDING_EXPLORER_SAMPLE_API_PATH,
+  EMBEDDING_EXPLORER_SAMPLE_INDICES_API_PATH,
   type EmbeddingExplorerDatasetResponse,
   type EmbeddingExplorerIndexDataRequest,
   type EmbeddingExplorerIndexDataResponse,
   type EmbeddingExplorerIndexFieldsResponse,
   type EmbeddingExplorerIndicesResponse,
   type EmbeddingExplorerPoint,
+  type EmbeddingExplorerSampleIndicesResponse,
 } from '../../../../common';
-
-type DataSourceMode = 'sample' | 'custom';
+import { getSuggestedField, getSuggestedProjectionField } from '../field_suggestions';
 
 interface EmbeddingExplorerAppProps {
   application: ApplicationStart;
@@ -101,59 +97,6 @@ const getCosineDistance = (left: number[], right: number[]) => {
   }
 
   return 1 - dotProduct / (Math.sqrt(leftMagnitude) * Math.sqrt(rightMagnitude));
-};
-
-const getSuggestedProjectionField = (fields: readonly string[], axis: 'x' | 'y') => {
-  const rankedField = [...fields].sort((left, right) => {
-    const leftScore = getProjectionFieldScore(left, axis);
-    const rightScore = getProjectionFieldScore(right, axis);
-
-    if (leftScore === rightScore) {
-      return left.localeCompare(right);
-    }
-
-    return rightScore - leftScore;
-  })[0];
-
-  return rankedField ?? '';
-};
-
-const getProjectionFieldScore = (fieldName: string, axis: 'x' | 'y') => {
-  const normalized = fieldName.toLowerCase();
-
-  if (normalized === axis || normalized.endsWith(`.${axis}`)) {
-    return 100;
-  }
-
-  if (
-    normalized.includes(`projection.${axis}`) ||
-    normalized.includes(`projection_${axis}`) ||
-    normalized.includes(`umap_${axis}`) ||
-    normalized.includes(`umap.${axis}`)
-  ) {
-    return 90;
-  }
-
-  if (normalized.endsWith(`_${axis}`) || normalized.includes(`.${axis}_`)) {
-    return 75;
-  }
-
-  if (normalized.includes(axis)) {
-    return 50;
-  }
-
-  return 0;
-};
-
-const getSuggestedField = (fields: readonly string[], candidates: readonly string[]) => {
-  const loweredCandidates = candidates.map((candidate) => candidate.toLowerCase());
-  return (
-    fields.find((field) =>
-      loweredCandidates.some((candidate) => field.toLowerCase().includes(candidate))
-    ) ??
-    fields[0] ??
-    ''
-  );
 };
 
 type AtlasEmbeddingViewComponent = typeof import('./atlas_embedding_view').AtlasEmbeddingView;
@@ -264,12 +207,8 @@ const projectDatasetWithUmap = async (
 };
 
 export const EmbeddingExplorerApp = ({ application, http }: EmbeddingExplorerAppProps) => {
-  const [activeMode, setActiveMode] = useState<DataSourceMode>('sample');
-  const [densityMode, setDensityMode] = useState(true);
-  const [sampleDataset, setSampleDataset] = useState<EmbeddingExplorerDatasetResponse | null>(null);
-  const [customDataset, setCustomDataset] = useState<EmbeddingExplorerDatasetResponse | null>(null);
+  const [loadedDataset, setLoadedDataset] = useState<EmbeddingExplorerDatasetResponse | null>(null);
   const [indices, setIndices] = useState<string[]>([]);
-  const [indexQuery, setIndexQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState('');
   const [fieldOptions, setFieldOptions] = useState<EmbeddingExplorerIndexFieldsResponse | null>(
     null
@@ -283,35 +222,45 @@ export const EmbeddingExplorerApp = ({ application, http }: EmbeddingExplorerApp
   });
   const [selectedPointId, setSelectedPointId] = useState<string | null>(null);
   const [hoveredPointId, setHoveredPointId] = useState<string | null>(null);
-  const [isSampleLoading, setIsSampleLoading] = useState(true);
+  const [isSampleIndicesStatusLoading, setIsSampleIndicesStatusLoading] = useState(true);
+  const [isSampleIndicesLoading, setIsSampleIndicesLoading] = useState(false);
   const [isIndicesLoading, setIsIndicesLoading] = useState(false);
   const [isFieldsLoading, setIsFieldsLoading] = useState(false);
   const [isCustomDatasetLoading, setIsCustomDatasetLoading] = useState(false);
   const [isProjectionComputing, setIsProjectionComputing] = useState(false);
   const [loadError, setLoadError] = useState<string>();
+  const [sampleIndicesStatus, setSampleIndicesStatus] =
+    useState<EmbeddingExplorerSampleIndicesResponse | null>(null);
+  const [sampleIndicesError, setSampleIndicesError] = useState<string>();
 
   useEffect(() => {
     let isMounted = true;
 
     void http
-      .get<EmbeddingExplorerDatasetResponse>(EMBEDDING_EXPLORER_SAMPLE_API_PATH)
+      .get<EmbeddingExplorerSampleIndicesResponse>(EMBEDDING_EXPLORER_SAMPLE_INDICES_API_PATH)
       .then((response) => {
         if (isMounted) {
-          setSampleDataset(response);
+          setSampleIndicesStatus(response);
+          setSampleIndicesError(undefined);
+          setIndices((current) =>
+            Array.from(new Set([response.projectedIndex, response.vectorOnlyIndex, ...current]))
+          );
         }
       })
-      .catch(() => {
+      .catch((error) => {
         if (isMounted) {
-          setLoadError(
-            i18n.translate('labs.embeddingExplorer.sampleDatasetErrorMessage', {
-              defaultMessage: 'Unable to load the sample embedding dataset.',
-            })
+          setSampleIndicesError(
+            getHttpErrorMessage(error) ??
+              i18n.translate('labs.embeddingExplorer.sampleIndicesStatusErrorMessage', {
+                defaultMessage:
+                  'Unable to check whether the sample Elasticsearch indices are already available.',
+              })
           );
         }
       })
       .finally(() => {
         if (isMounted) {
-          setIsSampleLoading(false);
+          setIsSampleIndicesStatusLoading(false);
         }
       });
 
@@ -321,19 +270,11 @@ export const EmbeddingExplorerApp = ({ application, http }: EmbeddingExplorerApp
   }, [http]);
 
   useEffect(() => {
-    if (activeMode !== 'custom') {
-      return;
-    }
-
     let isMounted = true;
     setIsIndicesLoading(true);
 
     void http
-      .get<EmbeddingExplorerIndicesResponse>(EMBEDDING_EXPLORER_INDICES_API_PATH, {
-        query: {
-          search_query: indexQuery,
-        },
-      })
+      .get<EmbeddingExplorerIndicesResponse>(EMBEDDING_EXPLORER_INDICES_API_PATH)
       .then((response) => {
         if (isMounted) {
           setIndices(response.indices.map(({ name }) => name));
@@ -357,7 +298,15 @@ export const EmbeddingExplorerApp = ({ application, http }: EmbeddingExplorerApp
     return () => {
       isMounted = false;
     };
-  }, [activeMode, http, indexQuery]);
+  }, [http]);
+
+  useEffect(() => {
+    if (!sampleIndicesStatus?.isReady || selectedIndex) {
+      return;
+    }
+
+    setSelectedIndex(sampleIndicesStatus.projectedIndex);
+  }, [sampleIndicesStatus, selectedIndex]);
 
   useEffect(() => {
     if (!selectedIndex) {
@@ -374,7 +323,7 @@ export const EmbeddingExplorerApp = ({ application, http }: EmbeddingExplorerApp
 
     let isMounted = true;
     setIsFieldsLoading(true);
-    setCustomDataset(null);
+    setLoadedDataset(null);
     setSelectedPointId(null);
     setHoveredPointId(null);
 
@@ -390,6 +339,7 @@ export const EmbeddingExplorerApp = ({ application, http }: EmbeddingExplorerApp
         setFieldOptions(response);
         setFieldState({
           categoryField: getSuggestedField(response.categoryFields, [
+            'type',
             'severity',
             'category',
             'source',
@@ -439,7 +389,7 @@ export const EmbeddingExplorerApp = ({ application, http }: EmbeddingExplorerApp
       categoryField: fieldState.categoryField || undefined,
       index: selectedIndex,
       labelField: fieldState.labelField || undefined,
-      size: 200,
+      size: EMBEDDING_EXPLORER_DEFAULT_INDEX_SAMPLE_SIZE,
       vectorField: fieldState.vectorField,
       xField: hasProjectionPair ? fieldState.xField : undefined,
       yField: hasProjectionPair ? fieldState.yField : undefined,
@@ -454,7 +404,7 @@ export const EmbeddingExplorerApp = ({ application, http }: EmbeddingExplorerApp
         setIsProjectionComputing(true);
       }
       const projectedDataset = await projectDatasetWithUmap(response);
-      setCustomDataset(projectedDataset);
+      setLoadedDataset(projectedDataset);
       setSelectedPointId(projectedDataset.points[0]?.id ?? null);
     } catch (error) {
       setLoadError(
@@ -469,7 +419,34 @@ export const EmbeddingExplorerApp = ({ application, http }: EmbeddingExplorerApp
     }
   }, [fieldState, http, selectedIndex]);
 
-  const activeDataset = activeMode === 'sample' ? sampleDataset : customDataset;
+  const handleLoadSampleIndices = useCallback(async () => {
+    setIsSampleIndicesLoading(true);
+    setLoadError(undefined);
+    setSampleIndicesError(undefined);
+
+    try {
+      const response = await http.post<EmbeddingExplorerSampleIndicesResponse>(
+        EMBEDDING_EXPLORER_SAMPLE_INDICES_API_PATH
+      );
+
+      setSampleIndicesStatus(response);
+      setIndices((current) =>
+        Array.from(new Set([response.projectedIndex, response.vectorOnlyIndex, ...current]))
+      );
+      setSelectedIndex(response.projectedIndex);
+    } catch (error) {
+      setSampleIndicesError(
+        getHttpErrorMessage(error) ??
+          i18n.translate('labs.embeddingExplorer.sampleIndicesSetupErrorMessage', {
+            defaultMessage: 'Unable to load the sample embeddings into Elasticsearch.',
+          })
+      );
+    } finally {
+      setIsSampleIndicesLoading(false);
+    }
+  }, [http]);
+
+  const activeDataset = loadedDataset;
   const points = useMemo(() => activeDataset?.points ?? [], [activeDataset]);
   const pointLookup = useMemo(() => new Map(points.map((point) => [point.id, point])), [points]);
 
@@ -547,263 +524,206 @@ export const EmbeddingExplorerApp = ({ application, http }: EmbeddingExplorerApp
         ],
       }}
     >
-      <KibanaPageTemplate.Section>
-        <EuiText>
-          <p>
-            <FormattedMessage
-              id="labs.embeddingExplorer.pageDescription"
-              defaultMessage="This Atlas-based spike lets you explore a few thousand preprojected Hacker News embeddings immediately and preview compatible Elasticsearch indices that already expose projection fields."
-            />
-          </p>
-        </EuiText>
-      </KibanaPageTemplate.Section>
+      {!isSampleIndicesStatusLoading && !sampleIndicesStatus?.isReady ? (
+        <KibanaPageTemplate.Section grow={false}>
+          <EuiCallOut
+            announceOnMount={false}
+            color={sampleIndicesError ? 'danger' : 'warning'}
+            data-test-subj="labsEmbeddingExplorerSampleIndicesCallout"
+            iconType="iInCircle"
+            title={
+              sampleIndicesError
+                ? i18n.translate('labs.embeddingExplorer.sampleIndicesErrorTitle', {
+                    defaultMessage: 'Unable to prepare the sample Elasticsearch indices',
+                  })
+                : i18n.translate('labs.embeddingExplorer.sampleIndicesSetupTitle', {
+                    defaultMessage: 'One more setup step: load the sample into Elasticsearch',
+                  })
+            }
+          >
+            <p>
+              {sampleIndicesError
+                ? sampleIndicesError
+                : i18n.translate('labs.embeddingExplorer.sampleIndicesSetupDescription', {
+                    defaultMessage:
+                      'To try the built-in Hacker News example, first create two sample Elasticsearch indices. This action loads the bundled embeddings into Elasticsearch and then preselects the projected sample index in the form below.',
+                  })}
+            </p>
+            <EuiSpacer size="m" />
+            <EuiButton
+              data-test-subj="labsEmbeddingExplorerLoadSampleIndicesButton"
+              fill
+              isLoading={isSampleIndicesLoading}
+              onClick={() => void handleLoadSampleIndices()}
+            >
+              {i18n.translate('labs.embeddingExplorer.loadSampleIndicesButtonLabel', {
+                defaultMessage: 'Load sample into Elasticsearch',
+              })}
+            </EuiButton>
+          </EuiCallOut>
+        </KibanaPageTemplate.Section>
+      ) : null}
 
-      <KibanaPageTemplate.Section>
+      <KibanaPageTemplate.Section grow={false}>
         <EuiPanel hasBorder hasShadow={false} paddingSize="m">
           <EuiFlexGroup alignItems="flexEnd" gutterSize="m" wrap>
             <EuiFlexItem grow={2}>
               <EuiFormRow
-                label={i18n.translate('labs.embeddingExplorer.dataSourceLabel', {
-                  defaultMessage: 'Data source',
+                label={i18n.translate('labs.embeddingExplorer.indexSelectLabel', {
+                  defaultMessage: 'Index',
                 })}
               >
-                <EuiButtonGroup
-                  buttonSize="compressed"
-                  idSelected={activeMode}
-                  isFullWidth
-                  legend={i18n.translate('labs.embeddingExplorer.dataSourceGroupLegend', {
-                    defaultMessage: 'Choose an embedding explorer data source',
-                  })}
-                  onChange={(value: string) => {
-                    setActiveMode(value as DataSourceMode);
-                    setLoadError(undefined);
-                  }}
-                  options={[
-                    {
-                      id: 'sample',
-                      label: i18n.translate('labs.embeddingExplorer.sampleModeOptionLabel', {
-                        defaultMessage: 'Sample dataset',
-                      }),
-                    },
-                    {
-                      id: 'custom',
-                      label: i18n.translate('labs.embeddingExplorer.customModeOptionLabel', {
-                        defaultMessage: 'My index',
-                      }),
-                    },
-                  ]}
+                <EuiSelect
+                  compressed
+                  data-test-subj="labsEmbeddingExplorerIndexSelect"
+                  disabled={isIndicesLoading}
+                  onChange={(event) => setSelectedIndex(event.target.value)}
+                  options={getSelectOptions(
+                    indices,
+                    i18n.translate('labs.embeddingExplorer.indexSelectPlaceholder', {
+                      defaultMessage: 'Select an index',
+                    }),
+                    { allowEmpty: true }
+                  )}
+                  value={selectedIndex}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem grow={1}>
+              <EuiFormRow
+                label={i18n.translate('labs.embeddingExplorer.vectorFieldLabel', {
+                  defaultMessage: 'Vector field',
+                })}
+              >
+                <EuiSelect
+                  compressed
+                  disabled={!fieldOptions || isFieldsLoading}
+                  onChange={(event) =>
+                    setFieldState((current) => ({
+                      ...current,
+                      vectorField: event.target.value,
+                    }))
+                  }
+                  options={getSelectOptions(
+                    fieldOptions?.vectorFields ?? [],
+                    i18n.translate('labs.embeddingExplorer.vectorFieldPlaceholder', {
+                      defaultMessage: 'Select a vector field',
+                    }),
+                    { allowEmpty: true }
+                  )}
+                  value={fieldState.vectorField}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem grow={1}>
+              <EuiFormRow
+                label={i18n.translate('labs.embeddingExplorer.xFieldLabel', {
+                  defaultMessage: 'Projection X field (optional)',
+                })}
+              >
+                <EuiSelect
+                  compressed
+                  disabled={!fieldOptions || isFieldsLoading}
+                  onChange={(event) =>
+                    setFieldState((current) => ({ ...current, xField: event.target.value }))
+                  }
+                  options={getSelectOptions(
+                    fieldOptions?.projectionFields ?? [],
+                    i18n.translate('labs.embeddingExplorer.xFieldPlaceholder', {
+                      defaultMessage: 'Select an X field',
+                    }),
+                    { allowEmpty: true }
+                  )}
+                  value={fieldState.xField}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem grow={1}>
+              <EuiFormRow
+                label={i18n.translate('labs.embeddingExplorer.yFieldLabel', {
+                  defaultMessage: 'Projection Y field (optional)',
+                })}
+              >
+                <EuiSelect
+                  compressed
+                  disabled={!fieldOptions || isFieldsLoading}
+                  onChange={(event) =>
+                    setFieldState((current) => ({ ...current, yField: event.target.value }))
+                  }
+                  options={getSelectOptions(
+                    fieldOptions?.projectionFields ?? [],
+                    i18n.translate('labs.embeddingExplorer.yFieldPlaceholder', {
+                      defaultMessage: 'Select a Y field',
+                    }),
+                    { allowEmpty: true }
+                  )}
+                  value={fieldState.yField}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem grow={1}>
+              <EuiFormRow
+                label={i18n.translate('labs.embeddingExplorer.labelFieldLabel', {
+                  defaultMessage: 'Label field',
+                })}
+              >
+                <EuiSelect
+                  compressed
+                  disabled={!fieldOptions || isFieldsLoading}
+                  onChange={(event) =>
+                    setFieldState((current) => ({ ...current, labelField: event.target.value }))
+                  }
+                  options={getSelectOptions(
+                    fieldOptions?.labelFields ?? [],
+                    i18n.translate('labs.embeddingExplorer.labelFieldPlaceholder', {
+                      defaultMessage: 'Optional label field',
+                    }),
+                    { allowEmpty: true }
+                  )}
+                  value={fieldState.labelField}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem grow={1}>
+              <EuiFormRow
+                label={i18n.translate('labs.embeddingExplorer.categoryFieldLabel', {
+                  defaultMessage: 'Category field',
+                })}
+              >
+                <EuiSelect
+                  compressed
+                  disabled={!fieldOptions || isFieldsLoading}
+                  onChange={(event) =>
+                    setFieldState((current) => ({
+                      ...current,
+                      categoryField: event.target.value,
+                    }))
+                  }
+                  options={getSelectOptions(
+                    fieldOptions?.categoryFields ?? [],
+                    i18n.translate('labs.embeddingExplorer.categoryFieldPlaceholder', {
+                      defaultMessage: 'Optional category field',
+                    }),
+                    { allowEmpty: true }
+                  )}
+                  value={fieldState.categoryField}
                 />
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiSwitch
-                checked={densityMode}
-                label={i18n.translate('labs.embeddingExplorer.densityModeToggleSwitch', {
-                  defaultMessage: 'Density mode',
+              <EuiButton
+                data-test-subj="labsEmbeddingExplorerLoadCustomDatasetButton"
+                disabled={!canLoadCustomDataset}
+                fill
+                isLoading={isCustomDatasetLoading}
+                onClick={() => void handleLoadCustomDataset()}
+              >
+                {i18n.translate('labs.embeddingExplorer.loadIndexButtonLabel', {
+                  defaultMessage: 'Load index',
                 })}
-                onChange={(event) => setDensityMode(event.target.checked)}
-              />
+              </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
-
-          {activeMode === 'custom' ? (
-            <>
-              <EuiSpacer size="m" />
-              <EuiFlexGroup alignItems="flexEnd" gutterSize="m" wrap>
-                <EuiFlexItem grow={2}>
-                  <EuiFormRow
-                    label={i18n.translate('labs.embeddingExplorer.indexSearchLabel', {
-                      defaultMessage: 'Index search',
-                    })}
-                  >
-                    <EuiFieldSearch
-                      compressed
-                      isLoading={isIndicesLoading}
-                      onChange={(event) => setIndexQuery(event.target.value)}
-                      placeholder={i18n.translate('labs.embeddingExplorer.indexSearchPlaceholder', {
-                        defaultMessage: 'Filter indices',
-                      })}
-                      value={indexQuery}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem grow={2}>
-                  <EuiFormRow
-                    label={i18n.translate('labs.embeddingExplorer.indexSelectLabel', {
-                      defaultMessage: 'Index',
-                    })}
-                  >
-                    <EuiSelect
-                      compressed
-                      data-test-subj="labsEmbeddingExplorerIndexSelect"
-                      onChange={(event) => setSelectedIndex(event.target.value)}
-                      options={getSelectOptions(
-                        indices,
-                        i18n.translate('labs.embeddingExplorer.indexSelectPlaceholder', {
-                          defaultMessage: 'Select an index',
-                        }),
-                        { allowEmpty: true }
-                      )}
-                      value={selectedIndex}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem grow={1}>
-                  <EuiFormRow
-                    label={i18n.translate('labs.embeddingExplorer.vectorFieldLabel', {
-                      defaultMessage: 'Vector field',
-                    })}
-                  >
-                    <EuiSelect
-                      compressed
-                      disabled={!fieldOptions || isFieldsLoading}
-                      onChange={(event) =>
-                        setFieldState((current) => ({
-                          ...current,
-                          vectorField: event.target.value,
-                        }))
-                      }
-                      options={getSelectOptions(
-                        fieldOptions?.vectorFields ?? [],
-                        i18n.translate('labs.embeddingExplorer.vectorFieldPlaceholder', {
-                          defaultMessage: 'Select a vector field',
-                        }),
-                        { allowEmpty: true }
-                      )}
-                      value={fieldState.vectorField}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem grow={1}>
-                  <EuiFormRow
-                    label={i18n.translate('labs.embeddingExplorer.xFieldLabel', {
-                      defaultMessage: 'Projection X field',
-                    })}
-                  >
-                    <EuiSelect
-                      compressed
-                      disabled={!fieldOptions || isFieldsLoading}
-                      onChange={(event) =>
-                        setFieldState((current) => ({ ...current, xField: event.target.value }))
-                      }
-                      options={getSelectOptions(
-                        fieldOptions?.projectionFields ?? [],
-                        i18n.translate('labs.embeddingExplorer.xFieldPlaceholder', {
-                          defaultMessage: 'Select an X field',
-                        }),
-                        { allowEmpty: true }
-                      )}
-                      value={fieldState.xField}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem grow={1}>
-                  <EuiFormRow
-                    label={i18n.translate('labs.embeddingExplorer.yFieldLabel', {
-                      defaultMessage: 'Projection Y field',
-                    })}
-                  >
-                    <EuiSelect
-                      compressed
-                      disabled={!fieldOptions || isFieldsLoading}
-                      onChange={(event) =>
-                        setFieldState((current) => ({ ...current, yField: event.target.value }))
-                      }
-                      options={getSelectOptions(
-                        fieldOptions?.projectionFields ?? [],
-                        i18n.translate('labs.embeddingExplorer.yFieldPlaceholder', {
-                          defaultMessage: 'Select a Y field',
-                        }),
-                        { allowEmpty: true }
-                      )}
-                      value={fieldState.yField}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem grow={1}>
-                  <EuiFormRow
-                    label={i18n.translate('labs.embeddingExplorer.labelFieldLabel', {
-                      defaultMessage: 'Label field',
-                    })}
-                  >
-                    <EuiSelect
-                      compressed
-                      disabled={!fieldOptions || isFieldsLoading}
-                      onChange={(event) =>
-                        setFieldState((current) => ({ ...current, labelField: event.target.value }))
-                      }
-                      options={getSelectOptions(
-                        fieldOptions?.labelFields ?? [],
-                        i18n.translate('labs.embeddingExplorer.labelFieldPlaceholder', {
-                          defaultMessage: 'Optional label field',
-                        }),
-                        { allowEmpty: true }
-                      )}
-                      value={fieldState.labelField}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem grow={1}>
-                  <EuiFormRow
-                    label={i18n.translate('labs.embeddingExplorer.categoryFieldLabel', {
-                      defaultMessage: 'Category field',
-                    })}
-                  >
-                    <EuiSelect
-                      compressed
-                      disabled={!fieldOptions || isFieldsLoading}
-                      onChange={(event) =>
-                        setFieldState((current) => ({
-                          ...current,
-                          categoryField: event.target.value,
-                        }))
-                      }
-                      options={getSelectOptions(
-                        fieldOptions?.categoryFields ?? [],
-                        i18n.translate('labs.embeddingExplorer.categoryFieldPlaceholder', {
-                          defaultMessage: 'Optional category field',
-                        }),
-                        { allowEmpty: true }
-                      )}
-                      value={fieldState.categoryField}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    data-test-subj="labsEmbeddingExplorerLoadCustomDatasetButton"
-                    disabled={!canLoadCustomDataset}
-                    fill
-                    isLoading={isCustomDatasetLoading}
-                    onClick={() => void handleLoadCustomDataset()}
-                  >
-                    {i18n.translate('labs.embeddingExplorer.loadIndexButtonLabel', {
-                      defaultMessage: 'Load index',
-                    })}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              {fieldOptions ? (
-                <>
-                  <EuiSpacer size="m" />
-                  <EuiCallOut
-                    announceOnMount={false}
-                    color="warning"
-                    iconType="iInCircle"
-                    title={i18n.translate('labs.embeddingExplorer.customIndexNoticeTitle', {
-                      defaultMessage: 'Projection fields are required in this first pass',
-                    })}
-                  >
-                    <p>
-                      {fieldOptions.projectionRequiredNotice}{' '}
-                      {fieldOptions.rawVectorProjectionNotice}
-                    </p>
-                  </EuiCallOut>
-                </>
-              ) : null}
-            </>
-          ) : null}
-
           {loadError ? (
             <>
               <EuiSpacer size="m" />
@@ -822,7 +742,7 @@ export const EmbeddingExplorerApp = ({ application, http }: EmbeddingExplorerApp
         </EuiPanel>
       </KibanaPageTemplate.Section>
 
-      <KibanaPageTemplate.Section>
+      <KibanaPageTemplate.Section grow={false}>
         <EuiFlexGroup alignItems="stretch" gutterSize="l">
           <EuiFlexItem grow={3}>
             <EuiPanel hasBorder hasShadow={false} paddingSize="m">
@@ -831,8 +751,8 @@ export const EmbeddingExplorerApp = ({ application, http }: EmbeddingExplorerApp
                   <EuiTitle size="s">
                     <h2>
                       {activeDataset?.datasetName ??
-                        i18n.translate('labs.embeddingExplorer.loadingDatasetTitle', {
-                          defaultMessage: 'Loading dataset',
+                        i18n.translate('labs.embeddingExplorer.defaultDatasetTitle', {
+                          defaultMessage: 'Select an index',
                         })}
                     </h2>
                   </EuiTitle>
@@ -847,31 +767,7 @@ export const EmbeddingExplorerApp = ({ application, http }: EmbeddingExplorerApp
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="s" />
-              {activeDataset?.description ? (
-                <>
-                  <EuiText size="s">
-                    <p>{activeDataset.description}</p>
-                  </EuiText>
-                  <EuiSpacer size="s" />
-                </>
-              ) : null}
-              {activeDataset?.projectionNote ? (
-                <>
-                  <EuiCallOut
-                    announceOnMount={false}
-                    color="primary"
-                    iconType="visVega"
-                    title={i18n.translate('labs.embeddingExplorer.projectionNoteTitle', {
-                      defaultMessage: 'Projection note',
-                    })}
-                  >
-                    <p>{activeDataset.projectionNote}</p>
-                  </EuiCallOut>
-                  <EuiSpacer size="m" />
-                </>
-              ) : null}
-              {isSampleLoading ||
-              (activeMode === 'custom' && (isCustomDatasetLoading || isProjectionComputing)) ? (
+              {isCustomDatasetLoading || isProjectionComputing ? (
                 <div
                   style={{
                     alignItems: 'center',
@@ -900,7 +796,6 @@ export const EmbeddingExplorerApp = ({ application, http }: EmbeddingExplorerApp
                 </div>
               ) : points.length > 0 ? (
                 <LazyAtlasEmbeddingView
-                  densityMode={densityMode}
                   onHoverChange={setHoveredPointId}
                   onSelectionChange={setSelectedPointId}
                   points={points}
@@ -918,14 +813,10 @@ export const EmbeddingExplorerApp = ({ application, http }: EmbeddingExplorerApp
                   }
                   body={
                     <p>
-                      {activeMode === 'sample'
-                        ? i18n.translate('labs.embeddingExplorer.noSampleBodyDescription', {
-                            defaultMessage: 'The sample dataset is still loading.',
-                          })
-                        : i18n.translate('labs.embeddingExplorer.noCustomDatasetBodyDescription', {
-                            defaultMessage:
-                              'Choose an index with vector and projection fields, then load the dataset.',
-                          })}
+                      {i18n.translate('labs.embeddingExplorer.noDatasetBodyDescription', {
+                        defaultMessage:
+                          'Choose an index with vector embeddings and optional projection fields, or load the built-in sample into Elasticsearch, then load the dataset.',
+                      })}
                     </p>
                   }
                 />
@@ -945,15 +836,33 @@ export const EmbeddingExplorerApp = ({ application, http }: EmbeddingExplorerApp
               <EuiSpacer size="m" />
               {detailsPoint ? (
                 <>
-                  <EuiTitle size="xs">
-                    <h3>{detailsPoint.label}</h3>
-                  </EuiTitle>
-                  <EuiSpacer size="s" />
                   <EuiText size="s">
-                    <p>{detailsPoint.summary}</p>
+                    <p style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}>
+                      {detailsPoint.summary}
+                    </p>
                   </EuiText>
                   <EuiSpacer size="m" />
-                  <EuiDescriptionList compressed listItems={detailItems} type="column" />
+                  <div
+                    style={{
+                      columnGap: 16,
+                      display: 'grid',
+                      gridTemplateColumns: 'minmax(120px, 160px) minmax(0, 1fr)',
+                      rowGap: 8,
+                    }}
+                  >
+                    {detailItems.map((item) => (
+                      <React.Fragment key={item.title}>
+                        <div style={{ fontWeight: 600, overflowWrap: 'anywhere' }}>
+                          {item.title}
+                        </div>
+                        <div
+                          style={{ minWidth: 0, overflowWrap: 'anywhere', wordBreak: 'break-word' }}
+                        >
+                          {item.description}
+                        </div>
+                      </React.Fragment>
+                    ))}
+                  </div>
                   <EuiHorizontalRule margin="m" />
                   <EuiTitle size="xs">
                     <h3>
@@ -977,6 +886,9 @@ export const EmbeddingExplorerApp = ({ application, http }: EmbeddingExplorerApp
                                 cursor: 'pointer',
                                 padding: 0,
                                 textAlign: 'left',
+                                whiteSpace: 'normal',
+                                width: '100%',
+                                wordBreak: 'break-word',
                               }}
                               type="button"
                             >

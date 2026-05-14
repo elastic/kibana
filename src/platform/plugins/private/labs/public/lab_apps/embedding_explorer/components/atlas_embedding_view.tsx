@@ -12,7 +12,6 @@ import { EmbeddingView, type DataPoint, type EmbeddingViewProps } from '../embed
 import type { EmbeddingExplorerPoint } from '../../../../common';
 
 export interface AtlasEmbeddingViewProps {
-  densityMode: boolean;
   onHoverChange?: (pointId: string | null) => void;
   onSelectionChange: (pointId: string | null) => void;
   points: readonly EmbeddingExplorerPoint[];
@@ -40,7 +39,6 @@ const getSelectionPoint = (
 };
 
 export const AtlasEmbeddingView = ({
-  densityMode,
   onHoverChange,
   onSelectionChange,
   points,
@@ -144,8 +142,8 @@ export const AtlasEmbeddingView = ({
       config: {
         autoLabelEnabled: false,
         downsampleMaxPoints: 5000,
-        mode: densityMode ? 'density' : 'points',
-        pointSize: densityMode ? null : 5,
+        mode: 'density',
+        pointSize: null,
       },
       data,
       height: 560,
@@ -154,7 +152,7 @@ export const AtlasEmbeddingView = ({
       querySelection,
       selection: selection.length ? selection : null,
     }),
-    [data, densityMode, handleSelectionChange, handleTooltipChange, querySelection, selection]
+    [data, handleSelectionChange, handleTooltipChange, querySelection, selection]
   );
 
   if (initialEmbeddingViewPropsRef.current === null) {

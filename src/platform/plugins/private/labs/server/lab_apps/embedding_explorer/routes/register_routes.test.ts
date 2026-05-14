@@ -14,13 +14,47 @@ import {
   EMBEDDING_EXPLORER_INDEX_DATA_API_PATH,
   EMBEDDING_EXPLORER_INDEX_FIELDS_API_PATH,
   EMBEDDING_EXPLORER_INDICES_API_PATH,
-  EMBEDDING_EXPLORER_SAMPLE_API_PATH,
+  EMBEDDING_EXPLORER_SAMPLE_INDICES_API_PATH,
 } from '../../../../common';
 import { isLabInstalled } from '../../../lib/installed_labs';
 import { registerEmbeddingExplorerRoutes } from './register_routes';
 
 jest.mock('../../../lib/installed_labs', () => ({
   isLabInstalled: jest.fn(),
+}));
+
+jest.mock('./get_sample_index_documents', () => ({
+  getSampleIndexDocuments: jest.fn(() => ({
+    categoryField: 'type',
+    datasetName: 'Sample Hacker News vector corpus',
+    description: 'Sample dataset for Elasticsearch loading.',
+    docs: [
+      {
+        author: 'sample-author',
+        embedding: [0.11, 0.22, 0.33],
+        id: 'doc-1',
+        length: 120,
+        projection: {
+          x: 1.25,
+          y: -0.75,
+        },
+        score: 4,
+        source_dataset: 'clickhouse-hackernews-sample',
+        summary: 'Authentication bypass',
+        text: 'Authentication bypass sample text',
+        time: '2020-01-01T00:00:00.000Z',
+        title: 'Authentication bypass',
+        type: 'comment',
+      },
+    ],
+    indexNamePrefix: 'labs_embedding_hackernews_sample',
+    labelField: 'summary',
+    projectionFields: {
+      x: 'projection.x',
+      y: 'projection.y',
+    },
+    vectorField: 'embedding',
+  })),
 }));
 
 const getRegisteredRouteHandler = (
@@ -42,13 +76,13 @@ describe('registerEmbeddingExplorerRoutes', () => {
 
     expect(mockRouter.get).toHaveBeenCalledWith(
       expect.objectContaining({
-        path: EMBEDDING_EXPLORER_SAMPLE_API_PATH,
+        path: EMBEDDING_EXPLORER_INDICES_API_PATH,
       }),
       expect.any(Function)
     );
     expect(mockRouter.get).toHaveBeenCalledWith(
       expect.objectContaining({
-        path: EMBEDDING_EXPLORER_INDICES_API_PATH,
+        path: EMBEDDING_EXPLORER_SAMPLE_INDICES_API_PATH,
       }),
       expect.any(Function)
     );
@@ -60,64 +94,15 @@ describe('registerEmbeddingExplorerRoutes', () => {
     );
     expect(mockRouter.post).toHaveBeenCalledWith(
       expect.objectContaining({
-        path: EMBEDDING_EXPLORER_INDEX_DATA_API_PATH,
+        path: EMBEDDING_EXPLORER_SAMPLE_INDICES_API_PATH,
       }),
       expect.any(Function)
     );
-  });
-
-  it('returns forbidden from the sample route when the lab is not installed', async () => {
-    const mockRouter = router.create();
-    const request = httpServerMock.createKibanaRequest();
-    const response = httpResourcesMock.createResponseFactory();
-    (isLabInstalled as jest.Mock).mockResolvedValue(false);
-
-    registerEmbeddingExplorerRoutes(mockRouter);
-
-    const routeHandler = getRegisteredRouteHandler(
-      mockRouter,
-      'get',
-      EMBEDDING_EXPLORER_SAMPLE_API_PATH
-    );
-    await routeHandler({}, request, response);
-
-    expect(response.forbidden).toHaveBeenCalledWith(
+    expect(mockRouter.post).toHaveBeenCalledWith(
       expect.objectContaining({
-        body: expect.objectContaining({
-          message: 'Install the Embedding explorer lab before using this API.',
-        }),
-      })
-    );
-  });
-
-  it('returns sample data when the lab is installed', async () => {
-    const mockRouter = router.create();
-    const request = httpServerMock.createKibanaRequest();
-    const response = httpResourcesMock.createResponseFactory();
-    (isLabInstalled as jest.Mock).mockResolvedValue(true);
-
-    registerEmbeddingExplorerRoutes(mockRouter);
-
-    const routeHandler = getRegisteredRouteHandler(
-      mockRouter,
-      'get',
-      EMBEDDING_EXPLORER_SAMPLE_API_PATH
-    );
-    await routeHandler({}, request, response);
-
-    expect(response.ok).toHaveBeenCalledWith(
-      expect.objectContaining({
-        body: expect.objectContaining({
-          datasetName: 'Sample Hacker News vector corpus',
-          points: expect.arrayContaining([
-            expect.objectContaining({
-              category: 'comment',
-              id: expect.any(String),
-              source: 'clickhouse-hackernews-sample',
-            }),
-          ]),
-        }),
-      })
+        path: EMBEDDING_EXPLORER_INDEX_DATA_API_PATH,
+      }),
+      expect.any(Function)
     );
   });
 
@@ -196,6 +181,129 @@ describe('registerEmbeddingExplorerRoutes', () => {
               y: 0,
             }),
           ],
+        }),
+      })
+    );
+  });
+
+  it('returns sample index setup status when the lab is installed', async () => {
+    const mockRouter = router.create();
+    const request = httpServerMock.createKibanaRequest();
+    const response = httpResourcesMock.createResponseFactory();
+    const coreContext = coreMock.createRequestHandlerContext();
+    const context = coreMock.createCustomRequestHandlerContext({ core: coreContext });
+    (isLabInstalled as jest.Mock).mockResolvedValue(true);
+
+    coreContext.elasticsearch.client.asCurrentUser.indices.exists
+      .mockResolvedValueOnce(false)
+      .mockResolvedValueOnce(false);
+
+    registerEmbeddingExplorerRoutes(mockRouter);
+
+    const routeHandler = getRegisteredRouteHandler(
+      mockRouter,
+      'get',
+      EMBEDDING_EXPLORER_SAMPLE_INDICES_API_PATH
+    );
+    await routeHandler(context, request, response);
+
+    expect(response.ok).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({
+          categoryField: 'type',
+          isReady: false,
+          projectedIndex: 'labs_embedding_hackernews_sample_projected',
+          vectorField: 'embedding',
+          vectorOnlyIndex: 'labs_embedding_hackernews_sample_vectors_only',
+          xField: 'projection.x',
+          yField: 'projection.y',
+        }),
+      })
+    );
+  });
+
+  it('creates the sample indices when requested', async () => {
+    const mockRouter = router.create();
+    const request = httpServerMock.createKibanaRequest();
+    const response = httpResourcesMock.createResponseFactory();
+    const coreContext = coreMock.createRequestHandlerContext();
+    const context = coreMock.createCustomRequestHandlerContext({ core: coreContext });
+    (isLabInstalled as jest.Mock).mockResolvedValue(true);
+
+    coreContext.elasticsearch.client.asCurrentUser.indices.exists
+      .mockResolvedValueOnce(false)
+      .mockResolvedValueOnce(false)
+      .mockResolvedValueOnce(true)
+      .mockResolvedValueOnce(true);
+    coreContext.elasticsearch.client.asCurrentUser.indices.create.mockResolvedValue({} as never);
+    coreContext.elasticsearch.client.asCurrentUser.bulk.mockResolvedValue({
+      errors: false,
+      items: [{ index: {} }],
+    } as never);
+    coreContext.elasticsearch.client.asCurrentUser.indices.refresh.mockResolvedValue({} as never);
+
+    registerEmbeddingExplorerRoutes(mockRouter);
+
+    const routeHandler = getRegisteredRouteHandler(
+      mockRouter,
+      'post',
+      EMBEDDING_EXPLORER_SAMPLE_INDICES_API_PATH
+    );
+    await routeHandler(context, request, response);
+
+    expect(coreContext.elasticsearch.client.asCurrentUser.indices.create).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        index: 'labs_embedding_hackernews_sample_projected',
+      })
+    );
+    expect(coreContext.elasticsearch.client.asCurrentUser.indices.create).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        index: 'labs_embedding_hackernews_sample_vectors_only',
+      })
+    );
+    expect(coreContext.elasticsearch.client.asCurrentUser.bulk).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        operations: [
+          {
+            index: {
+              _id: 'doc-1',
+              _index: 'labs_embedding_hackernews_sample_projected',
+            },
+          },
+          expect.objectContaining({
+            projection: {
+              x: 1.25,
+              y: -0.75,
+            },
+          }),
+        ],
+      })
+    );
+    expect(coreContext.elasticsearch.client.asCurrentUser.bulk).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        operations: [
+          {
+            index: {
+              _id: 'doc-1',
+              _index: 'labs_embedding_hackernews_sample_vectors_only',
+            },
+          },
+          expect.not.objectContaining({
+            projection: expect.anything(),
+          }),
+        ],
+      })
+    );
+    expect(response.ok).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({
+          isReady: true,
+          projectedIndex: 'labs_embedding_hackernews_sample_projected',
+          vectorOnlyIndex: 'labs_embedding_hackernews_sample_vectors_only',
         }),
       })
     );

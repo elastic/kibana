@@ -18,16 +18,18 @@ export {
 export { LAB_IDS, type LabId, type LabsProfileData } from './types';
 export {
   EMBEDDING_EXPLORER_APP_ID,
+  EMBEDDING_EXPLORER_DEFAULT_INDEX_SAMPLE_SIZE,
   EMBEDDING_EXPLORER_INDEX_DATA_API_PATH,
   EMBEDDING_EXPLORER_INDEX_FIELDS_API_PATH,
   EMBEDDING_EXPLORER_INDICES_API_PATH,
   EMBEDDING_EXPLORER_LAB_ID,
-  EMBEDDING_EXPLORER_SAMPLE_API_PATH,
+  EMBEDDING_EXPLORER_SAMPLE_INDICES_API_PATH,
   type EmbeddingExplorerDatasetResponse,
   type EmbeddingExplorerIndexDataRequest,
   type EmbeddingExplorerIndexDataResponse,
   type EmbeddingExplorerIndexFieldsResponse,
   type EmbeddingExplorerIndicesResponse,
+  type EmbeddingExplorerSampleIndicesResponse,
   type EmbeddingExplorerMetadataValue,
   type EmbeddingExplorerPoint,
 } from './lab_apps/embedding_explorer';

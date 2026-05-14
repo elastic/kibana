@@ -125,7 +125,6 @@ describe('AtlasEmbeddingView', () => {
     const onHoverChange = jest.fn();
     const { container, getByText } = render(
       <AtlasEmbeddingView
-        densityMode={false}
         onHoverChange={onHoverChange}
         onSelectionChange={onSelectionChange}
         points={points}
