@@ -94,7 +94,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
     const sloRepository = new DefaultSLODefinitionRepository(soClient, logger);
     let slo: SLODefinition;
     try {
-      slo = await withSpan({ name: 'slo_burn_rate_executor.load_definition', type: 'rule' }, () =>
+      slo = await withSpan({ name: 'slo_burn_rate_executor:load_definition', type: 'rule' }, () =>
         sloRepository.findById(params.sloId)
       );
     } catch (err) {
@@ -117,7 +117,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
     // We only need the end timestamp to base all of queries on. The length of the time range
     // doesn't matter for our use case since we allow the user to customize the window sizes,
     const { dateEnd } = getTimeRange('1m');
-    const results = await withSpan({ name: 'slo_burn_rate_executor.eval', type: 'rule' }, () =>
+    const results = await withSpan({ name: 'slo_burn_rate_executor:eval', type: 'rule' }, () =>
       evaluate(esClient.asCurrentUser, slo, params, new Date(dateEnd))
     );
 
@@ -125,7 +125,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
     const suppressResults =
       dependencies && results.some((res) => res.shouldAlert)
         ? (
-            await withSpan({ name: 'slo_burn_rate_executor.eval_dependencies', type: 'rule' }, () =>
+            await withSpan({ name: 'slo_burn_rate_executor:eval_dependencies', type: 'rule' }, () =>
               evaluateDependencies(
                 soClient,
                 esClient.asCurrentUser,
@@ -137,7 +137,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
           ).activeRules
         : [];
 
-    await withSpan({ name: 'slo_burn_rate_executor.action_dispatch', type: 'rule' }, async () => {
+    await withSpan({ name: 'slo_burn_rate_executor:action_dispatch', type: 'rule' }, async () => {
       if (results.length > 0) {
         const alertLimit = alertsClient.getAlertLimitValue();
         let hasReachedLimit = false;

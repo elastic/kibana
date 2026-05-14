@@ -81,7 +81,7 @@ async function queryAllResults(
   lastAfterKey?: { instanceId: string }
 ): Promise<EvaluationBucket[]> {
   const queryAndAggs = buildQuery(startedAt, slo, params, lastAfterKey);
-  const results = await withSpan({ name: 'slo_burn_rate_executor.es_query', type: 'rule' }, () =>
+  const results = await withSpan({ name: 'slo_burn_rate_executor:es_query', type: 'rule' }, () =>
     esClient.search<undefined, EvalutionAggResults>({
       index: SLI_DESTINATION_INDEX_PATTERN,
       ...queryAndAggs,

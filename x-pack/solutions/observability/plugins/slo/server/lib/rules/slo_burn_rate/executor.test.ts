@@ -988,19 +988,19 @@ describe('BurnRateRuleExecutor', () => {
 
       expect(addTransactionLabelsMock).toHaveBeenCalledWith({ executor_outcome: 'success' });
       expect(withSpanMock).toHaveBeenCalledWith(
-        { name: 'slo_burn_rate_executor.load_definition', type: 'rule' },
+        { name: 'slo_burn_rate_executor:load_definition', type: 'rule' },
         expect.any(Function)
       );
       expect(withSpanMock).toHaveBeenCalledWith(
-        { name: 'slo_burn_rate_executor.eval', type: 'rule' },
+        { name: 'slo_burn_rate_executor:eval', type: 'rule' },
         expect.any(Function)
       );
       expect(withSpanMock).toHaveBeenCalledWith(
-        { name: 'slo_burn_rate_executor.es_query', type: 'rule' },
+        { name: 'slo_burn_rate_executor:es_query', type: 'rule' },
         expect.any(Function)
       );
       expect(withSpanMock).toHaveBeenCalledWith(
-        { name: 'slo_burn_rate_executor.action_dispatch', type: 'rule' },
+        { name: 'slo_burn_rate_executor:action_dispatch', type: 'rule' },
         expect.any(Function)
       );
     });
