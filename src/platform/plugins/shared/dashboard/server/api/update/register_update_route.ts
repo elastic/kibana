@@ -86,10 +86,11 @@ export function registerUpdateRoute(
             isDashboardAppRequest
           );
           if (operation === 'create') {
-            trackCreateDashboardAction(body, req);
+            // do not await tracking actions
+            trackCreateDashboardAction(body, req).catch(); // do nothing on throw
             return res.created({ body });
           } else {
-            trackUpdateDashboardAction(body, req);
+            trackUpdateDashboardAction(body, req).catch();
             return res.ok({ body });
           }
         } catch (e) {
