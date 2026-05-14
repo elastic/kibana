@@ -1,0 +1,349 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e15]:
+    - banner [ref=e17]:
+      - generic [ref=e18]:
+        - generic [ref=e19]:
+          - generic [ref=e20]:
+            - generic:
+              - status "Page change announcements" [ref=e21]: Agents - Fleet - Elastic
+              - button "Skip to main content" [ref=e22] [cursor=pointer]:
+                - generic [ref=e24]: Skip to main content
+            - link "Elastic home" [ref=e26] [cursor=pointer]:
+              - /url: /app/home
+              - img "Elastic Logo" [ref=e27]
+              - img [ref=e34]
+          - generic [ref=e42]:
+            - generic [ref=e43]:
+              - generic [ref=e44]:
+                - generic:
+                  - generic:
+                    - img
+                - searchbox "Find apps, content, and more." [ref=e45]
+              - 'generic "Keyboard shortcut: Command + /" [ref=e47]': ⌘/
+            - paragraph [ref=e48]: Use the Up and Down arrow keys to move focus over options. Press Enter to select. Press Escape to collapse options.
+          - generic [ref=e49]:
+            - button "Help menu" [ref=e52] [cursor=pointer]:
+              - img [ref=e56]
+            - generic [ref=e59]:
+              - button "Newsfeed menu - unread items available" [ref=e62] [cursor=pointer]:
+                - img [ref=e66]
+              - button "AI Agent" [ref=e73] [cursor=pointer]:
+                - generic [ref=e78]: AI Agent
+              - button "Account menu" [ref=e83] [cursor=pointer]:
+                - img "elastic" [ref=e87]:
+                  - generic [ref=e88]: e
+        - generic [ref=e89]:
+          - generic [ref=e90]:
+            - button "Toggle primary navigation" [ref=e92] [cursor=pointer]:
+              - img [ref=e96]
+            - button "Spaces navigation" [ref=e101] [cursor=pointer]:
+              - img "Default" [ref=e105]:
+                - generic [ref=e106]: D
+          - navigation "Breadcrumbs" [ref=e107]:
+            - list [ref=e108]:
+              - listitem [ref=e109]:
+                - link "Fleet" [ref=e110] [cursor=pointer]:
+                  - /url: /app/fleet/
+              - listitem [ref=e111]:
+                - generic "Agents" [ref=e112]
+          - navigation "App menu" [ref=e117]:
+            - button "Give feedback" [ref=e119] [cursor=pointer]:
+              - generic [ref=e123]: Give feedback
+    - generic [ref=e125]:
+      - generic [ref=e129]:
+        - paragraph [ref=e130]: Help us improve the Elastic Stack
+        - generic [ref=e132]:
+          - strong [ref=e133]: Usage collection is disabled.
+          - text: This allows us to learn what our users are most interested in, so we can improve our products and services. Refer to our
+          - link "Privacy Statement (external, opens in a new tab or window)" [ref=e134] [cursor=pointer]:
+            - /url: https://www.elastic.co/legal/product-privacy-statement
+            - text: Privacy Statement
+            - generic [ref=e137]: (external, opens in a new tab or window)
+          - text: .
+          - link "Enable usage collection." [ref=e138] [cursor=pointer]:
+            - /url: /app/management/kibana/settings
+          - button "Dismiss" [ref=e140] [cursor=pointer]:
+            - generic [ref=e141]: Dismiss
+      - generic [ref=e144]:
+        - complementary "React Query Devtools":
+          - button "Open React Query Devtools" [ref=e145] [cursor=pointer]:
+            - img [ref=e146]
+            - generic [ref=e152]: Open React Query Devtools
+        - generic [ref=e153]:
+          - paragraph [ref=e154]:
+            - img [ref=e155]
+            - text: We've added new privileges that let you define more granularly who can view or edit Fleet agents, policies, and settings.
+            - link "Learn more. (external, opens in a new tab or window)" [ref=e158] [cursor=pointer]:
+              - /url: https://www.elastic.co/docs/reference/fleet/fleet-roles-privileges
+              - strong [ref=e159]: Learn more.
+              - generic [ref=e162]: (external, opens in a new tab or window)
+          - button "Dismiss this callout" [ref=e163] [cursor=pointer]:
+            - img
+          - status [ref=e164]
+        - generic [ref=e165]:
+          - generic [ref=e167]:
+            - generic [ref=e170]:
+              - heading "Fleet" [level=1] [ref=e174]
+              - paragraph [ref=e177]: Centralized management for Elastic Agents.
+            - tablist [ref=e180]:
+              - tab "Agents" [selected] [ref=e181] [cursor=pointer]:
+                - generic [ref=e182]: Agents
+              - tab "Agent policies" [ref=e185] [cursor=pointer]:
+                - generic [ref=e186]: Agent policies
+              - tab "Enrollment tokens" [ref=e187] [cursor=pointer]:
+                - generic [ref=e188]: Enrollment tokens
+              - tab "Uninstall tokens" [ref=e189] [cursor=pointer]:
+                - generic [ref=e190]: Uninstall tokens
+              - tab "Data streams" [ref=e191] [cursor=pointer]:
+                - generic [ref=e192]: Data streams
+              - tab "Settings" [ref=e193] [cursor=pointer]:
+                - generic [ref=e194]: Settings
+          - generic [ref=e197]:
+            - generic [ref=e199]:
+              - generic [ref=e200]:
+                - generic [ref=e202]:
+                  - link "Ingest Overview Metrics" [ref=e204] [cursor=pointer]:
+                    - /url: /app/r?l=DASHBOARD_APP_LOCATOR&v=9.5.0&lz=N4IgJghgzgFgRgewgJzASTCAXCApgG2gBcBLAYwH0IBzXAOyIFoIBGAFgA4wyB2ABkYA2OAGYyjFi1xhGATi64hPOGFxkwAJhYcNbEAF8gA%3D
+                    - generic [ref=e210]: Ingest Overview Metrics
+                  - link "Agent Info Metrics" [ref=e212] [cursor=pointer]:
+                    - /url: /app/r?l=DASHBOARD_APP_LOCATOR&v=9.5.0&lz=N4IgJghgzgFgRgewgJzASTCAXCApgG2gBcBLAYwH0IBzXAOyIFoAGANmeYDNOJnHW4AVlyMAjKNxhGATgAcYEawDscBWTAAmUbI0AWEAF8gA
+                    - generic [ref=e218]: Agent Info Metrics
+                - generic [ref=e219]:
+                  - button "Agent activity" [ref=e223] [cursor=pointer]:
+                    - generic [ref=e227]: Agent activity
+                  - button "Add" [ref=e230] [cursor=pointer]:
+                    - generic [ref=e231]: Add
+              - generic [ref=e235]:
+                - combobox "Search and filter the Fleet page" [ref=e238]:
+                  - search [ref=e239]:
+                    - textbox "Start typing to search and filter the Fleet page" [ref=e242]:
+                      - /placeholder: Filter your data using KQL syntax
+                    - generic:
+                      - generic:
+                        - img
+                - generic [ref=e244]:
+                  - button "Status 5 active filters" [ref=e248] [cursor=pointer]:
+                    - generic [ref=e249]:
+                      - generic "Status" [ref=e250]
+                      - marquee "5 active filters" [ref=e252]: "5"
+                  - button "Tags 1 available filters" [ref=e256] [cursor=pointer]:
+                    - generic [ref=e257]:
+                      - generic "Tags" [ref=e258]
+                      - marquee "1 available filters" [ref=e260]: "1"
+                  - button "Agent policy 2 available filters" [ref=e264] [cursor=pointer]:
+                    - generic [ref=e265]:
+                      - generic "Agent policy" [ref=e266]
+                      - marquee "2 available filters" [ref=e268]: "2"
+                  - button "Upgrade available" [ref=e271] [cursor=pointer]:
+                    - generic "Upgrade available" [ref=e273]
+            - generic [ref=e275]:
+              - generic [ref=e282]:
+                - text: Showing 3 agents
+                - img "Info" [ref=e284]
+              - generic [ref=e289]:
+                - generic [ref=e296]:
+                  - generic [ref=e297]: Healthy
+                  - generic [ref=e299]: "2"
+                - generic [ref=e306]:
+                  - generic [ref=e307]: Unhealthy
+                  - generic [ref=e309]: "0"
+                - generic [ref=e316]:
+                  - generic [ref=e317]: Orphaned
+                  - generic [ref=e319]: "0"
+                - generic [ref=e326]:
+                  - generic [ref=e327]: Updating
+                  - generic [ref=e329]: "0"
+                - generic [ref=e336]:
+                  - generic [ref=e337]: Offline
+                  - generic [ref=e339]: "1"
+                - generic [ref=e346]:
+                  - generic [ref=e347]: Inactive
+                  - generic [ref=e349]: "0"
+                - generic [ref=e356]:
+                  - generic [ref=e357]: Unenrolled
+                  - generic [ref=e359]: "0"
+                - generic [ref=e366]:
+                  - generic [ref=e367]: Uninstalled
+                  - generic [ref=e369]: "0"
+            - generic [ref=e376]:
+              - generic [ref=e377]: 𐘂𐘂
+              - table "Fleet agents, Showing 3 of 3 data rows." [ref=e379]:
+                - caption [ref=e380]:
+                  - generic [ref=e381]: ✄𐘗
+                  - paragraph [ref=e382]: Fleet agents,
+                  - paragraph [ref=e383]: Showing 3 of 3 data rows.
+                  - generic [ref=e384]: ✄𐘗
+                - rowgroup [ref=e385]:
+                  - row "Select all rows Status Host Agent policy CPU Memory Last activity Version Actions" [ref=e386]:
+                    - columnheader "Select all rows" [ref=e387]:
+                      - checkbox "Select all rows" [ref=e391] [cursor=pointer]
+                      - generic [ref=e392]: ↦
+                    - columnheader "Status" [ref=e393]:
+                      - generic "Status" [ref=e395]
+                      - generic [ref=e396]: ↦
+                    - columnheader "Host" [ref=e397]:
+                      - button "Host" [ref=e399] [cursor=pointer]:
+                        - generic "Host" [ref=e401]
+                      - generic [ref=e403]: ↦
+                    - columnheader "Agent policy" [ref=e404]:
+                      - button "Agent policy" [ref=e406] [cursor=pointer]:
+                        - generic "Agent policy" [ref=e408]
+                      - generic [ref=e410]: ↦
+                    - columnheader "CPU" [ref=e411]:
+                      - generic "CPU" [ref=e413]:
+                        - generic [ref=e415]:
+                          - text: CPU
+                          - img [ref=e416]
+                      - generic [ref=e420]: ↦
+                    - columnheader "Memory" [ref=e421]:
+                      - generic "Memory" [ref=e423]:
+                        - generic [ref=e425]:
+                          - text: Memory
+                          - img [ref=e426]
+                      - generic [ref=e430]: ↦
+                    - columnheader "Last activity" [ref=e431]:
+                      - button "Last activity" [ref=e433] [cursor=pointer]:
+                        - generic "Last activity" [ref=e435]
+                      - generic [ref=e437]: ↦
+                    - columnheader "Version" [ref=e438]:
+                      - button "Version" [ref=e440] [cursor=pointer]:
+                        - generic "Version" [ref=e442]
+                      - generic [ref=e444]: ↦
+                    - columnheader "Actions" [ref=e445]:
+                      - generic "Actions" [ref=e447]
+                      - generic [ref=e448]: ↵
+                - rowgroup [ref=e449]:
+                  - row "Select row 1 Healthy emulation-agent-c65e315f attack-emulation-agents (51222493-043a-4cb9-a945-0a675415eda1) rev. 34 0.83 % 171 MB 20 seconds ago 9.5.0 Open menu" [ref=e450]:
+                    - cell "Select row 1" [ref=e451]:
+                      - checkbox "Select row 1" [ref=e455] [cursor=pointer]
+                      - generic [ref=e456]: ↦
+                    - cell "Healthy" [ref=e457]:
+                      - generic "Healthy" [ref=e460]:
+                        - generic [ref=e462]: Healthy
+                      - generic [ref=e463]: ↦
+                    - cell "emulation-agent-c65e315f" [ref=e464]:
+                      - link "emulation-agent-c65e315f" [ref=e468] [cursor=pointer]:
+                        - /url: /app/fleet/agents/fc1964de-ac25-40d0-b5ff-7bba226f627d
+                      - generic [ref=e469]: ↦
+                    - cell "attack-emulation-agents (51222493-043a-4cb9-a945-0a675415eda1) rev. 34" [ref=e470]:
+                      - generic [ref=e473]:
+                        - link "attack-emulation-agents (51222493-043a-4cb9-a945-0a675415eda1)" [ref=e477] [cursor=pointer]:
+                          - /url: /app/fleet/policies/51222493-043a-4cb9-a945-0a675415eda1
+                        - generic [ref=e481]: rev. 34
+                      - generic [ref=e482]: ↦
+                    - cell "0.83 %" [ref=e483]:
+                      - generic [ref=e486]: 0.83 %
+                      - generic [ref=e487]: ↦
+                    - cell "171 MB" [ref=e488]:
+                      - generic [ref=e489]: 171 MB
+                      - generic [ref=e490]: ↦
+                    - cell "20 seconds ago" [ref=e491]:
+                      - generic [ref=e493]: 20 seconds ago
+                      - generic [ref=e494]: ↦
+                    - cell "9.5.0" [ref=e495]:
+                      - generic [ref=e501]: 9.5.0
+                      - generic [ref=e502]: ↦
+                    - cell "Open menu" [ref=e503]:
+                      - button "Open menu" [ref=e507] [cursor=pointer]:
+                        - img
+                      - generic [ref=e508]: ↵
+                  - row "Select row 2 Offline emulation-agent-b92820eb attack-emulation-agents (51222493-043a-4cb9-a945-0a675415eda1) rev. 34 N/A Info N/A Info 4 hours ago 9.5.0 Open menu" [ref=e509]:
+                    - cell "Select row 2" [ref=e510]:
+                      - checkbox "Select row 2" [ref=e514] [cursor=pointer]
+                      - generic [ref=e515]: ↦
+                    - cell "Offline" [ref=e516]:
+                      - generic "Offline" [ref=e519]:
+                        - generic [ref=e521]: Offline
+                      - generic [ref=e522]: ↦
+                    - cell "emulation-agent-b92820eb" [ref=e523]:
+                      - link "emulation-agent-b92820eb" [ref=e527] [cursor=pointer]:
+                        - /url: /app/fleet/agents/46647543-30a1-4849-b080-56e5eae1eab7
+                      - generic [ref=e528]: ↦
+                    - cell "attack-emulation-agents (51222493-043a-4cb9-a945-0a675415eda1) rev. 34" [ref=e529]:
+                      - generic [ref=e532]:
+                        - link "attack-emulation-agents (51222493-043a-4cb9-a945-0a675415eda1)" [ref=e536] [cursor=pointer]:
+                          - /url: /app/fleet/policies/51222493-043a-4cb9-a945-0a675415eda1
+                        - generic [ref=e540]: rev. 34
+                      - generic [ref=e541]: ↦
+                    - cell "N/A Info" [ref=e542]:
+                      - generic [ref=e544]:
+                        - generic [ref=e546]: N/A
+                        - img "Info" [ref=e549]
+                      - generic [ref=e553]: ↦
+                    - cell "N/A Info" [ref=e554]:
+                      - generic [ref=e556]:
+                        - generic [ref=e558]: N/A
+                        - img "Info" [ref=e561]
+                      - generic [ref=e565]: ↦
+                    - cell "4 hours ago" [ref=e566]:
+                      - generic [ref=e568]: 4 hours ago
+                      - generic [ref=e569]: ↦
+                    - cell "9.5.0" [ref=e570]:
+                      - generic [ref=e576]: 9.5.0
+                      - generic [ref=e577]: ↦
+                    - cell "Open menu" [ref=e578]:
+                      - button "Open menu" [ref=e582] [cursor=pointer]:
+                        - img
+                      - generic [ref=e583]: ↵
+                  - row "Select row 3 Healthy 4b3f039a0523 Fleet Server Policy (fleet-server-policy) rev. 3 0.80 % 108 MB 7 seconds ago 9.5.0 Info Open menu" [ref=e584]:
+                    - cell "Select row 3" [ref=e585]:
+                      - checkbox "Select row 3" [ref=e589] [cursor=pointer]
+                      - generic [ref=e590]: ↦
+                    - cell "Healthy" [ref=e591]:
+                      - generic "Healthy" [ref=e594]:
+                        - generic [ref=e596]: Healthy
+                      - generic [ref=e597]: ↦
+                    - cell "4b3f039a0523" [ref=e598]:
+                      - link "4b3f039a0523" [ref=e602] [cursor=pointer]:
+                        - /url: /app/fleet/agents/0a29adcc-5fd9-4283-8e03-415869dd0010
+                      - generic [ref=e603]: ↦
+                    - cell "Fleet Server Policy (fleet-server-policy) rev. 3" [ref=e604]:
+                      - generic [ref=e607]:
+                        - link "Fleet Server Policy (fleet-server-policy)" [ref=e611] [cursor=pointer]:
+                          - /url: /app/fleet/policies/fleet-server-policy
+                        - generic [ref=e615]: rev. 3
+                      - generic [ref=e616]: ↦
+                    - cell "0.80 %" [ref=e617]:
+                      - generic [ref=e620]: 0.80 %
+                      - generic [ref=e621]: ↦
+                    - cell "108 MB" [ref=e622]:
+                      - generic [ref=e623]: 108 MB
+                      - generic [ref=e624]: ↦
+                    - cell "7 seconds ago" [ref=e625]:
+                      - generic [ref=e627]: 7 seconds ago
+                      - generic [ref=e628]: ↦
+                    - cell "9.5.0 Info" [ref=e629]:
+                      - generic [ref=e633]:
+                        - generic [ref=e635]: 9.5.0
+                        - img "Info" [ref=e638]
+                      - generic [ref=e642]: ↦
+                    - cell "Open menu" [ref=e643]:
+                      - button "Open menu" [ref=e647] [cursor=pointer]:
+                        - img
+                      - generic [ref=e648]: ↵
+              - generic [ref=e649]: 𐘂𐘂
+              - generic [ref=e652]:
+                - 'button "Rows per page: 20" [ref=e655] [cursor=pointer]':
+                  - generic [ref=e657]: "Rows per page: 20"
+                - 'navigation "Pagination for table: Fleet agents" [ref=e660]':
+                  - status [ref=e661]: Page 1 of 1
+                  - button "Previous page" [disabled] [ref=e662]:
+                    - img
+                  - list [ref=e663]:
+                    - listitem [ref=e664]:
+                      - button "Page 1 of 1" [disabled] [ref=e665]:
+                        - generic [ref=e667]: "1"
+                  - button "Next page" [disabled] [ref=e668]:
+                    - img
+    - contentinfo
+  - generic:
+    - generic:
+      - log "Notification message list"
+  - button "Expand developer toolbar" [ref=e671] [cursor=pointer]:
+    - img
+  - dialog "Auto-upgrade agents" [ref=e672]:
+    - generic [ref=e676]:
+      - heading "Auto-upgrade agents" [level=2] [ref=e678]
+      - generic [ref=e680]: Select your policy and configure target agent versions for automatic upgrades.
+      - button "Got it" [ref=e684] [cursor=pointer]:
+        - generic [ref=e686]: Got it

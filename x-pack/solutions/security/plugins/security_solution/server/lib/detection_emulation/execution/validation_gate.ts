@@ -11,7 +11,7 @@ import { payloadLibrary } from '../payloads';
 /**
  * Operator-tunable validation gates that fire AFTER feature-flag /
  * RBAC checks but BEFORE any per-host I/O (allowlist resolution, rate
- * limiter acquire). The two gates are independent and both default to
+ * limiter acquire). The gates are independent and all default to
  * a no-op so existing deployments see no behavioural change.
  *
  * `curatedOnly`     ─ closes register row #15 (no safe-by-default
@@ -23,8 +23,13 @@ import { payloadLibrary } from '../payloads';
  *                      passed through to the EDR). When non-empty the
  *                      `runscript` command rejects any `scriptId` that
  *                      is not on the operator's vetted list.
+ * `allowedExecuteCommandPatterns` ─ closes register row #4 (`execute`
+ *                      free-form command string). When non-empty the
+ *                      `execute` command rejects any `parameters.command`
+ *                      value that does not match at least one of the
+ *                      operator-supplied regex patterns.
  *
- * Both gates exist as small pure helpers so the per-family tools'
+ * All gates exist as small pure helpers so the per-family tools'
  * existing `withCommandGates` orchestrator can call them at the right
  * point in the gate sequence without growing the orchestrator's I/O
  * surface.
@@ -33,11 +38,13 @@ import { payloadLibrary } from '../payloads';
 export interface ValidationGateConfig {
   curatedOnly: boolean;
   allowedScriptIds: readonly string[];
+  allowedExecuteCommandPatterns: readonly string[];
 }
 
 export const DEFAULT_VALIDATION_GATE_CONFIG: ValidationGateConfig = {
   curatedOnly: false,
   allowedScriptIds: [],
+  allowedExecuteCommandPatterns: [],
 };
 
 /**
@@ -169,6 +176,7 @@ export const resolveValidationGateConfig = (
     | {
         curatedOnly?: boolean;
         allowedScriptIds?: readonly string[];
+        allowedExecuteCommandPatterns?: readonly string[];
       }
     | undefined
 ): ValidationGateConfig => {
@@ -177,5 +185,8 @@ export const resolveValidationGateConfig = (
     curatedOnly: validation.curatedOnly ?? DEFAULT_VALIDATION_GATE_CONFIG.curatedOnly,
     allowedScriptIds:
       validation.allowedScriptIds ?? DEFAULT_VALIDATION_GATE_CONFIG.allowedScriptIds,
+    allowedExecuteCommandPatterns:
+      validation.allowedExecuteCommandPatterns ??
+      DEFAULT_VALIDATION_GATE_CONFIG.allowedExecuteCommandPatterns,
   };
 };

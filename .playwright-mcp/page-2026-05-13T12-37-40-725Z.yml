@@ -1,0 +1,320 @@
+- generic [ref=e1]:
+  - generic [ref=e15]:
+    - banner [ref=e17]:
+      - generic [ref=e18]:
+        - generic [ref=e19]:
+          - generic [ref=e20]:
+            - generic:
+              - status "Page change announcements" [ref=e21]: Response actions history - Manage - Security - Elastic
+              - button "Skip to main content" [ref=e22] [cursor=pointer]:
+                - generic [ref=e24]: Skip to main content
+            - link "Elastic home" [ref=e26] [cursor=pointer]:
+              - /url: /app/home
+              - progressbar "Loading content" [ref=e27]
+              - img [ref=e28]
+          - generic [ref=e36]:
+            - generic [ref=e37]:
+              - generic [ref=e38]:
+                - generic:
+                  - generic:
+                    - img
+                - searchbox "Find apps, content, and more." [ref=e39]
+              - 'generic "Keyboard shortcut: Command + /" [ref=e41]': ⌘/
+            - paragraph [ref=e42]: Use the Up and Down arrow keys to move focus over options. Press Enter to select. Press Escape to collapse options.
+          - generic [ref=e43]:
+            - button "Help menu" [ref=e46] [cursor=pointer]:
+              - img [ref=e50]
+            - generic [ref=e53]:
+              - button "Newsfeed menu - unread items available" [ref=e56] [cursor=pointer]:
+                - img [ref=e60]
+              - button "AI Agent" [ref=e67] [cursor=pointer]:
+                - generic [ref=e72]: AI Agent
+              - button "Account menu" [ref=e77] [cursor=pointer]:
+                - img "elastic" [ref=e81]:
+                  - generic [ref=e82]: e
+        - generic [ref=e83]:
+          - generic [ref=e84]:
+            - button "Toggle primary navigation" [ref=e86] [cursor=pointer]:
+              - img [ref=e90]
+            - button "Spaces navigation" [ref=e95] [cursor=pointer]:
+              - img "Default" [ref=e99]:
+                - generic [ref=e100]: D
+          - navigation "Breadcrumbs" [ref=e101]:
+            - list [ref=e102]:
+              - listitem [ref=e103]:
+                - link "Security" [ref=e104] [cursor=pointer]:
+                  - /url: /app/security/get_started
+              - listitem [ref=e105]:
+                - link "Manage" [ref=e106] [cursor=pointer]:
+                  - /url: /app/security/manage
+              - listitem [ref=e107]:
+                - generic "Response actions history" [ref=e108]
+          - navigation "App menu" [ref=e115]:
+            - link "Add integrations" [ref=e117] [cursor=pointer]:
+              - /url: /app/integrations/browse/security
+              - generic [ref=e123]: Add integrations
+    - generic [ref=e125]:
+      - generic [ref=e129]:
+        - paragraph [ref=e130]: Help us improve the Elastic Stack
+        - generic [ref=e132]:
+          - strong [ref=e133]: Usage collection is disabled.
+          - text: This allows us to learn what our users are most interested in, so we can improve our products and services. Refer to our
+          - link "Privacy Statement (external, opens in a new tab or window)" [ref=e134] [cursor=pointer]:
+            - /url: https://www.elastic.co/legal/product-privacy-statement
+            - text: Privacy Statement
+            - generic [ref=e137]: (external, opens in a new tab or window)
+          - text: .
+          - link "Enable usage collection." [ref=e138] [cursor=pointer]:
+            - /url: /app/management/kibana/settings
+          - button "Dismiss" [ref=e140] [cursor=pointer]:
+            - generic [ref=e141]: Dismiss
+      - generic [ref=e145]:
+        - generic [ref=e146]:
+          - generic [ref=e147]:
+            - heading "Security Security" [level=2] [ref=e148]:
+              - img "Security" [ref=e149]
+              - strong [ref=e153]: Security
+            - generic [ref=e158]:
+              - generic [ref=e159]:
+                - list [ref=e162]:
+                  - listitem [ref=e163]:
+                    - link "Dashboards" [ref=e164] [cursor=pointer]:
+                      - /url: /app/security/dashboards?timeline=(activeTab:query,isOpen:!f,query:(expression:'',kind:kuery))
+                      - generic [ref=e165]: Dashboards
+                - list [ref=e171]:
+                  - listitem [ref=e172]:
+                    - link "Rules" [ref=e173] [cursor=pointer]:
+                      - /url: /app/security/rules?timeline=(activeTab:query,isOpen:!f,query:(expression:'',kind:kuery))
+                      - generic [ref=e175]:
+                        - generic [ref=e176]: Rules
+                        - img [ref=e178]
+                - list [ref=e183]:
+                  - listitem [ref=e184]:
+                    - link "Alerts" [ref=e185] [cursor=pointer]:
+                      - /url: /app/security/alerts?timeline=(activeTab:query,isOpen:!f,query:(expression:'',kind:kuery))
+                      - generic [ref=e186]: Alerts
+                - list [ref=e190]:
+                  - listitem [ref=e191]:
+                    - link "Attack discovery" [ref=e192] [cursor=pointer]:
+                      - /url: /app/security/attack_discovery?timeline=(activeTab:query,isOpen:!f,query:(expression:'',kind:kuery))
+                      - generic [ref=e193]: Attack discovery
+                - list [ref=e197]:
+                  - listitem [ref=e198]:
+                    - link "Findings" [ref=e199] [cursor=pointer]:
+                      - /url: /app/security/cloud_security_posture/findings?timeline=(activeTab:query,isOpen:!f,query:(expression:'',kind:kuery))
+                      - generic [ref=e200]: Findings
+                - list [ref=e204]:
+                  - listitem [ref=e205]:
+                    - link "Cases" [ref=e206] [cursor=pointer]:
+                      - /url: /app/security/cases?timeline=(activeTab:query,isOpen:!f,query:(expression:'',kind:kuery))
+                      - generic [ref=e207]: Cases
+                - list [ref=e213]:
+                  - listitem [ref=e214]:
+                    - link "Entity analytics" [ref=e215] [cursor=pointer]:
+                      - /url: /app/security/entity_analytics_overview?timeline=(activeTab:query,isOpen:!f,query:(expression:'',kind:kuery))
+                      - generic [ref=e217]:
+                        - generic [ref=e218]: Entity analytics
+                        - img [ref=e220]
+                - list [ref=e225]:
+                  - listitem [ref=e226]:
+                    - link "Explore" [ref=e227] [cursor=pointer]:
+                      - /url: /app/security/hosts?timeline=(activeTab:query,isOpen:!f,query:(expression:'',kind:kuery))
+                      - generic [ref=e229]:
+                        - generic [ref=e230]: Explore
+                        - img [ref=e232]
+                - list [ref=e237]:
+                  - listitem [ref=e238]:
+                    - link "Timelines" [ref=e239] [cursor=pointer]:
+                      - /url: /app/security/timelines?timeline=(activeTab:query,isOpen:!f,query:(expression:'',kind:kuery))
+                      - generic [ref=e240]: Timelines
+                - list [ref=e244]:
+                  - listitem [ref=e245]:
+                    - link "Intelligence" [ref=e246] [cursor=pointer]:
+                      - /url: /app/security/threat_intelligence/indicators?timeline=(activeTab:query,isOpen:!f,query:(expression:'',kind:kuery))
+                      - generic [ref=e247]: Intelligence
+              - generic [ref=e251]:
+                - separator [ref=e252]
+                - list [ref=e255]:
+                  - listitem [ref=e256]:
+                    - link "Launchpad" [ref=e257] [cursor=pointer]:
+                      - /url: /app/security/get_started
+                      - generic [ref=e259]:
+                        - generic [ref=e260]: Launchpad
+                        - img [ref=e262]
+                - list [ref=e267]:
+                  - listitem [ref=e268]:
+                    - link "Manage" [ref=e269] [cursor=pointer]:
+                      - /url: /app/security/administration/endpoints
+                      - generic [ref=e271]:
+                        - generic [ref=e272]: Manage
+                        - img [ref=e274]
+            - generic [ref=e277]:
+              - separator [ref=e278]
+              - generic [ref=e279]:
+                - generic [ref=e280]:
+                  - generic [ref=e281]:
+                    - strong [ref=e284]: New navigation available
+                    - button "Dismiss" [ref=e286] [cursor=pointer]:
+                      - img
+                  - generic [ref=e288]: Switch to Security nav for easier access to analytics and management.
+                - button "Learn more" [ref=e290] [cursor=pointer]:
+                  - generic [ref=e292]: Learn more
+          - button "Collapse side navigation" [ref=e293] [cursor=pointer]:
+            - img
+        - main [ref=e294]:
+          - generic [ref=e297]:
+            - generic [ref=e301]:
+              - heading "Response actions history" [level=1] [ref=e302]:
+                - generic [ref=e305]: Response actions history
+              - paragraph [ref=e308]: View the history of response actions performed on hosts.
+            - generic [ref=e311]:
+              - generic [ref=e312]:
+                - generic [ref=e315]:
+                  - generic:
+                    - generic:
+                      - img
+                  - searchbox "Filter by username" [ref=e316]
+                - generic [ref=e318]:
+                  - button "Hosts 1 available filters" [ref=e321] [cursor=pointer]:
+                    - generic [ref=e322]:
+                      - generic "Hosts" [ref=e323]
+                      - marquee "1 available filters" [ref=e325]: "1"
+                  - button "Actions 12 available filters" [ref=e329] [cursor=pointer]:
+                    - generic [ref=e330]:
+                      - generic "Actions" [ref=e331]
+                      - marquee "12 available filters" [ref=e333]: "12"
+                  - button "Statuses 3 available filters" [ref=e337] [cursor=pointer]:
+                    - generic [ref=e338]:
+                      - generic "Statuses" [ref=e339]
+                      - marquee "3 available filters" [ref=e341]: "3"
+                  - button "Types 6 available filters" [ref=e345] [cursor=pointer]:
+                    - generic [ref=e346]:
+                      - generic "Types" [ref=e347]
+                      - marquee "6 available filters" [ref=e349]: "6"
+                - generic [ref=e356]:
+                  - button "Date quick select" [ref=e360] [cursor=pointer]
+                  - button "Last 24 hours" [ref=e366] [cursor=pointer]:
+                    - generic [ref=e368]: Last 24 hours
+                - button "Refresh" [ref=e371] [cursor=pointer]:
+                  - generic [ref=e374]: Refresh
+              - generic [ref=e375]:
+                - text: Showing
+                - strong [ref=e376]: 1-1
+                - text: of 1
+                - strong [ref=e377]: response action
+              - separator [ref=e378]
+              - generic [ref=e379]:
+                - generic [ref=e380]: 𐘂𐘂
+                - table "Response action log entries, Showing 1 of 1 data rows." [ref=e382]:
+                  - caption [ref=e383]:
+                    - generic [ref=e384]: ✄𐘗
+                    - paragraph [ref=e385]: Response action log entries,
+                    - paragraph [ref=e386]: Showing 1 of 1 data rows.
+                    - generic [ref=e387]: ✄𐘗
+                  - rowgroup [ref=e388]:
+                    - row "Time Command User Hosts Comments Status Expand rows" [ref=e389]:
+                      - columnheader "Time" [ref=e390]:
+                        - generic "Time" [ref=e392]
+                        - generic [ref=e393]: ↦
+                      - columnheader "Command" [ref=e394]:
+                        - generic "Command" [ref=e396]
+                        - generic [ref=e397]: ↦
+                      - columnheader "User" [ref=e398]:
+                        - generic "User" [ref=e400]
+                        - generic [ref=e401]: ↦
+                      - columnheader "Hosts" [ref=e402]:
+                        - generic "Hosts" [ref=e404]
+                        - generic [ref=e405]: ↦
+                      - columnheader "Comments" [ref=e406]:
+                        - generic "Comments" [ref=e408]
+                        - generic [ref=e409]: ↦
+                      - columnheader "Status" [ref=e410]:
+                        - generic "Status" [ref=e412]
+                        - generic [ref=e413]: ↦
+                      - columnheader "Expand rows" [ref=e414]:
+                        - generic [ref=e415]:
+                          - generic "Expand rows":
+                            - generic [ref=e416]: Expand rows
+                        - generic [ref=e417]: ↵
+                  - rowgroup [ref=e418]:
+                    - row "May 13, 2026 @ 14:32:07.946 execute elastic emulation-agent-c65e315f E2E demo proof - 2026-05-13T14:32:06+02:00 Successful Expand" [ref=e419]:
+                      - cell "May 13, 2026 @ 14:32:07.946" [ref=e420]:
+                        - generic [ref=e423]: May 13, 2026 @ 14:32:07.946
+                        - generic [ref=e424]: ↦
+                      - cell "execute" [ref=e425]:
+                        - generic [ref=e429]: execute
+                        - generic [ref=e430]: ↦
+                      - cell "elastic" [ref=e431]:
+                        - button "elastic" [ref=e434] [cursor=pointer]:
+                          - generic [ref=e435]:
+                            - img [ref=e436]:
+                              - generic [ref=e437]: e
+                            - generic [ref=e440]: elastic
+                        - generic [ref=e441]: ↦
+                      - cell "emulation-agent-c65e315f" [ref=e442]:
+                        - generic [ref=e446]: emulation-agent-c65e315f
+                        - generic [ref=e447]: ↦
+                      - cell "E2E demo proof - 2026-05-13T14:32:06+02:00" [ref=e448]:
+                        - generic [ref=e452]: E2E demo proof - 2026-05-13T14:32:06+02:00
+                        - generic [ref=e453]: ↦
+                      - cell "Successful" [ref=e454]:
+                        - generic [ref=e459]: Successful
+                        - generic [ref=e460]: ↦
+                      - cell "Expand" [ref=e461]:
+                        - button "Expand" [ref=e463] [cursor=pointer]:
+                          - img
+                        - generic [ref=e464]: ↵
+                - generic [ref=e465]: 𐘂𐘂
+                - generic [ref=e468]:
+                  - 'button "Rows per page: 10" [ref=e471] [cursor=pointer]':
+                    - generic [ref=e473]: "Rows per page: 10"
+                  - 'navigation "Pagination for table: Response action log entries" [ref=e476]':
+                    - status [ref=e477]: Page 1 of 1
+                    - button "Previous page" [disabled] [ref=e478]:
+                      - img
+                    - list [ref=e479]:
+                      - listitem [ref=e480]:
+                        - button "Page 1 of 1" [disabled] [ref=e481]:
+                          - generic [ref=e483]: "1"
+                    - button "Next page" [disabled] [ref=e484]:
+                      - img
+    - contentinfo
+  - generic:
+    - generic:
+      - log "Notification message list"
+  - button "Expand developer toolbar (console warning detected)" [ref=e487] [cursor=pointer]:
+    - img
+  - dialog "Introducing AI Agent" [active] [ref=e491]:
+    - generic [ref=e493]:
+      - img [ref=e496]
+      - heading "Introducing AI Agent" [level=1] [ref=e501]
+    - generic [ref=e504]:
+      - paragraph [ref=e505]: AI Agent can take action, not just answer. It runs queries, connects your tools, and works across your environment to complete tasks end-to-end.
+      - list [ref=e506]:
+        - listitem [ref=e507]:
+          - generic [ref=e508]:
+            - img [ref=e510]
+            - generic [ref=e513]:
+              - strong [ref=e514]: Takes action
+              - text: by executing multi-step tasks, not just suggestions
+        - listitem [ref=e515]:
+          - generic [ref=e516]:
+            - img [ref=e518]
+            - generic [ref=e521]:
+              - strong [ref=e522]: Connects tools
+              - text: by working across data sources and integrations
+        - listitem [ref=e523]:
+          - generic [ref=e524]:
+            - img [ref=e526]
+            - generic [ref=e529]:
+              - strong [ref=e530]: Iterates
+              - text: by adapting mid-task based on what it finds
+    - generic [ref=e534]:
+      - link "Release notes" [ref=e535] [cursor=pointer]:
+        - /url: https://www.elastic.co/docs/explore-analyze/ai-features/elastic-agent-builder
+        - generic [ref=e537]: Release notes
+      - button "Use AI Agent" [ref=e540] [cursor=pointer]:
+        - generic [ref=e542]: Use AI Agent
+    - paragraph [ref=e543]: You are in a modal dialog. Press Escape or tap/click outside the dialog on the shadowed overlay to close.
+    - button "Closes this modal window" [ref=e544] [cursor=pointer]:
+      - img

@@ -1,0 +1,158 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - banner [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - generic [ref=e8]:
+            - generic:
+              - status "Page change announcements" [ref=e9]: Home - Elastic
+              - button "Skip to main content" [ref=e10] [cursor=pointer]:
+                - generic [ref=e12]: Skip to main content
+            - link "Elastic home" [ref=e14] [cursor=pointer]:
+              - /url: /app/home
+              - img "Elastic Logo" [ref=e15]
+              - img [ref=e22]
+          - generic [ref=e30]:
+            - generic [ref=e31]:
+              - generic [ref=e32]:
+                - generic:
+                  - generic:
+                    - img
+                - searchbox "Find apps, content, and more." [ref=e33]
+              - 'generic "Keyboard shortcut: Command + /" [ref=e35]': ⌘/
+            - paragraph [ref=e36]: Use the Up and Down arrow keys to move focus over options. Press Enter to select. Press Escape to collapse options.
+          - generic [ref=e37]:
+            - button "Help menu" [ref=e40] [cursor=pointer]:
+              - img [ref=e44]
+            - generic [ref=e47]:
+              - button "Newsfeed menu - unread items available" [ref=e50] [cursor=pointer]:
+                - img [ref=e54]
+              - button "AI Agent" [ref=e61] [cursor=pointer]:
+                - generic [ref=e66]: AI Agent
+              - button "Account menu" [ref=e71] [cursor=pointer]:
+                - img "elastic" [ref=e75]:
+                  - generic [ref=e76]: e
+        - generic [ref=e77]:
+          - generic [ref=e78]:
+            - button "Toggle primary navigation" [ref=e80] [cursor=pointer]:
+              - img [ref=e84]
+            - button "Spaces navigation" [ref=e89] [cursor=pointer]:
+              - img "Default" [ref=e93]:
+                - generic [ref=e94]: D
+          - navigation "Breadcrumbs" [ref=e95]:
+            - list [ref=e96]:
+              - listitem [ref=e97]:
+                - generic "Home" [ref=e98]
+    - generic [ref=e100]:
+      - generic [ref=e104]:
+        - paragraph [ref=e105]: Help us improve the Elastic Stack
+        - generic [ref=e107]:
+          - strong [ref=e108]: Usage collection is disabled.
+          - text: This allows us to learn what our users are most interested in, so we can improve our products and services. Refer to our
+          - link "Privacy Statement (external, opens in a new tab or window)" [ref=e109] [cursor=pointer]:
+            - /url: https://www.elastic.co/legal/product-privacy-statement
+            - text: Privacy Statement
+            - generic [ref=e112]: (external, opens in a new tab or window)
+          - text: .
+          - link "Enable usage collection." [ref=e113] [cursor=pointer]:
+            - /url: /app/management/kibana/settings
+          - button "Dismiss" [ref=e115] [cursor=pointer]:
+            - generic [ref=e116]: Dismiss
+      - main [ref=e120]:
+        - heading "Welcome home" [level=1] [ref=e125]
+        - region "Pick your solution" [ref=e126]:
+          - generic [ref=e127]:
+            - heading "Pick your solution" [level=2] [ref=e128]
+            - generic [ref=e129]:
+              - generic [ref=e132]:
+                - img "Elasticsearch" [ref=e135]
+                - generic [ref=e140]:
+                  - heading "Elasticsearch" [level=2] [ref=e141]:
+                    - link "Elasticsearch" [ref=e142] [cursor=pointer]:
+                      - /url: /app/elasticsearch/overview
+                  - paragraph [ref=e144]: Create search experiences with a refined set of APIs and tools.
+              - generic [ref=e147]:
+                - img "Observability" [ref=e150]
+                - generic [ref=e154]:
+                  - heading "Observability" [level=2] [ref=e155]:
+                    - link "Observability" [ref=e156] [cursor=pointer]:
+                      - /url: /app/observability/
+                  - paragraph [ref=e158]: Consolidate your logs, metrics, application traces, and system availability with purpose-built UIs.
+              - generic [ref=e161] [cursor=pointer]:
+                - img "Security" [ref=e164]
+                - generic [ref=e168]:
+                  - heading "Security" [level=2] [ref=e169]:
+                    - link "Security" [ref=e170]:
+                      - /url: /app/security
+                  - paragraph [ref=e172]: Prevent, collect, detect, and respond to threats for unified protection across your infrastructure.
+              - generic [ref=e175]:
+                - img "Analytics" [ref=e178]
+                - generic [ref=e183]:
+                  - heading "Analytics" [level=2] [ref=e184]:
+                    - link "Analytics" [ref=e185] [cursor=pointer]:
+                      - /url: /app/kibana_overview
+                  - paragraph [ref=e187]: Explore, visualize, and analyze your data using a powerful suite of analytical tools and applications.
+        - region "Get started by adding integrations" [ref=e188]:
+          - generic [ref=e190]:
+            - generic [ref=e191]:
+              - heading "Get started by adding integrations" [level=2] [ref=e192]
+              - paragraph [ref=e195]: To start working with your data, use one of our many ingest options. Collect data from an app or service, or upload a file. If you're not ready to use your own data, play with a sample data set.
+              - generic [ref=e197]:
+                - link "Add integrations" [ref=e199] [cursor=pointer]:
+                  - /url: /app/integrations/browse
+                  - generic [ref=e200]: Add integrations
+                - link "Try sample data" [ref=e204] [cursor=pointer]:
+                  - /url: "#/tutorial_directory/sampleData"
+                  - generic [ref=e208]: Try sample data
+                - link "Upload a file" [ref=e210] [cursor=pointer]:
+                  - /url: "#/tutorial_directory/fileDataViz"
+                  - generic [ref=e213]: Upload a file
+            - generic [ref=e216]:
+              - figure [ref=e218]:
+                - img "Illustration for Cloud Connect setup" [ref=e219]
+              - generic [ref=e220]:
+                - heading "Cloud Connect" [level=4] [ref=e221]
+                - generic [ref=e223]: Use Elastic Cloud services like AutoOps and Elastic Inference Service for your self-managed clusters.
+                - link "Get started" [ref=e225] [cursor=pointer]:
+                  - /url: /app/cloud_connect
+                  - generic [ref=e226]: Get started
+        - region "Management" [ref=e227]:
+          - generic [ref=e228]:
+            - generic [ref=e229]:
+              - heading "Management" [level=2] [ref=e231]
+              - generic [ref=e233]:
+                - link "Dev Tools" [ref=e235] [cursor=pointer]:
+                  - /url: /app/dev_tools#/console
+                  - generic [ref=e238]: Dev Tools
+                - link "Stack Management" [ref=e240] [cursor=pointer]:
+                  - /url: /app/management
+                  - generic [ref=e244]: Stack Management
+            - generic [ref=e246]:
+              - generic [ref=e253]:
+                - heading "Manage permissions" [level=3] [ref=e254]:
+                  - link "Manage permissions" [ref=e255] [cursor=pointer]:
+                    - /url: /app/management/security/roles
+                - paragraph [ref=e257]: Control who has access and what tasks they can perform.
+              - generic [ref=e264]:
+                - heading "Monitor the stack" [level=3] [ref=e265]:
+                  - link "Monitor the stack" [ref=e266] [cursor=pointer]:
+                    - /url: /app/monitoring
+                - paragraph [ref=e268]: Track the real-time health and performance of your deployment.
+              - generic [ref=e275]:
+                - heading "Back up and restore" [level=3] [ref=e276]:
+                  - link "Back up and restore" [ref=e277] [cursor=pointer]:
+                    - /url: /app/management/data/snapshot_restore
+                - paragraph [ref=e279]: Save snapshots to a backup repository, and restore to recover index and cluster state.
+              - generic [ref=e288]:
+                - heading "Manage index lifecycles" [level=3] [ref=e289]:
+                  - link "Manage index lifecycles" [ref=e290] [cursor=pointer]:
+                    - /url: /app/management/data/index_lifecycle_management
+                - paragraph [ref=e292]: Define lifecycle policies to automatically perform operations as an index ages.
+        - button "Display a different page on log in" [ref=e298] [cursor=pointer]:
+          - generic [ref=e302]: Display a different page on log in
+    - contentinfo
+  - generic:
+    - generic:
+      - log "Notification message list"
+  - button "Expand developer toolbar" [ref=e305] [cursor=pointer]:
+    - img

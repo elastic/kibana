@@ -47,10 +47,12 @@ describe('validation_gate helpers', () => {
       expect(resolveValidationGateConfig({ curatedOnly: true })).toEqual({
         curatedOnly: true,
         allowedScriptIds: [],
+        allowedExecuteCommandPatterns: [],
       });
       expect(resolveValidationGateConfig({ allowedScriptIds: ['s1'] })).toEqual({
         curatedOnly: false,
         allowedScriptIds: ['s1'],
+        allowedExecuteCommandPatterns: [],
       });
     });
   });
