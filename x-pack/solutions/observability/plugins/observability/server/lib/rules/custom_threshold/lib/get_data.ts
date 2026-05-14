@@ -84,12 +84,68 @@ interface ResponseAggregations extends Partial<Aggs> {
   };
 }
 
+interface ElasticsearchErrorCause {
+  type?: unknown;
+  reason?: unknown;
+  root_cause?: unknown;
+  caused_by?: unknown;
+}
+
+interface ElasticsearchError {
+  message?: unknown;
+  meta?: {
+    body?: {
+      error?: unknown;
+    };
+  };
+}
+
 const NO_DATA_RESPONSE = {
   [UNGROUPED_FACTORY_KEY]: {
     value: null,
     trigger: false,
     bucketKey: { groupBy0: UNGROUPED_FACTORY_KEY },
   },
+};
+
+const LAST_VALUE_NO_DATA_ERROR_REASON =
+  'buckets_path must reference either a number value or a single value numeric metric aggregation';
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const hasLastValueNoDataReason = (errorCause: unknown): boolean => {
+  if (!isRecord(errorCause)) {
+    return false;
+  }
+
+  const {
+    reason,
+    root_cause: rootCause,
+    caused_by: causedBy,
+  } = errorCause as ElasticsearchErrorCause;
+  if (typeof reason === 'string' && reason.includes(LAST_VALUE_NO_DATA_ERROR_REASON)) {
+    return true;
+  }
+
+  if (Array.isArray(rootCause) && rootCause.some(hasLastValueNoDataReason)) {
+    return true;
+  }
+
+  return hasLastValueNoDataReason(causedBy);
+};
+
+const isLastValueNoDataError = (error: unknown): boolean => {
+  if (!isRecord(error)) {
+    return false;
+  }
+
+  const { message, meta } = error as ElasticsearchError;
+  if (typeof message === 'string' && message.includes(LAST_VALUE_NO_DATA_ERROR_REASON)) {
+    return true;
+  }
+
+  return hasLastValueNoDataReason(meta?.body?.error);
 };
 
 const createContainerList = (containerContext: ContainerContext) => {
@@ -231,7 +287,16 @@ export const getData = async (
       fieldsExisted
     ),
   };
-  const body = await esClient.search<undefined, ResponseAggregations>(request);
+  let body: SearchResponse<undefined, ResponseAggregations>;
+  try {
+    body = await esClient.search<undefined, ResponseAggregations>(request);
+  } catch (error) {
+    if (isLastValueNoDataError(error)) {
+      return NO_DATA_RESPONSE;
+    }
+    throw error;
+  }
+
   const { aggregations, _shards } = body;
   if (aggregations) {
     return handleResponse(aggregations, previousResults, _shards.successful);
