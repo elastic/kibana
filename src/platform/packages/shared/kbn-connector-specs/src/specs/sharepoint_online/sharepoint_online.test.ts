@@ -111,6 +111,13 @@ describe('SharepointOnline', () => {
   });
 
   describe('auth', () => {
+    it('supports oauth_client_credentials auth', () => {
+      const types = (SharepointOnline.auth?.types as Array<string | { type: string }>).map((t) =>
+        typeof t === 'string' ? t : t.type
+      );
+      expect(types).toContain('oauth_client_credentials');
+    });
+
     it('supports ears auth with microsoft provider and SharePoint scopes', () => {
       const earsType = (
         SharepointOnline.auth?.types as Array<
@@ -217,10 +224,10 @@ describe('SharepointOnline', () => {
       expect(result.value).toHaveLength(2);
     });
 
-    it('should treat oauth_entra_client_certificate as app-only (uses /sites/getAllSites)', async () => {
+    it('should treat oauth_client_credentials as app-only (uses /sites/getAllSites)', async () => {
       const certContext = {
         ...mockContext,
-        secrets: { authType: 'oauth_entra_client_certificate' },
+        secrets: { authType: 'oauth_client_credentials' },
       } as unknown as ActionContext;
 
       const mockResponse = { data: { value: [] } };
@@ -1118,10 +1125,10 @@ describe('SharepointOnline', () => {
       expect(result.value[0].hitsContainers[0].hits).toHaveLength(1);
     });
 
-    it('should search with oauth_entra_client_certificate treating it as app-only (includes region)', async () => {
+    it('should search with oauth_client_credentials treating it as app-only (includes region)', async () => {
       const certSearchContext = {
         ...mockContext,
-        secrets: { authType: 'oauth_entra_client_certificate' },
+        secrets: { authType: 'oauth_client_credentials' },
       } as unknown as ActionContext;
 
       const mockResponse = {
