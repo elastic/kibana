@@ -11,13 +11,14 @@ import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { formatFieldValueReact } from '@kbn/discover-utils';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getFieldIconProps } from '@kbn/field-utils';
 import { FieldIcon } from '@kbn/react-field';
 import classNames from 'classnames';
 import { isEqual, memoize } from 'lodash';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { CELL_CLASS } from '../../../utils/get_render_cell_value';
 import type { DocumentDiffMode } from '../types';
 import type { DocMap } from '../../../types';
@@ -35,6 +36,7 @@ import {
 
 export interface UseComparisonCellValueProps {
   dataView: DataView;
+  columnsMeta: DataTableColumnsMeta | undefined;
   comparisonFields: string[];
   fieldColumnId: string;
   selectedDocIds: string[];
@@ -45,6 +47,7 @@ export interface UseComparisonCellValueProps {
 
 export const useComparisonCellValue = ({
   dataView,
+  columnsMeta,
   comparisonFields,
   fieldColumnId,
   selectedDocIds,
@@ -61,6 +64,7 @@ export const useComparisonCellValue = ({
       <DiffProvider value={calculateDiffMemoized}>
         <CellValue
           dataView={dataView}
+          columnsMeta={columnsMeta}
           comparisonFields={comparisonFields}
           fieldColumnId={fieldColumnId}
           baseDocId={baseDocId}
@@ -78,6 +82,7 @@ export const useComparisonCellValue = ({
       calculateDiffMemoized,
       comparisonFields,
       dataView,
+      columnsMeta,
       diffMode,
       fieldColumnId,
       fieldFormats,
@@ -95,10 +100,20 @@ type CellValueProps = Omit<UseComparisonCellValueProps, 'selectedDocIds'> &
 const EMPTY_VALUE = '-';
 
 const CellValue = (props: CellValueProps) => {
-  const { dataView, comparisonFields, fieldColumnId, rowIndex, columnId, docMap } = props;
+  const { dataView, comparisonFields, fieldColumnId, rowIndex, columnId, docMap, columnsMeta } =
+    props;
   const fieldName = comparisonFields[rowIndex];
-  const field = useMemo(() => dataView.fields.getByName(fieldName), [dataView.fields, fieldName]);
+  const field = useMemo(
+    () =>
+      getDataViewFieldOrCreateFromColumnMeta({
+        dataView,
+        fieldName,
+        columnMeta: columnsMeta?.[fieldName],
+      }),
+    [dataView, fieldName, columnsMeta]
+  );
   const comparisonDoc = useMemo(() => docMap.get(columnId)?.doc, [columnId, docMap]);
+
   if (columnId === fieldColumnId) {
     return <FieldCellValue field={field} fieldName={fieldName} />;
   }
@@ -122,7 +137,10 @@ const FieldCellValue = ({ field, fieldName }: FieldCellValueProps) => {
     <EuiFlexGroup responsive={false} gutterSize="s">
       {field && (
         <EuiFlexItem grow={false}>
-          <FieldIcon {...getFieldIconProps(field)} />
+          <FieldIcon
+            {...getFieldIconProps(field)}
+            data-test-subj="unifiedDataTableComparisonFieldIcon"
+          />
         </EuiFlexItem>
       )}
       <EuiFlexItem>
