@@ -7,46 +7,54 @@
 
 import { Builder } from '@elastic/esql';
 import type { ESQLAstCommand, ESQLAstItem } from '@elastic/esql/types';
+import { isAlwaysCondition } from '../../../../types/conditions';
 import type { UriPartsProcessor } from '../../../../types/processors';
 import {
   URI_PARTS_DEFAULT_TARGET,
   URI_PARTS_SUCCESS_SUBFIELDS,
 } from '../../../../types/processors/uri_parts';
-import { conditionToESQLAst } from '../condition_to_esql';
-import { buildIgnoreMissingFilter, buildWhereCondition, combineAnd, combineOr } from './common';
+import {
+  buildCoalescePrefixedFieldsEval,
+  buildConditionalEval,
+  buildDropColumns,
+  buildIgnoreMissingFilter,
+  combineOr,
+} from './common';
+
+const internalColumnPrefix = '__streamlang_uri_parts';
+const internalExpressionColumn = '__streamlang_uri_parts_expression';
 
 /**
  * Converts a Streamlang UriPartsProcessor into a list of ES|QL AST commands.
  *
- * Conditional execution logic (mirrors DISSECT):
- *  - Neither `ignore_missing` nor `where` is set: emit a single URI_PARTS
- *    command (optionally preceded by `WHERE NOT(<from> IS NULL)`).
- *  - Otherwise: gate URI_PARTS through a temp column using CASE.
- *      * EVAL __temp__ = CASE(condition, <from>, "")
- *      * URI_PARTS <to> = __temp__
- *      * DROP __temp__
- *    Empty-string input makes URI_PARTS emit null for every part, so the
- *    command is a no-op for rows failing the condition.
  *
- * Option parity with the ES `uri_parts` ingest processor:
- *  - `keep_original` (default true): emit
- *    `EVAL <to>.original = CASE(<success>, <from>, NULL)` so the raw URI
- *    only lands alongside the extracted parts when the parse actually
- *    succeeded — matching the ingest processor, which writes `target_field`
- *    (including `.original`) atomically on success and nothing when
- *    `ignore_failure: true` swallows an unparseable input. In the
- *    conditional path the assignment is gated on `condition AND <success>`
- *    so rows that failed the condition are not touched either.
- *  - `remove_if_successful` (default false): emit
- *    `EVAL <from> = CASE(<success>, NULL, <from>)`.
- *  - `<success>` is `<to>.scheme IS NOT NULL OR <to>.domain IS NOT NULL
- *    OR <to>.path IS NOT NULL OR ...` across every primary sub-field.
- *    ES|QL `URI_PARTS` accepts relative URIs — `/app/login?session=expired`
- *    parses to null scheme + null domain + populated path/query — so the
- *    success signal must OR across all primary sub-fields. Only an
- *    unparseable input nulls every column.
- *    Both options are less idiomatic in ES|QL but are included for
- *    transpiler parity.
+ *  1. `WHERE NOT(<from> IS NULL)` pre-filter when `ignore_missing: false`.
+ *  2. If `where` is set (and not `{ always: true }`), gate the input through
+ *     `EVAL __streamlang_uri_parts_expression = CASE(<where>, <from>, "")`.
+ *     The empty-string fallback makes `URI_PARTS` short-circuit to null
+ *     outputs on rows failing the condition, so the temp output stays empty.
+ *  3. `URI_PARTS __streamlang_uri_parts = <input>` — parse into a temp prefix
+ *     so the user's target fields are never written by the command directly.
+ *  4. `EVAL <to>.<f> = COALESCE(__streamlang_uri_parts.<f>, <to>.<f>), ...`
+ *     merges the parsed sub-fields into `<to>.*`, preferring the new value
+ *     but preserving the prior value whenever the parse produced null. This
+ *     is the destructive-overwrite fix: rows that failed `where` (or didn't
+ *     parse a given sub-field) keep their pre-existing `<to>.*` value
+ *     instead of being silently NULLed.
+ *  5. `keep_original` (default true): `EVAL <to>.original = CASE(<success>,
+ *     <from>, <to>.original)` — only overwrite `<to>.original` when this
+ *     parse succeeded. The success predicate ORs over every primary
+ *     sub-field of the temp prefix so partial parses (e.g. relative URIs
+ *     with null scheme+domain but populated path/query) still count.
+ *  6. `remove_if_successful` (default false): `EVAL <from> = CASE(<success>,
+ *     NULL, <from>)` — null the source only when the parse succeeded.
+ *  7. `DROP __streamlang_uri_parts.<f>, ..., __streamlang_uri_parts_expression`
+ *     to clean up the temp columns introduced in steps 2–3.
+ *
+ * Reading the success predicate from the temp prefix (`__streamlang_uri_parts.*`)
+ * — not from `<to>.*` — is what makes `keep_original` / `remove_if_successful`
+ * key off "this invocation's parse succeeded" instead of "any value, possibly
+ * pre-existing, is non-null in `<to>.*`".
  *
  * @example
  *   ```typescript
@@ -65,18 +73,16 @@ import { buildIgnoreMissingFilter, buildWhereCondition, combineAnd, combineOr } 
  *
  *   Generates (conceptually):
  *   ```txt
- *   | EVAL __temp_uri_parts_where_attributes.url__ = CASE(
- *       NOT(`attributes.url` IS NULL), `attributes.url`, ""
- *     )
- *   | URI_PARTS `attributes.parts` = __temp_uri_parts_where_attributes.url__
- *   | DROP __temp_uri_parts_where_attributes.url__
+ *   | URI_PARTS __streamlang_uri_parts = `attributes.url`
+ *   | EVAL `attributes.parts.scheme`    = COALESCE(`__streamlang_uri_parts.scheme`,    `attributes.parts.scheme`),
+ *          `attributes.parts.domain`    = COALESCE(`__streamlang_uri_parts.domain`,    `attributes.parts.domain`),
+ *          ...
  *   | EVAL `attributes.parts.original` = CASE(
- *       NOT(`attributes.url` IS NULL)
- *         AND (`attributes.parts.scheme` IS NOT NULL
- *           OR `attributes.parts.domain` IS NOT NULL
- *           OR ...),
- *       `attributes.url`, NULL
+ *       NOT(`__streamlang_uri_parts.scheme` IS NULL) OR NOT(`__streamlang_uri_parts.domain` IS NULL) OR ...,
+ *       `attributes.url`,
+ *       `attributes.parts.original`
  *     )
+ *   | DROP `__streamlang_uri_parts.scheme`, ..., `__streamlang_uri_parts.port`
  *   ```
  */
 export function convertUriPartsProcessorToESQL(processor: UriPartsProcessor): ESQLAstCommand[] {
@@ -89,9 +95,8 @@ export function convertUriPartsProcessorToESQL(processor: UriPartsProcessor): ES
     where,
   } = processor;
 
-  const fromColumn = Builder.expression.column(from);
-  const prefixColumn = Builder.expression.column(to);
-  const needConditional = ignoreMissing || Boolean(where);
+  const isConditional = Boolean(where) && !isAlwaysCondition(where!);
+
   const commands: ESQLAstCommand[] = [];
 
   // Drop rows whose source field is null when ignore_missing=false. This is
@@ -102,112 +107,85 @@ export function convertUriPartsProcessorToESQL(processor: UriPartsProcessor): ES
   // silently drop. The cross-compat spec
   // (`missing source field with ignore_missing=false fails ingest and
   // drops the ES|QL row`) pins both halves of that contract.
-  //
-  // Emitted unconditionally (both branches) so a `where` clause doesn't
-  // accidentally let null sources through — matches dissect.ts / grok.ts.
   const missingFieldFilter = buildIgnoreMissingFilter(ignoreMissing, from);
   if (missingFieldFilter) {
     commands.push(missingFieldFilter);
   }
 
-  if (!needConditional) {
-    commands.push(buildUriPartsCommand(prefixColumn, fromColumn));
-  } else {
-    const condition = buildWhereCondition(from, ignoreMissing, where, conditionToESQLAst);
-    const tempFieldName = `__temp_uri_parts_where_${from}__`;
-    const tempColumn = Builder.expression.column(tempFieldName);
-
-    commands.push(
-      Builder.command({
-        name: 'eval',
-        args: [
-          Builder.expression.func.binary('=', [
-            tempColumn,
-            Builder.expression.func.call('CASE', [
-              condition,
-              fromColumn,
-              Builder.expression.literal.string(''),
-            ]),
-          ]),
-        ],
-      })
-    );
-    commands.push(buildUriPartsCommand(prefixColumn, tempColumn));
-    commands.push(Builder.command({ name: 'drop', args: [tempColumn] }));
-
-    if (keepOriginal) {
-      commands.push(buildKeepOriginalEval(to, fromColumn, condition));
-    }
-    if (removeIfSuccessful) {
-      commands.push(buildRemoveIfSuccessfulEval(to, from, fromColumn));
-    }
-    return commands;
+  if (isConditional) {
+    commands.push(buildConditionalEval(where!, from, internalExpressionColumn));
   }
+
+  commands.push(
+    Builder.command({
+      name: 'uri_parts',
+      args: [
+        Builder.expression.func.binary('=', [
+          Builder.expression.column(internalColumnPrefix),
+          Builder.expression.column(isConditional ? internalExpressionColumn : from),
+        ]),
+      ],
+    })
+  );
+
+  commands.push(
+    buildCoalescePrefixedFieldsEval([...URI_PARTS_SUCCESS_SUBFIELDS], internalColumnPrefix, to)
+  );
 
   if (keepOriginal) {
-    commands.push(buildKeepOriginalEval(to, fromColumn, /* gatedCondition */ null));
+    commands.push(buildKeepOriginalEval(to, from));
   }
   if (removeIfSuccessful) {
-    commands.push(buildRemoveIfSuccessfulEval(to, from, fromColumn));
+    commands.push(buildRemoveIfSuccessfulEval(from));
   }
+
+  const dropColumns = URI_PARTS_SUCCESS_SUBFIELDS.map((f) => `${internalColumnPrefix}.${f}`);
+  if (isConditional) {
+    dropColumns.push(internalExpressionColumn);
+  }
+  commands.push(buildDropColumns(dropColumns));
+
   return commands;
 }
 
 /**
- * `<to>.scheme IS NOT NULL OR <to>.domain IS NOT NULL OR ...` across every
- * primary URI sub-field. Per the ES|QL URI_PARTS csv-spec, only an
- * unparseable input nulls every column (with a warning); valid relative
- * URIs leave scheme/domain null but populate path/query. Shared by
- * `keep_original` and `remove_if_successful` so both options key off the
- * exact same "parse succeeded" signal.
+ * `NOT(__streamlang_uri_parts.scheme IS NULL) OR NOT(...) OR ...` across every
+ * primary URI sub-field of the temp prefix. Per the ES|QL URI_PARTS csv-spec,
+ * only an unparseable input nulls every column (with a warning); valid relative
+ * URIs leave scheme/domain null but populate path/query. Reading off the temp
+ * prefix is what makes this predicate reflect "this invocation parsed
+ * something" rather than "the target prefix has any non-null sub-field".
  */
-function buildSuccessPredicate(targetPrefix: string): ESQLAstItem {
+function buildSuccessPredicate(): ESQLAstItem {
   const predicates = URI_PARTS_SUCCESS_SUBFIELDS.map((suffix) =>
     Builder.expression.func.call('NOT', [
       Builder.expression.func.postfix(
         'IS NULL',
-        Builder.expression.column(`${targetPrefix}.${suffix}`)
+        Builder.expression.column(`${internalColumnPrefix}.${suffix}`)
       ),
     ])
   );
   return combineOr(predicates)!;
 }
 
-/** `URI_PARTS <prefix> = <expression>` — assignment-style processing command. */
-function buildUriPartsCommand(prefix: ESQLAstItem, expression: ESQLAstItem): ESQLAstCommand {
-  return Builder.command({
-    name: 'uri_parts',
-    args: [Builder.expression.func.binary('=', [prefix, expression])],
-  });
-}
-
 /**
- * `EVAL <prefix>.original = CASE(<success>, <from>, NULL)` — or
- * `CASE(gatedCondition AND <success>, <from>, NULL)` when a conditional
- * (`ignore_missing` / `where`) predicate is in play. Gating on the success
- * predicate keeps parity with the ES ingest `uri_parts` processor, which
- * only writes `target_field.original` when the parse succeeded; with
- * `ignore_failure: true` an unparseable URI produces no `target_field.*`
- * at all, so ES|QL must not silently populate `<prefix>.original` either.
+ * `EVAL <to>.original = CASE(<success>, <from>, <to>.original)` — only
+ * overwrites `<to>.original` when the temp parse succeeded; otherwise the
+ * existing value is preserved. Matches the ingest `uri_parts` processor,
+ * which writes `target_field.original` only on a successful parse and leaves
+ * the document untouched when `ignore_failure: true` swallows a failure.
  */
-function buildKeepOriginalEval(
-  targetPrefix: string,
-  sourceColumn: ESQLAstItem,
-  gatedCondition: ESQLAstItem | null
-): ESQLAstCommand {
+function buildKeepOriginalEval(targetPrefix: string, sourceField: string): ESQLAstCommand {
   const originalColumn = Builder.expression.column(`${targetPrefix}.original`);
-  const successPredicate = buildSuccessPredicate(targetPrefix);
-  const predicate =
-    gatedCondition !== null ? combineAnd([gatedCondition, successPredicate])! : successPredicate;
   return Builder.command({
     name: 'eval',
     args: [
       Builder.expression.func.binary('=', [
         originalColumn,
         Builder.expression.func.call('CASE', [
-          predicate,
-          sourceColumn,
-          Builder.expression.literal.nil(),
+          buildSuccessPredicate(),
+          Builder.expression.column(sourceField),
+          originalColumn,
         ]),
       ]),
     ],
@@ -215,23 +193,21 @@ function buildKeepOriginalEval(
 }
 
 /**
- * `EVAL <from> = CASE(<success>, NULL, <from>)`.
- * Nulls the source field only on rows where the parse populated at least
- * one sub-field. Matches the ingest processor's "remove only on success"
- * semantics. `<success>` is the same predicate used to gate `keep_original`.
+ * `EVAL <from> = CASE(<success>, NULL, <from>)` — nulls the source field only
+ * when the temp parse succeeded. Matches the ingest processor's "remove only
+ * on success" semantics. Because the success predicate reads from the temp
+ * prefix, rows that failed `where` (and therefore produced an empty temp
+ * output) keep their original source value.
  */
-function buildRemoveIfSuccessfulEval(
-  targetPrefix: string,
-  sourceName: string,
-  sourceColumn: ESQLAstItem
-): ESQLAstCommand {
+function buildRemoveIfSuccessfulEval(sourceField: string): ESQLAstCommand {
+  const sourceColumn = Builder.expression.column(sourceField);
   return Builder.command({
     name: 'eval',
     args: [
       Builder.expression.func.binary('=', [
-        Builder.expression.column(sourceName),
+        sourceColumn,
         Builder.expression.func.call('CASE', [
-          buildSuccessPredicate(targetPrefix),
+          buildSuccessPredicate(),
           Builder.expression.literal.nil(),
           sourceColumn,
         ]),

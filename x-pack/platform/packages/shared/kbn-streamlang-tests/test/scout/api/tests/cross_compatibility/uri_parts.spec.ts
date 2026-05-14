@@ -469,6 +469,81 @@ apiTest.describe(
     });
 
     apiTest(
+      'preserves pre-existing `<to>.*` and `<to>.original` values on where:false rows (destruction-fix parity)',
+      async ({ testBed, esql }) => {
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'uri_parts',
+              from: 'attributes.href',
+              to: 'url',
+              where: { field: 'attributes.should_process', eq: true },
+            } as UriPartsProcessor,
+          ],
+        };
+
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
+
+        const docs = [
+          {
+            case: 'processed',
+            attributes: { should_process: true, href: 'https://new.example.com/a' },
+            url: { domain: 'prior.example.com', original: 'prior://value' },
+          },
+          {
+            case: 'skipped',
+            attributes: { should_process: false, href: 'https://ignored.example.com/b' },
+            url: { domain: 'prior.example.com', original: 'prior://value' },
+          },
+        ];
+
+        await testBed.ingest('ingest-uri-parts-preserve', docs, processors);
+        const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-uri-parts-preserve');
+
+        const mappingDoc = {
+          attributes: { href: '', should_process: false },
+          url: {
+            scheme: '',
+            domain: '',
+            path: '',
+            query: '',
+            fragment: '',
+            extension: '',
+            port: 0,
+            user_info: '',
+            username: '',
+            password: '',
+            original: '',
+          },
+        };
+        await testBed.ingest('esql-uri-parts-preserve', [mappingDoc, ...docs]);
+        const esqlResult = await esql.queryOnIndex('esql-uri-parts-preserve', query);
+        const processedEsql = esqlResult.documentsWithoutKeywords.find(
+          (d) => d.case === 'processed'
+        );
+        const skippedEsql = esqlResult.documentsWithoutKeywords.find((d) => d.case === 'skipped');
+
+        const processedIngest = ingestResult.find((d) => d.case === 'processed')!;
+        const skippedIngest = ingestResult.find((d) => d.case === 'skipped')!;
+
+        // Processed row: new parse wins via COALESCE (temp first, target second).
+        expect(processedIngest['url.domain']).toBe('new.example.com');
+        expect(processedIngest['url.original']).toBe('https://new.example.com/a');
+        expect(processedEsql?.['url.domain']).toBe('new.example.com');
+        expect(processedEsql?.['url.original']).toBe('https://new.example.com/a');
+
+        // Skipped row: BOTH transpilers must preserve the prior `url.domain`
+        // AND `url.original` (this is the destruction-fix invariant). Without
+        // the COALESCE/CASE temp-output merge, ES|QL used to null both.
+        expect(skippedIngest['url.domain']).toBe('prior.example.com');
+        expect(skippedIngest['url.original']).toBe('prior://value');
+        expect(skippedEsql?.['url.domain']).toBe('prior.example.com');
+        expect(skippedEsql?.['url.original']).toBe('prior://value');
+      }
+    );
+
+    apiTest(
       'ignore_missing=true lets documents without the source field through in both transpilers',
       async ({ testBed, esql }) => {
         const streamlangDSL: StreamlangDSL = {
