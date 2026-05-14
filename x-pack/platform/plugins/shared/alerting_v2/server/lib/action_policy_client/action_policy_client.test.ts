@@ -480,33 +480,37 @@ describe('ActionPolicyClient', () => {
       });
     });
 
-    it('defaults legacy attributes (no type) to type "global" with null ruleId', async () => {
-      const existingAttributes = {
-        name: 'legacy',
-        description: 'd',
+    it('heals pre-fix documents: reads throttle.interval as null for intervalless strategy', async () => {
+      const existingAttributes: ActionPolicySavedObjectAttributes = {
+        name: 'stale-policy',
+        description: 'stale-policy description',
         type: 'global',
         enabled: true,
-        destinations: [{ type: 'workflow' as const, id: 'w' }],
-        auth: { apiKey: 'k', owner: 'u', createdByUser: false },
-        createdBy: null,
-        createdByUsername: null,
+        destinations: [{ type: 'workflow', id: 'test-workflow' }],
+        throttle: { strategy: 'on_status_change', interval: '5m' }, // stale pre-fix state
+        auth: {
+          apiKey: 'encrypted-api-key',
+          owner: 'test-user',
+          createdByUser: false,
+        },
+        createdBy: 'elastic_profile_uid',
+        createdByUsername: 'elastic',
         createdAt: '2025-01-01T00:00:00.000Z',
-        updatedBy: null,
-        updatedByUsername: null,
+        updatedBy: 'elastic_profile_uid',
+        updatedByUsername: 'elastic',
         updatedAt: '2025-01-01T00:00:00.000Z',
-      } as ActionPolicySavedObjectAttributes;
+      };
       mockSavedObjectsClient.get.mockResolvedValueOnce({
-        id: 'p-legacy',
+        id: 'policy-id-get-stale',
         type: ACTION_POLICY_SAVED_OBJECT_TYPE,
         attributes: existingAttributes,
         references: [],
         version: 'WzEsMV0=',
       });
 
-      const res = await client.getActionPolicy({ id: 'p-legacy' });
+      const res = await client.getActionPolicy({ id: 'policy-id-get-stale' });
 
-      expect(res.type).toBe('global');
-      expect(res.ruleId).toBeNull();
+      expect(res.throttle).toEqual({ strategy: 'on_status_change', interval: null });
     });
 
     it('returns ruleId for a single_rule policy', async () => {
@@ -525,6 +529,7 @@ describe('ActionPolicyClient', () => {
         updatedByUsername: null,
         updatedAt: '2025-01-01T00:00:00.000Z',
       } as ActionPolicySavedObjectAttributes;
+
       mockSavedObjectsClient.get.mockResolvedValueOnce({
         id: 'p-single',
         type: ACTION_POLICY_SAVED_OBJECT_TYPE,
@@ -1081,6 +1086,116 @@ describe('ActionPolicyClient', () => {
       expect(res.snoozedUntil).toBeNull();
     });
 
+    it('nulls throttle.interval when transitioning to an intervalless strategy', async () => {
+      const existingAttributes: ActionPolicySavedObjectAttributes = {
+        name: 'transition-policy',
+        description: 'transition-policy description',
+        type: 'global',
+        enabled: true,
+        destinations: [{ type: 'workflow', id: 'wf-1' }],
+        groupingMode: 'per_episode',
+        throttle: { strategy: 'per_status_interval', interval: '10m' },
+        auth: {
+          apiKey: 'old-api-key',
+          owner: 'old-user',
+          createdByUser: false,
+        },
+        createdBy: 'creator_profile_uid',
+        createdByUsername: 'creator',
+        createdAt: '2024-12-01T00:00:00.000Z',
+        updatedBy: 'updater_profile_uid',
+        updatedByUsername: 'updater',
+        updatedAt: '2024-12-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-update-1',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: existingAttributes,
+      });
+      mockSavedObjectsClient.update.mockResolvedValueOnce({
+        id: 'policy-id-update-1',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {
+          ...existingAttributes,
+          throttle: { strategy: 'on_status_change', interval: null },
+        },
+        references: [],
+        version: 'WzIsMV0=',
+      });
+
+      const res = await client.updateActionPolicy({
+        data: { throttle: { strategy: 'on_status_change' } },
+        options: { id: 'policy-id-update-1', version: 'WzEsMV0=' },
+      });
+
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        ACTION_POLICY_SAVED_OBJECT_TYPE,
+        'policy-id-update-1',
+        expect.objectContaining({
+          throttle: { strategy: 'on_status_change', interval: null },
+        }),
+        { version: 'WzEsMV0=' }
+      );
+      expect(res.throttle).toEqual({ strategy: 'on_status_change', interval: null });
+    });
+
+    it('preserves throttle.interval for interval-requiring strategies', async () => {
+      const existingAttributes: ActionPolicySavedObjectAttributes = {
+        name: 'keep-interval-policy',
+        description: 'keep-interval-policy description',
+        type: 'global',
+        enabled: true,
+        destinations: [{ type: 'workflow', id: 'wf-1' }],
+        groupingMode: 'per_episode',
+        throttle: { strategy: 'on_status_change', interval: null },
+        auth: {
+          apiKey: 'old-api-key',
+          owner: 'old-user',
+          createdByUser: false,
+        },
+        createdBy: 'creator_profile_uid',
+        createdByUsername: 'creator',
+        createdAt: '2024-12-01T00:00:00.000Z',
+        updatedBy: 'updater_profile_uid',
+        updatedByUsername: 'updater',
+        updatedAt: '2024-12-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-update-1',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: existingAttributes,
+      });
+      mockSavedObjectsClient.update.mockResolvedValueOnce({
+        id: 'policy-id-update-1',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {
+          ...existingAttributes,
+          throttle: { strategy: 'per_status_interval', interval: '5m' },
+        },
+        references: [],
+        version: 'WzIsMV0=',
+      });
+
+      const res = await client.updateActionPolicy({
+        data: { throttle: { strategy: 'per_status_interval', interval: '5m' } },
+        options: { id: 'policy-id-update-1', version: 'WzEsMV0=' },
+      });
+
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        ACTION_POLICY_SAVED_OBJECT_TYPE,
+        'policy-id-update-1',
+        expect.objectContaining({
+          throttle: { strategy: 'per_status_interval', interval: '5m' },
+        }),
+        { version: 'WzEsMV0=' }
+      );
+      expect(res.throttle).toEqual({ strategy: 'per_status_interval', interval: '5m' });
+    });
+
     it('updates a action policy and rotates the API key', async () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'original-policy',
@@ -1557,7 +1672,7 @@ describe('ActionPolicyClient', () => {
         );
       });
 
-      it('normalizes a legacy attributes (no type) to "global" with null ruleId on update', async () => {
+      it('preserves type and ruleId from the existing global policy on partial update', async () => {
         setupSinglePolicyMocks({ ...baseExisting });
 
         await client.updateActionPolicy({

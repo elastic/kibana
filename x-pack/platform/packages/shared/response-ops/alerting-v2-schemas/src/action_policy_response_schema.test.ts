@@ -24,7 +24,7 @@ const validResponse = {
   groupBy: ['host.name'],
   tags: ['production'],
   groupingMode: 'per_episode' as const,
-  throttle: { strategy: 'on_status_change' as const },
+  throttle: { strategy: 'on_status_change' as const, interval: null },
   snoozedUntil: null,
   auth: { owner: 'user-1', createdByUser: true },
   createdBy: 'user-1',
