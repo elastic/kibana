@@ -50,18 +50,24 @@ export function MachineLearningDataFrameAnalyticsEditProvider(
     async openEditCustomUrlsForJobTab(analyticsId: string) {
       // click Custom URLs tab
       await testSubjects.click('mlEditAnalyticsJobFlyout-customUrls');
-      await this.ensureEditCustomUrlTabOpen();
       await headerPage.waitUntilLoadingHasFinished();
+      await this.ensureEditCustomUrlTabOpen();
     },
 
     async ensureEditCustomUrlTabOpen() {
-      await testSubjects.existOrFail('mlJobOpenCustomUrlFormButton', { timeout: 5000 });
+      // React 18 concurrent mode defers tab panel content rendering; use a longer timeout.
+      await testSubjects.existOrFail('mlJobOpenCustomUrlFormButton', { timeout: 15000 });
     },
 
     async clickOpenCustomUrlEditor() {
-      await this.ensureEditCustomUrlTabOpen();
-      await testSubjects.click('mlJobOpenCustomUrlFormButton');
-      await testSubjects.existOrFail('mlJobCustomUrlForm');
+      // If a prior retry already opened the editor, the button is hidden (editorOpen=true).
+      // In that case the form is already present, so skip clicking.
+      const formAlreadyOpen = await testSubjects.exists('mlJobCustomUrlForm', { timeout: 500 });
+      if (!formAlreadyOpen) {
+        await this.ensureEditCustomUrlTabOpen();
+        await testSubjects.click('mlJobOpenCustomUrlFormButton');
+        await testSubjects.existOrFail('mlJobCustomUrlForm');
+      }
     },
 
     async clickIntervalTimeRangeSwitch() {

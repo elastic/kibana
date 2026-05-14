@@ -1714,12 +1714,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           return false;
         }
 
-        return Date.now() - stableSince >= 250;
+        // In React 18 concurrent mode, data-render-complete can oscillate while
+        // transitions are in-flight. Require a longer stable window.
+        return Date.now() - stableSince >= 500;
       });
 
       await common.waitUntilDomIsStable({
-        idleMs: 100,
-        timeoutMs: 2000,
+        idleMs: 200,
+        timeoutMs: 3000,
       });
     },
 

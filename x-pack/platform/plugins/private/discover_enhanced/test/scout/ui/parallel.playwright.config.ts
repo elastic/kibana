@@ -11,4 +11,7 @@ export default createPlaywrightConfig({
   testDir: './parallel_tests',
   workers: 2,
   runGlobalSetup: true,
+  // React 18 concurrent mode defers Lens vis service initialization, causing
+  // unifiedHistogramRendered to appear later than in React 17.
+  timeout: 120_000,
 });

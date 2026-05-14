@@ -217,7 +217,7 @@ export class DiscoverPageObject extends FtrService {
         return false;
       }
 
-      await this.common.sleep(100);
+      await this.common.sleep(300);
 
       const nextState = await this.getHitCountState();
 
@@ -245,7 +245,7 @@ export class DiscoverPageObject extends FtrService {
         return false;
       }
 
-      await this.common.sleep(100);
+      await this.common.sleep(300);
 
       return (
         (await this.testSubjects.exists('unifiedHistogramChart', { timeout: 1000 })) &&
@@ -281,7 +281,7 @@ export class DiscoverPageObject extends FtrService {
           return false;
         }
 
-        await this.common.sleep(100);
+        await this.common.sleep(200);
 
         return (
           (await this.testSubjects.getAttribute('discoverDocTable', 'data-render-complete', {
@@ -301,7 +301,7 @@ export class DiscoverPageObject extends FtrService {
 
     await this.waitUntilHistogramHasRendered();
     await this.common.waitUntilDomIsStable({
-      idleMs: 100,
+      idleMs: 200,
       timeoutMs: this.defaultFindTimeout * 2,
     });
 
@@ -450,7 +450,15 @@ export class DiscoverPageObject extends FtrService {
       await this.waitUntilHistogramHasRendered();
 
       const nextTime = await this.timePicker.getTimeConfig();
-      return nextTime.start !== previousTime.start || nextTime.end !== previousTime.end;
+      if (nextTime.start === previousTime.start && nextTime.end === previousTime.end) {
+        return false;
+      }
+
+      // In React 18 concurrent mode, the time range update may still be in a
+      // transitional state. Verify it has committed by checking twice.
+      await this.common.sleep(300);
+      const stableTime = await this.timePicker.getTimeConfig();
+      return stableTime.start === nextTime.start && stableTime.end === nextTime.end;
     });
   }
 
