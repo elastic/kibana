@@ -23,7 +23,7 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { Host } from '../../../../../flyout_v2/entity/host/main';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
 import { defaultToolsFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
-import { alertFlyoutHistoryKey } from '../../../../../flyout_v2/document/constants/flyout_history';
+import { documentFlyoutHistoryKey } from '../../../../../flyout_v2/shared/constants/flyout_history';
 
 interface Props {
   contextId: string;
@@ -53,7 +53,7 @@ const HostNameComponent: React.FC<Props> = ({
 
   const isInSecurityApp = useIsInSecurityApp();
 
-  const historyKey = isInSecurityApp ? alertFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
   const eventContext = useContext(StatefulEventContext);
   const hostName = `${value}`;

@@ -6,11 +6,14 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo } from 'react';
-import { css } from '@emotion/react';
-import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle, useEuiTheme } from '@elastic/eui';
-import { useTabs } from '../../../flyout/entity_details/host_details_left/hooks';
-import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import React, { useMemo, useState } from 'react';
+import { useTabs } from '../../../../../flyout/entity_details/host_details_left/hooks';
+import { LeftPanelHeader } from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { LeftPanelContent } from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_content';
+import type {
+  EntityDetailsLeftPanelTab,
+  EntityDetailsPath,
+} from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
 export interface HostDetailsProps {
   isRiskScoreExist: boolean;
@@ -35,7 +38,6 @@ export const HostDetails: FC<HostDetailsProps> = ({
   entityStoreEntityId,
   initialPath,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const tabs = useTabs({
     isRiskScoreExist,
     hostName,
@@ -47,31 +49,30 @@ export const HostDetails: FC<HostDetailsProps> = ({
     entityStoreEntityId,
   });
 
-  const selectedTab = useMemo(() => {
+  const defaultTabId = useMemo(() => {
     if (initialPath?.tab) {
       const match = tabs.find((tab) => tab.id === initialPath.tab);
-      if (match) return match;
+      if (match) return match.id;
     }
-    return tabs[0];
+    return tabs[0]?.id;
   }, [initialPath, tabs]);
 
-  if (!selectedTab) {
+  const [selectedTabId, setSelectedTabId] = useState<EntityDetailsLeftPanelTab | undefined>(
+    defaultTabId
+  );
+
+  if (!selectedTabId) {
     return null;
   }
 
   return (
     <>
-      <EuiFlyoutHeader
-        hasBorder
-        css={css`
-          padding-block: ${euiTheme.size.s} !important;
-        `}
-      >
-        <EuiTitle size="xs">
-          <h4>{selectedTab.name}</h4>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>{selectedTab.content}</EuiFlyoutBody>
+      <LeftPanelHeader
+        tabs={tabs}
+        selectedTabId={selectedTabId}
+        setSelectedTabId={setSelectedTabId}
+      />
+      <LeftPanelContent tabs={tabs} selectedTabId={selectedTabId} />
     </>
   );
 };
