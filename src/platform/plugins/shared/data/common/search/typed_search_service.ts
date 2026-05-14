@@ -56,11 +56,11 @@ export class TypedSearchService implements ITypedSearchService {
     options?: IESQLSearchOptions
   ): Promise<IESQLSearchResult> {
     const request = this.buildESQLRequest(params, options);
-    const rawResponse = await this.executeSearch(
+    const response = await this.executeSearch(
       request,
       this.mapESQLOptions(options, 'esql_async' as typeof ESQL_ASYNC_SEARCH_STRATEGY)
     );
-    return { rawResponse };
+    return { rawResponse: response.rawResponse };
   }
 
   /**
@@ -84,13 +84,13 @@ export class TypedSearchService implements ITypedSearchService {
     options?: IDSLSearchOptions
   ): Promise<IDSLSearchResult> {
     const request = this.buildDSLRequest(params);
-    const rawResponse = await this.executeSearch(request, this.mapDSLOptions(options));
+    const response = await this.executeSearch(request, this.mapDSLOptions(options));
 
-    const result: IDSLSearchResult = { rawResponse };
+    const result: IDSLSearchResult = { rawResponse: response.rawResponse };
 
     // Add pagination helpers if requested
     if (options?.paginate) {
-      result.pagination = this.buildDSLPagination(rawResponse, params, options);
+      result.pagination = this.buildDSLPagination(response.rawResponse, params, options);
     }
 
     return result;
@@ -104,11 +104,11 @@ export class TypedSearchService implements ITypedSearchService {
     options?: IEQLSearchOptions
   ): Promise<IEQLSearchResult> {
     const request = this.buildEQLRequest(params);
-    const rawResponse = await this.executeSearch(
+    const response = await this.executeSearch(
       request,
       this.mapEQLOptions(options, 'eql' as typeof EQL_SEARCH_STRATEGY)
     );
-    return { rawResponse };
+    return { rawResponse: response.rawResponse };
   }
 
   /**
@@ -119,11 +119,11 @@ export class TypedSearchService implements ITypedSearchService {
     options?: ISQLSearchOptions
   ): Promise<ISQLSearchResult> {
     const request = this.buildSQLRequest(params);
-    const rawResponse = await this.executeSearch(
+    const response = await this.executeSearch(
       request,
       this.mapSQLOptions(options, 'sql' as typeof SQL_SEARCH_STRATEGY)
     );
-    return { rawResponse };
+    return { rawResponse: response.rawResponse, took: response.took };
   }
 
   // ============================================================================
@@ -144,7 +144,7 @@ export class TypedSearchService implements ITypedSearchService {
       response$.pipe(takeWhile((r) => r.isRunning === true, true))
     );
 
-    return finalResponse.rawResponse;
+    return finalResponse;
   }
 
   // ============================================================================
@@ -211,11 +211,11 @@ export class TypedSearchService implements ITypedSearchService {
           (request.params as any).body.search_after = lastHit.sort;
         }
 
-        const nextRawResponse = await self.executeSearch(request, self.mapDSLOptions(options));
+        const nextResponse = await self.executeSearch(request, self.mapDSLOptions(options));
 
         return {
-          rawResponse: nextRawResponse,
-          pagination: self.buildDSLPagination(nextRawResponse, nextParams, options),
+          rawResponse: nextResponse.rawResponse,
+          pagination: self.buildDSLPagination(nextResponse.rawResponse, nextParams, options),
         };
       },
       async *getAllPages(maxPages = 100) {
@@ -230,7 +230,7 @@ export class TypedSearchService implements ITypedSearchService {
         while (currentResult.pagination?.hasNextPage && pageCount < maxPages) {
           const nextResult = await currentResult.pagination.nextPage();
           if (!nextResult) break;
-          currentResult = nextResult;
+          currentResult = nextResult as IDSLSearchResult;
           pageCount++;
           yield currentResult;
         }

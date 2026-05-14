@@ -98,6 +98,11 @@ export interface IDSLSearchParams {
    * Highlight configuration
    */
   highlight?: estypes.SearchHighlight;
+
+  /**
+   * Allow any additional SearchRequest body properties for maximum compatibility
+   */
+  [key: string]: unknown;
 }
 
 /**
@@ -229,7 +234,7 @@ export interface IESQLSearchParams {
   /**
    * Additional filter to apply
    */
-  filter?: estypes.QueryDslQueryContainer;
+  filter?: estypes.QueryDslQueryContainer | estypes.QueryDslQueryContainer[];
 
   /**
    * Time zone for date calculations
@@ -293,7 +298,7 @@ export interface IEQLSearchParams {
   /**
    * Filter to apply before EQL processing
    */
-  filter?: estypes.QueryDslQueryContainer;
+  filter?: estypes.QueryDslQueryContainer | estypes.QueryDslQueryContainer[];
 
   /**
    * Maximum number of events to return
@@ -367,7 +372,7 @@ export interface ISQLSearchParams {
   /**
    * Additional filter to apply
    */
-  filter?: estypes.QueryDslQueryContainer;
+  filter?: estypes.QueryDslQueryContainer | estypes.QueryDslQueryContainer[];
 }
 
 /**
@@ -393,6 +398,11 @@ export interface ISQLSearchResult {
    * Raw Elasticsearch SQL query response
    */
   rawResponse: estypes.SqlQueryResponse;
+
+  /**
+   * Time in milliseconds the search took to execute
+   */
+  took: number;
 }
 
 // ============================================================================

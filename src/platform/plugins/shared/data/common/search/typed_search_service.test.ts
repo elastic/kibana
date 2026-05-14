@@ -49,7 +49,6 @@ describe('TypedSearchService', () => {
       const params = {
         query: 'FROM logs | WHERE status > ?foo',
         params: [{ name: 'foo', value: 200 }],
-        limit: 100,
         filter: { term: { field: 'value' } },
         timeZone: 'UTC',
         locale: 'en-US',
@@ -60,14 +59,13 @@ describe('TypedSearchService', () => {
       expect(mockSearch).toHaveBeenCalledWith(
         {
           params: {
-            body: {
-              query: params.query,
-              params: params.params,
-              limit: params.limit,
-              filter: params.filter,
-              time_zone: params.timeZone,
-              locale: params.locale,
-            },
+            query: params.query,
+            params: params.params,
+            filter: params.filter,
+            time_zone: params.timeZone,
+            locale: params.locale,
+            dropNullColumns: undefined,
+            include_execution_metadata: undefined,
           },
         },
         expect.anything()

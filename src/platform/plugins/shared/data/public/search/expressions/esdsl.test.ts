@@ -41,6 +41,17 @@ describe('esdsl', () => {
       {
         search: {
           search: jest.fn((params: any) => of({ rawResponse: params })),
+          typed: {
+            searchDSL: jest.fn(async (params: any) => ({
+              rawResponse: {
+                params: {
+                  index: params.index,
+                  size: params.size,
+                  ...params,
+                },
+              },
+            })),
+          },
         },
       },
     ];
