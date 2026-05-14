@@ -16,13 +16,15 @@
  * This is a discovery probe, not an assertion spec. Operators should review the
  * output to decide which roles require explicit deny policies.
  *
+ * The probe inspects role definitions (read-only) rather than creating temporary
+ * users, so it works on any cluster regardless of write-quorum state.
+ *
  * Usage:
- *   EMULATION_SMOKE_ES_URL=https://elastic:changeme@localhost:9200 \
+ *   EMULATION_SMOKE_ES_URL=http://elastic:changeme@localhost:9200 \
  *     node scripts/jest server/lib/detection_emulation/log_injection/__tests__/index_access.smoke.test.ts
  */
 
 import { Client } from '@elastic/elasticsearch';
-import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import { EMULATION_LOGS_INDEX_PATTERN } from '../index_template';
 
 const ES_URL = process.env.EMULATION_SMOKE_ES_URL;
@@ -43,14 +45,38 @@ const BUILT_IN_ROLES = [
   'reporting_user',
 ] as const;
 
+const serializeError = (err: unknown): string => {
+  if (err instanceof Error) {
+    const statusCode: number | undefined = (err as Error & { meta?: { statusCode?: number } }).meta
+      ?.statusCode;
+    return statusCode != null ? `${statusCode}: ${err.message}` : err.message;
+  }
+  return typeof err === 'object' && err !== null ? JSON.stringify(err) : String(err);
+};
+
 interface AccessFinding {
   role: string;
   canRead: boolean;
   indexCount: number;
   write: boolean;
-  create_index: boolean;
+  createIndex: boolean;
   error?: string;
 }
+
+/**
+ * Returns true if the ES index name pattern `rolePattern` (which may contain
+ * * and ? wildcards) would match a concrete emulation log index name.  We test
+ * against a representative concrete index rather than the wildcard pattern
+ * itself because ES wildcard semantics only apply at query time.
+ */
+const exampleIndex = '.kibana-security-emulation-logs-default-2024.01.01';
+const patternMatchesEmulationIndex = (rolePattern: string): boolean => {
+  const reSource = rolePattern
+    .replace(/[.+^${}()|[\]\\]/g, '\\$&') // escape regex specials except * and ?
+    .replace(/\*/g, '.*')
+    .replace(/\?/g, '.');
+  return new RegExp(`^${reSource}$`).test(exampleIndex);
+};
 
 describe('index_access — built-in role discovery (smoke)', () => {
   if (!ES_URL) {
@@ -59,14 +85,12 @@ describe('index_access — built-in role discovery (smoke)', () => {
   }
 
   let client: Client;
-  const createdUsers: string[] = [];
 
   beforeAll(() => {
-    client = new Client({ node: ES_URL });
+    client = new Client({ node: ES_URL, requestTimeout: 10_000 });
   });
 
   afterAll(async () => {
-    await Promise.allSettled(createdUsers.map((u) => client.security.deleteUser({ username: u })));
     await client.close();
   });
 
@@ -74,76 +98,96 @@ describe('index_access — built-in role discovery (smoke)', () => {
     const ts = Date.now();
     const findings: AccessFinding[] = [];
 
+    // Fetch actual index count once using the admin credentials so we can
+    // populate indexCount for roles that the role-definition analysis says
+    // have read access.
+    let existingIndexCount = 0;
+    try {
+      const catResult = await client.cat.indices({
+        index: EMULATION_LOGS_INDEX_PATTERN,
+        format: 'json',
+      });
+      existingIndexCount = Array.isArray(catResult) ? catResult.length : 0;
+    } catch {
+      // Pattern resolves to nothing or access denied — 0 is correct.
+    }
+
     for (const role of BUILT_IN_ROLES) {
-      // Short unique username — ES max is 1024 chars, but keep it readable.
-      const username = `_smk_de_${role.replace(/_/g, '')}${ts}`;
-      const password = `SmokeP@ss${ts}!`;
-
       try {
-        await client.security.putUser({ username, password, roles: [role] });
-        createdUsers.push(username);
+        // Superuser is handled specially: it has unrestricted access by design.
+        if (role === 'superuser') {
+          findings.push({
+            role,
+            canRead: true,
+            indexCount: existingIndexCount,
+            write: true,
 
-        // Use run_as header so we stay on a single connection pool but the
-        // privilege check is evaluated as the role user, not the admin.
-        const runAsOpts: TransportRequestOptions = {
-          headers: { 'es-security-runas-user': username },
-        };
+            createIndex: true,
+          });
+        } else {
+          const result = await client.security.getRole({ name: role });
+          const roleDef = result[role as string];
 
-        const result = await client.security.hasPrivileges(
-          {
-            index: [
-              {
-                names: [EMULATION_LOGS_INDEX_PATTERN],
-                privileges: ['read', 'write', 'create_index'],
-              },
-            ],
-          },
-          runAsOpts
-        );
+          if (!roleDef) {
+            findings.push({
+              role,
+              canRead: false,
+              indexCount: 0,
+              write: false,
 
-        const idxPriv: Record<string, boolean> =
-          (result.index as Record<string, Record<string, boolean>>)[EMULATION_LOGS_INDEX_PATTERN] ??
-          {};
+              createIndex: false,
+              error: 'role definition not found in response',
+            });
+          } else {
+            const indices = roleDef.indices ?? [];
+            let canRead = false;
+            let write = false;
+            let createIndex = false;
 
-        const canRead = Boolean(idxPriv.read);
+            for (const grant of indices) {
+              const names: string[] = Array.isArray(grant.names)
+                ? (grant.names as string[])
+                : [grant.names as unknown as string];
+              const privs: string[] = Array.isArray(grant.privileges)
+                ? (grant.privileges as string[])
+                : [grant.privileges as unknown as string];
 
-        // Count actual indices visible to this role — 0 when none exist yet or
-        // access is denied. cat.indices returns an empty array on empty patterns
-        // rather than throwing.
-        let indexCount = 0;
-        if (canRead) {
-          try {
-            const catResult = await client.cat.indices(
-              { index: EMULATION_LOGS_INDEX_PATTERN, format: 'json' },
-              runAsOpts
-            );
-            indexCount = Array.isArray(catResult) ? catResult.length : 0;
-          } catch {
-            // Access denied or pattern resolves to nothing — leave count at 0.
+              if (names.some(patternMatchesEmulationIndex)) {
+                if (privs.some((p) => p === 'read' || p === 'all' || p === 'indices:data/read/*'))
+                  canRead = true;
+                if (privs.some((p) => p === 'write' || p === 'all' || p === 'indices:data/write/*'))
+                  write = true;
+                if (privs.some((p) => p === 'create_index' || p === 'all' || p === 'manage'))
+                  createIndex = true;
+              }
+            }
+
+            findings.push({
+              role,
+              canRead,
+              indexCount: canRead ? existingIndexCount : 0,
+              write,
+
+              createIndex,
+            });
           }
         }
-
-        findings.push({
-          role,
-          canRead,
-          indexCount,
-          write: Boolean(idxPriv.write),
-          create_index: Boolean(idxPriv.create_index),
-        });
       } catch (err) {
         findings.push({
           role,
           canRead: false,
           indexCount: 0,
           write: false,
-          create_index: false,
-          error: err instanceof Error ? err.message : String(err),
+
+          createIndex: false,
+          error: serializeError(err),
         });
       }
     }
 
     const output = {
       probe: 'index_access',
+      method: 'role_definition_inspection',
       index_pattern: EMULATION_LOGS_INDEX_PATTERN,
       timestamp: new Date(ts).toISOString(),
       findings,
@@ -160,5 +204,5 @@ describe('index_access — built-in role discovery (smoke)', () => {
 
     // Minimal guard: the probe must have run against at least one role.
     expect(findings.length).toBeGreaterThan(0);
-  }, 120_000);
+  }, 60_000);
 });
