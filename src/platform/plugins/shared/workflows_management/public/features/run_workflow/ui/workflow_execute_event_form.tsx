@@ -154,11 +154,23 @@ function buildSummaryText(row: TriggerEventLogGridRow): string {
   return parts.join(' ');
 }
 
-function applyWorkflowsEventsKqlFallbackFields(dataView: DataView): void {
-  if (dataView.getFieldByName('triggerId')) {
-    return;
+/** Fields hidden from KQL autocomplete (space is enforced server-side; `kibana.*` is index metadata). */
+const WORKFLOW_TRIGGER_EVENTS_KQL_SUPPRESSED_FIELD_NAMES = new Set(['spaceId', 'kibana.space_ids']);
+
+function stripWorkflowTriggerEventKqlSuppressedFields(dataView: DataView): void {
+  const toRemove = dataView.fields
+    .getAll()
+    .filter((field) => WORKFLOW_TRIGGER_EVENTS_KQL_SUPPRESSED_FIELD_NAMES.has(field.name));
+  for (const field of toRemove) {
+    dataView.fields.remove(field);
   }
-  dataView.fields.replaceAll(WORKFLOWS_EVENTS_KQL_FALLBACK_FIELDS);
+}
+
+function applyWorkflowsEventsKqlFallbackFields(dataView: DataView): void {
+  if (!dataView.getFieldByName('triggerId')) {
+    dataView.fields.replaceAll(WORKFLOWS_EVENTS_KQL_FALLBACK_FIELDS);
+  }
+  stripWorkflowTriggerEventKqlSuppressedFields(dataView);
 }
 
 export interface WorkflowExecuteEventFormProps {
