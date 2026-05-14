@@ -189,7 +189,7 @@ download_artifact() {
 
 GCS_CI_ARTIFACT_REGIONS=("asia-south2" "europe-west2" "northamerica-northeast2" "southamerica-east1" "us-central1" "us-east1" "us-west1")
 download_tmp_artifact() {
-  local artifact_name="$1" dest_dir="$2" build_id="$3"
+  local artifact_name="$1" dest_dir="$2" build_id="$3" fallback="${4:-true}"
   local region use_gcs=false
 
   for region in "${GCS_CI_ARTIFACT_REGIONS[@]}"; do
@@ -207,6 +207,10 @@ download_tmp_artifact() {
       return 0
     fi
     echo "GCS download failed for ${artifact_name} from kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION} (build ${build_id})."
+  fi
+
+  if [[ "$fallback" != "true" ]]; then
+    return 1
   fi
 
   echo "Falling back to Buildkite artifact download for ${artifact_name} (build ${build_id})."
