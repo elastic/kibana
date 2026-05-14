@@ -25,6 +25,8 @@ import {
   EuiSuperDatePicker,
   EuiSelect,
   EuiPanel,
+  EuiTabs,
+  EuiTab,
   EuiDataGrid,
   type EuiDataGridColumn,
   type EuiDataGridCellValueElementProps,
@@ -38,7 +40,7 @@ import { useDataFields } from '../../form/hooks/use_data_fields';
 import type { ComposeDiscoverState, ComposeDiscoverAction, SandboxTabConfig } from './types';
 import { useQueryExecution } from './use_query_execution';
 import { ComposeDiscoverChart } from './compose_discover_chart';
-import { ComposeDiscoverTabs } from './compose_discover_tabs';
+import { ComposeDiscoverTabs, TAB_DEFINITIONS, visibleTabIds } from './compose_discover_tabs';
 
 interface ComposeDiscoverChildProps {
   state: ComposeDiscoverState;
@@ -217,6 +219,12 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
     [rows]
   );
 
+  const splitTabs = useMemo(() => {
+    if (!isSplit) return [];
+    const tabIds = visibleTabIds(tabConfig);
+    return TAB_DEFINITIONS.filter((t) => tabIds.includes(t.id));
+  }, [isSplit, tabConfig]);
+
   const editorPanelStyles: React.CSSProperties = useMemo(
     () => ({
       resize: 'vertical',
@@ -257,6 +265,25 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
+        {/* ── 0. Tab bar (split mode only) ─────────────────────────────── */}
+        {splitTabs.length > 0 && (
+          <>
+            <EuiTabs>
+              {splitTabs.map((tab) => (
+                <EuiTab
+                  key={tab.id}
+                  isSelected={state.activeTab === tab.id}
+                  onClick={() => dispatch({ type: 'SET_TAB', tab: tab.id })}
+                  data-test-subj={`composeDiscoverTab-${tab.id}`}
+                >
+                  {tab.label}
+                </EuiTab>
+              ))}
+            </EuiTabs>
+            <EuiSpacer size="s" />
+          </>
+        )}
+
         {/* ── 1. Time field / date picker / Search row — one line ──────── */}
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
           <EuiFlexItem grow={false} style={{ width: 200, minWidth: 0 }}>
@@ -323,6 +350,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
               tabConfig={tabConfig}
               onAlertEditorMount={onAlertEditorMount}
               onRecoveryEditorMount={onRecoveryEditorMount}
+              hideTabBar
             />
           ) : (
             <CodeEditor

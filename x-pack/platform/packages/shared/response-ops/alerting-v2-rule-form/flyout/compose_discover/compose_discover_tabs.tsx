@@ -106,7 +106,7 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
   );
 };
 
-const TAB_DEFINITIONS: Array<{ id: QueryTab; label: string }> = [
+export const TAB_DEFINITIONS: Array<{ id: QueryTab; label: string }> = [
   {
     id: 'base',
     label: i18n.translate(
@@ -130,7 +130,7 @@ const TAB_DEFINITIONS: Array<{ id: QueryTab; label: string }> = [
   },
 ];
 
-function visibleTabIds(tabConfig: SandboxTabConfig): QueryTab[] {
+export function visibleTabIds(tabConfig: SandboxTabConfig): QueryTab[] {
   switch (tabConfig.type) {
     case 'base-alert':
       return ['base', 'alert'];
