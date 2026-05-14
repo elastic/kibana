@@ -227,6 +227,7 @@ export interface WorkflowExecutionDto {
   context?: Record<string, unknown>;
   traceId?: string; // APM trace ID for observability
   entryTransactionId?: string; // APM root transaction ID for trace embeddable
+  concurrencyGroupKey?: string; // Evaluated concurrency group key for grouping executions
 }
 
 export type WorkflowExecutionListItemDto = Omit<
