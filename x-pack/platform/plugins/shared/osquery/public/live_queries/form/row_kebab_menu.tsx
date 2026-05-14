@@ -73,12 +73,17 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
     const handleExport = useCallback(
       (format: ExportFormat, options: { filtered: boolean }) => {
         closeExportModal();
+        // Defense-in-depth: the export menu item is gated above on
+        // `row.action_id`, so a missing actionId should never reach this
+        // handler. If gating ever changes, bailing here prevents a request
+        // like `/api/osquery/live_queries/{actionId}/results/_export`.
+        if (!rowActionId) return;
         exportResults(
           format,
           options.filtered ? { kuery: exportFilters?.kuery, esFilters } : undefined
         );
       },
-      [closeExportModal, exportResults, exportFilters?.kuery, esFilters]
+      [closeExportModal, exportResults, rowActionId, exportFilters?.kuery, esFilters]
     );
 
     const kebabLabel = i18n.translate(

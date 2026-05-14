@@ -119,13 +119,22 @@ describe('ExportResultsModal', () => {
     });
 
     it('renders the warning exactly at the threshold (100k rows)', () => {
-      renderModal({ filteredTotal: 100_000 });
+      // hasActiveFilters=true so the filtered checkbox starts checked and
+      // `exportCount` resolves to `filteredTotal`. Without filters, the
+      // unfiltered path applies and would need `total` instead.
+      renderModal({ hasActiveFilters: true, filteredTotal: 100_000 });
 
       expect(screen.getByTestId('osqueryExportLargeWarning')).toBeInTheDocument();
     });
 
     it('renders the warning above the threshold', () => {
-      renderModal({ filteredTotal: 250_000 });
+      renderModal({ hasActiveFilters: true, filteredTotal: 250_000 });
+
+      expect(screen.getByTestId('osqueryExportLargeWarning')).toBeInTheDocument();
+    });
+
+    it('renders the warning when no filters are active and total exceeds the threshold', () => {
+      renderModal({ hasActiveFilters: false, total: 250_000 });
 
       expect(screen.getByTestId('osqueryExportLargeWarning')).toBeInTheDocument();
     });
@@ -169,6 +178,22 @@ describe('ExportResultsModal', () => {
       fireEvent.click(screen.getByText('CSV'));
 
       expect(screen.getByTestId('osqueryExportConfirmButton')).toHaveTextContent('Export 12');
+    });
+
+    it('falls back to plain "Export" when total is undefined and the user unchecks the filtered box', () => {
+      // Race condition: unfiltered total is still loading when the user opens
+      // the modal and unchecks "Only export filtered results". The button must
+      // NOT show the filtered count — that would mislead the user about how
+      // many rows the unfiltered export will return.
+      renderModal({ hasActiveFilters: true, filteredTotal: 12, total: undefined });
+
+      fireEvent.click(screen.getByTestId('osqueryExportFilteredCheckbox'));
+      fireEvent.click(screen.getByTestId('osqueryExportFormatSelect'));
+      fireEvent.click(screen.getByText('CSV'));
+
+      const confirm = screen.getByTestId('osqueryExportConfirmButton');
+      expect(confirm).toHaveTextContent('Export');
+      expect(confirm).not.toHaveTextContent('Export 12');
     });
   });
 

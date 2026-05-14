@@ -302,6 +302,98 @@ describe('ExportFiltersContext', () => {
     });
   });
 
+  describe('clearFilters', () => {
+    it('drops the entry from the store', () => {
+      let store: ReturnType<typeof useExportFiltersContext> | undefined;
+
+      const Capture = () => {
+        store = useExportFiltersContext();
+
+        return null;
+      };
+
+      render(
+        <ExportFiltersProvider>
+          <Capture />
+        </ExportFiltersProvider>
+      );
+
+      act(() => {
+        store?.setFilters('to-clear', { filteredTotal: 5, total: 50 });
+      });
+
+      expect(store?.getFilters('to-clear')).toEqual({ filteredTotal: 5, total: 50 });
+
+      act(() => {
+        store?.clearFilters('to-clear');
+      });
+
+      expect(store?.getFilters('to-clear')).toBeUndefined();
+    });
+
+    it('notifies subscribers when an entry is cleared so they re-read undefined', () => {
+      let store: ReturnType<typeof useExportFiltersContext> | undefined;
+
+      const Capture = () => {
+        store = useExportFiltersContext();
+
+        return null;
+      };
+
+      render(
+        <ExportFiltersProvider>
+          <Capture />
+          <ReaderConsumer actionId="clear-notify" />
+        </ExportFiltersProvider>
+      );
+
+      act(() => {
+        store?.setFilters('clear-notify', { kuery: 'host.name:a', filteredTotal: 1, total: 10 });
+      });
+
+      expect(screen.getByTestId('reader-clear-notify')).toHaveTextContent('host.name:a');
+
+      act(() => {
+        store?.clearFilters('clear-notify');
+      });
+
+      expect(screen.getByTestId('reader-clear-notify')).toHaveTextContent('none');
+    });
+
+    it('is a no-op when the entry does not exist', () => {
+      let store: ReturnType<typeof useExportFiltersContext> | undefined;
+      let renderCount = 0;
+
+      const Capture = () => {
+        store = useExportFiltersContext();
+
+        return null;
+      };
+
+      const TrackReader = () => {
+        useExportFilters('untouched');
+        renderCount++;
+
+        return null;
+      };
+
+      render(
+        <ExportFiltersProvider>
+          <Capture />
+          <TrackReader />
+        </ExportFiltersProvider>
+      );
+
+      const before = renderCount;
+
+      act(() => {
+        store?.clearFilters('untouched');
+      });
+
+      expect(renderCount).toBe(before);
+    });
+  });
+
   describe('subscriber cleanup on unmount', () => {
     it('removes the subscription when the consumer unmounts (no stale listeners)', () => {
       let store: ReturnType<typeof useExportFiltersContext> | undefined;

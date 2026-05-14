@@ -469,6 +469,30 @@ describe('useExportResults', () => {
       expect(mockAppendChild).toHaveBeenCalledWith(mockAnchorElement);
       expect(mockRemoveChild).toHaveBeenCalledWith(mockAnchorElement);
     });
+
+    it('falls back to arrayBuffer() when response.body is missing', async () => {
+      const { kibana, mocks } = createMockServices();
+      // Some environments (older browsers, certain test runtimes) deliver a
+      // Response with no streamable body. The hook must still produce a Blob
+      // and trigger the anchor click in that case.
+      const mockRaw = {
+        ...createMockRawResponse(),
+        body: null,
+      };
+      mocks.fetch.mockResolvedValueOnce({ response: mockRaw });
+      useKibanaMock.mockReturnValue(kibana as unknown as ReturnType<typeof useKibana>);
+
+      const { result } = renderHook(() =>
+        useExportResults({ actionId: 'action-abc', isLive: true })
+      );
+
+      await act(async () => {
+        await result.current.exportResults('ndjson');
+      });
+
+      expect(mockRaw.arrayBuffer).toHaveBeenCalled();
+      expect(mockAnchorClick).toHaveBeenCalled();
+    });
   });
 
   describe('success toast', () => {

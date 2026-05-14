@@ -32,6 +32,12 @@ export interface ExportFiltersStore {
   /** Write filters for an actionId; only notifies subscribers when shape changes. */
   setFilters: (actionId: string, filters: ExportFilters) => void;
   /**
+   * Drop the entry for an actionId and notify subscribers. Used by the
+   * publishing component's unmount cleanup so collapsed rows don't leave
+   * stale filter state in the store.
+   */
+  clearFilters: (actionId: string) => void;
+  /**
    * Subscribe to changes for a single actionId. Returns the unsubscribe fn.
    * Used by `useExportFilters(actionId)` via `useSyncExternalStore`.
    */
@@ -67,6 +73,16 @@ export const ExportFiltersProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
+  const clearFilters = useCallback((actionId: string) => {
+    if (!filtersRef.current.has(actionId)) return;
+    filtersRef.current.delete(actionId);
+
+    const listeners = listenersRef.current.get(actionId);
+    if (listeners) {
+      listeners.forEach((listener) => listener());
+    }
+  }, []);
+
   const subscribe = useCallback((actionId: string, listener: Listener) => {
     let listeners = listenersRef.current.get(actionId);
     if (!listeners) {
@@ -87,8 +103,8 @@ export const ExportFiltersProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const store = useMemo<ExportFiltersStore>(
-    () => ({ getFilters, setFilters, subscribe }),
-    [getFilters, setFilters, subscribe]
+    () => ({ getFilters, setFilters, clearFilters, subscribe }),
+    [getFilters, setFilters, clearFilters, subscribe]
   );
 
   return <ExportFiltersContext.Provider value={store}>{children}</ExportFiltersContext.Provider>;

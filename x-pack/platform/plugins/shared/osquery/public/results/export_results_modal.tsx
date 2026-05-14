@@ -95,7 +95,7 @@ const ExportResultsModalComponent: React.FC<ExportResultsModalProps> = ({
   );
 
   const exportCount = useMemo(
-    () => (exportFiltered ? filteredTotal : total ?? filteredTotal),
+    () => (exportFiltered ? filteredTotal : total),
     [exportFiltered, filteredTotal, total]
   );
 
