@@ -38,31 +38,39 @@ export const profilingSetupFixture = base.extend<{}, { profilingSetup: Profiling
       };
 
       const setupResources = async (): Promise<void> => {
-        try {
-          log.info('Setting up profiling resources');
-          await kbnClient.request({
-            description: 'Setup profiling resources',
-            path: '/api/profiling/setup/es_resources',
-            method: 'POST',
-            headers: {
-              'content-type': 'application/json',
-              'kbn-xsrf': 'reporting',
-            },
-            // The route is not idempotent on retry; we want a fast, clear failure so the
-            // underlying error (logged in Kibana by handleRouteHandlerError) is the first
-            // thing the developer sees instead of a series of 500s.
-            retries: 0,
-          });
-          log.info('Profiling resources set up successfully');
-        } catch (error: any) {
-          const status = error?.response?.status ?? error?.originalError?.response?.status;
-          const body = error?.response?.data ?? error?.originalError?.response?.data;
-          log.error(
-            `Error setting up profiling resources POST /api/profiling/setup/es_resources: status=${status} body=${JSON.stringify(
-              body
-            )}`
-          );
-          throw error;
+        const maxAttempts = 3;
+        const delayMs = 5_000;
+
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+          try {
+            log.info(`Setting up profiling resources (attempt ${attempt}/${maxAttempts})`);
+            await kbnClient.request({
+              description: 'Setup profiling resources',
+              path: '/api/profiling/setup/es_resources',
+              method: 'POST',
+              headers: {
+                'content-type': 'application/json',
+                'kbn-xsrf': 'reporting',
+              },
+              retries: 0,
+            });
+            log.info('Profiling resources set up successfully');
+            return;
+          } catch (error: any) {
+            const status = error?.response?.status ?? error?.originalError?.response?.status;
+            const body = error?.response?.data ?? error?.originalError?.response?.data;
+            log.error(
+              `Error setting up profiling resources POST /api/profiling/setup/es_resources: status=${status} body=${JSON.stringify(
+                body
+              )}`
+            );
+
+            if (attempt >= maxAttempts) {
+              throw error;
+            }
+            log.info(`Retrying setupResources in ${delayMs}ms...`);
+            await new Promise((resolve) => setTimeout(resolve, delayMs));
+          }
         }
       };
 
