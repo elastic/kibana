@@ -7,6 +7,7 @@
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useCallback, useMemo, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
 import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import { firstValueFrom } from 'rxjs';
@@ -32,8 +33,18 @@ import { mutationKeys } from '../../mutation_keys';
 import { subscribeToChatEvents } from './use_subscribe_to_chat_events';
 import { BrowserToolExecutor } from '../../services/browser_tool_executor';
 import { createConversationActions } from '../conversation/use_conversation_actions';
+import {
+  buildSidebarConversationListRow,
+  insertSidebarConversationListRow,
+  removeSidebarConversationListRow,
+} from '../../utils/conversation_sidebar_list_cache';
 
 const SCREEN_CONTEXT_ATTACHMENT_ID = 'screen-context';
+
+const optimisticConversationListTitle = i18n.translate(
+  'xpack.agentBuilder.conversationList.optimisticNewConversationTitle',
+  { defaultMessage: 'New conversation' }
+);
 
 export interface SendMessageVars {
   message?: string;
@@ -167,6 +178,7 @@ export const useSendMessageMutation = ({
       const controller = new AbortController();
       controllersRef.current.set(vars.conversationId, controller);
 
+      let insertedOptimisticListRow = false;
       if (isRegenerate) {
         // Clear the existing response immediately so UI shows empty state.
         streamActions.clearLastRoundResponse();
@@ -175,6 +187,15 @@ export const useSendMessageMutation = ({
           throw new Error('Message is required');
         }
         setPendingMessage(vars.conversationId, vars.message);
+        insertedOptimisticListRow = await insertSidebarConversationListRow({
+          queryClient,
+          agentId: vars.agentId,
+          row: buildSidebarConversationListRow({
+            id: vars.conversationId,
+            agent_id: vars.agentId,
+            title: optimisticConversationListTitle,
+          }),
+        });
         await streamActions.addOptimisticRound({
           userMessage: vars.message,
           attachments: vars.attachments ?? [],
@@ -245,6 +266,13 @@ export const useSendMessageMutation = ({
           cached?.rounds?.at(-1)?.status === ConversationRoundStatus.awaitingPrompt;
         if (succeeded && !endedInAwaitingPrompt) {
           streamActions.invalidateConversation();
+        }
+        if (!succeeded && insertedOptimisticListRow && !isRegenerate) {
+          removeSidebarConversationListRow({
+            queryClient,
+            agentId: vars.agentId,
+            conversationId: vars.conversationId,
+          });
         }
         clearActiveStream(vars.conversationId);
         if (controllersRef.current.get(vars.conversationId) === controller) {

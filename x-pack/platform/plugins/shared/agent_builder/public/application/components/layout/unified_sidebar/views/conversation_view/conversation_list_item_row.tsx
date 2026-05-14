@@ -54,6 +54,7 @@ export interface ConversationListItemRowProps {
   title: string;
   isActive: boolean;
   routeConversationId: string | undefined;
+  showActionsMenu?: boolean;
   onItemClick?: () => void;
 }
 
@@ -63,6 +64,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
   title,
   isActive,
   routeConversationId,
+  showActionsMenu = true,
   onItemClick,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -95,28 +97,37 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
     align-items: center;
     gap: ${euiTheme.size.xxs};
     border-radius: ${euiTheme.border.radius.small};
-    padding-inline-end: ${euiTheme.size.xxs};
+    ${showActionsMenu ? `padding-inline-end: ${euiTheme.size.xxs};` : ''}
   `;
 
-  const rowHoverAndFocusStyles = css`
-    &:hover .${ACTIONS_CLASS}, &:focus-within .${ACTIONS_CLASS} {
-      opacity: 1;
-    }
-    &:hover,
-    &:focus-within {
-      background-color: ${euiTheme.colors.backgroundLightPrimary};
-    }
-  `;
+  const rowHoverAndFocusStyles = showActionsMenu
+    ? css`
+        &:hover .${ACTIONS_CLASS}, &:focus-within .${ACTIONS_CLASS} {
+          opacity: 1;
+        }
+        &:hover,
+        &:focus-within {
+          background-color: ${euiTheme.colors.backgroundLightPrimary};
+        }
+      `
+    : css`
+        &:hover,
+        &:focus-within {
+          background-color: ${euiTheme.colors.backgroundLightPrimary};
+        }
+      `;
 
   const activeOrPopoverRowBg = css`
     background-color: ${euiTheme.colors.backgroundLightPrimary};
   `;
 
-  const popoverOpenActionsVisible = css`
-    .${ACTIONS_CLASS} {
-      opacity: 1;
-    }
-  `;
+  const popoverOpenActionsVisible = showActionsMenu
+    ? css`
+        .${ACTIONS_CLASS} {
+          opacity: 1;
+        }
+      `
+    : css``;
 
   const rowStyles = css([
     rowLayoutStyles,
@@ -204,21 +215,23 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
           </Link>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <div css={actionsStyles} className={ACTIONS_CLASS}>
-            <EuiPopover
-              button={menuButton}
-              isOpen={isPopoverOpen}
-              closePopover={closePopover}
-              panelPaddingSize="none"
-              anchorPosition="downRight"
-              repositionOnScroll
-              aria-label={labels.actionsMenu}
-            >
-              <EuiContextMenuPanel size="s" items={menuItems} />
-            </EuiPopover>
-          </div>
-        </EuiFlexItem>
+        {showActionsMenu ? (
+          <EuiFlexItem grow={false}>
+            <div css={actionsStyles} className={ACTIONS_CLASS}>
+              <EuiPopover
+                button={menuButton}
+                isOpen={isPopoverOpen}
+                closePopover={closePopover}
+                panelPaddingSize="none"
+                anchorPosition="downRight"
+                repositionOnScroll
+                aria-label={labels.actionsMenu}
+              >
+                <EuiContextMenuPanel size="s" items={menuItems} />
+              </EuiPopover>
+            </div>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
 
       {isRenameModalOpen ? (

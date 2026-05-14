@@ -34,6 +34,7 @@ import type { ConversationsService } from '../../../services/conversations';
 import { queryKeys } from '../../query_keys';
 import { buildOptimisticAttachments } from '../../utils/build_optimistic_attachments';
 import { createNewConversation, createNewRound } from '../../utils/new_conversation';
+import { patchSidebarConversationListTitle } from '../../utils/conversation_sidebar_list_cache';
 
 export interface ConversationActions {
   invalidateConversation: () => void;
@@ -306,6 +307,9 @@ export const createConversationActions = ({
       });
     },
     onConversationCreated: ({ title }: { title: string }) => {
+      const convBefore = queryClient.getQueryData<Conversation>(queryKey);
+      const agentIdForList = convBefore?.agent_id;
+
       setConversation(
         produce((draft) => {
           if (draft) {
@@ -313,6 +317,16 @@ export const createConversationActions = ({
           }
         })
       );
+
+      if (agentIdForList && conversationId) {
+        patchSidebarConversationListTitle({
+          queryClient,
+          agentId: agentIdForList,
+          conversationId,
+          title,
+        });
+      }
+
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
     },
     deleteConversation: async (id: string) => {
