@@ -16,11 +16,20 @@ import { createTestConfig } from '../common/config';
  * tasks (reconciliation, data view bootstrap) that we don't want
  * influencing other tests' fixtures, and a separate config makes it
  * easy to switch the v1 flag independently.
+ *
+ * `xpack.cases.analytics.enable_debug_mode=true` opts into the mutating
+ * admin routes (`/reset`, `/reconcile/run_soon`) so the suite can
+ * exercise them. The read-only `/state` route is registered regardless
+ * once v2 is on; the flag only gates the mutating pair. See
+ * `cases_analytics_v2/routes/index.ts` for the gating rationale.
  */
 export default createTestConfig('spaces_only', {
   disabledPlugins: ['security'],
   license: 'trial',
   ssl: false,
   testFiles: [require.resolve('./tests/trial/analytics_v2')],
-  kbnServerArgs: ['--xpack.cases.analyticsV2.enabled=true'],
+  kbnServerArgs: [
+    '--xpack.cases.analyticsV2.enabled=true',
+    '--xpack.cases.analytics.enable_debug_mode=true',
+  ],
 });

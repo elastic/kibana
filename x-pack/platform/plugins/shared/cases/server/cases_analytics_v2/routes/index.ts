@@ -84,6 +84,23 @@ interface RegisterArgs {
    */
   enabled: boolean;
   /**
+   * Resolved config value for `xpack.cases.analytics.enable_debug_mode`.
+   * Gates the **mutating** administrator routes (`/reset` and
+   * `/reconcile/run_soon`) at registration time — when false, neither
+   * route is registered, and an HTTP request to either path returns 404.
+   * The read-only `/state` route is always registered when v2 is on; a
+   * future Case Settings page polls it for health info, so gating /state
+   * would break that integration.
+   *
+   * Why route-registration gating (and not a runtime 403): the gated
+   * routes operate globally across every space but are invocable from a
+   * single space's URL — a misclick from a `default`-space operator
+   * wipes case data views in every other space. A 404 makes the gated
+   * surface invisible to space-aware tenants that haven't opted in,
+   * which is the right default for a debug-only surface.
+   */
+  enableDebugMode: boolean;
+  /**
    * Resolved config value for
    * `xpack.cases.analyticsV2.reconciliationIntervalMinutes`. Threaded into
    * the `/reset` handler so the re-scheduled task picks the configured
@@ -107,6 +124,7 @@ export const registerCasesAnalyticsV2Routes = ({
   getWriter,
   clearDataViewBootstrapCache,
   enabled,
+  enableDebugMode,
   reconciliationIntervalMinutes,
 }: RegisterArgs): void => {
   const router = core.http.createRouter();
@@ -192,6 +210,18 @@ export const registerCasesAnalyticsV2Routes = ({
       });
     }
   );
+
+  // The two routes below mutate subsystem state cluster-wide and are
+  // therefore gated behind `xpack.cases.analytics.enable_debug_mode`. When
+  // the flag is off, neither route is registered — requests to these paths
+  // return 404. See the `enableDebugMode` JSDoc on `RegisterArgs` for the
+  // (route-registration vs runtime-403) rationale.
+  if (!enableDebugMode) {
+    log.debug(
+      'cases-analyticsV2 debug-mode routes (/reset, /reconcile/run_soon) are NOT registered; set xpack.cases.analytics.enable_debug_mode: true to enable.'
+    );
+    return;
+  }
 
   // POST /internal/cases/_analyticsV2/reconcile/run_soon
   router.post(

@@ -133,6 +133,14 @@ export class CasePlugin
       logger: this.logger,
       enabled: this.caseConfig.analyticsV2.enabled,
       reconciliationIntervalMinutes: this.caseConfig.analyticsV2.reconciliationIntervalMinutes,
+      // `xpack.cases.analytics.enable_debug_mode` gates the v2 admin
+      // routes that mutate subsystem state (`/reset`,
+      // `/reconcile/run_soon`). The flag lives under `analytics` (not
+      // `analyticsV2`) so a future v1 admin surface can share the same
+      // opt-in. Default false; operators set this to true in
+      // `kibana.yml` when they need the debug surface (mapping
+      // migrations, sustained writer failures, dev iteration).
+      enableDebugMode: this.caseConfig.analytics.enable_debug_mode,
     });
     this.casesAnalyticsV2Service.setup({ core, taskManager: plugins.taskManager });
 

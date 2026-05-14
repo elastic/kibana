@@ -39,6 +39,15 @@ interface CasesAnalyticsV2ServiceDeps {
    * at start.
    */
   reconciliationIntervalMinutes: number;
+  /**
+   * Resolved value of `xpack.cases.analytics.enable_debug_mode`. Gates
+   * the mutating administrator routes (`/reset` and `/reconcile/run_soon`)
+   * at registration time — when false, those routes are NOT registered at
+   * all (HTTP 404 instead of 403, so health probes can't fingerprint the
+   * subsystem). `/state` is always registered when the v2 feature flag
+   * itself is on; a future Case Settings page consumes it.
+   */
+  enableDebugMode: boolean;
 }
 
 /**
@@ -119,6 +128,7 @@ export class CasesAnalyticsV2Service {
   private readonly logger: Logger;
   private readonly enabled: boolean;
   private readonly reconciliationIntervalMinutes: number;
+  private readonly enableDebugMode: boolean;
   /**
    * Holds the active writer. Starts as `V2_NOOP_WRITER` so calls before
    * `start()` (or when v2 is disabled) silently no-op. Replaced with a real
@@ -175,6 +185,7 @@ export class CasesAnalyticsV2Service {
     this.logger = deps.logger.get('cases.analyticsV2');
     this.enabled = deps.enabled;
     this.reconciliationIntervalMinutes = deps.reconciliationIntervalMinutes;
+    this.enableDebugMode = deps.enableDebugMode;
   }
 
   /**
@@ -240,6 +251,7 @@ export class CasesAnalyticsV2Service {
       getWriter: () => (this.writer === V2_NOOP_WRITER ? null : this.writerProxy),
       clearDataViewBootstrapCache: () => this.dataViewService?.clearBootstrapCache(),
       enabled: this.enabled,
+      enableDebugMode: this.enableDebugMode,
       reconciliationIntervalMinutes: this.reconciliationIntervalMinutes,
     });
   }

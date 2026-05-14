@@ -23,6 +23,7 @@ describe('CasesAnalyticsV2Service', () => {
         logger: loggerMock.create(),
         enabled: false, // doesn't matter for proxy shape
         reconciliationIntervalMinutes: 30,
+        enableDebugMode: false,
       });
       const proxy = service.getWriter();
 
@@ -50,6 +51,7 @@ describe('CasesAnalyticsV2Service', () => {
         logger: loggerMock.create(),
         enabled: false,
         reconciliationIntervalMinutes: 30,
+        enableDebugMode: false,
       });
       const refA = service.getDataViewRefresher();
       const refB = service.getDataViewRefresher();
@@ -63,6 +65,7 @@ describe('CasesAnalyticsV2Service', () => {
         logger: loggerMock.create(),
         enabled: false,
         reconciliationIntervalMinutes: 30,
+        enableDebugMode: false,
       });
       const refresher = service.getDataViewRefresher();
 
