@@ -107,11 +107,8 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   // ── UI state (step navigation, sandbox open/close, tab selection, etc.) ──
   // In edit mode, seed the sandbox draft with the rule's existing query so the
   // Alert Condition step shows the current query summary instead of "No query defined".
-  const initialSandboxQuery = useMemo(() => {
-    if (mode !== 'edit' || !rule) return '';
-    const mapped = mapRuleResponseToFormValues(rule);
-    return mapped.query?.breach ?? '';
-  }, [mode, rule]);
+  const initialSandboxQuery =
+    mode === 'edit' ? (rule ? mapRuleResponseToFormValues(rule).query?.breach ?? '' : '') : '';
   const [uiState, dispatch] = useComposeDiscoverState(mode, initialSandboxQuery);
 
   // Registered once here so providers persist across Sandbox open/close cycles.

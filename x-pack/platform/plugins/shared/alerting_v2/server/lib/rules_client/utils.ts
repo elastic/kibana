@@ -139,9 +139,8 @@ export function buildUpdateRuleAttributes(
     metadata: { ...existingAttrs.metadata, ...updateData.metadata },
     time_field: updateData.time_field ?? existingAttrs.time_field,
     schedule: { ...existingAttrs.schedule, ...updateData.schedule },
-    // `query` is a discriminated union: callers must send a complete new
-    // shape (we can't merge across formats), so omitted = preserved, present
-    // = full replacement.
+    // `query` - callers must send a complete new shape (we can't merge across formats),
+    // so omitted = preserved, present = full replacement.
     query: updateData.query ?? existingAttrs.query,
     // `null` → clear (null). SO schema uses `maybe(nullable())`.
     state_transition: applyNullableUpdate(
