@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import type { FC, ReactNode } from 'react';
 import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 
@@ -55,6 +56,11 @@ import { useSearch } from '../common/hooks/use_search';
 import { DocumentCountWithBrush } from './document_count_with_brush';
 import { useDataDriftColors } from './use_data_drift_colors';
 
+const maxInlineSizeStyles = css`
+  max-inline-size: 100%;
+  min-inline-size: 0;
+`;
+
 interface PageHeaderProps {
   onRefresh: () => void;
   needsUpdate: boolean;
@@ -100,12 +106,12 @@ export const PageHeader: FC<PageHeaderProps> = ({ onRefresh, needsUpdate, header
       gutterSize="s"
       alignItems="center"
       justifyContent="spaceBetween"
-      responsive={false}
+      wrap={true}
       data-test-subj="dataComparisonTimeRangeSelectorSection"
     >
       <EuiFlexItem grow={false}>{headerContent ?? null}</EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false} css={maxInlineSizeStyles}>
+        <EuiFlexGroup css={maxInlineSizeStyles} gutterSize="s" alignItems="center">
           {hasValidTimeField && (
             <EuiFlexItem grow={false}>
               <FullTimeRangeSelector
@@ -119,7 +125,7 @@ export const PageHeader: FC<PageHeaderProps> = ({ onRefresh, needsUpdate, header
               />
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} css={maxInlineSizeStyles}>
             <DatePickerWrapper
               isAutoRefreshOnly={!hasValidTimeField}
               showRefresh={!hasValidTimeField}

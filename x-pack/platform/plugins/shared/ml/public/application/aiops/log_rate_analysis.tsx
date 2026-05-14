@@ -20,7 +20,7 @@ import { HelpMenu } from '../components/help_menu';
 import { useEnabledFeatures } from '../contexts/ml';
 import { MlPageHeader } from '../components/page_header';
 import { PageTitle } from '../components/page_title';
-import { DataSourcePicker } from '../components/data_source_picker/data_source_picker';
+import { MlDataSourcePicker } from '../components/ml_data_source_picker/ml_data_source_picker';
 
 export const LogRateAnalysisPage: FC = () => {
   const { services } = useMlKibana();
@@ -33,10 +33,9 @@ export const LogRateAnalysisPage: FC = () => {
   );
 
   const headerContent = (
-    <DataSourcePicker
+    <MlDataSourcePicker
       currentDataView={dataView ?? null}
       currentSavedSearch={savedSearch ?? null}
-      requireTimeBased
     />
   );
 

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IndexDataVisualizerSpec } from '@kbn/data-visualizer-plugin/public';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';
 import type {
   GetAdditionalLinksParams,
@@ -29,7 +29,7 @@ import { useEnabledFeatures } from '../../contexts/ml';
 import { useDataSource } from '../../contexts/ml/data_source_context';
 import { useMlManagementLocator } from '../../contexts/kibana/use_create_url';
 import { PageTitle } from '../../components/page_title';
-import { DataSourcePicker } from '../../components/data_source_picker/data_source_picker';
+import { MlDataSourcePicker } from '../../components/ml_data_source_picker/ml_data_source_picker';
 
 export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false }) => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
@@ -195,7 +195,10 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
   );
 
   const dataSourcePicker = !esql ? (
-    <DataSourcePicker currentDataView={dataView ?? null} currentSavedSearch={savedSearch ?? null} />
+    <MlDataSourcePicker
+      currentDataView={dataView ?? null}
+      currentSavedSearch={savedSearch ?? null}
+    />
   ) : undefined;
 
   return IndexDataVisualizer ? (
@@ -203,23 +206,21 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
       {IndexDataVisualizer !== null ? (
         <>
           <MlPageHeader>
-            <EuiFlexGroup gutterSize="s" alignItems="center" direction="row">
-              <PageTitle
-                title={
+            <PageTitle
+              title={
+                esql ? (
                   <FormattedMessage
-                    id="xpack.ml.dataVisualizer.pageHeader"
-                    defaultMessage="Data Visualizer"
+                    id="xpack.ml.dataVisualizer.esql.pageHeader"
+                    defaultMessage="Index data visualizer (ES|QL)"
                   />
-                }
-              />
-              {esql ? (
-                <>
-                  <EuiFlexItem grow={false}>
-                    <FormattedMessage id="xpack.ml.datavisualizer" defaultMessage="(ES|QL)" />
-                  </EuiFlexItem>
-                </>
-              ) : null}
-            </EuiFlexGroup>
+                ) : (
+                  <FormattedMessage
+                    id="xpack.ml.dataVisualizer.index.pageHeader"
+                    defaultMessage="Index data visualizer"
+                  />
+                )
+              }
+            />
           </MlPageHeader>
           {!dataView && !esql ? (
             <>

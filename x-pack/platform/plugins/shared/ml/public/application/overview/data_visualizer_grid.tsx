@@ -26,7 +26,7 @@ export const DataVisualizerGrid: FC<{ isEsqlEnabled: boolean; cardTitleSize?: 's
         title={
           <FormattedMessage
             id="xpack.ml.datavisualizer.selector.selectESQLTitle"
-            defaultMessage="ES|QL"
+            defaultMessage="Index data visualizer (ES|QL)"
           />
         }
         titleSize={cardTitleSize}
@@ -87,14 +87,14 @@ export const DataVisualizerGrid: FC<{ isEsqlEnabled: boolean; cardTitleSize?: 's
       layout="horizontal"
       path={`/${ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER}`}
       title={i18n.translate('xpack.ml.datavisualizer.selector.selectDataViewTitle', {
-        defaultMessage: 'Data view',
+        defaultMessage: 'Index data visualizer',
       })}
       titleSize={cardTitleSize}
-      description={i18n.translate('xpack.ml.datavisualizer.selector.selectDataViewTitle', {
+      description={i18n.translate('xpack.ml.datavisualizer.selector.selectDataViewDescription', {
         defaultMessage: 'Analyze data, its shape, and statistical metadata from a data view.',
       })}
       buttonLabel={i18n.translate('xpack.ml.datavisualizer.selector.selectDataViewButtonLabel', {
-        defaultMessage: 'Select data view',
+        defaultMessage: 'Open Index data visualizer',
       })}
       cardDataTestSubj="mlDataVisualizerCardIndexData"
       buttonDataTestSubj="mlDataVisualizerSelectIndexButton"

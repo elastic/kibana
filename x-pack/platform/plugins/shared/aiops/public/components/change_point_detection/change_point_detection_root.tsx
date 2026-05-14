@@ -113,7 +113,15 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
   const warning = timeSeriesDataViewWarning(dataView, 'change_point_detection');
 
   if (warning !== null) {
-    return <>{warning}</>;
+    return (
+      <AiopsAppContext.Provider value={appContextValue}>
+        <UrlStateProvider>
+          {headerContent}
+          <EuiSpacer size="m" />
+          {warning}
+        </UrlStateProvider>
+      </AiopsAppContext.Provider>
+    );
   }
 
   appContextValue.embeddingOrigin = AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS;

@@ -127,6 +127,10 @@ export interface DiscoverStart {
    * Use the Discover context awareness framework instead to register a custom Discover profile.
    */
   readonly DiscoverContainer: ComponentType<DiscoverContainerProps>;
+  readonly OpenSessionPanel: ComponentType<{
+    onClose: () => void;
+    onOpenSavedSearch: (id: string) => void;
+  }>;
 }
 
 /**

@@ -7,6 +7,7 @@
 
 import type { FC, ReactNode } from 'react';
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { pick } from 'lodash';
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -76,7 +77,15 @@ export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
   const warning = timeSeriesDataViewWarning(dataView, 'log_rate_analysis');
 
   if (warning !== null) {
-    return <>{warning}</>;
+    return (
+      <AiopsAppContext.Provider value={appContextValue}>
+        <UrlStateProvider>
+          {headerContent}
+          <EuiSpacer size="m" />
+          {warning}
+        </UrlStateProvider>
+      </AiopsAppContext.Provider>
+    );
   }
   const CasesContext = appContextValue.cases?.ui.getCasesContext() ?? React.Fragment;
   const casesPermissions = appContextValue.cases?.helpers.canUseCases();

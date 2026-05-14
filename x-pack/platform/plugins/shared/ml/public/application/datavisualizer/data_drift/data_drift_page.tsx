@@ -11,13 +11,11 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataDriftSpec } from '@kbn/data-visualizer-plugin/public';
 
-import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
-import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
+import { useMlKibana } from '../../contexts/kibana';
 import { useDataSource } from '../../contexts/ml';
 import { MlPageHeader } from '../../components/page_header';
 import { PageTitle } from '../../components/page_title';
-import { DataSourcePicker } from '../../components/data_source_picker/data_source_picker';
-import { createPath } from '../../routing/router';
+import { MlDataSourcePicker } from '../../components/ml_data_source_picker/ml_data_source_picker';
 
 export const DataDriftPage: FC = () => {
   const {
@@ -34,14 +32,11 @@ export const DataDriftPage: FC = () => {
   }, [dataVisualizer]);
 
   const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
-  const navigateToPath = useNavigateToPath();
 
   const dataSourcePicker = (
-    <DataSourcePicker
+    <MlDataSourcePicker
       currentDataView={dataView ?? null}
       currentSavedSearch={savedSearch ?? null}
-      onCreateDataView={() => navigateToPath(createPath(ML_PAGES.DATA_DRIFT_CUSTOM))}
-      createDataViewButtonTestSubj="dataDriftCreateDataViewButton"
     />
   );
 

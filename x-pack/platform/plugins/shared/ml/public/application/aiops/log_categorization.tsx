@@ -20,7 +20,7 @@ import { useEnabledFeatures } from '../contexts/ml';
 import { HelpMenu } from '../components/help_menu';
 import { MlPageHeader } from '../components/page_header';
 import { PageTitle } from '../components/page_title';
-import { DataSourcePicker } from '../components/data_source_picker/data_source_picker';
+import { MlDataSourcePicker } from '../components/ml_data_source_picker/ml_data_source_picker';
 
 export const LogCategorizationPage: FC = () => {
   const { services } = useMlKibana();
@@ -36,10 +36,9 @@ export const LogCategorizationPage: FC = () => {
   );
 
   const headerContent = (
-    <DataSourcePicker
+    <MlDataSourcePicker
       currentDataView={dataView ?? null}
       currentSavedSearch={savedSearch ?? null}
-      requireTimeBased
     />
   );
 

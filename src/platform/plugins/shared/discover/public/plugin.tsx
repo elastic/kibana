@@ -29,6 +29,7 @@ import { ADD_PANEL_TRIGGER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/co
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DISCOVER_APP_LOCATOR, PLUGIN_ID, type DiscoverAppLocator } from '../common';
 import {
   DISCOVER_CONTEXT_APP_LOCATOR,
@@ -65,6 +66,8 @@ import type { ProfileProviderSharedServices, ProfilesManager } from './context_a
 import { forwardLegacyUrls } from './plugin_imports/forward_legacy_urls';
 import { registerEsqlResultsAttachmentUi } from './agent_builder/register_esql_results_ui';
 import { getProfilesInspectorView } from './context_awareness/inspector/get_profiles_inspector_view';
+import { OpenSearchPanel } from './application/main/components/top_nav/open_search_panel';
+import type { DiscoverServices } from './build_services';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -304,6 +307,23 @@ export class DiscoverPlugin
       DiscoverContainer: (props: DiscoverContainerProps) => (
         <DiscoverContainerInternal getDiscoverServices={getDiscoverServicesInternal} {...props} />
       ),
+      OpenSessionPanel: (props: {
+        onClose: () => void;
+        onOpenSavedSearch: (id: string) => void;
+      }) => {
+        const openSessionServices = {
+          addBasePath: (path: string) => core.http.basePath.prepend(path),
+          capabilities: core.application.capabilities,
+          savedObjectsTagging: plugins.savedObjectsTaggingOss?.getTaggingApi(),
+          contentClient: plugins.contentManagement.client,
+          uiSettings: core.uiSettings,
+        };
+        return (
+          <KibanaContextProvider services={openSessionServices as unknown as DiscoverServices}>
+            <OpenSearchPanel {...props} />
+          </KibanaContextProvider>
+        );
+      },
     };
   }
 

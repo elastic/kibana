@@ -23,7 +23,7 @@ import { MlPageHeader } from '../components/page_header';
 import { PageTitle } from '../components/page_title';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { useEnabledFeatures } from '../contexts/ml/serverless_context';
-import { DataSourcePicker } from '../components/data_source_picker/data_source_picker';
+import { MlDataSourcePicker } from '../components/ml_data_source_picker/ml_data_source_picker';
 
 export const ChangePointDetectionPage: FC = () => {
   const { services } = useMlKibana();
@@ -39,10 +39,9 @@ export const ChangePointDetectionPage: FC = () => {
   );
 
   const headerContent = (
-    <DataSourcePicker
+    <MlDataSourcePicker
       currentDataView={dataView ?? null}
       currentSavedSearch={savedSearch ?? null}
-      requireTimeBased
     />
   );
 

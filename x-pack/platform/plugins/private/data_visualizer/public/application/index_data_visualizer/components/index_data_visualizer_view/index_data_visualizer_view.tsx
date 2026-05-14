@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import type { FC, ReactNode } from 'react';
 import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import type { Required } from 'utility-types';
@@ -62,7 +63,6 @@ import { DocumentCountContent } from '../../../common/components/document_count_
 import { OMIT_FIELDS } from '../../../../../common/constants';
 import { SearchPanel } from '../search_panel';
 import { ActionsPanel } from '../actions_panel';
-import { DataVisualizerDataViewManagement } from '../data_view_management';
 import type { GetAdditionalLinks } from '../../../common/components/results_links';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
 import {
@@ -71,6 +71,11 @@ import {
   type RandomSamplerOption,
 } from '../../constants/random_sampler';
 import type { FieldStatisticTableEmbeddableProps } from '../../embeddables/grid_embeddable/types';
+
+const maxInlineSizeStyles = css`
+  max-inline-size: 100%;
+  min-inline-size: 0;
+`;
 
 const defaultSearchQuery = {
   match_all: {},
@@ -519,19 +524,12 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = ({
           gutterSize="s"
           alignItems="center"
           justifyContent="spaceBetween"
-          responsive={false}
+          wrap={true}
           data-test-subj="dataVisualizerTimeRangeSelectorSection"
         >
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>{headerContent ?? null}</EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <DataVisualizerDataViewManagement currentDataView={currentDataView} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>{headerContent ?? null}</EuiFlexItem>
+          <EuiFlexItem grow={false} css={maxInlineSizeStyles}>
+            <EuiFlexGroup css={maxInlineSizeStyles} gutterSize="s" alignItems="center">
               {hasValidTimeField && (
                 <EuiFlexItem grow={false}>
                   <FullTimeRangeSelector
@@ -544,7 +542,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = ({
                   />
                 </EuiFlexItem>
               )}
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false} css={maxInlineSizeStyles}>
                 <DatePickerWrapper
                   isAutoRefreshOnly={!hasValidTimeField}
                   showRefresh={!hasValidTimeField}

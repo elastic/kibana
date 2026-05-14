@@ -6,6 +6,7 @@
  */
 import type { FC, ReactNode } from 'react';
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { pick } from 'lodash';
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -70,7 +71,15 @@ export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
   const warning = timeSeriesDataViewWarning(dataView, 'log_categorization');
 
   if (warning !== null) {
-    return <>{warning}</>;
+    return (
+      <AiopsAppContext.Provider value={appContextValue}>
+        <UrlStateProvider>
+          {headerContent}
+          <EuiSpacer size="m" />
+          {warning}
+        </UrlStateProvider>
+      </AiopsAppContext.Provider>
+    );
   }
 
   const datePickerDeps: DatePickerDependencies = {
