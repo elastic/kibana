@@ -99,9 +99,7 @@ describe('validateAdditiveOnlyMappings', () => {
 
   it('passes when baseline has no mapped properties', () => {
     expect(() => validateAdditiveOnlyMappings('my-type', {}, {})).not.toThrow();
-    expect(() =>
-      validateAdditiveOnlyMappings('my-type', { dynamic: 'strict' }, {})
-    ).not.toThrow();
+    expect(() => validateAdditiveOnlyMappings('my-type', { dynamic: 'strict' }, {})).not.toThrow();
   });
 
   it('includes the type name in the error message', () => {
