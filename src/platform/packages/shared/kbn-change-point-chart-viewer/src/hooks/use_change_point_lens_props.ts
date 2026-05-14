@@ -151,7 +151,7 @@ export const useChangePointLensProps = ({
     })) as LensAttributes;
 
     // LensConfigBuilder does not expose a description field in its config; set it directly on
-    // the built attributes so it is available as Lens panel description and case-attachment metadata.
+    // the built attributes so it is available as case-attachment metadata.
     if (description) {
       result.description = description;
     }

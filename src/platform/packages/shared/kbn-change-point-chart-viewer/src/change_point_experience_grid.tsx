@@ -7,17 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiDelayRender, EuiEmptyPrompt, EuiSkeletonText } from '@elastic/eui';
+import { EuiBetaBadge, EuiDelayRender, EuiEmptyPrompt, EuiSkeletonText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ChartSectionTemplate } from '@kbn/unified-histogram';
 import { getChangePointSeriesColumns } from '@kbn/esql-utils';
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ChangePointExperienceGridContent } from './change_point_experience_grid_content';
 import type { UnifiedChangePointGridProps } from './types';
 import { getEsqlQuery } from './utils/get_esql_query';
 import { buildChangePointCards } from './utils/derive_change_point_cards';
-import { useChangePointControls } from './hooks/use_change_point_controls';
 
 export const ChangePointExperienceGrid: React.FC<UnifiedChangePointGridProps> = (props) => {
   const {
@@ -35,8 +34,16 @@ export const ChangePointExperienceGrid: React.FC<UnifiedChangePointGridProps> = 
     [esql, fetchParams.table]
   );
 
-  const { displayedCards, currentPage, setCurrentPage, controlsNode } =
-    useChangePointControls(cards);
+  const [currentPage, setCurrentPage] = useState(0);
+
+  // Reset to page 0 whenever the card set changes (new query result).
+  // Intentionally in render (not useEffect) so the reset lands before the next paint,
+  // preventing a flash where the user briefly sees the wrong page with new cards.
+  const prevCardsRef = useRef(cards);
+  if (prevCardsRef.current !== cards) {
+    prevCardsRef.current = cards;
+    setCurrentPage(0);
+  }
 
   const seriesColumns = useMemo(
     () => (esql ? getChangePointSeriesColumns(esql) : undefined),
@@ -66,7 +73,23 @@ export const ChangePointExperienceGrid: React.FC<UnifiedChangePointGridProps> = 
         toolbarCss={chartToolbarCss}
         toolbar={{
           toggleActions: toolbarToggleActions,
-          additionalControls: { prependRight: controlsNode },
+          // Empty leftSide creates a growing flex spacer that pushes the badge to the far right.
+          leftSide: <></>,
+          additionalControls: {
+            prependRight: (
+              <EuiBetaBadge
+                label={i18n.translate('changePointChartViewer.technicalPreviewLabel', {
+                  defaultMessage: 'Technical preview',
+                })}
+                size="s"
+                alignment="middle"
+                tooltipContent={i18n.translate('changePointChartViewer.technicalPreviewTooltip', {
+                  defaultMessage:
+                    'This functionality is in technical preview and may change or be removed in a future release.',
+                })}
+              />
+            ),
+          },
         }}
       >
         {showLoading ? (
@@ -117,7 +140,7 @@ export const ChangePointExperienceGrid: React.FC<UnifiedChangePointGridProps> = 
         canRenderChangePointCharts ? (
           <ChangePointExperienceGridContent
             {...props}
-            displayedCards={displayedCards}
+            displayedCards={cards!}
             currentPage={currentPage}
             onPageChange={setCurrentPage}
             seriesColumns={seriesColumns}

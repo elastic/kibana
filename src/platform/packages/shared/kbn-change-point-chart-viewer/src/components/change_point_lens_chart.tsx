@@ -31,7 +31,6 @@ import {
 } from '../utils/build_change_point_tab_queries';
 import { useChangePointLensProps } from '../hooks/use_change_point_lens_props';
 import { ChangePointBadge } from './change_point_badge';
-import { ChangePointEntityTitle } from './change_point_entity_title';
 import type { ChangePointCardModel } from '../utils/derive_change_point_cards';
 import type { UnifiedChangePointGridProps } from '../types';
 
@@ -101,7 +100,7 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
   const chartLayers = useMemo((): LensXYConfig['layers'] => {
     const seriesLayer: LensSeriesLayer = {
       type: 'series',
-      seriesType: 'line',
+      seriesType: 'area',
       // String xAxis omits `meta.type: date`, so Lens treats X as ordinal — not a time chart and
       // event annotations do not render. Date histogram maps the ES|QL time column as interval/date.
       xAxis: { type: 'dateHistogram', field: timeColumn, minimumInterval: 'auto' },
@@ -152,6 +151,7 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
   const { lensProps, buildError } = useChangePointLensProps({
     lensInstanceId: `changePointMiniLens-${card.id}`,
     title: card.title,
+    // Stored on attributes for case-attachment metadata.
     description: card.entityDescription,
     query: card.lineEsql,
     services,
@@ -216,8 +216,6 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
           <EmbeddableRendererContext.Provider value={EMBEDDABLE_QUICK_ACTIONS}>
             <EmbeddableComponent
               {...lensProps}
-              title={lensProps.attributes.title}
-              hidePanelTitles
               extraActions={extraActions}
               abortController={fetchParams.abortController}
               disabledActions={DEFAULT_DISABLED_ACTIONS}
@@ -233,7 +231,9 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
     if (buildError) {
       return (
         <EuiFlexGroup
-          style={{ flex: 1 }}
+          css={css`
+            flex: 1;
+          `}
           justifyContent="center"
           alignItems="center"
           responsive={false}
@@ -253,7 +253,9 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
 
     return (
       <EuiFlexGroup
-        style={{ flex: 1 }}
+        css={css`
+          flex: 1;
+        `}
         justifyContent="center"
         alignItems="center"
         responsive={false}
@@ -271,15 +273,12 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
         display: flex;
         flex-direction: column;
         height: ${CHART_HEIGHT_PX}px;
-        overflow: hidden;
         outline: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
         border-radius: ${euiTheme.border.radius.medium};
       `}
       ref={chartRef}
       data-test-subj={`changePointLensChart-${cardIndex}`}
     >
-      <ChangePointEntityTitle card={card} />
-      {/* Chart area fills the remaining height */}
       {renderChartBody()}
 
       {/* Badge row — sits below the chart, right-aligned, never overlaps chart content */}

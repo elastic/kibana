@@ -36,15 +36,6 @@ jest.mock('./utils/get_esql_query', () => ({
   getEsqlQuery: jest.fn().mockReturnValue('FROM logs-* | CHANGE_POINT count ON @timestamp'),
 }));
 
-jest.mock('./hooks/use_change_point_controls', () => ({
-  useChangePointControls: jest.fn().mockReturnValue({
-    displayedCards: [],
-    currentPage: 0,
-    setCurrentPage: jest.fn(),
-    controlsNode: null,
-  }),
-}));
-
 // Minimal fetchParams with only the fields the grid reads directly.
 const fetchParams = {
   query: { esql: 'FROM logs-* | CHANGE_POINT count ON @timestamp' },
