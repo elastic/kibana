@@ -12,7 +12,7 @@ import type { EntityRelationshipRecord } from './types';
 
 const makeCrudClient = (errors: Array<{ status: number }> = []): EntityUpdateClient =>
   ({
-    bulkUpdateEntity: jest.fn().mockResolvedValue(errors),
+    bulkUpdateEntityWithHistory: jest.fn().mockResolvedValue(errors),
   } as unknown as EntityUpdateClient);
 
 describe('writeEntityIds', () => {
@@ -20,7 +20,7 @@ describe('writeEntityIds', () => {
     const crudClient = makeCrudClient();
     const result = await writeEntityIds(crudClient, loggerMock.create(), []);
     expect(result).toEqual({ updated: 0, notFound: 0, errors: 0 });
-    expect(crudClient.bulkUpdateEntity).not.toHaveBeenCalled();
+    expect(crudClient.bulkUpdateEntityWithHistory).not.toHaveBeenCalled();
   });
 
   it('skips records with null entityId', async () => {
@@ -34,7 +34,7 @@ describe('writeEntityIds', () => {
     ];
     const result = await writeEntityIds(crudClient, loggerMock.create(), records);
     expect(result).toEqual({ updated: 0, notFound: 0, errors: 0 });
-    expect(crudClient.bulkUpdateEntity).not.toHaveBeenCalled();
+    expect(crudClient.bulkUpdateEntityWithHistory).not.toHaveBeenCalled();
   });
 
   it('skips records where all relationship arrays are empty', async () => {
@@ -51,10 +51,10 @@ describe('writeEntityIds', () => {
     ];
     const result = await writeEntityIds(crudClient, loggerMock.create(), records);
     expect(result).toEqual({ updated: 0, notFound: 0, errors: 0 });
-    expect(crudClient.bulkUpdateEntity).not.toHaveBeenCalled();
+    expect(crudClient.bulkUpdateEntityWithHistory).not.toHaveBeenCalled();
   });
 
-  it('calls bulkUpdateEntity with ids array per relType', async () => {
+  it('calls bulkUpdateEntityWithHistory with ids array per relType', async () => {
     const crudClient = makeCrudClient();
     const records: EntityRelationshipRecord[] = [
       {
@@ -67,7 +67,7 @@ describe('writeEntityIds', () => {
       },
     ];
     await writeEntityIds(crudClient, loggerMock.create(), records);
-    const [call] = (crudClient.bulkUpdateEntity as jest.Mock).mock.calls;
+    const [call] = (crudClient.bulkUpdateEntityWithHistory as jest.Mock).mock.calls;
     const { objects } = call[0];
     expect(objects).toHaveLength(1);
     const doc = objects[0].doc.entity.relationships;
@@ -90,7 +90,7 @@ describe('writeEntityIds', () => {
       },
     ];
     await writeEntityIds(crudClient, loggerMock.create(), records);
-    const [call] = (crudClient.bulkUpdateEntity as jest.Mock).mock.calls;
+    const [call] = (crudClient.bulkUpdateEntityWithHistory as jest.Mock).mock.calls;
     const { objects } = call[0];
     expect(objects).toHaveLength(1);
     expect(objects[0].doc.entity.relationships.communicates_with.ids.sort()).toEqual([
@@ -175,7 +175,7 @@ describe('writeEntityIds', () => {
     expect(logger.error).toHaveBeenCalled();
   });
 
-  it('calls bulkUpdateEntity with force: true', async () => {
+  it('calls bulkUpdateEntityWithHistory with force: true', async () => {
     const crudClient = makeCrudClient();
     const records: EntityRelationshipRecord[] = [
       {
@@ -185,7 +185,7 @@ describe('writeEntityIds', () => {
       },
     ];
     await writeEntityIds(crudClient, loggerMock.create(), records);
-    const [call] = (crudClient.bulkUpdateEntity as jest.Mock).mock.calls;
+    const [call] = (crudClient.bulkUpdateEntityWithHistory as jest.Mock).mock.calls;
     expect(call[0].force).toBe(true);
   });
 });

@@ -67,7 +67,8 @@ export interface WriteEntityIdsResult {
 export const writeEntityIds = async (
   crudClient: EntityUpdateClient,
   logger: Logger,
-  records: EntityRelationshipRecord[]
+  records: EntityRelationshipRecord[],
+  collected: string = new Date().toISOString()
 ): Promise<WriteEntityIdsResult> => {
   if (records.length === 0) return { updated: 0, notFound: 0, errors: 0 };
 
@@ -101,7 +102,11 @@ export const writeEntityIds = async (
   if (objects.length === 0) return { updated: 0, notFound: 0, errors: 0 };
 
   logger.info(`Writing relationship ids for ${objects.length} entity records`);
-  const responseErrors = await crudClient.bulkUpdateEntity({ objects, force: true });
+  const responseErrors = await crudClient.bulkUpdateEntityWithHistory({
+    objects,
+    collected,
+    force: true,
+  });
 
   const missingErrors = responseErrors.filter((e) => e.status === 404);
   const realErrors = responseErrors.filter((e) => e.status !== 404);

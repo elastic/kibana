@@ -27,6 +27,10 @@ import {
   EntityStoreNotInstalledError,
 } from '../errors';
 import { validateAndTransformDoc } from './utils';
+import {
+  RELATIONSHIP_HISTORY_PAINLESS_SCRIPT,
+  type RelationshipHistoryParams,
+} from './relationship_history_script';
 import { runWithSpan } from '../../telemetry/traces';
 import {
   searchEntitiesV2,
@@ -83,6 +87,11 @@ export interface BulkObjectResponse {
 interface BulkUpdateEntityParams {
   objects: BulkObject[];
   force?: boolean;
+}
+
+interface BulkUpdateEntityWithHistoryParams extends BulkUpdateEntityParams {
+  /** ISO timestamp recorded as the `seen` time for this scan's history entries. */
+  collected: string;
 }
 
 // EntityUpdateClient is the maintainer-safe CRUD surface: all CRUD methods
@@ -332,6 +341,89 @@ export class CRUDClient {
           reason: value.error?.reason,
         } as BulkObjectResponse;
       });
+  }
+
+  /**
+   * Same write contract as `bulkUpdateEntity`, plus an additional bulk Painless
+   * pass that upserts per-EUID `entity.relationships.<rel>.history` records
+   * (preserves `first_seen`, advances `last_seen`) for every entity that
+   * successfully received its `.ids` update.
+   *
+   * History is intentionally NOT written for entities that 404'd in the first
+   * pass — `bulkUpdateEntity` is the only authority on which EUIDs exist in
+   * the store. Callers see the same `BulkObjectResponse[]` error contract; any
+   * errors raised by the history pass are logged but do not surface as caller
+   * errors (the `.ids` update is the source of truth for caller-visible state).
+   */
+  public async bulkUpdateEntityWithHistory({
+    objects,
+    collected,
+    force = false,
+  }: BulkUpdateEntityWithHistoryParams): Promise<BulkObjectResponse[]> {
+    const idsErrors = await this.bulkUpdateEntity({ objects, force });
+
+    const failedHashes = new Set(idsErrors.map((e) => e._id));
+    const historyOps: object[] = [];
+    for (const { type: entityType, doc } of objects) {
+      const generatedId = getEuidFromObject(entityType, doc);
+      const valid = validateAndTransformDoc(
+        'update',
+        entityType,
+        this.namespace,
+        doc,
+        generatedId,
+        force
+      );
+      const docId = hashEuid(valid.id);
+      if (failedHashes.has(docId)) continue;
+
+      // Extract { relType: [euid, ...] } from the doc's relationships shape.
+      const docRels = (valid.doc as { entity?: { relationships?: Record<string, unknown> } })
+        ?.entity?.relationships;
+      if (!docRels || typeof docRels !== 'object') continue;
+      const updates: Record<string, string[]> = {};
+      for (const [relType, val] of Object.entries(docRels)) {
+        const ids = (val as { ids?: unknown })?.ids;
+        if (Array.isArray(ids) && ids.length > 0) {
+          updates[relType] = ids.filter((x): x is string => typeof x === 'string');
+        }
+      }
+      if (Object.keys(updates).length === 0) continue;
+
+      const params: RelationshipHistoryParams = { collected, updates };
+      historyOps.push(
+        { update: { _id: docId, retry_on_conflict: RETRY_ON_CONFLICT } },
+        {
+          script: {
+            source: RELATIONSHIP_HISTORY_PAINLESS_SCRIPT,
+            lang: 'painless',
+            params,
+          },
+        }
+      );
+    }
+
+    if (historyOps.length > 0) {
+      try {
+        const histResp = await this.esClient.bulk({
+          index: getLatestEntitiesIndexName(this.namespace),
+          operations: historyOps,
+          refresh: false,
+        });
+        if (histResp.errors) {
+          const histErrCount = histResp.items.filter((it) => it.update?.error).length;
+          this.logger.warn(
+            `Bulk relationship history upsert produced ${histErrCount} errors out of ${
+              historyOps.length / 2
+            } operations`
+          );
+        }
+      } catch (err) {
+        this.logger.error(`Bulk relationship history upsert failed: ${err}`);
+      }
+    }
+
+    return idsErrors;
   }
 
   // createEntity generates EUID and creates the entity in the LATEST index

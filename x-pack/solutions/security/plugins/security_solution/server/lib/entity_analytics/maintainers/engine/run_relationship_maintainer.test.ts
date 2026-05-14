@@ -47,7 +47,7 @@ const makeCrudClient = (
   errors: Array<{ status: number }> = []
 ): { crudClient: EntityUpdateClient; bulkUpdate: jest.Mock } => {
   const bulkUpdate = jest.fn().mockResolvedValue(errors);
-  const crudClient = { bulkUpdateEntity: bulkUpdate } as unknown as EntityUpdateClient;
+  const crudClient = { bulkUpdateEntityWithHistory: bulkUpdate } as unknown as EntityUpdateClient;
   return { crudClient, bulkUpdate };
 };
 

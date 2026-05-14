@@ -11,8 +11,30 @@ import type {
   EntityType,
 } from '../../../common/domain/definitions/entity_schema';
 import { ENTITY_BASE_PREFIX, ENTITY_SCHEMA_VERSION_V2 } from '../../../common/domain/entity_index';
+import { ENTITY_RELATIONSHIP_COLLECT_LEAVES } from '../../../common/domain/definitions/common_fields';
 
 type MappingProperties = NonNullable<MappingTypeMapping['properties']>;
+
+// Per-EUID first/last seen history is stored as a nested array next to
+// `entity.relationships.<rel>.ids`. Nested type preserves object identity so
+// DSL nested queries can filter by date range per EUID. ES|QL does not
+// support nested types — analyst temporal investigation lives elsewhere.
+const RELATIONSHIP_HISTORY_MAPPING = {
+  type: 'nested',
+  properties: {
+    euid: { type: 'keyword' },
+    first_seen: { type: 'date', format: 'strict_date_optional_time' },
+    last_seen: { type: 'date', format: 'strict_date_optional_time' },
+  },
+} as const;
+
+const ENTITY_RELATIONSHIP_HISTORY_MAPPINGS: MappingProperties = Object.fromEntries(
+  ENTITY_RELATIONSHIP_COLLECT_LEAVES.map((rel) => [
+    `entity.relationships.${rel}.history`,
+    RELATIONSHIP_HISTORY_MAPPING,
+  ])
+);
+
 const BASE_ENTITY_INDEX_MAPPING = {
   '@timestamp': { type: 'date' },
   'event.ingested': { type: 'date' },
@@ -43,6 +65,7 @@ export const getEntityDefinitionComponentTemplate = (
 const getIndexMappings = (definition: EntityDefinition): MappingTypeMapping => ({
   properties: {
     ...BASE_ENTITY_INDEX_MAPPING,
+    ...ENTITY_RELATIONSHIP_HISTORY_MAPPINGS,
     ...Object.fromEntries(
       definition.fields
         .filter(({ mapping }) => mapping)
