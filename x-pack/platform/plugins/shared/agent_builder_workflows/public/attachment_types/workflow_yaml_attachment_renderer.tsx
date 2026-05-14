@@ -358,7 +358,11 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
         });
       }
 
-      if (attachment.data.workflowId && attachment.origin && !isOnWorkflowPage(attachment.data.workflowId)) {
+      if (
+        attachment.data.workflowId &&
+        attachment.origin &&
+        !isOnWorkflowPage(attachment.data.workflowId)
+      ) {
         buttons.push({
           label: i18n.translate(
             'workflowsManagement.attachmentRenderers.workflowYaml.openInEditor',

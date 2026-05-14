@@ -123,7 +123,7 @@ export const ActionPolicyDefinitionList = ({
           defaultMessage: 'Dispatch per',
         }),
         description: getGroupingModeLabel(groupingMode),
-      },
+      }
     );
 
     if (groupingMode === 'per_field' && groupBy && groupBy.length > 0) {
