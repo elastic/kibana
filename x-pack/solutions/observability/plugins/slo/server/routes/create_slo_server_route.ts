@@ -7,6 +7,7 @@
 import { createServerRouteFactory } from '@kbn/server-route-repository';
 import type { Boom } from '@hapi/boom';
 import { forbidden, notFound, conflict, badRequest } from '@hapi/boom';
+import { addSpanLabels } from '@kbn/apm-utils';
 import type { CreateServerRouteFactory } from '@kbn/server-route-repository-utils/src/typings';
 import type { SLORouteHandlerResources } from './types';
 import {
@@ -46,6 +47,7 @@ export const createSloServerRoute: CreateServerRouteFactory<
   return createPlainSloServerRoute({
     ...config,
     handler: (options) => {
+      addSpanLabels({ plugin: 'slo' });
       return handler(options).catch((error) => {
         if (error instanceof SLOError) {
           throw handleSLOError(error);
