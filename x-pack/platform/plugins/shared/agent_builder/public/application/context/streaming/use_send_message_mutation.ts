@@ -178,7 +178,7 @@ export const useSendMessageMutation = ({
       const controller = new AbortController();
       controllersRef.current.set(vars.conversationId, controller);
 
-      let insertedOptimisticListRow = false;
+      let hasInsertedOptimisticListRow = false;
       if (isRegenerate) {
         // Clear the existing response immediately so UI shows empty state.
         streamActions.clearLastRoundResponse();
@@ -187,7 +187,7 @@ export const useSendMessageMutation = ({
           throw new Error('Message is required');
         }
         setPendingMessage(vars.conversationId, vars.message);
-        insertedOptimisticListRow = await insertSidebarConversationListRow({
+        hasInsertedOptimisticListRow = await insertSidebarConversationListRow({
           queryClient,
           agentId: vars.agentId,
           row: buildSidebarConversationListRow({
@@ -267,7 +267,7 @@ export const useSendMessageMutation = ({
         if (succeeded && !endedInAwaitingPrompt) {
           streamActions.invalidateConversation();
         }
-        if (!succeeded && insertedOptimisticListRow && !isRegenerate) {
+        if (!succeeded && hasInsertedOptimisticListRow) {
           removeSidebarConversationListRow({
             queryClient,
             agentId: vars.agentId,

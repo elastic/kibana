@@ -101,6 +101,5 @@ export const patchSidebarConversationListTitle = ({
   });
 };
 
-export const isServerBackedConversationListRow = (
-  conversation: ConversationWithoutRounds
-): boolean => !(conversation as SidebarConversationListRow)._isOptimistic;
+export const isConversationPersisted = (conversation: ConversationWithoutRounds): boolean =>
+  !(conversation as SidebarConversationListRow)._isOptimistic;

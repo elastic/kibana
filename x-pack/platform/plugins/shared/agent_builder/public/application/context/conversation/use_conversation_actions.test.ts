@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
+import type { Conversation } from '@kbn/agent-builder-common';
 import { QueryClient } from '@kbn/react-query';
 
 import type { ConversationsService } from '../../../services/conversations';
@@ -20,27 +20,15 @@ const conversationsServiceStub = {
 
 describe('createConversationActions', () => {
   describe('onConversationCreated', () => {
-    it('updates per-conversation cache and matching list row title (search-team#14321)', () => {
+    it('updates per-conversation cache and invalidates conversation lists', () => {
       const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
       const agentId = 'agent-flow';
       const conversationId = 'conv-flow-1';
-      const listKey = queryKeys.conversations.byAgent(agentId);
       const byIdKey = queryKeys.conversations.byId(conversationId);
 
       const conv = createNewConversation({ id: conversationId, agentId });
       conv.title = 'New conversation';
       queryClient.setQueryData<Conversation>(byIdKey, conv);
-
-      queryClient.setQueryData<ConversationWithoutRounds[]>(listKey, [
-        {
-          id: conversationId,
-          agent_id: agentId,
-          user: { id: '', username: '' },
-          title: 'New conversation',
-          created_at: '2024-01-01T00:00:00.000Z',
-          updated_at: '2024-01-01T00:00:00.000Z',
-        },
-      ]);
 
       const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
@@ -53,9 +41,6 @@ describe('createConversationActions', () => {
       actions.onConversationCreated({ title: 'LLM-generated title' });
 
       expect(queryClient.getQueryData<Conversation>(byIdKey)?.title).toBe('LLM-generated title');
-      expect(queryClient.getQueryData<ConversationWithoutRounds[]>(listKey)?.[0].title).toBe(
-        'LLM-generated title'
-      );
       expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.conversations.all });
 
       invalidateSpy.mockRestore();

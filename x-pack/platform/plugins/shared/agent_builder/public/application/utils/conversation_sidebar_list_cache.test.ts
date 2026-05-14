@@ -14,18 +14,18 @@ import {
   insertSidebarConversationListRow,
   removeSidebarConversationListRow,
   patchSidebarConversationListTitle,
-  isServerBackedConversationListRow,
+  isConversationPersisted,
 } from './conversation_sidebar_list_cache';
 
 describe('conversation_sidebar_list_cache', () => {
-  describe('isServerBackedConversationListRow', () => {
+  describe('isConversationPersisted', () => {
     it('is false for optimistic rows built for the sidebar cache', () => {
       const row = buildSidebarConversationListRow({
         id: '1',
         agent_id: 'a',
         title: 't',
       });
-      expect(isServerBackedConversationListRow(row)).toBe(false);
+      expect(isConversationPersisted(row)).toBe(false);
     });
 
     it('is true for API list rows without _isOptimistic (even if username is empty)', () => {
@@ -37,7 +37,7 @@ describe('conversation_sidebar_list_cache', () => {
         created_at: '2020-01-01T00:00:00.000Z',
         updated_at: '2020-01-01T00:00:00.000Z',
       };
-      expect(isServerBackedConversationListRow(row)).toBe(true);
+      expect(isConversationPersisted(row)).toBe(true);
     });
 
     it('is true when username is set', () => {
@@ -49,7 +49,7 @@ describe('conversation_sidebar_list_cache', () => {
         created_at: '2020-01-01T00:00:00.000Z',
         updated_at: '2020-01-01T00:00:00.000Z',
       };
-      expect(isServerBackedConversationListRow(row)).toBe(true);
+      expect(isConversationPersisted(row)).toBe(true);
     });
   });
 
