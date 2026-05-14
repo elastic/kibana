@@ -46,7 +46,7 @@ export function createVersionedLensSchemas<Version extends number>(version: Vers
    * The common SO type used for mSearch items.
    */
   const lensCommonSavedObjectSchema = savedObjectSchema(
-    z.object(lensItemAttributesSchema.pick({ title: true, description: true })).strict()
+    lensItemAttributesSchema.pick({ title: true, description: true }).strict()
   );
 
   // TODO: cleanup data for update, should we forbid or just ignore body.id on update?
