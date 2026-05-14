@@ -26,27 +26,42 @@ interface PrivilegeMap {
   viewRelations: boolean;
 }
 
+interface TestTitles {
+  view: string;
+  delete: string;
+  bulkDelete: string;
+  create: string;
+  edit: string;
+  viewRelations: string;
+}
+
 interface FeatureControlRoleSuite {
   role: KibanaRole;
-  description: string;
   privileges: PrivilegeMap;
+  titles: TestTitles;
 }
 
 const FEATURE_CONTROL_ROLE_SUITES: FeatureControlRoleSuite[] = [
   {
     role: getSavedObjectsTaggingReadRole(),
-    description: 'tag management read privileges',
     privileges: {
       view: true,
       create: false,
       edit: false,
       delete: false,
       viewRelations: false,
+    },
+    titles: {
+      view: 'read role can see all tags',
+      delete: 'read role cannot delete a tag',
+      bulkDelete: 'read role cannot bulk delete tags',
+      create: 'read role cannot create a tag',
+      edit: 'read role cannot edit a tag',
+      viewRelations: 'read role cannot see tag relations',
     },
   },
   {
     role: getSavedObjectsTaggingWriteRole(),
-    description: 'tag management write privileges',
     privileges: {
       view: true,
       create: true,
@@ -54,10 +69,17 @@ const FEATURE_CONTROL_ROLE_SUITES: FeatureControlRoleSuite[] = [
       delete: true,
       viewRelations: false,
     },
+    titles: {
+      view: 'write role can see all tags',
+      delete: 'write role can delete a tag',
+      bulkDelete: 'write role can bulk delete tags',
+      create: 'write role can create a tag',
+      edit: 'write role can edit a tag',
+      viewRelations: 'write role cannot see tag relations',
+    },
   },
   {
     role: getSavedObjectsTaggingReadWithSavedObjectsManagementReadRole(),
-    description: 'tag management read and so management read privileges',
     privileges: {
       view: true,
       create: false,
@@ -65,10 +87,17 @@ const FEATURE_CONTROL_ROLE_SUITES: FeatureControlRoleSuite[] = [
       delete: false,
       viewRelations: true,
     },
+    titles: {
+      view: 'read + so management read role can see all tags',
+      delete: 'read + so management read role cannot delete a tag',
+      bulkDelete: 'read + so management read role cannot bulk delete tags',
+      create: 'read + so management read role cannot create a tag',
+      edit: 'read + so management read role cannot edit a tag',
+      viewRelations: 'read + so management read role can see tag relations',
+    },
   },
   {
     role: getDefaultSpaceWriteRole(),
-    description: 'base write privileges',
     privileges: {
       view: true,
       create: true,
@@ -76,10 +105,16 @@ const FEATURE_CONTROL_ROLE_SUITES: FeatureControlRoleSuite[] = [
       delete: true,
       viewRelations: true,
     },
+    titles: {
+      view: 'base write role can see all tags',
+      delete: 'base write role can delete a tag',
+      bulkDelete: 'base write role can bulk delete tags',
+      create: 'base write role can create a tag',
+      edit: 'base write role can edit a tag',
+      viewRelations: 'base write role can see tag relations',
+    },
   },
 ];
-
-const canOrCannot = (allowed: boolean) => (allowed ? 'can' : "can't");
 
 const selectSomeTagsIfPossible = async (tagsTable: TagsTable) => {
   if (await tagsTable.isSelectionColumnVisible()) {
@@ -109,7 +144,7 @@ const loginAndOpenTagsPage = async ({
 // custom-role login is not supported in ECH yet, so this suite runs on local
 // stateful only.
 test.describe('Tags management feature controls', { tag: '@local-stateful-classic' }, () => {
-  test.beforeEach(async ({ kbnClient }) => {
+  test.beforeAll(async ({ kbnClient }) => {
     await kbnClient.savedObjects.cleanStandardList();
     await kbnClient.importExport.load(KBN_ARCHIVES.FUNCTIONAL_BASE);
   });
@@ -129,12 +164,7 @@ test.describe('Tags management feature controls', { tag: '@local-stateful-classi
   });
 
   for (const suite of FEATURE_CONTROL_ROLE_SUITES) {
-    test(`${suite.description} - ${canOrCannot(suite.privileges.view)} see all tags`, async ({
-      browserAuth,
-      page,
-      kbnUrl,
-      pageObjects,
-    }) => {
+    test(suite.titles.view, async ({ browserAuth, page, kbnUrl, pageObjects }) => {
       await loginAndOpenTagsPage({
         role: suite.role,
         browserAuth,
@@ -147,12 +177,7 @@ test.describe('Tags management feature controls', { tag: '@local-stateful-classi
       expect(tagNames).toHaveLength(suite.privileges.view ? 5 : 0);
     });
 
-    test(`${suite.description} - ${canOrCannot(suite.privileges.delete)} delete tag`, async ({
-      browserAuth,
-      page,
-      kbnUrl,
-      pageObjects,
-    }) => {
+    test(suite.titles.delete, async ({ browserAuth, page, kbnUrl, pageObjects }) => {
       await loginAndOpenTagsPage({
         role: suite.role,
         browserAuth,
@@ -161,16 +186,14 @@ test.describe('Tags management feature controls', { tag: '@local-stateful-classi
         tagsTable: pageObjects.tagManagement.tagsTable,
       });
 
-      const canDelete = await pageObjects.tagManagement.tagsTable.isRowActionAvailable('delete');
+      const canDelete = await pageObjects.tagManagement.tagsTable.isRowActionAvailable(
+        'delete',
+        'tag-1'
+      );
       expect(canDelete).toBe(suite.privileges.delete);
     });
 
-    test(`${suite.description} - ${canOrCannot(suite.privileges.delete)} bulk delete tags`, async ({
-      browserAuth,
-      page,
-      kbnUrl,
-      pageObjects,
-    }) => {
+    test(suite.titles.bulkDelete, async ({ browserAuth, page, kbnUrl, pageObjects }) => {
       await loginAndOpenTagsPage({
         role: suite.role,
         browserAuth,
@@ -186,12 +209,7 @@ test.describe('Tags management feature controls', { tag: '@local-stateful-classi
       expect(canBulkDelete).toBe(suite.privileges.delete);
     });
 
-    test(`${suite.description} - ${canOrCannot(suite.privileges.create)} create tag`, async ({
-      browserAuth,
-      page,
-      kbnUrl,
-      pageObjects,
-    }) => {
+    test(suite.titles.create, async ({ browserAuth, page, kbnUrl, pageObjects }) => {
       await loginAndOpenTagsPage({
         role: suite.role,
         browserAuth,
@@ -205,12 +223,7 @@ test.describe('Tags management feature controls', { tag: '@local-stateful-classi
       );
     });
 
-    test(`${suite.description} - ${canOrCannot(suite.privileges.edit)} edit tag`, async ({
-      browserAuth,
-      page,
-      kbnUrl,
-      pageObjects,
-    }) => {
+    test(suite.titles.edit, async ({ browserAuth, page, kbnUrl, pageObjects }) => {
       await loginAndOpenTagsPage({
         role: suite.role,
         browserAuth,
@@ -219,13 +232,14 @@ test.describe('Tags management feature controls', { tag: '@local-stateful-classi
         tagsTable: pageObjects.tagManagement.tagsTable,
       });
 
-      const canEdit = await pageObjects.tagManagement.tagsTable.isRowActionAvailable('edit');
+      const canEdit = await pageObjects.tagManagement.tagsTable.isRowActionAvailable(
+        'edit',
+        'tag-1'
+      );
       expect(canEdit).toBe(suite.privileges.edit);
     });
 
-    test(`${suite.description} - ${canOrCannot(
-      suite.privileges.viewRelations
-    )} see relations to other objects`, async ({ browserAuth, page, kbnUrl, pageObjects }) => {
+    test(suite.titles.viewRelations, async ({ browserAuth, page, kbnUrl, pageObjects }) => {
       await loginAndOpenTagsPage({
         role: suite.role,
         browserAuth,

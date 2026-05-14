@@ -44,10 +44,8 @@ export class TagsTable {
     const rows = await this.rows.all();
     return Promise.all(
       rows.map(async (row) => {
-        const nameCell = row.locator('[data-test-subj="tagsTableRowName"] .euiTableCellContent');
-        const descriptionCell = row.locator(
-          '[data-test-subj="tagsTableRowDescription"] .euiTableCellContent'
-        );
+        const nameCell = row.locator('[data-test-subj="tagsTableRowTagName"]');
+        const descriptionCell = row.locator('[data-test-subj="tagsTableRowDescription"]');
         const connectionsLocator = row.locator('[data-test-subj="tagsTableRowConnectionsLink"]');
 
         const [rawName, rawDescription, connectionCount] = await Promise.all([
@@ -97,12 +95,8 @@ export class TagsTable {
     return this.bulkActionsButton.isVisible();
   }
 
-  async openCollapsedRowMenu(rowIndex = 0) {
-    const rows = await this.rows.all();
-    const row = rows[rowIndex];
-    if (!row) {
-      throw new Error(`Tag row at index ${rowIndex} was not found`);
-    }
+  async openCollapsedRowMenu(tagName: string) {
+    const row = this.rowByName(tagName);
     const collapseBtn = row.locator('[data-test-subj="euiCollapsedItemActionsButton"]');
     await collapseBtn.waitFor({ state: 'visible' });
     await collapseBtn.click();
@@ -127,13 +121,7 @@ export class TagsTable {
   }
 
   async isSelectionColumnVisible() {
-    const rows = await this.rows.all();
-    const firstRow = rows[0];
-    if (!firstRow) {
-      return false;
-    }
-    const checkbox = firstRow.locator('.euiTableRowCellCheckbox .euiCheckbox__input');
-    return (await checkbox.count()) > 0;
+    return this.selectAllCheckbox.isVisible();
   }
 
   async isBulkActionPresent(actionId: string) {
@@ -147,13 +135,8 @@ export class TagsTable {
     return isPresent;
   }
 
-  async isRowActionAvailable(action: string, rowIndex = 0) {
-    const rows = await this.rows.all();
-    const row = rows[rowIndex];
-    if (!row) {
-      return false;
-    }
-
+  async isRowActionAvailable(action: string, tagName: string) {
+    const row = this.rowByName(tagName);
     const collapsedActionsButton = row.locator('[data-test-subj="euiCollapsedItemActionsButton"]');
     if (await collapsedActionsButton.isVisible()) {
       await collapsedActionsButton.click();
