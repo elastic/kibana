@@ -19,6 +19,8 @@ import {
   createMockEncryptedSavedObjects,
   createActionPolicySavedObjectService,
 } from '../services/action_policy_saved_object_service/action_policy_saved_object_service.mock';
+import type { RulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service';
+import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 import type { UserService } from '../services/user_service/user_service';
 import { createUserProfile, createUserService } from '../services/user_service/user_service.mock';
 import { ActionPolicyClient } from './action_policy_client';
@@ -27,6 +29,7 @@ describe('ActionPolicyClient', () => {
   let client: ActionPolicyClient;
   let actionPolicySavedObjectService: ActionPolicySavedObjectService;
   let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let rulesSavedObjectService: RulesSavedObjectService;
   let userService: UserService;
   let userProfileService: jest.Mocked<UserProfileServiceStart>;
   let apiKeyService: jest.Mocked<ApiKeyServiceContract>;
@@ -42,6 +45,13 @@ describe('ActionPolicyClient', () => {
 
     ({ actionPolicySavedObjectService, mockSavedObjectsClient } =
       createActionPolicySavedObjectService());
+    ({ rulesSavedObjectService } = createRulesSavedObjectService());
+    // Default: every rule lookup succeeds so happy-path tests don't need to wire it up.
+    jest.spyOn(rulesSavedObjectService, 'get').mockResolvedValue({
+      id: 'rule-default',
+      attributes: {} as never,
+      version: 'v1',
+    });
     ({ userService, userProfileService } = createUserService());
     apiKeyService = createMockApiKeyService();
     mockEncryptedSavedObjects = createMockEncryptedSavedObjects((id) => {
@@ -56,6 +66,7 @@ describe('ActionPolicyClient', () => {
 
     client = new ActionPolicyClient(
       actionPolicySavedObjectService,
+      rulesSavedObjectService,
       userService,
       apiKeyService,
       mockEsoClient as any,
@@ -111,6 +122,7 @@ describe('ActionPolicyClient', () => {
         expect.objectContaining({
           name: 'my-policy',
           description: 'my-policy description',
+          type: 'global',
           enabled: true,
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
           auth: {
@@ -134,6 +146,7 @@ describe('ActionPolicyClient', () => {
           version: 'WzEsMV0=',
           name: 'my-policy',
           description: 'my-policy description',
+          type: 'global',
           enabled: true,
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
           matcher: null,
@@ -181,6 +194,7 @@ describe('ActionPolicyClient', () => {
         expect.objectContaining({
           name: 'my-policy',
           description: 'my-policy description',
+          type: 'global',
           enabled: true,
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
           auth: {
@@ -319,6 +333,93 @@ describe('ActionPolicyClient', () => {
 
       expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['encoded-es-api-key']);
     });
+
+    describe('type and ruleId', () => {
+      const baseData = {
+        name: 'p',
+        description: 'd',
+        destinations: [{ type: 'workflow' as const, id: 'w' }],
+      };
+
+      const mockCreateResolved = (id: string) =>
+        mockSavedObjectsClient.create.mockResolvedValueOnce({
+          id,
+          type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {} as ActionPolicySavedObjectAttributes,
+          references: [],
+          version: 'WzEsMV0=',
+        });
+
+      it('defaults to type "global" with null ruleId when type is omitted', async () => {
+        mockCreateResolved('p-default');
+
+        const res = await client.createActionPolicy({
+          data: baseData,
+          options: { id: 'p-default' },
+        });
+
+        expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+          ACTION_POLICY_SAVED_OBJECT_TYPE,
+          expect.objectContaining({ type: 'global', ruleId: null }),
+          expect.anything()
+        );
+        expect(res.type).toBe('global');
+        expect(res.ruleId).toBeNull();
+      });
+
+      it('persists "single_rule" with the linked ruleId', async () => {
+        mockCreateResolved('p-single');
+
+        const res = await client.createActionPolicy({
+          data: { ...baseData, type: 'single_rule', ruleId: 'rule-7' },
+          options: { id: 'p-single' },
+        });
+
+        expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+          ACTION_POLICY_SAVED_OBJECT_TYPE,
+          expect.objectContaining({ type: 'single_rule', ruleId: 'rule-7' }),
+          expect.anything()
+        );
+        expect(res.type).toBe('single_rule');
+        expect(res.ruleId).toBe('rule-7');
+      });
+
+      it('rejects "single_rule" without ruleId at the schema layer', async () => {
+        await expect(
+          client.createActionPolicy({
+            data: { ...baseData, type: 'single_rule' as const },
+          })
+        ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+        expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
+      });
+
+      it('rejects "single_rule" when the linked rule does not exist', async () => {
+        jest
+          .spyOn(rulesSavedObjectService, 'get')
+          .mockRejectedValueOnce(
+            SavedObjectsErrorHelpers.createGenericNotFoundError('rule', 'rule-missing')
+          );
+
+        await expect(
+          client.createActionPolicy({
+            data: { ...baseData, type: 'single_rule', ruleId: 'rule-missing' },
+          })
+        ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+        expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
+      });
+
+      it('rejects "global" with ruleId at the schema layer', async () => {
+        await expect(
+          client.createActionPolicy({
+            data: { ...baseData, type: 'global' as const, ruleId: 'rule-7' },
+          })
+        ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+        expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('getActionPolicy', () => {
@@ -326,6 +427,7 @@ describe('ActionPolicyClient', () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'test-policy',
         description: 'test-policy description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'test-workflow' }],
         auth: {
@@ -377,6 +479,70 @@ describe('ActionPolicyClient', () => {
         output: { statusCode: 404 },
       });
     });
+
+    it('heals pre-fix documents: reads throttle.interval as null for intervalless strategy', async () => {
+      const existingAttributes: ActionPolicySavedObjectAttributes = {
+        name: 'stale-policy',
+        description: 'stale-policy description',
+        type: 'global',
+        enabled: true,
+        destinations: [{ type: 'workflow', id: 'test-workflow' }],
+        throttle: { strategy: 'on_status_change', interval: '5m' }, // stale pre-fix state
+        auth: {
+          apiKey: 'encrypted-api-key',
+          owner: 'test-user',
+          createdByUser: false,
+        },
+        createdBy: 'elastic_profile_uid',
+        createdByUsername: 'elastic',
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedBy: 'elastic_profile_uid',
+        updatedByUsername: 'elastic',
+        updatedAt: '2025-01-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-get-stale',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: existingAttributes,
+        references: [],
+        version: 'WzEsMV0=',
+      });
+
+      const res = await client.getActionPolicy({ id: 'policy-id-get-stale' });
+
+      expect(res.throttle).toEqual({ strategy: 'on_status_change', interval: null });
+    });
+
+    it('returns ruleId for a single_rule policy', async () => {
+      const existingAttributes = {
+        name: 's',
+        description: 'd',
+        type: 'single_rule',
+        ruleId: 'rule-7',
+        enabled: true,
+        destinations: [{ type: 'workflow' as const, id: 'w' }],
+        auth: { apiKey: 'k', owner: 'u', createdByUser: false },
+        createdBy: null,
+        createdByUsername: null,
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedBy: null,
+        updatedByUsername: null,
+        updatedAt: '2025-01-01T00:00:00.000Z',
+      } as ActionPolicySavedObjectAttributes;
+
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'p-single',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: existingAttributes,
+        references: [],
+        version: 'WzEsMV0=',
+      });
+
+      const res = await client.getActionPolicy({ id: 'p-single' });
+
+      expect(res.type).toBe('single_rule');
+      expect(res.ruleId).toBe('rule-7');
+    });
   });
 
   describe('getActionPolicies', () => {
@@ -384,6 +550,7 @@ describe('ActionPolicyClient', () => {
       const firstAttributes: ActionPolicySavedObjectAttributes = {
         name: 'policy-two',
         description: 'policy-two description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-two' }],
         auth: {
@@ -401,6 +568,7 @@ describe('ActionPolicyClient', () => {
       const secondAttributes: ActionPolicySavedObjectAttributes = {
         name: 'policy-one',
         description: 'policy-one description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-one' }],
         auth: {
@@ -459,6 +627,7 @@ describe('ActionPolicyClient', () => {
       const firstAttributes: ActionPolicySavedObjectAttributes = {
         name: 'policy-found-one',
         description: 'policy-found-one description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-found-one' }],
         auth: {
@@ -476,6 +645,7 @@ describe('ActionPolicyClient', () => {
       const thirdAttributes: ActionPolicySavedObjectAttributes = {
         name: 'policy-found-three',
         description: 'policy-found-three description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-found-three' }],
         auth: {
@@ -539,6 +709,7 @@ describe('ActionPolicyClient', () => {
       const validAttributes: ActionPolicySavedObjectAttributes = {
         name: 'policy-valid',
         description: 'policy-valid description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-valid' }],
         auth: {
@@ -615,6 +786,7 @@ describe('ActionPolicyClient', () => {
     const policyAttributes: ActionPolicySavedObjectAttributes = {
       name: 'find-policy',
       description: 'find-policy description',
+      type: 'global',
       enabled: true,
       destinations: [{ type: 'workflow', id: 'find-workflow' }],
       auth: {
@@ -849,6 +1021,7 @@ describe('ActionPolicyClient', () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'original-policy',
         description: 'original-policy description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
         matcher: 'event.severity: critical',
@@ -913,10 +1086,121 @@ describe('ActionPolicyClient', () => {
       expect(res.snoozedUntil).toBeNull();
     });
 
+    it('nulls throttle.interval when transitioning to an intervalless strategy', async () => {
+      const existingAttributes: ActionPolicySavedObjectAttributes = {
+        name: 'transition-policy',
+        description: 'transition-policy description',
+        type: 'global',
+        enabled: true,
+        destinations: [{ type: 'workflow', id: 'wf-1' }],
+        groupingMode: 'per_episode',
+        throttle: { strategy: 'per_status_interval', interval: '10m' },
+        auth: {
+          apiKey: 'old-api-key',
+          owner: 'old-user',
+          createdByUser: false,
+        },
+        createdBy: 'creator_profile_uid',
+        createdByUsername: 'creator',
+        createdAt: '2024-12-01T00:00:00.000Z',
+        updatedBy: 'updater_profile_uid',
+        updatedByUsername: 'updater',
+        updatedAt: '2024-12-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-update-1',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: existingAttributes,
+      });
+      mockSavedObjectsClient.update.mockResolvedValueOnce({
+        id: 'policy-id-update-1',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {
+          ...existingAttributes,
+          throttle: { strategy: 'on_status_change', interval: null },
+        },
+        references: [],
+        version: 'WzIsMV0=',
+      });
+
+      const res = await client.updateActionPolicy({
+        data: { throttle: { strategy: 'on_status_change' } },
+        options: { id: 'policy-id-update-1', version: 'WzEsMV0=' },
+      });
+
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        ACTION_POLICY_SAVED_OBJECT_TYPE,
+        'policy-id-update-1',
+        expect.objectContaining({
+          throttle: { strategy: 'on_status_change', interval: null },
+        }),
+        { version: 'WzEsMV0=' }
+      );
+      expect(res.throttle).toEqual({ strategy: 'on_status_change', interval: null });
+    });
+
+    it('preserves throttle.interval for interval-requiring strategies', async () => {
+      const existingAttributes: ActionPolicySavedObjectAttributes = {
+        name: 'keep-interval-policy',
+        description: 'keep-interval-policy description',
+        type: 'global',
+        enabled: true,
+        destinations: [{ type: 'workflow', id: 'wf-1' }],
+        groupingMode: 'per_episode',
+        throttle: { strategy: 'on_status_change', interval: null },
+        auth: {
+          apiKey: 'old-api-key',
+          owner: 'old-user',
+          createdByUser: false,
+        },
+        createdBy: 'creator_profile_uid',
+        createdByUsername: 'creator',
+        createdAt: '2024-12-01T00:00:00.000Z',
+        updatedBy: 'updater_profile_uid',
+        updatedByUsername: 'updater',
+        updatedAt: '2024-12-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-update-1',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: existingAttributes,
+      });
+      mockSavedObjectsClient.update.mockResolvedValueOnce({
+        id: 'policy-id-update-1',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {
+          ...existingAttributes,
+          throttle: { strategy: 'per_status_interval', interval: '5m' },
+        },
+        references: [],
+        version: 'WzIsMV0=',
+      });
+
+      const res = await client.updateActionPolicy({
+        data: { throttle: { strategy: 'per_status_interval', interval: '5m' } },
+        options: { id: 'policy-id-update-1', version: 'WzEsMV0=' },
+      });
+
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        ACTION_POLICY_SAVED_OBJECT_TYPE,
+        'policy-id-update-1',
+        expect.objectContaining({
+          throttle: { strategy: 'per_status_interval', interval: '5m' },
+        }),
+        { version: 'WzEsMV0=' }
+      );
+      expect(res.throttle).toEqual({ strategy: 'per_status_interval', interval: '5m' });
+    });
+
     it('updates a action policy and rotates the API key', async () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'original-policy',
         description: 'original-policy description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
         auth: {
@@ -1004,6 +1288,7 @@ describe('ActionPolicyClient', () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'tagged-policy',
         description: 'a policy with tags',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'wf-1' }],
         tags: ['production', 'critical'],
@@ -1053,6 +1338,7 @@ describe('ActionPolicyClient', () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'tagged-policy',
         description: 'a policy with tags',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'wf-1' }],
         tags: ['production'],
@@ -1102,6 +1388,7 @@ describe('ActionPolicyClient', () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'original-policy',
         description: 'original-policy description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
         auth: {
@@ -1155,6 +1442,7 @@ describe('ActionPolicyClient', () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'original-policy',
         description: 'original-policy description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
         auth: {
@@ -1204,6 +1492,7 @@ describe('ActionPolicyClient', () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'original-policy',
         description: 'original-policy description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
         auth: {
@@ -1288,6 +1577,7 @@ describe('ActionPolicyClient', () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'original-policy',
         description: 'original-policy description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
         auth: {
@@ -1327,6 +1617,76 @@ describe('ActionPolicyClient', () => {
       });
 
       expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['encoded-es-api-key']);
+    });
+
+    describe('type and ruleId immutability', () => {
+      const baseExisting: ActionPolicySavedObjectAttributes = {
+        name: 'existing',
+        description: 'd',
+        type: 'global',
+        enabled: true,
+        destinations: [{ type: 'workflow', id: 'w' }],
+        auth: { apiKey: 'old-key', owner: 'u', createdByUser: false },
+        createdBy: null,
+        createdByUsername: null,
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedBy: null,
+        updatedByUsername: null,
+        updatedAt: '2025-01-01T00:00:00.000Z',
+      };
+
+      const setupSinglePolicyMocks = (existing: ActionPolicySavedObjectAttributes) => {
+        mockSavedObjectsClient.get.mockResolvedValueOnce({
+          id: 'p-1',
+          type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+          references: [],
+          version: 'WzEsMV0=',
+          attributes: existing,
+        });
+        mockSavedObjectsClient.update.mockResolvedValueOnce({
+          id: 'p-1',
+          type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {} as ActionPolicySavedObjectAttributes,
+          references: [],
+          version: 'WzIsMV0=',
+        });
+      };
+
+      it('preserves type and ruleId from the existing single_rule policy on partial update', async () => {
+        setupSinglePolicyMocks({
+          ...baseExisting,
+          type: 'single_rule',
+          ruleId: 'rule-1',
+        });
+
+        await client.updateActionPolicy({
+          data: { name: 'renamed' },
+          options: { id: 'p-1', version: 'WzEsMV0=' },
+        });
+
+        expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+          ACTION_POLICY_SAVED_OBJECT_TYPE,
+          'p-1',
+          expect.objectContaining({ type: 'single_rule', ruleId: 'rule-1', name: 'renamed' }),
+          { version: 'WzEsMV0=' }
+        );
+      });
+
+      it('preserves type and ruleId from the existing global policy on partial update', async () => {
+        setupSinglePolicyMocks({ ...baseExisting });
+
+        await client.updateActionPolicy({
+          data: { name: 'renamed' },
+          options: { id: 'p-1', version: 'WzEsMV0=' },
+        });
+
+        expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+          ACTION_POLICY_SAVED_OBJECT_TYPE,
+          'p-1',
+          expect.objectContaining({ type: 'global', ruleId: null, name: 'renamed' }),
+          { version: 'WzEsMV0=' }
+        );
+      });
     });
   });
 
@@ -1416,6 +1776,7 @@ describe('ActionPolicyClient', () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'before',
         description: 'before description',
+        type: 'global',
         enabled: false,
         destinations: [{ type: 'workflow', id: 'wf-before' }],
         matcher: 'env: production',
@@ -1556,6 +1917,7 @@ describe('ActionPolicyClient', () => {
     const existingAttributes: ActionPolicySavedObjectAttributes = {
       name: 'existing-policy',
       description: 'existing-policy description',
+      type: 'global',
       enabled: true,
       destinations: [{ type: 'workflow', id: 'existing-workflow' }],
       auth: {
@@ -1695,6 +2057,7 @@ describe('ActionPolicyClient', () => {
     const updatedAttributes: ActionPolicySavedObjectAttributes = {
       name: 'snoozed-policy',
       description: 'snoozed-policy description',
+      type: 'global',
       enabled: true,
       destinations: [{ type: 'workflow', id: 'test-workflow' }],
       auth: {
@@ -1801,6 +2164,7 @@ describe('ActionPolicyClient', () => {
       const updatedAttributes: ActionPolicySavedObjectAttributes = {
         name: 'active-policy',
         description: 'active-policy description',
+        type: 'global',
         enabled: false,
         destinations: [{ type: 'workflow', id: 'test-workflow' }],
         auth: {
@@ -1869,6 +2233,7 @@ describe('ActionPolicyClient', () => {
       const updatedAttributes: ActionPolicySavedObjectAttributes = {
         name: 'active-policy',
         description: 'active-policy description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'test-workflow' }],
         snoozedUntil: '2025-06-01T12:00:00.000Z',
@@ -2372,6 +2737,7 @@ describe('ActionPolicyClient', () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'policy-to-delete',
         description: 'policy-to-delete description',
+        type: 'global',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-to-delete' }],
         auth: {
