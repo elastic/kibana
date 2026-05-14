@@ -10,11 +10,11 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { useEuiTheme } from '@elastic/eui';
 import type { ElasticAgentName, OpenTelemetryAgentName } from '@kbn/apm-types';
-import { ServiceNode } from '../service_node';
+import { ServiceNode } from '../../../shared/service_map/service_node';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import type { ServiceNodeData } from '../../../../../common/service_map';
-import { ServiceMapSearchProvider } from '../service_map_search_context';
-import { ServiceMapAlertsNavigateProvider } from '../service_map_alerts_navigate_context';
+import { ServiceMapSearchProvider } from '../../../shared/service_map/service_map_search_context';
+import { ServiceMapAlertsNavigateProvider } from '../../../shared/service_map/service_map_alerts_navigate_context';
 import { WithSearchHighlight } from './search_highlight_helper';
 
 const noopMakeAlertsNavigateHandler = () => () => {};
@@ -27,7 +27,7 @@ const LabelText = ({ children }: { children: React.ReactNode }) => {
 };
 
 const meta: Meta<typeof ServiceNode> = {
-  title: 'shared/ServiceMap/ServiceNode',
+  title: 'app/ServiceMap/ServiceNode',
   component: ServiceNode,
   decorators: [
     (Story) => (
