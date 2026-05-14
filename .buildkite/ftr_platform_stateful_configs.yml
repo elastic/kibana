@@ -119,7 +119,6 @@ enabled:
   - src/platform/test/functional/apps/discover/tabs8/config.ts
   - src/platform/test/functional/apps/discover/cascade_layout/config.ts
   - src/platform/test/functional/apps/getting_started/config.ts
-  - src/platform/test/functional/apps/home/config.ts
   - src/platform/test/functional/apps/management/group1/config.ts
   - src/platform/test/functional/apps/management/group2/config.ts
   - src/platform/test/functional/apps/management/group3/config.ts
@@ -144,7 +143,6 @@ enabled:
   - src/platform/test/functional/firefox/console.config.ts
   - src/platform/test/functional/firefox/dashboard.config.ts
   - src/platform/test/functional/firefox/discover.config.ts
-  - src/platform/test/functional/firefox/home.config.ts
   - src/platform/test/functional/firefox/visualize.config.ts
   - src/platform/test/health_gateway/config.ts
   - src/platform/test/interactive_setup_api_integration/enrollment_flow.config.ts
