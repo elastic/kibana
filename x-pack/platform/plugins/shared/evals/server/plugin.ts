@@ -57,7 +57,6 @@ export class EvalsPlugin
     }
 
     this.logger.info('Setting up Evals plugin');
-    this.datasetService = new DatasetService(this.logger, this.isServerless);
     coreSetup.dataStreams.registerDataStream(evaluationsDataStreamDefinition);
 
     coreSetup.savedObjects.registerType(evalsRemoteKibanaConfigSavedObjectType);
@@ -136,6 +135,11 @@ export class EvalsPlugin
       return {};
     }
 
+    this.datasetService = new DatasetService(
+      this.logger,
+      coreStart.elasticsearch.client.asInternalUser,
+      this.isServerless
+    );
     this.evaluationScoreService = new EvaluationScoreService(this.logger, coreStart.dataStreams);
 
     return {

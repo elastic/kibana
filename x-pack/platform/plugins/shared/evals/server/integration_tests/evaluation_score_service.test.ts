@@ -11,12 +11,9 @@ import { clearTimeout as nodeClearTimeout, setTimeout as nodeSetTimeout } from '
 import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { IngestScoresRequestBodyInput } from '@kbn/evals-common';
+import { EvaluationIndices, type IngestScoresRequestBodyInput } from '@kbn/evals-common';
 import { EvaluationScoreService } from '../storage/evaluation_score_service';
-import {
-  EVALUATIONS_DATA_STREAM_NAME,
-  evaluationsDataStreamDefinition,
-} from '../storage/scores_index_template';
+import { evaluationsDataStreamDefinition } from '../storage/scores_index_template';
 
 const getPayload = (runId: string): IngestScoresRequestBodyInput => ({
   run_id: runId,
@@ -69,10 +66,10 @@ const getPayload = (runId: string): IngestScoresRequestBodyInput => ({
 });
 
 const cleanupScoresStorage = async (esClient: ElasticsearchClient) => {
-  await esClient.indices.deleteDataStream({ name: EVALUATIONS_DATA_STREAM_NAME }).catch(() => {});
+  await esClient.indices.deleteDataStream({ name: EvaluationIndices.SCORES }).catch(() => {});
   await esClient.indices
     .deleteIndexTemplate({
-      name: EVALUATIONS_DATA_STREAM_NAME,
+      name: EvaluationIndices.SCORES,
     })
     .catch(() => {});
 };
@@ -104,8 +101,7 @@ describe('EvaluationScoreService integration', () => {
     const coreStart = await root.start();
     esClient = coreStart.elasticsearch.client.asInternalUser;
     coreDataStreams = coreStart.dataStreams;
-    initializeDataStreamClient = () =>
-      coreDataStreams.initializeClient(EVALUATIONS_DATA_STREAM_NAME);
+    initializeDataStreamClient = () => coreDataStreams.initializeClient(EvaluationIndices.SCORES);
   });
 
   afterAll(async () => {
@@ -136,14 +132,14 @@ describe('EvaluationScoreService integration', () => {
 
     expect(
       await esClient.indices.existsIndexTemplate({
-        name: EVALUATIONS_DATA_STREAM_NAME,
+        name: EvaluationIndices.SCORES,
       })
     ).toBe(true);
 
     const dataStream = await esClient.indices.getDataStream({
-      name: EVALUATIONS_DATA_STREAM_NAME,
+      name: EvaluationIndices.SCORES,
     });
-    expect(dataStream.data_streams.map(({ name }) => name)).toContain(EVALUATIONS_DATA_STREAM_NAME);
+    expect(dataStream.data_streams.map(({ name }) => name)).toContain(EvaluationIndices.SCORES);
 
     const firstWrite = await service.write(payload);
     expect(firstWrite).toEqual({ ingested: payload.scores.length, conflicted: 0, failed: [] });

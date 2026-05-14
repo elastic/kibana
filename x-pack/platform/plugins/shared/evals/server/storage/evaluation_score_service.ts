@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { AnyIDataStreamClient, ClientSearchRequest } from '@kbn/data-streams';
 import type { EvaluationScoreDocument, IngestScoresRequestBody } from '@kbn/evals-common';
-import { EVALUATIONS_DATA_STREAM_NAME } from './scores_index_template';
+import { EvaluationIndices } from '@kbn/evals-common';
 
 export interface IngestFailure {
   index: number;
@@ -94,7 +94,7 @@ export class EvaluationScoreService {
   }
 
   private async getClient(): Promise<AnyIDataStreamClient> {
-    return this.coreDataStreams.initializeClient(EVALUATIONS_DATA_STREAM_NAME);
+    return this.coreDataStreams.initializeClient(EvaluationIndices.SCORES);
   }
 
   public async search(request: ClientSearchRequest): Promise<DataStreamSearchResponse> {

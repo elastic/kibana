@@ -151,7 +151,7 @@ All evaluators except Rejection are wrapped with `skipNegativeCases` (returns N/
 
 ## Viewing Results
 
-Results are automatically exported to Elasticsearch in the `.kibana-evaluations` datastream.
+Results are automatically exported to Elasticsearch in the `.kibana-evaluation-scores` datastream.
 
 ### Query Results in Kibana
 
@@ -160,7 +160,7 @@ Navigate to **Kibana > Dev Tools** and paste the queries below. Replace `<run-id
 #### All scores for a specific run
 
 ```
-GET .kibana-evaluations/_search
+GET .kibana-evaluation-scores/_search
 {
   "query": {
     "term": { "run_id": "<run-id>" }
@@ -173,7 +173,7 @@ GET .kibana-evaluations/_search
 #### Per-evaluator mean scores for a run (aggregation)
 
 ```
-GET .kibana-evaluations/_search
+GET .kibana-evaluation-scores/_search
 {
   "size": 0,
   "query": {
@@ -193,7 +193,7 @@ GET .kibana-evaluations/_search
 #### Compare two runs side-by-side
 
 ```
-GET .kibana-evaluations/_search
+GET .kibana-evaluation-scores/_search
 {
   "size": 0,
   "query": {
@@ -218,7 +218,7 @@ GET .kibana-evaluations/_search
 #### Filter by model and suite (without a run ID)
 
 ```
-GET .kibana-evaluations/_search
+GET .kibana-evaluation-scores/_search
 {
   "query": {
     "bool": {
@@ -311,7 +311,7 @@ This means the required index (e.g., `logs-azure.auditlogs*`) does not exist in 
 
 ### Results Not Appearing in Elasticsearch
 
-**Problem**: No results in `.kibana-evaluations` datastream.
+**Problem**: No results in `.kibana-evaluation-scores` datastream.
 
 **Solution**:
 1. Verify `EVALUATIONS_KBN_URL` is set correctly

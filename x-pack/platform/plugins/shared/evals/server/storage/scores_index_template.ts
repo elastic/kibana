@@ -7,9 +7,7 @@
 
 import type { DataStreamDefinition } from '@kbn/core-data-streams-server';
 import type { MappingsDefinition } from '@kbn/es-mappings';
-
-export const EVALUATIONS_DATA_STREAM_NAME = '.kibana-evaluations';
-export const EVALUATIONS_DATA_STREAM_WILDCARD = '.kibana-evaluations*';
+import { EvaluationIndices } from '@kbn/evals-common';
 
 const evaluationsDataStreamMappings = {
   properties: {
@@ -107,7 +105,7 @@ const evaluationsDataStreamMappings = {
 } as unknown as MappingsDefinition;
 
 export const evaluationsDataStreamDefinition: DataStreamDefinition<MappingsDefinition> = {
-  name: EVALUATIONS_DATA_STREAM_NAME,
+  name: EvaluationIndices.SCORES,
   version: 1,
   hidden: false,
   template: {

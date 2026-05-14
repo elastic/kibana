@@ -159,7 +159,7 @@ Notes:
 
 ### Evaluation comparisons
 
-Use the evals CLI to compare two evaluation runs (persisted to the `.kibana-evaluations` data stream) using paired t-tests.
+Use the evals CLI to compare two evaluation runs (persisted to the `.kibana-evaluation-scores` data stream) using paired t-tests.
 
 Run the suite twice and capture the two run IDs. Scout will generate a `TEST_RUN_ID` automatically, but it's easiest to set it explicitly. **Important:** run a **single** Playwright project (connector/model) per run (use `--project`), otherwise multiple models can collide under the same run id.
 

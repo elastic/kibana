@@ -11,9 +11,9 @@ import {
   INTERNAL_API_ACCESS,
   UpdateEvaluationDatasetExampleRequestBody,
   UpdateEvaluationDatasetExampleRequestParams,
+  buildRouteValidationWithZod,
 } from '@kbn/evals-common';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { EVALS_API_PRIVILEGES } from '../../../common';
+import { PLUGIN_ID } from '../../../common';
 import {
   ENCRYPTION_NOT_CONFIGURED_MESSAGE,
   RemoteDecryptionError,
@@ -21,7 +21,6 @@ import {
   getDestinationFromRequest,
 } from '../../remote_kibana/forward_to_remote_kibana';
 import { ExampleAlreadyExistsError } from '../../storage/example_already_exists_error';
-import { ExampleNotFoundError } from '../../storage/example_not_found_error';
 import type { RouteDependencies } from '../register_routes';
 
 export const registerUpdateExampleRoute = ({
@@ -35,7 +34,7 @@ export const registerUpdateExampleRoute = ({
       path: EVALS_DATASET_EXAMPLE_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.manage] },
+        authz: { requiredPrivileges: [PLUGIN_ID] },
       },
       summary: 'Update evaluation dataset example',
     })
@@ -86,27 +85,33 @@ export const registerUpdateExampleRoute = ({
 
           const { datasetId, exampleId } = request.params;
           const { input, output, metadata } = request.body;
-          const coreContext = await context.core;
           const evalsContext = await context.evals;
-          const esClient = coreContext.elasticsearch.client.asCurrentUser;
-          const datasetClient = evalsContext.datasetService.getClient(esClient);
+          const datasetClient = evalsContext.datasetService.getClient();
+          const dataset = await datasetClient.get(datasetId);
 
-          const exists = await datasetClient.datasetExists(datasetId);
-          if (!exists) {
+          if (!dataset) {
             return response.notFound({
               body: { message: `Evaluation dataset not found: ${datasetId}` },
             });
           }
 
-          const updatedExample = await datasetClient.updateExample(
-            exampleId,
-            {
-              input,
-              output,
-              metadata,
-            },
-            datasetId
-          );
+          if (!dataset.examples.some((example) => example.id === exampleId)) {
+            return response.notFound({
+              body: { message: `Evaluation dataset example not found: ${exampleId}` },
+            });
+          }
+
+          const updatedExample = await datasetClient.updateExample(exampleId, {
+            input,
+            output,
+            metadata,
+          });
+
+          if (!updatedExample) {
+            return response.notFound({
+              body: { message: `Evaluation dataset example not found: ${exampleId}` },
+            });
+          }
 
           return response.ok({
             body: {
@@ -124,12 +129,6 @@ export const registerUpdateExampleRoute = ({
             logger.error(`Remote decryption failed: ${error.message}`);
             return response.customError({
               statusCode: 400,
-              body: { message: error.message },
-            });
-          }
-
-          if (error instanceof ExampleNotFoundError) {
-            return response.notFound({
               body: { message: error.message },
             });
           }

@@ -9,12 +9,12 @@ import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { AnyIDataStreamClient, ClientSearchRequest } from '@kbn/data-streams';
 import type { EvaluationScoreDocument, IngestScoresRequestBody } from '@kbn/evals-common';
+import { EvaluationIndices } from '@kbn/evals-common';
 import {
   EvaluationScoreService,
   computeScoreDocumentId,
   type WriteResult,
 } from './evaluation_score_service';
-import { EVALUATIONS_DATA_STREAM_NAME } from './scores_index_template';
 
 const getBaseRequest = (): IngestScoresRequestBody => ({
   run_id: 'run-1',
@@ -110,7 +110,7 @@ describe('EvaluationScoreService', () => {
     const result = await service.write(request);
 
     expect(result).toEqual<WriteResult>({ ingested: 1, conflicted: 0, failed: [] });
-    expect(initializeClient).toHaveBeenCalledWith(EVALUATIONS_DATA_STREAM_NAME);
+    expect(initializeClient).toHaveBeenCalledWith(EvaluationIndices.SCORES);
     expect(create).toHaveBeenCalledWith({
       documents: expect.any(Array),
       refresh: 'wait_for',
@@ -224,7 +224,7 @@ describe('EvaluationScoreService', () => {
 
     const service = new EvaluationScoreService(logger, coreDataStreams);
     await expect(service.search(request)).resolves.toBe(response);
-    expect(initializeClient).toHaveBeenCalledWith(EVALUATIONS_DATA_STREAM_NAME);
+    expect(initializeClient).toHaveBeenCalledWith(EvaluationIndices.SCORES);
     expect(search).toHaveBeenCalledWith(request);
   });
 });

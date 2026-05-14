@@ -343,7 +343,9 @@ function runFastHelp() {
   logInfo('  stop [--service <name>]       Stop backgrounded eval services');
   logInfo('  logs [--service <name>]       Tail logs from eval services');
   logInfo('  scout                         Start Scout server for evals');
-  logInfo('  clear-index                   Delete .kibana-evaluations indices (reset export)');
+  logInfo(
+    '  clear-index                   Delete .kibana-evaluation-scores indices (reset export)'
+  );
   logInfo('  run [--suite <id>] [...]      Run an eval suite');
   logInfo('  list [--refresh] [--json]     List eval suites');
   logInfo('  labels [suite-id ...]         Create/sync GitHub eval suite labels');

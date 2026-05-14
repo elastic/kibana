@@ -9,9 +9,9 @@
 
 /* eslint-disable no-console */
 import { Client } from '@elastic/elasticsearch';
+import { EvaluationIndices } from '@kbn/evals-common';
 
 const ES_URL = process.env.EVALUATIONS_ES_URL ?? 'http://elastic:changeme@localhost:9220';
-const INDEX = '.kibana-evaluations';
 
 interface EvalDoc {
   run_id: string;
@@ -86,7 +86,7 @@ async function main() {
 
 async function listRecentRuns(client: Client) {
   const response = await client.search({
-    index: INDEX,
+    index: EvaluationIndices.SCORES,
     size: 0,
     aggs: {
       runs: {
@@ -116,7 +116,7 @@ async function fetchDocs(client: Client, runId: string, extraFilter?: object): P
   }
 
   const response = await client.search<EvalDoc>({
-    index: INDEX,
+    index: EvaluationIndices.SCORES,
     size: 1000,
     query: { bool: { must } },
     sort: [
