@@ -41,6 +41,9 @@ interface ComposeDiscoverChildProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   onClose: () => void;
+  /** Called when the user clicks "Apply changes". The parent writes the query
+   *  into the reducer and RHF imperatively — no effect chains involved. */
+  onApply: (query: string) => void;
 }
 
 const CHILD_FLYOUT_TITLE_ID = 'composeDiscoverChildTitle';
@@ -56,9 +59,23 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
   state,
   dispatch,
   onClose,
+  onApply,
 }) => {
   const services = useRuleFormServices();
   const [localQuery, setLocalQuery] = useState(state.sandbox.query);
+
+  // Read timeField and the base query from RHF
+  const { setValue: setFormValue, watch: watchForm } = useFormContext<FormValues>();
+  const timeField = watchForm('timeField') ?? '@timestamp';
+  const formQuery = watchForm('evaluation.query.base') ?? '';
+
+  // Sync localQuery when RHF's query changes externally (e.g. from YAML edits
+  // that debounce into RHF). When the change comes from this Sandbox's own
+  // "Apply changes", formQuery equals localQuery so the setState is a no-op.
+  useEffect(() => {
+    setLocalQuery(formQuery);
+  }, [formQuery]);
+
   // Date range persists in the reducer so it's remembered across Sandbox open/close.
   // It is intentionally not connected to schedule.lookback in FormValues — it's a
   // preview window for testing the query, not a rule configuration field.
@@ -69,10 +86,6 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
 
   // Single-editor mode: always use localQuery
   const activeQuery = localQuery;
-
-  // Read timeField from RHF — it lives there, not in the UI reducer
-  const { setValue: setFormValue, watch: watchForm } = useFormContext<FormValues>();
-  const timeField = watchForm('timeField') ?? '@timestamp';
 
   // Only fetch fields when the query has a real index pattern after FROM.
   const queryForFields = /^\s*FROM\s+[a-zA-Z0-9_.*-]/i.test(activeQuery) ? activeQuery : '';
@@ -143,9 +156,11 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
   }, [run]);
 
   const handleDone = useCallback(() => {
-    dispatch({ type: 'COMMIT_SANDBOX_QUERY', query: localQuery });
-    onClose();
-  }, [localQuery, dispatch, onClose]);
+    onApply(localQuery);
+    if (!state.yamlMode) {
+      onClose();
+    }
+  }, [localQuery, onApply, onClose, state.yamlMode]);
 
   const gridColumns: EuiDataGridColumn[] = useMemo(
     () =>
@@ -303,7 +318,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
           )}
 
           {hasRun && isError && (
-            <EuiCallOut color="danger" iconType="error" title="Query error">
+            <EuiCallOut announceOnMount color="danger" iconType="error" title="Query error">
               <p>{error}</p>
             </EuiCallOut>
           )}
