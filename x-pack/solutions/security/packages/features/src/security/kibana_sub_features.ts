@@ -486,6 +486,7 @@ export const hostIsolationSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writeHostIsolationRelease`],
           id: 'host_isolation_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [],
@@ -576,6 +577,7 @@ export const executeActionSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writeExecuteOperations`],
           id: 'execute_operations_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [],
