@@ -19,6 +19,7 @@ export const POLL_INTERVAL_MS = 1_000;
 export {
   ALERTING_V2_RULE_API_PATH as RULE_API_PATH,
   ALERTING_V2_RULE_DOCTOR_INSIGHTS_API_PATH as INSIGHTS_API_PATH,
+  ALERTING_V2_ACTION_POLICY_API_PATH as ACTION_POLICY_API_PATH,
 } from '@kbn/alerting-v2-constants';
 export { ALERT_EVENTS_DATA_STREAM } from '../../../server/resources/datastreams/alert_events';
 export { ALERT_ACTIONS_DATA_STREAM } from '../../../server/resources/datastreams/alert_actions';

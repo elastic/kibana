@@ -12,7 +12,7 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { useToasts } from '../../../../hooks/use_toasts';
-import { useSendMessage } from '../../../../context/send_message/send_message_context';
+import { useConversationStream } from '../../../../hooks/use_conversation_stream';
 
 const labels = {
   copy: i18n.translate('xpack.agentBuilder.roundResponseActions.copy', {
@@ -38,7 +38,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   isLastRound,
 }) => {
   const { addSuccessToast } = useToasts();
-  const { regenerate, isRegenerating, isResponseLoading } = useSendMessage();
+  const { regenerate, isRegenerating, isResponseLoading } = useConversationStream();
 
   const handleCopy = useCallback(() => {
     const isSuccess = copy(content);

@@ -10,7 +10,7 @@ import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
-import { useSendMessage } from '../../../context/send_message/send_message_context';
+import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { useLastAgentId } from '../../../hooks/use_last_agent_id';
 import { appPaths } from '../../../utils/app_paths';
@@ -25,7 +25,7 @@ const NEW_CONVERSATION_BUTTON_LABEL = i18n.translate(
 export const StartNewConversationButton: React.FC = () => {
   const { navigateToAgentBuilderUrl } = useNavigation();
   const { isEmbeddedContext, setConversationId } = useConversationContext();
-  const { removeError } = useSendMessage();
+  const { removeError } = useConversationStream();
   const lastAgentId = useLastAgentId();
 
   const handleClick = useCallback(() => {

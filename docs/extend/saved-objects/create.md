@@ -193,6 +193,10 @@ router.get(
 
 When you create a new Saved Object type, define an initial model version (version 1) that describes the current shape. The first version must be numbered 1, with no gaps in subsequent versions.
 
+::::{note}
+If the type's schema and mappings are still evolving and you need to iterate freely without CI failing on immutability constraints, use the WIP types mechanism. See [Work-in-progress Saved Object types](./validate.md#saved-objects-wip-types) for the available approaches.
+::::
+
 We recommend defining `create` and `forwardCompatibility` schemas that include **all** fields of your Saved Object type: those that appear in your mappings, as well as any non-indexed attributes you store. Exhaustive schemas give better validation on create and on read, and support safe rollbacks in Serverless.
 
 :::{important}

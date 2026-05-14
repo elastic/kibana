@@ -17,7 +17,12 @@ import {
   InvalidWorkflowSourceIdError,
   WORKFLOWS_INBOX_SOURCE_APP,
 } from './workflows_inbox_provider';
+import type { WorkflowManagementAuditLog } from '../api/routes/utils/workflow_audit_logging';
 import type { WorkflowsManagementApi } from '../api/workflows_management_api';
+
+function createTestAudit(): WorkflowManagementAuditLog {
+  return { logExecutionResumed: jest.fn() } as unknown as WorkflowManagementAuditLog;
+}
 
 const buildStep = (overrides: Partial<EsWorkflowStepExecution> = {}): EsWorkflowStepExecution => ({
   spaceId: 'default',
@@ -51,7 +56,7 @@ const ctx = () => ({
 const fakeApi = () => {
   const api: Partial<WorkflowsManagementApi> = {
     listWaitingForInputSteps: jest.fn(async () => ({ results: [buildStep()], total: 1 })),
-    resumeWorkflowExecution: jest.fn(async () => {}),
+    resumeWorkflowExecution: jest.fn(async () => ({ resumedBy: 'user' })),
     // Default to "step is still waiting" so existing happy-path tests
     // remain unchanged after we added pre-resume verification.
     getStepExecution: jest.fn(async () => buildStep()),
@@ -64,6 +69,7 @@ describe('createWorkflowsInboxProvider', () => {
     const provider = createWorkflowsInboxProvider({
       api: fakeApi(),
       logger: loggerMock.create(),
+      audit: createTestAudit(),
     });
     expect(provider.sourceApp).toBe(WORKFLOWS_INBOX_SOURCE_APP);
   });
@@ -71,7 +77,11 @@ describe('createWorkflowsInboxProvider', () => {
   describe('list()', () => {
     it('delegates to the management service and maps results to InboxActions', async () => {
       const api = fakeApi();
-      const provider = createWorkflowsInboxProvider({ api, logger: loggerMock.create() });
+      const provider = createWorkflowsInboxProvider({
+        api,
+        logger: loggerMock.create(),
+        audit: createTestAudit(),
+      });
 
       const result = await provider.list({}, ctx());
 
@@ -94,7 +104,11 @@ describe('createWorkflowsInboxProvider', () => {
         results: [],
         total: 0,
       });
-      const provider = createWorkflowsInboxProvider({ api, logger: loggerMock.create() });
+      const provider = createWorkflowsInboxProvider({
+        api,
+        logger: loggerMock.create(),
+        audit: createTestAudit(),
+      });
 
       const result = await provider.list({}, ctx());
 
@@ -106,7 +120,7 @@ describe('createWorkflowsInboxProvider', () => {
     it('calls resumeWorkflowExecution with the parsed executionId and the opaque input', async () => {
       const api = fakeApi();
       const logger = loggerMock.create();
-      const provider = createWorkflowsInboxProvider({ api, logger });
+      const provider = createWorkflowsInboxProvider({ api, logger, audit: createTestAudit() });
       const c = ctx();
 
       await provider.respond('wf-1:run-1:step-exec-1', { approved: true, reason: 'contained' }, c);
@@ -119,6 +133,46 @@ describe('createWorkflowsInboxProvider', () => {
       );
     });
 
+    it('emits the same security audit as the resume HTTP route after a successful inbox resume', async () => {
+      const api = fakeApi();
+      const audit = createTestAudit();
+      const provider = createWorkflowsInboxProvider({
+        api,
+        logger: loggerMock.create(),
+        audit,
+      });
+      const c = ctx();
+
+      await provider.respond('wf-1:run-1:step-exec-1', { approved: true }, c);
+
+      expect(audit.logExecutionResumed).toHaveBeenCalledWith(c.request, {
+        executionId: 'run-1',
+        resumedBy: 'user',
+      });
+    });
+
+    it('emits a security audit failure event when resumeWorkflowExecution rejects', async () => {
+      const api = fakeApi();
+      const boom = new Error('engine unavailable');
+      (api.resumeWorkflowExecution as jest.Mock).mockRejectedValueOnce(boom);
+      const audit = createTestAudit();
+      const provider = createWorkflowsInboxProvider({
+        api,
+        logger: loggerMock.create(),
+        audit,
+      });
+      const c = ctx();
+
+      await expect(
+        provider.respond('wf-1:run-1:step-exec-1', { approved: true }, c)
+      ).rejects.toThrow(boom);
+
+      expect(audit.logExecutionResumed).toHaveBeenCalledWith(c.request, {
+        executionId: 'run-1',
+        error: boom,
+      });
+    });
+
     it('verifies the targeted step is still waiting before forwarding to the engine', async () => {
       // Regression coverage for the inbox/workflows resume race:
       // the workflow-level status check inside the execution engine
@@ -127,7 +181,11 @@ describe('createWorkflowsInboxProvider', () => {
       // The provider closes the cross-step leak by re-reading the step
       // doc keyed by `stepExecutionId` before forwarding.
       const api = fakeApi();
-      const provider = createWorkflowsInboxProvider({ api, logger: loggerMock.create() });
+      const provider = createWorkflowsInboxProvider({
+        api,
+        logger: loggerMock.create(),
+        audit: createTestAudit(),
+      });
 
       await provider.respond('wf-1:run-1:step-exec-1', { approved: true }, ctx());
 
@@ -145,7 +203,11 @@ describe('createWorkflowsInboxProvider', () => {
     it('throws InboxActionConflictError when the step execution is not found', async () => {
       const api = fakeApi();
       (api.getStepExecution as jest.Mock).mockResolvedValueOnce(null);
-      const provider = createWorkflowsInboxProvider({ api, logger: loggerMock.create() });
+      const provider = createWorkflowsInboxProvider({
+        api,
+        logger: loggerMock.create(),
+        audit: createTestAudit(),
+      });
 
       const err = await provider
         .respond('wf-1:run-1:missing-step', { approved: true }, ctx())
@@ -165,7 +227,11 @@ describe('createWorkflowsInboxProvider', () => {
       (api.getStepExecution as jest.Mock).mockResolvedValueOnce(
         buildStep({ status: ExecutionStatus.COMPLETED })
       );
-      const provider = createWorkflowsInboxProvider({ api, logger: loggerMock.create() });
+      const provider = createWorkflowsInboxProvider({
+        api,
+        logger: loggerMock.create(),
+        audit: createTestAudit(),
+      });
 
       const err = await provider
         .respond('wf-1:run-1:step-exec-1', { approved: true }, ctx())
@@ -191,7 +257,11 @@ describe('createWorkflowsInboxProvider', () => {
           error: { type: 'TimeoutError', message: 'Failed due to workflow timeout' },
         })
       );
-      const provider = createWorkflowsInboxProvider({ api, logger: loggerMock.create() });
+      const provider = createWorkflowsInboxProvider({
+        api,
+        logger: loggerMock.create(),
+        audit: createTestAudit(),
+      });
 
       const err = await provider
         .respond('wf-1:run-1:step-exec-1', { approved: true }, ctx())
@@ -207,6 +277,7 @@ describe('createWorkflowsInboxProvider', () => {
       const provider = createWorkflowsInboxProvider({
         api: fakeApi(),
         logger: loggerMock.create(),
+        audit: createTestAudit(),
       });
 
       await expect(provider.respond('invalid', {}, ctx())).rejects.toBeInstanceOf(
@@ -219,7 +290,11 @@ describe('createWorkflowsInboxProvider', () => {
       // surface the `InvalidWorkflowSourceIdError` synchronously without
       // an extra ES round-trip.
       const api = fakeApi();
-      const provider = createWorkflowsInboxProvider({ api, logger: loggerMock.create() });
+      const provider = createWorkflowsInboxProvider({
+        api,
+        logger: loggerMock.create(),
+        audit: createTestAudit(),
+      });
 
       await provider.respond('invalid', {}, ctx()).catch(() => undefined);
 

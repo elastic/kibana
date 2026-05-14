@@ -35,6 +35,23 @@ export const findPanelById = (
   return undefined;
 };
 
+export const indexPanelsById = (
+  widgets: DashboardAttachmentData['panels']
+): Map<string, AttachmentPanel> => {
+  const index = new Map<string, AttachmentPanel>();
+  for (const widget of widgets) {
+    if (isSection(widget)) {
+      for (const sectionPanel of widget.panels) {
+        index.set(sectionPanel.id, sectionPanel);
+      }
+      continue;
+    }
+
+    index.set(widget.id, widget);
+  }
+  return index;
+};
+
 /**
  * Returns the lowest occupied y-position across top-level panels and section contents.
  */

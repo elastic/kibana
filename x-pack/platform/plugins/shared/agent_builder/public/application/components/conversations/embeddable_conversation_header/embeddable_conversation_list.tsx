@@ -16,7 +16,7 @@ import {
 import { css } from '@emotion/react';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
-import { useSendMessageContext } from '../../../context/send_message/send_message_context';
+import { useStreamingContext } from '../../../context/streaming/streaming_context';
 import { useConversationList } from '../../../hooks/use_conversation_list';
 import {
   createConversationListItemStyles,
@@ -35,7 +35,7 @@ export const EmbeddableConversationList: React.FC<EmbeddableConversationListProp
 }) => {
   const { euiTheme } = useEuiTheme();
   const { agentId, conversationId, setConversationId } = useConversationContext();
-  const { removeAllErrors } = useSendMessageContext();
+  const { removeAllErrors } = useStreamingContext();
   const { conversations = [], isLoading } = useConversationList({ agentId });
 
   const sortedConversations = useMemo(
