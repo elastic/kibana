@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { withSpan } from '@kbn/apm-utils';
 import { get } from 'lodash';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { SLODefinition } from '../../../../domain/models';
@@ -80,10 +81,12 @@ async function queryAllResults(
   lastAfterKey?: { instanceId: string }
 ): Promise<EvaluationBucket[]> {
   const queryAndAggs = buildQuery(startedAt, slo, params, lastAfterKey);
-  const results = await esClient.search<undefined, EvalutionAggResults>({
-    index: SLI_DESTINATION_INDEX_PATTERN,
-    ...queryAndAggs,
-  });
+  const results = await withSpan({ name: 'slo_burn_rate_executor.es_query', type: 'rule' }, () =>
+    esClient.search<undefined, EvalutionAggResults>({
+      index: SLI_DESTINATION_INDEX_PATTERN,
+      ...queryAndAggs,
+    })
+  );
 
   if (!results.aggregations) {
     throw new Error('Elasticsearch query failed to return a valid aggregation');
