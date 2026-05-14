@@ -43,7 +43,7 @@ const getMemberColumns = (
   burnRateWindow: BurnRateWindow,
   setBurnRateWindow: (w: BurnRateWindow) => void,
   isBurnRatePopoverOpen: boolean,
-  setIsBurnRatePopoverOpen: (open: boolean) => void
+  setIsBurnRatePopoverOpen: React.Dispatch<React.SetStateAction<boolean>>
 ): Array<EuiBasicTableColumn<CompositeSLOMemberSummary>> => [
   {
     field: 'name',
