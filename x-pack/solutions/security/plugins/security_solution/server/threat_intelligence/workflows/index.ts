@@ -56,7 +56,7 @@ export const BUILTIN_WORKFLOWS = [
   {
     id: 'threat-intel.hit_provenance_backfill',
     description:
-      'Attribute Detection Engine alerts back to their originating .kibana-threat-reports-* docs (Layers 1/2)',
+      'Attribute Detection Engine alerts back to their originating .kibana-threat-reports docs (Layers 1/2)',
     yaml: HIT_PROVENANCE_BACKFILL_YAML,
   },
 ] as const;

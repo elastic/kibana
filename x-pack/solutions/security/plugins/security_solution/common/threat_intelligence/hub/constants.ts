@@ -43,7 +43,22 @@ export const THREAT_INTELLIGENCE_API_PRIVILEGES = {
  * `kibana_system` is intentionally denied access to them.
  */
 export const THREAT_REPORTS_DATA_STREAM = '.kibana-threat-reports' as const;
-export const THREAT_REPORTS_INDEX_PATTERN = '.kibana-threat-reports-*' as const;
+/**
+ * Index pattern used both by the data-stream index template's `index_patterns`
+ * and by all read-side callers (`search_reports`, `coverage_gap`,
+ * `dashboard_overview`, `hunt_for_threat`, `ioc_indicator_sync`).
+ *
+ * No dash before the wildcard: a trailing `-*` requires at least one
+ * character after the dash, which means `.kibana-threat-reports-*` does NOT
+ * match the bare data-stream name `.kibana-threat-reports`. With that
+ * pattern, `createDataStream` 400s with "no matching index template found
+ * for data stream", and every read returns zero hits because backing
+ * indices are named `.ds-.kibana-threat-reports-…` (and so don't match
+ * either). `.kibana-threat-reports*` matches the data-stream name itself
+ * and any legacy suffixed indices, without colliding with the sibling
+ * `.kibana-threat-intel-*` companion indices.
+ */
+export const THREAT_REPORTS_INDEX_PATTERN = '.kibana-threat-reports*' as const;
 export const THREAT_INTEL_SOURCES_INDEX = '.kibana-threat-intel-sources' as const;
 export const THREAT_INTEL_SUBSCRIPTIONS_INDEX = '.kibana-threat-intel-subscriptions' as const;
 // Recurring-query recall is intentionally not a plugin-owned capability:

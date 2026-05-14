@@ -12,7 +12,7 @@
 #           channel. The agent — not this workflow — picks the right tools
 #           and attachment types.
 # =============================================================================
-name: threat_intel.digest_delivery
+name: Threat intelligence — Digest delivery
 description: Render and deliver per-subscription threat intelligence digests
 enabled: true
 triggers:

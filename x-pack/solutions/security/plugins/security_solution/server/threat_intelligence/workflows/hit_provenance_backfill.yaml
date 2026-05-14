@@ -32,8 +32,8 @@
 # Bounded to reports with at least one extracted IOC OR behavior. Reports
 # with neither cannot produce env hits and are skipped.
 # =============================================================================
-name: threat_intel.hit_provenance_backfill
-description: Attribute Detection Engine alerts back to their originating .kibana-threat-reports-* docs (Layers 1/2)
+name: Threat intelligence — Hit provenance backfill (Layers 1/2)
+description: Attribute Detection Engine alerts back to their originating .kibana-threat-reports docs (Layers 1/2)
 enabled: true
 triggers:
   - type: scheduled
@@ -43,7 +43,7 @@ steps:
   - name: load_reports_with_extractions
     type: elasticsearch.search
     with:
-      index: .kibana-threat-reports-*
+      index: .kibana-threat-reports
       size: 500
       _source:
         - extracted.ttps.techniques
@@ -85,7 +85,7 @@ steps:
                 - term:
                     kibana.alert.rule.type: threat_match
                 - term:
-                    kibana.alert.threat.indicator.reference: "threat-report:{{ item._id }}"
+                    kibana.alert.threat.indicator.reference: "threat-report:{{ foreach.item._id }}"
         on-failure:
           # If the alerts index doesn't exist yet (fresh deployment) or RBAC
           # blocks the read, treat as zero rather than failing the loop.
@@ -93,15 +93,15 @@ steps:
 
       # Layer 2 — behavioral DE rule alerts whose ATT&CK techniques overlap
       # with this report's extracted techniques. Skipped when the report has
-      # no techniques because the terms query would be malformed.
+      # no techniques because the terms query would be malformed. The
+      # condition is in KQL form (workflow `if` steps don't accept Liquid
+      # here — see `IfStepConfigSchema` in `kbn-workflows/spec/schema.ts`).
+      # KQL `field : *` evaluates to true when the field has at least one
+      # value, which for an array means non-empty.
       - name: count_layer2_hits
         type: if
-        with:
-          condition: >-
-            {{ item._source.extracted.ttps.techniques
-               | default: []
-               | size > 0 }}
-        then:
+        condition: "foreach.item._source.extracted.ttps.techniques : *"
+        steps:
           - name: layer2_search
             type: elasticsearch.search
             with:
@@ -114,28 +114,34 @@ steps:
                         "@timestamp":
                           gte: "now-7d"
                     - terms:
-                        kibana.alert.rule.threat.technique.id: "{{ item._source.extracted.ttps.techniques }}"
+                        kibana.alert.rule.threat.technique.id: "{{ foreach.item._source.extracted.ttps.techniques }}"
                   must_not:
                     - term:
                         kibana.alert.rule.type: threat_match
             on-failure:
               continue: true
 
+      # `index` is bound to the concrete backing index of the loaded hit
+      # (`{{ foreach.item._index }}`) — `_update` cannot target a data-stream
+      # alias or a wildcard pattern by id, so we use the index Elasticsearch
+      # returned on the load search rather than `.kibana-threat-reports*`.
       - name: write_provenance
         type: elasticsearch.update
         with:
-          index: .kibana-threat-reports-*
-          id: "{{ item._id }}"
+          index: "{{ foreach.item._index }}"
+          id: "{{ foreach.item._id }}"
           doc:
             provenance:
               environment_hits:
                 window: "7d"
                 computed_at: "{{ now }}"
                 layer_1_ioc_match: "{{ steps.count_layer1_hits.output.hits.total.value | default: 0 }}"
-                layer_2_behavioral: "{{ steps.count_layer2_hits.output.layer2_search.output.hits.total.value | default: 0 }}"
-              environment_hits_total: >-
-                {{ (steps.count_layer1_hits.output.hits.total.value | default: 0)
-                  + (steps.count_layer2_hits.output.layer2_search.output.hits.total.value | default: 0) }}
+                layer_2_behavioral: "{{ steps.layer2_search.output.hits.total.value | default: 0 }}"
+              # Liquid has no arithmetic operators — `(a) + (b)` is parsed as
+              # a range literal and rejected. Use the `plus` filter, which
+              # coerces missing values to 0 internally so the `if`-skipped
+              # `layer2_search` case still produces a clean sum.
+              environment_hits_total: "{{ steps.count_layer1_hits.output.hits.total.value | default: 0 | plus: steps.layer2_search.output.hits.total.value }}"
         on-failure:
           # Doc deleted mid-run, mapping mismatch on first run after template
           # bump, or version conflict from a concurrent ingest. Backfill is

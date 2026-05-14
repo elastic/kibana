@@ -11,7 +11,7 @@
 #           Skip documents whose content_fingerprint has already been processed
 #           (dedup gate).
 # =============================================================================
-name: threat_intel.nl_extraction_behavioral
+name: Threat intelligence — IOC and behavior extraction
 description: Extract IOCs + behaviors from freshly ingested threat reports (deduped by content_fingerprint)
 enabled: true
 triggers:
