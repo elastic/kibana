@@ -23,6 +23,7 @@ import { getTagsNode } from './nodes/get_tags';
 import { getEsqlQueryGraphWithTool } from './sub_graphs/esql_with_tool/esql_query_graph';
 import { addScheduleNode } from './nodes/add_schedule';
 import { addMitreMappingsNode } from './nodes/add_mitre_mappings';
+import { terminalValidationNode } from './nodes/terminal_validation';
 
 export const BUILD_AGENT_NODE_NAMES = {
   ESQL_QUERY_CREATION: 'esqlQueryCreation',
@@ -30,6 +31,7 @@ export const BUILD_AGENT_NODE_NAMES = {
   CREATE_RULE_NAME_AND_DESCRIPTION: 'createRuleNameAndDescription',
   ADD_MITRE_MAPPINGS: 'addMitreMappings',
   ADD_SCHEDULE: 'addSchedule',
+  TERMINAL_VALIDATION: 'terminalValidation',
   REJECTION: 'rejection',
 } as const;
 
@@ -39,6 +41,7 @@ const {
   CREATE_RULE_NAME_AND_DESCRIPTION,
   ADD_MITRE_MAPPINGS,
   ADD_SCHEDULE,
+  TERMINAL_VALIDATION,
   REJECTION,
 } = BUILD_AGENT_NODE_NAMES;
 
@@ -82,6 +85,7 @@ export const getBuildAgent = async ({
     .addNode(CREATE_RULE_NAME_AND_DESCRIPTION, createRuleNameAndDescriptionNode({ model, events }))
     .addNode(ADD_MITRE_MAPPINGS, addMitreMappingsNode({ model, events }))
     .addNode(ADD_SCHEDULE, addScheduleNode({ model, logger, events }))
+    .addNode(TERMINAL_VALIDATION, terminalValidationNode())
     .addNode(REJECTION, rejectionNode)
     .addEdge(START, ESQL_QUERY_CREATION)
     .addConditionalEdges(ESQL_QUERY_CREATION, resolveRejectionRoute, {
@@ -96,7 +100,12 @@ export const getBuildAgent = async ({
     })
     .addEdge(GET_TAGS, ADD_MITRE_MAPPINGS)
     .addEdge(ADD_MITRE_MAPPINGS, ADD_SCHEDULE)
-    .addEdge(ADD_SCHEDULE, END)
+    .addEdge(ADD_SCHEDULE, TERMINAL_VALIDATION)
+    .addConditionalEdges(TERMINAL_VALIDATION, resolveRejectionRoute, {
+      continue: END,
+      end: END,
+      rejection: REJECTION,
+    })
     .addEdge(REJECTION, END);
 
   const graph = buildAgentGraph.compile({ checkpointer: undefined });
