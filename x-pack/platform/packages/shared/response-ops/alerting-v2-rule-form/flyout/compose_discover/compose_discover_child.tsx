@@ -258,62 +258,61 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
 
       <EuiFlyoutBody>
         {/* ── 1. Time field / date picker / Search row — one line ──────── */}
-        <div style={{ padding: '8px 16px' }}>
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
-            <EuiFlexItem grow={false} style={{ width: 200, minWidth: 0 }}>
-              <EuiSelect
-                options={timeFieldOptions}
-                value={timeField}
-                aria-label={i18n.translate(
-                  'xpack.responseOps.alertingV2RuleForm.composeDiscover.child.timeFieldAriaLabel',
-                  { defaultMessage: 'Time field for rule execution' }
-                )}
-                onChange={(e) => setFormValue('timeField', e.target.value)}
-                compressed
-                prepend={i18n.translate(
-                  'xpack.responseOps.alertingV2RuleForm.composeDiscover.child.timeFieldPrepend',
-                  { defaultMessage: 'Time field' }
-                )}
-                data-test-subj="composeDiscoverTimeField"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow>
-              <EuiSuperDatePicker
-                start={dateStart}
-                end={dateEnd}
-                onTimeChange={({ start, end }) => {
-                  dispatch({ type: 'SET_SANDBOX_DATE_RANGE', start, end });
-                }}
-                showUpdateButton={false}
-                compressed
-                width="full"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={i18n.translate(
-                  'xpack.responseOps.alertingV2RuleForm.composeDiscover.child.searchTooltip',
-                  {
-                    defaultMessage: 'Search ({shortcut})',
-                    values: { shortcut: RUN_SHORTCUT_LABEL },
-                  }
-                )}
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
+          <EuiFlexItem grow={false} style={{ width: 200, minWidth: 0 }}>
+            <EuiSelect
+              options={timeFieldOptions}
+              value={timeField}
+              aria-label={i18n.translate(
+                'xpack.responseOps.alertingV2RuleForm.composeDiscover.child.timeFieldAriaLabel',
+                { defaultMessage: 'Time field for rule execution' }
+              )}
+              onChange={(e) => setFormValue('timeField', e.target.value)}
+              compressed
+              prepend={i18n.translate(
+                'xpack.responseOps.alertingV2RuleForm.composeDiscover.child.timeFieldPrepend',
+                { defaultMessage: 'Time field' }
+              )}
+              data-test-subj="composeDiscoverTimeField"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow>
+            <EuiSuperDatePicker
+              start={dateStart}
+              end={dateEnd}
+              onTimeChange={({ start, end }) => {
+                dispatch({ type: 'SET_SANDBOX_DATE_RANGE', start, end });
+              }}
+              showUpdateButton={false}
+              compressed
+              width="full"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.responseOps.alertingV2RuleForm.composeDiscover.child.searchTooltip',
+                {
+                  defaultMessage: 'Search ({shortcut})',
+                  values: { shortcut: RUN_SHORTCUT_LABEL },
+                }
+              )}
+            >
+              <EuiButton
+                size="s"
+                onClick={run}
+                isLoading={isLoading}
+                data-test-subj="composeDiscoverRunQuery"
               >
-                <EuiButton
-                  size="s"
-                  onClick={run}
-                  isLoading={isLoading}
-                  data-test-subj="composeDiscoverRunQuery"
-                >
-                  <FormattedMessage
-                    id="xpack.responseOps.alertingV2RuleForm.composeDiscover.child.searchButtonLabel"
-                    defaultMessage="Search"
-                  />
-                </EuiButton>
-              </EuiToolTip>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
+                <FormattedMessage
+                  id="xpack.responseOps.alertingV2RuleForm.composeDiscover.child.searchButtonLabel"
+                  defaultMessage="Search"
+                />
+              </EuiButton>
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
 
         {/* ── 2. Editor — bordered panel ──────────────────────────────── */}
         <EuiPanel hasBorder paddingSize="s" style={{ ...editorPanelStyles }}>
@@ -340,132 +339,131 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
             />
           )}
         </EuiPanel>
+        <EuiSpacer size="s" />
 
         {/* ── 3. Footer stats ─────────────────────────────────────────── */}
         {hasRun && !isLoading && !isError && (
-          <div style={{ padding: '4px 16px' }}>
-            <EuiText size="xs" color="subdued">
-              {i18n.translate(
-                'xpack.responseOps.alertingV2RuleForm.composeDiscover.child.resultCountLabel',
-                {
-                  defaultMessage: '{count, plural, one {# result} other {# results}}',
-                  values: { count: totalRowCount },
-                }
-              )}
-            </EuiText>
-          </div>
+          <EuiText size="xs" color="subdued">
+            {i18n.translate(
+              'xpack.responseOps.alertingV2RuleForm.composeDiscover.child.resultCountLabel',
+              {
+                defaultMessage: '{count, plural, one {# result} other {# results}}',
+                values: { count: totalRowCount },
+              }
+            )}
+          </EuiText>
         )}
 
+        <EuiSpacer size="s" />
+
         {/* ── 4. Results ──────────────────────────────────────────────── */}
-        <div style={{ padding: '0 16px' }}>
-          <EuiSpacer size="m" />
+        <EuiSpacer size="m" />
 
-          {!hasRun && (
-            <EuiEmptyPrompt
-              iconType="playFilled"
-              title={
-                <h4>
-                  <FormattedMessage
-                    id="xpack.responseOps.alertingV2RuleForm.composeDiscover.child.emptyStateTitle"
-                    defaultMessage="Run your query to see results"
-                  />
-                </h4>
-              }
-              body={
-                <p>
-                  <FormattedMessage
-                    id="xpack.responseOps.alertingV2RuleForm.composeDiscover.child.emptyStateDescription"
-                    defaultMessage="Click <strong>Search</strong> or press <strong>{shortcut}</strong> to execute the query."
-                    values={{
-                      strong: (chunks) => <strong>{chunks}</strong>,
-                      shortcut: RUN_SHORTCUT_LABEL,
-                    }}
-                  />
-                </p>
-              }
+        {!hasRun && (
+          <EuiEmptyPrompt
+            iconType="playFilled"
+            title={
+              <h4>
+                <FormattedMessage
+                  id="xpack.responseOps.alertingV2RuleForm.composeDiscover.child.emptyStateTitle"
+                  defaultMessage="Run your query to see results"
+                />
+              </h4>
+            }
+            body={
+              <p>
+                <FormattedMessage
+                  id="xpack.responseOps.alertingV2RuleForm.composeDiscover.child.emptyStateDescription"
+                  defaultMessage="Click <strong>Search</strong> or press <strong>{shortcut}</strong> to execute the query."
+                  values={{
+                    strong: (chunks) => <strong>{chunks}</strong>,
+                    shortcut: RUN_SHORTCUT_LABEL,
+                  }}
+                />
+              </p>
+            }
+          />
+        )}
+
+        {hasRun && isLoading && (
+          <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="l" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+
+        {hasRun && isError && (
+          <EuiCallOut
+            announceOnMount
+            color="danger"
+            iconType="error"
+            title={i18n.translate(
+              'xpack.responseOps.alertingV2RuleForm.composeDiscover.child.queryErrorCalloutTitle',
+              { defaultMessage: 'Query error' }
+            )}
+          >
+            <p>{error}</p>
+          </EuiCallOut>
+        )}
+
+        {hasRun && !isLoading && !isError && rows.length === 0 && activeQuery.trim() && (
+          <EuiEmptyPrompt
+            iconType="search"
+            title={
+              <h4>
+                <FormattedMessage
+                  id="xpack.responseOps.alertingV2RuleForm.composeDiscover.child.noResultsTitle"
+                  defaultMessage="No results"
+                />
+              </h4>
+            }
+            body={
+              <p>
+                <FormattedMessage
+                  id="xpack.responseOps.alertingV2RuleForm.composeDiscover.child.noResultsDescription"
+                  defaultMessage="The query returned no results for the current time range."
+                />
+              </p>
+            }
+          />
+        )}
+
+        {hasRun && !isLoading && !isError && rows.length > 0 && (
+          <>
+            <ComposeDiscoverChart
+              query={lastExecutedQuery ?? activeQuery}
+              timeField={timeField}
+              timeRange={timeRange}
+              columns={columns}
             />
-          )}
 
-          {hasRun && isLoading && (
-            <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner size="l" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
+            <EuiSpacer size="m" />
 
-          {hasRun && isError && (
-            <EuiCallOut
-              announceOnMount
-              color="danger"
-              iconType="error"
-              title={i18n.translate(
-                'xpack.responseOps.alertingV2RuleForm.composeDiscover.child.queryErrorCalloutTitle',
-                { defaultMessage: 'Query error' }
+            <EuiDataGrid
+              aria-label={i18n.translate(
+                'xpack.responseOps.alertingV2RuleForm.composeDiscover.child.queryResultsGridAriaLabel',
+                { defaultMessage: 'Query results' }
               )}
-            >
-              <p>{error}</p>
-            </EuiCallOut>
-          )}
-
-          {hasRun && !isLoading && !isError && rows.length === 0 && activeQuery.trim() && (
-            <EuiEmptyPrompt
-              iconType="search"
-              title={
-                <h4>
-                  <FormattedMessage
-                    id="xpack.responseOps.alertingV2RuleForm.composeDiscover.child.noResultsTitle"
-                    defaultMessage="No results"
-                  />
-                </h4>
-              }
-              body={
-                <p>
-                  <FormattedMessage
-                    id="xpack.responseOps.alertingV2RuleForm.composeDiscover.child.noResultsDescription"
-                    defaultMessage="The query returned no results for the current time range."
-                  />
-                </p>
-              }
+              columns={gridColumns}
+              columnVisibility={{ visibleColumns, setVisibleColumns }}
+              rowCount={rows.length}
+              renderCellValue={renderCellValue}
+              pagination={{
+                ...pagination,
+                pageSizeOptions: [10, 25, 50],
+                onChangePage,
+                onChangeItemsPerPage,
+              }}
+              gridStyle={{ border: 'all', header: 'shade', fontSize: 's', cellPadding: 's' }}
+              toolbarVisibility={{
+                showColumnSelector: true,
+                showSortSelector: true,
+                showFullScreenSelector: false,
+              }}
             />
-          )}
-
-          {hasRun && !isLoading && !isError && rows.length > 0 && (
-            <>
-              <ComposeDiscoverChart
-                query={lastExecutedQuery ?? activeQuery}
-                timeField={timeField}
-                timeRange={timeRange}
-                columns={columns}
-              />
-
-              <EuiSpacer size="m" />
-
-              <EuiDataGrid
-                aria-label={i18n.translate(
-                  'xpack.responseOps.alertingV2RuleForm.composeDiscover.child.queryResultsGridAriaLabel',
-                  { defaultMessage: 'Query results' }
-                )}
-                columns={gridColumns}
-                columnVisibility={{ visibleColumns, setVisibleColumns }}
-                rowCount={rows.length}
-                renderCellValue={renderCellValue}
-                pagination={{
-                  ...pagination,
-                  pageSizeOptions: [10, 25, 50],
-                  onChangePage,
-                  onChangeItemsPerPage,
-                }}
-                gridStyle={{ border: 'all', header: 'shade', fontSize: 's', cellPadding: 's' }}
-                toolbarVisibility={{
-                  showColumnSelector: true,
-                  showSortSelector: true,
-                  showFullScreenSelector: false,
-                }}
-              />
-            </>
-          )}
-        </div>
+          </>
+        )}
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
