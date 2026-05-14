@@ -114,7 +114,7 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
                     invalidEndpointIds={invalidEndpointIds}
                     hasSavedObject={hasSavedObject}
                     isFeatureDirty={isFeatureDirty}
-                    globalDefaultId={globalDefaultId}
+                    globalDefaultId={feature.ignoreGlobalDefault ? undefined : globalDefaultId}
                   />
                 </EuiFlexItem>
               )
