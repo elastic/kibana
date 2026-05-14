@@ -10,10 +10,10 @@ import {
   API_VERSIONS,
   INTERNAL_API_ACCESS,
   TRACES_INDEX_PATTERN,
-  buildRouteValidationWithZod,
   GetTracingProjectsRequestQuery,
 } from '@kbn/evals-common';
-import { PLUGIN_ID } from '../../../common';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 import { escapeWildcard } from './utils';
 
@@ -23,7 +23,7 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
       path: EVALS_TRACING_PROJECTS_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [PLUGIN_ID] },
+        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.read] },
       },
       summary: 'List tracing projects',
     })

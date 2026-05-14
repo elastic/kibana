@@ -218,6 +218,13 @@ export const getStepDescription = (step: StreamlangProcessorDefinitionWithUIAttr
           values: {
             from: step.from,
             prefix: step.to || 'url',
+    } else if (step.action === 'registered_domain') {
+      return i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.registeredDomainProcessorDescription',
+        {
+          defaultMessage: 'Extracts domain parts from "{expression}"',
+          values: {
+            expression: step.expression,
           },
         }
       );

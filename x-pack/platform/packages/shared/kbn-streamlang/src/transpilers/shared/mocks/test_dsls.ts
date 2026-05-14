@@ -24,11 +24,17 @@ import type {
   ConcatProcessor,
   NetworkDirectionProcessor,
   UriPartsProcessor,
+  RegisteredDomainProcessor,
 } from '../../../../types/processors';
 import type { StreamlangDSL } from '../../../../types/streamlang';
 
 export const comprehensiveTestDSL: StreamlangDSL = {
   steps: [
+    {
+      action: 'registered_domain',
+      expression: 'expression',
+      prefix: 'prefix',
+    } as RegisteredDomainProcessor,
     {
       action: 'network_direction',
       source_ip: 'source_ip',

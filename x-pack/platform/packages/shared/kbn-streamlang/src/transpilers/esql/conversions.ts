@@ -35,6 +35,7 @@ import type {
   JsonExtractProcessor,
   EnrichProcessor,
   UriPartsProcessor,
+  RegisteredDomainProcessor,
 } from '../../../types/processors';
 import { type StreamlangProcessorDefinition } from '../../../types/processors';
 import {
@@ -64,6 +65,7 @@ import { convertNetworkDirectionProcessorToESQL } from './processors/network_dir
 import { convertJsonExtractProcessorToESQL } from './processors/json_extract';
 import { convertEnrichProcessorToESQL } from './processors/enrich';
 import { convertUriPartsProcessorToESQL } from './processors/uri_parts';
+import { convertRegisteredDomainProcessorToESQL } from './processors/registered_domain';
 
 async function convertProcessorToESQL(
   processor: StreamlangProcessorDefinition,
@@ -147,6 +149,9 @@ async function convertProcessorToESQL(
         throw new Error('Enrich policy resolver is required for enrich processor.');
       }
       return await convertEnrichProcessorToESQL(processor as EnrichProcessor, resolver);
+
+    case 'registered_domain':
+      return convertRegisteredDomainProcessorToESQL(processor as RegisteredDomainProcessor);
 
     case 'manual_ingest_pipeline':
       return [

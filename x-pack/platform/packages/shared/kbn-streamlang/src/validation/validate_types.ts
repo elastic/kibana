@@ -182,6 +182,13 @@ export function extractModifiedFields(processor: StreamlangProcessorDefinition):
       fields.push(processor.to);
       break;
 
+    case 'registered_domain':
+      fields.push(`${processor.prefix}.domain`);
+      fields.push(`${processor.prefix}.registered_domain`);
+      fields.push(`${processor.prefix}.top_level_domain`);
+      fields.push(`${processor.prefix}.subdomain`);
+      break;
+
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
@@ -289,6 +296,7 @@ export function getProcessorOutputType(
     case 'lowercase':
     case 'trim':
     case 'concat':
+    case 'registered_domain':
       return 'string';
 
     case 'uri_parts': {
@@ -453,6 +461,12 @@ export function getExpectedInputType(
       }
       return null;
 
+    case 'registered_domain':
+      if (processor.expression === fieldName) {
+        return ['string'];
+      }
+      return null;
+
     case 'sort':
     case 'rename':
     case 'set':
@@ -544,6 +558,9 @@ export function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDe
         break;
       case 'enrich':
         fieldsUsed.push(step.to);
+        break;
+      case 'registered_domain':
+        fieldsUsed.push(step.expression);
         break;
       case 'append':
       case 'drop_document':

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createElement, Fragment } from 'react';
+import { createElement, Fragment, memo, forwardRef } from 'react';
 import { parseDeclarativeChildren } from './parsing';
 import { createDeclarativeComponent } from './factory';
 
@@ -62,6 +62,7 @@ describe('parseDeclarativeChildren', () => {
           preset: 'name',
           instanceId: 'name',
           attributes: { label: 'Title' },
+          componentType: NameColumn,
         },
       ]);
     });
@@ -477,6 +478,51 @@ describe('parseDeclarativeChildren', () => {
           attributes: { label: 'Title' },
         })
       );
+    });
+  });
+
+  describe('componentType unwrapping', () => {
+    it('should set componentType to the bare function for a plain component.', () => {
+      const children = createElement(NameColumn, { label: 'Title' });
+      const result = parseDeclarativeChildren(children, assembly);
+
+      expect(result[0]).toEqual(expect.objectContaining({ componentType: NameColumn }));
+    });
+
+    it('should unwrap a React.memo wrapper to the inner function.', () => {
+      const MemoColumn = memo(NameColumn) as any;
+      // Assembly Symbols are not standard statics so React.memo does not hoist
+      // them automatically — assign them to the wrapper so getPartType sees them.
+      Object.assign(MemoColumn, NameColumn);
+      const children = createElement(MemoColumn, { label: 'Title' });
+      const result = parseDeclarativeChildren(children, assembly);
+
+      expect(result[0]).toEqual(expect.objectContaining({ componentType: NameColumn }));
+    });
+
+    it('should unwrap a React.forwardRef wrapper to the render function.', () => {
+      const renderFn = (props: { label: string }, _ref: unknown) => null;
+      const RefColumn = forwardRef(renderFn) as any;
+      // Assign assembly statics to the wrapper so getPartType recognises it.
+      Object.assign(RefColumn, NameColumn);
+
+      const children = createElement(RefColumn, { label: 'Title' });
+      const result = parseDeclarativeChildren(children, assembly);
+
+      expect(result[0]).toEqual(expect.objectContaining({ componentType: renderFn }));
+    });
+
+    it('should unwrap nested memo(forwardRef(fn)) to the inner render function.', () => {
+      const renderFn = (props: { label: string }, _ref: unknown) => null;
+      const RefColumn = forwardRef(renderFn) as any;
+      const MemoRefColumn = memo(RefColumn) as any;
+      // Assign assembly statics to the outermost wrapper (memo copies them inward).
+      Object.assign(MemoRefColumn, NameColumn);
+
+      const children = createElement(MemoRefColumn, { label: 'Title' });
+      const result = parseDeclarativeChildren(children, assembly);
+
+      expect(result[0]).toEqual(expect.objectContaining({ componentType: renderFn }));
     });
   });
 });

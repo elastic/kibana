@@ -19,7 +19,6 @@ import { fromKueryExpression } from '@kbn/es-query';
 import { AttachmentType } from '../../../common/types/domain';
 import type { AttachmentMode } from '../../../common/types/domain/attachment/v2';
 import {
-  UnifiedAttachmentAttributesRt,
   AttachmentAttributesRtV2,
   AttachmentPatchAttributesRtV2,
 } from '../../../common/types/domain/attachment/v2';
@@ -28,8 +27,12 @@ import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
-  FILE_ATTACHMENT_TYPE,
+  LEGACY_FILE_ATTACHMENT_TYPE,
 } from '../../../common/constants';
+import {
+  PERSISTABLE_ATTACHMENT_TYPES,
+  SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+} from '../../../common/constants/attachments';
 import {
   getAttachmentSavedObjectType,
   getAttachmentTypeFromAttributes,
@@ -61,7 +64,6 @@ import type {
 import { AttachmentGetter } from './operations/get';
 import type {
   AttachmentPersistedAttributes,
-  AttachmentTransformedAttributes,
   AttachmentSavedObjectTransformed,
 } from '../../common/types/attachments_v1';
 import {
@@ -70,6 +72,7 @@ import {
 } from '../../common/types/attachments_v1';
 import type {
   AttachmentAttributesV2,
+  AttachmentSavedObjectTransformedV2,
   AttachmentTransformedAttributesV2,
   UnifiedAttachmentAttributes,
   UnifiedAttachmentPersistedAttributes,
@@ -77,6 +80,8 @@ import type {
 } from '../../common/types/attachments_v2';
 import { isSOError } from '../../common/error';
 import { getTransformerForPatchAttributes, transformAttributesForMode } from './operations/utils';
+
+const PERSISTABLE_ATTACHMENT_TYPES_ARRAY = Array.from(PERSISTABLE_ATTACHMENT_TYPES);
 
 /**
  * Ensures alert attachments have rule.name, or else existing tests will fail
@@ -90,6 +95,36 @@ function assertAlertAttachmentHasRuleName(attributes: Record<string, unknown>): 
   if (rule == null || rule.name == null) {
     throw new Error('Invalid attributes: expected attributes.rule.name for alert attachments');
   }
+}
+
+/**
+ * Unified attachment shape fields that must NOT appear on the legacy
+ * `cases-comments` SO. When a unified-shape payload (e.g.
+ * `{ type: 'security.endpoint', attachmentId, metadata }`) is written to the
+ * legacy SO type, the request attributes still carry those keys after io-ts
+ * decoding and may otherwise leak into `_source` (mapping is `dynamic: false`,
+ * so they would be stored but not indexed). Stripping here guarantees
+ * byte-for-byte equivalence with pre-migration legacy writes.
+ *
+ * Applied via {@link stripUnifiedOnlyFields} on every legacy-SO write path:
+ * `create`, `bulkCreate`, `update`, `bulkUpdate`. Regression tests for all
+ * four paths live in the "byte-for-byte legacy storage equivalence" describe
+ * block in `index.test.ts`.
+ */
+const UNIFIED_ONLY_ATTRIBUTE_KEYS = ['attachmentId', 'metadata', 'data'] as const;
+
+function stripUnifiedOnlyFields<T extends object>(attributes: T): T {
+  const asRecord = attributes as unknown as Record<string, unknown>;
+  let result: Record<string, unknown> | undefined;
+  for (const key of UNIFIED_ONLY_ATTRIBUTE_KEYS) {
+    if (key in asRecord) {
+      if (result === undefined) {
+        result = { ...asRecord };
+      }
+      delete result[key];
+    }
+  }
+  return (result ?? asRecord) as unknown as T;
 }
 
 export class AttachmentService {
@@ -178,7 +213,18 @@ export class AttachmentService {
   }
 
   /**
-   * Counts the persistableState and externalReference attachments that are not .files
+   * Counts attachments that contribute to the
+   * `MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES` limit:
+   * - Legacy: `persistableState` and `externalReference` rows in
+   *   `cases-comments`, EXCLUDING `.files` (file attachments are limited
+   *   separately).
+   * - Unified (when the flag is on): persistable-state subtypes plus
+   *   `security.endpoint`, EXCLUDING `file` (matched via the `type` field on
+   *   `cases-attachments`).
+   *
+   * Files are intentionally excluded on both sides; the request-side
+   * `PersistableStateAndExternalReferencesLimiter.countOfItemsInRequest`
+   * filters them out symmetrically.
    */
   public async countPersistableStateAndExternalReferenceAttachments({
     caseId,
@@ -190,29 +236,64 @@ export class AttachmentService {
         `Attempting to count persistableState and externalReference attachments for case id ${caseId}`
       );
 
-      const typeFilter = buildFilter({
+      const isCasesAttachmentsEnabled = this.context.config.attachments?.enabled === true;
+      const legacyTypeFilter = buildFilter({
         filters: [AttachmentType.persistableState, AttachmentType.externalReference],
         field: 'type',
         operator: 'or',
         type: CASE_COMMENT_SAVED_OBJECT,
       });
 
-      const excludeFilesFilter = fromKueryExpression(
-        `not ${CASE_COMMENT_SAVED_OBJECT}.attributes.externalReferenceAttachmentTypeId: ${FILE_ATTACHMENT_TYPE}`
+      const excludeLegacyFilesFilter = fromKueryExpression(
+        `not ${CASE_COMMENT_SAVED_OBJECT}.attributes.externalReferenceAttachmentTypeId: ${LEGACY_FILE_ATTACHMENT_TYPE}`
       );
 
-      const combinedFilter = combineFilters([typeFilter, excludeFilesFilter]);
+      const legacyFilter = combineFilters([legacyTypeFilter, excludeLegacyFilesFilter]);
 
-      const response = await this.context.unsecuredSavedObjectsClient.find<{ total: number }>({
+      const legacyFindPromise = this.context.unsecuredSavedObjectsClient.find<{
+        total: number;
+      }>({
         type: CASE_COMMENT_SAVED_OBJECT,
         hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
         page: 1,
         perPage: 1,
         sortField: defaultSortField,
-        filter: combinedFilter,
+        filter: legacyFilter,
       });
 
-      return response.total;
+      if (!isCasesAttachmentsEnabled) {
+        const legacyResponse = await legacyFindPromise;
+        return legacyResponse.total;
+      }
+
+      const unifiedTypesToCount = [
+        ...PERSISTABLE_ATTACHMENT_TYPES_ARRAY,
+        SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+      ];
+      const unifiedTypeFilter = buildFilter({
+        filters: unifiedTypesToCount,
+        field: 'type',
+        operator: 'or',
+        type: CASE_ATTACHMENT_SAVED_OBJECT,
+      });
+
+      const unifiedFindPromise = this.context.unsecuredSavedObjectsClient.find<{
+        total: number;
+      }>({
+        type: CASE_ATTACHMENT_SAVED_OBJECT,
+        hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+        page: 1,
+        perPage: 1,
+        sortField: defaultSortField,
+        filter: unifiedTypeFilter,
+      });
+
+      const [legacyResponse, unifiedResponse] = await Promise.all([
+        legacyFindPromise,
+        unifiedFindPromise,
+      ]);
+
+      return legacyResponse.total + unifiedResponse.total;
     } catch (error) {
       this.context.log.error(
         `Error while attempting to count persistableState and externalReference attachments for case id ${caseId}: ${error}`
@@ -280,20 +361,35 @@ export class AttachmentService {
       );
       if (savedObjectType === CASE_ATTACHMENT_SAVED_OBJECT) {
         const unifiedAttributes = transformer.toUnifiedSchema(decodedAttributes);
+        const { attributes: extractedAttributes, references: extractedReferences } =
+          extractAttachmentSORefsFromAttributes(
+            unifiedAttributes,
+            references ?? [],
+            this.context.persistableStateAttachmentTypeRegistry
+          );
         const unifiedAttachment =
           await this.context.unsecuredSavedObjectsClient.create<UnifiedAttachmentAttributes>(
             CASE_ATTACHMENT_SAVED_OBJECT,
-            unifiedAttributes,
+            extractedAttributes as UnifiedAttachmentAttributes,
             {
-              references,
+              references: extractedReferences,
               id,
               refresh,
             }
           );
-        const validatedAttributes = decodeOrThrow(UnifiedAttachmentAttributesRt)(
-          unifiedAttachment.attributes
+        // Restore `attachmentId` on the response so callers see the shape they wrote.
+        const injectedAttachment = injectAttachmentSOAttributesFromRefs(
+          unifiedAttachment as unknown as SavedObject<AttachmentPersistedAttributes>,
+          this.context.persistableStateAttachmentTypeRegistry
         );
-        return Object.assign(unifiedAttachment, { attributes: validatedAttributes });
+        // v2 union accepts both unified- and legacy-shape attributes (some
+        // unmigrated types still pass through legacy-shaped).
+        const validatedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(
+          injectedAttachment.attributes
+        );
+        return Object.assign(injectedAttachment, {
+          attributes: validatedAttributes,
+        }) as unknown as UnifiedAttachmentSavedObjectTransformed;
       }
 
       const legacyAttributes = transformer.toLegacySchema(decodedAttributes);
@@ -307,7 +403,7 @@ export class AttachmentService {
       const attachment =
         await this.context.unsecuredSavedObjectsClient.create<AttachmentPersistedAttributes>(
           CASE_COMMENT_SAVED_OBJECT,
-          extractedAttributes,
+          stripUnifiedOnlyFields(extractedAttributes),
           {
             references: extractedReferences,
             id,
@@ -351,12 +447,21 @@ export class AttachmentService {
                 getAttachmentTypeFromAttributes(decodedAttributes),
                 decodedAttributes.owner
               );
-              const attributesToWrite = transformer.toUnifiedSchema(decodedAttributes);
+              const unifiedAttributes = transformer.toUnifiedSchema(decodedAttributes);
+              // Mirror the unified create path: lift `attachmentId` into refs
+              // for savedObject-backed unified subtypes (those with `metadata.soType`).
+              const { attributes: extractedAttributes, references: extractedReferences } =
+                extractAttachmentSORefsFromAttributes(
+                  unifiedAttributes,
+                  attachment.references ?? [],
+                  this.context.persistableStateAttachmentTypeRegistry
+                );
 
               return {
                 type: CASE_ATTACHMENT_SAVED_OBJECT,
                 ...attachment,
-                attributes: attributesToWrite,
+                attributes: extractedAttributes as UnifiedAttachmentAttributes,
+                references: extractedReferences,
               };
             }),
             { refresh }
@@ -386,7 +491,7 @@ export class AttachmentService {
             return {
               type: CASE_COMMENT_SAVED_OBJECT,
               ...attachment,
-              attributes: extractedAttributes,
+              attributes: stripUnifiedOnlyFields(extractedAttributes),
               references: extractedReferences,
             };
           }),
@@ -403,15 +508,30 @@ export class AttachmentService {
     res: SavedObjectsBulkResponse<AttachmentPersistedAttributes | UnifiedAttachmentAttributes>
   ): SavedObjectsBulkResponse<AttachmentAttributesV2> {
     const validatedAttachments: Array<
-      AttachmentSavedObjectTransformed | UnifiedAttachmentSavedObjectTransformed
+      | AttachmentSavedObjectTransformed
+      | UnifiedAttachmentSavedObjectTransformed
+      | AttachmentSavedObjectTransformedV2
     > = [];
 
     for (const so of res.saved_objects) {
       if (isSOError(so)) {
         validatedAttachments.push(so as AttachmentSavedObjectTransformed);
       } else if (so.type === CASE_ATTACHMENT_SAVED_OBJECT) {
-        const validatedAttributes = decodeOrThrow(UnifiedAttachmentAttributesRt)(so.attributes);
-        validatedAttachments.push(Object.assign(so, { attributes: validatedAttributes }));
+        // Restore `attachmentId` for savedObject-backed unified rows; no-op
+        // for other unified types.
+        const injectedAttachment = injectAttachmentSOAttributesFromRefs(
+          so as unknown as SavedObject<AttachmentPersistedAttributes>,
+          this.context.persistableStateAttachmentTypeRegistry
+        );
+        // v2 union accepts both unified- and legacy-shape attributes.
+        const validatedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(
+          injectedAttachment.attributes
+        );
+        validatedAttachments.push(
+          Object.assign(injectedAttachment, { attributes: validatedAttributes }) as
+            | AttachmentSavedObjectTransformed
+            | UnifiedAttachmentSavedObjectTransformed
+        );
       } else if (so.type === CASE_COMMENT_SAVED_OBJECT) {
         const legacySo = so as SavedObject<AttachmentPersistedAttributes>;
         const transformedAttachment = injectAttachmentSOAttributesFromRefs(
@@ -482,7 +602,7 @@ export class AttachmentService {
         await this.context.unsecuredSavedObjectsClient.update<AttachmentPersistedAttributes>(
           CASE_COMMENT_SAVED_OBJECT,
           savedObjectId,
-          extractedAttributes,
+          stripUnifiedOnlyFields(extractedAttributes),
           {
             ...options,
             /**
@@ -580,7 +700,7 @@ export class AttachmentService {
               ...c.options,
               type: CASE_COMMENT_SAVED_OBJECT,
               id: c.savedObjectId,
-              attributes: extractedAttributes,
+              attributes: stripUnifiedOnlyFields(extractedAttributes),
               /* If c.options?.references are undefined and there is no field to move to the refs
                * then the extractedAttributes will be an empty array. If we pass the empty array
                * on the update then all previously refs will be removed. The check below is needed
@@ -677,28 +797,28 @@ export class AttachmentService {
       const validatedAttachments: Array<SavedObjectsFindResult<AttachmentAttributesV2>> = [];
 
       for (const so of res.saved_objects) {
+        const injectedSo = injectAttachmentSOAttributesFromRefs(
+          so as unknown as SavedObject<AttachmentPersistedAttributes>,
+          this.context.persistableStateAttachmentTypeRegistry
+        ) as unknown as SavedObjectsFindResult<AttachmentAttributesV2>;
         const transformed = transformAttributesForMode({
-          attributes: so.attributes,
+          attributes: injectedSo.attributes,
           mode,
         });
         if (transformed.isUnified) {
-          validatedAttachments.push(Object.assign(so, { attributes: transformed.attributes }));
+          const validatedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(
+            transformed.attributes
+          );
+          validatedAttachments.push(Object.assign(injectedSo, { attributes: validatedAttributes }));
         } else {
-          const transformedAttachment = injectAttachmentSOAttributesFromRefs(
-            { ...so, attributes: transformed.attributes },
-            this.context.persistableStateAttachmentTypeRegistry
-            // casting here because injectAttachmentSOAttributesFromRefs returns a SavedObject but we need a SavedObjectsFindResult
-            // which has the score in it. The score is returned but the type is not correct
-          ) as SavedObjectsFindResult<AttachmentTransformedAttributes>;
-
           const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
-            transformedAttachment.attributes
+            transformed.attributes
           );
 
           validatedAttachments.push(
-            Object.assign(transformedAttachment, {
+            Object.assign(injectedSo, {
               attributes: validatedAttributes,
-            })
+            }) as unknown as SavedObjectsFindResult<AttachmentAttributesV2>
           );
         }
       }

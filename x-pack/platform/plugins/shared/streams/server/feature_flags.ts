@@ -12,10 +12,8 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
   OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
-  OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
   OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
-  OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE,
   OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
@@ -242,21 +240,6 @@ export function registerFeatureFlags(
       solutionViews: ['classic', 'oblt'],
       technicalPreview: true,
     },
-    [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: {
-      category: ['observability'],
-      name: i18n.translate('xpack.streams.streamsAttachmentsSettingsName', {
-        defaultMessage: 'Streams attachments',
-      }),
-      value: false,
-      description: i18n.translate('xpack.streams.streamsAttachmentsSettingsDescription', {
-        defaultMessage: 'Enable Streams attachments tab.',
-      }),
-      type: 'boolean',
-      schema: schema.boolean(),
-      requiresPageReload: true,
-      solutionViews: ['classic', 'oblt'],
-      technicalPreview: true,
-    },
     [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: {
       category: ['observability'],
       name: i18n.translate('xpack.streams.queryStreamsSettingsName', {
@@ -282,24 +265,6 @@ export function registerFeatureFlags(
       value: false,
       description: i18n.translate('xpack.streams.wiredStreamViewsSettingsDescription', {
         defaultMessage: 'Enable ES|QL views for wired streams.',
-      }),
-      type: 'boolean',
-      schema: schema.boolean(),
-      requiresPageReload: true,
-      solutionViews: ['classic', 'oblt'],
-      technicalPreview: true,
-      readonly: true,
-      readonlyMode: 'ui',
-    },
-    [OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE]: {
-      category: ['observability'],
-      name: i18n.translate('xpack.streams.streamsOverviewPageSettingsName', {
-        defaultMessage: 'Streams overview page',
-      }),
-      value: false,
-      description: i18n.translate('xpack.streams.streamsOverviewPageSettingsDescription', {
-        defaultMessage:
-          'Enable the stream Overview tab. When disabled, the default management tab is Retention (ingest streams) or Schema (query streams).',
       }),
       type: 'boolean',
       schema: schema.boolean(),

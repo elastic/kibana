@@ -37,7 +37,6 @@ export {
   createDegradedDocsControl,
   createStacktraceControl,
   fieldConstants,
-  formatFieldValue,
   formatFieldValueReact,
   formatFieldValueText,
   formatFieldStringValueWithHighlights,
@@ -71,6 +70,7 @@ export {
   AppMenuRegistry,
   dismissAllFlyoutsExceptFor,
   dismissFlyouts,
+  ErrorCallout,
   prepareDataViewForEditing,
   getEsqlDataView,
   setChartHidden,
@@ -91,7 +91,14 @@ export {
   HISTOGRAM_BREAKDOWN_FIELD_KEY,
 } from './src';
 
-export type { LogsContextService, ApmContextService, SortOrder, SortInput, SortPair } from './src';
+export type {
+  LogsContextService,
+  ApmContextService,
+  SortOrder,
+  SortInput,
+  SortPair,
+  ErrorCalloutProps,
+} from './src';
 
 export * from './src/types';
 
