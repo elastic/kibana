@@ -147,7 +147,7 @@ pageLoadAssetSize:
   sampleDataIngest: 2640
   savedObjects: 11735
   savedObjectsFinder: 4319
-  savedObjectsManagement: 22390
+  savedObjectsManagement: 22361
   savedObjectsTagging: 23144
   savedObjectsTaggingOss: 2163
   savedSearch: 11000
@@ -209,8 +209,8 @@ pageLoadAssetSize:
   visTypeVislib: 14679
   visTypeXy: 32342
   visualizationListing: 5148
-  visualizations: 52210
+  visualizations: 52092
   watcher: 10485
   workflowsExtensions: 38938
-  workflowsManagement: 35010
+  workflowsManagement: 38954
   workplaceAIApp: 6234

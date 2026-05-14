@@ -1249,9 +1249,20 @@ export class WorkflowsExecutionEnginePlugin
         );
       }
 
+      const resumedBy = await getAuthenticatedUser(
+        request,
+        coreStart.security,
+        coreStart.elasticsearch.client
+      );
+
       await workflowExecutionRepository.updateWorkflowExecution({
         id: executionId,
-        context: { ...workflowExecution.context, resumeInput: input },
+        context: {
+          ...workflowExecution.context,
+          resumeInput: input,
+          resumedBy,
+          resumedAt: new Date().toISOString(),
+        },
       });
 
       await workflowTaskManager.scheduleImmediateResume({
@@ -1262,6 +1273,8 @@ export class WorkflowsExecutionEnginePlugin
 
       // Same idea as cancel: nudge TM so the resume task runs as soon as possible
       await workflowTaskManager.forceRunIdleTasks(executionId);
+
+      return { resumedBy };
     };
 
     const workflowEventLoggerService = new WorkflowEventLoggerService(

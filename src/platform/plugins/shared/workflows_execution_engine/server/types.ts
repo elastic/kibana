@@ -33,6 +33,11 @@ export interface ExecuteWorkflowStepResponse {
   workflowExecutionId: string;
 }
 
+/** Engine contract for `resumeWorkflowExecution` (same shape as `@kbn/workflows` `ResumeWorkflowExecutionResponseDto`). */
+export interface ResumeWorkflowExecutionResponse {
+  resumedBy: string;
+}
+
 export interface WorkflowsExecutionEnginePluginSetup {
   // No setup contract exposed yet. Extend this interface when other plugins need to configure the engine during setup.
   [key: string]: unknown;
@@ -102,7 +107,7 @@ export type ResumeWorkflowExecution = (
   spaceId: string,
   input: Record<string, unknown>,
   request: KibanaRequest
-) => Promise<void>;
+) => Promise<ResumeWorkflowExecutionResponse>;
 
 export type ScheduleWorkflow = (
   workflow: WorkflowExecutionEngineModel,
