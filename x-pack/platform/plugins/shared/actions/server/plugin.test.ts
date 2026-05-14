@@ -11,7 +11,7 @@ import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { z } from '@kbn/zod/v4';
 import type { PluginInitializerContext, RequestHandlerContext } from '@kbn/core/server';
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock, elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
@@ -321,6 +321,96 @@ describe('Actions Plugin', () => {
             isConnectorTypeDeprecated: false,
           },
         ]);
+      });
+
+      describe('getUserIdentifiersFromAPIKey callback', () => {
+        const getResolverFromStartedPlugin = async (
+          configureScopedClient: (
+            scopedClient: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>
+          ) => void
+        ) => {
+          const coreStart = coreMock.createStart();
+          const scopedClient = elasticsearchServiceMock.createScopedClusterClient();
+          coreStart.elasticsearch.client.asScoped.mockReturnValue(scopedClient);
+          configureScopedClient(scopedClient);
+
+          await plugin.setup(coreSetup, {
+            ...pluginsSetup,
+            encryptedSavedObjects: {
+              ...pluginsSetup.encryptedSavedObjects,
+              canEncrypt: true,
+            },
+          });
+          await plugin.start(coreStart, {
+            licensing: licensingMock.createStart(),
+            taskManager: taskManagerMock.createStart(),
+            encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+            eventLog: eventLogMock.createStart(),
+          });
+
+          return (
+            plugin as unknown as {
+              getUserIdentifiersFromAPIKeyFn: (
+                request: ReturnType<typeof httpServerMock.createKibanaRequest>
+              ) => Promise<any>;
+            }
+          ).getUserIdentifiersFromAPIKeyFn;
+        };
+
+        it('logs decode failures and returns undefined when API key id cannot be parsed', async () => {
+          const resolver = await getResolverFromStartedPlugin(() => {});
+
+          const result = await resolver(httpServerMock.createKibanaRequest());
+
+          expect(result).toBeUndefined();
+          expect(context.logger.get().debug).toHaveBeenCalledWith(
+            'Failed to decode API key ID from Authorization header.'
+          );
+        });
+
+        it('logs when API key lookup returns no keys', async () => {
+          const resolver = await getResolverFromStartedPlugin((scopedClient) => {
+            scopedClient.asCurrentUser.security.getApiKey.mockResolvedValue({
+              api_keys: [],
+            } as any);
+          });
+          const requestWithApiKey = httpServerMock.createKibanaRequest({
+            headers: {
+              authorization: `ApiKey ${Buffer.from('api-key-id:api-key-secret').toString(
+                'base64'
+              )}`,
+            },
+          });
+
+          const result = await resolver(requestWithApiKey);
+
+          expect(result).toBeUndefined();
+          expect(context.logger.get().debug).toHaveBeenCalledWith(
+            'No API keys were returned from query, cannot retrieve associated profile id.'
+          );
+        });
+
+        it('logs and returns undefined when API key lookup throws', async () => {
+          const resolver = await getResolverFromStartedPlugin((scopedClient) => {
+            scopedClient.asCurrentUser.security.getApiKey.mockRejectedValue(
+              new Error('ES failure')
+            );
+          });
+          const requestWithApiKey = httpServerMock.createKibanaRequest({
+            headers: {
+              authorization: `ApiKey ${Buffer.from('api-key-id:api-key-secret').toString(
+                'base64'
+              )}`,
+            },
+          });
+
+          const result = await resolver(requestWithApiKey);
+
+          expect(result).toBeUndefined();
+          expect(context.logger.get().debug).toHaveBeenCalledWith(
+            'Failed to retrieve API key for user profile retrieval: ES failure'
+          );
+        });
       });
     });
 

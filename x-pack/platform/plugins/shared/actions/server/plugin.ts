@@ -65,8 +65,10 @@ import type {
   ActionTypeSecrets,
   ActionTypeParams,
   ActionsRequestHandlerContext,
+  UserIdentifiersResult,
   UnsecuredServices,
   ConnectorLifecycleListener,
+  GetUserIdentifiersFromAPIKeyFn,
 } from './types';
 
 import type { ActionsConfigurationUtilities } from './actions_config';
@@ -94,6 +96,7 @@ import { ACTIONS_FEATURE } from './feature';
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
 import { getCurrentUserProfileIdFromRequest } from './lib/get_current_user_profile_id';
+import { mapFirstApiKeyToUserIdentifiers } from './lib/map_api_key_response_to_user_identifiers';
 import { renderMustacheObject } from './lib/mustache_renderer';
 import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history_es_index/alert_history_es_index';
 import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
@@ -272,6 +275,7 @@ export class ActionsPlugin
   private connectorUsageReportingTask: ConnectorUsageReportingTask | undefined;
   private connectorLifecycleListeners: ConnectorLifecycleListener[] = [];
   private skippedPreconfiguredConnectorIds: Set<string> = new Set();
+  private getUserIdentifiersFromAPIKeyFn!: GetUserIdentifiersFromAPIKeyFn;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -595,6 +599,7 @@ export class ActionsPlugin
         isESOCanEncrypt: isESOCanEncrypt!,
         encryptedSavedObjectsClient,
         connectorLifecycleListeners: this.connectorLifecycleListeners,
+        getUserIdentifiersFromAPIKey,
         getCurrentUserProfileId,
       });
     };
@@ -677,14 +682,13 @@ export class ActionsPlugin
       core.savedObjects.createInternalRepository();
 
     /**
-     * Resolves profile UID from the `Authorization` API-key header for callers that run under a
-     * `FakeRequest` (action executor / background execution), where there is no browser session
-     * and `userProfiles.getCurrent` cannot run. For real `KibanaRequest` traffic, use
-     * `getCurrentUserProfileIdFromRequest` instead.
+     * Resolves user identifiers from the `Authorization` API-key header for callers that run under
+     * a `FakeRequest` (action executor / background execution), where there is no browser session
+     * and `userProfiles.getCurrent` cannot run. For interactive `KibanaRequest` traffic, prefer
+     * `getCurrentUserProfileIdFromRequest` for session profile resolution; this helper runs first
+     * when an API key is present so API-key-based execution can still obtain identifiers.
      */
-    async function getCurrentUserProfileIdFromAPIKey(
-      request: KibanaRequest
-    ): Promise<string | undefined> {
+    const getUserIdentifiersFromAPIKey = async (request: KibanaRequest): UserIdentifiersResult => {
       try {
         const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
         if (!id) {
@@ -700,12 +704,16 @@ export class ActionsPlugin
           });
 
         if (response.api_keys && response.api_keys.length > 0) {
-          return response.api_keys[0].profile_uid;
+          const mapped = mapFirstApiKeyToUserIdentifiers(response.api_keys);
+          if (mapped) {
+            return mapped;
+          }
+          logger.debug(`No profile UID or cloud user ID found in API key response.`);
+        } else {
+          logger.debug(
+            `No API keys were returned from query, cannot retrieve associated profile id.`
+          );
         }
-
-        logger.debug(
-          `No API keys were returned from query, cannot retrieve associated profile id.`
-        );
       } catch (error) {
         logger.debug(
           `Failed to retrieve API key for user profile retrieval: ${
@@ -714,7 +722,9 @@ export class ActionsPlugin
         );
       }
       return undefined;
-    }
+    };
+
+    this.getUserIdentifiersFromAPIKeyFn = getUserIdentifiersFromAPIKey;
 
     const getCurrentUserProfileId = (requestWithAuth: KibanaRequest) =>
       getCurrentUserProfileIdFromRequest(requestWithAuth, plugins.security, logger);
@@ -743,7 +753,7 @@ export class ActionsPlugin
         return instantiateAuthorization(request);
       },
       analyticsService: core.analytics,
-      getCurrentUserProfileIdFromAPIKey,
+      getUserIdentifiersFromAPIKey,
     });
 
     taskRunnerFactory!.initialize({
@@ -956,6 +966,7 @@ export class ActionsPlugin
     core: CoreSetup<ActionsPluginsStart>,
     actionsConfigUtils: ActionsConfigurationUtilities
   ): IContextProvider<ActionsRequestHandlerContext, 'actions'> => {
+    const actionsPlugin = this;
     const {
       actionTypeRegistry,
       authTypeRegistry,
@@ -1029,6 +1040,7 @@ export class ActionsPlugin
             isESOCanEncrypt: isESOCanEncrypt!,
             encryptedSavedObjectsClient,
             connectorLifecycleListeners,
+            getUserIdentifiersFromAPIKey: actionsPlugin.getUserIdentifiersFromAPIKeyFn,
             getCurrentUserProfileId: (requestWithAuth: KibanaRequest) =>
               getCurrentUserProfileIdFromRequest(requestWithAuth, pluginsStart.security, logger),
           });
