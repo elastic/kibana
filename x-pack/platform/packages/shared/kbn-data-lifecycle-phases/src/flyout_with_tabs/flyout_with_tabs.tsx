@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import {
   EuiFlyout,
   type EuiFlyoutProps,
+  EuiButtonIcon,
   EuiFlyoutHeader,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,6 +20,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 
 export interface FlyoutHeaderTab<TId extends string> {
   id: TId;
@@ -33,6 +35,7 @@ export type NonEmptyFlyoutTabs<TId extends string> = readonly [
 
 export interface FlyoutWithTabsProps<TId extends string> {
   title: string;
+  showBackButton?: boolean;
   tabsAriaLabel: string;
   tabs: NonEmptyFlyoutTabs<TId>;
   initialTabId?: TId;
@@ -44,6 +47,7 @@ export interface FlyoutWithTabsProps<TId extends string> {
 
 export const FlyoutWithTabs = <TId extends string>({
   title,
+  showBackButton = false,
   tabsAriaLabel,
   tabs,
   initialTabId,
@@ -91,9 +95,33 @@ export const FlyoutWithTabs = <TId extends string>({
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup direction="column" gutterSize="s" responsive={false} css={headerStyles}>
           <EuiFlexItem grow={false}>
-            <EuiTitle size="s">
-              <h2 id={flyoutTitleId}>{title}</h2>
-            </EuiTitle>
+            <EuiFlexGroup
+              alignItems="flexStart"
+              gutterSize="s"
+              responsive={false}
+              wrap={false}
+              justifyContent="flexStart"
+            >
+              {showBackButton && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    iconType="chevronSingleLeft"
+                    aria-label={i18n.translate(
+                      'xpack.dataLifecyclePhases.flyoutWithTabs.backButtonAriaLabel',
+                      { defaultMessage: 'Back' }
+                    )}
+                    onClick={onClose}
+                    data-test-subj="flyoutWithTabsBackButton"
+                    color="text"
+                  />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow>
+                <EuiTitle size="s">
+                  <h2 id={flyoutTitleId}>{title}</h2>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiTabs size="m" bottomBorder={false} aria-label={tabsAriaLabel}>

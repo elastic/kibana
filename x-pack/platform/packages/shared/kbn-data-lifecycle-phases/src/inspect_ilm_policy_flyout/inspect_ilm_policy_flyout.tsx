@@ -51,6 +51,7 @@ export const InspectIlmPolicyFlyout = ({
   return (
     <FlyoutWithTabs
       title={strings.title(policyName)}
+      showBackButton
       tabsAriaLabel={strings.tabsAriaLabel}
       tabs={TABS}
       initialTabId="summary"
