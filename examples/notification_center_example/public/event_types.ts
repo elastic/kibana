@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import type {
   INotificationEvents,
   NotificationEventTypeData,
-  TypedNotificationEvent,
 } from '@kbn/core-notifications-browser';
 
 // Allowlist-conforming typeIds (NotificationTypeId prefix carve-out for examples).
@@ -49,18 +49,47 @@ export const cloudType: NotificationEventTypeData = {
   eventName: 'demo-cloud',
 };
 
+const REPORT_PRIMARY_ACTION_LABEL = i18n.translate(
+  'notificationCenterExample.reportPrimaryAction',
+  { defaultMessage: 'Download report' }
+);
+
+function alertDemoReportAction(event: {
+  id: string;
+  title: string;
+  metadata?: ReportMetadata;
+}): void {
+  const format = event.metadata?.format;
+  window.alert(
+    `[${reportTypeId}] "${event.title}" (id: ${event.id})${
+      format !== undefined ? `, format: ${format}` : ''
+    }`
+  );
+}
+
 /**
  * Register the three demo notification types and return typed update callbacks.
  * The callbacks merge an updated event into the matching id (see EventsService).
  * Demo events are *published* via `events.notify(...)` from the controller app.
+ *
+ * Primary action for report events is registered here, co-located with the type
+ * definition. Alert and cloud types have no primary action.
  */
 export function registerDemoTypes(events: INotificationEvents) {
   return {
-    updateReport: events.registerType<ReportMetadata>(reportTypeId, reportType),
+    updateReport: events.registerType<ReportMetadata>(
+      reportTypeId,
+      reportType,
+      undefined,
+      (event) => ({
+        label: REPORT_PRIMARY_ACTION_LABEL,
+        onClick: () => alertDemoReportAction(event),
+      })
+    ),
     updateAlert: events.registerType<AlertMetadata>(alertTypeId, alertType),
     updateCloud: events.registerType<CloudMetadata>(cloudTypeId, cloudType),
   };
 }
 
 export type DemoUpdaters = ReturnType<typeof registerDemoTypes>;
-export type { TypedNotificationEvent };
+export type { TypedNotificationEvent } from '@kbn/core-notifications-browser';

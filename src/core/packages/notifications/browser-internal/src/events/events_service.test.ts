@@ -193,6 +193,100 @@ describe('EventsService', () => {
     });
   });
 
+  describe('registerType / getPrimaryActionForEvent', () => {
+    it('returns undefined for an event with no typeId', async () => {
+      const service = new EventsService(new LocalStorageNotificationStateStore());
+      await service.start();
+      const result = service.getPrimaryActionForEvent(baseEvent());
+      expect(result).toBeUndefined();
+    });
+
+    it('returns undefined for an unregistered typeId', async () => {
+      const service = new EventsService(new LocalStorageNotificationStateStore());
+      await service.start();
+      service.notify(baseEvent({ typeId: 'notificationExampleFoo' as const }));
+      const result = service.getPrimaryActionForEvent(
+        baseEvent({ typeId: 'notificationExampleFoo' as const })
+      );
+      expect(result).toBeUndefined();
+    });
+
+    it('returns undefined when the type is registered without a resolver', async () => {
+      const service = new EventsService(new LocalStorageNotificationStateStore());
+      await service.start();
+      service.registerType('notificationExampleFoo' as const, {
+        severity: 'info',
+        eventName: 'foo',
+      });
+      const result = service.getPrimaryActionForEvent(
+        baseEvent({ typeId: 'notificationExampleFoo' as const })
+      );
+      expect(result).toBeUndefined();
+    });
+
+    it('calls resolvePrimaryAction with the event and returns the descriptor', async () => {
+      const service = new EventsService(new LocalStorageNotificationStateStore());
+      await service.start();
+      const descriptor = { label: 'Download', onClick: jest.fn() };
+      const resolver = jest.fn().mockReturnValue(descriptor);
+
+      service.registerType(
+        'notificationExampleFoo' as const,
+        { severity: 'info', eventName: 'foo' },
+        undefined,
+        resolver
+      );
+
+      const event = baseEvent({ typeId: 'notificationExampleFoo' as const });
+      const result = service.getPrimaryActionForEvent(event);
+
+      expect(resolver).toHaveBeenCalledWith(event);
+      expect(result).toBe(descriptor);
+    });
+
+    it('returns undefined when resolver returns undefined', async () => {
+      const service = new EventsService(new LocalStorageNotificationStateStore());
+      await service.start();
+      service.registerType(
+        'notificationExampleFoo' as const,
+        { severity: 'info', eventName: 'foo' },
+        undefined,
+        () => undefined
+      );
+      const result = service.getPrimaryActionForEvent(
+        baseEvent({ typeId: 'notificationExampleFoo' as const })
+      );
+      expect(result).toBeUndefined();
+    });
+
+    it('first registration wins — second registerType for same typeId is a no-op', async () => {
+      const service = new EventsService(new LocalStorageNotificationStateStore());
+      await service.start();
+      const firstResolver = jest.fn().mockReturnValue({ label: 'First', onClick: jest.fn() });
+      const secondResolver = jest.fn().mockReturnValue({ label: 'Second', onClick: jest.fn() });
+
+      service.registerType(
+        'notificationExampleFoo' as const,
+        { severity: 'info', eventName: 'foo' },
+        undefined,
+        firstResolver
+      );
+      service.registerType(
+        'notificationExampleFoo' as const,
+        { severity: 'info', eventName: 'foo' },
+        undefined,
+        secondResolver
+      );
+
+      const event = baseEvent({ typeId: 'notificationExampleFoo' as const });
+      const result = service.getPrimaryActionForEvent(event);
+
+      expect(firstResolver).toHaveBeenCalledWith(event);
+      expect(secondResolver).not.toHaveBeenCalled();
+      expect(result?.label).toBe('First');
+    });
+  });
+
   describe('getUnreadCount$', () => {
     it('emits the initial count and on every change', async () => {
       const service = new EventsService(new LocalStorageNotificationStateStore());

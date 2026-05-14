@@ -23,6 +23,7 @@ const createStartContract = (): jest.Mocked<INotificationEvents> => {
     delete: jest.fn().mockResolvedValue(undefined),
     getUnreadCount$: jest.fn(() => unreadCount$.asObservable()),
     getUnreadCount: jest.fn(() => unreadCount$.getValue()),
+    getPrimaryActionForEvent: jest.fn().mockReturnValue(undefined),
   };
 };
 

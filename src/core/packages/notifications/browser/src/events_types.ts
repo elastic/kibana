@@ -80,6 +80,16 @@ export interface TypedNotificationEvent<T> extends BaseNotificationEvent {
 
 export type NotificationEvent = BaseNotificationEvent & NotificationEventTypeData;
 
+/**
+ * In-memory descriptor returned by {@link INotificationEvents.getPrimaryActionForEvent}.
+ * Never persisted. The notification center renders a primary-action button only
+ * when both `label` and `onClick` are present.
+ */
+export interface PrimaryActionDescriptor {
+  label: string;
+  onClick: () => void;
+}
+
 export interface RegisteredNotificationEventType<T extends Record<string, string>>
   extends NotificationEventTypeData {
   typeId: NotificationTypeId;
@@ -94,12 +104,36 @@ export interface INotificationEvents {
    * Register a notification type so events published with the same `typeId` can
    * share metadata (severity, icon, badge). The returned callback updates an
    * existing event with matching `id`.
+   *
+   * @param actionCallback - Optional side-effect invoked after a typed merge
+   *   (i.e. after the returned update function patches an existing event).
+   *   Not called by `notify()`.
+   * @param resolvePrimaryAction - Optional render-time resolver typed to the
+   *   same `T` as `actionCallback`. The notification center calls this per event
+   *   row via {@link getPrimaryActionForEvent} to decide whether to show a
+   *   primary-action button and what it should do. The resolver receives a
+   *   `TypedNotificationEvent<T>` so callers can access `event.metadata` with
+   *   the correct type — metadata is preserved at runtime by the merge path even
+   *   though the stream's public type (`NotificationEvent`) does not expose it.
+   *   Not called automatically — only invoked by the read-side API.
    */
   registerType: <T>(
     typeId: NotificationTypeId,
     type: NotificationEventTypeData,
-    actionCallback?: (event: TypedNotificationEvent<T>) => void
+    actionCallback?: (event: TypedNotificationEvent<T>) => void,
+    resolvePrimaryAction?: (event: TypedNotificationEvent<T>) => PrimaryActionDescriptor | undefined
   ) => (event: TypedNotificationEvent<T>) => void;
+
+  /**
+   * Resolve a primary action for the given event, using the `resolvePrimaryAction`
+   * function registered with {@link registerType} for that event's `typeId`.
+   * Returns `undefined` when:
+   * - the event has no `typeId`
+   * - the typeId is not registered
+   * - the registration did not supply `resolvePrimaryAction`
+   * - the resolver itself returns `undefined`
+   */
+  getPrimaryActionForEvent: (event: NotificationEvent) => PrimaryActionDescriptor | undefined;
 
   /**
    * Publish (or upsert by id) a notification event. The persisted read/pin

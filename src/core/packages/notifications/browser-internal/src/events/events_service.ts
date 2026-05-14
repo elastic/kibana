@@ -14,17 +14,24 @@ import type {
   NotificationEventTypeData,
   NotificationStateStore,
   NotificationTypeId,
+  PrimaryActionDescriptor,
   TypedNotificationEvent,
 } from '@kbn/core-notifications-browser';
 
 interface RegisteredType extends NotificationEventTypeData {
   typeId: NotificationTypeId;
   callback: (event: TypedNotificationEvent<unknown>) => void;
+  // Stored with T erased to unknown. The cast is safe: metadata is preserved at
+  // runtime by the spread merge in registerType's callback, even though the
+  // stream's TypeScript type (NotificationEvent) does not expose it.
+  resolvePrimaryAction?: (event: TypedNotificationEvent<unknown>) => PrimaryActionDescriptor | undefined;
 }
 
 export class EventsService implements INotificationEvents {
   private readonly events$ = new BehaviorSubject<NotificationEvent[]>([]);
   private readonly types$ = new BehaviorSubject<RegisteredType[]>([]);
+  /** O(1) lookup by typeId — kept in sync with types$ in registerType. */
+  private readonly typeMap = new Map<NotificationTypeId, RegisteredType>();
   /**
    * Reactive unread count maintained alongside `events$`. Subscribers (e.g.
    * the global-header badge) get O(1) re-renders that only fire when the
@@ -164,9 +171,10 @@ export class EventsService implements INotificationEvents {
   public registerType<T>(
     typeId: NotificationTypeId,
     type: NotificationEventTypeData,
-    actionCallback?: (event: TypedNotificationEvent<T>) => void
+    actionCallback?: (event: TypedNotificationEvent<T>) => void,
+    resolvePrimaryAction?: (event: TypedNotificationEvent<T>) => PrimaryActionDescriptor | undefined
   ): (event: TypedNotificationEvent<T>) => void {
-    const existing = this.types$.getValue().find((t) => t.typeId === typeId);
+    const existing = this.typeMap.get(typeId);
     if (existing) {
       return existing.callback as (event: TypedNotificationEvent<T>) => void;
     }
@@ -191,9 +199,23 @@ export class EventsService implements INotificationEvents {
       typeId,
       ...type,
       callback: callback as (event: TypedNotificationEvent<unknown>) => void,
+      resolvePrimaryAction: resolvePrimaryAction as
+        | ((event: TypedNotificationEvent<unknown>) => PrimaryActionDescriptor | undefined)
+        | undefined,
     };
+    this.typeMap.set(typeId, item);
     this.types$.next([...this.types$.getValue(), item]);
 
     return callback;
+  }
+
+  public getPrimaryActionForEvent(event: NotificationEvent): PrimaryActionDescriptor | undefined {
+    if (!event.typeId) return undefined;
+    const registration = this.typeMap.get(event.typeId);
+    if (!registration?.resolvePrimaryAction) return undefined;
+    // Cast is safe: typeId is guaranteed non-null above, and any metadata merged
+    // via the typed update callback is preserved on the runtime object even
+    // though the stream's TypeScript type (NotificationEvent) does not declare it.
+    return registration.resolvePrimaryAction(event as unknown as TypedNotificationEvent<unknown>);
   }
 }
