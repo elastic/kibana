@@ -35,9 +35,19 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'http') {
       return { basePath: { prepend: (p: string) => p } };
     }
-    return {};
+    if (token === 'notifications') {
+      return {};
+    }
+    if (token === 'data' || token === 'dataViews' || token === 'lens') {
+      return {};
+    }
+    throw new Error(`Unexpected token in useService mock: ${String(token)}`);
   },
   CoreStart: (key: string) => key,
+}));
+
+jest.mock('@kbn/core-di', () => ({
+  PluginStart: (key: string) => key,
 }));
 
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
@@ -51,6 +61,16 @@ jest.mock('../../hooks/use_fetch_rules', () => ({
 
 jest.mock('../../hooks/use_fetch_rule_tags', () => ({
   useFetchRuleTags: () => ({ data: ['prod'], isLoading: false, isError: false }),
+}));
+
+const mockCreateRuleMutate = jest.fn();
+jest.mock('../../hooks/use_create_rule', () => ({
+  useCreateRule: () => ({ mutate: mockCreateRuleMutate, isLoading: false }),
+}));
+
+const mockUpdateRuleMutate = jest.fn();
+jest.mock('../../hooks/use_update_rule', () => ({
+  useUpdateRule: () => ({ mutate: mockUpdateRuleMutate, isLoading: false }),
 }));
 
 const mockDeleteMutate = jest.fn();
@@ -241,6 +261,21 @@ describe('RulesListPage', () => {
       screen.getByRole('heading', { level: 2, name: /welcome to the new alerting experience/i })
     ).toBeInTheDocument();
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
+  });
+
+  it('opens the flyout from the empty state ES|QL rule card', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: [], total: 0, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
+
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
   });
 
   it('shows correct "Showing" range when rules exist', () => {

@@ -26,6 +26,7 @@ import {
   useCaseViewNavigation,
   getCasesConfigureCreateTemplatePath,
   getCasesConfigureEditTemplatePath,
+  getCasesConfigureFieldLibraryPath,
 } from '../../common/navigation';
 import { NoPrivilegesPage } from '../no_privileges';
 import * as i18n from './translations';
@@ -34,6 +35,7 @@ import type { CaseViewProps } from '../case_view/types';
 import type { CreateCaseFormProps } from '../create/form';
 import type { CreateTemplatePageProps } from '../templates_v2/pages/create_template/page';
 import type { EditTemplatePageProps } from '../templates_v2/pages/edit_template/page';
+import type { AllFieldDefinitionsPageProps } from '../field_library/pages/all_field_definitions_page';
 import { KibanaServices } from '../../common/lib/kibana/services';
 
 const CaseViewLazy: FC<CaseViewProps> = lazy(() => import('../case_view'));
@@ -44,6 +46,10 @@ const CreateTemplateLazy: FC<CreateTemplatePageProps> = lazy(
 
 const EditTemplateLazy: FC<EditTemplatePageProps> = lazy(
   () => import('../templates_v2/pages/edit_template/page')
+);
+
+const AllFieldDefinitionsLazy: FC<AllFieldDefinitionsPageProps> = lazy(
+  () => import('../field_library/pages/all_field_definitions_page')
 );
 
 const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
@@ -88,6 +94,18 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
             <NoPrivilegesPage pageName={i18n.CREATE_CASE_PAGE_NAME} />
           )}
         </Route>
+
+        {isTemplatesEnabled && (
+          <Route exact path={getCasesConfigureFieldLibraryPath(basePath)}>
+            {permissions.manageTemplates ? (
+              <Suspense fallback={<EuiLoadingSpinner />}>
+                <AllFieldDefinitionsLazy />
+              </Suspense>
+            ) : (
+              <NoPrivilegesPage pageName={i18n.TEMPLATES_PAGE_NAME} />
+            )}
+          </Route>
+        )}
 
         {isTemplatesEnabled && (
           <Route exact path={getCasesConfigureCreateTemplatePath(basePath)}>
