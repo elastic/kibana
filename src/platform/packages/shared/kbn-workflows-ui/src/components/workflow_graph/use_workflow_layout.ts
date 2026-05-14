@@ -13,10 +13,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   applyGraphLayout,
   computeTopologyFingerprint,
+  ExecutionStatus,
   transformWorkflowToGraph,
 } from '@kbn/workflows';
 import type {
-  ExecutionStatus,
   HandleSide,
   LayoutDirection,
   LayoutedNode,
@@ -185,10 +185,22 @@ export function useWorkflowLayout({
   }, [layoutResult.nodes, stepExecutionMap, searchActive, lowerSearch, preview]);
 
   const derivedEdges = useMemo<Edge[]>(() => {
+    // Build a fast id→node map so edge lookups don't scan the full node list.
+    const nodeById = new Map(layoutResult.nodes.map((n) => [n.id, n]));
+    // Mirror the same label-first lookup used for nodes: stepExecutionMap is
+    // keyed by stepId which equals the step label, not the graph node id.
+    const getExec = (nodeId: string): WorkflowStepExecutionDto | undefined => {
+      const nodeData = nodeById.get(nodeId)?.data as Record<string, unknown> | undefined;
+      const label = typeof nodeData?.label === 'string' ? nodeData.label : undefined;
+      return (label ? stepExecutionMap?.[label] : undefined) ?? stepExecutionMap?.[nodeId];
+    };
+
     return layoutResult.edges.map((e) => {
-      const targetExec = stepExecutionMap?.[e.target];
-      const traversed = !!targetExec;
-      const traversedStatus = targetExec?.status as ExecutionStatus | undefined;
+      const sourceExec = getExec(e.source);
+      // An arrow turns green once the source step has completed — that is
+      // exactly when execution has passed through this edge.
+      const traversed = sourceExec?.status === ExecutionStatus.COMPLETED;
+      const traversedStatus = sourceExec?.status as ExecutionStatus | undefined;
       return {
         id: e.id,
         source: e.source,
@@ -202,7 +214,7 @@ export function useWorkflowLayout({
         },
       } as Edge;
     });
-  }, [layoutResult.edges, stepExecutionMap]);
+  }, [layoutResult.edges, layoutResult.nodes, stepExecutionMap]);
 
   const [nodes, setNodes] = useState<Node[]>(derivedNodes);
   const [edges, setEdges] = useState<Edge[]>(derivedEdges);
