@@ -9,6 +9,7 @@
 
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useEffect, useMemo } from 'react';
+import { apm } from '@elastic/apm-rum';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { buildMetricsInfoQuery, hasTransformationalCommand } from '@kbn/esql-utils';
 import { getFieldIconType } from '@kbn/field-utils';
@@ -19,7 +20,6 @@ import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
 import { getEsqlQuery } from '../utils/get_esql_query';
 import { isSuppressedFetchError } from '../utils/is_suppressed_fetch_error';
-import { buildMetricsInfoErrorTelemetry } from '../telemetry/build_metrics_info_error_telemetry';
 
 /**
  * Fetches METRICS_INFO when in Metrics Experience (non-transformational ES|QL, chart visible).
@@ -38,7 +38,7 @@ export function useFetchMetricsData({
   isComponentVisible: boolean;
   selectedDimensionNames?: Dimension[];
 }): MetricsInfo {
-  const { trackMetricsInfo, trackMetricsInfoError } = useTelemetry();
+  const { trackMetricsInfo } = useTelemetry();
   const { trackRequest } = useChartSectionInspector();
   const esql = getEsqlQuery(fetchParams.query);
 
@@ -123,12 +123,13 @@ export function useFetchMetricsData({
           activeDimensions: appliedDimensions ?? [],
         };
       } catch (err) {
-        // Skip telemetry for aborted fetches (normal control flow on re-render /
+        // Skip reporting for aborted fetches (normal control flow on re-render /
         // unmount / dependency change) and for AbortErrors that surface through
-        // the platform's data plugin. Real failures emit the structured event
-        // and re-throw so MetricsInfoError still renders via useAsyncFn's error.
-        if (!signal.aborted && !isSuppressedFetchError(err)) {
-          trackMetricsInfoError(buildMetricsInfoErrorTelemetry(err));
+        // the platform's data plugin. Real failures go to APM via
+        // `apm.captureError` (matching the pattern adopted in #265380), and
+        // we re-throw so MetricsInfoError still renders via useAsyncFn's error.
+        if (!signal.aborted && !isSuppressedFetchError(err) && err instanceof Error) {
+          apm.captureError(err);
         }
         throw err;
       }
@@ -143,7 +144,6 @@ export function useFetchMetricsData({
       services.data.search.search,
       services.uiSettings,
       trackMetricsInfo,
-      trackMetricsInfoError,
       appliedDimensions,
     ]
   );

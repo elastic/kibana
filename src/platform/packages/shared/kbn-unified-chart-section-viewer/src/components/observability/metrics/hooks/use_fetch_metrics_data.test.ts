@@ -16,10 +16,14 @@ const mockTrackRequest = jest.fn(
   }
 );
 const mockTrackMetricsInfo = jest.fn();
-const mockTrackMetricsInfoError = jest.fn();
 
 // Mock ALL external heavy dependencies with factory functions to avoid loading
 // their transitive dependency trees (e.g., @kbn/data-plugin/public).
+jest.mock('@elastic/apm-rum', () => ({
+  apm: {
+    captureError: jest.fn(),
+  },
+}));
 jest.mock('../utils/execute_esql_query', () => ({
   executeEsqlQuery: jest.fn(),
 }));
@@ -41,7 +45,6 @@ jest.mock('@kbn/field-utils', () => ({
 jest.mock('../../../../context/ebt_telemetry_context', () => ({
   useTelemetry: () => ({
     trackMetricsInfo: mockTrackMetricsInfo,
-    trackMetricsInfoError: mockTrackMetricsInfoError,
   }),
 }));
 jest.mock('../../../../context/chart_section_inspector', () => ({
@@ -51,6 +54,7 @@ jest.mock('../../../../context/chart_section_inspector', () => ({
 }));
 
 import { renderHook, waitFor, act } from '@testing-library/react';
+import { apm } from '@elastic/apm-rum';
 import type { Dimension, ParsedMetricsWithTelemetry } from '../../../../types';
 import { useFetchMetricsData } from './use_fetch_metrics_data';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
@@ -62,6 +66,7 @@ const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof exec
 const mockParseMetricsWithTelemetry = parseMetricsWithTelemetry as jest.MockedFunction<
   typeof parseMetricsWithTelemetry
 >;
+const mockApmCaptureError = apm.captureError as jest.MockedFunction<typeof apm.captureError>;
 
 const createDimension = (name: string): Dimension => ({ name });
 
@@ -652,8 +657,9 @@ describe('useFetchMetricsData', () => {
       );
     });
 
-    it('emits trackMetricsInfoError with builder output when fetch rejects with a generic Error', async () => {
-      mockExecuteEsqlQuery.mockRejectedValue(new Error('Network error'));
+    it('reports the error to APM when fetch rejects with a generic Error', async () => {
+      const fetchError = new Error('Network error');
+      mockExecuteEsqlQuery.mockRejectedValue(fetchError);
 
       const params = createDefaultParams();
       const { result } = renderHook(() => useFetchMetricsData(params));
@@ -663,13 +669,13 @@ describe('useFetchMetricsData', () => {
         expect(result.current.error).toBeTruthy();
       });
 
-      expect(mockTrackMetricsInfoError).toHaveBeenCalledTimes(1);
-      expect(mockTrackMetricsInfoError).toHaveBeenCalledWith({ error_name: 'Error' });
+      expect(mockApmCaptureError).toHaveBeenCalledTimes(1);
+      expect(mockApmCaptureError).toHaveBeenCalledWith(fetchError);
       // Success-path emission must NOT fire when the fetch failed.
       expect(mockTrackMetricsInfo).not.toHaveBeenCalled();
     });
 
-    it('emits trackMetricsInfoError with EsqlResponseError fields when the response carries an embedded error', async () => {
+    it('reports an EsqlResponseError to APM when the response carries an embedded error', async () => {
       const responseError = new EsqlResponseError(
         { type: 'verification_exception', reason: 'Unknown column [host.name]' },
         { status: 400 }
@@ -684,15 +690,11 @@ describe('useFetchMetricsData', () => {
         expect(result.current.error).toBeTruthy();
       });
 
-      expect(mockTrackMetricsInfoError).toHaveBeenCalledTimes(1);
-      expect(mockTrackMetricsInfoError).toHaveBeenCalledWith({
-        error_name: 'EsqlResponseError',
-        status: 400,
-        es_error_type: 'verification_exception',
-      });
+      expect(mockApmCaptureError).toHaveBeenCalledTimes(1);
+      expect(mockApmCaptureError).toHaveBeenCalledWith(responseError);
     });
 
-    it('does NOT emit trackMetricsInfoError when the error is an AbortError', async () => {
+    it('does NOT report to APM when the error is an AbortError', async () => {
       const abortError = new Error('aborted');
       abortError.name = 'AbortError';
       mockExecuteEsqlQuery.mockRejectedValue(abortError);
@@ -704,10 +706,10 @@ describe('useFetchMetricsData', () => {
         expect(result.current.loading).toBe(false);
       });
 
-      expect(mockTrackMetricsInfoError).not.toHaveBeenCalled();
+      expect(mockApmCaptureError).not.toHaveBeenCalled();
     });
 
-    it('still surfaces error on the hook return after emitting telemetry', async () => {
+    it('still surfaces error on the hook return after reporting to APM', async () => {
       mockExecuteEsqlQuery.mockRejectedValue(new Error('boom'));
 
       const params = createDefaultParams();
@@ -720,7 +722,7 @@ describe('useFetchMetricsData', () => {
       // Re-throw preserves useAsyncFn's error surface so MetricsInfoError can still render.
       expect(result.current.error).toBeTruthy();
       expect(result.current.error?.message).toBe('boom');
-      expect(mockTrackMetricsInfoError).toHaveBeenCalled();
+      expect(mockApmCaptureError).toHaveBeenCalled();
     });
   });
 });
