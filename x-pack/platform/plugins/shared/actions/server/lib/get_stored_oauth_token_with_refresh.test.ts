@@ -87,6 +87,20 @@ describe('getStoredTokenWithRefresh', () => {
   afterAll(() => clock.restore());
 
   describe('stored token retrieval', () => {
+    it('returns null and warns when isPerUser is true but profileUid is missing', async () => {
+      const result = await getStoredTokenWithRefresh({
+        ...baseOpts,
+        isPerUser: true,
+        userIdentifiers: { userCloudId: 'cloud-1' },
+      });
+
+      expect(result).toBeNull();
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Per-user token retrieval requires profileUid for connectorId: connector-1. Cannot retrieve token.'
+      );
+      expect(connectorTokenClient.get).not.toHaveBeenCalled();
+    });
+
     it('returns null and warns when the token fetch reports errors', async () => {
       connectorTokenClient.get.mockResolvedValueOnce({ hasErrors: true, connectorToken: null });
 
@@ -331,7 +345,7 @@ describe('getStoredTokenWithRefresh', () => {
 
     it('queues concurrent per-user calls for the same connector+user so only one refresh runs', async () => {
       const lockedConnectorId = 'connector-lock-per-user-same';
-      // Same profileUid => same lock key => serialized.
+      // Same userIdentifiers => same lock key => serialized.
       // First call refreshes, second call re-fetches and sees the valid token.
       connectorTokenClient.get
         .mockResolvedValueOnce({
@@ -348,7 +362,7 @@ describe('getStoredTokenWithRefresh', () => {
         ...baseOpts,
         connectorId: lockedConnectorId,
         isPerUser: true as const,
-        profileUid: 'profile-1',
+        userIdentifiers: { profileUid: 'profile-1' },
       };
       const [result1, result2] = await Promise.all([
         getStoredTokenWithRefresh(opts),
@@ -369,7 +383,10 @@ describe('getStoredTokenWithRefresh', () => {
       },
       {
         label: 'per-user mode (composite lock key)',
-        extraOpts: { isPerUser: true as const, profileUid: 'profile-cleanup-test' },
+        extraOpts: {
+          isPerUser: true as const,
+          userIdentifiers: { profileUid: 'profile-cleanup-test' },
+        },
         connectorToken: validPerUserToken,
         expectedLockKey: (connectorId: string) => `${connectorId}:profile-cleanup-test`,
       },
@@ -408,7 +425,7 @@ describe('getStoredTokenWithRefresh', () => {
 
     it('allows concurrent per-user calls for different users on the same connector to refresh independently', async () => {
       const lockedConnectorId = 'connector-lock-per-user-diff';
-      // Different profileUids => different lock keys => independent execution.
+      // Different users => different lock keys => independent execution.
       // Both users see an expired token and each triggers its own refresh.
       const expiredUser1Token = { ...expiredPerUserToken, connectorId: lockedConnectorId };
       const expiredUser2Token = {
@@ -429,13 +446,13 @@ describe('getStoredTokenWithRefresh', () => {
           ...baseOpts,
           connectorId: lockedConnectorId,
           isPerUser: true,
-          profileUid: 'profile-1',
+          userIdentifiers: { profileUid: 'profile-1' },
         }),
         getStoredTokenWithRefresh({
           ...baseOpts,
           connectorId: lockedConnectorId,
           isPerUser: true,
-          profileUid: 'profile-2',
+          userIdentifiers: { profileUid: 'profile-2' },
         }),
       ]);
 
