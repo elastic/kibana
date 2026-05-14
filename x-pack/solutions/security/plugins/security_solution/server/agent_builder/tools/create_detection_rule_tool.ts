@@ -107,6 +107,20 @@ The tool stores the result as an attachment (creating new or updating existing).
         });
         const result = await iterativeAgent.invoke({ userQuery });
 
+        if (result.rejectionReason) {
+          return {
+            results: [{
+              type: ToolResultType.other,
+              data: {
+                success: false,
+                rejected: true,
+                rejectionCode: result.rejectionReason.code,
+                message: result.rejectionMessage,
+              },
+            }],
+          };
+        }
+
         if (result.errors.length) {
           logger.error(`Rule creation failed with errors: ${result.errors.join('; ')}`);
           return {
