@@ -6,44 +6,39 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { ElasticsearchClient } from '@kbn/core/server';
 import moment from 'moment';
 import { unflattenObject } from '@kbn/object-utils';
 import { get } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { entityStoreMetrics } from '../../monitor/metrics';
-import type { Entity } from '../../../common/domain/definitions/entity.gen';
+import type { Entity } from '../../../../common/domain/definitions/entity.gen';
 import {
   EntityType,
   type ManagedEntityDefinition,
-} from '../../../common/domain/definitions/entity_schema';
+} from '../../../../common/domain/definitions/entity_schema';
 import {
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
   type LogSlicePaginationParams,
   type PaginationParams,
-} from './query_builder_commons';
+} from '../query_builder_commons';
 import {
-  buildCcsLogsExtractionEsqlQuery,
-  extractCcsPaginationParams,
-} from './ccs_logs_extraction_query_builder';
+  buildRemoteLogsExtractionEsqlQuery,
+  extractRemotePaginationParams,
+} from './remote_logs_extraction_query_builder';
 import {
   buildLogPaginationCursorProbeEsql,
   interpretLogPaginationCursorRows,
   parseLogPaginationCursorRow,
   type LogPaginationCursor,
-} from './log_pagination_probe_query_builder';
-import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
-import { ingestEntities } from '../../infra/elasticsearch/ingest';
-import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';
-import type { CcsLogExtractionStateClient } from '../saved_objects/ccs_log_extraction_state';
-import {
-  applyMaxLagCutoff,
-  capExtractionWindowEnd,
-  resolveCcsExtractionWindow,
-} from './extraction_window';
-import { capAtMaxLogsPerWindow } from './effective_page_limits';
+} from '../log_pagination_probe_query_builder';
+import { executeEsqlQuery } from '../../../infra/elasticsearch/esql';
+import { ingestEntities } from '../../../infra/elasticsearch/ingest';
+import { getUpdatesEntitiesDataStreamName } from '../../asset_manager/updates_data_stream';
+import { capExtractionWindowEnd, resolveRemoteExtractionWindow } from '../extraction_window';
+import { capAtMaxLogsPerWindow } from '../effective_page_limits';
+import type { RemoteExtractionStrategy } from './strategies';
 
-interface CcsExtractToUpdatesParams {
+interface RemoteExtractToUpdatesParams {
   type: EntityType;
   remoteIndexPatterns: string[];
   docsLimit: number;
@@ -53,9 +48,7 @@ interface CcsExtractToUpdatesParams {
   frequency: string;
   entityDefinition: ManagedEntityDefinition;
   abortController?: AbortController;
-  /** Explicit time window override (API calls). When set, the internal checkpoint is not updated. */
   windowOverride?: { fromDateISO: string; toDateISO: string };
-  /** Cap each scheduled sub-window to this duration to bound probe cost in lagging environments. */
   maxTimeWindowSize: string;
   /** Total raw log documents allowed per run. 0 = disabled. */
   maxLogsPerWindow: number;
@@ -63,7 +56,7 @@ interface CcsExtractToUpdatesParams {
   maxLogsPerWindowCapBehavior: 'defer' | 'drop';
 }
 
-export interface CcsExtractToUpdatesResult {
+interface RemoteExtractToUpdatesResult {
   count: number;
   pages: number;
   logsProcessed?: number;
@@ -71,22 +64,25 @@ export interface CcsExtractToUpdatesResult {
   logsCapApplied?: boolean;
 }
 
-export class CcsLogsExtractionClient {
+export class RemoteLogsExtractionClient {
+  private readonly logger: Logger;
+
   constructor(
-    private readonly logger: Logger,
-    private readonly esClient: ElasticsearchClient,
+    logger: Logger,
     private readonly namespace: string,
-    private readonly ccsStateClient: CcsLogExtractionStateClient
-  ) {}
+    public readonly strategy: RemoteExtractionStrategy
+  ) {
+    this.logger = logger.get(`remote.${strategy.id}`);
+  }
 
   public async extractToUpdates(
-    params: CcsExtractToUpdatesParams
-  ): Promise<CcsExtractToUpdatesResult> {
+    params: RemoteExtractToUpdatesParams
+  ): Promise<RemoteExtractToUpdatesResult> {
     try {
       return await this.doExtractToUpdates(params);
     } catch (error) {
       const wrappedError = new Error(
-        `Failed to extract to updates from CCS indices: ${error.message}`
+        `Failed to extract to updates from remote indices: ${error.message}`
       );
       this.logger.error(wrappedError);
       return { count: 0, pages: 0, error: wrappedError };
@@ -107,37 +103,27 @@ export class CcsLogsExtractionClient {
     maxTimeWindowSize,
     maxLogsPerWindow,
     maxLogsPerWindowCapBehavior,
-  }: CcsExtractToUpdatesParams): Promise<CcsExtractToUpdatesResult> {
-    const ccsState =
+  }: RemoteExtractToUpdatesParams): Promise<RemoteExtractToUpdatesResult> {
+    if (remoteIndexPatterns.length === 0) {
+      return { count: 0, pages: 0 };
+    }
+
+    const state =
       windowOverride != null
         ? { checkpointTimestamp: null, paginationRecoveryId: null }
-        : await this.ccsStateClient.findOrInit(type);
+        : await this.strategy.stateClient.findOrInit(type);
 
-    const {
-      effectiveFromDateISO: resolvedFromDateISO,
-      effectiveWindowEnd,
-      recoveryId,
-      isWindowOverride,
-    } = resolveCcsExtractionWindow({
-      config: { lookbackPeriod, delay },
-      ccsState,
-      windowOverride,
-      logger: this.logger,
-    });
-
-    const effectiveFromDateISO = isWindowOverride
-      ? resolvedFromDateISO
-      : applyMaxLagCutoff({
-          fromDateISO: resolvedFromDateISO,
-          effectiveWindowEnd,
-          lookbackPeriod,
-          frequency,
-          logger: this.logger,
-        });
+    const { effectiveFromDateISO, effectiveWindowEnd, recoveryId, isWindowOverride } =
+      resolveRemoteExtractionWindow({
+        config: { lookbackPeriod, delay },
+        state,
+        windowOverride,
+        logger: this.logger,
+      });
 
     if (effectiveFromDateISO >= effectiveWindowEnd) {
       this.logger.error(
-        `CCS extraction window is empty (from=${effectiveFromDateISO} >= to=${effectiveWindowEnd}), skipping`
+        `extraction window is empty (from=${effectiveFromDateISO} >= to=${effectiveWindowEnd}), skipping`
       );
       return { count: 0, pages: 0 };
     }
@@ -165,7 +151,7 @@ export class CcsLogsExtractionClient {
           remote: true,
         });
         this.logger.warn(
-          `CCS extraction volume cap reached for entity type "${type}" (manual run): processed ${result.logsProcessed} logs (limit: ${maxLogsPerWindow}). Cap behavior: "${maxLogsPerWindowCapBehavior}". Cursor is not persisted.`
+          `${this.strategy.id.toUpperCase()} extraction volume cap reached for entity type "${type}" (manual run): processed ${result.logsProcessed} logs (limit: ${maxLogsPerWindow}). Cap behavior: "${maxLogsPerWindowCapBehavior}". Cursor is not persisted.`
         );
       }
       entityStoreMetrics.extractionLogsProcessed.record(result.logsProcessed ?? 0, {
@@ -235,13 +221,13 @@ export class CcsLogsExtractionClient {
           remote: true,
         });
         this.logger.warn(
-          `CCS extraction volume cap reached for entity type "${type}": processed ${totalLogs} logs (limit: ${maxLogsPerWindow}). Cap behavior: "${maxLogsPerWindowCapBehavior}".`
+          `${this.strategy.id.toUpperCase()} extraction volume cap reached for entity type "${type}": processed ${totalLogs} logs (limit: ${maxLogsPerWindow}). Cap behavior: "${maxLogsPerWindowCapBehavior}".`
         );
         if (maxLogsPerWindowCapBehavior === 'drop') {
           this.logger.warn(
-            `Dropping remaining CCS logs. Advancing checkpoint to end of window: ${effectiveWindowEnd}.`
+            `Dropping remaining ${this.strategy.id} logs. Advancing checkpoint to end of window: ${effectiveWindowEnd}.`
           );
-          await this.ccsStateClient.update(type, {
+          await this.strategy.stateClient.update(type, {
             checkpointTimestamp: effectiveWindowEnd,
             paginationRecoveryId: null,
           });
@@ -260,7 +246,7 @@ export class CcsLogsExtractionClient {
     }
 
     if (totalCount === 0) {
-      await this.ccsStateClient.clearRecoveryId(type);
+      await this.strategy.stateClient.clearRecoveryId(type);
     }
 
     entityStoreMetrics.extractionLogsProcessed.record(totalLogs, {
@@ -302,7 +288,7 @@ export class CcsLogsExtractionClient {
     effectiveFromDateISO: string;
     recoveryId: string | undefined;
     skipStateUpdates: boolean;
-  }): Promise<CcsExtractToUpdatesResult> {
+  }): Promise<RemoteExtractToUpdatesResult> {
     const effectiveMaxLogsPerPage = capAtMaxLogsPerWindow(maxLogsPerPage, maxLogsPerWindow);
     const effectiveDocsLimit = capAtMaxLogsPerWindow(docsLimit, maxLogsPerWindow);
     let totalCount = 0;
@@ -311,7 +297,7 @@ export class CcsLogsExtractionClient {
 
     const onAbort = () => {
       this.logger.info(
-        `Aborting CCS logs extraction, CCS entities extracted until abort: ${totalCount}, in ${totalPages} pages`
+        `Aborting logs extraction, entities extracted until abort: ${totalCount}, in ${totalPages} pages`
       );
       entityStoreMetrics.extractionTaskAborted.add(1, {
         entity_type: type,
@@ -387,7 +373,7 @@ export class CcsLogsExtractionClient {
       sliceStart = sliceEnd;
       effectiveFromDateISO = sliceEnd.timestampCursor;
       if (!skipStateUpdates) {
-        await this.ccsStateClient.update(type, {
+        await this.strategy.stateClient.update(type, {
           checkpointTimestamp: sliceEnd.timestampCursor,
           paginationRecoveryId: null,
         });
@@ -395,7 +381,7 @@ export class CcsLogsExtractionClient {
 
       if (!bumpedSliceEnd && maxLogsPerWindow > 0 && totalLogs >= maxLogsPerWindow) {
         this.logger.info(
-          `CCS entities extracted: ${totalCount}, logs processed: ${totalLogs}, in ${totalPages} pages`
+          `${this.strategy.id.toUpperCase()} entities extracted: ${totalCount}, logs processed: ${totalLogs}, in ${totalPages} pages`
         );
         return {
           count: totalCount,
@@ -407,7 +393,7 @@ export class CcsLogsExtractionClient {
     } while (!isLastLogsPage);
 
     this.logger.info(
-      `CCS entities extracted: ${totalCount}, logs processed: ${totalLogs}, in ${totalPages} pages`
+      `${this.strategy.id.toUpperCase()} entities extracted: ${totalCount}, logs processed: ${totalLogs}, in ${totalPages} pages`
     );
 
     return {
@@ -450,14 +436,14 @@ export class CcsLogsExtractionClient {
     });
 
     this.logger.info(
-      `CCS probe: from=${fromDateISO} to=${toDateISO}${
+      `${this.strategy.id} probe: from=${fromDateISO} to=${toDateISO}${
         sliceStart ? ` sliceStart=${sliceStart.timestampCursor}` : ''
       }`
     );
 
     const probeStart = Date.now();
     const probeResponse = await executeEsqlQuery({
-      esClient: this.esClient,
+      esClient: this.strategy.client,
       query: probeQuery,
       abortController,
     });
@@ -521,7 +507,7 @@ export class CcsLogsExtractionClient {
     let recoveryId = initialRecoveryId;
 
     do {
-      const query = buildCcsLogsExtractionEsqlQuery({
+      const query = buildRemoteLogsExtractionEsqlQuery({
         indexPatterns: remoteIndexPatterns,
         entityDefinition,
         fromDateISO,
@@ -535,7 +521,7 @@ export class CcsLogsExtractionClient {
       recoveryId = undefined; // one-shot: used only on the first page of a recovered slice
 
       this.logger.info(
-        `CCS extraction from=${fromDateISO} to=${toDateISO} sliceEnd=${sliceEnd.timestampCursor}${
+        `extraction from=${fromDateISO} to=${toDateISO} sliceEnd=${sliceEnd.timestampCursor}${
           entityPagination
             ? ` entityPagination=${entityPagination.timestampCursor}|${entityPagination.idCursor}`
             : ''
@@ -544,7 +530,7 @@ export class CcsLogsExtractionClient {
 
       const queryStart = Date.now();
       const esqlResponse = await executeEsqlQuery({
-        esClient: this.esClient,
+        esClient: this.strategy.client,
         query,
         abortController,
       });
@@ -555,7 +541,7 @@ export class CcsLogsExtractionClient {
       });
 
       count += esqlResponse.values.length;
-      entityPagination = extractCcsPaginationParams(esqlResponse, docsLimit);
+      entityPagination = extractRemotePaginationParams(esqlResponse, docsLimit);
 
       if (esqlResponse.values.length > 0) {
         pages++;
@@ -566,7 +552,7 @@ export class CcsLogsExtractionClient {
         });
         const ingestStart = Date.now();
         await ingestEntities({
-          esClient: this.esClient,
+          esClient: this.strategy.client,
           esqlResponse,
           targetIndex: getUpdatesEntitiesDataStreamName(this.namespace),
           logger: this.logger,
@@ -589,7 +575,7 @@ export class CcsLogsExtractionClient {
       }
 
       if (entityPagination && !skipStateUpdates) {
-        await this.ccsStateClient.update(type, {
+        await this.strategy.stateClient.update(type, {
           checkpointTimestamp: entityPagination.timestampCursor,
           paginationRecoveryId: entityPagination.idCursor,
         });
@@ -613,7 +599,7 @@ export class CcsLogsExtractionClient {
     ) {
       const bumpedTs = moment(sliceEnd.timestampCursor).add(1, 'ms').toISOString();
       this.logger.warn(
-        `CCS log-slice probe stalled at ${sliceEnd.timestampCursor} with a full page (${sliceLogCount} docs); advancing cursor by 1ms. Docs sharing this timestamp beyond maxLogsPerPage will be dropped.`
+        `${this.strategy.id.toUpperCase()} log-slice probe stalled at ${sliceEnd.timestampCursor} with a full page (${sliceLogCount} docs); advancing cursor by 1ms. Docs sharing this timestamp beyond maxLogsPerPage will be dropped.`
       );
       return { timestampCursor: bumpedTs };
     }
@@ -622,20 +608,20 @@ export class CcsLogsExtractionClient {
 
   /**
    * Returns a document transformer that rewrites `@timestamp` to a synthetic value
-   * just of now, incrementing by 1ms per doc, so the next local extraction
-   * run picks up CCS-written updates in the correct order.
-   * This should be picked up in time because of the delay implemented in the main extraction
+   * just past now, incrementing by 1ms per doc, so the next local extraction run
+   * picks up these updates in the correct order. This is bounded by the `delay`
+   * configured on the main extraction.
    */
   private buildTransformDocument(type: EntityType) {
     let timestampIncrement = 1;
     return (doc: Record<string, unknown>) => {
       timestampIncrement++;
       const timestamp = moment().utc().add(timestampIncrement, 'ms').toISOString();
-      return this.transformDocForCcsUpsert(type, doc, timestamp);
+      return this.transformDocForUpsert(type, doc, timestamp);
     };
   }
 
-  private transformDocForCcsUpsert(
+  private transformDocForUpsert(
     type: EntityType,
     data: Partial<Entity>,
     timestamp: string

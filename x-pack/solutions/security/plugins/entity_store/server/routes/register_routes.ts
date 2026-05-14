@@ -17,7 +17,7 @@ import {
   registerGetMaintainers,
   registerInitMaintainers,
   registerRunMaintainer,
-  registerForceCcsExtractToUpdates,
+  registerForceRemoteExtractToUpdates,
   registerForceHistorySnapshot,
   registerCRUDCreate,
   registerCRUDUpdate,
@@ -30,15 +30,15 @@ import {
   registerUpdate,
   registerCheckPrivileges,
 } from './apis';
-import type { EntityStorePluginRouter } from '../types';
+import type { EntityStoreCoreSetup, EntityStorePluginRouter } from '../types';
 
-export function registerRoutes(router: EntityStorePluginRouter) {
+export function registerRoutes(router: EntityStorePluginRouter, coreSetup: EntityStoreCoreSetup) {
   registerInstall(router);
   registerStop(router);
   registerStatus(router);
   registerUninstall(router);
   registerForceLogExtraction(router);
-  registerForceCcsExtractToUpdates(router);
+  registerForceRemoteExtractToUpdates(router);
   registerForceHistorySnapshot(router);
   registerCheckPrivileges(router);
   registerCRUDCreate(router);

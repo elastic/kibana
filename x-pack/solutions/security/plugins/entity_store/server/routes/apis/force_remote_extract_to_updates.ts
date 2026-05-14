@@ -42,10 +42,10 @@ const bodySchema = z.object({
     .default(LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT),
 });
 
-export function registerForceCcsExtractToUpdates(router: EntityStorePluginRouter) {
+export function registerForceRemoteExtractToUpdates(router: EntityStorePluginRouter) {
   router.versioned
     .post({
-      path: ENTITY_STORE_ROUTES.internal.FORCE_CCS_EXTRACT_TO_UPDATES,
+      path: ENTITY_STORE_ROUTES.internal.FORCE_REMOTE_EXTRACT_TO_UPDATES,
       access: 'internal',
       summary: 'Force cross-cluster search extraction',
       description:
@@ -67,7 +67,7 @@ export function registerForceCcsExtractToUpdates(router: EntityStorePluginRouter
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger: baseLogger, ccsLogsExtractionClient, namespace } = entityStoreCtx;
+        const { logger: baseLogger, remoteLogsExtractionClient, namespace } = entityStoreCtx;
         const { entityType } = req.params;
         const {
           indexPatterns,
@@ -79,7 +79,7 @@ export function registerForceCcsExtractToUpdates(router: EntityStorePluginRouter
           maxLogsPerWindowCapBehavior,
         } = req.body;
 
-        const logger = baseLogger.get('forceCcsExtractToUpdates').get(entityType);
+        const logger = baseLogger.get('forceRemoteExtractToUpdates').get(entityType);
         logger.debug(
           `Force CCS extract to updates API called for entity type: ${entityType}, index patterns: ${indexPatterns.join(
             ', '
@@ -87,7 +87,7 @@ export function registerForceCcsExtractToUpdates(router: EntityStorePluginRouter
         );
 
         const entityDefinition = getEntityDefinition(entityType, namespace);
-        const result = await ccsLogsExtractionClient.extractToUpdates({
+        const result = await remoteLogsExtractionClient.extractToUpdates({
           type: entityType,
           remoteIndexPatterns: indexPatterns,
           docsLimit: docsLimit ?? DEFAULT_DOCS_LIMIT,

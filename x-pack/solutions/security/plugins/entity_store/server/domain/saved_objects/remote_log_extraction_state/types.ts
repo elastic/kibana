@@ -10,6 +10,11 @@ import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 
 export const CcsLogExtractionStateTypeName = 'entity-store-ccs-state';
+export const CpsLogExtractionStateTypeName = 'entity-store-cps-state';
+
+export type RemoteLogExtractionStateTypeName =
+  | typeof CcsLogExtractionStateTypeName
+  | typeof CpsLogExtractionStateTypeName;
 
 const stateSchemaV1 = schema.object({
   checkpointTimestamp: schema.nullable(schema.string()),
@@ -24,12 +29,21 @@ const version1: SavedObjectsFullModelVersion = {
   },
 };
 
-export const CcsLogExtractionStateType: SavedObjectsType = {
-  name: CcsLogExtractionStateTypeName,
+const baseType: Omit<SavedObjectsType, 'name'> = {
   hidden: false,
   namespaceType: 'multiple-isolated',
   // Fields are not queried, only read — no mappings needed
   mappings: { dynamic: false, properties: {} },
   modelVersions: { 1: version1 },
   hiddenFromHttpApis: true,
+};
+
+export const CcsLogExtractionStateType: SavedObjectsType = {
+  ...baseType,
+  name: CcsLogExtractionStateTypeName,
+};
+
+export const CpsLogExtractionStateType: SavedObjectsType = {
+  ...baseType,
+  name: CpsLogExtractionStateTypeName,
 };
