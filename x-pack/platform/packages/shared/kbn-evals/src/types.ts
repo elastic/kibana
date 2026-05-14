@@ -223,6 +223,10 @@ export interface EvaluationReport {
   runId: string;
 }
 
+export interface WorkerRunIdRef {
+  current: string | undefined;
+}
+
 export interface EvaluationSpecificWorkerFixtures {
   inferenceClient: BoundInferenceClient;
   evaluationsKbnClient: ScoutWorkerFixtures['kbnClient'];
@@ -237,6 +241,7 @@ export interface EvaluationSpecificWorkerFixtures {
   executorClient: EvalsExecutorClient;
   evaluators: DefaultEvaluators;
   fetch: HttpHandler;
+  workerRunId: WorkerRunIdRef;
   connector: AvailableConnectorWithId;
   evaluationConnector: AvailableConnectorWithId;
   repetitions: number;
