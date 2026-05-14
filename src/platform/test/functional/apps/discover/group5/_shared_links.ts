@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
 
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await share.clickShareTopNavButton();
 
       return async () => {

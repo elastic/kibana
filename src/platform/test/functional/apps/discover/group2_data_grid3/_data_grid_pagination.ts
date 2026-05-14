@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     beforeEach(async function () {
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await discover.waitUntilSearchingHasFinished();
     });
 
@@ -110,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       // first render is based on settings value
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await discover.waitUntilSearchingHasFinished();
       expect((await dataGrid.getDocTableRows()).length).to.be(6);
       await dataGrid.checkCurrentRowsPerPageToBe(6);
@@ -160,7 +160,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'discover:sampleRowsPerPage': rowsPerPage,
       });
 
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await discover.waitUntilSearchingHasFinished();
 
       // expect pagination to be present for data view mode

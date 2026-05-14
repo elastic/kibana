@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     beforeEach(async function () {
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await discover.waitUntilSearchingHasFinished();
       await dataViews.createFromSearchBar({ name: INDEX_NAME, adHoc: true, hasTimeField: false });
       await discover.waitUntilSearchingHasFinished();

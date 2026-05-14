@@ -41,7 +41,13 @@ export class DiscoverPageObject extends FtrService {
 
   public readonly APP_ID = 'discover';
 
-  public async navigateToApp() {
+  public async navigateToApp(discoverMode?: 'classic' | 'esql') {
+    if (discoverMode) {
+      // To set a local storage item, the browser must be in a valid URL, so if it isn't it first navigates there
+      const isInDiscoverApp = (await this.browser.getCurrentUrl()).includes(this.APP_ID);
+      if (!isInDiscoverApp) await this.common.navigateToApp(this.APP_ID);
+      await this.setQueryMode(discoverMode);
+    }
     await this.common.navigateToApp(this.APP_ID);
   }
 
@@ -1287,7 +1293,7 @@ export class DiscoverPageObject extends FtrService {
     return this.browser.getLocalStorageItem(DISCOVER_QUERY_MODE_KEY);
   }
 
-  public setQueryMode(mode: string) {
+  public setQueryMode(mode: 'classic' | 'esql') {
     return this.browser.setLocalStorageItem(DISCOVER_QUERY_MODE_KEY, JSON.stringify(mode));
   }
 

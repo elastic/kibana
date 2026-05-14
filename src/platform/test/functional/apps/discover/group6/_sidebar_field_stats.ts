@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('data view fields', function () {
       before(async () => {
         await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.waitUntilSearchingHasFinished();
 
         await discover.addRuntimeField('_is_large', 'emit(doc["bytes"].value > 1024)', 'boolean');
@@ -149,7 +149,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('ES|QL columns', function () {
       beforeEach(async () => {
         await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.waitUntilSearchingHasFinished();
 
         await discover.selectTextBaseLang();

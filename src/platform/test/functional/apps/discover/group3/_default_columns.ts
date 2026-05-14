@@ -70,7 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     beforeEach(async function () {
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await discover.waitUntilSearchingHasFinished();
     });
 
@@ -139,7 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.update({
         'discover:modifyColumnsOnSwitch': false,
       });
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await discover.waitUntilSearchingHasFinished();
 
       expect(await dataGrid.getHeaderFields()).to.eql([

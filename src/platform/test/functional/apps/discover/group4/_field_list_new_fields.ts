@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
 
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await timePicker.setCommonlyUsedTime('This_week');
     });
 

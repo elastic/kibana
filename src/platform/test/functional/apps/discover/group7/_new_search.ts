@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await timePicker.setDefaultAbsoluteRange();
     });
 

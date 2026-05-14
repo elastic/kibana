@@ -220,7 +220,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await discover.hasUnsavedChangesIndicator()).to.be(false);
 
         await kibanaServer.uiSettings.update({ defaultColumns: ['agent'] });
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.waitUntilTabIsLoaded();
 
         await discover.loadSavedSearch(SEARCH_NAME);

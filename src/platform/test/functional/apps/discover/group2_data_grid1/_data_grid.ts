@@ -13,8 +13,8 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover data grid tests', function describeDiscoverDataGrid() {
     const esArchiver = getService('esArchiver');
-    const { common, timePicker, unifiedFieldList } = getPageObjects([
-      'common',
+    const { discover, timePicker, unifiedFieldList } = getPageObjects([
+      'discover',
       'timePicker',
       'unifiedFieldList',
     ]);
@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await timePicker.setDefaultAbsoluteRange();
     });
 

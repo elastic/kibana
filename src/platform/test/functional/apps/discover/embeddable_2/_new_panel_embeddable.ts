@@ -138,7 +138,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Save Discover Table Button', () => {
       it('can save to a new Dashboard from Discover', async () => {
-        await discover.navigateToApp();
+        await discover.navigateToApp('classic');
         await discover.clickNewSearchButton();
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();

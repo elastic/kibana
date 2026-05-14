@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'timepicker:timeDefaults': `{ "from": "${fromTime}", "to": "${toTime}"}`,
       });
 
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await discover.selectIndexPattern('test-index-unmapped-fields');
     });
 

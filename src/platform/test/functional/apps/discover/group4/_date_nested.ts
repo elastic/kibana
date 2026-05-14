@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/kbn_archiver/date_nested.json'
       );
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nested']);
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
     });
 
     after(async function unloadMakelogs() {

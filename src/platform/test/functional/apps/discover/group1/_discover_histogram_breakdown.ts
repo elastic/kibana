@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await header.waitUntilLoadingHasFinished();
       await timePicker.setDefaultAbsoluteRange();
       await discover.waitUntilSearchingHasFinished();

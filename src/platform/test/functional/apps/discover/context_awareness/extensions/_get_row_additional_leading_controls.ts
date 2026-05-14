@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('data view mode', () => {
       it('should render logs controls for logs data source', async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await unifiedTabs.closeTabPreviewWithEsc();
         await dataViews.switchTo('my-example-logs');
         await discover.waitUntilSearchingHasFinished();
@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should not render logs controls for non-logs data source', async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await unifiedTabs.closeTabPreviewWithEsc();
         await dataViews.switchTo('my-example-metrics');
         await discover.waitUntilSearchingHasFinished();

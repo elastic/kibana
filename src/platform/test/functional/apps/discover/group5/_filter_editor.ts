@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace(defaultSettings);
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       log.debug('discover filter editor');
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
     });
 
     describe('filter editor', function () {
@@ -118,7 +118,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await indexPatterns.create({ title: indexTitle }, { override: true });
 
-          await common.navigateToApp('discover');
+          await discover.navigateToApp('classic');
           await discover.selectIndexPattern(indexTitle);
         });
 

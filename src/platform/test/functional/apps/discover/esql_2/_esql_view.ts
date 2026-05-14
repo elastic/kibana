@@ -79,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await kibanaServer.uiSettings.replace(defaultSettings);
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await discover.waitUntilTabIsLoaded();
     });
 
@@ -90,7 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('ES|QL in Discover', () => {
       beforeEach(async () => {
         await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.waitUntilTabIsLoaded();
       });
 
@@ -319,7 +319,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('switch modal', () => {
       beforeEach(async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.waitUntilTabIsLoaded();
         await timePicker.setDefaultAbsoluteRange();
         await discover.waitUntilTabIsLoaded();
@@ -394,7 +394,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('inspector', () => {
       beforeEach(async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.waitUntilTabIsLoaded();
         await timePicker.setDefaultAbsoluteRange();
         await discover.waitUntilTabIsLoaded();
@@ -459,7 +459,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('query history', () => {
       beforeEach(async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.waitUntilTabIsLoaded();
         await timePicker.setDefaultAbsoluteRange();
         await discover.waitUntilTabIsLoaded();
@@ -527,7 +527,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('sorting', () => {
       beforeEach(async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.waitUntilTabIsLoaded();
         await timePicker.setDefaultAbsoluteRange();
         await discover.waitUntilTabIsLoaded();
@@ -783,7 +783,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('filtering by clicking on the table in Discover', () => {
       beforeEach(async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.waitUntilTabIsLoaded();
         await timePicker.setDefaultAbsoluteRange();
         await discover.waitUntilTabIsLoaded();
@@ -928,7 +928,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('filtering by clicking on the table in Dashboards', () => {
       beforeEach(async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.waitUntilTabIsLoaded();
         await timePicker.setDefaultAbsoluteRange();
         await discover.waitUntilTabIsLoaded();
@@ -983,7 +983,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('histogram breakdown', () => {
       before(async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.waitUntilTabIsLoaded();
         await timePicker.setDefaultAbsoluteRange();
         await discover.waitUntilTabIsLoaded();

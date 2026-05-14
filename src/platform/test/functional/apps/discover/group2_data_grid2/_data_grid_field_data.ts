@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
     });
     describe('field data', function () {
       it('search php should show the correct hit count', async function () {

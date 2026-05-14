@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await settings.addFieldFilter('relatedContent*');
 
       log.debug('discover');
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await timePicker.setDefaultAbsoluteRange();
       await discover.waitUntilSearchingHasFinished();
 

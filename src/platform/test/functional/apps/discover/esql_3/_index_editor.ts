@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
 
       // Set ESQL mode
       await discover.waitUntilSearchingHasFinished();
@@ -269,7 +269,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ],
       });
 
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await discover.waitUntilSearchingHasFinished();
       await discover.selectTextBaseLang();
       await discover.waitUntilSearchingHasFinished();

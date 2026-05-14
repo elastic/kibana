@@ -24,7 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('when there is no default query mode set', () => {
       it('should open Discover in ESQL mode', async () => {
         // Validate that no default query mode is set
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         const queryMode = await discover.getQueryMode();
         expect(queryMode).to.be(null);
 
@@ -36,7 +36,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('when the user clicks ES|QL mode', () => {
       it('should set the default mode to ES|QL', async () => {
         // Go to discover and select ES|QL mode
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await unifiedSearch.switchToDataViewMode();
         await discover.selectTextBaseLang();
         const queryMode = await discover.getQueryMode();
@@ -51,7 +51,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('when the user clicks classic', () => {
       it('should set the default mode to classic', async () => {
         // Go to discover and select classic mode
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await unifiedSearch.switchToDataViewMode();
         const queryMode = await discover.getQueryMode();
         expect(queryMode).to.contain('classic');

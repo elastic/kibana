@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('data view mode', () => {
       before(async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await timePicker.setDefaultAbsoluteRange();
         await discover.waitUntilSearchingHasFinished();
         if (await discover.isChartVisible()) {
@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('ES|QL mode', () => {
       before(async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await timePicker.setDefaultAbsoluteRange();
         await discover.selectTextBaseLang();
         await monacoEditor.setCodeEditorValue('from logstash-* | sort @timestamp desc | limit 10');

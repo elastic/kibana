@@ -191,7 +191,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('when saving a Discover table with ES|QL controls to a dashboard', () => {
       it('should create a dashboard with the Discover table and the selected control state', async () => {
-        await discover.navigateToApp();
+        await discover.navigateToApp('classic');
         await discover.loadSavedSearch('ESQL control unlink test');
         await discover.waitUntilTabIsLoaded();
 

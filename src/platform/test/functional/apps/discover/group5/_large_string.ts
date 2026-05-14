@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ' you’ll have to check the laws of the country where you are' +
         ' located before using this ebook.';
 
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await retry.try(async function tryingForTime() {
         const rowData = await discover.getDocTableIndex(1, true);
         expect(rowData).to.contain(expectedText);

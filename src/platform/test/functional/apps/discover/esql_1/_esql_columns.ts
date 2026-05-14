@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await timePicker.setDefaultAbsoluteRange();
       await discover.waitUntilSearchingHasFinished();
       await discover.selectTextBaseLang();

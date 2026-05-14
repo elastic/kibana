@@ -270,7 +270,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async function () {
         await timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await kibanaServer.uiSettings.update(defaultSettings);
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -283,7 +283,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async function () {
         await timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await kibanaServer.uiSettings.update(defaultSettings);
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await header.waitUntilLoadingHasFinished();
         await dataViews.createFromSearchBar({
           name: 'log*',
@@ -301,7 +301,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async function () {
         await timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await kibanaServer.uiSettings.update(defaultSettings);
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await header.waitUntilLoadingHasFinished();
         await discover.selectTextBaseLang();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -314,7 +314,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async function () {
         await timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await kibanaServer.uiSettings.update(defaultSettings);
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await header.waitUntilLoadingHasFinished();
         await discover.selectTextBaseLang();
         await monacoEditor.setCodeEditorValue(
@@ -332,7 +332,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async function () {
         await timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await kibanaServer.uiSettings.update(defaultSettings);
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await header.waitUntilLoadingHasFinished();
         await dataViews.createFromSearchBar({
           name: 'log*',

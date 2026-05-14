@@ -577,7 +577,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       before(async () => {
         // Create saved data view without time range
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.waitUntilTabIsLoaded();
         await dataViews.createFromSearchBar({
           name: 'logstas',

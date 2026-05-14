@@ -16,12 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
-  const { common, discover, header, timePicker } = getPageObjects([
-    'common',
-    'discover',
-    'header',
-    'timePicker',
-  ]);
+  const { discover, header, timePicker } = getPageObjects(['discover', 'header', 'timePicker']);
   const dataViews = getService('dataViews');
   const monacoEditor = getService('monacoEditor');
 
@@ -55,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('classic mode', () => {
       it('should show warning and results', async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await dataViews.createFromSearchBar({
           name: 'ftr-remote:logstash-*,logstash-*',
           hasTimeField: false,
@@ -118,8 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('esql mode', () => {
       it('should show warning and results', async () => {
-        await common.navigateToApp('discover');
-        await discover.selectTextBaseLang();
+        await discover.navigateToApp('esql');
         await timePicker.setDefaultAbsoluteRange();
         await monacoEditor.setCodeEditorValue(`FROM logstash-*, ftr-remote:logstash-* METADATA _index
   | EVAL buckets = DATE_TRUNC(5 minute, @timestamp), delay = TO_STRING(CASE(STARTS_WITH(_index, "ftr-remote"), DELAY(10ms), false))

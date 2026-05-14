@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // set up a query with filters and a time filter
     log.debug('set up a query with filters to save');
     await common.setTime({ from, to });
-    await common.navigateToApp('discover');
+    await discover.navigateToApp('classic');
     await dataViews.switchToAndValidate(logstashIndexPatternString);
     await retry.try(async function tryingForTime() {
       const hitCount = await discover.getHitCount();
@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await kibanaServer.uiSettings.replace(defaultSettings);
       log.debug('discover');
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
     });
 
     after(async () => {
@@ -253,7 +253,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('allows clearing if non default language was remembered in localstorage', async () => {
         await savedQueryManagementComponent.openSavedQueryManagementComponent();
         await queryBar.switchQueryLanguage('lucene');
-        await common.navigateToApp('discover'); // makes sure discovered is reloaded without any state in url
+        await discover.navigateToApp('classic'); // makes sure discovered is reloaded without any state in url
         await savedQueryManagementComponent.openSavedQueryManagementComponent();
         await queryBar.expectQueryLanguageOrFail('lucene'); // make sure lucene is remembered after refresh (comes from localstorage)
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');

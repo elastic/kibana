@@ -236,7 +236,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             ...defaultSettings,
             'doc_table:hideTimeColumn': hideTimeFieldColumnSetting,
           });
-          await common.navigateToApp('discover');
+          await discover.navigateToApp('classic');
           await discover.waitUntilTabIsLoaded();
         });
 

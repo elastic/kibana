@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
 
       for (const columnName of TEST_COLUMN_NAMES) {
         await unifiedFieldList.clickFieldListItemAdd(columnName);
@@ -107,7 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('navigates to context view from embeddable', async () => {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await header.waitUntilLoadingHasFinished();
       await filterBar.addFilter({ field: 'extension.raw', operation: 'is', value: 'jpg' });
       await header.waitUntilLoadingHasFinished();

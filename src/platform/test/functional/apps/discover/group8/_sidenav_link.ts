@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('saves the last URL when in data view mode', async function () {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       await queryBar.setQuery('response:200');
@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('saves the last URL when in ES|QL mode', async function () {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       await discover.selectTextBaseLang();
@@ -106,7 +106,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should not save the last URL if it was an ad-hoc data view', async function () {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       await queryBar.setQuery('response:200');
@@ -137,7 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('saves the last URL if the session was saved', async function () {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       await dataViews.createFromSearchBar({ name: 'logs', hasTimeField: true, adHoc: true });

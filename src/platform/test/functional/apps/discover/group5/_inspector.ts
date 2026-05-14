@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
     });
 
     afterEach(async () => {

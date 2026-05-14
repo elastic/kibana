@@ -20,7 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should apply the root profile default query when ES|QL mode is the default', async () => {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await discover.waitUntilTabIsLoaded();
       await discover.isInClassicMode();
       await discover.setQueryMode('esql');

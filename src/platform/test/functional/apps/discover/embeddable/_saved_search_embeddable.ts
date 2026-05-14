@@ -310,7 +310,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         discover.isOnDashboardsEditMode().then((editMode) => expect(editMode).to.be(true)),
       ]);
       // Navigate to/Refresh page to reset Discover state
-      await discover.navigateToApp();
+      await discover.navigateToApp('classic');
       await header.waitUntilLoadingHasFinished();
       await Promise.all([
         globalNav

@@ -11,16 +11,9 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, discover, unifiedFieldList, dashboard, header, timePicker, unifiedTabs } =
-    getPageObjects([
-      'common',
-      'discover',
-      'unifiedFieldList',
-      'dashboard',
-      'header',
-      'timePicker',
-      'unifiedTabs',
-    ]);
+  const { discover, unifiedFieldList, dashboard, header, timePicker, unifiedTabs } = getPageObjects(
+    ['discover', 'unifiedFieldList', 'dashboard', 'header', 'timePicker', 'unifiedTabs']
+  );
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
   const dataViews = getService('dataViews');
@@ -52,8 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should set EBT context for telemetry events with default profile', async () => {
-        await common.navigateToApp('discover');
-        await discover.selectTextBaseLang();
+        await discover.navigateToApp('esql');
         await discover.waitUntilSearchingHasFinished();
         await monacoEditor.setCodeEditorValue('from my-example-* | sort @timestamp desc');
         await ebtUIHelper.setOptIn(true);
@@ -72,8 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should set EBT context for telemetry events when example profile and reset', async () => {
-        await common.navigateToApp('discover');
-        await discover.selectTextBaseLang();
+        await discover.navigateToApp('esql');
         await discover.waitUntilSearchingHasFinished();
         await monacoEditor.setCodeEditorValue('from my-example-logs | sort @timestamp desc');
         await ebtUIHelper.setOptIn(true);
@@ -149,8 +140,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should send EBT events when a different data source profile gets resolved', async () => {
-        await common.navigateToApp('discover');
-        await discover.selectTextBaseLang();
+        await discover.navigateToApp('esql');
         await discover.waitUntilSearchingHasFinished();
         await monacoEditor.setCodeEditorValue('from my-example-logs | sort @timestamp desc');
         await ebtUIHelper.setOptIn(true); // starts the recording of events from this moment
@@ -203,8 +193,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should send EBT events when a different document profile gets resolved', async () => {
-        await common.navigateToApp('discover');
-        await discover.selectTextBaseLang();
+        await discover.navigateToApp('esql');
         await monacoEditor.setCodeEditorValue('from my-example-* | sort @timestamp desc');
         await testSubjects.click('querySubmitButton');
         await header.waitUntilLoadingHasFinished();
@@ -232,7 +221,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('field usage events', () => {
       beforeEach(async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
       });
@@ -438,7 +427,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('trackSubmittingQuery telemetry', () => {
       beforeEach(async () => {
         await discover.resetQueryMode();
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.waitUntilTabIsLoaded();
         await ebtUIHelper.setOptIn(true);
       });
@@ -516,7 +505,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('trackTabs telemetry', () => {
       beforeEach(async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.waitUntilTabIsLoaded();
         await ebtUIHelper.setOptIn(true);
       });

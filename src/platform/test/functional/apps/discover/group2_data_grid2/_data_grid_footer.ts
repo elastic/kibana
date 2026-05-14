@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       beforeEach(async function () {
         await timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await kibanaServer.uiSettings.update(defaultSettings);
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.waitUntilSearchingHasFinished();
       });
 
@@ -170,7 +170,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'discover:sampleSize': 4,
           'discover:sampleRowsPerPage': 2,
         });
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await discover.waitUntilSearchingHasFinished();
       });
 

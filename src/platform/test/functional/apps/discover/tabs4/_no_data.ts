@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     beforeEach(async () => {
       await common.navigateToApp('home');
       await kibanaServer.savedObjects.cleanStandardList();
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await header.waitUntilLoadingHasFinished();
     });
 

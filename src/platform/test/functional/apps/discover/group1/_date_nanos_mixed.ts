@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.setWindowSize(1200, 900);
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos_mixed']);
       await common.setTime({ from, to });
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
     });
 
     after(async () => {

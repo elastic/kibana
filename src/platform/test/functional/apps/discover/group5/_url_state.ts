@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await timePicker.setDefaultAbsoluteRange();
     });
 
@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show a warning and fall back to the default data view when navigating to a URL with an invalid data view ID', async () => {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await timePicker.setDefaultAbsoluteRange();
       await header.waitUntilLoadingHasFinished();
       const dataViewId = await discover.getCurrentDataViewId();
@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show a warning and fall back to the current data view if the URL is updated to an invalid data view ID', async () => {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await timePicker.setDefaultAbsoluteRange();
       const originalHash = await browser.execute<[], string>('return window.location.hash');
       const dataViewId = await discover.getCurrentDataViewId();
@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should sync Lens global state to Discover sidebar link and carry over the state when navigating to Discover', async () => {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await common.navigateToApp('lens');
       await appsMenu.openCollapsibleNav();
       let discoverLink = await appsMenu.getLink('Discover');
@@ -131,7 +131,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'timepicker:timeDefaults':
           '{  "from": "Sep 18, 2015 @ 19:37:13.000",  "to": "Sep 23, 2015 @ 02:30:09.000"}',
       });
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
 
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();

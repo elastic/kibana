@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         defaultIndex: 'without-timefield',
         'timepicker:timeDefaults': '{  "from": "2019-01-18T19:37:13.000Z",  "to": "now"}',
       });
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
     });
 
     after(async () => {
@@ -123,7 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should allow switching from a saved search with a time field to a saved search without a time field', async () => {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await discover.selectIndexPattern('with-timefield');
       await header.waitUntilLoadingHasFinished();
       await discover.saveSearch('with-timefield');
@@ -138,7 +138,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should allow switching from data views with different timefields and sort correctly', async () => {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await discover.selectIndexPattern('with-timefield');
       await header.waitUntilLoadingHasFinished();
       let url = await browser.getCurrentUrl();

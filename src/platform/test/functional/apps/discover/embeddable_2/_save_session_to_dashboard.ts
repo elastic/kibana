@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('from standalone Discover', () => {
       it('can save a new session with None option to the library', async () => {
-        await discover.navigateToApp();
+        await discover.navigateToApp('classic');
         await discover.clickNewSearchButton();
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('can save a new session to a new dashboard', async () => {
-        await discover.navigateToApp();
+        await discover.navigateToApp('classic');
         await discover.clickNewSearchButton();
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
@@ -99,7 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.clickNewDashboard();
         await dashboard.saveDashboard(existingDashboardName);
 
-        await discover.navigateToApp();
+        await discover.navigateToApp('classic');
         await discover.clickNewSearchButton();
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
@@ -121,7 +121,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const existingDashboardName = 'Existing Target Dashboard 2';
         const originalSession = 'Original Session for Save As';
 
-        await discover.navigateToApp();
+        await discover.navigateToApp('classic');
         await discover.clickNewSearchButton();
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
@@ -157,7 +157,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('can save as a copy to a new dashboard via Save As menu', async () => {
-        await discover.navigateToApp();
+        await discover.navigateToApp('classic');
         await discover.clickNewSearchButton();
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
@@ -179,7 +179,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('can save as a copy to a new dashboard via "Save as new Discover session" toggle', async () => {
-        await discover.navigateToApp();
+        await discover.navigateToApp('classic');
         await discover.clickNewSearchButton();
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();

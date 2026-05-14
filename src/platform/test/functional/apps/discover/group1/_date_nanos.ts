@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'date-nanos' });
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos']);
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await timePicker.setAbsoluteRange(fromTime, toTime);
     });
 

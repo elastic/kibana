@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await timePicker.setDefaultAbsoluteRange();
     });
 
@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await discover.isChartVisible()).to.be(false);
 
       await dashboard.navigateToApp();
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await timePicker.setDefaultAbsoluteRange();
       await header.waitUntilLoadingHasFinished();
 
@@ -72,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.toggleChartVisibility();
       expect(await discover.isChartVisible()).to.be(true);
 
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await timePicker.setDefaultAbsoluteRange();
       await header.waitUntilLoadingHasFinished();
       expect(await discover.isChartVisible()).to.be(true);

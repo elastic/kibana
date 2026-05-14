@@ -72,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show recommended fields section for logs profile', async () => {
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.navigateToApp('classic');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await dataViews.switchToAndValidate('All logs');
 
@@ -96,7 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should not show recommended fields for non-logs profile', async () => {
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.navigateToApp('classic');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       // Create metrics data view for negative test
       await dataViews.createFromSearchBar({

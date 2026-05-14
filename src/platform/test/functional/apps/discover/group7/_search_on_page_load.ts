@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const initSearchOnPageLoad = async (searchOnPageLoad: boolean) => {
     await kibanaServer.uiSettings.replace({ 'discover:searchOnPageLoad': searchOnPageLoad });
-    await common.navigateToApp('discover');
+    await discover.navigateToApp('classic');
     await header.awaitKibanaChrome();
   };
 
@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
     });
 
     after(async () => {

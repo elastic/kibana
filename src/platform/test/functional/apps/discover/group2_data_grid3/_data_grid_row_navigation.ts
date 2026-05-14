@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await settings.createIndexPattern('similar_index*', '@timestamp', true);
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
     });
 
     it('should navigate through rows with the same id but different indices correctly', async () => {

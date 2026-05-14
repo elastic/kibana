@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.update({
         'timepicker:timeDefaults': `{ "from": "2016-10-05T00:00:00", "to": "2016-10-06T00:00:00"}`,
       });
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
     });
 
     it('test_huge data should have expected number of fields', async function () {
