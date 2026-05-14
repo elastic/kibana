@@ -26,6 +26,7 @@ describe('csp collector', () => {
   function updateCsp(config: Partial<ICspConfig>) {
     httpMock.csp = new CspConfig({
       ...CspConfig.DEFAULT,
+      form_action: [],
       style_src: [],
       worker_src: [],
       script_src: [],
@@ -35,7 +36,6 @@ describe('csp collector', () => {
       frame_src: [],
       img_src: [],
       object_src: [],
-      form_action: [],
       frame_ancestors: [],
       report_uri: [],
       report_to: [],
