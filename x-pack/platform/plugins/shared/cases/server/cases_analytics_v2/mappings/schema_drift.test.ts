@@ -207,7 +207,7 @@ describe('case mapping covers every doc-builder field', () => {
  * unexplained allowlist entry is "engineer silently skips a new SO field,"
  * which is exactly what this layer exists to prevent.
  */
-const OMITTED_FROM_V2_MIRROR: ReadonlyMap<string, string> = new Map([
+const OMITTED_FROM_ANALYTICS_V2_MIRROR: ReadonlyMap<string, string> = new Map([
   // Empty today. The handful of intentional divergences are all covered by
   // an opaque (`enabled: false`) or `dynamic: true` parent in v2 and are
   // caught by the `isCovered` rule:
@@ -229,10 +229,10 @@ describe('cases SO mapping is mirrored in CASE_INDEX_MAPPING', () => {
     // v2. `isCovered` also accepts a match on any prefix — so SO subfields
     // of an opaque (`enabled: false`) or `dynamic: true` v2 parent are
     // implicitly covered without needing an allowlist entry. Anything that
-    // still doesn't match must appear in `OMITTED_FROM_V2_MIRROR` with a
-    // documented reason.
+    // still doesn't match must appear in `OMITTED_FROM_ANALYTICS_V2_MIRROR`
+    // with a documented reason.
     const missing = [...soPaths].filter((soPath) => {
-      if (OMITTED_FROM_V2_MIRROR.has(soPath)) return false;
+      if (OMITTED_FROM_ANALYTICS_V2_MIRROR.has(soPath)) return false;
       const expected = `cases.${soPath}`;
       return !isCovered(expected, v2Paths);
     });

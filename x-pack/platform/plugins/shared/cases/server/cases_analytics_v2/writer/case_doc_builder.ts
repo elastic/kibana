@@ -11,10 +11,42 @@ import type { CasePersistedAttributes } from '../../common/types/case';
 import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
 
 /**
- * Shape of a single document indexed into `.cases`. Mirrors `CASE_INDEX_MAPPING`
- * — every field below has a matching mapping, and the mapping is `dynamic:
- * 'strict'` so adding a field here without updating the mapping fails the write
- * loudly.
+ * Shape of a single document indexed into `.cases`. Mirrors
+ * `CASE_INDEX_MAPPING` — every field below has a matching mapping, and the
+ * mapping is `dynamic: 'strict'` so adding a field here without updating
+ * the mapping fails the write loudly.
+ *
+ * **Why this is hand-crafted instead of `extends CasePersistedAttributes`.**
+ * The analytics doc is deliberately *not* the SO shape with cosmetic
+ * tweaks — it's a separately-curated projection chosen for query / Lens
+ * ergonomics, with several intentional divergences:
+ *
+ *   - `status` / `severity` are persisted as numeric enums on the SO for
+ *     sortability + small index footprint; analytics consumers (Lens,
+ *     ES|QL) want the human-readable strings, so the writer translates.
+ *   - `observables` is **denormalized** — the SO shape is a nested array
+ *     of `{ typeKey, value, description }`; the analytics doc collapses
+ *     to one keyword array per type for cardinality-friendly aggregations.
+ *     `description` is dropped on purpose (free-text observable
+ *     descriptions blow up the field count under sustained ingest).
+ *   - `extended_fields` lives in a flattened sub-object with snake-key
+ *     suffixes (`<name>_as_<type>`); the SO has no equivalent.
+ *   - `@timestamp` and `kibana.space_ids` are derived, not direct
+ *     SO attributes.
+ *
+ * Coupling the two via `extends` would force every additive change to the
+ * cases SO into the analytics doc surface — exactly the wrong direction.
+ * The analytics-doc shape is a contract with downstream
+ * dashboards / queries, so it should evolve on its own merits and break
+ * loudly via the `dynamic: 'strict'` mapping when an unintentional new
+ * field sneaks in. The schema-drift test
+ * (`mappings/schema_drift.test.ts`) catches the inverse mistake — an SO
+ * field that was added without an accompanying analytics decision.
+ *
+ * Where the SO shape is the analytics shape (lossless 1:1) and ownership
+ * is shared, the type is referenced via
+ * `CasePersistedAttributes['<field>']` rather than restated, so the two
+ * stay in lockstep without inheritance — see `template` below.
  */
 export interface CaseAnalyticsDoc {
   '@timestamp': string;
@@ -47,7 +79,9 @@ export interface CaseAnalyticsDoc {
     time_to_investigate?: number | null;
     time_to_resolve?: number | null;
     incremental_id?: number | null;
-    template?: { id: string; version: number } | null;
+    // Tied 1:1 to the SO field — referencing the SO's type prevents the
+    // two from drifting silently if a new sub-field lands on the SO.
+    template?: CasePersistedAttributes['template'];
     // `connector` and `external_service` are fully indexed (their sub-fields
     // are searchable). `customFields` is a typed nested array per the SO
     // shape. `settings` is opaque (mapped `enabled: false`).

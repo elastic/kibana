@@ -908,12 +908,14 @@ export class CasesService {
       // item would fan out to N ES `index` requests, saturating the
       // connection pool the rest of Kibana shares — `bulkUpsertCases`
       // collapses that to one `_bulk` request.
-      const successfulV2Mirrors: Array<(typeof bulkCreateResponse.saved_objects)[number]> = [];
+      const successfulAnalyticsV2Mirrors: Array<
+        (typeof bulkCreateResponse.saved_objects)[number]
+      > = [];
       const res = bulkCreateResponse.saved_objects.map((theCase) => {
         if (isSOError<CasePersistedAttributes>(theCase)) {
           return theCase;
         }
-        successfulV2Mirrors.push(theCase);
+        successfulAnalyticsV2Mirrors.push(theCase);
 
         const transformedCase = transformSavedObjectToExternalModel(theCase);
         const decodedRes = decodeOrThrow(CaseTransformedAttributesRt)(transformedCase.attributes);
@@ -921,7 +923,7 @@ export class CasesService {
         return { ...transformedCase, attributes: decodedRes };
       });
       this.analyticsV2Writer.bulkUpsertCases(
-        successfulV2Mirrors as Array<SavedObject<CasePersistedAttributes>>
+        successfulAnalyticsV2Mirrors as Array<SavedObject<CasePersistedAttributes>>
       );
 
       return { saved_objects: res };
@@ -1039,7 +1041,7 @@ export class CasesService {
       // successfully-patched case (`originalCase + new attributes`) and
       // dispatch as one bulk write. Same fan-out-collapse rationale as
       // `bulkCreateCases`.
-      const v2Mirrors: Array<SavedObject<CasePersistedAttributes>> = [];
+      const analyticsV2Mirrors: Array<SavedObject<CasePersistedAttributes>> = [];
 
       const res = updatedCases.saved_objects.reduce((acc, theCase) => {
         if (isSOError(theCase)) {
@@ -1052,7 +1054,7 @@ export class CasesService {
         // them onto the pre-update SO to model the post-update state.
         const ctx = updateContextById.get(theCase.id);
         if (ctx) {
-          v2Mirrors.push({
+          analyticsV2Mirrors.push({
             ...ctx.originalCase,
             attributes: {
               ...ctx.originalCase.attributes,
@@ -1072,7 +1074,7 @@ export class CasesService {
         return acc;
       }, [] as Array<SavedObjectsUpdateResponse<CaseTransformedAttributes> | SOWithErrors<CaseTransformedAttributes>>);
 
-      this.analyticsV2Writer.bulkUpsertCases(v2Mirrors);
+      this.analyticsV2Writer.bulkUpsertCases(analyticsV2Mirrors);
 
       return Object.assign(updatedCases, {
         saved_objects: res,

@@ -140,12 +140,12 @@ export async function runReconciliation({
       //      the connection pool from saturating on cold-start / post-reset
       //      walks that can span tens of thousands of cases.
       //   2. Awaiting between pages bounds concurrency to one in-flight
-      //      bulk at a time. The previous per-item fire-and-forget loop
-      //      could fan thousands of writes into ES while the runner kept
-      //      paging — ES indexing-queue overflow → 429s → writer's retry
-      //      budget exhausts → reconciliation drops docs the next tick
-      //      then has to repair. Serializing pages avoids the failure
-      //      mode entirely.
+      //      bulk at a time. A per-item fire-and-forget loop could fan
+      //      thousands of writes into ES while the runner kept paging — ES
+      //      indexing-queue overflow → 429s → writer's retry budget
+      //      exhausts → reconciliation drops docs the next tick then has
+      //      to repair. Serializing pages avoids the failure mode
+      //      entirely.
       // The awaited variant never throws — bulk-level + per-item failures
       // are logged inside the writer; the page count still advances.
       await writer.bulkUpsertCasesAwait(page.saved_objects);
