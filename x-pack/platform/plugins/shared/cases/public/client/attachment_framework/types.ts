@@ -66,6 +66,7 @@ export interface CommonAttachmentViewProps {
 /** Props for case-level attachment tabs (Alerts/Events/… table hosts). */
 export interface CommonAttachmentTabViewProps {
   caseData: CaseUI;
+  searchTerm?: string;
 }
 
 export interface ExternalReferenceAttachmentViewProps extends CommonAttachmentViewProps {

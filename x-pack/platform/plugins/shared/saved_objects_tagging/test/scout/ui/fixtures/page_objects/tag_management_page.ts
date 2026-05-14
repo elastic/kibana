@@ -6,6 +6,7 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
+import { TagsTable } from './tags_table';
 
 interface FillTagFormFields {
   name?: string;
@@ -14,7 +15,11 @@ interface FillTagFormFields {
 }
 
 export class TagManagementPage {
-  constructor(private readonly page: ScoutPage) {}
+  readonly tagsTable: TagsTable;
+
+  constructor(private readonly page: ScoutPage) {
+    this.tagsTable = new TagsTable(page);
+  }
 
   async waitForTableLoaded() {
     await this.page.testSubj.waitForSelector('tagsManagementTable table-is-ready');

@@ -32,7 +32,9 @@ export const runLegacyTypeCheckCli = () => {
     async ({ log, flagsReader, procRunner }) => {
       const { TS_PROJECTS } = await import('@kbn/ts-projects');
       const shouldCleanCache = flagsReader.boolean('clean-cache');
-      const shouldUseArchive = flagsReader.boolean('with-archive');
+      const withArchive = flagsReader.boolean('with-archive');
+      const shouldRestoreArchive = withArchive || flagsReader.boolean('restore-archive');
+      const shouldUploadArchive = withArchive || flagsReader.boolean('upload-archive');
 
       if (shouldCleanCache) {
         await cleanTypeCheckCaches(log, TS_PROJECTS);
@@ -47,10 +49,12 @@ export const runLegacyTypeCheckCli = () => {
       // a reference to every composite project in the repo.
       await updateRootRefsConfig(log);
 
-      if (shouldUseArchive) {
+      if (shouldRestoreArchive) {
         await restoreTSBuildArtifacts(log);
       } else {
-        log.verbose('Skipping TypeScript cache restore because --with-archive was not provided.');
+        log.verbose(
+          'Skipping TypeScript cache restore because --restore-archive was not provided.'
+        );
       }
 
       const projectFilter = normalizeProjectPath(flagsReader.path('project'), log);
@@ -91,10 +95,10 @@ export const runLegacyTypeCheckCli = () => {
       }
 
       try {
-        const localChanges = shouldUseArchive ? await detectLocalChanges() : [];
+        const localChanges = shouldUploadArchive ? await detectLocalChanges() : [];
         const hasLocalChanges = localChanges.length > 0;
 
-        if (shouldUseArchive) {
+        if (shouldUploadArchive) {
           if (hasLocalChanges) {
             const changedFiles = localChanges.join('\n');
             const message = `uncommitted changes were detected after the TypeScript build. TypeScript cache artifacts must be generated from a clean working tree.\nChanged files:\n${changedFiles}`;
@@ -108,7 +112,9 @@ export const runLegacyTypeCheckCli = () => {
             await archiveTSBuildArtifacts(log);
           }
         } else {
-          log.verbose('Skipping TypeScript cache archive because --with-archive was not provided.');
+          log.verbose(
+            'Skipping TypeScript cache archive because --upload-archive was not provided.'
+          );
         }
       } finally {
         if (flagsReader.boolean('cleanup')) {
@@ -138,7 +144,14 @@ export const runLegacyTypeCheckCli = () => {
     `,
       flags: {
         string: ['project'],
-        boolean: ['clean-cache', 'cleanup', 'extended-diagnostics', 'with-archive'],
+        boolean: [
+          'clean-cache',
+          'cleanup',
+          'extended-diagnostics',
+          'with-archive',
+          'restore-archive',
+          'upload-archive',
+        ],
         help: `
         --project [path]        Path to a tsconfig.json file determines the project to check
         --help                  Show this message
@@ -148,7 +161,9 @@ export const runLegacyTypeCheckCli = () => {
                                   identify that none of the imports have changed (it uses creation/update
                                   times) but cleaning them prevents leaving garbage around the repo.
         --extended-diagnostics  Turn on extended diagnostics in the TypeScript compiler
-        --with-archive          Restore cached artifacts before running and archive results afterwards
+        --restore-archive       Restore cached artifacts from GCS before running tsc
+        --upload-archive        Upload resulting artifacts to GCS after a successful tsc run
+        --with-archive          Shorthand for \`--restore-archive --upload-archive\`
       `,
       },
     }

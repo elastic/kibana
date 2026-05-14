@@ -1,5 +1,5 @@
 {
-  "sha1": "3c0f756ccf7951b3b17b57f4f1e429242d576ed7",
+  "sha1": "d686f02384a84239944421c7601ad4b10094e94b",
   "tests": [
     {
       "id": "7a50a1b508e10f4-3be34281d1d9c2c",
@@ -2442,6 +2442,134 @@
       }
     },
     {
+      "id": "1635c91bf5bdd57-6de94559f3b9d48",
+      "title": "Cross-compatibility - Registered Domain Processor should extract domain parts from an FQDN",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/registered_domain.spec.ts",
+        "line": 18,
+        "column": 12
+      }
+    },
+    {
+      "id": "1635c91bf5bdd57-f5e2fbc8969eeb0",
+      "title": "Cross-compatibility - Registered Domain Processor should fail when expression field is of non-string type (e.g. numeric)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/registered_domain.spec.ts",
+        "line": 52,
+        "column": 12
+      }
+    },
+    {
+      "id": "1635c91bf5bdd57-ecfa56646b29901",
+      "title": "Cross-compatibility - Registered Domain Processor should extract domain parts from a FQDN with a missing part",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/registered_domain.spec.ts",
+        "line": 90,
+        "column": 12
+      }
+    },
+    {
+      "id": "1635c91bf5bdd57-4471248410fec33",
+      "title": "Cross-compatibility - Registered Domain Processor should apply conditional extraction to only matching documents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/registered_domain.spec.ts",
+        "line": 124,
+        "column": 12
+      }
+    },
+    {
+      "id": "1635c91bf5bdd57-155a5f23494c997",
+      "title": "Cross-compatibility - Registered Domain Processor should handle missing expression field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/registered_domain.spec.ts",
+        "line": 166,
+        "column": 12
+      }
+    },
+    {
+      "id": "1635c91bf5bdd57-c68c092da469040",
+      "title": "Cross-compatibility - Registered Domain Processor should fail in Ingest Pipelines when expression field is missing with ignore_missing: false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/registered_domain.spec.ts",
+        "line": 205,
+        "column": 12
+      }
+    },
+    {
+      "id": "1635c91bf5bdd57-7fd9c442730de06",
+      "title": "Cross-compatibility - Registered Domain Processor should handle pre-existing value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/registered_domain.spec.ts",
+        "line": 255,
+        "column": 12
+      }
+    },
+    {
+      "id": "1635c91bf5bdd57-bb497417e8eabf5",
+      "title": "Cross-compatibility - Registered Domain Processor should handle pre-existing value with conditional extraction",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/registered_domain.spec.ts",
+        "line": 293,
+        "column": 12
+      }
+    },
+    {
       "id": "3cb715f2a60e60f-b13a5d5cb3a476e",
       "title": "Cross-compatibility - RemoveByPrefix Processor should remove nested fields in both ingest pipeline and ES|QL",
       "expectedStatus": "passed",
@@ -3959,8 +4087,8 @@
       }
     },
     {
-      "id": "525ab2d1aa4c0d7-0d76a31690c137a",
-      "title": "Streamlang to ES|QL - Grok Processor should fail if field is missing and ignore_missing is false",
+      "id": "525ab2d1aa4c0d7-dea8eccb7c52942",
+      "title": "Streamlang to ES|QL - Grok Processor should filter out if field is missing and ignore_missing is false",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -3986,7 +4114,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
-        "line": 196,
+        "line": 199,
         "column": 10
       }
     },
@@ -4002,7 +4130,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
-        "line": 246,
+        "line": 249,
         "column": 10
       }
     },
@@ -4018,7 +4146,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
-        "line": 309,
+        "line": 312,
         "column": 10
       }
     },
@@ -4032,7 +4160,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
-        "line": 380,
+        "line": 383,
         "column": 10
       }
     },
@@ -4048,7 +4176,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
-        "line": 501,
+        "line": 504,
         "column": 10
       }
     },
@@ -4064,7 +4192,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
-        "line": 540,
+        "line": 543,
         "column": 10
       }
     },
@@ -4080,7 +4208,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
-        "line": 561,
+        "line": 564,
         "column": 10
       }
     },

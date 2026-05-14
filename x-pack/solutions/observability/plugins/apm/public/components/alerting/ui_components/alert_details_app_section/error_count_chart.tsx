@@ -49,6 +49,8 @@ export function ErrorCountChart({
   groupId,
   threshold,
   ruleTypeId,
+  compact,
+  showAlertAnnotations,
 }: {
   alert: TopAlert;
   serviceName: string;
@@ -64,6 +66,10 @@ export function ErrorCountChart({
   groupId?: string;
   threshold?: ReactElement;
   ruleTypeId?: string;
+  /** When true, hide the threshold side panel even if `threshold` is provided. */
+  compact?: boolean;
+  /** When set, overrides the default annotation behavior (which is keyed off `threshold`). */
+  showAlertAnnotations?: boolean;
 }) {
   const {
     services: { uiSettings },
@@ -105,7 +111,8 @@ export function ErrorCountChart({
 
   const alertAnnotations = useGetChartAlertAnnotations({
     alert,
-    showAnnotations: !!threshold,
+    showAnnotations: showAlertAnnotations ?? !!threshold,
+    showThresholdAnnotation: !!threshold,
     dateFormat,
   });
 
@@ -155,12 +162,12 @@ export function ErrorCountChart({
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexGroup direction="row" gutterSize="m">
-          {!!threshold && (
+          {!!threshold && !compact && (
             <EuiFlexItem style={{ minWidth: 180 }} grow={1}>
               {threshold}
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={!!threshold ? 5 : undefined}>
+          <EuiFlexItem grow={!!threshold && !compact ? 5 : undefined}>
             <TimeseriesChart
               id="errorCountChart"
               height={200}
