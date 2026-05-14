@@ -79,6 +79,7 @@ describe('runNode', () => {
       node: mockNode,
       scopeStack,
       abortController: new AbortController(),
+      flushEventLogs: jest.fn().mockResolvedValue(undefined),
       contextManager: {
         ensureContextReady: jest.fn().mockResolvedValue(undefined),
       },
@@ -153,6 +154,7 @@ describe('runNode', () => {
       await runNode(mockParams);
 
       expect(mockParams.workflowRuntime.saveState).toHaveBeenCalled();
+      expect(mockStepExecutionRuntime.flushEventLogs).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -204,6 +206,7 @@ describe('runNode', () => {
 
       expect(mockParams.workflowRuntime.setWorkflowError).toHaveBeenCalledWith(error);
       expect(mockParams.workflowRuntime.saveState).toHaveBeenCalled();
+      expect(mockStepExecutionRuntime.flushEventLogs).toHaveBeenCalledTimes(1);
     });
 
     it('should call catchError when error occurs', async () => {
