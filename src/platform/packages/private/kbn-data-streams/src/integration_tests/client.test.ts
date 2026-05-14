@@ -1152,7 +1152,11 @@ describe('DataStreamClient', () => {
       expect(getIndexTemplateSpy).toHaveBeenCalledTimes(2);
       expect(putIndexTemplateSpy).toHaveBeenCalledTimes(1); // Index template not updated when version is same
       expect(createDataStreamSpy).toHaveBeenCalledTimes(1);
-      expect(putMappingSpy).toHaveBeenCalledTimes(0); // Mappings are not applied to write index when version is not incremented
+      // The migration round-trip (simulateTemplate + putMapping) now runs unconditionally when
+      // an existing data stream is present, regardless of _meta.version. See elastic/kibana#268853:
+      // the version-bump short-circuit was removed so a failed migration retries on the next boot.
+      // putMapping is idempotent when the resolved mappings match the write index's existing ones.
+      expect(putMappingSpy).toHaveBeenCalledTimes(1);
     });
 
     test('updates lifecycle policy when a new version is deployed', async () => {

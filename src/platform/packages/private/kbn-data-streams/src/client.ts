@@ -113,25 +113,27 @@ export class DataStreamClient<
       getExistingIndexTemplate(elasticsearchClient, dataStream.name, logger),
     ]);
 
+    // Migrate the existing write index BEFORE installing the new template, so a migration
+    // failure leaves the on-disk `_meta.version` untouched and the next call can retry
+    // (see elastic/kibana#268853). When no data stream exists yet, this is a no-op.
+    if (existingDataStream) {
+      await initializeDataStream({
+        logger,
+        dataStream,
+        elasticsearchClient,
+        existingDataStream,
+        existingIndexTemplate,
+      });
+    }
+
+    // Install / update the index template last. The `_meta.version` bump is the
+    // "everything before this succeeded" marker.
     await initializeIndexTemplate({
       logger,
       dataStream,
       elasticsearchClient,
       existingIndexTemplate,
       skipCreation: false,
-    });
-
-    // Apply mapping migrations to the existing write index when present. The pre-update
-    // `existingIndexTemplate` reference is intentional: it lets `initializeDataStream` detect
-    // a version bump and run `simulateIndexTemplate` + `putMapping` against the write index.
-    // When no data stream exists yet, this is a no-op thanks to the `skipCreation` guard.
-    await initializeDataStream({
-      logger,
-      dataStream,
-      elasticsearchClient,
-      existingDataStream,
-      existingIndexTemplate,
-      skipCreation: true,
     });
   }
 
