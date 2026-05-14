@@ -15,7 +15,9 @@ import {
   SECURITY_LABS_SEARCH_TOOL_ID,
   SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
 } from '../../tools';
-import { fetchExecutionEvents } from './fetch_execution_events';
+import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
+import { fetchExecutionEvents, fetchExecutionMetrics } from './fetch_execution_events';
+import { classifyExecutionFailure } from './classify_execution_failure';
 
 // Matches the content of brain_definition.md; edit that file first and keep them in sync.
 const SKILL_CONTENT = `# investigate-rule Skill
@@ -339,6 +341,330 @@ export const investigateRuleSkill = defineSkillType({
                 type: ToolResultType.error,
                 data: {
                   message: `Failed to fetch execution logs for rule ${ruleId}: ${
+                    error instanceof Error ? error.message : String(error)
+                  }`,
+                },
+              },
+            ],
+          };
+        }
+      },
+    },
+
+    // ── Task 4: get_rule_details ─────────────────────────────────────────────
+    {
+      id: 'investigate-rule.get_rule_details',
+      type: ToolType.builtin,
+      description:
+        'Fetches the full rule definition for a detection rule by its UUID. ' +
+        'Returns name, description, type, language, query, index patterns, schedule, enabled state, ' +
+        'tags, and MITRE threat mappings. ' +
+        'The rule attachment already contains this data when the rule is loaded in chat. ' +
+        'Use this tool only as a fallback when resolving a related rule by ID (e.g. cross-rule referral).',
+      schema: z.object({
+        rule_id: z
+          .string()
+          .describe('The UUID of the detection rule (id field, same as kibana.alert.rule.uuid)'),
+      }),
+      handler: async ({ rule_id: ruleId }, context) => {
+        try {
+          const so = await context.savedObjectsClient.get<Record<string, unknown>>(
+            'alert',
+            String(ruleId)
+          );
+
+          const attrs = so.attributes;
+          const params = (attrs.params ?? {}) as Record<string, unknown>;
+
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  message: `Fetched rule details for rule ${ruleId}.`,
+                  rule: {
+                    id: so.id,
+                    ruleId: params.ruleId ?? params.rule_id,
+                    name: attrs.name,
+                    description: params.description,
+                    type: params.type,
+                    language: params.language,
+                    query: params.query,
+                    index: params.index,
+                    interval: (attrs.schedule as Record<string, unknown> | undefined)?.interval,
+                    from: params.from,
+                    enabled: attrs.enabled,
+                    tags: attrs.tags,
+                    threat: params.threat,
+                  },
+                },
+              },
+            ],
+          };
+        } catch (error) {
+          const isNotFound =
+            error != null &&
+            typeof error === 'object' &&
+            (error as { output?: { statusCode?: number } }).output?.statusCode === 404;
+
+          if (isNotFound) {
+            return {
+              results: [
+                {
+                  type: ToolResultType.other,
+                  data: { message: `Rule ${ruleId} was not found in this space.` },
+                },
+              ],
+            };
+          }
+
+          return {
+            results: [
+              {
+                type: ToolResultType.error,
+                data: {
+                  message: `Failed to fetch rule details for ${ruleId}: ${
+                    error instanceof Error ? error.message : String(error)
+                  }`,
+                },
+              },
+            ],
+          };
+        }
+      },
+    },
+
+    // ── Task 5: classify_execution_failure ───────────────────────────────────
+    {
+      id: 'investigate-rule.classify_execution_failure',
+      type: ToolType.builtin,
+      description:
+        'Classifies a rule execution error message into a structured error class. ' +
+        'Returns error_class (index_not_found | query_timeout | permission_denied | schedule_gap | ' +
+        'circuit_breaker | executor_internal_error | unknown), a confidence level, and an explanation. ' +
+        'Pure classification — no ES or Kibana API calls. ' +
+        'Call this for each failed execution record returned by get_rule_execution_logs.',
+      schema: z.object({
+        error_message: z.string().describe('The error message string from the failed execution'),
+        rule_type: z
+          .string()
+          .optional()
+          .describe(
+            'Optional rule type (e.g. siem.queryRule) for future context-aware classification'
+          ),
+      }),
+      handler: async ({ error_message: errorMessage, rule_type: ruleType }) => {
+        const result = classifyExecutionFailure(String(errorMessage), ruleType);
+
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data: result,
+            },
+          ],
+        };
+      },
+    },
+
+    // ── Task 6: get_rule_alerts ──────────────────────────────────────────────
+    {
+      id: 'investigate-rule.get_rule_alerts',
+      type: ToolType.builtin,
+      description:
+        'Fetches recent alerts produced by a specific detection rule, with entity aggregations for FP pattern detection. ' +
+        'Returns total_count, a sample of recent alerts (timestamp, severity, key entity fields), ' +
+        'and top_entities (aggregated counts of host.name, user.name, source.ip). ' +
+        'top_entities is the primary FP signal: a single entity generating most alerts indicates ' +
+        'benign activity from a known source rather than a true threat. ' +
+        'Use for FP/noise (Branch B) and Gap Analysis (Branch D) workflows.',
+      schema: z.object({
+        rule_id: z.string().describe('The UUID of the detection rule (kibana.alert.rule.uuid)'),
+        time_window_hours: z
+          .number()
+          .min(1)
+          .max(168)
+          .default(24)
+          .describe('Time window in hours to fetch alerts (1-168, default 24)'),
+        size: z
+          .number()
+          .int()
+          .min(1)
+          .max(100)
+          .default(50)
+          .describe('Maximum number of alert samples to return (default 50)'),
+      }),
+      handler: async ({ rule_id: ruleId, time_window_hours: timeWindowHours, size }, context) => {
+        const hours = Number(timeWindowHours);
+        const alertSize = Number(size);
+
+        try {
+          const alertsIndex = `${DEFAULT_ALERTS_INDEX}-${context.spaceId}`;
+
+          const searchResult = await context.esClient.asCurrentUser.search({
+            index: alertsIndex,
+            size: alertSize,
+            query: {
+              bool: {
+                filter: [
+                  { term: { 'kibana.alert.rule.uuid': String(ruleId) } },
+                  { range: { '@timestamp': { gte: `now-${hours}h` } } },
+                ],
+              },
+            },
+            sort: [{ '@timestamp': 'desc' }],
+            _source: [
+              '@timestamp',
+              'kibana.alert.severity',
+              'kibana.alert.risk_score',
+              'kibana.alert.workflow_status',
+              'host.name',
+              'user.name',
+              'source.ip',
+              'destination.ip',
+              'process.name',
+            ],
+            aggs: {
+              total: { value_count: { field: 'kibana.alert.uuid' } },
+              top_hosts: {
+                terms: { field: 'host.name', size: 10 },
+              },
+              top_users: {
+                terms: { field: 'user.name', size: 10 },
+              },
+              top_source_ips: {
+                terms: { field: 'source.ip', size: 10 },
+              },
+            },
+            ignore_unavailable: true,
+          });
+
+          const totalCount =
+            typeof searchResult.hits.total === 'number'
+              ? searchResult.hits.total
+              : searchResult.hits.total?.value ?? 0;
+
+          const alerts = searchResult.hits.hits.map((hit) => ({
+            _id: hit._id,
+            ...(hit._source as Record<string, unknown>),
+          }));
+
+          const aggs = searchResult.aggregations as
+            | Record<string, { buckets?: Array<{ key: string; doc_count: number }> }>
+            | undefined;
+
+          const topEntities = {
+            hosts: (aggs?.top_hosts?.buckets ?? []).map((b) => ({
+              value: b.key,
+              count: b.doc_count,
+            })),
+            users: (aggs?.top_users?.buckets ?? []).map((b) => ({
+              value: b.key,
+              count: b.doc_count,
+            })),
+            source_ips: (aggs?.top_source_ips?.buckets ?? []).map((b) => ({
+              value: b.key,
+              count: b.doc_count,
+            })),
+          };
+
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  message:
+                    totalCount === 0
+                      ? `No alerts found for rule ${ruleId} in the last ${hours} hour(s).`
+                      : `Found ${totalCount} alert(s) for rule ${ruleId} in the last ${hours} hour(s) (showing ${alerts.length}).`,
+                  total_count: totalCount,
+                  alerts,
+                  top_entities: topEntities,
+                },
+              },
+            ],
+          };
+        } catch (error) {
+          return {
+            results: [
+              {
+                type: ToolResultType.error,
+                data: {
+                  message: `Failed to fetch alerts for rule ${ruleId}: ${
+                    error instanceof Error ? error.message : String(error)
+                  }`,
+                },
+              },
+            ],
+          };
+        }
+      },
+    },
+
+    // ── Task 7: get_rule_execution_metrics ───────────────────────────────────
+    {
+      id: 'investigate-rule.get_rule_execution_metrics',
+      type: ToolType.builtin,
+      description:
+        'Fetches aggregated per-execution timing and resource cost for a detection rule. ' +
+        'Returns avg_duration_ms, p95_duration_ms, max_duration_ms (rule query latency), ' +
+        'total_search_hits (total candidate documents across all executions), ' +
+        'execution_count (total runs in window), and gap_count (runs with gap_duration_s > 0). ' +
+        'gap_count > 0 is the primary signal for the Gap Analysis branch. ' +
+        'High p95_duration_ms relative to the rule interval is the primary Performance branch signal. ' +
+        'Use for Performance (Branch C) and as a secondary check in FP/noise (Branch B).',
+      schema: z.object({
+        rule_id: z
+          .string()
+          .describe('The UUID of the detection rule (id field from the rule attachment)'),
+        time_window_hours: z
+          .number()
+          .min(1)
+          .max(168)
+          .default(24)
+          .describe('Time window in hours for metric aggregation (1-168, default 24)'),
+      }),
+      handler: async ({ rule_id: ruleId, time_window_hours: timeWindowHours }, context) => {
+        const hours = Number(timeWindowHours);
+        try {
+          const metrics = await fetchExecutionMetrics(context.esClient, {
+            ruleId: String(ruleId),
+            spaceId: context.spaceId,
+            timeWindowHours: hours,
+          });
+
+          if (metrics.execution_count === 0) {
+            return {
+              results: [
+                {
+                  type: ToolResultType.other,
+                  data: {
+                    message: `No execution data found for rule ${ruleId} in the last ${hours} hour(s).`,
+                    ...metrics,
+                  },
+                },
+              ],
+            };
+          }
+
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  message: `Execution metrics for rule ${ruleId} over the last ${hours} hour(s) (${metrics.execution_count} run(s), ${metrics.gap_count} gap(s)).`,
+                  ...metrics,
+                },
+              },
+            ],
+          };
+        } catch (error) {
+          return {
+            results: [
+              {
+                type: ToolResultType.error,
+                data: {
+                  message: `Failed to fetch execution metrics for rule ${ruleId}: ${
                     error instanceof Error ? error.message : String(error)
                   }`,
                 },
