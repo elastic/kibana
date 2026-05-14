@@ -97,7 +97,10 @@
     "@kbn/rule-data-utils",
     "@kbn/inbox-plugin",
     "@kbn/inbox-common",
-    "@kbn/core-saved-objects-common"
+    "@kbn/core-saved-objects-common",
+    "@kbn/unified-data-table",
+    "@kbn/cell-actions",
+    "@kbn/ui-actions-plugin"
   ],
   "exclude": ["target/**/*"]
 }
