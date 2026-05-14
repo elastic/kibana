@@ -20,10 +20,6 @@ jest.mock('../../hooks/use_stream_detail', () => ({
   useStreamDetail: () => mockUseStreamDetail(),
 }));
 
-jest.mock('./overview_time_filter', () => ({
-  OverviewTimeFilter: () => <div data-test-subj="mockOverviewTimeFilter">Time filter</div>,
-}));
-
 jest.mock('./data_quality_card', () => ({
   DataQualityCard: () => <div data-test-subj="mockDataQualityCard">Dataset quality</div>,
 }));
@@ -51,7 +47,6 @@ describe('StreamOverview', () => {
     renderWithI18n(<StreamOverview />);
 
     expect(screen.getByText('About this stream')).toBeInTheDocument();
-    expect(screen.getByTestId('mockOverviewTimeFilter')).toBeInTheDocument();
   });
 
   it('renders chart and dataset quality card only for ingest stream', () => {
