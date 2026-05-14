@@ -40,7 +40,10 @@ spaceTest.describe(
         await pageObjects.discover.goto({ queryMode: 'classic' });
 
         await spaceTest.step('verify trace-specific column headers', async () => {
-          await expectTracesExperienceEnabled(pageObjects);
+          await expectTracesExperienceEnabled({
+            pageObjects,
+            shouldCheckForREDMetricsCharts: false,
+          });
         });
       }
     );
@@ -53,7 +56,10 @@ spaceTest.describe(
       });
 
       await spaceTest.step('verify trace-specific column headers', async () => {
-        await expectTracesExperienceEnabled(pageObjects);
+        await expectTracesExperienceEnabled({
+          pageObjects,
+          shouldCheckForREDMetricsCharts: true,
+        });
       });
     });
   }

@@ -26,12 +26,20 @@ async function waitForTracesProfileApplied(
   });
 }
 
-export async function expectTracesExperienceEnabled(
-  pageObjects: PageObjects & { tracesExperience: TracesExperiencePage }
-) {
+export async function expectTracesExperienceEnabled({
+  pageObjects,
+  shouldCheckForREDMetricsCharts = true,
+}: {
+  pageObjects: PageObjects & { tracesExperience: TracesExperiencePage };
+  shouldCheckForREDMetricsCharts?: boolean;
+}) {
   await waitForTracesProfileApplied(pageObjects);
+
   for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
     await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
   }
-  await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
+
+  if (shouldCheckForREDMetricsCharts) {
+    await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
+  }
 }
