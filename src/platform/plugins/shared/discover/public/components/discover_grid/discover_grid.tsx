@@ -13,8 +13,12 @@ import {
   DEFAULT_PAGINATION_MODE,
   renderCustomToolbar,
   UnifiedDataTable,
+  type CustomGridColumnProps,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { setGroupByField } from '@kbn/esql-utils';
 import type { UpdateESQLQueryFn } from '../../context_awareness';
 import { useProfileAccessor } from '../../context_awareness';
 import type { DiscoverAppState } from '../../application/main/state_management/redux';
@@ -86,6 +90,41 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
       return getColumnsConfigurationAccessor(() => ({}))();
     }, [getColumnsConfigurationAccessor]);
 
+    const groupByColumnsConfiguration = useMemo(() => {
+      if (!query || !isOfAggregateQueryType(query) || !onUpdateESQLQuery) {
+        return customGridColumnsConfiguration;
+      }
+      return Object.fromEntries(
+        (props.columns ?? []).map((colId) => [
+          colId,
+          (colProps: CustomGridColumnProps) => {
+            const base = customGridColumnsConfiguration[colId]?.(colProps) ?? colProps.column;
+            const existing = Array.isArray(base.actions?.additional) ? base.actions.additional : [];
+            return {
+              ...base,
+              actions: {
+                ...base.actions,
+                additional: [
+                  ...existing,
+                  {
+                    label: i18n.translate('discover.groupBy.columnAction.label', {
+                      defaultMessage: 'Group by {field}',
+                      values: { field: colId },
+                    }),
+                    iconType: 'layers',
+                    size: 'xs',
+                    iconProps: { size: 'm' },
+                    onClick: () => onUpdateESQLQuery((prev) => setGroupByField(prev, colId)),
+                    'data-test-subj': `discoverGroupBy-${colId}`,
+                  },
+                ],
+              },
+            };
+          },
+        ])
+      );
+    }, [query, props.columns, customGridColumnsConfiguration, onUpdateESQLQuery]);
+
     const cascadeGroupingChangeHandler = useCallback(
       (cascadeGrouping: string[]) => {
         return cascadedDocumentsContext?.cascadeGroupingChangeHandler(cascadeGrouping);
@@ -148,7 +187,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
         rowAdditionalLeadingControls={rowAdditionalLeadingControls}
         visibleCellActions={3} // this allows to show up to 3 actions on cell hover if available (filter in, filter out, and copy)
         paginationMode={paginationModeConfig.paginationMode}
-        customGridColumnsConfiguration={customGridColumnsConfiguration}
+        customGridColumnsConfiguration={groupByColumnsConfiguration}
         shouldKeepAdHocDataViewImmutable
         externalAdditionalControls={externalAdditionalControls}
         onFullScreenChange={onFullScreenChange}

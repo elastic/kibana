@@ -21,6 +21,7 @@ export {
   appendToESQLQuery,
   appendWhereClauseToESQLQuery,
   appendStatsByToQuery,
+  setGroupByField,
   appendLimitToQuery,
   buildMetricsInfoQuery,
   getESQLQueryColumns,
