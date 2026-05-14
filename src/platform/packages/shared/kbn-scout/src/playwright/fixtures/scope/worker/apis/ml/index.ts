@@ -284,11 +284,17 @@ export const getMlApiHelper = (
 
     async delete(calendarId: string): Promise<void> {
       await measurePerformanceAsync(log, `mlApi.calendars.delete [${calendarId}]`, async () => {
+        let calendarExisted = true;
         await esClient.ml.deleteCalendar({ calendar_id: calendarId }).catch((err) => {
-          // ignore 404 errors because the calendar may not exist / has already been deleted
-          if (err?.statusCode === 404) return;
+          if (err?.statusCode === 404) {
+            calendarExisted = false;
+            return;
+          }
           throw err;
         });
+        if (calendarExisted) {
+          await this.waitForCalendarNotToExist(calendarId);
+        }
       });
     },
 
