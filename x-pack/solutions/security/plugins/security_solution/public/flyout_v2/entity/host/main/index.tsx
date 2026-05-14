@@ -349,6 +349,7 @@ export const Host: FC<HostProps> = memo(function Host({
             entityRecord={entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined}
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
+            hideHeaderIcons
           />
         )}
       </EuiFlyoutBody>
