@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { AuthMode } from '@kbn/connector-specs';
 import { OAUTH_AUTHORIZATION_CODE_AUTH_ID } from '@kbn/connector-specs';
 import type { ActionsConfigurationUtilities } from '../actions_config';
-import type { ConnectorTokenClientContract } from '../types';
+import type { ConnectorTokenClientContract, UserIdentifiers } from '../types';
 import type { TokenResponseOptions } from './request_oauth_token';
 import { requestOAuthRefreshToken } from './request_oauth_refresh_token';
 import { getStoredTokenWithRefresh } from './get_stored_oauth_token_with_refresh';
@@ -36,7 +36,7 @@ interface GetOAuthAuthorizationCodeAccessTokenOpts {
   connectorTokenClient: ConnectorTokenClientContract;
   scope?: string;
   authMode?: AuthMode;
-  profileUid?: string;
+  userIdentifiers?: UserIdentifiers;
   /**
    * When true, skip the expiration check and force a token refresh.
    * Use this when you've received a 401 and know the token is invalid
@@ -58,7 +58,7 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
   connectorTokenClient,
   scope,
   authMode,
-  profileUid,
+  userIdentifiers,
   forceRefresh = false,
   tokenResponseOptions,
 }: GetOAuthAuthorizationCodeAccessTokenOpts): Promise<string | null> => {
@@ -72,9 +72,9 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
 
   const isPerUser = authMode === 'per-user';
 
-  if (isPerUser && !profileUid) {
+  if (isPerUser && !userIdentifiers?.profileUid) {
     logger.warn(
-      `Per-user authMode requires a profileUid for connectorId: ${connectorId}. Cannot retrieve token.`
+      `Per-user authMode requires profileUid for connectorId: ${connectorId}. Cannot retrieve token until userCloudId-based lookup is supported.`
     );
     return null;
   }
@@ -89,7 +89,7 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
     authMethod: OAUTH_AUTHORIZATION_CODE_AUTH_ID,
     forceRefresh,
     isPerUser,
-    profileUid,
+    userIdentifiers,
     authMode,
     refreshFn: (refreshToken) =>
       requestOAuthRefreshToken(
