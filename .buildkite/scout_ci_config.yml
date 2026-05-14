@@ -44,6 +44,7 @@ plugins:
     - search_getting_started
     - search_homepage
     - search_inference_endpoints
+    - searchprofiler
     - security
     - security_solution
     - serverless_observability

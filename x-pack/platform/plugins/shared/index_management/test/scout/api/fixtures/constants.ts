@@ -12,4 +12,28 @@ export const COMMON_HEADERS = {
 };
 
 export const CAPABILITIES_API_PATH = '/api/core/capabilities';
-export const API_BASE_PATH = 'api/index_management';
+export const API_BASE_PATH = '/api/index_management';
+export const INTERNAL_API_BASE_PATH = '/internal/index_management';
+
+export const INDEX_PATTERNS = ['test*'];
+
+const expectedIndexKeys = [
+  'health',
+  'hidden',
+  'status',
+  'name',
+  'uuid',
+  'primary',
+  'replica',
+  'documents',
+  'documents_deleted',
+  'size',
+  'primary_size',
+  'isFrozen',
+  'aliases',
+  'isFollowerIndex',
+  'ilm',
+  'isRollupIndex',
+];
+
+export const SORTED_EXPECTED_INDEX_KEYS = expectedIndexKeys.sort();

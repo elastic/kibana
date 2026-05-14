@@ -32,7 +32,7 @@ apiTest.describe('Index management feature controls', { tag: tags.stateful.class
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.management.data.index_management).toBe(false);
+      expect(response.body.index_management.monitor).toBe(false);
     }
   );
 
@@ -46,7 +46,7 @@ apiTest.describe('Index management feature controls', { tag: tags.stateful.class
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.management.data.index_management).toBe(true);
+      expect(response.body.index_management.monitor).toBe(true);
     }
   );
 });
