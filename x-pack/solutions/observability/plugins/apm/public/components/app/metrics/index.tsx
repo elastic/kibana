@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import moment from 'moment';
-import { useHistory, useLocation } from 'react-router-dom';
+import React from 'react';
 import { isElasticAgentName, isJRubyAgentName } from '@kbn/elastic-agent-utils/src/agent_guards';
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { isAWSLambdaAgentName } from '../../../../common/agent_name';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 import { ServerlessMetrics } from './serverless_metrics';
 import { ServiceMetrics } from './service_metrics';
 import { JsonMetricsDashboard } from './static_dashboard';
 import { hasDashboard } from './static_dashboard/helper';
-import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 import { JvmMetricsOverview } from './jvm_metrics_overview';
-import { fromQuery, toQuery, isInactiveHistoryError } from '../../shared/links/url_helpers';
+import {
+  MixedAgentCallout,
+  NoDataForRangeCallout,
+  NoDashboardFoundCallout,
+} from './metrics_callouts';
 
 export function Metrics() {
   const {
@@ -36,28 +36,6 @@ export function Metrics() {
   } = useApmServiceContext();
   const isAWSLambda = isAWSLambdaAgentName(serverlessType);
   const { dataView, apmIndices } = useAdHocApmDataView();
-  const history = useHistory();
-  const location = useLocation();
-
-  const navigateToTimeRange = useCallback(
-    (range: { from: number; to: number }) => {
-      try {
-        history.push({
-          ...location,
-          search: fromQuery({
-            ...toQuery(location.search),
-            rangeFrom: new Date(range.from).toISOString(),
-            rangeTo: new Date(range.to).toISOString(),
-          }),
-        });
-      } catch (error) {
-        if (!isInactiveHistoryError(error)) {
-          throw error;
-        }
-      }
-    },
-    [history, location]
-  );
 
   const hasDashboardFile = hasDashboard({
     agentName,
@@ -71,123 +49,19 @@ export function Metrics() {
   }
 
   if (serviceAgentStatus === FETCH_STATUS.SUCCESS && !agentName) {
-    return (
-      <EuiCallOut
-        announceOnMount
-        title={i18n.translate('xpack.apm.metrics.noDataForRange.title', {
-          defaultMessage:
-            'No metrics data found for the selected time range. Try adjusting the time range.',
-        })}
-        iconType="eyeSlash"
-        color="warning"
-        data-test-subj="apmMetricsNoDataForRange"
-      />
-    );
+    return <NoDataForRangeCallout />;
   }
 
   if (!hasDashboardFile && !isElasticAgentName(agentName ?? '')) {
-    return (
-      <EuiCallOut
-        announceOnMount
-        title={i18n.translate('xpack.apm.metrics.emptyState.title', {
-          defaultMessage: 'Runtime metrics are not available for this Agent / SDK type.',
-        })}
-        iconType="info"
-        data-test-subj="apmMetricsNoDashboardFound"
-      />
-    );
+    return <NoDashboardFoundCallout />;
   }
 
-  const dateFormat = 'MMM D, YYYY HH:mm';
-  const formatRange = (range: { from: number; to: number }) =>
-    `${moment(range.from).format(dateFormat)} – ${moment(range.to).format(dateFormat)}`;
-
-  const renderRangeLink = (range: { from: number; to: number }) => (
-    <EuiLink data-test-subj="apmMetricsTimeRangeLink" onClick={() => navigateToTimeRange(range)}>
-      {formatRange(range)}
-    </EuiLink>
+  const mixedAgentCallout = (
+    <MixedAgentCallout
+      hasMultipleAgentTypes={hasMultipleAgentTypes}
+      ingestionTimeRanges={ingestionTimeRanges}
+    />
   );
-
-  const hasOverlap =
-    ingestionTimeRanges &&
-    ingestionTimeRanges.classicApm.from < ingestionTimeRanges.otelNative.to &&
-    ingestionTimeRanges.otelNative.from < ingestionTimeRanges.classicApm.to;
-
-  const mixedAgentCallout = (() => {
-    if (!hasMultipleAgentTypes || !ingestionTimeRanges) {
-      return null;
-    }
-
-    if (hasOverlap) {
-      return (
-        <>
-          <EuiCallOut
-            announceOnMount
-            title={i18n.translate('xpack.apm.metrics.mixedAgentTypes.overlapping.title', {
-              defaultMessage:
-                'This service has overlapping data from multiple instrumentation types. Only metrics from the most recent instrumentation are shown.',
-            })}
-            iconType="warning"
-            color="warning"
-            data-test-subj="apmMetricsMixedAgentTypesOverlap"
-          >
-            <p>
-              {i18n.translate('xpack.apm.metrics.mixedAgentTypes.classicRangeLabel', {
-                defaultMessage: 'Classic APM metrics:',
-              })}{' '}
-              {renderRangeLink(ingestionTimeRanges.classicApm)}
-              <br />
-              {i18n.translate('xpack.apm.metrics.mixedAgentTypes.otelRangeLabel', {
-                defaultMessage: 'OpenTelemetry metrics:',
-              })}{' '}
-              {renderRangeLink(ingestionTimeRanges.otelNative)}
-            </p>
-            <p>
-              {i18n.translate('xpack.apm.metrics.mixedAgentTypes.overlapping.description', {
-                defaultMessage:
-                  'Both instrumentation types are sending data simultaneously. Metrics from the other type are not displayed in this view.',
-              })}
-            </p>
-          </EuiCallOut>
-          <EuiSpacer size="m" />
-        </>
-      );
-    }
-
-    return (
-      <>
-        <EuiCallOut
-          announceOnMount
-          title={i18n.translate('xpack.apm.metrics.mixedAgentTypes.sequential.title', {
-            defaultMessage:
-              'The selected time range contains data from multiple instrumentation types. Only metrics from the most recent instrumentation are shown.',
-          })}
-          iconType="info"
-          color="primary"
-          data-test-subj="apmMetricsMixedAgentTypes"
-        >
-          <p>
-            {i18n.translate('xpack.apm.metrics.mixedAgentTypes.classicRangeLabel', {
-              defaultMessage: 'Classic APM metrics:',
-            })}{' '}
-            {renderRangeLink(ingestionTimeRanges.classicApm)}
-            <br />
-            {i18n.translate('xpack.apm.metrics.mixedAgentTypes.otelRangeLabel', {
-              defaultMessage: 'OpenTelemetry metrics:',
-            })}{' '}
-            {renderRangeLink(ingestionTimeRanges.otelNative)}
-          </p>
-          <p>
-            {i18n.translate('xpack.apm.metrics.mixedAgentTypes.sequential.description', {
-              defaultMessage:
-                'Adjust the time range to view metrics from a specific instrumentation type.',
-            })}
-          </p>
-        </EuiCallOut>
-        <EuiSpacer size="m" />
-      </>
-    );
-  })();
 
   if (hasDashboardFile && dataView) {
     return (
