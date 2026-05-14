@@ -34,6 +34,7 @@ import {
 import { registerDrilldown } from './drilldowns/registry';
 import { registerActions } from './ui_actions/register_actions';
 import { closeSetup } from './react_embeddable_system/react_embeddable_registry';
+import type { RequestType } from '../server/search_route/types';
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private stateTransferService: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
@@ -66,7 +67,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     );
 
     const embeddableStart: EmbeddableStart = {
-      getSavedObjects: async (request: { type: string | string[] }) => {
+      getSavedObjects: async (request: RequestType) => {
         const result = await core.http.post('/internal/embeddable/fetch_saved_objects', {
           body: JSON.stringify(request),
           asSystemRequest: true,

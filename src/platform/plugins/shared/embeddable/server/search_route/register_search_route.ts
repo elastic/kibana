@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext, SavedObjectsFindOptionsReference } from '@kbn/core/server';
+import { requestTypeSchema, responseTypeSchema } from './types';
 
 export function registerSearchRoute(router: IRouter<RequestHandlerContext>) {
   router.post(
@@ -17,25 +17,11 @@ export function registerSearchRoute(router: IRouter<RequestHandlerContext>) {
       path: '/internal/embeddable/fetch_saved_objects',
       validate: {
         request: {
-          body: schema.object({
-            type: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
-            search: schema.maybe(schema.string()),
-            limit: schema.maybe(schema.number()),
-            tags: schema.maybe(
-              schema.object({
-                included: schema.arrayOf(schema.string()),
-                excluded: schema.arrayOf(schema.string()),
-              })
-            ),
-          }),
+          body: requestTypeSchema,
         },
         response: {
           200: {
-            body: () =>
-              schema.object({
-                hits: schema.arrayOf(schema.any()),
-                total: schema.number(),
-              }),
+            body: () => responseTypeSchema,
             description: 'success',
           },
         },
