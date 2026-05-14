@@ -3380,7 +3380,6 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.agents/skills/scout-migrate-from-ftr/** @elastic/appex-qa
 /.agents/skills/scout-ui-testing/** @elastic/appex-qa
 /.agents/skills/enzyme-to-rtl/** @elastic/appex-qa
-/.agents/skills/buildkite-logs @elastic/appex-qa
 /.agents/skills/evals-create-suite/** @elastic/obs-ai-team @elastic/security-generative-ai
 /.agents/skills/evals-write-spec/** @elastic/obs-ai-team @elastic/security-generative-ai
 

@@ -48,6 +48,7 @@ export function runCheckSavedObjectsCli() {
         gitRev: gitRev!,
         serverlessGitRev,
         updatedTypes: [],
+        wipTypes: [],
         currentRemovedTypes: [],
         newRemovedTypes: [],
         fixtures: {
