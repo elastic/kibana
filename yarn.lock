@@ -7652,6 +7652,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/llm-trace-waterfall@link:x-pack/platform/packages/shared/llm-trace-waterfall":
+  version "0.0.0"
+  uid ""
+
 "@kbn/locator-examples-plugin@link:examples/locator_examples":
   version "0.0.0"
   uid ""
