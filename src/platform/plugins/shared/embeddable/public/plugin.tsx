@@ -66,6 +66,13 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     );
 
     const embeddableStart: EmbeddableStart = {
+      getSavedObjects: async (request: { type: string | string[] }) => {
+        const result = await core.http.post('/internal/embeddable/fetch_saved_objects', {
+          body: JSON.stringify(request),
+          asSystemRequest: true,
+        });
+        return result;
+      },
       getAddFromLibraryComponent: async () => {
         const { AddFromLibraryFlyout } = await import('./add_from_library/add_from_library_flyout');
         return AddFromLibraryFlyout;

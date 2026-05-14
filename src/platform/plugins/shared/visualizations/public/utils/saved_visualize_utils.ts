@@ -38,6 +38,7 @@ import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from './saved_objects_uti
 import { visualizationsClient } from '../content_management';
 import type { VisualizationSavedObjectAttributes } from '../../common';
 import { urlFor } from './url_utils';
+import { getEmbeddable } from '../services';
 
 export const SAVED_VIS_TYPE = 'visualization';
 
@@ -159,23 +160,17 @@ export async function findListItems(
   const searchOption = (field: string, ...defaults: string[]) =>
     _(extensions).map(field).concat(defaults).compact().flatten().uniq().value() as string[];
 
-  const {
-    hits: savedObjects,
-    pagination: { total },
-  } = await visualizationsClient.search(
-    {
-      text: search ? `${search}*` : undefined,
-      limit: size,
-      tags: {
-        included: references?.map((r) => r.id),
-        excluded: referencesToExclude?.map((r) => r.id),
-      },
+  const embeddableService = getEmbeddable();
+
+  const { hits: savedObjects, total } = await embeddableService.getSavedObjects({
+    type: searchOption('docTypes', 'visualization'),
+    search,
+    limit: size,
+    tags: {
+      included: references?.map((r) => r.id),
+      excluded: referencesToExclude?.map((r) => r.id),
     },
-    {
-      types: searchOption('docTypes', 'visualization'),
-      searchFields: searchOption('searchFields', 'title^3', 'description'),
-    }
-  );
+  });
 
   return {
     total,
