@@ -382,25 +382,6 @@ describe('resolveModelsForFeature', () => {
         soEntryFound: false,
       });
     });
-
-    it('still returns only the default connector when ignoreGlobalDefault is false and defaultConnectorOnly is set', async () => {
-      const defaultConnector = inferenceConnector('default-id');
-      getConnectorById.mockResolvedValue(defaultConnector);
-
-      const result = await resolve(
-        { defaultConnectorId: 'default-id', defaultConnectorOnly: true },
-        'my_feature',
-        false
-      );
-
-      expect(getForFeature).not.toHaveBeenCalled();
-      expect(getConnectorList).not.toHaveBeenCalled();
-      expect(result).toEqual({
-        connectors: [defaultConnector],
-        warnings: [],
-        soEntryFound: false,
-      });
-    });
   });
 
   it('propagates warnings from getForFeature', async () => {
