@@ -10,8 +10,8 @@
  *
  * Self-skips when EMULATION_SMOKE_ES_URL is not set.
  * When the env var is present, probes which built-in Elasticsearch roles have
- * read/write access to .kibana-security-emulation-logs-* and emits a
- * structured JSON findings object to stdout.
+ * read access to .kibana-security-emulation-logs-* and emits a structured JSON
+ * findings object to stdout.
  *
  * This is a discovery probe, not an assertion spec. Operators should review the
  * output to decide which roles require explicit deny policies.
@@ -45,7 +45,8 @@ const BUILT_IN_ROLES = [
 
 interface AccessFinding {
   role: string;
-  read: boolean;
+  canRead: boolean;
+  indexCount: number;
   write: boolean;
   create_index: boolean;
   error?: string;
@@ -72,7 +73,7 @@ describe('index_access — built-in role discovery (smoke)', () => {
   });
 
   it(
-    'probes read/write access for built-in roles and emits structured findings',
+    'probes read access for built-in roles and emits structured findings',
     async () => {
       const ts = Date.now();
       const findings: AccessFinding[] = [];
@@ -109,16 +110,36 @@ describe('index_access — built-in role discovery (smoke)', () => {
               EMULATION_LOGS_INDEX_PATTERN
             ] ?? {};
 
+          const canRead = Boolean(idxPriv.read);
+
+          // Count actual indices visible to this role — 0 when none exist yet or
+          // access is denied. cat.indices returns an empty array on empty patterns
+          // rather than throwing.
+          let indexCount = 0;
+          if (canRead) {
+            try {
+              const catResult = await client.cat.indices(
+                { index: EMULATION_LOGS_INDEX_PATTERN, format: 'json' },
+                runAsOpts
+              );
+              indexCount = Array.isArray(catResult) ? catResult.length : 0;
+            } catch {
+              // Access denied or pattern resolves to nothing — leave count at 0.
+            }
+          }
+
           findings.push({
             role,
-            read: Boolean(idxPriv.read),
+            canRead,
+            indexCount,
             write: Boolean(idxPriv.write),
             create_index: Boolean(idxPriv.create_index),
           });
         } catch (err) {
           findings.push({
             role,
-            read: false,
+            canRead: false,
+            indexCount: 0,
             write: false,
             create_index: false,
             error: err instanceof Error ? err.message : String(err),
@@ -132,8 +153,8 @@ describe('index_access — built-in role discovery (smoke)', () => {
         timestamp: new Date(ts).toISOString(),
         findings,
         summary: {
-          can_read: findings.filter((f) => f.read).map((f) => f.role),
-          cannot_read: findings.filter((f) => !f.read && !f.error).map((f) => f.role),
+          can_read: findings.filter((f) => f.canRead).map((f) => f.role),
+          cannot_read: findings.filter((f) => !f.canRead && !f.error).map((f) => f.role),
           errored: findings.filter((f) => Boolean(f.error)).map((f) => f.role),
         },
       };
