@@ -118,8 +118,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
           opacity: 0;
         }
 
-        &:hover .${ACTIONS_CLASS},
-        &:focus-within .${ACTIONS_CLASS} {
+        &:hover .${ACTIONS_CLASS}, &:focus-within .${ACTIONS_CLASS} {
           opacity: 1;
         }
 
