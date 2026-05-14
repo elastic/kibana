@@ -7,7 +7,7 @@
     "public/**/*",
     "common/**/*",
     "test/scout/**/*",
-    "test/scout_kibana_overview_no_data/**/*",
+    "test/scout_shared_ux_no_data/**/*",
   ],
   "kbn_references": [
     "@kbn/core",

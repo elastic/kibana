@@ -59,7 +59,7 @@ export const NewsfeedNavButton = ({ newsfeedApi, hasCustomBranding$, isServerles
       <>
         <EuiHeaderSectionItemButton
           ref={setButtonRef}
-          data-test-subj="newsfeed"
+          data-test-subj={hasNew ? 'newsfeedHasUnread' : 'newsfeedAllRead'}
           aria-controls="keyPadMenu"
           aria-expanded={flyoutVisible}
           aria-haspopup="true"
