@@ -23,17 +23,24 @@ interface ExternalLinkModalProps {
 }
 
 export const ExternalLinkModal: React.FC<ExternalLinkModalProps> = ({ url, onClose }) => {
+  if (url === null) {
+    return null;
+  }
+  return <ExternalLinkModalContent url={url} onClose={onClose} />;
+};
+
+interface ExternalLinkModalContentProps {
+  url: string;
+  onClose: () => void;
+}
+
+const ExternalLinkModalContent: React.FC<ExternalLinkModalContentProps> = ({ url, onClose }) => {
   const titleId = useGeneratedHtmlId({ prefix: 'externalLinkModal' });
   const {
-    services: {
-      analytics,
-      appParams: { history },
-    },
+    services: { analytics, appParams },
   } = useKibana();
 
-  if (url === null) return null;
-
-  const pathname = history.location.pathname;
+  const pathname = appParams?.history?.location.pathname ?? window.location.pathname;
 
   return (
     <EuiConfirmModal
