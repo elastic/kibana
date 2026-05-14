@@ -43,9 +43,11 @@ export function getEql({
         core.elasticsearch.client.asScoped(request).asCurrentUser,
         request
       );
+      const scopedClient = search.asScoped(request);
       return {
         uiSettingsClient: core.uiSettings.asScopedToClient(savedObjectsClient),
-        search: search.asScoped(request).search,
+        search: scopedClient.search,
+        typed: scopedClient.typed,
         dataViews,
       };
     },

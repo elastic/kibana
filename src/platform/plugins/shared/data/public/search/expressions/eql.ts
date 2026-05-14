@@ -37,6 +37,7 @@ export function getEql({
       return {
         uiSettingsClient: core.uiSettings as unknown as UiSettingsCommon,
         search: search.search,
+        typed: search.typed,
         dataViews,
       };
     },

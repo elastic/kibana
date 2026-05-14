@@ -26,25 +26,25 @@ import type {
   IBaseSearchOptions,
   ISearchOptions,
   IEsSearchRequest,
+  ISearchGeneric,
 } from '@kbn/search-types';
 import type {
   ENHANCED_ES_SEARCH_STRATEGY,
   ESQL_ASYNC_SEARCH_STRATEGY,
   EQL_SEARCH_STRATEGY,
   SQL_SEARCH_STRATEGY,
-} from '../../common';
-import type { ISearchInterceptor } from './search_interceptor';
+} from '.';
 
 /**
  * TypedSearchService provides strategy-specific search methods with type-safe
  * parameters, invisible polling, and built-in pagination support.
  *
- * This is a client-side abstraction over the existing SearchInterceptor that
- * converts Observable-based searches to Promise-based searches and adds
- * pagination helpers for DSL searches using search_after.
+ * This is a common abstraction that works on both client and server by accepting
+ * a generic search function that converts Observable-based searches to Promise-based
+ * searches and adds pagination helpers for DSL searches using search_after.
  */
 export class TypedSearchService implements ITypedSearchService {
-  constructor(private readonly searchInterceptor: ISearchInterceptor) {}
+  constructor(private readonly search: ISearchGeneric) {}
 
   /**
    * Execute an ES|QL search
@@ -129,10 +129,10 @@ export class TypedSearchService implements ITypedSearchService {
   // ============================================================================
 
   /**
-   * Execute a search request using the SearchInterceptor and convert Observable to Promise
+   * Execute a search request using the search function and convert Observable to Promise
    */
   private async executeSearch(request: IEsSearchRequest, options: ISearchOptions): Promise<any> {
-    const response$ = this.searchInterceptor.search(request, options);
+    const response$ = this.search(request, options);
 
     // Wait for final result (when isRunning becomes false)
     const finalResponse = await lastValueFrom(

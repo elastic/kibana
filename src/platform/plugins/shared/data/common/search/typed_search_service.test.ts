@@ -9,18 +9,15 @@
 
 import { of } from 'rxjs';
 import { TypedSearchService } from './typed_search_service';
-import type { ISearchInterceptor } from './search_interceptor';
+import type { ISearchGeneric } from '@kbn/search-types';
 
 describe('TypedSearchService', () => {
-  let mockSearchInterceptor: jest.Mocked<ISearchInterceptor>;
+  let mockSearch: jest.MockedFunction<ISearchGeneric>;
   let service: TypedSearchService;
 
   beforeEach(() => {
-    mockSearchInterceptor = {
-      search: jest.fn(),
-    } as unknown as jest.Mocked<ISearchInterceptor>;
-
-    service = new TypedSearchService(mockSearchInterceptor);
+    mockSearch = jest.fn();
+    service = new TypedSearchService(mockSearch);
   });
 
   const createMockResponse = (rawResponse: object, isRunning = false) => {
@@ -33,11 +30,11 @@ describe('TypedSearchService', () => {
   describe('searchESQL', () => {
     it('executes with correct strategy', async () => {
       const mockResponse = { columns: [], values: [] };
-      mockSearchInterceptor.search.mockReturnValue(createMockResponse(mockResponse));
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
       await service.searchESQL({ query: 'FROM logs' });
 
-      expect(mockSearchInterceptor.search).toHaveBeenCalledWith(
+      expect(mockSearch).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
           strategy: 'esql_async',
@@ -47,7 +44,7 @@ describe('TypedSearchService', () => {
 
     it('maps params correctly', async () => {
       const mockResponse = { columns: [], values: [] };
-      mockSearchInterceptor.search.mockReturnValue(createMockResponse(mockResponse));
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
       const params = {
         query: 'FROM logs | WHERE status > ?foo',
@@ -60,7 +57,7 @@ describe('TypedSearchService', () => {
 
       await service.searchESQL(params);
 
-      expect(mockSearchInterceptor.search).toHaveBeenCalledWith(
+      expect(mockSearch).toHaveBeenCalledWith(
         {
           params: {
             body: {
@@ -79,7 +76,7 @@ describe('TypedSearchService', () => {
 
     it('passes options correctly', async () => {
       const mockResponse = { columns: [], values: [] };
-      mockSearchInterceptor.search.mockReturnValue(createMockResponse(mockResponse));
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
       const abortController = new AbortController();
       const options = {
@@ -91,7 +88,7 @@ describe('TypedSearchService', () => {
 
       await service.searchESQL({ query: 'FROM logs' }, options);
 
-      expect(mockSearchInterceptor.search).toHaveBeenCalledWith(
+      expect(mockSearch).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
           abortSignal: options.abortSignal,
@@ -104,7 +101,7 @@ describe('TypedSearchService', () => {
 
     it('returns rawResponse', async () => {
       const mockResponse = { columns: [], values: [] };
-      mockSearchInterceptor.search.mockReturnValue(createMockResponse(mockResponse));
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
       const result = await service.searchESQL({ query: 'FROM logs' });
 
@@ -115,14 +112,14 @@ describe('TypedSearchService', () => {
   describe('searchDSL', () => {
     it('executes with correct strategy', async () => {
       const mockResponse = { hits: { hits: [], total: 0 } };
-      mockSearchInterceptor.search.mockReturnValue(createMockResponse(mockResponse));
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
       await service.searchDSL({
         index: 'logs-*',
         query: { match_all: {} },
       });
 
-      expect(mockSearchInterceptor.search).toHaveBeenCalledWith(
+      expect(mockSearch).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
           strategy: 'ese',
@@ -132,7 +129,7 @@ describe('TypedSearchService', () => {
 
     it('maps params correctly', async () => {
       const mockResponse = { hits: { hits: [], total: 0 } };
-      mockSearchInterceptor.search.mockReturnValue(createMockResponse(mockResponse));
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
       const params = {
         index: 'logs-*',
@@ -148,7 +145,7 @@ describe('TypedSearchService', () => {
 
       await service.searchDSL(params);
 
-      expect(mockSearchInterceptor.search).toHaveBeenCalledWith(
+      expect(mockSearch).toHaveBeenCalledWith(
         {
           params: {
             index: params.index,
@@ -170,7 +167,7 @@ describe('TypedSearchService', () => {
 
     it('passes DSL-specific options', async () => {
       const mockResponse = { hits: { hits: [], total: 0 } };
-      mockSearchInterceptor.search.mockReturnValue(createMockResponse(mockResponse));
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
       const mockDataView = { id: 'test-dataview' };
       const options = {
@@ -186,7 +183,7 @@ describe('TypedSearchService', () => {
         options
       );
 
-      expect(mockSearchInterceptor.search).toHaveBeenCalledWith(
+      expect(mockSearch).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
           legacyHitsTotal: options.legacyHitsTotal,
@@ -198,7 +195,7 @@ describe('TypedSearchService', () => {
     describe('without pagination', () => {
       it('returns result without pagination property', async () => {
         const mockResponse = { hits: { hits: [], total: 0 } };
-        mockSearchInterceptor.search.mockReturnValue(createMockResponse(mockResponse));
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
         const result = await service.searchDSL({
           index: 'logs-*',
@@ -221,7 +218,7 @@ describe('TypedSearchService', () => {
             total: { value: 100 },
           },
         };
-        mockSearchInterceptor.search.mockReturnValue(createMockResponse(mockResponse));
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
         const result = await service.searchDSL(
           {
@@ -248,7 +245,7 @@ describe('TypedSearchService', () => {
             total: { value: 100 },
           },
         };
-        mockSearchInterceptor.search.mockReturnValue(createMockResponse(mockResponse));
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
         const result = await service.searchDSL(
           {
@@ -272,7 +269,7 @@ describe('TypedSearchService', () => {
             total: { value: 2 },
           },
         };
-        mockSearchInterceptor.search.mockReturnValue(createMockResponse(mockResponse));
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
         const result = await service.searchDSL(
           {
@@ -296,7 +293,7 @@ describe('TypedSearchService', () => {
             total: { value: 100 },
           },
         };
-        mockSearchInterceptor.search.mockReturnValue(createMockResponse(mockResponse));
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
         const result = await service.searchDSL(
           {
@@ -330,7 +327,7 @@ describe('TypedSearchService', () => {
           },
         };
 
-        mockSearchInterceptor.search
+        mockSearch
           .mockReturnValueOnce(createMockResponse(firstPageResponse))
           .mockReturnValueOnce(createMockResponse(secondPageResponse));
 
@@ -345,8 +342,8 @@ describe('TypedSearchService', () => {
 
         await result.pagination?.nextPage();
 
-        expect(mockSearchInterceptor.search).toHaveBeenCalledTimes(2);
-        expect(mockSearchInterceptor.search).toHaveBeenNthCalledWith(
+        expect(mockSearch).toHaveBeenCalledTimes(2);
+        expect(mockSearch).toHaveBeenNthCalledWith(
           2,
           expect.objectContaining({
             params: expect.objectContaining({
@@ -369,7 +366,7 @@ describe('TypedSearchService', () => {
             total: { value: 2 },
           },
         };
-        mockSearchInterceptor.search.mockReturnValue(createMockResponse(mockResponse));
+        mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
         const result = await service.searchDSL(
           {
@@ -411,7 +408,7 @@ describe('TypedSearchService', () => {
           },
         };
 
-        mockSearchInterceptor.search
+        mockSearch
           .mockReturnValueOnce(createMockResponse(page1))
           .mockReturnValueOnce(createMockResponse(page2))
           .mockReturnValueOnce(createMockResponse(page3));
@@ -444,7 +441,7 @@ describe('TypedSearchService', () => {
           },
         };
 
-        mockSearchInterceptor.search.mockReturnValue(createMockResponse(pageResponse));
+        mockSearch.mockReturnValue(createMockResponse(pageResponse));
 
         const result = await service.searchDSL(
           {
@@ -468,14 +465,14 @@ describe('TypedSearchService', () => {
   describe('searchEQL', () => {
     it('executes with correct strategy', async () => {
       const mockResponse = { hits: { events: [] } };
-      mockSearchInterceptor.search.mockReturnValue(createMockResponse(mockResponse));
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
       await service.searchEQL({
         index: 'logs-*',
         query: 'process where process.name == "regsvr32.exe"',
       });
 
-      expect(mockSearchInterceptor.search).toHaveBeenCalledWith(
+      expect(mockSearch).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
           strategy: 'eql',
@@ -485,7 +482,7 @@ describe('TypedSearchService', () => {
 
     it('maps params correctly', async () => {
       const mockResponse = { hits: { events: [] } };
-      mockSearchInterceptor.search.mockReturnValue(createMockResponse(mockResponse));
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
       const params = {
         index: 'logs-*',
@@ -498,7 +495,7 @@ describe('TypedSearchService', () => {
 
       await service.searchEQL(params);
 
-      expect(mockSearchInterceptor.search).toHaveBeenCalledWith(
+      expect(mockSearch).toHaveBeenCalledWith(
         {
           params: {
             index: params.index,
@@ -517,7 +514,7 @@ describe('TypedSearchService', () => {
 
     it('passes options correctly', async () => {
       const mockResponse = { hits: { events: [] } };
-      mockSearchInterceptor.search.mockReturnValue(createMockResponse(mockResponse));
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
       const abortController = new AbortController();
       const options = {
@@ -533,7 +530,7 @@ describe('TypedSearchService', () => {
         options
       );
 
-      expect(mockSearchInterceptor.search).toHaveBeenCalledWith(
+      expect(mockSearch).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
           abortSignal: options.abortSignal,
@@ -544,7 +541,7 @@ describe('TypedSearchService', () => {
 
     it('returns rawResponse', async () => {
       const mockResponse = { hits: { events: [] } };
-      mockSearchInterceptor.search.mockReturnValue(createMockResponse(mockResponse));
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
       const result = await service.searchEQL({
         index: 'logs-*',
@@ -558,11 +555,11 @@ describe('TypedSearchService', () => {
   describe('searchSQL', () => {
     it('executes with correct strategy', async () => {
       const mockResponse = { columns: [], rows: [] };
-      mockSearchInterceptor.search.mockReturnValue(createMockResponse(mockResponse));
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
       await service.searchSQL({ query: 'SELECT * FROM logs' });
 
-      expect(mockSearchInterceptor.search).toHaveBeenCalledWith(
+      expect(mockSearch).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
           strategy: 'sql',
@@ -572,7 +569,7 @@ describe('TypedSearchService', () => {
 
     it('maps params correctly', async () => {
       const mockResponse = { columns: [], rows: [] };
-      mockSearchInterceptor.search.mockReturnValue(createMockResponse(mockResponse));
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
       const params = {
         query: 'SELECT * FROM logs WHERE status = ?',
@@ -583,7 +580,7 @@ describe('TypedSearchService', () => {
 
       await service.searchSQL(params);
 
-      expect(mockSearchInterceptor.search).toHaveBeenCalledWith(
+      expect(mockSearch).toHaveBeenCalledWith(
         {
           params: {
             body: {
@@ -600,7 +597,7 @@ describe('TypedSearchService', () => {
 
     it('passes options correctly', async () => {
       const mockResponse = { columns: [], rows: [] };
-      mockSearchInterceptor.search.mockReturnValue(createMockResponse(mockResponse));
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
       const abortController = new AbortController();
       const options = {
@@ -611,7 +608,7 @@ describe('TypedSearchService', () => {
 
       await service.searchSQL({ query: 'SELECT * FROM logs' }, options);
 
-      expect(mockSearchInterceptor.search).toHaveBeenCalledWith(
+      expect(mockSearch).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
           abortSignal: options.abortSignal,
@@ -623,7 +620,7 @@ describe('TypedSearchService', () => {
 
     it('returns rawResponse', async () => {
       const mockResponse = { columns: [], rows: [] };
-      mockSearchInterceptor.search.mockReturnValue(createMockResponse(mockResponse));
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
       const result = await service.searchSQL({ query: 'SELECT * FROM logs' });
 

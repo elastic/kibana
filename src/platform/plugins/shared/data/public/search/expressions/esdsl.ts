@@ -37,6 +37,7 @@ export function getEsdsl({
       return {
         uiSettingsClient: core.uiSettings as any as UiSettingsCommon,
         search: search.search,
+        typed: search.typed,
       };
     },
   });

@@ -23,6 +23,7 @@ import type {
   ISearchOptions,
   IEsSearchResponse,
   IEsSearchRequest,
+  ITypedSearchService,
 } from '@kbn/search-types';
 
 import type { AsScopedOptions } from '@kbn/core-elasticsearch-server';
@@ -85,6 +86,7 @@ export interface ISearchStrategy<
 }
 
 export interface IScopedSearchClient extends ISearchClient {
+  typed: ITypedSearchService;
   saveSession: IScopedSearchSessionsClient['save'];
   getSession: IScopedSearchSessionsClient['get'];
   findSessions: IScopedSearchSessionsClient['find'];

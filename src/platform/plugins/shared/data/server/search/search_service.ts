@@ -28,6 +28,7 @@ import type {
   ISearchOptions,
   IEsSearchRequest,
   IEsSearchResponse,
+  ISearchGeneric,
 } from '@kbn/search-types';
 import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
@@ -85,6 +86,7 @@ import {
   SQL_SEARCH_STRATEGY,
   ESQL_SEARCH_STRATEGY,
   ESQL_ASYNC_SEARCH_STRATEGY,
+  TypedSearchService,
 } from '../../common/search';
 import { getEsaggs, getEsdsl, getEssql, getEql, getEsql } from './expressions';
 import {
@@ -563,15 +565,17 @@ export class SearchService {
         request,
         rollupsEnabled,
       };
+      const search = <
+        SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
+        SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+      >(
+        searchRequest: SearchStrategyRequest,
+        options: ISearchOptions = {}
+      ) => this.search<SearchStrategyRequest, SearchStrategyResponse>(deps, searchRequest, options);
+
       return {
-        search: <
-          SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-          SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
-        >(
-          searchRequest: SearchStrategyRequest,
-          options: ISearchOptions = {}
-        ) =>
-          this.search<SearchStrategyRequest, SearchStrategyResponse>(deps, searchRequest, options),
+        search,
+        typed: new TypedSearchService(search as ISearchGeneric),
         cancel: this.cancel.bind(this, deps),
         extend: this.extend.bind(this, deps),
         saveSession: searchSessionsClient.save,

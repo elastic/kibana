@@ -72,7 +72,7 @@ import { createUsageCollector } from './collectors';
 import { getEql, getEsaggs, getEsdsl, getEssql, getEsql } from './expressions';
 import type { ISearchInterceptor } from './search_interceptor';
 import { SearchInterceptor } from './search_interceptor';
-import { TypedSearchService } from './typed_search_service';
+import { TypedSearchService } from '../../common/search';
 import type { ISearchSessionEBTManager, ISessionsClient, ISessionService } from './session';
 import {
   SessionsClient,
@@ -259,7 +259,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       return this.searchInterceptor.search(request, options);
     }) as ISearchGeneric;
 
-    this.typedSearchService = new TypedSearchService(this.searchInterceptor);
+    this.typedSearchService = new TypedSearchService(
+      this.searchInterceptor.search.bind(this.searchInterceptor) as ISearchGeneric
+    );
 
     const loadingCount$ = new BehaviorSubject(0);
     http.addLoadingCountSource(loadingCount$);

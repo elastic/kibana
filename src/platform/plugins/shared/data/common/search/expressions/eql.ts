@@ -15,7 +15,7 @@ import type { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { lastValueFrom } from 'rxjs';
 import type { RequestStatistics } from '@kbn/inspector-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { ISearchGeneric } from '@kbn/search-types';
+import type { ISearchGeneric, ITypedSearchService } from '@kbn/search-types';
 import type { KibanaContext, EqlSearchStrategyResponse, EqlSearchStrategyRequest } from '..';
 import { EQL_SEARCH_STRATEGY } from '..';
 import { getEsQueryConfig } from '../../es_query';
@@ -43,6 +43,7 @@ export type EqlExpressionFunctionDefinition = ExpressionFunctionDefinition<
 
 interface EqlStartDependencies {
   search: ISearchGeneric;
+  typed?: ITypedSearchService;
   uiSettingsClient: UiSettingsCommon;
   dataViews: DataViewsContract;
 }

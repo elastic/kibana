@@ -18,7 +18,7 @@ import { zipObject } from 'lodash';
 import type { Observable } from 'rxjs';
 import { defer, throwError } from 'rxjs';
 import { catchError, map, switchMap, tap } from 'rxjs';
-import type { ISearchGeneric } from '@kbn/search-types';
+import type { ISearchGeneric, ITypedSearchService } from '@kbn/search-types';
 import type { NowProviderPublicContract } from '../../../public';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
@@ -56,6 +56,7 @@ interface EssqlFnArguments {
 interface EssqlStartDependencies {
   nowProvider?: NowProviderPublicContract;
   search: ISearchGeneric;
+  typed?: ITypedSearchService;
   uiSettings: UiSettingsCommon;
 }
 

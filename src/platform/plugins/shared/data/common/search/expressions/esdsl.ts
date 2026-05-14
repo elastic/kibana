@@ -12,7 +12,7 @@ import { buildEsQuery } from '@kbn/es-query';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 
 import { lastValueFrom } from 'rxjs';
-import type { ISearchGeneric } from '@kbn/search-types';
+import type { ISearchGeneric, ITypedSearchService } from '@kbn/search-types';
 import type { RequestStatistics } from '@kbn/inspector-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { EsRawResponse } from './es_raw_response';
@@ -41,6 +41,7 @@ export type EsdslExpressionFunctionDefinition = ExpressionFunctionDefinition<
 
 interface EsdslStartDependencies {
   search: ISearchGeneric;
+  typed?: ITypedSearchService;
   uiSettingsClient: UiSettingsCommon;
 }
 

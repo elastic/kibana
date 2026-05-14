@@ -14,6 +14,7 @@ import type {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchGeneric,
+  ITypedSearchService,
 } from '@kbn/search-types';
 import type {
   Datatable,
@@ -84,6 +85,7 @@ interface EsqlFnArguments {
 
 interface EsqlStartDependencies {
   search: ISearchGeneric;
+  typed?: ITypedSearchService;
   uiSettings: UiSettingsCommon;
 }
 
