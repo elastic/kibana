@@ -24,6 +24,7 @@ import { INTEGRATION_CATEGORIES } from './tiles_config';
 import { MiniIntegrationTile } from './more_integrations_section/mini_integration_tile';
 import { BrowseAllIntegrationsTile } from './more_integrations_section/browse_all_integrations_tile';
 import { MINI_INTEGRATION_TILES } from './more_integrations_section/mini_tiles_config';
+import { IntegrationsSearch } from './integrations_search';
 
 export const IntegrationsGrid = () => {
   const titleId = useGeneratedHtmlId({ prefix: 'integrationsGridTitle' });
@@ -49,6 +50,8 @@ export const IntegrationsGrid = () => {
       </EuiText>
       <EuiSpacer size="l" />
       <EuiPanel color="subdued" hasShadow={false} paddingSize="l">
+        <IntegrationsSearch />
+        <EuiSpacer size="l" />
         <EuiFlexGroup direction="column" gutterSize="xl">
           {INTEGRATION_CATEGORIES.map((category) => (
             <EuiFlexItem key={category.id} grow={false}>
