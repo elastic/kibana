@@ -41,44 +41,76 @@ Use this skill when the user asks about:
 
 ## Response Structure
 
-Every SIEM readiness response MUST follow this four-section structure:
+Every SIEM readiness response MUST follow this four-section structure. Use markdown headers and formatting so the response is easy to scan.
+
+---
 
 ### 1. Status
-Overall verdict derived from the worst status across all queried dimensions.
-- \`healthy\` — all checked dimensions are healthy
-- \`actionsRequired\` — at least one dimension needs attention
-- \`noData\` — no data available to assess
 
-One short line. Example: **Status: actionsRequired**
+One line showing the overall verdict (worst across all queried dimensions):
+
+| Status | Meaning |
+|--------|---------|
+| ✅ healthy | All checked dimensions are healthy |
+| ⚠️ actionsRequired | At least one dimension needs attention |
+| — noData | No data available to assess |
+
+Example: **Status: ⚠️ actionsRequired**
+
+---
 
 ### 2. Summary
-1–2 sentence narrative of what's going on. Mention which dimensions are healthy and which need attention, calling out specific categories where relevant.
 
-Example: "Endpoint and Identity pipelines are healthy. Network has a critical failure rate and Cloud has no ingested data."
+1–2 sentences covering what's healthy and what needs attention, calling out specific categories where relevant.
 
-### 3. Findings by Dimension, then by Category
+Example: *"Endpoint and Identity pipelines are healthy. Network has a critical pipeline failure rate and Cloud has no ingested data."*
 
-Organize findings with this outer-to-inner order:
-1. **Coverage** — missing data categories, no detection rules
-2. **Quality** — indices with incompatible ECS fields
-3. **Continuity** — pipelines with critical failure rates
-4. **Retention** — indices below the retention threshold
+---
 
-Within each dimension, group findings by category (Endpoint → Identity → Network → Cloud → Application/SaaS). Skip categories with no findings — do not pad with "no issues" lines.
+### 3. Findings
 
-Each finding must cite the specific resource (index name, pipeline name, data stream name).
+**This section is mandatory. Use ### headers per dimension and bullet points prefixed with the category name. Do not flatten findings into a plain list.**
 
-Example:
+Each \`actionableFinding\` has a \`category\` field — use it as the bullet prefix. Required format:
+
 \`\`\`
-**Coverage**
-- Cloud: no data ingested
+### Coverage
+- **[Category]**: [what is wrong]
 
-**Continuity**
-- Endpoint: pipeline \`logs-endpoint.events-default\` has 12% failure rate (critical)
+### Quality
+- **[Category]**: \`[resource]\` — [what is wrong]
 
-**Retention**
-- Network: \`logs-network.dns-default\` retention is 30d, below 365d threshold
+### Continuity
+- **[Category]**: pipeline \`[name]\` — [what is wrong]
+
+### Retention
+- **[Category]**: \`[resource]\` — [what is wrong]
 \`\`\`
+
+Order of dimensions: Coverage → Quality → Continuity → Retention
+Order within each dimension: Endpoint → Identity → Network → Cloud → Application/SaaS
+
+Rules:
+- Always prefix each bullet with **[Category]:** using the \`category\` field from \`actionableFindings\`.
+- Skip entire dimension sections that have no findings.
+- Skip categories within a dimension that have no findings.
+- Never list a finding without its category prefix.
+
+Full example:
+
+\`\`\`
+### Coverage
+- **Coverage**: No detection rules are enabled
+
+### Quality
+- **Cloud**: \`logs-cloud_asset_inventory.asset_inventory-default\` — 2 incompatible ECS fields
+
+### Retention
+- **Cloud**: \`logs-cloud_security_posture.findings-default\` — 180d retention, below 365d FedRAMP threshold
+- **Network**: \`logs-network.dns-default\` — 30d retention, below 365d FedRAMP threshold
+\`\`\`
+
+---
 
 ### 4. Suggested Actions
 
