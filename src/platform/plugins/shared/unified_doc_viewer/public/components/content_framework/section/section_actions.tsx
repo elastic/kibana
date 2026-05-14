@@ -10,6 +10,8 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
+import type { EbtClickAttrs } from '@kbn/ebt-click';
+import { getEbtProps } from '@kbn/ebt-click';
 import { getLinkActionProps } from '../utils/link_action';
 
 interface BaseAction {
@@ -18,6 +20,7 @@ interface BaseAction {
   dataTestSubj?: string;
   label?: string;
   id?: string;
+  ebt: EbtClickAttrs;
 }
 
 export type Action =
@@ -35,8 +38,9 @@ export const SectionActions = ({ actions }: SectionActionsProps) => {
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
       {actions.map((action, idx) => {
-        const { icon, ariaLabel, dataTestSubj, label, onClick, href } = action;
+        const { icon, ariaLabel, dataTestSubj, label, onClick, href, ebt } = action;
         const buttonProps = getLinkActionProps({ href, onClick });
+        const ebtProps = getEbtProps(ebt);
 
         return (
           <EuiFlexItem grow={false} key={action.id ?? idx} id={action.id}>
@@ -46,6 +50,7 @@ export const SectionActions = ({ actions }: SectionActionsProps) => {
                 iconType={icon}
                 aria-label={ariaLabel}
                 data-test-subj={dataTestSubj}
+                {...ebtProps}
                 {...buttonProps}
               >
                 {label}
@@ -56,6 +61,7 @@ export const SectionActions = ({ actions }: SectionActionsProps) => {
                 iconType={icon}
                 aria-label={ariaLabel}
                 data-test-subj={dataTestSubj}
+                {...ebtProps}
                 {...buttonProps}
               />
             )}

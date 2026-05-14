@@ -170,7 +170,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // This test no longer works because the reindex api will error if you're trying to reindex into an existing index.
+    // https://github.com/elastic/kibana/issues/267685: This test no longer works,
+    // because the reindex api will error if you're trying to reindex into an existing index.
     // Need to find another method of testing this.
     it.skip('can resume after reindexing was stopped right after creating the new index', async () => {
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/upgrade_assistant/reindex');
