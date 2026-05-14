@@ -18,7 +18,8 @@ import { AttackDetailsRightPanelKey } from './constants/panel_keys';
 import type { AttackDetailsPanelTabType } from './tabs';
 import { useKibana } from '../../common/lib/kibana';
 
-import { useTabs } from './hooks/use_tabs';
+import { useTabs } from '../../flyout_v2/shared/hooks/use_tabs';
+import { allTabs as tabsDisplayed } from './tabs';
 import { useNavigateToAttackDetailsLeftPanel } from './hooks/use_navigate_to_attack_details_left_panel';
 import { useAttackDetailsContext } from './context';
 import { PanelHeader } from './header';
@@ -39,7 +40,11 @@ export const AttackDetailsRightPanel: React.FC<Partial<AttackDetailsProps>> = me
 
   const expandDetails = useNavigateToAttackDetailsLeftPanel();
 
-  const { tabsDisplayed, selectedTabId } = useTabs({ path });
+  const { selectedTabId } = useTabs<AttackDetailsPanelPaths>({
+    validTabIds: tabsDisplayed.map((t) => t.id),
+    storageKey: FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS,
+    initialTabId: path?.tab,
+  });
 
   const setSelectedTabId = useCallback(
     (tabId: AttackDetailsPanelTabType['id']) => {

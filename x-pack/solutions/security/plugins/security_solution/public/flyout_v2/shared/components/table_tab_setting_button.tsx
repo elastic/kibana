@@ -15,8 +15,8 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import type { TableTabState } from '../tabs/table_tab';
 import {
   TABLE_TAB_SETTING_BUTTON_TEST_ID,
@@ -25,60 +25,34 @@ import {
   TABLE_TAB_SETTING_HIDE_ALERT_FIELDS_TEST_ID,
 } from './test_ids';
 
-const TABLE_TAB_SETTING_BUTTON_LABEL = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.right.tableTabSettingButton.label',
-  {
-    defaultMessage: 'Table settings',
-  }
+const LABEL = i18n.translate(
+  'xpack.securitySolution.flyout.document.tableTab.settingButton.label',
+  { defaultMessage: 'Table settings' }
 );
 
 const HIGHLIGHTED_FIELDS_ONLY_LABEL = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.right.tableTabSettingButton.highlightedFieldsOnlyLabel',
-  {
-    defaultMessage: 'Show highlighted fields only',
-  }
+  'xpack.securitySolution.flyout.document.tableTab.settingButton.highlightedFieldsOnlyLabel',
+  { defaultMessage: 'Show highlighted fields only' }
 );
 
 const HIDE_EMPTY_FIELDS_LABEL = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.right.tableTabSettingButton.hideEmptyFieldsLabel',
-  {
-    defaultMessage: 'Hide empty fields',
-  }
+  'xpack.securitySolution.flyout.document.tableTab.settingButton.hideEmptyFieldsLabel',
+  { defaultMessage: 'Hide empty fields' }
 );
 
 const HIDE_ALERT_FIELDS_LABEL = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.right.tableTabSettingButton.hideAlertFieldsLabel',
-  {
-    defaultMessage: 'Hide Kibana alert fields',
-  }
+  'xpack.securitySolution.flyout.document.tableTab.settingButton.hideAlertFieldsLabel',
+  { defaultMessage: 'Hide Kibana alert fields' }
 );
 
-interface TableTabSettingButtonProps {
-  /**
-   * The current state of the table tab
-   */
+export interface TableTabSettingButtonProps {
   tableTabState: TableTabState;
-  /**
-   * The function to set the state of the table tab
-   */
-  setTableTabState: (tableTabState: TableTabState) => void;
-  /**
-   * The current state of the popover
-   */
+  setTableTabState: (state: TableTabState) => void;
   isPopoverOpen: boolean;
-  /**
-   * The function to set the state of the popover
-   */
-  setIsPopoverOpen: (isPopoverOpen: boolean) => void;
-  /**
-   * Whether the document is an alert
-   */
+  setIsPopoverOpen: (open: boolean) => void;
   isAlert: boolean;
 }
 
-/**
- * Settings button for the table tab.
- */
 export const TableTabSettingButton = ({
   tableTabState,
   setTableTabState,
@@ -89,41 +63,35 @@ export const TableTabSettingButton = ({
   const { showHighlightedFields, hideEmptyFields, hideAlertFields } = tableTabState;
   const { euiTheme } = useEuiTheme();
 
-  const onClick = useCallback(() => {
-    setIsPopoverOpen(!isPopoverOpen);
-  }, [isPopoverOpen, setIsPopoverOpen]);
+  const onClick = useCallback(
+    () => setIsPopoverOpen(!isPopoverOpen),
+    [isPopoverOpen, setIsPopoverOpen]
+  );
 
-  const closePopover = useCallback(() => {
-    setIsPopoverOpen(false);
-  }, [setIsPopoverOpen]);
+  const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
 
-  const onToggleShowHighlightedFields = useCallback(() => {
-    setTableTabState({
-      ...tableTabState,
-      showHighlightedFields: !showHighlightedFields,
-    });
-  }, [showHighlightedFields, setTableTabState, tableTabState]);
+  const onToggleShowHighlightedFields = useCallback(
+    () => setTableTabState({ ...tableTabState, showHighlightedFields: !showHighlightedFields }),
+    [showHighlightedFields, setTableTabState, tableTabState]
+  );
 
-  const onToggleHideEmptyFields = useCallback(() => {
-    setTableTabState({
-      ...tableTabState,
-      hideEmptyFields: !hideEmptyFields,
-    });
-  }, [hideEmptyFields, setTableTabState, tableTabState]);
+  const onToggleHideEmptyFields = useCallback(
+    () => setTableTabState({ ...tableTabState, hideEmptyFields: !hideEmptyFields }),
+    [hideEmptyFields, setTableTabState, tableTabState]
+  );
 
-  const onToggleHideAlertFields = useCallback(() => {
-    setTableTabState({
-      ...tableTabState,
-      hideAlertFields: !hideAlertFields,
-    });
-  }, [hideAlertFields, setTableTabState, tableTabState]);
+  const onToggleHideAlertFields = useCallback(
+    () => setTableTabState({ ...tableTabState, hideAlertFields: !hideAlertFields }),
+    [hideAlertFields, setTableTabState, tableTabState]
+  );
 
   return (
-    <EuiToolTip content={TABLE_TAB_SETTING_BUTTON_LABEL}>
+    <EuiToolTip content={LABEL}>
       <EuiPopover
+        aria-label={LABEL}
         button={
           <EuiButtonIcon
-            aria-label={TABLE_TAB_SETTING_BUTTON_LABEL}
+            aria-label={LABEL}
             onClick={onClick}
             iconType="gear"
             size="m"
@@ -176,3 +144,5 @@ export const TableTabSettingButton = ({
     </EuiToolTip>
   );
 };
+
+TableTabSettingButton.displayName = 'TableTabSettingButton';

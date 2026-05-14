@@ -6,9 +6,12 @@
  */
 
 export const FLYOUT_STORAGE_KEYS = {
+  RIGHT_PANEL_SELECTED_TABS: 'securitySolution.documentDetailsFlyout.rightPanel.selectedTabs.v8.14',
   OVERVIEW_TAB_EXPANDED_SECTIONS:
     'securitySolution.documentDetailsFlyout.overviewSectionExpanded.v8.14',
   THREAT_INTELLIGENCE_TIME_RANGE:
     'securitySolution.documentDetailsFlyout.threatIntelligenceTimeRange',
   PREVALENCE_TIME_RANGE: 'securitySolution.documentDetailsFlyout.prevalenceTimeRange',
+  TABLE_TAB_STATE: 'securitySolution.documentDetailsFlyoutV2.tableTabState',
+  TABLE_TAB_TOUR: 'securitySolution.documentDetailsFlyoutV2.tableTabTourState',
 };

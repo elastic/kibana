@@ -7,18 +7,18 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import type { RightPanelPaths, RightPanelTabType } from './tabs';
+import type { TabId, TabType } from './tabs';
 import { IOC_DETAILS_BODY_TEST_ID } from './test_ids';
 
 export interface ContentProps {
   /**
    * Id of the tab selected in the parent component to display its content
    */
-  selectedTabId: RightPanelPaths;
+  selectedTabId: TabId;
   /**
    * Tabs display right below the flyout's header
    */
-  tabs: RightPanelTabType[];
+  tabs: TabType[];
 }
 
 /**

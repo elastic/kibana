@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 
-import { JsonTab as SharedJsonTab } from '../../shared/components/json_tab';
+import { JsonTab as SharedJsonTab } from '../../../flyout_v2/shared/tabs/json_tab';
 import { useAttackDetailsContext } from '../context';
 import { JSON_TAB_TEST_ID } from '../constants/test_ids';
 

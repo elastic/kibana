@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTab, EuiTabs, EuiText } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
@@ -24,6 +24,7 @@ import { ALERT_SUMMARY_PANEL_TEST_ID } from '../../shared/components/test_ids';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { noopCellActionRenderer } from '../../shared/components/cell_actions';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
+import type { TabId, TabType } from './tabs';
 
 export interface HeaderProps {
   /**
@@ -42,6 +43,18 @@ export interface HeaderProps {
    * Callback that opens the notes details view.
    */
   onShowNotes: () => void;
+  /**
+   * Tabs to render in the header.
+   */
+  tabs: TabType[];
+  /**
+   * Currently selected tab id.
+   */
+  selectedTabId: TabId;
+  /**
+   * Callback to change the selected tab.
+   */
+  setSelectedTabId: (id: TabId) => void;
 }
 
 /**
@@ -50,7 +63,15 @@ export interface HeaderProps {
  * and alert-only summary blocks (status, risk score assignees, and notes).
  */
 export const Header: FC<HeaderProps> = memo(
-  ({ hit, renderCellActions = noopCellActionRenderer, onAlertUpdated, onShowNotes }) => {
+  ({
+    hit,
+    renderCellActions = noopCellActionRenderer,
+    onAlertUpdated,
+    onShowNotes,
+    tabs,
+    selectedTabId,
+    setSelectedTabId,
+  }) => {
     const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
@@ -103,6 +124,23 @@ export const Header: FC<HeaderProps> = memo(
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
+          </>
+        )}
+        {tabs?.length > 0 && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiTabs size="l" expand>
+              {tabs.map((tab, index) => (
+                <EuiTab
+                  key={index}
+                  onClick={() => setSelectedTabId(tab.id)}
+                  isSelected={tab.id === selectedTabId}
+                  data-test-subj={tab['data-test-subj']}
+                >
+                  {tab.name}
+                </EuiTab>
+              ))}
+            </EuiTabs>
           </>
         )}
       </>

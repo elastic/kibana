@@ -10,10 +10,10 @@ import { i18n } from '@kbn/i18n';
 import type { EuiTourStepProps } from '@elastic/eui';
 import { EuiTourStep, EuiButton, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../../../common/lib/kibana';
-import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
+import { useKibana } from '../../../common/lib/kibana';
+import { FLYOUT_STORAGE_KEYS } from '../../document/main/constants/local_storage';
 import {
-  FLYOUT_TABLE_PIN_ACTION_TEST_ID,
+  TABLE_TAB_PIN_ACTION_TEST_ID,
   TABLE_TAB_SETTING_BUTTON_TEST_ID,
   TABLE_TAB_TOUR_TEST_ID,
 } from './test_ids';
@@ -36,7 +36,7 @@ export const TOUR_STEPS = [
         />
       </EuiText>
     ),
-    anchor: `[data-test-subj=${FLYOUT_TABLE_PIN_ACTION_TEST_ID}]`,
+    anchor: `[data-test-subj=${TABLE_TAB_PIN_ACTION_TEST_ID}]`,
     anchorPosition: 'leftCenter' as EuiTourStepProps['anchorPosition'],
   },
   {
@@ -126,7 +126,6 @@ export const TableTabTour = ({
             subtitle={TOUR_TITLE}
             title={step.title}
             footerAction={
-              // if it's the last step, we don't want to show the next button
               index === TOUR_STEPS.length - 1 ? (
                 <EuiButton color="success" size="s" onClick={finishTour}>
                   {'Finish tour'}

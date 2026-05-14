@@ -10,7 +10,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
-import { JsonTab } from './tabs/json_tab';
+import { JsonTab } from '../../shared/tabs/json_tab';
 import { OverviewTab } from './tabs/overview_tab';
 import { TableTab } from './tabs/table_tab';
 import {
@@ -19,10 +19,12 @@ import {
   IOC_DETAILS_JSON_TAB_TEST_ID,
 } from './test_ids';
 
-export type RightPanelPaths = 'overview' | 'table' | 'json';
+export type TabId = 'overview' | 'table' | 'json';
 
-export interface RightPanelTabType {
-  id: RightPanelPaths;
+export const validTabIds: readonly TabId[] = ['overview', 'table', 'json'];
+
+export interface TabType {
+  id: TabId;
   name: ReactElement;
   content: React.ReactElement;
   'data-test-subj': string;
@@ -50,7 +52,7 @@ export const getTabsDisplayed = ({
   indicator,
   onViewAllFieldsInTable,
   renderCellActions,
-}: GetTabsDisplayedOptions): RightPanelTabType[] => [
+}: GetTabsDisplayedOptions): TabType[] => [
   {
     id: 'overview',
     'data-test-subj': IOC_DETAILS_OVERVIEW_TAB_TEST_ID,
@@ -88,6 +90,12 @@ export const getTabsDisplayed = ({
         defaultMessage="JSON"
       />
     ),
-    content: <JsonTab indicator={indicator} />,
+    content: (
+      <JsonTab
+        value={indicator as unknown as Record<string, unknown>}
+        data-test-subj="indicators-flyout"
+        isEmpty={Object.keys(indicator.fields).length === 0}
+      />
+    ),
   },
 ];
