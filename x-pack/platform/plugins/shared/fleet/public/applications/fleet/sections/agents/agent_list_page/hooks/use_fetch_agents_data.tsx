@@ -183,7 +183,7 @@ export function useFetchAgentsData() {
     [updateTableState]
   );
 
-  const pageSizeOptions = [5, 20, 50];
+  const pageSizeOptions = [20, 50, 100, 200];
 
   // Sync draftKuery with session storage search
   const [draftKuery, setDraftKuery] = useState<string>(search);

@@ -19,7 +19,10 @@ import type {
   ConsumerExecutionMetrics,
   RuleExecutionStatus,
 } from '../../types';
-import { createAlertEventLogRecordObject } from '../create_alert_event_log_record_object';
+import {
+  createAlertEventLogRecordObject,
+  type Event,
+} from '../create_alert_event_log_record_object';
 import type { RuleRunMetrics } from '../rule_run_metrics_store';
 import { Gap } from '../rule_gaps/gap';
 import type { GapBase } from '../../application/gaps/types';
@@ -472,7 +475,7 @@ export function createAlertRecord(
   ruleData: RuleContext,
   savedObjects: SavedObjects[],
   alert: AlertOpts
-) {
+): Event {
   return createAlertEventLogRecordObject({
     ruleId: ruleData.id,
     ruleType: ruleData.type,
@@ -499,7 +502,7 @@ export function createActionExecuteRecord(
   ruleData: RuleContext,
   savedObjects: SavedObjects[],
   action: ActionOpts
-) {
+): Event {
   return createAlertEventLogRecordObject({
     ruleId: ruleData.id,
     ruleType: ruleData.type,
@@ -530,7 +533,7 @@ export function createExecuteTimeoutRecord(
   savedObjects: SavedObjects[],
   type: ExecutionType,
   ruleData?: RuleContext
-) {
+): Event {
   let message = '';
   switch (type) {
     case executionType.BACKFILL:
@@ -570,7 +573,7 @@ export function createGapRecord(
     };
     reason?: GapReason;
   }
-) {
+): Event {
   return createAlertEventLogRecordObject({
     ruleId: ruleData?.id,
     ruleType: ruleData?.type,
@@ -590,7 +593,7 @@ export function initializeExecuteRecord(
   context: Context,
   ruleData: RuleContext,
   so: SavedObjects[]
-) {
+): Event {
   return createAlertEventLogRecordObject({
     ruleId: ruleData.id,
     ruleType: ruleData.type,
@@ -608,7 +611,7 @@ export function initializeExecuteRecord(
   });
 }
 
-export function initializeExecuteBackfillRecord(context: Context, so: SavedObjects[]) {
+export function initializeExecuteBackfillRecord(context: Context, so: SavedObjects[]): Event {
   return createAlertEventLogRecordObject({
     namespace: context.namespace,
     spaceId: context.spaceId,
