@@ -10,6 +10,7 @@
 import type { Logger } from '@kbn/logging';
 import type { z } from '@kbn/zod/v4';
 import type { ServerStepDefinition } from './types';
+import { applyPollDefaults, pollCeilingsAreDefault, validateStepDefinitionShape } from './types';
 import type { ServerStepDefinitionOrLoader } from '../types';
 
 /**
@@ -54,19 +55,27 @@ export class ServerStepRegistry {
   /**
    * Add a step definition to the registry.
    * @param definition - The step definition to add
-   * @throws Error if the step id is already registered
+   * @throws Error if the step id is already registered or the definition fails
+   *   structural validation (e.g. missing handler/run/poll, invalid poll policy).
    */
   private addToRegistry<
     Input extends z.ZodType = z.ZodType,
     Output extends z.ZodType = z.ZodType,
     Config extends z.ZodObject = z.ZodObject
   >(definition: ServerStepDefinition<Input, Output, Config>): void {
+    validateStepDefinitionShape(definition as ServerStepDefinition);
     if (this.registry.has(definition.id)) {
       throw new Error(
         `Step definition for type "${definition.id}" is already registered. Each step type must have a unique definition.`
       );
     }
-    this.registry.set(definition.id, definition as ServerStepDefinition);
+    const finalDefinition = applyPollDefaults(definition as ServerStepDefinition);
+    if (pollCeilingsAreDefault(finalDefinition)) {
+      this.logger.warn(
+        `Step "${finalDefinition.id}" registered without explicit poll.ceilings; using defaults (maxAttempts=120, maxWaitMs=3600000ms). Declare poll.ceilings explicitly to silence this warning.`
+      );
+    }
+    this.registry.set(finalDefinition.id, finalDefinition);
   }
 
   /**

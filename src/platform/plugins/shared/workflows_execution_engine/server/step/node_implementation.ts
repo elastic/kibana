@@ -25,6 +25,13 @@ export interface RunStepResult {
   input: unknown;
   output: unknown;
   error: SerializedError | undefined;
+  /**
+   * When true, the step has handed control back to the scheduler (e.g. a
+   * durable poll step that put itself in WAITING state). The base run loop
+   * skips finishStep/failStep/navigateToNextNode so the persisted WAITING
+   * record drives the resume flow instead.
+   */
+  suspended?: true;
 }
 
 // TODO: To remove it and replace with AtomicGraphNode
@@ -163,6 +170,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
       stepSpan.setLabel('step_id', this.stepExecutionRuntime.stepExecutionId);
     }
 
+    let suspended = false;
     try {
       input = await this.getInput();
       this.stepExecutionRuntime.setInput(input);
@@ -203,6 +211,17 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
         return;
       }
 
+      // The step (e.g. a durable poll) put itself in WAITING. Skip
+      // finishStep/failStep/navigateToNextNode — the persisted WAITING
+      // record drives the resume flow instead.
+      if (result.suspended) {
+        suspended = true;
+        if (stepSpan) {
+          stepSpan.setOutcome('unknown');
+        }
+        return;
+      }
+
       if (result.error) {
         this.stepExecutionRuntime.failStep(new ExecutionError(result.error));
         if (stepSpan) {
@@ -226,7 +245,9 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
       }
     }
 
-    this.workflowExecutionRuntime.navigateToNextNode();
+    if (!suspended) {
+      this.workflowExecutionRuntime.navigateToNextNode();
+    }
   }
 
   // Subclasses implement this to execute the step logic

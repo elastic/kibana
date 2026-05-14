@@ -732,6 +732,55 @@ const myStepHandler: StepHandler = async (context) => {
 };
 ```
 
+### Durable awaitable steps (`run` / `poll`)
+
+Some integrations finish asynchronously: you start work in one request, then must **wake up later** and check status until the work completes or fails. For that, server steps can use **`run` with `poll`**, or **`poll`** alone. **Single-shot steps always use `handler`** (not `run` without `poll`).
+
+**Modes** involving `poll` (`handler` cannot be combined with `run` or `poll`):
+
+| Mode | Behavior |
+|------|----------|
+| **`handler` only** (no `poll`) | One invocation must return `{ output }` or `{ error }`. This is the only single-shot shape. |
+| **`poll` only** | No setup phase. The engine invokes `poll.handler` on the first execution, then on each scheduled wake-up until the handler returns `{ output }` or `{ error }`. |
+| **`run` + `poll`** | The only shape that uses **`run`**: `run` may return `{ output }` / `{ error }` immediately, or return **`{ state }`** to hand off to polling. After a hand-off, the **first** `poll.handler` invocation happens on the **next** wake-up (not in the same turn as `run`). |
+
+**`PollHandlerContext`** (passed to `poll.handler`) extends `StepHandlerContext` with:
+
+- **`state`** — author-owned state persisted from the previous `run` or `poll` result (`undefined` on the first poll of a **poll-only** step).
+- **`attempt`** — 1-based count of **`poll.handler`** invocations so far (does not count `run`).
+
+**`poll.policy`** (required) defines how long the workflow stays in **`WAITING`** between polls. Supported strategies: **`fixed`**, **`exponential`** (optional `jitter` to spread wake-ups), and **`dynamic`** (author-supplied `next(ctx)` returning delay ms from engine bookkeeping + `state`). Cadence is fixed at **definition time**; it is not configurable from workflow YAML.
+
+**`poll.ceilings`** (optional) caps runaway polling. Omitted ceilings default to conservative **`DEFAULT_POLL_CEILINGS`** (`maxAttempts` / `maxWaitMs`). If a ceiling is exceeded, the step fails with `ExecutionError` type **`PollCeilingExceeded`**. When you rely on those defaults, the registry logs a **warning** at registration time so authors notice.
+
+**Reserved persisted keys** inside the step’s persisted state object: **`__poll`** (engine bookkeeping) and **`__authorState`** (your `state` from `run` / `poll`). Step authors should return **`{ state }`** / **`{ state: null }`** at the top level of results; the runtime maps that to `__authorState`. Clearing author state uses **`{ state: null }`**; merging treats explicit `undefined` fields as removals so stale keys do not linger.
+
+**`onCancel` and `WAITING`**: optional **`onCancel`** still runs when a workflow is cancelled while the step is **waiting** between polls (after `abortSignal` has fired), so you can tear down external jobs without waiting for the next poll.
+
+Use **`createServerStepDefinition`** so TypeScript enforces the correct shape per mode and runtime guards catch invalid definitions from non-TypeScript callers.
+
+```typescript
+import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { z } from '@kbn/zod/v4';
+
+// Poll-only: illustrative pattern (check upstream, return { output } when ready).
+export const demoPollOnly = createServerStepDefinition({
+  id: 'my-namespace.awaitJob',
+  inputSchema: z.object({ jobId: z.string() }),
+  outputSchema: z.object({ status: z.literal('complete') }),
+  poll: {
+    handler: async ({ input, state, attempt, logger }) => {
+      const marker = state?.marker ?? 'seed';
+      logger.debug(`poll ${attempt} job=${input.jobId} marker=${marker}`);
+      // return { output: { status: 'complete' } };
+      return { state: { marker: `${marker}.` } };
+    },
+    policy: { strategy: 'exponential', initialMs: 5_000, maxMs: 60_000, jitter: true },
+    ceilings: { maxAttempts: 60, maxWaitMs: 30 * 60_000 },
+  },
+});
+```
+
 ### Error Handling
 
 Step handlers can return errors in their result, or throw errors directly. The workflow execution engine automatically catches thrown errors and converts them to `ExecutionError`, so you don't need to handle conversion manually.
@@ -932,10 +981,10 @@ All custom step definitions must be approved by the workflows-eng team before be
 
 1. **Registration Detection**: When you register a new step or modify an existing step's handler, the test will detect it during CI runs.
 
-2. **Handler Hash**: The test generates a SHA256 hash of each step's handler function implementation. This ensures that:
+2. **Handler hash**: The test compares a SHA256 fingerprint of the step’s **callable implementation** (see `hashStepImplementation` in `get_step_definitions.ts`). For legacy **`handler`**-only steps (no `run`, `poll`, or `onCancel`), this is unchanged from hashing **`handler` alone**. For **`run` / `poll` / `onCancel`** definitions, the fingerprint includes every present phase so changes to polling or cancellation logic require re-approval. This ensures:
 
    - New steps are detected
-   - Changes to handler implementations are detected (even if the step ID remains the same)
+   - Changes to step implementations are detected (even if the step ID remains the same)
 
 3. **Approval Required**: The test compares registered steps against the approved list in:
    ```

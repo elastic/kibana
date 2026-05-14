@@ -11,7 +11,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { ServerStepRegistry } from './step_registry';
-import type { ServerStepDefinition } from './types';
+import type { PollLifecycle, ServerStepDefinition } from './types';
 
 const stepId = 'custom.myStep';
 const handler = jest.fn();
@@ -196,6 +196,118 @@ describe('ServerStepRegistry', () => {
     it('should resolve immediately when no pending loaders', async () => {
       registry.register(defaultDefinition);
       await expect(registry.whenReady()).resolves.toBeUndefined();
+    });
+  });
+
+  describe('shape validation', () => {
+    const baseCommon = {
+      id: 'custom.poll',
+      category: StepCategory.Kibana,
+      label: 'Poll Step',
+      description: 'A poll step',
+      inputSchema: z.object({}),
+      outputSchema: z.object({}),
+    } as const;
+
+    it('rejects definitions that declare neither handler, run, nor poll', () => {
+      expect(() => registry.register({ ...baseCommon } as unknown as ServerStepDefinition)).toThrow(
+        /must define one of:/
+      );
+    });
+
+    it('rejects run without poll', () => {
+      expect(() =>
+        registry.register({
+          ...baseCommon,
+          run: jest.fn(),
+        } as unknown as ServerStepDefinition)
+      ).toThrow(/defines "run" without "poll"/);
+    });
+
+    it('rejects mixing legacy handler with run', () => {
+      expect(() =>
+        registry.register({
+          ...baseCommon,
+          handler: jest.fn(),
+          run: jest.fn(),
+        } as unknown as ServerStepDefinition)
+      ).toThrow(/mixes the legacy "handler" field/);
+    });
+
+    it('rejects poll without a policy', () => {
+      const poll = { handler: jest.fn() } as unknown as PollLifecycle;
+      expect(() =>
+        registry.register({ ...baseCommon, poll } as unknown as ServerStepDefinition)
+      ).toThrow(/defines "poll" without a policy/);
+    });
+
+    it('rejects fixed policy with non-positive interval', () => {
+      const poll: PollLifecycle = {
+        handler: jest.fn(),
+        policy: { strategy: 'fixed', intervalMs: 0 },
+      };
+      expect(() =>
+        registry.register({ ...baseCommon, poll } as unknown as ServerStepDefinition)
+      ).toThrow(/"fixed.intervalMs" must be a positive number/);
+    });
+
+    it('rejects exponential policy when maxMs < initialMs', () => {
+      const poll: PollLifecycle = {
+        handler: jest.fn(),
+        policy: { strategy: 'exponential', initialMs: 5_000, maxMs: 1_000 },
+      };
+      expect(() =>
+        registry.register({ ...baseCommon, poll } as unknown as ServerStepDefinition)
+      ).toThrow(/"exponential.maxMs" must be >= "initialMs"/);
+    });
+
+    it('rejects exponential policy when factor <= 1', () => {
+      const poll: PollLifecycle = {
+        handler: jest.fn(),
+        policy: { strategy: 'exponential', initialMs: 1_000, maxMs: 10_000, factor: 1 },
+      };
+      expect(() =>
+        registry.register({ ...baseCommon, poll } as unknown as ServerStepDefinition)
+      ).toThrow(/"exponential.factor" must be > 1/);
+    });
+
+    it('rejects dynamic policy when next is not a function', () => {
+      const poll = {
+        handler: jest.fn(),
+        policy: { strategy: 'dynamic', next: 'not a function' },
+      } as unknown as PollLifecycle;
+      expect(() =>
+        registry.register({ ...baseCommon, poll } as unknown as ServerStepDefinition)
+      ).toThrow(/"dynamic.next" must be a function/);
+    });
+
+    it('logs a warning and applies defaults when poll.ceilings is omitted', () => {
+      const poll: PollLifecycle = {
+        handler: jest.fn(),
+        policy: { strategy: 'fixed', intervalMs: 1_000 },
+      };
+      registry.register({ ...baseCommon, poll } as unknown as ServerStepDefinition);
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('registered without explicit poll.ceilings')
+      );
+      const stored = registry.get(baseCommon.id);
+      expect(stored?.poll?.ceilings).toEqual({ maxAttempts: 120, maxWaitMs: 60 * 60_000 });
+    });
+
+    it('does not warn when poll.ceilings are supplied explicitly', () => {
+      const poll: PollLifecycle = {
+        handler: jest.fn(),
+        policy: { strategy: 'fixed', intervalMs: 1_000 },
+        ceilings: { maxAttempts: 5, maxWaitMs: 60_000 },
+      };
+      registry.register({ ...baseCommon, poll } as unknown as ServerStepDefinition);
+
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(registry.get(baseCommon.id)?.poll?.ceilings).toEqual({
+        maxAttempts: 5,
+        maxWaitMs: 60_000,
+      });
     });
   });
 });

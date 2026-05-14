@@ -45,13 +45,34 @@ export {
 
 export type {
   ServerStepDefinition,
+  LegacyHandlerMode,
+  RunOnlyMode,
+  PollOnlyMode,
+  RunPlusPollMode,
   StepHandler,
   StepHandlerContext,
   StepHandlerResult,
   OnCancelHandler,
+  RunDoneOnlyHandler,
+  RunWithHandoffHandler,
+  PollHandler,
+  PollHandlerContext,
+  PollLifecycle,
+  PollPolicy,
+  PollPolicyContext,
+  PollCeilings,
+  PhaseDoneResult,
+  PhaseErrorResult,
+  RunHandoffResult,
+  PollContinueResult,
 } from './step_registry/types';
 
-export { createServerStepDefinition } from './step_registry/types';
+export {
+  createServerStepDefinition,
+  validateStepDefinitionShape,
+  pollCeilingsAreDefault,
+  DEFAULT_POLL_CEILINGS,
+} from './step_registry/types';
 
 export { TriggerRegistry } from './trigger_registry';
 

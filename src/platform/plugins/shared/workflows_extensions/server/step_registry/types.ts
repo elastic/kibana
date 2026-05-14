@@ -14,93 +14,117 @@ import type { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../common';
 
 /**
- * Definition of a server-side workflow step extension.
- * Contains the technical/behavioral implementation of a step.
- *
- * The input and output types are automatically inferred from the inputSchema and outputSchema,
- * so you don't need to specify them explicitly. Use `createServerStepDefinition` helper function
- * for the best type inference experience.
- *
- * @example
- * ```typescript
- * // Option 1: Using the helper function (recommended for best type inference)
- * const myStepDefinition = createServerStepDefinition({
- *   id: 'custom.myStep',
- *   inputSchema: z.object({ message: z.string() }),
- *   outputSchema: z.object({ result: z.string() }),
- *   handler: async (context) => {
- *     // context.input is automatically typed as { message: string }
- *     return { output: { result: context.input.message } };
- *   },
- * });
- *
- * // Option 2: Using type annotation (works but may require explicit types in some cases)
- * const myStepDefinition: ServerStepDefinition = {
- *   id: 'custom.myStep',
- *   inputSchema: z.object({ message: z.string() }),
- *   outputSchema: z.object({ result: z.string() }),
- *   handler: async (context) => {
- *     return { output: { result: context.input.message } };
- *   },
- * };
- * ```
+ * Default ceilings applied when a poll-based step omits {@link PollCeilings}.
+ * Conservative values that prevent runaway polling but are loose enough for
+ * most real-world async jobs (background ML tasks, Osquery actions, etc.).
  */
-export interface ServerStepDefinition<
-  Input extends z.ZodType = z.ZodType,
-  Output extends z.ZodType = z.ZodType,
-  Config extends z.ZodObject = z.ZodObject
-> extends CommonStepDefinition<Input, Output, Config> {
-  /**
-   * The handler function that executes this step's logic.
-   * Input and output types are automatically inferred from the schemas.
-   */
-  handler: StepHandler<Input, Output, Config>;
+export const DEFAULT_POLL_CEILINGS: Required<PollCeilings> = {
+  maxAttempts: 120,
+  maxWaitMs: 60 * 60_000,
+};
 
-  /**
-   * Optional cancellation cleanup handler.
-   *
-   * Called after the step's abort signal fires and `run()` completes, giving the
-   * step a guaranteed cleanup entry point (e.g. cancelling spawned child operations).
-   * Only invoked when the workflow is being cancelled — normal completions skip it.
-   *
-   * Implementations must be idempotent. Errors thrown here are logged but do not
-   * disrupt the cancellation flow.
-   */
-  onCancel?: OnCancelHandler<Input, Config>;
+// -----------------------------------------------------------------------------
+// Result types
+// -----------------------------------------------------------------------------
+
+/** Successful run/poll outcome — step has produced its final output. */
+export interface PhaseDoneResult<TOutput> {
+  output: TOutput;
+  /** Optional error information if the step failed. */
+  error?: never;
 }
 
 /**
- * Helper function to create a ServerStepDefinition with automatic type inference.
- * This ensures that the handler's input and output types are correctly inferred
- * from the inputSchema and outputSchema without needing explicit type annotations.
- *
- * @example
- * ```typescript
- * const myStepDefinition = createServerStepDefinition({
- *   id: 'custom.myStep',
- *   inputSchema: z.object({ message: z.string() }),
- *   outputSchema: z.object({ result: z.string() }),
- *   handler: async (context) => {
- *     // context.input is typed as { message: string }
- *     // return type should be { output: { result: string } }
- *     return { output: { result: context.input.message } };
- *   },
- * });
- * ```
+ * Run-phase hand-off: the step has started its work and now needs the engine
+ * to drive the {@link PollLifecycle.handler} until the work completes.
  */
-export function createServerStepDefinition<
+export interface RunHandoffResult<TState> {
+  output?: never;
+  state: TState;
+  error?: never;
+}
+
+/**
+ * Poll-phase continuation: the step is not done yet. Engine schedules the next
+ * wake-up using the step definition's {@link PollPolicy}. The handler may
+ * optionally update the persisted author state.
+ */
+export interface PollContinueResult<TState> {
+  output?: never;
+  /**
+   * Optional updated author state. Omit to keep the previously persisted state.
+   * Pass `null` to explicitly clear it.
+   */
+  state?: TState | null;
+  error?: never;
+}
+
+/** Failure outcome — same shape as the existing single-handler result. */
+export interface PhaseErrorResult {
+  output?: undefined;
+  state?: undefined;
+  error: Error;
+}
+
+/**
+ * Result returned by a legacy single-`handler` step. Kept for backward
+ * compatibility with existing step authors using `handler`.
+ */
+export interface StepHandlerResult<TOutput extends z.ZodType = z.ZodType> {
+  output?: z.infer<TOutput>;
+  error?: Error;
+}
+
+// -----------------------------------------------------------------------------
+// Phase handler types
+// -----------------------------------------------------------------------------
+
+/**
+ * Handler for a `run` phase that completes synchronously (output or error only).
+ * Used by {@link RunWithHandoffHandler} as the non-hand-off branch; single-shot
+ * steps use {@link StepHandler} (`handler`) instead of `run` without `poll`.
+ */
+export type RunDoneOnlyHandler<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
   Config extends z.ZodObject = z.ZodObject
->(
-  definition: ServerStepDefinition<Input, Output, Config>
-): ServerStepDefinition<Input, Output, Config> {
-  return definition;
-}
+> = (
+  context: StepHandlerContext<Input, Config>
+) => Promise<PhaseDoneResult<z.infer<Output>> | PhaseErrorResult>;
+
+/**
+ * Handler for a `run` phase that hands off to a `poll` phase.
+ * Returns either a final output (synchronous completion) or `{ state }`
+ * to start the polling loop.
+ */
+export type RunWithHandoffHandler<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject,
+  State = unknown
+> = (
+  context: StepHandlerContext<Input, Config>
+) => Promise<PhaseDoneResult<z.infer<Output>> | RunHandoffResult<State> | PhaseErrorResult>;
+
+/**
+ * Handler for a `poll` phase. Receives the persisted author `state` alongside
+ * the regular step handler context. Returns either the final output or
+ * `{ state? }` to continue polling.
+ */
+export type PollHandler<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject,
+  State = unknown
+> = (
+  context: PollHandlerContext<Input, Config, State>
+) => Promise<PhaseDoneResult<z.infer<Output>> | PollContinueResult<State> | PhaseErrorResult>;
 
 /**
  * Handler function that executes a custom workflow step.
- * This function is called by the execution engine to run the step logic.
+ * Legacy alias retained for backward compatibility with step definitions that
+ * use the `handler` field. New step authors should use `run` (and optionally
+ * `poll`) instead.
  *
  * @param context - The runtime context for the step execution
  * @returns The step output (should conform to outputSchema)
@@ -115,11 +139,402 @@ export type StepHandler<
  * Cancellation cleanup handler for custom workflow steps.
  * Receives the same context as the main handler so it has access to input,
  * config, and runtime services needed for cleanup.
+ *
+ * `onCancel` fires after the abort signal triggers, in both the `RUNNING`
+ * and `WAITING` states. Durable poll steps therefore get a guaranteed
+ * cleanup entry point even when they were suspended between polls — handy
+ * for cancelling externally-tracked jobs (e.g. an Osquery action created in
+ * `run()`) without waiting for the next wake-up.
+ *
+ * Implementations must be idempotent. Errors thrown here are logged but do
+ * not disrupt the cancellation flow.
  */
 export type OnCancelHandler<
   Input extends z.ZodType = z.ZodType,
   Config extends z.ZodObject = z.ZodObject
 > = (context: StepHandlerContext<Input, Config>) => Promise<void> | void;
+
+// -----------------------------------------------------------------------------
+// Poll policy + ceilings
+// -----------------------------------------------------------------------------
+
+/**
+ * Strategy for computing the next poll wake-up. Cadence is owned by the step
+ * author at definition time and is intentionally not configurable from YAML.
+ *
+ * - `fixed`        — constant interval between every poll.
+ * - `exponential`  — `initialMs` doubles by `factor` (default 2) each attempt,
+ *                    capped at `maxMs`. With `jitter` enabled, the computed
+ *                    delay is multiplied by a uniform random value in
+ *                    `[0.5, 1.5]` to avoid thundering herds across executions.
+ * - `dynamic`      — the step author supplies a pure function that computes
+ *                    the next delay (in ms) from the engine bookkeeping plus
+ *                    the persisted author state. Useful when the upstream
+ *                    system gives explicit timing hints (e.g. HTTP
+ *                    `Retry-After`, ML job progress).
+ */
+export type PollPolicy<State = unknown> =
+  | { strategy: 'fixed'; intervalMs: number }
+  | {
+      strategy: 'exponential';
+      initialMs: number;
+      maxMs: number;
+      factor?: number;
+      jitter?: boolean;
+    }
+  | {
+      strategy: 'dynamic';
+      next: (ctx: PollPolicyContext<State>) => number;
+    };
+
+/**
+ * Context passed to {@link PollPolicy} `dynamic.next`. All fields are derived
+ * from engine bookkeeping or the persisted author state.
+ */
+export interface PollPolicyContext<State = unknown> {
+  /** 1-based count of poll invocations so far (does not include `run`). */
+  attempt: number;
+  /** Epoch ms when the step entered its poll loop (after `run`). */
+  startedAt: number;
+  /** Epoch ms of the most recent poll handler invocation. */
+  lastInvocationAt: number;
+  /** Persisted author state, as returned by the previous handler call. */
+  state: State | undefined;
+}
+
+/**
+ * Engine-enforced ceilings for a poll-based step. Both default to
+ * {@link DEFAULT_POLL_CEILINGS} when omitted.
+ *
+ * When a ceiling is exceeded the step fails with an `ExecutionError` of type
+ * `'PollCeilingExceeded'` whose `details` indicate which ceiling tripped.
+ */
+export interface PollCeilings {
+  /** Maximum number of `poll.handler` invocations before failing the step. */
+  maxAttempts?: number;
+  /** Maximum wall-clock time (ms) the step may spend in `WAITING` before failing. */
+  maxWaitMs?: number;
+}
+
+/**
+ * Definition of the `poll` phase of a step. `policy` is required; `ceilings`
+ * default to {@link DEFAULT_POLL_CEILINGS}.
+ */
+export interface PollLifecycle<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject,
+  State = unknown
+> {
+  handler: PollHandler<Input, Output, Config, State>;
+  policy: PollPolicy<State>;
+  ceilings?: PollCeilings;
+}
+
+// -----------------------------------------------------------------------------
+// Step definition union
+// -----------------------------------------------------------------------------
+
+/**
+ * Definition of a server-side workflow step extension.
+ * Contains the technical/behavioral implementation of a step.
+ *
+ * A step must declare exactly one of the following modes:
+ *
+ * - **`handler` only (single invocation)** — legacy {@link StepHandler}; one
+ *   invocation returns `{ output }` or `{ error }`. No `run` and no `poll`.
+ * - **`poll` only** — pure polling: no setup phase, the engine drives `poll`
+ *   from the first execution onwards.
+ * - **`run` + `poll`** — the only shape that uses **`run`**: a hand-off phase
+ *   that may return `{ output }` / `{ error }` immediately, or `{ state }` to
+ *   continue in `poll`, which is invoked on each wake-up until `{ output }`.
+ *
+ * Constraints enforced at compile time:
+ * - At least one of `handler`, `run`, or `poll` must be defined.
+ * - `handler` must not appear together with `run` or `poll`.
+ * - `run` without `poll` is invalid — single-shot steps use `handler` only.
+ * - When `poll` is defined, `policy` is required.
+ *
+ * Runtime guards in {@link createServerStepDefinition} catch the same
+ * violations for callers that bypass the type system.
+ *
+ * @example Legacy handler (existing steps — no change required)
+ * ```typescript
+ * const myStepDefinition = createServerStepDefinition({
+ *   id: 'custom.myStep',
+ *   inputSchema: z.object({ message: z.string() }),
+ *   outputSchema: z.object({ result: z.string() }),
+ *   handler: async (context) => ({ output: { result: context.input.message } }),
+ * });
+ * ```
+ *
+ * @example New `run` + `poll` shape
+ * ```typescript
+ * const osqueryRunQuery = createServerStepDefinition({
+ *   ...OsqueryRunQueryAndWaitStepCommonDefinition,
+ *   run: async ({ input }) => {
+ *     const action = await osqueryClient.actions.create(input);
+ *     return { state: { actionId: action.action_id } };
+ *   },
+ *   poll: {
+ *     handler: async ({ input, state }) => {
+ *       const action = await osqueryClient.actions.get({ actionId: state.actionId });
+ *       if (action.responded < input.agentIds.length) return { state };
+ *       const results = await osqueryClient.results.get({ actionId: state.actionId });
+ *       return { output: { rows: results.items } };
+ *     },
+ *     policy: { strategy: 'exponential', initialMs: 5_000, maxMs: 60_000, jitter: true },
+ *     ceilings: { maxAttempts: 60, maxWaitMs: 30 * 60_000 },
+ *   },
+ * });
+ * ```
+ */
+export type ServerStepDefinition<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject,
+  State = unknown
+> = CommonStepDefinition<Input, Output, Config> & {
+  onCancel?: OnCancelHandler<Input, Config>;
+} & (
+    | RunOnlyMode<Input, Output, Config>
+    | PollOnlyMode<Input, Output, Config, State>
+    | RunPlusPollMode<Input, Output, Config, State>
+  );
+
+/**
+ * Single-invocation step: {@link StepHandler} only (no `run`, no `poll`).
+ */
+export interface RunOnlyMode<
+  Input extends z.ZodType,
+  Output extends z.ZodType,
+  Config extends z.ZodObject
+> {
+  handler: StepHandler<Input, Output, Config>;
+  run?: never;
+  poll?: never;
+}
+
+/**
+ * @deprecated Use {@link RunOnlyMode} (identical).
+ */
+export type LegacyHandlerMode<
+  Input extends z.ZodType,
+  Output extends z.ZodType,
+  Config extends z.ZodObject
+> = RunOnlyMode<Input, Output, Config>;
+
+export interface PollOnlyMode<
+  Input extends z.ZodType,
+  Output extends z.ZodType,
+  Config extends z.ZodObject,
+  State
+> {
+  handler?: never;
+  run?: never;
+  poll: PollLifecycle<Input, Output, Config, State>;
+}
+
+export interface RunPlusPollMode<
+  Input extends z.ZodType,
+  Output extends z.ZodType,
+  Config extends z.ZodObject,
+  State
+> {
+  handler?: never;
+  run: RunWithHandoffHandler<Input, Output, Config, State>;
+  poll: PollLifecycle<Input, Output, Config, State>;
+}
+
+// -----------------------------------------------------------------------------
+// Helper: createServerStepDefinition (overloaded)
+// -----------------------------------------------------------------------------
+
+/**
+ * Helper function to create a {@link ServerStepDefinition} with full type
+ * inference for input, output, config, and (when applicable) author state.
+ *
+ * Three overloads (plus the implementation), one per mode shape, give clean
+ * TypeScript errors when a definition is malformed (e.g. omitting `policy` from
+ * a `poll` lifecycle). {@link RunPlusPollMode} is listed first so `run`+`poll`
+ * does not bind to {@link RunOnlyMode} (which is `handler` only).
+ *
+ * Performs the following runtime guards in addition to the static checks:
+ * - Throws if neither `handler`, `run`, nor `poll` is defined.
+ * - Throws if `policy` is missing or structurally invalid.
+ * - Defaults missing `poll.ceilings` to {@link DEFAULT_POLL_CEILINGS} so the
+ *   registry can warn at registration time.
+ */
+export function createServerStepDefinition<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject,
+  State = unknown
+>(
+  definition: CommonStepDefinition<Input, Output, Config> &
+    RunPlusPollMode<Input, Output, Config, State> & {
+      onCancel?: OnCancelHandler<Input, Config>;
+    }
+): CommonStepDefinition<Input, Output, Config> &
+  RunPlusPollMode<Input, Output, Config, State> & { onCancel?: OnCancelHandler<Input, Config> };
+export function createServerStepDefinition<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject,
+  State = unknown
+>(
+  definition: CommonStepDefinition<Input, Output, Config> &
+    PollOnlyMode<Input, Output, Config, State> & {
+      onCancel?: OnCancelHandler<Input, Config>;
+    }
+): CommonStepDefinition<Input, Output, Config> &
+  PollOnlyMode<Input, Output, Config, State> & { onCancel?: OnCancelHandler<Input, Config> };
+export function createServerStepDefinition<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject
+>(
+  definition: CommonStepDefinition<Input, Output, Config> &
+    RunOnlyMode<Input, Output, Config> & {
+      onCancel?: OnCancelHandler<Input, Config>;
+    }
+): CommonStepDefinition<Input, Output, Config> &
+  RunOnlyMode<Input, Output, Config> & { onCancel?: OnCancelHandler<Input, Config> };
+export function createServerStepDefinition(
+  definition: ServerStepDefinition & { onCancel?: OnCancelHandler }
+): ServerStepDefinition {
+  validateStepDefinitionShape(definition);
+  return applyPollDefaults(definition);
+}
+
+/**
+ * Throws if the definition violates a structural invariant that the type
+ * system cannot enforce against JS callers (the registry contract is
+ * runtime-callable from non-TS plugins).
+ */
+export function validateStepDefinitionShape(definition: ServerStepDefinition): void {
+  const { id, handler, run, poll } = definition;
+
+  if (!handler && !run && !poll) {
+    throw new Error(
+      `Step "${id}" must define one of: "handler" (single-shot), "poll" (poll-only), or "run" together with "poll" (hand-off). None were provided.`
+    );
+  }
+
+  if (handler && (run || poll)) {
+    throw new Error(
+      `Step "${id}" mixes the legacy "handler" field with "run" or "poll". Use one shape only.`
+    );
+  }
+
+  if (run && !poll) {
+    throw new Error(
+      `Step "${id}" defines "run" without "poll". Single-shot steps must use "handler"; use "run" only together with "poll" for the hand-off lifecycle.`
+    );
+  }
+
+  if (poll) {
+    if (!poll.handler) {
+      throw new Error(`Step "${id}" defines "poll" without a handler.`);
+    }
+    if (!poll.policy) {
+      throw new Error(`Step "${id}" defines "poll" without a policy.`);
+    }
+    validatePollPolicy(id, poll.policy);
+    if (poll.ceilings) {
+      validatePollCeilings(id, poll.ceilings);
+    }
+  }
+}
+
+function validatePollPolicy(stepId: string, policy: PollPolicy): void {
+  switch (policy.strategy) {
+    case 'fixed':
+      if (!Number.isFinite(policy.intervalMs) || policy.intervalMs <= 0) {
+        throw new Error(
+          `Step "${stepId}" has invalid poll policy: "fixed.intervalMs" must be a positive number.`
+        );
+      }
+      break;
+    case 'exponential':
+      if (!Number.isFinite(policy.initialMs) || policy.initialMs <= 0) {
+        throw new Error(
+          `Step "${stepId}" has invalid poll policy: "exponential.initialMs" must be a positive number.`
+        );
+      }
+      if (!Number.isFinite(policy.maxMs) || policy.maxMs < policy.initialMs) {
+        throw new Error(
+          `Step "${stepId}" has invalid poll policy: "exponential.maxMs" must be >= "initialMs".`
+        );
+      }
+      if (policy.factor != null && (!Number.isFinite(policy.factor) || policy.factor <= 1)) {
+        throw new Error(
+          `Step "${stepId}" has invalid poll policy: "exponential.factor" must be > 1 when provided.`
+        );
+      }
+      break;
+    case 'dynamic':
+      if (typeof policy.next !== 'function') {
+        throw new Error(
+          `Step "${stepId}" has invalid poll policy: "dynamic.next" must be a function.`
+        );
+      }
+      break;
+    default:
+      throw new Error(
+        `Step "${stepId}" has invalid poll policy: unknown strategy "${
+          (policy as { strategy: string }).strategy
+        }".`
+      );
+  }
+}
+
+function validatePollCeilings(stepId: string, ceilings: PollCeilings): void {
+  if (
+    ceilings.maxAttempts != null &&
+    (!Number.isFinite(ceilings.maxAttempts) || ceilings.maxAttempts < 1)
+  ) {
+    throw new Error(
+      `Step "${stepId}" has invalid poll ceilings: "maxAttempts" must be >= 1 when provided.`
+    );
+  }
+  if (
+    ceilings.maxWaitMs != null &&
+    (!Number.isFinite(ceilings.maxWaitMs) || ceilings.maxWaitMs <= 0)
+  ) {
+    throw new Error(
+      `Step "${stepId}" has invalid poll ceilings: "maxWaitMs" must be > 0 when provided.`
+    );
+  }
+}
+
+/**
+ * Returns a definition with default `poll.ceilings` filled in. The original
+ * object is not mutated. The registry can detect that ceilings were defaulted
+ * by checking whether the ceilings reference equals {@link DEFAULT_POLL_CEILINGS}.
+ */
+export function applyPollDefaults(definition: ServerStepDefinition): ServerStepDefinition {
+  if (!definition.poll || definition.poll.ceilings) {
+    return definition;
+  }
+  return {
+    ...definition,
+    poll: { ...definition.poll, ceilings: DEFAULT_POLL_CEILINGS },
+  } as ServerStepDefinition;
+}
+
+/**
+ * Returns true when the given definition uses the default ceilings object
+ * (i.e. the author did not supply explicit ceilings and the defaults were
+ * filled in by {@link createServerStepDefinition} or {@link applyPollDefaults}).
+ */
+export function pollCeilingsAreDefault(definition: ServerStepDefinition): boolean {
+  return definition.poll?.ceilings === DEFAULT_POLL_CEILINGS;
+}
+
+// -----------------------------------------------------------------------------
+// Handler context shapes
+// -----------------------------------------------------------------------------
 
 /**
  * Context provided to custom step handlers during execution.
@@ -174,6 +589,22 @@ export interface StepHandlerContext<TInput = z.ZodType, TConfig = z.ZodObject> {
 }
 
 /**
+ * Context passed to a {@link PollHandler}. Extends {@link StepHandlerContext}
+ * with the persisted author `state` from the previous run/poll invocation.
+ */
+export interface PollHandlerContext<TInput = z.ZodType, TConfig = z.ZodObject, TState = unknown>
+  extends StepHandlerContext<TInput, TConfig> {
+  /**
+   * Author state persisted by the most recent run/poll invocation.
+   * Undefined on the first poll of a poll-only step (no `run` to seed it).
+   */
+  state: TState | undefined;
+
+  /** 1-based count of poll invocations so far. */
+  attempt: number;
+}
+
+/**
  * Context manager for accessing step execution runtime services
  */
 export interface ContextManager {
@@ -198,19 +629,4 @@ export interface ContextManager {
    * Returns the fake request
    */
   getFakeRequest(): KibanaRequest;
-}
-
-/**
- * Result returned by a custom step handler
- */
-export interface StepHandlerResult<TOutput extends z.ZodType = z.ZodType> {
-  /**
-   * Output data from the step execution
-   * This will be available to subsequent steps via template expressions
-   */
-  output?: z.infer<TOutput>;
-  /**
-   * Optional error information if the step failed
-   */
-  error?: Error;
 }

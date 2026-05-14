@@ -343,7 +343,7 @@ step['max-step-size']  ??  workflow.settings['max-step-size']  ??  pluginConfig.
 | `server/step/elasticsearch_action_step.ts` | Pass `maxResponseSize` option to `transport.request()` |
 | `server/step/kibana_action_step.ts` | Replace `response.json()` with streaming body reader |
 
-No changes needed to `connector_step.ts`, `custom_step_impl.ts`, or any control-flow node implementations.
+No changes needed to `connector_step.ts`, `server/step/custom_step_impl/`, or any control-flow node implementations.
 
 ---
 
