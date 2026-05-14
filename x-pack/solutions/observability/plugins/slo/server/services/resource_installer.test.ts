@@ -23,7 +23,7 @@ import {
 import { DefaultResourceInstaller } from './resource_installer';
 
 describe('resourceInstaller', () => {
-  it('installs the common resources when there is a version mismatch', async () => {
+  it('installs the common resources (including composite SLO) when there is a version mismatch and composite SLO is enabled', async () => {
     const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
     mockClusterClient.cluster.getComponentTemplate.mockResponse({
       component_templates: [
@@ -55,7 +55,7 @@ describe('resourceInstaller', () => {
       ],
     });
 
-    const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create());
+    const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create(), true);
 
     await installer.ensureCommonResourcesInstalled();
 
@@ -131,11 +131,58 @@ describe('resourceInstaller', () => {
       });
     });
 
-    const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create());
+    const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create(), true);
 
     await installer.ensureCommonResourcesInstalled();
 
     expect(mockClusterClient.cluster.putComponentTemplate).not.toHaveBeenCalled();
     expect(mockClusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+  });
+
+  it('skips composite SLO resources when composite SLO is disabled', async () => {
+    const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+    mockClusterClient.cluster.getComponentTemplate.mockResponse({
+      component_templates: [
+        {
+          name: SLI_INDEX_TEMPLATE_NAME,
+          component_template: {
+            _meta: { version: 2 },
+            template: { settings: {} },
+          },
+        },
+      ],
+    });
+    mockClusterClient.indices.getIndexTemplate.mockResponse({
+      index_templates: [
+        {
+          name: SLI_INDEX_TEMPLATE_NAME,
+          index_template: {
+            index_patterns: SLI_INDEX_TEMPLATE_NAME,
+            composed_of: [],
+            _meta: { version: 2 },
+          },
+        },
+      ],
+    });
+
+    const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create(), false);
+
+    await installer.ensureCommonResourcesInstalled();
+
+    const putComponentTemplateCalls = mockClusterClient.cluster.putComponentTemplate.mock.calls;
+    expect(putComponentTemplateCalls).toHaveLength(4);
+    const componentTemplateNames = putComponentTemplateCalls.map((call) => call[0].name);
+    expect(componentTemplateNames).not.toContain(
+      COMPOSITE_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME
+    );
+
+    const putIndexTemplateCalls = mockClusterClient.indices.putIndexTemplate.mock.calls;
+    const indexTemplateNames = putIndexTemplateCalls.map((call) => call[0].name);
+    expect(indexTemplateNames).not.toContain(COMPOSITE_SUMMARY_INDEX_TEMPLATE_NAME);
+
+    const createCalls = mockClusterClient.indices.create.mock.calls;
+    const createIndexNames = createCalls.map((call) => call[0].index);
+    expect(createIndexNames).not.toContain('.slo-observability.composite-summary-v1');
+    expect(mockClusterClient.indices.putMapping).not.toHaveBeenCalled();
   });
 });
