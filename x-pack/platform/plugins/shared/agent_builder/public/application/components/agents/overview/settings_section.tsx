@@ -98,7 +98,9 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                   flush="left"
                   data-test-subj="agentOverviewAddInstructionsLink"
                   data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_OVERVIEW}
-                  data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageAgent.OVERVIEW_ADD_INSTRUCTIONS_LINK}
+                  data-ebt-action={
+                    AGENT_BUILDER_UI_EBT.action.manageAgent.OVERVIEW_ADD_INSTRUCTIONS_LINK
+                  }
                 >
                   {overviewLabels.addInstructionsLink}
                 </EuiButtonEmpty>

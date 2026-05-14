@@ -210,7 +210,9 @@ const PluginsSelection: React.FC<PluginsSelectionProps> = ({
               disabled={disabled}
               compressed
               data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_FORM}
-              data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageAgent.FORM_PLUGINS_SHOW_ACTIVE_ONLY}
+              data-ebt-action={
+                AGENT_BUILDER_UI_EBT.action.manageAgent.FORM_PLUGINS_SHOW_ACTIVE_ONLY
+              }
             />
           </EuiFlexItem>
         )}
@@ -277,7 +279,7 @@ const ActivePluginsStatus: React.FC<{ activePluginsCount: number; totalPlugins: 
             <EuiFlexItem>
               <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type={iconType} color={statusColor} size="m" />
+                  <EuiIcon type={iconType} color={statusColor} size="m" aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="m" color={statusColor}>
@@ -302,7 +304,9 @@ const ActivePluginsStatus: React.FC<{ activePluginsCount: number; totalPlugins: 
                       <EuiLink
                         href={createAgentBuilderUrl(appPaths.plugins.list)}
                         data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_FORM}
-                        data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageAgent.FORM_PLUGINS_MANAGE_LIBRARY_LINK}
+                        data-ebt-action={
+                          AGENT_BUILDER_UI_EBT.action.manageAgent.FORM_PLUGINS_MANAGE_LIBRARY_LINK
+                        }
                       >
                         {labels.plugins.title}
                       </EuiLink>
