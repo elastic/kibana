@@ -343,6 +343,14 @@ export const TestWorkflowResponseSchema = z.object({
 });
 export type TestWorkflowResponseDto = z.infer<typeof TestWorkflowResponseSchema>;
 
+/** Result of scheduling a resume for a workflow execution that was waiting for human input. */
+export const ResumeWorkflowExecutionResponseSchema = z.object({
+  resumedBy: z.string(),
+});
+export type ResumeWorkflowExecutionResponseDto = z.infer<
+  typeof ResumeWorkflowExecutionResponseSchema
+>;
+
 export interface UpdatedWorkflowResponseDto {
   id: string;
   lastUpdatedAt: string;
