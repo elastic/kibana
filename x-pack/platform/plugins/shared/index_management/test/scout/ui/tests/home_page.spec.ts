@@ -7,12 +7,30 @@
 
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
+import type { EnrichSummary } from '@elastic/elasticsearch/lib/api/types';
+import { getPolicyType } from '../../../../common/lib';
 import { test } from '../fixtures';
 
 const testIndexName = `index-test-${Math.random()}`;
 
-// Failing: See https://github.com/elastic/kibana/issues/267414
-test.describe.skip('Home page', { tag: tags.stateful.classic }, () => {
+test.describe('Home page', { tag: tags.stateful.classic }, () => {
+  test.beforeAll(async ({ esClient, log }) => {
+    const { policies } = await esClient.enrich.getPolicy();
+    for (const policy of policies as EnrichSummary[]) {
+      const policyType = getPolicyType(policy);
+      const name = policy.config[policyType]?.name;
+      if (!name) {
+        continue;
+      }
+      try {
+        await esClient.enrich.deletePolicy({ name }, { ignore: [404] });
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : String(e);
+        log.debug(`Enrich policy cleanup failed for ${name}: ${message}`);
+      }
+    }
+  });
+
   test.beforeEach(async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsIndexManagementUser();
     await pageObjects.indexManagement.goto();
