@@ -663,11 +663,12 @@ export const getEndpointConsoleCommands = ({
 
   if (microsoftDefenderEndpointCancelEnabled || responseActionsEndpointCancel) {
     const isSupported = canCancelForCurrentContext();
+
     consoleCommands.push({
       name: 'cancel',
       about: getCommandAboutInfo({
         aboutInfo: CONSOLE_COMMANDS.cancel.about,
-        isSupported,
+        isSupported: isSupported && doesEndpointSupportCommand('cancel'),
       }),
       RenderComponent: CancelActionResult,
       meta: commandMeta,
@@ -686,7 +687,8 @@ export const getEndpointConsoleCommands = ({
                 about: i18n.translate(
                   'xpack.securitySolution.endpointConsoleCommands.cancel.action.about',
                   {
-                    defaultMessage: 'The response action to cancel',
+                    defaultMessage:
+                      'The response action to cancel (selected from a popup that displays the list of pending actions for this host that can be canceled).',
                   }
                 ),
                 mustHaveValue: 'truthy',
@@ -694,12 +696,7 @@ export const getEndpointConsoleCommands = ({
               },
             }
           : {}),
-        comment: {
-          required: false,
-          allowMultiples: false,
-          mustHaveValue: 'non-empty-string',
-          about: COMMENT_ARG_ABOUT,
-        },
+        ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
