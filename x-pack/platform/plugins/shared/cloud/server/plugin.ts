@@ -175,6 +175,11 @@ export interface CloudSetup {
    * Method to retrieve if the organization is in trial.
    */
   isInTrial: () => boolean;
+  /**
+   * Method to retrieve the number of days left in the trial.
+   * Returns undefined if trial_end_date is not set, or the number of days remaining (0 if expired).
+   */
+  trialDaysLeft: () => number | undefined;
 }
 
 /**
@@ -201,6 +206,11 @@ export interface CloudStart {
    * Method to retrieve if the organization is in trial.
    */
   isInTrial: () => boolean;
+  /**
+   * Method to retrieve the number of days left in the trial.
+   * Returns undefined if trial_end_date is not set, or the number of days remaining (0 if expired).
+   */
+  trialDaysLeft: () => number | undefined;
 }
 
 export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
@@ -404,6 +414,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         organizationInTrial: this.config.serverless?.in_trial,
       },
       isInTrial: this.isInTrial.bind(this),
+      trialDaysLeft: this.trialDaysLeft.bind(this),
     };
   }
 
@@ -412,6 +423,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       ...this.getCloudUrls(),
       isCloudEnabled: getIsCloudEnabled(this.config.id),
       isInTrial: this.isInTrial.bind(this),
+      trialDaysLeft: this.trialDaysLeft.bind(this),
     };
   }
 
@@ -424,18 +436,22 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     };
   }
 
-  private isInTrial(): boolean {
-    if (this.config.serverless?.in_trial) return true;
-    if (this.trialEndDate !== undefined) {
-      if (this.config.trial_end_date) {
-        const endDateMs = this.trialEndDate.getTime();
-        if (!Number.isNaN(endDateMs)) {
-          return Date.now() <= endDateMs;
-        } else {
-          this.logger.error('cloud.trial_end_date config value could not be parsed.');
-        }
+  private trialDaysLeft(): number | undefined {
+    if (this.trialEndDate !== undefined && this.config.trial_end_date) {
+      const endDateMs = this.trialEndDate.getTime();
+      if (!Number.isNaN(endDateMs)) {
+        const diff = endDateMs - Date.now();
+        return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+      } else {
+        this.logger.error('cloud.trial_end_date config value could not be parsed.');
       }
     }
-    return false;
+    return undefined;
+  }
+
+  private isInTrial(): boolean {
+    if (this.config.serverless?.in_trial) return true;
+    const daysLeft = this.trialDaysLeft();
+    return daysLeft !== undefined && daysLeft > 0;
   }
 }
