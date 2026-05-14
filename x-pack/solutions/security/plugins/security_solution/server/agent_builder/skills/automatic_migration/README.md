@@ -59,20 +59,26 @@ both skills consume:
   `security.migration_translated_rule_update`. The update tool accepts an
   `updates: [{ rule_id, patch }]` array (capped at 50) so single-rule and
   bulk corrections share one tool surface and one `confirm: z.literal(true)`
-  structural gate. ES|QL queries are re-validated on save via
-  `parseEsqlQuery` from `@kbn/securitysolution-utils`; the handler writes
-  `translation_result` (`full` / `partial` / `untranslatable`) alongside
-  the patch — mirroring the in-tree route helper
-  `convertEsqlQueryToTranslationResult`. Implemented as registered
-  `BuiltinToolDefinition`s (the `alerts_tool` /
-  `create_detection_rule_tool` shape) using `esClient.asCurrentUser`
-  against `.kibana-siem-rule-migrations-rules-<spaceId>` — keeping
-  plugin-private services out of the tool surface. ✅
+  structural gate. The update handler routes through the canonical SIEM
+  migration data layer via
+  `siemMigrationsService.createRulesClient(...).data.items.update`, reusing
+  the same `transformToInternalUpdateRuleMigrationData` helper as the
+  `PATCH /internal/siem_migrations/rules/{migration_id}/rules` route — so
+  ES|QL re-validation (`translation_result` recomputation) stays in lock-
+  step with the canonical helper rather than via a duplicated inline copy.
+  Audit logging emits via `core.security.audit.asScoped(request)` against
+  the `SiemMigrationsAuditActions` action set. ✅
 - **Phase 3** — `automatic-migration-context` backing registry tools:
   `security.migration_resources_list`, `security.migration_resource_upsert`,
   and `security.migration_resource_remove`. Destructive ops gated by
-  schema-enforced `confirm: z.literal(true)`. Same registered-tool shape
-  against `.kibana-siem-rule-migrations-resources-<spaceId>`. ✅
+  schema-enforced `confirm: z.literal(true)`. Upsert routes through
+  `siemMigrationsService.createRulesClient(...).data.resources.upsert`
+  (same canonical client as the
+  `POST /internal/siem_migrations/rules/{migration_id}/resources` route);
+  remove is the only operation still backed by a direct-ES delete because
+  the canonical resources client exposes a bulk `prepareDelete` (all
+  resources for a migration) but no per-resource delete method —
+  documented as a known architectural seam below. ✅
 - **Phase 4** — eval suite extension. The existing
   `@kbn/evals-suite-security-automatic-migrations` package gets a `src/skills/`
   subsystem (chat client + `createEvaluateMigrationSkillsDataset`) and two
@@ -101,90 +107,79 @@ constants are introduced in Phase 1.** If a Phase 2/3 operation surfaces that
 isn't covered by `SIEM_MIGRATIONS_API_ACTION_ALL`, the new privilege is added
 in the phase that requires it, following the existing pattern.
 
-## Known Limitations
+## Architectural Seams
 
-Scheduled-fix items only — each entry names the fix shape, the driver
-path, and the test name that will pass once it lands. Acknowledgement-
-only entries are not allowed here; if a limitation cannot be fixed in
-this cycle it carries a concrete follow-up commitment.
+Per the address-known-limitations triage matrix, each entry below is a
+**permanent constraint** of the current platform surface, paired with a
+concrete fallback and the trigger that would re-open the decision.
+Scheduled-fix items are **not** allowed in this section — anything that
+could be fixed in this cycle has been fixed.
 
-### 1. Translated-rule update tool writes directly to ES instead of routing through the migration PATCH endpoint
-
-- **Where:** `tools/migration_translated_rules_tools.ts ::
-  migrationTranslatedRuleUpdateTool`.
-- **What it does today:** `esClient.asCurrentUser.update({ index:
-  '.kibana-siem-rule-migrations-rules-<spaceId>', id: ruleId, doc, refresh:
-  'wait_for' })`, with ES|QL re-validation inlined via `parseEsqlQuery`
-  from `@kbn/securitysolution-utils`. Mirrors the route helper's
-  `convertEsqlQueryToTranslationResult` semantics.
-- **What it bypasses:** the
-  `PATCH /internal/siem_migrations/rules/{migration_id}/rules` route
-  pipeline — specifically `withLicense`, `withExistingMigration`,
-  `logUpdateRules` audit emission via `SiemMigrationAuditLogger`, and any
-  future middleware that route accumulates.
-- **Why this shape for now:** the inline `BuiltinToolDefinition`
-  handler context only exposes `esClient`, `savedObjectsClient`,
-  `spaceId`, `request` — not `ruleMigrationsClient`. Calling the
-  internal route from a tool handler via `core.http.fetch` is its own
-  anti-pattern (inline tool wrapping a single internal HTTP route);
-  the canonical alternative is
-  `platform.workflows.workflow_execute_step` with
-  `step.type: kibana.request`, which requires a workflow YAML
-  attachment mechanism that has zero in-tree precedent among
-  `security_solution` Agent Builder skills (every existing tool —
-  `alertsTool`, `attackDiscoverySearchTool`, etc. — uses the same
-  direct-ES pattern). Pioneering it on this PR would change the
-  conversational UX in ways not currently runtime-validatable.
-- **Fix sketch (scheduled):** refactor `migrationTranslatedRuleUpdateTool`
-  to a registry-tool shape that receives the full plugin setup contract,
-  obtain `ruleMigrationsClient` from the `securitySolution` start
-  contract, and delegate to `ruleMigrationsClient.data.items.update(...)`
-  (the same method the existing PATCH route calls via
-  `transformToInternalUpdateRuleMigrationData`). This restores
-  middleware reuse without depending on the workflow-YAML attachment
-  primitive.
-- **Driver file:** the registry-tool refactor will live in
-  `tools/migration_translated_rules_tools.ts` (rename / split as
-  needed) and be wired in `tools/register_tools.ts`.
-- **Test name:** `migration_translated_rules_tools (registry shape)
-  > update tool delegates to ruleMigrationsClient.data.items.update
-  with audit + license + existing-migration middleware applied`.
-- **Tracking:** see PR description follow-ups; the schema and skill
-  prose are stable across this refactor (the change is implementation
-  shape, not the agent-facing contract).
-
-### 2. Resource upsert / remove tools share the same direct-ES shape
+### 1. Per-resource delete uses direct-ES against the resources index
 
 - **Where:** `tools/migration_resources_tools.ts ::
-  migrationResourceUpsertTool` and `migrationResourceRemoveTool`.
-- **What they bypass:** the
-  `POST` and `DELETE` variants of
-  `/internal/siem_migrations/rules/{migration_id}/resources`.
-- **Scheduled-fix:** same refactor pattern as Limitation #1 — move
-  to a registry-tool shape that consumes the migrations client.
-- **Test name:** `migration_resources_tools (registry shape) > upsert
-  / remove delegate to ruleMigrationsClient.data.resources.*`.
+  migrationResourceRemoveTool`.
+- **What it does:** `esClient.asCurrentUser.deleteByQuery({ index:
+  '.kibana-siem-rule-migrations-resources-<spaceId>', query: { bool: {
+  must: [{ term: { migration_id } }, { term: { type } }, { term: { name }
+  }] } }, refresh: true })`.
+- **Why direct-ES:** the canonical
+  `SiemMigrationsDataResourcesClient` (which the resource upsert path
+  routes through) exposes a bulk `prepareDelete` that removes **all**
+  resources for a migration — there is no per-resource (`{ type, name }`-
+  scoped) delete method on the client today. Re-implementing one on the
+  agent-builder side would require either (a) widening the canonical
+  client surface (out of scope for this PR — it is a contract change on a
+  shared service) or (b) loading every resource for the migration into
+  memory just to drop one and write the rest back, which is strictly
+  worse than the direct `deleteByQuery`. The tool handler still wraps the
+  call with `core.security.audit.asScoped(request)` to emit the same
+  `SIEM_MIGRATION_DELETED` action the canonical path would.
+- **Fallback / monitoring trigger:** if the canonical resources client
+  gains a `data.resources.remove({ migration_id, type, name })` method,
+  this tool should switch to it in the same PR. Detection: a `kbn-evals`
+  trajectory regression that asserts the tool's `extra_tools` set stays
+  bounded to `esClient` — the moment it includes a registry method on
+  `ruleMigrationsClient.data.resources`, this seam closes.
 
-These two are bundled into one follow-up PR (post-merge of the current
-draft) since they share the registry-tool refactor scaffolding.
+### 2. Audit logging emits via `core.security.audit.asScoped` instead of `SiemMigrationAuditLogger`
 
-### 3. No regression test asserts ES|QL re-validation parity with the route helper
+- **Where:** all three writing tools — `migrationTranslatedRuleUpdateTool`,
+  `migrationResourceUpsertTool`, `migrationResourceRemoveTool`.
+- **What it does:** maps each handler outcome to one of the
+  `SiemMigrationsAuditActions` enum values and calls
+  `core.security.audit.asScoped(request).log({...})` directly.
+- **Why not `SiemMigrationAuditLogger`:** the canonical audit logger is
+  constructed from a `SecuritySolutionApiRequestHandlerContext`
+  (`context.securitySolution.getAuditLogger(...)`) which is not
+  available in `BuiltinToolDefinition` handler context. Synthesising one
+  inside a tool handler would mean reconstructing a request-handler
+  context that the tool surface explicitly is not — that is a
+  cross-layer leak.
+- **Fallback / monitoring trigger:** if the platform exposes a
+  request-scoped audit-logger factory that does not require the full
+  request-handler context (e.g. `core.security.audit.asScoped(request)
+  .withCategory('siem_migrations')`), the tools should adopt it in the
+  same PR that ships the platform helper. Detection: a periodic
+  schema-drift check on `SiemMigrationsAuditActions` — if a new action
+  is added to that enum but not consumed here, the auditing surface has
+  drifted and needs reconciling.
 
-- **Why this matters:** if the route helper
-  (`convertEsqlQueryToTranslationResult` in
-  `lib/siem_migrations/rules/api/util/update_rules.ts`) changes its
-  semantics for empty strings / aggregating queries / parser-error
-  classification, the inline copy in `migration_translated_rules_tools.ts`
-  will silently drift.
-- **Scheduled-fix:** unit test that feeds a small fixture set
-  (empty string, valid query, aggregating query, syntax-error query,
-  unknown-function query) into both the inline path and
-  `parseEsqlQuery` itself, asserting `translation_result` is
-  identical to what `convertEsqlQueryToTranslationResult` would
-  produce.
-- **Test name:** `migration_translated_rules_tools >
-  convertQueryToTranslationResult matches the route helper for the
-  shared fixture set`.
-- **Lands with:** the registry-tool refactor (#1), at which point
-  the inline helper is deleted in favour of importing the route
-  helper directly.
+### 3. The migration model carries no `tags` field on a translated rule
+
+- **Where:** `migrationTranslatedRuleUpdateTool.ruleUpdatePatchSchema`.
+- **What is allowed:** `query`, `severity`, `risk_score`, `description`.
+- **What is not allowed:** `tags`, `false_positives`, `references`,
+  `name`, custom fields. The schema is intentionally a strict subset of
+  `ElasticRulePartial` because the underlying migration draft (an
+  `ElasticRule` saved-object payload) does not carry those fields until
+  the rule is installed via the regular detection-engine flow.
+- **Fallback:** for tag / reference / false-positive edits, the operator
+  should first install the migrated rule from the migration UI, then use
+  the regular `detection-rule-edit` skill (or the rules-management UI)
+  to apply the edit on the installed rule.
+- **Monitoring trigger:** if `ElasticRule` gains a `tags` field on the
+  migration model (`common/siem_migrations/model/rule_migration.gen.ts`),
+  add `tags` to `ruleUpdatePatchSchema` and add coverage in the eval
+  suite. Detection: a type-check regression — `ElasticRulePartial`
+  becomes a strict superset of the patch schema if `tags` lands.

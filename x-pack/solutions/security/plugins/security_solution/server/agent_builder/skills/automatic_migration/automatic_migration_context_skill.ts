@@ -94,7 +94,8 @@ When the user asks to manage migration context, follow this order:
 
 2. **List existing resources first.** Before adding new context, call
    \`security.migration_resources_list\` with the \`migration_id\` (and
-   optionally a \`type\` filter: \`macro\`, \`list\`, or \`lookup\`).
+   optionally a \`type\` filter: \`macro\` or \`lookup\` — the two
+   canonical Splunk resource kinds tracked by the migration data model).
    Surface the resource ids, types, and names — this prevents duplicate
    uploads and helps the user understand the current state.
 
@@ -107,9 +108,10 @@ When the user asks to manage migration context, follow this order:
    \`security.security_labs_search\` for detection-engineering
    articles the operator may want to register.
 
-4. **Validate before attaching.** Resources have a type (\`document\`,
-   \`naming_convention\`, \`lookup\`, \`mapping\`) and a payload that
-   must match that type's shape. Validate the user's input against the
+4. **Validate before attaching.** Resources have a type (\`macro\` or
+   \`lookup\`) and a payload that must match that type's shape — name +
+   content for both, with content holding the macro body or the lookup
+   table CSV/JSON serialization. Validate the user's input against the
    schema before calling the upsert endpoint — schema-level validation
    is mandatory, not advisory.
 

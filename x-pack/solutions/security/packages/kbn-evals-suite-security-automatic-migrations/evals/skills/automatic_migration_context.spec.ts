@@ -13,9 +13,10 @@ import { AUTOMATIC_MIGRATION_CONTEXT_SKILL_NAME } from '../../src/skills/evaluat
  * Baseline eval suite for the `automatic-migration-context` skill.
  *
  * The context skill is the *pre-translation* surface. Its scope is managing
- * migration resources (macros, lists, lookups), gating destructive ops on a
- * structural `confirm: true`, and explaining that new context applies only on
- * the next translation run — not retroactively.
+ * migration resources (macros and lookups — the canonical Splunk-source
+ * resource kinds tracked by the migration data model), gating destructive ops
+ * on a structural `confirm: true`, and explaining that new context applies
+ * only on the next translation run — not retroactively.
  */
 evaluate.describe('Automatic Migration Skills: Context', { tag: tags.stateful.classic }, () => {
   evaluate.beforeAll(async ({ skillsChatClient, log }) => {

@@ -10,47 +10,28 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
-import { parseEsqlQuery } from '@kbn/securitysolution-utils';
-import {
-  MigrationTranslationResultEnum,
-  type MigrationTranslationResult,
-} from '../../../common/siem_migrations/model/common.gen';
+import type { MigrationTranslationResult } from '../../../common/siem_migrations/model/common.gen';
+import type {
+  ElasticRulePartial,
+  UpdateRuleMigrationRule,
+} from '../../../common/siem_migrations/model/rule_migration.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import type { ExperimentalFeatures } from '../../../common';
+import type { SiemMigrationsService } from '../../lib/siem_migrations/siem_migrations_service';
+import { transformToInternalUpdateRuleMigrationData } from '../../lib/siem_migrations/rules/api/util/update_rules';
+import { SiemMigrationsAuditActions } from '../../lib/siem_migrations/common/api/util/audit';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import { securityTool } from './constants';
-
-/**
- * Mirror of the in-tree route helper
- * `lib/siem_migrations/rules/api/util/update_rules.ts#convertEsqlQueryToTranslationResult`.
- *
- * Inlined here (rather than imported) so this tool stays inside the
- * `BuiltinToolDefinition` boundary — handlers only get `esClient`,
- * `savedObjectsClient`, `spaceId`, `request`, NOT plugin-internal services.
- * Long-term, this update path should call the existing
- * `PATCH ${SIEM_RULE_MIGRATION_RULES_PATH}` route or move to a registry
- * tool with access to `ruleMigrationsClient`; see the "Known Limitations"
- * section in `skills/automatic_migration/README.md`.
- */
-const convertQueryToTranslationResult = (query: string): MigrationTranslationResult => {
-  if (query === '') {
-    return MigrationTranslationResultEnum.untranslatable;
-  }
-  return parseEsqlQuery(query).errors.length === 0
-    ? MigrationTranslationResultEnum.full
-    : MigrationTranslationResultEnum.partial;
-};
+import { buildSiemMigrationsClientDependencies } from './util/siem_migrations_client_dependencies';
 
 const TRANSLATED_RULES_INDEX_BASE = '.kibana-siem-rule-migrations-rules' as const;
 
 /**
- * Builds the per-space translated rules index name.
- *
- * Mirrors `SiemMigrationsBaseDataService.getAdapterIndexName('rules')` + the
- * `IndexPatternAdapter` `${baseName}-${spaceId}` convention. We re-derive the
- * pattern here instead of importing the data service because inline-style
- * registry tools must not pull in plugin-internal services — keeping this
- * formula local also makes the tool surface OSS-friendly.
+ * Builds the per-space translated rules index name. Used only by the search
+ * and get tools, which are read-only and have no canonical data-client read
+ * method that takes a free-form name substring filter. The destructive update
+ * tool delegates to `ruleMigrationsClient.data.items.update`, which derives
+ * its own index name via the migration data service.
  */
 const getRulesIndexName = (spaceId: string) => `${TRANSLATED_RULES_INDEX_BASE}-${spaceId}`;
 
@@ -283,6 +264,19 @@ export const migrationTranslatedRuleGetTool = (
 /*  orchestrator, not in a chat tool. If the operator needs a wider sweep     */
 /*  the agent should split the batch and surface each partial before the      */
 /*  next confirmation.                                                        */
+/*                                                                            */
+/*  The write delegates to `ruleMigrationsClient.data.items.update`, which    */
+/*  derives the index name from the migration data service, applies the      */
+/*  canonical document shape (timestamps, updated_by profile uid), and runs  */
+/*  the operation as an ES bulk under the hood. Pre-write, every patched     */
+/*  query is funneled through `transformToInternalUpdateRuleMigrationData`   */
+/*  from `rules/api/util/update_rules.ts`, which is the same helper the      */
+/*  PATCH ${SIEM_RULE_MIGRATION_RULES_PATH} route uses — so the              */
+/*  `translation_result` flip on save is byte-for-byte identical to the      */
+/*  route path. The bulk update is atomic from the tool's reporting          */
+/*  perspective (matching the route's `{ updated: true }` semantics):        */
+/*  pre-write skip reasons are surfaced per-rule, but a bulk write error is  */
+/*  surfaced as a single batch failure.                                      */
 /* -------------------------------------------------------------------------- */
 
 const ruleUpdatePatchSchema = z
@@ -291,15 +285,14 @@ const ruleUpdatePatchSchema = z
       .string()
       .optional()
       .describe(
-        'Replacement ES|QL query. The handler re-runs `parseEsqlQuery` on save and updates `translation_result` to `full` (no errors) / `partial` (parser errors) / `untranslatable` (empty), mirroring the in-tree route helper.'
+        'Replacement ES|QL query. The migration data client invokes the canonical `convertEsqlQueryToTranslationResult` helper on save and updates `translation_result` to `full` (no parser errors) / `partial` (parser errors) / `untranslatable` (empty).'
       ),
     severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
     risk_score: z.number().int().min(0).max(100).optional(),
     description: z.string().optional(),
-    tags: z.array(z.string()).optional(),
   })
   .describe(
-    'Partial replacement for one rule. Only listed fields are written; omitted fields are preserved. At least one field is required (the handler rejects empty patches per entry).'
+    'Partial replacement for one rule. Only listed fields are written; omitted fields are preserved. At least one field is required (the handler reports an empty patch as a per-rule skip). The migration model does not carry rule tags — for tag changes the operator should install the rule and edit it in Detection Engine.'
   );
 
 const ruleUpdateEntrySchema = z.object({
@@ -338,7 +331,8 @@ interface PerRuleUpdateResult {
 export const migrationTranslatedRuleUpdateTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
-  experimentalFeatures: ExperimentalFeatures
+  experimentalFeatures: ExperimentalFeatures,
+  siemMigrationsService: SiemMigrationsService
 ): BuiltinToolDefinition<typeof updateSchema> => ({
   id: SECURITY_MIGRATION_TRANSLATED_RULE_UPDATE_TOOL_ID,
   type: ToolType.builtin,
@@ -347,7 +341,7 @@ export const migrationTranslatedRuleUpdateTool = (
     'Destructive — overwrites the prior translator output for every rule listed. ' +
     'Requires explicit operator consent via the `confirm: true` field; the schema enforces consent structurally and rejects calls without it. ' +
     'Run AFTER the operator approves the diff for every affected rule. ' +
-    'On save, the handler re-runs `parseEsqlQuery` on any replaced `query` and updates `translation_result` (`full` / `partial` / `untranslatable`) — so the rule status reflects the corrected query immediately. ' +
+    'On save, the canonical migration data client re-runs `convertEsqlQueryToTranslationResult` on any replaced `query` and updates `translation_result` (`full` / `partial` / `untranslatable`) — same helper the migration PATCH route uses. ' +
     'Rules still have to be installed via the migration install flow afterwards.',
   schema: updateSchema,
   tags: ['security', 'siem-migrations', 'rules', 'update', 'destructive', 'bulk'],
@@ -366,101 +360,198 @@ export const migrationTranslatedRuleUpdateTool = (
   },
   handler: async (
     { migration_id: migrationId, updates, confirm: _confirm },
-    { esClient, spaceId }
+    { request, spaceId }
   ) => {
-    const index = getRulesIndexName(spaceId);
+    try {
+      const { coreStart, dependencies } = await buildSiemMigrationsClientDependencies(
+        core,
+        request,
+        experimentalFeatures
+      );
 
-    const applyOne = async (
-      entry: z.infer<typeof ruleUpdateEntrySchema>
-    ): Promise<PerRuleUpdateResult> => {
-      const { rule_id: ruleId, patch } = entry;
-      try {
-        const existing = await esClient.asCurrentUser.get<{ migration_id?: string }>({
-          index,
-          id: ruleId,
-        });
-        if (existing._source?.migration_id !== migrationId) {
-          return {
-            rule_id: ruleId,
-            success: false,
-            error: `Rule is not part of migration ${migrationId}; refusing to update.`,
-          };
-        }
+      const currentUser = coreStart.security.authc.getCurrentUser(request);
+      if (!currentUser) {
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: { message: 'Authenticated user required to update translated rules.' },
+            },
+          ],
+        };
+      }
 
-        const elasticRulePatch: Record<string, unknown> = {};
+      const ruleMigrationsClient = siemMigrationsService.createRulesClient({
+        request,
+        currentUser,
+        spaceId,
+        dependencies,
+      });
+
+      const { data: probeRules } = await ruleMigrationsClient.data.items.get(migrationId, {
+        size: 1,
+      });
+      if (probeRules.length === 0) {
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: { message: `Migration ${migrationId} not found.` },
+            },
+          ],
+        };
+      }
+
+      const updateRequests: UpdateRuleMigrationRule[] = [];
+      const fieldsByRuleId = new Map<string, string[]>();
+      const skipped: PerRuleUpdateResult[] = [];
+
+      const classifyEntry = (entry: z.infer<typeof ruleUpdateEntrySchema>) => {
+        const { rule_id: ruleId, patch } = entry;
+        const elasticRulePatch: ElasticRulePartial = {};
         if (patch.query !== undefined) elasticRulePatch.query = patch.query;
         if (patch.severity !== undefined) elasticRulePatch.severity = patch.severity;
         if (patch.risk_score !== undefined) elasticRulePatch.risk_score = patch.risk_score;
         if (patch.description !== undefined) elasticRulePatch.description = patch.description;
-        if (patch.tags !== undefined) elasticRulePatch.tags = patch.tags;
 
-        if (Object.keys(elasticRulePatch).length === 0) {
-          return {
+        const fields = Object.keys(elasticRulePatch);
+        if (fields.length === 0) {
+          skipped.push({
             rule_id: ruleId,
             success: false,
             error:
-              'Patch contained no recognised fields. Provide at least one of: query, severity, risk_score, description, tags.',
-          };
+              'Patch contained no recognised fields. Provide at least one of: query, severity, risk_score, description.',
+          });
+          return;
         }
+        fieldsByRuleId.set(ruleId, fields);
+        updateRequests.push({ id: ruleId, elastic_rule: elasticRulePatch });
+      };
 
-        const doc: Record<string, unknown> = { elastic_rule: elasticRulePatch };
-        let translationResult: MigrationTranslationResult | undefined;
-        if (patch.query !== undefined) {
-          translationResult = convertQueryToTranslationResult(patch.query);
-          doc.translation_result = translationResult;
-        }
+      for (const entry of updates) {
+        classifyEntry(entry);
+      }
 
-        await esClient.asCurrentUser.update({
-          index,
-          id: ruleId,
-          doc,
-          refresh: 'wait_for',
+      if (updateRequests.length === 0) {
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data: {
+                migration_id: migrationId,
+                total: updates.length,
+                succeeded: 0,
+                failed: skipped.length,
+                per_rule: skipped,
+                note: 'No writable entries in this batch.',
+              },
+            },
+          ],
+        };
+      }
+
+      const transformed = updateRequests.map(transformToInternalUpdateRuleMigrationData);
+      const idsForAudit = updateRequests.map((r) => r.id);
+      const auditLogger = coreStart.security.audit.asScoped(request);
+      const auditMessage = `[migrationType=rules]User updated translated rules in migration with [id=${migrationId}, ids=${idsForAudit.join(
+        ','
+      )}]`;
+
+      try {
+        await ruleMigrationsClient.data.items.update(transformed);
+        auditLogger.log({
+          message: auditMessage,
+          event: {
+            action: SiemMigrationsAuditActions.SIEM_MIGRATION_UPDATED_RULE,
+            category: ['database'],
+            type: ['change'],
+            outcome: 'success',
+          },
         });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        auditLogger.log({
+          message: auditMessage,
+          event: {
+            action: SiemMigrationsAuditActions.SIEM_MIGRATION_UPDATED_RULE,
+            category: ['database'],
+            type: ['change'],
+            outcome: 'failure',
+          },
+          error: { code: 'BulkUpdateError', message },
+        });
+        const failedAll: PerRuleUpdateResult[] = updateRequests.map((rule) => ({
+          rule_id: rule.id,
+          success: false,
+          error: message,
+        }));
+        logger.error(
+          `migration_translated_rule_update bulk write failed on migration ${migrationId}: ${message}`
+        );
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data: {
+                migration_id: migrationId,
+                total: updates.length,
+                succeeded: 0,
+                failed: failedAll.length + skipped.length,
+                per_rule: [...failedAll, ...skipped],
+                note: 'Bulk update failed atomically (same semantics as the migration PATCH route). No rules were modified.',
+              },
+            },
+          ],
+        };
+      }
 
+      const perRule: PerRuleUpdateResult[] = transformed.map((rule) => {
+        const ruleId = rule.id;
+        const fields = fieldsByRuleId.get(ruleId) ?? [];
+        const translationResult =
+          'translation_result' in rule && rule.translation_result !== undefined
+            ? rule.translation_result
+            : undefined;
         return {
           rule_id: ruleId,
           success: true,
-          updated_fields: Object.keys(elasticRulePatch),
+          updated_fields: fields,
           ...(translationResult ? { translation_result: translationResult } : {}),
         };
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        logger.error(
-          `migration_translated_rule_update: rule ${ruleId} failed in migration ${migrationId}: ${message}`
-        );
-        return { rule_id: ruleId, success: false, error: message };
-      }
-    };
+      });
 
-    const perRule: PerRuleUpdateResult[] = [];
-    for (const entry of updates) {
-      // Sequential application keeps Elasticsearch back-pressure manageable
-      // and produces a deterministic per-rule result order for the report.
+      logger.info(
+        `migration_translated_rule_update batch on migration ${migrationId}: ${perRule.length}/${
+          perRule.length + skipped.length
+        } written, ${skipped.length} skipped.`
+      );
 
-      perRule.push(await applyOne(entry));
-    }
-
-    const succeeded = perRule.filter((entry) => entry.success).length;
-    const failed = perRule.length - succeeded;
-
-    logger.info(
-      `migration_translated_rule_update batch on migration ${migrationId}: ${succeeded}/${perRule.length} succeeded, ${failed} failed.`
-    );
-
-    return {
-      results: [
-        {
-          type: ToolResultType.other,
-          data: {
-            migration_id: migrationId,
-            total: updates.length,
-            succeeded,
-            failed,
-            per_rule: perRule,
-            note: 'Updated rules still have to be installed via the migration install flow. ES|QL queries are re-validated on save (translation_result flips to full / partial / untranslatable). For a full LLM re-translation of corrected rules, POST /internal/siem_migrations/rules/{migration_id}/start with retry=selected and selection.ids=[...].',
+      return {
+        results: [
+          {
+            type: ToolResultType.other,
+            data: {
+              migration_id: migrationId,
+              total: updates.length,
+              succeeded: perRule.length,
+              failed: skipped.length,
+              per_rule: [...perRule, ...skipped],
+              note: 'Written via the canonical migration data client (data.items.update). ES|QL queries are re-validated on save via the same convertEsqlQueryToTranslationResult helper the PATCH route uses. Rules still have to be installed via the migration install flow. For a full LLM re-translation of corrected rules, POST /internal/siem_migrations/rules/{migration_id}/start with retry=selected and selection.ids=[...].',
+            },
           },
-        },
-      ],
-    };
+        ],
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      logger.error(`migration_translated_rule_update failed: ${message}`);
+      return {
+        results: [
+          {
+            type: ToolResultType.error,
+            data: { message: `Failed to update translated rules: ${message}` },
+          },
+        ],
+      };
+    }
   },
 });

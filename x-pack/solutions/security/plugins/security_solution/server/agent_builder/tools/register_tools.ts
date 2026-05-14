@@ -28,19 +28,26 @@ import {
   migrationResourceRemoveTool,
 } from './migration_resources_tools';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
+import type { SiemMigrationsService } from '../../lib/siem_migrations/siem_migrations_service';
 
 /**
  * Registers all security agent builder tools with the agentBuilder plugin.
  *
  * PCI compliance tools are gated behind `experimentalFeatures.pciComplianceAgentBuilder` so
  * the feature can ship dark and be enabled per environment.
+ *
+ * `siemMigrationsService` is threaded through so the destructive automatic-migration
+ * tools (update + resource upsert) can construct a request-scoped
+ * `SiemRuleMigrationsClient` and delegate writes through the canonical migration
+ * data layer instead of poking ES directly.
  */
 export const registerTools = async (
   agentBuilder: AgentBuilderPluginSetup,
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
   experimentalFeatures: ExperimentalFeatures,
-  isServerless: boolean = false
+  isServerless: boolean = false,
+  siemMigrationsService: SiemMigrationsService
 ) => {
   agentBuilder.tools.register(entityRiskScoreTool(core, logger));
   agentBuilder.tools.register(attackDiscoverySearchTool(core, logger));
@@ -64,10 +71,12 @@ export const registerTools = async (
     );
     agentBuilder.tools.register(migrationTranslatedRuleGetTool(core, logger, experimentalFeatures));
     agentBuilder.tools.register(
-      migrationTranslatedRuleUpdateTool(core, logger, experimentalFeatures)
+      migrationTranslatedRuleUpdateTool(core, logger, experimentalFeatures, siemMigrationsService)
     );
     agentBuilder.tools.register(migrationResourcesListTool(core, logger, experimentalFeatures));
-    agentBuilder.tools.register(migrationResourceUpsertTool(core, logger, experimentalFeatures));
+    agentBuilder.tools.register(
+      migrationResourceUpsertTool(core, logger, experimentalFeatures, siemMigrationsService)
+    );
     agentBuilder.tools.register(migrationResourceRemoveTool(core, logger, experimentalFeatures));
   }
 };

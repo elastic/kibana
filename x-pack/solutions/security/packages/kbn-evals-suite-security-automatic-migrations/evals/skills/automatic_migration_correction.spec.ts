@@ -88,7 +88,7 @@ evaluate.describe('Automatic Migration Skills: Correction', { tag: tags.stateful
               criteria: [
                 'The response reads the current threat[] mapping via security.migration_translated_rule_get before proposing changes.',
                 'The proposed diff either includes the parent T1059 mapping or confirms it is already present — the response is explicit about that.',
-                'The proposed diff touches ONLY the threat[] field; severity, risk_score, query, description, tags are NOT modified.',
+                'The proposed diff touches ONLY the threat[] field; severity, risk_score, query, description are NOT modified.',
                 'The response pauses for confirmation before invoking security.migration_translated_rule_update with confirm: true.',
               ],
               tool_sequence: [
@@ -123,7 +123,7 @@ evaluate.describe('Automatic Migration Skills: Correction', { tag: tags.stateful
               criteria: [
                 'The response references both severity and risk_score in the proposed diff — high severity implies a risk_score in the 73–99 band, so leaving risk_score at the medium-band default is called out explicitly.',
                 'The response reads the current severity and risk_score via security.migration_translated_rule_get before proposing changes.',
-                'The proposed diff touches only severity and risk_score; query, description, tags, threat[] are NOT modified.',
+                'The proposed diff touches only severity and risk_score; query, description, threat[] are NOT modified.',
                 'The response pauses for confirmation before invoking security.migration_translated_rule_update.',
               ],
               tool_sequence: ['security.migration_translated_rule_get'],

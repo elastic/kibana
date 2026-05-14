@@ -63,11 +63,11 @@ phrasing:
 - "Fix the ES|QL in the translated rule called 'Suspicious PowerShell'"
 - "Remap the MITRE tactic on rule X to T1059.001"
 - "The severity on the translated rule is too low — bump it to high"
-- "Update the description / tags / risk score on the translated rule"
+- "Update the description / severity / risk score on the translated rule"
 - "Fix every translated rule in migration \`abc-123\` that has a query error"
 - "Bump severity to high on all the credential-theft rules in this migration"
-- "Replace the \`splunk_tag\` tag with \`tags.normalized\` on every rule that
-  has it"
+- "Replace the \`splunk_tag\` field reference with \`tags.normalized\` in the
+  query of every rule that has it"
 - "Why did the migration translator pick this index pattern?"
 
 **Triggers (intent):** the user has already executed an automatic translation
@@ -116,8 +116,8 @@ order:
    \`security.migration_translated_rules_search\` to enumerate the rules
    matching the predicate, then \`security.migration_translated_rule_get\`
    to fetch the full draft of each one in scope (query, severity,
-   risk_score, description, tags, translation_result, status). Quote the
-   relevant subset back to the user so they can confirm the scope.
+   risk_score, description, threat\\[\\], translation_result, status). Quote
+   the relevant subset back to the user so they can confirm the scope.
 
 3. **Diagnose before editing.** If the user reports an ES|QL error, run
    the query through \`platform.core.generate_esql\` (or
@@ -154,10 +154,12 @@ order:
    explicitly approved the diff for the entire batch. The schema
    rejects calls without \`confirm: true\` — this is the structural
    contract; never substitute prose for it. The patch on each entry
-   accepts only \`query\`, \`severity\`, \`risk_score\`, \`description\`,
-   \`tags\`; omitted fields are preserved. If the batch would exceed 50
-   rules, split it into 50-rule chunks and re-confirm before each
-   chunk.
+   accepts only \`query\`, \`severity\`, \`risk_score\`, \`description\`;
+   omitted fields are preserved. The migration model does not carry rule
+   tags — for tag changes the operator should first install the rule and
+   then edit it via the regular detection-engine surface. If the batch
+   would exceed 50 rules, split it into 50-rule chunks and re-confirm
+   before each chunk.
 
 7. **Report what landed and what didn't.** The tool returns a
    per-rule summary (\`succeeded\`, \`failed\`, \`per_rule\` with the

@@ -12,11 +12,23 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import type { ExperimentalFeatures } from '../../../common';
+import type { SiemMigrationsService } from '../../lib/siem_migrations/siem_migrations_service';
+import { SiemMigrationsAuditActions } from '../../lib/siem_migrations/common/api/util/audit';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import { securityTool } from './constants';
+import { buildSiemMigrationsClientDependencies } from './util/siem_migrations_client_dependencies';
 
 const RESOURCES_INDEX_BASE = '.kibana-siem-rule-migrations-resources' as const;
 
+/**
+ * Per-space resources index name. Used only by the list and remove tools —
+ * list is read-only, and remove has no canonical per-resource delete on the
+ * `SiemMigrationsDataResourcesClient` surface (the client only exposes
+ * `prepareDelete(migrationId)` which removes ALL resources for a migration,
+ * a granularity mismatch for the chat-level remove UX). The upsert tool
+ * delegates to `ruleMigrationsClient.data.resources.upsert`, which derives
+ * the index name internally.
+ */
 const getResourcesIndexName = (spaceId: string) => `${RESOURCES_INDEX_BASE}-${spaceId}`;
 
 const migrationIdField = z
@@ -25,9 +37,9 @@ const migrationIdField = z
   .describe('UUID of the migration that scopes the resources.');
 
 const resourceTypeSchema = z
-  .enum(['macro', 'list', 'lookup'])
+  .enum(['macro', 'lookup'])
   .describe(
-    'Resource kind. `macro` = reusable query fragment, `list` = static enumeration, `lookup` = key/value mapping table.'
+    'Resource kind. `macro` = reusable query fragment, `lookup` = key/value mapping table. These two are the canonical Splunk-source resource kinds tracked by the migration data model; other vendor-specific kinds (qradar reference data, etc.) are not exposed via this chat tool.'
   );
 
 /* -------------------------------------------------------------------------- */
@@ -127,6 +139,12 @@ export const migrationResourcesListTool = (
 
 /* -------------------------------------------------------------------------- */
 /*  Tool 2: upsert a migration resource (destructive — requires confirmation) */
+/*                                                                            */
+/*  Delegates to `ruleMigrationsClient.data.resources.upsert`, which is the   */
+/*  same data-client method the `POST ${SIEM_RULE_MIGRATION_RESOURCES_PATH}`  */
+/*  route uses. The bulk-write uses the data service's natural-key hash       */
+/*  (`migration_id + type + name`) so a re-upsert replaces the previous       */
+/*  entry without us having to look it up first.                              */
 /* -------------------------------------------------------------------------- */
 
 const upsertSchema = z.object({
@@ -160,7 +178,8 @@ export const SECURITY_MIGRATION_RESOURCE_UPSERT_TOOL_ID = securityTool('migratio
 export const migrationResourceUpsertTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
-  experimentalFeatures: ExperimentalFeatures
+  experimentalFeatures: ExperimentalFeatures,
+  siemMigrationsService: SiemMigrationsService
 ): BuiltinToolDefinition<typeof upsertSchema> => ({
   id: SECURITY_MIGRATION_RESOURCE_UPSERT_TOOL_ID,
   type: ToolType.builtin,
@@ -183,55 +202,86 @@ export const migrationResourceUpsertTool = (
   },
   handler: async (
     { migration_id: migrationId, type, name, content, metadata, confirm: _confirm },
-    { esClient, spaceId }
+    { request, spaceId }
   ) => {
     try {
-      const index = getResourcesIndexName(spaceId);
+      const { coreStart, dependencies } = await buildSiemMigrationsClientDependencies(
+        core,
+        request,
+        experimentalFeatures
+      );
+      const currentUser = coreStart.security.authc.getCurrentUser(request);
+      if (!currentUser) {
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: { message: 'Authenticated user required to upsert resources.' },
+            },
+          ],
+        };
+      }
 
-      const existing = await esClient.asCurrentUser.search<{ migration_id?: string }>({
-        index,
-        size: 1,
-        query: {
-          bool: {
-            must: [
-              { term: { migration_id: migrationId } },
-              { term: { type } },
-              { term: { name: name as string } },
-            ],
-          },
-        },
+      const ruleMigrationsClient = siemMigrationsService.createRulesClient({
+        request,
+        currentUser,
+        spaceId,
+        dependencies,
       });
 
-      const now = new Date().toISOString();
-      const existingId = existing.hits.hits[0]?._id;
-      const replaced = Boolean(existingId);
+      const { data: probeRules } = await ruleMigrationsClient.data.items.get(migrationId, {
+        size: 1,
+      });
+      if (probeRules.length === 0) {
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: { message: `Migration ${migrationId} not found.` },
+            },
+          ],
+        };
+      }
 
-      if (existingId) {
-        await esClient.asCurrentUser.update({
-          index,
-          id: existingId,
-          doc: { content, metadata, updated_at: now },
-          refresh: 'wait_for',
-        });
-      } else {
-        await esClient.asCurrentUser.index({
-          index,
-          document: {
+      const auditLogger = coreStart.security.audit.asScoped(request);
+      const auditMessage = `[migrationType=rules]User uploaded resources to a SIEM migration with [id=${migrationId}]`;
+
+      try {
+        await ruleMigrationsClient.data.resources.upsert([
+          {
             migration_id: migrationId,
             type,
             name,
             content,
             metadata,
-            updated_at: now,
           },
-          refresh: 'wait_for',
+        ]);
+        auditLogger.log({
+          message: auditMessage,
+          event: {
+            action: SiemMigrationsAuditActions.SIEM_MIGRATION_UPLOADED_RESOURCES,
+            category: ['database'],
+            type: ['creation'],
+            outcome: 'success',
+          },
         });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        auditLogger.log({
+          message: auditMessage,
+          event: {
+            action: SiemMigrationsAuditActions.SIEM_MIGRATION_UPLOADED_RESOURCES,
+            category: ['database'],
+            type: ['creation'],
+            outcome: 'failure',
+          },
+          error: { code: 'UpsertResourceError', message },
+        });
+        throw error;
       }
 
       logger.info(
-        `Migration resource (${type}/${name}) on migration ${migrationId} ${
-          replaced ? 'replaced' : 'created'
-        }.`
+        `Migration resource (${type}/${name}) upserted on migration ${migrationId} via the canonical resources data client.`
       );
 
       return {
@@ -243,21 +293,19 @@ export const migrationResourceUpsertTool = (
               migration_id: migrationId,
               type,
               name,
-              replaced,
-              note: 'New content applies on the NEXT translation run; previously translated rules are unaffected.',
+              note: 'Written via the canonical migration resources data client (data.resources.upsert). New content applies on the NEXT translation run; previously translated rules are unaffected.',
             },
           },
         ],
       };
     } catch (error) {
-      logger.error(`migration_resource_upsert failed: ${error.message}`);
+      const message = error instanceof Error ? error.message : String(error);
+      logger.error(`migration_resource_upsert failed: ${message}`);
       return {
         results: [
           {
             type: ToolResultType.error,
-            data: {
-              message: `Failed to upsert resource (${type}/${name}): ${error.message}`,
-            },
+            data: { message: `Failed to upsert resource (${type}/${name}): ${message}` },
           },
         ],
       };
@@ -267,6 +315,13 @@ export const migrationResourceUpsertTool = (
 
 /* -------------------------------------------------------------------------- */
 /*  Tool 3: remove a migration resource (destructive — requires confirmation) */
+/*                                                                            */
+/*  Stays on direct ES because `SiemMigrationsDataResourcesClient` does NOT   */
+/*  expose a per-resource delete. The only delete-shaped method on the data   */
+/*  client is `prepareDelete(migrationId)`, which removes ALL resources for a */
+/*  migration — a granularity mismatch for a chat-level "remove this one"     */
+/*  UX. Promoting a per-resource delete to the canonical client would be a    */
+/*  separate change to the siem-migrations data layer.                       */
 /* -------------------------------------------------------------------------- */
 
 const removeSchema = z.object({
