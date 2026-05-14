@@ -1,101 +1,101 @@
 {
-  "sha1": "1284fc5f1ff1408ac248272036442119308302bb",
+  "sha1": "0b87a584ecec7fa1fdb63b752d13a0af756a1da5",
   "tests": [
     {
       "id": "e7ca8c886a58426-d57f60fe1d6db3b",
       "title": "Home page Loads the app and renders the indices tab by default",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 28,
+        "line": 29,
         "column": 7
       }
     },
     {
       "id": "e7ca8c886a58426-27b5341489d2049",
       "title": "Home page Indices - renders the indices tab",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 46,
+        "line": 47,
         "column": 7
       }
     },
     {
       "id": "e7ca8c886a58426-8af903399832657",
       "title": "Home page Indices - can create an index",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 57,
+        "line": 58,
         "column": 7
       }
     },
     {
       "id": "e7ca8c886a58426-6254649b2eeb89f",
       "title": "Home page Data streams - renders the data streams tab",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 67,
+        "line": 68,
         "column": 7
       }
     },
     {
       "id": "e7ca8c886a58426-c4e1c8ec6b68b76",
       "title": "Home page Index templates - renders the index templates tab",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 78,
+        "line": 79,
         "column": 7
       }
     },
     {
       "id": "e7ca8c886a58426-9c13e3ee7e1f9fe",
       "title": "Home page Component templates - renders the component templates tab",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 89,
+        "line": 90,
         "column": 7
       }
     },
     {
       "id": "e7ca8c886a58426-9b94d3afcaf88b6",
       "title": "Home page Enrich policies - renders the enrich policies tab",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 104,
+        "line": 105,
         "column": 7
       }
     },

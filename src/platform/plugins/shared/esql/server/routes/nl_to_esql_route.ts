@@ -15,10 +15,30 @@ import type {
 } from '@kbn/core/server';
 import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { generateEsql } from '@kbn/agent-builder-genai-utils';
+import { generateEsql, generateEsqlCompletion } from '@kbn/agent-builder-genai-utils';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
+
+const MAX_NL_INSTRUCTION_LENGTH = 2000;
+
+/**
+ * Wraps the editor's current buffer as additional context for {@link generateEsql} when
+ * the request is not a completion: the user has typed something but is asking for a fresh query.
+ */
+const buildNlToEsqlAdditionalContext = (currentQuery: string): string => {
+  if (!currentQuery) return '';
+  return [
+    'The user is in the ES|QL editor. Below is their current query.',
+    'If the request is about changing, extending, or fixing that query, treat it as the starting point.',
+    'If the request is for a new or unrelated query, you may produce a full replacement.',
+    '',
+    '<current_query>',
+    currentQuery,
+    '</current_query>',
+  ].join('\n');
+};
 
 import type { EsqlServerPluginStart } from '../types';
 
@@ -78,8 +98,9 @@ export const registerNLtoESQLRoute = (
       path: NL_TO_ESQL_ROUTE,
       validate: {
         body: schema.object({
-          nlInstruction: schema.string(),
+          nlInstruction: schema.string({ maxLength: MAX_NL_INSTRUCTION_LENGTH }),
           currentQuery: schema.maybe(schema.string({ maxLength: 50000 })),
+          isCompletion: schema.maybe(schema.boolean()),
         }),
       },
       security: {
@@ -92,7 +113,7 @@ export const registerNLtoESQLRoute = (
     async (requestHandlerContext, request, response) => {
       const logger = context.logger.get();
       try {
-        const { nlInstruction, currentQuery } = request.body;
+        const { nlInstruction, currentQuery, isCompletion } = request.body;
         const core = await requestHandlerContext.core;
         const client = core.elasticsearch.client.asCurrentUser;
         const [, { inference }] = await getStartServices();
@@ -113,17 +134,25 @@ export const registerNLtoESQLRoute = (
 
         const model = await createScopedModel({ inference, request, connectorId });
         const trimmedCurrent = currentQuery?.trim();
-        const additionalContext = trimmedCurrent
-          ? [
-              'The user is in the ES|QL editor. Below is their current query.',
-              'If the request is about changing, extending, or fixing that query, treat it as the starting point.',
-              'If the request is for a new or unrelated query, you may produce a full replacement.',
-              '',
-              '<current_query>',
-              trimmedCurrent,
-              '</current_query>',
-            ].join('\n')
-          : undefined;
+        const isCompletionRequest = Boolean(isCompletion && trimmedCurrent);
+        const signal = getRequestAbortedSignal(request.events.aborted$);
+
+        if (isCompletionRequest) {
+          const { content, replacesNext } = await generateEsqlCompletion({
+            model,
+            esClient: client,
+            logger,
+            nlInstruction,
+            currentQuery: trimmedCurrent ?? '',
+            signal,
+          });
+          return response.ok({
+            body: { content, replacesNext },
+          });
+        }
+
+        const additionalContext = buildNlToEsqlAdditionalContext(trimmedCurrent ?? '');
+
         const result = await generateEsql({
           model,
           esClient: client,

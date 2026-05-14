@@ -12,6 +12,7 @@ import type { CellActionRenderer } from '../../../shared/components/cell_actions
 import { AboutSection } from '../components/about_section';
 import { InsightsSection } from '../components/insights_section';
 import { InvestigationSection } from '../components/investigation_section';
+import { ResponseSection } from '../components/response_section';
 import { VisualizationsSection } from '../components/visualizations_section';
 
 export interface OverviewTabProps {
@@ -49,6 +50,8 @@ export const OverviewTab = memo(({ hit, renderCellActions, onAlertUpdated }: Ove
       renderCellActions={renderCellActions}
       onAlertUpdated={onAlertUpdated}
     />
+    <EuiHorizontalRule margin="m" />
+    <ResponseSection hit={hit} />
   </>
 ));
 
