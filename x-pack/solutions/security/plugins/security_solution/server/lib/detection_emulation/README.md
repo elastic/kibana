@@ -178,3 +178,63 @@ triggered by different rule tag changes produce different fingerprints.
 | `detectionEmulationRealExecution` | Enables real-execution dispatch and the route for `mode: real_execution` |
 
 Both are `experimental` in `config/experimental_features.ts`.
+
+---
+
+## OOB notification path (Risk #3)
+
+Every emulation run writes a `detection-emulation-report` saved object before returning. That SO is the primary out-of-band audit record — it is distinct from the injected emulation events and persists regardless of whether the emulation produced any alerts.
+
+### Key SO fields for SOC queries
+
+| Field | Type | Content |
+|---|---|---|
+| `actor.kind` | `keyword` | `"user"` (direct REST/UI call) or `"agent-builder"` (AI tool dispatch) |
+| `actor.conversationId` | `keyword` | Agent Builder conversation ID — pivots back to the chat that triggered the run |
+| `actor.executionId` | `keyword` | Per-agent-run ID — correlates with Agent Builder execution logs |
+| `actor.runId` | `keyword` | Top-level run ID from the agent runtime |
+| `actor.toolCallId` | `keyword` | Per-tool-call ID — uniquely identifies one emulation dispatch within a run |
+| `scenarioFingerprint` | `keyword` | SHA-256 of `{ ruleId, payloadIds (sorted), agentType }` — content-addressed, stable across re-runs of identical scenarios |
+| `scenarioId` | `keyword` | SHA-256 of `{ ruleId, techniqueIds }` — identifies the MITRE surface evaluated |
+| `operator` | `keyword` | Username of the Kibana user whose session triggered the run |
+| `startedAt` | `date` | ISO 8601 timestamp of the emulation start |
+| `mode` | `keyword` | `"log_injection"` or `"real_execution"` |
+
+All fields are mapped as `keyword` (or `date` for `startedAt`) with `dynamic: false`, so they are available for filtering in Kibana Discover and ES query DSL without scripting.
+
+### Kibana security audit log integration
+
+When `xpack.security.audit.enabled: true` is set in `kibana.yml`, the Kibana security plugin emits an `saved_object_create` audit event every time a `detection-emulation-report` SO is written. Each event includes:
+
+- `event.action: "saved_object_create"`
+- `kibana.saved_object.type: "detection-emulation-report"`
+- `kibana.saved_object.id` — the new SO ID
+- `user.name` — the operator who made the request
+- `kibana.space_ids` — the Kibana space
+
+These events land in the Kibana audit log file (`xpack.security.audit.appender`) or in the `filebeat`-indexed stream if the ECS output appender is configured. They are separate from the `.kibana-security-emulation-logs-*` index that receives synthetic endpoint events.
+
+To capture both the SO write and the injection side in a single SIEM rule, join on `scenarioId` or `scenarioFingerprint`:
+
+```esql
+FROM .kibana-security-solution* METADATA _index
+| WHERE kibana.saved_object.type == "detection-emulation-report"
+| EVAL fingerprint = detection-emulation-report.attributes.scenarioFingerprint,
+       actor_kind  = detection-emulation-report.attributes.actor.kind
+| WHERE actor_kind == "agent-builder"
+| STATS count = COUNT(*) BY actor_kind, fingerprint
+```
+
+> **Note:** The `.kibana-security-solution-*` index requires `superuser` or a role with `read` access to that index. Prefer routing alerts through a Watcher or Kibana rule that queries via the saved-objects Find API (`GET /api/saved_objects/_find?type=detection-emulation-report`) so the query runs under a dedicated service account with narrowly-scoped privileges.
+
+### SOC tooling consumption surface
+
+Three consumption patterns are supported:
+
+1. **Kibana rule (recommended)** — Create an Elasticsearch rule in the Security Solution that searches `.kibana-security-solution-*` for new `detection-emulation-report` documents where `actor.kind == "agent-builder"`. Alert on the first occurrence of a `scenarioFingerprint` seen within a rolling 24-hour window.
+
+2. **Watcher** — A cluster-level Watcher job that polls the SO index on a schedule and POSTs a payload to a webhook (PagerDuty, Slack) when `actor.kind == "agent-builder"` appears. Use the `scenarioFingerprint` as the deduplication key.
+
+3. **Fleet / Filebeat audit pipeline** — If `xpack.security.audit.appender.type: rolling-file` is configured, Filebeat's `kibana` module ingests the audit log. Filter on `event.action: "saved_object_create"` and `kibana.saved_object.type: "detection-emulation-report"` to forward notifications to the SIEM.
+
+The `actor.kind` discriminator is the single field that distinguishes a human operator (who presumably knows they triggered a test) from an AI-driven dispatch (which may warrant a page to the SOC). Build alerting thresholds around `actor.kind == "agent-builder"` rather than on all emulation activity.
