@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -16,6 +16,7 @@ import {
   EuiSplitPanel,
   EuiText,
   useEuiTheme,
+  useResizeObserver,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ActionButton, HeaderBadge } from '@kbn/agent-builder-browser/attachments';
@@ -56,6 +57,8 @@ interface AttachmentHeaderProps {
   previewBadgeState?: 'none' | 'preview_available' | 'previewing';
 }
 
+export const COMPACT_WIDTH_THRESHOLD = 560;
+
 export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   icon,
   title,
@@ -67,6 +70,10 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   previewBadgeState = 'none',
 }) => {
   const { euiTheme } = useEuiTheme();
+
+  const measureRef = useRef<HTMLDivElement | null>(null);
+  const { width: headerWidth } = useResizeObserver(measureRef.current);
+  const isCompact = headerWidth > 0 && headerWidth <= COMPACT_WIDTH_THRESHOLD;
 
   const textStyles = css`
     font-weight: ${euiTheme.font.weight.semiBold};
@@ -83,11 +90,9 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
 
   const headerStyles = css`
     position: relative;
-    display: flex;
-    align-items: center;
     border-bottom: ${euiTheme.border.thin};
     border-color: ${euiTheme.colors.borderBaseSubdued};
-    min-height: ${HEADER_HEIGHT}px;
+    min-height: ${isCompact ? 'auto' : `${HEADER_HEIGHT}px`};
   `;
 
   const badgeStyles = css`
@@ -101,86 +106,107 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   const hasActionButtons = actionButtons && actionButtons.length > 0;
 
   return (
-    <EuiSplitPanel.Inner color="subdued" css={headerStyles} paddingSize="m">
-      {previewBadgeState === 'preview_available' && (
-        <EuiBadge iconType="lock" color="primary" css={badgeStyles}>
-          {PREVIEW_ONLY_LABEL}
-        </EuiBadge>
-      )}
-      <EuiFlexGroup
-        responsive={false}
-        direction="row"
-        justifyContent="spaceBetween"
-        alignItems="center"
-        style={{ width: '100%' }}
-      >
-        {icon && (
-          <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
-            <EuiIcon type={icon} size="l" aria-hidden={true} />
-          </EuiFlexItem>
+    <div ref={measureRef} style={{ width: '100%' }}>
+      <EuiSplitPanel.Inner color="subdued" css={headerStyles} paddingSize="m">
+        {previewBadgeState === 'preview_available' && (
+          <EuiBadge iconType="lock" color="primary" css={badgeStyles}>
+            {PREVIEW_ONLY_LABEL}
+          </EuiBadge>
         )}
-        <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
-          <EuiFlexGroup
-            direction="column"
-            gutterSize="xs"
-            responsive={false}
-            style={{ minWidth: 0 }}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup
-                gutterSize="xs"
-                alignItems="center"
-                responsive={false}
-                wrap
-                style={{ minWidth: 0 }}
-              >
-                <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
-                  <EuiText css={textStyles} size="s">
-                    {title}
-                  </EuiText>
+        <EuiFlexGroup
+          responsive={false}
+          direction={isCompact ? 'column' : 'row'}
+          justifyContent="spaceBetween"
+          alignItems={isCompact ? 'flexStart' : 'center'}
+          gutterSize={isCompact ? 's' : 'm'}
+          style={{ width: '100%' }}
+        >
+          {/* Start: icon + title/badges/subtitle */}
+          <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
+            <EuiFlexGroup
+              gutterSize="m"
+              alignItems="center"
+              responsive={false}
+              style={{ minWidth: 0 }}
+            >
+              {icon && (
+                <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
+                  <EuiIcon type={icon} size="l" aria-hidden={true} />
                 </EuiFlexItem>
-                {badges?.map((badge, index) => (
-                  <EuiFlexItem grow={false} key={index}>
-                    <EuiBadge color={badge.color} iconType={badge.iconType}>
-                      {badge.label}
-                    </EuiBadge>
+              )}
+              <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
+                <EuiFlexGroup
+                  direction="column"
+                  gutterSize="xs"
+                  responsive={false}
+                  style={{ minWidth: 0 }}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup
+                      gutterSize="xs"
+                      alignItems="center"
+                      responsive={false}
+                      wrap
+                      style={{ minWidth: 0 }}
+                    >
+                      <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+                        <EuiText css={textStyles} size="s">
+                          {title}
+                        </EuiText>
+                      </EuiFlexItem>
+                      {badges?.map((badge, index) => (
+                        <EuiFlexItem grow={false} key={index}>
+                          <EuiBadge color={badge.color} iconType={badge.iconType}>
+                            {badge.label}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      ))}
+                    </EuiFlexGroup>
                   </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            {subtitle && (
-              <EuiFlexItem grow={false}>
-                <EuiText css={subtitleStyles} size="xs" color="subdued">
-                  {subtitle}
-                </EuiText>
+                  {subtitle && (
+                    <EuiFlexItem grow={false}>
+                      <EuiText css={subtitleStyles} size="xs" color="subdued">
+                        {subtitle}
+                      </EuiText>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
               </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        {previewBadgeState !== 'previewing' && hasActionButtons && (
-          <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
-            <AttachmentActions buttons={actionButtons} />
+            </EuiFlexGroup>
           </EuiFlexItem>
-        )}
-        {previewBadgeState === 'previewing' && (
-          <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
-            <EuiButtonEmpty color="text" size="s" iconType="cross" onClick={onClosePreview}>
-              {CLOSE_PREVIEW_LABEL}
-            </EuiButtonEmpty>
+          {/* End: action buttons + close button */}
+          <EuiFlexItem
+            grow={false}
+            style={isCompact ? { alignSelf: 'flex-end', flexShrink: 0 } : { flexShrink: 0 }}
+          >
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              {previewBadgeState !== 'previewing' && hasActionButtons && (
+                <EuiFlexItem grow={false}>
+                  <AttachmentActions buttons={actionButtons} />
+                </EuiFlexItem>
+              )}
+              {previewBadgeState === 'previewing' && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty color="text" size="s" iconType="cross" onClick={onClosePreview}>
+                    {CLOSE_PREVIEW_LABEL}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
+              {onClose && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    aria-label={CLOSE_BUTTON_ARIA_LABEL}
+                    iconType="cross"
+                    onClick={onClose}
+                    size="s"
+                    color="text"
+                  />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiFlexItem>
-        )}
-        {onClose && (
-          <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
-            <EuiButtonIcon
-              aria-label={CLOSE_BUTTON_ARIA_LABEL}
-              iconType="cross"
-              onClick={onClose}
-              size="s"
-              color="text"
-            />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </EuiSplitPanel.Inner>
+        </EuiFlexGroup>
+      </EuiSplitPanel.Inner>
+    </div>
   );
 };
