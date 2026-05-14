@@ -31,8 +31,7 @@ const waitForSavedObjectsTable = async (page: ScoutPage) => {
 };
 
 const selectTagsInFilter = async (page: ScoutPage, ...tagNames: string[]) => {
-  // EUI filter popover doesn't expose a direct testSubj for the trigger.
-  await page.locator('.euiFilterGroup > *:last-child .euiFilterButton').click();
+  await page.testSubj.locator('savedObjectSearchBar').getByRole('button', { name: 'Tags' }).click();
   for (const tagName of tagNames) {
     await page.testSubj.click(`tag-searchbar-option-${tagName.replace(' ', '_')}`);
   }
@@ -109,7 +108,7 @@ test.describe('Tags - saved objects management integration', { tag: tags.statefu
         .getByText('Visualization 3 (tag-1 + tag-3)'),
     });
     await expect(
-      row.locator('[data-test-subj="listingTableRowTags"] .euiBadge__content')
+      row.locator('[data-test-subj="listingTableRowTags"] [data-test-subj^="tag-badge-"]')
     ).toHaveText(['tag-1', 'tag-3']);
   });
 });
