@@ -26,11 +26,16 @@ export const getCaseDataViewId = (spaceId: string): string =>
   `${CASE_DATA_VIEW_ID_PREFIX}${spaceId}`;
 
 /**
- * Display name shown in the Lens / Discover data view dropdown. Plain
- * `Cases` (no v2 suffix) — v1 doesn't create a managed data view, so
- * there's nothing to disambiguate against.
+ * Display name shown in the Lens / Discover data view dropdown.
+ *
+ * "Case Analytics" — not plain "Cases" — because the cases plugin also
+ * surfaces user-facing case lists and pages in Lens/Discover dropdowns,
+ * and a managed data view named "Cases" would visually collide with
+ * those. The name signals "this is the analytics surface" so operators
+ * who land in Lens can immediately tell whether they're looking at the
+ * primary case view or the analytics mirror.
  */
-const CASE_DATA_VIEW_NAME = 'Cases';
+const CASE_DATA_VIEW_NAME = 'Case Analytics';
 
 /**
  * Base spec for the managed Cases data view in a single space. Runtime
