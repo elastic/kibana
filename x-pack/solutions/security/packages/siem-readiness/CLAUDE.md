@@ -31,7 +31,7 @@ The dimension orchestrators in `server/lib/siem_readiness/dimensions/` filter it
 ### Category assignment in payloads
 
 - **Coverage**: items are already `CategoryGroup[]` — pre-grouped by category.
-- **Continuity**: items are `PipelineStats[]`. Use `getIndexCategoryMap` to find which category a pipeline's indices belong to.
+- **Continuity**: items are `PipelineStats[]` filtered to categorized pipelines, each with a `categories: MainCategories[]` field listing all categories that pipeline's indices belong to.
 - **Quality**: items are `DataQualityResultDocument[]` filtered to categorized indices. Use `actionableFindings[].category` for grouping.
 - **Retention**: items are `RetentionInfo[]` filtered to categorized indices, each with a `categories: MainCategories[]` field listing all categories that index belongs to.
 
@@ -78,14 +78,16 @@ The right approach:
 ```
 src/types.ts  ←  start here when adding a new metric
     ↓
-server/lib/siem_readiness/fetchers/fetch_pipelines.ts   (raw ES I/O)
+server/lib/siem_readiness/fetchers/fetch_pipelines.ts   (raw ES I/O, no filtering)
     ↓
-server/lib/siem_readiness/dimensions/get_continuity.ts  (orchestrates fetchers + status functions → ContinuityPayload)
+server/lib/siem_readiness/dimensions/get_continuity.ts  (filters to categorized, enriches with categories[], computes status → ContinuityPayload)
     ↓
 server/lib/siem_readiness/routes/get_readiness_pipelines.ts  →  public/siem_readiness/ (UI)
-    OR
+    AND
 server/agent_builder/tools/siem_readiness/get_continuity_tool.ts  →  agent
 ```
+
+Both the route and the agent tool call the **same orchestrator**. The UI and agent always receive identical data.
 
 The same pattern applies to all four dimensions: **Coverage**, **Quality**, **Continuity**, **Retention**.
 
@@ -97,11 +99,11 @@ The same pattern applies to all four dimensions: **Coverage**, **Quality**, **Co
 
 **`src/get_siem_readiness_statuses/`** — Pure status functions (no I/O). Both the UI hooks and the server-side dimension orchestrators import from here — same logic, both surfaces.
 
-**`fetchers/`** — Raw ES I/O, one file per query. No verdict logic. If a new metric needs ES data, it belongs in the matching fetcher.
+**`fetchers/`** — Raw ES I/O, one file per query. No filtering, no verdict logic. Always return everything ES returns.
 
-**`dimensions/`** — Per-dimension orchestrators. Compose fetcher results + status functions into `*Payload` objects with `status`, `summary`, `items`, and `actionableFindings`. This is where new metrics become findings.
+**`dimensions/`** — Per-dimension orchestrators. Call fetchers, filter to categorized-only, enrich items with `categories[]`, call pure status functions, and return `*Payload` objects with `status`, `summary`, `items`, and `actionableFindings`. This is where new metrics become findings.
 
-**`routes/`** — Thin HTTP wrappers (~20 lines). UI's React Query hooks depend on these shapes — don't change the response structure without updating the UI.
+**`routes/`** — Thin HTTP wrappers (~20 lines) that call the matching dimension orchestrator. Because routes and agent tools call the same orchestrator, the UI and agent always receive identical data. The `categories` route is the one justified exception — it has no orchestrator because the raw categories structure is what the coverage tab renders directly.
 
 **Agent tools** — Call dimension orchestrators directly (no HTTP). New fields in a payload are immediately available to the agent with no wiring changes.
 
