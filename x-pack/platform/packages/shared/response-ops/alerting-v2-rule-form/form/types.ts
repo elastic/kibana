@@ -34,12 +34,13 @@ export interface RuleSchedule {
 }
 
 /**
- * The form represents the rule's detection query as a single full ES|QL
- * statement — the "breach" query in the API's `standalone` format. Composed
- * authoring is not yet supported in the UI.
+ * The form represents the rule's detection query in the API's `standalone`
+ * format. `breach` is required; `recover` is optional and set by the compose
+ * discover flow when the user configures a custom recovery condition.
  */
 export interface RuleQuery {
   breach: string;
+  recover?: string;
 }
 
 export interface RuleGrouping {
