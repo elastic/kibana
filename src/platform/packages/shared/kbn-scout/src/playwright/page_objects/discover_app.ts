@@ -18,11 +18,6 @@ const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
 export type DiscoverQueryMode = 'esql' | 'classic';
 
 export interface DiscoverGotoOptions {
-  /**
-   * When provided, sets Discover's query mode in localStorage before the navigation
-   * runs (via `setQueryMode`). Use this to make tests independent of the
-   * `discover.isEsqlDefault` feature flag default.
-   */
   queryMode?: DiscoverQueryMode;
 }
 
