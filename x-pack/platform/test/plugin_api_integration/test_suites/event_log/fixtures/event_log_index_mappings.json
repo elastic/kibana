@@ -26,14 +26,16 @@
     "kibana": {
       "properties": {
         "saved_objects": {
+          "type": "nested",
           "properties": {
             "id": { "type": "keyword" },
             "rel": { "type": "keyword" },
-            "type": { "type": "keyword" }
+            "type": { "type": "keyword" },
+            "namespace": { "type": "keyword" }
           }
         },
         "server_uuid": { "type": "keyword" },
-        "version": { "type": "keyword" }
+        "version": { "type": "version" }
       }
     }
   }

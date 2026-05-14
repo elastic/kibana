@@ -168,8 +168,16 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe(`Index Lifecycle`, () => {
       const indices = ['.kibana-event-log-7.9.0-000001', '.kibana-event-log-8.0.0-000001'];
+      const savedObjectId = '421f2511-5cd1-44fd-95df-e0df83e354d5';
 
       before(async () => {
+        // The event log client verifies SO access before searching, so the referenced SO must exist.
+        await kibanaServer.savedObjects.create({
+          type: 'event_log_test',
+          id: savedObjectId,
+          overwrite: true,
+          attributes: {},
+        });
         await es.indices.delete({ index: indices, ignore_unavailable: true });
         for (const index of indices) {
           await es.indices.create({
