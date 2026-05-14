@@ -989,6 +989,7 @@ x-pack/platform/packages/shared/agent-builder/agent-builder-common @elastic/work
 x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils @elastic/workchat-eng
 x-pack/platform/packages/shared/agent-builder/agent-builder-server @elastic/workchat-eng
 x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base @elastic/workchat-eng
+x-pack/platform/packages/shared/agent-builder/agent-builder-workflow-gen @elastic/workchat-eng @elastic/workflows-eng
 x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder @elastic/workchat-eng
 x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta @elastic/appex-sharedux
@@ -1055,6 +1056,8 @@ x-pack/platform/packages/shared/kbn-streamlang-tests @elastic/obs-onboarding-tea
 x-pack/platform/packages/shared/kbn-streamlang-yaml-editor @elastic/obs-onboarding-team
 x-pack/platform/packages/shared/kbn-streams-ai @elastic/obs-onboarding-team @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/kbn-streams-schema @elastic/obs-onboarding-team @elastic/obs-sig-events-team
+x-pack/platform/packages/shared/kbn-uiam-api-keys-provisioning-status @elastic/response-ops
+x-pack/platform/packages/shared/llm-trace-waterfall @elastic/obs-ai-team @elastic/workchat-eng
 x-pack/platform/packages/shared/logs-overview @elastic/obs-exploration-team
 x-pack/platform/packages/shared/ml/aiops_common @elastic/ml-ui
 x-pack/platform/packages/shared/ml/aiops_log_pattern_analysis @elastic/ml-ui
@@ -2494,6 +2497,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/jina/** @elastic/jina
 src/platform/packages/shared/kbn-connector-specs/src/specs/microsoft_teams/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/notion/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/one_password/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/outlook/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/pagerduty/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/salesforce/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/servicenow_search/** @elastic/workchat-eng
@@ -2505,6 +2509,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/tavily/** @elastic/wo
 src/platform/packages/shared/kbn-connector-specs/src/specs/urlvoid/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/virustotal/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/zendesk/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/hubspot/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/zoom/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/sharepoint_server/** @elastic/workchat-eng
 
@@ -3376,7 +3381,6 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.agents/skills/scout-migrate-from-ftr/** @elastic/appex-qa
 /.agents/skills/scout-ui-testing/** @elastic/appex-qa
 /.agents/skills/enzyme-to-rtl/** @elastic/appex-qa
-/.agents/skills/buildkite-logs @elastic/appex-qa
 /.agents/skills/evals-create-suite/** @elastic/obs-ai-team @elastic/security-generative-ai
 /.agents/skills/evals-write-spec/** @elastic/obs-ai-team @elastic/security-generative-ai
 

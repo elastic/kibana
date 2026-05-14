@@ -14,6 +14,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { defineRoutes } from './api/routes';
+import { WorkflowManagementAuditLog } from './api/routes/utils/workflow_audit_logging';
 import { WorkflowsManagementApi } from './api/workflows_management_api';
 import { WorkflowsService } from './api/workflows_management_service';
 import { AvailabilityUpdater } from './availability';
@@ -86,12 +87,13 @@ export class WorkflowsPlugin
     const spaces = plugins.spaces.spacesService;
 
     const router = core.http.createRouter<WorkflowsRequestHandlerContext>();
-    defineRoutes(router, api, this.logger, spaces, workflowsService);
+    const audit = new WorkflowManagementAuditLog({ service: workflowsService });
+    defineRoutes(router, api, this.logger, spaces, workflowsService, audit);
 
     if (plugins.inbox) {
       this.logger.debug('Workflows Management: registering inbox provider');
       plugins.inbox.registerActionProvider(
-        createWorkflowsInboxProvider({ api, logger: this.logger })
+        createWorkflowsInboxProvider({ api, logger: this.logger, audit })
       );
     }
 

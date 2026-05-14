@@ -14,7 +14,6 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/monaco",
     "@kbn/es-query",
     "@kbn/core",
     "@kbn/kibana-react-plugin",
