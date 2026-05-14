@@ -60,30 +60,27 @@ jest.mock('../../../shared/components/tools_flyout_header', () => ({
 const onCancel = jest.fn();
 const onConfirm = jest.fn();
 
-const defaultSource = {
-  '@timestamp': '2026-05-11T11:54:22.134Z',
-  agent: { type: 'endpoint' },
-  event: { code: 'behavior', kind: 'signal' },
-  file: { hash: { sha256: 'abc123' }, path: 'C:\\Windows\\System32\\example.exe' },
-  host: { os: { name: 'Windows' } },
-};
-
-// flattened is used by getFieldValue for ruleId / alertStatus extraction only
+// alertData is always built from hit.flattened (flat dotted keys converted to nested objects).
+// This works regardless of whether Discover fetched _source or used the fields API (_source: false).
 const defaultFlattenedAlertFields = {
   'kibana.alert.rule.uuid': ['rule-uuid'],
   'kibana.alert.workflow_status': ['open'],
+  'agent.type': ['endpoint'],
+  'event.code': ['behavior'],
+  'event.kind': ['signal'],
+  'file.hash.sha256': ['abc123'],
+  'file.path': ['C:\\Windows\\System32\\example.exe'],
+  'host.os.name': ['Windows'],
 };
 
 const createDiscoverHit = (
-  flattened: DataTableRecord['flattened'] = defaultFlattenedAlertFields,
-  source: object = defaultSource
+  flattened: DataTableRecord['flattened'] = defaultFlattenedAlertFields
 ): DataTableRecord =>
   ({
     id: 'alert-id',
     raw: {
       _id: 'alert-id',
       _index: '.alerts-security.alerts-default',
-      _source: source,
     },
     flattened,
     isAnchor: false,
@@ -101,7 +98,7 @@ describe('<AddRuleException />', () => {
     );
   });
 
-  it('builds alert data from raw _source without staying in loading state', () => {
+  it('builds nested alert data from flattened fields without loading state', () => {
     render(
       <AddRuleException
         hit={createDiscoverHit()}
@@ -129,14 +126,14 @@ describe('<AddRuleException />', () => {
       expect.objectContaining({
         _id: 'alert-id',
         _index: '.alerts-security.alerts-default',
-        agent: expect.objectContaining({ type: 'endpoint' }),
-        event: expect.objectContaining({ code: 'behavior', kind: 'signal' }),
+        agent: expect.objectContaining({ type: ['endpoint'] }),
+        event: expect.objectContaining({ code: ['behavior'], kind: ['signal'] }),
         file: expect.objectContaining({
-          hash: expect.objectContaining({ sha256: 'abc123' }),
-          path: 'C:\\Windows\\System32\\example.exe',
+          hash: expect.objectContaining({ sha256: ['abc123'] }),
+          path: ['C:\\Windows\\System32\\example.exe'],
         }),
         host: expect.objectContaining({
-          os: expect.objectContaining({ name: 'Windows' }),
+          os: expect.objectContaining({ name: ['Windows'] }),
         }),
       })
     );
@@ -150,7 +147,7 @@ describe('<AddRuleException />', () => {
 
     render(
       <AddRuleException
-        hit={createDiscoverHit({ 'event.kind': ['signal'] }, {})}
+        hit={createDiscoverHit({ 'event.kind': ['signal'] })}
         exceptionListType={ExceptionListTypeEnum.RULE_DEFAULT}
         onCancel={onCancel}
         onConfirm={onConfirm}

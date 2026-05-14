@@ -12,6 +12,7 @@ import {
   EuiFlyoutHeader,
   EuiSkeletonText,
 } from '@elastic/eui';
+import { set } from 'lodash';
 import { ALERT_RULE_UUID, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
@@ -74,15 +75,19 @@ export const AddRuleException: React.FC<AddRuleExceptionProps> = memo(
     const renderEndpointExceptionContent =
       isEndpointItem && isEndpointExceptionsMovedUnderManagement;
 
-    const alertData = useMemo<AlertData>(
-      () =>
-        ({
-          ...(hit.raw._source as object),
-          _id: hit.raw._id,
-          _index: hit.raw._index,
-        } as AlertData),
-      [hit]
-    );
+    const alertData = useMemo<AlertData>(() => {
+      // hit.flattened is always populated (from _source or from the fields API when
+      // Discover sets _source: false). Convert its flat dotted keys to a nested structure
+      // so that lodash get() can traverse the field paths used by exception helpers.
+      const source = Object.entries(hit.flattened).reduce<Record<string, unknown>>(
+        (acc, [key, value]) => {
+          set(acc, key, value);
+          return acc;
+        },
+        {}
+      );
+      return { ...source, _id: hit.raw._id, _index: hit.raw._index } as AlertData;
+    }, [hit]);
 
     const alertStatus = useMemo<Status | undefined>(() => {
       const raw = getFieldValue(hit, ALERT_WORKFLOW_STATUS);
