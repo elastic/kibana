@@ -28,7 +28,7 @@ More access means more context on the failure:
 Use the `bk` CLI when interacting with Buildkite. Create a token at https://buildkite.com/user/api-access-tokens and export it as `BUILDKITE_API_TOKEN`. Required scopes:
 
 - `read_builds`: browse pipelines, builds, and job logs.
-- `read_artifacts`: list and download build artifacts (Scout traces, screenshots, FTR debug output, etc.).
+- `read_artifacts`: list and download build artifacts (Scout HTML failure reports, screenshots, FTR failure-debug HTML, etc.). See "Did the environment cause the failure?" for the specific paths and how to use them.
 
 ### GitHub
 
@@ -145,7 +145,10 @@ Signs the environment is at fault rather than the test itself:
 
 - **The build had many unrelated failures.** A broad pattern of failures across unrelated tests in the same build points to an infrastructure issue (agent problems, network, downstream service outage).
 - **The test was polluted by another test.** Most likely for Scout tests sharing a lane (see "How tests are distributed across servers"). Look at which other tests ran against the same servers in the failing build. Check whether the failing builds often share the same config run order pattern.
-- **The failure screenshot** can sometimes help. Example: it shows a loading Kibana logo, typically indicating that Kibana isn't completely operational.
+- **Failure screenshots and HTML reports** are uploaded as Buildkite artifacts and are often the fastest way to see what actually happened at the point of failure.
+  - **Scout (preferred entry point): the per-failure HTML report.** For each failed test, Scout writes a self-contained `<failure-id>.html` to `.scout/reports/scout-playwright-test-failures-*/`, bundling the error message + stack trace, stdout, test metadata (suite, title, target, owner, Kibana module, duration), and screenshots inlined as base64. A sibling `test-failures-summary.json` lists each failure with its HTML filename — use it as an index. Standalone screenshots are also uploaded under `.scout/test-artifacts/**/*.png` if you only need the image.
+  - **FTR:** screenshots under `**/screenshots/failure/*.png` and a page snapshot at `**/failure_debug/html/*.html`.
+  - Use the Buildkite artifacts API (see the `buildkite-logs` skill) with a `read_artifacts` token to list and download them. A loading Kibana logo in the screenshot, for example, typically indicates Kibana wasn't fully operational.
 
 ## Assess the test itself
 
@@ -188,6 +191,7 @@ Scout and FTR tests should also follow the general best practices in `docs/exten
 When investigating a Scout failure, weight these checks higher:
 
 - **Lane pollution.** Scout tests in the same Playwright lane share servers (see "How tests are distributed across servers"). Look at which other configs ran in the same lane in the failing build. If the same neighbor configs appear repeatedly in failing builds, suspect cross-test state leakage.
+- **Worker load on shared servers (parallel configs).** Scout configs that opt in to parallelism — typically named `parallel.playwright.config.ts` and passing `workers > 1` to `createPlaywrightConfig` (e.g. `src/platform/packages/shared/kbn-scout/test/scout/api/parallel.playwright.config.ts`) — run several Playwright workers against the same Kibana/Elasticsearch test servers. Under load, this can manifest as slow responses, occasional timeouts, or transient errors that look test-specific but are really resource pressure. Worth keeping in mind when interpreting timeout-shaped failures in a parallel config — it is *not* by itself a reason to drop `workers` back to 1. Consider it especially when the same test passes in isolation but flakes only in the full parallel run.
 - **Page-object brittleness.** Page-object rewrites are a common "fix" that often does not hold. If a page-object change is on the table, confirm it addresses a root cause (e.g. the previous locator was racing with rendering) rather than being a cleaner-looking rewrite of the same race.
 - **Poll/timeout values.** Bumping a Scout poll timeout is a frequent and frequently-recurring fix. Before recommending one, confirm the slow operation is intrinsic to the product (e.g. index creation, SLO calculation) rather than a missing `waitForResponse` or `waitForSelector` somewhere upstream.
 - **Whole-suite recurrence.** Some Scout suites (e.g. parts of the Streams plugin, Observability dashboards) generate clusters of `failed-test` issues that share infrastructure problems. If multiple sibling specs in the same suite are flaky, expect a structural conclusion rather than a single-test patch.
