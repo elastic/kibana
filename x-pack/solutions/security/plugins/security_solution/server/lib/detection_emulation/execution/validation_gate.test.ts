@@ -193,6 +193,71 @@ describe('validation_gate helpers', () => {
     });
   });
 
+  describe('checkValidationGates — allowedExecuteCommandPatterns', () => {
+    it('admits an execute command that matches at least one pattern', () => {
+      const result = checkValidationGates(
+        { command: 'execute', parameters: { command: 'whoami' } },
+        { curatedOnly: false, allowedScriptIds: [], allowedExecuteCommandPatterns: ['^whoami$'] },
+        stubLibrary
+      );
+      expect(result.allowed).toBe(true);
+    });
+
+    it('rejects an execute command that matches none of the patterns', () => {
+      const result = checkValidationGates(
+        { command: 'execute', parameters: { command: 'rm -rf /' } },
+        { curatedOnly: false, allowedScriptIds: [], allowedExecuteCommandPatterns: ['^whoami$'] },
+        stubLibrary
+      );
+      expect(result).toEqual({
+        allowed: false,
+        reason: 'execute_command_not_allowed',
+        message: expect.stringContaining('allowedExecuteCommandPatterns'),
+      });
+    });
+
+    it('rejects an execute command with no parameters.command when patterns are set', () => {
+      const result = checkValidationGates(
+        { command: 'execute', parameters: {} },
+        { curatedOnly: false, allowedScriptIds: [], allowedExecuteCommandPatterns: ['^whoami$'] },
+        stubLibrary
+      );
+      expect(result.allowed).toBe(false);
+      if (!result.allowed) expect(result.reason).toBe('execute_command_not_allowed');
+    });
+
+    it('is a no-op when the pattern list is empty even for execute', () => {
+      const result = checkValidationGates(
+        { command: 'execute', parameters: { command: 'rm -rf /' } },
+        { curatedOnly: false, allowedScriptIds: [], allowedExecuteCommandPatterns: [] },
+        stubLibrary
+      );
+      expect(result.allowed).toBe(true);
+    });
+
+    it('is a no-op for non-execute commands even when patterns are populated', () => {
+      const result = checkValidationGates(
+        { command: 'running-processes', parameters: null },
+        { curatedOnly: false, allowedScriptIds: [], allowedExecuteCommandPatterns: ['^whoami$'] },
+        stubLibrary
+      );
+      expect(result.allowed).toBe(true);
+    });
+
+    it('matches against multiple patterns (any-match semantics)', () => {
+      const result = checkValidationGates(
+        { command: 'execute', parameters: { command: 'ipconfig /all' } },
+        {
+          curatedOnly: false,
+          allowedScriptIds: [],
+          allowedExecuteCommandPatterns: ['^whoami$', '^ipconfig'],
+        },
+        stubLibrary
+      );
+      expect(result.allowed).toBe(true);
+    });
+  });
+
   describe('checkValidationGates — gate ordering', () => {
     it('reports curatedOnly rejection FIRST when both gates would fire', () => {
       const result = checkValidationGates(

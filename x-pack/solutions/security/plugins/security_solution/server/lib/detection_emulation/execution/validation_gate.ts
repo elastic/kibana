@@ -56,7 +56,7 @@ export type ValidationGateResult =
   | { allowed: true }
   | {
       allowed: false;
-      reason: 'not_in_curated_library' | 'script_not_allowed';
+      reason: 'not_in_curated_library' | 'script_not_allowed' | 'execute_command_not_allowed';
       message: string;
     };
 
