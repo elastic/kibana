@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ContentListItem } from '@kbn/content-list-provider';
 import type { EditActionProps, ActionOutput, ActionBuilderContext } from '../types';
 
 /** Default i18n-translated label for the edit action. */
@@ -24,13 +25,10 @@ const DEFAULT_EDIT_DESCRIPTION = i18n.translate(
 /**
  * Build a `DefaultItemAction` for the edit action preset.
  *
- * Returns `undefined` when:
- * - The table is in read-only mode.
- * - No edit handler (`onEdit`) or edit URL generator (`getEditUrl`) is configured.
- *
- * When both `getEditUrl` and `onEdit` are provided, the action renders as a link
- * (`href`) and also fires `onEdit` on click. This enables composable behavior
- * such as navigating to an edit page while also tracking analytics.
+ * Returns `undefined` when read-only or when no `actions.edit.onItemAction`
+ * is configured. Composes `enabled` and `description` with
+ * `actions.edit.restriction` to disable the icon and surface the reason
+ * when restricted.
  *
  * @param attributes - The declarative attributes from the parsed `Action.Edit` element.
  * @param context - Builder context with provider configuration.
@@ -46,23 +44,43 @@ export const buildEditAction = (
     return undefined;
   }
 
-  const { getEditUrl, onEdit } = itemConfig;
+  const editConfig = itemConfig.actions?.edit;
+  const onItemAction = editConfig?.onItemAction;
 
-  if (!getEditUrl && !onEdit) {
+  if (!onItemAction) {
     return undefined;
   }
 
   const label = attributes.label ?? DEFAULT_EDIT_LABEL;
+  const { enabled: consumerEnabled } = attributes;
+  const restriction = editConfig?.restriction;
+
+  const enabled = (item: ContentListItem): boolean => {
+    if (restriction && restriction(item) !== undefined) {
+      return false;
+    }
+    return consumerEnabled ? consumerEnabled(item) : true;
+  };
+
+  // EUI surfaces `description` as the icon's tooltip. When a restriction
+  // predicate is configured we forward a function so the tooltip can carry
+  // the per-item reason; otherwise we keep the static string (preserves
+  // EUI's fast-path for static descriptions).
+  const description = restriction
+    ? (item: ContentListItem): string => {
+        const reason = restriction(item);
+        return reason ?? DEFAULT_EDIT_DESCRIPTION;
+      }
+    : DEFAULT_EDIT_DESCRIPTION;
 
   return {
     name: label,
-    description: DEFAULT_EDIT_DESCRIPTION,
+    description,
     icon: 'pencil',
     type: 'icon',
     isPrimary: true,
-    ...(getEditUrl && { href: (item) => getEditUrl(item) }),
-    ...(onEdit && { onClick: (item) => onEdit(item) }),
-    ...(attributes.enabled && { enabled: attributes.enabled }),
+    onClick: (item) => onItemAction(item),
+    enabled,
     'data-test-subj': 'content-list-table-action-edit',
   };
 };

@@ -84,8 +84,9 @@ export interface ActionsColumnProps
    *
    * When provided, only the specified actions are rendered in the given order.
    * When omitted, actions are determined automatically from the provider config
-   * (e.g., edit is shown if `getEditUrl` or `onEdit` is configured, delete is
-   * shown if `onDelete` is configured).
+   * (e.g., edit is shown if `actions.edit.onItemAction` is configured, delete
+   * is shown if `actions.delete.onBulkAction` is configured, inspect is shown
+   * if `actions.inspect.onItemAction` is configured).
    */
   children?: ReactNode;
 }
@@ -94,21 +95,21 @@ export interface ActionsColumnProps
  * Build default action parts based on the current context.
  *
  * When `Column.Actions` has no children, this function determines which actions
- * to show based on the provider configuration. For example, edit is included
- * when `getEditUrl` or `onEdit` is configured, and delete is included when
- * `onDelete` is configured.
+ * to show based on the provider configuration: each `actions[id]` entry whose
+ * handler is configured contributes a default action.
  */
 const getDefaultActionParts = (context: ColumnBuilderContext): ParsedPart[] => {
   const parts: ParsedPart[] = [];
   const { itemConfig, isReadOnly } = context;
+  const itemActions = itemConfig?.actions;
 
   // Edit and delete actions are suppressed in read-only mode, but inspect
   // (view details) is always available when the content editor is enabled —
   // matching the existing TableListView behavior where "View details" is
   // shown regardless of read-only state.
   if (!isReadOnly) {
-    const hasEdit = itemConfig?.getEditUrl || itemConfig?.onEdit;
-    const hasDelete = itemConfig?.onDelete;
+    const hasEdit = itemActions?.edit?.onItemAction;
+    const hasDelete = itemActions?.delete?.onBulkAction;
 
     if (hasEdit) {
       parts.push({
@@ -131,7 +132,7 @@ const getDefaultActionParts = (context: ColumnBuilderContext): ParsedPart[] => {
     }
   }
 
-  if (itemConfig?.onInspect) {
+  if (itemActions?.inspect?.onItemAction) {
     parts.push({
       type: 'part',
       part: 'action',
@@ -148,8 +149,7 @@ const getDefaultActionParts = (context: ColumnBuilderContext): ParsedPart[] => {
  * Build an `EuiBasicTableColumn` (actions column) from `Column.Actions` declarative attributes.
  *
  * Parses action children to determine which row actions to render. When no children
- * are provided, defaults are inferred from the provider configuration. Returns
- * `undefined` when no actions are available (e.g., read-only mode, no handlers configured).
+ * are provided, defaults are inferred from the provider configuration.
  *
  * @param attributes - The declarative attributes from the parsed `Column.Actions` element.
  * @param context - Builder context with provider configuration.

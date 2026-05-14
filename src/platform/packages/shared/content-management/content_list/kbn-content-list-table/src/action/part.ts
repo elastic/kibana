@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ContentListItem } from '@kbn/content-list-provider';
 import { table } from '../assembly';
 import type {
   EditActionProps,
@@ -37,8 +38,14 @@ export const action = table.definePart<ActionPresets, ActionOutput, ActionBuilde
 /**
  * Build a `DefaultItemAction` from a custom (non-preset) action.
  *
- * Registered as the fallback resolver via `createComponent({ resolve })`.
- * Custom actions are identified by `props.id` rather than a preset name.
+ * Custom actions are identified by `props.id` and resolved against
+ * `itemConfig.actions?.[id]`:
+ *
+ * - Prefers `onItemAction`, falls back to `onBulkAction([item])`.
+ * - Returns `undefined` if no handler exists, skipping the action
+ *   to prevent EUI crashes.
+ * - Composes `enabled` and `description` with `restriction` to
+ *   disable the icon and surface the reason when restricted.
  */
 const resolveCustomAction = (
   {
@@ -48,32 +55,71 @@ const resolveCustomAction = (
     icon,
     type: actionType,
     color,
-    onClick,
-    href,
-    enabled,
+    enabled: consumerEnabled,
     available,
     'data-test-subj': dataTestSubj,
   }: ActionProps,
-  _context: ActionBuilderContext
-): ActionOutput => {
+  { itemConfig }: ActionBuilderContext
+): ActionOutput | undefined => {
+  const actionConfig = itemConfig?.actions?.[id];
+  const onItemAction = actionConfig?.onItemAction;
+  const onBulkAction = actionConfig?.onBulkAction;
+
+  // Row click: prefer the explicit single-item handler; fall back to
+  // invoking the bulk handler with a singleton when only it is defined.
+  const onClick: ((item: ContentListItem) => void) | undefined = onItemAction
+    ? (item) => onItemAction(item)
+    : onBulkAction
+    ? (item) => {
+        void onBulkAction([item]);
+      }
+    : undefined;
+
+  // EUI's `DefaultItemAction` requires either `onClick` or `href` and
+  // throws at render otherwise. Custom actions never set `href` (no
+  // navigation slot in `ActionProps`), so the absence of a handler in
+  // `itemConfig.actions[id]` means there's nothing safe to emit. Skip
+  // the action — the table simply won't render an icon for this `id`.
+  if (!onClick) {
+    return undefined;
+  }
+
   // Default `type` to `'icon'` when an icon is provided, ensuring the object
   // satisfies EUI's discriminated union (`DefaultItemIconButtonAction` requires
   // both `icon` and `type`). Without this, the conditional spread loses the
   // discriminant and requires a cast.
   const resolvedType = actionType ?? (icon ? 'icon' : undefined);
 
+  const restriction = actionConfig?.restriction;
+
+  const composedEnabled = restriction
+    ? (item: ContentListItem): boolean => {
+        if (restriction(item) !== undefined) {
+          return false;
+        }
+        return consumerEnabled ? consumerEnabled(item) : true;
+      }
+    : consumerEnabled;
+
+  // EUI surfaces `description` as the icon's tooltip. When a restriction
+  // is configured we forward a function so the tooltip can carry the
+  // per-item reason; otherwise we keep the static string when one was
+  // provided (preserves EUI's fast-path for static descriptions).
+  const composedDescription = restriction
+    ? (item: ContentListItem): string | undefined => restriction(item) ?? description
+    : description;
+
   // Cast required: EUI's `DefaultItemAction` is a discriminated union keyed on
   // `icon`. The spread-conditional pattern loses the discriminant, but the
   // `resolvedType` guard above ensures the runtime object is always valid.
   return {
     name,
-    ...(description && { description }),
+    ...(composedDescription !== undefined && { description: composedDescription }),
     ...(icon && { icon }),
     ...(resolvedType && { type: resolvedType }),
     ...(color && { color }),
-    ...(onClick && { onClick }),
-    ...(href && { href }),
-    ...(enabled && { enabled }),
+    onClick,
+    ...(composedEnabled && { enabled: composedEnabled }),
     ...(available && { available }),
     'data-test-subj': dataTestSubj ?? `content-list-table-action-${id}`,
   } as ActionOutput;
@@ -155,7 +201,7 @@ export const InspectAction = action.createPreset({ name: 'inspect', resolve: bui
  *   <Column.Name />
  *   <Column.Actions>
  *     <Action.Edit />
- *     <Action id="duplicate" name="Duplicate" icon="copy" onClick={handleDuplicate} />
+ *     <Action id="duplicate" name="Duplicate" icon="copy" />
  *     <Action.Delete />
  *   </Column.Actions>
  * </ContentListTable>

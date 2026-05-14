@@ -70,7 +70,14 @@ export { CONTENT_LIST_ACTIONS } from './src/state';
 export type { ContentListAction } from './src/state';
 
 // Types.
-export type { ContentListItem, ContentListItemConfig } from './src/item';
+export type {
+  ContentListItem,
+  ContentListItemConfig,
+  ContentListActions,
+  ActionConfig,
+  ActionId,
+  KnownActionId,
+} from './src/item';
 export type {
   ContentListFeatures,
   ContentListSupports,
@@ -135,3 +142,11 @@ export {
 
 // Utilities.
 export { contentListKeys, contentListQueryClient } from './src/query';
+
+// Bulk actions (per-action restriction predicates and partitioning).
+export type {
+  RegisteredBulkAction,
+  BulkActionPartition,
+  BulkActionSkippedItem,
+} from './src/bulk_actions';
+export { useBulkActionRestrictions, partitionByRestriction } from './src/bulk_actions';

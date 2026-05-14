@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useRef, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useContentListConfig } from '../../context';
 import { useContentListState } from '../../state/use_content_list_state';
 import { DeleteConfirmationComponent } from './delete_confirmation.component';
-import type { ContentListItem } from '../../item';
+import { partitionByRestriction, useBulkActionRestrictions } from '../../bulk_actions';
+import type { ContentListItem, KnownActionId } from '../../item';
 
 /**
  * Props for the connected {@link DeleteConfirmationModal}.
@@ -27,9 +28,16 @@ export interface DeleteConfirmationModalProps {
 /**
  * Connected confirmation modal for delete operations.
  *
- * Reads `item.onDelete` and entity labels from the provider config, calls
- * `refetch` on success, and manages `isDeleting`/`error` locally.
- * Delegates rendering to {@link DeleteConfirmationComponent}.
+ * Looks up the delete restriction from the bulk-action registry,
+ * partitions the requested `items`, and delegates rendering to
+ * {@link DeleteConfirmationComponent}.
+ *
+ * - When some items are restricted, a callout lists skipped items;
+ *   confirming deletes only the permitted subset.
+ * - When *every* item is restricted, flips to an informational layout.
+ *
+ * Calls `refetch` on successful delete and manages `isDeleting`/`error`
+ * locally.
  *
  * @example
  * ```tsx
@@ -44,13 +52,26 @@ export interface DeleteConfirmationModalProps {
 export const DeleteConfirmationModal = ({ items, onClose }: DeleteConfirmationModalProps) => {
   const { labels, item: itemConfig } = useContentListConfig();
   const { refetch } = useContentListState();
+  const registeredActions = useBulkActionRestrictions();
 
   const deletingRef = useRef(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const deleteRestriction = useMemo(
+    () =>
+      registeredActions.find((a) => a.actionId === ('delete' satisfies KnownActionId))?.restriction,
+    [registeredActions]
+  );
+
+  const partition = useMemo(
+    () => partitionByRestriction(items, deleteRestriction),
+    [items, deleteRestriction]
+  );
+
   const onConfirm = useCallback(async () => {
-    if (!itemConfig?.onDelete || deletingRef.current) {
+    const onBulkDelete = itemConfig?.actions?.delete?.onBulkAction;
+    if (!onBulkDelete || deletingRef.current || partition.permitted.length === 0) {
       return;
     }
 
@@ -59,7 +80,7 @@ export const DeleteConfirmationModal = ({ items, onClose }: DeleteConfirmationMo
     setError(null);
 
     try {
-      await itemConfig.onDelete(items);
+      await onBulkDelete(partition.permitted);
       refetch();
       onClose();
     } catch (e) {
@@ -75,11 +96,14 @@ export const DeleteConfirmationModal = ({ items, onClose }: DeleteConfirmationMo
             })
       );
     }
-  }, [itemConfig, items, labels.entityPlural, refetch, onClose]);
+  }, [itemConfig, partition, labels.entityPlural, refetch, onClose]);
 
   return (
     <DeleteConfirmationComponent
-      {...{ items, isDeleting, error }}
+      permitted={partition.permitted}
+      skipped={partition.skipped}
+      isDeleting={isDeleting}
+      error={error}
       entityName={labels.entity}
       entityNamePlural={labels.entityPlural}
       onCancel={onClose}

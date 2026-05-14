@@ -98,6 +98,72 @@ export type ContentListItem<T = Record<string, unknown>> = T & {
 };
 
 /**
+ * Action identifiers known to the package.
+ *
+ * The package owns built-in action presets keyed by these IDs (`Action.Edit`,
+ * `Action.Delete`, `Action.Inspect`). Consumers may also invent custom IDs;
+ * see {@link ActionId}.
+ */
+export type KnownActionId = 'edit' | 'delete' | 'inspect';
+
+/**
+ * Identifier for an action.
+ *
+ * `KnownActionId | (string & {})` keeps IDE autocomplete on the known
+ * IDs while still accepting any consumer-invented string (e.g.
+ * `'archive'`). The opaque `string & {}` is the standard TypeScript
+ * trick that prevents the union from collapsing to plain `string`.
+ */
+export type ActionId = KnownActionId | (string & {});
+
+interface ActionConfigBase {
+  /**
+   * Per-item restriction. Returns a reason string when the action is
+   * not permitted on the item; `undefined` otherwise. Drives row icon
+   * disabling, selection-checkbox gating (when `onBulkAction` is set),
+   * and the dialog partition.
+   */
+  restriction?: (item: ContentListItem) => string | undefined;
+}
+
+/**
+ * Configuration for a single action.
+ *
+ * At least one of `onItemAction` or `onBulkAction` must be supplied.
+ * Presence of `onBulkAction` makes the action bulk-eligible.
+ */
+export type ActionConfig =
+  | (ActionConfigBase & {
+      /** Single-item handler. */
+      onItemAction: (item: ContentListItem) => void;
+      /** Optional bulk handler. */
+      onBulkAction?: (items: ContentListItem[]) => Promise<void>;
+    })
+  | (ActionConfigBase & {
+      /** Optional single-item handler. */
+      onItemAction?: (item: ContentListItem) => void;
+      /** Bulk handler. */
+      onBulkAction: (items: ContentListItem[]) => Promise<void>;
+    });
+
+/**
+ * Action configuration map.
+ *
+ * Known IDs (`edit`/`delete`/`inspect`) are first-class fields;
+ * consumers can also add custom action IDs via the index signature.
+ */
+export interface ContentListActions {
+  /** Row-level edit. */
+  edit?: ActionConfig;
+  /** Bulk-eligible delete. */
+  delete?: ActionConfig;
+  /** Row-level inspect ("View details"). */
+  inspect?: ActionConfig;
+  /** Custom actions, identified by a consumer-chosen string ID. */
+  [customId: string]: ActionConfig | undefined;
+}
+
+/**
  * Per-item configuration for link behavior and actions.
  */
 export interface ContentListItemConfig {
@@ -108,42 +174,7 @@ export interface ContentListItemConfig {
   getHref?: (item: ContentListItem) => string;
 
   /**
-   * Function to generate the edit URL for an item.
-   * When provided, the edit action renders as an `<a>` link with this `href`,
-   * preserving native link behavior (right-click, middle-click, screen reader
-   * announcement).
-   *
-   * Composable with `onEdit`: when both are provided, the action renders as a
-   * link (`href`) and also calls `onEdit` on click (e.g., for analytics tracking).
+   * Action handlers and per-item restrictions, keyed by action ID.
    */
-  getEditUrl?: (item: ContentListItem) => string;
-
-  /**
-   * Callback invoked when the edit action is clicked.
-   * Use this for side effects such as opening a flyout, tracking analytics,
-   * or programmatic navigation.
-   *
-   * When provided alone, the action renders as a button with an `onClick` handler.
-   * When provided alongside `getEditUrl`, both are applied: the action renders
-   * as a link and the callback fires on click.
-   */
-  onEdit?: (item: ContentListItem) => void;
-
-  /**
-   * Callback invoked to delete one or more items.
-   * When provided, enables the delete action on rows and the bulk-delete flow.
-   * The callback should handle the actual deletion and return a resolved promise on success.
-   */
-  onDelete?: (items: ContentListItem[]) => Promise<void>;
-
-  /**
-   * Callback invoked to inspect an item (view/edit its metadata).
-   * When provided, enables the "View details" row action.
-   *
-   * This is a simple, UI-agnostic callback — the implementation decides what
-   * happens when the action fires (e.g., opening a flyout, navigating to a
-   * detail page). The Kibana content editor integration is handled by
-   * `ContentListClientProvider` in `@kbn/content-list-provider-client`.
-   */
-  onInspect?: (item: ContentListItem) => void;
+  actions?: ContentListActions;
 }

@@ -7,20 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  ContentListItem,
-  ContentListItemConfig,
-  ContentListActions,
-  ActionConfig,
-  ActionId,
-  KnownActionId,
-} from './types';
+export type { RegisteredBulkAction } from './types';
+export { useBulkActionRestrictions } from './use_bulk_action_restrictions';
 export {
-  USER_UID_FIELDS,
-  MANAGED_USER_FILTER,
-  NO_CREATOR_USER_FILTER,
-  MANAGED_USER_LABEL,
-  NO_CREATOR_USER_LABEL,
-  SENTINEL_KEYS,
-  getCreatorKey,
-} from './types';
+  BulkActionRegistryContext,
+  buildRegisteredActions,
+  useBulkActionRegistryContext,
+} from './registry';
+
+export type { BulkActionPartition, BulkActionSkippedItem } from './partition';
+export { partitionByRestriction } from './partition';

@@ -16,6 +16,7 @@ import type { DataSourceConfig } from '../datasource';
 import { ProfileCache, ProfileCacheContext } from '../services';
 import { ContentListStateProvider } from '../state';
 import { QueryClientProvider, contentListQueryClient } from '../query';
+import { BulkActionRegistryContext, buildRegisteredActions } from '../bulk_actions';
 
 /**
  * Internal context value type.
@@ -151,10 +152,20 @@ export const ContentListProvider = ({
     [labels, item, isReadOnly, id, queryKeyScope, dataSource, features, supports, services]
   );
 
+  // Bulk-action registry: a pure projection of `item`. Provided
+  // alongside `ContentListContext` so every table's selection bridge
+  // and the toolbar's delete-confirmation dialog share one consistent,
+  // provider-scoped registry. The registry has no setter — multiple
+  // tables under the same provider therefore see the same derived
+  // entries, and unmounting any table never clears the registry.
+  const bulkActionRegistry = useMemo(() => ({ actions: buildRegisteredActions(item) }), [item]);
+
   // Build the provider tree bottom-up (innermost → outermost).
   let content: React.ReactNode = (
     <ContentListContext.Provider value={value}>
-      <ContentListStateProvider>{children}</ContentListStateProvider>
+      <BulkActionRegistryContext.Provider value={bulkActionRegistry}>
+        <ContentListStateProvider>{children}</ContentListStateProvider>
+      </BulkActionRegistryContext.Provider>
     </ContentListContext.Provider>
   );
 

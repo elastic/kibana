@@ -128,10 +128,11 @@ export type ContentListClientProviderProps = ContentListCoreConfig & {
   /**
    * Content editor (metadata editing flyout) configuration.
    *
-   * When provided, creates an `onInspect` callback on the item config that opens
-   * the Kibana content editor flyout. The consumer must wrap their component tree
-   * with `ContentEditorKibanaProvider` (from `@kbn/content-management-content-editor`)
-   * above this provider.
+   * When provided, populates `actions.inspect.onItemAction` on the item
+   * config with a handler that opens the Kibana content editor flyout.
+   * The consumer must wrap their component tree with
+   * `ContentEditorKibanaProvider` (from
+   * `@kbn/content-management-content-editor`) above this provider.
    */
   contentEditor?: ContentEditorConfig;
 };
@@ -394,7 +395,7 @@ export const ContentListClientProvider = ({
     };
   }, [contentEditor, onInvalidate]);
 
-  // Create the onInspect callback from the content editor config.
+  // Create the inspect handler from the content editor config.
   const onInspect = useContentEditorInspect({
     contentEditor: contentEditorWithInvalidation,
     entityName: rest.labels.entity,
@@ -402,14 +403,23 @@ export const ContentListClientProvider = ({
     queryKeyScope,
   });
 
-  // Merge onInspect into the item config.
-  const itemConfig = useMemo(
-    () => ({
+  // Merge the inspect handler into the item config, preserving consumer-supplied
+  // fields on `actions.inspect` (e.g. `restriction`). Only `onItemAction` is overridden.
+  const itemConfig = useMemo(() => {
+    if (!onInspect) {
+      return itemConfigProp;
+    }
+    return {
       ...itemConfigProp,
-      ...(onInspect && { onInspect }),
-    }),
-    [itemConfigProp, onInspect]
-  );
+      actions: {
+        ...itemConfigProp?.actions,
+        inspect: {
+          ...itemConfigProp?.actions?.inspect,
+          onItemAction: onInspect,
+        },
+      },
+    };
+  }, [itemConfigProp, onInspect]);
 
   return (
     <ContentListProvider
