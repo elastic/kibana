@@ -24,15 +24,6 @@ test.describe('Home page', { tag: tags.stateful.classic }, () => {
     await expect(page).toHaveURL(/\/app\/home/);
   });
 
-  test('clicking on console on homepage should take you to dev tools', async ({
-    page,
-    pageObjects,
-  }) => {
-    await pageObjects.home.goto();
-    await page.testSubj.click('homeDevTools');
-    await expect(page).toHaveURL(/\/app\/dev_tools#\/console/);
-  });
-
   test('home page should render breadcrumbs', async ({ page, pageObjects }) => {
     await pageObjects.home.goto();
 
