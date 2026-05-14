@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { addTransactionLabels } from '@kbn/apm-utils';
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import {
@@ -18,6 +19,7 @@ import {
 import { retryTransientEsErrors } from '../utils/retry';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { TransformManager } from './transform_manager';
+import { getSloApmLabels } from './utils';
 
 interface Options {
   skipDataDeletion: boolean;
@@ -42,6 +44,7 @@ export class DeleteSLO {
     }
   ): Promise<void> {
     const slo = await this.repository.findById(sloId);
+    addTransactionLabels(getSloApmLabels(slo));
 
     // First delete the linked resources before deleting the data
     const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
