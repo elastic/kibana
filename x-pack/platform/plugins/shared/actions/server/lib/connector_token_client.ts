@@ -8,7 +8,7 @@
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { Logger, SavedObjectsClientContract, SavedObjectAttributes } from '@kbn/core/server';
 import { SharedConnectorTokenClient } from './shared_connector_token_client';
-import type { ConnectorToken, UserConnectorToken } from '../types';
+import type { ConnectorToken, UserConnectorToken, UserIdentifiers } from '../types';
 import { UserConnectorTokenClient } from './user_connector_token_client';
 
 export const MAX_TOKENS_RETURNED = 1;
@@ -26,7 +26,7 @@ interface ConstructorOptions {
 }
 
 interface CreateOptions {
-  profileUid?: string;
+  userIdentifiers?: UserIdentifiers;
   connectorId: string;
   token?: string;
   credentials?: SavedObjectAttributes;
@@ -45,7 +45,7 @@ export interface UpdateOptions {
 }
 
 interface UpdateOrReplaceOptions {
-  profileUid?: string;
+  userIdentifiers?: UserIdentifiers;
   connectorId: string;
   token: ConnectorToken | UserConnectorToken | null;
   newToken: string;
@@ -66,12 +66,28 @@ export class ConnectorTokenClient {
   }
 
   private getScope(
-    profileUid?: string,
+    userIdentifiers?: UserIdentifiers,
     authMode?: typeof PER_USER_TOKEN_SCOPE | typeof SHARED_TOKEN_SCOPE
   ): typeof PER_USER_TOKEN_SCOPE | typeof SHARED_TOKEN_SCOPE {
-    return profileUid || (authMode && authMode === PER_USER_TOKEN_SCOPE)
-      ? PER_USER_TOKEN_SCOPE
-      : SHARED_TOKEN_SCOPE;
+    const hasProfileUid = Boolean(userIdentifiers?.profileUid);
+    const hasUserCloudId = Boolean(userIdentifiers?.userCloudId);
+    const userCloudIdWithoutProfileUid = hasUserCloudId && !hasProfileUid;
+    const authModeIsExplicitlyShared = authMode === SHARED_TOKEN_SCOPE;
+    const authModeForcesPerUser = authMode === PER_USER_TOKEN_SCOPE;
+
+    if (hasProfileUid) {
+      return PER_USER_TOKEN_SCOPE;
+    }
+
+    if (authModeIsExplicitlyShared) {
+      return SHARED_TOKEN_SCOPE;
+    }
+
+    if (authModeForcesPerUser || userCloudIdWithoutProfileUid) {
+      return PER_USER_TOKEN_SCOPE;
+    }
+
+    return SHARED_TOKEN_SCOPE;
   }
 
   private parseTokenId(id: string): {
@@ -113,7 +129,7 @@ export class ConnectorTokenClient {
     tokenType?: string;
   }): Promise<ConnectorToken>;
   public async create(options: {
-    profileUid: string;
+    userIdentifiers: UserIdentifiers;
     connectorId: string;
     token?: string;
     credentials?: SavedObjectAttributes;
@@ -122,7 +138,7 @@ export class ConnectorTokenClient {
     credentialType?: string;
   }): Promise<UserConnectorToken>;
   public async create(options: CreateOptions): Promise<ConnectorToken | UserConnectorToken> {
-    const scope = this.getScope(options.profileUid);
+    const scope = this.getScope(options.userIdentifiers);
     this.log({ method: 'create', scope, fields: { connectorId: options.connectorId } });
     if (scope === PER_USER_TOKEN_SCOPE) {
       return this.userClient.create(options as Parameters<typeof this.userClient.create>[0]);
@@ -159,13 +175,13 @@ export class ConnectorTokenClient {
     credentialType?: string;
   }): Promise<{ hasErrors: boolean; connectorToken: ConnectorToken | null }>;
   public async get(options: {
-    profileUid: string;
+    userIdentifiers: UserIdentifiers & { profileUid: string };
     connectorId: string;
     tokenType?: string;
     credentialType?: string;
   }): Promise<{ hasErrors: boolean; connectorToken: UserConnectorToken | null }>;
   public async get(options: {
-    profileUid?: string;
+    userIdentifiers: UserIdentifiers;
     connectorId: string;
     tokenType?: string;
     credentialType?: string;
@@ -174,7 +190,7 @@ export class ConnectorTokenClient {
     connectorToken: ConnectorToken | UserConnectorToken | null;
   }>;
   public async get(options: {
-    profileUid?: string;
+    userIdentifiers?: UserIdentifiers;
     connectorId: string;
     tokenType?: string;
     credentialType?: string;
@@ -182,7 +198,7 @@ export class ConnectorTokenClient {
     hasErrors: boolean;
     connectorToken: ConnectorToken | UserConnectorToken | null;
   }> {
-    const scope = this.getScope(options.profileUid);
+    const scope = this.getScope(options.userIdentifiers);
     this.log({ method: 'get', scope, fields: { connectorId: options.connectorId } });
     if (scope === PER_USER_TOKEN_SCOPE) {
       return this.userClient.get(options as Parameters<typeof this.userClient.get>[0]);
@@ -194,13 +210,13 @@ export class ConnectorTokenClient {
    * Delete all connector tokens (delegates to shared or user client)
    */
   public async deleteConnectorTokens(options: {
-    profileUid?: string;
+    userIdentifiers?: UserIdentifiers;
     connectorId: string;
     tokenType?: string;
     credentialType?: string;
     authMode?: typeof PER_USER_TOKEN_SCOPE | typeof SHARED_TOKEN_SCOPE;
   }): Promise<void> {
-    const scope = this.getScope(options.profileUid, options.authMode);
+    const scope = this.getScope(options.userIdentifiers, options.authMode);
     this.log({
       method: 'deleteConnectorTokens',
       scope,
@@ -217,7 +233,7 @@ export class ConnectorTokenClient {
   }
 
   public async updateOrReplace(options: UpdateOrReplaceOptions) {
-    const scope = this.getScope(options.profileUid);
+    const scope = this.getScope(options.userIdentifiers);
     this.log({ method: 'updateOrReplace', scope, fields: { connectorId: options.connectorId } });
     if (scope === PER_USER_TOKEN_SCOPE) {
       return this.userClient.updateOrReplace(
@@ -233,7 +249,7 @@ export class ConnectorTokenClient {
    * Create new token with refresh token support (delegates to shared or user client)
    */
   public async createWithRefreshToken(options: {
-    profileUid?: string;
+    userIdentifiers?: UserIdentifiers;
     connectorId: string;
     accessToken: string;
     refreshToken?: string;
@@ -242,7 +258,7 @@ export class ConnectorTokenClient {
     tokenType?: string;
     credentialType?: string;
   }): Promise<ConnectorToken | UserConnectorToken> {
-    const scope = this.getScope(options.profileUid);
+    const scope = this.getScope(options.userIdentifiers);
     this.log({
       method: 'createWithRefreshToken',
       scope,

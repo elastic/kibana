@@ -15,6 +15,7 @@ import type {
   UserConnectorToken,
   OAuthPersonalCredentials,
   UserConnectorOAuthToken,
+  UserIdentifiers,
 } from '../types';
 import { USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 
@@ -28,7 +29,7 @@ interface ConstructorOptions {
 }
 
 interface CreateOptions {
-  profileUid: string;
+  userIdentifiers?: UserIdentifiers;
   connectorId: string;
   token?: string;
   credentials?: SavedObjectAttributes;
@@ -47,7 +48,7 @@ export interface UpdateOptions {
 }
 
 interface UpdateOrReplaceOptions {
-  profileUid: string;
+  userIdentifiers: UserIdentifiers;
   connectorId: string;
   token: UserConnectorToken | null;
   newToken: string;
@@ -59,6 +60,7 @@ interface UpdateOrReplaceOptions {
 interface PersonalTokenAttributes {
   connectorId: string;
   profileUid: string;
+  userCloudId?: string;
   credentialType: string;
   credentials: SavedObjectAttributes;
   expiresAt?: string;
@@ -100,12 +102,13 @@ export class UserConnectorTokenClient {
   }
 
   private getContextString(
-    profileUid?: string,
+    userIdentifiers?: UserIdentifiers,
     connectorId?: string,
     credentialType?: string
   ): string {
     const parts = [];
-    if (profileUid) parts.push(`profileUid "${profileUid}"`);
+    if (userIdentifiers?.userCloudId) parts.push(`userCloudId "${userIdentifiers.userCloudId}"`);
+    if (userIdentifiers?.profileUid) parts.push(`profileUid "${userIdentifiers.profileUid}"`);
     if (connectorId) parts.push(`connectorId "${connectorId}"`);
     if (credentialType) parts.push(`credentialType: "${credentialType}"`);
     return parts.join(', ');
@@ -125,7 +128,7 @@ export class UserConnectorTokenClient {
    * Create new per-user token for connector
    */
   public async create({
-    profileUid,
+    userIdentifiers,
     connectorId,
     token,
     credentials,
@@ -140,15 +143,20 @@ export class UserConnectorTokenClient {
     const resolvedCredentials =
       credentials ?? (token ? { accessToken: token } : ({} as SavedObjectAttributes));
 
+    if (!userIdentifiers?.profileUid) {
+      throw new Error('Per-user profileUid is required to create a user connector token');
+    }
+
     if (Object.keys(resolvedCredentials).length === 0) {
       throw new Error('Per-user credentials are required to create a user connector token');
     }
 
-    const context = this.getContextString(profileUid, connectorId, resolvedCredentialType);
+    const context = this.getContextString(userIdentifiers, connectorId, resolvedCredentialType);
 
     const attributes: PersonalTokenAttributes = {
       connectorId,
-      profileUid,
+      profileUid: userIdentifiers.profileUid,
+      userCloudId: userIdentifiers?.userCloudId,
       credentialType: resolvedCredentialType,
       credentials: resolvedCredentials,
       expiresAt: expiresAtMillis,
@@ -195,9 +203,8 @@ export class UserConnectorTokenClient {
     const createTime = Date.now();
 
     const existingAttrs = attributes as PersonalTokenAttributes;
-    const profileUid = existingAttrs.profileUid;
     const context = this.getContextString(
-      profileUid,
+      { profileUid: existingAttrs.profileUid, userCloudId: existingAttrs.userCloudId },
       existingAttrs.connectorId,
       credentialType ?? existingAttrs.credentialType
     );
@@ -260,12 +267,12 @@ export class UserConnectorTokenClient {
    * Get per-user connector token
    */
   public async get({
-    profileUid,
+    userIdentifiers,
     connectorId,
     tokenType,
     credentialType,
   }: {
-    profileUid: string;
+    userIdentifiers: UserIdentifiers;
     connectorId: string;
     tokenType?: string;
     credentialType?: string;
@@ -274,13 +281,18 @@ export class UserConnectorTokenClient {
     connectorToken: UserConnectorToken | null;
   }> {
     const contextCredentialType = credentialType ?? 'oauth';
-    const context = this.getContextString(profileUid, connectorId, contextCredentialType);
+    const context = this.getContextString(userIdentifiers, connectorId, contextCredentialType);
+
+    if (!userIdentifiers.profileUid) {
+      this.logger.error(`Cannot get user_connector_token: profileUid is required`);
+      return { hasErrors: true, connectorToken: null };
+    }
 
     const credentialTypeFilter = credentialType
       ? ` AND ${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.credentialType: "${credentialType}"`
       : '';
 
-    const profileUidFilter = `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.profileUid: "${profileUid}" AND `;
+    const profileUidFilter = `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.profileUid: "${userIdentifiers.profileUid}"`;
 
     const connectorTokensResult = [];
     try {
@@ -289,7 +301,7 @@ export class UserConnectorTokenClient {
           await this.unsecuredSavedObjectsClient.find<UserConnectorToken>({
             perPage: MAX_TOKENS_RETURNED,
             type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-            filter: `${profileUidFilter}${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.connectorId: "${connectorId}"${credentialTypeFilter}`,
+            filter: `${profileUidFilter} AND ${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.connectorId: "${connectorId}"${credentialTypeFilter}`,
             sortField: 'updated_at',
             sortOrder: 'desc',
           })
@@ -350,17 +362,17 @@ export class UserConnectorTokenClient {
    * Get OAuth per-user token with parsed credentials
    */
   public async getOAuthPersonalToken({
-    profileUid,
+    userIdentifiers,
     connectorId,
   }: {
-    profileUid: string;
+    userIdentifiers: UserIdentifiers;
     connectorId: string;
   }): Promise<{
     hasErrors: boolean;
     connectorToken: UserConnectorOAuthToken | null;
   }> {
     const { connectorToken, hasErrors } = await this.get({
-      profileUid,
+      userIdentifiers,
       connectorId,
       credentialType: 'oauth',
     });
@@ -369,26 +381,24 @@ export class UserConnectorTokenClient {
       return { hasErrors, connectorToken: null };
     }
 
+    const context = this.getContextString(userIdentifiers, connectorId);
+
     if (!('credentials' in connectorToken)) {
-      this.logger.error(
-        `Expected per-user credentials for connectorId "${connectorId}", profileUid "${profileUid}".`
-      );
+      this.logger.error(`Expected per-user credentials for ${context}.`);
       return { hasErrors: true, connectorToken: null };
     }
 
     // Verify credential type matches oauth before parsing
     if (connectorToken.credentialType !== 'oauth') {
       this.logger.error(
-        `Expected OAuth credential type but found "${connectorToken.credentialType}" for connectorId "${connectorId}", profileUid "${profileUid}".`
+        `Expected OAuth credential type but found "${connectorToken.credentialType}" for ${context}.`
       );
       return { hasErrors: true, connectorToken: null };
     }
 
     const parsedCredentials = this.parseOAuthPerUserCredentials(connectorToken.credentials);
     if (!parsedCredentials) {
-      this.logger.error(
-        `Invalid OAuth credentials shape for connectorId "${connectorId}", profileUid "${profileUid}".`
-      );
+      this.logger.error(`Invalid OAuth credentials shape for ${context}.`);
       return { hasErrors: true, connectorToken: null };
     }
 
@@ -403,33 +413,45 @@ export class UserConnectorTokenClient {
   }
 
   /**
-   * Delete all per-user connector tokens
+   * Delete per-user connector tokens.
+   * When profileUid is provided, deletes only tokens for that user and connector.
+   * When profileUid is absent (e.g. connector delete/update flows), deletes all per-user tokens for the connector.
+   * When userCloudId is set without profileUid, does nothing: delete-by-cloud-id is not supported until lookup work exists.
    */
   public async deleteConnectorTokens({
-    profileUid,
+    userIdentifiers,
     connectorId,
     tokenType,
     credentialType,
   }: {
-    profileUid: string;
+    userIdentifiers?: UserIdentifiers;
     connectorId: string;
     tokenType?: string;
     credentialType?: string;
   }): Promise<void> {
-    const context = this.getContextString(profileUid, connectorId);
+    const context = this.getContextString(userIdentifiers, connectorId);
+    const profileUid = userIdentifiers?.profileUid;
+
+    if (userIdentifiers?.userCloudId && !profileUid) {
+      this.logger.warn(
+        `Skipping deleteConnectorTokens for user_connector_token: userCloudId without profileUid is not supported for scoped delete (${context}).`
+      );
+      return;
+    }
 
     const credentialTypeFilter = credentialType
       ? ` AND ${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.credentialType: "${credentialType}"`
       : '';
 
-    const profileUidFilter = profileUid
-      ? `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.profileUid: "${profileUid}" AND `
-      : '';
+    const connectorIdFilter = `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.connectorId: "${connectorId}"`;
+    const filter = profileUid
+      ? `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.profileUid: "${profileUid}" AND ${connectorIdFilter}${credentialTypeFilter}`
+      : `${connectorIdFilter}${credentialTypeFilter}`;
 
     try {
       const result = await this.unsecuredSavedObjectsClient.find<UserConnectorToken>({
         type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-        filter: `${profileUidFilter}${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.connectorId: "${connectorId}"${credentialTypeFilter}`,
+        filter,
       });
       await Promise.all(
         result.saved_objects.map(
@@ -449,7 +471,7 @@ export class UserConnectorTokenClient {
   }
 
   public async updateOrReplace({
-    profileUid,
+    userIdentifiers,
     connectorId,
     token,
     newToken,
@@ -462,14 +484,14 @@ export class UserConnectorTokenClient {
     if (token === null) {
       if (deleteExisting) {
         await this.deleteConnectorTokens({
-          profileUid,
+          userIdentifiers,
           connectorId,
           credentialType: 'oauth',
         });
       }
 
       await this.create({
-        profileUid,
+        userIdentifiers,
         connectorId,
         token: newToken,
         expiresAtMillis: new Date(tokenRequestDate + expiresInSec * 1000).toISOString(),
@@ -478,9 +500,8 @@ export class UserConnectorTokenClient {
     } else {
       const tokenId = token.id;
       if (tokenId == null || tokenId === '') {
-        throw new Error(
-          `Cannot update user connector token for connectorId "${connectorId}", profileUid "${profileUid}": token id is missing`
-        );
+        const context = this.getContextString(userIdentifiers, connectorId);
+        throw new Error(`Cannot update user connector token for ${context}: token id is missing`);
       }
       await this.update({
         id: tokenId,
@@ -495,7 +516,7 @@ export class UserConnectorTokenClient {
    * Create new per-user token with refresh token support
    */
   public async createWithRefreshToken({
-    profileUid,
+    userIdentifiers,
     connectorId,
     accessToken,
     refreshToken,
@@ -504,7 +525,7 @@ export class UserConnectorTokenClient {
     tokenType,
     credentialType,
   }: {
-    profileUid: string;
+    userIdentifiers: UserIdentifiers;
     connectorId: string;
     accessToken: string;
     refreshToken?: string;
@@ -521,7 +542,13 @@ export class UserConnectorTokenClient {
       : undefined;
 
     const resolvedCredentialType = credentialType ?? 'oauth';
-    const context = this.getContextString(profileUid, connectorId);
+    const context = this.getContextString(userIdentifiers, connectorId);
+
+    if (!userIdentifiers.profileUid) {
+      throw new Error(
+        `Per-user profileUid is required to create a user connector token for ${context}`
+      );
+    }
 
     const credentials: Record<string, string> = {
       accessToken,
@@ -531,14 +558,15 @@ export class UserConnectorTokenClient {
     }
 
     this.logger.debug(
-      `Creating per-user token with credentials blob for profileUid: ${profileUid}, connectorId: ${connectorId}, credentialKeys: ${Object.keys(
+      `Creating per-user token with credentials blob for ${context}, credentialKeys: ${Object.keys(
         credentials
       ).join(', ')}`
     );
 
     const attributes: PersonalTokenAttributes = {
       connectorId,
-      profileUid,
+      profileUid: userIdentifiers.profileUid,
+      userCloudId: userIdentifiers.userCloudId,
       credentialType: resolvedCredentialType,
       credentials,
       expiresAt: expiresInMillis,
@@ -602,11 +630,18 @@ export class UserConnectorTokenClient {
       ? new Date(now + refreshTokenExpiresIn * 1000).toISOString()
       : undefined;
 
-    const profileUid =
+    const existingProfileUid =
       'profileUid' in attributes && typeof attributes.profileUid === 'string'
         ? attributes.profileUid
         : undefined;
-    const context = this.getContextString(profileUid, attributes.connectorId);
+    const existingUserCloudId =
+      'userCloudId' in attributes && typeof attributes.userCloudId === 'string'
+        ? attributes.userCloudId
+        : undefined;
+    const context = this.getContextString(
+      { profileUid: existingProfileUid, userCloudId: existingUserCloudId },
+      attributes.connectorId
+    );
 
     try {
       const updateOperation = () => {
