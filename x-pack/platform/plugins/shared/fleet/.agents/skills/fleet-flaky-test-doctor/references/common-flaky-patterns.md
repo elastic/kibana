@@ -183,3 +183,21 @@ await page.locator('[data-test-subj="addAgent"]').click();
 3. Check recent commits touching Fleet UI components that gate actions on privilege.
 
 **Fix:** Update the Scout role fixture to match the current privilege model, or fix the UI component to correctly gate on the privilege.
+
+---
+
+## ES Forward-Compatibility Pipeline Re-opening Stale Issues
+
+**Symptom:** A batch of old issues (potentially already resolved on `main`) all get a new comment and re-open on the same day, at nearly the same timestamp, all pointing to the same Buildkite build — e.g. `kibana-es-forward-compatibility-testing-9-dot-2 - 8.19`.
+
+**Cause:** The `kibana-es-forward-compatibility-testing-9-dot-2` pipeline runs tests from an older maintenance branch (e.g. `8.19`) against a newer ES version. When it hits an infra failure (Docker registry timeout, network blip) or a genuine older-branch regression, `kbn-failed-test-reporter-cli` re-opens every matching issue it finds — including ones already fixed on `main`. The re-open is on the old branch's behalf, not `main`.
+
+**How to identify:** Check the last comment on the affected issues. If multiple issues share the same build URL and the pipeline name contains `forward-compatibility` or `es-forward`, this pattern applies.
+
+**Fix:** Do **not** treat these as new regressions on `main`.
+1. Check whether the test passes on `main` with the current (renamed/fixed) file.
+2. If yes: close the issue citing the build URL, the branch it failed on, and the fix/rename commit on `main`.
+3. If the build failure was an infra issue (Docker timeout, registry unreachable): close as infra-transient with a note.
+4. If the test genuinely fails on `main` too: treat as a real issue and investigate separately.
+
+**Cluster signal:** Many issues re-opened simultaneously (same minute, same build URL).

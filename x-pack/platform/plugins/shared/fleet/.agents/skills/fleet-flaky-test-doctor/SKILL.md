@@ -450,4 +450,3 @@ Open only what you need:
 - Fleet test conventions, cleanup audit, deletion guidelines, flaky process: `references/conventions-and-deletion.md`
 - FTR test execution: `fleet-ftr-testing` sub-skill
 - Local Kibana setup: `kibana-local-dev` sub-skill
-- Backlog cluster map: `backlog-report-may-2026.md`
