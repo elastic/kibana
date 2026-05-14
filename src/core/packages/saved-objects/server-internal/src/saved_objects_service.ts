@@ -487,7 +487,7 @@ export class SavedObjectsService
 
   private assertNoUnallowedWipTypes() {
     const wipTypeNames = new Set<string>(wipTypes);
-    const allowedWipTypes = new Set<string>(this.config!.migration.allowWipTypes);
+    const allowedWipTypes = new Set<string>(this.config!.migration.allowWipTypes ?? []);
     const registeredWipTypes = this.typeRegistry
       .getAllTypes()
       .filter((t) => wipTypeNames.has(t.name))
