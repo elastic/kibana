@@ -44,8 +44,8 @@ const tagcloudStylingSchema = z
           .default(LENS_TAGCLOUD_DEFAULT_STATE.maxFontSize)
           .meta({ description: 'Maximum font size.' }),
       })
-      .meta({ description: 'Font size range for tags.' })
-      .optional(),
+      .optional()
+      .meta({ description: 'Font size range for tags.' }),
     /**
      * Show the metric caption
      */
@@ -53,14 +53,14 @@ const tagcloudStylingSchema = z
       .object({
         visible: z
           .boolean()
-          .meta({ description: 'When `true`, displays the caption.' })
-          .default(LENS_TAGCLOUD_DEFAULT_STATE.showCaption),
+          .default(LENS_TAGCLOUD_DEFAULT_STATE.showCaption)
+          .meta({ description: 'When `true`, displays the caption.' }),
       })
+      .optional()
       .meta({
         description:
           'Caption configuration representing the metric and the tag_by operations labels',
-      })
-      .optional(),
+      }),
   })
   .meta({
     id: 'tagcloudStyling',

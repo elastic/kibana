@@ -12,12 +12,12 @@ import { isValidId } from './is_valid_id';
 
 export const asCodeIdSchema = z
   .string()
-  .meta({
-    description:
-      'A unique identifier. Must contain only lowercase letters, numbers, hyphens, and underscores.',
-  })
   .min(1)
   .max(250)
   .refine((value) => isValidId(value), {
     message: 'ID must contain only lowercase letters, numbers, hyphens, and underscores.',
+  })
+  .meta({
+    description:
+      'A unique identifier. Must contain only lowercase letters, numbers, hyphens, and underscores.',
   });

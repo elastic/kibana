@@ -32,21 +32,18 @@ const rangeSchema = z
   .object({
     gte: z
       .union([z.number(), z.string()])
-      .meta({ description: 'Greater than or equal to.' })
-      .optional(),
+      .optional()
+      .meta({ description: 'Greater than or equal to.' }),
     lte: z
       .union([z.number(), z.string()])
-      .meta({ description: 'Less than or equal to.' })
-      .optional(),
-    gt: z.union([z.number(), z.string()]).meta({ description: 'Greater than.' }).optional(),
-    lt: z.union([z.number(), z.string()]).meta({ description: 'Less than.' }).optional(),
-    format: z
-      .string()
-      .meta({
-        description:
-          'Elasticsearch [date format](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/mapping-date-format) string applied when parsing date boundary values. For example, `strict_date_optional_time` or `epoch_millis`.',
-      })
-      .optional(),
+      .optional()
+      .meta({ description: 'Less than or equal to.' }),
+    gt: z.union([z.number(), z.string()]).optional().meta({ description: 'Greater than.' }),
+    lt: z.union([z.number(), z.string()]).optional().meta({ description: 'Less than.' }),
+    format: z.string().optional().meta({
+      description:
+        'Elasticsearch [date format](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/mapping-date-format) string applied when parsing date boundary values. For example, `strict_date_optional_time` or `epoch_millis`.',
+    }),
   })
   .meta({
     description: 'Boundary values for a range comparison.',
@@ -59,50 +56,35 @@ const rangeSchema = z
 /**
  * Negation property that can be used at the top-level of all filters or inside condition filters
  */
-const negatePropertySchema = z
-  .boolean()
-  .meta({
-    description:
-      'When `true`, the filter is negated and matches documents that do NOT satisfy the condition. Defaults to `false`.',
-  })
-  .optional();
+const negatePropertySchema = z.boolean().optional().meta({
+  description:
+    'When `true`, the filter is negated and matches documents that do NOT satisfy the condition. Defaults to `false`.',
+});
 
 /**
  * Common top-level properties shared by all as code filters
  */
 const commonBasePropertiesSchema = z.object({
-  disabled: z
-    .boolean()
-    .meta({
-      description:
-        'When `true`, the filter is inactive and does not affect query results. Defaults to `false`.',
-    })
-    .optional(),
+  disabled: z.boolean().optional().meta({
+    description:
+      'When `true`, the filter is inactive and does not affect query results. Defaults to `false`.',
+  }),
   negate: negatePropertySchema,
-  controlled_by: z
-    .string()
-    .meta({
-      description:
-        'Identifier of the panel that manages this filter. When set, the filter is treated as owned by that panel.',
-    })
-    .optional(),
-  data_view_id: z
-    .string()
-    .meta({
-      description: 'Identifier of the data view used as context for this filter.',
-    })
-    .optional(),
+  controlled_by: z.string().optional().meta({
+    description:
+      'Identifier of the panel that manages this filter. When set, the filter is treated as owned by that panel.',
+  }),
+  data_view_id: z.string().optional().meta({
+    description: 'Identifier of the data view used as context for this filter.',
+  }),
   label: z
     .string()
-    .meta({ description: 'Human-readable label for the filter, used for display purposes.' })
-    .optional(),
-  is_multi_index: z
-    .boolean()
-    .meta({
-      description:
-        'When `true`, the filter can be applied across multiple indices. Defaults to `false`.',
-    })
-    .optional(),
+    .optional()
+    .meta({ description: 'Human-readable label for the filter, used for display purposes.' }),
+  is_multi_index: z.boolean().optional().meta({
+    description:
+      'When `true`, the filter can be applied across multiple indices. Defaults to `false`.',
+  }),
 });
 
 // ====================================================================
@@ -274,20 +256,14 @@ export const asCodeDSLFilterSchema = commonBasePropertiesSchema
     dsl: z.record(z.string(), z.any()).meta({
       description: 'Elasticsearch Query DSL object passed directly to the query.',
     }),
-    field: z
-      .string()
-      .meta({
-        description:
-          'Field name for scripted filters where the field cannot be extracted from the DSL query.',
-      })
-      .optional(),
-    params: z
-      .any()
-      .meta({
-        description:
-          'Filter parameters metadata. May contain display values, formats, and parameters for scripted filters.',
-      })
-      .optional(),
+    field: z.string().optional().meta({
+      description:
+        'Field name for scripted filters where the field cannot be extracted from the DSL query.',
+    }),
+    params: z.any().optional().meta({
+      description:
+        'Filter parameters metadata. May contain display values, formats, and parameters for scripted filters.',
+    }),
   })
   .meta({
     description:

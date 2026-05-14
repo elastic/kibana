@@ -11,7 +11,7 @@ import { z } from '@kbn/zod';
 import { DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 
 export const controlTitleSchema = z.object({
-  title: z.string().meta({ description: 'A human-readable title for the control.' }).optional(),
+  title: z.string().optional().meta({ description: 'A human-readable title for the control.' }),
 });
 
 export const dataControlSchema = z.object({

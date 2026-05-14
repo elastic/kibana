@@ -96,25 +96,26 @@ const gaugeConfigMetricOptionsShape = {
     .object({
       visible: z
         .boolean()
-        .meta({ description: 'When `true`, displays the title.' })
         .default(true)
-        .optional(),
-      text: z.string().meta({ description: 'Title text.' }).optional(),
+        .optional()
+        .meta({ description: 'When `true`, displays the title.' }),
+      text: z.string().optional().meta({ description: 'Title text.' }),
     })
-    .meta({ description: 'Title configuration' })
-    .optional(),
+    .optional()
+    .meta({ description: 'Title configuration' }),
   /**
    * Subtitle
    */
-  subtitle: z.string().meta({ description: 'Subtitle below the gauge value.' }).optional(),
+  subtitle: z.string().optional().meta({ description: 'Subtitle below the gauge value.' }),
   /**
    * Color configuration
    */
   color: z
     .union([colorByValueSchema, noColorSchema, autoColorSchema])
-    .meta({ description: 'Color configuration for the gauge fill.' })
+
     .default(AUTO_COLOR)
-    .optional(),
+    .optional()
+    .meta({ description: 'Color configuration for the gauge fill.' }),
   /**
    * Tick marks configuration
    */
@@ -122,17 +123,20 @@ const gaugeConfigMetricOptionsShape = {
     .object({
       visible: z
         .boolean()
-        .meta({ description: 'When `true`, displays tick marks on the gauge.' })
+
         .default(true)
-        .optional(),
+        .optional()
+        .meta({ description: 'When `true`, displays tick marks on the gauge.' }),
       mode: z
         .union([z.literal('auto'), z.literal('bands')])
-        .meta({ description: 'Tick placement mode.' })
+
         .default('bands')
-        .optional(),
+        .optional()
+        .meta({ description: 'Tick placement mode.' }),
     })
-    .meta({ description: 'Ticks configuration' })
-    .optional(),
+
+    .optional()
+    .meta({ description: 'Ticks configuration' }),
 };
 
 export const gaugeConfigSchemaNoESQL = z

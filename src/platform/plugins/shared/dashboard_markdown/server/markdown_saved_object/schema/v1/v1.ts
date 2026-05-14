@@ -36,7 +36,7 @@ export const markdownAttributesSchema = schema.object(
 export const markdownAttributesSchemaZod = z
   .object({
     title: z.string().meta({ description: 'A human-readable title' }),
-    description: z.string().meta({ description: 'A short description.' }).optional(),
+    description: z.string().optional().meta({ description: 'A short description.' }),
     content: z.string().meta({ description: 'Markdown enriched text content' }),
     settings: z
       .object({

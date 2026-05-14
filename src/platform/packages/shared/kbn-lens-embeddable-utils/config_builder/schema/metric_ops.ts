@@ -135,12 +135,9 @@ const emptyAsNullSchemaRawObject = {
   /**
    * Whether to consider null values as null
    */
-  empty_as_null: z
-    .boolean()
-    .meta({
-      description: 'When `true`, treats empty buckets as null instead of zero.',
-    })
-    .default(LENS_EMPTY_AS_NULL_DEFAULT_VALUE),
+  empty_as_null: z.boolean().default(LENS_EMPTY_AS_NULL_DEFAULT_VALUE).meta({
+    description: 'When `true`, treats empty buckets as null instead of zero.',
+  }),
 };
 
 export const countMetricOperationSchema = fieldBasedOperationSharedSchema
@@ -150,7 +147,7 @@ export const countMetricOperationSchema = fieldBasedOperationSharedSchema
      * Select the operation type
      */
     operation: z.literal('count'),
-    field: z.string().meta({ description: 'Field to be used for the metric' }).optional(),
+    field: z.string().optional().meta({ description: 'Field to be used for the metric' }),
   })
   .meta({ id: 'countMetricOperation', title: METRIC_OP_TITLES.count });
 
@@ -188,13 +185,10 @@ export const lastValueOperationSchema = fieldBasedOperationSharedSchema
      * Whether to return all values for multi-value fields.
      * Only affects data table and metric charts; other charts use the last value from the array.
      */
-    multi_value: z
-      .boolean()
-      .meta({
-        description:
-          'Whether to return all values for multi-value fields. Only affects data table and metric charts; other charts use the last value from the array.',
-      })
-      .default(LENS_LAST_VALUE_DEFAULT_MULTI_VALUE),
+    multi_value: z.boolean().default(LENS_LAST_VALUE_DEFAULT_MULTI_VALUE).meta({
+      description:
+        'Whether to return all values for multi-value fields. Only affects data table and metric charts; other charts use the last value from the array.',
+    }),
   })
   .meta({ id: 'lastValueOperation', title: METRIC_OP_TITLES.lastValue });
 
@@ -203,8 +197,8 @@ export const percentileOperationSchema = fieldBasedOperationSharedSchema
     operation: z.literal('percentile'),
     percentile: z
       .number()
-      .meta({ description: 'Percentile' })
-      .default(LENS_PERCENTILE_DEFAULT_VALUE),
+      .default(LENS_PERCENTILE_DEFAULT_VALUE)
+      .meta({ description: 'Percentile' }),
   })
   .meta({ id: 'percentileOperation', title: METRIC_OP_TITLES.percentile });
 
@@ -213,8 +207,8 @@ export const percentileRanksOperationSchema = fieldBasedOperationSharedSchema
     operation: z.literal('percentile_rank'),
     rank: z
       .number()
-      .meta({ description: 'Percentile Rank' })
-      .default(LENS_PERCENTILE_RANK_DEFAULT_VALUE),
+      .default(LENS_PERCENTILE_RANK_DEFAULT_VALUE)
+      .meta({ description: 'Percentile Rank' }),
   })
   .meta({ id: 'percentileRanksOperation', title: METRIC_OP_TITLES.percentileRanks });
 
@@ -241,7 +235,7 @@ export const movingAverageOperationSchema = metricOperationSharedSchema
   .extend({
     operation: z.literal('moving_average'),
     of: fieldMetricOperationsSchema,
-    window: z.number().meta({ description: 'Window' }).default(LENS_MOVING_AVERAGE_DEFAULT_WINDOW),
+    window: z.number().default(LENS_MOVING_AVERAGE_DEFAULT_WINDOW).meta({ description: 'Window' }),
   })
   .meta({ id: 'movingAverageOperation', title: METRIC_OP_TITLES.movingAverage });
 

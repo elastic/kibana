@@ -42,13 +42,12 @@ const waffleConfigSharedShape = {
       visibility: legendVisibilitySchemaWithAuto,
       size: legendSizeSchema,
     })
-
+    .optional()
     .meta({
       id: 'waffleLegend',
       title: 'Legend',
       description: 'Legend configuration for waffle chart',
-    })
-    .optional(),
+    }),
 };
 
 const waffleStylingSchema = z
@@ -109,19 +108,19 @@ export const waffleConfigSchemaNoESQL = z
       )
       .min(1)
       .max(100)
-      .meta({ description: 'Array of breakdown dimensions (minimum 1)' })
-      .optional(),
-  })
-  .meta({
-    id: 'waffleNoESQL',
-    title: 'Waffle Chart (DSL)',
-    description: 'Waffle chart configuration for standard queries',
+      .optional()
+      .meta({ description: 'Array of breakdown dimensions (minimum 1)' }),
   })
   .superRefine((data, ctx) => {
     const msg = validateMultipleMetricsCriteria(data);
     if (msg) {
       ctx.addIssue({ code: 'custom', message: msg });
     }
+  })
+  .meta({
+    id: 'waffleNoESQL',
+    title: 'Waffle Chart (DSL)',
+    description: 'Waffle chart configuration for standard queries',
   });
 
 /**
@@ -144,19 +143,19 @@ export const waffleConfigSchemaESQL = z
       .array(esqlColumnWithFormatSchema.extend(partitionConfigBreakdownByOptionsShape))
       .min(1)
       .max(100)
-      .meta({ description: 'Array of ES|QL breakdown columns (minimum 1)' })
-      .optional(),
-  })
-  .meta({
-    id: 'waffleESQL',
-    title: 'Waffle Chart (ES|QL)',
-    description: 'Waffle chart configuration for ES|QL queries',
+      .optional()
+      .meta({ description: 'Array of ES|QL breakdown columns (minimum 1)' }),
   })
   .superRefine((data, ctx) => {
     const msg = validateMultipleMetricsCriteria(data);
     if (msg) {
       ctx.addIssue({ code: 'custom', message: msg });
     }
+  })
+  .meta({
+    id: 'waffleESQL',
+    title: 'Waffle Chart (ES|QL)',
+    description: 'Waffle chart configuration for ES|QL queries',
   });
 
 /**

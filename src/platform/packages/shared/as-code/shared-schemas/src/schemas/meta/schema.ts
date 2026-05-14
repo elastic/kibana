@@ -13,34 +13,31 @@ export const asCodeMetaSchema = z
   .object({
     created_at: z
       .string()
-      .meta({ description: 'Timestamp when the object was created (ISO 8601).' })
-      .optional(),
+      .optional()
+      .meta({ description: 'Timestamp when the object was created (ISO 8601).' }),
     created_by: z
       .string()
-      .meta({ description: 'User profile ID of the user who created the object.' })
-      .optional(),
-    managed: z
-      .boolean()
-      .meta({
-        description: 'When `true`, the object is managed by Kibana and cannot be edited by users.',
-      })
-      .optional(),
+      .optional()
+      .meta({ description: 'User profile ID of the user who created the object.' }),
+    managed: z.boolean().optional().meta({
+      description: 'When `true`, the object is managed by Kibana and cannot be edited by users.',
+    }),
     owner: z
       .string()
-      .meta({ description: 'Identifier of the plugin or team that owns this object.' })
-      .optional(),
+      .optional()
+      .meta({ description: 'Identifier of the plugin or team that owns this object.' }),
     updated_at: z
       .string()
-      .meta({ description: 'Timestamp when the object was last updated (ISO 8601).' })
-      .optional(),
+      .optional()
+      .meta({ description: 'Timestamp when the object was last updated (ISO 8601).' }),
     updated_by: z
       .string()
-      .meta({ description: 'User profile ID of the user who last updated the object.' })
-      .optional(),
+      .optional()
+      .meta({ description: 'User profile ID of the user who last updated the object.' }),
     version: z
       .string()
-      .meta({ description: 'Internal version identifier for optimistic concurrency control.' })
-      .optional(),
+      .optional()
+      .meta({ description: 'Internal version identifier for optimistic concurrency control.' }),
   })
   .meta({
     id: 'kbn-as-code-meta',

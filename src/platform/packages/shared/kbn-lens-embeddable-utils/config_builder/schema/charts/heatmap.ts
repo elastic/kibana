@@ -37,7 +37,7 @@ const legendSchema = z.object({
 });
 
 const labelsSchema = z.object({
-  visible: z.boolean().default(true).meta({ description: 'Show axis labels' }).optional(),
+  visible: z.boolean().default(true).optional().meta({ description: 'Show axis labels' }),
   orientation: orientationSchema.default('horizontal').optional().meta({
     description: 'Orientation of the axis labels',
   }),
@@ -58,13 +58,13 @@ const heatmapStylingSchema = z
             visible: z
               .boolean()
               .default(false)
-              .meta({ description: 'Show cell labels' })
-              .optional(),
+              .optional()
+              .meta({ description: 'Show cell labels' }),
           })
           .optional(),
       })
-      .meta({ id: 'heatmapCells', title: 'Cells', description: 'Cells configuration' })
-      .optional(),
+      .optional()
+      .meta({ id: 'heatmapCells', title: 'Cells', description: 'Cells configuration' }),
   })
   .meta({
     id: 'heatmapStyling',
@@ -74,13 +74,11 @@ const heatmapStylingSchema = z
 
 const heatmapSharedConfigSchema = z.object({
   type: z.literal('heatmap'),
-  legend: legendSchema
-    .meta({
-      id: 'heatmapLegend',
-      title: 'Legend',
-      description: 'Legend configuration',
-    })
-    .optional(),
+  legend: legendSchema.optional().meta({
+    id: 'heatmapLegend',
+    title: 'Legend',
+    description: 'Legend configuration',
+  }),
   ...sharedPanelInfoSchema.shape,
   ...layerSettingsSchema.shape,
   axis: z
@@ -92,31 +90,31 @@ const heatmapSharedConfigSchema = z.object({
           sort: heatmapSortPredicateSchema.optional(),
           scale: xScaleSchema,
         })
+        .optional()
         .meta({
           id: 'heatmapXAxis',
           title: 'X Axis',
           description: 'X axis configuration',
-        })
-        .optional(),
+        }),
       y: z
         .object({
           title: axisTitleSchema.optional(),
           labels: simpleLabelsSchema.optional(),
           sort: heatmapSortPredicateSchema.optional(),
         })
+        .optional()
         .meta({
           id: 'heatmapYAxis',
           title: 'Y Axis',
           description: 'Y axis configuration',
-        })
-        .optional(),
+        }),
     })
+    .optional()
     .meta({
       id: 'heatmapAxes',
       title: 'Axes',
       description: 'Axis configuration for X and Y axes',
-    })
-    .optional(),
+    }),
 });
 
 const heatmapAxesConfigShape = {
@@ -132,9 +130,9 @@ const heatmapAxesConfigESQLShape = {
 const heatmapConfigMetricOptionsShape = {
   color: z
     .union([colorByValueSchema, autoColorSchema])
-    .meta({ description: 'Color scale configuration for the heatmap cells.' })
     .default(AUTO_COLOR)
-    .optional(),
+    .optional()
+    .meta({ description: 'Color scale configuration for the heatmap cells.' }),
 };
 
 export const heatmapConfigSchemaNoESQL = heatmapSharedConfigSchema

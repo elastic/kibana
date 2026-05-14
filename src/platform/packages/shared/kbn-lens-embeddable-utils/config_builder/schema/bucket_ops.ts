@@ -113,13 +113,10 @@ const bucketTermsRankByCustomOperationSchema = bucketTermsRankByCustomSharedSche
 const bucketTermsRankByPercentileOperationSchema = bucketTermsRankByCustomSharedSchema
   .extend({
     operation: z.literal('percentile'),
-    percentile: z
-      .number()
-      .meta({
-        description:
-          'The percentile threshold (0–100) at which to compute the field value used for ranking terms.',
-      })
-      .default(LENS_PERCENTILE_DEFAULT_VALUE),
+    percentile: z.number().default(LENS_PERCENTILE_DEFAULT_VALUE).meta({
+      description:
+        'The percentile threshold (0–100) at which to compute the field value used for ranking terms.',
+    }),
   })
   .meta({
     id: 'termsRankByPercentileOperation',
@@ -130,13 +127,10 @@ const bucketTermsRankByPercentileOperationSchema = bucketTermsRankByCustomShared
 const bucketTermsRankByPercentileRankOperationSchema = bucketTermsRankByCustomSharedSchema
   .extend({
     operation: z.literal('percentile_rank'),
-    rank: z
-      .number()
-      .meta({
-        description:
-          'The numeric value for which to compute the percentile rank (the percentage of field values at or below this value).',
-      })
-      .default(LENS_PERCENTILE_RANK_DEFAULT_VALUE),
+    rank: z.number().default(LENS_PERCENTILE_RANK_DEFAULT_VALUE).meta({
+      description:
+        'The numeric value for which to compute the percentile rank (the percentage of field values at or below this value).',
+    }),
   })
   .meta({
     id: 'termsRankByPercentileRankOperation',
@@ -331,12 +325,9 @@ export const bucketHistogramOperationSchema = z
     /**
      * Whether to include empty rows
      */
-    include_empty_rows: z
-      .boolean()
-      .meta({
-        description: 'When `true`, includes empty rows in the results.',
-      })
-      .default(LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT),
+    include_empty_rows: z.boolean().default(LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT).meta({
+      description: 'When `true`, includes empty rows in the results.',
+    }),
   })
   .meta({ id: 'histogramOperation', title: BUCKET_OP_TITLES.histogram });
 

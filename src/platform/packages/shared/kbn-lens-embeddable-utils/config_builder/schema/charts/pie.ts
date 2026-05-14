@@ -40,12 +40,12 @@ const pieStateSharedShape = {
       visibility: legendVisibilitySchemaWithAuto,
       size: legendSizeSchema,
     })
+    .optional()
     .meta({
       id: 'pieLegend',
       title: 'Legend',
       description: 'Legend configuration for pie chart',
-    })
-    .optional(),
+    }),
 };
 
 /**
@@ -58,25 +58,25 @@ const pieStylingSchema = z
       .object({
         visible: z
           .boolean()
-          .meta({ description: 'When `true`, displays slice labels.' })
-          .optional(),
+          .optional()
+          .meta({ description: 'When `true`, displays slice labels.' }),
         position: z
           .union([z.literal('inside'), z.literal('outside')])
+          .optional()
           .meta({
             description: 'Slice label position: `inside` or `outside`.',
-          })
-          .optional(),
+          }),
       })
+      .optional()
       .meta({
         description: 'Label configuration for pie chart slice labels inside or outside the pie',
-      })
-      .optional(),
+      }),
     donut_hole: z
       .union([z.literal('none'), z.literal('s'), z.literal('m'), z.literal('l')])
+      .optional()
       .meta({
         description: 'Donut hole size. Accepted values: `none` (full pie), `s`, `m`, `l`.',
-      })
-      .optional(),
+      }),
   })
   .meta({
     id: 'pieStyling',
@@ -150,19 +150,19 @@ export const pieConfigSchemaNoESQL = z
       )
       .min(1)
       .max(100)
-      .meta({ description: 'Array of breakdown dimensions (minimum 1)' })
-      .optional(),
-  })
-  .meta({
-    id: 'pieNoESQL',
-    title: 'Pie Chart (DSL)',
-    description: 'Pie chart configuration for standard queries',
+      .optional()
+      .meta({ description: 'Array of breakdown dimensions (minimum 1)' }),
   })
   .superRefine((data, ctx) => {
     const msg = validateForMultipleMetrics(data);
     if (msg) {
       ctx.addIssue({ code: 'custom', message: msg });
     }
+  })
+  .meta({
+    id: 'pieNoESQL',
+    title: 'Pie Chart (DSL)',
+    description: 'Pie chart configuration for standard queries',
   });
 
 /**
@@ -189,19 +189,19 @@ export const pieConfigSchemaESQL = z
       .array(esqlColumnWithFormatSchema.extend(partitionConfigBreakdownByOptionsShape))
       .min(1)
       .max(100)
-      .meta({ description: 'Array of breakdown dimensions (minimum 1)' })
-      .optional(),
-  })
-  .meta({
-    id: 'pieESQL',
-    title: 'Pie Chart (ES|QL)',
-    description: 'Pie chart configuration for ES|QL queries',
+      .optional()
+      .meta({ description: 'Array of breakdown dimensions (minimum 1)' }),
   })
   .superRefine((data, ctx) => {
     const msg = validateForMultipleMetrics(data);
     if (msg) {
       ctx.addIssue({ code: 'custom', message: msg });
     }
+  })
+  .meta({
+    id: 'pieESQL',
+    title: 'Pie Chart (ES|QL)',
+    description: 'Pie chart configuration for ES|QL queries',
   });
 
 /**

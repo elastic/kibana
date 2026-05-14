@@ -81,11 +81,11 @@ export const ESGeoGridSourceSchema = BaseESAggSourceSchema.extend({
   ]),
   type: z.literal(SOURCE_TYPES.ES_GEO_GRID),
 })
+  .strict()
   .meta({
     description:
       'Vector feature source returning points and polygons from Elasticsearch geotile_grid or geohex_grid aggregations. One feature is returned per bucket.',
-  })
-  .strict();
+  });
 
 export const ESGeoLineSourceSchema = BaseESAggSourceSchema.extend({
   geoField: z.string().meta({
@@ -118,8 +118,8 @@ export const ESPewPewSourceSchema = BaseESAggSourceSchema.extend({
   }),
   type: z.literal(SOURCE_TYPES.ES_PEW_PEW),
 })
+  .strict()
   .meta({
     description:
       'Vector feature source returning lines from Elasticsearch nested geotile_grid aggregation. Results grouped by destintation point, creating one feature per destination point and source geotile_grid bucket.',
-  })
-  .strict();
+  });

@@ -35,12 +35,12 @@ const mosaicConfigSharedShape = {
       visibility: legendVisibilitySchemaWithAuto,
       size: legendSizeSchema,
     })
+    .optional()
     .meta({
       id: 'mosaicLegend',
       title: 'Legend',
       description: 'Legend configuration for mosaic chart appearance and behavior',
-    })
-    .optional(),
+    }),
 };
 
 const mosaicStylingSchema = z
@@ -115,8 +115,8 @@ export const mosaicConfigSchemaNoESQL = z
       )
       .min(1)
       .max(100)
-      .meta({ description: 'Array of breakdown dimensions (minimum 1)' })
-      .optional(),
+      .optional()
+      .meta({ description: 'Array of breakdown dimensions (minimum 1)' }),
     /**
      * Unfortunately due to the collapsed feature, it is necessary to distinct between primary and secondary groups
      * at the api level as well.  Secondary groups are rendered inside the primary groups.
@@ -130,20 +130,20 @@ export const mosaicConfigSchemaNoESQL = z
       )
       .min(1)
       .max(100)
-      .meta({ description: 'Array of group breakdown dimensions (minimum 1)' })
-      .optional(),
-  })
-  .meta({
-    id: 'mosaicNoESQL',
-    title: 'Mosaic Chart (DSL)',
-    description:
-      'Mosaic chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions',
+      .optional()
+      .meta({ description: 'Array of group breakdown dimensions (minimum 1)' }),
   })
   .superRefine((data, ctx) => {
     const msg = validateMosaicGroupings(data);
     if (msg) {
       ctx.addIssue({ code: 'custom', message: msg });
     }
+  })
+  .meta({
+    id: 'mosaicNoESQL',
+    title: 'Mosaic Chart (DSL)',
+    description:
+      'Mosaic chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions',
   });
 
 export const mosaicConfigSchemaESQL = z
@@ -168,26 +168,27 @@ export const mosaicConfigSchemaESQL = z
       .array(esqlColumnWithFormatSchema.extend(partitionConfigBreakdownByOptionsSchema.shape))
       .min(1)
       .max(100)
-      .meta({ description: 'Array of breakdown dimensions (minimum 1)' })
-      .optional(),
+      .optional()
+      .meta({ description: 'Array of breakdown dimensions (minimum 1)' }),
     group_breakdown_by: z
       .array(esqlColumnWithFormatSchema.extend(partitionConfigBreakdownByOptionsSchema.shape))
       .min(1)
       .max(100)
-      .meta({ description: 'Array of group breakdown dimensions (minimum 1)' })
-      .optional(),
-  })
-  .meta({
-    id: 'mosaicESQL',
-    title: 'Mosaic Chart (ES|QL)',
-    description:
-      'Mosaic chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration',
+
+      .optional()
+      .meta({ description: 'Array of group breakdown dimensions (minimum 1)' }),
   })
   .superRefine((data, ctx) => {
     const msg = validateMosaicGroupings(data);
     if (msg) {
       ctx.addIssue({ code: 'custom', message: msg });
     }
+  })
+  .meta({
+    id: 'mosaicESQL',
+    title: 'Mosaic Chart (ES|QL)',
+    description:
+      'Mosaic chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration',
   });
 
 export const mosaicConfigSchema = z.union([mosaicConfigSchemaNoESQL, mosaicConfigSchemaESQL]).meta({

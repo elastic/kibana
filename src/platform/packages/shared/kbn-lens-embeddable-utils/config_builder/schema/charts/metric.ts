@@ -178,12 +178,12 @@ const metricStylingSchema = z
             description: 'Icon alignment. Accepted values: `left`, `right`. Defaults to `right`.',
           }),
       })
+      .optional()
       .meta({
         id: 'metricIconConfig',
         title: 'Icon Configuration',
         description: 'Icon configuration for the metric chart',
-      })
-      .optional(),
+      }),
     primary: z
       .object({
         /**
@@ -214,8 +214,8 @@ const metricStylingSchema = z
                   'Horizontal alignment for the title and subtitle text. Accepted values: `left`, `center`, `right`. Defaults to `left`.',
               }),
           })
-          .meta({ description: 'Labels (title and subtitle) configuration' })
-          .optional(),
+          .optional()
+          .meta({ description: 'Labels (title and subtitle) configuration' }),
         /**
          * Values configuration
          */
@@ -243,14 +243,14 @@ const metricStylingSchema = z
             sizing: z
               .union([z.literal('auto'), z.literal('fill')])
               .default(DEFAULT_PRIMARY_VALUE_SIZING)
+              .optional()
               .meta({
                 description:
                   "Controls how the primary value text is sized within the panel. 'auto' selects a font size from predefined breakpoints based on panel height, then shrinks if the text overflows horizontally. 'fill' scales the text to be as large as possible, filling all available space.",
-              })
-              .optional(),
+              }),
           })
-          .meta({ description: 'Primary metric value configuration' })
-          .optional(),
+          .optional()
+          .meta({ description: 'Primary metric value configuration' }),
       })
       .optional(),
     secondary: z
@@ -265,9 +265,9 @@ const metricStylingSchema = z
              */
             visible: z
               .boolean()
-              .meta({ description: 'When `true`, displays the label.' })
               .default(DEFAULT_SECONDARY_LABEL_VISIBLE)
-              .optional(),
+              .optional()
+              .meta({ description: 'When `true`, displays the label.' }),
             /**
              * Label placement relative to the secondary metric value. Possible values:
              * - 'before': Label appears before the value
@@ -295,8 +295,8 @@ const metricStylingSchema = z
                   'Alignment for secondary values. Accepted values: `left`, `center`, `right`. Defaults to `right`.',
               }),
           })
-          .meta({ description: 'Secondary metric value configuration' })
-          .optional(),
+          .optional()
+          .meta({ description: 'Secondary metric value configuration' }),
       })
       .optional(),
   })
@@ -313,15 +313,15 @@ const metricConfigPrimaryMetricOptionsShape = {
   /**
    * Subtitle
    */
-  subtitle: z.string().meta({ description: 'Subtitle below the primary metric value.' }).optional(),
+  subtitle: z.string().optional().meta({ description: 'Subtitle below the primary metric value.' }),
   /**
    * Color configuration
    */
   color: z
     .union([colorByValueSchema, staticColorSchema, autoColorSchema])
     .default(AUTO_COLOR)
-    .meta({ description: 'Color configuration for the primary metric value or background.' })
-    .optional(),
+    .optional()
+    .meta({ description: 'Color configuration for the primary metric value or background.' }),
   /**
    * Where to apply the color (background or value)
    */
@@ -341,7 +341,7 @@ const metricConfigSecondaryMetricOptionsShape = {
       compareToSchemaShared
         .extend({
           to: z.literal('baseline'),
-          baseline: z.number().meta({ description: 'Baseline value.' }).default(0),
+          baseline: z.number().default(0).meta({ description: 'Baseline value.' }),
         })
         .meta({ id: 'metricCompareToBaseline', title: 'Compare To Baseline' }),
       compareToSchemaShared
@@ -350,10 +350,10 @@ const metricConfigSecondaryMetricOptionsShape = {
         })
         .meta({ id: 'metricCompareToPrimary', title: 'Compare To Primary' }),
     ])
+    .optional()
     .meta({
       description: 'Compare the secondary metric to a baseline value or to the primary metric.',
-    })
-    .optional(),
+    }),
   /**
    * Color configuration
    */
@@ -437,15 +437,15 @@ export const metricConfigSchemaNoESQL = z
       .array(z.union([primaryMetricSchemaNoESQL, secondaryMetricSchemaNoESQL]))
       .min(1)
       .max(2)
-      .meta({
-        description:
-          'Metric dimensions to display. The first must be a primary metric; an optional second must be a secondary metric.',
-      })
       .superRefine((metrics, ctx) => {
         const msg = validateMetrics(metrics);
         if (msg) {
           ctx.addIssue({ code: 'custom', message: msg });
         }
+      })
+      .meta({
+        description:
+          'Metric dimensions to display. The first must be a primary metric; an optional second must be a secondary metric.',
       }),
     /**
      * Configure how to break down the metric (e.g. show one metric per term).
@@ -453,11 +453,6 @@ export const metricConfigSchemaNoESQL = z
     breakdown_by: getBucketsWithChartDimensionSchema('metricBreakdown')
       .and(z.object(metricConfigBreakdownByOptionsShape))
       .optional(),
-  })
-  .meta({
-    id: 'metricNoESQL',
-    title: 'Metric Chart (DSL)',
-    description: 'Metric chart configuration for standard queries',
   })
   .superRefine(({ metrics, breakdown_by }, ctx) => {
     const primaryMetric = metrics.find((metric) => isPrimaryMetric(metric));
@@ -471,6 +466,11 @@ export const metricConfigSchemaNoESQL = z
         });
       }
     }
+  })
+  .meta({
+    id: 'metricNoESQL',
+    title: 'Metric Chart (DSL)',
+    description: 'Metric chart configuration for standard queries',
   });
 
 const primaryMetricESQL = esqlColumnWithFormatSchema
@@ -495,25 +495,20 @@ export const metricConfigSchemaESQL = z
       .array(z.union([primaryMetricESQL, secondaryMetricESQL]))
       .min(1)
       .max(2)
-      .meta({
-        description:
-          'Metric dimensions to display. The first must be a primary metric; an optional second must be a secondary metric.',
-      })
       .superRefine((metrics, ctx) => {
         const msg = validateMetrics(metrics);
         if (msg) {
           ctx.addIssue({ code: 'custom', message: msg });
         }
+      })
+      .meta({
+        description:
+          'Metric dimensions to display. The first must be a primary metric; an optional second must be a secondary metric.',
       }),
     /**
      * Configure how to break down the metric (e.g. show one metric per term).
      */
     breakdown_by: esqlColumnWithFormatSchema.extend(metricConfigBreakdownByOptionsShape).optional(),
-  })
-  .meta({
-    id: 'metricESQL',
-    title: 'Metric Chart (ES|QL)',
-    description: 'Metric chart configuration for ES|QL queries',
   })
   .superRefine(({ metrics, breakdown_by }, ctx) => {
     const primaryMetric = metrics.find((metric) => isPrimaryMetric(metric));
@@ -527,6 +522,11 @@ export const metricConfigSchemaESQL = z
         });
       }
     }
+  })
+  .meta({
+    id: 'metricESQL',
+    title: 'Metric Chart (ES|QL)',
+    description: 'Metric chart configuration for ES|QL queries',
   });
 
 export const metricConfigSchema = z.union([metricConfigSchemaNoESQL, metricConfigSchemaESQL]).meta({

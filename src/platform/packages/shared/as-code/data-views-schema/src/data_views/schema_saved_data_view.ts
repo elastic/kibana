@@ -30,32 +30,19 @@ export const savedFieldSettingsSchema = z
 
 export const savedDataViewSpecSchema = z
   .object({
-    id: z
-      .string()
-      .min(1)
-      .max(256)
-      .meta({
-        title: 'Data view ID',
-        description:
-          'Kibana provides a unique identifier for each data view, or you can create your own.',
-      })
-      .optional(),
-    name: z
-      .string()
-      .min(1)
-      .max(256)
-      .meta({
-        title: 'Data view name',
-        description: 'The name of the data view. Example: "Sample data view".',
-      })
-      .optional(),
-    allow_hidden_indices: z
-      .boolean()
-      .meta({
-        title: 'Allow hidden and system indices',
-        description: 'When `true`, allows the data view to match hidden indices.',
-      })
-      .optional(),
+    id: z.string().min(1).max(256).optional().meta({
+      title: 'Data view ID',
+      description:
+        'Kibana provides a unique identifier for each data view, or you can create your own.',
+    }),
+    name: z.string().min(1).max(256).optional().meta({
+      title: 'Data view name',
+      description: 'The name of the data view. Example: "Sample data view".',
+    }),
+    allow_hidden_indices: z.boolean().optional().meta({
+      title: 'Allow hidden and system indices',
+      description: 'When `true`, allows the data view to match hidden indices.',
+    }),
     index_pattern: indexPatternSchema,
     time_field: timeFieldSchema,
     field_settings: z.record(fieldSettingsFieldNameSchema, savedFieldSettingsSchema).optional(),

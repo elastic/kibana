@@ -23,8 +23,8 @@ export const storedFilterMetaSchema = z
     alias: z.string().nullable().optional(),
     disabled: z.boolean().optional(),
     negate: z.boolean().optional(),
-    controlledBy: z.string().meta({ description: 'Identifies the owner the filter.' }).optional(),
-    group: z.string().meta({ description: 'The group to which this filter belongs.' }).optional(),
+    controlledBy: z.string().optional().meta({ description: 'Identifies the owner the filter.' }),
+    group: z.string().optional().meta({ description: 'The group to which this filter belongs.' }),
     relation: z.string().optional(),
     // field is missing from the Filter type, but is stored in SerializedSearchSourceFields
     // see the todo in src/platform/packages/shared/kbn-es-query/src/filters/helpers/update_filter.ts

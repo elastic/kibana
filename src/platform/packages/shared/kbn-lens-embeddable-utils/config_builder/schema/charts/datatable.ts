@@ -93,8 +93,8 @@ const datatableStylingSchema = z
         mode: z
           .union([z.literal('compact'), z.literal('default'), z.literal('expanded')])
           .default('default')
-          .meta({ description: 'Display density mode.' })
-          .optional(),
+          .optional()
+          .meta({ description: 'Display density mode.' }),
         /**
          * Height configuration
          */
@@ -108,10 +108,10 @@ const datatableStylingSchema = z
                   max_lines: z.number().min(1).max(5).default(DEFAULT_HEADER_ROW_HEIGHT_LINES),
                 }),
               ])
+              .optional()
               .meta({
                 description: 'Number of lines before the header is truncated.',
-              })
-              .optional(),
+              }),
             value: z
               .union([
                 z.object({ type: z.literal('auto') }),
@@ -120,28 +120,28 @@ const datatableStylingSchema = z
                   lines: z.number().min(1).max(20).default(DEFAULT_ROW_HEIGHT_LINES),
                 }),
               ])
+              .optional()
               .meta({
                 description: 'Number of lines to display per table body cell.',
-              })
-              .optional(),
+              }),
           })
           .optional(),
       })
+      .optional()
       .meta({
         id: 'datatableDensity',
         description: 'Density configuration for the datatable.',
-      })
-      .optional(),
+      }),
     /**
      * Paging configuration
      */
     paging: z
       .union([z.literal(10), z.literal(20), z.literal(30), z.literal(50), z.literal(100)])
+      .optional()
       .meta({
         description:
           'Rows per page. When set, pagination is enabled with the specified number of rows.',
-      })
-      .optional(),
+      }),
     /**
      * Sorting configuration
      */
@@ -153,10 +153,10 @@ const datatableStylingSchema = z
       .object({
         visible: z.boolean().meta({ description: 'When `true`, displays row numbers.' }),
       })
+      .optional()
       .meta({
         description: 'Configuration for row numbers',
-      })
-      .optional(),
+      }),
   })
   .meta({
     id: 'datatableStyling',
@@ -175,12 +175,12 @@ const datatableConfigCommonOptionsSchema = z.object({
   visible: z
     .boolean()
     .default(true)
-    .meta({ description: 'When `false`, hides the column from the datatable.' })
-    .optional(),
+    .optional()
+    .meta({ description: 'When `false`, hides the column from the datatable.' }),
   /**
    * Column width in pixels
    */
-  width: z.number().min(0).meta({ description: 'Column width in pixels.' }).optional(),
+  width: z.number().min(0).optional().meta({ description: 'Column width in pixels.' }),
 });
 
 const datatableConfigRowsOptionsNoESQLSchema = datatableConfigCommonOptionsSchema.extend({
@@ -200,8 +200,8 @@ const datatableConfigRowsOptionsNoESQLSchema = datatableConfigCommonOptionsSchem
   click_filter: z
     .boolean()
     .default(false)
-    .meta({ description: 'When `true`, enables one-click filtering on cell values.' })
-    .optional(),
+    .optional()
+    .meta({ description: 'When `true`, enables one-click filtering on cell values.' }),
   /**
    * Collapse by function. This parameter is used to collapse the
    * metric chart when the number of columns is bigger than the
@@ -217,11 +217,11 @@ const datatableConfigRowsOptionsESQLSchema = datatableConfigRowsOptionsNoESQLSch
   color: z
     .union([colorByValueSchema, colorMappingSchema, autoColorSchema])
     .default(AUTO_COLOR)
+    .optional()
     .meta({
       description:
         'Color configuration for ESQL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
-    })
-    .optional(),
+    }),
 });
 
 const datatableConfigMetricsOptionsSchema = datatableConfigCommonOptionsSchema.extend({
@@ -231,11 +231,11 @@ const datatableConfigMetricsOptionsSchema = datatableConfigCommonOptionsSchema.e
   color: z
     .union([colorByValueSchema, colorMappingSchema, autoColorSchema])
     .default(AUTO_COLOR)
+    .optional()
     .meta({
       description:
         'Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
-    })
-    .optional(),
+    }),
   /**
    * Alignment of the columns
    */
@@ -256,10 +256,10 @@ const datatableConfigMetricsOptionsSchema = datatableConfigCommonOptionsSchema.e
           z.literal('max'),
         ])
         .meta({ description: 'Type of summary function to apply to the column.' }),
-      label: z.string().meta({ description: 'Summary row label.' }).optional(),
+      label: z.string().optional().meta({ description: 'Summary row label.' }),
     })
-    .meta({ description: 'Summary row configuration' })
-    .optional(),
+    .optional()
+    .meta({ description: 'Summary row configuration' }),
 });
 
 interface SortByValidationInput {
@@ -351,8 +351,8 @@ export const datatableConfigSchemaNoESQL = z
       )
       .min(1)
       .max(50)
-      .meta({ description: 'Array of operations to split the datatable rows by' })
-      .optional(),
+      .optional()
+      .meta({ description: 'Array of operations to split the datatable rows by' }),
     /**
      * Split metrics by configuration, optional bucket operations.
      */
@@ -360,19 +360,20 @@ export const datatableConfigSchemaNoESQL = z
       .array(bucketOperationDefinitionSchema)
       .min(1)
       .max(20)
-      .meta({ description: 'Array of operations to split the metric columns by' })
-      .optional(),
+      .optional()
+      .meta({ description: 'Array of operations to split the metric columns by' }),
   })
-  .meta({
-    id: 'datatableNoESQL',
-    title: 'Datatable (DSL)',
-    description: 'Datatable state configuration for standard queries',
-  })
+
   .superRefine((data, ctx) => {
     const msg = validateSortBy(data);
     if (msg) {
       ctx.addIssue({ code: 'custom', message: msg });
     }
+  })
+  .meta({
+    id: 'datatableNoESQL',
+    title: 'Datatable (DSL)',
+    description: 'Datatable state configuration for standard queries',
   });
 
 export const datatableConfigSchemaESQL = z
@@ -394,8 +395,8 @@ export const datatableConfigSchemaESQL = z
       )
       .min(1)
       .max(1000)
-      .meta({ description: 'Array of metrics to display as columns in the datatable' })
-      .optional(),
+      .optional()
+      .meta({ description: 'Array of metrics to display as columns in the datatable' }),
     /**
      * Row configuration, optional operations.
      */
@@ -403,8 +404,8 @@ export const datatableConfigSchemaESQL = z
       .array(esqlColumnWithFormatSchema.extend(datatableConfigRowsOptionsESQLSchema.shape))
       .min(1)
       .max(50)
-      .meta({ description: 'Array of operations to split the datatable rows by' })
-      .optional(),
+      .optional()
+      .meta({ description: 'Array of operations to split the datatable rows by' }),
     /**
      * Split metrics by configuration, optional operations.
      */
@@ -412,13 +413,8 @@ export const datatableConfigSchemaESQL = z
       .array(esqlColumnWithFormatSchema)
       .min(1)
       .max(20)
-      .meta({ description: 'Array of operations to split the metric columns by' })
-      .optional(),
-  })
-  .meta({
-    id: 'datatableESQL',
-    title: 'Datatable (ES|QL)',
-    description: 'Datatable state configuration for ES|QL queries',
+      .optional()
+      .meta({ description: 'Array of operations to split the metric columns by' }),
   })
   .superRefine((data, ctx) => {
     const sortByError = validateSortBy(data);
@@ -435,6 +431,11 @@ export const datatableConfigSchemaESQL = z
         message: 'Datatable must have at least one column',
       });
     }
+  })
+  .meta({
+    id: 'datatableESQL',
+    title: 'Datatable (ES|QL)',
+    description: 'Datatable state configuration for ES|QL queries',
   });
 
 export const datatableConfigSchema = z

@@ -28,12 +28,12 @@ export const valueDisplaySchema = z
       .optional()
       .meta({ description: 'Decimal places for percentage display (0-10)' }),
   })
+  .optional()
   .meta({
     id: 'valueDisplay',
     description:
       'Configure the visibility and the format of the values rendered on each chart partition section',
-  })
-  .optional();
+  });
 
 export const legendNestedSchema = z
   .boolean()

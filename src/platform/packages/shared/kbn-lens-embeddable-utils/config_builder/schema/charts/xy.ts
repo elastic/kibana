@@ -120,12 +120,12 @@ const yDomainSchema = z
     domainFitConfigSchema,
     domainCustomConfigSchema,
   ])
-  .meta({
-    description: 'Y-axis domain configuration',
-  })
   .default({
     type: 'full',
     rounding: true,
+  })
+  .meta({
+    description: 'Y-axis domain configuration',
   });
 export type YDomainSchemaType = z.output<typeof yDomainSchema>;
 
@@ -146,14 +146,14 @@ export const sharedAxisSchema = z.object({
     .object({
       visible: z.boolean().meta({ description: 'Show tick marks on the axis' }),
     })
-    .meta({ description: 'Axis tick marks configuration' })
-    .optional(),
+    .optional()
+    .meta({ description: 'Axis tick marks configuration' }),
   grid: z
     .object({
       visible: z.boolean().meta({ description: 'Show grid lines for this axis' }),
     })
-    .meta({ description: 'Axis grid lines configuration' })
-    .optional(),
+    .optional()
+    .meta({ description: 'Axis grid lines configuration' }),
   labels: z
     .object({
       /**
@@ -166,8 +166,8 @@ export const sharedAxisSchema = z.object({
         description: 'Orientation of the axis labels',
       }),
     })
-    .meta({ description: 'Label configuration' })
-    .optional(),
+    .optional()
+    .meta({ description: 'Label configuration' }),
 });
 
 const yAxisSchema = sharedAxisSchema
@@ -184,12 +184,9 @@ export type YAxisSchemaType = z.output<typeof yAxisSchema>;
 const xAxisSchema = sharedAxisSchema
   .extend({
     scale: xScaleSchema.optional(),
-    domain: z
-      .union([domainFitConfigSchema, domainCustomConfigSchema])
-      .meta({
-        description: 'X-axis domain configuration',
-      })
-      .optional(),
+    domain: z.union([domainFitConfigSchema, domainCustomConfigSchema]).optional().meta({
+      description: 'X-axis domain configuration',
+    }),
   })
   .meta({ description: 'X-axis configuration' });
 export type XAxisSchemaType = z.output<typeof xAxisSchema>;
@@ -218,9 +215,9 @@ const legendSeriesHeaderSchema = z
   .object({
     visible: z
       .boolean()
-      .meta({ description: 'When true, shows the legend table series header.' })
-      .optional(),
-    text: z.string().meta({ description: 'Legend table series header text.' }).optional(),
+      .optional()
+      .meta({ description: 'When true, shows the legend table series header.' }),
+    text: z.string().optional().meta({ description: 'Legend table series header text.' }),
   })
   .meta({
     id: 'xyLegendSeriesHeader',
@@ -235,20 +232,17 @@ const sharedLegendSchema = z.object({
   statistics: z
     .array(statisticsSchema)
     .max(statisticsOptionsSize)
-    .meta({ description: 'Statistics to display in legend' })
-    .optional(),
+    .optional()
+    .meta({ description: 'Statistics to display in legend' }),
   series_header: legendSeriesHeaderSchema.optional(),
 });
 
 /**
  * Layout Schemas
  */
-const legendTruncateEnabledSchema = z
-  .boolean()
-  .meta({
-    description: 'Enable truncation of legend items',
-  })
-  .optional();
+const legendTruncateEnabledSchema = z.boolean().optional().meta({
+  description: 'Enable truncation of legend items',
+});
 const gridLayout = z.object({
   type: z.literal('grid'),
   truncate: z
@@ -282,8 +276,8 @@ const xyStylingSchema = z
               .default(DEFAULT_PARTIAL_BUCKETS_VISIBLE)
               .meta({ description: 'Show partial bucket indicators at time range edges' }),
           })
-          .meta({ description: 'Partial (incomplete) bucket indicator configuration' })
-          .optional(),
+          .optional()
+          .meta({ description: 'Partial (incomplete) bucket indicator configuration' }),
         current_time_marker: z
           .object({
             visible: z
@@ -291,14 +285,14 @@ const xyStylingSchema = z
               .default(DEFAULT_CURRENT_TIME_MARKER_VISIBLE)
               .meta({ description: 'Show current time marker line' }),
           })
-          .meta({ description: 'Current time marker configuration' })
-          .optional(),
+          .optional()
+          .meta({ description: 'Current time marker configuration' }),
       })
+      .optional()
       .meta({
         id: 'xyStylingOverlays',
         description: 'Visual overlays drawn on top of the chart canvas',
-      })
-      .optional(),
+      }),
 
     // Lines + areas shared (alphabetical)
     fitting: z
@@ -314,26 +308,23 @@ const xyStylingSchema = z
             z.literal('nearest'),
           ])
           .meta({ description: 'Fitting function type for missing data' }),
-        emphasize: z
-          .boolean()
-          .meta({
-            description:
-              'Visually distinguish fitted segments with a dashed line style and reduced area opacity',
-          })
-          .optional(),
+        emphasize: z.boolean().optional().meta({
+          description:
+            'Visually distinguish fitted segments with a dashed line style and reduced area opacity',
+        }),
         extend: z
           .union([z.literal('none'), z.literal('zero'), z.literal('nearest')])
+          .optional()
           .meta({
             description:
               'How to render line and area edges when data does not cover the full X domain',
-          })
-          .optional(),
+          }),
       })
+      .optional()
       .meta({
         id: 'xyFitting',
         description: 'Missing data interpolation configuration for line and area series',
-      })
-      .optional(),
+      }),
     interpolation: z
       .union([
         z.literal(XY_API_LINE_INTERPOLATION.LINEAR),
@@ -341,21 +332,21 @@ const xyStylingSchema = z
         z.literal(XY_API_LINE_INTERPOLATION.STEPPED),
       ])
       .default(DEFAULT_LINES_INTERPOLATION)
-      .meta({ description: 'Curve interpolation method for line and area series' })
-      .optional(),
+      .optional()
+      .meta({ description: 'Curve interpolation method for line and area series' }),
     points: z
       .object({
         visibility: z
           .union([z.literal('auto'), z.literal('visible'), z.literal('hidden')])
           .default(DEFAULT_POINTS_VISIBILITY)
-          .meta({ description: 'Data point marker visibility on line and area series' })
-          .optional(),
+          .optional()
+          .meta({ description: 'Data point marker visibility on line and area series' }),
       })
+      .optional()
       .meta({
         id: 'xyStylingPoints',
         description: 'Data point marker settings for line and area series',
-      })
-      .optional(),
+      }),
 
     // Series-type specific (alphabetical)
     areas: z
@@ -365,22 +356,22 @@ const xyStylingSchema = z
           .min(0)
           .max(2)
           .default(DEFAULT_AREAS_FILL_OPACITY)
-          .meta({ description: 'Area fill opacity (0-1 typical, max 2 for legacy)' })
-          .optional(),
+          .optional()
+          .meta({ description: 'Area fill opacity (0-1 typical, max 2 for legacy)' }),
       })
+      .optional()
       .meta({
         id: 'xyStylingAreas',
         description: 'Area-specific rendering settings',
-      })
-      .optional(),
+      }),
     bars: z
       .object({
         minimum_height: z
           .number()
           .min(0)
           .default(DEFAULT_BARS_MINIMUM_HEIGHT)
-          .meta({ description: 'Minimum bar height in pixels' })
-          .optional(),
+          .optional()
+          .meta({ description: 'Minimum bar height in pixels' }),
         data_labels: z
           .object({
             visible: z
@@ -388,14 +379,14 @@ const xyStylingSchema = z
               .default(DEFAULT_DATA_LABELS_VISIBLE)
               .meta({ description: 'Display value labels on bar data points' }),
           })
-          .meta({ description: 'Data label configuration for bar series' })
-          .optional(),
+          .optional()
+          .meta({ description: 'Data label configuration for bar series' }),
       })
+      .optional()
       .meta({
         id: 'xyStylingBars',
         description: 'Bar-specific rendering settings',
-      })
-      .optional(),
+      }),
   })
   .meta({
     id: 'xyStyling',
@@ -435,7 +426,7 @@ const xyLegendInsideSchema = sharedLegendSchema
   .extend({
     placement: z.literal('inside'),
     layout: gridLayout.optional(),
-    columns: z.number().min(1).max(5).meta({ description: 'Number of legend columns' }).optional(),
+    columns: z.number().min(1).max(5).optional().meta({ description: 'Number of legend columns' }),
     position: cornerPositionSchema.optional().meta({
       description: 'Legend position inside the chart',
     }),
@@ -452,12 +443,12 @@ const xyLegendInsideSchema = sharedLegendSchema
 const xySharedSettings = {
   legend: z
     .union([xyLegendOutsideHorizontalSchema, xyLegendOutsideVerticalSchema, xyLegendInsideSchema])
+    .optional()
     .meta({
       id: 'xyLegend',
       title: 'Legend',
       description: 'Legend configuration for XY chart',
-    })
-    .optional(),
+    }),
 
   axis: z
     .object({
@@ -465,13 +456,13 @@ const xySharedSettings = {
       y: yAxisSchema.optional(),
       y2: yAxisSchema.optional(),
     })
+    .optional()
     .meta({
       id: 'vis_api_xy_axis_config',
       title: 'Axis',
       description:
         'Axis configuration for X, Y, and Y2 axes. The Y axis is on the start (leading) side, the Y2 axis is on the end (trailing) side.',
-    })
-    .optional(),
+    }),
   styling: xyStylingSchema.optional(),
 };
 
@@ -495,13 +486,10 @@ const xyDataLayerSchemaNoESQL = z
         z.object({
           collapse_by: collapseBySchema.optional(),
           color: colorMappingSchema.optional(),
-          aggregate_first: z
-            .boolean()
-            .meta({
-              description:
-                'When `true`, aggregates data before splitting into series. Defaults to `false`.',
-            })
-            .optional(),
+          aggregate_first: z.boolean().optional().meta({
+            description:
+              'When `true`, aggregates data before splitting into series. Defaults to `false`.',
+          }),
         })
       )
       .optional(),
@@ -537,8 +525,8 @@ const xyDataLayerSchemaESQL = z
         color: colorMappingSchema.optional(),
         collapse_by: collapseBySchema.optional(),
       })
-      .meta({ description: 'ES|QL column for breakdown' })
-      .optional(),
+      .optional()
+      .meta({ description: 'ES|QL column for breakdown' }),
     y: z
       .array(
         esqlColumnWithFormatSchema
@@ -588,38 +576,38 @@ const STROKE_WIDTH_MAX = 10;
 const referenceLineLayerSharedShape = {
   fill: z
     .union([z.literal('above'), z.literal('below')])
-    .meta({ description: 'Fill direction for reference line' })
-    .optional(),
+    .optional()
+    .meta({ description: 'Fill direction for reference line' }),
   text: z
     .object({
       visible: z.boolean().meta({ description: 'Show text label on the reference line' }),
     })
-    .meta({ description: 'Reference line text label configuration' })
-    .optional(),
+    .optional()
+    .meta({ description: 'Reference line text label configuration' }),
   icon: getListOfAvailableIcons('Icon to display on the reference line').optional(),
   stroke_width: z
     .number()
-    .meta({ description: 'Line width in pixels' })
     .min(STROKE_WIDTH_MIN)
     .max(STROKE_WIDTH_MAX)
-    .optional(),
+    .optional()
+    .meta({ description: 'Line width in pixels' }),
   stroke_dash: z
     .union([z.literal('solid'), z.literal('dashed'), z.literal('dotted')])
-    .meta({ description: 'Line style' })
-    .optional(),
+    .optional()
+    .meta({ description: 'Line style' }),
   color: z.union([staticColorSchema, autoColorSchema]).default(AUTO_COLOR).optional(),
   position: z
     .union([z.literal('auto'), z.literal('left'), z.literal('right')])
-    .meta({ description: 'Position of the icon and label relative to the reference line' })
-    .optional(),
+    .optional()
+    .meta({ description: 'Position of the icon and label relative to the reference line' }),
   axis: z
     .union([z.literal('x'), z.literal('y'), z.literal('y2')])
     .default('y')
+    .optional()
     .meta({
       description:
         'The axis this reference line is drawn on. Values match the root axis configuration keys. If omitted, defaults to the primary Y axis.',
-    })
-    .optional(),
+    }),
 };
 
 /**
@@ -671,7 +659,7 @@ const referenceLineLayerSchemaESQL = z
  */
 const annotationEventShared = {
   color: z.union([staticColorSchema, autoColorSchema]).default(AUTO_COLOR).optional(),
-  visible: z.boolean().meta({ description: 'Show the annotation' }).optional(),
+  visible: z.boolean().optional().meta({ description: 'Show the annotation' }),
 };
 
 /**
@@ -684,15 +672,15 @@ const annotationPointShared = {
     .object({
       stroke_width: z
         .number()
-        .meta({ description: 'Vertical line width in pixels' })
         .min(STROKE_WIDTH_MIN)
-        .max(STROKE_WIDTH_MAX),
+        .max(STROKE_WIDTH_MAX)
+        .meta({ description: 'Vertical line width in pixels' }),
       stroke_dash: z
         .union([z.literal('solid'), z.literal('dashed'), z.literal('dotted')])
         .meta({ description: 'Vertical line style' }),
     })
-    .meta({ description: 'Vertical line configuration for point annotation' })
-    .optional(),
+    .optional()
+    .meta({ description: 'Vertical line configuration for point annotation' }),
 };
 
 /**
@@ -712,19 +700,19 @@ const annotationQuery = z
     type: z.literal('query'),
     query: filterSchema,
     time_field: z.string().meta({ description: 'Field containing the timestamp' }),
-    label: z.string().meta({ description: 'Label text for the annotation' }).optional(),
+    label: z.string().optional().meta({ description: 'Label text for the annotation' }),
     text: z
       .object({
         visible: z.boolean().meta({ description: 'Show text label on the annotation' }),
-        field: z.string().meta({ description: 'Field name for text label source' }).optional(),
+        field: z.string().optional().meta({ description: 'Field name for text label source' }),
       })
-      .meta({ description: 'Annotation text label configuration' })
-      .optional(),
+      .optional()
+      .meta({ description: 'Annotation text label configuration' }),
     extra_fields: z
       .array(z.string().meta({ description: 'Additional field to include in tooltip' }))
       .max(100)
-      .meta({ description: 'Additional fields for annotation tooltip' })
-      .optional(),
+      .optional()
+      .meta({ description: 'Additional fields for annotation tooltip' }),
   })
   .meta({
     id: 'xyAnnotationQuery',
@@ -739,13 +727,13 @@ const annotationManualEvent = z
     ...annotationPointShared,
     type: z.literal('point'),
     timestamp: annotationTimestampSchema,
-    label: z.string().meta({ description: 'Label text for the annotation' }).optional(),
+    label: z.string().optional().meta({ description: 'Label text for the annotation' }),
     text: z
       .object({
         visible: z.boolean().meta({ description: 'Show text label on the annotation' }),
       })
-      .meta({ description: 'Annotation text label visibility' })
-      .optional(),
+      .optional()
+      .meta({ description: 'Annotation text label visibility' }),
   })
   .meta({
     id: 'xyAnnotationManualEvent',
@@ -765,12 +753,12 @@ const annotationManualRange = z
         to: annotationTimestampSchema,
       })
       .meta({ description: 'Time range for annotation' }),
-    label: z.string().meta({ description: 'Label text for the annotation' }).optional(),
+    label: z.string().optional().meta({ description: 'Label text for the annotation' }),
     fill: z
       .union([z.literal('inside'), z.literal('outside')])
       .default('inside')
-      .meta({ description: 'Fill direction for range' })
-      .optional(),
+      .optional()
+      .meta({ description: 'Fill direction for range' }),
   })
   .meta({
     id: 'xyAnnotationManualRange',

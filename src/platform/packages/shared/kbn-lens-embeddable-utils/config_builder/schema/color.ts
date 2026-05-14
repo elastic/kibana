@@ -73,9 +73,6 @@ export const colorByValueStepsSchema = z
   .array(colorByValueStepSchema)
   .min(1)
   .max(100)
-  .meta({
-    description: 'Array of ordered color steps defining the range each color is applied.',
-  })
   .superRefine((steps, ctx) => {
     let trackingValue = steps[0]?.gte ?? steps[0]?.lt ?? -Infinity;
     for (const [i, step] of steps.entries()) {
@@ -117,6 +114,9 @@ export const colorByValueStepsSchema = z
 
       trackingValue = step.lt;
     }
+  })
+  .meta({
+    description: 'Array of ordered color steps defining the range each color is applied.',
   });
 
 const colorByValueBaseSchema = z.object({

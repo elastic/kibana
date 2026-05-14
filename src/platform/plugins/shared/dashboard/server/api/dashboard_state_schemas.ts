@@ -104,7 +104,7 @@ export function getSectionSchema(isDashboardAppRequest: boolean) {
         .max(MAX_PANELS)
         .default([])
         .meta({ description: 'The panels that belong to the section.' }),
-      id: z.string().meta({ description: 'The unique ID of the section.' }).optional(),
+      id: z.string().optional().meta({ description: 'The unique ID of the section.' }),
     })
     .meta({
       description: 'A collapsible group of panels.',
@@ -143,12 +143,12 @@ export const optionsSchema = z
         'When `true`, the cursor position is synchronized across panels. Defaults to `true`.',
     }),
   })
+  .default(DEFAULT_DASHBOARD_OPTIONS)
   .meta({
     id: 'kbn-dashboard-options',
     title: 'Options',
     description: 'Display and behavior settings for the dashboard.',
-  })
-  .default(DEFAULT_DASHBOARD_OPTIONS);
+  });
 
 export const accessControlSchema = z
   .object({
@@ -160,12 +160,12 @@ export const accessControlSchema = z
           'Controls edit access to the dashboard. Set to `write_restricted` to prevent edits by users without explicit write permission. Defaults to `default` (all viewers can edit).',
       }),
   })
+  .optional()
   .meta({
     description: 'Access control settings for the dashboard.',
     id: 'kbn-dashboard-access-control',
     title: 'Access control',
-  })
-  .optional();
+  });
 
 export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
   return z
@@ -173,15 +173,11 @@ export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
       pinned_panels: getPinnedPanelsSchema(),
       description: z
         .string()
-        .meta({ description: 'A short description of the dashboard.' })
-        .optional(),
-      filters: z
-        .array(asCodeFilterSchema)
-        .max(500)
-        .meta({
-          description: 'Filters applied across all panels, including pinned panels.',
-        })
-        .optional(),
+        .optional()
+        .meta({ description: 'A short description of the dashboard.' }),
+      filters: z.array(asCodeFilterSchema).max(500).optional().meta({
+        description: 'Filters applied across all panels, including pinned panels.',
+      }),
       options: optionsSchema,
       panels: z
         .array(
@@ -193,20 +189,17 @@ export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
           description:
             'Panels and sections in the dashboard. Each entry is either a panel (with a `type` and `config`) or a collapsible section (with a `title`, `collapsed` state, and nested `panels`).',
         }),
-      project_routing: z
-        .string()
-        .meta({
-          description:
-            'Controls [cross-project search](https://www.elastic.co/docs/explore-analyze/cross-project-search/cross-project-search-project-routing) behavior for this dashboard (Serverless only). Set to `_alias:_origin` to scope data to the current project, or `_alias:*` to search across all projects. When omitted, the space default applies.',
-        })
-        .optional(),
+      project_routing: z.string().optional().meta({
+        description:
+          'Controls [cross-project search](https://www.elastic.co/docs/explore-analyze/cross-project-search/cross-project-search-project-routing) behavior for this dashboard (Serverless only). Set to `_alias:_origin` to scope data to the current project, or `_alias:*` to search across all projects. When omitted, the space default applies.',
+      }),
       query: asCodeQuerySchema.optional(),
       refresh_interval: refreshIntervalSchema.optional(),
       tags: z
         .array(z.string())
         .max(100)
-        .meta({ description: 'Tag IDs to associate with this dashboard.' })
-        .optional(),
+        .optional()
+        .meta({ description: 'Tag IDs to associate with this dashboard.' }),
       time_range: timeRangeSchema.optional(),
       title: z.string().min(1).meta({ description: 'A human-readable title for the dashboard.' }),
       access_control: accessControlSchema,

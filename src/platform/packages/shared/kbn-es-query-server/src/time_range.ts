@@ -22,13 +22,10 @@ export const timeRangeSchema = z
       description:
         'The end of the time range. Accepts Elasticsearch [date math](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/common-options#date-math) expressions (for example, `now`) or ISO 8601 timestamps.',
     }),
-    mode: z
-      .union([absoluteTimeRangeMode, relativeTimeRangeMode])
-      .meta({
-        description:
-          'The time range mode. Use `absolute` for fixed start and end timestamps. Use `relative` for [date math](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/common-options#date-math) expressions that are re-evaluated at query time (for example, `now-7d`).',
-      })
-      .optional(),
+    mode: z.union([absoluteTimeRangeMode, relativeTimeRangeMode]).optional().meta({
+      description:
+        'The time range mode. Use `absolute` for fixed start and end timestamps. Use `relative` for [date math](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/common-options#date-math) expressions that are re-evaluated at query time (for example, `now-7d`).',
+    }),
   })
   .meta({
     id: 'kbn-es-query-server-timeRangeSchema',

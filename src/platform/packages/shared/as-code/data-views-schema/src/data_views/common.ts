@@ -16,15 +16,12 @@ export const indexPatternSchema = z.string().meta({
     'The index pattern (Elasticsearch index expression) to use as the data source. Example: "my-index-*".',
 });
 
-export const timeFieldSchema = z
-  .string()
-  .meta({
-    id: 'kbn-time-field-schema',
-    title: 'Time field',
-    description:
-      'The name of the time field in the index. Used for time-based filtering. Example: "@timestamp".',
-  })
-  .optional();
+export const timeFieldSchema = z.string().optional().meta({
+  id: 'kbn-time-field-schema',
+  title: 'Time field',
+  description:
+    'The name of the time field in the index. Used for time-based filtering. Example: "@timestamp".',
+});
 
 export const fieldSettingsFieldNameSchema = z.string().min(1).meta({
   id: 'kbn-field-settings-field-name-schema',

@@ -33,8 +33,8 @@ const legacyMetricConfigMetricOptionsShape = {
       z.literal('xl'),
       z.literal('xxl'),
     ])
-    .meta({ description: 'Font size for the label and value' })
-    .optional(),
+    .optional()
+    .meta({ description: 'Font size for the label and value' }),
   labels: z
     .object({
       /**
@@ -46,8 +46,8 @@ const legacyMetricConfigMetricOptionsShape = {
         description: 'Label alignment',
       }),
     })
-    .meta({ description: 'Labels configuration' })
-    .optional(),
+    .optional()
+    .meta({ description: 'Labels configuration' }),
   values: z
     .object({
       /**
@@ -60,8 +60,8 @@ const legacyMetricConfigMetricOptionsShape = {
         description: 'Value alignment',
       }),
     })
-    .meta({ description: 'Values configuration' })
-    .optional(),
+    .optional()
+    .meta({ description: 'Values configuration' }),
   /**
    * Where to apply the color (background or value)
    */
@@ -71,8 +71,8 @@ const legacyMetricConfigMetricOptionsShape = {
    */
   color: z
     .union([colorByValueAbsoluteSchema, legacyColorByValueAbsoluteSchema, autoColorSchema])
-    .meta({ description: 'Color configuration based on the metric value.' })
-    .optional(),
+    .optional()
+    .meta({ description: 'Color configuration based on the metric value.' }),
 };
 
 export const legacyMetricConfigSchemaNoESQL = z

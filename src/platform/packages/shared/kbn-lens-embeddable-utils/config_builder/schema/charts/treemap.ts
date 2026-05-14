@@ -41,12 +41,12 @@ const treemapSharedConfigShape = {
       visibility: legendVisibilitySchemaWithAuto,
       size: legendSizeSchema,
     })
+    .optional()
     .meta({
       id: 'treemapLegend',
       title: 'Legend',
       description: 'Configuration for the treemap chart legend appearance and behavior',
-    })
-    .optional(),
+    }),
 };
 
 const treemapStylingSchema = z
@@ -57,10 +57,10 @@ const treemapStylingSchema = z
      */
     labels: z
       .object({
-        visible: z.boolean().meta({ description: 'Show category labels' }).optional(),
+        visible: z.boolean().optional().meta({ description: 'Show category labels' }),
       })
-      .meta({ description: 'Labels configuration' })
-      .optional(),
+      .optional()
+      .meta({ description: 'Labels configuration' }),
   })
   .meta({
     id: 'treemapStyling',
@@ -146,14 +146,8 @@ export const treemapConfigSchemaNoESQL = z
       )
       .min(1)
       .max(100)
-      .meta({ description: 'Array of breakdown dimensions (minimum 1)' })
-      .optional(),
-  })
-  .meta({
-    id: 'treemapNoESQL',
-    title: 'Treemap Chart (DSL)',
-    description:
-      'Treemap chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions',
+      .optional()
+      .meta({ description: 'Array of breakdown dimensions (minimum 1)' }),
   })
   .superRefine((data, ctx) => {
     const msg = validateForMultipleMetrics({
@@ -163,6 +157,12 @@ export const treemapConfigSchemaNoESQL = z
     if (msg) {
       ctx.addIssue({ code: 'custom', message: msg });
     }
+  })
+  .meta({
+    id: 'treemapNoESQL',
+    title: 'Treemap Chart (DSL)',
+    description:
+      'Treemap chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions',
   });
 
 export const treemapConfigSchemaESQL = z
@@ -188,14 +188,8 @@ export const treemapConfigSchemaESQL = z
       .array(esqlColumnWithFormatSchema.extend(partitionConfigBreakdownByOptionsShape))
       .min(1)
       .max(100)
-      .meta({ description: 'Array of breakdown dimensions (minimum 1)' })
-      .optional(),
-  })
-  .meta({
-    id: 'treemapESQL',
-    title: 'Treemap Chart (ES|QL)',
-    description:
-      'Treemap chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration',
+      .optional()
+      .meta({ description: 'Array of breakdown dimensions (minimum 1)' }),
   })
   .superRefine((data, ctx) => {
     const msg = validateForMultipleMetrics({
@@ -205,6 +199,12 @@ export const treemapConfigSchemaESQL = z
     if (msg) {
       ctx.addIssue({ code: 'custom', message: msg });
     }
+  })
+  .meta({
+    id: 'treemapESQL',
+    title: 'Treemap Chart (ES|QL)',
+    description:
+      'Treemap chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration',
   });
 
 export const treemapConfigSchema = z

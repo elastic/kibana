@@ -23,13 +23,9 @@ import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 const columnSettingsEntrySchema = z.object({
-  width: z
-    .number()
-    .min(0)
-    .meta({
-      description: 'Optional width of the column in pixels.',
-    })
-    .optional(),
+  width: z.number().min(0).optional().meta({
+    description: 'Optional width of the column in pixels.',
+  }),
 });
 
 const sortSchema = z.object({
@@ -56,26 +52,14 @@ export const viewModeSchema = z
 
 const dataTableLimitsSchema = z
   .object({
-    rows_per_page: z
-      .number()
-      .min(1)
-      .max(10000)
-      .default(100)
-      .meta({
-        description:
-          'The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".',
-      })
-      .optional(),
-    sample_size: z
-      .number()
-      .min(10)
-      .max(10000)
-      .default(500)
-      .meta({
-        description:
-          'The number of documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".',
-      })
-      .optional(),
+    rows_per_page: z.number().min(1).max(10000).default(100).optional().meta({
+      description:
+        'The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".',
+    }),
+    sample_size: z.number().min(10).max(10000).default(500).optional().meta({
+      description:
+        'The number of documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".',
+    }),
   })
   .meta({ id: 'discoverSessionEmbeddableDataTableLimitsSchema' });
 
@@ -89,18 +73,15 @@ const dataTableSchema = z
       )
       .max(100)
       .default([])
+      .optional()
       .meta({
         description:
           'Ordered list of field names to display in the data table. If omitted, defaults to the advanced setting "defaultColumns" or the referenced saved object.',
-      })
-      .optional(),
-    column_settings: z
-      .record(z.string(), columnSettingsEntrySchema)
-      .meta({
-        description:
-          'Per-column presentation settings keyed by field name (e.g. widths). Keys should correspond to entries in `column_order` when both are set.',
-      })
-      .optional(),
+      }),
+    column_settings: z.record(z.string(), columnSettingsEntrySchema).optional().meta({
+      description:
+        'Per-column presentation settings keyed by field name (e.g. widths). Keys should correspond to entries in `column_order` when both are set.',
+    }),
     sort: z.array(sortSchema).max(100).default([]).meta({
       description: 'Sort configuration for the data table (field and direction).',
     }),
@@ -111,27 +92,27 @@ const dataTableSchema = z
         z.literal(DataGridDensity.NORMAL),
       ])
       .default(DataGridDensity.COMPACT)
+      .optional()
       .meta({
         description:
           'Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, defaults to Discover or embeddable defaults (e.g. user preference / local storage).',
-      })
-      .optional(),
+      }),
     header_row_height: z
       .union([z.number().min(1).max(5), z.literal('auto')])
       .default(3)
+      .optional()
       .meta({
         description:
           'Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, defaults to Discover or embeddable defaults (e.g. user preference / local storage).',
-      })
-      .optional(),
+      }),
     row_height: z
       .union([z.number().min(1).max(20), z.literal('auto')])
       .default(3)
+      .optional()
       .meta({
         description:
           'Data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".',
-      })
-      .optional(),
+      }),
   })
   .meta({ id: 'discoverSessionEmbeddableDataTableSchema' });
 
@@ -145,27 +126,19 @@ const panelOverridesSchema = z
       )
       .max(100)
       .default([])
+      .optional()
       .meta({
         description:
           'When set, overrides column order for the data table relative to the referenced saved object (`ref_id`) or the inline tab in `tabs`. If omitted, the source configuration is used.',
-      })
-      .optional(),
-    column_settings: z
-      .record(z.string(), columnSettingsEntrySchema)
-      .meta({
-        description:
-          'Per-column presentation overrides (e.g. widths) keyed by field name. When set, merges with the source configuration for the referenced session or inline tab.',
-      })
-      .optional(),
-    sort: z
-      .array(sortSchema)
-      .max(100)
-      .default([])
-      .meta({
-        description:
-          'Sort configuration (field and direction) for the data table. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
-      })
-      .optional(),
+      }),
+    column_settings: z.record(z.string(), columnSettingsEntrySchema).optional().meta({
+      description:
+        'Per-column presentation overrides (e.g. widths) keyed by field name. When set, merges with the source configuration for the referenced session or inline tab.',
+    }),
+    sort: z.array(sortSchema).max(100).default([]).optional().meta({
+      description:
+        'Sort configuration (field and direction) for the data table. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
+    }),
     density: z
       .union([
         z.literal(DataGridDensity.COMPACT),
@@ -173,47 +146,35 @@ const panelOverridesSchema = z
         z.literal(DataGridDensity.NORMAL),
       ])
       .default(DataGridDensity.COMPACT)
+      .optional()
       .meta({
         description:
           'Data grid row spacing: `compact`, `expanded`, or `normal`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
-      })
-      .optional(),
+      }),
     header_row_height: z
       .union([z.number().min(1).max(5), z.literal('auto')])
       .default(3)
+      .optional()
       .meta({
         description:
           'Header row height: number (1–5) or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
-      })
-      .optional(),
+      }),
     row_height: z
       .union([z.number().min(1).max(20), z.literal('auto')])
       .default(3)
+      .optional()
       .meta({
         description:
           'Data row height: number (1–20) or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:rowHeightOption".',
-      })
-      .optional(),
-    rows_per_page: z
-      .number()
-      .min(1)
-      .max(10000)
-      .default(100)
-      .meta({
-        description:
-          'Number of rows per page. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:sampleRowsPerPage".',
-      })
-      .optional(),
-    sample_size: z
-      .number()
-      .min(10)
-      .max(10000)
-      .default(500)
-      .meta({
-        description:
-          'Number of documents to sample. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:sampleSize".',
-      })
-      .optional(),
+      }),
+    rows_per_page: z.number().min(1).max(10000).default(100).optional().meta({
+      description:
+        'Number of rows per page. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:sampleRowsPerPage".',
+    }),
+    sample_size: z.number().min(10).max(10000).default(500).optional().meta({
+      description:
+        'Number of documents to sample. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:sampleSize".',
+    }),
   })
   .default({});
 
@@ -273,13 +234,10 @@ const getDiscoverSessionByValueEmbeddableSchema = withPanelSchemas(
 
 const discoverSessionByReferencePropsSchema = z.object({
   ref_id: z.string(),
-  selected_tab_id: z
-    .string()
-    .meta({
-      description:
-        'Tab to select from the referenced saved object. If omitted, defaults to the first tab.',
-    })
-    .optional(),
+  selected_tab_id: z.string().optional().meta({
+    description:
+      'Tab to select from the referenced saved object. If omitted, defaults to the first tab.',
+  }),
   overrides: panelOverridesSchema,
 });
 const getDiscoverSessionByReferenceEmbeddableSchema = withPanelSchemas(

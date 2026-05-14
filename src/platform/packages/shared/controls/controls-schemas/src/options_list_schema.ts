@@ -18,37 +18,22 @@ import { controlTitleSchema, dataControlSchema } from './control_schema';
 const SELECTIONS_MAX = 10000;
 
 export const optionsListDisplaySettingsSchema = z.object({
-  placeholder: z
-    .string()
-    .meta({
-      description: 'Placeholder text displayed in the control input when no option is selected.',
-    })
-    .optional(),
-  hide_action_bar: z
-    .boolean()
-    .meta({
-      description:
-        'When `true`, the search bar, sorting options, and select all toggle are hidden from the control.',
-    })
-    .optional(),
-  hide_exclude: z
-    .boolean()
-    .meta({
-      description: 'When `true`, the exclude mode toggle is hidden from the control.',
-    })
-    .optional(),
-  hide_exists: z
-    .boolean()
-    .meta({
-      description: 'When `true`, the exists filter option is hidden from the control.',
-    })
-    .optional(),
-  hide_sort: z
-    .boolean()
-    .meta({
-      description: 'When `true`, the sort selector is hidden from the control.',
-    })
-    .optional(),
+  placeholder: z.string().optional().meta({
+    description: 'Placeholder text displayed in the control input when no option is selected.',
+  }),
+  hide_action_bar: z.boolean().optional().meta({
+    description:
+      'When `true`, the search bar, sorting options, and select all toggle are hidden from the control.',
+  }),
+  hide_exclude: z.boolean().optional().meta({
+    description: 'When `true`, the exclude mode toggle is hidden from the control.',
+  }),
+  hide_exists: z.boolean().optional().meta({
+    description: 'When `true`, the exists filter option is hidden from the control.',
+  }),
+  hide_sort: z.boolean().optional().meta({
+    description: 'When `true`, the sort selector is hidden from the control.',
+  }),
 });
 
 export const optionsListSearchTechniqueSchema = z

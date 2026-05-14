@@ -47,13 +47,13 @@ export const searchResponseBodySchema = z.object({
         data: z.object({
           description: z
             .string()
-            .meta({ description: 'A short description of the dashboard.' })
-            .optional(),
+            .optional()
+            .meta({ description: 'A short description of the dashboard.' }),
           tags: z
             .array(z.string())
             .max(100)
-            .meta({ description: 'Tag IDs associated with this dashboard.' })
-            .optional(),
+            .optional()
+            .meta({ description: 'Tag IDs associated with this dashboard.' }),
           time_range: timeRangeSchema.optional(),
           title: z.string().meta({ description: 'The dashboard title.' }),
           access_control: accessControlSchema,

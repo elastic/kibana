@@ -20,7 +20,7 @@ const SingleOverviewCustomSchema = z.object({
     description:
       'ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. Defaults to * (all instances).',
   }),
-  remote_name: z.string().meta({ description: 'The name of the remote SLO' }).optional(),
+  remote_name: z.string().optional().meta({ description: 'The name of the remote SLO' }),
   overview_mode: z.literal('single'),
 });
 
