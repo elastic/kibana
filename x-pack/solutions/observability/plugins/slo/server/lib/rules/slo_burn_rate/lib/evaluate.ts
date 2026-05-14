@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import { BURN_RATE_EXECUTOR_SPAN_NAMES } from '../constants';
 import { get } from 'lodash';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { SLODefinition } from '../../../../domain/models';
@@ -81,7 +82,7 @@ async function queryAllResults(
   lastAfterKey?: { instanceId: string }
 ): Promise<EvaluationBucket[]> {
   const queryAndAggs = buildQuery(startedAt, slo, params, lastAfterKey);
-  const results = await withSpan({ name: 'slo_burn_rate_executor:es_query', type: 'rule' }, () =>
+  const results = await withSpan({ name: BURN_RATE_EXECUTOR_SPAN_NAMES.ES_QUERY, type: 'rule' }, () =>
     esClient.search<undefined, EvalutionAggResults>({
       index: SLI_DESTINATION_INDEX_PATTERN,
       ...queryAndAggs,

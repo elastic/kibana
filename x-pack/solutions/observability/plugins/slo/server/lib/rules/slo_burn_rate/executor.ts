@@ -45,6 +45,7 @@ import type { Duration, SLODefinition } from '../../../domain/models';
 import { DefaultSLODefinitionRepository } from '../../../services';
 import type { EsSummaryDocument } from '../../../services/summary_transform_generator/helpers/create_temp_summary';
 import { getSloApmLabels } from '../../../services/utils';
+import { BURN_RATE_EXECUTOR_SPAN_NAMES } from './constants';
 import { evaluate } from './lib/evaluate';
 import { evaluateDependencies } from './lib/evaluate_dependencies';
 import { shouldSuppressInstanceId } from './lib/should_suppress_instance_id';
@@ -94,8 +95,9 @@ export const getRuleExecutor = (basePath: IBasePath) =>
     const sloRepository = new DefaultSLODefinitionRepository(soClient, logger);
     let slo: SLODefinition;
     try {
-      slo = await withSpan({ name: 'slo_burn_rate_executor:load_definition', type: 'rule' }, () =>
-        sloRepository.findById(params.sloId)
+      slo = await withSpan(
+        { name: BURN_RATE_EXECUTOR_SPAN_NAMES.LOAD_DEFINITION, type: 'rule' },
+        () => sloRepository.findById(params.sloId)
       );
     } catch (err) {
       throw createTaskRunError(
@@ -117,7 +119,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
     // We only need the end timestamp to base all of queries on. The length of the time range
     // doesn't matter for our use case since we allow the user to customize the window sizes,
     const { dateEnd } = getTimeRange('1m');
-    const results = await withSpan({ name: 'slo_burn_rate_executor:eval', type: 'rule' }, () =>
+    const results = await withSpan({ name: BURN_RATE_EXECUTOR_SPAN_NAMES.EVAL, type: 'rule' }, () =>
       evaluate(esClient.asCurrentUser, slo, params, new Date(dateEnd))
     );
 
@@ -125,19 +127,21 @@ export const getRuleExecutor = (basePath: IBasePath) =>
     const suppressResults =
       dependencies && results.some((res) => res.shouldAlert)
         ? (
-            await withSpan({ name: 'slo_burn_rate_executor:eval_dependencies', type: 'rule' }, () =>
-              evaluateDependencies(
-                soClient,
-                esClient.asCurrentUser,
-                sloRepository,
-                dependencies,
-                new Date(dateEnd)
-              )
+            await withSpan(
+              { name: BURN_RATE_EXECUTOR_SPAN_NAMES.EVAL_DEPENDENCIES, type: 'rule' },
+              () =>
+                evaluateDependencies(
+                  soClient,
+                  esClient.asCurrentUser,
+                  sloRepository,
+                  dependencies,
+                  new Date(dateEnd)
+                )
             )
           ).activeRules
         : [];
 
-    await withSpan({ name: 'slo_burn_rate_executor:action_dispatch', type: 'rule' }, async () => {
+    await withSpan({ name: BURN_RATE_EXECUTOR_SPAN_NAMES.ACTION_DISPATCH, type: 'rule' }, async () => {
       if (results.length > 0) {
         const alertLimit = alertsClient.getAlertLimitValue();
         let hasReachedLimit = false;
