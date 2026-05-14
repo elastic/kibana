@@ -165,7 +165,6 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
                 })
               : null
           }
-          delay="long"
           position="right"
         >
           <SelectOption
