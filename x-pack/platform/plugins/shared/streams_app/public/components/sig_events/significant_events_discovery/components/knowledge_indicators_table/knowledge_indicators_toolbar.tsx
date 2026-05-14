@@ -19,6 +19,7 @@ import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React from 'react';
 import { TableTitle } from '../../../stream_detail_systems/table_title';
 import { KnowledgeIndicatorsTypeFilter } from '../../../stream_detail_significant_events_view/knowledge_indicators_type_filter';
+import { KnowledgeIndicatorsSubtypeFilter } from '../../../stream_detail_significant_events_view/knowledge_indicators_subtype_filter';
 import { MATCH_QUERY_TYPE } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_type';
 import { KnowledgeIndicatorsStatusFilter } from '../../../stream_detail_significant_events_view/knowledge_indicators_status_filter';
 import { StreamFilter } from '../stream_filter';
@@ -47,6 +48,7 @@ interface KnowledgeIndicatorsToolbarProps {
   debouncedSearchTerm: string;
   statusFilter: 'active' | 'excluded';
   selectedTypes: string[];
+  selectedSubtypes: string[];
   selectedStreams: string[];
   hideComputedTypes: boolean;
   pagination: { pageIndex: number; pageSize: number };
@@ -60,6 +62,7 @@ interface KnowledgeIndicatorsToolbarProps {
   onSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onStatusFilterChange: (filter: 'active' | 'excluded') => void;
   onSelectedTypesChange: (types: string[]) => void;
+  onSelectedSubtypesChange: (subtypes: string[]) => void;
   onSelectedStreamsChange: (streams: string[]) => void;
   onComputedToggleChange: (checked: boolean) => void;
   onClearSelection: () => void;
@@ -76,6 +79,7 @@ export function KnowledgeIndicatorsToolbar({
   debouncedSearchTerm,
   statusFilter,
   selectedTypes,
+  selectedSubtypes,
   selectedStreams,
   hideComputedTypes,
   pagination,
@@ -89,6 +93,7 @@ export function KnowledgeIndicatorsToolbar({
   onSearchChange,
   onStatusFilterChange,
   onSelectedTypesChange,
+  onSelectedSubtypesChange,
   onSelectedStreamsChange,
   onComputedToggleChange,
   onClearSelection,
@@ -127,6 +132,18 @@ export function KnowledgeIndicatorsToolbar({
             statusFilter={statusFilter}
             selectedTypes={selectedTypes}
             onSelectedTypesChange={onSelectedTypesChange}
+            hideComputedTypes={hideComputedTypes}
+            selectedStreams={selectedStreams}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <KnowledgeIndicatorsSubtypeFilter
+            knowledgeIndicators={knowledgeIndicators}
+            searchTerm={debouncedSearchTerm}
+            statusFilter={statusFilter}
+            selectedTypes={selectedTypes}
+            selectedSubtypes={selectedSubtypes}
+            onSelectedSubtypesChange={onSelectedSubtypesChange}
             hideComputedTypes={hideComputedTypes}
             selectedStreams={selectedStreams}
           />
