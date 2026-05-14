@@ -235,7 +235,7 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
   }
 
   return (
-    <EuiPanel hasBorder>
+    <EuiPanel hasBorder data-test-subj="mitreAttackPanel">
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiText size="s">
           <h4>

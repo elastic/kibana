@@ -124,7 +124,7 @@ export const RuleCoveragePanel: React.FC = () => {
   const hasNoEnabledRules = (getDetectionRules.data?.data?.length || 0) === 0;
 
   return (
-    <EuiPanel hasBorder>
+    <EuiPanel hasBorder data-test-subj="ruleCoveragePanel">
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
