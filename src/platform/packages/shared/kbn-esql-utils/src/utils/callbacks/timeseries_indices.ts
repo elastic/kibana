@@ -12,14 +12,15 @@ import type { IndicesAutocompleteResult } from '@kbn/esql-types';
 import { cacheParametrizedAsyncFunction } from './utils/cache';
 
 export const getTimeseriesIndices = cacheParametrizedAsyncFunction(
-  async (http: HttpStart) => {
+  async (http: HttpStart, signal?: AbortSignal) => {
     const result = await http.get<IndicesAutocompleteResult>(
-      '/internal/esql/autocomplete/timeseries/indices'
+      '/internal/esql/autocomplete/timeseries/indices',
+      { signal }
     );
 
     return result;
   },
-  (http: HttpStart) => 'timeseries',
+  (http: HttpStart, _signal?: AbortSignal) => 'timeseries',
   1000 * 60 * 5, // Keep the value in cache for 5 minutes
   1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
 );

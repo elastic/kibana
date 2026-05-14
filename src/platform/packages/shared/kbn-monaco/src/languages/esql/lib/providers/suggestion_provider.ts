@@ -35,11 +35,20 @@ export function getSuggestionProvider(
     triggerCharacters: ESQL_AUTOCOMPLETE_TRIGGER_CHARS,
     async provideCompletionItems(
       model: monaco.editor.ITextModel,
-      position: monaco.Position
+      position: monaco.Position,
+      _context: monaco.languages.CompletionContext,
+      token: monaco.CancellationToken
     ): Promise<monaco.languages.CompletionList> {
+      const resolvedCallbacks = deps?.getModelDependencies?.(model) ?? deps;
+      const resolvedDeps = resolvedCallbacks
+        ? ({ ...deps, ...resolvedCallbacks } as ESQLDependencies)
+        : deps;
+
       return createMonacoProvider({
         model,
-        run: async (safeModel) => {
+        callbacks: resolvedDeps,
+        token,
+        run: async (safeModel, cancellableDeps) => {
           // Avoid returning suggestions for unfocused editors sharing the same model.
           const editors = monaco.editor
             .getEditors()
@@ -51,19 +60,15 @@ export function getSuggestionProvider(
             return { suggestions: [] };
           }
 
-          const resolvedCallbacks = deps?.getModelDependencies?.(model) ?? deps;
-          const resolvedDeps = resolvedCallbacks
-            ? ({ ...deps, ...resolvedCallbacks } as ESQLDependencies)
-            : deps;
           const fullText = safeModel.getValue();
           const offset = monacoPositionToOffset(fullText, position);
 
           const computeStart = performance.now();
-          const suggestions = await suggest(fullText, offset, resolvedDeps);
+          const suggestions = await suggest(fullText, offset, cancellableDeps);
 
           const suggestionsWithCustomCommands = filterSuggestionsWithCustomCommands(suggestions);
           if (suggestionsWithCustomCommands.length) {
-            resolvedDeps?.telemetry?.onSuggestionsWithCustomCommandShown?.(
+            cancellableDeps?.telemetry?.onSuggestionsWithCustomCommandShown?.(
               suggestionsWithCustomCommands
             );
           }
@@ -71,7 +76,7 @@ export function getSuggestionProvider(
           const result = wrapAsMonacoSuggestions(suggestions, fullText);
           const computeEnd = performance.now();
 
-          resolvedDeps?.telemetry?.onSuggestionsReady?.(
+          cancellableDeps?.telemetry?.onSuggestionsReady?.(
             computeStart,
             computeEnd,
             safeModel.getValueLength(),
@@ -84,7 +89,7 @@ export function getSuggestionProvider(
           for (const suggestion of result.suggestions) {
             itemContext.set(suggestion, {
               streamNames,
-              getFieldsMetadata: resolvedDeps?.getFieldsMetadata,
+              getFieldsMetadata: cancellableDeps?.getFieldsMetadata,
             });
           }
 

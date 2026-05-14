@@ -21,14 +21,17 @@ export function getSignatureProvider(
     signatureHelpRetriggerCharacters: ['(', ','],
     async provideSignatureHelp(
       model: monaco.editor.ITextModel,
-      position: monaco.Position
+      position: monaco.Position,
+      token: monaco.CancellationToken
     ): Promise<monaco.languages.SignatureHelpResult | null> {
       return createMonacoProvider({
         model,
-        run: async (safeModel) => {
+        callbacks: deps,
+        token,
+        run: async (safeModel, cancellableDeps) => {
           const fullText = safeModel.getValue();
           const offset = monacoPositionToOffset(fullText, position);
-          const signatureHelp = await getSignatureHelp(fullText, offset, deps);
+          const signatureHelp = await getSignatureHelp(fullText, offset, cancellableDeps);
 
           if (!signatureHelp) {
             return null;

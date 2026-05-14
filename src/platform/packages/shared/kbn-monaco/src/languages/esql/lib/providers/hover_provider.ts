@@ -17,10 +17,16 @@ export function getHoverProvider(deps?: ESQLDependencies): monaco.languages.Hove
   let lastHoveredWord: string;
 
   return {
-    async provideHover(model: monaco.editor.ITextModel, position: monaco.Position) {
+    async provideHover(
+      model: monaco.editor.ITextModel,
+      position: monaco.Position,
+      token: monaco.CancellationToken
+    ) {
       return createMonacoProvider({
         model,
-        run: async (safeModel) => {
+        callbacks: deps,
+        token,
+        run: async (safeModel, cancellableDeps) => {
           const fullText = safeModel.getValue();
           const offset = monacoPositionToOffset(fullText, position);
           const hoveredWord = safeModel.getWordAtPosition(position);
@@ -40,7 +46,7 @@ export function getHoverProvider(deps?: ESQLDependencies): monaco.languages.Hove
             }
           }
 
-          return getHoverItem(fullText, offset, deps);
+          return getHoverItem(fullText, offset, cancellableDeps);
         },
         emptyResult: null,
       });

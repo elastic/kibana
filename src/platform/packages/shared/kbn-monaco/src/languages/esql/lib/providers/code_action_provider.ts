@@ -18,15 +18,18 @@ export function getCodeActionProvider(
   deps?: ESQLDependencies
 ): monaco.languages.CodeActionProvider {
   return {
-    async provideCodeActions(model, _range, context, _token) {
+    async provideCodeActions(model, _range, context, token) {
+      const modelDeps = deps?.getModelDependencies?.(model);
+      const resolvedDeps = modelDeps ? { ...deps, ...modelDeps } : deps;
+
       return createMonacoProvider({
         model,
-        run: async (safeModel) => {
+        callbacks: resolvedDeps,
+        token,
+        run: async (safeModel, cancellableDeps) => {
           const actions: monaco.languages.CodeAction[] = [];
-          const modelDeps = deps?.getModelDependencies?.(model);
-          const resolvedDeps = modelDeps ? { ...deps, ...modelDeps } : deps;
 
-          const editorMessages = resolvedDeps?.getEditorMessages?.();
+          const editorMessages = cancellableDeps?.getEditorMessages?.();
           const allMessages = editorMessages
             ? [...editorMessages.errors, ...editorMessages.warnings]
             : [];
@@ -40,7 +43,7 @@ export function getCodeActionProvider(
               const quickFix = await getQuickFixForMessage({
                 queryString,
                 message,
-                callbacks: resolvedDeps,
+                callbacks: cancellableDeps,
               });
 
               if (quickFix) {

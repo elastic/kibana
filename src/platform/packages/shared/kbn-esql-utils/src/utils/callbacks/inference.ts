@@ -18,12 +18,13 @@ import { cacheParametrizedAsyncFunction } from './utils/cache';
  * @returns A promise that resolves to an InferenceEndpointsAutocompleteResult object.
  */
 export const getInferenceEndpoints = cacheParametrizedAsyncFunction(
-  async (http: HttpStart, taskType: string) => {
+  async (http: HttpStart, taskType: string, signal?: AbortSignal) => {
     return await http.get<InferenceEndpointsAutocompleteResult>(
-      `/internal/esql/autocomplete/inference_endpoints/${encodeURIComponent(taskType)}`
+      `/internal/esql/autocomplete/inference_endpoints/${encodeURIComponent(taskType)}`,
+      { signal }
     );
   },
-  (http: HttpStart, taskType: string) => taskType,
+  (http: HttpStart, taskType: string, _signal?: AbortSignal) => taskType,
   1000 * 60 * 5, // Keep the value in cache for 5 minutes
   1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
 );

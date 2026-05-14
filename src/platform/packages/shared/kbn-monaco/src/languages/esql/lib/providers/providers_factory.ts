@@ -7,11 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { monaco } from '../../../../monaco_imports';
 
-export interface CreateProviderParams<T> {
+export interface MonacoProviderContext {
+  signal: AbortSignal;
+}
+
+export interface CreateProviderParams<T, TCallbacks extends ESQLCallbacks | undefined = undefined> {
   model: monaco.editor.ITextModel;
-  run: (safeModel: monaco.editor.ITextModel) => T | Promise<T>;
+  callbacks?: TCallbacks;
+  token?: monaco.CancellationToken;
+  run: (
+    safeModel: monaco.editor.ITextModel,
+    callbacks: TCallbacks,
+    context: MonacoProviderContext
+  ) => T | Promise<T>;
   emptyResult: T;
 }
 
@@ -31,21 +42,70 @@ export class DisposedModelAccessError extends Error {
  * - Use safeModel for accessing any property or function of the model.
  * - Use the original model if you need to compare instances.
  */
-export async function createMonacoProvider<T>({
-  model,
-  run,
-  emptyResult,
-}: CreateProviderParams<T>): Promise<T> {
+export async function createMonacoProvider<
+  T,
+  TCallbacks extends ESQLCallbacks | undefined = undefined
+>({ model, callbacks, token, run, emptyResult }: CreateProviderParams<T, TCallbacks>): Promise<T> {
   const safeModel = createDisposedSafeModel(model);
+  const abortController = new AbortController();
+  const cancellationListener = token?.onCancellationRequested(() => {
+    abortController.abort();
+  });
+
+  if (token?.isCancellationRequested) {
+    abortController.abort();
+  }
+
   try {
-    const result = await Promise.resolve(run(safeModel));
-    return model.isDisposed() ? emptyResult : result;
+    if (abortController.signal.aborted) {
+      return emptyResult;
+    }
+
+    const cancellableCallbacks = createCancellableCallbacks(
+      callbacks as TCallbacks,
+      abortController.signal
+    );
+    const result = await Promise.resolve(
+      run(safeModel, cancellableCallbacks, {
+        signal: abortController.signal,
+      })
+    );
+    return model.isDisposed() || abortController.signal.aborted ? emptyResult : result;
   } catch (error) {
     if (error instanceof DisposedModelAccessError) {
       return emptyResult;
     }
+    if (abortController.signal.aborted) {
+      return emptyResult;
+    }
     throw error;
+  } finally {
+    cancellationListener?.dispose();
   }
+}
+
+function createCancellableCallbacks<TCallbacks extends ESQLCallbacks | undefined>(
+  callbacks: TCallbacks,
+  signal: AbortSignal
+): TCallbacks {
+  if (!callbacks) {
+    return callbacks;
+  }
+
+  return Object.fromEntries(
+    Object.entries(callbacks).map(([key, value]) => {
+      if (typeof value !== 'function') {
+        return [key, value];
+      }
+
+      return [
+        key,
+        function (this: unknown, ...args: unknown[]) {
+          return value.apply(this, [...args, signal]);
+        },
+      ];
+    })
+  ) as TCallbacks;
 }
 
 /**

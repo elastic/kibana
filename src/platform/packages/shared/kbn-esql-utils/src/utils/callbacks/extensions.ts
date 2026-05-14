@@ -57,18 +57,21 @@ export const analyzeSourceQuery = (
 const getEditorExtensionsFromRegistry = async (
   http: HttpStart,
   queryString: string,
-  activeSolutionId: ESQLRegistrySolutionId
+  activeSolutionId: ESQLRegistrySolutionId,
+  signal?: AbortSignal
 ): Promise<EditorExtensions> => {
   const encodedQuery = encodeURIComponent(queryString);
   const result = await http.get<EditorExtensions>(
-    `${REGISTRY_EXTENSIONS_ROUTE}${activeSolutionId}/${encodedQuery}`
+    `${REGISTRY_EXTENSIONS_ROUTE}${activeSolutionId}/${encodedQuery}`,
+    { signal }
   );
   return result;
 };
 
 const cachedGetEditorExtensions = cacheParametrizedAsyncFunction(
   getEditorExtensionsFromRegistry,
-  (_http, queryString, activeSolutionId) => `${queryString}-${activeSolutionId}`,
+  (_http, queryString, activeSolutionId, _signal?: AbortSignal) =>
+    `${queryString}-${activeSolutionId}`,
   1000 * 60 * 10, // Keep the value in cache for 10 minutes
   1000 * 60 * 5 // Refresh the cache in the background only if 5 minutes passed since the last call
 );
@@ -86,16 +89,22 @@ const cachedGetEditorExtensions = cacheParametrizedAsyncFunction(
 export const getEditorExtensions = (
   http: HttpStart,
   queryString: string,
-  activeSolutionId: ESQLRegistrySolutionId
+  activeSolutionId: ESQLRegistrySolutionId,
+  signal?: AbortSignal
 ): Promise<EditorExtensions> => {
   const analysis = analyzeSourceQuery(queryString);
   if (!analysis) {
     // Still fetch from the server so standalone queries are returned
-    return cachedGetEditorExtensions(http, '_', activeSolutionId);
+    return cachedGetEditorExtensions(http, '_', activeSolutionId, signal);
   }
   // Normalize to a minimal query so the HTTP URL is always identical for a
   // given index pattern — even when the cache triggers a background refresh
   // with a later, longer query string.
   const { commandName, indexPattern } = analysis;
-  return cachedGetEditorExtensions(http, `${commandName} ${indexPattern}`, activeSolutionId);
+  return cachedGetEditorExtensions(
+    http,
+    `${commandName} ${indexPattern}`,
+    activeSolutionId,
+    signal
+  );
 };

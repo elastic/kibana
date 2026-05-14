@@ -13,17 +13,17 @@ import { cacheParametrizedAsyncFunction } from './utils/cache';
 import { getRemoteClustersFromESQLQuery } from '../query_parsing_helpers';
 
 const getLookupIndices = cacheParametrizedAsyncFunction(
-  async (http: HttpStart, remoteClusters?: string) => {
+  async (http: HttpStart, remoteClusters?: string, signal?: AbortSignal) => {
     const query = remoteClusters ? { remoteClusters } : {};
 
     const result = await http.get<IndicesAutocompleteResult>(
       '/internal/esql/autocomplete/join/indices',
-      { query }
+      { query, signal }
     );
 
     return result;
   },
-  (http: HttpStart, remoteClusters?: string) => remoteClusters || '',
+  (http: HttpStart, remoteClusters?: string, _signal?: AbortSignal) => remoteClusters || '',
   1000 * 60 * 5, // Keep the value in cache for 5 minutes
   1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
 );
@@ -38,13 +38,15 @@ const getLookupIndices = cacheParametrizedAsyncFunction(
 export const getJoinIndices = async (
   query: string,
   http: HttpStart,
-  cacheOptions?: { forceRefresh?: boolean }
+  cacheOptions?: { forceRefresh?: boolean },
+  signal?: AbortSignal
 ) => {
   const remoteClusters = getRemoteClustersFromESQLQuery(query);
   const result = await getLookupIndices.call(
     { forceRefresh: cacheOptions?.forceRefresh },
     http,
-    remoteClusters?.join(',')
+    remoteClusters?.join(','),
+    signal
   );
   return result;
 };

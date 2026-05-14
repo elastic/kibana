@@ -33,6 +33,7 @@ import type { ESQLEditorDeps } from '../types';
 import type { StarredQueryMetadata } from '../editor_footer/esql_starred_queries_service';
 import { useCanCreateLookupIndex } from '../lookup_join';
 import { useCanSuggestResourceBrowser } from '../resource_browser/use_can_suggest_resource_browser';
+import { ESQL_SOURCES_CACHE_KEY, HISTORY_STARRED_ITEMS_CACHE_KEY } from './use_memoized_caches';
 
 type MemoizedFn<TArgs extends unknown[], TResult> = (...args: TArgs) => {
   timestamp: number;
@@ -57,7 +58,8 @@ type MemoizedSources = MemoizedFn<
   [
     CoreStart,
     (() => Promise<ILicense | undefined>) | undefined,
-    ((sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>) | undefined
+    ((sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>) | undefined,
+    AbortSignal | undefined
   ],
   ReturnType<typeof getESQLSources>
 >;
@@ -109,16 +111,25 @@ export const useEsqlCallbacks = ({
   const columnsAbortControllerRef = useRef<AbortController | undefined>(undefined);
   const previousColumnsQueryRef = useRef<string | undefined>(undefined);
 
-  const getSources = useCallback(async () => {
-    clearCacheWhenOld(dataSourcesCache, minimalQueryRef.current);
-    const getLicense = esqlService?.getLicense;
-    const enrichSources = esqlService?.enrichSources;
-    const sources = await memoizedSources(core, getLicense, enrichSources).result;
-    return sources;
-  }, [dataSourcesCache, minimalQueryRef, memoizedSources, core, esqlService]);
+  const getSources = useCallback(
+    async (_ctx?: Object, signal?: AbortSignal) => {
+      clearCacheWhenOld(dataSourcesCache, ESQL_SOURCES_CACHE_KEY);
+      const getLicense = esqlService?.getLicense;
+      const enrichSources = esqlService?.enrichSources;
+      const sources = await memoizedSources(core, getLicense, enrichSources, undefined).result;
+      if (signal?.aborted) {
+        return [];
+      }
+      return sources;
+    },
+    [dataSourcesCache, memoizedSources, core, esqlService]
+  );
 
   const getColumnsFor = useCallback(
-    async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
+    async (
+      { query: queryToExecute }: { query?: string } | undefined = {},
+      signal?: AbortSignal
+    ) => {
       if (queryToExecute) {
         // Only abort if the query changed — re-requests for the same query
         // (e.g. from concurrent validation passes) should share the same fetch
@@ -161,7 +172,7 @@ export const useEsqlCallbacks = ({
         // Bail out without touching the cache — cache cleanup for the aborted query
         // already happened at abort time. Deleting here would race with a fresh re-request that may
         // have repopulated the same key.
-        if (currentController.signal.aborted) {
+        if (currentController.signal.aborted || signal?.aborted) {
           return [];
         }
 
@@ -191,7 +202,10 @@ export const useEsqlCallbacks = ({
     };
   }, [esqlFieldsCache]);
 
-  const getPolicies = useCallback(async () => getEsqlPolicies(core.http), [core.http]);
+  const getPolicies = useCallback(
+    async (_ctx?: Object, signal?: AbortSignal) => getEsqlPolicies(core.http, signal),
+    [core.http]
+  );
 
   const getPreferences = useCallback(
     async () => ({
@@ -212,24 +226,33 @@ export const useEsqlCallbacks = ({
     [esqlService]
   );
 
-  const getTimeseriesIndicesCallback = useCallback(async () => {
-    return (await getTimeseriesIndices(core.http)) || [];
-  }, [core.http]);
+  const getTimeseriesIndicesCallback = useCallback(
+    async (signal?: AbortSignal) => {
+      return (await getTimeseriesIndices(core.http, signal)) || [];
+    },
+    [core.http]
+  );
 
-  const getViewsCallback = useCallback(async () => {
-    return await getViews(core.http);
-  }, [core.http]);
+  const getViewsCallback = useCallback(
+    async (signal?: AbortSignal) => {
+      return await getViews(core.http, signal);
+    },
+    [core.http]
+  );
 
-  const getDatasetsCallback = useCallback(async () => {
-    return await getDatasets(core.http);
-  }, [core.http]);
+  const getDatasetsCallback = useCallback(
+    async (signal?: AbortSignal) => {
+      return await getDatasets(core.http, signal);
+    },
+    [core.http]
+  );
 
   const getEditorExtensionsCallback = useCallback(
-    async (queryString: string) => {
+    async (queryString: string, signal?: AbortSignal) => {
       // Only fetch recommendations if there's an active solutionId and a non-empty query
       // Otherwise the route will return an error
       if (activeSolutionId && queryString.trim() !== '') {
-        return await getEditorExtensions(core.http, queryString, activeSolutionId);
+        return await getEditorExtensions(core.http, queryString, activeSolutionId, signal);
       }
       return {
         recommendedQueries: [],
@@ -240,8 +263,8 @@ export const useEsqlCallbacks = ({
   );
 
   const getInferenceEndpointsCallback = useCallback(
-    async (taskType: string) => {
-      return (await getInferenceEndpoints(core.http, taskType)) || [];
+    async (taskType: string, signal?: AbortSignal) => {
+      return (await getInferenceEndpoints(core.http, taskType, signal)) || [];
     },
     [core.http]
   );
@@ -262,7 +285,7 @@ export const useEsqlCallbacks = ({
   const getActiveProduct = useCallback(() => core.pricing.getActiveProduct(), [core.pricing]);
 
   const getHistoryStarredItems = useCallback(async () => {
-    clearCacheWhenOld(historyStarredItemsCache, 'historyStarredItems');
+    clearCacheWhenOld(historyStarredItemsCache, HISTORY_STARRED_ITEMS_CACHE_KEY);
     return await memoizedHistoryStarredItems(getHistoryItems, favoritesClient).result;
   }, [historyStarredItemsCache, memoizedHistoryStarredItems, favoritesClient]);
 

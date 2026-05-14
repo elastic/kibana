@@ -32,6 +32,9 @@ interface UseMemoizedCachesParams {
   pickerProjectRouting: string | undefined;
 }
 
+export const ESQL_SOURCES_CACHE_KEY = 'esqlSources';
+export const HISTORY_STARRED_ITEMS_CACHE_KEY = 'historyStarredItems';
+
 export const useMemoizedCaches = ({
   code,
   core,
@@ -66,19 +69,21 @@ export const useMemoizedCaches = ({
   const effectiveProjectRouting = setProjectRouting ?? pickerProjectRouting;
 
   const { cache: dataSourcesCache, memoizedSources } = useMemo(() => {
-    // Keying on effectiveProjectRouting ensures a fresh cache (and therefore a fresh fetch)
+    // The cache is recreated whenever effectiveProjectRouting changes,ensuring a fresh fetch
     // whenever either the SET statement or the picker selection changes.
     const fn = memoize(
       (
         ...args: [
           CoreStart,
           (() => Promise<ILicense | undefined>) | undefined,
-          ((sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>) | undefined
+          ((sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>) | undefined,
+          AbortSignal | undefined
         ]
       ) => ({
         timestamp: Date.now(),
-        result: getESQLSources(...args, undefined, effectiveProjectRouting),
-      })
+        result: getESQLSources(...args, effectiveProjectRouting),
+      }),
+      () => ESQL_SOURCES_CACHE_KEY
     );
 
     return { cache: fn.cache, memoizedSources: fn };
@@ -115,7 +120,7 @@ export const useMemoizedCaches = ({
         })(),
       }),
       // Constant key: single cache entry, invalidated via cache.clear() in clearCacheWhenOld()
-      () => 'historyStarredItems'
+      () => HISTORY_STARRED_ITEMS_CACHE_KEY
     );
 
     return { cache: fn.cache, memoizedHistoryStarredItems: fn };
@@ -133,8 +138,8 @@ export const useMemoizedCaches = ({
   minimalQueryRef.current = minimalQuery;
 
   const getJoinIndicesCallback = useCallback<Required<ESQLCallbacks>['getJoinIndices']>(
-    async (cacheOptions) => {
-      const result = await getJoinIndices(minimalQueryRef.current, core.http, cacheOptions);
+    async (cacheOptions, signal?: AbortSignal) => {
+      const result = await getJoinIndices(minimalQueryRef.current, core.http, cacheOptions, signal);
       return result;
     },
     [core.http]

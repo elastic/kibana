@@ -20,11 +20,13 @@ export function getInlineCompletionsProvider(
       model: monaco.editor.ITextModel,
       position: monaco.Position,
       _context: monaco.languages.InlineCompletionContext,
-      _token: monaco.CancellationToken
+      token: monaco.CancellationToken
     ) {
       return createMonacoProvider({
         model,
-        run: async (safeModel) => {
+        callbacks,
+        token,
+        run: async (safeModel, cancellableCallbacks) => {
           const fullText = safeModel.getValue();
           const textBeforeCursor = safeModel.getValueInRange({
             startLineNumber: 1,
@@ -40,7 +42,7 @@ export function getInlineCompletionsProvider(
             position.column
           );
 
-          return await inlineSuggest(fullText, textBeforeCursor, range, callbacks);
+          return await inlineSuggest(fullText, textBeforeCursor, range, cancellableCallbacks);
         },
         emptyResult: { items: [] },
       });

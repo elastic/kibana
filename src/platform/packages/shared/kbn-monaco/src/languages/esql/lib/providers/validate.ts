@@ -17,13 +17,16 @@ export async function esqlValidate(
   model: monaco.editor.ITextModel,
   code?: string,
   callbacks?: ESQLCallbacks,
-  options?: { invalidateColumnsCache?: boolean }
+  options?: { invalidateColumnsCache?: boolean },
+  token?: monaco.CancellationToken
 ) {
   return createMonacoProvider({
     model,
-    run: async (safeModel) => {
+    callbacks,
+    token,
+    run: async (safeModel, cancellableCallbacks) => {
       const text = code ?? safeModel.getValue();
-      const { errors, warnings } = await validateQuery(text, callbacks, options);
+      const { errors, warnings } = await validateQuery(text, cancellableCallbacks, options);
       const monacoErrors = wrapAsMonacoMessages(text, errors);
       const monacoWarnings = wrapAsMonacoMessages(text, warnings);
       return { errors: monacoErrors, warnings: monacoWarnings };

@@ -18,10 +18,11 @@ export function getDocumentHighlightProvider(): monaco.languages.DocumentHighlig
     provideDocumentHighlights(
       model: monaco.editor.ITextModel,
       position: monaco.Position,
-      _token: monaco.CancellationToken
+      token: monaco.CancellationToken
     ) {
       return createMonacoProvider({
         model,
+        token,
         run: (safeModel) => {
           const fullText = safeModel.getValue();
           const offset = monacoPositionToOffset(fullText, position);

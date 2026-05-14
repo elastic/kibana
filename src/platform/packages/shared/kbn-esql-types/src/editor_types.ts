@@ -37,7 +37,10 @@ export interface ESQLQueryStats {
 }
 
 /** @internal **/
-type CallbackFn<Options = {}, Result = string> = (ctx?: Options) => Result[] | Promise<Result[]>;
+type CallbackFn<Options = {}, Result = string> = (
+  ctx?: Options,
+  signal?: AbortSignal
+) => Result[] | Promise<Result[]>;
 
 /**
  * All supported field types in ES|QL. This is all the types
@@ -146,17 +149,26 @@ export interface ESQLCallbacks {
   getFieldsMetadata?: Promise<PartialFieldsMetadataClient>;
   getVariables?: () => ESQLControlVariable[] | undefined;
   canSuggestVariables?: () => boolean;
-  getJoinIndices?: (cacheOptions?: {
-    forceRefresh?: boolean;
-  }) => Promise<{ indices: IndexAutocompleteItem[] }>;
-  getTimeseriesIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
-  getViews?: () => Promise<EsqlViewsResult>;
-  getDatasets?: () => Promise<EsqlDatasetsResult>;
-  getEditorExtensions?: (queryString: string) => Promise<{
+  getJoinIndices?: (
+    cacheOptions?: {
+      forceRefresh?: boolean;
+    },
+    signal?: AbortSignal
+  ) => Promise<{ indices: IndexAutocompleteItem[] }>;
+  getTimeseriesIndices?: (signal?: AbortSignal) => Promise<{ indices: IndexAutocompleteItem[] }>;
+  getViews?: (signal?: AbortSignal) => Promise<EsqlViewsResult>;
+  getDatasets?: (signal?: AbortSignal) => Promise<EsqlDatasetsResult>;
+  getEditorExtensions?: (
+    queryString: string,
+    signal?: AbortSignal
+  ) => Promise<{
     recommendedQueries: RecommendedQuery[];
     recommendedFields: RecommendedField[];
   }>;
-  getInferenceEndpoints?: (taskType: string) => Promise<InferenceEndpointsAutocompleteResult>;
+  getInferenceEndpoints?: (
+    taskType: string,
+    signal?: AbortSignal
+  ) => Promise<InferenceEndpointsAutocompleteResult>;
   getLicense?: () => Promise<Pick<ILicense, 'hasAtLeast'> | undefined>;
   getActiveProduct?: () => PricingProduct | undefined;
   getHistoryStarredItems?: () => Promise<string[]>;
