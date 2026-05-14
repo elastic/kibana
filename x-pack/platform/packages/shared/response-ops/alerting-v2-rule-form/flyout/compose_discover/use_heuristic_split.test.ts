@@ -25,13 +25,49 @@ describe('splitQuery', () => {
   });
 
   describe('no STATS segment', () => {
-    it('returns none confidence and puts the whole query as alertBlock when there is no STATS', () => {
-      const query = 'FROM logs-* | WHERE count > 0';
+    it('returns base = full query when no STATS and no WHERE', () => {
+      const query = 'FROM logs-* | LIMIT 100';
       const result = splitQuery(query);
       expect(result.confidence).toBe('none');
       expect(result.reason).toBe('no_stats');
-      expect(result.alertBlock).toBe(query.trim());
-      expect(result.base).toBe('');
+      expect(result.base).toBe(query.trim());
+      expect(result.alertBlock).toBe('');
+    });
+
+    it('splits after the last non-WHERE before the trailing WHERE', () => {
+      const query = 'FROM logs-* | WHERE status_code >= 500';
+      const result = splitQuery(query);
+      expect(result.confidence).toBe('low');
+      expect(result.reason).toBe('where_without_stats');
+      expect(result.base).toBe('FROM logs-*');
+      expect(result.alertBlock).toBe('| WHERE status_code >= 500');
+    });
+
+    it('groups consecutive trailing WHEREs into the alert block', () => {
+      const query = 'FROM logs-* | WHERE a > 1 | WHERE b > 2 | WHERE c > 3';
+      const result = splitQuery(query);
+      expect(result.confidence).toBe('low');
+      expect(result.reason).toBe('where_without_stats');
+      expect(result.base).toBe('FROM logs-*');
+      expect(result.alertBlock).toBe('| WHERE a > 1 | WHERE b > 2 | WHERE c > 3');
+    });
+
+    it('splits after the last non-WHERE when a non-WHERE precedes the trailing chain', () => {
+      const query = 'FROM logs-* | WHERE env == "prod" | EVAL x = 1 | WHERE error_rate > 0.05';
+      const result = splitQuery(query);
+      expect(result.confidence).toBe('low');
+      expect(result.reason).toBe('where_without_stats');
+      expect(result.base).toBe('FROM logs-* | WHERE env == "prod" | EVAL x = 1');
+      expect(result.alertBlock).toBe('| WHERE error_rate > 0.05');
+    });
+
+    it('returns no base when all commands are WHERE', () => {
+      const query = 'FROM logs-* | WHERE x > 1';
+      const result = splitQuery(query);
+      expect(result.confidence).toBe('low');
+      expect(result.reason).toBe('where_without_stats');
+      expect(result.base).toBe('FROM logs-*');
+      expect(result.alertBlock).toBe('| WHERE x > 1');
     });
   });
 
@@ -104,11 +140,13 @@ describe('splitQuery', () => {
   });
 
   describe('reason field', () => {
-    it('reason is no_stats when no STATS found', () => {
-      // FROM logs-* has no pipe at all so tokeniseSegments yields one segment (FROM) with no STATS
+    it('reason is no_stats when neither STATS nor WHERE found', () => {
       expect(splitQuery('FROM logs-*').reason).toBe('no_stats');
-      // FROM logs-* | WHERE x > 1 has a WHERE but still no STATS
-      expect(splitQuery('FROM logs-* | WHERE x > 1').reason).toBe('no_stats');
+      expect(splitQuery('FROM logs-* | LIMIT 10').reason).toBe('no_stats');
+    });
+
+    it('reason is where_without_stats when WHERE but no STATS', () => {
+      expect(splitQuery('FROM logs-* | WHERE x > 1').reason).toBe('where_without_stats');
     });
 
     it('reason is no_where when STATS present but no WHERE', () => {
