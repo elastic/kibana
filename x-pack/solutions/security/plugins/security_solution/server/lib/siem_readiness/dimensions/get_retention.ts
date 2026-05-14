@@ -8,12 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { ActionableFinding, MainCategories, RetentionPayload } from '@kbn/siem-readiness';
-import {
-  ALL_CATEGORIES,
-  getIndexCategoryMap,
-  getRetentionStatus,
-  isRetentionNonCompliant,
-} from '@kbn/siem-readiness';
+import { ALL_CATEGORIES, getRetentionStatus, isRetentionNonCompliant } from '@kbn/siem-readiness';
 import { fetchCategories, fetchRetention } from '../fetchers';
 
 export const getRetention = async ({
@@ -30,24 +25,22 @@ export const getRetention = async ({
     fetchCategories({ esClient, logger }),
   ]);
 
-  const indexToCategoryMap = getIndexCategoryMap(categoriesData);
-
-  // Build a map of indexName → all categories it belongs to (an index can appear in multiple).
-  const allCategoriesMap = new Map<string, MainCategories[]>();
-  categoriesData?.mainCategoriesMap?.forEach((group) => {
-    group.indices.forEach((idx) => {
-      const existing = allCategoriesMap.get(idx.indexName) ?? [];
-      allCategoriesMap.set(idx.indexName, [...existing, group.category as MainCategories]);
+  // Category indices are backing index names (.ds-<stream>-YYYY.MM.DD-N); retention items carry the
+  // data stream name. Use the same contains-match the UI used: categoryIdx.includes(itemIndexName).
+  const getCategoriesForItem = (itemIndexName: string): MainCategories[] => {
+    const cats = new Set<MainCategories>();
+    categoriesData?.mainCategoriesMap?.forEach((group) => {
+      if (group.indices.some((idx) => idx.indexName.includes(itemIndexName))) {
+        cats.add(group.category as MainCategories);
+      }
     });
-  });
+    return Array.from(cats);
+  };
 
-  // Only include indices that belong to at least one recognized category, matching the UI view.
   const categorizedItems = retentionResponse.items
-    .filter((item) => indexToCategoryMap.has(item.indexName))
-    .map((item) => ({
-      ...item,
-      categories: allCategoriesMap.get(item.indexName) ?? [],
-    }));
+    .map((item) => ({ item, categories: getCategoriesForItem(item.indexName) }))
+    .filter(({ categories }) => categories.length > 0)
+    .map(({ item, categories }) => ({ ...item, categories }));
 
   const status = getRetentionStatus(categoriesData, retentionResponse, ALL_CATEGORIES);
 
