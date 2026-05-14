@@ -32,6 +32,7 @@
     "@kbn/core-http-browser",
     "@kbn/esql-utils",
     "@kbn/kibana-utils-plugin",
-    "@kbn/resizable-layout"
+    "@kbn/resizable-layout",
+    "@kbn/search-errors"
   ]
 }

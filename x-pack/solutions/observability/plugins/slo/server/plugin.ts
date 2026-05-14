@@ -46,6 +46,7 @@ import {
   DefaultSummaryTransformManager,
   DefaultTransformManager,
 } from './services';
+import { DefaultCompositeSLORepository } from './services/composites/composite_slo_repository';
 import { DefaultSLOSettingsRepository } from './services/slo_settings_repository';
 import { DefaultSLOTemplateRepository } from './services/slo_template_repository';
 import { DefaultSummaryTransformGenerator } from './services/summary_transform_generator/summary_transform_generator';
@@ -165,6 +166,7 @@ export class SLOPlugin
     core.savedObjects.registerType(slo);
     core.savedObjects.registerType(sloSettings);
     if (isCompositeSloEnabled) {
+      // eslint-disable-next-line @kbn/eslint/no_conditional_saved_object_type_registration -- TODO: remove conditional registration; tracked for follow-up PR
       core.savedObjects.registerType(sloComposite);
     }
 
@@ -221,6 +223,7 @@ export class SLOPlugin
           ]);
 
           const repository = new DefaultSLODefinitionRepository(soClient, logger);
+          const compositeSloRepository = new DefaultCompositeSLORepository(soClient, logger);
           const settingsRepository = new DefaultSLOSettingsRepository(soClient);
           const templateRepository = new DefaultSLOTemplateRepository(soClient);
 
@@ -243,6 +246,7 @@ export class SLOPlugin
             rulesClient,
             spaceId,
             repository,
+            compositeSloRepository,
             settingsRepository,
             templateRepository,
             transformManager,
@@ -263,7 +267,11 @@ export class SLOPlugin
       .getStartServices()
       .then(async ([coreStart, pluginStart]) => {
         const esInternalClient = coreStart.elasticsearch.client.asInternalUser;
-        const sloResourceInstaller = new DefaultResourceInstaller(esInternalClient, this.logger);
+        const sloResourceInstaller = new DefaultResourceInstaller(
+          esInternalClient,
+          this.logger,
+          isCompositeSloEnabled
+        );
         await lockManager.withLock(LOCK_ID_RESOURCE_INSTALLER, () =>
           sloResourceInstaller.ensureCommonResourcesInstalled()
         );

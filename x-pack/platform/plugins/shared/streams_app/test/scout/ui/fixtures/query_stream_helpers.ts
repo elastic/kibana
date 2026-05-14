@@ -7,7 +7,6 @@
 import {
   OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
-  OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE,
 } from '@kbn/management-settings-ids';
 import type { KbnClient, EsClient, ApiServicesFixture, ScoutLogger } from '@kbn/scout';
 
@@ -43,9 +42,6 @@ export const enableQueryStreams = async (kbnClient: KbnClient) => {
   await kbnClient.uiSettings.update({
     [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: true,
   });
-  await kbnClient.uiSettings.update({
-    [OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE]: true,
-  });
 };
 
 export const disableQueryStreams = async (kbnClient: KbnClient) => {
@@ -54,9 +50,6 @@ export const disableQueryStreams = async (kbnClient: KbnClient) => {
   });
   await kbnClient.uiSettings.update({
     [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: false,
-  });
-  await kbnClient.uiSettings.update({
-    [OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE]: false,
   });
 };
 

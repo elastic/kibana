@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mkdir, writeFile } from 'fs/promises';
+import { mkdir, readFile, writeFile } from 'fs/promises';
 import { dirname, isAbsolute, resolve } from 'path';
 
 import { run } from '@kbn/dev-cli-runner';
@@ -15,6 +15,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 
 import { takeSnapshot } from '../snapshots';
 import { getKibanaServer } from '../util';
+import { WIP_TYPES_JSON_PATH } from '../migrations/removed_types/constants';
 
 const DEFAULT_OUTPUT_PATH = 'target/plugin_so_types_snapshot.json';
 
@@ -28,10 +29,17 @@ export const runSoMigrationSnapshotCli = () => {
         ? outputPathArg
         : resolve(REPO_ROOT, outputPathArg);
 
+      const wipTypes = new Set<string>(
+        JSON.parse(await readFile(WIP_TYPES_JSON_PATH, 'utf-8')) as string[]
+      );
+
       const kibanaServer = await getKibanaServer();
       await kibanaServer.preboot();
       const coreSetup = await kibanaServer.setup();
-      const types = coreSetup.savedObjects.getTypeRegistry().getAllTypes();
+      const types = coreSetup.savedObjects
+        .getTypeRegistry()
+        .getAllTypes()
+        .filter((t) => !wipTypes.has(t.name));
       const snapshot = await takeSnapshot(types);
 
       await mkdir(dirname(outputPath), { recursive: true });

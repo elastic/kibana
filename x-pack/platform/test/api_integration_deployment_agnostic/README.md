@@ -42,6 +42,21 @@ While the deployment-agnostic testing approach is beneficial, it should not comp
 - **Environment Constraints**: If a test can only run locally and not on MKI or Cloud deployments.
 - **Complex Logic**: If the test logic requires splitting across multiple locations.
 
+### Multi-Node Cache Settlement
+
+Stateful deployment-agnostic runs may execute against a multi-node Kibana deployment and may run into cross-node cache settlement delays. For example, a test can write `uiSettings` on one Kibana node and then send the next request to another node whose shared `uiSettings` cache has not refreshed yet.
+
+If a test updates advanced settings and then immediately exercises server-side behavior that depends on those settings, use the `kibanaServer.uiSettings` client and wait for the eventual cache refresh window before asserting behavior:
+
+```ts
+await kibanaServer.uiSettings.update({ // or .unset, .replace .updateGlobal
+  'myPlugin:mySetting': true,
+});
+await kibanaServer.uiSettings.waitForEventualCacheRefresh();
+```
+
+Prefer `kibanaServer.uiSettings` for `uiSettings` changes so this pattern is available. If a stateful-only failure appears right after such a write, check whether this wait is missing. See [#265720](https://github.com/elastic/kibana/issues/265720).
+
 ## File Structure
 
 We recommend following this structure to simplify maintenance and allow other teams to reuse code (e.g., FTR services) created by different teams:
