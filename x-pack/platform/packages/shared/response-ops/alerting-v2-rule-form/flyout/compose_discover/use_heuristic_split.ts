@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { Parser } from '@elastic/esql';
 
 export type SplitConfidence = 'high' | 'low' | 'none';
@@ -95,7 +94,3 @@ export function guessRecoveryBlock(alertBlock: string): string {
   const FLIP: Record<string, string> = { '>=': '<=', '<=': '>=', '>': '<', '<': '>' };
   return alertBlock.replace(/>=|<=|>|</g, (op) => FLIP[op] ?? op);
 }
-
-export const useHeuristicSplit = (fullQuery: string): SplitResult => {
-  return useMemo(() => splitQuery(fullQuery), [fullQuery]);
-};
