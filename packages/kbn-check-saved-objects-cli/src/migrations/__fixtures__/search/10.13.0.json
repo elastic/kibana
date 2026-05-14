@@ -55,7 +55,7 @@
       "description": "Fixture saved search used for modelVersion migration checks",
       "tabs": [
         {
-          "id": "23b8d702-cd0a-498c-b022-06a0f74aea16",
+          "id": "ed668b76-545d-5729-94c1-2eabade8ae48",
           "label": "Untitled",
           "attributes": {
             "columns": ["@timestamp", "message"],
