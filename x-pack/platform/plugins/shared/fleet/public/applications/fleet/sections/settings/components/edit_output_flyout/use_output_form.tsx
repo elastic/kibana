@@ -1240,7 +1240,6 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     isShipperEnabled: !isShipperDisabled,
     isDisabled:
       isLoading ||
-      (!authz.fleet.allSettings && !authz.fleet.allAgentPolicies) ||
       (output && !hasChanged) ||
       !nameInput.value ||
       isHostsMissing ||
