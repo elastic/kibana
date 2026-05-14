@@ -141,14 +141,20 @@ export async function runReconciliation({
       //      the connection pool from saturating on cold-start / post-reset
       //      walks that can span tens of thousands of cases.
       //   2. Awaiting between pages bounds concurrency to one in-flight
-      //      bulk at a time. A per-item fire-and-forget loop could fan
+      //      bulk per runner. A per-item fire-and-forget loop could fan
       //      thousands of writes into ES while the runner kept paging — ES
       //      indexing-queue overflow → 429s → writer's retry budget
       //      exhausts → reconciliation drops docs the next tick then has
       //      to repair. Serializing pages avoids the failure mode
       //      entirely.
-      // The awaited variant never throws — bulk-level + per-item failures
-      // are logged inside the writer; the page count still advances.
+      // `bulkUpsertCasesAwait` **throws** on bulk-level failure / retry
+      // exhaustion (retryable per-item failures, e.g. 429s, count as
+      // retryable). That propagation is deliberate: it aborts the tick
+      // before we persist the new cursor, so the next tick re-walks the
+      // same window. Permanent per-item failures (mapper errors etc.)
+      // are logged inside the writer but do NOT throw — those cases
+      // can't be repaired by reconciliation regardless and rely on the
+      // case's next update to retry the mirror.
       await writer.bulkUpsertCasesAwait(page.saved_objects);
 
       for (const so of page.saved_objects) {

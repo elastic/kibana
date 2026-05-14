@@ -99,6 +99,71 @@ describe('deleteAllPerSpaceCasesDataViews', () => {
     expect(soClient.delete).not.toHaveBeenCalled();
   });
 
+  it('walks every page before deleting so page-shift never skips entries', async () => {
+    // Regression guard: a single-pass implementation that deleted while
+    // iterating would shift offsets on every page-fetch — SOs originally
+    // at position N moved onto already-walked page N-1 once items in front
+    // of them were removed. Two-pass shape (collect every page first, then
+    // delete) keeps pagination stable because the index isn't mutated
+    // while it's being read.
+    //
+    // We exercise the multi-page path by returning a full page (length
+    // === PAGE_SIZE = 100) on the first call so the loop continues to a
+    // second page. With the buggy single-pass shape the second page's
+    // 50 items would have been skipped entirely.
+    const soClient = savedObjectsClientMock.create();
+    const pageOne = Array.from({ length: 100 }, (_, i) => ({
+      id: `cases-analytics-managed-space-p1-${i}`,
+      type: 'index-pattern',
+      namespaces: [`space-p1-${i}`],
+      attributes: {},
+      references: [],
+      score: 0,
+    }));
+    const pageTwo = Array.from({ length: 50 }, (_, i) => ({
+      id: `cases-analytics-managed-space-p2-${i}`,
+      type: 'index-pattern',
+      namespaces: [`space-p2-${i}`],
+      attributes: {},
+      references: [],
+      score: 0,
+    }));
+    soClient.find
+      .mockResolvedValueOnce({
+        saved_objects: pageOne,
+        total: 150,
+        per_page: 100,
+        page: 1,
+      })
+      .mockResolvedValueOnce({
+        saved_objects: pageTwo,
+        total: 150,
+        per_page: 100,
+        page: 2,
+      });
+
+    const deleted = await deleteAllPerSpaceCasesDataViews(soClient, logger);
+
+    expect(deleted).toBe(150);
+    expect(soClient.delete).toHaveBeenCalledTimes(150);
+    // All page-two ids made it through — the bug would have dropped them.
+    expect(soClient.delete).toHaveBeenCalledWith(
+      'index-pattern',
+      'cases-analytics-managed-space-p2-49',
+      { force: true }
+    );
+
+    // Find is called exactly twice: page-two returned 50 < PAGE_SIZE so
+    // the walk terminates. No find calls happen during the delete phase.
+    expect(soClient.find).toHaveBeenCalledTimes(2);
+
+    // Sanity check: no `find` calls were interleaved with `delete` calls —
+    // the two-pass invariant means every find happens before any delete.
+    const findOrder = (soClient.find as jest.Mock).mock.invocationCallOrder;
+    const deleteOrder = (soClient.delete as jest.Mock).mock.invocationCallOrder;
+    expect(Math.max(...findOrder)).toBeLessThan(Math.min(...deleteOrder));
+  });
+
   it('continues the walk and logs at WARN when a single delete fails', async () => {
     const soClient = savedObjectsClientMock.create();
     soClient.find.mockResolvedValueOnce({

@@ -307,6 +307,19 @@ export const registerCasesAnalyticsV2Routes = ({
  * walk continues — best-effort cleanup is preferred over aborting on a
  * single failure.
  *
+ * Two-pass shape:
+ *   1. Walk every page of `index-pattern` SOs, collecting only the ids
+ *      that match our prefix. No deletes inside the loop.
+ *   2. Delete the collected ids.
+ * A single-pass implementation that deleted while iterating would shift
+ * subsequent page offsets — items at positions `[N*PAGE_SIZE..]` would
+ * move onto an already-walked page and be skipped. Since `/reset` is a
+ * rare administrator action and missed data views are lazily recreated on
+ * the next cases request in that space, this isn't a correctness bug for
+ * the user — but it shows up as `data_views_deleted` undercounts in the
+ * response and as orphaned SOs in `.kibana`, both of which a tenant-scale
+ * `/reset` would surface.
+ *
  * Notes:
  *   - `index-pattern` is a multi-namespace SO type (`namespaceType: 'multiple'`).
  *     We pass `force: true` so the underlying ES document is fully removed
@@ -329,9 +342,11 @@ export async function deleteAllPerSpaceCasesDataViews(
   logger: Logger
 ): Promise<number> {
   const PAGE_SIZE = 100;
-  let page = 1;
-  let deleted = 0;
 
+  // Pass 1: collect matching ids. Pagination is stable because we don't
+  // mutate the index while walking it.
+  const targets: Array<{ id: string; namespace: string | undefined }> = [];
+  let page = 1;
   while (true) {
     const result = await soClient.find({
       type: DATA_VIEW_SO_TYPE,
@@ -343,22 +358,29 @@ export async function deleteAllPerSpaceCasesDataViews(
     for (const so of result.saved_objects) {
       // Only act on data views we manage; everything else is left untouched.
       if (so.id.startsWith(CASE_DATA_VIEW_ID_PREFIX)) {
-        const namespace = so.namespaces?.[0];
-        try {
-          await soClient.delete(DATA_VIEW_SO_TYPE, so.id, { force: true });
-          deleted++;
-        } catch (err) {
-          logger.warn(
-            `reset: failed to delete data view ${so.id} (space=${namespace ?? 'unknown'}): ${
-              err instanceof Error ? err.message : String(err)
-            }`
-          );
-        }
+        targets.push({ id: so.id, namespace: so.namespaces?.[0] });
       }
     }
 
     if (result.saved_objects.length < PAGE_SIZE) break;
     page++;
+  }
+
+  // Pass 2: delete the collected ids. Per-item errors log at WARN and the
+  // walk continues — one stuck data view shouldn't block the rest of the
+  // cleanup.
+  let deleted = 0;
+  for (const target of targets) {
+    try {
+      await soClient.delete(DATA_VIEW_SO_TYPE, target.id, { force: true });
+      deleted++;
+    } catch (err) {
+      logger.warn(
+        `reset: failed to delete data view ${target.id} (space=${target.namespace ?? 'unknown'}): ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+    }
   }
 
   return deleted;

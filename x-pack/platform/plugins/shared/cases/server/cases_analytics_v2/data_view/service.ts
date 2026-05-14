@@ -176,6 +176,17 @@ export class CasesAnalyticsV2DataViewService {
   public async ensureForSpace(deps: EnsureForSpaceDeps): Promise<void> {
     const cached = this.bootstrappedSpaces.get(deps.spaceId);
     if (cached != null && this.now() - cached.ensuredAt < BOOTSTRAP_CACHE_TTL_MS) return;
+    if (cached != null) {
+      // TTL elapsed — log so support cases ("user reports no data view")
+      // can confirm the next request re-checked instead of trusting a
+      // stale cache. Only fires on the post-TTL path; cold-start (cached
+      // == null) is uninteresting noise.
+      this.logger.debug(
+        `bootstrap cache expired for space=${deps.spaceId}; re-running ensure (cache TTL ${BOOTSTRAP_CACHE_TTL_MS}ms exceeded by ${
+          this.now() - cached.ensuredAt - BOOTSTRAP_CACHE_TTL_MS
+        }ms)`
+      );
+    }
     await this.ensureOrRefreshForSpace(deps);
   }
 

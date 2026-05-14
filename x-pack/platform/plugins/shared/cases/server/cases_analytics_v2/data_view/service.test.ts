@@ -384,11 +384,18 @@ describe('CasesAnalyticsV2DataViewService', () => {
           return nowMs;
         }
       }
+      const parentLogger = loggerMock.create();
       const service = new TtlControlledService({
-        logger: loggerMock.create(),
+        logger: parentLogger,
         dataViewsService: makeDataViewsPluginStart(dvService),
         internalSavedObjectsClient: internalSoClient,
       });
+      // `logger.get('dataView')` is what the service holds onto for its
+      // own log calls; the parent mock's `.get` returns a child mock by
+      // default so we resolve to the actual instance for assertions.
+      const childLogger = (parentLogger.get as jest.Mock).mock.results[0]?.value as ReturnType<
+        typeof loggerMock.create
+      >;
       const deps = {
         spaceId,
         savedObjectsClient: savedObjectsClientMock.create(),
@@ -410,11 +417,21 @@ describe('CasesAnalyticsV2DataViewService', () => {
       expect(dvService.createAndSave).not.toHaveBeenCalled();
 
       // Past TTL with the data view deleted out-of-band: ensure re-runs and recreates.
+      // The post-TTL re-check is logged at DEBUG so support cases ("user
+      // reports no data view") can confirm the next request re-checked
+      // instead of trusting a stale cache.
       nowMs += 6 * 60_000; // +6 more minutes (well past 5-minute TTL)
       stubMissingDataView(dvService);
+      childLogger?.debug.mockClear?.();
       await service.ensureForSpace(deps);
       expect(dvService.get).toHaveBeenCalledTimes(1);
       expect(dvService.createAndSave).toHaveBeenCalledTimes(1);
+      if (childLogger) {
+        const debugCalls = (childLogger.debug as jest.Mock).mock.calls.map(([msg]: [string]) => msg);
+        expect(
+          debugCalls.some((m) => m.includes('bootstrap cache expired') && m.includes(spaceId))
+        ).toBe(true);
+      }
     });
   });
 });
