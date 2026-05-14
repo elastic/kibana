@@ -120,7 +120,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
 
   const showGlobalDefaultRow =
     !hasSavedObject && !!globalDefaultId && globalDefaultId !== NO_DEFAULT_MODEL;
-  const { icon: globalDefaultIcon = 'compute', label: globalDefaultLabel = globalDefaultId } =
+  const { icon: globalDefaultIcon = 'compute', label: globalDefaultLabel = globalDefaultId ?? '' } =
     (globalDefaultId ? endpointDisplayMap.get(globalDefaultId) : undefined) ?? {};
 
   const handleRemove = useCallback(
