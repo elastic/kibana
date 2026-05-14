@@ -53,6 +53,9 @@ it('should return Component and componentApi', async () => {
   expect(Component).toMatchInlineSnapshot(`[Function]`);
   expect(componentApi).toMatchInlineSnapshot(`
     Object {
+      "anyStateChange$": Observable {
+        "_subscribe": [Function],
+      },
       "applySerializedState": [MockFunction],
       "hasLockedHoverActions$": BehaviorSubject {
         "_value": false,

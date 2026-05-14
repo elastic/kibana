@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, skip, Subject } from 'rxjs';
 import type {
   ChatEvent,
   Conversation,
@@ -42,65 +43,25 @@ const createDashboardSaveState = (): DashboardSaveEvent['dashboardState'] => ({
 });
 
 interface MockDashboardApi {
+  anyStateChange$: Observable<void>;
   savedObjectId$: BehaviorSubject<string | undefined>;
   onSave$: Subject<DashboardSaveEvent>;
-  layout$: BehaviorSubject<unknown>;
-  children$: BehaviorSubject<Record<string, MockChildApi>>;
-  title$: BehaviorSubject<string>;
-  description$: BehaviorSubject<string>;
   filters$: BehaviorSubject<unknown[]>;
   query$: BehaviorSubject<unknown>;
   timeRange$: BehaviorSubject<unknown>;
-  projectRouting$: BehaviorSubject<unknown>;
-  hideTitle$: BehaviorSubject<boolean>;
-  hideBorder$: BehaviorSubject<boolean>;
-  settings?: {
-    autoApplyFilters$?: BehaviorSubject<boolean>;
-    syncColors$?: BehaviorSubject<boolean>;
-    syncCursor$?: BehaviorSubject<boolean>;
-    syncTooltips$?: BehaviorSubject<boolean>;
-    useMargins$?: BehaviorSubject<boolean>;
-  };
   setState: jest.Mock;
   getSerializedState: jest.Mock;
 }
 
-interface MockChildApi {
-  uuid: string;
-  hasUnsavedChanges$: BehaviorSubject<boolean>;
-  resetUnsavedChanges: jest.Mock;
-  serializeState: jest.Mock;
-  applySerializedState: jest.Mock;
-}
+const mockAnyStateChange$ = new BehaviorSubject(undefined);
 
 const createMockDashboardApi = (): MockDashboardApi => ({
+  anyStateChange$: mockAnyStateChange$.pipe(skip(1)),
   savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
   onSave$: new Subject<DashboardSaveEvent>(),
-  layout$: new BehaviorSubject<unknown>([]),
-  children$: new BehaviorSubject<Record<string, MockChildApi>>({
-    'panel-1': {
-      uuid: 'panel-1',
-      hasUnsavedChanges$: new BehaviorSubject<boolean>(false),
-      resetUnsavedChanges: jest.fn(),
-      serializeState: jest.fn().mockReturnValue({}),
-      applySerializedState: jest.fn(),
-    },
-  }),
-  title$: new BehaviorSubject<string>('Test Dashboard'),
-  description$: new BehaviorSubject<string>('Test Description'),
   filters$: new BehaviorSubject<unknown[]>([]),
   query$: new BehaviorSubject<unknown>({ query: '', language: 'kuery' }),
   timeRange$: new BehaviorSubject<unknown>({ from: 'now-15m', to: 'now' }),
-  projectRouting$: new BehaviorSubject<unknown>(undefined),
-  hideTitle$: new BehaviorSubject<boolean>(false),
-  hideBorder$: new BehaviorSubject<boolean>(false),
-  settings: {
-    autoApplyFilters$: new BehaviorSubject<boolean>(true),
-    syncColors$: new BehaviorSubject<boolean>(false),
-    syncCursor$: new BehaviorSubject<boolean>(true),
-    syncTooltips$: new BehaviorSubject<boolean>(true),
-    useMargins$: new BehaviorSubject<boolean>(true),
-  },
   setState: jest.fn(),
   getSerializedState: jest.fn().mockReturnValue({
     attributes: {
@@ -274,7 +235,7 @@ describe('registerDashboardAppIntegration', () => {
       attachments: [createVersionedAttachment(attachment)],
     });
 
-    mockApi.title$.next('Updated Title');
+    mockAnyStateChange$.next(undefined);
     jest.advanceTimersByTime(200);
 
     expect(addAttachment).toHaveBeenCalledWith(
@@ -307,7 +268,7 @@ describe('registerDashboardAppIntegration', () => {
       ],
     });
 
-    mockApi.title$.next('Updated Title');
+    mockAnyStateChange$.next(undefined);
     jest.advanceTimersByTime(200);
 
     expect(addAttachment).toHaveBeenCalledWith(
@@ -389,7 +350,7 @@ describe('registerDashboardAppIntegration', () => {
 
     jest.runOnlyPendingTimers();
     addAttachment.mockClear();
-    mockApi.title$.next('Updated Title');
+    mockAnyStateChange$.next(undefined);
     jest.advanceTimersByTime(200);
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
@@ -446,7 +407,7 @@ describe('registerDashboardAppIntegration', () => {
     emitConversationChange({ id: 'conversation-1', attachments: [] });
 
     addAttachment.mockClear();
-    mockApi.title$.next('Updated Title');
+    mockAnyStateChange$.next(undefined);
     jest.advanceTimersByTime(200);
 
     expect(addAttachment).not.toHaveBeenCalled();

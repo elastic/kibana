@@ -340,7 +340,11 @@ describe('TimeSliderControlApi', () => {
     });
 
     test('should not emit on subscribe and emit when any state changes', (done) => {
+      let emitCount = 0;
       embeddableApi.anyStateChange$.subscribe(() => {
+        emitCount++;
+        // clearSelections updates start and stop. Only validate on first emit
+        if (emitCount > 1) return;
         try {
           const { start_percentage_of_time_range } = embeddableApi.serializeState();
           expect(start_percentage_of_time_range).toBe(0);
