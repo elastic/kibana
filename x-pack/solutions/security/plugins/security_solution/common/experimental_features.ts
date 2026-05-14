@@ -231,6 +231,11 @@ export const allowedExperimentalValues = Object.freeze({
   automaticTroubleshootingSkill: false,
 
   /**
+   * Enables the Automatic Migration correction and context Agent Builder skills
+   */
+  automaticMigrationSkillsEnabled: false,
+
+  /**
    * Enables the PCI DSS v4.0.1 Compliance Agent Builder skill and its backing tools.
    * Gates skill + tool registration so the feature can ship dark and be enabled per environment.
    */
