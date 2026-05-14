@@ -4,4 +4,4 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-05-12
-title: Cap window size
+title: Fix window size limits in entity store
