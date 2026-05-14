@@ -227,11 +227,6 @@ export interface IESQLSearchParams {
   params?: Array<{ name: string; value: unknown }>;
 
   /**
-   * Maximum number of rows to return
-   */
-  limit?: number;
-
-  /**
    * Additional filter to apply
    */
   filter?: estypes.QueryDslQueryContainer;
@@ -255,6 +250,11 @@ export interface IESQLSearchOptions extends IBaseSearchOptions {
    * Drop columns that only contain null values
    */
   dropNullColumns?: boolean;
+
+  /**
+   * When set to true, the response will include an extra _clusters object with information about the clusters that participated in the search along with info such as shards count. This is similar to include_ccs_metadata, but it also returns metadata when the query is not CCS/CPS
+   */
+  includeExecutionMetadata?: boolean;
 
   /**
    * Keep-alive duration for the cursor

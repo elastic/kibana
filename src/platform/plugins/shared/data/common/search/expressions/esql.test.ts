@@ -7,28 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { of } from 'rxjs';
 import type { UiSettingsCommon } from '@kbn/data-views-plugin/common';
 import { getEsqlFn } from './esql';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
-import type { ESQLSearchResponse } from '@kbn/es-types';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
+import type { ITypedSearchService } from '@kbn/search-types';
 import type { KibanaContext } from '..';
 
 describe('getEsqlFn', () => {
   it('should always return a fully serializable table', async () => {
-    const mockSearch = jest.fn().mockReturnValue(
-      of({
+    const mockTyped = {
+      searchESQL: jest.fn().mockResolvedValue({
         rawResponse: {
           values: [['value1']],
           columns: [{ name: 'column1', type: 'string' }],
         },
-      } as IKibanaSearchResponse<ESQLSearchResponse>)
-    );
+      }),
+    } as unknown as ITypedSearchService;
 
     const esqlFn = getEsqlFn({
       getStartDependencies: async () => ({
-        search: mockSearch,
+        typed: mockTyped,
         uiSettings: {
           get: jest.fn((key: string) => {
             if (key === 'dateFormat:tz') return 'UTC';
@@ -51,17 +49,17 @@ describe('getEsqlFn', () => {
       getExecutionContext: jest.fn(),
     } as unknown as ExecutionContext;
 
-    const result = await esqlFn.fn(input, args, context).toPromise();
+    const result = await esqlFn.fn(input, args, context);
 
     expect(result?.type).toEqual('datatable');
     expect(() => JSON.stringify(result)).not.toThrow();
   });
 
   describe('ignoreGlobalFilters', () => {
-    const makeEsqlFn = (mockSearch: jest.Mock) =>
+    const makeEsqlFn = (mockTyped: ITypedSearchService) =>
       getEsqlFn({
         getStartDependencies: async () => ({
-          search: mockSearch,
+          typed: mockTyped,
           uiSettings: {
             get: jest.fn((key: string) => {
               if (key === 'dateFormat:tz') return 'UTC';
@@ -94,19 +92,16 @@ describe('getEsqlFn', () => {
       },
     };
 
-    const emptySearchResponse = of({
-      rawResponse: { values: [], columns: [] },
-    } as unknown as IKibanaSearchResponse<ESQLSearchResponse>);
-
     it('should include global query and filters in params.filter when ignoreGlobalFilters is false', async () => {
-      const mockSearch = jest.fn().mockReturnValue(emptySearchResponse);
-      const esqlFn = makeEsqlFn(mockSearch);
+      const mockSearchESQL = jest.fn().mockResolvedValue({
+        rawResponse: { values: [], columns: [] },
+      });
+      const mockTyped = { searchESQL: mockSearchESQL } as unknown as ITypedSearchService;
+      const esqlFn = makeEsqlFn(mockTyped);
 
-      await esqlFn
-        .fn(input, { query: 'FROM index', ignoreGlobalFilters: false }, makeContext())
-        .toPromise();
+      await esqlFn.fn(input, { query: 'FROM index', ignoreGlobalFilters: false }, makeContext());
 
-      const params = mockSearch.mock.calls[0][0].params;
+      const params = mockSearchESQL.mock.calls[0][0];
       expect(params.query).toBe('FROM index');
       const filterJson = JSON.stringify(params.filter);
       expect(filterJson).toContain('uniqueFromFilterPill');
@@ -114,14 +109,15 @@ describe('getEsqlFn', () => {
     });
 
     it('should exclude global query and filters from params.filter when ignoreGlobalFilters is true', async () => {
-      const mockSearch = jest.fn().mockReturnValue(emptySearchResponse);
-      const esqlFn = makeEsqlFn(mockSearch);
+      const mockSearchESQL = jest.fn().mockResolvedValue({
+        rawResponse: { values: [], columns: [] },
+      });
+      const mockTyped = { searchESQL: mockSearchESQL } as unknown as ITypedSearchService;
+      const esqlFn = makeEsqlFn(mockTyped);
 
-      await esqlFn
-        .fn(input, { query: 'FROM index', ignoreGlobalFilters: true }, makeContext())
-        .toPromise();
+      await esqlFn.fn(input, { query: 'FROM index', ignoreGlobalFilters: true }, makeContext());
 
-      const params = mockSearch.mock.calls[0][0].params;
+      const params = mockSearchESQL.mock.calls[0][0];
       expect(params.query).toBe('FROM index');
       const filterJson = JSON.stringify(params.filter);
       expect(filterJson).not.toContain('uniqueFromFilterPill');

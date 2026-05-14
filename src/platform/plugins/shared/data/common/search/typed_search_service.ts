@@ -26,8 +26,10 @@ import type {
   IBaseSearchOptions,
   ISearchOptions,
   IEsSearchRequest,
+  IKibanaSearchRequest,
   ISearchGeneric,
 } from '@kbn/search-types';
+import type { ESQLSearchParams } from '@kbn/es-types';
 import type {
   ENHANCED_ES_SEARCH_STRATEGY,
   ESQL_ASYNC_SEARCH_STRATEGY,
@@ -53,7 +55,7 @@ export class TypedSearchService implements ITypedSearchService {
     params: IESQLSearchParams,
     options?: IESQLSearchOptions
   ): Promise<IESQLSearchResult> {
-    const request = this.buildESQLRequest(params);
+    const request = this.buildESQLRequest(params, options);
     const rawResponse = await this.executeSearch(
       request,
       this.mapESQLOptions(options, 'esql_async' as typeof ESQL_ASYNC_SEARCH_STRATEGY)
@@ -131,7 +133,10 @@ export class TypedSearchService implements ITypedSearchService {
   /**
    * Execute a search request using the search function and convert Observable to Promise
    */
-  private async executeSearch(request: IEsSearchRequest, options: ISearchOptions): Promise<any> {
+  private async executeSearch<T extends IKibanaSearchRequest>(
+    request: T,
+    options: ISearchOptions
+  ): Promise<any> {
     const response$ = this.search(request, options);
 
     // Wait for final result (when isRunning becomes false)
@@ -237,17 +242,19 @@ export class TypedSearchService implements ITypedSearchService {
   // ES|QL Search Helpers
   // ============================================================================
 
-  private buildESQLRequest(params: IESQLSearchParams): IEsSearchRequest {
+  private buildESQLRequest(
+    params: IESQLSearchParams,
+    options?: IESQLSearchOptions
+  ): IKibanaSearchRequest<ESQLSearchParams> {
     return {
       params: {
-        body: {
-          query: params.query,
-          params: params.params,
-          limit: params.limit,
-          filter: params.filter,
-          time_zone: params.timeZone,
-          locale: params.locale,
-        } as any,
+        query: params.query,
+        params: params.params as any,
+        filter: params.filter as any,
+        time_zone: params.timeZone,
+        locale: params.locale,
+        dropNullColumns: options?.dropNullColumns,
+        include_execution_metadata: options?.includeExecutionMetadata,
       },
     };
   }
@@ -259,7 +266,6 @@ export class TypedSearchService implements ITypedSearchService {
     return {
       ...this.mapBaseOptions(options),
       strategy,
-      // ES|QL specific options would go here
     };
   }
 
