@@ -50,7 +50,7 @@ export const cloudType: NotificationEventTypeData = {
 };
 
 const REPORT_PRIMARY_ACTION_LABEL = i18n.translate(
-  'notificationCenterExample.reportPrimaryAction',
+  'notificationEventsExample.reportPrimaryAction',
   { defaultMessage: 'Download report' }
 );
 
