@@ -68,7 +68,7 @@ export class DashboardMarkdownPlugin
       getSavedObjects: async (searchRequest) => {
         const { markdownClient } = await import('./async_services');
         const { text, tags, limit } = searchRequest ?? {};
-        if (tags?.included) return []; // markdown does not support tags
+        if ((tags?.included ?? []).length) return []; // markdown does not support tags
         const result = await markdownClient.search({ per_page: limit, query: text });
         return result.markdowns.map(({ id, data, meta }) => {
           return {
