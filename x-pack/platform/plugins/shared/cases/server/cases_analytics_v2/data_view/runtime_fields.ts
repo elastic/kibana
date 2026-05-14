@@ -89,7 +89,7 @@ export const suffixToRuntimeType = (suffix: string): RuntimeType | undefined => 
  * either break the script or open a script-injection path. Template names
  * are validated upstream (`common/types/domain/template/fields.ts`) but
  * that schema currently allows any string, and we want to provide an extra
- * layer of validation. We also cap the total length to keep Painless 
+ * layer of validation. We also cap the total length to keep Painless
  * compile budgets bounded.
  */
 const SAFE_SNAKE_KEY = /^[A-Za-z0-9_]+$/;
@@ -271,6 +271,13 @@ export const buildRuntimeFieldEntry = (snakeKey: string): RuntimeFieldEntry | nu
  * so any change to the suffix → runtime-type table or the Painless transform
  * invalidates every cached fingerprint without a manual cache flush.
  *
+ * **Algorithm: SHA-256.** Not a cryptographic concern (fingerprints are
+ * process-local and never leave the node), but Kibana's type surface only
+ * accepts the modern hash algorithms — every other `createHash` call site
+ * in the platform uses `sha256` or `sha3-256`. SHA-1 trips the narrower
+ * algorithm typing here. We truncate to 16 hex chars regardless of the
+ * underlying digest length, so this is a no-op for callers.
+ *
  * Truncated to 16 hex chars (~64 bits). Collision probability for any pair
  * is ~1 in 2^32 by the birthday bound; the worst-case fault from a hit
  * would be a real change going undetected on one node until the bootstrap
@@ -278,6 +285,6 @@ export const buildRuntimeFieldEntry = (snakeKey: string): RuntimeFieldEntry | nu
  */
 export const computeRuntimeFieldsFingerprint = (snakeKeys: readonly string[]): string => {
   const unique = Array.from(new Set(snakeKeys)).sort();
-  const hash = createHash('sha1').update(unique.join('\n')).digest('hex').slice(0, 16);
+  const hash = createHash('sha256').update(unique.join('\n')).digest('hex').slice(0, 16);
   return `v${RUNTIME_FIELDS_BUILD_VERSION}:${hash}`;
 };
