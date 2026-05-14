@@ -5,7 +5,17 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiTitle } from '@elastic/eui';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import {
+  AT_TIMESTAMP,
+  EVENT_OUTCOME,
+  PROCESSOR_EVENT,
+  SERVICE_NAME,
+  TRANSACTION_DURATION,
+  TRANSACTION_ID,
+  TRANSACTION_NAME,
+} from '@kbn/apm-types';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -87,7 +97,7 @@ export function TransactionsTable({
   showSparkPlots,
 }: Props) {
   const { link } = useApmRouter();
-  const { core, observabilityAIAssistant } = useApmPluginContext();
+  const { core, observabilityAIAssistant, share } = useApmPluginContext();
   const { slo: sloPlugin } = useKibana<ApmPluginStartDeps>().services;
   const [renderedItems, setRenderedItems] = useState<ApiResponse['transactionGroups']>([]);
 
@@ -127,6 +137,33 @@ export function TransactionsTable({
   const shouldShowSparkPlots = showSparkPlots ?? !isLarge;
   const { transactionType, serviceName } = useApmServiceContext();
   const { indexSettings = [] } = useApmIndexSettingsContext();
+
+  const exploreWithSparklines = useMemo(() => {
+    const discoverLocator = share?.url?.locators?.get(DISCOVER_APP_LOCATOR);
+    const indices = indexSettings
+      .filter((s) => ['span', 'transaction'].includes(s.configurationName))
+      .map((s) => s.savedValue ?? s.defaultValue)
+      .filter(Boolean)
+      .join(',');
+
+    if (!discoverLocator || !indices) return undefined;
+
+    const esqlQuery = [
+      `FROM ${indices}`,
+      `| WHERE ${PROCESSOR_EVENT} == "transaction"`,
+      `| WHERE ${SERVICE_NAME} == "${serviceName}"`,
+      `| EVAL duration_ms = TO_DOUBLE(${TRANSACTION_DURATION}) / 1000`,
+      `| EVAL is_error = CASE(${EVENT_OUTCOME} == "failure", 1, 0)`,
+      `| STATS latency = SPARKLINE(AVG(duration_ms), ${AT_TIMESTAMP}, 20, ?_tstart, ?_tend), avg_ms = AVG(duration_ms), errors = SPARKLINE(SUM(is_error), ${AT_TIMESTAMP}, 20, ?_tstart, ?_tend), e_count = SUM(is_error), throughput = SPARKLINE(COUNT(${TRANSACTION_ID}), ${AT_TIMESTAMP}, 20, ?_tstart, ?_tend), t_count = COUNT(${TRANSACTION_ID}) BY ${TRANSACTION_NAME}`,
+    ].join('\n');
+
+    return discoverLocator.getRedirectUrl({
+      timeRange: { from: start, to: end },
+      query: { esql: esqlQuery },
+      hideChart: true,
+      tab: { id: 'new', label: `${serviceName} - Transactions` },
+    });
+  }, [share, indexSettings, serviceName, start, end]);
   const [searchQuery, setSearchQueryDebounced] = useStateDebounced('');
 
   const { mainStatistics, mainStatisticsStatus, detailedStatistics, detailedStatisticsStatus } =
@@ -266,20 +303,43 @@ export function TransactionsTable({
                   <h2>{title}</h2>
                 </EuiTitle>
               </EuiFlexItem>
-              {!hideViewTransactionsLink && (
-                <EuiFlexItem grow={false}>
-                  <TransactionOverviewLink
-                    serviceName={serviceName}
-                    latencyAggregationType={latencyAggregationType}
-                    transactionType={transactionType}
-                    query={query}
-                  >
-                    {i18n.translate('xpack.apm.transactionsTable.linkText', {
-                      defaultMessage: 'View transactions',
-                    })}
-                  </TransactionOverviewLink>
-                </EuiFlexItem>
-              )}
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+                  {!hideViewTransactionsLink && (
+                    <EuiFlexItem grow={false}>
+                      <TransactionOverviewLink
+                        serviceName={serviceName}
+                        latencyAggregationType={latencyAggregationType}
+                        transactionType={transactionType}
+                        query={query}
+                      >
+                        {i18n.translate('xpack.apm.transactionsTable.linkText', {
+                          defaultMessage: 'View transactions',
+                        })}
+                      </TransactionOverviewLink>
+                    </EuiFlexItem>
+                  )}
+                  {exploreWithSparklines && (
+                    <EuiFlexItem grow={false}>
+                      <EuiLink
+                        href={exploreWithSparklines}
+                        data-test-subj="exploreWithSparklinesLink"
+                      >
+                        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                          <EuiFlexItem grow={false}>
+                            <EuiIcon type="discoverApp" size="s" />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            {i18n.translate('xpack.apm.transactionsTable.openInDiscover', {
+                              defaultMessage: 'Open in Discover',
+                            })}
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiLink>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         )}
