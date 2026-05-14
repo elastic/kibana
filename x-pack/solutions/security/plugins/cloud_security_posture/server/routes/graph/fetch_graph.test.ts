@@ -10,16 +10,21 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchGraph } from './fetch_graph';
 import { fetchEvents } from './fetch_events_graph';
 import { fetchEntityRelationships, fetchEntities } from './fetch_entity_relationships_graph';
+import { fetchEntityEnrichment } from './fetch_entity_enrichment';
 import type { EventEdge, RelationshipEdge } from './types';
 
 jest.mock('./fetch_events_graph');
 jest.mock('./fetch_entity_relationships_graph');
+jest.mock('./fetch_entity_enrichment');
 
 const mockedFetchEvents = fetchEvents as jest.MockedFunction<typeof fetchEvents>;
 const mockedFetchEntityRelationships = fetchEntityRelationships as jest.MockedFunction<
   typeof fetchEntityRelationships
 >;
 const mockedFetchEntities = fetchEntities as jest.MockedFunction<typeof fetchEntities>;
+const mockedFetchEntityEnrichment = fetchEntityEnrichment as jest.MockedFunction<
+  typeof fetchEntityEnrichment
+>;
 
 describe('fetchGraph', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -36,6 +41,7 @@ describe('fetchGraph', () => {
     spaceId: 'default',
   };
 
+  // Include actorEntityId and targetEntityId so re-grouping works correctly
   const mockEventRecords: EventEdge[] = [
     {
       badge: 1,
@@ -44,13 +50,15 @@ describe('fetchGraph', () => {
       actorIdsCount: 1,
       targetNodeId: 'target-1',
       targetIdsCount: 1,
-      docs: ['doc-1'],
+      docs: ['{"id":"doc-1","type":"event"}'],
       isAlert: false,
       isOrigin: true,
       isOriginAlert: false,
       uniqueEventsCount: 1,
       uniqueAlertsCount: 0,
-      labelNodeId: 'label-1',
+      labelNodeId: 'doc-1',
+      actorEntityId: 'actor-1',
+      targetEntityId: 'target-1',
     },
   ];
 
@@ -65,6 +73,7 @@ describe('fetchGraph', () => {
       targetNodeId: 'target-1',
       targetIdsCount: 1,
       targetIds: ['target-1'],
+      targetId: 'target-1',
     },
   ];
 
@@ -80,6 +89,8 @@ describe('fetchGraph', () => {
       columns: [],
       records: [],
     } as any);
+    // Return empty enrichment map by default (no entity store data)
+    mockedFetchEntityEnrichment.mockResolvedValue(new Map());
   });
 
   afterEach(() => {
@@ -104,10 +115,14 @@ describe('fetchGraph', () => {
     });
   });
 
-  it('should return events from fetchEvents', async () => {
+  it('should return events from fetchEvents (re-grouped by type/subtype)', async () => {
     const result = await fetchGraph(baseParams);
 
-    expect(result.events).toEqual(mockEventRecords);
+    // Re-grouping produces one group per (action, actorType, actorSubType, ...) combination
+    expect(result.events).toHaveLength(1);
+    expect(result.events[0].action).toBe('test-action');
+    expect(result.events[0].isOrigin).toBe(true);
+    expect(result.events[0].badge).toBe(1);
   });
 
   it('should not call fetchEntityRelationships when entityIds is undefined', async () => {
@@ -125,7 +140,8 @@ describe('fetchGraph', () => {
   it('should return empty relationships when entityIds is not provided', async () => {
     const result = await fetchGraph(baseParams);
 
-    expect(result.relationships).toEqual([]);
+    // No entityIds → relationshipsPromise resolves to empty → re-grouping returns []
+    expect(result.relationships).toHaveLength(0);
   });
 
   it('should not call fetchEvents when originEventIds is empty and no esQuery', async () => {
@@ -141,7 +157,7 @@ describe('fetchGraph', () => {
 
     const result = await fetchGraph({ ...baseParams, originEventIds: [], entityIds });
 
-    expect(result.events).toEqual([]);
+    expect(result.events).toHaveLength(0);
   });
 
   it('should call fetchEvents when originEventIds is empty but esQuery is provided', async () => {
@@ -176,12 +192,15 @@ describe('fetchGraph', () => {
     });
   });
 
-  it('should return relationships from fetchEntityRelationships', async () => {
+  it('should return relationships from fetchEntityRelationships (re-grouped by type/subtype)', async () => {
     const entityIds = [{ id: 'entity-1', isOrigin: true }];
 
     const result = await fetchGraph({ ...baseParams, entityIds });
 
-    expect(result.relationships).toEqual(mockRelationshipRecords);
+    // Re-grouping by (actorNodeId, relationship, targetType, targetSubType) — 1 group
+    expect(result.relationships).toHaveLength(1);
+    expect(result.relationships[0].relationship).toBe('Owns');
+    expect(result.relationships[0].badge).toBe(1);
   });
 
   it('should pass esQuery to fetchEvents when provided', async () => {

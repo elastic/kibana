@@ -30,21 +30,13 @@ describe('fetchEntityRelationships', () => {
   });
 
   describe('successful queries', () => {
-    it('should use LOOKUP JOIN when entities index is in lookup mode', async () => {
+    it('should NOT use LOOKUP JOIN and should query when entities index exists', async () => {
       const indexName = getEntitiesLatestIndexName('default');
 
-      // Mock lookup mode available
-      (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
+      // Mock index exists check
+      (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
         .fn()
-        .mockResolvedValueOnce({
-          [indexName]: {
-            settings: {
-              index: {
-                mode: 'lookup',
-              },
-            },
-          },
-        });
+        .mockResolvedValueOnce(true);
 
       const toRecordsMock = jest.fn().mockResolvedValue({ records: [] });
       esClient.asCurrentUser.helpers.esql.mockReturnValue({
@@ -66,27 +58,17 @@ describe('fetchEntityRelationships', () => {
       const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
       const query = esqlCallArgs[0].query;
 
-      // Verify query uses v2 index and LOOKUP JOIN
+      // Verify query uses the entity store index and does NOT use LOOKUP JOIN
       expect(query).toContain(`FROM ${indexName}`);
-      expect(query).toContain(`LOOKUP JOIN ${indexName} ON entity.id`);
+      expect(query).not.toContain('LOOKUP JOIN');
       expect(query).toContain('`entity.relationships.owns.ids`');
     });
 
-    it('should return empty result when entities index is not in lookup mode', async () => {
-      const indexName = getEntitiesLatestIndexName('default');
-
-      // Mock lookup mode NOT available (standard mode)
-      (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
+    it('should return empty result when entities index does not exist', async () => {
+      // Mock index does NOT exist
+      (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
         .fn()
-        .mockResolvedValueOnce({
-          [indexName]: {
-            settings: {
-              index: {
-                mode: 'standard',
-              },
-            },
-          },
-        });
+        .mockResolvedValueOnce(false);
 
       const entityIds: EntityId[] = [{ id: 'entity-1', isOrigin: false }];
 
@@ -97,30 +79,21 @@ describe('fetchEntityRelationships', () => {
         spaceId: 'default',
       });
 
-      // Should not call ESQL when lookup mode is not available
+      // Should not call ESQL when index does not exist
       expect(esClient.asCurrentUser.helpers.esql).not.toHaveBeenCalled();
       expect(result).toEqual({ columns: [], records: [] });
       expect(logger.debug).toHaveBeenCalledWith(
-        expect.stringContaining('is not in lookup mode, skipping relationship fetch')
+        expect.stringContaining('does not exist, skipping relationship fetch')
       );
     });
   });
 
   describe('DSL filter building', () => {
     it('should build correct terms filter from entityIds', async () => {
-      const indexName = getEntitiesLatestIndexName('default');
-
-      (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
+      // Mock index exists
+      (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
         .fn()
-        .mockResolvedValueOnce({
-          [indexName]: {
-            settings: {
-              index: {
-                mode: 'lookup',
-              },
-            },
-          },
-        });
+        .mockResolvedValueOnce(true);
 
       const toRecordsMock = jest.fn().mockResolvedValue({ records: [] });
       esClient.asCurrentUser.helpers.esql.mockReturnValue({
@@ -175,19 +148,10 @@ describe('fetchEntityRelationships', () => {
     });
 
     it('should handle empty entityIds array', async () => {
-      const indexName = getEntitiesLatestIndexName('default');
-
-      (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
+      // Mock index exists
+      (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
         .fn()
-        .mockResolvedValueOnce({
-          [indexName]: {
-            settings: {
-              index: {
-                mode: 'lookup',
-              },
-            },
-          },
-        });
+        .mockResolvedValueOnce(true);
 
       const toRecordsMock = jest.fn().mockResolvedValue({ records: [] });
       esClient.asCurrentUser.helpers.esql.mockReturnValue({
@@ -214,20 +178,11 @@ describe('fetchEntityRelationships', () => {
   });
 
   describe('error handling', () => {
-    it('should return empty result when index does not exist (404)', async () => {
-      const indexName = getEntitiesLatestIndexName('default');
-
-      (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
+    it('should return empty result when ESQL query returns 404', async () => {
+      // Mock index exists (passes the existence check)
+      (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
         .fn()
-        .mockResolvedValueOnce({
-          [indexName]: {
-            settings: {
-              index: {
-                mode: 'lookup',
-              },
-            },
-          },
-        });
+        .mockResolvedValueOnce(true);
 
       // Mock ESQL query throwing 404 error
       esClient.asCurrentUser.helpers.esql.mockReturnValue({
@@ -252,19 +207,10 @@ describe('fetchEntityRelationships', () => {
     });
 
     it('should throw error on non-404 errors', async () => {
-      const indexName = getEntitiesLatestIndexName('default');
-
-      (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
+      // Mock index exists
+      (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
         .fn()
-        .mockResolvedValueOnce({
-          [indexName]: {
-            settings: {
-              index: {
-                mode: 'lookup',
-              },
-            },
-          },
-        });
+        .mockResolvedValueOnce(true);
 
       // Mock ESQL query throwing generic error
       const genericError = new Error('Connection refused');
@@ -288,20 +234,11 @@ describe('fetchEntityRelationships', () => {
   });
 
   describe('query structure', () => {
-    it('should include actorsDocData and targetsDocData in query', async () => {
-      const indexName = getEntitiesLatestIndexName('default');
-
-      (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
+    it('should include actorsDocData and targetsDocData in query without LOOKUP JOIN', async () => {
+      // Mock index exists
+      (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
         .fn()
-        .mockResolvedValueOnce({
-          [indexName]: {
-            settings: {
-              index: {
-                mode: 'lookup',
-              },
-            },
-          },
-        });
+        .mockResolvedValueOnce(true);
 
       const toRecordsMock = jest.fn().mockResolvedValue({ records: [] });
       esClient.asCurrentUser.helpers.esql.mockReturnValue({
@@ -329,10 +266,15 @@ describe('fetchEntityRelationships', () => {
       expect(query).toContain('availableInEntityStore');
       expect(query).toContain('relationshipNodeId');
       expect(query).toContain('actorHostIps = VALUES(host.ip)');
-      expect(query).toContain('targetHostIps = VALUES(_target_host_ip)');
 
-      // Verify sourceFields are included in both actor and target doc data
+      // LOOKUP JOIN is removed — target enrichment happens in TypeScript
+      expect(query).not.toContain('LOOKUP JOIN');
+
+      // Verify sourceFields are included in actor doc data
       expect(query).toContain('sourceFields');
+
+      // Verify STATS groups BY _target_id (not target type/subtype)
+      expect(query).toContain('BY entity.id, relationship, _target_id');
     });
   });
 });

@@ -9,38 +9,23 @@ import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 
 /**
- * Checks if the entities latest index exists and is configured in lookup mode.
+ * Checks if the entities latest index exists.
+ * Previously checked for lookup mode (required for LOOKUP JOIN), but since
+ * enrichment now uses follow-up queries, only existence matters.
  */
-export const checkIfEntitiesIndexLookupMode = async (
+export const checkIfEntitiesIndexExists = async (
   esClient: IScopedClusterClient,
   logger: Logger,
   spaceId: string
 ): Promise<boolean> => {
   const indexName = getEntitiesLatestIndexName(spaceId);
   try {
-    const response = await esClient.asInternalUser.indices.getSettings({
-      index: indexName,
-    });
-    const indexSettings = response[indexName];
-    if (!indexSettings) {
-      logger.debug(`Entities index ${indexName} not found`);
-      return false;
-    }
-
-    // Check if index is in lookup mode
-    const mode = indexSettings.settings?.index?.mode;
-    const isLookupMode = mode === 'lookup';
-
-    if (!isLookupMode) {
-      logger.debug(`Entities index ${indexName} exists but is not in lookup mode (mode: ${mode})`);
-    }
-
-    return isLookupMode;
-  } catch (error) {
-    if (error.statusCode === 404) {
+    const exists = await esClient.asInternalUser.indices.exists({ index: indexName });
+    if (!exists) {
       logger.debug(`Entities index ${indexName} does not exist`);
-      return false;
     }
+    return exists;
+  } catch (error) {
     logger.error(`Error checking entities index ${indexName}: ${error.message}`);
     return false;
   }

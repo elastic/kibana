@@ -13,7 +13,7 @@ import {
 } from '@kbn/cloud-security-posture-common/constants';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import { SECURITY_ALERTS_PARTIAL_IDENTIFIER } from '../../../common/constants';
-import { generateFieldHintCases, checkIfEntitiesIndexLookupMode } from '../graph/utils';
+import { generateFieldHintCases, checkIfEntitiesIndexExists } from '../graph/utils';
 import type { EntityRecord } from './types';
 
 interface FetchEntitiesParams {
@@ -46,7 +46,7 @@ export const fetchEntities = async ({
     'logs-*',
   ];
 
-  const isLookupIndexAvailable = await checkIfEntitiesIndexLookupMode(esClient, logger, spaceId);
+  const isLookupIndexAvailable = await checkIfEntitiesIndexExists(esClient, logger, spaceId);
 
   const query = buildEntitiesEsqlQuery({
     indexPatterns: resolvedIndexPatterns,

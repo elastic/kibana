@@ -22,8 +22,6 @@ import {
 } from '@kbn/entity-store/common/domain/euid';
 import {
   concatJsonObjectPropertyEsqlExprSafe,
-  buildEntityEnrichment,
-  checkIfEntitiesIndexLookupMode,
   concatJsonObjectPropertyBool,
   JSON_OBJECT_START,
   JSON_OBJECT_END,
@@ -44,8 +42,6 @@ interface BuildEsqlQueryParams {
   indexPatterns: string[];
   originEventIds: OriginEventId[];
   originAlertIds: OriginEventId[];
-  isLookupIndexAvailable: boolean;
-  spaceId: string;
   alertsMappingsIncluded: boolean;
   pinnedIds?: string[];
 }
@@ -89,7 +85,6 @@ export const fetchEvents = async ({
     }
   });
 
-  const isLookupIndexAvailable = await checkIfEntitiesIndexLookupMode(esClient, logger, spaceId);
   const alertsMappingsIncluded = indexPatterns.some((indexPattern) =>
     indexPattern.includes(SECURITY_ALERTS_PARTIAL_IDENTIFIER)
   );
@@ -98,8 +93,6 @@ export const fetchEvents = async ({
     indexPatterns,
     originEventIds,
     originAlertIds,
-    isLookupIndexAvailable,
-    spaceId,
     alertsMappingsIncluded,
     pinnedIds,
   });
@@ -402,76 +395,10 @@ const buildActorSourceFieldsEsql = (): string =>
 const buildTargetSourceFieldsEsql = (): string =>
   buildSourceFieldsJson(GRAPH_TARGET_EUID_SOURCE_FIELDS, 'targetEntityId');
 
-/**
- * Generates ESQL statements for building entity fields with enrichment data.
- * This is used when entity store enrichment is available (via LOOKUP JOIN).
- * Uses REPLACE to fix "{," pattern that occurs when first property is null.
- */
-const buildEnrichedEntityFieldsEsql = (): string => {
-  return `// Construct actor and target entities data
-// Build entity field conditionally - only include fields that have values
-// Put required fields first (no comma prefix), optional fields use comma prefix
-| EVAL actorEntityField = CASE(
-    actorEntityName IS NOT NULL OR actorEntityType IS NOT NULL OR actorEntitySubType IS NOT NULL,
-    CONCAT("\\"entity\\":",
-    ${JSON_OBJECT_START},
-      ${concatJsonObjectPropertyBool('availableInEntityStore', true)},
-      CASE(actorEntityName IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
-        ${concatJsonObjectPropertyEsqlExprAsString('name', 'actorEntityName')}), ""),
-      CASE(actorEntityType IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
-        ${concatJsonObjectPropertyEsqlExprAsString('type', 'actorEntityType')}), ""),
-      CASE(actorEntitySubType IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
-        ${concatJsonObjectPropertyEsqlExprAsString('sub_type', 'actorEntitySubType')}), ""),
-      CASE(actorEntityEngineType IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
-        ${concatJsonObjectPropertyEsqlExprAsString('engine_type', 'actorEntityEngineType')}), ""),
-      CASE(
-        actorHostIp IS NOT NULL,
-        CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":",
-        ${JSON_OBJECT_START},
-          "\\"ip\\":[\\"", MV_CONCAT(actorHostIp, "\\",\\""), "\\"]",
-        ${JSON_OBJECT_END}), ""),
-      ${JSON_OBJECT_SEPARATOR}, ${buildActorSourceFieldsEsql()},
-    ${JSON_OBJECT_END}),
-    CONCAT("\\"entity\\":", ${JSON_OBJECT_START},
-      ${concatJsonObjectPropertyBool('availableInEntityStore', false)},
-      ${JSON_OBJECT_SEPARATOR}, ${buildActorSourceFieldsEsql()},
-    ${JSON_OBJECT_END})
-  )
-| EVAL targetEntityField = CASE(
-    targetEntityName IS NOT NULL OR targetEntityType IS NOT NULL OR targetEntitySubType IS NOT NULL,
-    CONCAT("\\"entity\\":",
-    ${JSON_OBJECT_START},
-      ${concatJsonObjectPropertyBool('availableInEntityStore', true)},
-      CASE(targetEntityName IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
-        ${concatJsonObjectPropertyEsqlExprAsString('name', 'targetEntityName')}), ""),
-      CASE(targetEntityType IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
-        ${concatJsonObjectPropertyEsqlExprAsString('type', 'targetEntityType')}), ""),
-      CASE(targetEntitySubType IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
-        ${concatJsonObjectPropertyEsqlExprAsString('sub_type', 'targetEntitySubType')}), ""),
-      CASE(targetEntityEngineType IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
-        ${concatJsonObjectPropertyEsqlExprAsString('engine_type', 'targetEntityEngineType')}), ""),
-      CASE(
-        targetHostIp IS NOT NULL,
-        CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":",
-        ${JSON_OBJECT_START},
-          "\\"ip\\":[\\"", MV_CONCAT(targetHostIp, "\\",\\""), "\\"]",
-        ${JSON_OBJECT_END}), ""),
-      ${JSON_OBJECT_SEPARATOR}, ${buildTargetSourceFieldsEsql()},
-    ${JSON_OBJECT_END}),
-    CONCAT("\\"entity\\":",
-    ${JSON_OBJECT_START},
-      ${concatJsonObjectPropertyBool('availableInEntityStore', false)},
-      ${JSON_OBJECT_SEPARATOR}, ${buildTargetSourceFieldsEsql()},
-    ${JSON_OBJECT_END})
-  )`;
-};
-
 const buildEsqlQuery = ({
   indexPatterns,
   originEventIds,
   originAlertIds,
-  isLookupIndexAvailable,
-  spaceId,
   alertsMappingsIncluded,
   pinnedIds,
 }: BuildEsqlQueryParams): string => {
@@ -487,14 +414,7 @@ ${buildSaveSourceFieldsEsql()}
 | MV_EXPAND actorEntityId
 | MV_EXPAND targetEntityId
 ${buildPinnedEsql(pinnedIds)}
-${
-  isLookupIndexAvailable
-    ? `
-${buildEntityEnrichment(isLookupIndexAvailable, spaceId)}
-
-${buildEnrichedEntityFieldsEsql()}
-`
-    : `
+// Build entity fields with availableInEntityStore=false; TypeScript enrichment rebuilds post-enrichment
 | EVAL actorEntityField = CONCAT("\\"entity\\":",
   ${JSON_OBJECT_START},
     ${concatJsonObjectPropertyBool('availableInEntityStore', false)},
@@ -505,19 +425,7 @@ ${buildEnrichedEntityFieldsEsql()}
     ${concatJsonObjectPropertyBool('availableInEntityStore', false)},
     ${JSON_OBJECT_SEPARATOR}, ${buildTargetSourceFieldsEsql()},
   ${JSON_OBJECT_END})
-// Fallback to null string with non-enriched entity metadata
-| EVAL actorEntityName = TO_STRING(null)
-| EVAL actorEntityType = TO_STRING(null)
-| EVAL actorEntitySubType = TO_STRING(null)
-| EVAL actorHostIp = TO_STRING(null)
-| EVAL actorEntityEngineType = TO_STRING(null)
-| EVAL targetEntityName = TO_STRING(null)
-| EVAL targetEntityType = TO_STRING(null)
-| EVAL targetEntitySubType = TO_STRING(null)
-| EVAL targetHostIp = TO_STRING(null)
-| EVAL targetEntityEngineType = TO_STRING(null)
-`
-}
+
 // Create actor and target data with entity data
 
 | EVAL actorDocData = CONCAT(${JSON_OBJECT_START},
@@ -568,6 +476,8 @@ ${buildEnrichedEntityFieldsEsql()}
         : ''
     }
   "}")
+// Group by actor and target entity IDs (entity-ID level).
+// TypeScript re-groups by type/subtype after enrichment, restoring current behavior.
 | STATS badge = COUNT(*),
   uniqueEventsCount = COUNT_DISTINCT(CASE(isAlert == false, _id, null)),
   uniqueAlertsCount = COUNT_DISTINCT(CASE(isAlert == true, _id, null)),
@@ -580,40 +490,23 @@ ${buildEnrichedEntityFieldsEsql()}
     MV_COUNT(VALUES(_id)) == 1, TO_STRING(VALUES(_id)),
     MD5(MV_CONCAT(MV_SORT(VALUES(_id)), ","))
   ),
-  // actor attributes
-  actorNodeId = CASE(
-    // deterministic group IDs - use raw entity ID for single values, MD5 hash for multiple
-    MV_COUNT(VALUES(actorEntityId)) == 1, TO_STRING(VALUES(actorEntityId)),
-    MD5(MV_CONCAT(MV_SORT(VALUES(actorEntityId)), ","))
-  ),
-  actorIdsCount = COUNT_DISTINCT(actorEntityId),
-  actorEntityName = VALUES(actorEntityName),
-  actorHostIps = VALUES(actorHostIp),
+  // actor attributes - single value since we group BY actorEntityId
+  actorNodeId = TO_STRING(actorEntityId),
+  actorIdsCount = 1,
   actorsDocData = VALUES(actorDocData),
-  // target attributes
-  targetNodeId = CASE(
-    // deterministic group IDs - use raw entity ID for single values, MD5 hash for multiple
-    COUNT_DISTINCT(targetEntityId) == 0, null,
-    CASE(
-      MV_COUNT(VALUES(targetEntityId)) == 1, TO_STRING(VALUES(targetEntityId)),
-      MD5(MV_CONCAT(MV_SORT(VALUES(targetEntityId)), ","))
-    )
-  ),
-  targetIdsCount = COUNT_DISTINCT(targetEntityId),
-  targetEntityName = VALUES(targetEntityName),
-  targetHostIps = VALUES(targetHostIp),
+  // target attributes - single value since we group BY targetEntityId
+  targetNodeId = CASE(targetEntityId IS NULL, null, TO_STRING(targetEntityId)),
+  targetIdsCount = CASE(targetEntityId IS NULL, 0, 1),
   targetsDocData = VALUES(targetDocData)
     BY action = event.action,
-      actorEntityType,
-      actorEntitySubType,
-      targetEntityType,
-      targetEntitySubType,
+      actorEntityId,
+      targetEntityId,
       isOrigin,
       isOriginAlert,
       pinned
 | EVAL pinnedSort = CASE(pinned IS NULL, 1, 0)
 | SORT action DESC, pinnedSort ASC, isOrigin
-| LIMIT 1000
+| LIMIT 5000
 | DROP pinnedSort`;
 
   return query;

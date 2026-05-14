@@ -75,6 +75,17 @@ export interface EventEdge extends GraphEdge {
    */
   labelNodeId: string;
   pinned?: string | null;
+  /**
+   * Single actor entity EUID for this entity-ID STATS row.
+   * Present in the raw ESQL output; consumed during TypeScript re-grouping.
+   * Populated from the STATS BY actorEntityId clause.
+   */
+  actorEntityId?: string | null;
+  /**
+   * Single target entity EUID for this entity-ID STATS row.
+   * Present in the raw ESQL output; consumed during TypeScript re-grouping.
+   */
+  targetEntityId?: string | null;
 }
 
 /**
@@ -90,6 +101,12 @@ export interface RelationshipEdge extends GraphEdge {
   // Target entity grouping (relationship-specific)
   targetNodeId: string; // Override to make non-nullable for relationships
   targetIds: string[]; // All target entity IDs in this group
+  /**
+   * Single target entity ID for this entity-ID STATS row.
+   * Present in the raw ESQL output before TypeScript re-grouping.
+   * Consumed during re-grouping to reconstruct targetIds and targetNodeId.
+   */
+  targetId?: string | null;
 }
 
 export interface EntityRecord {

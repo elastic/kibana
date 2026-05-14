@@ -9,7 +9,6 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchEvents } from './fetch_events_graph';
 import type { Logger } from '@kbn/core/server';
 import type { OriginEventId, EsQuery } from './types';
-import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { GRAPH_ACTOR_EUID_SOURCE_FIELDS, GRAPH_TARGET_EUID_SOURCE_FIELDS } from './constants';
 
 describe('fetchEvents', () => {
@@ -127,23 +126,8 @@ describe('fetchEvents', () => {
     expect(result).toEqual([{ id: 'dummy' }]);
   });
 
-  describe('LOOKUP JOIN integration', () => {
-    it('should include LOOKUP JOIN clause when entities index is in lookup mode', async () => {
-      const indexName = getEntitiesLatestIndexName('default');
-
-      // Mock the indices.getSettings to return lookup mode
-      (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
-        .fn()
-        .mockResolvedValueOnce({
-          [indexName]: {
-            settings: {
-              index: {
-                mode: 'lookup',
-              },
-            },
-          },
-        });
-
+  describe('enrichment integration', () => {
+    it('should NOT include LOOKUP JOIN in the query', async () => {
       const validIndexPatterns = ['valid_index'];
       const params = {
         esClient,
@@ -157,42 +141,17 @@ describe('fetchEvents', () => {
         esQuery: undefined as EsQuery | undefined,
       };
 
-      const result = await fetchEvents(params);
+      await fetchEvents(params);
 
       expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
       const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
       const query = esqlCallArgs[0].query;
 
-      // Verify LOOKUP JOIN is used (preferred over ENRICH)
-      expect(query).toContain(`LOOKUP JOIN ${indexName} ON entity.id`);
-
-      // Verify LOOKUP JOIN populates expected fields
-      expect(query).toContain('actorEntityName');
-      expect(query).toContain('actorEntityType');
-      expect(query).toContain('actorEntitySubType');
-      expect(query).toContain('targetEntityName');
-      expect(query).toContain('targetEntityType');
-      expect(query).toContain('targetEntitySubType');
-
-      expect(result).toEqual([{ id: 'dummy' }]);
+      // LOOKUP JOIN is removed in favour of follow-up TypeScript enrichment
+      expect(query).not.toContain('LOOKUP JOIN');
     });
 
-    it('should not include LOOKUP JOIN clause when entities index is not in lookup mode', async () => {
-      const indexName = getEntitiesLatestIndexName('default');
-
-      // Mock the indices.getSettings to return standard mode (not lookup)
-      (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
-        .fn()
-        .mockResolvedValueOnce({
-          [indexName]: {
-            settings: {
-              index: {
-                mode: 'standard',
-              },
-            },
-          },
-        });
-
+    it('should group STATS BY actorEntityId and targetEntityId', async () => {
       const validIndexPatterns = ['valid_index'];
       const params = {
         esClient,
@@ -206,51 +165,20 @@ describe('fetchEvents', () => {
         esQuery: undefined as EsQuery | undefined,
       };
 
-      const result = await fetchEvents(params);
+      await fetchEvents(params);
 
       expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
       const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
       const query = esqlCallArgs[0].query;
 
-      // Verify LOOKUP JOIN is NOT used
-      expect(query).not.toContain('LOOKUP JOIN');
+      // Must group BY actor and target entity IDs (not type/subtype — those come from enrichment)
+      expect(query).toContain('BY action = event.action');
+      expect(query).toContain('actorEntityId');
+      expect(query).toContain('targetEntityId');
 
-      // Verify fallback EVALs are present for null values
-      expect(query).toMatch(/EVAL\s+actorEntityName\s*=\s*TO_STRING\(null\)/);
-      expect(query).toMatch(/EVAL\s+targetEntityName\s*=\s*TO_STRING\(null\)/);
-
-      expect(result).toEqual([{ id: 'dummy' }]);
-    });
-
-    it('should not include LOOKUP JOIN when entities index does not exist', async () => {
-      // Mock the indices.getSettings to throw 404 (index not found)
-      (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
-        .fn()
-        .mockRejectedValueOnce({ statusCode: 404 });
-
-      const validIndexPatterns = ['valid_index'];
-      const params = {
-        esClient,
-        logger,
-        start: 0,
-        end: 1000,
-        originEventIds: [] as OriginEventId[],
-        showUnknownTarget: false,
-        indexPatterns: validIndexPatterns,
-        spaceId: 'default',
-        esQuery: undefined as EsQuery | undefined,
-      };
-
-      const result = await fetchEvents(params);
-
-      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
-      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
-      const query = esqlCallArgs[0].query;
-
-      // Verify LOOKUP JOIN is NOT used
-      expect(query).not.toContain('LOOKUP JOIN');
-
-      expect(result).toEqual([{ id: 'dummy' }]);
+      // Must NOT group by type/subtype since those come from enrichment
+      expect(query).not.toMatch(/BY.*actorEntityType/);
+      expect(query).not.toMatch(/BY.*actorEntitySubType/);
     });
   });
 
