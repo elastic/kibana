@@ -224,7 +224,6 @@ For a recurring offender, the right conclusion is usually "escalate to the ownin
 
 Before reporting your conclusion, walk through this checklist. Items that fail mean the conclusion is not yet solid — keep investigating or be explicit that you couldn't get further.
 
-```
 - [ ] I can name the root cause in one sentence (not "the test is flaky").
 - [ ] That sentence describes either a product behavior, a test-isolation problem, or an environment coupling — not "the previous code timed out".
 - [ ] If my conclusion blames only the test, I can articulate why the product side is correct and does not need to change.
@@ -233,7 +232,6 @@ Before reporting your conclusion, walk through this checklist. Items that fail m
 - [ ] I checked whether the original issue was previously reopened. If yes, my conclusion is meaningfully different from the previous one — or I have stated explicitly why the previous reasoning still applies.
 - [ ] I am not relying on a hypothetical flaky-test-runner pass as proof. The runner can confirm a fix is plausible; it cannot confirm a fix is durable.
 - [ ] I have stated my confidence level honestly. "Likely environmental, low confidence" is a valid conclusion. "The test is flaky, fixed by retry" is not.
-```
 
 # Investigation pitfalls
 
