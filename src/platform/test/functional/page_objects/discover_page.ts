@@ -1066,12 +1066,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   private async waitForDropToFinish() {
-    await this.retry.try(async () => {
-      const exists = await this.find.existsByCssSelector('.domDragDrop-isActiveGroup');
-      if (exists) {
-        throw new Error('UI still in drag/drop mode');
-      }
-    });
+    await this.find.waitForDeletedByCssSelector('.domDragDrop-isActiveGroup');
     await this.header.waitUntilLoadingHasFinished();
     await this.waitUntilSearchingHasFinished();
   }
