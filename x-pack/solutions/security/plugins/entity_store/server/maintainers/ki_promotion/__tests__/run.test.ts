@@ -216,10 +216,75 @@ describe('runKiPromotion', () => {
       entity: {
         EngineMetadata: { Type: 'service' },
         id: 'service:demo',
+        name: 'demo',
         confidence: 'low',
         previous_id: 'generic:demo@stream:logs.svc:service',
       },
     });
+  });
+
+  it('writes entity.name from service.name on service promotion', async () => {
+    const reader = buildReader([buildEntityFeature()]);
+    const esClient = buildEsClient({
+      promotionHits: [
+        {
+          _id: 'doc-svc-name',
+          entityId: 'generic:demo@stream:logs.svc:service',
+          engineMetadataType: 'generic',
+          entityType: 'Service',
+          entitySource: ['stream:logs.svc:service'],
+          serviceName: 'demo',
+        },
+      ],
+    });
+    const globalStateClient = buildGlobalStateClient();
+
+    await runKiPromotion({
+      reader,
+      esClient,
+      logger,
+      namespace: NAMESPACE,
+      abortController,
+      globalStateClient: globalStateClient as unknown as EntityStoreGlobalStateClient,
+    });
+
+    const operations = (esClient.bulk.mock.calls[0][0] as any).operations as any[];
+    expect(operations[1].doc.entity.name).toBe('demo');
+  });
+
+  it('writes entity.name from host.name (then host.id fallback) on host promotion', async () => {
+    const reader = buildReader([
+      buildEntityFeature({
+        subtype: 'host',
+        filter: { field: 'host.name', eq: 'web-01' },
+        stream_name: 'logs.hosts',
+      }),
+    ]);
+    const esClient = buildEsClient({
+      promotionHits: [
+        {
+          _id: 'doc-host-name',
+          entityId: 'generic:web-01@stream:logs.hosts:host',
+          engineMetadataType: 'generic',
+          entityType: 'Host',
+          entitySource: ['stream:logs.hosts:host'],
+          hostName: 'web-01',
+        },
+      ],
+    });
+    const globalStateClient = buildGlobalStateClient();
+
+    await runKiPromotion({
+      reader,
+      esClient,
+      logger,
+      namespace: NAMESPACE,
+      abortController,
+      globalStateClient: globalStateClient as unknown as EntityStoreGlobalStateClient,
+    });
+
+    const operations = (esClient.bulk.mock.calls[0][0] as any).operations as any[];
+    expect(operations[1].doc.entity.name).toBe('web-01');
   });
 
   // Regression: KI extraction writes `entity.source` as a single string via a

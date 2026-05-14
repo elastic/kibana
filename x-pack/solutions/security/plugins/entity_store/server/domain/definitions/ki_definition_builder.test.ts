@@ -258,6 +258,29 @@ describe('buildDefinitionFromEntityKIs', () => {
     expect(sources.filter((s) => s === 'service.name')).toHaveLength(1);
   });
 
+  it('maps the grouping field to entity.name so the display name is the entity value, not the EUID', () => {
+    const def = buildDefinitionFromEntityKIs(args());
+    const nameField = def.fields.find((f) => f.destination === 'entity.name');
+    expect(nameField).toBeDefined();
+    expect(nameField?.source).toBe('service.name');
+  });
+
+  it('maps a non-ECS grouping field to entity.name the same way', () => {
+    const def = buildDefinitionFromEntityKIs(
+      args({
+        features: [
+          baseFeature({
+            filter: { field: 'org.team', eq: 'platform' },
+            meta: { entity_store: { grouping_field: 'org.team' } },
+          }),
+        ],
+      })
+    );
+    const nameField = def.fields.find((f) => f.destination === 'entity.name');
+    expect(nameField).toBeDefined();
+    expect(nameField?.source).toBe('org.team');
+  });
+
   // End-to-end check that the produced definition feeds correctly through the
   // existing ESQL field-evaluations builder. Confirms the literal-source
   // wiring chosen by the KI builder is syntactically valid for the pipeline

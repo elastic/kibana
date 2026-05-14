@@ -262,6 +262,10 @@ export const runKiPromotion = async (
         doc: {
           'entity.EngineMetadata.Type': targetEngine,
           'entity.id': newEuid,
+          'entity.name':
+            targetEngine === 'host'
+              ? (candidate.hostName ?? candidate.hostId ?? candidate.hostHostname)
+              : candidate.serviceName,
           'entity.confidence': 'low',
           'entity.previous_id': candidate.entityId,
         },

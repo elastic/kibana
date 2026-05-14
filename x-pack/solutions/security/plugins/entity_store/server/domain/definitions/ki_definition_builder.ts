@@ -314,7 +314,7 @@ const sanitizeIdSegment = (segment: string): string => segment.replace(/[^a-zA-Z
 const buildKiDefinitionFields = (groupingField: string): EntityField[] => {
   const baseFields: EntityField[] = [
     newestValue({ source: 'entity.id' }),
-    newestValue({ source: 'entity.name' }),
+    newestValue({ destination: 'entity.name', source: groupingField }),
     ...getEntityFieldsDescriptions(),
     ...getCommonFieldDescriptions('entity'),
   ];
