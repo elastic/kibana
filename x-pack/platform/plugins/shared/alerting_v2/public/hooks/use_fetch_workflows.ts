@@ -8,12 +8,13 @@
 import { useQuery } from '@kbn/react-query';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
-import type { WorkflowListDto, WorkflowsSearchParams } from '@kbn/workflows';
+import type { WorkflowListDto } from '@kbn/workflows';
 import { WorkflowsApi } from '../services/workflows_api';
 import { workflowKeys } from './query_key_factory';
 
-interface UseFetchWorkflowsParams extends Pick<WorkflowsSearchParams, 'query' | 'tags'> {
+interface UseFetchWorkflowsParams {
   query: string;
+  tags?: string[];
   isEnabled?: boolean;
 }
 

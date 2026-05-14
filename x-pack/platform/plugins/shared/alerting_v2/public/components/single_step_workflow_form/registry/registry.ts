@@ -48,5 +48,10 @@ export const getSingleStepWorkflowType = (
   id: SingleStepWorkflowTypeId
 ): SingleStepWorkflowType | undefined => SINGLE_STEP_WORKFLOW_TYPES.find((type) => type.id === id);
 
-export const getDefaultSingleStepWorkflowType = (): SingleStepWorkflowType =>
-  SINGLE_STEP_WORKFLOW_TYPES[0];
+export const getDefaultSingleStepWorkflowType = (): SingleStepWorkflowType => {
+  const defaultType = SINGLE_STEP_WORKFLOW_TYPES[0];
+  if (!defaultType) {
+    throw new Error('No single-step workflow types are registered.');
+  }
+  return defaultType;
+};

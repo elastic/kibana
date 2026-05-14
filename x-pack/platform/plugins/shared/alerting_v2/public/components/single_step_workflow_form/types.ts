@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type SingleStepWorkflowTypeId = string;
+export type SingleStepWorkflowTypeId = 'email' | 'slack';
 
 export interface ExistingWorkflowFormValue {
   mode: 'existing';

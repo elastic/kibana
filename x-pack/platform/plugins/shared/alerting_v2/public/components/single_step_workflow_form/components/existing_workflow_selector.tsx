@@ -39,6 +39,9 @@ export const ExistingWorkflowSelector = ({
 
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedQuery = useDebouncedValue(searchQuery, 300);
+  const [selectedWorkflow, setSelectedWorkflow] = useState<{ id: string; name: string } | null>(
+    null
+  );
 
   const { data: workflowsData, isLoading } = useFetchWorkflows({
     query: debouncedQuery,
@@ -59,7 +62,12 @@ export const ExistingWorkflowSelector = ({
   ];
 
   const selectedOptions: Array<EuiComboBoxOptionOption<string>> = value
-    ? [{ label: results.find((w) => w.id === value)?.name ?? value, value }]
+    ? [
+        {
+          label: results.find((w) => w.id === value)?.name ?? selectedWorkflow?.name ?? value,
+          value,
+        },
+      ]
     : [];
 
   if (!isWorkflowsEnabled) {
@@ -78,9 +86,8 @@ export const ExistingWorkflowSelector = ({
       >
         <FormattedMessage
           id="xpack.alertingV2.singleStepWorkflow.workflowsDisabled.description"
-          defaultMessage="Single-step workflows require the Workflows feature. Enable the {settingName} setting in {advancedSettingsLink}, then refresh this page."
+          defaultMessage="Single-step workflows require the Workflows feature. Enable it in {advancedSettingsLink}, then refresh this page."
           values={{
-            settingName: WORKFLOWS_UI_SETTING_ID,
             advancedSettingsLink: (
               <EuiLink href={settingsUrl} data-test-subj="singleStepWorkflowsDisabledSettingsLink">
                 <FormattedMessage
@@ -124,6 +131,8 @@ export const ExistingWorkflowSelector = ({
             return;
           }
           if (next.value) {
+            const workflow = results.find((w) => w.id === next.value);
+            if (workflow) setSelectedWorkflow({ id: workflow.id, name: workflow.name });
             onSelect(next.value);
           }
         }}

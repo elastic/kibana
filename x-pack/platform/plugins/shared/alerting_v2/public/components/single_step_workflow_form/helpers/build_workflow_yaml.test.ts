@@ -115,6 +115,7 @@ describe('buildSingleStepWorkflowYaml', () => {
     expect(() =>
       buildSingleStepWorkflowYaml({
         mode: 'create',
+        // @ts-expect-error intentionally invalid type id to test runtime guard
         typeId: 'pager-duty',
         connectorId: 'c1',
         params: '',

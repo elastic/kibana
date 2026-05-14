@@ -81,12 +81,13 @@ jest.mock('./hooks/use_fetch_connectors_by_type', () => ({
 }));
 
 const renderForm = (
-  initialValue: SingleStepWorkflowFormValue = { mode: 'existing', workflowId: null }
+  initialValue: SingleStepWorkflowFormValue = { mode: 'existing', workflowId: null },
+  extraProps: { isInvalid?: boolean; errorMessage?: string } = {}
 ) => {
   const onChange = jest.fn();
   const result = render(
     <I18nProvider>
-      <SingleStepWorkflowForm value={initialValue} onChange={onChange} />
+      <SingleStepWorkflowForm value={initialValue} onChange={onChange} {...extraProps} />
     </I18nProvider>
   );
   return { ...result, onChange };
@@ -138,6 +139,16 @@ describe('SingleStepWorkflowForm', () => {
     expect(screen.getByTestId('singleStepWorkflowForm')).toBeInTheDocument();
     expect(screen.getByTestId('singleStepWorkflowSubform')).toBeInTheDocument();
     expect(screen.getByTestId('singleStepWorkflowParamsEditor')).toBeInTheDocument();
+  });
+
+  it('shows an error message when isInvalid is true', () => {
+    renderForm({ mode: 'existing', workflowId: null }, { isInvalid: true, errorMessage: 'Workflow is required' });
+    expect(screen.getByText('Workflow is required')).toBeInTheDocument();
+  });
+
+  it('does not show an error message when isInvalid is false', () => {
+    renderForm({ mode: 'existing', workflowId: null }, { isInvalid: false, errorMessage: 'Workflow is required' });
+    expect(screen.queryByText('Workflow is required')).not.toBeInTheDocument();
   });
 
   it('reverts to existing mode when the back link is clicked', async () => {
