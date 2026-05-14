@@ -42,7 +42,6 @@ import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
 import type { DashboardReadResponseBody } from '../../server';
 import { initializePauseFetchManager } from './pause_fetch_manager';
-import { initializeRelatedPanelsManager } from './related_panels_manager';
 import { getDashboardBackupService } from '../services/dashboard_api_services';
 
 export function getDashboardApi({
@@ -81,9 +80,14 @@ export function getDashboardApi({
     createdBy: readResult?.meta?.created_by,
     user,
   });
-  const trackPanel = initializeTrackPanel(async (id: string) => {
-    await layoutManager.api.getChildApi(id);
-  }, dashboardContainerRef$);
+  const trackPanel = initializeTrackPanel(
+    async (id: string) => {
+      await layoutManager.api.getChildApi(id);
+    },
+    dashboardContainerRef$,
+    getDashboardBackupService(),
+    savedObjectId$
+  );
 
   const layoutManager = initializeLayoutManager(
     viewModeManager,
@@ -140,14 +144,6 @@ export function getDashboardApi({
     }
   }
 
-  const relatedPanelsManager = initializeRelatedPanelsManager({
-    trackPanel,
-    layoutManager,
-    savedObjectId$,
-    backupService: getDashboardBackupService(),
-    viewMode$: viewModeManager.api.viewMode$,
-  });
-
   const unsavedChangesManager = initializeUnsavedChangesManager({
     viewMode$: viewModeManager.api.viewMode$,
     storeUnsavedChanges: creationOptions?.useSessionStorageIntegration,
@@ -192,7 +188,6 @@ export function getDashboardApi({
     ...unsavedChangesManager.api,
     ...projectRoutingManager?.api,
     ...trackOverlayApi,
-    ...relatedPanelsManager.api,
     esqlVariables$: esqlVariablesManager.api.publishedEsqlVariables$,
     ...timesliceManager.api,
     ...pauseFetchManager.api,
@@ -333,7 +328,6 @@ export function getDashboardApi({
       timesliceManager.cleanup();
       projectRoutingManager?.cleanup();
       pauseFetchManager.cleanup();
-      relatedPanelsManager.cleanup();
     },
   };
 }

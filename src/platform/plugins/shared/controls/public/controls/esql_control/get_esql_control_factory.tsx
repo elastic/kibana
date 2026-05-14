@@ -8,9 +8,8 @@
  */
 
 import { pick } from 'lodash';
-import deepEqual from 'fast-deep-equal';
 import React, { useEffect } from 'react';
-import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
+import { BehaviorSubject, combineLatest, map } from 'rxjs';
 
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
@@ -21,13 +20,9 @@ import {
   type QueryESQLControl,
   type StaticESQLControl,
 } from '@kbn/esql-types';
-import { getESQLQueryVariables } from '@kbn/esql-utils';
 import {
   apiHasPinnedPanels,
-  apiPublishesChildren,
-  apiPublishesESQLQuery,
   initializeUnsavedChanges,
-  type HasUniqueId,
   type StateComparators,
 } from '@kbn/presentation-publishing';
 
@@ -105,32 +100,7 @@ export const getESQLControlFactory = <
         },
       });
 
-      const relatedPanels$ = new BehaviorSubject<string[]>([]);
-      const relatedPanelsSubscription = apiPublishesChildren(parentApi)
-        ? parentApi.children$
-            .pipe(
-              map(
-                (children) =>
-                  Object.values(children)
-                    .filter(
-                      (child) =>
-                        (child as HasUniqueId).uuid !== uuid &&
-                        apiPublishesESQLQuery(child) &&
-                        getESQLQueryVariables(child.query$.getValue().esql).includes(
-                          initialState.variable_name
-                        )
-                    )
-                    .map((child) => (child as HasUniqueId).uuid),
-                distinctUntilChanged(deepEqual)
-              )
-            )
-            .subscribe((children) => {
-              relatedPanels$.next(children);
-            })
-        : null;
-
       const api = finalizeApi({
-        relatedPanels$,
         ...unsavedChangesApi,
         ...selections.api,
         ...labelManager.api,
@@ -146,6 +116,7 @@ export const getESQLControlFactory = <
          */
         isDuplicable: false,
         isPinnable: true,
+        canIndicateRelatedSiblings: true,
         tooltipLabel$,
         isEditingEnabled: () => true,
         getTypeDisplayName: () => VariableControlsStrings.displayName,
@@ -188,6 +159,7 @@ export const getESQLControlFactory = <
           'parentApi',
           'tooltipLabel$',
           'relatedPanels$',
+          'canIndicateRelatedSiblings',
         ]),
         ...selections.internalApi,
         uuid,
@@ -246,7 +218,6 @@ export const getESQLControlFactory = <
               selections.cleanup();
               labelManager.cleanup();
               tooltipLabelSubscription.unsubscribe();
-              relatedPanelsSubscription?.unsubscribe();
             };
           }, []);
 

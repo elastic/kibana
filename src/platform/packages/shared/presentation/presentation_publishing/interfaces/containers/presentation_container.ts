@@ -15,7 +15,7 @@ import { apiHasUniqueId } from '../has_uuid';
 import type { CanAddNewPanel } from './can_add_new_panel';
 import { apiCanAddNewPanel } from './can_add_new_panel';
 import type { CanAddNewSection } from './can_add_new_section';
-import type { CanIndicateRelatedPanels } from './can_indicate_related_panels';
+import type { CanIndicateRelatedChildren } from './can_indicate_related_panels';
 
 export interface PanelPackage<SerializedState extends object = object> {
   panelType: string;
@@ -29,7 +29,7 @@ export interface PanelPackage<SerializedState extends object = object> {
 
 export interface PresentationContainer<ApiType extends unknown = unknown>
   extends CanAddNewPanel,
-    Partial<CanIndicateRelatedPanels> {
+    Partial<CanIndicateRelatedChildren> {
   /**
    * Removes a panel from the container.
    */

@@ -70,7 +70,7 @@ export const ConditionalLabelWrapper = ({
           panelTooltipLabel={tooltipLabel}
           id={tooltipId}
         >
-          <span
+          <EuiFlexGroup
             onKeyDown={(e) =>
               enableIndicateRelatedPanels && (e.key === 'Enter' || e.key === ' ')
                 ? onToggleIndicateRelatedPanels()
@@ -80,11 +80,12 @@ export const ConditionalLabelWrapper = ({
             role="button"
             tabIndex={0}
             ref={linkTextRef}
+            alignItems="center"
+            gutterSize="xs"
           >
-            {label}
+            <EuiFlexItem>{label}</EuiFlexItem>
             {canIndicateRelatedPanels && numberOfRelatedPanels === 0 && (
-              <>
-                {' '}
+              <EuiFlexItem>
                 <EuiIcon
                   size="s"
                   aria-label={i18n.translate('controls.controlGroup.warningNoRelatedPanels', {
@@ -92,9 +93,9 @@ export const ConditionalLabelWrapper = ({
                   })}
                   type="warning"
                 />
-              </>
+              </EuiFlexItem>
             )}
-          </span>
+          </EuiFlexGroup>
         </ControlLabelTooltip>
       </EuiLink>
     </EuiFlexItem>

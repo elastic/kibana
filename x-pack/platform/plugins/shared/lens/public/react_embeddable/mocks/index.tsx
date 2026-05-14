@@ -91,6 +91,7 @@ function getDefaultLensApiMock() {
       status: 'rendered',
       timeToEvent: 1000,
     }),
+    relatedPanels$: new BehaviorSubject<string[]>([]),
     dataViews$: new BehaviorSubject<DataView[] | undefined>(undefined),
     savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
     adapters$: new BehaviorSubject<Adapters>({}),

@@ -12,6 +12,7 @@ import type {
   HasSerializableState,
   HasType,
   PublishesPhaseEvents,
+  PublishesRelatedPanels,
 } from '@kbn/presentation-publishing';
 import type React from 'react';
 import type { DefaultPresentationPanelApi } from './panel_component/types';
@@ -27,6 +28,7 @@ export interface DefaultEmbeddableApi<SerializedState extends object = object>
   extends DefaultPresentationPanelApi,
     HasType,
     PublishesPhaseEvents,
+    PublishesRelatedPanels,
     HasSerializableState<SerializedState> {}
 
 /**
@@ -36,7 +38,7 @@ export interface DefaultEmbeddableApi<SerializedState extends object = object>
 export type EmbeddableApiRegistration<
   SerializedState extends object = object,
   Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
-> = Omit<Api, 'uuid' | 'parent' | 'type' | 'phase$' | keyof CanLockHoverActions>;
+> = Omit<Api, 'uuid' | 'parent' | 'type' | 'phase$' | 'relatedPanels$' | keyof CanLockHoverActions>;
 
 export interface BuildEmbeddableProps<
   SerializedState extends object = object,

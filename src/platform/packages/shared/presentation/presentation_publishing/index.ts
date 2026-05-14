@@ -206,9 +206,10 @@ export type { PublishesSearchSession } from './interfaces/fetch/publishes_search
 
 export { apiCanAddNewPanel, type CanAddNewPanel } from './interfaces/containers/can_add_new_panel';
 export {
-  apiCanIndicateRelatedPanels,
-  type CanIndicateRelatedPanels,
-  type PanelRelationshipComparator,
+  apiCanIndicateRelatedChildren,
+  apiCanIndicateRelatedSiblings,
+  type CanIndicateRelatedChildren,
+  type CanIndicateRelatedSiblings,
 } from './interfaces/containers/can_indicate_related_panels';
 
 export {

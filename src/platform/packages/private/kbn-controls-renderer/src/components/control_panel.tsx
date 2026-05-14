@@ -26,7 +26,11 @@ import type { HasCustomPrepend, PinnedControlLayoutState } from '@kbn/controls-s
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { EmbeddableRenderer, type DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { useBatchedPublishingSubjects, type PublishingSubject } from '@kbn/presentation-publishing';
+import {
+  apiPublishesRelatedPanels,
+  useBatchedPublishingSubjects,
+  type PublishingSubject,
+} from '@kbn/presentation-publishing';
 import {
   apiPublishesTooltipLabel,
   type PublishesTooltipLabel,
@@ -58,25 +62,26 @@ export const ControlPanel = ({
     id,
   });
 
-  const [viewMode, disabledActionIds, arePanelsRelated, indicateRelatedPanelsId] =
-    useBatchedPublishingSubjects(
-      parentApi.viewMode$,
-      parentApi.disabledActionIds$ ?? (of([] as string[]) as PublishingSubject<string[]>),
-      parentApi.arePanelsRelated$ ?? (of(undefined) as PublishingSubject<undefined>),
-      parentApi.indicateRelatedPanelsId$ ?? (of(undefined) as PublishingSubject<undefined>)
-    );
+  const [viewMode, disabledActionIds, indicateRelatedPanelsId] = useBatchedPublishingSubjects(
+    parentApi.viewMode$,
+    parentApi.disabledActionIds$ ?? (of([] as string[]) as PublishingSubject<string[]>),
+    parentApi.indicateRelatedPanelsId$ ?? (of(undefined) as PublishingSubject<undefined>)
+  );
 
   const [panelLabel, setPanelLabel] = useState<string | undefined>();
   const [panelTooltipLabel, setPanelTooltipLabel] = useState<string | undefined>();
+  const [relatedPanels, setRelatedPanels] = useState<string[]>([]);
 
   const prependWrapperRef = useRef<HTMLDivElement>(null);
 
   const indicateControl = useMemo(
     () =>
-      api &&
-      indicateRelatedPanelsId !== undefined &&
-      arePanelsRelated?.(id, indicateRelatedPanelsId),
-    [arePanelsRelated, id, indicateRelatedPanelsId, api]
+      Boolean(
+        api &&
+          indicateRelatedPanelsId !== undefined &&
+          relatedPanels.includes(indicateRelatedPanelsId)
+      ),
+    [relatedPanels, indicateRelatedPanelsId, api]
   );
   const {
     canIndicateRelatedPanels,
@@ -103,6 +108,9 @@ export const ControlPanel = ({
           setPanelTooltipLabel(result);
         })
       );
+    }
+    if (apiPublishesRelatedPanels(api)) {
+      subscriptions.add(api.relatedPanels$.subscribe(setRelatedPanels));
     }
     return () => {
       subscriptions.unsubscribe();

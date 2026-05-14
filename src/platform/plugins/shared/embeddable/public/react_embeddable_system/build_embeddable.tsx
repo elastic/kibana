@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import type { DefaultEmbeddableApi, EmbeddableApiRegistration, EmbeddableFactory } from './types';
 import type { PhaseTracker } from './phase_tracker';
 import { initializeDrilldownsManager } from '../drilldowns/drilldowns_manager';
+import { initializeRelatedPanels } from './initialize_related_panels';
 
 export async function buildEmbeddable<
   SerializedState extends object = object,
@@ -42,9 +43,15 @@ export async function buildEmbeddable<
       isCustomizable: true,
       isPinnable: false,
     };
+    const { relatedPanels$ } = initializeRelatedPanels({
+      uuid,
+      parentApi,
+      api: apiRegistration,
+    });
     return {
       // Spread default panel capabilities first, allow apiRegistration to override them
       ...panelCapabilitiesDefaults,
+      relatedPanels$,
       ...apiRegistration,
       uuid,
       phase$: phaseTracker.getPhase$(),

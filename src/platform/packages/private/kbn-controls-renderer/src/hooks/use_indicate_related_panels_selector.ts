@@ -9,10 +9,10 @@
 
 import { useMemo, useCallback, useEffect, useState, useRef } from 'react';
 import {
-  apiCanIndicateRelatedPanels,
+  apiCanIndicateRelatedChildren,
+  apiCanIndicateRelatedSiblings,
   apiHasParentApi,
   apiHasUniqueId,
-  apiPublishesRelatedPanels,
   apiPublishesViewMode,
 } from '@kbn/presentation-publishing';
 import type { Subscription } from 'rxjs';
@@ -24,7 +24,7 @@ export const useIndicateRelatedPanelsSelector = (
 ) => {
   const parentApi = api && apiHasParentApi(api) ? api.parentApi : null;
   const parentApiLoaded =
-    parentApi && apiCanIndicateRelatedPanels(parentApi) && apiPublishesViewMode(parentApi)
+    parentApi && apiCanIndicateRelatedChildren(parentApi) && apiPublishesViewMode(parentApi)
       ? parentApi
       : null;
 
@@ -40,7 +40,7 @@ export const useIndicateRelatedPanelsSelector = (
 
   useEffect(() => {
     // Don't trigger expensive subscriptions if the API can't indicate related panels
-    if (!parentApiLoaded || !apiPublishesRelatedPanels(api)) return;
+    if (!parentApiLoaded || !apiCanIndicateRelatedSiblings(api)) return;
     if (!parentApiSubscription.current) {
       const sub = combineLatest([
         parentApiLoaded.viewMode$,
@@ -57,16 +57,16 @@ export const useIndicateRelatedPanelsSelector = (
   }, [parentApiLoaded, id, api, skipDebounce]);
 
   const canIndicateRelatedPanels = useMemo(
-    () => Boolean(viewMode === 'edit' && id && apiPublishesRelatedPanels(api)),
+    () => Boolean(viewMode === 'edit' && id && apiCanIndicateRelatedSiblings(api)),
     [api, viewMode, id]
   );
   const numberOfRelatedPanels = useMemo(() => relatedPanels.length, [relatedPanels]);
   const isIndicatingRelatedPanels = useMemo(
-    () => indicateRelatedPanelsId === id,
-    [indicateRelatedPanelsId, id]
+    () => canIndicateRelatedPanels && indicateRelatedPanelsId === id,
+    [canIndicateRelatedPanels, indicateRelatedPanelsId, id]
   );
   const onToggleIndicateRelatedPanels = useCallback(() => {
-    if (apiCanIndicateRelatedPanels(parentApi))
+    if (apiCanIndicateRelatedChildren(parentApi))
       parentApi.setIndicateRelatedPanelsId(isIndicatingRelatedPanels ? undefined : id);
   }, [parentApi, isIndicatingRelatedPanels, id]);
 

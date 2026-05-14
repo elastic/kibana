@@ -15,7 +15,7 @@ import type { GridLayoutData } from '@kbn/grid-layout';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type {
   CanExpandPanels,
-  CanIndicateRelatedPanels,
+  CanIndicateRelatedChildren,
   CanPinPanels,
   HasLastSavedChildState,
   HasSections,
@@ -147,7 +147,7 @@ export interface DashboardCreationOptions {
  * This type combines multiple capability interfaces to provide full dashboard functionality.
  */
 export type DashboardApi = CanExpandPanels &
-  CanIndicateRelatedPanels &
+  CanIndicateRelatedChildren &
   CanPinPanels &
   HasSections &
   HasAppContext &

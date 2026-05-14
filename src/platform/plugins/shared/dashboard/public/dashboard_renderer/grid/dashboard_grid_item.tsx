@@ -12,11 +12,13 @@ import { EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import {
+  apiPublishesRelatedPanels,
   useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { BehaviorSubject, of, switchMap } from 'rxjs';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
@@ -26,6 +28,25 @@ import { DASHBOARD_MARGIN_SIZE } from './constants';
 import { getHighlightStyles } from './highlight_styles';
 
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
+
+const useRenderedPanelRelatedPanels$ = (
+  dashboardApi: ReturnType<typeof useDashboardApi>,
+  id: string
+) => {
+  const relatedPanels$ = useRef(new BehaviorSubject<string[]>([]));
+  useEffect(() => {
+    const subscription = dashboardApi.children$
+      .pipe(
+        switchMap((children) => {
+          const child = children[id];
+          return apiPublishesRelatedPanels(child) ? child.relatedPanels$ : of<string[]>([]);
+        })
+      )
+      .subscribe((relatedPanels) => relatedPanels$.current.next(relatedPanels));
+    return () => subscription.unsubscribe();
+  }, [dashboardApi, id, relatedPanels$]);
+  return relatedPanels$.current;
+};
 
 export interface Props extends DivProps {
   appFixedViewport?: HTMLElement;
@@ -63,8 +84,8 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       useMargins,
       viewMode,
       dashboardContainerRef,
-      arePanelsRelated,
       indicateRelatedPanelsId,
+      relatedPanels,
     ] = useBatchedPublishingSubjects(
       dashboardApi.hideBorder$,
       dashboardApi.highlightPanelId$,
@@ -74,8 +95,8 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       dashboardApi.settings.useMargins$,
       dashboardApi.viewMode$,
       dashboardInternalApi.dashboardContainerRef$,
-      dashboardApi.arePanelsRelated$,
-      dashboardApi.indicateRelatedPanelsId$
+      dashboardApi.indicateRelatedPanelsId$,
+      useRenderedPanelRelatedPanels$(dashboardApi, id)
     );
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
@@ -88,7 +109,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     const indicatePanel =
       viewMode === 'edit' &&
       indicateRelatedPanelsId !== undefined &&
-      arePanelsRelated(id, indicateRelatedPanelsId);
+      relatedPanels.includes(indicateRelatedPanelsId);
     const focusPanel =
       isIndicatingRelatedPanels ||
       indicatePanel ||
@@ -107,7 +128,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       !focusPanel &&
       !indicatePanel &&
       idToCompareForBlur &&
-      !arePanelsRelated(id, idToCompareForBlur);
+      !relatedPanels.includes(idToCompareForBlur);
 
     const showBorder = useMargins && !hidePanelBorders; // we do not show panel borders when margins are disabled
     const classes = classNames('dshDashboardGrid__item', {

@@ -15,12 +15,16 @@ import {
   getViewportBoundaries,
   getScrollPosition,
 } from '@kbn/core-chrome-layout-utils';
+import type { PublishesSavedObjectId } from '@kbn/presentation-publishing';
+import type { DashboardBackupService } from '../services/dashboard_backup_service';
 
 export const highlightAnimationDuration = 2000;
 
 export function initializeTrackPanel(
   untilLoaded: (id: string) => Promise<undefined>,
-  dashboardContainerRef$: BehaviorSubject<HTMLElement | null>
+  dashboardContainerRef$: BehaviorSubject<HTMLElement | null>,
+  backupService: DashboardBackupService,
+  savedObjectId$: PublishesSavedObjectId['savedObjectId$']
 ) {
   const expandedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const focusedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
@@ -28,6 +32,9 @@ export function initializeTrackPanel(
   const scrollToPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const scrollToBottom$ = new Subject<void>();
   const scrollPosition$ = new BehaviorSubject<number | undefined>(undefined);
+  const indicateRelatedPanelsId$ = new BehaviorSubject<string | undefined>(
+    backupService.getIndicateRelatedPanelsId(savedObjectId$.value)
+  );
 
   function setScrollToPanelId(id: string | undefined) {
     if (scrollToPanelId$.value !== id) scrollToPanelId$.next(id);
@@ -67,6 +74,11 @@ export function initializeTrackPanel(
       });
 
       highlightPanelId$.next(undefined);
+    },
+    indicateRelatedPanelsId$,
+    setIndicateRelatedPanelsId: (panelId: string | undefined) => {
+      indicateRelatedPanelsId$.next(panelId);
+      backupService.setIndicateRelatedPanelsId(savedObjectId$.value, panelId);
     },
     scrollToPanelId$,
     scrollToPanel: async (panelRef: HTMLDivElement) => {

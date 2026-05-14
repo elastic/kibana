@@ -8,12 +8,18 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import type { DashboardBackupService } from '../services/dashboard_backup_service';
 import { initializeTrackPanel } from './track_panel';
 
 describe('track panel', () => {
   const mockDashboardContainerRef = document.createElement('div');
   const dashboardContainerRef$ = new BehaviorSubject<HTMLElement | null>(mockDashboardContainerRef);
   mockDashboardContainerRef.getBoundingClientRect = jest.fn(() => ({ top: 96 } as DOMRect));
+  const mockBackupService = {
+    getIndicateRelatedPanelsId: jest.fn(() => undefined),
+    setIndicateRelatedPanelsId: jest.fn(),
+  } as unknown as DashboardBackupService;
+  const savedObjectId$ = new BehaviorSubject<string | undefined>(undefined);
   const {
     expandPanel,
     expandedPanelId$,
@@ -21,6 +27,8 @@ describe('track panel', () => {
     setFocusedPanelId,
     highlightPanelId$,
     highlightPanel,
+    indicateRelatedPanelsId$,
+    setIndicateRelatedPanelsId,
     scrollToPanel,
     scrollPosition$,
     scrollToPanelId$,
@@ -28,7 +36,12 @@ describe('track panel', () => {
     setScrollToPanelId,
     scrollToTop,
     scrollToBottom,
-  } = initializeTrackPanel(async (id: string) => undefined, dashboardContainerRef$);
+  } = initializeTrackPanel(
+    async (id: string) => undefined,
+    dashboardContainerRef$,
+    mockBackupService,
+    savedObjectId$
+  );
 
   document.documentElement.scrollTop = 100;
   document.documentElement.scrollTo = jest.fn();
@@ -175,6 +188,24 @@ describe('track panel', () => {
         top: document.body.scrollHeight,
         behavior: 'smooth',
       });
+    });
+  });
+
+  describe('setIndicateRelatedPanelsId', () => {
+    it('updates the subject and persists the id to the backup service', () => {
+      setIndicateRelatedPanelsId('control-id');
+      expect(indicateRelatedPanelsId$.value).toBe('control-id');
+      expect(mockBackupService.setIndicateRelatedPanelsId).toHaveBeenCalledWith(
+        undefined,
+        'control-id'
+      );
+
+      setIndicateRelatedPanelsId(undefined);
+      expect(indicateRelatedPanelsId$.value).toBeUndefined();
+      expect(mockBackupService.setIndicateRelatedPanelsId).toHaveBeenCalledWith(
+        undefined,
+        undefined
+      );
     });
   });
 });

@@ -8,24 +8,41 @@
  */
 
 import type { BehaviorSubject } from 'rxjs';
+import type { PublishesRelatedPanels } from '../publishes_related_panels';
 
-export type PanelRelationshipComparator = (a: string, b: string) => boolean;
 /**
- * This API can indicate panels related to a certain child panel. We are calling this "indicating" because "highlight" refers to something else and
- * "callout" is a kind of EUI element and naming things is the second hardest problem in computer science.
+ * This API can indicate panels related to a certain child panel. Consumers determine
+ * relatedness by subscribing to the rendered child's own `relatedPanels$` (auto-published
+ * on every embeddable) and checking whether the indicated id is in the list.
+ *
+ * We are calling this "indicating" because "highlight" refers to something else and
+ * "callout" is a kind of EUI element and naming things is the second hardest problem in
+ * computer science.
  */
-export interface CanIndicateRelatedPanels {
+export interface CanIndicateRelatedChildren {
   setIndicateRelatedPanelsId: (panelId?: string) => void;
   indicateRelatedPanelsId$: BehaviorSubject<string | undefined>;
-  arePanelsRelated$: BehaviorSubject<PanelRelationshipComparator>;
 }
 
 /**
  * A type guard which can be used to determine if a given API can indicate panels related to a certain child panel
  */
-export const apiCanIndicateRelatedPanels = (api: unknown): api is CanIndicateRelatedPanels => {
+export const apiCanIndicateRelatedChildren = (api: unknown): api is CanIndicateRelatedChildren => {
   return (
-    typeof (api as CanIndicateRelatedPanels)?.setIndicateRelatedPanelsId === 'function' &&
-    typeof (api as CanIndicateRelatedPanels)?.indicateRelatedPanelsId$ !== 'undefined'
+    typeof (api as CanIndicateRelatedChildren)?.setIndicateRelatedPanelsId === 'function' &&
+    typeof (api as CanIndicateRelatedChildren)?.indicateRelatedPanelsId$ !== 'undefined'
   );
 };
+
+/**
+ * This API is capable of indicating its related siblings. Used to enable a user action to set this particular panel
+ * as the indicateRelatedPanelsId in a CanIndicateRelatedChildren
+ */
+export type CanIndicateRelatedSiblings = PublishesRelatedPanels & {
+  canIndicateRelatedSiblings: boolean;
+};
+
+export const apiCanIndicateRelatedSiblings = (
+  unknownApi: unknown | null
+): unknownApi is CanIndicateRelatedSiblings =>
+  Boolean((unknownApi as CanIndicateRelatedSiblings).canIndicateRelatedSiblings);

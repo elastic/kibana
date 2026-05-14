@@ -83,6 +83,7 @@ describe('layout manager', () => {
     type: 'testPanelType',
     uuid: PANEL_ONE_ID,
     phase$: {} as unknown as PublishingSubject<PhaseEvent | undefined>,
+    relatedPanels$: new BehaviorSubject<string[]>([]),
     ...titleManager.api,
     serializeState: () => titleManager.getLatestState(),
     applySerializedState: jest.fn(),
