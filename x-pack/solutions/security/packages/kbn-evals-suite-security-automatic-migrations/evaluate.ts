@@ -23,6 +23,9 @@ import {
   formatRuleEvalSummary,
 } from './src/rules/evaluate_dataset';
 import type { RuleExample } from './datasets/rules/types';
+import { MigrationSkillsChatClient } from './src/skills/chat_client';
+import type { EvaluateMigrationSkillsDataset } from './src/skills/evaluate_dataset';
+import { createEvaluateMigrationSkillsDataset } from './src/skills/evaluate_dataset';
 
 type EvaluateDatasetFn = (args: { dataset: EvaluationDataset<DashboardExample> }) => Promise<void>;
 
@@ -36,6 +39,8 @@ interface WorkerFixtures {
   evaluateDataset: EvaluateDatasetFn;
   ruleMigrationClient: RuleMigrationClient;
   evaluateRuleDataset: EvaluateRuleDatasetFn;
+  skillsChatClient: MigrationSkillsChatClient;
+  evaluateSkillsDataset: EvaluateMigrationSkillsDataset;
   reportDisplayOptions: ReportDisplayOptions;
   reportModelScore: ReturnType<typeof createDefaultTerminalReporter>;
 }
@@ -76,6 +81,26 @@ export const evaluate = base.extend<{}, WorkerFixtures>({
           ruleMigrationClient,
           log,
           connectorId: connector.id,
+        })
+      );
+    },
+    { scope: 'worker' },
+  ],
+  skillsChatClient: [
+    async ({ fetch, log, connector }, use) => {
+      await use(new MigrationSkillsChatClient(fetch, log, connector.id));
+    },
+    { scope: 'worker' },
+  ],
+  evaluateSkillsDataset: [
+    async ({ skillsChatClient, evaluators, executorClient, traceEsClient, log }, use) => {
+      await use(
+        createEvaluateMigrationSkillsDataset({
+          chatClient: skillsChatClient,
+          evaluators,
+          executorClient,
+          traceEsClient,
+          log,
         })
       );
     },

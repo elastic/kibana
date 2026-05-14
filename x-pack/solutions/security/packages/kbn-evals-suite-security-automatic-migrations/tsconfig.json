@@ -8,6 +8,8 @@
   "kbn_references": [
     "@kbn/evals",
     "@kbn/scout",
-    "@kbn/tooling-log"
+    "@kbn/tooling-log",
+    "@kbn/agent-builder-common",
+    "@kbn/core"
   ]
 }
