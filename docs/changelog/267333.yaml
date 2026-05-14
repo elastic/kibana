@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/267333
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-12
+areas:
+- AI and machine Learning
+title: agent-centric connectors
+description: 'Introduces an optional configuration for Agent Builder Agents: `connector_ids`. If unset, a given agent has access to all configured kibana connectors. When set, the Agent will have access only to the listed connectors.'
