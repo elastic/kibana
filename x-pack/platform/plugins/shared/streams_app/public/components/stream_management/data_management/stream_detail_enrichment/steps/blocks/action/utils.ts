@@ -210,6 +210,16 @@ export const getStepDescription = (step: StreamlangProcessorDefinitionWithUIAttr
           },
         }
       );
+    } else if (step.action === 'registered_domain') {
+      return i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.registeredDomainProcessorDescription',
+        {
+          defaultMessage: 'Extracts domain parts from "{expression}"',
+          values: {
+            expression: step.expression,
+          },
+        }
+      );
     } else {
       const { action, parentId, customIdentifier, ignore_failure, ...rest } = step;
       // Remove 'where' if it exists (some processors have it, some don't)

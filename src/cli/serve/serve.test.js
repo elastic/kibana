@@ -10,8 +10,7 @@
 import { applyConfigOverrides } from './serve';
 import { KBN_CERT_PATH, KBN_KEY_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 
-// Failing: See https://github.com/elastic/kibana/issues/269079
-describe.skip('applyConfigOverrides', () => {
+describe('applyConfigOverrides', () => {
   it('merges empty objects to an empty config', () => {
     const output = applyConfigOverrides({}, {}, {}, {});
     const defaultEmptyConfig = {
@@ -140,10 +139,6 @@ describe.skip('applyConfigOverrides', () => {
       plugins: { paths: [] },
       server: { basePath: '/kbn', publicBaseUrl: 'http://localhost:5601/kbn' },
       xpack: {
-        cloud: {
-          id: 'ftr_fake_cloud_id',
-          organization_id: 'org1234567890',
-        },
         security: {
           authc: {
             providers: {
