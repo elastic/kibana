@@ -11,6 +11,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IngestionTimeRange } from '../../../context/apm_service/apm_service_context';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { fromQuery, toQuery, isInactiveHistoryError } from '../../shared/links/url_helpers';
 
 export function NoDataForRangeCallout() {
@@ -41,6 +42,9 @@ export function NoDashboardFoundCallout() {
   );
 }
 
+// TODO: remove flip once a dedicated mixed-agent-types doc page is available
+const SHOW_MIXED_AGENT_DOC_LINK = false;
+
 const DATE_FORMAT = 'MMM D, YYYY HH:mm';
 
 const formatRange = (range: IngestionTimeRange) =>
@@ -58,6 +62,7 @@ export function MixedAgentCallout({
   hasMultipleAgentTypes,
   ingestionTimeRanges,
 }: MixedAgentCalloutProps) {
+  const { docLinks } = useApmPluginContext().core;
   const history = useHistory();
   const location = useLocation();
 
@@ -129,6 +134,20 @@ export function MixedAgentCallout({
                 'Both instrumentation types are sending data simultaneously. Metrics from the other type are not displayed in this view.',
             })}
           </p>
+          {SHOW_MIXED_AGENT_DOC_LINK && (
+            <p>
+              <EuiLink
+                data-test-subj="apmMetricsMixedAgentTypesDocLink"
+                href={docLinks.links.apm.overview}
+                target="_blank"
+                external
+              >
+                {i18n.translate('xpack.apm.metrics.mixedAgentTypes.docsLink', {
+                  defaultMessage: 'See documentation for more information',
+                })}
+              </EuiLink>
+            </p>
+          )}
         </EuiCallOut>
         <EuiSpacer size="m" />
       </>
@@ -154,6 +173,20 @@ export function MixedAgentCallout({
               'Adjust the time range to view metrics from a specific instrumentation type.',
           })}
         </p>
+        {SHOW_MIXED_AGENT_DOC_LINK && (
+          <p>
+            <EuiLink
+              data-test-subj="apmMetricsMixedAgentTypesDocLink"
+              href={docLinks.links.apm.overview}
+              target="_blank"
+              external
+            >
+              {i18n.translate('xpack.apm.metrics.mixedAgentTypes.docsLink', {
+                defaultMessage: 'See documentation for more information',
+              })}
+            </EuiLink>
+          </p>
+        )}
       </EuiCallOut>
       <EuiSpacer size="m" />
     </>
