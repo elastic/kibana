@@ -20,7 +20,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
@@ -67,10 +67,22 @@ const shortcuts = [
   },
 ];
 
-export function KeyboardShortcutsPopover() {
+interface KeyboardShortcutsPopoverProps {
+  openRef?: React.MutableRefObject<(() => void) | null>;
+}
+
+export function KeyboardShortcutsPopover({ openRef }: KeyboardShortcutsPopoverProps = {}) {
   const { euiTheme } = useEuiTheme();
   const styles = useMemoCss(componentStyles);
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (!openRef) return;
+    openRef.current = () => setIsOpen(true);
+    return () => {
+      openRef.current = null;
+    };
+  }, [openRef]);
   const popoverTitleId = useGeneratedHtmlId();
 
   const label = i18n.translate('workflows.yamlEditor.shortcuts.label', {
@@ -86,14 +98,14 @@ export function KeyboardShortcutsPopover() {
       anchorPosition="upRight"
       panelPaddingSize="none"
       button={
-        <EuiToolTip content={label} delay="long" disableScreenReaderOutput>
+        <EuiToolTip content={label} disableScreenReaderOutput>
           <EuiButtonIcon
-            size="xs"
             iconType="keyboard"
+            size="s"
             data-test-subj="workflowYamlEditorKeyboardShortcutsButton"
             onClick={() => setIsOpen(!isOpen)}
             aria-label={label}
-            color="primary"
+            color="text"
           />
         </EuiToolTip>
       }

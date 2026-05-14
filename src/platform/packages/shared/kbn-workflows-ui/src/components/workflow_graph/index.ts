@@ -7,5 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './workflow_selector';
-export * from './workflow_graph';
+export { ReactFlowProvider } from '@xyflow/react';
+export {
+  WorkflowDetailBottomBar,
+  WorkflowGraphBottomBar,
+  type WorkflowDetailBottomBarView,
+  type WorkflowGraphEditorView,
+  type ToolMenuItemDef,
+} from './workflow_graph_bottom_bar';
