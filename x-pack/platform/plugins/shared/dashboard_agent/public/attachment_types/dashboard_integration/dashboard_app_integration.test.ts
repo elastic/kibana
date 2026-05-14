@@ -53,10 +53,8 @@ interface MockDashboardApi {
   getSerializedState: jest.Mock;
 }
 
-const mockAnyStateChange$ = new BehaviorSubject(undefined);
-
-const createMockDashboardApi = (): MockDashboardApi => ({
-  anyStateChange$: mockAnyStateChange$.pipe(skip(1)),
+const createMockDashboardApi = (anyStateChange$: Observable<void>): MockDashboardApi => ({
+  anyStateChange$,
   savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
   onSave$: new Subject<DashboardSaveEvent>(),
   filters$: new BehaviorSubject<unknown[]>([]),
@@ -160,10 +158,15 @@ describe('registerDashboardAppIntegration', () => {
     attachments?: VersionedAttachment[];
   }) => void;
   let cleanup: () => void;
+  let simulateDashboardStateChange: () => void;
 
   beforeEach(() => {
+    const mockAnyStateChange$ = new BehaviorSubject(undefined);
+    simulateDashboardStateChange = () => {
+      mockAnyStateChange$.next(undefined);
+    };
     jest.useFakeTimers();
-    mockApi = createMockDashboardApi();
+    mockApi = createMockDashboardApi(mockAnyStateChange$.pipe(skip(1)));
     chatEventsByConversationId = new Map();
     addAttachment = jest.fn();
     updateAttachmentOrigin = jest.fn().mockResolvedValue(undefined);
@@ -235,7 +238,7 @@ describe('registerDashboardAppIntegration', () => {
       attachments: [createVersionedAttachment(attachment)],
     });
 
-    mockAnyStateChange$.next(undefined);
+    simulateDashboardStateChange();
     jest.advanceTimersByTime(200);
 
     expect(addAttachment).toHaveBeenCalledWith(
@@ -268,7 +271,7 @@ describe('registerDashboardAppIntegration', () => {
       ],
     });
 
-    mockAnyStateChange$.next(undefined);
+    simulateDashboardStateChange();
     jest.advanceTimersByTime(200);
 
     expect(addAttachment).toHaveBeenCalledWith(
@@ -350,7 +353,7 @@ describe('registerDashboardAppIntegration', () => {
 
     jest.runOnlyPendingTimers();
     addAttachment.mockClear();
-    mockAnyStateChange$.next(undefined);
+    simulateDashboardStateChange();
     jest.advanceTimersByTime(200);
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
@@ -407,7 +410,7 @@ describe('registerDashboardAppIntegration', () => {
     emitConversationChange({ id: 'conversation-1', attachments: [] });
 
     addAttachment.mockClear();
-    mockAnyStateChange$.next(undefined);
+    simulateDashboardStateChange();
     jest.advanceTimersByTime(200);
 
     expect(addAttachment).not.toHaveBeenCalled();
