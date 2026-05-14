@@ -42,6 +42,12 @@ export type ActionTypeConfig = Record<string, unknown>;
 export type ActionTypeSecrets = Record<string, unknown>;
 export type ActionTypeParams = Record<string, unknown>;
 export type ConnectorTokenClientContract = PublicMethodsOf<ConnectorTokenClient>;
+export interface UserIdentifiers {
+  profileUid?: string;
+  userCloudId?: string;
+}
+export type UserIdentifiersResult = Promise<UserIdentifiers | undefined>;
+export type GetUserIdentifiersFromAPIKeyFn = (request: KibanaRequest) => UserIdentifiersResult;
 
 import type { Connector, ConnectorWithExtraFindData } from './application/connector/types';
 import type { ActionExecutionSource, ActionExecutionSourceType } from './lib';
@@ -99,6 +105,10 @@ export interface ActionTypeExecutorOptions<
   connectorTokenClient?: ConnectorTokenClientContract;
   signal?: AbortSignal;
   authMode?: AuthMode;
+  userIdentifiers?: UserIdentifiers;
+  /**
+   * @deprecated Use `userIdentifiers.profileUid`. Mirrored for external connector and plugin compatibility.
+   */
   profileUid?: string;
 }
 
@@ -342,6 +352,7 @@ export interface ConnectorToken extends SavedObjectAttributes {
 export interface UserConnectorToken {
   id?: string;
   profileUid: string;
+  userCloudId?: string;
   connectorId: string;
   credentialType: string;
   credentials: Record<string, unknown>;
