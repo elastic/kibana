@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { filter, map } from 'lodash';
+import { filter, map, mapValues } from 'lodash';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { type IRouter, SavedObjectsErrorHelpers } from '@kbn/core/server';
 
@@ -100,7 +100,11 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           updated_by: attributes.updated_by,
           updated_by_profile_uid: attributes.updated_by_profile_uid,
           saved_object_id: id,
-          queries: convertSOQueriesToPack(attributes.queries),
+          queries: mapValues(
+            convertSOQueriesToPack(attributes.queries),
+            // `start_date` is a write-side detail and must not leak to the public API.
+            ({ start_date: _omit, ...query }) => query
+          ),
           shards: convertShardsToObject(attributes.shards),
           policy_ids: policyIds,
           read_only: attributes.version !== undefined && osqueryPackAssetReference,

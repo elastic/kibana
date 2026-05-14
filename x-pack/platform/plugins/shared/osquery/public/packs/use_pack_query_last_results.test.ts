@@ -374,7 +374,10 @@ describe('usePackQueryLastResults', () => {
         expect.objectContaining({
           query: expect.objectContaining({
             bool: expect.objectContaining({
-              filter: [{ term: { schedule_id: 'sched-wins' } }],
+              filter: [
+                { term: { schedule_id: 'sched-wins' } },
+                { range: { 'event.ingested': { gte: 'now-30d' } } },
+              ],
             }),
           }),
         })

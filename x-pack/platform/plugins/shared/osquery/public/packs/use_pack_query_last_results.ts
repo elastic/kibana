@@ -33,14 +33,17 @@ interface UsePackQueryLastResultsProps {
   scheduleId?: string;
 }
 
+// Defensive upper bound on the schedule branch's ES query.
+const SCHEDULE_LOOKBACK = 'now-30d';
+
 /**
  * Fetches the most recent execution metadata for a pack query.
  *
  * If `scheduleId` is provided, the schedule branch runs first. It uses a single
- * `terms` agg over `osquery_meta.schedule_execution_count` to pull the most
- * recent execution's metadata in one round-trip. This branch does not honor
- * `startDate` / `endDate` because the latest execution is found by ordering on
- * `event.ingested`.
+ * `terms` agg over `osquery_meta.schedule_execution_count` (scoped to the last
+ * 30 days via `SCHEDULE_LOOKBACK`) to pull the most recent execution's metadata
+ * in one round-trip. The `startDate` / `endDate` props do not apply to this
+ * branch — the latest execution is found by ordering on `event.ingested`.
  *
  * If the schedule branch finds no buckets (legacy packs whose docs still carry
  * `action_id`, or environments mid-migration), we fall back to the legacy
@@ -68,7 +71,10 @@ export const usePackQueryLastResults = ({
           query: {
             // @ts-expect-error update types
             bool: {
-              filter: [{ term: { schedule_id: scheduleId } }],
+              filter: [
+                { term: { schedule_id: scheduleId } },
+                { range: { 'event.ingested': { gte: SCHEDULE_LOOKBACK } } },
+              ],
             },
           },
         });
