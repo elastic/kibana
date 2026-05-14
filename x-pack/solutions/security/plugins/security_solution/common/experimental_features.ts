@@ -247,6 +247,12 @@ export const allowedExperimentalValues = Object.freeze({
   entityAnalyticsEntityStoreV2: false,
 
   /**
+   * Enables API-driven alert-analysis skill registration.
+   * When disabled, the legacy inline implementation is used.
+   */
+  alertAnalysisApiDrivenSkill: false,
+
+  /**
    * Enables the deprecated prebuilt rules UI
    * Release: 9.4
    */
