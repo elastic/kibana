@@ -23,6 +23,8 @@ import type { ActionPolicyAttachment } from './action_policy_attachment_definiti
 
 const EMPTY_VALUE = '-';
 
+type ActionPolicyCanvasData = ActionPolicyAttachment['data'] & { id: string };
+
 export interface ActionPolicyCanvasContentProps
   extends AttachmentRenderProps<ActionPolicyAttachment>,
     CanvasRenderCallbacks {}
@@ -39,7 +41,8 @@ export const ActionPolicyCanvasContent = ({
   const basePath = useService(CoreStart('http')).basePath;
   const notifications = useService(CoreStart('notifications'));
 
-  const { data, origin: savedObjectId } = attachment;
+  const { data: rawData, origin: savedObjectId } = attachment;
+  const data = rawData as ActionPolicyCanvasData;
   const isPersisted = isPersistedSavedObject(savedObjectId);
 
   const [mounted, setMounted] = useState(false);
@@ -114,8 +117,8 @@ export const ActionPolicyCanvasContent = ({
               })
             : undefined,
           handler: async () => {
-            await actionPoliciesApi.upsertActionPolicy(data.id!, buildActionPolicyPayload(data));
-            await updateOrigin(data.id!);
+            await actionPoliciesApi.upsertActionPolicy(data.id, buildActionPolicyPayload(data));
+            await updateOrigin(data.id);
             notifications.toasts.addSuccess(
               i18n.translate('xpack.alertingV2.actionPolicyAttachment.createdSuccess', {
                 defaultMessage: 'Policy "{name}" created',
@@ -184,7 +187,7 @@ export const ActionPolicyCanvasContent = ({
         <h2>{data.name ?? EMPTY_VALUE}</h2>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <ActionPolicyDefinitionList policy={data as ActionPolicyResponse} />
+      <ActionPolicyDefinitionList policy={data} />
     </EuiPanel>
   );
 };
