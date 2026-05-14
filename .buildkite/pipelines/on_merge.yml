@@ -148,6 +148,8 @@ steps:
       diskSizeGb: 105
     key: check_types
     timeout_in_minutes: 60
+    env:
+      UPLOAD_ARCHIVE: 'true'
     retry:
       automatic:
         - exit_status: '-1'

@@ -77,4 +77,49 @@ describe('ActionPoliciesApi', () => {
       expect(http.delete).toHaveBeenCalledWith(`${ALERTING_V2_ACTION_POLICY_API_PATH}/policy-1`);
     });
   });
+
+  describe('fetchDataFields', () => {
+    it('omits the query param entirely when no matcher is provided', async () => {
+      http.get.mockResolvedValue([]);
+
+      await api.fetchDataFields();
+
+      expect(http.get).toHaveBeenCalledWith(
+        `${ALERTING_V2_ACTION_POLICY_API_PATH}/suggestions/data_fields`,
+        {}
+      );
+    });
+
+    it('forwards the trimmed matcher as a query parameter', async () => {
+      http.get.mockResolvedValue([]);
+
+      await api.fetchDataFields('  rule.id : "abc"  ');
+
+      expect(http.get).toHaveBeenCalledWith(
+        `${ALERTING_V2_ACTION_POLICY_API_PATH}/suggestions/data_fields`,
+        {
+          query: { matcher: 'rule.id : "abc"' },
+        }
+      );
+    });
+
+    it('omits the query param when matcher is empty or whitespace', async () => {
+      http.get.mockResolvedValue([]);
+
+      await api.fetchDataFields('   ');
+
+      expect(http.get).toHaveBeenCalledWith(
+        `${ALERTING_V2_ACTION_POLICY_API_PATH}/suggestions/data_fields`,
+        {}
+      );
+    });
+
+    it('returns the response payload from the HTTP layer', async () => {
+      http.get.mockResolvedValue(['data.host.name', 'data.count']);
+
+      const result = await api.fetchDataFields();
+
+      expect(result).toEqual(['data.host.name', 'data.count']);
+    });
+  });
 });
