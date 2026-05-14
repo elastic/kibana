@@ -40,6 +40,7 @@
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/kibana-react-plugin",
     "@kbn/i18n-react",
+    "@kbn/llm-trace-waterfall",
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/core-lifecycle-browser",
@@ -132,6 +133,7 @@
     "@kbn/gen-ai-functional-testing",
     "@kbn/repo-info",
     "@kbn/test",
-    "@kbn/test-es-server"
+    "@kbn/test-es-server",
+    "@kbn/react-kibana-mount"
   ]
 }

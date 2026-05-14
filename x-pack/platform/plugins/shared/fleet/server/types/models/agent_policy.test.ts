@@ -147,6 +147,32 @@ describe('AgentPolicyBaseSchema', () => {
       }).toThrow();
     });
   });
+
+  describe('overrides validations', () => {
+    it('should throw an error if inputs key is provided', () => {
+      expect(() => {
+        AgentPolicyBaseSchema.overrides.validate({ 'inputs.foo': 'bar' });
+      }).toThrow('inputs overrides is not allowed');
+    });
+
+    it('should throw an error if output_permissions key is provided', () => {
+      expect(() => {
+        AgentPolicyBaseSchema.overrides.validate({ output_permissions: { _fallback: {} } });
+      }).toThrow('output_permissions overrides is not allowed');
+    });
+
+    it('should throw an error if nested output_permissions key is provided', () => {
+      expect(() => {
+        AgentPolicyBaseSchema.overrides.validate({ 'output_permissions.someOutput': {} });
+      }).toThrow('output_permissions overrides is not allowed');
+    });
+
+    it('should not throw for valid overrides keys', () => {
+      expect(() => {
+        AgentPolicyBaseSchema.overrides.validate({ 'agent.monitoring.use_output': 'custom' });
+      }).not.toThrow();
+    });
+  });
 });
 
 describe('FullAgentPolicySchema', () => {
