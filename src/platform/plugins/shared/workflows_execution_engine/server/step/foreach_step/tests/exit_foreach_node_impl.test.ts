@@ -9,8 +9,8 @@
 
 import type { ExitForeachNode, WorkflowGraph } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
+import type { StepIoService } from '../../../workflow_context_manager/step_io_service';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { WorkflowExecutionState } from '../../../workflow_context_manager/workflow_execution_state';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 import { ExitForeachNodeImpl } from '../exit_foreach_node_impl';
 
@@ -19,7 +19,7 @@ describe('ExitForeachNodeImpl', () => {
   let wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager;
   let stepExecutionRuntime: StepExecutionRuntime;
   let workflowLogger: IWorkflowEventLogger;
-  let workflowExecutionState: WorkflowExecutionState;
+  let stepIoService: StepIoService;
   let workflowGraph: WorkflowGraph;
   let underTest: ExitForeachNodeImpl;
 
@@ -43,9 +43,9 @@ describe('ExitForeachNodeImpl', () => {
     workflowLogger = {} as unknown as IWorkflowEventLogger;
     workflowLogger.logDebug = jest.fn();
 
-    workflowExecutionState = {
+    stepIoService = {
       evictStaleLoopOutputs: jest.fn(),
-    } as unknown as WorkflowExecutionState;
+    } as unknown as StepIoService;
 
     workflowGraph = {
       getInnerStepIds: jest.fn().mockReturnValue(new Set(['innerStep'])),
@@ -56,7 +56,7 @@ describe('ExitForeachNodeImpl', () => {
       stepExecutionRuntime,
       wfExecutionRuntimeManager,
       workflowLogger,
-      workflowExecutionState,
+      stepIoService,
       workflowGraph
     );
   });
@@ -97,7 +97,7 @@ describe('ExitForeachNodeImpl', () => {
     it('should not evict stale loop outputs when looping back', async () => {
       await underTest.run();
 
-      expect(workflowExecutionState.evictStaleLoopOutputs).not.toHaveBeenCalled();
+      expect(stepIoService.evictStaleLoopOutputs).not.toHaveBeenCalled();
     });
   });
 
@@ -209,18 +209,14 @@ describe('ExitForeachNodeImpl', () => {
       node.onLimit = 'fail';
 
       expect(() => underTest.run()).toThrow();
-      expect(workflowExecutionState.evictStaleLoopOutputs).toHaveBeenCalledWith(
-        new Set(['innerStep'])
-      );
+      expect(stepIoService.evictStaleLoopOutputs).toHaveBeenCalledWith(new Set(['innerStep']));
     });
 
     it('should evict stale loop outputs when loop completes', async () => {
       await underTest.run();
 
       expect(workflowGraph.getInnerStepIds).toHaveBeenCalledWith('testStep');
-      expect(workflowExecutionState.evictStaleLoopOutputs).toHaveBeenCalledWith(
-        new Set(['innerStep'])
-      );
+      expect(stepIoService.evictStaleLoopOutputs).toHaveBeenCalledWith(new Set(['innerStep']));
     });
 
     it('should evict stale loop outputs when max-iterations reached with on-limit continue', async () => {
@@ -233,7 +229,7 @@ describe('ExitForeachNodeImpl', () => {
 
       await underTest.run();
 
-      expect(workflowExecutionState.evictStaleLoopOutputs).toHaveBeenCalled();
+      expect(stepIoService.evictStaleLoopOutputs).toHaveBeenCalled();
     });
   });
 });

@@ -215,6 +215,12 @@ export interface SmlService {
   /**
    * Check whether the current user has access to specific SML items.
    * Returns a map of document id → authorized (true/false).
+   *
+   * **Internal use only.** Callers outside the plugin should use the public
+   * `getDocuments` method, which performs this check internally and returns
+   * only authorized documents. This primitive is exposed on the internal
+   * `SmlService` so `resolveSmlAttachItems` can distinguish "access denied"
+   * from "not found" in its per-item error messages.
    */
   checkItemsAccess: (params: {
     ids: string[];
@@ -234,7 +240,16 @@ export interface SmlService {
     logger: Logger;
   }) => Promise<void>;
 
-  /** Fetch SML documents by their chunk IDs, scoped to a space */
+  /**
+   * Fetch SML documents by their chunk IDs, scoped to a space.
+   *
+   * **Internal use only — does NOT perform permission checks.** The public
+   * `AgentContextLayerPluginStart.getDocuments` wraps this with an access
+   * check and filters out unauthorized IDs before fetching. Direct callers
+   * MUST authorize IDs (via `checkItemsAccess`) before invoking this method,
+   * or use it only from system contexts where the user's privileges are
+   * irrelevant (e.g. crawler/indexer tasks).
+   */
   getDocuments: (params: {
     ids: string[];
     spaceId: string;

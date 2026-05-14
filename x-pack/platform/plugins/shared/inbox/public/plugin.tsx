@@ -15,6 +15,7 @@ import {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type {
+  InboxActionDetailRendererLoader,
   InboxClientConfig,
   InboxPublicSetup,
   InboxPublicStart,
@@ -32,6 +33,7 @@ export class InboxPublicPlugin
     Plugin<InboxPublicSetup, InboxPublicStart, InboxSetupDependencies, InboxStartDependencies>
 {
   private readonly config: InboxClientConfig;
+  private readonly detailRenderers = new Map<string, InboxActionDetailRendererLoader>();
 
   constructor(context: PluginInitializerContext<InboxClientConfig>) {
     this.config = context.config.get();
@@ -41,8 +43,20 @@ export class InboxPublicPlugin
     coreSetup: CoreSetup<InboxStartDependencies, InboxPublicStart>,
     _setupDeps: InboxSetupDependencies
   ): InboxPublicSetup {
+    const registerActionDetailRenderer: InboxPublicSetup['registerActionDetailRenderer'] = (
+      sourceApp,
+      load
+    ) => {
+      if (this.detailRenderers.has(sourceApp)) {
+        throw new Error(
+          `An inbox action detail renderer for sourceApp "${sourceApp}" is already registered`
+        );
+      }
+      this.detailRenderers.set(sourceApp, load);
+    };
+
     if (!this.config.enabled) {
-      return {};
+      return { registerActionDetailRenderer };
     }
 
     coreSetup.application.register({
@@ -57,15 +71,22 @@ export class InboxPublicPlugin
       mount: async (params) => {
         const [coreStart, startDeps] = await coreSetup.getStartServices();
         const { renderApp } = await import('./application');
-        return renderApp({ coreStart, startDeps, params });
+        return renderApp({
+          coreStart,
+          startDeps,
+          params,
+          detailRenderers: this.detailRenderers,
+        });
       },
     });
 
-    return {};
+    return { registerActionDetailRenderer };
   }
 
   public start(_core: CoreStart, _startDeps: InboxStartDependencies): InboxPublicStart {
-    return {};
+    return {
+      getActionDetailRenderer: (sourceApp) => this.detailRenderers.get(sourceApp),
+    };
   }
 
   public stop() {}
