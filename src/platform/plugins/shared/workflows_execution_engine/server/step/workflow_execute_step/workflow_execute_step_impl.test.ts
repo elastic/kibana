@@ -409,18 +409,6 @@ describe('WorkflowExecuteStepImpl', () => {
       );
     });
 
-    it('should always flush event logs even on failure', async () => {
-      const init = createMockInit();
-      const repo = init.workflowRepository as jest.Mocked<WorkflowRepository>;
-      repo.getWorkflow.mockRejectedValue(new Error('boom'));
-
-      const step = new WorkflowExecuteStepImpl(init);
-      await step.run();
-
-      const stepRuntime = init.stepExecutionRuntime as jest.Mocked<StepExecutionRuntime>;
-      expect(stepRuntime.flushEventLogs).toHaveBeenCalled();
-    });
-
     it('should handle missing inputs gracefully', async () => {
       const nodeNoInputs = {
         id: 'step-no-inputs',

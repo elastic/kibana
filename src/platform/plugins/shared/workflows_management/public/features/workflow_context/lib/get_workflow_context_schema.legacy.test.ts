@@ -18,28 +18,32 @@ describe('getWorkflowContextSchema - Legacy Array Format', () => {
     const workflow = {
       name: 'New workflow',
       enabled: false,
-      triggers: [{ type: 'manual' }],
-      inputs: [
+      triggers: [
         {
-          name: 'people',
-          type: 'array',
-          default: ['alice', 'bob', 'charlie'],
-          description: 'List of people to greet',
-        },
-        {
-          name: 'greeting',
-          type: 'string',
-          default: 'Hello',
-          description: 'The greeting message to use',
-        },
-      ],
-      steps: [
-        {
-          name: 'first-step',
-          type: 'console',
-          with: {
-            message: 'First step executed',
-          },
+          type: 'manual',
+          inputs: [
+            {
+              name: 'people',
+              type: 'array',
+              default: ['alice', 'bob', 'charlie'],
+              description: 'List of people to greet',
+            },
+            {
+              name: 'greeting',
+              type: 'string',
+              default: 'Hello',
+              description: 'The greeting message to use',
+            },
+          ],
+          steps: [
+            {
+              name: 'first-step',
+              type: 'console',
+              with: {
+                message: 'First step executed',
+              },
+            },
+          ],
         },
       ],
     };
@@ -81,12 +85,16 @@ describe('getWorkflowContextSchema - Legacy Array Format', () => {
     const workflow = {
       name: 'Legacy workflow',
       enabled: true,
-      triggers: [{ type: 'manual' }],
-      inputs: [
+      triggers: [
         {
-          name: 'people',
-          type: 'array',
-          default: ['alice', 'bob'],
+          type: 'manual',
+          inputs: [
+            {
+              name: 'people',
+              type: 'array',
+              default: ['alice', 'bob'],
+            },
+          ],
         },
       ],
       steps: [

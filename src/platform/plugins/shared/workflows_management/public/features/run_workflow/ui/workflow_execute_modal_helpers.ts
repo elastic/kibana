@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseDocument } from 'yaml';
 import { getKqlFieldNamesFromExpression } from '@kbn/es-query';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { isTriggerType } from '@kbn/workflows';
-import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
+import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import type { WorkflowTriggerTab } from './types';
 
-export type NormalizedWorkflowInputs = ReturnType<typeof normalizeFieldsToJsonSchema>;
+export type NormalizedWorkflowInputs = JsonModelSchemaType | undefined;
 
 /** True when normalized workflow inputs define at least one field. */
 export function hasWorkflowInputFields(normalized?: NormalizedWorkflowInputs): boolean {
@@ -50,26 +50,6 @@ export function isRacAlertsApiForbiddenError(error: unknown): boolean {
     msg.includes('Kibana privileges [rac]') ||
     msg.includes('/internal/rac/alerts')
   );
-}
-
-export function normalizeInputsFromDefinitionOrYaml(
-  definition: WorkflowYaml | null,
-  yamlString: string | undefined
-): NormalizedWorkflowInputs {
-  if (definition?.inputs) {
-    return normalizeFieldsToJsonSchema(definition.inputs);
-  }
-  if (yamlString) {
-    try {
-      const yamlJson = parseDocument(yamlString).toJSON();
-      if (yamlJson && typeof yamlJson === 'object' && 'inputs' in yamlJson) {
-        return normalizeFieldsToJsonSchema(yamlJson.inputs);
-      }
-    } catch {
-      // ignore errors when extracting from YAML
-    }
-  }
-  return undefined;
 }
 
 export function hasCustomEventTrigger(definition: WorkflowYaml | null): boolean {
@@ -131,10 +111,9 @@ export function getDefaultTrigger(definition: WorkflowYaml | null): WorkflowTrig
     return 'alert';
   }
 
-  const hasManualTrigger = definition.triggers?.some((trigger) => trigger.type === 'manual');
-  const normalizedInputs = normalizeFieldsToJsonSchema(definition.inputs);
+  const normalizedInputs = getInputsFromDefinition(definition);
 
-  if (hasManualTrigger && hasWorkflowInputFields(normalizedInputs)) {
+  if (normalizedInputs && hasWorkflowInputFields(normalizedInputs)) {
     return 'manual';
   }
   return 'alert';
