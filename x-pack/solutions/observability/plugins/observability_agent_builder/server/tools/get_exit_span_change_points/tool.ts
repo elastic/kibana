@@ -23,12 +23,15 @@ export const OBSERVABILITY_GET_EXIT_SPAN_CHANGE_POINTS_TOOL_ID =
 
 const getExitSpanChangePointsSchema = z.object({
   ...timeRangeSchemaRequired,
-  kqlFilter: z
+  serviceName: z
     .string()
-    .optional()
+    .min(1)
+    .describe('APM `service.name` for the service that emits the outbound calls (the caller).'),
+  serviceEnvironment: z
+    .string()
+    .min(1)
     .describe(
-      dedent(`KQL filter scoped to the emitting service (and optional environment), e.g.
-      'service.name: "checkout" AND service.environment: "production"'. Results are always grouped by span.destination.service.resource (each dependency).`)
+      'APM `service.environment` for that service (e.g. production, staging). Required together with serviceName.'
     ),
 });
 
@@ -48,10 +51,12 @@ export function createGetExitSpanChangePointsTool({
     id: OBSERVABILITY_GET_EXIT_SPAN_CHANGE_POINTS_TOOL_ID,
     type: ToolType.builtin,
     description:
-      dedent(`Detects statistically significant change points in egress traffic from a service to its dependencies: latency (avg), throughput (calls per minute), and failure rate, grouped by dependency (span.destination.service.resource). This reflects outbound calls the service makes.
+      dedent(`Detects statistically significant change points in egress traffic from a service to its dependencies: exit span latency (average) and exit span failure rate, one series per dependency (span.destination.service.resource).
+
+      Returns only metrics that have at least one change point. Each item includes a title, the dependency id (grouping), and the list of changes (timestamps and change types).
 
       When to use:
-      - Sudden shifts in downstream dependency performance (latency spike, throughput drop, error rate increase).
+      - Sudden shifts in downstream dependency latency or error rate.
       - Correlating a service incident with a specific external or internal dependency.
 
       When NOT to use:
@@ -60,7 +65,7 @@ export function createGetExitSpanChangePointsTool({
       You may call both tools in the same investigation to compare ingress vs egress patterns.`),
     schema: getExitSpanChangePointsSchema,
     tags: ['observability', 'traces'],
-    handler: async ({ start, end, kqlFilter }, { request }) => {
+    handler: async ({ start, end, serviceName, serviceEnvironment }, { request }) => {
       try {
         const changePoints = await getToolHandler({
           core,
@@ -69,7 +74,8 @@ export function createGetExitSpanChangePointsTool({
           logger,
           start,
           end,
-          kqlFilter,
+          serviceName,
+          serviceEnvironment,
         });
 
         return {

@@ -15,15 +15,15 @@ import {
 } from '@kbn/synthtrace';
 
 import type { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { ChangePointGrouping } from '@kbn/observability-agent-builder-plugin/server/tools/get_exit_span_change_points/handler';
 import { OBSERVABILITY_GET_EXIT_SPAN_CHANGE_POINTS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools/get_exit_span_change_points/tool';
-import type { ChangePoint } from '@kbn/observability-agent-builder-plugin/server/utils/get_change_points';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
 
 interface ToolResult {
   type: ToolResultType.other;
   data: {
-    changePoints: ChangePoint[];
+    changePoints: ChangePointGrouping[];
   };
 }
 
@@ -50,7 +50,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('when retrieving exit span change points', () => {
-      let exitSpanChangePoints: ChangePoint[];
+      let exitSpanChangePoints: ChangePointGrouping[];
 
       before(async () => {
         const toolResults: ToolResult[] = await agentBuilderApiClient.executeTool({
@@ -58,7 +58,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: EXIT_SPAN_CHANGE_POINTS_ANALYSIS_WINDOW.start,
             end: EXIT_SPAN_CHANGE_POINTS_ANALYSIS_WINDOW.end,
-            kqlFilter: `service.name: "${EXIT_SPAN_CHANGE_POINTS_SERVICE_NAME}" AND service.environment: "test"`,
+            serviceName: EXIT_SPAN_CHANGE_POINTS_SERVICE_NAME,
+            serviceEnvironment: 'test',
           },
         });
         exitSpanChangePoints = toolResults[0]?.data?.changePoints ?? [];
@@ -66,22 +67,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('should return results grouped by span.destination.service.resource', () => {
         const dependency = exitSpanChangePoints.find(
-          (cp: ChangePoint) => cp.key === EXIT_SPAN_CHANGE_POINTS_DEPENDENCY_RESOURCE
+          (row) => row.grouping === EXIT_SPAN_CHANGE_POINTS_DEPENDENCY_RESOURCE
         );
         expect(dependency).to.not.be(undefined);
       });
 
-      it('should include changes_latency, changes_throughput, and changes_failure_rate change points results', () => {
-        exitSpanChangePoints.forEach((cp: ChangePoint) => {
-          expect(cp).to.have.property('changes_latency');
-          expect(cp).to.have.property('changes_throughput');
-          expect(cp).to.have.property('changes_failure_rate');
+      it('should return title, grouping, and changes for each series', () => {
+        exitSpanChangePoints.forEach((row) => {
+          expect(row).to.have.property('title');
+          expect(row).to.have.property('grouping');
+          expect(row).to.have.property('changes');
+          expect(row.changes).to.be.an('array');
+          expect(row.changes.length).to.be.greaterThan(0);
         });
       });
 
-      it('should include time series data for visualization', () => {
-        exitSpanChangePoints.forEach((cp: ChangePoint) => {
-          expect(cp).to.have.property('time_series');
+      it('should include change point metadata on each change', () => {
+        exitSpanChangePoints.forEach((row) => {
+          row.changes.forEach((change) => {
+            expect(change).to.have.property('type');
+            expect(change).to.have.property('date');
+          });
         });
       });
     });

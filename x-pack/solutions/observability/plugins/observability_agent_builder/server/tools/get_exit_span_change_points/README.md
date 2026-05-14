@@ -1,12 +1,24 @@
 # get_exit_span_change_points
 
-Detects statistically significant changes in **egress** APM metrics: outbound requests from a service to each dependency (`span.destination.service.resource`). Metrics are derived from service destination metric documents (avg latency, throughput per minute, failure rate).
+Detects statistically significant change points in **egress** APM metrics: outbound calls from a service to each dependency (`span.destination.service.resource`). Series are built from **service destination** metric documents.
 
-For **ingress** (incoming requests to a service), use `observability.get_trace_change_points` instead.
+For the current implementation:
 
-## Examples
+- **Required scope:** `serviceName` and `serviceEnvironment` (both must be non-empty). The tool returns an empty `changePoints` array if either is missing.
+- **Metrics analyzed:** exit span **latency** (average, ms) and exit span **failure rate** (%). Each metric is evaluated per dependency; only series that include at least one detected change point are returned.
+- **Ingress** (incoming requests to a service): use `observability.get_trace_change_points` instead.
 
-### Scope by service and environment
+## Response shape
+
+`changePoints` is an array of objects:
+
+| Field       | Description |
+|------------|-------------|
+| `title`    | Human-readable metric label (e.g. `Exit span latency`, `Exit span failure rate`). |
+| `grouping` | Dependency identifier: `span.destination.service.resource`. |
+| `changes`  | List of detected change points (`date`, `type`, optional stats such as `p_value`, `r_value`, `trend`). |
+
+## Example
 
 ```
 POST kbn://api/agent_builder/tools/_execute
@@ -15,7 +27,8 @@ POST kbn://api/agent_builder/tools/_execute
   "tool_params": {
     "start": "now-1h",
     "end": "now",
-    "kqlFilter": "service.name: \"checkout\" AND service.environment: \"production\""
+    "serviceName": "checkout",
+    "serviceEnvironment": "production"
   }
 }
 ```
