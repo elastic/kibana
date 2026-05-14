@@ -24,7 +24,9 @@ interface RegisteredType extends NotificationEventTypeData {
   // Stored with T erased to unknown. The cast is safe: metadata is preserved at
   // runtime by the spread merge in registerType's callback, even though the
   // stream's TypeScript type (NotificationEvent) does not expose it.
-  resolvePrimaryAction?: (event: TypedNotificationEvent<unknown>) => PrimaryActionDescriptor | undefined;
+  resolvePrimaryAction?: (
+    event: TypedNotificationEvent<unknown>
+  ) => PrimaryActionDescriptor | undefined;
 }
 
 export class EventsService implements INotificationEvents {
