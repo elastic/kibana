@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ApmMainTemplate } from '../../routing/templates/apm_main_template';
@@ -27,28 +28,31 @@ export function TraceOverview({
     query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/traces');
 
+  const pageTitle = (
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexItem grow={false}>{title}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <OpenInDiscover
+          dataTestSubj="apmTracesExploreInDiscoverButton"
+          variant="emptyButton"
+          indexType="traces"
+          label={i18n.translate('xpack.apm.tracesOverview.exploreTracesInDiscover', {
+            defaultMessage: 'Explore traces',
+          })}
+          rangeFrom={rangeFrom}
+          rangeTo={rangeTo}
+          queryParams={{ kuery, environment, sortDirection: 'DESC' }}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
   return (
     <ApmIndexSettingsContextProvider>
       <Breadcrumb href="/traces" title={title} omitOnServerless>
         <ApmMainTemplate
-          pageTitle={title}
+          pageTitle={pageTitle}
           searchBar={searchBar}
-          pageHeader={{
-            rightSideItems: [
-              <OpenInDiscover
-                key="apmTracesExploreInDiscoverButton"
-                dataTestSubj="apmTracesExploreInDiscoverButton"
-                variant="button"
-                indexType="traces"
-                label={i18n.translate('xpack.apm.tracesOverview.exploreTracesInDiscover', {
-                  defaultMessage: 'Explore traces',
-                })}
-                rangeFrom={rangeFrom}
-                rangeTo={rangeTo}
-                queryParams={{ kuery, environment, sortDirection: 'DESC' }}
-              />,
-            ],
-          }}
           pageSectionProps={{
             contentProps: {
               style: {
