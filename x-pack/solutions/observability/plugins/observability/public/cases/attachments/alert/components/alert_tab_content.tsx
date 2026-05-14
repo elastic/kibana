@@ -11,6 +11,7 @@ import type { CommonAttachmentTabViewProps } from '@kbn/cases-plugin/public';
 import { getManualAlertIds } from '@kbn/cases-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
+import { observabilityAlertFeatureIds } from '../../../../../common/constants';
 import { useKibana } from '../../../../utils/kibana_react';
 import { ObservabilityAlertsTable } from '../../../..';
 import { ALERTS_EMPTY_DESCRIPTION } from '../translations';
@@ -64,6 +65,7 @@ export function AlertTabContent({ caseData }: CommonAttachmentTabViewProps) {
       <ObservabilityAlertsTable
         id={`case-details-alerts-${caseData.owner}`}
         ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
+        consumers={observabilityAlertFeatureIds}
         query={alertIdsQuery}
         showAlertStatusWithFlapping
         services={alertsTableServices}

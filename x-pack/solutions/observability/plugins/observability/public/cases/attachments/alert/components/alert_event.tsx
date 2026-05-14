@@ -35,7 +35,7 @@ export function AlertEvent({ alertId, totalAlerts, savedObjectId, rule }: AlertE
   const ruleId = rule?.id ?? null;
   const ruleName = rule?.name ?? null;
 
-  // Only fetch live alert data when the attachment does not already carry rule info.
+  // Only fetch rule metadata from the live alert data when the attachment does not already carry rule info.
   const hasRuleIdFromMetadata = !isEmpty(ruleId);
   const idsToFetch = useMemo(
     () => (hasRuleIdFromMetadata ? [] : [alertId]),
