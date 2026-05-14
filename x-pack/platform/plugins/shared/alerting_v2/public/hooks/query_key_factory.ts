@@ -31,7 +31,8 @@ export const workflowKeys = {
 
 export const matcherSuggestionKeys = {
   all: ['matcherSuggestions'] as const,
-  dataFields: () => [...matcherSuggestionKeys.all, 'dataFields'] as const,
+  dataFields: (matcher?: string) =>
+    [...matcherSuggestionKeys.all, 'dataFields', { matcher: matcher || undefined }] as const,
 };
 
 export const actionPolicyKeys = {
@@ -49,4 +50,11 @@ export const actionPolicyKeys = {
   }) => [...actionPolicyKeys.lists(), filters] as const,
   allTags: () => [...actionPolicyKeys.all, 'tags'] as const,
   tags: (search?: string) => [...actionPolicyKeys.allTags(), { search }] as const,
+};
+
+export const executionHistoryKeys = {
+  all: ['executionHistory'] as const,
+  list: (filters: { page: number; perPage: number }) =>
+    [...executionHistoryKeys.all, 'list', filters] as const,
+  countSince: (since: string) => [...executionHistoryKeys.all, 'countSince', since] as const,
 };

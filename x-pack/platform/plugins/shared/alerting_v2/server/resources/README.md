@@ -89,6 +89,7 @@ This stream is the durable history of rule evaluation.
 | `episode.id` | `keyword` | Episode id for alert-type events. |
 | `episode.status` | `keyword` | `inactive`, `pending`, `active`, or `recovering`. |
 | `episode.status_count` | `long` | Consecutive count within the current episode status. |
+| `severity` | `keyword` | Optional. Best-effort severity extracted from the ES\|QL `severity` column on breached events. One of `info`, `low`, `medium`, `high`, `critical`. |
 
 Writers:
 
