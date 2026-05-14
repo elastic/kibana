@@ -6,14 +6,19 @@
  */
 
 import { useReducer } from 'react';
-import {
-  getStepIds,
-  type ComposeDiscoverState,
-  type ComposeDiscoverAction,
-  type ComposeDiscoverMode,
-  type QueryTab,
-  type SandboxTabConfig,
+import type {
+  StepId,
+  ComposeDiscoverState,
+  ComposeDiscoverAction,
+  ComposeDiscoverMode,
+  QueryTab,
+  SandboxTabConfig,
 } from './types';
+
+export const getStepIds = (tracking: boolean): StepId[] =>
+  tracking
+    ? ['alertCondition', 'recoveryCondition', 'details', 'notifications']
+    : ['alertCondition', 'details', 'notifications'];
 import { guessRecoveryBlock, splitQuery } from './use_heuristic_split';
 
 export interface InitialStateConfig {

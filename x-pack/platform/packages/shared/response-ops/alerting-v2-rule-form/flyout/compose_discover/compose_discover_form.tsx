@@ -29,13 +29,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import {
-  getStepIds,
-  type ComposeDiscoverState,
-  type ComposeDiscoverAction,
-  type RecoveryType,
-  type StepDefinition,
+import type {
+  ComposeDiscoverState,
+  ComposeDiscoverAction,
+  RecoveryType,
+  StepDefinition,
 } from './types';
+import { getStepIds } from './use_compose_discover_state';
 import type { FormValues } from '../../form/types';
 import { QuerySummary } from './query_summary';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
