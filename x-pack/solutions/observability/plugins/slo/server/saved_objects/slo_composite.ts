@@ -30,9 +30,10 @@ const compositeSloAttributesSchema = {
       sloId: schema.string(),
       weight: schema.number(),
       instanceId: schema.maybe(schema.string()),
-    })
+    }),
+    { maxSize: 25 }
   ),
-  tags: schema.arrayOf(schema.string()),
+  tags: schema.arrayOf(schema.string(), { maxSize: 30 }),
   enabled: schema.boolean(),
   createdAt: schema.string(),
   updatedAt: schema.string(),
@@ -63,7 +64,6 @@ export const sloComposite: SavedObjectsType = {
       members: {
         properties: {
           sloId: { type: 'keyword' },
-          weight: { type: 'float' },
           instanceId: { type: 'keyword' },
         },
       },
