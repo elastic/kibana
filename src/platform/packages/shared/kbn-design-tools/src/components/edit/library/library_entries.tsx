@@ -26,6 +26,82 @@ import {
   SwitchMini,
   SwitchNoLabel,
 } from './switch';
+import {
+  AccordionRegular,
+  AccordionOpen,
+  AccordionArrowRight,
+  AccordionBorders,
+  AccordionMultiple,
+} from './accordion';
+import {
+  CardRegular,
+  CardClickable,
+  CardHorizontal,
+  CardPlain,
+  CardBordered,
+  CardGroup,
+} from './card';
+import {
+  SplitButtonRegular,
+  SplitButtonFill,
+  SplitButtonSmall,
+  SplitButtonDisabled,
+  SplitButtonWithIcon,
+} from './split_button';
+import {
+  ButtonGroupSingle,
+  ButtonGroupIconOnly,
+  ButtonGroupMulti,
+  ButtonGroupCompressed,
+} from './button_group';
+import { LinkRegular, LinkExternal, LinkButton, LinkDisabled } from './link';
+import { StepsRegular, StepsWithStatus, StepsHorizontal, StepsSmall } from './steps';
+import { TreeViewRegular, TreeViewCompressed, TreeViewExpanded } from './tree_view';
+import {
+  AvatarRegular,
+  AvatarLarge,
+  AvatarSmall,
+  AvatarSpace,
+  AvatarIcon,
+  AvatarDisabled,
+} from './avatar';
+import {
+  BadgeRegular,
+  BadgeHollow,
+  BadgeClickable,
+  BadgeWithIcon,
+  BadgeDisabled,
+  BadgeGroup,
+  BadgeBeta,
+  BadgeNotification,
+} from './badge';
+import { BeaconRegular, BeaconLarge } from './beacon';
+import {
+  CalloutInfo,
+  CalloutSuccess,
+  CalloutWarning,
+  CalloutDanger,
+  CalloutSmall,
+  CalloutTitleOnly,
+} from './callout';
+import {
+  IconRegular,
+  IconLarge,
+  IconXXL,
+  IconApp,
+  IconLogo,
+  TokenRegular,
+  TokenLarge,
+} from './icon';
+import {
+  SelectRegular,
+  SelectCompressed,
+  SelectDisabled,
+  SelectLoading,
+  SuperSelectRegular,
+  SuperSelectCompressed,
+  SuperSelectDisabled,
+} from './select';
 
 /**
  * A single variant of an EUI component (e.g. a specific icon type or button style).
@@ -83,6 +159,115 @@ const switchVariants: EuiComponentVariant[] = [
   { label: 'No Label', element: <SwitchNoLabel />, interactive: true },
 ];
 
+const accordionVariants: EuiComponentVariant[] = [
+  { label: 'Regular', element: <AccordionRegular />, interactive: true },
+  { label: 'Opened', element: <AccordionOpen />, interactive: true },
+  { label: 'Arrow Right', element: <AccordionArrowRight />, interactive: true },
+  { label: 'With Borders', element: <AccordionBorders />, interactive: true },
+  { label: 'Multiple', element: <AccordionMultiple />, interactive: true },
+];
+
+const cardVariants: EuiComponentVariant[] = [
+  { label: 'Regular', element: <CardRegular /> },
+  { label: 'Clickable', element: <CardClickable /> },
+  { label: 'Horizontal', element: <CardHorizontal /> },
+  { label: 'Plain', element: <CardPlain /> },
+  { label: 'Bordered', element: <CardBordered /> },
+  { label: 'Group', element: <CardGroup /> },
+];
+
+const splitButtonVariants: EuiComponentVariant[] = [
+  { label: 'Regular', element: <SplitButtonRegular />, interactive: true },
+  { label: 'Fill', element: <SplitButtonFill />, interactive: true },
+  { label: 'Small', element: <SplitButtonSmall /> },
+  { label: 'Disabled', element: <SplitButtonDisabled /> },
+  { label: 'With Icon', element: <SplitButtonWithIcon />, interactive: true },
+];
+
+const buttonGroupVariants: EuiComponentVariant[] = [
+  { label: 'Single Select', element: <ButtonGroupSingle />, interactive: true },
+  { label: 'Icon Only', element: <ButtonGroupIconOnly />, interactive: true },
+  { label: 'Multi Select', element: <ButtonGroupMulti />, interactive: true },
+  { label: 'Compressed', element: <ButtonGroupCompressed />, interactive: true },
+];
+
+const linkVariants: EuiComponentVariant[] = [
+  { label: 'Inline', element: <LinkRegular /> },
+  { label: 'External', element: <LinkExternal /> },
+  { label: 'Button', element: <LinkButton /> },
+  { label: 'Disabled', element: <LinkDisabled /> },
+];
+
+const stepsVariants: EuiComponentVariant[] = [
+  { label: 'Regular', element: <StepsRegular /> },
+  { label: 'With Status', element: <StepsWithStatus /> },
+  { label: 'Horizontal', element: <StepsHorizontal />, interactive: true },
+  { label: 'Small', element: <StepsSmall /> },
+];
+
+const treeViewVariants: EuiComponentVariant[] = [
+  { label: 'Regular', element: <TreeViewRegular />, interactive: true },
+  { label: 'Compressed', element: <TreeViewCompressed />, interactive: true },
+  { label: 'Expanded', element: <TreeViewExpanded />, interactive: true },
+];
+
+const avatarVariants: EuiComponentVariant[] = [
+  { label: 'Regular', element: <AvatarRegular /> },
+  { label: 'Large', element: <AvatarLarge /> },
+  { label: 'Small', element: <AvatarSmall /> },
+  { label: 'Space', element: <AvatarSpace /> },
+  { label: 'Icon', element: <AvatarIcon /> },
+  { label: 'Disabled', element: <AvatarDisabled /> },
+];
+
+const badgeVariants: EuiComponentVariant[] = [
+  { label: 'Regular', element: <BadgeRegular /> },
+  { label: 'Hollow', element: <BadgeHollow /> },
+  { label: 'Clickable', element: <BadgeClickable /> },
+  { label: 'With Icon', element: <BadgeWithIcon /> },
+  { label: 'Disabled', element: <BadgeDisabled /> },
+  { label: 'Group', element: <BadgeGroup /> },
+  { label: 'Beta', element: <BadgeBeta /> },
+  { label: 'Notification', element: <BadgeNotification /> },
+];
+
+const beaconVariants: EuiComponentVariant[] = [
+  { label: 'Regular', element: <BeaconRegular /> },
+  { label: 'Large', element: <BeaconLarge /> },
+];
+
+const calloutVariants: EuiComponentVariant[] = [
+  { label: 'Info', element: <CalloutInfo /> },
+  { label: 'Success', element: <CalloutSuccess /> },
+  { label: 'Warning', element: <CalloutWarning /> },
+  { label: 'Danger', element: <CalloutDanger /> },
+  { label: 'Small', element: <CalloutSmall /> },
+  { label: 'Title Only', element: <CalloutTitleOnly /> },
+];
+
+const iconVariants: EuiComponentVariant[] = [
+  { label: 'Regular', element: <IconRegular /> },
+  { label: 'Large', element: <IconLarge /> },
+  { label: 'XX-Large', element: <IconXXL /> },
+  { label: 'App Icon', element: <IconApp /> },
+  { label: 'Logo', element: <IconLogo /> },
+  { label: 'Token', element: <TokenRegular /> },
+  { label: 'Token Large', element: <TokenLarge /> },
+];
+
+const selectVariants: EuiComponentVariant[] = [
+  { label: 'Regular', element: <SelectRegular />, interactive: true },
+  { label: 'Compressed', element: <SelectCompressed />, interactive: true },
+  { label: 'Disabled', element: <SelectDisabled /> },
+  { label: 'Loading', element: <SelectLoading /> },
+];
+
+const superSelectVariants: EuiComponentVariant[] = [
+  { label: 'Regular', element: <SuperSelectRegular />, interactive: true },
+  { label: 'Compressed', element: <SuperSelectCompressed />, interactive: true },
+  { label: 'Disabled', element: <SuperSelectDisabled /> },
+];
+
 /**
  * Curated catalog of EUI components available for insertion via design tools.
  * Each entry uses JSX to define the rendered element directly.
@@ -98,5 +283,80 @@ export const EUI_LIBRARY: EuiLibraryEntry[] = [
     element: <SwitchRegular />,
     interactive: true,
     variants: switchVariants,
+  },
+  {
+    label: 'Accordion',
+    element: <AccordionRegular />,
+    interactive: true,
+    variants: accordionVariants,
+  },
+  {
+    label: 'Card',
+    element: <CardRegular />,
+    variants: cardVariants,
+  },
+  {
+    label: 'Split Button',
+    element: <SplitButtonRegular />,
+    variants: splitButtonVariants,
+  },
+  {
+    label: 'Button Group',
+    element: <ButtonGroupSingle />,
+    interactive: true,
+    variants: buttonGroupVariants,
+  },
+  {
+    label: 'Link',
+    element: <LinkRegular />,
+    variants: linkVariants,
+  },
+  {
+    label: 'Steps',
+    element: <StepsRegular />,
+    variants: stepsVariants,
+  },
+  {
+    label: 'Tree View',
+    element: <TreeViewRegular />,
+    interactive: true,
+    variants: treeViewVariants,
+  },
+  {
+    label: 'Avatar',
+    element: <AvatarRegular />,
+    variants: avatarVariants,
+  },
+  {
+    label: 'Badge',
+    element: <BadgeRegular />,
+    variants: badgeVariants,
+  },
+  {
+    label: 'Beacon',
+    element: <BeaconRegular />,
+    variants: beaconVariants,
+  },
+  {
+    label: 'Callout',
+    element: <CalloutInfo />,
+    variants: calloutVariants,
+  },
+  {
+    label: 'Icon',
+    element: <IconRegular />,
+    variants: iconVariants,
+  },
+  {
+    label: 'Select',
+    element: <SelectRegular />,
+    interactive: true,
+    variants: selectVariants,
+  },
+  {
+    label: 'Super Select',
+    element: <SuperSelectRegular />,
+    interactive: true,
+    variants: superSelectVariants,
   },
 ];
