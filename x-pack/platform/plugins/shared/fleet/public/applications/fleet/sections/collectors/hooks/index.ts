@@ -6,4 +6,8 @@
  */
 
 export { useCollectorsList } from './use_collectors_list';
-export { useCollectorsUrlFilters, useSetCollectorsUrlFilters, VALID_PAGE_SIZES } from './use_url_filters';
+export {
+  useCollectorsUrlFilters,
+  useSetCollectorsUrlFilters,
+  VALID_PAGE_SIZES,
+} from './use_url_filters';

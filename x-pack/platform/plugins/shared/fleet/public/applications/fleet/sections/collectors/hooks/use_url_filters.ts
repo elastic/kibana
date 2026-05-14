@@ -27,8 +27,7 @@ export const useCollectorsUrlFilters = (): CollectorsFilter => {
   const { urlParams } = useUrlParams();
 
   return useMemo(() => {
-    const q =
-      typeof urlParams[QUERYPARAM_Q] === 'string' ? urlParams[QUERYPARAM_Q] : undefined;
+    const q = typeof urlParams[QUERYPARAM_Q] === 'string' ? urlParams[QUERYPARAM_Q] : undefined;
 
     const rawPage = Number(urlParams[QUERYPARAM_PAGE]);
     const pageIndex = Number.isInteger(rawPage) && rawPage >= 1 ? rawPage - 1 : 0;
