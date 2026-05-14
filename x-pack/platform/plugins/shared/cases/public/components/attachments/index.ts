@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import type { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
 import { getCommentAttachmentType } from './comment';
-import { getFileType } from './file/file_type';
+import { getFileAttachmentType } from './file';
 import { getVisualizationAttachmentType } from './lens';
 
-export const registerInternalAttachments = (
-  externalRefRegistry: ExternalReferenceAttachmentTypeRegistry,
-  unifiedRegistry: UnifiedAttachmentTypeRegistry
-) => {
-  externalRefRegistry.register(getFileType());
+export const registerInternalAttachments = (unifiedRegistry: UnifiedAttachmentTypeRegistry) => {
+  unifiedRegistry.register(getFileAttachmentType());
   unifiedRegistry.register(getVisualizationAttachmentType());
   unifiedRegistry.register(getCommentAttachmentType());
 };

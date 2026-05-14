@@ -23,6 +23,7 @@ export const IGNORED_WATCH_PATTERNS: RegExp[] = [
   /[\\/]target[\\/]/,
   /\.tsbuildinfo$/,
   /\.test\.[jt]sx?$/,
+  /\.spec\.[jt]sx?$/,
   /\.stories\.[jt]sx?$/,
   /\.mock\.[jt]sx?$/,
   /[\\/]__(?:mocks|snapshots|fixtures|jest)__[\\/]/,
