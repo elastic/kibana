@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import {
   EuiPopover,
   EuiFlexGroup,
@@ -15,6 +15,7 @@ import {
   EuiLoadingSpinner,
   EuiText,
   EuiIcon,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -54,8 +55,11 @@ export const PendingActionsSelector = memo<
     EndpointCommandDefinitionMeta
   >
 >(({ value, valueText, onChange, store, command, requestFocus, argName, argIndex }) => {
-  const testId = useTestIdGenerator(`${command.commandDefinition.name}-${argName}-arg-${argIndex}`);
+  // The initial value when component is initialized. This could be populated if
+  // user selected an entry from the console's command history
+  const [initValueToCheck, setInitValueToCheck] = useState(value);
 
+  const testId = useTestIdGenerator(`${command.commandDefinition.name}-${argName}-arg-${argIndex}`);
   const agentType = command.commandDefinition.meta?.agentType;
   const endpointId = command.commandDefinition.meta?.endpointId;
 
@@ -73,7 +77,7 @@ export const PendingActionsSelector = memo<
       commands: agentType ? getListOfCancelableResponseActions(agentType) : [],
     },
     {
-      enabled: state.isPopoverOpen,
+      enabled: state.isPopoverOpen || Boolean(initValueToCheck),
     }
   );
 
@@ -175,6 +179,19 @@ export const PendingActionsSelector = memo<
     [testId]
   );
 
+  // After data is loaded, check to ensure that the selected value (which could have been "static" if the user
+  // selected the command from the console's history) is valid
+  useEffect(() => {
+    if (!isLoading && initValueToCheck && data?.data && !data.data.find(({ id }) => id === value)) {
+      onChange({
+        ...state,
+        value: '',
+        valueText: '',
+      });
+      setInitValueToCheck(undefined);
+    }
+  }, [data?.data, initValueToCheck, isLoading, onChange, state, value]);
+
   if (isAwaitingRenderDelay || (isLoading && !error)) {
     return <EuiLoadingSpinner data-test-subj={testId('loading')} size="m" />;
   }
@@ -208,6 +225,18 @@ export const PendingActionsSelector = memo<
           onChange={handleSelection}
           renderOption={renderOption}
           singleSelection
+          emptyMessage={
+            <EuiEmptyPrompt
+              body={
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="xpack.securitySolution.baseArgumentSelector.noPendingActionsFound"
+                    defaultMessage="No supported cancelable actions found for this host"
+                  />
+                </EuiText>
+              }
+            />
+          }
           searchProps={{
             placeholder: valueText || PENDING_ACTIONS_CONFIG.initialLabel,
             autoFocus: true,
@@ -229,7 +258,7 @@ export const PendingActionsSelector = memo<
         >
           {(list, search) => (
             <>
-              <div css={{ margin: 5 }}>{search}</div>
+              {options.length > 0 && <div css={{ margin: 5 }}>{search}</div>}
               {list}
             </>
           )}
