@@ -262,7 +262,15 @@ export function WorkflowGraphNode(node: NodeProps<Node<WorkflowGraphNodeData>>) 
             <EuiIcon
               type={iconType}
               size="m"
-              color={LOGO_ICONS.has(iconType) ? undefined : palette.iconColor}
+              color={
+                LOGO_ICONS.has(iconType)
+                  ? undefined
+                  : isSuccess
+                  ? STATUS_SUCCESS
+                  : isFailed
+                  ? STATUS_FAIL
+                  : palette.iconColor
+              }
             />
           </div>
         </div>
