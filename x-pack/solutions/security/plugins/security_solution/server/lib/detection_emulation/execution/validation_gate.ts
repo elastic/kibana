@@ -97,13 +97,32 @@ export const buildLibraryFingerprintSet = (
 };
 
 /**
- * Test-only escape hatch — invalidates the memoised fingerprint set so
- * a fresh `buildLibraryFingerprintSet()` rebuilds it. Production code
- * never mutates `payloadLibrary` so this should never be needed at
- * runtime.
+ * Compile and cache the operator-supplied `allowedExecuteCommandPatterns`
+ * regex strings. Memoised by array reference so a single config snapshot
+ * compiles once for the life of the process. Bad pattern strings throw a
+ * `SyntaxError` on first compilation — callers (config validation at
+ * Kibana boot) are expected to catch and surface this as a startup error.
+ *
+ * Exported for tests only.
+ */
+let cachedExecutePatterns: Map<readonly string[], readonly RegExp[]> = new Map();
+export const buildExecutePatternSet = (patterns: readonly string[]): readonly RegExp[] => {
+  const cached = cachedExecutePatterns.get(patterns);
+  if (cached) return cached;
+  const compiled = patterns.map((p) => new RegExp(p));
+  cachedExecutePatterns.set(patterns, compiled);
+  return compiled;
+};
+
+/**
+ * Test-only escape hatch — invalidates both memoised caches so
+ * a fresh call to `buildLibraryFingerprintSet()` / `buildExecutePatternSet()`
+ * rebuilds them. Production code never mutates these inputs so this should
+ * never be needed at runtime.
  */
 export const __resetLibraryFingerprintCacheForTests = (): void => {
   cachedLibraryFingerprints = undefined;
+  cachedExecutePatterns = new Map();
 };
 
 const fingerprintFromPayload = (payload: EmulationPayload): string => {
