@@ -26,3 +26,19 @@ export {
 export { pciScopeDiscoveryTool, PCI_SCOPE_DISCOVERY_TOOL_ID } from './pci_scope_discovery_tool';
 export { pciComplianceTool, PCI_COMPLIANCE_TOOL_ID } from './pci_compliance_tool';
 export { pciFieldMapperTool, PCI_FIELD_MAPPER_TOOL_ID } from './pci_field_mapper_tool';
+export {
+  migrationTranslatedRulesSearchTool,
+  SECURITY_MIGRATION_TRANSLATED_RULES_SEARCH_TOOL_ID,
+  migrationTranslatedRuleGetTool,
+  SECURITY_MIGRATION_TRANSLATED_RULE_GET_TOOL_ID,
+  migrationTranslatedRuleUpdateTool,
+  SECURITY_MIGRATION_TRANSLATED_RULE_UPDATE_TOOL_ID,
+} from './migration_translated_rules_tools';
+export {
+  migrationResourcesListTool,
+  SECURITY_MIGRATION_RESOURCES_LIST_TOOL_ID,
+  migrationResourceUpsertTool,
+  SECURITY_MIGRATION_RESOURCE_UPSERT_TOOL_ID,
+  migrationResourceRemoveTool,
+  SECURITY_MIGRATION_RESOURCE_REMOVE_TOOL_ID,
+} from './migration_resources_tools';
