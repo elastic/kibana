@@ -1941,6 +1941,7 @@ Object {
                       "type": "null",
                     },
                   ],
+                  "default": null,
                 },
                 "summary": Object {
                   "type": "string",
@@ -1948,7 +1949,6 @@ Object {
               },
               "required": Array [
                 "summary",
-                "otherFields",
               ],
               "type": "object",
             },
@@ -3055,11 +3055,11 @@ Object {
                       "type": "null",
                     },
                   ],
+                  "default": null,
                 },
               },
               "required": Array [
                 "short_description",
-                "additional_fields",
               ],
               "type": "object",
             },
@@ -3893,11 +3893,11 @@ Object {
                       "type": "null",
                     },
                   ],
+                  "default": null,
                 },
               },
               "required": Array [
                 "short_description",
-                "additional_fields",
               ],
               "type": "object",
             },

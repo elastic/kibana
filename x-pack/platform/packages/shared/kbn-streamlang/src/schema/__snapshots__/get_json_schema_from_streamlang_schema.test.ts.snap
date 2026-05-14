@@ -96,7 +96,6 @@ Object {
         },
       ],
       "description": "The root condition object. It can be a simple filter or a combination of other conditions.",
-      "id": "Condition",
     },
     "ConditionWithSteps": Object {
       "allOf": Array [
@@ -124,7 +123,6 @@ Object {
           "type": "object",
         },
       ],
-      "id": "ConditionWithSteps",
     },
     "FilterCondition": Object {
       "anyOf": Array [
@@ -283,7 +281,6 @@ Object {
         },
       ],
       "description": "A basic filter condition, either unary or binary.",
-      "id": "FilterCondition",
     },
     "StreamlangConditionBlock": Object {
       "additionalProperties": false,
@@ -360,7 +357,6 @@ Object {
           "label": "Condition block with else",
         },
       ],
-      "id": "StreamlangConditionBlock",
       "properties": Object {
         "condition": Object {
           "additionalProperties": false,
@@ -590,7 +586,6 @@ Object {
               "label": "NOT condition",
             },
           ],
-          "id": "ConditionWithSteps",
           "properties": Object {
             "always": Object {
               "additionalProperties": false,
@@ -2291,7 +2286,6 @@ Object {
           "$ref": "#/definitions/StreamlangConditionBlock",
         },
       ],
-      "id": "StreamlangStep",
     },
   },
   "properties": Object {
@@ -3805,7 +3799,6 @@ Object {
             "$ref": "#/definitions/StreamlangConditionBlock",
           },
         ],
-        "id": "StreamlangStep",
       },
       "type": "array",
     },
