@@ -117,8 +117,11 @@ Playbook guidance:
 ### Quality (\`get_quality\`)
 - \`status\`: \`healthy | actionsRequired | noData\`
 - \`summary\`: pre-computed summary string
-- \`items\`: array of \`DataQualityResultDocument\` — includes \`indexName\`, \`incompatibleFieldCount\`, \`incompatibleFieldMappingItems\`, \`incompatibleFieldValueItems\`, \`ecsFieldCount\`, \`totalFieldCount\`
+- \`items\`: array of ECS quality results for **categorized indices only** — includes \`indexName\`, \`incompatibleFieldCount\`, \`incompatibleFieldMappingItems\`, \`ecsFieldCount\`, \`totalFieldCount\`
+  - Only indices whose data maps to one of the five main SIEM categories are included. Uncategorized system indices are excluded.
+  - The count in \`summary\` reflects the number of categorized indices checked, not total ES indices.
 - \`actionableFindings\`: array of \`{ category, severity, message, resource }\`
+- When reporting: "N of M checked indices have incompatible fields" — N and M are both counts of categorized indices only.
 
 ### Continuity (\`get_continuity\`)
 - \`status\`: \`healthy | actionsRequired | noData\`
@@ -131,9 +134,13 @@ Playbook guidance:
 ### Retention (\`get_retention\`)
 - \`status\`: \`healthy | actionsRequired | noData\`
 - \`summary\`: pre-computed summary string
-- \`items\`: array of \`RetentionInfo\` — \`{ indexName, isDataStream, retentionType (ilm|dsl|null), retentionPeriod, retentionDays, policyName, status (healthy|non-compliant) }\`
+- \`items\`: array of \`RetentionInfo\` for **categorized indices only** — \`{ indexName, isDataStream, retentionType (ilm|dsl|null), retentionPeriod, retentionDays, policyName, status (healthy|non-compliant), categories }\`
+  - Only indices whose data maps to one of the five main SIEM categories are included. Uncategorized system indices (e.g. internal workflow indices) are excluded.
+  - \`categories\`: array of all main categories this index belongs to. An index can belong to multiple categories because it ingests data with multiple \`event.category\` values.
+  - The count in \`summary\` reflects the number of unique categorized indices, not total ES data streams.
 - \`actionableFindings\`: array of \`{ category, severity, message, resource }\`
 - Threshold: 365 days (FedRAMP). \`retentionDays: null\` means no explicit retention — data kept forever — which is compliant.
+- When reporting retention findings: group by category using the \`categories\` field. Example: "1 index in Cloud has retention below threshold: logs-cloud_security_posture.findings-default (180d)".
 
 ## Best Practices
 - Always call \`actionableFindings\` arrays first to build the Suggested Actions section — they are pre-computed from the data.

@@ -73,9 +73,15 @@ export const getQuality = async ({
   ]);
 
   const indexToCategoryMap = getIndexCategoryMap(categoriesData);
+
+  // Only include indices that belong to at least one recognized category, matching the UI view.
+  const categorizedResults = qualityResults.filter((result) =>
+    indexToCategoryMap.has(result.indexName)
+  );
+
   const status = getQualityStatus(categoriesData, qualityResults, ALL_CATEGORIES);
 
-  const actionableFindings: ActionableFinding[] = qualityResults
+  const actionableFindings: ActionableFinding[] = categorizedResults
     .filter((result) => isQualityIncompatible(result.incompatibleFieldCount))
     .map((result) => {
       const category = (indexToCategoryMap.get(result.indexName) as MainCategories) ?? 'Endpoint';
@@ -87,9 +93,9 @@ export const getQuality = async ({
       };
     });
 
-  const summary = buildQualitySummary(status, qualityResults.length, actionableFindings.length);
+  const summary = buildQualitySummary(status, categorizedResults.length, actionableFindings.length);
 
-  return { status, summary, items: qualityResults, actionableFindings };
+  return { status, summary, items: categorizedResults, actionableFindings };
 };
 
 const buildQualitySummary = (

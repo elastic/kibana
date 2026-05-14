@@ -1,4 +1,52 @@
-# SIEM Readiness — Architecture Guide
+# SIEM Readiness — Domain Knowledge and Architecture Guide
+
+## Domain knowledge
+
+### The five main SIEM categories
+
+All data in SIEM Readiness is organized into five main categories:
+
+| Category | Maps from `event.category` values |
+|---|---|
+| Endpoint | endpoint, file, process, registry, malware, driver, host, vulnerability |
+| Identity | authentication, iam, session, user |
+| Network | network, firewall, intrusion_detection, dns |
+| Cloud | cloud, configuration |
+| Application/SaaS | application, web, database, package, api |
+
+The mapping lives in `server/lib/siem_readiness/fetchers/fetch_categories.ts` (`MAIN_CATEGORY_MAPPING`). A raw `event.category` value not in this table is **uncategorized** and is excluded from all views.
+
+### An index can belong to multiple categories
+
+An index like `logs-cloud_asset_inventory.asset_inventory-2` typically ingests documents with multiple `event.category` values (e.g., `cloud`, `network`, `host`). This means it appears in multiple category groups — Cloud, Network, and Endpoint — at the same time. The UI shows it once per category section it belongs to. This is expected and correct.
+
+When counting "how many indices", count **unique indices**, not category-index pairs. If 5 unique indices are categorized but one appears in 3 categories, the total is still 5 — not 7.
+
+### Only categorized data is shown
+
+The UI and the agent both show only indices that are categorized into one of the five main groups. Uncategorized system indices (e.g. `.workflows-events`, `.kibana-*`, internal monitoring indices) are excluded from all SIEM Readiness views. If an index appears in the agent's response but not in the UI, it is likely uncategorized.
+
+The dimension orchestrators in `server/lib/siem_readiness/dimensions/` filter items to categorized-only before building the payload. This is what makes agent and UI results consistent.
+
+### Category assignment in payloads
+
+- **Coverage**: items are already `CategoryGroup[]` — pre-grouped by category.
+- **Continuity**: items are `PipelineStats[]`. Use `getIndexCategoryMap` to find which category a pipeline's indices belong to.
+- **Quality**: items are `DataQualityResultDocument[]` filtered to categorized indices. Use `actionableFindings[].category` for grouping.
+- **Retention**: items are `RetentionInfo[]` filtered to categorized indices, each with a `categories: MainCategories[]` field listing all categories that index belongs to.
+
+### Thresholds and compliance rules
+
+- **Pipeline failure rate**: critical at ≥ 1% (`CRITICAL_FAILURE_RATE_THRESHOLD` in `src/constants.ts`). Computed as `failedDocsCount / docsCount * 100`.
+- **Retention**: FedRAMP minimum is 365 days. `retentionDays: null` means no explicit delete policy — data is kept forever — which is **compliant**. Only indices with an explicit retention shorter than 365 days are flagged.
+- **ECS quality**: any index with `incompatibleFieldCount > 0` is flagged as having ECS mapping issues.
+- **Coverage**: a category is considered covered if at least one of its indices has ingested documents.
+
+### Serverless differences
+
+In serverless Kibana, ingest pipeline node stats are unavailable. `PipelineStats.statsAvailable` will be `false` for all pipelines. Pipelines are still listed (they exist) but `docsCount` and `failedDocsCount` cannot be reported. ILM is also unavailable on serverless — retention is DSL-only for data streams; standalone indices don't exist.
+
+---
 
 ## Core principle: enrich, don't multiply
 

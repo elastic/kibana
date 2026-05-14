@@ -12,6 +12,7 @@ import type {
   ContinuityPayload,
   CoveragePayload,
   QualityPayload,
+  RetentionInfo,
   RetentionPayload,
 } from '@kbn/siem-readiness';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
@@ -93,6 +94,7 @@ export const siemReadinessRetentionDataSchema = securityAttachmentDataSchema.ext
       retentionDays: z.number().nullable(),
       policyName: z.string().nullable(),
       status: z.enum(['healthy', 'non-compliant']),
+      categories: z.array(z.string()).optional(),
     })
   ),
   actionableFindings: z.array(actionableFindingSchema).optional(),
@@ -148,6 +150,29 @@ const formatContinuityForAgent = (
 
 const formatRetentionForAgent = (data: RetentionPayload & { dimension: 'retention' }): string => {
   const lines = [`SIEM Retention — ${data.status}`, data.summary];
+
+  // Group non-compliant items by their primary category for the agent.
+  const nonCompliantByCategory = new Map<string, typeof data.items>();
+  data.items.forEach((item) => {
+    if (item.status === 'non-compliant') {
+      const primaryCategory =
+        (item as RetentionInfo & { categories?: string[] }).categories?.[0] ?? 'Uncategorized';
+      const existing = nonCompliantByCategory.get(primaryCategory) ?? [];
+      nonCompliantByCategory.set(primaryCategory, [...existing, item]);
+    }
+  });
+
+  if (nonCompliantByCategory.size > 0) {
+    lines.push('Non-compliant by category:');
+    nonCompliantByCategory.forEach((items, category) => {
+      lines.push(`  ${category}:`);
+      items.forEach((item) => {
+        const retention = item.retentionDays ? `${item.retentionDays}d` : 'no policy';
+        lines.push(`    ${item.indexName} — ${retention} (threshold: 365d)`);
+      });
+    });
+  }
+
   if (data.actionableFindings?.length) {
     lines.push('Findings:');
     data.actionableFindings.forEach((f) => lines.push(`  [${f.severity}] ${f.message}`));

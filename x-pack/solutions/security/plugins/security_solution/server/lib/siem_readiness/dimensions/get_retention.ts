@@ -31,12 +31,30 @@ export const getRetention = async ({
   ]);
 
   const indexToCategoryMap = getIndexCategoryMap(categoriesData);
+
+  // Build a map of indexName → all categories it belongs to (an index can appear in multiple).
+  const allCategoriesMap = new Map<string, MainCategories[]>();
+  categoriesData?.mainCategoriesMap?.forEach((group) => {
+    group.indices.forEach((idx) => {
+      const existing = allCategoriesMap.get(idx.indexName) ?? [];
+      allCategoriesMap.set(idx.indexName, [...existing, group.category as MainCategories]);
+    });
+  });
+
+  // Only include indices that belong to at least one recognized category, matching the UI view.
+  const categorizedItems = retentionResponse.items
+    .filter((item) => indexToCategoryMap.has(item.indexName))
+    .map((item) => ({
+      ...item,
+      categories: allCategoriesMap.get(item.indexName) ?? [],
+    }));
+
   const status = getRetentionStatus(categoriesData, retentionResponse, ALL_CATEGORIES);
 
-  const actionableFindings: ActionableFinding[] = retentionResponse.items
+  const actionableFindings: ActionableFinding[] = categorizedItems
     .filter((item) => isRetentionNonCompliant(item.status))
     .map((item) => {
-      const category = (indexToCategoryMap.get(item.indexName) as MainCategories) ?? 'Endpoint';
+      const category = item.categories[0] ?? ('Endpoint' as MainCategories);
       const retentionLabel = item.retentionDays ? `${item.retentionDays}d` : 'no retention policy';
       return {
         category,
@@ -46,13 +64,9 @@ export const getRetention = async ({
       };
     });
 
-  const summary = buildRetentionSummary(
-    status,
-    retentionResponse.items.length,
-    actionableFindings.length
-  );
+  const summary = buildRetentionSummary(status, categorizedItems.length, actionableFindings.length);
 
-  return { status, summary, items: retentionResponse.items, actionableFindings };
+  return { status, summary, items: categorizedItems, actionableFindings };
 };
 
 const buildRetentionSummary = (

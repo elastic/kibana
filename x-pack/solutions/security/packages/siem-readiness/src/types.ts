@@ -118,6 +118,8 @@ export interface RetentionInfo {
   retentionDays: number | null;
   policyName: string | null;
   status: RetentionStatus;
+  /** All main categories this index belongs to. Populated by the dimension orchestrator; absent on raw fetcher output. */
+  categories?: MainCategories[];
 }
 
 export interface RetentionResponse {
