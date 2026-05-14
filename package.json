@@ -754,6 +754,7 @@
     "@kbn/inference-prompt-utils": "link:x-pack/platform/packages/shared/kbn-inference-prompt-utils",
     "@kbn/inference-tracing": "link:x-pack/platform/packages/shared/kbn-inference-tracing",
     "@kbn/inference-tracing-config": "link:x-pack/platform/packages/shared/kbn-inference-tracing-config",
+    "@kbn/inference-workflows-plugin": "link:x-pack/platform/plugins/shared/inference_workflows",
     "@kbn/infra-forge": "link:x-pack/platform/packages/private/kbn-infra-forge",
     "@kbn/infra-plugin": "link:x-pack/solutions/observability/plugins/infra",
     "@kbn/ingest-hub-plugin": "link:x-pack/platform/plugins/shared/ingest_hub",
