@@ -142,45 +142,64 @@ export async function scheduleReconciliationTask({
   }
 }
 
+interface ResetReconciliationTaskArgs extends ScheduleReconciliationTaskArgs {
+  /**
+   * State to force the persisted task SO to after the reset. The `/reset`
+   * route uses this to seed the next periodic tick's `last_run_at` cursor
+   * to the wall-clock at which it ran its direct full walk — so future
+   * periodic ticks walk only the post-walk delta instead of re-emitting
+   * every case every interval. Empty (default `{}`) means the next tick
+   * runs as a full backfill, which is rarely what you want (the runner's
+   * default cadence is 30m and a tenant-wide walk every 30m is expensive).
+   */
+  initialState?: Record<string, unknown>;
+}
+
 /**
- * Clears the reconciliation task's persisted state by removing and
- * re-scheduling the task SO. The fresh task starts with `state: {}`, so the
- * runner sees `last_run_at === undefined` and walks every case — exactly what
- * the `/reset` endpoint needs after dropping and recreating the index.
+ * Resets the reconciliation task's persisted state.
  *
- * **Why remove + re-schedule** instead of mutating state in place? Task
- * Manager's state-mutation APIs (`bulkUpdateState`, etc.) update the task
- * SO atomically, but they fail if the SO is locked by an in-flight tick or
- * doesn't exist yet. Remove + re-schedule is robust to both cases: missing
- * task → recreated cleanly; in-flight tick → the running tick completes
- * against the old state, the new task starts with empty state on its next
- * tick. Idempotent: a missing task on remove is a no-op.
+ * **Two steps, both required:**
+ *   1. `scheduleReconciliationTask` (ensure-scheduled). No-op when the task
+ *      already exists; creates it with the configured interval otherwise.
+ *      Guarantees a task SO is on disk for step 2 to update.
+ *   2. `bulkUpdateState`. Atomically rewrites the persisted state to
+ *      `initialState`. Unlike `remove` + `ensureScheduled` (the previous
+ *      implementation), this:
+ *        - does NOT depend on `remove` succeeding for non-404 reasons —
+ *          a transient cluster error during remove used to silently leave
+ *          the SO alive with stale state, and the subsequent
+ *          `ensureScheduled` no-oped because the SO still existed. The
+ *          symptom was that `/reset` returned 200 but the next periodic
+ *          tick inherited the old cursor and only re-emitted cases
+ *          touched after that point, making every never-patched case
+ *          invisible until someone happened to edit it.
+ *        - does NOT race a freshly-scheduled task SO against an in-flight
+ *          tick that's about to write its (old) state back to the same id.
+ *
+ * **Race with an in-flight tick:** `bulkUpdateState` reads + writes the
+ * SO non-atomically — a tick that completes between our read and write
+ * (or a tick that starts mid-update) can still clobber our cursor. That's
+ * acceptable here: the runner's filter has an unconditional
+ * `updated_at IS NULL` branch (see `runner.ts`), so any case missed by
+ * the clobbering tick still gets re-emitted on the next tick until it
+ * gets patched and falls into the cursor-based branch.
  */
 export async function resetReconciliationTask({
   taskManager,
   logger,
   intervalMinutes,
-}: ScheduleReconciliationTaskArgs): Promise<void> {
-  try {
-    await taskManager.remove(RECONCILIATION_TASK_ID);
-  } catch (err) {
-    // 404 = task wasn't scheduled (first-ever reset, or task was manually
-    // deleted). Either way, our post-state ("no task with stale state") is
-    // already met — log at debug and proceed to re-schedule.
-    const status =
-      (err as { statusCode?: number })?.statusCode ??
-      (err as { meta?: { statusCode?: number } })?.meta?.statusCode;
-    if (status !== 404) {
-      logger.warn(
-        `cases-analyticsV2: failed to remove reconciliation task during reset: ${
-          err instanceof Error ? err.message : String(err)
-        }`
-      );
-    }
-  }
-  // Re-schedule with the same configured interval the route handler
-  // received from the v2 service.
+  initialState = {},
+}: ResetReconciliationTaskArgs): Promise<void> {
   await scheduleReconciliationTask({ taskManager, logger, intervalMinutes });
+  try {
+    await taskManager.bulkUpdateState([RECONCILIATION_TASK_ID], () => initialState);
+  } catch (err) {
+    logger.warn(
+      `cases-analyticsV2: failed to reset reconciliation task state: ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    );
+  }
 }
 
 /**

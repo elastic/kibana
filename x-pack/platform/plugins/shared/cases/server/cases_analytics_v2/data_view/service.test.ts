@@ -146,6 +146,123 @@ describe('CasesAnalyticsV2DataViewService', () => {
     });
 
     /**
+     * FAILURE SCENARIO: Concurrent first-request bootstrap races into
+     *                   version_conflict_engine_exception
+     * Symptom: Two parallel cases requests in a fresh-cache space both
+     *          pass the cache check, both see `dvService.get` return 404,
+     *          and both call `createAndSave`. The loser surfaces
+     *          `version_conflict_engine_exception: [index-pattern:cases-
+     *          analytics-managed-<spaceId>]: document already exists`
+     *          via the WARN log path. Users see broken data view bootstrap
+     *          telemetry in support sessions even though the doc landed
+     *          fine.
+     * Log signature: `cases-analyticsV2: data view ensure failed for
+     *                 space=<...>: version_conflict_engine_exception`
+     * Trigger: First cases-request burst after Kibana boot in a tenant
+     *          with several concurrently-created cases per space.
+     * Recovery: In-flight dedupe — concurrent ensures for the same space
+     *           collapse onto a single promise; the second caller just
+     *           awaits the first's result.
+     */
+    it('collapses concurrent ensures for the same space onto a single in-flight promise', async () => {
+      const { service, dvService, deps } = setup([]);
+      stubMissingDataView(dvService);
+      // Stretch `createAndSave` so the second `ensureForSpace` lands while
+      // the first one is mid-flight. Without dedupe, both would race into
+      // `createAndSave` and the second would surface the version conflict.
+      let resolveCreate: () => void = () => {};
+      dvService.createAndSave.mockImplementation(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveCreate = resolve;
+          })
+      );
+
+      const first = service.ensureForSpace(deps);
+      const second = service.ensureForSpace(deps);
+      resolveCreate();
+      await Promise.all([first, second]);
+
+      expect(dvService.get).toHaveBeenCalledTimes(1);
+      expect(dvService.createAndSave).toHaveBeenCalledTimes(1);
+    });
+
+    it('dedupe slot frees up so a later ensure (post-cache-eviction or refresh) re-runs work', async () => {
+      // Per-call sanity check: the in-flight map must be cleared in the
+      // finally block, otherwise the next ensure after eviction / refresh
+      // would silently no-op forever.
+      const { service, dvService, deps } = setup([]);
+      stubMissingDataView(dvService);
+      await service.ensureForSpace(deps);
+
+      // Force-refresh path bypasses the cache short-circuit; if the
+      // inflight map wasn't cleared, this would await a resolved promise
+      // and never re-invoke the data views service.
+      stubMissingDataView(dvService);
+      await service.refreshForSpace(deps);
+
+      expect(dvService.get).toHaveBeenCalledTimes(2);
+    });
+
+    /**
+     * FAILURE SCENARIO: Cross-Kibana-node bootstrap race
+     * Symptom: Two Kibana nodes in the same cluster bootstrap the same
+     *          space concurrently. Per-process dedupe doesn't help because
+     *          they're in different processes; the loser's `createAndSave`
+     *          surfaces `version_conflict_engine_exception` and the cache
+     *          slot stays empty, so every subsequent request in that
+     *          space on the losing node pays the full ensure cost again.
+     * Log signature (before): WARN — looks like a bug.
+     * Log signature (after): DEBUG — explicit "another node won".
+     * Trigger: Cluster-wide burst of first cases requests, multi-node
+     *          deployments.
+     * Recovery: Both nodes computed the desired runtime field map from the
+     *           same persisted templates view, so the winning doc carries
+     *           the same fields ours would have. Treat the 409 as a benign
+     *           success; populate the in-process cache as if we'd written.
+     */
+    it('treats a cross-node version_conflict on createAndSave as a benign bootstrap success', async () => {
+      const { service, dvService, deps, logger } = setup([]);
+      stubMissingDataView(dvService);
+      // Mirror ES's wire shape — `version_conflict_engine_exception` text
+      // plus a 409 statusCode. We check both in `isVersionConflictError`
+      // so the test pins both paths.
+      const conflictErr = Object.assign(
+        new Error(
+          '[index-pattern:cases-analytics-managed-default]: version conflict, document already exists (current version [1])'
+        ),
+        { statusCode: 409 }
+      );
+      dvService.createAndSave.mockRejectedValueOnce(conflictErr);
+
+      await expect(service.ensureForSpace(deps)).resolves.toBeUndefined();
+
+      // No WARN on the data view ensure path — the conflict is benign.
+      expect(logger.warn).not.toHaveBeenCalledWith(expect.stringContaining('version conflict'));
+      // The cache slot was populated; the next ensure short-circuits.
+      dvService.get.mockClear();
+      dvService.createAndSave.mockClear();
+      await service.ensureForSpace(deps);
+      expect(dvService.get).not.toHaveBeenCalled();
+      expect(dvService.createAndSave).not.toHaveBeenCalled();
+    });
+
+    it('still surfaces non-conflict createAndSave failures via the WARN path', async () => {
+      // Negative case for the conflict-tolerance path: a 503 / 500 from
+      // ES must NOT be swallowed — those are real failures the operator
+      // needs to see, and the next request should re-attempt.
+      const { service, dvService, deps, logger } = setup([]);
+      stubMissingDataView(dvService);
+      dvService.createAndSave.mockRejectedValueOnce(
+        Object.assign(new Error('cluster_block_exception'), { statusCode: 503 })
+      );
+
+      await service.ensureForSpace(deps);
+
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('cluster_block_exception'));
+    });
+
+    /**
      * FAILURE SCENARIO: Stale or soft-deleted templates poison the runtime field map
      * Symptom: A renamed template (`score_as_long → priority_as_keyword`)
      *          would still publish the old `score_as_long` runtime field

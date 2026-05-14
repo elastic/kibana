@@ -9,8 +9,8 @@ import { createHash } from 'crypto';
 import type { RuntimeFieldSpec, RuntimeType } from '@kbn/data-views-plugin/common';
 
 /**
- * Bumped whenever `SUFFIX_TO_RUNTIME_TYPE`, `NO_RUNTIME_FIELD_SUFFIXES`,
- * or `buildPainlessSource` changes shape. The build version is the prefix
+ * Bumped whenever `SUFFIX_TO_RUNTIME_TYPE` or `buildPainlessSource` changes
+ * shape. The build version is the prefix
  * on every fingerprint produced by `computeRuntimeFieldsFingerprint`, so
  * a bump invalidates every cached fingerprint and forces all spaces to
  * re-run the diff branch on their next ensure — which is the only way to
@@ -63,42 +63,22 @@ const SUFFIX_TO_RUNTIME_TYPE: Record<string, RuntimeType> = {
 };
 
 /**
- * Suffixes that the template system can emit but that intentionally don't
- * get a runtime field — the indexed value is already independently
- * accessible at its native path in the data view.
- *
- * Currently empty: every supported suffix needs a runtime field because
- * `cases.extended_fields` is `flattened` (sub-keys aren't discoverable as
- * data-view fields). Kept as a structural hook so a future mapping change
- * — e.g. promoting a specific suffix to a typed sub-field — can opt that
- * suffix out of the runtime-field path without touching the rest of the
- * pipeline.
- */
-const NO_RUNTIME_FIELD_SUFFIXES = new Set<string>();
-
-/**
- * Every suffix the cases template system can emit — derived once from the
- * two tables above so adding a new template type extends it automatically.
+ * Every suffix the cases template system can emit — derived once from
+ * `SUFFIX_TO_RUNTIME_TYPE` so adding a new template type extends it automatically.
  *
  * Exported for `mappings/schema_drift.test.ts`, which uses it to forbid
  * any mapping field whose leaf ends in `_as_<one of these>` from
  * colliding with a runtime field of the same name.
  */
-export const ALL_TEMPLATE_TYPE_SUFFIXES: readonly string[] = [
-  ...Object.keys(SUFFIX_TO_RUNTIME_TYPE),
-  ...NO_RUNTIME_FIELD_SUFFIXES,
-];
+export const ALL_TEMPLATE_TYPE_SUFFIXES: readonly string[] = Object.keys(SUFFIX_TO_RUNTIME_TYPE);
 
 /**
  * Suffix → runtime type. Returns:
  *   - the runtime type if the suffix is mapped (e.g. 'long' → 'long',
  *     'keyword' → 'keyword')
- *   - `null` if the suffix is known but intentionally doesn't get a runtime
- *     field (today: nothing; see `NO_RUNTIME_FIELD_SUFFIXES`)
  *   - `undefined` if the suffix is unknown — caller should ignore the field
  */
-export const suffixToRuntimeType = (suffix: string): RuntimeType | null | undefined => {
-  if (NO_RUNTIME_FIELD_SUFFIXES.has(suffix)) return null;
+export const suffixToRuntimeType = (suffix: string): RuntimeType | undefined => {
   return SUFFIX_TO_RUNTIME_TYPE[suffix];
 };
 
@@ -108,9 +88,9 @@ export const suffixToRuntimeType = (suffix: string): RuntimeType | null | undefi
  * `buildPainlessSource`, so any single quote, backslash, or newline would
  * either break the script or open a script-injection path. Template names
  * are validated upstream (`common/types/domain/template/fields.ts`) but
- * that schema currently allows any string, and we don't want the analytics
- * layer's safety to depend on a sibling team's validation choices. We also
- * cap the total length to keep Painless compile budgets bounded.
+ * that schema currently allows any string, and we want to provide an extra
+ * layer of validation. We also cap the total length to keep Painless 
+ * compile budgets bounded.
  */
 const SAFE_SNAKE_KEY = /^[A-Za-z0-9_]+$/;
 const MAX_SNAKE_KEY_LENGTH = 256;
@@ -242,8 +222,8 @@ export interface RuntimeFieldEntry {
  * From a template snake-key, decide whether to emit a runtime field and, if
  * so, return the spec ready to merge into a data view's `runtimeFieldMap`.
  *
- * Returns `null` when the snake-key isn't shaped like `<name>_as_<type>`,
- * the suffix is in `NO_RUNTIME_FIELD_SUFFIXES`, or the suffix is unknown.
+ * Returns `null` when the snake-key isn't shaped like `<name>_as_<type>`
+ * or the suffix is unknown.
  *
  * Publication path: `cases.<snakeKey>` (e.g. `cases.riskScore_as_long`),
  * sitting alongside `cases.title`, `cases.severity`, etc. The painless
@@ -268,7 +248,7 @@ export const buildRuntimeFieldEntry = (snakeKey: string): RuntimeFieldEntry | nu
   if (!split) return null;
 
   const runtimeType = suffixToRuntimeType(split.suffix);
-  if (runtimeType == null) return null;
+  if (runtimeType === undefined) return null;
 
   return {
     fieldName: `cases.${snakeKey}`,

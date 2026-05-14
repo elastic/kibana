@@ -20,6 +20,19 @@ import type { CasesAnalyticsV2WriterContract } from '../writer';
 const PAGE_SIZE = 100;
 
 /**
+ * Sentinel SO-namespaces value meaning "every namespace". The runner's SO
+ * client is the unscoped internal client (no spaces extension), so the
+ * default behavior of `find` / `openPointInTimeForType` is to look only in
+ * the `default` namespace — i.e., the reconciliation walk silently skips
+ * every case in every non-default space. Passing `['*']` opts into the
+ * cross-namespace path; the SO repository's search DSL builder treats the
+ * literal `'*'` as `ALL_NAMESPACES_STRING` and lifts the namespace filter.
+ * The same constant feeds both the PIT open call and every paged find so
+ * the snapshot and the page reads agree on scope.
+ */
+const NAMESPACES_ALL: string[] = ['*'];
+
+/**
  * Cap on the per-space breakdown the summary log reports. Heavy-tenant
  * clusters (1000+ spaces) would otherwise produce log lines large enough
  * to break ingest pipelines; capping keeps the line readable while still
@@ -83,30 +96,46 @@ export async function runReconciliation({
   // SOs are stored namespaced under their type, so the filter applies inside
   // that namespace.
   //
-  // **Why two clauses, not one.** Newly-created cases land in the SO store
-  // with `updated_at = null` (`transformNewCase` in common/utils.ts). A
+  // **Why the null branch is unconditional.** Newly-created cases land in
+  // the SO store with `updated_at = null` (`transformNewCase` in
+  // common/utils.ts) and stay that way until someone patches the case. A
   // filter that only matches `updated_at > lastRunAt` would never see them,
-  // and the very scenario this backstop exists for — fire-and-forget write
-  // failed at create time — would stay broken forever. So:
+  // and the very scenario this backstop exists for — the fire-and-forget
+  // write hook failed at create time — would stay broken forever for a
+  // case that no one happens to update. Pinning the null branch to
+  // `created_at > lastRunAt` would shrink the per-tick read, but at the
+  // cost of letting any create-and-never-touched case that the writer
+  // missed slip through both clauses permanently (the symptom: after a
+  // `/reset`, only cases the user has patched come back; ancient
+  // never-touched cases disappear). So:
   //   - clause 1: updated_at > lastRunAt          (existing case, patched)
-  //   - clause 2: updated_at IS MISSING/NULL
-  //               AND created_at > lastRunAt      (case never patched, still
-  //                                                missed by the writer)
+  //   - clause 2: updated_at IS MISSING/NULL      (any never-patched case —
+  //                                                re-emit every tick until
+  //                                                it gets patched and
+  //                                                drops out of this branch)
+  // Re-emitting on every tick is safe: `bulkUpsertCasesAwait` is
+  // idempotent, and the un-patched population is normally small (most
+  // cases pick up at least one status / comment edit quickly). Wasted
+  // work is bounded by the un-patched case count, not by total case
+  // volume.
+  //
   // `fromKueryExpression('not <field>:*')` is the standard KQL idiom for
   // "field is missing or null" — there's no nodeBuilder helper for it.
   const filter = lastRunAt
     ? nodeBuilder.or([
         nodeBuilder.range(`${CASE_SAVED_OBJECT}.attributes.updated_at`, 'gt', lastRunAt),
-        nodeBuilder.and([
-          fromKueryExpression(`not ${CASE_SAVED_OBJECT}.attributes.updated_at:*`),
-          nodeBuilder.range(`${CASE_SAVED_OBJECT}.attributes.created_at`, 'gt', lastRunAt),
-        ]),
+        fromKueryExpression(`not ${CASE_SAVED_OBJECT}.attributes.updated_at:*`),
       ])
     : undefined;
 
   // Open a PIT (Point-In-Time) so paging is consistent against a fixed
   // snapshot of the index — concurrent writes don't shift our results.
-  const pit = await savedObjectsClient.openPointInTimeForType(CASE_SAVED_OBJECT);
+  // `namespaces: NAMESPACES_ALL` is required for the same reason as on
+  // the page reads below: omitting it would scope the snapshot to the
+  // `default` namespace under an unscoped internal SO client.
+  const pit = await savedObjectsClient.openPointInTimeForType(CASE_SAVED_OBJECT, {
+    namespaces: NAMESPACES_ALL,
+  });
 
   let processed = 0;
   let searchAfter: SortResults | undefined;
@@ -120,6 +149,18 @@ export async function runReconciliation({
       const page = await savedObjectsClient.find<CasePersistedAttributes>({
         type: CASE_SAVED_OBJECT,
         filter,
+        // **Must** pass `namespaces: ['*']` here even though our SO client
+        // is the unscoped internal client. The SO repository's `find`
+        // implementation defaults `options.namespaces` to
+        // `[DEFAULT_NAMESPACE_STRING]` when the spaces extension is absent
+        // (see `core/saved-objects/api-server-internal/.../find.ts`), so
+        // an omitted value silently restricts the walk to the `default`
+        // space — every case in every other space gets skipped. The
+        // symptom looks like "reset doesn't actually re-walk anything,"
+        // because in tenants where users create cases in custom spaces
+        // (e.g. `analytics-1`, `analytics-2`, ...) the runner sees zero
+        // matching cases.
+        namespaces: NAMESPACES_ALL,
         // No `sortField` — the SO API uses `_shard_doc` by default with a
         // PIT, which is unique per doc (no ties → no `searchAfter` skips
         // or dupes when many cases share the same timestamp, e.g. bulk

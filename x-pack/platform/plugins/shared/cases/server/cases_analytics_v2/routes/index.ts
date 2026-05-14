@@ -19,7 +19,9 @@ import {
   RECONCILIATION_TASK_TYPE,
   resetReconciliationTask,
 } from '../reconciliation';
+import { runReconciliation, type RunReconciliationResult } from '../reconciliation/runner';
 import { ensureCaseIndex } from '../ensure_indices/case';
+import type { CasesAnalyticsV2WriterContract } from '../writer';
 
 const DATA_VIEW_SO_TYPE = 'index-pattern';
 
@@ -49,6 +51,25 @@ interface RegisterArgs {
    * registration site can pass a closure that resolves once start runs.
    */
   getTaskManager: () => TaskManagerStartContract | null;
+  /**
+   * Late-bound — the internal SO client is constructed during plugin
+   * `start()`, after routes are registered in `setup()`. `/reset` needs an
+   * unscoped client to delete per-space `index-pattern` SOs across
+   * namespaces; the request-scoped client (`coreContext.savedObjects.client`)
+   * is bound by the spaces extension to the requester's namespace and 404s
+   * on any data view that lives elsewhere — even with `force: true`,
+   * because the spaces extension performs the existence check before
+   * delegating the delete.
+   */
+  getInternalSavedObjectsClient: () => SavedObjectsClientContract | null;
+  /**
+   * Late-bound — the analytics writer is constructed during plugin
+   * `start()` (it holds the live ES client). `/reset` calls
+   * `runReconciliation` directly with `lastRunAt: undefined` (bypassing
+   * Task Manager's `runSoon` — see the reset handler for the rationale)
+   * and needs the writer to dispatch the full re-walk's bulk upserts.
+   */
+  getWriter: () => CasesAnalyticsV2WriterContract | null;
   /**
    * Wipes the data view service's in-memory "bootstrapped spaces" cache.
    * `/reset` deletes per-space data views directly via the SO API, so the
@@ -82,6 +103,8 @@ export const registerCasesAnalyticsV2Routes = ({
   core,
   logger,
   getTaskManager,
+  getInternalSavedObjectsClient,
+  getWriter,
   clearDataViewBootstrapCache,
   enabled,
   reconciliationIntervalMinutes,
@@ -223,7 +246,24 @@ export const registerCasesAnalyticsV2Routes = ({
       const taskManager = getTaskManager();
       const coreContext = await context.core;
       const esClient = coreContext.elasticsearch.client.asInternalUser;
-      const soClient = coreContext.savedObjects.client;
+      // Per-space data view cleanup AND the post-reset full re-walk both
+      // need an unscoped SO client (see `getInternalSavedObjectsClient`
+      // JSDoc above). The walk in step 5 also needs the analytics writer.
+      // The reset path is gated on both being available — when either is
+      // `null` (v2 hasn't started, or `analyticsV2.enabled` flipped to
+      // false at runtime) we 503 rather than half-completing the reset
+      // (drop + recreate the index but never repopulate it).
+      const internalSoClient = getInternalSavedObjectsClient();
+      const writer = getWriter();
+      if (internalSoClient == null || writer == null) {
+        return response.customError({
+          statusCode: 503,
+          body: {
+            message:
+              'cases-analyticsV2 is not ready (writer or internal SO client unavailable); v2 is likely disabled or still starting.',
+          },
+        });
+      }
 
       try {
         // 1. Drop existing index. 404 is fine — reset on an empty cluster.
@@ -240,8 +280,10 @@ export const registerCasesAnalyticsV2Routes = ({
 
         // 3. Delete every per-space data view. Each lives in a single space
         //    (it's a namespaced SO), so we walk every namespace and delete
-        //    each match.
-        const deletedDataViews = await deleteAllPerSpaceCasesDataViews(soClient, log);
+        //    each match. Uses the internal (unscoped) SO client so the
+        //    cross-namespace deletes don't 404 against the requester's
+        //    space — see `getInternalSavedObjectsClient` JSDoc.
+        const deletedDataViews = await deleteAllPerSpaceCasesDataViews(internalSoClient, log);
 
         // 4. Clear the data view sub-service's in-memory bootstrapped-spaces
         //    cache. Without this, the next request in a previously-bootstrapped
@@ -249,32 +291,79 @@ export const registerCasesAnalyticsV2Routes = ({
         //    data view until process restart.
         clearDataViewBootstrapCache();
 
-        // 5. Reset reconciliation task state + trigger an immediate tick.
+        // 5. Full re-walk to repopulate `.cases`, in-handler — NOT via
+        //    Task Manager.
         //
-        // **Critical**: we must clear the task's persisted state before
-        // running. Without this step, the next tick uses the existing
-        // `last_run_at` cursor and only walks cases updated since that
-        // timestamp — every case older than the cursor stays missing from
-        // the new index. The reset helper removes the task SO and
-        // re-schedules a fresh one with empty state, so the next tick sees
-        // no cursor and walks every case.
+        //    The previous implementation re-scheduled the periodic task
+        //    with empty state and called `runSoon`. That looked correct
+        //    on paper but had two race windows that produced exactly the
+        //    symptom the user hit: after `/reset`, the index stays empty
+        //    and only cases the user later patches re-appear (via the
+        //    fire-and-forget write hook).
         //
-        // If Task Manager isn't available (v2 disabled), we still report
-        // the reset succeeded — the index exists, ready for writes once
-        // the flag flips on.
-        let reconcileResult: string | null = null;
+        //      Race 1: `taskManager.remove` failing for any reason other
+        //      than 404 (cluster blip, locked SO, transient ES error)
+        //      surfaced as a WARN but did NOT abort. The follow-up
+        //      `ensureScheduled` then no-ops because the SO still exists,
+        //      so the task's persisted state survives unchanged. The next
+        //      tick — including the one `runSoon` triggers — uses the
+        //      stale cursor and filters out every case with
+        //      `updated_at < stale_cursor`.
+        //
+        //      Race 2: even when `remove` succeeded, an in-flight tick
+        //      that started before the reset can finish *after* the new
+        //      task SO is scheduled and write its result back to the same
+        //      id, clobbering the fresh `state: {}` with its own old
+        //      cursor — and again the next run inherits stale state.
+        //
+        //    Walking here, in the handler, removes both races: we hold a
+        //    direct writer reference, `lastRunAt: undefined` is hardcoded,
+        //    and no Task Manager state needs to survive between this call
+        //    and the walk's start.
+        //
+        //    A failure mid-walk leaves `.cases` partially populated. The
+        //    runner's filter has an unconditional `updated_at IS NULL`
+        //    branch (see `runner.ts`), so any case missed by a partial
+        //    walk that hasn't been patched still gets re-emitted on every
+        //    subsequent periodic tick. A user-initiated retry of `/reset`
+        //    is also idempotent.
+        let walkResult: RunReconciliationResult | null = null;
+        try {
+          walkResult = await runReconciliation({
+            savedObjectsClient: internalSoClient,
+            writer,
+            logger: log,
+            lastRunAt: undefined,
+          });
+        } catch (err) {
+          log.warn(
+            `reset: full re-walk failed mid-flight: ${
+              err instanceof Error ? err.message : String(err)
+            }. Index is partially populated; the periodic reconciliation task will continue to fill it in.`
+          );
+        }
+
+        // 6. Seed the periodic reconciliation task's cursor so the next
+        //    scheduled tick walks only the post-walk delta. If we left
+        //    the task at empty state, every periodic tick would walk
+        //    every case — expensive and unnecessary now that step 5
+        //    already did the full backfill. Falls back to "now" if the
+        //    walk failed, which means the next tick walks only updates
+        //    that arrive from this moment forward; orphan / never-patched
+        //    cases still get caught by the runner's unconditional
+        //    `updated_at IS NULL` branch.
+        const cursorForNextTick = walkResult?.newLastRunAt ?? new Date().toISOString();
         if (taskManager != null) {
           try {
             await resetReconciliationTask({
               taskManager,
               logger: log,
               intervalMinutes: reconciliationIntervalMinutes,
+              initialState: { last_run_at: cursorForNextTick },
             });
-            const result = await taskManager.runSoon(RECONCILIATION_TASK_ID);
-            reconcileResult = result.id;
           } catch (err) {
             log.warn(
-              `reset: failed to schedule follow-up reconciliation: ${
+              `reset: failed to seed reconciliation cursor: ${
                 err instanceof Error ? err.message : String(err)
               }`
             );
@@ -285,7 +374,8 @@ export const registerCasesAnalyticsV2Routes = ({
           body: {
             reset: CASE_INDEX_NAME,
             data_views_deleted: deletedDataViews,
-            reconciliation_scheduled: reconcileResult,
+            processed: walkResult?.processed ?? null,
+            next_reconciliation_cursor: cursorForNextTick,
           },
         });
       } catch (err) {
@@ -321,21 +411,34 @@ export const registerCasesAnalyticsV2Routes = ({
  * `/reset` would surface.
  *
  * Notes:
+ *   - **Must be called with an internal (unscoped) SO client.** A request-
+ *     scoped client passes through the spaces extension, which scopes
+ *     `delete` to the requester's namespace and 404s on any data view that
+ *     doesn't live in that exact space — even with `force: true`, because
+ *     the spaces extension's existence check runs before delegating the
+ *     delete to the underlying repository. The caller (`/reset` handler)
+ *     resolves the internal client from the v2 service's start-time
+ *     bindings.
  *   - `index-pattern` is a multi-namespace SO type (`namespaceType: 'multiple'`).
- *     We pass `force: true` so the underlying ES document is fully removed
- *     regardless of how many namespaces the SO is in — without it, a `delete`
- *     against a multi-namespace SO may only drop the namespace reference and
- *     leave the doc behind, causing the next `createAndSave` (which collides
- *     on the deterministic id) to 409 with `version_conflict_engine_exception`.
- *     This matches the data-views plugin's own wrapper (see
- *     `src/platform/plugins/shared/data_views/server/saved_objects_client_wrapper.ts`).
- *   - We do **not** pass a `namespace` option. When the Spaces SO extension
- *     is enabled, the request's space context owns the namespace — passing
- *     it explicitly throws `"Namespace cannot be specified by the caller
- *     when the spaces extension is enabled."`. `force: true` already
- *     removes the multi-namespace doc fully regardless of which namespace(s)
- *     it lived in, so the option is redundant. Same reason the data-views
- *     plugin's wrapper doesn't pass it either.
+ *     **Each delete is issued against the SO's own namespace**, not the
+ *     internal client's implicit default. The SO repository's `delete`
+ *     preflight (`preflightCheckNamespaces` in
+ *     `core/saved-objects/api-server-internal/.../delete.ts`) returns
+ *     `found_outside_namespace` and surfaces as a 404 if the SO's
+ *     `namespaces` array doesn't include the namespace we pass — and the
+ *     internal client's implicit default is `'default'`, so any data view
+ *     that lives in `analytics-1`, `analytics-2`, etc. would never be
+ *     deletable without this. `force: true` only widens the multi-share
+ *     case (SO in N spaces); it does NOT bypass the preflight on the
+ *     namespace mismatch. Together they handle every shape — single-space
+ *     view (the common case), multi-space share (via `force`), and the
+ *     cross-namespace cleanup path (via the explicit namespace arg).
+ *   - **404 on delete is treated as success.** An unscoped client should
+ *     not normally 404 on an id we just enumerated with its namespace,
+ *     but a concurrent `/reset` (or out-of-band SO deletion via the Stack
+ *     Management UI) between pass 1 and pass 2 can race the delete. The
+ *     desired end state is "data view gone," which the 404 path already
+ *     satisfies.
  */
 export async function deleteAllPerSpaceCasesDataViews(
   soClient: SavedObjectsClientContract,
@@ -368,13 +471,35 @@ export async function deleteAllPerSpaceCasesDataViews(
 
   // Pass 2: delete the collected ids. Per-item errors log at WARN and the
   // walk continues — one stuck data view shouldn't block the rest of the
-  // cleanup.
+  // cleanup. A 404 is a benign race outcome (concurrent `/reset` or an
+  // out-of-band Stack Management deletion between pass 1 and pass 2) so we
+  // log it at DEBUG and exclude it from the deletion count (the
+  // disappearing-id wasn't deleted by *us*, but the desired end state is
+  // satisfied).
   let deleted = 0;
   for (const target of targets) {
     try {
-      await soClient.delete(DATA_VIEW_SO_TYPE, target.id, { force: true });
+      await soClient.delete(DATA_VIEW_SO_TYPE, target.id, {
+        // Tells the SO repository which namespace to run its existence
+        // preflight against — see the "each delete is issued against the
+        // SO's own namespace" note above. Falls back to `undefined`
+        // (= default) for the edge case where a managed data view SO
+        // somehow lacks a `namespaces` array; in that situation the
+        // existing 404-as-success branch below covers the wrong-default
+        // mismatch.
+        namespace: target.namespace,
+        force: true,
+      });
       deleted++;
     } catch (err) {
+      if (isSavedObjectNotFoundError(err)) {
+        logger.debug(
+          `reset: data view ${target.id} (space=${
+            target.namespace ?? 'unknown'
+          }) already gone by the time we issued delete; treating as success`
+        );
+        continue;
+      }
       logger.warn(
         `reset: failed to delete data view ${target.id} (space=${target.namespace ?? 'unknown'}): ${
           err instanceof Error ? err.message : String(err)
@@ -384,4 +509,24 @@ export async function deleteAllPerSpaceCasesDataViews(
   }
 
   return deleted;
+}
+
+/**
+ * Detects the saved-objects "not found" surface. The SO API throws
+ * `SavedObjectsErrorHelpers.createGenericNotFoundError` (404), but at the
+ * SO client boundary the error can land as either a `Boom`-style object
+ * with `output.statusCode === 404` or a plain `Error` whose message
+ * matches `Saved object [<type>/<id>] not found`. We check all three so
+ * test fixtures (which often skip the Boom shape) still take the benign
+ * path.
+ */
+function isSavedObjectNotFoundError(err: unknown): boolean {
+  if (err == null) return false;
+  const status =
+    (err as { statusCode?: number })?.statusCode ??
+    (err as { output?: { statusCode?: number } })?.output?.statusCode ??
+    (err as { meta?: { statusCode?: number } })?.meta?.statusCode;
+  if (status === 404) return true;
+  const message = err instanceof Error ? err.message : String(err);
+  return /not\s+found/i.test(message);
 }

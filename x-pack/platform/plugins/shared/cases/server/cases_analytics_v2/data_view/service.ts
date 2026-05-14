@@ -34,6 +34,27 @@ const TEMPLATES_PAGE_SIZE = 100;
  */
 const BOOTSTRAP_CACHE_TTL_MS = 5 * 60 * 1000;
 
+/**
+ * Detects the data-views plugin's "id already exists" conflict surface.
+ * The plugin re-throws ES's `version_conflict_engine_exception` with
+ * varying statusCode coverage depending on the saved-objects code path
+ * the conflict crossed — checking message + statusCode covers both
+ * shapes we've seen in practice.
+ *
+ * Used only on the `createAndSave` call site; we deliberately do NOT
+ * generalize this to other ES error paths because real version conflicts
+ * elsewhere (e.g. a stale `updateSavedObject` payload) deserve to surface.
+ */
+function isVersionConflictError(err: unknown): boolean {
+  if (err == null) return false;
+  const status =
+    (err as { statusCode?: number })?.statusCode ??
+    (err as { meta?: { statusCode?: number } })?.meta?.statusCode;
+  if (status === 409) return true;
+  const message = err instanceof Error ? err.message : String(err);
+  return /version_conflict_engine_exception|document already exists/i.test(message);
+}
+
 interface CasesAnalyticsV2DataViewServiceDeps {
   logger: Logger;
   dataViewsService: DataViewsServerPluginStart;
@@ -144,6 +165,21 @@ export class CasesAnalyticsV2DataViewService {
    */
   private readonly bootstrappedSpaces = new Map<string, BootstrapEntry>();
 
+  /**
+   * In-flight ensures, keyed by space id. Concurrent requests for the same
+   * space (the cold-start window when the cache is empty, e.g. first case
+   * create in a space after Kibana boot) collapse onto the first ensure's
+   * promise instead of racing into `createAndSave` simultaneously and
+   * surfacing `version_conflict_engine_exception` on the deterministic
+   * data view id.
+   *
+   * Cross-Kibana-node races (two nodes in the same cluster bootstrapping
+   * the same space concurrently) can't be deduped this way; the
+   * `createAndSave` call site below tolerates a 409 from that race
+   * separately.
+   */
+  private readonly inflightEnsures = new Map<string, Promise<void>>();
+
   constructor(deps: CasesAnalyticsV2DataViewServiceDeps) {
     this.logger = deps.logger.get('dataView');
     this.deps = deps;
@@ -189,7 +225,7 @@ export class CasesAnalyticsV2DataViewService {
         }ms)`
       );
     }
-    await this.ensureOrRefreshForSpace(deps);
+    await this.dedupedEnsure(deps);
   }
 
   /**
@@ -201,7 +237,33 @@ export class CasesAnalyticsV2DataViewService {
    * Fire-and-forget like `ensureForSpace`.
    */
   public async refreshForSpace(deps: EnsureForSpaceDeps): Promise<void> {
-    await this.ensureOrRefreshForSpace(deps);
+    await this.dedupedEnsure(deps);
+  }
+
+  /**
+   * Collapses concurrent ensures for the same space onto a single
+   * in-flight promise. The deterministic data view id means two parallel
+   * `createAndSave` calls race into `version_conflict_engine_exception`;
+   * a `Map<spaceId, Promise>` keyed dedupe makes that race impossible
+   * within a single Kibana process.
+   *
+   * The `finally` clears the slot only if it still holds *this* promise —
+   * a later overlapping call could have replaced it (no-op replace is
+   * harmless; the guard prevents clobbering a fresh in-flight ensure).
+   */
+  private async dedupedEnsure(deps: EnsureForSpaceDeps): Promise<void> {
+    const existing = this.inflightEnsures.get(deps.spaceId);
+    if (existing != null) {
+      await existing;
+      return;
+    }
+    const promise = this.ensureOrRefreshForSpace(deps).finally(() => {
+      if (this.inflightEnsures.get(deps.spaceId) === promise) {
+        this.inflightEnsures.delete(deps.spaceId);
+      }
+    });
+    this.inflightEnsures.set(deps.spaceId, promise);
+    await promise;
   }
 
   /**
@@ -245,13 +307,28 @@ export class CasesAnalyticsV2DataViewService {
 
         // `overwrite: false` — the deterministic id means a second concurrent
         // create from another node hits a conflict error rather than racing.
-        // Caught and logged as the data view already exists at that point.
-        await dvService.createAndSave(spec, false, true);
-        this.logger.info(
-          `bootstrapped data view ${dataViewId} (space=${deps.spaceId}, runtime_fields=${
-            Object.keys(desiredRuntimeFieldMap).length
-          })`
-        );
+        // Per-process concurrency is collapsed by `dedupedEnsure` above, so
+        // the only remaining source of a conflict here is a cross-Kibana-
+        // node race: another node ensured the same space at the same time
+        // and won the SO create. Both nodes computed the desired map from
+        // the same templates view (a `find` against the persisted SO store),
+        // so the winning doc carries the same runtime fields ours would
+        // have. Treat the conflict as a benign success, log at debug, and
+        // let the next refresh path (template lifecycle hook or the
+        // post-TTL recompute) reconcile if anything ever drifts.
+        try {
+          await dvService.createAndSave(spec, false, true);
+          this.logger.info(
+            `bootstrapped data view ${dataViewId} (space=${deps.spaceId}, runtime_fields=${
+              Object.keys(desiredRuntimeFieldMap).length
+            })`
+          );
+        } catch (err) {
+          if (!isVersionConflictError(err)) throw err;
+          this.logger.debug(
+            `data view ${dataViewId} (space=${deps.spaceId}) already created by another Kibana node; treating as bootstrapped`
+          );
+        }
       } else {
         // `toSpec()` clones internal state, so it's safe to read without
         // worrying about mutating the cached DataView.

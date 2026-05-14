@@ -216,13 +216,28 @@ export class CasesAnalyticsV2Service {
 
     // Register administrator routes. The TM start contract isn't available
     // yet — routes close over `getTaskManager()` which returns
-    // `this.taskManager` once `start()` runs. `/reset` also closes over
+    // `this.taskManager` once `start()` runs. Same pattern for the internal
+    // SO client used by `/reset` to delete per-space data views across
+    // namespaces (the spaces extension scopes the request-scoped client's
+    // `delete` to the requester's namespace, which 404s on any data view
+    // that doesn't live in that exact space). `/reset` also closes over
     // `clearDataViewBootstrapCache()` to wipe the in-memory ensure cache
     // after dropping per-space data views.
     registerCasesAnalyticsV2Routes({
       core: deps.core,
       logger: this.logger,
       getTaskManager: () => this.taskManager ?? null,
+      getInternalSavedObjectsClient: () => this.internalSavedObjectsClient ?? null,
+      // `/reset` calls `runReconciliation` directly (NOT via Task
+      // Manager's `runSoon`) so the post-reset full re-walk doesn't race
+      // an in-flight tick that could clobber the fresh cursor — see the
+      // reset handler for the full rationale. The closure returns the
+      // proxy only AFTER `start()` has swapped the underlying writer
+      // from `V2_NOOP_WRITER` to the real `CasesAnalyticsV2Writer`;
+      // before that, it returns null so the reset handler 503s instead
+      // of silently walking against a noop writer and reporting
+      // "processed=N" with zero actual ES writes.
+      getWriter: () => (this.writer === V2_NOOP_WRITER ? null : this.writerProxy),
       clearDataViewBootstrapCache: () => this.dataViewService?.clearBootstrapCache(),
       enabled: this.enabled,
       reconciliationIntervalMinutes: this.reconciliationIntervalMinutes,

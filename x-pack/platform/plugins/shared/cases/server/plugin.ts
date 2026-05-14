@@ -311,14 +311,24 @@ export class CasePlugin
             'Skipping v2 start.'
         );
       } else {
-        // The internal repo serves two consumers:
+        // The internal repo serves three consumers:
         //  - The reconciliation runner walks `cases` SOs.
         //  - The data view sub-service reads `cases-templates` SOs per-space
         //    to derive runtime fields.
-        // Both types are hidden, so they must be opted in explicitly here.
+        //  - The `/reset` admin route deletes per-space `index-pattern` SOs
+        //    across namespaces. A request-scoped SO client can't do this:
+        //    the spaces extension scopes `delete` to the request's namespace,
+        //    so deleting a data view in space `analytics-1` from a `/reset`
+        //    request that arrived in `default` 404s on the existence check
+        //    (even with `force: true`).
+        // `cases` and `cases-templates` are hidden, so they must be opted in
+        // explicitly. `index-pattern` is a globally-registered SO type
+        // (data-views plugin); opting it in here grants the internal client
+        // the cross-namespace delete it needs.
         const v2InternalRepository = core.savedObjects.createInternalRepository([
           CASE_SAVED_OBJECT,
           CASE_TEMPLATE_SAVED_OBJECT,
+          'index-pattern',
         ]);
         const v2InternalSavedObjectsClient = new SavedObjectsClient(v2InternalRepository);
         void this.casesAnalyticsV2Service.start({

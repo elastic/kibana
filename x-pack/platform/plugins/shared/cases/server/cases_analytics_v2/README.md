@@ -244,9 +244,27 @@ POST /internal/cases/_analyticsV2/reset
 ```
 
 Drops `.cases`, recreates it from scratch using the same bootstrap path as
-plugin start, and schedules a follow-up reconciliation to repopulate from the
-SO source of truth. Use for mapping migrations, recovery from sustained
-writer failures, or administrator-initiated full backfills. Superuser only.
+plugin start, deletes every per-space managed Cases data view, and synchronously
+walks every case SO via the reconciliation runner to repopulate from the SO
+source of truth. Returns once the walk completes; the response includes the
+processed count and the cursor the next periodic tick will resume from.
+
+The walk runs **in-handler** (not via Task Manager's `runSoon`) — going through
+Task Manager would expose two race windows that produce a silent "reset
+returns 200 but the index stays empty until you touch each case" failure mode:
+
+- `taskManager.remove` failing for any non-404 reason left the persisted task
+  state stale; the follow-up `ensureScheduled` no-oped because the SO still
+  existed, and the next `runSoon` inherited the old cursor.
+- An in-flight tick that started before the reset could complete after the
+  re-schedule and overwrite the fresh state with its own old cursor before the
+  triggered run picked up.
+
+In-handler avoids both. A failure mid-walk is partial-progress; the periodic
+task's cursor still advances correctly and the runner's unconditional
+`updated_at IS NULL` branch picks up any case the partial walk missed on the
+next tick. Use for mapping migrations, recovery from sustained writer
+failures, or administrator-initiated full backfills. Superuser only.
 
 ### Failure modes
 
@@ -285,7 +303,14 @@ cases_analytics_v2/
 │   ├── index.ts       task type registration + scheduling (interval from
 │   │                  xpack.cases.analyticsV2.reconciliationIntervalMinutes,
 │   │                  default 30m)
-│   └── runner.ts      walks SOs by `updated_at > last_run_at` using PIT
+│   └── runner.ts      walks SOs by `updated_at > last_run_at OR
+│                      updated_at IS NULL` using PIT; the unconditional
+│                      null branch ensures create-and-never-patched cases
+│                      whose write hook missed at create time stay
+│                      eligible for repair on every tick. Both the PIT
+│                      open and every paged `find` opt into
+│                      `namespaces: ['*']` — the unscoped internal SO
+│                      client otherwise silently scopes to `default`.
 │
 ├── data_view/
 │   ├── service.ts                   ensures Cases data view; syncs runtime fields
