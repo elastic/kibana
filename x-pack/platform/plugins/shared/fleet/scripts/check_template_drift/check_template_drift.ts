@@ -167,9 +167,7 @@ async function extractRelevantFiles(
  * Given the extracted file map for one package, returns a record of
  * dataset → IndexTemplateMappings for every data stream in the package.
  */
-function computeMappingsForPackage(
-  files: Map<string, Buffer>
-): Record<string, unknown> {
+function computeMappingsForPackage(files: Map<string, Buffer>): Record<string, unknown> {
   // Group entries by dataset key. Integration packages use
   // data_stream/<dataset> as the key; input packages use the package name
   // itself (represented here as the special key '__input__').
@@ -280,8 +278,7 @@ export async function run() {
             pkgOutput[dataset] = mappings[dataset];
           }
         } catch (err: unknown) {
-          const msg =
-            err instanceof Error ? `${err.message}\n${err.stack ?? ''}` : String(err);
+          const msg = err instanceof Error ? `${err.message}\n${err.stack ?? ''}` : String(err);
           pkgOutput.__error = msg;
           errors++;
           logger.warning(`  SKIP ${label}: ${err instanceof Error ? err.message : msg}`);

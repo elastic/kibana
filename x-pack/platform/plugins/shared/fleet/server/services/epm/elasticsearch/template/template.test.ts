@@ -3484,9 +3484,7 @@ describe('EPM template', () => {
     // `fields` array is empty.
     describe('group with no fields key', () => {
       it('does not throw and emits no properties', () => {
-        expect(() =>
-          generateMappings([{ name: 'a', type: 'group' } as any])
-        ).not.toThrow();
+        expect(() => generateMappings([{ name: 'a', type: 'group' } as any])).not.toThrow();
 
         const result = generateMappings([{ name: 'a', type: 'group' } as any]);
         expect(result.properties).toEqual({});
