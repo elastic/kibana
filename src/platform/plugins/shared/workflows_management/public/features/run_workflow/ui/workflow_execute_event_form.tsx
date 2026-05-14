@@ -134,6 +134,8 @@ export interface WorkflowExecuteEventFormProps {
   errors: string | null;
   /** Clears validation errors when the table updates the run payload from the current selection. */
   setErrors?: (errors: string | null) => void;
+  /** Number of rows currently selected in the trigger-events table (checkbox selection). */
+  onTriggerEventTableSelectionCountChange?: (selectedCount: number) => void;
 }
 
 interface TriggerEventTableRow {
@@ -200,12 +202,40 @@ const TriggerEventRunPayloadSelectionSync = ({
 
 TriggerEventRunPayloadSelectionSync.displayName = 'TriggerEventRunPayloadSelectionSync';
 
+interface TriggerEventTableSelectionCountSyncProps {
+  onSelectionCountChange: (selectedCount: number) => void;
+}
+
+/**
+ * Reports checkbox selection size to the parent so the run modal can block execution when
+ * multiple rows are selected (only a single trigger event is supported).
+ */
+const TriggerEventTableSelectionCountSync = ({
+  onSelectionCountChange,
+}: TriggerEventTableSelectionCountSyncProps) => {
+  const { selectedDocsState } = useContext(UnifiedDataTableContext);
+  const selectedStateRef = useRef(selectedDocsState);
+  selectedStateRef.current = selectedDocsState;
+
+  const docIdsKey = (selectedDocsState?.docIdsInSelectionOrder ?? []).join('\0');
+
+  useEffect(() => {
+    const docIds = selectedStateRef.current?.docIdsInSelectionOrder ?? [];
+    onSelectionCountChange(docIds.length);
+  }, [docIdsKey, onSelectionCountChange]);
+
+  return null;
+};
+
+TriggerEventTableSelectionCountSync.displayName = 'TriggerEventTableSelectionCountSync';
+
 export const WorkflowExecuteEventForm = ({
   definition,
   value: _value,
   setValue,
   errors,
   setErrors,
+  onTriggerEventTableSelectionCountChange,
 }: WorkflowExecuteEventFormProps): React.JSX.Element => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
@@ -516,35 +546,19 @@ export const WorkflowExecuteEventForm = ({
   );
 
   const documentCount = searchResult?.total ?? 0;
-  const selectionAutoHint = useMemo(
+  const leftToolbarContent = useMemo(
     () => (
-      <EuiText size="xs" color="subdued" data-test-subj="workflowTriggerEventsSelectionAutoHint">
-        {i18n.translate('workflows.workflowExecuteEventTriggerForm.selectionAutoHint', {
-          defaultMessage:
-            'Selecting a row fills the run payload. If several rows are selected, the first in selection order is used.',
+      <EuiText size="s" color="subdued" data-test-subj="workflowTriggerEventsDocumentCount">
+        <span css={{ fontWeight: euiTheme.font.weight.bold }}>
+          <FormattedNumber value={documentCount} />
+        </span>{' '}
+        {i18n.translate('workflows.workflowExecuteEventTriggerForm.documentCountLabel', {
+          defaultMessage: '{count, plural, one {document} other {documents}}',
+          values: { count: documentCount },
         })}
       </EuiText>
     ),
-    []
-  );
-  const leftToolbarContent = useMemo(
-    () => (
-      <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued" data-test-subj="workflowTriggerEventsDocumentCount">
-            <span css={{ fontWeight: euiTheme.font.weight.bold }}>
-              <FormattedNumber value={documentCount} />
-            </span>{' '}
-            {i18n.translate('workflows.workflowExecuteEventTriggerForm.documentCountLabel', {
-              defaultMessage: '{count, plural, one {document} other {documents}}',
-              values: { count: documentCount },
-            })}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{selectionAutoHint}</EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-    [documentCount, euiTheme.font.weight.bold, selectionAutoHint]
+    [documentCount, euiTheme.font.weight.bold]
   );
   const baseToolbarRenderer = useMemo(
     () =>
@@ -563,13 +577,25 @@ export const WorkflowExecuteEventForm = ({
             setValue={setValue}
             setErrors={setErrors}
           />
+          {onTriggerEventTableSelectionCountChange ? (
+            <TriggerEventTableSelectionCountSync
+              onSelectionCountChange={onTriggerEventTableSelectionCountChange}
+            />
+          ) : null}
           {baseToolbarRenderer(toolbarProps)}
         </>
       );
     }
     renderTriggerEventToolbar.displayName = 'WorkflowTriggerEventsRenderCustomToolbar';
     return renderTriggerEventToolbar;
-  }, [baseToolbarRenderer, dataTableRows, replaySpaceId, setErrors, setValue]);
+  }, [
+    baseToolbarRenderer,
+    dataTableRows,
+    onTriggerEventTableSelectionCountChange,
+    replaySpaceId,
+    setErrors,
+    setValue,
+  ]);
 
   const renderCellPopover = useCallback((popoverProps: EuiDataGridCellPopoverElementProps) => {
     return <WorkflowTriggerEventDataGridCellPopover {...popoverProps} />;
@@ -728,6 +754,12 @@ export const WorkflowExecuteEventForm = ({
               .unifiedDataTableToolbar {
                 padding-top: ${euiTheme.size.xs};
                 padding-bottom: ${euiTheme.size.xs};
+              }
+              .unifiedDataTableToolbarControlButton:has(
+                  [data-test-subj='unifiedDataTableSelectionBtn']
+                ),
+              .unifiedDataTableToolbarControlButton:has([data-test-subj='dscGridSelectAllDocs']) {
+                display: none !important;
               }
               .euiDataGrid__pagination {
                 padding-bottom: 0 !important;

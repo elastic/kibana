@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { useFetchAlertsIndexNamesQuery } from '@kbn/alerts-ui-shared';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -77,9 +77,9 @@ const mockWorkflowExecuteHistoricalForm = jest.fn(() => null);
 jest.mock('./workflow_execute_historical_form', () => ({
   WorkflowExecuteHistoricalForm: () => mockWorkflowExecuteHistoricalForm(),
 }));
-const mockWorkflowExecuteEventForm = jest.fn(() => null);
+const mockWorkflowExecuteEventForm = jest.fn((_props?: Record<string, unknown>) => null);
 jest.mock('./workflow_execute_event_form', () => ({
-  WorkflowExecuteEventForm: () => mockWorkflowExecuteEventForm(),
+  WorkflowExecuteEventForm: (props: Record<string, unknown>) => mockWorkflowExecuteEventForm(props),
 }));
 
 jest.mock('../../workflow_list/ui/use_event_driven_execution_status', () => ({
@@ -137,6 +137,7 @@ describe('WorkflowExecuteModal', () => {
     mockWorkflowExecuteIndexForm.mockClear();
     mockWorkflowExecuteManualForm.mockClear();
     mockWorkflowExecuteHistoricalForm.mockClear();
+    mockWorkflowExecuteEventForm.mockClear();
   });
 
   describe('Basic rendering', () => {
@@ -610,6 +611,33 @@ describe('WorkflowExecuteModal', () => {
 
       const executeButton = getByTestId('executeWorkflowButton');
       expect(executeButton).not.toBeDisabled();
+    });
+
+    it('disables execute button when the event trigger reports multiple table row selections', () => {
+      const { getByTestId, getByText } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      const eventTrigger = getByText('Event').closest('button');
+      fireEvent.click(eventTrigger!);
+
+      const eventFormCalls = mockWorkflowExecuteEventForm.mock.calls;
+      const lastEventFormProps = eventFormCalls[eventFormCalls.length - 1]?.[0] as
+        | { onTriggerEventTableSelectionCountChange?: (count: number) => void }
+        | undefined;
+      expect(lastEventFormProps?.onTriggerEventTableSelectionCountChange).toBeDefined();
+
+      act(() => {
+        lastEventFormProps!.onTriggerEventTableSelectionCountChange!(2);
+      });
+
+      const executeButton = getByTestId('executeWorkflowButton');
+      expect(executeButton).toBeDisabled();
     });
   });
 

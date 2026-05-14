@@ -99,11 +99,16 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
 
     const [executionInput, setExecutionInput] = useState<string>('');
     const [executionInputErrors, setExecutionInputErrors] = useState<string | null>(null);
+    const [eventTriggerTableSelectionCount, setEventTriggerTableSelectionCount] = useState(0);
 
     const { euiTheme } = useEuiTheme();
 
     const handleInputChange = useCallback((value: string) => {
       setExecutionInput(sanitizeText(value));
+    }, []);
+
+    const handleEventTriggerTableSelectionCountChange = useCallback((count: number) => {
+      setEventTriggerTableSelectionCount(count);
     }, []);
 
     const handleSubmit = useCallback(() => {
@@ -112,6 +117,14 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         setExecutionInputErrors(
           i18n.translate('workflows.workflowExecuteModal.eventSelectionRequired', {
             defaultMessage: 'Select a trigger event row to use as the run input.',
+          })
+        );
+        return;
+      }
+      if (selectedTrigger === 'event' && eventTriggerTableSelectionCount > 1) {
+        setExecutionInputErrors(
+          i18n.translate('workflows.workflowExecuteModal.eventMultipleRowsSelected', {
+            defaultMessage: 'Select only one trigger event row before running the workflow.',
           })
         );
         return;
@@ -130,7 +143,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       setExecutionInputErrors(null);
       onSubmit(parsed, selectedTrigger);
       onClose();
-    }, [selectedTrigger, onSubmit, onClose, executionInput]);
+    }, [selectedTrigger, onSubmit, onClose, executionInput, eventTriggerTableSelectionCount]);
 
     const handleChangeTrigger = useCallback(
       (trigger: WorkflowTriggerTab): void => {
@@ -148,6 +161,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         }
         setExecutionInput('');
         setExecutionInputErrors(null);
+        setEventTriggerTableSelectionCount(0);
         setSelectedTrigger(trigger);
       },
       [hasAlertRacAccess, canReadWorkflowExecution, eventDrivenExecutionEnabled, selectedTrigger]
@@ -586,6 +600,9 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                     setValue={handleInputChange}
                     errors={executionInputErrors}
                     setErrors={setExecutionInputErrors}
+                    onTriggerEventTableSelectionCountChange={
+                      handleEventTriggerTableSelectionCountChange
+                    }
                   />
                 )}
                 {selectedTrigger === 'historical' && (
@@ -608,7 +625,8 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
               iconType="play"
               disabled={
                 Boolean(executionInputErrors) ||
-                (selectedTrigger === 'event' && executionInput.trim() === '')
+                (selectedTrigger === 'event' && executionInput.trim() === '') ||
+                (selectedTrigger === 'event' && eventTriggerTableSelectionCount > 1)
               }
               color="success"
               data-test-subj="executeWorkflowButton"
