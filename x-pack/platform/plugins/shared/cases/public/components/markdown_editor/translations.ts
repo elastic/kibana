@@ -24,3 +24,7 @@ export const UNSUPPORTED_MIME_TYPE_MESSAGE = i18n.translate(
     defaultMessage: 'Only PNG and JPG images are supported.',
   }
 );
+
+export const MARKDOWN_RENDER_ERROR = i18n.translate('xpack.cases.markdownEditor.renderError', {
+  defaultMessage: 'Unable to render this comment as markdown. Showing raw content instead.',
+});
