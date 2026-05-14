@@ -88,6 +88,11 @@ function createStartDependencies() {
     cloud: {},
     share: {},
     uiActions: {},
+    unifiedSearch: {
+      ui: {
+        SearchBar: () => null,
+      },
+    },
   } as AgentBuilderStartDependencies;
 }
 

@@ -6,7 +6,6 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { OnTimeChangeProps } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
@@ -15,9 +14,15 @@ const DEFAULT_TIME_RANGE: TimeRange = { from: 'now-24h', to: 'now' };
 const areTimeRangesEqual = (currentTimeRange: TimeRange | undefined, nextTimeRange: TimeRange) =>
   currentTimeRange?.from === nextTimeRange.from && currentTimeRange.to === nextTimeRange.to;
 
+/** Bounds only; avoids coupling to EUI `OnTimeChangeProps` (extra fields like `isInvalid`). */
+export interface VisualizationTimeBounds {
+  start: string;
+  end: string;
+}
+
 export interface VisualizationTimeRangeControl {
   selectedTimeRange: TimeRange;
-  onTimeChange: ({ start, end }: OnTimeChangeProps) => void;
+  onTimeChange: (bounds: VisualizationTimeBounds) => void;
   onBrushEnd: NonNullable<TypedLensByValueInput['onBrushEnd']>;
 }
 
@@ -46,7 +51,7 @@ export const useTimeRange = ({
   }, [from, to, updateSelectedTimeRange]);
 
   const onTimeChange = useCallback(
-    ({ start, end }: OnTimeChangeProps) => {
+    ({ start, end }: VisualizationTimeBounds) => {
       updateSelectedTimeRange({ from: start, to: end });
     },
     [updateSelectedTimeRange]

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner, EuiSuperDatePicker } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import type {} from '@emotion/react/types/css-prop';
 import type { InlineEditLensEmbeddableContext, LensPublicStart } from '@kbn/lens-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
@@ -22,7 +23,9 @@ import {
   visualizationTimePickerContainerClassName,
   visualizationHeaderStyles,
 } from './styles';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { useTimeRange } from './use_time_range';
+import { useVisualizationLensTimeSearchBarProps } from './use_visualization_lens_time_search_bar_props';
 
 const saveButtonLabel = i18n.translate(
   'xpack.agentBuilder.conversation.visualization.saveToDashboard',
@@ -71,16 +74,31 @@ export function BaseVisualization({
   >(null);
 
   const {
-    services: { application },
+    services: { application, plugins },
   } = useKibana();
+  const SearchBar = plugins.unifiedSearch.ui.SearchBar;
   const canWriteDashboards = application?.capabilities.dashboard_v2?.showWriteControls === true;
-  const timeRangeControl = useTimeRange({ timeRange: lensInput?.timeRange });
-  const selectedTimeRange = timeRangeControl?.selectedTimeRange;
+  const { selectedTimeRange, onTimeChange, onBrushEnd } = useTimeRange({
+    timeRange: lensInput?.timeRange,
+  });
   const lensInputWithTimeRange = useMemo(
     () =>
       lensInput && selectedTimeRange ? { ...lensInput, timeRange: selectedTimeRange } : lensInput,
     [lensInput, selectedTimeRange]
   );
+
+  const onDateRangeCommit = useCallback(
+    (dateRange: TimeRange) => {
+      onTimeChange({ start: dateRange.from, end: dateRange.to });
+    },
+    [onTimeChange]
+  );
+
+  const searchBarProps = useVisualizationLensTimeSearchBarProps({
+    dateRangeFrom: selectedTimeRange.from,
+    dateRangeTo: selectedTimeRange.to,
+    onDateRangeCommit,
+  });
 
   const onLoad = useCallback(
     (
@@ -156,18 +174,7 @@ export function BaseVisualization({
   return (
     <>
       <div css={visualizationHeaderStyles} className={visualizationTimePickerContainerClassName}>
-        {timeRangeControl && (
-          <EuiSuperDatePicker
-            data-test-subj="agentBuilderVisualizeLensTimeRangePicker"
-            start={timeRangeControl.selectedTimeRange.from}
-            end={timeRangeControl.selectedTimeRange.to}
-            onTimeChange={timeRangeControl.onTimeChange}
-            onRefresh={() => undefined}
-            showUpdateButton={false}
-            compressed
-            width="auto"
-          />
-        )}
+        <SearchBar {...searchBarProps} />
       </div>
 
       <div css={visualizationEmbeddableStyles(VISUALIZATION_HEIGHT)}>
@@ -178,7 +185,7 @@ export function BaseVisualization({
             <lens.EmbeddableComponent
               {...lensInputWithTimeRange}
               style={{ height: '100%' }}
-              onBrushEnd={timeRangeControl?.onBrushEnd}
+              onBrushEnd={onBrushEnd}
               onLoad={onLoad}
             />
           )
