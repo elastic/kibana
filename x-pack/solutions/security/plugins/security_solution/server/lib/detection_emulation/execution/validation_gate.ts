@@ -182,6 +182,22 @@ export const checkValidationGates = (
     }
   }
 
+  if (cmd.command === 'execute' && config.allowedExecuteCommandPatterns.length > 0) {
+    const cmdString =
+      cmd.parameters && typeof cmd.parameters.command === 'string'
+        ? cmd.parameters.command
+        : undefined;
+    const patterns = buildExecutePatternSet(config.allowedExecuteCommandPatterns);
+    if (!cmdString || !patterns.some((re) => re.test(cmdString))) {
+      return {
+        allowed: false,
+        reason: 'execute_command_not_allowed',
+        message:
+          'Command string does not match any operator-configured pattern (`xpack.securitySolution.detectionEmulation.validation.allowedExecuteCommandPatterns`).',
+      };
+    }
+  }
+
   return { allowed: true };
 };
 
