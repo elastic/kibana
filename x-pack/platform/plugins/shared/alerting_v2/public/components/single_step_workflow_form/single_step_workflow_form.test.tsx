@@ -142,12 +142,18 @@ describe('SingleStepWorkflowForm', () => {
   });
 
   it('shows an error message when isInvalid is true', () => {
-    renderForm({ mode: 'existing', workflowId: null }, { isInvalid: true, errorMessage: 'Workflow is required' });
+    renderForm(
+      { mode: 'existing', workflowId: null },
+      { isInvalid: true, errorMessage: 'Workflow is required' }
+    );
     expect(screen.getByText('Workflow is required')).toBeInTheDocument();
   });
 
   it('does not show an error message when isInvalid is false', () => {
-    renderForm({ mode: 'existing', workflowId: null }, { isInvalid: false, errorMessage: 'Workflow is required' });
+    renderForm(
+      { mode: 'existing', workflowId: null },
+      { isInvalid: false, errorMessage: 'Workflow is required' }
+    );
     expect(screen.queryByText('Workflow is required')).not.toBeInTheDocument();
   });
 
