@@ -9,10 +9,19 @@
 
 import type { Example, TaskOutput } from '@kbn/evals';
 
+export interface LiquidExpectation {
+  /** The Liquid reference, e.g. "steps.create_case.output.id" or "event.alerts" */
+  ref: string;
+  /** Expected resolution context — used by createLiquidCorrectnessEvaluator */
+  resolvesTo?: 'step-output' | 'foreach-item' | 'event-field' | 'consts';
+}
+
 export interface StructuralExpectations {
   expectedStepCount?: number | { min: number; max: number };
   expectedStepTypes?: string[];
   expectedStepNames?: string[];
+  /** Liquid template chains to validate for correctness (field resolution), not just presence. */
+  expectedLiquidChains?: LiquidExpectation[];
 }
 
 export interface EfficiencyExpectations {
@@ -63,3 +72,64 @@ export type WorkflowTaskOutput = TaskOutput & {
   resultYaml?: string;
   latencyMs?: number;
 };
+
+export interface MultiTurnWorkflowEditExample extends Example {
+  input: {
+    initialYaml: string;
+    /** Ordered list of user turns. Each is sent in a separate `converse` call, threading conversationId. */
+    turns: Array<{ instruction: string }>;
+  };
+  output: {
+    criteria: string[];
+    preservedStepNames?: string[];
+  } & StructuralExpectations &
+    EfficiencyExpectations;
+  metadata?: {
+    category?: string;
+  };
+}
+
+export interface SelfCorrectionExample extends Example {
+  input: {
+    /** Intentionally broken YAML to inject as the starting attachment */
+    brokenYaml: string;
+    brokenKind: 'syntax' | 'semantic';
+    /** The user message that accompanies the broken YAML, e.g. "this workflow doesn't run, please fix it" */
+    instruction: string;
+  };
+  output: {
+    /** Max conversation turns before scoring recovery as failed */
+    maxTurns: number;
+    criteria: string[];
+  };
+  metadata?: {
+    category?: string;
+  };
+}
+
+/** Scenario where the agent should refuse, push back, or ask for clarification rather than produce YAML. */
+export interface NegativeWorkflowExample extends Example {
+  input: {
+    instruction: string;
+    /** Optional starting YAML context (for edit-context negatives like "add error handling" with no workflow) */
+    initialYaml?: string;
+  };
+  output: {
+    /**
+     * Why this is a negative case — used by the spec to set metadata.category = 'negative'
+     * and route through createRejectionEvaluator + createCriteriaEvaluator on refusal text.
+     */
+    expectedRefusalReason:
+      | 'ambiguous'
+      | 'impossible'
+      | 'out-of-scope'
+      | 'unsupported-feature'
+      | 'unsafe';
+    /** LLM-judge criteria applied to the agent's refusal / clarification text, NOT to resultYaml */
+    criteria: string[];
+  };
+  metadata?: {
+    category: 'negative';
+    [key: string]: unknown;
+  };
+}
