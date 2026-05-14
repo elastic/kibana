@@ -431,22 +431,30 @@ describe('ContentListClientProvider', () => {
   });
 
   describe('inspect action merge', () => {
-    it('overrides consumer-provided `actions.inspect.onItemAction` with the content editor handler', () => {
+    // The merge spreads the existing config so only `onItemAction` is overridden.
+    it('preserves consumer-provided `actions.inspect.restriction` when injecting the inspect handler', () => {
       const openContentEditor = jest.fn<() => void, [OpenContentEditorParams]>(() => jest.fn());
+      const restriction = jest.fn(() => 'archived');
+      // Consumer-provided placeholder handler — the discriminated union
+      // requires at least one handler. The client provider's injection
+      // is what actually opens the flyout, so this should be overridden.
       const consumerOnItemAction = jest.fn();
 
       const { result } = renderHook(() => useContentListConfig(), {
         wrapper: createWrapper({
           contentEditor: { openContentEditor, isReadonly: true },
           item: {
-            actions: { inspect: { onItemAction: consumerOnItemAction } },
+            actions: { inspect: { onItemAction: consumerOnItemAction, restriction } },
           },
         }),
       });
 
       const inspect = result.current.item?.actions?.inspect;
       expect(inspect?.onItemAction).toEqual(expect.any(Function));
+      // The consumer's placeholder is overridden by the injected handler.
       expect(inspect?.onItemAction).not.toBe(consumerOnItemAction);
+      // The restriction flows through unchanged.
+      expect(inspect?.restriction).toBe(restriction);
     });
 
     it('preserves other consumer-provided `actions[id]` entries unchanged', () => {

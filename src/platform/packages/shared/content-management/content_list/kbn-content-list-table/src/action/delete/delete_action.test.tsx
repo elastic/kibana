@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ReactNode } from 'react';
-import { render } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import type React from 'react';
 import type { ActionBuilderContext, DeleteActionProps } from '../types';
 import { buildDeleteAction } from './delete_action';
 
@@ -43,6 +41,7 @@ describe('delete action builder', () => {
       const result = buildDeleteAction({}, defaultContext);
 
       expect(result).toMatchObject({
+        name: 'Delete',
         description: expect.any(String),
         icon: 'trash',
         type: 'icon',
@@ -50,9 +49,6 @@ describe('delete action builder', () => {
         isPrimary: true,
         'data-test-subj': 'content-list-table-action-delete',
       });
-
-      const { getByText } = render(<>{result!.name as ReactNode}</>);
-      expect(getByText('Delete')).toBeInTheDocument();
     });
 
     it('returns `undefined` when in read-only mode', () => {
@@ -86,8 +82,7 @@ describe('delete action builder', () => {
       const props: DeleteActionProps = { label: 'Remove' };
       const result = buildDeleteAction(props, defaultContext);
 
-      const { getByText } = render(<>{result!.name as ReactNode}</>);
-      expect(getByText('Remove')).toBeInTheDocument();
+      expect(result?.name).toBe('Remove');
     });
 
     it('calls `actions.onDelete` with the item wrapped in an array', () => {
@@ -114,14 +109,81 @@ describe('delete action builder', () => {
     });
   });
 
-  describe('enabled', () => {
-    it('forwards the consumer `enabled` predicate', () => {
-      const enabled = jest.fn(() => false);
-      const result = buildDeleteAction({ enabled }, defaultContext);
-      const item = { id: '1', title: 'Test' };
+  describe('with `itemConfig.actions.delete.restriction`', () => {
+    const freeItem = { id: '1', title: 'Free', managed: false };
+    const managedItem = { id: '2', title: 'Managed', managed: true };
 
-      expect(result?.enabled?.(item)).toBe(false);
-      expect(enabled).toHaveBeenCalledWith(item);
+    const restrictManaged = (item: { managed?: boolean }) =>
+      item.managed ? 'Managed dashboards cannot be deleted.' : undefined;
+
+    const contextWithRestriction = (
+      restriction: (item: { managed?: boolean }) => string | undefined
+    ): ActionBuilderContext => ({
+      ...defaultContext,
+      itemConfig: {
+        actions: {
+          delete: { onBulkAction: jest.fn(async () => {}), restriction },
+        },
+      },
+    });
+
+    it('disables the row icon when the item has a restriction reason', () => {
+      const result = buildDeleteAction({}, contextWithRestriction(restrictManaged));
+
+      // EUI's `enabled` predicate: `false` => disabled.
+      expect((result!.enabled as (item: typeof managedItem) => boolean)(managedItem)).toBe(false);
+      expect((result!.enabled as (item: typeof freeItem) => boolean)(freeItem)).toBe(true);
+    });
+
+    it('surfaces the restriction reason as the per-row tooltip via `description`', () => {
+      const result = buildDeleteAction({}, contextWithRestriction(restrictManaged));
+      const description = result!.description as (item: typeof managedItem) => string;
+
+      expect(description(managedItem)).toBe('Managed dashboards cannot be deleted.');
+      // Default description (the i18n action description) is used for unrestricted items.
+      expect(description(freeItem)).toEqual(expect.any(String));
+      expect(description(freeItem)).not.toBe('Managed dashboards cannot be deleted.');
+    });
+
+    it('lets the consumer `enabled` further narrow but never expand the auto verdict', () => {
+      // Auto-derivation says `freeItem` is OK; consumer says no -> result is no.
+      const result = buildDeleteAction(
+        { enabled: (item) => item.id !== '1' },
+        contextWithRestriction(restrictManaged)
+      );
+      const enabled = result!.enabled as (item: typeof freeItem) => boolean;
+
+      expect(enabled(freeItem)).toBe(false);
+      expect(enabled(managedItem)).toBe(false);
+    });
+
+    it('keeps the icon enabled when no restriction predicate is configured', () => {
+      const result = buildDeleteAction({}, defaultContext);
+      const enabled = result!.enabled as (item: typeof freeItem) => boolean;
+
+      expect(enabled(freeItem)).toBe(true);
+      expect(enabled(managedItem)).toBe(true);
+    });
+
+    it('keeps the static description when no restriction predicate is configured', () => {
+      const result = buildDeleteAction({}, defaultContext);
+      expect(typeof result?.description).toBe('string');
+    });
+
+    it('ignores `actions.edit.restriction` when building the delete action', () => {
+      const context: ActionBuilderContext = {
+        ...defaultContext,
+        itemConfig: {
+          actions: {
+            delete: { onBulkAction: jest.fn(async () => {}) },
+            edit: { onItemAction: jest.fn(), restriction: () => 'Cannot edit' },
+          },
+        },
+      };
+
+      const result = buildDeleteAction({}, context);
+
+      expect(typeof result?.description).toBe('string');
     });
   });
 });

@@ -58,6 +58,7 @@ export type {
   ActionConfig,
   ActionId,
   KnownActionId,
+  ActionRestriction,
   ItemActionHref,
   ItemActionHandler,
   BulkActionHandler,

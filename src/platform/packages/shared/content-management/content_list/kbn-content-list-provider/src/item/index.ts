@@ -12,6 +12,7 @@ export type {
   ContentListItemConfig,
   ContentListActions,
   ActionConfig,
+  ActionRestriction,
   ActionId,
   KnownActionId,
   ItemActionHref,
