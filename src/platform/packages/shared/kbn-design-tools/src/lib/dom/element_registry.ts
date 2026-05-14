@@ -9,6 +9,55 @@
 
 import type { ReactElement } from 'react';
 import { DEVTOOL_HIDDEN_ATTR } from '../constants';
+import { setImportant } from './clone_element';
+
+/** A recorded inline style override (for undo). */
+export interface StyleEdit {
+  element: HTMLElement;
+  property: string;
+  original: string;
+}
+
+/** A recorded text node change (for undo). */
+export interface TextEdit {
+  node: Text;
+  original: string;
+}
+
+/** A recorded source/attribute change (for undo). */
+export interface SourceEdit {
+  element: Element;
+  attribute: string;
+  original: string;
+}
+
+/**
+ * Revert all edits recorded in the given arrays and clear them.
+ */
+const revertEdits = (
+  styleEdits: StyleEdit[],
+  textEdits: TextEdit[],
+  sourceEdits: SourceEdit[]
+): void => {
+  for (const { element, property, original } of styleEdits) {
+    if (original) {
+      setImportant(element, property, original);
+    } else {
+      element.style.removeProperty(property);
+    }
+  }
+  styleEdits.length = 0;
+
+  for (const { node, original } of textEdits) {
+    node.textContent = original;
+  }
+  textEdits.length = 0;
+
+  for (const { element, attribute, original } of sourceEdits) {
+    element.setAttribute(attribute, original);
+  }
+  sourceEdits.length = 0;
+};
 
 /**
  * Tracks the editing state of a single managed element.
@@ -32,6 +81,16 @@ export interface ElementSession {
   referenceEl?: HTMLElement;
   /** When set, this element is a live React render (not a static clone). */
   liveReactElement?: { element: ReactElement; zIndex: number };
+  /** Snapshot of React hook state for live elements, used to restore state on duplicate. */
+  componentState?: unknown[][];
+  /** Tracked style edits applied via the edit modal. */
+  styleEdits: StyleEdit[];
+  /** Tracked text node edits applied via the edit modal. */
+  textEdits: TextEdit[];
+  /** Tracked source/attribute edits applied via the edit modal. */
+  sourceEdits: SourceEdit[];
+  /** Tear-down callback for live React roots. Called on delete/reset. */
+  cleanup?: () => void;
 }
 
 /**
@@ -67,12 +126,31 @@ export class ElementRegistry {
   }
 
   /**
-   * Reset all sessions: remove managed elements, restore hidden originals,
-   * and clear the registry.
+   * Whether a session's element should be removed from the DOM on cleanup.
+   *
+   * Sessions created by drag (clone + hidden original) or duplicate/insert
+   * own their element — it must be removed. Edit-only sessions track an
+   * in-place page element that was never cloned; removing it would destroy
+   * the original page content.
+   *
+   * Convention: a session that has no `referenceEl` (no hidden original)
+   * and is not a duplicate is an edit-only session on the page element itself.
+   */
+  private isOwnedElement(session: ElementSession): boolean {
+    return session.isDuplicate || !!session.referenceEl;
+  }
+
+  /**
+   * Reset all sessions: revert edits, remove owned elements, restore
+   * hidden originals, and clear the registry.
    */
   resetAll(): void {
     for (const session of this.sessions.values()) {
-      session.el.remove();
+      revertEdits(session.styleEdits, session.textEdits, session.sourceEdits);
+      session.cleanup?.();
+      if (this.isOwnedElement(session)) {
+        session.el.remove();
+      }
     }
     this.sessions.clear();
 
@@ -86,10 +164,41 @@ export class ElementRegistry {
   }
 
   /**
-   * Remove a session and detach its element from the DOM.
+   * Remove a session. Reverts edits and, for owned elements (clones /
+   * duplicates / inserts), detaches the element from the DOM. Edit-only
+   * sessions on in-place page elements are simply unregistered.
    */
   removeSession(session: ElementSession): void {
-    session.el.remove();
+    revertEdits(session.styleEdits, session.textEdits, session.sourceEdits);
+    session.cleanup?.();
+    if (this.isOwnedElement(session)) {
+      session.el.remove();
+    }
     this.delete(session);
+  }
+
+  /**
+   * Get or create a session for `el`. If no session exists, a lightweight
+   * edit-only session is registered — the element is NOT cloned or hidden.
+   */
+  getOrCreate(el: HTMLElement): ElementSession {
+    const existing = this.sessions.get(el);
+    if (existing) return existing;
+
+    const rect = el.getBoundingClientRect();
+    const session: ElementSession = {
+      el,
+      dx: 0,
+      dy: 0,
+      dw: 0,
+      dh: 0,
+      originalRect: new DOMRect(rect.left, rect.top, rect.width, rect.height),
+      isDuplicate: false,
+      styleEdits: [],
+      textEdits: [],
+      sourceEdits: [],
+    };
+    this.set(session);
+    return session;
   }
 }

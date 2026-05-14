@@ -100,12 +100,14 @@ export const DesignToolsButton = () => {
       let el: HTMLElement;
       let rect: DOMRect;
       let liveReactElement: { element: ReactElement; zIndex: number } | undefined;
+      let cleanup: (() => void) | undefined;
 
       if (interactive) {
-        const live = renderEuiComponentLive(element, zIndex.clone);
+        const live = await renderEuiComponentLive(element, zIndex.clone);
         el = live.wrapper;
         rect = live.rect;
         liveReactElement = live.liveReactElement;
+        cleanup = live.cleanup;
       } else {
         const cloned = await renderAndCloneEuiComponent(element, zIndex.clone);
         el = cloned.clone;
@@ -124,7 +126,7 @@ export const DesignToolsButton = () => {
       // The state updates above are batched, so editHandleRef.current
       // is null until the next commit.
       requestAnimationFrame(() => {
-        editHandleRef.current?.insertElement(el, liveReactElement);
+        editHandleRef.current?.insertElement(el, liveReactElement, cleanup);
       });
     },
     [zIndex.clone]

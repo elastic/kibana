@@ -18,6 +18,7 @@ import {
   useOverlayZIndex,
   useScrollSync,
   useLockedTarget,
+  useEditChangeTracker,
 } from '../../hooks';
 import { DEVTOOL_HIDDEN_ATTR, HANDLE_CURSORS, MEASURE_OVERLAY_ID } from '../../lib/constants';
 import {
@@ -38,7 +39,6 @@ import {
   applyDragMove,
 } from '../../lib/dom/drag_helpers';
 import { createDuplicate } from '../../lib/dom/duplicate_helpers';
-import { setImportant } from '../../lib/dom/clone_element';
 import { startResize, applyResizeMove } from '../../lib/dom/resize_helpers';
 import type { InteractionState, DragState } from '../../lib/dom/interaction_state';
 import { IDLE, deriveCursor } from '../../lib/dom/interaction_state';
@@ -51,7 +51,8 @@ export interface EditOverlayHandle {
   resetAll: () => void;
   insertElement: (
     element: HTMLElement,
-    liveReactElement?: { element: ReactElement; zIndex: number }
+    liveReactElement?: { element: ReactElement; zIndex: number },
+    cleanup?: () => void
   ) => void;
 }
 
@@ -87,17 +88,9 @@ export const EditOverlay = ({
   const registry = useRef(new ElementRegistry());
   const rafId = useRef<number>(0);
   const stickyHover = useRef<HTMLElement | null>(null);
-  const styleEdits = useRef<Array<{ element: HTMLElement; property: string; original: string }>>(
-    []
-  );
-  const textEdits = useRef<Array<{ node: Text; original: string }>>([]);
-  const sourceEdits = useRef<Array<{ element: Element; attribute: string; original: string }>>([]);
   const roundedTargets = useRef(new WeakSet<HTMLElement>());
 
-  const updateCursor = useCallback(
-    (next: string) => setCursor((prev) => (prev === next ? prev : next)),
-    []
-  );
+  const { editCount, applyEdits } = useEditChangeTracker(registry);
 
   // Keep ref in sync with state so stable callbacks can read the current value.
   const updateHoverTarget = useCallback((next: HTMLElement | null) => {
@@ -112,14 +105,8 @@ export const EditOverlay = ({
   const notifyCount = useCallback(() => {
     const hiddenOriginals = document.querySelectorAll(`[${DEVTOOL_HIDDEN_ATTR}]`).length;
     const duplicates = [...registry.current.values()].filter((s) => s.isDuplicate).length;
-    onChangeCount?.(
-      hiddenOriginals +
-        duplicates +
-        styleEdits.current.length +
-        textEdits.current.length +
-        sourceEdits.current.length
-    );
-  }, [onChangeCount]);
+    onChangeCount?.(hiddenOriginals + duplicates + editCount());
+  }, [onChangeCount, editCount]);
 
   const deleteElement = useCallback(
     (el: HTMLElement) => {
@@ -146,27 +133,15 @@ export const EditOverlay = ({
     interaction.current = IDLE;
     registry.current.resetAll();
     restoreAll();
-    for (const { element, property, original } of styleEdits.current) {
-      if (original) {
-        setImportant(element, property, original);
-      } else {
-        element.style.removeProperty(property);
-      }
-    }
-    styleEdits.current = [];
-    for (const { node, original } of textEdits.current) {
-      node.textContent = original;
-    }
-    textEdits.current = [];
-    for (const { element, attribute, original } of sourceEdits.current) {
-      element.setAttribute(attribute, original);
-    }
-    sourceEdits.current = [];
     onChangeCount?.(0);
   }, [onChangeCount, restoreAll]);
 
   const insertElement = useCallback(
-    (element: HTMLElement, liveReactElement?: { element: ReactElement; zIndex: number }) => {
+    (
+      element: HTMLElement,
+      liveReactElement?: { element: ReactElement; zIndex: number },
+      cleanup?: () => void
+    ) => {
       const rect = element.getBoundingClientRect();
       const originalRect = new DOMRect(rect.left, rect.top, rect.width, rect.height);
 
@@ -179,14 +154,18 @@ export const EditOverlay = ({
         originalRect,
         isDuplicate: true,
         liveReactElement,
+        styleEdits: [],
+        textEdits: [],
+        sourceEdits: [],
+        cleanup,
       };
       registry.current.set(session);
       stickyHover.current = element;
       updateHoverTarget(element);
-      updateCursor('grab');
+      setCursor('grab');
       notifyCount();
     },
-    [notifyCount, updateHoverTarget, updateCursor]
+    [notifyCount, updateHoverTarget]
   );
 
   useImperativeHandle(handleRef, () => ({ resetAll, insertElement }), [resetAll, insertElement]);
@@ -271,7 +250,7 @@ export const EditOverlay = ({
                 state.startY
               );
             }
-            updateCursor('grabbing');
+            setCursor('grabbing');
             notifyCount();
             // Apply the move that triggered promotion
             applyDragMove(
@@ -316,7 +295,7 @@ export const EditOverlay = ({
                 target: resolution.target!,
                 handle: resolution.handle,
               };
-              updateCursor(HANDLE_CURSORS[resolution.handle]);
+              setCursor(HANDLE_CURSORS[resolution.handle]);
               return;
             }
 
@@ -329,23 +308,18 @@ export const EditOverlay = ({
               resolution.target === currentHover &&
               isInsideHoverLock(event.clientX, event.clientY)
             ) {
-              updateCursor('grab');
+              setCursor('grab');
               return;
             }
 
             // When in rounded dead-zone with no handle, derive cursor from idle state
             if (resolution.target === currentHover && currentHover) {
-              updateCursor(deriveCursor(IDLE, currentHover));
+              setCursor(deriveCursor(IDLE, currentHover));
               return;
             }
 
-            const nextCursor = resolution.target ? 'grab' : '';
-            updateHoverTarget(
-              resolution.target === hoverTargetRef.current
-                ? hoverTargetRef.current
-                : resolution.target
-            );
-            updateCursor(nextCursor);
+            updateHoverTarget(resolution.target);
+            setCursor(resolution.target ? 'grab' : '');
           }
         }
       });
@@ -356,7 +330,6 @@ export const EditOverlay = ({
       toolbarHeight,
       notifyCount,
       isInsideHoverLock,
-      updateCursor,
       updateHoverTarget,
       zIndex.clone,
     ]
@@ -372,7 +345,7 @@ export const EditOverlay = ({
     // antialiasing and causes visibly blurry text.
     state.session.el.style.willChange = '';
     interaction.current = IDLE;
-    setCursor((prev) => (prev === 'grab' ? prev : 'grab'));
+    setCursor('grab');
   }, []);
 
   const handlePointerDown = useCallback(
@@ -408,7 +381,7 @@ export const EditOverlay = ({
 
         interaction.current = startResize(session, corner, event.clientX, event.clientY);
         updateHoverTarget(null);
-        updateCursor(deriveCursor(interaction.current, null));
+        setCursor(deriveCursor(interaction.current, null));
         notifyCount();
         return;
       }
@@ -431,40 +404,52 @@ export const EditOverlay = ({
       };
 
       updateHoverTarget(null);
-      updateCursor('grab');
+      setCursor('grab');
       notifyCount();
     },
-    [zIndex.clone, notifyCount, updateCursor, updateHoverTarget, parkInteraction]
+    [zIndex.clone, notifyCount, updateHoverTarget, parkInteraction]
+  );
+
+  const duplicateAndDrag = useCallback(
+    async (target: HTMLElement) => {
+      const duplicate = await createDuplicate(target, registry.current, zIndex.clone);
+      const session = registry.current.get(duplicate);
+      if (session) {
+        const rect = duplicate.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        interaction.current = startDragFromSession(session, cx, cy);
+      }
+      updateHoverTarget(null);
+      clearLock();
+      setCursor('grabbing');
+      notifyCount();
+    },
+    [zIndex.clone, clearLock, notifyCount, updateHoverTarget]
   );
 
   const handlePointerUp = useCallback(
     (event: PointerEvent) => {
       const state = interaction.current;
 
-      // Pending drag released without enough movement — cancel it.
       if (state.type === 'pending-drag') {
         interaction.current = IDLE;
         (event.target as Element)?.releasePointerCapture?.(event.pointerId);
-
-        // Re-resolve hover so the outline shows immediately without needing to move
-        const target = getElementUnder(event.clientX, event.clientY);
-        updateHoverTarget(target);
-        updateCursor(target ? 'grab' : '');
+      } else if (state.type === 'drag' || state.type === 'resize') {
+        event.preventDefault();
+        event.stopPropagation();
+        (event.target as Element)?.releasePointerCapture?.(event.pointerId);
+        parkInteraction();
+      } else {
         return;
       }
 
-      if (state.type !== 'drag' && state.type !== 'resize') return;
-      event.preventDefault();
-      event.stopPropagation();
-      (event.target as Element)?.releasePointerCapture?.(event.pointerId);
-      parkInteraction();
-
-      // Re-resolve hover so the outline shows immediately after drop
+      // Re-resolve hover so the outline shows immediately
       const target = getElementUnder(event.clientX, event.clientY);
       updateHoverTarget(target);
-      updateCursor(target ? 'grab' : '');
+      setCursor(target ? 'grab' : '');
     },
-    [parkInteraction, updateHoverTarget, updateCursor]
+    [parkInteraction, updateHoverTarget]
   );
 
   const handleKeydown = useCallback(
@@ -489,18 +474,7 @@ export const EditOverlay = ({
       if (isDuplicateShortcut(event) && currentHover) {
         event.preventDefault();
         event.stopPropagation();
-        const duplicate = createDuplicate(currentHover, registry.current, zIndex.clone);
-        const session = registry.current.get(duplicate);
-        if (session) {
-          const rect = duplicate.getBoundingClientRect();
-          const cx = rect.left + rect.width / 2;
-          const cy = rect.top + rect.height / 2;
-          interaction.current = startDragFromSession(session, cx, cy);
-        }
-        updateHoverTarget(null);
-        clearLock();
-        updateCursor('grabbing');
-        notifyCount();
+        duplicateAndDrag(currentHover);
         return;
       }
 
@@ -512,20 +486,11 @@ export const EditOverlay = ({
         updateHoverTarget(null);
       }
     },
-    [
-      setIsEditMode,
-      deleteElement,
-      zIndex.clone,
-      clearLock,
-      notifyCount,
-      updateHoverTarget,
-      updateCursor,
-    ]
+    [setIsEditMode, deleteElement, duplicateAndDrag, updateHoverTarget]
   );
 
   const handleClick = useCallback((event: MouseEvent) => {
-    const target = getElementUnder(event.clientX, event.clientY);
-    if (!target) return;
+    if (!getElementUnder(event.clientX, event.clientY)) return;
     event.preventDefault();
     event.stopPropagation();
   }, []);
@@ -593,65 +558,20 @@ export const EditOverlay = ({
       savedTextChanges: TextNodeChange[],
       savedSourceChanges: SourceChange[]
     ) => {
-      // Apply style changes
-      for (const { element, property, value } of savedStyleChanges) {
-        const cssProp = property.replace(/([A-Z])/g, '-$1').toLowerCase();
-        const original = element.style.getPropertyValue(cssProp);
-        styleEdits.current.push({ element, property: cssProp, original });
-        setImportant(element, cssProp, value);
+      if (editModalTarget) {
+        applyEdits(editModalTarget, savedStyleChanges, savedTextChanges, savedSourceChanges);
       }
-
-      // Apply text node changes
-      for (const { node, text, color: textColor } of savedTextChanges) {
-        if (text !== undefined) {
-          textEdits.current.push({ node, original: node.textContent ?? '' });
-          node.textContent = text;
-        }
-        if (textColor !== undefined && node.parentElement) {
-          const parent = node.parentElement;
-          const originalColor = parent.style.color;
-          const originalFill = parent.style.getPropertyValue('-webkit-text-fill-color');
-          styleEdits.current.push({ element: parent, property: 'color', original: originalColor });
-          styleEdits.current.push({
-            element: parent,
-            property: '-webkit-text-fill-color',
-            original: originalFill,
-          });
-          setImportant(parent, 'color', textColor);
-          setImportant(parent, '-webkit-text-fill-color', textColor);
-        }
-      }
-
-      // Apply source changes
-      for (const { element, attribute, value } of savedSourceChanges) {
-        const original = element.getAttribute(attribute) ?? '';
-        sourceEdits.current.push({ element, attribute, original });
-        element.setAttribute(attribute, value);
-      }
-
       setEditModalTarget(null);
       notifyCount();
     },
-    [notifyCount]
+    [editModalTarget, notifyCount, applyEdits]
   );
 
   const handleDuplicate = useCallback(() => {
     const currentHover = hoverTargetRef.current;
     if (!currentHover) return;
-
-    const duplicate = createDuplicate(currentHover, registry.current, zIndex.clone);
-    const session = registry.current.get(duplicate);
-    if (session) {
-      const rect = duplicate.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-      interaction.current = startDragFromSession(session, cx, cy);
-    }
-    updateHoverTarget(null);
-    clearLock();
-    updateCursor('grabbing');
-    notifyCount();
-  }, [zIndex.clone, clearLock, notifyCount, updateHoverTarget, updateCursor]);
+    duplicateAndDrag(currentHover);
+  }, [duplicateAndDrag]);
 
   return (
     <>

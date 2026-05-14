@@ -31,29 +31,27 @@ export const EditOutline = ({ target, onDelete, onDuplicate, onEdit }: Props) =>
   const { euiTheme } = useEuiTheme();
   const zIndex = useOverlayZIndex();
 
-  const outlineCss = useMemo(() => {
+  const { outline: outlineCss, handle: handleCss } = useMemo(() => {
     const accentColor = euiTheme.colors.primary;
-    return css({
-      position: 'fixed',
-      pointerEvents: 'none',
-      zIndex: zIndex.highlight,
-      border: `2px solid ${accentColor}`,
-      borderRadius: '2px',
-    });
+    return {
+      outline: css({
+        position: 'fixed',
+        pointerEvents: 'none',
+        zIndex: zIndex.highlight,
+        border: `2px solid ${accentColor}`,
+        borderRadius: '2px',
+      }),
+      handle: css({
+        position: 'absolute',
+        width: RESIZE_HANDLE_SIZE,
+        height: RESIZE_HANDLE_SIZE,
+        background: accentColor,
+        border: `1px solid ${accentColor}`,
+        borderRadius: '1px',
+        pointerEvents: 'auto',
+      }),
+    };
   }, [euiTheme.colors.primary, zIndex.highlight]);
-
-  const handleCss = useMemo(() => {
-    const accentColor = euiTheme.colors.primary;
-    return css({
-      position: 'absolute',
-      width: RESIZE_HANDLE_SIZE,
-      height: RESIZE_HANDLE_SIZE,
-      background: accentColor,
-      border: `1px solid ${accentColor}`,
-      borderRadius: '1px',
-      pointerEvents: 'auto',
-    });
-  }, [euiTheme.colors.primary]);
 
   const rect = useElementRect(target);
   const mode = getHandleMode(rect);

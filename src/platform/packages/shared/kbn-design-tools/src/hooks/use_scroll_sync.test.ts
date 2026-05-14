@@ -44,6 +44,9 @@ describe('useScrollSync', () => {
         toJSON: () => ({}),
       } as DOMRect,
       isDuplicate: false,
+      styleEdits: [],
+      textEdits: [],
+      sourceEdits: [],
     };
   };
 

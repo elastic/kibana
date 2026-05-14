@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_LIVE_ATTR, DEVTOOL_MANAGED_ATTR } from '../constants';
+import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR } from '../constants';
 import { copyCanvasContent, copyStylesDeep, setImportant, roundRect } from './clone_element';
+import { isLiveElement } from './managed_element';
 
 export interface PreviewCloneResult {
   clone: HTMLElement;
@@ -33,7 +34,7 @@ const stripTranslate = (transform: string): string => {
  */
 export const createPreviewClone = (target: HTMLElement): PreviewCloneResult => {
   const isManaged = target.hasAttribute(DEVTOOL_MANAGED_ATTR);
-  const isLive = target.hasAttribute(DEVTOOL_LIVE_ATTR);
+  const isLive = isLiveElement(target);
   // Visual dimensions (post-transform) — what the user actually sees
   const visualRect = roundRect(target.getBoundingClientRect());
 

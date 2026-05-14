@@ -9,7 +9,7 @@
 
 import type { ReactElement } from 'react';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { EuiThemeProvider } from '@elastic/eui';
 import { cloneClean, setImportant } from './clone_element';
 import { DEVTOOL_MANAGED_ATTR, DEVTOOL_LIVE_ATTR } from '../constants';
@@ -38,25 +38,29 @@ export const renderAndCloneEuiComponent = async (
   container.style.pointerEvents = 'none';
   document.body.appendChild(container);
 
-  ReactDOM.render(element, container);
+  const root = createRoot(container);
 
-  // The component's root element is the first (and only) child of container.
-  const rendered = container.firstElementChild as HTMLElement;
-  if (!rendered) {
-    ReactDOM.unmountComponentAtNode(container);
+  try {
+    // createRoot.render is async; we need a synchronous flush for
+    // cloneClean to read computed styles. Use flushSync.
+    const { flushSync } = await import('react-dom');
+    flushSync(() => {
+      root.render(element);
+    });
+
+    // The component's root element is the first (and only) child of container.
+    const rendered = container.firstElementChild as HTMLElement;
+    if (!rendered) {
+      throw new Error('EUI component did not render a DOM element');
+    }
+
+    // Use the same cloneClean path that drag/duplicate use — this copies
+    // all computed styles, pseudo-elements, canvas content, etc.
+    return cloneClean(rendered, zIndex);
+  } finally {
+    root.unmount();
     container.remove();
-    throw new Error('EUI component did not render a DOM element');
   }
-
-  // Use the same cloneClean path that drag/duplicate use — this copies
-  // all computed styles, pseudo-elements, canvas content, etc.
-  const result = cloneClean(rendered, zIndex);
-
-  // Tear down the temporary React tree.
-  ReactDOM.unmountComponentAtNode(container);
-  container.remove();
-
-  return result;
 };
 
 /**
@@ -66,15 +70,19 @@ export const renderAndCloneEuiComponent = async (
  * The returned wrapper is a plain HTMLElement that the edit overlay can
  * manage just like a cloneClean result, but the component inside stays
  * interactive.
+ *
+ * Call `cleanup()` on the returned object when the element is removed to
+ * unmount the React root and prevent memory leaks.
  */
-export const renderEuiComponentLive = (
+export const renderEuiComponentLive = async (
   element: ReactElement,
   zIndex: number
-): {
+): Promise<{
   wrapper: HTMLElement;
   rect: DOMRect;
   liveReactElement: { element: ReactElement; zIndex: number };
-} => {
+  cleanup: () => void;
+}> => {
   const wrapper = document.createElement('div');
   wrapper.style.position = 'fixed';
   wrapper.style.left = '0px';
@@ -86,20 +94,27 @@ export const renderEuiComponentLive = (
   wrapper.setAttribute(DEVTOOL_LIVE_ATTR, '');
   document.body.appendChild(wrapper);
 
-  ReactDOM.render(
-    React.createElement(EuiThemeProvider, { colorMode: getPageColorMode(), children: element }),
-    wrapper
-  );
+  const root = createRoot(wrapper);
+  const { flushSync } = await import('react-dom');
+  flushSync(() => {
+    root.render(
+      React.createElement(EuiThemeProvider, { colorMode: getPageColorMode(), children: element })
+    );
+  });
 
   const rendered = wrapper.firstElementChild as HTMLElement;
   if (!rendered) {
-    ReactDOM.unmountComponentAtNode(wrapper);
+    root.unmount();
     wrapper.remove();
     throw new Error('EUI component did not render a DOM element');
   }
 
   const rect = rendered.getBoundingClientRect();
-  return { wrapper, rect, liveReactElement: { element, zIndex } };
+  const cleanup = () => {
+    root.unmount();
+  };
+
+  return { wrapper, rect, liveReactElement: { element, zIndex }, cleanup };
 };
 
 /**

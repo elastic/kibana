@@ -22,3 +22,4 @@ export { useElementRect } from './use_element_rect';
 export { useElementSelection } from './use_element_selection';
 export { useEuiColorTokens } from './use_eui_color_tokens';
 export type { EuiColorToken } from './use_eui_color_tokens';
+export { useEditChangeTracker } from './use_edit_change_tracker';

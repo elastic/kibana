@@ -65,6 +65,9 @@ export const startDragFromElement = (
     originalRect: rect,
     isDuplicate: false,
     referenceEl: target,
+    styleEdits: [],
+    textEdits: [],
+    sourceEdits: [],
   };
   registry.set(session);
 

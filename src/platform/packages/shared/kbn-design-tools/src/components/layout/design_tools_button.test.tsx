@@ -13,6 +13,11 @@ import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { DesignToolsButton } from './design_tools_button';
 
+jest.mock('../../lib/eui_icon_cache', () => ({
+  preloadAllEuiIcons: jest.fn().mockResolvedValue(undefined),
+  getIconTypes: jest.fn().mockResolvedValue([]),
+}));
+
 describe('DesignToolsButton', () => {
   afterEach(() => {
     cleanup();

@@ -26,12 +26,13 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { DEVTOOL_IGNORE_ATTR, DEVTOOL_LIVE_ATTR, EDIT_MODAL_ID } from '../../../lib/constants';
+import { DEVTOOL_IGNORE_ATTR, EDIT_MODAL_ID } from '../../../lib/constants';
 import { collectAllTextNodes } from '../../../lib/dom/collect_text_nodes';
 import { collectSourceElements } from '../../../lib/dom/collect_source_elements';
 import { setImportant } from '../../../lib/dom/clone_element';
 import { useOverlayZIndex, usePortalZIndex, useElementSelection } from '../../../hooks';
 import { getPageColorMode } from '../../../lib/dom';
+import { getContentRoot } from '../../../lib/dom/managed_element';
 import { ElementTree } from './element_tree';
 import { TextNodeEditor } from './text_node_editor';
 import type { TextNodeEntry } from './text_node_editor';
@@ -150,10 +151,7 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
       // Called here instead of in a separate useEffect to avoid an extra render
       // cycle and to guarantee elementMapRef is populated.
       // For live elements the tree root is the first child (skipping the wrapper).
-      const initialSelection =
-        target.hasAttribute(DEVTOOL_LIVE_ATTR) && target.firstElementChild
-          ? (target.firstElementChild as HTMLElement)
-          : target;
+      const initialSelection = getContentRoot(target);
       handleSelectRef.current(initialSelection);
     },
     [target]
@@ -340,11 +338,7 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
             {cloneRoot && (
               <div className={treeCss}>
                 <ElementTree
-                  root={
-                    target.hasAttribute(DEVTOOL_LIVE_ATTR) && target.firstElementChild
-                      ? (target.firstElementChild as HTMLElement)
-                      : target
-                  }
+                  root={getContentRoot(target)}
                   selectedElement={selectedElement}
                   onSelect={handleSelect}
                 />
