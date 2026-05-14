@@ -9,11 +9,10 @@
 
 // This import needs to come first as it contains the jest.mocks
 import { setupEnvironment } from './helpers';
-import { waitFor } from '@testing-library/react';
-import type { Props } from '../../public/components/field_editor_flyout_content';
+import { mockDocuments, createPreviewError } from './helpers/mocks';
 import { setSearchResponse } from './field_editor_flyout_preview.helpers';
 import { setup } from './field_editor_flyout_content.helpers';
-import { mockDocuments, createPreviewError } from './helpers/mocks';
+import { waitFor } from '@testing-library/react';
 
 describe('<FieldEditorFlyoutContent />', () => {
   const { httpRequestsMockHelpers } = setupEnvironment();
@@ -33,13 +32,13 @@ describe('<FieldEditorFlyoutContent />', () => {
     httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['mockedScriptValue'] });
   });
 
-  test('should have the correct title', async () => {
+  it('should have the correct title', async () => {
     const { getByText } = await setup();
 
     expect(getByText('Create field')).toBeVisible();
   });
 
-  test('should allow an existing field to be provided', async () => {
+  it('should allow an existing field to be provided', async () => {
     const field = {
       name: 'foo',
       type: 'ip' as const,
@@ -49,8 +48,8 @@ describe('<FieldEditorFlyoutContent />', () => {
     };
 
     const {
-      getByText,
       actions: { getByTestSubjectPath },
+      getByText,
     } = await setup({ fieldToEdit: field });
 
     expect(getByText(`Edit field 'foo'`)).toBeVisible();
@@ -59,7 +58,7 @@ describe('<FieldEditorFlyoutContent />', () => {
     expect(getInputValue(getByTestSubjectPath('scriptField'))).toBe(field.script.source);
   });
 
-  test('should allow a new field to be created with initial configuration', async () => {
+  it('should allow a new field to be created with initial configuration', async () => {
     const fieldToCreate = {
       name: 'demotestfield',
       type: 'boolean' as const,
@@ -70,8 +69,8 @@ describe('<FieldEditorFlyoutContent />', () => {
     };
 
     const {
-      getByText,
       actions: { getByTestSubjectPath },
+      getByText,
     } = await setup({ fieldToCreate });
 
     expect(getByText(`Create field`)).toBeVisible();
@@ -83,13 +82,13 @@ describe('<FieldEditorFlyoutContent />', () => {
     );
   });
 
-  test('should accept an "onSave" prop', async () => {
+  it('should accept an "onSave" prop', async () => {
     const field = {
       name: 'foo',
       type: 'date' as const,
       script: { source: 'test=123' },
     };
-    const onSave: jest.Mock<Props['onSave']> = jest.fn();
+    const onSave = jest.fn();
 
     const { actions } = await setup({ onSave, fieldToEdit: field });
 
@@ -102,7 +101,7 @@ describe('<FieldEditorFlyoutContent />', () => {
     expect(fieldReturned).toEqual({ ...field, format: null });
   });
 
-  test('should accept an onCancel prop', async () => {
+  it('should accept an onCancel prop', async () => {
     const onCancel = jest.fn();
     const { actions } = await setup({ onCancel });
 
@@ -112,25 +111,27 @@ describe('<FieldEditorFlyoutContent />', () => {
   });
 
   describe('validation', () => {
-    test('should validate the fields and prevent saving invalid form', async () => {
-      const onSave: jest.Mock<Props['onSave']> = jest.fn();
+    it('should validate the fields and prevent saving invalid form', async () => {
+      const onSave = jest.fn();
 
       const {
-        actions: { getByTestSubjectPath, getErrorsMessages, saveField },
+        actions: { saveField },
+        getAllByText,
+        getByRole,
       } = await setup({ onSave });
 
-      expect(getByTestSubjectPath('fieldSaveButton')).not.toBeDisabled();
+      expect(getByRole('button', { name: 'Save' })).not.toBeDisabled();
 
       await saveField();
 
-      await waitFor(() => expect(getByTestSubjectPath('fieldSaveButton')).toBeDisabled());
+      await waitFor(() => expect(getByRole('button', { name: 'Save' })).toBeDisabled());
 
       expect(onSave).toHaveBeenCalledTimes(0);
-      expect(getErrorsMessages()).toEqual(['A name is required.']);
+      expect(getAllByText('A name is required.')).toHaveLength(2);
     });
 
-    test('should forward values from the form', async () => {
-      const onSave: jest.Mock<Props['onSave']> = jest.fn();
+    it('should forward values from the form', async () => {
+      const onSave = jest.fn();
 
       const {
         actions: { fields, saveField, toggleFormRow, waitForUpdates },
@@ -192,7 +193,7 @@ describe('<FieldEditorFlyoutContent />', () => {
       });
     });
 
-    test('should not block validation if no documents could be fetched from server', async () => {
+    it('should not block validation if no documents could be fetched from server', async () => {
       // If no documents can be fetched from the cluster (either because there are none or because
       // the request failed), we still need to be able to resolve the painless script validation.
       // In this test we will make sure that the validation for the script does not block saving the
@@ -202,7 +203,7 @@ describe('<FieldEditorFlyoutContent />', () => {
       httpRequestsMockHelpers.setFieldPreviewResponse({ values: [], error, status: 400 });
       setSearchResponse([]);
 
-      const onSave: jest.Mock<Props['onSave']> = jest.fn();
+      const onSave = jest.fn();
 
       const {
         actions: { fields, saveField, toggleFormRow, waitForUpdates },

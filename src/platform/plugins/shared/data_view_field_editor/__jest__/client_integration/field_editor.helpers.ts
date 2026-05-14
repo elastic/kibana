@@ -7,45 +7,62 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act } from 'react-dom/test-utils';
-import type { TestBed } from '@kbn/test-jest-helpers';
-import { registerTestBed } from '@kbn/test-jest-helpers';
-
+import React from 'react';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
+import { act, fireEvent, type RenderResult } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { createRtlHelpers } from './helpers/rtl_helpers';
+import { FieldEditor } from '../../public/components/field_editor/field_editor';
+import { WithFieldEditorDependencies } from './helpers';
 import type { Context } from '../../public/components/field_editor_context';
 import type { Props } from '../../public/components/field_editor/field_editor';
-import { FieldEditor } from '../../public/components/field_editor/field_editor';
-import { WithFieldEditorDependencies, getCommonActions } from './helpers';
-
-export { waitForUpdates, waitForDocumentsAndPreviewUpdate } from './helpers';
 
 export const defaultProps: Props = {
   onChange: jest.fn(),
 };
 
-export type FieldEditorTestBed = TestBed & { actions: ReturnType<typeof getCommonActions> };
+const getActions = (renderResult: RenderResult, user: UserEvent) => {
+  const { createFieldEditorFields, getByTestSubjectPath, toggleFormRow } = createRtlHelpers(
+    renderResult,
+    user
+  );
+  const userEventFields = createFieldEditorFields();
+
+  const setInputValue = async (selector: string, value: string) => {
+    await act(async () => {
+      fireEvent.change(getByTestSubjectPath(selector), { target: { value } });
+      jest.advanceTimersByTime(0);
+    });
+  };
+
+  return {
+    fields: {
+      updateName: (value: string) => setInputValue('nameField.input', value),
+      updatePopularity: userEventFields.updatePopularity,
+      updateScript: (value: string) => setInputValue('scriptField', value),
+      updateType: userEventFields.updateType,
+    },
+    toggleFormRow,
+  };
+};
 
 export const setup = async (
   props?: Partial<Props>,
   deps?: Partial<Context>,
   getByNameOverride?: () => any
 ) => {
-  let testBed: TestBed<string>;
+  const user = userEvent.setup({
+    advanceTimers: jest.advanceTimersByTime,
+  });
+
+  const Component = WithFieldEditorDependencies(FieldEditor, deps, getByNameOverride);
+  let renderResult: RenderResult;
 
   await act(async () => {
-    testBed = await registerTestBed(
-      WithFieldEditorDependencies(FieldEditor, deps, getByNameOverride),
-      {
-        memoryRouter: {
-          wrapComponent: false,
-        },
-      }
-    )({ ...defaultProps, ...props });
+    renderResult = renderWithI18n(React.createElement(Component, { ...defaultProps, ...props }));
   });
-  testBed!.component.update();
 
-  const actions = {
-    ...getCommonActions(testBed!),
-  };
+  const actions = getActions(renderResult!, user);
 
-  return { ...testBed!, actions };
+  return { ...renderResult!, actions, user };
 };

@@ -13,8 +13,6 @@ import type { Context } from '../../public/components/field_editor_context';
 import type { Props } from '../../public/components/field_editor_flyout_content';
 import {
   createRtlHelpers,
-  flushDocumentsAndPreviewTimers,
-  flushFormValidation,
   flushPreviewAndSearchTimers,
   setupFieldEditorFlyout,
 } from './helpers/rtl_helpers';
@@ -25,22 +23,18 @@ const defaultProps: Props = {
 };
 
 const getActions = (renderResult: RenderResult, user: UserEvent) => {
-  const { container } = renderResult;
-  const { createFieldEditorFields, getByTestSubjectPath, queryByTestSubjectPath, toggleFormRow } =
-    createRtlHelpers(renderResult, user);
+  const { createFieldEditorFields, getByTestSubjectPath, toggleFormRow } = createRtlHelpers(
+    renderResult,
+    user
+  );
 
   const closeFlyout = async () => {
-    await user.click(getByTestSubjectPath('closeFlyoutButton'));
+    await user.click(renderResult.getByText('Cancel'));
   };
-
-  const getErrorsMessages = () =>
-    Array.from(container.querySelectorAll('.euiFormErrorText')).map(
-      (element) => element.textContent ?? ''
-    );
 
   const saveField = async () => {
     await act(async () => {
-      fireEvent.click(getByTestSubjectPath('fieldSaveButton'));
+      fireEvent.click(renderResult.getByText('Save'));
       jest.advanceTimersByTime(0);
     });
   };
@@ -48,13 +42,9 @@ const getActions = (renderResult: RenderResult, user: UserEvent) => {
   return {
     closeFlyout,
     fields: createFieldEditorFields(),
-    flushFormValidation,
     getByTestSubjectPath,
-    getErrorsMessages,
-    queryByTestSubjectPath,
     saveField,
     toggleFormRow,
-    waitForDocumentsAndPreviewUpdate: flushDocumentsAndPreviewTimers,
     waitForUpdates: flushPreviewAndSearchTimers,
   };
 };
@@ -62,5 +52,3 @@ const getActions = (renderResult: RenderResult, user: UserEvent) => {
 export const setup = async (props?: Partial<Props>, deps?: Partial<Context>) => {
   return setupFieldEditorFlyout(props, deps, defaultProps, getActions);
 };
-
-export type FieldEditorFlyoutContentHarness = Awaited<ReturnType<typeof setup>>;
