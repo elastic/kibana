@@ -58,6 +58,12 @@ function isIncomingMessagePayload(payload: unknown): payload is IncomingMessage 
  * so alternate `Readable` identities (e.g. duplicate `stream` module graphs) still stream correctly.
  */
 function isOpaqueErrorBody(payload: unknown): boolean {
+  // Boom and other `Error` subclasses must never be treated as opaque bodies: nested
+  // `{ message: boom }` payloads (e.g. content_management `wrapError`) need `getErrorMessage`
+  // to read `error.message`, not recurse into stream/buffer detection on the Boom object.
+  if (payload instanceof Error) {
+    return false;
+  }
   if (Buffer.isBuffer(payload)) {
     return true;
   }

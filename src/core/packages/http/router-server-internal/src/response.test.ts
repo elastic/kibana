@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Readable } from 'stream';
+
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { kibanaResponseFactory } from './response';
 
@@ -111,6 +113,15 @@ describe('kibanaResponseFactory', () => {
       expect(decodeURIComponent(contentDispositionHeader)).toBe(
         `attachment; filename=${multuByteCharacters}`
       );
+    });
+
+    it('omits content-length for stream bodies without fileContentSize', () => {
+      const body = Readable.from(['chunk']);
+      const result = kibanaResponseFactory.file({
+        body,
+        filename: 'streamed.bin',
+      });
+      expect(result.options.headers).not.toHaveProperty('content-length');
     });
 
     it('accepts additional headers but doesnt override file headers', () => {

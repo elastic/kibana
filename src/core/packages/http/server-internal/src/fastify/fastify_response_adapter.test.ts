@@ -8,6 +8,7 @@
  */
 
 import { Readable } from 'stream';
+import Boom from '@hapi/boom';
 import type { FastifyReply } from 'fastify';
 import type { IncomingMessage } from 'http';
 import { KibanaResponse } from '@kbn/core-http-router-server-internal';
@@ -53,6 +54,28 @@ describe('FastifyResponseAdapter', () => {
     expect(recordedHeaders.get('content-type')).toBe('application/json');
     expect(recordedHeaders.has('transfer-encoding')).toBe(false);
     expect(reply.send).toHaveBeenCalledWith(body);
+  });
+
+  it('formats customError bodies that nest a Boom on `message` (content_management wrapError)', async () => {
+    const reply = {
+      code: jest.fn().mockReturnThis(),
+      header: jest.fn(),
+      hasHeader: jest.fn().mockReturnValue(false),
+      send: jest.fn().mockReturnThis(),
+    } as unknown as FastifyReply;
+
+    const boom = Boom.badRequest('procedure failed');
+    const adapter = new FastifyResponseAdapter();
+    await adapter.handle(new KibanaResponse(400, { message: boom }, {}), reply);
+
+    expect(reply.code).toHaveBeenCalledWith(400);
+    expect(reply.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'procedure failed',
+      })
+    );
   });
 
   it('passes through duck-typed readable bodies on errors (Fastify stream detection parity)', async () => {
