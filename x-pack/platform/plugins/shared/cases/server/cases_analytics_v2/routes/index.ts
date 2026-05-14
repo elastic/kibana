@@ -316,9 +316,13 @@ export const registerCasesAnalyticsV2Routes = ({
  *     on the deterministic id) to 409 with `version_conflict_engine_exception`.
  *     This matches the data-views plugin's own wrapper (see
  *     `src/platform/plugins/shared/data_views/server/saved_objects_client_wrapper.ts`).
- *   - We pass `namespace` from the SO's `namespaces[0]` so the request-scoped
- *     client targets the right space for the delete (the request that hit
- *     `/reset` may be in a different space than where the data view lives).
+ *   - We do **not** pass a `namespace` option. When the Spaces SO extension
+ *     is enabled, the request's space context owns the namespace — passing
+ *     it explicitly throws `"Namespace cannot be specified by the caller
+ *     when the spaces extension is enabled."`. `force: true` already
+ *     removes the multi-namespace doc fully regardless of which namespace(s)
+ *     it lived in, so the option is redundant. Same reason the data-views
+ *     plugin's wrapper doesn't pass it either.
  */
 export async function deleteAllPerSpaceCasesDataViews(
   soClient: SavedObjectsClientContract,
@@ -341,7 +345,7 @@ export async function deleteAllPerSpaceCasesDataViews(
       if (so.id.startsWith(CASE_DATA_VIEW_ID_PREFIX)) {
         const namespace = so.namespaces?.[0];
         try {
-          await soClient.delete(DATA_VIEW_SO_TYPE, so.id, { namespace, force: true });
+          await soClient.delete(DATA_VIEW_SO_TYPE, so.id, { force: true });
           deleted++;
         } catch (err) {
           logger.warn(

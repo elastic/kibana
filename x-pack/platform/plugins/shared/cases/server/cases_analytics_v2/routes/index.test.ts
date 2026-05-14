@@ -16,13 +16,21 @@ describe('deleteAllPerSpaceCasesDataViews', () => {
     jest.clearAllMocks();
   });
 
-  it('deletes each managed Cases data view with force: true (required for multi-namespace SOs)', async () => {
-    // Regression guard for the version_conflict_engine_exception observed
-    // post-/reset: `index-pattern` is `namespaceType: 'multiple'`, and
-    // without `force: true` a `delete` can leave the underlying ES doc
-    // behind. The next `createAndSave` then 409s on the deterministic id.
-    // The data-views plugin's own SO wrapper passes `force: true` for the
-    // same reason — we mirror that here.
+  it('deletes each managed Cases data view with force: true and no caller-supplied namespace', async () => {
+    // Regression guard covering two prod issues from PR1:
+    //   1. version_conflict_engine_exception on the next ensure because the
+    //      previous delete didn't fully remove the multi-namespace SO. `index-
+    //      pattern` is `namespaceType: 'multiple'` — without `force: true` a
+    //      raw `delete` can leave the underlying ES doc behind and the next
+    //      `createAndSave` 409s on the deterministic id.
+    //   2. "Namespace cannot be specified by the caller when the spaces
+    //      extension is enabled." The Spaces SO extension owns namespace
+    //      selection from the request context; passing `{ namespace }`
+    //      throws. `force: true` already removes the multi-namespace doc
+    //      fully, so the caller never needs to specify it.
+    //
+    // The data-views plugin's own SO wrapper passes only `{ force: true }`
+    // for these same two reasons — we mirror that here.
     const soClient = savedObjectsClientMock.create();
     soClient.find.mockResolvedValueOnce({
       saved_objects: [
@@ -55,13 +63,18 @@ describe('deleteAllPerSpaceCasesDataViews', () => {
     expect(soClient.delete).toHaveBeenCalledWith(
       'index-pattern',
       'cases-analytics-managed-default',
-      expect.objectContaining({ namespace: 'default', force: true })
+      { force: true }
     );
     expect(soClient.delete).toHaveBeenCalledWith(
       'index-pattern',
       'cases-analytics-managed-team-a',
-      expect.objectContaining({ namespace: 'team-a', force: true })
+      { force: true }
     );
+    // Explicit guard: the spaces extension would throw on these calls.
+    for (const call of (soClient.delete as jest.Mock).mock.calls) {
+      const opts = call[2] as { namespace?: string };
+      expect(opts).not.toHaveProperty('namespace');
+    }
   });
 
   it('skips data views whose id does not start with the managed prefix', async () => {
