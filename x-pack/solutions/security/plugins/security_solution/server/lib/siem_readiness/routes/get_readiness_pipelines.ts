@@ -7,13 +7,10 @@
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { PipelineStats } from '@kbn/siem-readiness';
 import { GET_SIEM_READINESS_PIPELINES_API_PATH } from '@kbn/siem-readiness';
 import { API_VERSIONS } from '../../../../common/constants';
 import type { SiemReadinessRoutesDeps } from '../types';
-import { fetchPipelines } from '../fetchers';
-
-export type PipelinesResponse = PipelineStats[];
+import { getContinuity } from '../dimensions';
 
 export const getReadinessPipelinesRoute = (
   router: SiemReadinessRoutesDeps['router'],
@@ -42,9 +39,9 @@ export const getReadinessPipelinesRoute = (
           const core = await context.core;
           const esClient = core.elasticsearch.client.asCurrentUser;
 
-          const pipelines = await fetchPipelines({ esClient, isServerless, logger });
+          const payload = await getContinuity({ esClient, isServerless, logger });
 
-          return response.ok({ body: pipelines });
+          return response.ok({ body: payload });
         } catch (e) {
           const error = transformError(e);
           logger.error(`Error retrieving SIEM readiness pipelines: ${error.message}`);

@@ -10,7 +10,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { GET_SIEM_READINESS_RETENTION_API_PATH } from '@kbn/siem-readiness';
 import { API_VERSIONS } from '../../../../common/constants';
 import type { SiemReadinessRoutesDeps } from '../types';
-import { fetchRetention } from '../fetchers';
+import { getRetention } from '../dimensions';
 
 export const getReadinessRetentionRoute = (
   router: SiemReadinessRoutesDeps['router'],
@@ -39,9 +39,9 @@ export const getReadinessRetentionRoute = (
           const core = await context.core;
           const esClient = core.elasticsearch.client.asCurrentUser;
 
-          const retentionResponse = await fetchRetention({ esClient, isServerless, logger });
+          const payload = await getRetention({ esClient, isServerless, logger });
 
-          return response.ok({ body: retentionResponse });
+          return response.ok({ body: payload });
         } catch (e) {
           const error = transformError(e);
           logger.error(`Error retrieving SIEM readiness retention data: ${error.message}`);

@@ -13,8 +13,8 @@ import type {
   SiemReadinessPackageInfo,
   RelatedIntegrationRuleResponse,
   DataQualityResultDocument,
-  PipelineStats,
-  RetentionResponse,
+  ContinuityPayload,
+  RetentionPayload,
 } from '@kbn/siem-readiness';
 import {
   GET_SIEM_READINESS_CATEGORIES_API_PATH,
@@ -77,7 +77,7 @@ export const useSiemReadinessApi = () => {
   const getReadinessPipelines = useQuery({
     queryKey: GET_READINESS_PIPELINES_QUERY_KEY,
     queryFn: () => {
-      return http.get<PipelineStats[]>(GET_SIEM_READINESS_PIPELINES_API_PATH);
+      return http.get<ContinuityPayload>(GET_SIEM_READINESS_PIPELINES_API_PATH);
     },
     refetchInterval: REFETCH_INTERVAL,
   });
@@ -85,7 +85,7 @@ export const useSiemReadinessApi = () => {
   const getReadinessRetention = useQuery({
     queryKey: GET_READINESS_RETENTION_QUERY_KEY,
     queryFn: () => {
-      return http.get<RetentionResponse>(GET_SIEM_READINESS_RETENTION_API_PATH);
+      return http.get<RetentionPayload>(GET_SIEM_READINESS_RETENTION_API_PATH);
     },
     refetchInterval: REFETCH_INTERVAL,
   });

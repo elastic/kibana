@@ -74,6 +74,7 @@ export const siemReadinessContinuityDataSchema = securityAttachmentDataSchema.ex
       docsCount: z.number(),
       failedDocsCount: z.number(),
       statsAvailable: z.boolean(),
+      categories: z.array(z.string()).optional(),
     })
   ),
   actionableFindings: z.array(actionableFindingSchema).optional(),
@@ -141,6 +142,33 @@ const formatContinuityForAgent = (
   data: ContinuityPayload & { dimension: 'continuity' }
 ): string => {
   const lines = [`SIEM Continuity — ${data.status}`, data.summary];
+
+  // Group critical pipelines by their primary category for the agent.
+  const criticalByCategory = new Map<string, typeof data.items>();
+  data.items.forEach((item) => {
+    if (item.statsAvailable && item.failedDocsCount > 0) {
+      const primaryCategory = item.categories?.[0] ?? 'Uncategorized';
+      const existing = criticalByCategory.get(primaryCategory) ?? [];
+      criticalByCategory.set(primaryCategory, [...existing, item]);
+    }
+  });
+
+  if (criticalByCategory.size > 0) {
+    lines.push('Pipelines with failures by category:');
+    criticalByCategory.forEach((items, category) => {
+      lines.push(`  ${category}:`);
+      items.forEach((item) => {
+        const rate =
+          item.docsCount > 0
+            ? `${((item.failedDocsCount / item.docsCount) * 100).toFixed(2)}%`
+            : 'N/A';
+        lines.push(
+          `    ${item.name} — ${item.failedDocsCount} failed / ${item.docsCount} total (${rate})`
+        );
+      });
+    });
+  }
+
   if (data.actionableFindings?.length) {
     lines.push('Findings:');
     data.actionableFindings.forEach((f) => lines.push(`  [${f.severity}] ${f.message}`));

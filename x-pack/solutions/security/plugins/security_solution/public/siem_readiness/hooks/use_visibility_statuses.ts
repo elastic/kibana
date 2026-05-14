@@ -61,8 +61,8 @@ export const useVisibilityStatuses = (activeCategories: MainCategories[]): Visib
   );
 
   const continuityStatus = useMemo(
-    () => getContinuityStatus(pipelinesData, indexToCategoryMap, activeCategories),
-    [pipelinesData, indexToCategoryMap, activeCategories]
+    () => getContinuityStatus(pipelinesData?.items, indexToCategoryMap, activeCategories),
+    [pipelinesData?.items, indexToCategoryMap, activeCategories]
   );
 
   const retentionStatus = useMemo(

@@ -63,36 +63,22 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
 }) => {
   const basePath = useBasePath();
   const { openNewCaseFlyout } = useSiemReadinessCases();
-  const { getReadinessCategories, getReadinessPipelines } = useSiemReadinessApi();
+  const { getReadinessPipelines } = useSiemReadinessApi();
 
-  const { data: categoriesData, isLoading: categoriesLoading } = getReadinessCategories;
   const { data: pipelinesData, isLoading: pipelinesLoading } = getReadinessPipelines;
 
+  const pipelineItems = pipelinesData?.items;
+
   // If any pipeline has statsAvailable: false, stats are not available for this environment
-  const statsAvailable = pipelinesData ? pipelinesData.every((p) => p.statsAvailable) : true;
+  const statsAvailable = pipelineItems ? pipelineItems.every((p) => p.statsAvailable) : true;
 
-  // Build index → category mapping from getReadinessCategories
-  const indexToCategoryMap = useMemo(() => {
-    const map = new Map<string, string>();
-
-    if (!categoriesData?.mainCategoriesMap) return map;
-
-    categoriesData.mainCategoriesMap.forEach(({ category, indices }) => {
-      indices.forEach(({ indexName }) => {
-        map.set(indexName, category);
-      });
-    });
-
-    return map;
-  }, [categoriesData?.mainCategoriesMap]);
-
-  // Group pipelines by category based on their associated indices
+  // Group pipelines by category using pre-enriched categories from the orchestrator
   const categorizedPipelines: Array<CategoryData<PipelineInfoWithStatus>> = useMemo(() => {
-    if (!pipelinesData?.length) return [];
+    if (!pipelineItems?.length) return [];
 
     const categoryPipelinesMap = new Map<string, PipelineInfoWithStatus[]>();
 
-    pipelinesData.forEach((pipeline) => {
+    pipelineItems.forEach((pipeline) => {
       const failureRate = getFailureRateString(pipeline.failedDocsCount, pipeline.docsCount);
 
       const pipelineWithStats: PipelineInfoWithStatus = {
@@ -101,44 +87,29 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         status: getDocInjectionStatus(failureRate),
       };
 
-      // Get unique categories for this pipeline
-      const uniqueCategories = new Set<string>();
-      pipeline.indices.forEach((indexName) => {
-        const category = indexToCategoryMap.get(indexName);
-        if (category) uniqueCategories.add(category);
-      });
-
-      // Add pipeline to each category (once per category)
-      uniqueCategories.forEach((category) => {
-        const pipelinesInCategory = categoryPipelinesMap.get(category) || [];
-        pipelinesInCategory.push(pipelineWithStats);
-        categoryPipelinesMap.set(category, pipelinesInCategory);
+      // categories are pre-populated by the dimension orchestrator
+      pipeline.categories?.forEach((category) => {
+        if (activeCategories.includes(category)) {
+          const pipelinesInCategory = categoryPipelinesMap.get(category) || [];
+          pipelinesInCategory.push(pipelineWithStats);
+          categoryPipelinesMap.set(category, pipelinesInCategory);
+        }
       });
     });
 
-    // Build result in category order, filtered by active categories
+    // Build result in category order
     const result: Array<CategoryData<PipelineInfoWithStatus>> = [];
     activeCategories.forEach((category) => {
       const items = categoryPipelinesMap.get(category);
       if (!items) return;
-
-      result.push({
-        category,
-        items,
-      });
+      result.push({ category, items });
     });
 
     return result;
-  }, [pipelinesData, indexToCategoryMap, activeCategories]);
+  }, [pipelineItems, activeCategories]);
 
-  // Check if any matched pipelines exist ignoring activeCategories filter (for hasUnfilteredData prop)
-  const hasUnfilteredData = useMemo(() => {
-    if (!pipelinesData?.length) return false;
-
-    return pipelinesData.some((pipeline) =>
-      pipeline.indices.some((indexName) => indexToCategoryMap.has(indexName))
-    );
-  }, [pipelinesData, indexToCategoryMap]);
+  // All items in the payload are already categorized; data exists if there are any items at all.
+  const hasUnfilteredData = (pipelineItems?.length ?? 0) > 0;
 
   // Check if any pipeline has failures
   const hasDocCriticalFailures = useMemo(() => {
@@ -359,7 +330,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     );
   };
 
-  const isLoading = categoriesLoading || pipelinesLoading;
+  const isLoading = pipelinesLoading;
 
   if (isLoading) {
     return (

@@ -31,17 +31,33 @@ export const getContinuity = async ({
   ]);
 
   const indexToCategoryMap = getIndexCategoryMap(categoriesData);
-  const status = getContinuityStatus(pipelines, indexToCategoryMap, ALL_CATEGORIES);
 
-  const actionableFindings: ActionableFinding[] = pipelines
+  // Build index → all categories map (an index can belong to multiple categories).
+  const allCategoriesMap = new Map<string, MainCategories[]>();
+  categoriesData?.mainCategoriesMap?.forEach((group) => {
+    group.indices.forEach((idx) => {
+      const existing = allCategoriesMap.get(idx.indexName) ?? [];
+      allCategoriesMap.set(idx.indexName, [...existing, group.category as MainCategories]);
+    });
+  });
+
+  // Only include pipelines that serve at least one categorized index.
+  const categorizedPipelines = pipelines
+    .filter((p) => p.indices.some((indexName) => indexToCategoryMap.has(indexName)))
+    .map((p) => {
+      const categoriesSet = new Set<MainCategories>();
+      p.indices.forEach((indexName) => {
+        (allCategoriesMap.get(indexName) ?? []).forEach((cat) => categoriesSet.add(cat));
+      });
+      return { ...p, categories: Array.from(categoriesSet) };
+    });
+
+  const status = getContinuityStatus(categorizedPipelines, indexToCategoryMap, ALL_CATEGORIES);
+
+  const actionableFindings: ActionableFinding[] = categorizedPipelines
     .filter((p) => isCriticalFailureRate(p.failedDocsCount, p.docsCount))
     .map((p) => {
-      const pipelineCategories = new Set<string>();
-      p.indices.forEach((indexName) => {
-        const cat = indexToCategoryMap.get(indexName);
-        if (cat) pipelineCategories.add(cat);
-      });
-      const category = (pipelineCategories.values().next().value as MainCategories) ?? 'Endpoint';
+      const category = p.categories[0] ?? ('Endpoint' as MainCategories);
       return {
         category,
         severity: 'critical' as const,
@@ -50,9 +66,13 @@ export const getContinuity = async ({
       };
     });
 
-  const summary = buildContinuitySummary(status, pipelines.length, actionableFindings.length);
+  const summary = buildContinuitySummary(
+    status,
+    categorizedPipelines.length,
+    actionableFindings.length
+  );
 
-  return { status, summary, items: pipelines, actionableFindings };
+  return { status, summary, items: categorizedPipelines, actionableFindings };
 };
 
 const buildContinuitySummary = (

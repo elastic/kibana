@@ -98,6 +98,8 @@ export interface PipelineStats {
   failedDocsCount: number;
   /** False when the server cannot provide ingestion stats (e.g. serverless mode). */
   statsAvailable: boolean;
+  /** All main categories this pipeline belongs to (via its indices). Populated by the dimension orchestrator; absent on raw fetcher output. */
+  categories?: MainCategories[];
 }
 export interface CasesSearchResponse {
   total: number;
