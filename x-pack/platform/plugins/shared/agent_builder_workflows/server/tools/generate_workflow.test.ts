@@ -7,7 +7,11 @@
 
 import { generateWorkflow } from '@kbn/agent-builder-workflow-gen';
 import { ToolResultType } from '@kbn/agent-builder-common';
-import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
+import {
+  WORKFLOW_YAML_ATTACHMENT_TYPE,
+  WORKFLOW_YAML_CHANGED_EVENT,
+  WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
+} from '@kbn/workflows/common/constants';
 import { generateWorkflowTool } from './generate_workflow';
 
 jest.mock('@kbn/agent-builder-workflow-gen', () => ({
@@ -19,6 +23,10 @@ const generateWorkflowMock = generateWorkflow as jest.MockedFunction<typeof gene
 describe('generateWorkflowTool', () => {
   const workflowsManagement = {
     management: { __mock: 'workflowsApi' },
+  } as any;
+
+  const aiTelemetryClient = {
+    reportEditResult: jest.fn(),
   } as any;
 
   const generatedWorkflow = {
@@ -33,6 +41,8 @@ describe('generateWorkflowTool', () => {
       get: jest.Mock;
       add: jest.Mock;
       update: jest.Mock;
+      sendUiEvent: jest.Mock;
+      stack: unknown[];
     }> = {}
   ) =>
     ({
@@ -42,40 +52,48 @@ describe('generateWorkflowTool', () => {
       spaceId: 'default',
       attachments: {
         get: overrides.get ?? jest.fn(),
-        add: overrides.add ?? jest.fn().mockResolvedValue({ id: 'new-att', current_version: 1 }),
+        add:
+          overrides.add ??
+          jest
+            .fn()
+            // first call = diff attachment, second call = workflow attachment (creation path)
+            .mockResolvedValueOnce({ id: 'diff-att', current_version: 1 })
+            .mockResolvedValueOnce({ id: 'new-att', current_version: 1 }),
         update:
           overrides.update ?? jest.fn().mockResolvedValue({ id: 'src-att', current_version: 2 }),
+      },
+      events: {
+        sendUiEvent: overrides.sendUiEvent ?? jest.fn(),
+      },
+      runContext: {
+        stack: overrides.stack ?? [],
       },
     } as any);
 
   beforeEach(() => {
     generateWorkflowMock.mockReset();
+    aiTelemetryClient.reportEditResult.mockReset();
   });
 
-  it('creates a new workflow attachment when no attachmentId is provided', async () => {
+  it('creates a new workflow: adds diff attachment, adds workflow attachment, sends UI event, reports telemetry', async () => {
     generateWorkflowMock.mockResolvedValueOnce({
       workflow: generatedWorkflow,
       response: 'created the workflow',
     } as any);
 
     const context = buildContext();
-    const tool = generateWorkflowTool({ workflowsManagement });
+    const tool = generateWorkflowTool({ workflowsManagement, aiTelemetryClient });
     const out = await tool.handler(
       { query: 'a workflow', context: 'ctx', instructions: 'inst' } as any,
       context
     );
 
-    expect(generateWorkflowMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        nlQuery: 'a workflow',
-        additionalContext: 'ctx',
-        additionalInstructions: 'inst',
-        spaceId: 'default',
-        workflowsApi: workflowsManagement.management,
-        workflow: undefined,
-      })
+    // diff attachment added first
+    expect(context.attachments.add).toHaveBeenCalledWith(
+      expect.objectContaining({ type: WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE })
     );
 
+    // workflow.yaml attachment added second (creation path — no existing attachment)
     expect(context.attachments.add).toHaveBeenCalledWith(
       expect.objectContaining({
         type: WORKFLOW_YAML_ATTACHMENT_TYPE,
@@ -83,21 +101,30 @@ describe('generateWorkflowTool', () => {
       })
     );
 
-    expect((out as { results: unknown[] }).results).toEqual([
-      {
-        type: ToolResultType.other,
-        data: {
-          attachment_id: 'new-att',
-          attachment_version: 1,
-          comment: 'created the workflow',
-          success: true,
-          created: true,
-        },
-      },
-    ]);
+    // UI event sent
+    expect(context.events.sendUiEvent).toHaveBeenCalledWith(
+      WORKFLOW_YAML_CHANGED_EVENT,
+      expect.objectContaining({
+        beforeYaml: '',
+        proposalId: expect.any(String),
+      })
+    );
+
+    // telemetry: creation success
+    expect(aiTelemetryClient.reportEditResult).toHaveBeenCalledWith(
+      expect.objectContaining({ editSuccess: true, isCreation: true })
+    );
+
+    // result includes diff_attachment_id and proposal_id
+    const result = (out as { results: Array<{ data: Record<string, unknown> }> }).results[0];
+    expect(result.data.diff_attachment_id).toBe('diff-att');
+    expect(result.data.attachment_id).toBe('new-att');
+    expect(result.data.proposal_id).toEqual(expect.any(String));
+    expect(result.data.created).toBe(true);
+    expect(result.data.comment).toBe('created the workflow');
   });
 
-  it('updates an existing attachment and preserves workflowId across edits', async () => {
+  it('updates an existing attachment: updates (not adds) workflow attachment, emits diff, reports telemetry', async () => {
     generateWorkflowMock.mockResolvedValueOnce({
       workflow: generatedWorkflow,
       response: 'edited',
@@ -117,17 +144,18 @@ describe('generateWorkflowTool', () => {
     };
     const get = jest.fn().mockReturnValue(sourceAttachment);
     const update = jest.fn().mockResolvedValue({ id: 'src-att', current_version: 2 });
-    const context = buildContext({ get, update });
+    const addMock = jest.fn().mockResolvedValue({ id: 'diff-att', current_version: 1 });
+    const sendUiEvent = jest.fn();
+    const context = buildContext({ get, update, add: addMock, sendUiEvent });
 
-    const tool = generateWorkflowTool({ workflowsManagement });
-    await tool.handler({ query: 'tweak it', attachmentId: 'src-att' } as any, context);
+    const tool = generateWorkflowTool({ workflowsManagement, aiTelemetryClient });
+    const out = await tool.handler({ query: 'tweak it', attachmentId: 'src-att' } as any, context);
 
-    expect(generateWorkflowMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        workflow: { yaml: 'name: foo\n' },
-      })
+    // diff attachment added
+    expect(addMock).toHaveBeenCalledWith(
+      expect.objectContaining({ type: WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE })
     );
-
+    // workflow attachment updated (not added again)
     expect(update).toHaveBeenCalledWith(
       'src-att',
       expect.objectContaining({
@@ -137,12 +165,26 @@ describe('generateWorkflowTool', () => {
         }),
       })
     );
+
+    // UI event has the beforeYaml from the source attachment
+    expect(sendUiEvent).toHaveBeenCalledWith(
+      WORKFLOW_YAML_CHANGED_EVENT,
+      expect.objectContaining({ beforeYaml: 'name: foo\n' })
+    );
+
+    // telemetry: edit success
+    expect(aiTelemetryClient.reportEditResult).toHaveBeenCalledWith(
+      expect.objectContaining({ editSuccess: true, isCreation: false })
+    );
+
+    const result = (out as { results: Array<{ data: Record<string, unknown> }> }).results[0];
+    expect(result.data.updated).toBe(true);
   });
 
   it('returns an errorResult when attachmentId is provided but the attachment does not exist', async () => {
     const get = jest.fn().mockReturnValue(undefined);
     const context = buildContext({ get });
-    const tool = generateWorkflowTool({ workflowsManagement });
+    const tool = generateWorkflowTool({ workflowsManagement, aiTelemetryClient });
 
     const out = await tool.handler({ query: 'q', attachmentId: 'missing' } as any, context);
 
@@ -159,7 +201,7 @@ describe('generateWorkflowTool', () => {
   it('returns an errorResult when the source attachment is the wrong type', async () => {
     const get = jest.fn().mockReturnValue({ id: 'x', type: 'something_else', data: { data: {} } });
     const context = buildContext({ get });
-    const tool = generateWorkflowTool({ workflowsManagement });
+    const tool = generateWorkflowTool({ workflowsManagement, aiTelemetryClient });
 
     const out = await tool.handler({ query: 'q', attachmentId: 'x' } as any, context);
 
@@ -169,15 +211,19 @@ describe('generateWorkflowTool', () => {
     );
   });
 
-  it('returns an errorResult when generateWorkflow throws', async () => {
+  it('returns an errorResult and reports failed telemetry when generateWorkflow throws', async () => {
     generateWorkflowMock.mockRejectedValueOnce(new Error('boom'));
 
     const context = buildContext();
-    const tool = generateWorkflowTool({ workflowsManagement });
+    const tool = generateWorkflowTool({ workflowsManagement, aiTelemetryClient });
     const out = await tool.handler({ query: 'q' } as any, context);
 
     expect((out as { results: unknown[] }).results).toEqual([
       { type: ToolResultType.error, data: { message: 'boom' } },
     ]);
+
+    expect(aiTelemetryClient.reportEditResult).toHaveBeenCalledWith(
+      expect.objectContaining({ editSuccess: false, isCreation: true })
+    );
   });
 });

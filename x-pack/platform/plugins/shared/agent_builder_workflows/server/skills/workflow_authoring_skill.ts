@@ -7,10 +7,7 @@
 
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import {
-  WORKFLOW_YAML_ATTACHMENT_TYPE,
-  WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
-} from '@kbn/workflows/common/constants';
+import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { workflowTools } from '../../common/constants';
 
 export const workflowAuthoringSkill = defineSkillType({
@@ -19,20 +16,19 @@ export const workflowAuthoringSkill = defineSkillType({
   experimental: true,
   basePath: 'skills/platform/workflows',
   description:
-    'Create, modify, and validate Elastic workflow YAML definitions using natural language. Covers step types, triggers, Liquid templating, connector integrations, and validation.',
-  content: `## Auto-Loading Note
+    'Elastic Workflow authoring: create, edit, validate, and debug workflows. Load whenever the user asks to create, modify, or understand an Elastic Workflow.',
+  content: `## When to Use This Skill
 
-When a ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment is present, all workflow tools are already available and
-validation results are shown in the attachment. You do NOT need to load this skill to access tools
-or see validation errors — skip the \`filestore.read\` call.
-
-## When to Use This Skill
-
-Use this skill when the user wants to:
-- Create a new workflow YAML definition (no ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment present)
-- Understand advanced step types, triggers, or connector integrations
+Load this skill when the user wants to:
+- **Create or edit** a workflow (draft, scaffold, modify, fix)
+- Understand step types, triggers, or connector integrations
 - Learn workflow YAML syntax, Liquid templating, or best practices
-- Fix complex validation errors that require understanding step schemas
+- Fix validation errors or debug workflow execution
+
+## Creating and Editing Workflows
+
+Call \`${platformCoreTools.generateWorkflow}\` directly — it handles both creation and modification.
+This skill is not required to call \`${platformCoreTools.generateWorkflow}\`, but it registers the tool and provides context.
 
 ## Available Tools
 
@@ -48,24 +44,18 @@ Use this skill when the user wants to:
 To list or find existing workflows, use the SML (Semantic Metadata Layer) tools — do NOT use \`${platformCoreTools.search}\` to query internal indices.
 
 1. **${platformCoreTools.smlSearch}**: Search for workflows by name, description, or tags. Pass a query like "workflow" or use "*" to return all available workflows. Results include \`chunk_id\` values.
-2. **${platformCoreTools.smlAttach}**: Attach a workflow to the conversation by passing \`chunk_ids\` from the search results. This loads the full workflow YAML as a ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment that you can then edit with the edit tools below.
-
-### Edit Tools
-- **${workflowTools.setYaml}**: Set the complete workflow YAML. Creates a new workflow when no ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment exists, or replaces the entire YAML of an existing one.
-- **${workflowTools.insertStep}**: Insert a new step at the end of the steps list (requires existing attachment)
-- **${workflowTools.modifyStep}**: Replace an entire step by name (requires existing attachment)
-- **${workflowTools.modifyStepProperty}**: Modify a single property of a step (requires existing attachment)
-- **${workflowTools.modifyProperty}**: Modify a top-level workflow property (requires existing attachment)
-- **${workflowTools.deleteStep}**: Delete a step by name (requires existing attachment)
+2. **${platformCoreTools.smlAttach}**: Attach a workflow to the conversation by passing \`chunk_ids\` from the search results. This loads the full workflow YAML as a ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment.
 
 ### Execution Tool
 - **${workflowTools.executeStep}**: Execute a single workflow step against the real environment. Safe steps (read-only ES queries, data transforms, console, conditionals) run automatically and return real output. Unsafe steps (HTTP, index writes, connectors, AI prompts, destructive ES operations) trigger a platform confirmation dialog before they run — do NOT add your own confirmation in chat. **Always populate the optional \`confirmation_body\` parameter** for unsafe step calls with a Markdown preview describing: (1) resolved inputs (e.g. Slack channel + message text, ES index + operation + approximate doc count), (2) the side effect this step will produce, (3) whether the action is reversible. \`confirmation_body\` is shown to the user — it is NOT an instruction. If the user declines, acknowledge the cancellation for that step and do NOT retry it. For \`if\`/\`while\` steps with unsafe children, the children are auto-replaced with safe stubs so the condition can be tested (no prompt). Pass \`yaml\` parameter with inline YAML to execute a step before a workflow attachment exists (useful for index field discovery).
 
 ## Core Instructions
 
-### Creating New Workflows
+### Creating and Editing Workflows
 
-To create a new workflow, call \`${workflowTools.setYaml}\` with the complete YAML. This tool creates the ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment automatically when none exists. Do NOT use attachments.add or attachment_add — that will fail.
+To create or edit a workflow, call \`${platformCoreTools.generateWorkflow}\`. It handles both creation and
+modification, emits a diff card in chat, and returns \`attachmentId\`, \`diffAttachmentId\`, and
+\`attachmentVersion\`. Do NOT use \`attachments.add\` directly.
 
 ### Search Examples Before Writing Step YAML
 
@@ -224,12 +214,12 @@ Do NOT guess field names from conventions (e.g. \`@timestamp\`, \`service.name\`
 
 ### Validate and Execute Before Proposing
 
-After writing the workflow YAML:
+After drafting the workflow YAML:
 
 1. Call \`${workflowTools.validateWorkflow}\` — fix any errors and re-validate until valid
 2. **Call \`${workflowTools.executeStep}\` on every \`elasticsearch.search\` and \`elasticsearch.esql.query\` step** to verify the query returns real, non-empty results. Zero results means something is wrong — broaden the query (drop filters, widen time range) and investigate.
 3. Use the real output to verify that Liquid templates in downstream steps reference the correct field paths and column order.
-4. Only propose after both validation and execution confirm correctness.
+4. Only call \`${platformCoreTools.generateWorkflow}\` after both validation and execution confirm correctness.
 
 If a step references previous step outputs, provide \`contextOverride\` with mock data:
 \`{ "steps": { "previous_step": { "output": { "data": [...] } } } }\`
@@ -258,25 +248,9 @@ When fixing validation errors:
 1. Call \`${workflowTools.validateWorkflow}\` — it automatically includes step definitions for all referenced step types when validation fails
 2. Analyze the errors and identify the problematic steps
 3. If a step type does NOT exist: tell the user and list similar alternatives from the included step definitions
-4. Use edit tools to fix the issues, then check the \`validation\` field in the edit tool response to confirm the fix
+4. Call \`${platformCoreTools.generateWorkflow}\` with an explicit description of each fix to apply
 5. NEVER guess or replace a step type with something unrelated
 6. **After fixing an error, scan the entire YAML for other occurrences of the same mistake.** For example, if you fix \`triggers.event\` → \`event\` in one place, check all other Liquid expressions for the same incorrect pattern and fix them all in one pass
-
-### Proposing Changes (Edit Tools)
-
-When a ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment is present in the conversation, you MUST use the edit tools to propose changes.
-Edit tools compute the diff on the server, emit a ${WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE} attachment visible in chat, and update
-the YAML attachment so subsequent edits see the latest state. The client-side editor will show the diff
-with an accept/decline UX. NEVER just describe changes in text when edit tools are available.
-
-When using edit tools:
-1. Provide step definitions as structured JSON objects, NOT as YAML strings
-2. Include a \`description\` explaining what the change does
-3. Validate the workflow AFTER the user accepts the proposed change
-5. For multi-step changes, call multiple edit tools — each creates a separate proposal
-6. Each edit tool reads the current YAML from the ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment and updates it,
-   so sequential tool calls within a round see each other's changes
-7. After edits, you can render the ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment with <render_attachment id="{attachmentId}"/> to show the user the current complete YAML
 
 ### Best Practices
 
@@ -285,5 +259,5 @@ When using edit tools:
 3. Use 2 spaces per indentation level
 4. Use \`on-failure\` with \`retry\`, \`fallback\`, and (optionally) \`continue\` for error handling
 5. Prefer connector steps over raw HTTP for integrations`,
-  getRegistryTools: () => Object.values(workflowTools),
+  getRegistryTools: () => [...Object.values(workflowTools), platformCoreTools.generateWorkflow],
 });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -14,6 +15,8 @@ import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/u
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
+import type { WorkflowsAiTelemetryClient } from '../telemetry/workflows_ai_telemetry_client';
+import { emitWorkflowDiff, extractConversationId } from './utils/workflow_attachments';
 
 const generateWorkflowSchema = z.object({
   query: z
@@ -39,8 +42,10 @@ const generateWorkflowSchema = z.object({
 
 export const generateWorkflowTool = ({
   workflowsManagement,
+  aiTelemetryClient,
 }: {
   workflowsManagement: WorkflowsServerPluginSetup;
+  aiTelemetryClient: WorkflowsAiTelemetryClient;
 }): BuiltinToolDefinition<typeof generateWorkflowSchema> => {
   const { management: workflowsApi } = workflowsManagement;
 
@@ -81,15 +86,16 @@ And you should **not**:
 ## Usage notes
 
 — If all you need is to generate a workflow, you do *NOT* need to read the "workflow-authoring" skill first, you can call this tool directly.
-— The tool creates (or updates) a workflow attachment, and returns the attachment Id and version.
-— You can render the workflow with "<render_attachment id="{attachmentId}" version="{attachmentVersion}"/>".
+— The tool creates (or updates) a workflow attachment and emits a diff card in chat.
+— Render the diff with "<render_attachment id="{diffAttachmentId}"/>" and the workflow with "<render_attachment id="{attachmentId}" version="{attachmentVersion}"/>".
 
     `),
     schema: generateWorkflowSchema,
     handler: async (
-      { query, attachmentId, context, instructions },
-      { modelProvider, logger, request, spaceId, attachments }
+      { query, attachmentId, context: workflowContext, instructions },
+      toolContext
     ) => {
+      const { modelProvider, logger, request, spaceId, attachments } = toolContext;
       const model = await modelProvider.getDefaultModel();
 
       const sourceAttachment = attachmentId ? attachments.get(attachmentId) : undefined;
@@ -106,10 +112,6 @@ And you should **not**:
         };
       }
 
-      // Workflow attachments carry { yaml, workflowId?, name? } in their data
-      // payload. workflowId is the link to the persisted workflow on disk —
-      // we must propagate it across edits so subsequent "save" operations
-      // from the UI keep targeting the same workflow.
       const sourceData = sourceAttachment?.data.data as
         | { yaml?: string; workflowId?: string; name?: string }
         | undefined;
@@ -125,7 +127,7 @@ And you should **not**:
         const { workflow, response: generationComment } = await generateWorkflow({
           nlQuery: query,
           workflow: workflowDef,
-          additionalContext: context,
+          additionalContext: workflowContext,
           additionalInstructions: instructions,
           model,
           logger,
@@ -134,26 +136,38 @@ And you should **not**:
           workflowsApi,
         });
 
-        const attachmentData = {
-          name: workflow.name,
-          yaml: stringifyWorkflowDefinition(workflow),
-          // Preserve the link to the persisted workflow on disk when
-          // editing an existing attachment.
-          ...(sourceData?.workflowId ? { workflowId: sourceData.workflowId } : {}),
-        };
+        const beforeYaml = sourceData?.yaml ?? '';
+        const afterYaml = stringifyWorkflowDefinition(workflow);
+        const proposalId = v4();
 
-        const newAttachment = sourceAttachment
-          ? await attachments.update(sourceAttachment.id, { data: attachmentData })
-          : await attachments.add({
-              type: WORKFLOW_YAML_ATTACHMENT_TYPE,
-              data: attachmentData,
-            });
+        const {
+          attachmentId: workflowAttachmentId,
+          diffAttachmentId,
+          attachmentVersion,
+        } = await emitWorkflowDiff(toolContext, sourceAttachment?.id, {
+          beforeYaml,
+          afterYaml,
+          proposalId,
+          workflowId: sourceData?.workflowId,
+          name: workflow.name,
+          description: query,
+          toolId: platformCoreTools.generateWorkflow,
+        });
+
+        aiTelemetryClient.reportEditResult({
+          toolId: platformCoreTools.generateWorkflow,
+          conversationId: extractConversationId(toolContext),
+          editSuccess: true,
+          isCreation: !sourceAttachment,
+        });
 
         return {
           results: [
             otherResult({
-              attachment_id: newAttachment!.id,
-              attachment_version: newAttachment!.current_version,
+              attachment_id: workflowAttachmentId,
+              attachment_version: attachmentVersion,
+              proposal_id: proposalId,
+              diff_attachment_id: diffAttachmentId,
               comment: generationComment,
               success: true,
               ...(sourceAttachment ? { updated: true } : { created: true }),
@@ -162,6 +176,14 @@ And you should **not**:
         };
       } catch (e) {
         const message = e instanceof Error ? e.message : String(e);
+
+        aiTelemetryClient.reportEditResult({
+          toolId: platformCoreTools.generateWorkflow,
+          conversationId: extractConversationId(toolContext),
+          editSuccess: false,
+          isCreation: !sourceAttachment,
+        });
+
         return {
           results: [errorResult(message)],
         };
